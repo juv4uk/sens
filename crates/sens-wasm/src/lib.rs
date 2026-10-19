@@ -159,6 +159,15 @@ struct Diagnostic {
     message: String,
 }
 
+fn remap_literate_error(
+    mut error: sens::LanguageError,
+    offset_maps: &[(usize, usize, usize)],
+) -> sens::LanguageError {
+    error.span.start = sens_literate::remap_offset(error.span.start, offset_maps);
+    error.span.end = sens_literate::remap_offset(error.span.end, offset_maps);
+    error
+}
+
 /// Ensures the shared session exists and has core.lisp preloaded.
 /// Idempotent — subsequent calls are no-ops.
 fn init_if_needed() -> Result<(), String> {
@@ -195,52 +204,68 @@ pub fn evaluate(source: &str, mode: JsValue) -> Result<JsValue, JsValue> {
         let mut guard = slot.borrow_mut();
         let state = guard.as_mut().expect("session set by init_if_needed");
         // Ukrainian human source uses decimal integer spellings as a source
-        // projection into exact D24+ values. This is a source-boundary step:
-        // it never promotes D1-D10 words, and the arithmetic evaluator remains
-        // fail-closed for unqualified host numbers.
-        let (result, forms) = if source_mode == SourceMode::PureLisp
-            && matches!(state.surface, WebSurface::Ukrainian | WebSurface::UkrainianFull)
-        {
-            let parsed = sens::parse(source).map_err(|error| {
-                JsValue::from_str(&render_error_for_presentation(
-                    &error,
-                    source,
-                    state.surface.presentation(),
-                ))
-            })?;
-            let projected = sens::source_projection::project_ukr_decimal_integer_literals(
-                &parsed,
+        // projection into exact D24+ values. This happens before lowering for
+        // both ordinary .lisp and fenced Markdown code, with original spans
+        // restored for diagnostics. D1-D10 identities are never promoted.
+        let (result, forms) = if matches!(
+            state.surface,
+            WebSurface::Ukrainian | WebSurface::UkrainianFull
+        ) {
+            let (code, offset_maps) = sens_literate::extract_code(
                 source,
-            )
-            .map_err(|error| {
-                JsValue::from_str(&render_error_for_presentation(
-                    &error,
-                    source,
-                    state.surface.presentation(),
-                ))
-            })?;
-            sens::load_core_library(&mut state.session).map_err(|error| {
-                JsValue::from_str(&render_error_for_presentation(
-                    &error,
-                    source,
-                    state.surface.presentation(),
-                ))
-            })?;
-            let result = sens::eval_parsed_expressions(&projected, &mut state.session).map_err(
-                |error| {
+                source_mode == SourceMode::Literate,
+            );
+            if source_mode == SourceMode::Literate && offset_maps.is_empty() {
+                (
+                    sens::EvalResult {
+                        value: sens::Value::Nil,
+                        output: vec!["No sens code blocks found in markdown document.".to_string()],
+                    },
+                    vec![],
+                )
+            } else {
+                let parsed = sens::parse(&code).map_err(|error| {
+                    let error = remap_literate_error(error, &offset_maps);
                     JsValue::from_str(&render_error_for_presentation(
                         &error,
                         source,
                         state.surface.presentation(),
                     ))
-                },
-            )?;
-            (result, projected)
+                })?;
+                let projected =
+                    sens::source_projection::project_ukr_decimal_integer_literals(&parsed, &code)
+                        .map_err(|error| {
+                            let error = remap_literate_error(error, &offset_maps);
+                            JsValue::from_str(&render_error_for_presentation(
+                                &error,
+                                source,
+                                state.surface.presentation(),
+                            ))
+                        })?;
+                sens::load_core_library(&mut state.session).map_err(|error| {
+                    let error = remap_literate_error(error, &offset_maps);
+                    JsValue::from_str(&render_error_for_presentation(
+                        &error,
+                        source,
+                        state.surface.presentation(),
+                    ))
+                })?;
+                let result = sens::eval_parsed_expressions(&projected, &mut state.session)
+                    .map_err(|error| {
+                        let error = remap_literate_error(error, &offset_maps);
+                        JsValue::from_str(&render_error_for_presentation(
+                            &error,
+                            source,
+                            state.surface.presentation(),
+                        ))
+                    })?;
+                (result, projected)
+            }
         } else {
             sens_literate::eval_literate(source, source_mode, &mut state.session).map_err(
-                |e| {
+                |error| {
                     JsValue::from_str(&render_error_for_presentation(
-                        &e,
+                        &error,
                         source,
                         state.surface.presentation(),
                     ))
