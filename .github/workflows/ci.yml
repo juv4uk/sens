@@ -9,10 +9,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
-  cancel-in-progress: false
-  # За GitHub Actions 2026 default queue=single все ще скасовує попередній pending.
-  # queue=max зберігає до 100 точних SHA у спільній послідовній черзі.
-  queue: max
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 permissions:
   contents: read
