@@ -1,14 +1,13 @@
 //! Живе виконання виправлених post-core функцій через справжній SENS evaluator.
 //! Не підмінює семантику Rust або Python; Rust лише викликає SENS та звіряє результат.
-use sens::{eval_program, Session};
+use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session};
 
 fn core_session() -> Session {
     let mut session = Session::default();
-    sens::eval_core_library_source(
-        include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("чинний core має завантажуватися реальним SENS reader/evaluator");
+    let forms = parse_mixed_exact_domain(include_str!("../../../lib/core.lisp"))
+        .expect("чинний Core має читатися загальним SENS reader");
+    eval_parsed_expressions(&forms, &mut session)
+        .expect("чинний Core має виконуватися SENS evaluator без legacy adapter");
     session
 }
 
@@ -67,5 +66,47 @@ fn core_constructs_only_ukrainian_d4_define_expressions() {
         execute(&mut session,
             "(my-postcore-build-definitions (як-є джерело) (як-є (перший другий)))"),
         "(визначити перший (визначити другий джерело))"
+    );
+}
+
+// Справжній evaluator читає увесь core, а не окремі скопійовані форми.
+#[test]
+fn core_nth_member_follow_current_d6_d5_semantics() {
+    let mut session = core_session();
+    assert_eq!(
+        execute(&mut session, "(елемент-списку-за-індексом 1 (як-є (а б)))"),
+        execute(&mut session, "(як-є б)")
+    );
+    assert_eq!(
+        execute(&mut session, "(елемент-списку-за-індексом 2 (як-є (а б)))"),
+        execute(&mut session, "(як-є ())")
+    );
+    assert_eq!(
+        execute(&mut session, "(значення-у-списку? (як-є б) (як-є (а б)))"),
+        execute(&mut session, "так")
+    );
+    assert_eq!(
+        execute(&mut session, "(значення-у-списку? (як-є в) (як-є (а б)))"),
+        execute(&mut session, "ні")
+    );
+}
+
+#[test]
+fn core_sublis_and_maplist_execute_in_sens_without_host_oracle() {
+    let mut session = core_session();
+    assert_eq!(
+        execute(&mut session,
+            "(підставити-пари (список (сполучити (як-є а) (як-є б))) (як-є (а в а)))"),
+        execute(&mut session, "(як-є (б в б))")
+    );
+    assert_eq!(
+        execute(&mut session,
+            "(підставити-пари (список (сполучити (як-є (а в)) (як-є ціле))) (як-є (а в)))"),
+        execute(&mut session, "(як-є ціле)")
+    );
+    assert_eq!(
+        execute(&mut session,
+            "(відобразити-залишки (як-є (а б)) (функція (хвіст) (перше хвіст)))"),
+        execute(&mut session, "(як-є (а б))")
     );
 }

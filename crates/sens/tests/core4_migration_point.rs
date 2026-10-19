@@ -85,3 +85,29 @@ fn core4_d6_filter_and_reduce_execute_ukrainian_sources() {
         assert_eq!(value.to_string(), expected, "{source}");
     }
 }
+
+#[test]
+fn core4_d6_sublis_prioritizes_complete_tree_before_descending() {
+    let mut session = migrated_core();
+    // Повне завантаження Core4 та реальне виконання у SENS, а не симуляція.
+    for (source, expected) in [
+        (
+            "(підставити-пари (список (сполучити (як-є а) (як-є б))) (як-є (а в а)))",
+            "(б в б)",
+        ),
+        (
+            "(підставити-пари (список (сполучити (як-є (а в)) (як-є ціле))) (як-є (а в)))",
+            "ціле",
+        ),
+        (
+            "(підставити-пари (список (сполучити (як-є ()) (як-є порожнє))) (як-є ()))",
+            "порожнє",
+        ),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS SUBLIS {source}: {error:?}"))
+            .value
+            .to_string();
+        assert_eq!(actual, expected, "D6 exact SUBLIS whole-tree precedence: {source}");
+    }
+}

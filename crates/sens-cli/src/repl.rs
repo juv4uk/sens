@@ -23,7 +23,6 @@ unsafe extern "C" {
     fn sens_zig_repl_time_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_meta_eval_bytes_copy(dst: *mut u8, cap: usize) -> isize;
-    fn sens_zig_meta_registry_bytes_copy(dst: *mut u8, cap: usize) -> isize;
 }
 #[cfg(feature = "zig-transport")]
 fn repl_zig_source(
@@ -271,7 +270,7 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface, sens_loop: bool
         surface,
         ReplSurface::Ukrainian | ReplSurface::UkrainianFull | ReplSurface::Sanskrit
     );
-    // Meta-eval + registry + repl-core are needed both for surface projection
+    // Meta-eval + repl-core are needed both for surface projection
     // and for the SENS-owned `--sens-loop` mode. They load here once; the
     // surface-specific sources below load only for uk/укр/sa.
     if sens_loop || needs_surface {
@@ -283,13 +282,12 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface, sens_loop: bool
         };
         #[cfg(feature = "zig-transport")]
         {
-            let registry = repl_zig_source(sens_zig_meta_registry_bytes_copy, "ZIG_SENS_META_REGISTRY")?;
             let meta_eval = repl_zig_source(sens_zig_meta_eval_bytes_copy, "ZIG_SENS_META_EVAL")?;
-            sens::load_meta_evaluator_library_from_source(&mut session, &registry, &meta_eval)
+            sens::load_meta_evaluator_library_from_source(&mut session, &meta_eval)
                 .map_err(|error| {
                     format!(
-                        "не вдалося завантажити meta-eval/registry: {}",
-                        error.render("lib/meta-eval.lisp")
+                        "не вдалося завантажити MetaEval: {}",
+                        error.render(&meta_eval)
                     )
                 })?;
             let repl_core = crate::zig_transport::repl_core_source_bytes()

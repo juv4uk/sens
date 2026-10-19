@@ -44,7 +44,7 @@ class RequiredChecksTests(unittest.TestCase):
         self.assertIn("workflow_dispatch", workflow["on"])
         self.assertEqual(
             workflow["concurrency"]["group"],
-            "${{ github.workflow }}-${{ github.run_id }}",
+            "${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}",
         )
         self.assertEqual(
             workflow["concurrency"]["cancel-in-progress"],

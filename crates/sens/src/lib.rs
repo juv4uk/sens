@@ -317,13 +317,8 @@ pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 /// bytes переходять на parsing CORE_LIBRARY_SOURCE.
 const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 
-/// Generated runtime projection of admitted surface spellings to opaque CoreDomainIdentity
-/// identities. semantic-registry.lisp remains the only spelling authority.
-pub const META_SEMANTIC_REGISTRY_SOURCE: &str =
-    include_str!("../../../lib/generated/meta-semantic-registry.lisp");
-
-/// Metacircular evaluator source. Surface names are supplied by the generated
-/// semantic registry projection rather than duplicated in this file.
+/// Metacircular evaluator source. Primitive identity values are canonical
+/// Ukrainian domain projections, not decimalized bit strings or a generated SID registry.
 pub const META_EVAL_LIBRARY_SOURCE: &str = include_str!("../../../lib/meta-eval.lisp");
 
 /// Language-owned time semantics. Host clocks expose raw observations such as
@@ -645,43 +640,22 @@ pub fn load_core3_library(session: &mut Session) -> Result<EvalResult, LanguageE
     Ok(result)
 }
 
-/// Load the explicit metacircular self-hosting witness after the ordinary core.
-/// Rust owns bootstrap mechanics; surface admission stays registry-owned.
+/// Завантажити явний метакруговий свідок SENS після звичайного ядра.
+/// Реєстр SID/Sens8 не завантажується: поверхні й семантичні ідентичності
+/// належать чинним доменним таблицям, а MetaEval використовує українські імена.
 pub fn load_meta_evaluator_library(
     session: &mut Session,
 ) -> Result<EvalResult, LanguageError> {
-    load_meta_evaluator_library_from_source(
-        session,
-        META_SEMANTIC_REGISTRY_SOURCE,
-        META_EVAL_LIBRARY_SOURCE,
-    )
+    load_meta_evaluator_library_from_source(session, META_EVAL_LIBRARY_SOURCE)
 }
 
-/// Load caller-supplied registry + metacircular source through the SAME
-/// owner-pinned exact-width readers used by the original loader.
-/// Zig transports bytes; SENS interprets. This keeps the CLI on the sterile
-/// byte corridor instead of Rust `include_str!` project source.
+/// Завантажити caller-supplied MetaEval source через той самий загальний
+/// exact-domain reader, який використовує інший SENS Lisp source.
 pub fn load_meta_evaluator_library_from_source(
     session: &mut Session,
-    registry_source: &str,
     meta_eval_source: &str,
 ) -> Result<EvalResult, LanguageError> {
-    // The generated registry carries historical 8-bit SID ids and legacy W8
-    // wrappers; the ordinary parser would read a bare id as a Number. Load it
-    // with the exact-domain reader (same owner-approved loader family as
-    // core/time/meta-eval), not the general parser.
-    let registry_forms = mixed_source::parse_mixed_exact_domain_registry_source(
-        "lib/generated/meta-semantic-registry.lisp",
-        registry_source,
-    )?;
-    eval_parsed_expressions(&registry_forms, session)?;
-    // The metacircular witness now contains exact D3/D4 call heads.
-    // Reuse the already-approved mixed reader: quoted interpreter data
-    // stays data, whereas executable binary heads retain domain widths.
-    let forms = mixed_source::parse_mixed_exact_domain_meta_source(
-        "lib/meta-eval.lisp",
-        meta_eval_source,
-    )?;
+    let forms = parse_mixed_exact_domain(meta_eval_source)?;
     eval_parsed_expressions(&forms, session)
 }
 
