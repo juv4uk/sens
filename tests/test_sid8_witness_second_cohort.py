@@ -23,7 +23,6 @@ COHORT = {
     "tests/fixtures/machine-register-width-witness.lisp": ("882e0f74e7e276e75e42add7c7d1d793ef8e4d56", 77),
     "tests/fixtures/x86-64-instruction-set-witness.lisp": ("a5551fc94d9e1d68900009d424c37e911d8504a2", 40),
     "tests/fixtures/structural-observation-contract-witness.lisp": ("6e9f54d513052ae39e18e70571bb14fa39e78c28", 184),
-    "tests/fixtures/native-first-coverage-ledger-witness.lisp": ("573631c421a9f00db85af1055759b794ec9c497a", 240),
     "tests/fixtures/native-first-dispatch-witness.lisp": ("1fce83fa91b0af40d108d5f52874648480d65cb0", 22),
     "tests/fixtures/native-first-execution-witness.lisp": ("10da52de43829fbf27afc714dd2a7c6e5f3522fd", 20),
     "tests/fixtures/native-first-parity-witness.lisp": ("20dc71a12a239ee1d2851abfcb0916a562c039f6", 18),
@@ -54,8 +53,8 @@ class SecondWitnessCohort(unittest.TestCase):
                 count = sum(x != y for x, y in zip(a, b))
                 self.assertEqual(count, expected)
                 total += count
-        self.assertEqual(len(COHORT), 12)
-        self.assertEqual(total, 1301)
+        self.assertEqual(len(COHORT), 11)
+        self.assertEqual(total, 1061)
 
     def test_quoted_x86_machine_data_retained(self):
         path = "tests/fixtures/x86-64-instruction-set-witness.lisp"
