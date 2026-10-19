@@ -54,7 +54,6 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/domains/d8.lisp");
     println!("cargo:rerun-if-changed=../../lib/domains/d9.lisp");
     println!("cargo:rerun-if-changed=../../lib/domains/d10.lisp");
-    println!("cargo:rerun-if-changed=../../lib/generated/meta-semantic-registry.lisp");
     println!("cargo:rerun-if-changed=../../lib/meta-eval.lisp");
     println!("cargo:rerun-if-changed=../../lib/repl-core.lisp");
     println!("cargo:rerun-if-changed=../../language-contract.lisp");
