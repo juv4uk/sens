@@ -376,7 +376,7 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         first = (root / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
         mutual = (root / "lib/meta-eval-mutual.lisp").read_text(encoding="utf-8")
-        self.assertIn("(сполучити (як-є atom) (my-fc-primitive (як-є atom)))", first)
+        self.assertIn("(сполучити (як-є атом?) (першокласний-примітив (як-є атом?)))", first)
         self.assertIn("(тотожне? (перше форма) (як-є def))", mutual)
         # Джерело зберігає історичний #d1:1 у коментарі; заборона діє
         # лише для виконуваного SENS-коду, а не для provenance.
@@ -394,8 +394,8 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         self.assertIn("((атом? значення) ні)", mutual)
         self.assertIn("(так (тотожне? (перше значення) (як-є recursive-group-closure)))", mutual)
         self.assertNotIn("#d1:0", mutual)
-        self.assertIn("(визначити my-fc-env-lookup", first)
-        self.assertNotIn("(0011 my-fc-env-lookup", first)
+        self.assertIn("(визначити першокласне-знайти-в-середовищі", first)
+        self.assertNotIn("(0011 першокласне-знайти-в-середовищі", first)
         self.assertIn("(визначити my-group-eval", mutual)
         # Negative witness: numeric operator behind QUOTE remains data, not callable.
         sample = "(як-є (100 quoted)) (сполучити (як-є datum) (перше xs))"
@@ -408,7 +408,7 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
     def test_first_class_exact_inverse_original_git_blob(self):
         """Перевірка точних D1/D3/D4 координат і збереження ВСІХ старих байтів."""
         current_src = (Path(__file__).resolve().parents[1] / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
-        # Спершу строго відновлюємо 31 пізнішу поточну D3–D8 укр-проєкцію.
+        # Спершу відновлюємо повне українське переписування й 31 пізнішу D3–D8 проєкцію.
         # І лише тоді починає діяти старий незмінний D1/D3/D4 receipt нижче.
         # Таким чином pinned Git blob ніколи не послаблюється.
         from tests.test_meta_eval_fc_ukr_remaining import reconstruct as undo_latest_projection
