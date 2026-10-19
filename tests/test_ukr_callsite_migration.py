@@ -1669,248 +1669,155 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
   "scripts/check-domain-logic-laws.lisp": {
     "sha": "381b4dcbb1ff53a7dbf87a20586b12bc17537449",
     "edits": [
-      [
-        826,
-        "0011"
-      ],
-      [
-        844,
-        "0010"
-      ],
-      [
-        864,
-        "110"
-      ],
-      [
-        879,
-        "001"
-      ],
-      [
-        932,
-        "0011"
-      ],
-      [
-        973,
-        "001"
-      ],
-      [
-        996,
-        "101"
-      ],
-      [
-        1001,
-        "100"
-      ],
-      [
-        1006,
-        "111"
-      ],
-      [
-        1011,
-        "001"
-      ],
-      [
-        1019,
-        "001"
-      ],
-      [
-        1029,
-        "001"
-      ],
-      [
-        1050,
-        "001"
-      ],
-      [
-        1073,
-        "101"
-      ],
-      [
-        1078,
-        "011"
-      ],
-      [
-        1083,
-        "111"
-      ],
-      [
-        1088,
-        "001"
-      ],
-      [
-        1096,
-        "001"
-      ],
-      [
-        1106,
-        "001"
-      ],
-      [
-        1127,
-        "001"
-      ],
-      [
-        1150,
-        "010"
-      ],
-      [
-        1155,
-        "001"
-      ],
-      [
-        1176,
-        "001"
-      ],
-      [
-        1199,
-        "0100"
-      ],
-      [
-        1205,
-        "010"
-      ],
-      [
-        1210,
-        "111"
-      ],
-      [
-        1215,
-        "001"
-      ],
-      [
-        1223,
-        "001"
-      ],
-      [
-        1246,
-        "001"
-      ],
-      [
-        1269,
-        "101"
-      ],
-      [
-        1274,
-        "001"
-      ],
-      [
-        1282,
-        "001"
-      ],
-      [
-        1303,
-        "001"
-      ],
-      [
-        1326,
-        "0100"
-      ],
-      [
-        1332,
-        "101"
-      ],
-      [
-        1337,
-        "001"
-      ],
-      [
-        1345,
-        "001"
-      ],
-      [
-        1367,
-        "001"
-      ],
-      [
-        1390,
-        "0101"
-      ],
-      [
-        1396,
-        "001"
-      ],
-      [
-        1418,
-        "001"
-      ],
-      [
-        1441,
-        "101"
-      ],
-      [
-        1446,
-        "100"
-      ],
-      [
-        1451,
-        "1110"
-      ],
-      [
-        1457,
-        "001"
-      ],
-      [
-        1465,
-        "001"
-      ],
-      [
-        1475,
-        "001"
-      ],
-      [
-        1888,
-        "001"
-      ],
-      [
-        1909,
-        "101"
-      ],
-      [
-        1914,
-        "100"
-      ],
-      [
-        1919,
-        "1111"
-      ],
-      [
-        1925,
-        "001"
-      ],
-      [
-        1934,
-        "1110"
-      ],
-      [
-        1940,
-        "001"
-      ],
-      [
-        1951,
-        "001"
-      ],
-      [
-        3107,
-        "001"
-      ]
+      [826, "0011"],
+      [844, "0010"],
+      [864, "110"],
+      [879, "001"],
+      [932, "0011"],
+      [973, "001"],
+      [996, "101"],
+      [1001, "100"],
+      [1006, "111"],
+      [1011, "001"],
+      [1019, "001"],
+      [1029, "001"],
+      [1050, "001"],
+      [1073, "101"],
+      [1078, "011"],
+      [1083, "111"],
+      [1088, "001"],
+      [1096, "001"],
+      [1106, "001"],
+      [1127, "001"],
+      [1150, "010"],
+      [1155, "001"],
+      [1176, "001"],
+      [1199, "0100"],
+      [1205, "010"],
+      [1210, "111"],
+      [1215, "001"],
+      [1223, "001"],
+      [1246, "001"],
+      [1269, "101"],
+      [1274, "001"],
+      [1282, "001"],
+      [1303, "001"],
+      [1326, "0100"],
+      [1332, "101"],
+      [1337, "001"],
+      [1345, "001"],
+      [1367, "001"],
+      [1390, "0101"],
+      [1396, "001"],
+      [1418, "001"],
+      [1441, "101"],
+      [1446, "100"],
+      [1451, "1110"],
+      [1457, "001"],
+      [1465, "001"],
+      [1475, "001"],
+      [1525, "001"],
+      [1551, "11010"],
+      [1575, "001"],
+      [1601, "11011"],
+      [1625, "001"],
+      [1651, "0100"],
+      [1657, "11010"],
+      [1682, "001"],
+      [1708, "0100"],
+      [1714, "11011"],
+      [1739, "001"],
+      [1765, "0100"],
+      [1771, "11010"],
+      [1778, "01010"],
+      [1806, "001"],
+      [1832, "0100"],
+      [1838, "11011"],
+      [1845, "01010"],
+      [1888, "001"],
+      [1909, "101"],
+      [1914, "100"],
+      [1919, "1111"],
+      [1925, "001"],
+      [1934, "1110"],
+      [1940, "001"],
+      [1951, "001"],
+      [1997, "001"],
+      [2025, "0100"],
+      [2031, "11011"],
+      [2038, "10110"],
+      [2066, "001"],
+      [2094, "0100"],
+      [2100, "11010"],
+      [2107, "10111"],
+      [2161, "001"],
+      [2180, "11101"],
+      [2187, "001"],
+      [2195, "1110"],
+      [2201, "001"],
+      [2209, "001"],
+      [2264, "001"],
+      [2291, "0100"],
+      [2297, "11010"],
+      [2304, "100"],
+      [2309, "101000"],
+      [2317, "0010"],
+      [2327, "01010"],
+      [2340, "1110"],
+      [2369, "001"],
+      [2396, "0100"],
+      [2402, "11011"],
+      [2409, "100"],
+      [2414, "101000"],
+      [2422, "0010"],
+      [2432, "01010"],
+      [2445, "1110"],
+      [2474, "001"],
+      [2503, "0100"],
+      [2509, "11010"],
+      [2516, "101110"],
+      [2532, "1110"],
+      [2560, "001"],
+      [2589, "0100"],
+      [2595, "11011"],
+      [2602, "101110"],
+      [2618, "1110"],
+      [2676, "001"],
+      [2702, "0100"],
+      [2708, "11010"],
+      [2715, "001000"],
+      [2737, "01010"],
+      [2766, "001"],
+      [2792, "0100"],
+      [2798, "11011"],
+      [2805, "001000"],
+      [2827, "01010"],
+      [2856, "001"],
+      [2882, "11010"],
+      [2891, "000000"],
+      [2899, "1110"],
+      [2905, "001"],
+      [2913, "001"],
+      [2964, "001"],
+      [2990, "11110111"],
+      [3000, "1110"],
+      [3006, "001"],
+      [3014, "001"],
+      [3023, "1110"],
+      [3029, "001"],
+      [3037, "001"],
+      [3107, "001"],
+      [3132, "101"],
+      [3137, "100"],
+      [3142, "110101001"],
+      [3153, "110110111"],
+      [3189, "001"],
+      [3255, "001"],
+      [3277, "11010"],
+      [3297, "11011011"]
     ],
     "changed": [
-      18,
-      19,
-      20,
-      21,
-      24,
-      27,
-      28,
-      29,
-      30,
-      31,
-      32,
-      33,
-      34,
-      45,
-      46,
-      70
+      18, 19, 20, 21, 24, 27, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 45, 46, 49, 50, 53, 56, 57, 58, 59, 62, 63, 64, 67, 70, 71, 74, 76
     ]
   }
 }
@@ -1922,7 +1829,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
     def setUpClass(cls):
         cls.root = Path(__file__).resolve().parents[1]
         cls.authority = {}
-        for domain in (3, 4):
+        for domain in (3, 4, 5, 6, 8, 9):
             table = (cls.root / f"lib/domains/d{domain}.lisp").read_text(encoding="utf-8")
             for line in table.splitlines():
                 match = cls.ROW.match(line)
@@ -1942,7 +1849,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
                 raise AssertionError("Некоректний порядок точних координат")
             previous = pos
             peer = cls.authority.get(bits)
-            if peer is None or len(bits) not in (3, 4):
+            if peer is None or len(bits) not in (3, 4, 5, 6, 8, 9):
                 raise AssertionError(f"Відсутня точна ратифікація {bits}")
             shifts.append((pos + delta, bits, peer))
             delta += len(peer) - len(bits)
@@ -1954,19 +1861,9 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
 
     @staticmethod
     def _restore_prior_domain_logic_calls(path, source):
-        """Preserve the pinned Git blob after separately verified D3/D9 and D8 migrations."""
-        if path != "scripts/check-domain-logic-laws.lisp":
-            return source
-        new_schema = '  (тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp"))) (як-є domain-table/1)))'
-        old_schema = '  (101 (100 (110101001 (110110111 "lib/domains/d1.lisp"))) (001 domain-table/1)))'
-        if source.count(new_schema) != 1:
-            raise AssertionError("Точна D3/D9 форма read-file-schema не збігається")
-        source = source.replace(new_schema, old_schema, 1)
-        current = '(друкувати "DOMAIN-LOGIC-LAWS: PASS'
-        historical = '(11011011 "DOMAIN-LOGIC-LAWS: PASS'
-        if source.count(current) != 1:
-            raise AssertionError("Очікуваний точний D8-друк змінено або видалено")
-        return source.replace(current, historical, 1)
+        """Позиційні правки тепер покривають увесь файл (D3/D4/D5/D6/D8/D9),
+        тож додаткового рядкового відновлення не потрібно."""
+        return source
 
     def test_source_inverse_restores_exact_pre_migration_git_blobs(self):
         for path, evidence in self.PINNED.items():
@@ -1989,7 +1886,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
                 before, after = old.splitlines(), source.splitlines()
                 self.assertEqual(len(before), len(after))
                 changed = [i + 1 for i, (a, b) in enumerate(zip(before, after)) if a != b]
-                later_line = [71, 76] if path == "scripts/check-domain-logic-laws.lisp" else []
+                later_line = []  # спец-випадок прибрано: усі зміни в evidence["changed"]
                 self.assertEqual(changed, evidence["changed"] + later_line)
                 for number in changed:
                     line = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"',
@@ -1998,9 +1895,13 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
         capacity = (self.root / "scripts/check-domain-bitness-laws.lisp").read_text(encoding="utf-8")
         self.assertIn("(як-є 00000000000)", capacity)
         self.assertIn("(як-є 1111111111)", capacity)
-        # D5/D6/D8/D9 operators are separately admitted; not inferred from width.
+        # D5/D6/D8/D9 operators use their own ratified укр surfaces (not width inference).
         logic = (self.root / "scripts/check-domain-logic-laws.lisp").read_text(encoding="utf-8")
-        self.assertIn("(11010 2 3)", logic)
+        self.assertIn("(менше? 2 3)", logic)
+        self.assertNotIn("(11010 2 3)", logic)
+        for raw in ("(11010 ", "(11011 ", "(0100 ", "(01010 ", "(10110 ", "(10111 ",
+                    "(11101 ", "(101000 ", "(101110 ", "(000000 ", "(001000 ", "(11110111 "):
+            self.assertNotIn(raw, logic)
         self.assertIn('(тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp")))', logic)
         self.assertNotIn('(101 (100 (110101001 (110110111 "lib/domains/d1.lisp")))', logic)
         self.assertIn('(друкувати "DOMAIN-LOGIC-LAWS:', logic)
