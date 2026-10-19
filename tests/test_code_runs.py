@@ -85,15 +85,15 @@ class PythonEntrypointsRunTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "український.lisp").write_text(
-                "(визначити число 1)\\n; український коментар\\n", encoding="utf-8")
+                "(визначити число 1)\n; український коментар\n", encoding="utf-8")
             (root / "незавершений.lisp").write_text(
-                "(визначити число 1)\\n; English\\n", encoding="utf-8")
+                "(визначити число 1)\n; English\n", encoding="utf-8")
             p = run_entrypoint("scripts/report_ukr_projection_progress.py",
                                "--root", directory, "--no-annotation")
             self.assertEqual(p.returncode, 0)
             self.assertEqual(
                 p.stdout.strip(),
-                "УКР-ПРОЄКЦІЯ .lisp: повністю українські файли 1/2 (50.0%)")
+                "УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 1/2 (50.0%)")
 
     def test_ukr_projection_report_bad_root_is_usage_error(self):
         p = run_entrypoint("scripts/report_ukr_projection_progress.py", "--root", "/no/such/dir")
