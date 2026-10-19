@@ -15,6 +15,7 @@ SOURCE = ROOT / "lib/fs.lisp"
 D1 = ROOT / "lib/domains/d1.lisp"
 D3 = ROOT / "lib/domains/d3.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
+D9 = ROOT / "lib/domains/d9.lisp"
 PRE_MIGRATION_BLOB = "59b18e3dfdc10bb33036448dc4d3eb33efefec59"
 
 EXACT_LAW = """
@@ -70,10 +71,13 @@ def parse(source: str):
 
 def old_identity(node):
     if not isinstance(node, list):
-        return "#d1:1" if node == "так" else node
+        if node == "так":
+            return "#d1:1"
+        return {"шлях": "path", "декодоване": "decoded", "текст": "text"}.get(node, node)
     items = [old_identity(value) for value in node]
     if items and isinstance(items[0], str):
         reversed_peers = {value: key for key, value in REQUIRED.items()}
+        reversed_peers["кодування-юнікод-8-кодувати-рядок"] = "utf8-encode-string"  # D9:000010101
         items[0] = reversed_peers.get(items[0], items[0])
     return items
 
@@ -88,6 +92,9 @@ def source_to_previous(text: str) -> str:
         line = re.sub(r"\(визначити(?=\s)", "(0011", line)
         line = re.sub(r"\(функція(?=\s)", "(0010", line)
         line = re.sub(r"\(так(?=\s|$)", "(#d1:1", line)
+        line = line.replace("(кодування-юнікод-8-кодувати-рядок ", "(utf8-encode-string ")
+        for нове, старе in (("шлях", "path"), ("декодоване", "decoded"), ("текст", "text")):
+            line = re.sub(r"(?<![\\w-])" + нове + r"(?![\\w-])", старе, line)
         result.append(line)
     return "".join(result)
 
@@ -126,6 +133,11 @@ class FsUkrProjectionTests(unittest.TestCase):
                     self.assertEqual(rows[bits], name, f"D{domain}:{bits}")
 
     def test_exact_original_git_blob_and_full_sens_ast(self):
+        self.assertIn(
+            "(000010101 (ук кодування-юнікод-8-кодувати-рядок) "
+            "(укр кодування-юнікод-8-кодувати-рядок)",
+            D9.read_text(encoding="utf-8"),
+        )
         verify(self.source)
 
     def test_no_legacy_numeric_heads_or_d1_literals(self):
@@ -139,8 +151,8 @@ class FsUkrProjectionTests(unittest.TestCase):
 
     def test_host_io_boundary_and_public_names_untouched(self):
         for literal in ("(визначити read-file", "(визначити write-file",
-                        "(read-file-utf8-raw path)",
-                        "(write-file-bytes path (utf8-encode-string text))"):
+                        "(read-file-utf8-raw шлях)",
+                        "(write-file-bytes шлях (кодування-юнікод-8-кодувати-рядок текст))"):
             self.assertIn(literal, self.source)
         verify(self.source)
 
@@ -153,6 +165,16 @@ class FsUkrProjectionTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 verify(changed)
+
+    def test_negative_wrong_full_ukr_identity_or_lexical_binding(self):
+        for corrupted in (
+            self.source.replace("(кодування-юнікод-8-кодувати-рядок текст)",
+                                "(кодування-юнікод-8-декодувати-рядок текст)", 1),
+            self.source.replace("(read-file-utf8-raw шлях)",
+                                "(read-file-utf8-raw текст)", 1),
+        ):
+            with self.assertRaises(AssertionError):
+                verify(corrupted)
 
     def test_negative_wrong_domain_word_or_malformed_file(self):
         with self.assertRaises(AssertionError):
