@@ -43,7 +43,14 @@ def git_blob_sha(data: bytes) -> str:
 
 
 def restore_operator_heads(source: str) -> str:
-    return HEAD_PATTERN.sub(lambda match: "(" + RESTORE[match.group(1)], source)
+    # Незмінний pre-projection Git-свідок містить п'ять #d1:1.
+    # Поточна програма замінила їх на мовний доказ D1:YES через D3 ATOM.
+    # У зворотній проєкції відновлюємо ЛИШЕ ці п'ять місць,
+    # потім повертаємо первісні назви операторів до бітів.
+    derived = "((атом? (як-є ()))"
+    assert source.count(derived) == 5, "кількість замінених D1-істин змінилася"
+    before_d1_cutover = source.replace(derived, "(#d1:1")
+    return HEAD_PATTERN.sub(lambda match: "(" + RESTORE[match.group(1)], before_d1_cutover)
 
 
 def assert_exact_projection(testcase, table_path, bits, surface, english, lisp):
@@ -80,8 +87,8 @@ class CapabilityAxisUkrProjectionTests(unittest.TestCase):
         self.assertIsNone(RAW_PATTERN.search(source),
                           "no raw D1-D4 operation heads in this source")
         for surface, count in (
-            ("визначити", 7), ("функція", 4), ("як-є", 4), ("за-умовою", 5),
-            ("атом?", 4), ("тотожне?", 3), ("перше", 10), ("решта", 7),
+            ("визначити", 7), ("функція", 4), ("як-є", 9), ("за-умовою", 5),
+            ("атом?", 9), ("тотожне?", 3), ("перше", 10), ("решта", 7),
         ):
             pattern = re.compile(r"[(]" + re.escape(surface) + r"(?=\s)")
             self.assertEqual(len(pattern.findall(source)), count, surface)
