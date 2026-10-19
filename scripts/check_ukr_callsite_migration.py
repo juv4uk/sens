@@ -24,6 +24,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LATIN = re.compile(r"[A-Za-z]")
 UKRAINIAN = re.compile(r"[А-Яа-яІіЇїЄєҐґ]")
+# Та сама стандартна українська розкладка, що і в головному звіті.
+UKRAINIAN_KEYBOARD_OUTPUTS = set(
+    "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
+    "АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"
+    "0123456789"
+    "'\\-=./!\"№;%:?*()_+,₴ "
+)
 BIT_WORD = re.compile(r"[01]+\Z")
 ENCODED_HEAD = re.compile(r"#(?:[dD][0-9]+:[01]+|[bB][01]+|[xX][0-9A-Fa-f]+)\Z")
 LIVE_SOURCE_DIRS = {'lib', 'examples', 'scripts'}
@@ -374,6 +381,8 @@ def measure(root: Path) -> dict:
                     archive_latin += int(archival)
                     active_latin += int(not archival)
                 elif UKRAINIAN.search(head.text):
+                    if any(ch not in UKRAINIAN_KEYBOARD_OUTPUTS for ch in head.text):
+                        file_nonfull += 1
                     cyrillic += 1
                     active_cyrillic += int(not archival)
                     spelling = head.text.casefold()
@@ -400,7 +409,9 @@ def measure(root: Path) -> dict:
                     file_nonfull += 1
             if not archival and file_heads:
                 active_files_with_calls += 1
-                if file_full and not file_nonfull:
+                if not file_nonfull:
+                    # Локальна кирилична функція допустима без власного
+                    # ратифікованого domain-id, як і в головному звіті.
                     active_files_full_ukr += 1
                 elif file_full:
                     active_files_mixed += 1
