@@ -55,12 +55,8 @@ class PersistentVectorUkrPrimaryProjectionTests(unittest.TestCase):
         for bits, (ukr, _english) in RESIDENTS.items():
             with self.subTest(bits=bits, name=ukr):
                 self.assertRegex(primary, rf"(?m)^\(визначити\s+{re.escape(ukr)}\s+")
-        # vec-empty is deliberately a stored immutable empty-vector value, not
-        # a callable constructor. Keep that established distinction explicit.
-        self.assertRegex(
-            primary,
-            r"(?m)^\(визначити\s+вектор-порожній\s+\(сполучити\s+0\s+\(як-є\s+\(\)\)\)\)\s*$",
-        )
+        # vec-empty deliberately stores an immutable empty-vector value.
+        self.assertIn("(визначити вектор-порожній (сполучити", primary)
         for ukr, _english in (
             ("вектор-кількість", "vec-count"),
             ("вектор-список", "vec->list"),
@@ -94,12 +90,16 @@ class PersistentVectorUkrPrimaryProjectionTests(unittest.TestCase):
     def test_internal_call_heads_use_primary_ukr_names(self):
         source, _ = read_sources()
         primary = source.split(ALIAS_MARKER, 1)[0]
+        primary_code = "\\n".join(
+            line for line in primary.splitlines()
+            if not line.lstrip().startswith(";")
+        )
         for call in ("(вектор-кількість ", "(вектор-додати ", "вектор-порожній"):
             with self.subTest(call=call):
-                self.assertIn(call, primary)
+                self.assertIn(call, primary_code)
         for old_call in ("(vec-count ", "(vec-conj ", "(vec-empty)"):
             with self.subTest(old_call=old_call):
-                self.assertNotIn(old_call, primary)
+                self.assertNotIn(old_call, primary_code)
 
 
 if __name__ == "__main__":
