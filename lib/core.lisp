@@ -231,7 +231,7 @@
 
 ; Internal derived closure for D6:000000 LENGTH when no admitted D6
 ; evaluator mechanism exists. This is a Lisp binding, not D6 dispatch.
-(визначити внутрішня-довжина length)
+(визначити внутрішня-довжина довжина)
 
 (визначити reverse-onto зворот-до)
 
