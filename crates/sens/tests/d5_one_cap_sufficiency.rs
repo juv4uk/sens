@@ -77,29 +77,28 @@ fn d5_one_cap_w4_ordinary_lambda_remains_eager() {
 }
 
 #[test]
-fn d5_one_cap_w5_defmacro_remains_define_plus_transformer_derivation() {
-    let macro_source = include_str!("../../../lib/macro.lisp");
-
-    assert!(
-        macro_source.contains("00001001"),
-        "bootstrap macro derivation must still reference DEFINE"
-    );
-    assert!(
-        macro_source.contains("00001000"),
-        "bootstrap macro derivation must still reference LAMBDA"
-    );
-    assert!(
-        macro_source.contains("make-macro"),
-        "research surrogate must remain the single explicit transformer materializer"
-    );
-
+fn d5_one_cap_w5_canonical_ukrainian_macro_executes_with_raw_operands() {
     let value = eval(
         r#"
-        (defmacro derived-first (a b) a)
-        (derived-first (quote ok) never-defined)
+        (визначити випробування
+          (макрос (функція (перший другий) перший)))
+        (випробування (як-є гаразд) невідоме-ім'я)
         "#,
     )
-    .expect("language-owned defmacro should remain derived over the transformer surrogate");
+    .expect("D5 макрос має розгортати перший аргумент без обчислення другого");
 
-    assert_eq!(value, "ok");
+    assert_eq!(value, "гаразд");
+}
+
+#[test]
+fn d5_one_cap_w6_derived_ukrainian_macro_uses_define_and_lambda() {
+    let value = eval(
+        r#"
+        (визначити-макрос обрати-перший (лівий правий) лівий)
+        (обрати-перший (як-є готово) невідоме-ім'я)
+        "#,
+    )
+    .expect("мовне визначення макроса використовує D4 та ратифікований D5");
+
+    assert_eq!(value, "готово");
 }

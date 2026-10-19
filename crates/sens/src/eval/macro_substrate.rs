@@ -6,13 +6,26 @@ use std::rc::Rc;
 /// into a macro value. `defmacro` itself remains language-owned in
 /// `lib/macro.lisp`; this binding only supplies Closure -> Macro materialization.
 pub(crate) fn install(environment: &Environment) {
-    environment.define(
-        "make-macro",
-        Value::Builtin(Rc::new(Builtin {
-            name: "make-macro",
-            func: Rc::new(make_macro_values),
-        })),
+    // Ratified D5:00011 (not an historical byte) owns this mechanism.
+    let identity = crate::semantic_registry::domain_identity_for_surface("макрос")
+        .expect("ратифікована голова D5 макрос");
+    assert!(
+        matches!(identity, crate::CoreDomainIdentity::D5(_)),
+        "макрос має належати саме D5"
     );
+
+    let mechanism = Value::Builtin(Rc::new(Builtin {
+        name: "макрос",
+        func: Rc::new(make_macro_values),
+    }));
+    assert!(
+        environment.bind_domain_code_slot_once(identity, mechanism.clone()),
+        "єдиний механізм макроса не можна затінювати"
+    );
+
+    // Existing unmigrated call sites share this same already existing
+    // mechanical constructor, not an independent semantic implementation.
+    environment.define("make-macro", mechanism);
 }
 
 fn make_macro_values(

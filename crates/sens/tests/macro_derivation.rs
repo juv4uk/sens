@@ -36,17 +36,19 @@ fn scan_exact_macro_ast(
     legacy: &mut usize,
     d3: &mut Vec<u16>,
     d4: &mut Vec<u16>,
+    d5: &mut Vec<u16>,
 ) {
     match &expr.kind {
         ExprKind::Sid(_) => *legacy += 1,
         ExprKind::DomainIdentity(identity) => match identity.width() {
             3 => d3.push(identity.packed_bits()),
             4 => d4.push(identity.packed_bits()),
+            5 => d5.push(identity.packed_bits()),
             _ => {}
         },
         ExprKind::List(items) => {
             for item in items.iter() {
-                scan_exact_macro_ast(item, legacy, d3, d4);
+                scan_exact_macro_ast(item, legacy, d3, d4, d5);
             }
         }
         _ => {}
@@ -54,7 +56,7 @@ fn scan_exact_macro_ast(
 }
 
 #[test]
-fn migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda() {
+fn migrated_macro_bootstrap_uses_ratified_d3_d4_d5_and_executes_ukrainian_source() {
     let legacy_words = binary_runs(MACRO_LIBRARY_SOURCE)
         .into_iter()
         .filter(|word| word.len() == 8)
@@ -69,8 +71,9 @@ fn migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda()
     let mut legacy = 0;
     let mut d3 = Vec::new();
     let mut d4 = Vec::new();
+    let mut d5 = Vec::new();
     for expr in &parsed {
-        scan_exact_macro_ast(expr, &mut legacy, &mut d3, &mut d4);
+        scan_exact_macro_ast(expr, &mut legacy, &mut d3, &mut d4, &mut d5);
     }
     assert_eq!(legacy, 0, "macro AST must contain no legacy SID nodes");
     for required in [0b001, 0b010, 0b011, 0b100, 0b110, 0b111] {
@@ -82,6 +85,9 @@ fn migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda()
     );
     assert!(!d4.contains(&0b0011),
         "quoted Ukrainian DEFINE is data until the expansion is lowered");
+    assert!(d5.contains(&0b00011), "потрібен ратифікований D5:00011");
+    assert!(!MACRO_LIBRARY_SOURCE.contains("make-macro"));
+    assert!(MACRO_LIBRARY_SOURCE.contains("(як-є макрос)"));
     assert!(MACRO_LIBRARY_SOURCE.contains("(як-є визначити)"));
     assert!(MACRO_LIBRARY_SOURCE.contains("(як-є функція)"));
     assert!(!MACRO_LIBRARY_SOURCE.contains("(як-є 0010)"));
@@ -96,6 +102,12 @@ fn migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda()
     )
     .expect("generated D4 DEFINE/LAMBDA must execute after value->expr roundtrip");
     assert_eq!(result.value.to_string(), "37");
+    let result = eval_program(
+        "(визначити перевірити-макрос (макрос (функція (а б) а))) (перевірити-макрос (як-є успіх) невизначене)",
+        &mut session,
+    )
+    .expect("точний D5 MACRO має виконуватися з необчисленими операндами");
+    assert_eq!(result.value.to_string(), "успіх");
 }
 
 #[test]
