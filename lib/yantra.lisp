@@ -78,8 +78,8 @@
       (так (strcat-onto (решта items) (рядок-додати acc (перше items)))))))
 
 (визначити strcat
-  (функція args
-    (strcat-onto args "")))
+  (функція аргументи
+    (strcat-onto аргументи "")))
 
 (визначити json-encode-string
   (функція (s) (рядок-додати "\"" (рядок-додати (екранувати-формат-обміну-даними s) "\""))))
@@ -301,8 +301,8 @@
 ; as one that succeeded. Text shape stays LLM-friendly.
 (визначити execute-bash
   (функція (arguments-json)
-    (нехай-послідовно ((args (формат-обміну-даними-розібрати arguments-json))
-           (cmd (alist-ref "cmd" args))
+    (нехай-послідовно ((аргументи (формат-обміну-даними-розібрати arguments-json))
+           (cmd (alist-ref "cmd" аргументи))
            (result (процес-запустити "bash" (список "-c" cmd)))
            (exit-code (елемент-списку-за-індексом 0 result))
            (stdout (елемент-списку-за-індексом 1 result))
