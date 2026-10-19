@@ -1,8 +1,9 @@
-; LEGACY_MIGRATION_DEBT #5605 / owner prohibition #5789: old #d1:0/#d1:1
-; are NOT permitted literals in current SENS source. Never add/copy new ones.
-; These pre-existing tokens are quarantined for the historical parse() reader.
-; Retire with a positional D1 loader, positive/negative native SENS witnesses
-; and exact Zig T5 round-trip; no blind substitution with numeric 0/1.
+; Чинний Forward: точні ратифіковані D1–D10 і повна українська проєкція.
+; Старі SID8/Sens8 та закодовані #d1:0/#d1:1 — тільки історія Git, не режим
+; виконання і не карантин активних вихідних файлів. D1 так/ні — предикати,
+; десяткові математичні значення — D24+; T5M фізично пакує їх окремо.
+; Deutsch: Kein historischer Byte-Fallback; die Sprache bleibt in SENS.
+; English: No legacy byte execution; exact domains own current behavior.
 ; A forward-chaining rule engine (CLIPS-style: working memory of facts +
 ; pattern/action rules), the other half of classic symbolic AI from
 ; `lib/reason.lisp`'s backward-chaining (Prolog-style) engine. Grown natively
