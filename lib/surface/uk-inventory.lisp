@@ -45,7 +45,7 @@
        (довжина-до reverse-onto map-onto filter-onto largest-chunk
         nondecreasing-from? nonincreasing-from? digit->string
         number->string-onto sqrt-iter isqrt-step truthy?
-        string-membership-helper string-order-helper nonempty-string-membership-helper
+        класифікувати-рядкове-значення порівняти-рядки-за-кодовими-точками класифікувати-непорожність-рядка
         sublis-pair apply-quote-args
         my-postcore-stable-peer-projection my-postcore-peer-group
         my-postcore-binding-status my-postcore-missing-peers

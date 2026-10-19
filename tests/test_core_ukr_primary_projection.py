@@ -64,6 +64,37 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
                 with self.subTest(alias=alias):
                     self.assertIn(alias, surface)
 
+        # Internal helpers remain internal; their executable names are Ukrainian
+        # in both bootstrap/core4 copies and every live caller. No alias or new
+        # domain resident is introduced by this lexical migration.
+        helpers = (
+            ("класифікувати-рядкове-значення", "string-membership-helper"),
+            ("порівняти-рядки-за-кодовими-точками", "string-order-helper"),
+            ("класифікувати-непорожність-рядка", "nonempty-string-membership-helper"),
+        )
+        for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
+            with self.subTest(file=filename, migration="internal helper names"):
+                for ukrainian, legacy in helpers:
+                    with self.subTest(helper=ukrainian):
+                        self.assertIn(f"(визначити {ukrainian}", code)
+                        self.assertNotIn(f"({legacy} ", code)
+        live_callers = (
+            "lib/yantra.lisp",
+            "lib/translation.lisp",
+            "scripts/generate-rust-semantic-registry.lisp",
+            "scripts/generate-function-table.lisp",
+        )
+        for filename in live_callers:
+            code = source(filename)
+            with self.subTest(file=filename, migration="string classification"):
+                self.assertIn("класифікувати-рядкове-значення", code)
+                self.assertNotIn("(string-membership-helper ", code)
+        inventory = source("lib/surface/uk-inventory.lisp")
+        for ukrainian, legacy in helpers:
+            with self.subTest(inventory=legacy):
+                self.assertIn(ukrainian, inventory)
+                self.assertNotIn(legacy, inventory)
+
         # Exact keys and full Ukrainian labels come from their owning domains.
         # In particular, D6:100111's label "четверте" is only a projection;
         # this test does not admit direct D6 execution.

@@ -100,9 +100,9 @@
   (функція (word)
     (за-умовою
       ((однакові? word (як-є ())) "()")
-      ((тотожне? (string-membership-helper word) (class-membership string member))
+      ((тотожне? (класифікувати-рядкове-значення word) (class-membership string member))
        word)
-      ((тотожне? (string-membership-helper word) (class-membership string nonmember))
+      ((тотожне? (класифікувати-рядкове-значення word) (class-membership string nonmember))
        (значення-у-текст word)))))
 
 ; For the machine-readable .lisp output specifically, a bare apostrophe

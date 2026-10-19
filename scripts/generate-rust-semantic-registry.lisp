@@ -25,10 +25,10 @@
 (визначити rust-string
   (функція (value)
     (за-умовою
-      ((string-membership-helper value)
+      ((класифікувати-рядкове-значення value)
        (class-membership string member)
        (значення-у-текст value))
-      ((string-membership-helper value)
+      ((класифікувати-рядкове-значення value)
        (class-membership string nonmember)
        (значення-у-текст (символ-у-текст value))))))
 

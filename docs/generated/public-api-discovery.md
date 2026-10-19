@@ -165,9 +165,9 @@
 | `lib/core4.lisp` | function | `спарувати` | unreviewed |
 | `lib/core4.lisp` | function | `pairlis` | unreviewed |
 | `lib/core4.lisp` | macro | `let*` | unreviewed |
-| `lib/core4.lisp` | function | `string-membership-helper` | unreviewed |
-| `lib/core4.lisp` | function | `string-order-helper` | unreviewed |
-| `lib/core4.lisp` | function | `nonempty-string-membership-helper` | unreviewed |
+| `lib/core4.lisp` | function | `класифікувати-рядкове-значення` | unreviewed |
+| `lib/core4.lisp` | function | `порівняти-рядки-за-кодовими-точками` | unreviewed |
+| `lib/core4.lisp` | function | `класифікувати-непорожність-рядка` | unreviewed |
 | `lib/core4.lisp` | function | `string<?` | unreviewed |
 | `lib/core4.lisp` | function | `symbol?` | unreviewed |
 | `lib/core4.lisp` | function | `largest-chunk` | unreviewed |
