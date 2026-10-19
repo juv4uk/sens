@@ -53,7 +53,7 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     assert_eq!((width, packed_bits), (5, 10));
 
     let capabilities = eval_program(
-        &format!("(machine-capabilities-for-domain {width} {packed_bits})"),
+        &format!("(спроможності-для-домену {width} {packed_bits})"),
         &mut session,
     )
     .expect("exact-domain machine capability lookup")
@@ -101,7 +101,7 @@ fn current_d3_machine_capabilities_are_keyed_by_exact_domain_identity() {
         (3, "((pair-field-load tail bounded-u64))"),
     ] {
         let actual = eval_program(
-            &format!("(machine-capabilities-for-domain 3 {packed_bits})"),
+            &format!("(спроможності-для-домену 3 {packed_bits})"),
             &mut session,
         )
         .unwrap_or_else(|error| panic!("D3 packed={packed_bits} capability lookup failed: {error}"))
@@ -115,8 +115,8 @@ fn current_d3_machine_capabilities_are_keyed_by_exact_domain_identity() {
 fn current_machine_axis_and_profile_do_not_claim_sid8_as_authority() {
     let axis = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis");
-    assert!(axis.contains("machine-capability-axis-v3"));
-    assert!(axis.contains("machine-capabilities-for-domain"));
+    assert!(axis.contains("вісь-спроможностей-машини-v3"));
+    assert!(axis.contains("спроможності-для-домену"));
     assert!(!axis.contains("machine-capability-legacy-sid-axis"));
     assert!(!axis.contains("machine-capabilities-for-sid"));
     assert!(!axis.contains("00001100"));
