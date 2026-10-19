@@ -20,9 +20,9 @@
 ; — D3. D9 map-residents тут не отримують автоматичної callability:
 ; нижні українські імена — Lisp-owned closures.
 
-(визначити map-empty (як-є ()))
+(визначити мапа-порожній (як-є ()))
 
-(визначити map-insert
+(визначити мапа-вставити
   (функція (key value entries)
     (за-умовою
       ((порожній? entries)
@@ -33,7 +33,7 @@
        (сполучити (перше entries)
             (внутрішня-мапа-вставити key value (решта entries)))))))
 
-(визначити map-get
+(визначити мапа-отримати
   (функція (key entries)
     (за-умовою
       ((порожній? entries) (як-є ()))
@@ -43,26 +43,29 @@
        (мапа-отримати key (решта entries))))))
 
 ; Exact D1 projection: presence is (010 (001 ())) form via NOT of empty get.
-(визначити map-contains?
+(визначити мапа-містить?
   (функція (key entries)
     (хибне? (атом? (мапа-отримати key entries)))))
 
-(визначити map->list
+(визначити мапа-список
   (функція (entries) entries))
 
 ; Приватні Lisp-owned механізми. Назви лишають зовнішній D9 resident
 ; fail-closed: residency сама по собі не створює mechanism.
-(визначити внутрішня-мапа-вставити map-insert)
-(визначити внутрішня-мапа-отримати map-get)
-(визначити внутрішня-мапа-містить map-contains?)
-(визначити внутрішня-мапа-список map->list)
+(визначити внутрішня-мапа-вставити мапа-вставити)
+(визначити внутрішня-мапа-отримати мапа-отримати)
+(визначити внутрішня-мапа-містить мапа-містить?)
+(визначити внутрішня-мапа-список мапа-список)
 
-; D9 resident projections over the existing immutable map mechanism.
-; Exact identities: MAP-EMPTY D9:101100011; MAP-GET D9:101100101;
-; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
-; These wrappers preserve the map's maybe-shaped lookup result and dotted-entry order.
-(визначити внутрішня-мапа-порожній map-empty)
-(визначити мапа-порожній внутрішня-мапа-порожній)
-(визначити мапа-отримати внутрішня-мапа-отримати)
-(визначити мапа-містить? внутрішня-мапа-містить)
-(визначити мапа-список внутрішня-мапа-список)
+; Full укр names are the primary Lisp-owned closures for their ratified residents.
+; Exact identities: MAP-EMPTY D9:101100011; MAP-INSERT D9:101101110;
+; MAP-GET D9:101100101; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
+; The width belongs to the domain row; this library never executes raw bit strings.
+(визначити внутрішня-мапа-порожній мапа-порожній)
+
+; Історичні англійські входи — сумісні псевдоніми тих самих укр-замикань.
+(визначити map-empty мапа-порожній)
+(визначити map-insert мапа-вставити)
+(визначити map-get мапа-отримати)
+(визначити map-contains? мапа-містить?)
+(визначити map->list мапа-список)
