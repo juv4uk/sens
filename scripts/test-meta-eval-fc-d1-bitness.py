@@ -5,8 +5,8 @@ Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/meta-eval-first-class.lisp has no bare host truthiness (t / T / NIL)
   2. Exact D1 full Ukrainian predicate words «так»/«ні» are present; legacy #d1 literals absent
-  3. First-class primitive surface present (atom/eq/car/cdr/cons/+/-/*/</=/>)
-  4. Public entry my-eval-first-class present
+  3. First-class primitive surface uses the ratified Ukrainian call names
+  4. Public entry обчислити-першокласні-функції present
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
 Does not prove runtime callability or T5 physical execution. Run:
@@ -25,14 +25,14 @@ ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
 D1_YES = "так"
 D1_NO = "ні"
-PRIMITIVES = ("atom", "eq", "car", "cdr", "cons", "+", "-", "*", "<", "=", ">")
+PRIMITIVES = ("атом?", "тотожне?", "перше", "решта", "сполучити", "додати", "відняти", "помножити", "менше?", "однакові?", "більше?")
 REQUIRED = (
-    "my-fc-primitive",
-    "my-fc-root-env",
-    "my-fc-eval",
-    "my-fc-apply",
-    "my-fc-compare-chain",
-    "my-eval-first-class",
+    "першокласний-примітив",
+    "першокласне-початкове-середовище",
+    "першокласне-обчислити",
+    "першокласне-застосувати",
+    "першокласне-порівняти-послідовність",
+    "обчислити-першокласні-функції",
 )
 
 
@@ -65,10 +65,8 @@ def check_meta() -> list[str]:
         if fn not in text:
             errs.append(f"meta-eval-fc: required surface missing: {fn}")
     for p in PRIMITIVES:
-        if f"(001 {p})" not in text and f"(001 {p})" not in text:
-            # allow both quoted forms
-            if p not in text:
-                errs.append(f"meta-eval-fc: first-class primitive missing: {p}")
+        if f"(як-є {p})" not in executable:
+            errs.append(f"meta-eval-fc: український примітив відсутній: {p}")
     return errs
 
 
@@ -101,7 +99,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("META-EVAL-FC: PASS — no host truthiness or legacy #d1, Ukrainian D1 words, first-class primitives")
+    print("META-EVAL-FC: статична перевірка — проєкція укр, D1 і відсутність #d1; не доказ SENS eval")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
