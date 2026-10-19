@@ -16,14 +16,13 @@
 //! String-Primitive nötig.
 
 use sens::{
-    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_pinned_reasoning_source,
+    eval_parsed_expressions, eval_core_library_source, eval_pinned_reasoning_source,
     eval_program, parse_mixed_exact_domain, Session,
 };
 
 fn eval_import(source: &str) -> String {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session,
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session,
     )
     .expect("test_id=clips-defrule-d4-split: exact-domain Core must load");
     for (path, library) in [
@@ -510,9 +509,7 @@ fn eval_exact_clips_slot_lookup(source: &str) -> String {
     let mut session = Session::default();
     // Old eval_program(lib/core.lisp) interprets migrated binary heads as
     // numbers. This path uses the already proven, source-pinned D3/D4 loader.
-    sens::eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("canonical source-pinned bootstrap");
@@ -558,9 +555,7 @@ fn clips_slot_lookup_scans_named_atom_slots_without_d8_structural_alias() {
 #[test]
 fn clips_defrule_deftemplate_d1_self_verdict_and_mutant() {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("test_id=clips-deftemplate-d1: pinned Core must load");
@@ -602,9 +597,7 @@ fn clips_defrule_form_dispatch_d1_self_verdict_and_one_bit_mutant() {
     // Rust transports real SENS source; D3 EQ and COND own all three YES
     // results and the one-bit NO mutant, not a host-side result table.
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("test_id=clips-form-dispatch-d1: pinned Core must load");
