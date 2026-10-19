@@ -390,7 +390,7 @@ mod tests {
     }
 
     #[test]
-    fn web_session_starts_on_full_ukrainian_projection() {
+    fn ukr_surface_selects_full_ukrainian_namespace() {
         reset_session();
         init_if_needed().expect("full Ukrainian default surface");
         SESSION.with(|slot| {
@@ -401,19 +401,14 @@ mod tests {
                 .expect("full Ukrainian call head works by default");
             assert_eq!(full.value.to_string(), "(1)");
         });
-    }
 
-    #[test]
-    fn ukr_surface_selects_full_ukrainian_namespace() {
-        reset_session();
-        init_if_needed().expect("full Ukrainian default surface");
         assert_eq!(set_surface_impl("core").expect("core"), "core");
         assert_eq!(set_surface_impl("ukr").expect("ukr"), "укр");
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
             let full = eval_program("(порожній-текст? \"\")", session)
-                .expect("full Ukrainian spelling");
+                .expect("full Ukrainian spelling after explicit switch");
             assert_eq!(full.value.to_string(), "(1)");
         });
     }
