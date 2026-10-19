@@ -23,7 +23,7 @@
     (список
       ; Supported bounded structural slice reaches the CPU.
       (native-first-execution-witness-check
-        (native-first-execute-expression
+        (нативне-виконати-вираз
           (як-є (перше (сполучити 2 3))))
         (як-є
           (execution-route native
@@ -32,7 +32,7 @@
 
       ; Unsupported ordinary Lisp stays evaluator-owned.
       (native-first-execution-witness-check
-        (native-first-execute-expression
+        (нативне-виконати-вираз
           (як-є (+ 2 3)))
         (як-є
           (execution-route evaluator
@@ -41,7 +41,7 @@
 
       ; Source text is parsed; each top-level form is routed separately.
       (native-first-execution-witness-check
-        (native-first-execute-source
+        (нативне-виконати-джерело
           "(+ 1 2)
 (car (cons 7 9))")
         (як-є
@@ -55,7 +55,7 @@
 
       ; Once a native plan exists, admission rejection stays visibly native.
       (native-first-execution-witness-check
-        (native-first-execute-plan
+        (нативне-виконати-план
           (як-є
             (native-plan
               ((definitely-not-an-admitted-machine-form))
@@ -70,7 +70,7 @@
 
       ; Malformed native plans fail closed on the native route.
       (native-first-execution-witness-check
-        (native-first-execute-plan
+        (нативне-виконати-план
           (як-є (native-plan ((ret)))))
         (як-є
           (execution-route native
