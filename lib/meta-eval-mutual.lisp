@@ -5,7 +5,7 @@
 ; Семантика: те саме одноразове обчислення аргументу, те саме локальне зв'язування.
 ; Двопольний D3 COND; резервна умова — прямий однобітний D1:YES.
 ; Reuses existing meta-eval surface: my-apply, my-eval-body, bind-params,
-; env-lookup, my-macro?, my-lambda-form?, my-fifth, my-fourth.
+; env-lookup, my-macro?, my-lambda-form?, my-fifth, четверте.
 ; Width is identity; every bit of the domain address is valued.
 ;
 ; Consecutive top-level `(def name (lambda ...))` forms are treated as one
@@ -86,7 +86,7 @@
 (визначити my-apply-group-closure
   (функція (викликана-функція аргументи)
     ((функція (group-env) (my-eval-body
-        (my-fourth викликана-функція)
+        (четверте викликана-функція)
         (зв'язати-аргументи-з-лямбда-параметрами
           (третє викликана-функція)
           аргументи
@@ -129,7 +129,7 @@
     (за-умовою
       ((це-замикання-рекурсивної-групи? викликана-функція)
        ((функція (group-env) (my-group-eval-body
-           (my-fourth викликана-функція)
+           (четверте викликана-функція)
            (зв'язати-аргументи-з-лямбда-параметрами (третє викликана-функція) аргументи group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth викликана-функція) (my-sixth викликана-функція))))
       (так (my-apply викликана-функція аргументи)))))
 

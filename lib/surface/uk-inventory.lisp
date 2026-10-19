@@ -47,8 +47,8 @@
         number->string-onto уточнити-корінь-ітерацією крок-цілого-кореня truthy?
         класифікувати-рядкове-значення порівняти-рядки-за-кодовими-точками класифікувати-непорожність-рядка
         знайти-пару-підстановки підготувати-цитовані-аргументи
-        my-postcore-stable-peer-projection my-postcore-peer-group
-        my-postcore-binding-status my-postcore-missing-peers
+        my-postcore-stable-peer-projection знайти-групу-відповідників
+        my-postcore-binding-status знайти-відсутні-відповідники
         my-postcore-build-definitions my-postcore-materialize-stable-peers))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
   (public-predicates
