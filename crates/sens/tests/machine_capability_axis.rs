@@ -237,7 +237,7 @@ fn x86_target_witnesses_reference_existing_lowering_names_without_owning_meaning
     ] {
         assert!(source.contains(name), "axis references {name}");
         assert!(
-            lowering.contains(&format!("(00001001 {name}")),
+            lowering.contains(&format!("(визначити {name}")),
             "referenced x86 witness {name} must exist"
         );
     }
