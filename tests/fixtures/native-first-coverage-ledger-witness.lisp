@@ -102,7 +102,7 @@
                row))
            (plan (native-first-plan expression))
            (outcome
-             (native-first-execute-expression expression))
+             (нативне-виконати-вираз expression))
            (parity
              (native-first-parity-case
                (1110
