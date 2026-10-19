@@ -33,7 +33,7 @@ fn compound_plan_tag_does_not_reach_atom_only_d3_eq() {
 fn overlong_plan_is_not_a_three_element_list() {
     let overlong = r#"
         (за-умовою
-          ((native-first-proper-list-length-3?
+          ((нативний-список-трьох-елементів?
              (як-є (native-plan код дані надлишок)))
            (як-є помилково-прийнято))
           (так (як-є відхилено)))
@@ -42,7 +42,7 @@ fn overlong_plan_is_not_a_three_element_list() {
 
     let exact = r#"
         (за-умовою
-          ((native-first-proper-list-length-3?
+          ((нативний-список-трьох-елементів?
              (як-є (native-plan код дані)))
            (як-є прийнято))
           (так (як-є помилково-відхилено)))
@@ -62,7 +62,7 @@ fn compound_tag_rejects_plan_without_executing_fallback() {
 #[test]
 fn malformed_native_result_tag_rejects_in_native_route() {
     let actual = execute(
-        "(native-first-execute-native-plan-result (як-є (native-plan код дані)) (як-є ((пошкоджений-тег) дані)))",
+        "(нативне-виконання-результат-плану (як-є (native-plan код дані)) (як-є ((пошкоджений-тег) дані)))",
     );
     assert_eq!(
         actual,
@@ -71,7 +71,7 @@ fn malformed_native_result_tag_rejects_in_native_route() {
     );
 
     let rejected = execute(
-        "(native-first-execute-native-plan-result (як-є (native-plan код дані)) (як-є (rejected неприпустиме-кодування)))",
+        "(нативне-виконання-результат-плану (як-є (native-plan код дані)) (як-є (rejected неприпустиме-кодування)))",
     );
     assert_eq!(
         rejected,
