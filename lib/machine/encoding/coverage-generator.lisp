@@ -58,7 +58,7 @@
 
 (визначити encoder-coverage-count=?
   (функція (двійкова-кількість елементи)
-    (= двійкова-кількість
+    (тотожне? двійкова-кількість
        (encoder-coverage-binary-length елементи))))
 
 
@@ -315,7 +315,7 @@
       (список (як-є projection-count)
         (encoder-coverage-count=? encoder-coverage-projection-partial-count encoder-coverage-partials))
       (список (як-є projection-orphan-zero)
-        (= encoder-coverage-projection-orphan-count 0))
+        (тотожне? encoder-coverage-projection-orphan-count 0))
       (список (як-є projection-subset)
         (encoder-coverage-partials-valid? encoder-coverage-index-rows encoder-coverage-partials))
       (список (як-є legacy-head)
@@ -429,9 +429,9 @@
          (список
            (encoder-coverage-same? (перше форма-покриття) (як-є x86-encoder-coverage/1))
            (encoder-coverage-same? (перше (друге форма-покриття)) (як-є form-count))
-           (= (друге (друге форма-покриття)) encoder-coverage-form-count)
+           (тотожне? (друге (друге форма-покриття)) encoder-coverage-form-count)
            (encoder-coverage-same? (перше (третє форма-покриття)) (як-є partial-count))
-           (= (друге (третє форма-покриття)) encoder-coverage-projection-partial-count)
+           (тотожне? (друге (третє форма-покриття)) encoder-coverage-projection-partial-count)
            (encoder-coverage-projection-rows-valid?
              encoder-coverage-index-rows
              (решта (решта (решта форма-покриття)))
