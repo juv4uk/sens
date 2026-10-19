@@ -6,7 +6,8 @@ on:
   workflow_dispatch:
 concurrency:
   group: byte-pack-bench-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   smoke:

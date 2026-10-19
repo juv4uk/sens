@@ -8,6 +8,7 @@ permissions:
 concurrency:
   group: history-source-reconcile-main
   cancel-in-progress: false
+  queue: max
 
 jobs:
   compare-immutable-git-blobs:

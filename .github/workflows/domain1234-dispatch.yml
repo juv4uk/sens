@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
 concurrency:
   group: d34-dispatch-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   bench:

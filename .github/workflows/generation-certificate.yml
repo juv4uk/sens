@@ -5,7 +5,8 @@ on:
 
 concurrency:
   group: generation-certificate-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   selector-certificate:

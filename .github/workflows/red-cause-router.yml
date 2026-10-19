@@ -14,6 +14,7 @@ permissions:
 concurrency:
   group: sens-red-quarantine-updater
   cancel-in-progress: false
+  queue: max
 
 jobs:
   red-cause-contract:

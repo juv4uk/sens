@@ -17,6 +17,7 @@ permissions:
 concurrency:
   group: deep-meta-nightly
   cancel-in-progress: false
+  queue: max
 
 jobs:
   deep-meta-advice-taker:

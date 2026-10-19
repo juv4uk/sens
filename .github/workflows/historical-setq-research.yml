@@ -5,7 +5,8 @@ on:
 
 concurrency:
   group: historical-setq-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read

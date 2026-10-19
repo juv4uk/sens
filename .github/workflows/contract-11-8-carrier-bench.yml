@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 concurrency:
   group: contract-11-8-carrier-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   bench:

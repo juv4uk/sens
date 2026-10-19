@@ -9,11 +9,12 @@ on:
 permissions:
   contents: read
 
-# На кожен коміт запускається один workflow; нові push скасовують застарілі
-# push-запуски тієї самої гілки, щоб вони не займали чергу раннерів.
+# Кожен запуск зберігаємо до завершення: нові push не скасовують попередні.
+# Черга concurrency зберігає до 100 очікуваних запусків.
 concurrency:
   group: sens-lisp-surface-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'push' }}
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   lisp-surface:

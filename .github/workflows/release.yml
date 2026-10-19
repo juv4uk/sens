@@ -12,6 +12,7 @@ permissions:
 concurrency:
   group: sens-release-${{ github.ref }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   test:

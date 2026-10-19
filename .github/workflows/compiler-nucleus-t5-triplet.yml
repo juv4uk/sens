@@ -9,6 +9,7 @@ permissions:
 concurrency:
   group: compiler-nucleus-t5-triplet
   cancel-in-progress: false
+  queue: max
 
 jobs:
   triplet:
