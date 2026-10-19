@@ -709,7 +709,7 @@ class UkrainianGreetingFullSurfaceTests(unittest.TestCase):
         self.assertEqual(source.count("(друкувати"), 3)
         self.assertIn("(значення-у-текст (перше гості))", source)
         self.assertIn("(значення-у-текст (атом? (перше гості)))", source)
-        self.assertNotRegex(source, r"\\(\\s*[01]{2,10}(?=\\s|\\))")
+        self.assertNotRegex(source, r"\(\s*[01]{2,10}(?=\s|\))")
 
         from scripts.report_ukr_projection_progress import (
             UKRAINIAN_KEYBOARD_OUTPUTS,
@@ -718,7 +718,7 @@ class UkrainianGreetingFullSurfaceTests(unittest.TestCase):
         self.assertTrue(source.strip())
         self.assertFalse(
             {char for char in source if char not in UKRAINIAN_KEYBOARD_OUTPUTS
-             and char not in "\\n\\r\\t"}
+             and char not in "\n\r\t"}
         )
 
         expected = (
