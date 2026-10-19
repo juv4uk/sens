@@ -29,19 +29,19 @@
 (за-умовою
   ((тотожне? (перше d1) (як-є domain-table/1))
    (за-умовою
-     ((101 (000000 (table-rows d1)) 2)
+     ((тотожне? (довжина (table-rows d1)) 2)
       (за-умовою
-        ((101 (000000 (table-rows d2)) 4)
+        ((тотожне? (довжина (table-rows d2)) 4)
          (за-умовою
-           ((101 (000000 (table-rows d3)) 8)
+           ((тотожне? (довжина (table-rows d3)) 8)
             (за-умовою
-              ((101 (000000 (table-rows d4)) 16)
+              ((тотожне? (довжина (table-rows d4)) 16)
                (за-умовою
-                 ((101 (000000 (table-rows d5)) 32)
+                 ((тотожне? (довжина (table-rows d5)) 32)
                   (за-умовою
-                    ((101 (000000 (table-rows d6)) 64)
+                    ((тотожне? (довжина (table-rows d6)) 64)
                      (за-умовою
-                       ((101 (000000 (table-rows d8)) 256)
+                       ((тотожне? (довжина (table-rows d8)) 256)
                         (за-умовою
                        ((тотожне? (first-key-text d1) "0")
                         (за-умовою
@@ -56,7 +56,7 @@
                                       ((тотожне? (first-key-text d6) "000000")
                                        (за-умовою
                                          ((тотожне? (first-key-text d8) "00000000")
-                                          (11011011 "DOMAIN-TABLE-READ: PASS files=7 rows=382 widths=1..6,8"))
+                                          (друкувати "DOMAIN-TABLE-READ: PASS files=7 rows=382 widths=1..6,8"))
                                          (так (domain-table-width-loss-d8))))
                                       (так (domain-table-width-loss-d6))))
                                    (так (domain-table-width-loss-d5))))
