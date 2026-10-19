@@ -67,24 +67,27 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         # Exact keys and full Ukrainian labels come from their owning domains.
         # In particular, D6:100111's label "четверте" is only a projection;
         # this test does not admit direct D6 execution.
-        for path, bits, label in (
-            ("lib/domains/d4.lisp", "1001", "друге"),
-            ("lib/domains/d5.lisp", "10011", "третє"),
-            ("lib/domains/d6.lisp", "100111", "четверте"),
+        for path, width, bits, label in (
+            ("lib/domains/d4.lisp", 4, "1001", "друге"),
+            ("lib/domains/d5.lisp", 5, "10011", "третє"),
+            ("lib/domains/d6.lisp", 6, "100111", "четверте"),
         ):
             with self.subTest(domain=path, bits=bits):
+                self.assertEqual(
+                    len(bits), width,
+                    f"{path}: ширина ключа має належати своєму домену D{width}",
+                )
                 matching = [
                     line for line in source(path).splitlines()
                     if line.lstrip().startswith(f"({bits} ")
                 ]
                 self.assertEqual(
                     len(matching), 1,
-                    f"{path}: очікував єдиний точний ключ ширини {len(bits)}: {bits}",
+                    f"{path}: очікував єдиний точний ключ {width}-бітової ширини: {bits}",
                 )
                 self.assertRegex(
                     matching[0], rf"\(укр\s+{re.escape(label)}\)"
                 )
-                self.assertEqual(len(bits), len(re.sub(r"[^01]", "", bits)))
 
 
 if __name__ == "__main__":
