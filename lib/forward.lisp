@@ -66,19 +66,27 @@
 
 (визначити assert-fact!
   (make-macro
-    (функція (fact)
-      (список (як-є def) (як-є *working-memory*) (список (як-є 111) fact (як-є *working-memory*))))))
+    (функція (факт)
+      (список (як-є def) (як-є *working-memory*) (список (як-є 111) факт (як-є *working-memory*))))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in
 ; — the new fact this rule application would produce. On failure, returns
 ; `'no-match` rather than `'()` — an empty list would be ambiguous with a
 ; template that legitimately evaluates to `()`.
+; Мовні зв'язування: правило/факт → шаблон/зразок → зв'язування.
+; Стан середовища та маркер невдачі no-match не змінюються.
 (визначити fire-rule
-  (функція (rule fact)
-    ((функція (pattern template) ((функція (bindings) (за-умовою
-          ((підстановка-позначає-невдачу? bindings) (як-є no-match))
-          (так (застосувати-підстановка template bindings)))) (уніфікувати pattern fact (як-є ())))) (перше rule) (друге rule))))
+  (функція (правило факт)
+    ((функція (шаблон зразок)
+       ((функція (зв'язування)
+          (за-умовою
+            ((підстановка-позначає-невдачу? зв'язування)
+             (як-є no-match))
+            (так (застосувати-підстановка зразок зв'язування))))
+        (уніфікувати шаблон факт (як-є ()))))
+     (перше правило)
+     (друге правило))))
 
 ; Step 2: apply one rule to every fact in a list, collecting the new facts
 ; it produces. Still just one rule (not the whole rule set) and still no
