@@ -20,6 +20,7 @@
 (визначити binary
   (функція (ширина)
     (список (як-є binary) ширина)))
+(визначити бінарний binary)
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -107,8 +108,8 @@
 ; prefix (no default-prefix convenience yet -- G5: earn that later if
 ; a real caller needs it, don't build it speculatively now).
 (визначити створити-символ
-  (функція (prefix)
-    (текст-у-символ (рядок-додати prefix (значення-у-текст (монотонний-наносекунди))))))
+  (функція (префікс)
+    (текст-у-символ (рядок-додати префікс (значення-у-текст (монотонний-наносекунди))))))
 
 (визначити pair
   (функція (left right)

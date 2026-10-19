@@ -39,8 +39,8 @@
 ; chooses when to invoke it; the host function may reveal only exact width/bits
 ; and has no identity->meaning authority.
 (визначити compiler-domain-shape
-  (функція (decompose ідентичність)
-    (decompose ідентичність)))
+  (функція (розкласти ідентичність)
+    (розкласти ідентичність)))
 
 
 ; #3809 — bounded compiler-role derivation from generated, provenance-bound
@@ -71,9 +71,9 @@
 ; from the admitted D3 ATOM + atom-only D3 EQ laws. N0's compiler ISA
 ; does not claim a D4 NULL lowering role or invent a callable bridge.
 (визначити compiler-list-end?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((атом? value) (тотожне? value (як-є ())))
+      ((атом? значення) (тотожне? значення (як-є ())))
       (так (хиба-компілятора ())))))
 
 ; A verified bit sequence is a proper list of D1 atoms. To test the
@@ -114,24 +114,24 @@
 ; D6 is ratified but these longer selectors lack executable admission;
 ; compose admitted D5 and D3 instead. No D7 text/data aliases.
 (визначити compiler-shape-width
-  (функція (shape)
-    (перше shape)))
+  (функція (форма)
+    (перше форма)))
 
 (визначити compiler-shape-bits
-  (функція (shape)
-    (перше (решта shape))))
+  (функція (форма)
+    (перше (решта форма))))
 
 (визначити compiler-law-width
-  (функція (law)
-    (перше law)))
+  (функція (закон)
+    (перше закон)))
 
 (визначити compiler-law-empty-bits
-  (функція (law)
-    (перше (решта law))))
+  (функція (закон)
+    (перше (решта закон))))
 
 (визначити compiler-law-xor-mask
-  (функція (law)
-    (перше (решта (решта law)))))
+  (функція (закон)
+    (перше (решта (решта закон)))))
 
 (визначити остов-закону-л5-компілятора
   (функція (закон-остова-л5-компілятора)
