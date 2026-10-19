@@ -10,72 +10,72 @@
 ; Load `lib/utf8.lisp` before this file.
 
 (визначити process-raw-exit-code
-  (функція (raw)
-    (друге raw)))
+  (функція (сирий-результат)
+    (друге сирий-результат)))
 
 (визначити process-raw-stdout-bytes
-  (функція (raw)
-    (третє raw)))
+  (функція (сирий-результат)
+    (третє сирий-результат)))
 
 (визначити process-raw-stderr-bytes
-  (функція (raw)
-    (перше (решта (решта (решта raw))))))
+  (функція (сирий-результат)
+    (перше (решта (решта (решта сирий-результат))))))
 
-(визначити process-result->text
-  (функція (raw)
+(визначити процес-результат-текст
+  (функція (сирий-результат)
     (за-умовою
-      ((хибне? (тотожне? (перше raw) (як-є process-result)))
+      ((хибне? (тотожне? (перше сирий-результат) (як-є process-result)))
        (список (як-є rejected) (як-є invalid-process-result)))
-      ((тотожне? (перше raw) (як-є process-result))
-       ((функція (stdout-result stderr-result)
+      ((тотожне? (перше сирий-результат) (як-є process-result))
+       ((функція (результат-виводу результат-помилок)
         (за-умовою
-           ((хибне? (тотожне? (перше stdout-result) (як-є decoded)))
+           ((хибне? (тотожне? (перше результат-виводу) (як-є decoded)))
             (список (як-є rejected) (як-є stdout-invalid-utf8)))
-           ((тотожне? (перше stdout-result) (як-є decoded))
+           ((тотожне? (перше результат-виводу) (як-є decoded))
             (за-умовою
-              ((хибне? (тотожне? (перше stderr-result) (як-є decoded)))
+              ((хибне? (тотожне? (перше результат-помилок) (як-є decoded)))
                (список (як-є rejected) (як-є stderr-invalid-utf8)))
-              ((тотожне? (перше stderr-result) (як-є decoded))
+              ((тотожне? (перше результат-помилок) (як-є decoded))
                (список
                  (як-є decoded-process)
-                 (process-raw-exit-code raw)
-                 (друге stdout-result)
-                 (друге stderr-result)))
+                 (process-raw-exit-code сирий-результат)
+                 (друге результат-виводу)
+                 (друге результат-помилок)))
               (так
                (список (як-є rejected) (як-є stderr-invalid-utf8)))))
            (так
             (список (як-є rejected) (як-є stdout-invalid-utf8)))))
-       (кодування-юнікод-8-декодувати-рядок (process-raw-stdout-bytes raw))
-       (кодування-юнікод-8-декодувати-рядок (process-raw-stderr-bytes raw))))
+       (кодування-юнікод-8-декодувати-рядок (process-raw-stdout-bytes сирий-результат))
+       (кодування-юнікод-8-декодувати-рядок (process-raw-stderr-bytes сирий-результат))))
       (так
        (список (як-є rejected) (як-є invalid-process-result))))))
 
-(визначити process-run-text
-  (функція (program args)
-    (process-result->text (process-run-raw program args))))
+(визначити процес-запустити-текст
+  (функція (програма аргументи)
+    (процес-результат-текст (process-run-raw програма аргументи))))
 
 ; Public compatibility surface. Valid UTF-8 preserves the historical
 ; 3-element result shape. Invalid UTF-8 returns explicit rejection.
-(визначити process-public-exit-code
-  (функція (code)
+(визначити процес-публічний-вихід-код
+  (функція (код)
     (за-умовою
-      ((тотожне? code (як-є ())) -1)
-      ((хибне? (тотожне? code (як-є ()))) code)
+      ((тотожне? код (як-є ())) -1)
+      ((хибне? (тотожне? код (як-є ()))) код)
       (так -1))))
 
-(визначити process-run
-  (функція (program args)
-    ((функція (result)
+(визначити процес-запустити
+  (функція (програма аргументи)
+    ((функція (результат)
         (за-умовою
-        ((тотожне? (перше result) (як-є decoded-process))
+        ((тотожне? (перше результат) (як-є decoded-process))
          (список
-           (process-public-exit-code (друге result))
-           (третє result)
-           (перше (решта (решта (решта result))))))
-        ((хибне? (тотожне? (перше result) (як-є decoded-process)))
-         result)
-        (так result)))
-       (process-run-text program args))))
+           (процес-публічний-вихід-код (друге результат))
+           (третє результат)
+           (перше (решта (решта (решта результат))))))
+        ((хибне? (тотожне? (перше результат) (як-є decoded-process)))
+         результат)
+        (так результат)))
+       (процес-запустити-текст програма аргументи))))
 
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
 ; whether this post-core closure currently has any additional stable peers.
