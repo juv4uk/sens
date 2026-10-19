@@ -19,20 +19,20 @@
 ; Historical read-file returns decoded text directly. Invalid UTF-8 returns
 ; the same explicit rejection utf8-decode-string produces for process/TCP.
 (визначити read-file
-  (функція (path)
-    ((функція (decoded)
+  (функція (шлях)
+    ((функція (декодоване)
       (за-умовою
-        ((тотожне? (перше decoded) (як-є decoded))
-         (друге decoded))
+        ((тотожне? (перше декодоване) (як-є decoded))
+         (друге декодоване))
         (так
-         decoded)))
-     (read-file-utf8-raw path))))
+         декодоване)))
+     (read-file-utf8-raw шлях))))
 
 ; Historical write-file returns the text after successful write;
 ; encoding policy belongs to Lisp, host only persists bytes.
 (визначити write-file
-  (функція (path text)
-    (друге (список (write-file-bytes path (utf8-encode-string text)) text))))
+  (функція (шлях текст)
+    (друге (список (write-file-bytes шлях (utf8-encode-string текст)) текст))))
 
 ; Stable surface peers are projected by load_fs_library after the public
 ; file closures exist. Avoid the retired per-file post-core materializer.
