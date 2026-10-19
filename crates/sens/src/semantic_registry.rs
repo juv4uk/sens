@@ -264,6 +264,19 @@ pub(crate) fn d9_binding_identity_for_definition(name: &str) -> Option<DomainIde
         )))
 }
 
+/// Resolve an owner-ratified **Ukrainian source head** from the D9 ladder.
+/// Unlike binding-only aliases, only the first (укр/ук) spelling is eligible
+/// for this executable-source path; the evaluator must still require a
+/// separately admitted concrete D9 mechanism before dispatch. No W8 lookup.
+pub(crate) fn d9_uk_source_identity(name: &str) -> Option<DomainIdentity> {
+    D9_DEFINITION_BINDINGS
+        .iter()
+        .find(|row| row.names.first().copied() == Some(name))
+        .map(|row| DomainIdentity::D9(CoreD9::from_word(
+            Bit9::new(row.bits).expect("ratified D9 source word has exactly nine bits"),
+        )))
+}
+
 /// Binding-only D10 lookup. A domain-table name maps to an exact coordinate,
 /// but only evaluation of a concrete root callable populates its runtime slot.
 pub(crate) fn d10_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {

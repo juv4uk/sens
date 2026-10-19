@@ -206,6 +206,27 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
                 };
             }
 
+            // Canonical D9 string mechanism is not CoreDomainIdentity
+            // (D3-D6). Qualify *only* the ratified Ukrainian head and
+            // *only* if its exact D9 law has an installed evaluator mechanism.
+            // The text remains a projection, never an historical W8 byte.
+            if let ExprKind::Symbol(head) = &items[0].kind {
+                if let Some(identity) = semantic_registry::d9_uk_source_identity(head)
+                    .filter(|identity| canon::has_d9_string_mechanism(*identity))
+                {
+                    let mut lowered = Vec::with_capacity(items.len());
+                    lowered.push(Expr {
+                        kind: ExprKind::DomainIdentity(identity),
+                        span: items[0].span,
+                    });
+                    lowered.extend(arguments.iter().map(|arg| lower(arg, depth + 1, mode)));
+                    return Expr {
+                        kind: ExprKind::List(lowered.into()),
+                        span: expression.span,
+                    };
+                }
+            }
+
             // Exact source must not consult a flat historical W8 registry.
             if mode == LowerMode::ExactDomain {
                 return Expr {
@@ -227,6 +248,43 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
     Expr {
         kind,
         span: expression.span,
+    }
+}
+
+#[cfg(test)]
+mod ratified_d9_string_surface_tests {
+    use super::*;
+
+    #[test]
+    fn ukr_string_append_uses_real_d9_110011110_not_legacy_w8() {
+        let source = "(рядок-додати \"Привіт, \" \"світе\")";
+        let parsed = crate::parse(source).expect("канонічна українська Lisp-форма");
+        let lowered = lower_program(&parsed);
+        let ExprKind::List(items) = &lowered[0].kind else {
+            panic!("джерело має залишатися списком з точним D9 head");
+        };
+        assert!(matches!(&items[0].kind,
+            ExprKind::DomainIdentity(crate::DomainIdentity::D9(word))
+                if word.word().packed_bits() == 0b110011110
+        ), "D9 identity may not alias the old SID8 row");
+        assert_eq!(lower_program(&lowered), lowered, "D9 source lowering is idempotent");
+
+        let result = crate::eval_parsed_expressions(&parsed, &mut crate::Session::default())
+            .expect("реальний D9 механізм складає обидва Unicode рядки");
+        assert_eq!(result.value, crate::Value::String("Привіт, світе".into()));
+    }
+
+    #[test]
+    fn nested_canonical_d9_append_keeps_both_editor_selection_fragments() {
+        let source = "(рядок-додати \"[\" (рядок-додати \"їжак\" \"]\"))";
+        let parsed = crate::parse(source).expect("два вкладені D9 виклики");
+        let result = crate::eval_parsed_expressions(&parsed, &mut crate::Session::default())
+            .expect("вкладений D9 рядок-додати реально виконується");
+        assert_eq!(result.value, crate::Value::String("[їжак]".into()));
+
+        let short = crate::parse("(рядок-додати \"тільки один\")").unwrap();
+        assert!(crate::eval_parsed_expressions(&short, &mut crate::Session::default()).is_err(),
+            "не підміняти D9 виклик мовчазним поверненням останнього аргументу");
     }
 }
 
