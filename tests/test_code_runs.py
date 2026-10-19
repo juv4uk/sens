@@ -1024,41 +1024,48 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
 
     def test_private_helpers_and_formals_use_full_ukr_projection_with_exact_inverse(self):
         source = self.SOURCE.read_text(encoding="utf-8")
-        projected, counts, unexpected, forms = self._rewrite_heads(
-            source, {}, self.LOCAL_HELPERS_UKR, self.LOCAL_FORMALS_UKR
-        )
-        self.assertEqual(unexpected, [])
-        self.assertEqual(forms, 57)
-        self.assertTrue(all(name in counts for name in self.LOCAL_HELPERS_UKR), counts)
-        self.assertTrue(all(name in counts for name in
-                            {key for pair in self.LOCAL_FORMALS_UKR.values() for key in pair}), counts)
-        self.assertIn("(визначити compiler-nucleus", projected)
-        self.assertIn("(визначити compiler-domain-shape", projected)
-        self.assertIn("(визначити compiler-lowering-role-from-laws", projected)
+        self.assertIn("(визначити знайти-авторитет-компілятора", source)
+        self.assertIn("(визначити істина-компілятора", source)
+        self.assertIn("(визначити хиба-компілятора", source)
+        self.assertIn("(визначити бітові-послідовності-однакові?", source)
+        self.assertIn("(визначити compiler-nucleus", source)
+        self.assertIn("(визначити compiler-domain-shape", source)
+        self.assertIn("(визначити compiler-lowering-role-from-laws", source)
 
         inverse_helpers = {ukr: old for old, ukr in self.LOCAL_HELPERS_UKR.items()}
         inverse_formals = {
             self.LOCAL_HELPERS_UKR[fn]: {ukr: old for old, ukr in pairs.items()}
             for fn, pairs in self.LOCAL_FORMALS_UKR.items()
         }
-        restored, _, inverse_unclassified, _ = self._rewrite_heads(
-            projected, {}, inverse_helpers, inverse_formals
+        restored, counts, unclassified, forms = self._rewrite_heads(
+            source, {}, inverse_helpers, inverse_formals
         )
-        self.assertEqual(inverse_unclassified, [])
-        self.assertEqual(self._git_blob_sha(restored),
-                         self.CURRENT_SOURCE_BLOB_BEFORE_LOCAL_PROJECTION,
-                         "local helper projection must restore exact pre-migration Git blob")
+        self.assertEqual(unclassified, [])
+        self.assertEqual(forms, 57)
+        self.assertTrue(all(name in counts for name in self.LOCAL_HELPERS_UKR.values()), counts)
+        self.assertTrue(all(name in counts for name in
+                            {value for pairs in self.LOCAL_FORMALS_UKR.values()
+                             for value in pairs.values()}), counts)
+        self.assertEqual(
+            self._git_blob_sha(restored),
+            self.CURRENT_SOURCE_BLOB_BEFORE_LOCAL_PROJECTION,
+            "inverse of the live Ukrainian source must restore the exact pre-projection Git blob",
+        )
 
-        mutant = projected.replace(
+        mutant = source.replace(
             "(визначити знайти-авторитет-компілятора",
             "(визначити хиба-компілятора", 1
         )
+        self.assertNotEqual(mutant, source)
         wrong, _, wrong_unclassified, _ = self._rewrite_heads(
             mutant, {}, inverse_helpers, inverse_formals
         )
         self.assertEqual(wrong_unclassified, [])
-        self.assertNotEqual(self._git_blob_sha(wrong),
-                            self.CURRENT_SOURCE_BLOB_BEFORE_LOCAL_PROJECTION)
+        self.assertNotEqual(
+            self._git_blob_sha(wrong),
+            self.CURRENT_SOURCE_BLOB_BEFORE_LOCAL_PROJECTION,
+            "wrong Ukrainian helper peer must fail the exact inverse witness",
+        )
 
 
 
