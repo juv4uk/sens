@@ -3,11 +3,11 @@
 use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session};
 
 fn core_session() -> Session {
-    // Єдиний допустимий механізм D5 MACRO встановлюємо один раз.
-    // Runtime Core4 допускає чинну D8 «значення-у-текст» перед завантаженням
-    // виконуваного lib/core.lisp, який далі перевіряє сам SENS evaluator.
-    let mut session = Session::bare();
-    sens::load_core_library(&mut session).expect("чинний Core4 runtime bootstrap");
+    // Справжній незалежний запуск lib/core.lisp: Session::default()
+    // допускає D5 MACRO один раз і не підміняє цей файл Core4/FASL.
+    // Виявлені відсутні D8-механізми лишаються реальними помилками,
+    // а не приховуються завантаженням іншого ядра.
+    let mut session = Session::default();
     let forms = parse_mixed_exact_domain(include_str!("../../../lib/core.lisp"))
         .expect("чинний Core має читатися загальним SENS reader");
     eval_parsed_expressions(&forms, &mut session)
