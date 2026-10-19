@@ -202,7 +202,7 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     assert_eq!(
         eval_text(
             &format!(
-                "(life-scheduler-projection-ready? (quote {invocation}) (quote ({projection_ready})))"
+                "(життя-проєкція-готова? (quote {invocation}) (quote ({projection_ready})))"
             ),
             &mut session,
         ),
@@ -211,7 +211,7 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     assert_eq!(
         eval_text(
             &format!(
-                "(life-scheduler-projection-ready? (quote {invocation}) (quote ((projection-ready {} observation-99))))",
+                "(життя-проєкція-готова? (quote {invocation}) (quote ((projection-ready {} observation-99))))",
                 edge.bridge_contract_ref
             ),
             &mut session,
@@ -221,7 +221,7 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     assert_eq!(
         eval_text(
             &format!(
-                "(life-scheduler-projection-ready? (quote {invocation}) (quote ((projection-ready different-bridge-contract {}))))",
+                "(життя-проєкція-готова? (quote {invocation}) (quote ((projection-ready different-bridge-contract {}))))",
                 source_ref
             ),
             &mut session,
@@ -231,7 +231,7 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
 
     let selection = eval_text(
         &format!(
-            "(life-scheduler-select-ready (list (quote {invocation})) (quote ({projection_ready})))"
+            "(життя-обрати-готове (list (quote {invocation})) (quote ({projection_ready})))"
         ),
         &mut session,
     );
@@ -241,7 +241,7 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     );
     assert_eq!(
         eval_text(
-            "(life-scheduler-quiescence (quote ()) (quote ()) (quote no-transition-required))",
+            "(життя-спокій (quote ()) (quote ()) (quote no-transition-required))",
             &mut session,
         ),
         "(quiescence-state quiescent)"
