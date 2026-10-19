@@ -217,9 +217,21 @@ def reject_shadowed_surfaces(source, surfaces):
         return set()
 
     def bound_names(node, context):
+        # Match the actual SENS evaluator's three supported lambda-list shapes:
+        # (x y), (x y . rest), and a bare symbol such as args. LET bindings
+        # remain strict proper lists through binding_list(); only parameter
+        # binding uses this more permissive, evaluator-backed grammar.
+        if isinstance(node, reader.Atom):
+            return bound_name(node, context)
+        if not isinstance(node, reader.ListNode):
+            raise ValueError(
+                f"SOURCE_FORM_ERROR: {context}: очікувався список, dotted-список або атомарне ім'я"
+            )
         names = set()
-        for item in binding_list(node, context):
+        for item in node.items:
             names |= bound_name(item, context)
+        if node.tail is not None:
+            names |= bound_name(node.tail, context)
         return names
 
     def head_and_args(node):

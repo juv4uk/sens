@@ -179,11 +179,28 @@ class ExactDomainMigrationTests(unittest.TestCase):
                         f"невиправдано переписано локальне ім'я {head}",
                     )
 
-    def test_unproved_parameter_destructuring_stays_blocked(self):
+    def test_runtime_supported_bare_and_dotted_lambda_lists_migrate(self):
+        self.assertEqual(
+            self.rewrite("(lambda x (car x))"),
+            "(функція x (перше x))",
+        )
+        # A bare rest parameter that shadows a canonical surface stays local.
+        self.assertEqual(
+            self.rewrite("(lambda car (car x))"),
+            "(функція car (car x))",
+        )
+        # Dotted rest is supported by the evaluator; shadowing is lexical.
+        self.assertEqual(
+            self.rewrite("(lambda (car . rest) (car x) (cdr rest))"),
+            "(функція (car . rest) (car x) (решта rest))",
+        )
+
+    def test_nested_parameter_destructuring_stays_rejected_by_runtime_grammar(self):
         for source in (
-            "(lambda x (car x))",
+            "(lambda ((car x)) (car x))",
             "(defun f ((car x)) (car x))",
             "(flet ((f ((car x)) (car x))) (f z))",
+            "(lambda (car . (rest)) (car x))",
         ):
             with self.subTest(source=source):
                 with self.assertRaisesRegex(ValueError, "SOURCE_FORM_ERROR"):
