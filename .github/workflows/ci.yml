@@ -156,6 +156,8 @@ jobs:
           python3 -m unittest tests/test_ukr_narrate_peers.py -v
           python3 -m unittest tests/test_ukr_lib_peers.py -v
           python3 -m unittest tests/test_persistent_map_ukr_primary_projection.py -v
+          python3 -m unittest tests/test_content_store_ukr_primary_projection.py -v
+          python3 scripts/test-content-store-d1-bitness.py
           # Борг active Latin call heads лишається видимим у звіті й JSON.
           # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
           python3 scripts/check_ukr_callsite_migration.py --json "$RUNNER_TEMP/ukr-callsite-migration.json" --limit 25
