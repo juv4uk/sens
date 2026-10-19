@@ -28,6 +28,108 @@ RECENT_CALLS = (
 )
 
 
+def undo_primary_projection(source: str) -> str:
+    """Invert the exact D9 primary-surface commit without touching laws/data."""
+    previous = source
+    pairs = (
+        ("(визначити мапа-порожній (як-є ()))",
+         "(визначити map-empty (як-є ()))"),
+        ("(визначити мапа-вставити\\n", "(визначити map-insert\\n"),
+        ("(визначити мапа-отримати\\n", "(визначити map-get\\n"),
+        ("(визначити мапа-містить?\\n", "(визначити map-contains?\\n"),
+        ("(визначити мапа-список\\n", "(визначити map->list\\n"),
+        ("(визначити внутрішня-мапа-вставити мапа-вставити)",
+         "(визначити внутрішня-мапа-вставити map-insert)"),
+        ("(визначити внутрішня-мапа-отримати мапа-отримати)",
+         "(визначити внутрішня-мапа-отримати map-get)"),
+        ("(визначити внутрішня-мапа-містить мапа-містить?)",
+         "(визначити внутрішня-мапа-містить map-contains?)"),
+        ("(визначити внутрішня-мапа-список мапа-список)",
+         "(визначити внутрішня-мапа-список map->list)"),
+    )
+    for current, historic in pairs:
+        if previous.count(current) != 1:
+            raise AssertionError("MAP: primary-укр inverse input missing/ambiguous: " + current)
+        previous = previous.replace(current, historic, 1)
+    current_tail = """; Full укр names are the primary Lisp-owned closures for their ratified residents.
+; Exact identities: MAP-EMPTY D9:101100011; MAP-INSERT D9:101101110;
+; MAP-GET D9:101100101; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
+; The width belongs to the domain row; this library never executes raw bit strings.
+(визначити внутрішня-мапа-порожній мапа-порожній)
+
+; Історичні англійські входи — сумісні псевдоніми тих самих укр-замикань.
+(визначити map-empty мапа-порожній)
+(визначити map-insert мапа-вставити)
+(визначити map-get мапа-отримати)
+(визначити map-contains? мапа-містить?)
+(визначити map->list мапа-список)
+"""
+    historic_tail = """; D9 resident projections over the existing immutable map mechanism.
+; Exact identities: MAP-EMPTY D9:101100011; MAP-GET D9:101100101;
+; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
+; These wrappers preserve the map's maybe-shaped lookup result and dotted-entry order.
+(визначити внутрішня-мапа-порожній map-empty)
+(визначити мапа-порожній внутрішня-мапа-порожній)
+(визначити мапа-отримати внутрішня-мапа-отримати)
+(визначити мапа-містить? внутрішня-мапа-містить)
+(визначити мапа-список внутрішня-мапа-список)
+"""
+    if not previous.endswith(current_tail):
+        raise AssertionError("MAP: primary-укр inverse tail missing/ambiguous")
+    return previous[:-len(current_tail)] + historic_tail
+
+
+def apply_primary_projection(source: str) -> str:
+    """Reapply the exact D9 primary-surface migration."""
+    current = source
+    pairs = (
+        ("(визначити map-empty (як-є ()))",
+         "(визначити мапа-порожній (як-є ()))"),
+        ("(визначити map-insert\\n", "(визначити мапа-вставити\\n"),
+        ("(визначити map-get\\n", "(визначити мапа-отримати\\n"),
+        ("(визначити map-contains?\\n", "(визначити мапа-містить?\\n"),
+        ("(визначити map->list\\n", "(визначити мапа-список\\n"),
+        ("(визначити внутрішня-мапа-вставити map-insert)",
+         "(визначити внутрішня-мапа-вставити мапа-вставити)"),
+        ("(визначити внутрішня-мапа-отримати map-get)",
+         "(визначити внутрішня-мапа-отримати мапа-отримати)"),
+        ("(визначити внутрішня-мапа-містить map-contains?)",
+         "(визначити внутрішня-мапа-містить мапа-містить?)"),
+        ("(визначити внутрішня-мапа-список map->list)",
+         "(визначити внутрішня-мапа-список мапа-список)"),
+    )
+    for historic, projected in pairs:
+        if current.count(historic) != 1:
+            raise AssertionError("MAP: primary-укр projection input missing/ambiguous: " + historic)
+        current = current.replace(historic, projected, 1)
+    historic_tail = """; D9 resident projections over the existing immutable map mechanism.
+; Exact identities: MAP-EMPTY D9:101100011; MAP-GET D9:101100101;
+; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
+; These wrappers preserve the map's maybe-shaped lookup result and dotted-entry order.
+(визначити внутрішня-мапа-порожній map-empty)
+(визначити мапа-порожній внутрішня-мапа-порожній)
+(визначити мапа-отримати внутрішня-мапа-отримати)
+(визначити мапа-містить? внутрішня-мапа-містить)
+(визначити мапа-список внутрішня-мапа-список)
+"""
+    current_tail = """; Full укр names are the primary Lisp-owned closures for their ratified residents.
+; Exact identities: MAP-EMPTY D9:101100011; MAP-INSERT D9:101101110;
+; MAP-GET D9:101100101; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
+; The width belongs to the domain row; this library never executes raw bit strings.
+(визначити внутрішня-мапа-порожній мапа-порожній)
+
+; Історичні англійські входи — сумісні псевдоніми тих самих укр-замикань.
+(визначити map-empty мапа-порожній)
+(визначити map-insert мапа-вставити)
+(визначити map-get мапа-отримати)
+(визначити map-contains? мапа-містить?)
+(визначити map->list мапа-список)
+"""
+    if not current.endswith(historic_tail):
+        raise AssertionError("MAP: historic primary-surface tail missing/ambiguous")
+    return current[:-len(historic_tail)] + current_tail
+
+
 def undo_recent_calls(source: str) -> str:
     previous = source
     for old, projected in RECENT_CALLS:
@@ -49,17 +151,18 @@ def apply_recent_calls(source: str) -> str:
 
 
 
-HISTORICAL_DEFS = (
-    "map-empty", "map-insert", "map-get", "map-contains?", "map->list",
+CURRENT_DEFS = (
+    "мапа-порожній", "мапа-вставити", "мапа-отримати", "мапа-містить?", "мапа-список",
     "внутрішня-мапа-вставити", "внутрішня-мапа-отримати",
     "внутрішня-мапа-містить", "внутрішня-мапа-список",
-    "внутрішня-мапа-порожній", "мапа-порожній", "мапа-отримати",
-    "мапа-містить?", "мапа-список",
+    "внутрішня-мапа-порожній", "map-empty", "map-insert", "map-get",
+    "map-contains?", "map->list",
 )
 PEERS = {1: ("1", "так"), 3: ("001", "як-є"), 4: ("0011", "визначити")}
 
 
 def restore_exact_previous(source: str) -> str:
+    source = undo_primary_projection(source)
     source = undo_recent_calls(source)
     restored = []
     for line in source.splitlines(keepends=True):
@@ -86,11 +189,11 @@ def verify(source: str) -> None:
     if git_blob(restore_exact_previous(source)) != PRE_MIGRATION_BLOB:
         raise AssertionError("MAP: змінено байти поза D1/D3/D4 peer проєкціями")
     heads = re.findall(r"(?m)^\(визначити\s+([^\s()]+)", source)
-    if tuple(heads) != HISTORICAL_DEFS:
+    if tuple(heads) != CURRENT_DEFS:
         raise AssertionError("MAP: визначення/порядок/імена порушено")
     if source.count("(так") != 2:
         raise AssertionError("MAP: мають бути два явні D1:YES fallback")
-    if "(визначити map-empty (як-є ()))" not in source:
+    if "(визначити мапа-порожній (як-є ()))" not in source:
         raise AssertionError("MAP: D3:001 QUOTE не на повній укр-проєкції")
 
 
@@ -111,9 +214,9 @@ class PersistentMapUkrTests(unittest.TestCase):
     def test_original_blob_fully_recovered_no_semantic_substitution(self):
         verify(self.source)
 
-    def test_all_fourteen_defs_and_d1_quote_are_ukr(self):
-        self.assertEqual(self.source.count("(визначити "), 14)
-        self.assertIn("(визначити map-empty (як-є ()))", self.source)
+    def test_all_fifteen_defs_and_d1_quote_are_ukr(self):
+        self.assertEqual(self.source.count("(визначити "), 15)
+        self.assertIn("(визначити мапа-порожній (як-є ()))", self.source)
         code = "\n".join(s for s in self.source.splitlines()
                          if not s.lstrip().startswith(";"))
         self.assertNotRegex(code, r"\([01]{3,9}(?=\s|\))")
@@ -125,21 +228,28 @@ class PersistentMapUkrTests(unittest.TestCase):
             "(внутрішня-мапа-вставити key value (решта entries))",
             "(мапа-отримати key (решта entries))",
             "(мапа-отримати key entries)",
-            "(визначити внутрішня-мапа-вставити map-insert)",
-            "(визначити мапа-порожній внутрішня-мапа-порожній)",
-            "(визначити мапа-отримати внутрішня-мапа-отримати)",
+            "(визначити внутрішня-мапа-вставити мапа-вставити)",
+            "(визначити внутрішня-мапа-отримати мапа-отримати)",
+            "(визначити внутрішня-мапа-містить мапа-містить?)",
+            "(визначити внутрішня-мапа-список мапа-список)",
+            "(визначити внутрішня-мапа-порожній мапа-порожній)",
+            "(визначити map-empty мапа-порожній)",
+            "(визначити map-insert мапа-вставити)",
+            "(визначити map-get мапа-отримати)",
+            "(визначити map-contains? мапа-містить?)",
+            "(визначити map->list мапа-список)",
         ):
             self.assertIn(form, self.source)
         verify(self.source)
 
     def test_fail_closed_for_wrong_op_bit_or_data(self):
         for mutation in (
-            self.source.replace("(визначити map-empty", "(функція map-empty", 1),
+            self.source.replace("(визначити мапа-порожній", "(функція мапа-порожній", 1),
             self.source.replace("(як-є ())", "(атом? ())", 1),
             self.source.replace("(так", "(ні", 1),
             self.source.replace("(сполучити key value)", "(сполучити value key)", 1),
-            self.source.replace("мапа-отримати внутрішня-мапа-отримати",
-                                "мапа-отримати внутрішня-мапа-містить", 1),
+            self.source.replace("(визначити внутрішня-мапа-отримати мапа-отримати)",
+                                "(визначити внутрішня-мапа-отримати мапа-містить?)", 1),
             self.source.replace("(мапа-отримати key entries)",
                                 "(мапа-містить? key entries)", 1),
             self.source.replace("(внутрішня-мапа-вставити key value",
@@ -155,6 +265,7 @@ class PersistentMapUkrTests(unittest.TestCase):
         again = re.sub(r"\(0011(?=\s)", "(визначити", again)
         again = re.sub(r"\(#d1:1(?=\s|$)", "(так", again, flags=re.M)
         again = apply_recent_calls(again)
+        again = apply_primary_projection(again)
         self.assertEqual(again, self.source)
 
 
