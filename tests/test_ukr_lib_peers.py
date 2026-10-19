@@ -66,8 +66,9 @@ def definitions(src: str):
 def optin_pairs(src: str):
     """Лише суміжні DEFINE-аліаси після кожного opt-in маркера.
 
-    Звичайні визначення та зворотні англомовні compatibility-аліаси
-    після завершення блоку не є ратифікованими назвами колонки укр.
+    Зворотні сумісні англомовні імена після переходу справжнього
+    DEFINE на повну укр не є новими назвами колонки укр. Тільки
+    точні пари EN→укр драбини розпізнаються як зворотні псевдоніми.
     """
     pairs = []
     in_block = False
@@ -82,7 +83,16 @@ def optin_pairs(src: str):
             line,
         )
         if match:
-            pairs.append((match.group(1), match.group(2)))
+            left, right = match.group(1), match.group(2)
+            # Після переходу самого D10-визначення на укр історичне
+            # ім'я лишається DEFINE-посиланням на ту саму функцію.
+            # Це зворотний сумісний псевдонім, а не новий укр-резидент.
+            reverse_peer = any(
+                english == left and full == right
+                for _short, full, english in ROWS.values()
+            )
+            if not reverse_peer:
+                pairs.append((left, right))
         else:
             in_block = False
     return pairs
