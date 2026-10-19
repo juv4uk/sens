@@ -45,6 +45,71 @@ jobs:
 
       - uses: ./.github/actions/install-zig
 
+      # Одноразове виконання тільки на конкретному MIGRATE-SID8-UKR push.
+      # Жодних комітів/пушів із раннера — лише звіт та patch artifact.
+      - name: "ONE-SHOT — SID8/Sens8 до укр із історичним Git SHA"
+        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-SID8-UKR:') }}
+        shell: bash
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          historical_sha=4abb15f2cec953a74f63bd9ca8ea59b1b9bb1bb1
+          output="$RUNNER_TEMP/sid8-ukr-migration"
+          mkdir -p "$output"
+          timeout 90s git fetch --no-tags --depth=1 origin "$historical_sha"
+          set +e
+          python3 scripts/migrate-legacy-w8-ukr.py lib/ \
+            --source-ref "$historical_sha" --write --report "$output/report.json"
+          migration_rc=$?
+          set -e
+          git diff --binary -- lib/ > "$output/source.patch"
+          git diff --stat -- lib/ > "$output/changes.txt"
+          cat "$output/changes.txt"
+          if [[ ! -s "$output/report.json" ]]; then
+            echo "::error::SID8_UKR_NO_REPORT rc=$migration_rc"
+            exit 1
+          fi
+          python3 - "$output/report.json" "$migration_rc" <<'PY'
+          import collections
+          import json
+          import os
+          from pathlib import Path
+          import sys
+          rows = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          rc = int(sys.argv[2])
+          states = collections.Counter(row.get("status", "missing") for row in rows)
+          replaced = sum(len(row.get("replacements", [])) for row in rows)
+          unknown = sum(len(row.get("unresolved", [])) for row in rows)
+          changed = sum(bool(row.get("written")) for row in rows)
+          print(f"SID8_UKR_MIGRATION head={os.getenv('GITHUB_SHA')} rc={rc} "
+                f"files={len(rows)} changed_files={changed} replacements={replaced} "
+                f"unresolved={unknown} errors={states['error']} "
+                f"nonexecutable={states['skipped-nonexecutable']}")
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as summary:
+              summary.write("## SID8/Sens8 → укр: реальна міграція lib/\n\n")
+              summary.write(f"- SHA: {os.environ['GITHUB_SHA']}\n")
+              summary.write(f"- Файлів: {len(rows)}; змінено: {changed}; замін: {replaced}\n")
+              summary.write(f"- Невідомих: {unknown}; помилок: {states['error']}\n")
+              summary.write("- Результат: артефакт diff+JSON, без автоматичного push.\n")
+          if states["error"] or rc not in (0, 2):
+              for row in rows:
+                  if row.get("status") == "error":
+                      print(f"::error file={row['file']}::{row.get('reason', 'unknown')}")
+              sys.exit(1)
+          if unknown:
+              print(f"::warning::SID8_UKR_PARTIAL unresolved={unknown}")
+          PY
+
+      - name: "ONE-SHOT — зберегти звіт та патч SID8/Sens8"
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-SID8-UKR:') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        with:
+          name: sens-sid8-ukr-${{ github.sha }}
+          path: ${{ runner.temp }}/sid8-ukr-migration/
+          if-no-files-found: warn
+          retention-days: 7
+
+
       - name: Локальний Windows-шлях до пінованого Zig — без послаблення версії
         if: ${{ always() }}
         run: python3 -m unittest tests/test_pinned_zig_windows_setup.py -v
