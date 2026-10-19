@@ -234,7 +234,7 @@
       (так (нехай ((tcs (msg-tool-calls m)))
            (приєднати (список (сполучити "role" (msg-role m))
                          (сполучити "content" (msg-content m)))
-                   (за-умовою (tcs (список (сполучити "tool_calls" (відобразити encode-tool-call tcs))))
+                   (за-умовою (tcs (список (сполучити "tool_calls" (відобразити кодувати-виклик-інструмента tcs))))
                          )))))))
 
 (визначити bash-tool-schema
