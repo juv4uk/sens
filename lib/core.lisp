@@ -126,29 +126,29 @@
 ; Selector law is compiled from domain+bit width, never from English aliases.
 ; D7 is text data and is NOT used for fifth (four CDR steps).
 
-(визначити second
+; Повноукраїнські назви — первинні; англійські лишаються сумісними псевдонімами.
+(визначити друге
   (функція (значення-функції)
-    (друге значення-функції)))
+    (перше (решта значення-функції))))
+(визначити second друге)
 
-(визначити third
-  (функція (значення-функції)
-    (третє значення-функції)))
+(визначити third третє)
 
-(визначити fourth
+(визначити четверте
   (функція (значення-функції)
     (третє (решта значення-функції))))
+(визначити fourth четверте)
 
 ; cadddr — the classical car/cdr-composition name for the exact same
-; operation fourth already performs; kept as an alias (same closure
+; operation `четверте` already performs; kept as an alias (same closure
 ; object, not a second definition) since real callers already spell it
 ; this way (lib/reason.lisp had its own local (def cadddr ...) before
 ; this, character-for-character identical to fourth's body).
 ; cadddr — класична car/cdr-композиційна назва для тієї самої операції,
-; що вже виконує fourth; лишено як псевдонім (той самий об'єкт-closure,
+; що вже виконує `четверте`; лишено як псевдонім (той самий об'єкт-closure,
 ; не друге визначення), бо реальні виклики вже пишуть саме так
 ; (lib/reason.lisp мав власний локальний (def cadddr ...) до цього,
 ; посимвольно ідентичний тілу fourth).
-(визначити четверте fourth)
 (визначити cadddr четверте)
 
 ; fifth — same single-parameter primitive-chain pattern as second/third/
@@ -171,7 +171,6 @@
     (перше (перше значення-функції))))
 (визначити caar перше-першого)
 
-(визначити друге second)
 (визначити cadr друге)
 
 (визначити решта-решти
