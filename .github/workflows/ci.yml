@@ -20,7 +20,9 @@ jobs:
     name: Українська проєкція та заборона сирих літералів
     # Pull-request code stays on an ephemeral hosted runner; trusted pushes and
     # manual dispatch use the owner's self-hosted Linux x64 runners.
-    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04' || fromJSON('["self-hosted","Linux","X64"]') }}
+    # Only trusted main pushes / main manual runs use local runners.
+    # Pull requests and pushes to other refs stay on ephemeral hosted runners.
+    runs-on: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && fromJSON('[\"self-hosted\",\"Linux\",\"X64\"]') || 'ubuntu-24.04' }}
     # Обмеження часу захищає локальні ранери та чергу від завислих перевірок.
     timeout-minutes: 25
     steps:
@@ -28,16 +30,17 @@ jobs:
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
+          GIT_REF: ${{ github.ref }}
         run: |
           set -euo pipefail
-          printf 'RUNNER_ROUTING event=%s environment=%s os=%s arch=%s name=%s\n' "$EVENT_NAME" "${RUNNER_ENVIRONMENT:-unset}" "${RUNNER_OS:-unset}" "${RUNNER_ARCH:-unset}" "${RUNNER_NAME:-unset}"
-          if [[ "$EVENT_NAME" == 'pull_request' ]]; then
-            expected='github-hosted'
-          else
+          printf 'RUNNER_ROUTING event=%s ref=%s environment=%s os=%s arch=%s name=%s\\n' "$EVENT_NAME" "$GIT_REF" "${RUNNER_ENVIRONMENT:-unset}" "${RUNNER_OS:-unset}" "${RUNNER_ARCH:-unset}" "${RUNNER_NAME:-unset}"
+          if [[ "$GIT_REF" == 'refs/heads/main' && ( "$EVENT_NAME" == 'push' || "$EVENT_NAME" == 'workflow_dispatch' ) ]]; then
             expected='self-hosted'
+          else
+            expected='github-hosted'
           fi
           if [[ "${RUNNER_ENVIRONMENT:-}" != "$expected" ]]; then
-            echo "::error::SENS expected $expected runner for event $EVENT_NAME"
+            echo "::error::SENS expected $expected runner for event $EVENT_NAME ref $GIT_REF"
             exit 1
           fi
 
