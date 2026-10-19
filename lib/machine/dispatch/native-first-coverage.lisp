@@ -21,7 +21,7 @@
   (001
     ((native-coverage
        (class car-cons-u64-literals)
-       (representative (car (cons 2 3)))
+       (representative (перше (сполучити 2 3)))
        (status native-supported)
        (reason bounded-car-cons-u64-lowering-admitted)
        (evidence native-first-parity-witness)
@@ -38,14 +38,14 @@
 
      (native-coverage
        (class car-cons-outside-native-literal-domain)
-       (representative (car (cons "native-limits" 3)))
+       (representative (перше (сполучити "native-limits" 3)))
        (status fallback-required)
        (reason current-native-island-holds-all-exact-integers)
        (evidence native-first-dispatch-witness))
 
      (native-coverage
        (class dynamic-pair-result)
-       (representative (cons 2 3))
+       (representative (сполучити 2 3))
        (status blocked-runtime-prerequisite)
        (reason native-pair-result-needs-managed-lifetime)
        (evidence native-first-dispatch-witness)
@@ -53,7 +53,7 @@
 
      (native-coverage
        (class lambda-application)
-       (representative ((lambda (x) (+ x 1)) 41))
+       (representative ((функція (x) (+ x 1)) 41))
        (status blocked-runtime-prerequisite)
        (reason user-callable-native-path-needs-closure-abi)
        (evidence native-first-dispatch-witness)
