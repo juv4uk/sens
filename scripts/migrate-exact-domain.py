@@ -372,7 +372,11 @@ def reject_shadowed_surfaces(source, surfaces):
 
 
 def plan(source: str, surfaces, *, legacy_heads=None, unresolved=None):
-    shadowed = reject_shadowed_surfaces(source, surfaces)
+    # Повноцінний AST-shadow-аналіз потрібний для перейменування named
+    # поверхонь. Під час W8-аудиту surfaces={} — у більшості lib-файлів
+    # немає жодного W8-виклику, тож примусово розбирати нецільові LAMBDA
+    # (зокрема цитовані схеми) було хибним негативним результатом.
+    shadowed = reject_shadowed_surfaces(source, surfaces) if surfaces else set()
     frames, edits = [], []
     pending_quote = False
     i = 0
@@ -446,7 +450,7 @@ def plan(source: str, surfaces, *, legacy_heads=None, unresolved=None):
             i += 1
             continue
         start = i
-        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in ("(", ")", "'", '"', ";", ",", ":"):
+        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in ("(", ")", "'", '"', ";", ","):
             if source.startswith("#|", i):
                 break
             i += 1
@@ -483,6 +487,14 @@ def plan(source: str, surfaces, *, legacy_heads=None, unresolved=None):
         pending_quote = False
     if frames:
         raise ValueError("unterminated list")
+    # Реальні W8 виклики також повинні враховувати lexical shadowing.
+    # Робимо дорогий AST-прохід ЛИШЕ для W8, які точно замінюємо.
+    # У разі неоднозначного binder/quote parser відмовить локально;
+    # жодна неперевірена W8-голова не буде переписана.
+    if legacy_heads is not None and edits:
+        active = {edit.source.casefold(): edit.identity for edit in edits}
+        shadowed_w8 = reject_shadowed_surfaces(source, active)
+        edits = [edit for edit in edits if edit.start not in shadowed_w8]
     return edits
 
 
