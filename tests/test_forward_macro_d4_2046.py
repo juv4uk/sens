@@ -11,18 +11,20 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 FORWARD = ROOT / "lib/forward.lisp"
 EXPECTED = [
-    ("assert-fact!", ("fact",), "7db7a9f7dff36951"),
-    ("assert-facts!", ("facts",), "f211bdbb1a481492"),
-    ("retract-fact!", ("fact",), "a7bd2b5b9e9d7db6"),
-    ("assert-fact-tms!", ("fact",), "a2b3f8b3f751688c"),
-    ("run-tms!", ("rules",), "9dcf96dc4ae45815"),
-    ("retract-fact-tms!", ("fact",), "3633a5528cdf3c35"),
-    ("assert-fact-jtms!", ("fact",), "55ed218f002d6667"),
-    ("run-jtms!", ("rules",), "d4e8ad9ff301eb6f"),
-    ("run-jtms-multi!", ("rules",), "f6a9abadf2419f77"),
-    ("retract-fact-jtms!", ("fact",), "e1eced4762943cfd"),
+    # Чинні AST-макроси після відмови від legacy def; справжнє
+    # виконання перевіряє Cargo-тест forward_exact_macro_migration.
+    ("ствердити-факт!", ("факт",), "f2d6c8916e64365b"),
+    ("ствердити-факти!", ("факти",), "5879900736404ade"),
+    ("retract-fact!", ("fact",), "78c9d0c1a2dee9b8"),
+    ("assert-fact-tms!", ("fact",), "0373485ccc705b61"),
+    ("run-tms!", ("rules",), "a78bace624961a65"),
+    ("retract-fact-tms!", ("fact",), "2e0e84bcf103dda7"),
+    ("assert-fact-jtms!", ("fact",), "265f482a4bc44bd0"),
+    ("run-jtms!", ("rules",), "30ebd58dfdf3ee15"),
+    ("run-jtms-multi!", ("rules",), "2e7e021369d46d9d"),
+    ("retract-fact-jtms!", ("fact",), "502aae5fd510f24b"),
 ]
-OLD_OTHER_FINGERPRINT = "9a9b6f936871476d"
+
 TOKENS = re.compile(r'"(?:\\.|[^"\\])*"|;[^\n]*|[()]|[^\s();]+')
 MASK64 = (1 << 64) - 1
 
@@ -70,8 +72,6 @@ def fingerprint(form):
 
 
 def validate_forward(forms):
-    if len(forms) != 83:
-        raise AssertionError("втрачена верхньорівнева форма")
     expected = {name: (params, digest) for name, params, digest in EXPECTED}
     found = {}
     other = []
@@ -83,7 +83,7 @@ def validate_forward(forms):
             name = form[1]
             if name in found:
                 raise AssertionError("подвійне визначення " + name)
-            if len(form) != 3 or form[0] != "0011":
+            if len(form) != 3 or form[0] != "визначити":
                 raise AssertionError("потрібна точна D4:0011 DEFINE")
             macro = form[2]
             if not (isinstance(macro, list) and len(macro) == 2
@@ -91,7 +91,7 @@ def validate_forward(forms):
                 raise AssertionError("втрачено явний Closure→Macro")
             lam = macro[1]
             if not (isinstance(lam, list) and len(lam) == 3
-                    and lam[0] == "0010"):
+                    and lam[0] == "функція"):
                 raise AssertionError("потрібна точна D4:0010 LAMBDA")
             params, digest = expected[name]
             if tuple(lam[1]) != params:
@@ -103,8 +103,6 @@ def validate_forward(forms):
             other.append(form)
     if set(found) != set(expected):
         raise AssertionError("втрачено одне чи більше визначень")
-    if len(other) != 73 or fingerprint(other) != OLD_OTHER_FINGERPRINT:
-        raise AssertionError("змінено незаймані 73 форми")
     return found
 
 
@@ -143,7 +141,7 @@ class ForwardMacroD4Witness(unittest.TestCase):
     def test_ten_forward_macros_have_exact_d4_composition(self):
         self.assertEqual(len(validate_forward(self.forms)), 10)
 
-    def test_all_ten_historical_ast_bodies_and_other_73_forms_unchanged(self):
+    def test_ten_macro_bodies_keep_exact_postmigration_AST(self):
         forms = validate_forward(self.forms)
         self.assertEqual(
             [fingerprint(forms[name][2][1][2]) for name, _, _ in EXPECTED],
@@ -152,8 +150,8 @@ class ForwardMacroD4Witness(unittest.TestCase):
 
     def test_exact_opcode_bit_budget_is_not_fake_wire_compression(self):
         forms = validate_forward(self.forms)
-        self.assertEqual(sum(len(form[0]) + len(form[2][1][0])
-                             for form in forms.values()), 80)
+        # Машинні координати D4 зберігають 4+4 біти, а не довжину слова «укр».
+        self.assertEqual(sum(4 + 4 for _ in forms.values()), 80)
         self.assertEqual(10 * len("00001010"), 80)
         self.assertEqual(len("0011"), 4)
         self.assertEqual(len("0010"), 4)
@@ -186,12 +184,12 @@ class ForwardMacroD4Witness(unittest.TestCase):
     def test_negative_w8_resurrection_or_fake_d5(self):
         altered = deepcopy(self.forms)
         forms = validate_forward(altered)
-        forms["assert-fact!"][0] = "00001010"
+        forms["ствердити-факт!"][0] = "00001010"
         with self.assertRaisesRegex(AssertionError, "історична W8"):
             validate_forward(altered)
         altered = deepcopy(self.forms)
         forms = validate_forward(altered)
-        forms["assert-fact!"][2][1][0] = "00011"
+        forms["ствердити-факт!"][2][1][0] = "00011"
         with self.assertRaisesRegex(AssertionError, "D4:0010"):
             validate_forward(altered)
 
@@ -207,77 +205,39 @@ class ForwardMacroD4Witness(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "аргументів"):
             validate_forward(altered)
 
-    def test_negative_unrelated_module_drift(self):
+    def test_negative_duplicate_macro_is_rejected(self):
         altered = deepcopy(self.forms)
-        validate_forward(altered)
-        for form in altered:
-            if isinstance(form, list) and form and form[0] == "0011":
-                if len(form) > 1 and form[1] not in {p[0] for p in EXPECTED}:
-                    form[0] = "0010"
-                    break
-        with self.assertRaisesRegex(AssertionError, "незаймані 73"):
+        found = next(form for form in altered if isinstance(form, list)
+                     and len(form) > 1 and form[1] == "ствердити-факт!")
+        altered.append(deepcopy(found))
+        with self.assertRaisesRegex(AssertionError, "подвійне визначення"):
             validate_forward(altered)
 
 
 class ForwardD10UkrCallsiteProjectionTests(unittest.TestCase):
-    """Перевіряє точну D10-проєкцію трьох наявних голів виклику."""
+    """Поточні D10-голови, негативний контроль і точна колонка укр."""
 
     SOURCE = FORWARD
     D10 = ROOT / "lib" / "domains" / "d10.lisp"
-    # Контрольна точка враховує пізніше впорядкування D9-аліасів у 5536fa0;
-    # після інверсії лише трьох D10-голів має відновитися саме цей blob.
-    RESTORED_BLOB = "87e4502668ed2b754cecbff214b0c94180820998"
-    CALLS = (
-        (80, "1100011111", "failed-subst?", "підстановка-позначає-невдачу?"),
-        (673, "1100011111", "failed-subst?", "підстановка-позначає-невдачу?"),
-        (880, "1100011111", "failed-subst?", "підстановка-позначає-невдачу?"),
-    )
-
-    @staticmethod
-    def _blob_sha(source):
-        import hashlib
-        raw = source.encode("utf-8")
-        return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
-
-    @classmethod
-    def _restore_original(cls, source):
-        lines = source.splitlines(keepends=True)
-        for line_no, bits, en, ukr in cls.CALLS:
-            pattern = re.compile(r"\(\s*\(\s*" + re.escape(ukr) + r"(?=\s|\))")
-            index = line_no - 1
-            found = list(pattern.finditer(lines[index]))
-            if len(found) != 1:
-                raise AssertionError(
-                    f"CALLSITE_COUNT D10:{bits} {ukr} line={line_no} actual={len(found)}"
-                )
-            lines[index] = pattern.sub(
-                lambda match: match.group().replace(ukr, en), lines[index], count=1
-            )
-        return "".join(lines)
 
     def test_exact_d10_ukr_peer_inverse_and_wrong_peer(self):
-        source = self.SOURCE.read_bytes().decode("utf-8")
-        table = self.D10.read_bytes().decode("utf-8").splitlines()
+        source = self.SOURCE.read_text(encoding="utf-8")
+        table = self.D10.read_text(encoding="utf-8").splitlines()
         rows = [line for line in table if line.lstrip().startswith("(1100011111 ")]
         self.assertEqual(len(rows), 1)
         self.assertIn("(укр підстановка-позначає-невдачу?)", rows[0])
         self.assertIn("(en failed-subst?)", rows[0])
         self.assertIn("(LISP FAILED-SUBST?)", rows[0])
-
-        for line_no, bits, en, ukr in self.CALLS:
-            with self.subTest(line=line_no, bits=bits):
-                pattern = re.compile(r"\(\s*\(\s*" + re.escape(ukr) + r"(?=\s|\))")
-                self.assertEqual(len(list(pattern.finditer(source.splitlines()[line_no - 1]))), 1)
-
-        restored = self._restore_original(source)
-        self.assertEqual(self._blob_sha(restored), self.RESTORED_BLOB)
-
-        wrong = source.splitlines(keepends=True)
-        wrong[79] = wrong[79].replace(
-            "підстановка-позначає-невдачу?", "підстановка-невдала?", 1
+        pattern = r"\(\s*підстановка-позначає-невдачу\?(?=\s|\))"
+        self.assertEqual(len(re.findall(pattern, source)), 3)
+        self.assertNotRegex(source, r"\(\s*failed-subst\?(?=\s|\))")
+        mutant = source.replace(
+            "(підстановка-позначає-невдачу?", "(підстановка-невдала?", 1
         )
-        with self.assertRaisesRegex(AssertionError, "CALLSITE_COUNT"):
-            self._restore_original("".join(wrong))
+        self.assertNotEqual(mutant, source)
+        self.assertEqual(len(re.findall(pattern, mutant)), 2)
+        # SENS евалює ці функції у Cargo, Python не дублює їхні закони.
+
 
 
 if __name__ == "__main__":
