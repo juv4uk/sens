@@ -47,22 +47,22 @@
 ; Кількість елементів — математичне десяткове число D24+ від першої комірки.
 ; У вихідній програмі звичайні 0, 1 та 5; фізичне T5M-пакування належить Zig.
 (визначити encoder-coverage-binary-length-onto
-  (функція (values count)
+  (функція (елементи кількість)
     (за-умовою
-      ((encoder-coverage-empty? values) count)
+      ((encoder-coverage-empty? елементи) кількість)
       (encoder-coverage-d1-yes
        (encoder-coverage-binary-length-onto
-         (решта values)
-         (додати count 1))))))
+         (решта елементи)
+         (додати кількість 1))))))
 
 (визначити encoder-coverage-binary-length
-  (функція (values)
-    (encoder-coverage-binary-length-onto values 0)))
+  (функція (елементи)
+    (encoder-coverage-binary-length-onto елементи 0)))
 
 (визначити encoder-coverage-count=?
-  (функція (binary-count values)
-    (= binary-count
-       (encoder-coverage-binary-length values))))
+  (функція (двійкова-кількість елементи)
+    (= двійкова-кількість
+       (encoder-coverage-binary-length елементи))))
 
 
 ; Conjunction over already-admitted predicate answers. Structural EMPTY is
@@ -81,13 +81,13 @@
   (функція (left right)
     (encoder-coverage-same? left right)))
 (визначити encoder-coverage-member?
-  (функція (item values)
+  (функція (елемент елементи)
     (за-умовою
-      ((encoder-coverage-empty? values) encoder-coverage-d1-no)
-      ((encoder-coverage-same? item (перше values))
+      ((encoder-coverage-empty? елементи) encoder-coverage-d1-no)
+      ((encoder-coverage-same? елемент (перше елементи))
        encoder-coverage-d1-yes)
       (encoder-coverage-d1-yes
-       (encoder-coverage-member? item (решта values))))))
+       (encoder-coverage-member? елемент (решта елементи))))))
 
 ; Pairwise rounds form a rope-like balanced concatenation tree. This avoids
 ; copying an ever-growing ~200 KB accumulator once per emitted coverage row.
