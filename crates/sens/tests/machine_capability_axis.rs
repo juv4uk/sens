@@ -38,7 +38,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     let mut s = session();
     let add = eval_program(
         &format!(
-            "(machine-capabilities-for-domain {} {})",
+            "(спроможності-для-домену {} {})",
             add_identity.width(),
             add_identity.packed_bits()
         ),
@@ -51,7 +51,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
 
     let car = eval_program(
         &format!(
-            "(machine-capabilities-for-domain {} {})",
+            "(спроможності-для-домену {} {})",
             car_identity.width(),
             car_identity.packed_bits()
         ),
@@ -63,7 +63,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     assert_eq!(car, "((pair-field-load head bounded-u64))");
 
     let quoted_shadow = eval_program(
-        r#"(machine-capabilities-for-domain 5 "01010")"#,
+        r#"(спроможності-для-домену 5 "01010")"#,
         &mut s,
     )
     .expect("quoted domain shadow must remain ordinary String data")
@@ -80,14 +80,14 @@ fn packed_bits_do_not_cross_domain_widths() {
     let mut s = session();
 
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 5 10)", &mut s)
+        eval_program("(спроможності-для-домену 5 10)", &mut s)
             .expect("D5:01010 PLUS")
             .value
             .to_string(),
         "((integer-add bounded-u32-inputs u64-result))"
     );
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 4 10)", &mut s)
+        eval_program("(спроможності-для-домену 4 10)", &mut s)
             .expect("D4:1010 LOOKUP must not inherit PLUS")
             .value
             .to_string(),
@@ -95,14 +95,14 @@ fn packed_bits_do_not_cross_domain_widths() {
     );
 
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 5 11)", &mut s)
+        eval_program("(спроможності-для-домену 5 11)", &mut s)
             .expect("D5:01011 DIFFERENCE")
             .value
             .to_string(),
         "((integer-subtract bounded-u64 no-underflow))"
     );
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 4 11)", &mut s)
+        eval_program("(спроможності-для-домену 4 11)", &mut s)
             .expect("D4:1011 BIND must not inherit DIFFERENCE")
             .value
             .to_string(),
@@ -110,14 +110,14 @@ fn packed_bits_do_not_cross_domain_widths() {
     );
 
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 5 8)", &mut s)
+        eval_program("(спроможності-для-домену 5 8)", &mut s)
             .expect("D5:01000 ZEROP")
             .value
             .to_string(),
         "((integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary))"
     );
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 4 8)", &mut s)
+        eval_program("(спроможності-для-домену 4 8)", &mut s)
             .expect("D4:1000 CAAR must not inherit ZEROP")
             .value
             .to_string(),
@@ -126,28 +126,28 @@ fn packed_bits_do_not_cross_domain_widths() {
 
 
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 6 14)", &mut s)
+        eval_program("(спроможності-для-домену 6 14)", &mut s)
             .expect("D6:001110 ADD1")
             .value
             .to_string(),
         "((integer-increment bounded-u64 no-overflow))"
     );
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 5 14)", &mut s)
+        eval_program("(спроможності-для-домену 5 14)", &mut s)
             .expect("D5:01110 selector must not inherit D6 ADD1")
             .value
             .to_string(),
         "()"
     );
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 6 15)", &mut s)
+        eval_program("(спроможності-для-домену 6 15)", &mut s)
             .expect("D6:001111 SUB1")
             .value
             .to_string(),
         "((integer-decrement bounded-u64 no-underflow))"
     );
     assert_eq!(
-        eval_program("(machine-capabilities-for-domain 5 15)", &mut s)
+        eval_program("(спроможності-для-домену 5 15)", &mut s)
             .expect("D5:01111 selector must not inherit D6 SUB1")
             .value
             .to_string(),
@@ -160,8 +160,8 @@ fn active_machine_capability_axis_has_no_sid8_lookup() {
     let source = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis source");
 
-    assert!(source.contains("machine-capability-axis-v3"));
-    assert!(source.contains("machine-capabilities-for-domain"));
+    assert!(source.contains("вісь-спроможностей-машини-v3"));
+    assert!(source.contains("спроможності-для-домену"));
     assert!(!source.contains("machine-capability-legacy-sid-axis"));
     assert!(!source.contains("machine-capabilities-for-sid"));
     assert!(!source.contains("00001100"));
@@ -198,7 +198,7 @@ fn unsupported_targets_are_explicitly_unwitnessed() {
     let mut s = session();
 
     for target in ["arm64", "risc-v", "fpga"] {
-        let expression = format!("(machine-target-witness-status (quote {target}))");
+        let expression = format!("(статус-свідка-цілі-машини (як-є {target}))");
         let value = eval_program(&expression, &mut s)
             .expect("target status lookup")
             .value
@@ -207,7 +207,7 @@ fn unsupported_targets_are_explicitly_unwitnessed() {
     }
 
     let x86 = eval_program(
-        "(machine-target-witness-status (quote x86-64))",
+        "(статус-свідка-цілі-машини (як-є x86-64))",
         &mut s,
     )
     .expect("x86 witness status")
