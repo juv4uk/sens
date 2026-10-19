@@ -24,9 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          printf 'RUNNER_ROUTING environment=%s os=%s arch=%s name=%s\\n' \\
-            "${RUNNER_ENVIRONMENT:-unset}" "${RUNNER_OS:-unset}" \\
-            "${RUNNER_ARCH:-unset}" "${RUNNER_NAME:-unset}"
+          printf 'RUNNER_ROUTING environment=%s os=%s arch=%s name=%s\n' "${RUNNER_ENVIRONMENT:-unset}" "${RUNNER_OS:-unset}" "${RUNNER_ARCH:-unset}" "${RUNNER_NAME:-unset}"
           if [[ "${RUNNER_ENVIRONMENT:-}" != 'github-hosted' ]]; then
             echo '::error::SENS jobs must run on GitHub-hosted runners only'
             exit 1
