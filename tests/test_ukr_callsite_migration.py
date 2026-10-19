@@ -2022,213 +2022,8 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
     PINNED = {
   "scripts/check-domain-table-readable.lisp": {
     "sha": "e1c9a89a7338bcd46df4d9a5227b191acb28119d",
-    "edits": [
-      [
-        186,
-        "0011"
-      ],
-      [
-        206,
-        "0010"
-      ],
-      [
-        223,
-        "100"
-      ],
-      [
-        275,
-        "0011"
-      ],
-      [
-        294,
-        "0010"
-      ],
-      [
-        311,
-        "011"
-      ],
-      [
-        325,
-        "0011"
-      ],
-      [
-        348,
-        "0010"
-      ],
-      [
-        381,
-        "100"
-      ],
-      [
-        428,
-        "0011"
-      ],
-      [
-        474,
-        "0011"
-      ],
-      [
-        520,
-        "0011"
-      ],
-      [
-        566,
-        "0011"
-      ],
-      [
-        612,
-        "0011"
-      ],
-      [
-        658,
-        "0011"
-      ],
-      [
-        704,
-        "0011"
-      ],
-      [
-        751,
-        "110"
-      ],
-      [
-        759,
-        "101"
-      ],
-      [
-        764,
-        "100"
-      ],
-      [
-        773,
-        "001"
-      ],
-      [
-        798,
-        "110"
-      ],
-      [
-        848,
-        "110"
-      ],
-      [
-        904,
-        "110"
-      ],
-      [
-        966,
-        "110"
-      ],
-      [
-        1035,
-        "110"
-      ],
-      [
-        1110,
-        "110"
-      ],
-      [
-        1191,
-        "110"
-      ],
-      [
-        1279,
-        "110"
-      ],
-      [
-        1308,
-        "101"
-      ],
-      [
-        1362,
-        "110"
-      ],
-      [
-        1394,
-        "101"
-      ],
-      [
-        1452,
-        "110"
-      ],
-      [
-        1487,
-        "101"
-      ],
-      [
-        1549,
-        "110"
-      ],
-      [
-        1587,
-        "101"
-      ],
-      [
-        1653,
-        "110"
-      ],
-      [
-        1694,
-        "101"
-      ],
-      [
-        1764,
-        "110"
-      ],
-      [
-        1808,
-        "101"
-      ],
-      [
-        1882,
-        "110"
-      ],
-      [
-        1929,
-        "101"
-      ]
-    ],
-    "changed": [
-      5,
-      6,
-      7,
-      11,
-      12,
-      13,
-      15,
-      16,
-      18,
-      21,
-      22,
-      23,
-      24,
-      25,
-      26,
-      27,
-      29,
-      30,
-      31,
-      33,
-      35,
-      37,
-      39,
-      41,
-      43,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58
-    ]
+    "edits": [],
+    "changed": []
   },
   "scripts/fixtures-for-tier.lisp": {
     "sha": "189cc75ed4f2eaaaf40f58d1730b33ee39bfa179",
@@ -2484,10 +2279,19 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
     """D1/D6/D8/D9 живі проєкції без W8 і без підміни D24+ арифметики."""
 
     SOURCE = Path(__file__).resolve().parents[1] / "scripts/check-domain-table-readable.lisp"
-    ORIGINAL_BLOB = "081bd59f4b81c65e1219a079aa7e20863943f28d"
+    ORIGINAL_BLOB = "e1c9a89a7338bcd46df4d9a5227b191acb28119d"
     PEERS = (
         (1, "1", "так", 15),
+        (3, "001", "як-є", 1),
+        (3, "011", "решта", 1),
+        (3, "100", "перше", 3),
+        (3, "101", "тотожне?", 15),
+        (3, "110", "за-умовою", 15),
+        (4, "0010", "функція", 3),
+        (4, "0011", "визначити", 10),
+        (6, "000000", "довжина", 7),
         (6, "000100", "елемент-списку-за-індексом", 1),
+        (8, "11011011", "друкувати", 1),
         (8, "11110100", "значення-у-текст", 1),
         (9, "110101001", "читати-всі", 1),
         (9, "110110111", "читати-файл", 1),
@@ -2521,8 +2325,8 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
                 import re
                 found = re.findall(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))", source)
                 self.assertEqual(len(found), count)
-        self.assertIn("(000000 (table-rows d1))", source)
-        self.assertNotIn("(довжина (table-rows d1))", source)
+        self.assertIn("(довжина (table-rows d1))", source)
+        self.assertNotIn("(000000 (table-rows d1))", source)
         self._undo_exact_heads(source)
 
     def test_wrong_d9_peer_does_not_pass_original_inverse(self):
@@ -2532,7 +2336,7 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "PEER_COUNT"):
             self._undo_exact_heads(wrong)
         self.assertIn('"00000000"', source)
-        self.assertIn("(000000 (table-rows d8))", source)
+        self.assertIn("(довжина (table-rows d8))", source)
 
 
 
