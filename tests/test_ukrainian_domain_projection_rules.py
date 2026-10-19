@@ -209,5 +209,12 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
                     "D11 projection must match the existing table without changing identity",
                 )
 
+        full_labels = {row["ukr"] for row in rows}
+        self.assertEqual(len(full_labels), 43,
+                         "D11 full Ukrainian peer labels must be unique")
+        self.assertTrue(
+            all(row["uk"] != row["ukr"] for row in rows),
+            "укр is the full projection; ук remains the compact projection",
+        )
 if __name__ == "__main__":
     unittest.main(verbosity=2)
