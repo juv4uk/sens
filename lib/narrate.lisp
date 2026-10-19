@@ -197,9 +197,9 @@
       (так
        (список (як-є invalid) (як-є outcome-tag) (перше підсумок))))))
 
-; D9 Ukrainian callable projections. Names/codes: lib/domains/d9.lisp;
-; source laws: knowledge/d9-semantic-layer-harvest-v1.json.
-; SENS DEFINE aliases existing Lisp closures; NO new native D9 dispatch.
+; Full укр names below are the primary Lisp-owned closures for their D9/D10 residents.
+; Exact keys stay in lib/domains/d9.lisp and lib/domains/d10.lisp; no raw binary dispatch.
+; English compatibility names at the end of this file point to these same closures.
 ; D9:000011000
 (визначити narrate-fact пояснити-факт)
 ; D9:000111000
