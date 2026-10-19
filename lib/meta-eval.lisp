@@ -21,8 +21,8 @@
 ; complete self-hosting.
 
 (визначити my-primitive
-  (функція (name)
-    (список (як-є primitive) name)))
+  (функція (імя-символу)
+    (список (як-є primitive) імя-символу)))
 
 (визначити створити-структуровану-помилку
   (функція (kind detail)
@@ -33,29 +33,29 @@
 ; a program could reproduce with quote/cons. Public my-eval/my-apply unwrap the
 ; envelope, so the observable interface stays unchanged.
 (визначити my-result-ok-token
-  (функція (value) value))
+  (функція (значення-виразу) значення-виразу))
 
 (визначити my-result-fail-token
-  (функція (value) value))
+  (функція (значення-виразу) значення-виразу))
 
 (визначити власний-результат-успіх
-  (функція (value)
-    (сполучити my-result-ok-token value)))
+  (функція (значення-виразу)
+    (сполучити my-result-ok-token значення-виразу)))
 
 (визначити власний-результат-невдача
   (функція (error)
     (сполучити my-result-fail-token error)))
 
 (визначити це-результат-невдалого-обчислення?
-  (функція (result)
+  (функція (результат-виразу)
     (за-умовою
       
-      ((атом? result)  ні)
-      ((атом? ()) (тотожне? (перше result) my-result-fail-token)))))
+      ((атом? результат-виразу)  ні)
+      ((атом? ()) (тотожне? (перше результат-виразу) my-result-fail-token)))))
 
 (визначити my-result-value
-  (функція (result)
-    (решта result)))
+  (функція (результат-виразу)
+    (решта результат-виразу)))
 
 ; Surface spellings are not owned here. The generated projection loaded before
 ; this evaluator maps every admitted runtime spelling to the numeric semantic ID
@@ -64,119 +64,119 @@
 ; Canon and semantic IDs are atoms: D3:101 EQ compares their exact
 ; identity. D8:11110111 EQUAL has no admitted mechanism here.
 (визначити my-semantic-id?
-  (функція (name semantic-id)
+  (функція (імя-символу семантичний-код)
     (за-умовою
       ; D3 EQ is defined only on atoms. A source list is never a name.
-      ((хибне? (атом? name)) ні)
-      ((тотожне? name semantic-id) так)
-      (так (тотожне? (my-semantic-id-for-surface name) semantic-id)))))
+      ((хибне? (атом? імя-символу)) ні)
+      ((тотожне? імя-символу семантичний-код) так)
+      (так (тотожне? (my-semantic-id-for-surface імя-символу) семантичний-код)))))
 
 ; The D6 LET binding list is data for the pinned mixed reader.
 ; Evaluate D3:110 outside that binding position so its head retains 3 bits.
 ; This SENS function owns the existing seven semantic-ID branches.
 (визначити my-canon-semantic-id
-  (функція (name)
+  (функція (імя-символу)
     (за-умовою
       ; Lists are data, not callable Canon names or D3-EQ operands.
-      ((хибне? (атом? name)) (як-є ()))
-      ((тотожне? name 001) 001)
-      ((тотожне? name 010) 010)
-      ((тотожне? name 101) 101)
-      ((тотожне? name 111) 111)
-      ((тотожне? name 100) 100)
-      ((тотожне? name 011) 011)
-      ((тотожне? name 110) 110)
-      (так (my-semantic-id-for-surface name)))))
+      ((хибне? (атом? імя-символу)) (як-є ()))
+      ((тотожне? імя-символу 001) 001)
+      ((тотожне? імя-символу 010) 010)
+      ((тотожне? імя-символу 101) 101)
+      ((тотожне? імя-символу 111) 111)
+      ((тотожне? імя-символу 100) 100)
+      ((тотожне? імя-символу 011) 011)
+      ((тотожне? імя-символу 110) 110)
+      (так (my-semantic-id-for-surface імя-символу)))))
 
 (визначити my-canon-identity
-  (функція (name)
-    (нехай ((semantic-id (my-canon-semantic-id name)))
+  (функція (імя-символу)
+    (нехай ((семантичний-код (my-canon-semantic-id імя-символу)))
       (за-умовою
-        ((тотожне? semantic-id 001) (як-є quote))
-        ((тотожне? semantic-id 010) (як-є atom))
-        ((тотожне? semantic-id 101) (як-є eq))
-        ((тотожне? semantic-id 111) (як-є cons))
-        ((тотожне? semantic-id 100) (як-є car))
-        ((тотожне? semantic-id 011) (як-є cdr))
-        ((тотожне? semantic-id 110) (як-є cond))
+        ((тотожне? семантичний-код 001) (як-є quote))
+        ((тотожне? семантичний-код 010) (як-є atom))
+        ((тотожне? семантичний-код 101) (як-є eq))
+        ((тотожне? семантичний-код 111) (як-є cons))
+        ((тотожне? семантичний-код 100) (як-є car))
+        ((тотожне? семантичний-код 011) (як-є cdr))
+        ((тотожне? семантичний-код 110) (як-є cond))
         ))))
 
 (визначити my-lambda-name?
-  (функція (name)
-    (my-semantic-id? name 0010)))
+  (функція (імя-символу)
+    (my-semantic-id? імя-символу 0010)))
 
 (визначити my-define-name?
-  (функція (name)
-    (my-semantic-id? name 0011)))
+  (функція (імя-символу)
+    (my-semantic-id? імя-символу 0011)))
 
 (визначити my-defmacro-name?
-  (функція (name)
-    (my-semantic-id? name 00011)))
+  (функція (імя-символу)
+    (my-semantic-id? імя-символу 00011)))
 
 (визначити my-def-compat-name?
-  (функція (name)
-    (my-semantic-id? name 0011)))
+  (функція (імя-символу)
+    (my-semantic-id? імя-символу 0011)))
 
 (визначити my-definition-name?
-  (функція (name)
+  (функція (імя-символу)
     (за-умовою
-      ((my-define-name? name) так)
-      ((my-def-compat-name? name) так)
+      ((my-define-name? імя-символу) так)
+      ((my-def-compat-name? імя-символу) так)
       (так ні))))
 
 ; Canon identity is an atom or (). D4 NULL/NOT project that
 ; structural distinction to an exact one-bit D1 predicate for D3 COND.
 (визначити my-canon-name?
-  (функція (name)
-    (хибне? (порожній? (my-canon-identity name)))))
+  (функція (імя-символу)
+    (хибне? (порожній? (my-canon-identity імя-символу)))))
 
 ; Canon callable names remain the five currently admitted primitives.
 ; The last branch explicitly rejects all other identities as D1:NO.
 (визначити my-canon-callable-identity?
-  (функція (identity-ref)
+  (функція (посилання-тотожності)
     (за-умовою
-      ((тотожне? identity-ref (як-є atom)) так)
-      ((тотожне? identity-ref (як-є eq)) так)
-      ((тотожне? identity-ref (як-є cons)) так)
-      ((тотожне? identity-ref (як-є car)) так)
-      ((тотожне? identity-ref (як-є cdr)) так)
+      ((тотожне? посилання-тотожності (як-є atom)) так)
+      ((тотожне? посилання-тотожності (як-є eq)) так)
+      ((тотожне? посилання-тотожності (як-є cons)) так)
+      ((тотожне? посилання-тотожності (як-є car)) так)
+      ((тотожне? посилання-тотожності (як-є cdr)) так)
       (так ні))))
 
 (визначити my-canon-quote-name?
-  (функція (name)
-    (тотожне? (my-canon-identity name) (як-є quote))))
+  (функція (імя-символу)
+    (тотожне? (my-canon-identity імя-символу) (як-є quote))))
 
 (визначити my-canon-cond-name?
-  (функція (name)
-    (тотожне? (my-canon-identity name) (як-є cond))))
+  (функція (імя-символу)
+    (тотожне? (my-canon-identity імя-символу) (як-є cond))))
 
 (визначити my-canon-binding-error
-  (функція (name)
+  (функція (імя-символу)
     (створити-структуровану-помилку
       (як-є invalid-form)
-      (список (як-є canonical-name-immutable) name))))
+      (список (як-є canonical-name-immutable) імя-символу))))
 
 ; Root primitive meanings are represented as values. Canon is handled first.
 ; Ordinary non-Canon boundary spellings are resolved to exact SENS identities
 ; here; the primitive value carried by the evaluator never uses the human
 ; spelling as its identity.
 (визначити my-default-binding
-  (функція (name)
-    (нехай ((identity-ref (my-canon-identity name)))
+  (функція (імя-символу)
+    (нехай ((посилання-тотожності (my-canon-identity імя-символу)))
       (за-умовою
-        ((my-canon-callable-identity? identity-ref) (my-primitive identity-ref))
-        ((my-canon-name? name) (my-canon-binding-error name))
-        ((my-semantic-id? name 01010) (my-primitive 01010))
-        ((my-semantic-id? name 01011) (my-primitive 01011))
-        ((my-semantic-id? name 10110) (my-primitive 10110))
-        ((my-semantic-id? name 11010) (my-primitive 11010))
-        ((my-semantic-id? name 11110111) (my-primitive 11110111))
-        ((my-semantic-id? name 11011) (my-primitive 11011))
-        ((my-semantic-id? name 11110100)
+        ((my-canon-callable-identity? посилання-тотожності) (my-primitive посилання-тотожності))
+        ((my-canon-name? імя-символу) (my-canon-binding-error імя-символу))
+        ((my-semantic-id? імя-символу 01010) (my-primitive 01010))
+        ((my-semantic-id? імя-символу 01011) (my-primitive 01011))
+        ((my-semantic-id? імя-символу 10110) (my-primitive 10110))
+        ((my-semantic-id? імя-символу 11010) (my-primitive 11010))
+        ((my-semantic-id? імя-символу 11110111) (my-primitive 11110111))
+        ((my-semantic-id? імя-символу 11011) (my-primitive 11011))
+        ((my-semantic-id? імя-символу 11110100)
          (my-primitive 11110100))
-        ((my-semantic-id? name 11101101)
+        ((my-semantic-id? імя-символу 11101101)
          (my-primitive 11101101))
-        ((атом? ()) name)))))
+        ((атом? ()) імя-символу)))))
 
 ; ADR-009 shared definition frame.
 ;
@@ -199,119 +199,119 @@
       ((атом? ()) (тотожне? (перше binding) 0)))))
 
 (визначити ім'я-зв'язане-в-кадрі?
-  (функція (name frame)
+  (функція (імя-символу кадр)
     (за-умовою
       
-      ((атом? frame)  ні)
-      ((тотожне? (перше (перше frame)) name) так)
-      ((атом? ()) (ім'я-зв'язане-в-кадрі? name (решта frame))))))
+      ((атом? кадр)  ні)
+      ((тотожне? (перше (перше кадр)) імя-символу) так)
+      ((атом? ()) (ім'я-зв'язане-в-кадрі? імя-символу (решта кадр))))))
 
 (визначити знайти-значення-імені-в-рамці
-  (функція (name frame)
+  (функція (імя-символу кадр)
     (за-умовою
-      ((тотожне? (перше (перше frame)) name) (решта (перше frame)))
-      ((атом? ()) (знайти-значення-імені-в-рамці name (решта frame))))))
+      ((тотожне? (перше (перше кадр)) імя-символу) (решта (перше кадр)))
+      ((атом? ()) (знайти-значення-імені-в-рамці імя-символу (решта кадр))))))
 
 (визначити my-env-has-shared-frame?
-  (функція (env-ref)
+  (функція (посилання-оточення)
     (за-умовою
       
-      ((атом? env-ref)  ні)
-      ((my-shared-frame-binding? (перше env-ref)) так)
-      ((атом? ()) (my-env-has-shared-frame? (решта env-ref))))))
+      ((атом? посилання-оточення)  ні)
+      ((my-shared-frame-binding? (перше посилання-оточення)) так)
+      ((атом? ()) (my-env-has-shared-frame? (решта посилання-оточення))))))
 
 (визначити my-shared-frame-value
-  (функція (env-ref)
+  (функція (посилання-оточення)
     (за-умовою
       
-      ((атом? env-ref)  (як-є ()))
-      ((my-shared-frame-binding? (перше env-ref)) (решта (перше env-ref)))
-      ((атом? ()) (my-shared-frame-value (решта env-ref))))))
+      ((атом? посилання-оточення)  (як-є ()))
+      ((my-shared-frame-binding? (перше посилання-оточення)) (решта (перше посилання-оточення)))
+      ((атом? ()) (my-shared-frame-value (решта посилання-оточення))))))
 
 (визначити my-ensure-shared-frame
-  (функція (env-ref)
+  (функція (посилання-оточення)
     (за-умовою
-      ((my-env-has-shared-frame? env-ref) env-ref)
-      ((атом? ()) (сполучити (сполучити 0 (як-є ())) env-ref)))))
+      ((my-env-has-shared-frame? посилання-оточення) посилання-оточення)
+      ((атом? ()) (сполучити (сполучити 0 (як-є ())) посилання-оточення)))))
 
 (визначити my-replace-shared-frame
-  (функція (env-ref frame)
+  (функція (посилання-оточення кадр)
     (за-умовою
       
-      ((атом? env-ref)  env-ref)
-      ((my-shared-frame-binding? (перше env-ref))
-       (сполучити (сполучити 0 frame) (решта env-ref)))
+      ((атом? посилання-оточення)  посилання-оточення)
+      ((my-shared-frame-binding? (перше посилання-оточення))
+       (сполучити (сполучити 0 кадр) (решта посилання-оточення)))
       ((атом? ())
-       (сполучити (перше env-ref)
-             (my-replace-shared-frame (решта env-ref) frame))))))
+       (сполучити (перше посилання-оточення)
+             (my-replace-shared-frame (решта посилання-оточення) кадр))))))
 
 (визначити my-refresh-shared-frame
-  (функція (captured-env caller-env)
+  (функція (захоплене-оточення оточення-виклику)
     (за-умовою
-      ((my-env-has-shared-frame? captured-env)
+      ((my-env-has-shared-frame? захоплене-оточення)
        (за-умовою
-         ((my-env-has-shared-frame? caller-env)
+         ((my-env-has-shared-frame? оточення-виклику)
           (my-replace-shared-frame
-            captured-env
-            (my-shared-frame-value caller-env)))
-         ((атом? ()) captured-env)))
-      ((атом? ()) captured-env))))
+            захоплене-оточення
+            (my-shared-frame-value оточення-виклику)))
+         ((атом? ()) захоплене-оточення)))
+      ((атом? ()) захоплене-оточення))))
 
 ; Definitions update the shared marker when one is active. Outside
 ; my-eval-program this falls back to the historical plain-alist extension, so
 ; direct my-eval-top-form use remains compatible.
 (визначити my-env-define
-  (функція (name value env-ref)
+  (функція (імя-символу значення-виразу посилання-оточення)
     (за-умовою
       
-      ((атом? env-ref)  (сполучити (сполучити name value) env-ref))
-      ((my-shared-frame-binding? (перше env-ref))
+      ((атом? посилання-оточення)  (сполучити (сполучити імя-символу значення-виразу) посилання-оточення))
+      ((my-shared-frame-binding? (перше посилання-оточення))
        (сполучити
          (сполучити 0
-               (сполучити (сполучити name value)
-                     (решта (перше env-ref))))
-         (решта env-ref)))
+               (сполучити (сполучити імя-символу значення-виразу)
+                     (решта (перше посилання-оточення))))
+         (решта посилання-оточення)))
       ((атом? ())
-       (сполучити (перше env-ref)
-             (додати-визначення-до-оточення name value (решта env-ref)))))))
+       (сполучити (перше посилання-оточення)
+             (додати-визначення-до-оточення імя-символу значення-виразу (решта посилання-оточення)))))))
 
 ; Contract 6.0: Canon outranks the lexical alist even if a hostile/pre-existing
 ; environment contains the same text. Non-Canon names retain ordinary lookup.
 (визначити env-lookup
-  (функція (name env-ref)
-    (нехай ((identity-ref (my-canon-identity name)))
+  (функція (імя-символу посилання-оточення)
+    (нехай ((посилання-тотожності (my-canon-identity імя-символу)))
       (за-умовою
-        ((my-canon-callable-identity? identity-ref) (my-primitive identity-ref))
-        ((my-canon-name? name) (my-canon-binding-error name))
+        ((my-canon-callable-identity? посилання-тотожності) (my-primitive посилання-тотожності))
+        ((my-canon-name? імя-символу) (my-canon-binding-error імя-символу))
         
-        ((атом? env-ref)  (my-default-binding name))
-        ((my-shared-frame-binding? (перше env-ref))
+        ((атом? посилання-оточення)  (my-default-binding імя-символу))
+        ((my-shared-frame-binding? (перше посилання-оточення))
          (за-умовою
-           ((ім'я-зв'язане-в-кадрі? name (решта (перше env-ref)))
-            (знайти-значення-імені-в-рамці name (решта (перше env-ref))))
-           ((атом? ()) (знайти-значення-імені-в-лексичному-середовищі name (решта env-ref)))))
-        ((тотожне? (перше (перше env-ref)) name) (решта (перше env-ref)))
-        ((атом? ()) (знайти-значення-імені-в-лексичному-середовищі name (решта env-ref)))))))
+           ((ім'я-зв'язане-в-кадрі? імя-символу (решта (перше посилання-оточення)))
+            (знайти-значення-імені-в-рамці імя-символу (решта (перше посилання-оточення))))
+           ((атом? ()) (знайти-значення-імені-в-лексичному-середовищі імя-символу (решта посилання-оточення)))))
+        ((тотожне? (перше (перше посилання-оточення)) імя-символу) (решта (перше посилання-оточення)))
+        ((атом? ()) (знайти-значення-імені-в-лексичному-середовищі імя-символу (решта посилання-оточення)))))))
 
 (визначити env-bound?
-  (функція (name env-ref)
+  (функція (імя-символу посилання-оточення)
     (за-умовою
-      ((my-canon-name? name) так)
+      ((my-canon-name? імя-символу) так)
       
-      ((атом? env-ref)  ні)
-      ((my-shared-frame-binding? (перше env-ref))
+      ((атом? посилання-оточення)  ні)
+      ((my-shared-frame-binding? (перше посилання-оточення))
        (за-умовою
-         ((ім'я-зв'язане-в-кадрі? name (решта (перше env-ref))) так)
-         ((атом? ()) (ім'я-визначене-в-оточенні? name (решта env-ref)))))
-      ((тотожне? (перше (перше env-ref)) name) так)
-      ((атом? ()) (ім'я-визначене-в-оточенні? name (решта env-ref))))))
+         ((ім'я-зв'язане-в-кадрі? імя-символу (решта (перше посилання-оточення))) так)
+         ((атом? ()) (ім'я-визначене-в-оточенні? імя-символу (решта посилання-оточення)))))
+      ((тотожне? (перше (перше посилання-оточення)) імя-символу) так)
+      ((атом? ()) (ім'я-визначене-в-оточенні? імя-символу (решта посилання-оточення))))))
 
 (визначити my-primitive?
-  (функція (value)
+  (функція (значення-виразу)
     (за-умовою
       
-      ((атом? value)  ні)
-      ((атом? ()) (тотожне? (перше value) (як-є primitive))))))
+      ((атом? значення-виразу)  ні)
+      ((атом? ()) (тотожне? (перше значення-виразу) (як-є primitive))))))
 
 ; UnknownSymbol belongs to name resolution, not application. A symbol produced
 ; as a value (for example by quote) is not an unresolved lookup and therefore
@@ -322,30 +322,30 @@
 ; This predicate crosses a D3:110 COND boundary: always yield the
 ; exact one-bit D1 result. () is data, never an implicit false predicate.
 (визначити my-unresolved-name?
-  (функція (name env-ref)
+  (функція (імя-символу посилання-оточення)
     (за-умовою
-      ((символ? name)
+      ((символ? імя-символу)
        (за-умовою
-         ((тотожне? name так) ні)
-         ((my-canon-name? name) ні)
-         ((ім'я-визначене-в-оточенні? name env-ref) ні)
-         ((my-primitive? (my-default-binding name)) ні)
+         ((тотожне? імя-символу так) ні)
+         ((my-canon-name? імя-символу) ні)
+         ((ім'я-визначене-в-оточенні? імя-символу посилання-оточення) ні)
+         ((my-primitive? (my-default-binding імя-символу)) ні)
          (так так)))
       (так ні))))
 
 (визначити my-macro?
-  (функція (value)
+  (функція (значення-виразу)
     (за-умовою
       
-      ((атом? value) ні)
-      (так (тотожне? (перше value) (як-є macro))))))
+      ((атом? значення-виразу) ні)
+      (так (тотожне? (перше значення-виразу) (як-є macro))))))
 
 (визначити my-closure?
-  (функція (value)
+  (функція (значення-виразу)
     (за-умовою
       
-      ((атом? value) ні)
-      (так (тотожне? (перше value) (як-є closure))))))
+      ((атом? значення-виразу) ні)
+      (так (тотожне? (перше значення-виразу) (як-є closure))))))
 
 ; A recursive closure is finite Lisp data. It does not require a cyclic host
 ; Environment. At call time my-apply reconstructs the one self-binding that
@@ -354,11 +354,11 @@
 ; Shape:
 ;   (recursive-closure name params body captured-env)
 (визначити my-recursive-closure?
-  (функція (value)
+  (функція (значення-виразу)
     (за-умовою
       
-      ((атом? value) ні)
-      (так (тотожне? (перше value) (як-є recursive-closure))))))
+      ((атом? значення-виразу) ні)
+      (так (тотожне? (перше значення-виразу) (як-є recursive-closure))))))
 
 ; A mutually-recursive group is also finite Lisp data. Every member stores the
 ; same raw group and captured outer environment; my-apply reconstructs the
@@ -367,46 +367,46 @@
 ; Shape:
 ;   (recursive-group-closure name params body group captured-env)
 (визначити my-group-closure?
-  (функція (value)
+  (функція (значення-виразу)
     (за-умовою
-      ((атом? value) ні)
-      ((атом? ()) (тотожне? (перше value) (як-є recursive-group-closure))))))
+      ((атом? значення-виразу) ні)
+      ((атом? ()) (тотожне? (перше значення-виразу) (як-є recursive-group-closure))))))
 
 (визначити my-lambda-form?
-  (функція (form)
+  (функція (форма)
     (за-умовою
-      ((атом? form)  ні)
-      ((атом? (перше form))  (my-lambda-name? (перше form)))
+      ((атом? форма)  ні)
+      ((атом? (перше форма))  (my-lambda-name? (перше форма)))
       (так ні))))
 
 (визначити my-lambda-def-form?
-  (функція (form)
+  (функція (форма)
     (за-умовою
-      ((атом? form)  ні)
-      ((my-definition-name? (перше form))
+      ((атом? форма)  ні)
+      ((my-definition-name? (перше форма))
        (за-умовою
-         ((my-canon-name? (друге form)) ні)
-         ((атом? ()) (перевірити-форму-лямбда? (третє form)))))
+         ((my-canon-name? (друге форма)) ні)
+         ((атом? ()) (перевірити-форму-лямбда? (третє форма)))))
       (так ні))))
 
 (визначити my-fourth
-  (функція (values)
-    (перше (решта (решта (решта values))))))
+  (функція (значення-списку)
+    (перше (решта (решта (решта значення-списку))))))
 
 (визначити my-fifth
-  (функція (values)
-    (перше (решта (решта (решта (решта values)))))))
+  (функція (значення-списку)
+    (перше (решта (решта (решта (решта значення-списку)))))))
 
 (визначити my-sixth
-  (функція (values)
-    (перше (решта (решта (решта (решта (решта values))))))))
+  (функція (значення-списку)
+    (перше (решта (решта (решта (решта (решта значення-списку))))))))
 
 (визначити my-compare-two
-  (функція (operator left right)
+  (функція (оператор-виразу left right)
     (за-умовою
-      ((тотожне? operator 11010) (менше? left right))
-      ((тотожне? operator 11110111) (однакові? left right))
-      ((тотожне? operator 11011) (більше? left right))
+      ((тотожне? оператор-виразу 11010) (менше? left right))
+      ((тотожне? оператор-виразу 11110111) (однакові? left right))
+      ((тотожне? оператор-виразу 11011) (більше? left right))
       )))
 
 ; Chained comparison semantics are Lisp-owned: values arrive already
@@ -416,35 +416,35 @@
 ; in my-lisp (only Nil and Bool(false) are falsy), we MUST use a 3-part
 ; clause matching the exact-Q YES result (1) — not a 2-part clause.
 (визначити my-compare-chain
-  (функція (operator values)
+  (функція (оператор-виразу значення-списку)
     (за-умовою
       
-      ((атом? (решта values))  так)
-      ((тотожне? (my-compare-two operator (перше values) (друге values)) 1)
-       (усі-сусідні-значення-задовольняють-порівняння? operator (решта values)))
+      ((атом? (решта значення-списку))  так)
+      ((тотожне? (my-compare-two оператор-виразу (перше значення-списку) (друге значення-списку)) 1)
+       (усі-сусідні-значення-задовольняють-порівняння? оператор-виразу (решта значення-списку)))
       )))
 
 ; Primitive *identity* is a Lisp value. This function is the narrow bridge
 ; from that identity to the admitted native operation mechanism.
 (визначити my-apply-primitive
-  (функція (name args)
+  (функція (імя-символу аргументи)
     (за-умовою
-      ((тотожне? name (як-є atom)) (атом? (перше args)))
-      ((тотожне? name (як-є eq))   (тотожне? (перше args) (друге args)))
-      ((тотожне? name (як-є car))  (перше (перше args)))
-      ((тотожне? name (як-є cdr))  (решта (перше args)))
-      ((тотожне? name (як-є cons)) (сполучити (перше args) (друге args)))
-      ((тотожне? name 01010) (додати (перше args) (друге args)))
-      ((тотожне? name 01011) (відняти (перше args) (друге args)))
-      ((тотожне? name 10110) (помножити (перше args) (друге args)))
-      ((тотожне? name 11010) (усі-сусідні-значення-задовольняють-порівняння? 11010 args))
-      ((тотожне? name 11110111) (усі-сусідні-значення-задовольняють-порівняння? 11110111 args))
-      ((тотожне? name 11011) (усі-сусідні-значення-задовольняють-порівняння? 11011 args))
-      ((тотожне? name 11110100)
-       (значення-у-текст (перше args)))
-      ((тотожне? name 11101101)
-       (текст-у-символ (перше args)))
-      ((атом? ()) (список (як-є unknown-primitive) name)))))
+      ((тотожне? імя-символу (як-є atom)) (атом? (перше аргументи)))
+      ((тотожне? імя-символу (як-є eq))   (тотожне? (перше аргументи) (друге аргументи)))
+      ((тотожне? імя-символу (як-є car))  (перше (перше аргументи)))
+      ((тотожне? імя-символу (як-є cdr))  (решта (перше аргументи)))
+      ((тотожне? імя-символу (як-є cons)) (сполучити (перше аргументи) (друге аргументи)))
+      ((тотожне? імя-символу 01010) (додати (перше аргументи) (друге аргументи)))
+      ((тотожне? імя-символу 01011) (відняти (перше аргументи) (друге аргументи)))
+      ((тотожне? імя-символу 10110) (помножити (перше аргументи) (друге аргументи)))
+      ((тотожне? імя-символу 11010) (усі-сусідні-значення-задовольняють-порівняння? 11010 аргументи))
+      ((тотожне? імя-символу 11110111) (усі-сусідні-значення-задовольняють-порівняння? 11110111 аргументи))
+      ((тотожне? імя-символу 11011) (усі-сусідні-значення-задовольняють-порівняння? 11011 аргументи))
+      ((тотожне? імя-символу 11110100)
+       (значення-у-текст (перше аргументи)))
+      ((тотожне? імя-символу 11101101)
+       (текст-у-символ (перше аргументи)))
+      ((атом? ()) (список (як-є unknown-primitive) імя-символу)))))
 
 ; Lambda-list arity is derivable from Lisp list structure itself:
 ;   (x y)        -> exact 2
@@ -454,154 +454,154 @@
 ; An arity is D24 mathematics, not an implicitly promoted reader Number.
 ; One derived structural counter supplies BOTH fixed and received counts.
 (визначити порахувати-обов'язкові-параметри-лямбди
-  (функція (params)
+  (функція (параметри)
     (за-умовою
-      ((атом? params) 0)
+      ((атом? параметри) 0)
       ((атом? ()) (додати 1
-                       (порахувати-обов'язкові-параметри-лямбди (решта params)))))))
+                       (порахувати-обов'язкові-параметри-лямбди (решта параметри)))))))
 
 (визначити лямбда-має-параметр-залишку?
-  (функція (params)
+  (функція (параметри)
     (за-умовою
       
-      ((атом? params)  (за-умовою
-         ((тотожне? params (як-є ())) ні)
+      ((атом? параметри)  (за-умовою
+         ((тотожне? параметри (як-є ())) ні)
          (так так)))
-      (так (лямбда-має-параметр-залишку? (решта params))))))
+      (так (лямбда-має-параметр-залишку? (решта параметри))))))
 
 (визначити арність-відповідає-аргументам?
-  (функція (params args)
-    (нехай ((fixed (порахувати-обов'язкові-параметри-лямбди params))
-             (received (порахувати-обов'язкові-параметри-лямбди args)))
+  (функція (параметри аргументи)
+    (нехай ((зафіксоване (порахувати-обов'язкові-параметри-лямбди параметри))
+             (отримане (порахувати-обов'язкові-параметри-лямбди аргументи)))
       (за-умовою
-        ((лямбда-має-параметр-залишку? params)
+        ((лямбда-має-параметр-залишку? параметри)
          (за-умовою
-           ((менше? received fixed) ні)
-           ((хибне? (менше? received fixed)) так)
+           ((менше? отримане зафіксоване) ні)
+           ((хибне? (менше? отримане зафіксоване)) так)
            (так ні)))
         (так
          (за-умовою
-           ((тотожне? received fixed) так)
+           ((тотожне? отримане зафіксоване) так)
            (так ні)))))))
 
 (визначити опис-очікуваної-та-одержаної-арності
-  (функція (params args)
-    (нехай ((fixed (порахувати-обов'язкові-параметри-лямбди params))
-          (received (порахувати-обов'язкові-параметри-лямбди args)))
+  (функція (параметри аргументи)
+    (нехай ((зафіксоване (порахувати-обов'язкові-параметри-лямбди параметри))
+          (отримане (порахувати-обов'язкові-параметри-лямбди аргументи)))
       (список
         (як-є expected)
         (за-умовою
-          ((лямбда-має-параметр-залишку? params) (список (як-є at-least) fixed))
-          ((атом? ()) (список (як-є exact) fixed)))
+          ((лямбда-має-параметр-залишку? параметри) (список (як-є at-least) зафіксоване))
+          ((атом? ()) (список (як-є exact) зафіксоване)))
         (як-є received)
-        received))))
+        отримане))))
 
 (визначити my-arity-error
-  (функція (params args)
-    (створити-структуровану-помилку (як-є arity) (опис-очікуваної-та-одержаної-арності params args))))
+  (функція (параметри аргументи)
+    (створити-структуровану-помилку (як-є arity) (опис-очікуваної-та-одержаної-арності параметри аргументи))))
 
 ; Lambda-list validation is syntax semantics, not application semantics.
 ; Contract 6 adds reserved-Canon rejection to the existing structural checks.
 (визначити my-symbol-member?
-  (функція (name names)
+  (функція (імя-символу імена)
     (за-умовою
-      ((атом? names)  ні)
-      ((тотожне? name (перше names)) так)
-      ((атом? ()) (my-symbol-member? name (решта names))))))
+      ((атом? імена)  ні)
+      ((тотожне? імя-символу (перше імена)) так)
+      ((атом? ()) (my-symbol-member? імя-символу (решта імена))))))
 
 (визначити my-lambda-list-error-pairs
-  (функція (params seen)
+  (функція (параметри seen)
     (за-умовою
       
-      ((атом? params)  (за-умовою
-         ((тотожне? params (як-є ())) (як-є ()))
-         ((символ? params)
+      ((атом? параметри)  (за-умовою
+         ((тотожне? параметри (як-є ())) (як-є ()))
+         ((символ? параметри)
           (за-умовою
-            ((my-canon-name? params)
-             (список (як-є canonical-parameter) params))
-            ((my-symbol-member? params seen)
-             (список (як-є duplicate-parameter) params))
+            ((my-canon-name? параметри)
+             (список (як-є canonical-parameter) параметри))
+            ((my-symbol-member? параметри seen)
+             (список (як-є duplicate-parameter) параметри))
             ))
-         ((атом? ()) (список (як-є invalid-rest) params))))
-      ((символ? (перше params))
+         ((атом? ()) (список (як-є invalid-rest) параметри))))
+      ((символ? (перше параметри))
        (за-умовою
-         ((my-canon-name? (перше params))
-          (список (як-є canonical-parameter) (перше params)))
-         ((my-symbol-member? (перше params) seen)
-          (список (як-є duplicate-parameter) (перше params)))
+         ((my-canon-name? (перше параметри))
+          (список (як-є canonical-parameter) (перше параметри)))
+         ((my-symbol-member? (перше параметри) seen)
+          (список (як-є duplicate-parameter) (перше параметри)))
          ((атом? ())
           (my-lambda-list-error-pairs
-            (решта params)
-            (сполучити (перше params) seen)))))
-      ((атом? ()) (список (як-є non-symbol-parameter) (перше params))))))
+            (решта параметри)
+            (сполучити (перше параметри) seen)))))
+      ((атом? ()) (список (як-є non-symbol-parameter) (перше параметри))))))
 
 (визначити перевірити-параметри-лямбди
-  (функція (params)
+  (функція (параметри)
     (за-умовою
       
-      ((атом? params)  (за-умовою
-         ((тотожне? params (як-є ())) (як-є ()))
-         ((символ? params)
+      ((атом? параметри)  (за-умовою
+         ((тотожне? параметри (як-є ())) (як-є ()))
+         ((символ? параметри)
           (за-умовою
-            ((my-canon-name? params)
-             (список (як-є canonical-parameter) params))
+            ((my-canon-name? параметри)
+             (список (як-є canonical-parameter) параметри))
             ))
-         ((атом? ()) (список (як-є invalid-parameters) params))))
-      ((атом? ()) (my-lambda-list-error-pairs params (як-є ()))))))
+         ((атом? ()) (список (як-є invalid-parameters) параметри))))
+      ((атом? ()) (my-lambda-list-error-pairs параметри (як-є ()))))))
 
 (визначити my-lambda-invalid-form
-  (функція (problem)
+  (функція (проблема)
     (створити-структуровану-помилку
       (як-є invalid-form)
-      (сполучити (як-є lambda-parameters) problem))))
+      (сполучити (як-є lambda-parameters) проблема))))
 
 (визначити my-make-closure
-  (функція (params body env-ref)
-    (нехай ((problem (перевірити-параметри-лямбди params)))
+  (функція (параметри тіло-функції посилання-оточення)
+    (нехай ((проблема (перевірити-параметри-лямбди параметри)))
       (за-умовою
         
-        ((атом? problem)  (список (як-є closure) params body env-ref))
-        ((атом? ()) (my-lambda-invalid-form problem))))))
+        ((атом? проблема)  (список (як-є closure) параметри тіло-функції посилання-оточення))
+        ((атом? ()) (my-lambda-invalid-form проблема))))))
 
 ; Return the first malformed lambda-list in a top-level recursive group.
 ; Canon-named definitions never enter a recursive group; my-lambda-def-form?
 ; routes them to the ordinary top-form rejection path first.
 (визначити my-lambda-def-group-error
-  (функція (forms)
+  (функція (форми)
     (за-умовою
       
-      ((атом? forms)  (як-є ()))
+      ((атом? форми)  (як-є ()))
       ((атом? ())
-       (нехай ((problem
-               (перевірити-параметри-лямбди (друге (третє (перше forms))))))
+       (нехай ((проблема
+               (перевірити-параметри-лямбди (друге (третє (перше форми))))))
          (за-умовою
            
-           ((атом? problem)  (my-lambda-def-group-error (решта forms)))
-           ((атом? ()) problem)))))))
+           ((атом? проблема)  (my-lambda-def-group-error (решта форми)))
+           ((атом? ()) проблема)))))))
 
 ; Parameter binding owns only the successful path. Arity and Canon-name
 ; validity are checked before this function is entered.
 (визначити bind-params
-  (функція (params args env-ref)
+  (функція (параметри аргументи посилання-оточення)
     (за-умовою
       
-      ((атом? params)  (за-умовою
-         ((тотожне? params (як-є ())) env-ref)
-         ((атом? ()) (сполучити (сполучити params args) env-ref))))
-      ((атом? ()) (сполучити (сполучити (перше params) (перше args))
-               (зв'язати-аргументи-з-лямбда-параметрами (решта params) (решта args) env-ref))))))
+      ((атом? параметри)  (за-умовою
+         ((тотожне? параметри (як-є ())) посилання-оточення)
+         ((атом? ()) (сполучити (сполучити параметри аргументи) посилання-оточення))))
+      ((атом? ()) (сполучити (сполучити (перше параметри) (перше аргументи))
+               (зв'язати-аргументи-з-лямбда-параметрами (решта параметри) (решта аргументи) посилання-оточення))))))
 
 (визначити my-eval-list-result
-  (функція (exprs env-ref)
+  (функція (exprs посилання-оточення)
     (за-умовою
       
       ((атом? exprs)  (власний-результат-успіх (як-є ())))
       ((атом? ())
-       (нехай ((head-result (обчислити-вираз-з-наслідком (перше exprs) env-ref)))
+       (нехай ((head-result (обчислити-вираз-з-наслідком (перше exprs) посилання-оточення)))
          (за-умовою
            ((це-результат-невдалого-обчислення? head-result) head-result)
            ((атом? ())
-            (нехай ((tail-result (обчислити-аргументи-з-явним-успіхом-або-помилкою (решта exprs) env-ref)))
+            (нехай ((tail-result (обчислити-аргументи-з-явним-успіхом-або-помилкою (решта exprs) посилання-оточення)))
               (за-умовою
                 ((це-результат-невдалого-обчислення? tail-result) tail-result)
                 ((атом? ())
@@ -611,159 +611,159 @@
                      (my-result-value tail-result)))))))))))))
 
 (визначити my-eval-list
-  (функція (exprs env-ref)
-    (my-result-value (обчислити-аргументи-з-явним-успіхом-або-помилкою exprs env-ref))))
+  (функція (exprs посилання-оточення)
+    (my-result-value (обчислити-аргументи-з-явним-успіхом-або-помилкою exprs посилання-оточення))))
 
 (визначити my-eval-body-result
-  (функція (body env-ref)
+  (функція (тіло-функції посилання-оточення)
     (за-умовою
-      ((хибне? (атом? (решта body))) (обчислити-вираз-з-наслідком (перше body) env-ref))
-      ((атом? (решта body))  (обчислити-вираз-з-наслідком (перше body) env-ref))
+      ((хибне? (атом? (решта тіло-функції))) (обчислити-вираз-з-наслідком (перше тіло-функції) посилання-оточення))
+      ((атом? (решта тіло-функції))  (обчислити-вираз-з-наслідком (перше тіло-функції) посилання-оточення))
       ((атом? ())
-       (нехай ((first-result (обчислити-вираз-з-наслідком (перше body) env-ref)))
+       (нехай ((first-result (обчислити-вираз-з-наслідком (перше тіло-функції) посилання-оточення)))
          (за-умовою
            ((це-результат-невдалого-обчислення? first-result) first-result)
-           ((атом? ()) (обчислити-послідовне-тіло-з-раннім-збоєм (решта body) env-ref))))))))
+           ((атом? ()) (обчислити-послідовне-тіло-з-раннім-збоєм (решта тіло-функції) посилання-оточення))))))))
 
 (визначити my-eval-body
-  (функція (body env-ref)
-    (my-result-value (обчислити-послідовне-тіло-з-раннім-збоєм body env-ref))))
+  (функція (тіло-функції посилання-оточення)
+    (my-result-value (обчислити-послідовне-тіло-з-раннім-збоєм тіло-функції посилання-оточення))))
 
 (визначити my-cond-has-migration-clause?
-  (функція (clauses)
+  (функція (гілки-умов)
     (за-умовою
       
-      ((атом? clauses) ні)
-      ((хибне? (атом? (перше clauses))) (my-cond-has-migration-clause? (решта clauses)))
-      ((атом? (перше clauses))  (my-cond-has-migration-clause? (решта clauses)))
-      ((тотожне? (довжина (перше clauses)) 2)  так)
-      (так (my-cond-has-migration-clause? (решта clauses))))))
+      ((атом? гілки-умов) ні)
+      ((хибне? (атом? (перше гілки-умов))) (my-cond-has-migration-clause? (решта гілки-умов)))
+      ((атом? (перше гілки-умов))  (my-cond-has-migration-clause? (решта гілки-умов)))
+      ((тотожне? (довжина (перше гілки-умов)) 2)  так)
+      (так (my-cond-has-migration-clause? (решта гілки-умов))))))
 
 (визначити my-eval-cond-result-mode
-  (функція (clauses env-ref migration-compatibility?)
+  (функція (гілки-умов посилання-оточення migration-compatibility?)
     (за-умовою
       
-      ((атом? clauses)  (за-умовою
+      ((атом? гілки-умов)  (за-умовою
          (migration-compatibility? (власний-результат-успіх (як-є ())))
          ((атом? ())
           (власний-результат-невдача
             (створити-структуровану-помилку (як-є unsatisfied-conditional) (як-є cond))))))
       ((атом? ())
-       (нехай ((clause (перше clauses)))
+       (нехай ((гілка-умови (перше гілки-умов)))
          (за-умовою
            ; #217 canonical path: evaluate only the query. The expected result
            ; is already Lisp data in the interpreted program and must never be
            ; executed as code. Match it structurally, then evaluate the branch.
-           ((тотожне? (довжина clause) 3) 
-            (нехай ((test-result (обчислити-вираз-з-наслідком (перше clause) env-ref)))
+           ((тотожне? (довжина гілка-умови) 3) 
+            (нехай ((результат-перевірки (обчислити-вираз-з-наслідком (перше гілка-умови) посилання-оточення)))
               (за-умовою
-                ((це-результат-невдалого-обчислення? test-result) test-result)
-                ((однакові? (my-result-value test-result) (друге clause))
+                ((це-результат-невдалого-обчислення? результат-перевірки) результат-перевірки)
+                ((однакові? (my-result-value результат-перевірки) (друге гілка-умови))
                  
-                 (обчислити-вираз-з-наслідком (третє clause) env-ref))
-                ((хибне? (однакові? (my-result-value test-result) (друге clause)))
+                 (обчислити-вираз-з-наслідком (третє гілка-умови) посилання-оточення))
+                ((хибне? (однакові? (my-result-value результат-перевірки) (друге гілка-умови)))
                  (my-eval-cond-result-mode
-                   (решта clauses) env-ref migration-compatibility?)))))
+                   (решта гілки-умов) посилання-оточення migration-compatibility?)))))
            ; Historical two-part clauses remain migration-only, mirroring the
            ; native evaluator until their callers are moved to explicit result
            ; matching. This path intentionally retains old truthiness.
-           ((тотожне? (довжина clause) 2) 
-            (нехай ((test-result (обчислити-вираз-з-наслідком (перше clause) env-ref)))
+           ((тотожне? (довжина гілка-умови) 2) 
+            (нехай ((результат-перевірки (обчислити-вираз-з-наслідком (перше гілка-умови) посилання-оточення)))
               (за-умовою
-                ((це-результат-невдалого-обчислення? test-result) test-result)
-                ((my-result-value test-result)
-                 (обчислити-вираз-з-наслідком (друге clause) env-ref))
+                ((це-результат-невдалого-обчислення? результат-перевірки) результат-перевірки)
+                ((my-result-value результат-перевірки)
+                 (обчислити-вираз-з-наслідком (друге гілка-умови) посилання-оточення))
                 ((атом? ())
                  (my-eval-cond-result-mode
-                   (решта clauses) env-ref migration-compatibility?)))))
+                   (решта гілки-умов) посилання-оточення migration-compatibility?)))))
            ((атом? ())
             (власний-результат-невдача
               (створити-структуровану-помилку
                 (як-є invalid-form)
-                (список (як-є cond-clause) clause))))))))))
+                (список (як-є cond-clause) гілка-умови))))))))))
 
 (визначити my-eval-cond-result
-  (функція (clauses env-ref)
+  (функція (гілки-умов посилання-оточення)
     (my-eval-cond-result-mode
-      clauses env-ref (my-cond-has-migration-clause? clauses))))
+      гілки-умов посилання-оточення (my-cond-has-migration-clause? гілки-умов))))
 
 (визначити my-eval-cond
-  (функція (clauses env-ref)
-    (my-result-value (my-eval-cond-result clauses env-ref))))
+  (функція (гілки-умов посилання-оточення)
+    (my-result-value (my-eval-cond-result гілки-умов посилання-оточення))))
 
 (визначити my-take-lambda-def-group
-  (функція (forms)
+  (функція (форми)
     (за-умовою
       
-      ((атом? forms)  (як-є ()))
-      ((визначення-лямбди-на-верхньому-рівні? (перше forms))
-       (сполучити (перше forms)
-             (my-take-lambda-def-group (решта forms))))
+      ((атом? форми)  (як-є ()))
+      ((визначення-лямбди-на-верхньому-рівні? (перше форми))
+       (сполучити (перше форми)
+             (my-take-lambda-def-group (решта форми))))
       )))
 
 (визначити my-drop-lambda-def-group
-  (функція (forms)
+  (функція (форми)
     (за-умовою
       
-      ((атом? forms)  (як-є ()))
-      ((визначення-лямбди-на-верхньому-рівні? (перше forms))
-       (my-drop-lambda-def-group (решта forms)))
-      ((атом? ()) forms))))
+      ((атом? форми)  (як-є ()))
+      ((визначення-лямбди-на-верхньому-рівні? (перше форми))
+       (my-drop-lambda-def-group (решта форми)))
+      ((атом? ()) форми))))
 
 (визначити my-group-closure-from-def
-  (функція (form group captured-env)
-    (нехай ((lambda-form (третє form)))
+  (функція (форма група захоплене-оточення)
+    (нехай ((lambda-form (третє форма)))
       (список (як-є recursive-group-closure)
-            (друге form)
+            (друге форма)
             (друге lambda-form)
             (решта (решта lambda-form))
-            group
-            captured-env))))
+            група
+            захоплене-оточення))))
 
 ; Application-time reconstruction keeps SCC members as lexical bindings around
 ; the refreshed shared frame. This retains finite group recursion.
 (визначити my-build-group-env-onto
-  (функція (forms group captured-env out)
+  (функція (форми група захоплене-оточення out)
     (за-умовою
       
-      ((атом? forms)  out)
+      ((атом? форми)  out)
       ((атом? ())
-       (нехай ((form (перше forms)))
+       (нехай ((форма (перше форми)))
          (my-build-group-env-onto
-           (решта forms)
-           group
-           captured-env
+           (решта форми)
+           група
+           захоплене-оточення
            (сполучити
-             (сполучити (друге form)
-                   (створити-замикання-взаєморекурсивної-групи form group captured-env))
+             (сполучити (друге форма)
+                   (створити-замикання-взаєморекурсивної-групи форма група захоплене-оточення))
              out)))))))
 
 (визначити побудувати-лексичні-зв'язки-рекурсивної-групи
-  (функція (group captured-env)
-    (my-build-group-env-onto group group captured-env captured-env)))
+  (функція (група захоплене-оточення)
+    (my-build-group-env-onto група група захоплене-оточення захоплене-оточення)))
 
 ; Program-time installation is different: SCC members are top-level definitions
 ; and therefore belong to the shared definition frame rather than to a lexical
 ; prefix that could become a stale snapshot for later closures.
 (визначити my-install-group-env-onto
-  (функція (forms group captured-env out)
+  (функція (форми група захоплене-оточення out)
     (за-умовою
       
-      ((атом? forms)  out)
+      ((атом? форми)  out)
       ((атом? ())
-       (нехай ((form (перше forms)))
+       (нехай ((форма (перше форми)))
          (my-install-group-env-onto
-           (решта forms)
-           group
-           captured-env
+           (решта форми)
+           група
+           захоплене-оточення
            (додати-визначення-до-оточення
-             (друге form)
-             (створити-замикання-взаєморекурсивної-групи form group captured-env)
+             (друге форма)
+             (створити-замикання-взаєморекурсивної-групи форма група захоплене-оточення)
              out)))))))
 
 (визначити встановити-взаєморекурсивні-замикання
-  (функція (group captured-env)
-    (my-install-group-env-onto group group captured-env captured-env)))
+  (функція (група захоплене-оточення)
+    (my-install-group-env-onto група група захоплене-оточення захоплене-оточення)))
 
 ; caller-env is optional only for compatibility with the old experimental
 ; meta-eval-mutual wrapper. Main my-eval always passes it. When present it is
@@ -772,175 +772,175 @@
 ; failures distinct from ordinary Lisp data whose printed shape happens to be
 ; `(error ...)`.
 (визначити застосувати-функцію-з-наслідком
-  (функція (fn args caller-env)
+  (функція (функція-значення аргументи оточення-виклику)
     (за-умовою
       
-      ((атом? fn)  (власний-результат-невдача (створити-структуровану-помилку (як-є not-callable) fn)))
-      ((my-primitive? fn)
-       (власний-результат-успіх (my-apply-primitive (друге fn) args)))
-      ((це-замикання? fn)
+      ((атом? функція-значення)  (власний-результат-невдача (створити-структуровану-помилку (як-є not-callable) функція-значення)))
+      ((my-primitive? функція-значення)
+       (власний-результат-успіх (my-apply-primitive (друге функція-значення) аргументи)))
+      ((це-замикання? функція-значення)
        (за-умовою
-         ((арність-відповідає-аргументам? (друге fn) args)
+         ((арність-відповідає-аргументам? (друге функція-значення) аргументи)
           (обчислити-послідовне-тіло-з-раннім-збоєм
-            (третє fn)
+            (третє функція-значення)
             (зв'язати-аргументи-з-лямбда-параметрами
-              (друге fn)
-              args
+              (друге функція-значення)
+              аргументи
               (оновити-спільний-кадр-замикання
-                (my-fourth fn)
-                caller-env))))
+                (my-fourth функція-значення)
+                оточення-виклику))))
          ((атом? ())
-          (власний-результат-невдача (my-arity-error (друге fn) args)))))
-      ((це-рекурсивне-замикання? fn)
+          (власний-результат-невдача (my-arity-error (друге функція-значення) аргументи)))))
+      ((це-рекурсивне-замикання? функція-значення)
        (за-умовою
-         ((арність-відповідає-аргументам? (третє fn) args)
+         ((арність-відповідає-аргументам? (третє функція-значення) аргументи)
           (нехай ((captured
                   (оновити-спільний-кадр-замикання
-                    (my-fifth fn)
-                    caller-env)))
+                    (my-fifth функція-значення)
+                    оточення-виклику)))
             (нехай ((self-env
-                    (сполучити (сполучити (друге fn) fn)
+                    (сполучити (сполучити (друге функція-значення) функція-значення)
                           captured)))
               (обчислити-послідовне-тіло-з-раннім-збоєм
-                (my-fourth fn)
+                (my-fourth функція-значення)
                 (зв'язати-аргументи-з-лямбда-параметрами
-                  (третє fn)
-                  args
+                  (третє функція-значення)
+                  аргументи
                   self-env)))))
          ((атом? ())
-          (власний-результат-невдача (my-arity-error (третє fn) args)))))
-      ((це-замикання-рекурсивної-групи? fn)
+          (власний-результат-невдача (my-arity-error (третє функція-значення) аргументи)))))
+      ((це-замикання-рекурсивної-групи? функція-значення)
        (за-умовою
-         ((арність-відповідає-аргументам? (третє fn) args)
+         ((арність-відповідає-аргументам? (третє функція-значення) аргументи)
           (нехай ((captured
                   (оновити-спільний-кадр-замикання
-                    (my-sixth fn)
-                    caller-env)))
+                    (my-sixth функція-значення)
+                    оточення-виклику)))
             (нехай ((group-env
-                    (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) captured)))
+                    (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth функція-значення) captured)))
               (обчислити-послідовне-тіло-з-раннім-збоєм
-                (my-fourth fn)
+                (my-fourth функція-значення)
                 (зв'язати-аргументи-з-лямбда-параметрами
-                  (третє fn)
-                  args
+                  (третє функція-значення)
+                  аргументи
                   group-env)))))
          ((атом? ())
-          (власний-результат-невдача (my-arity-error (третє fn) args)))))
-      ((my-macro? fn)
+          (власний-результат-невдача (my-arity-error (третє функція-значення) аргументи)))))
+      ((my-macro? функція-значення)
        (за-умовою
-         ((арність-відповідає-аргументам? (друге fn) args)
+         ((арність-відповідає-аргументам? (друге функція-значення) аргументи)
           (обчислити-послідовне-тіло-з-раннім-збоєм
-            (третє fn)
+            (третє функція-значення)
             (зв'язати-аргументи-з-лямбда-параметрами
-              (друге fn)
-              args
+              (друге функція-значення)
+              аргументи
               (оновити-спільний-кадр-замикання
-                (my-fourth fn)
-                caller-env))))
+                (my-fourth функція-значення)
+                оточення-виклику))))
          ((атом? ())
-          (власний-результат-невдача (my-arity-error (друге fn) args)))))
+          (власний-результат-невдача (my-arity-error (друге функція-значення) аргументи)))))
       ((атом? ())
-       (власний-результат-невдача (створити-структуровану-помилку (як-є not-callable) fn))))))
+       (власний-результат-невдача (створити-структуровану-помилку (як-є not-callable) функція-значення))))))
 
 (визначити my-apply
-  (функція (fn args . caller-env-rest)
-    (нехай ((caller-env
+  (функція (функція-значення аргументи . caller-env-rest)
+    (нехай ((оточення-виклику
             (за-умовою
               
               ((атом? caller-env-rest)  (як-є ()))
               ((атом? ()) (перше caller-env-rest)))))
-      (my-result-value (застосувати-функцію-з-наслідком fn args caller-env)))))
+      (my-result-value (застосувати-функцію-з-наслідком функція-значення аргументи оточення-виклику)))))
 
 ; Evaluate one ordinary application with explicit operator-first and
 ; left-to-right argument sequencing. Recursive evaluation stays inside the
 ; outcome channel until this application has produced a value or its first
 ; failure.
 (визначити my-eval-application-result
-  (функція (expr env-ref)
-    (нехай ((fn-result (обчислити-вираз-з-наслідком (перше expr) env-ref)))
+  (функція (вираз посилання-оточення)
+    (нехай ((fn-result (обчислити-вираз-з-наслідком (перше вираз) посилання-оточення)))
       (за-умовою
         ((це-результат-невдалого-обчислення? fn-result) fn-result)
         ((атом? ())
-         (нехай ((fn (my-result-value fn-result)))
+         (нехай ((функція-значення (my-result-value fn-result)))
            (за-умовою
-             ((my-macro? fn)
+             ((my-macro? функція-значення)
               (за-умовою
-                ((арність-відповідає-аргументам? (друге fn) (решта expr))
+                ((арність-відповідає-аргументам? (друге функція-значення) (решта вираз))
                  (нехай ((expansion-result
-                         (застосувати-функцію-з-наслідком fn (решта expr) env-ref)))
+                         (застосувати-функцію-з-наслідком функція-значення (решта вираз) посилання-оточення)))
                    (за-умовою
                      ((це-результат-невдалого-обчислення? expansion-result) expansion-result)
                      ((атом? ())
                       (обчислити-вираз-з-наслідком
                         (my-result-value expansion-result)
-                        env-ref)))))
+                        посилання-оточення)))))
                 ((атом? ())
                  (власний-результат-невдача
-                   (my-arity-error (друге fn) (решта expr))))))
+                   (my-arity-error (друге функція-значення) (решта вираз))))))
              ((атом? ())
               (нехай ((args-result
-                      (обчислити-аргументи-з-явним-успіхом-або-помилкою (решта expr) env-ref)))
+                      (обчислити-аргументи-з-явним-успіхом-або-помилкою (решта вираз) посилання-оточення)))
                 (за-умовою
                   ((це-результат-невдалого-обчислення? args-result) args-result)
                   ((атом? ())
                    (застосувати-функцію-з-наслідком
-                     fn
+                     функція-значення
                      (my-result-value args-result)
-                     env-ref))))))))))))
+                     посилання-оточення))))))))))))
 
 (визначити обчислити-вираз-з-наслідком
-  (функція (expr env-ref)
+  (функція (вираз посилання-оточення)
     (за-умовою
-      ((атом? expr)  (за-умовою
-         ((визначити-невирішене-ім'я-в-оточенні? expr env-ref)
+      ((атом? вираз)  (за-умовою
+         ((визначити-невирішене-ім'я-в-оточенні? вираз посилання-оточення)
           (власний-результат-невдача
-            (створити-структуровану-помилку (як-є unbound-symbol) expr)))
+            (створити-структуровану-помилку (як-є unbound-symbol) вираз)))
          ((атом? ())
-          (власний-результат-успіх (знайти-значення-імені-в-лексичному-середовищі expr env-ref)))))
-      ((хибне? (атом? (перше expr))) (за-умовою
-         ((my-canon-quote-name? (перше expr))
-          (власний-результат-успіх (друге expr)))
-         ((my-canon-cond-name? (перше expr))
-          (my-eval-cond-result (решта expr) env-ref))
-         ((my-lambda-name? (перше expr))
-          (нехай ((problem (перевірити-параметри-лямбди (друге expr))))
+          (власний-результат-успіх (знайти-значення-імені-в-лексичному-середовищі вираз посилання-оточення)))))
+      ((хибне? (атом? (перше вираз))) (за-умовою
+         ((my-canon-quote-name? (перше вираз))
+          (власний-результат-успіх (друге вираз)))
+         ((my-canon-cond-name? (перше вираз))
+          (my-eval-cond-result (решта вираз) посилання-оточення))
+         ((my-lambda-name? (перше вираз))
+          (нехай ((проблема (перевірити-параметри-лямбди (друге вираз))))
             (за-умовою
               
-              ((атом? problem)  (власний-результат-успіх
+              ((атом? проблема)  (власний-результат-успіх
                  (створити-лексичне-замикання-або-повернути-структуровану-помилку
-                   (друге expr)
-                   (решта (решта expr))
-                   env-ref)))
+                   (друге вираз)
+                   (решта (решта вираз))
+                   посилання-оточення)))
               ((атом? ())
                (власний-результат-невдача
-                 (my-lambda-invalid-form problem))))))
+                 (my-lambda-invalid-form проблема))))))
          ((атом? ())
-          (my-eval-application-result expr env-ref))))
-      ((атом? (перше expr))  (за-умовою
-         ((my-canon-quote-name? (перше expr))
-          (власний-результат-успіх (друге expr)))
-         ((my-canon-cond-name? (перше expr))
-          (my-eval-cond-result (решта expr) env-ref))
-         ((my-lambda-name? (перше expr))
-          (нехай ((problem (перевірити-параметри-лямбди (друге expr))))
+          (my-eval-application-result вираз посилання-оточення))))
+      ((атом? (перше вираз))  (за-умовою
+         ((my-canon-quote-name? (перше вираз))
+          (власний-результат-успіх (друге вираз)))
+         ((my-canon-cond-name? (перше вираз))
+          (my-eval-cond-result (решта вираз) посилання-оточення))
+         ((my-lambda-name? (перше вираз))
+          (нехай ((проблема (перевірити-параметри-лямбди (друге вираз))))
             (за-умовою
               
-              ((атом? problem)  (власний-результат-успіх
+              ((атом? проблема)  (власний-результат-успіх
                  (створити-лексичне-замикання-або-повернути-структуровану-помилку
-                   (друге expr)
-                   (решта (решта expr))
-                   env-ref)))
+                   (друге вираз)
+                   (решта (решта вираз))
+                   посилання-оточення)))
               ((атом? ())
                (власний-результат-невдача
-                 (my-lambda-invalid-form problem))))))
+                 (my-lambda-invalid-form проблема))))))
          ((атом? ())
-          (my-eval-application-result expr env-ref))))
+          (my-eval-application-result вираз посилання-оточення))))
       ((атом? ())
-       (my-eval-application-result expr env-ref)))))
+       (my-eval-application-result вираз посилання-оточення)))))
 
 (визначити my-eval
-  (функція (expr env-ref)
-    (my-result-value (обчислити-вираз-з-наслідком expr env-ref))))
+  (функція (вираз посилання-оточення)
+    (my-result-value (обчислити-вираз-з-наслідком вираз посилання-оточення))))
 
 ; Top-level sequencing. `def` and `defmacro` return `(new-env . value)` so
 ; the environment can be threaded explicitly to the next form. Under
@@ -949,266 +949,266 @@
 ;
 ; Contract 6 rejects Canon definition names before value construction.
 (визначити обчислити-форму-та-оновити-оточення
-  (функція (form env-ref)
+  (функція (форма посилання-оточення)
     (за-умовою
-      ((атом? form)  (сполучити env-ref (my-eval form env-ref)))
-      ((my-definition-name? (перше form))
+      ((атом? форма)  (сполучити посилання-оточення (my-eval форма посилання-оточення)))
+      ((my-definition-name? (перше форма))
        (за-умовою
-         ((my-canon-name? (друге form))
-          (сполучити env-ref (my-canon-binding-error (друге form))))
+         ((my-canon-name? (друге форма))
+          (сполучити посилання-оточення (my-canon-binding-error (друге форма))))
          ((атом? ())
-          (нехай ((value-form (третє form)))
+          (нехай ((value-form (третє форма)))
             (за-умовою
               ((перевірити-форму-лямбда? value-form)
-               (нехай ((problem (перевірити-параметри-лямбди (друге value-form))))
+               (нехай ((проблема (перевірити-параметри-лямбди (друге value-form))))
                  (за-умовою
                    
-                   ((атом? problem)  (нехай ((value
+                   ((атом? проблема)  (нехай ((значення-виразу
                             (список (як-є recursive-closure)
-                                  (друге form)
+                                  (друге форма)
                                   (друге value-form)
                                   (решта (решта value-form))
-                                  env-ref)))
+                                  посилання-оточення)))
                       (сполучити
-                        (додати-визначення-до-оточення (друге form) value env-ref)
-                        value)))
-                   ((атом? ()) (сполучити env-ref (my-lambda-invalid-form problem))))))
+                        (додати-визначення-до-оточення (друге форма) значення-виразу посилання-оточення)
+                        значення-виразу)))
+                   ((атом? ()) (сполучити посилання-оточення (my-lambda-invalid-form проблема))))))
               ((атом? ())
-               (нехай ((value (my-eval value-form env-ref)))
+               (нехай ((значення-виразу (my-eval value-form посилання-оточення)))
                  (сполучити
-                   (додати-визначення-до-оточення (друге form) value env-ref)
-                   value))))))))
-      ((my-defmacro-name? (перше form))
+                   (додати-визначення-до-оточення (друге форма) значення-виразу посилання-оточення)
+                   значення-виразу))))))))
+      ((my-defmacro-name? (перше форма))
        (за-умовою
-         ((my-canon-name? (друге form))
-          (сполучити env-ref (my-canon-binding-error (друге form))))
+         ((my-canon-name? (друге форма))
+          (сполучити посилання-оточення (my-canon-binding-error (друге форма))))
          ((атом? ())
           (нехай ((macro-val
                   (список (як-є macro)
-                        (третє form)
-                        (решта (решта (решта form)))
-                        env-ref)))
+                        (третє форма)
+                        (решта (решта (решта форма)))
+                        посилання-оточення)))
             (сполучити
-              (додати-визначення-до-оточення (друге form) macro-val env-ref)
+              (додати-визначення-до-оточення (друге форма) macro-val посилання-оточення)
               macro-val)))))
-      ((атом? ()) (сполучити env-ref (my-eval form env-ref))))))
+      ((атом? ()) (сполучити посилання-оточення (my-eval форма посилання-оточення))))))
 
 ; Dependency analysis for top-level lambda definitions stays in Lisp data.
 ; A graph entry is `(name dependencies)`, where dependencies are only free
 ; references to names from the same contiguous lambda-definition block.
 (визначити my-params-bind-name?
-  (функція (name params)
+  (функція (імя-символу параметри)
     (за-умовою
       
-      ((атом? params)  (за-умовою
-         ((тотожне? params (як-є ())) ні)
-         ((тотожне? params name) так)
+      ((атом? параметри)  (за-умовою
+         ((тотожне? параметри (як-є ())) ні)
+         ((тотожне? параметри імя-символу) так)
          (так ні)))
-      ((тотожне? (перше params) name) так)
-      ((атом? ()) (ім'я-зв'язане-формальними-параметрами? name (решта params))))))
+      ((тотожне? (перше параметри) імя-символу) так)
+      ((атом? ()) (ім'я-зв'язане-формальними-параметрами? імя-символу (решта параметри))))))
 
 (визначити my-forms-reference-name?
-  (функція (forms name)
+  (функція (форми імя-символу)
     (за-умовою
       
-      ((атом? forms) ні)
-      ((вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? (перше forms) name) так)
-      ((атом? ()) (my-forms-reference-name? (решта forms) name)))))
+      ((атом? форми) ні)
+      ((вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? (перше форми) імя-символу) так)
+      ((атом? ()) (my-forms-reference-name? (решта форми) імя-символу)))))
 
 (визначити my-form-references-name?
-  (функція (form name)
+  (функція (форма імя-символу)
     (за-умовою
       
-      ((атом? form)  (за-умовою
-         ((символ? form) (тотожне? form name))
+      ((атом? форма)  (за-умовою
+         ((символ? форма) (тотожне? форма імя-символу))
          (так ні)))
-      ((хибне? (атом? (перше form))) (за-умовою
+      ((хибне? (атом? (перше форма))) (за-умовою
          ; Quoted data is not a lexical dependency.
-         ((my-canon-quote-name? (перше form)) ні)
+         ((my-canon-quote-name? (перше форма)) ні)
          ; A nested lambda can shadow a candidate top-level name.
-         ((my-lambda-name? (перше form))
+         ((my-lambda-name? (перше форма))
           (за-умовою
-            ((ім'я-зв'язане-формальними-параметрами? name (друге form)) ні)
-            ((атом? ()) (my-forms-reference-name? (решта (решта form)) name))))
-         ((атом? ()) (my-forms-reference-name? form name))))
-      ((атом? (перше form))  (за-умовою
+            ((ім'я-зв'язане-формальними-параметрами? імя-символу (друге форма)) ні)
+            ((атом? ()) (my-forms-reference-name? (решта (решта форма)) імя-символу))))
+         ((атом? ()) (my-forms-reference-name? форма імя-символу))))
+      ((атом? (перше форма))  (за-умовою
          ; Quoted data is not a lexical dependency.
-         ((my-canon-quote-name? (перше form)) ні)
+         ((my-canon-quote-name? (перше форма)) ні)
          ; A nested lambda can shadow a candidate top-level name.
-         ((my-lambda-name? (перше form))
+         ((my-lambda-name? (перше форма))
           (за-умовою
-            ((ім'я-зв'язане-формальними-параметрами? name (друге form)) ні)
-            ((атом? ()) (my-forms-reference-name? (решта (решта form)) name))))
-         ((атом? ()) (my-forms-reference-name? form name))))
-      ((атом? ()) (my-forms-reference-name? form name)))))
+            ((ім'я-зв'язане-формальними-параметрами? імя-символу (друге форма)) ні)
+            ((атом? ()) (my-forms-reference-name? (решта (решта форма)) імя-символу))))
+         ((атом? ()) (my-forms-reference-name? форма імя-символу))))
+      ((атом? ()) (my-forms-reference-name? форма імя-символу)))))
 
 (визначити my-lambda-def-references-name?
-  (функція (form name)
-    (нехай ((lambda-form (третє form)))
+  (функція (форма імя-символу)
+    (нехай ((lambda-form (третє форма)))
       (за-умовою
-        ((ім'я-зв'язане-формальними-параметрами? name (друге lambda-form)) ні)
-        ((атом? ()) (my-forms-reference-name? (решта (решта lambda-form)) name))))))
+        ((ім'я-зв'язане-формальними-параметрами? імя-символу (друге lambda-form)) ні)
+        ((атом? ()) (my-forms-reference-name? (решта (решта lambda-form)) імя-символу))))))
 
 (визначити my-lambda-def-names
-  (функція (forms)
+  (функція (форми)
     (за-умовою
       
-      ((атом? forms)  (як-є ()))
-      ((атом? ()) (сполучити (друге (перше forms))
-               (my-lambda-def-names (решта forms)))))))
+      ((атом? форми)  (як-є ()))
+      ((атом? ()) (сполучити (друге (перше форми))
+               (my-lambda-def-names (решта форми)))))))
 
 (визначити my-def-dependencies
-  (функція (form candidates)
+  (функція (форма кандидати)
     (за-умовою
       
-      ((атом? candidates)  (як-є ()))
-      ((визначення-посилається-на-ім'я? form (перше candidates))
-       (сполучити (перше candidates)
-             (залежності-визначення-серед-кандидатів form (решта candidates))))
-      ((атом? ()) (залежності-визначення-серед-кандидатів form (решта candidates))))))
+      ((атом? кандидати)  (як-є ()))
+      ((визначення-посилається-на-ім'я? форма (перше кандидати))
+       (сполучити (перше кандидати)
+             (залежності-визначення-серед-кандидатів форма (решта кандидати))))
+      ((атом? ()) (залежності-визначення-серед-кандидатів форма (решта кандидати))))))
 
 (визначити my-build-dependency-graph-with-names
-  (функція (forms names)
+  (функція (форми імена)
     (за-умовою
       
-      ((атом? forms)  (як-є ()))
+      ((атом? форми)  (як-є ()))
       ((атом? ())
        (сполучити
          (список
-           (друге (перше forms))
-           (залежності-визначення-серед-кандидатів (перше forms) names))
-         (my-build-dependency-graph-with-names (решта forms) names))))))
+           (друге (перше форми))
+           (залежності-визначення-серед-кандидатів (перше форми) імена))
+         (my-build-dependency-graph-with-names (решта форми) імена))))))
 
 (визначити побудувати-граф-залежностей-визначень
-  (функція (forms)
-    (нехай ((names (my-lambda-def-names forms)))
-      (my-build-dependency-graph-with-names forms names))))
+  (функція (форми)
+    (нехай ((імена (my-lambda-def-names форми)))
+      (my-build-dependency-graph-with-names форми імена))))
 
 (визначити my-graph-dependencies
-  (функція (name graph)
+  (функція (імя-символу граф)
     (за-умовою
       
-      ((атом? graph)  (як-є ()))
-      ((тотожне? name (перше (перше graph))) (друге (перше graph)))
-      ((атом? ()) (my-graph-dependencies name (решта graph))))))
+      ((атом? граф)  (як-є ()))
+      ((тотожне? імя-символу (перше (перше граф))) (друге (перше граф)))
+      ((атом? ()) (my-graph-dependencies імя-символу (решта граф))))))
 
 (визначити my-graph-dependencies-reach?
-  (функція (dependencies target graph visited)
+  (функція (залежності ціль-операції граф відвідані)
     (за-умовою
       
-      ((атом? dependencies) ні)
-      ((тотожне? (перше dependencies) target) так)
-      ((my-symbol-member? (перше dependencies) visited)
+      ((атом? залежності) ні)
+      ((тотожне? (перше залежності) ціль-операції) так)
+      ((my-symbol-member? (перше залежності) відвідані)
        (my-graph-dependencies-reach?
-         (решта dependencies) target graph visited))
+         (решта залежності) ціль-операції граф відвідані))
       ((вузол-графа-досяжний?
-         (перше dependencies)
-         target
-         graph
-         (сполучити (перше dependencies) visited))
+         (перше залежності)
+         ціль-операції
+         граф
+         (сполучити (перше залежності) відвідані))
        так)
       ((атом? ())
        (my-graph-dependencies-reach?
-         (решта dependencies) target graph visited)))))
+         (решта залежності) ціль-операції граф відвідані)))))
 
 (визначити my-graph-reaches?
-  (функція (from target graph visited)
+  (функція (from ціль-операції граф відвідані)
     (my-graph-dependencies-reach?
-      (my-graph-dependencies from graph)
-      target
-      graph
-      (сполучити from visited))))
+      (my-graph-dependencies from граф)
+      ціль-операції
+      граф
+      (сполучити from відвідані))))
 
 ; The SCC containing `name` is the set of block names mutually reachable
 ; with it. `name` itself is always retained so an acyclic node is a singleton
 ; component; only components with 2+ members use recursive-group-closure.
 (визначити my-scc-names
-  (функція (name candidates graph)
+  (функція (імя-символу кандидати граф)
     (за-умовою
       
-      ((атом? candidates)  (як-є ()))
-      ((тотожне? name (перше candidates))
-       (сполучити (перше candidates)
-             (імена-сильно-зв'язаної-компоненти name (решта candidates) graph)))
-      ((вузол-графа-досяжний? name (перше candidates) graph (як-є ()))
+      ((атом? кандидати)  (як-є ()))
+      ((тотожне? імя-символу (перше кандидати))
+       (сполучити (перше кандидати)
+             (імена-сильно-зв'язаної-компоненти імя-символу (решта кандидати) граф)))
+      ((вузол-графа-досяжний? імя-символу (перше кандидати) граф (як-є ()))
        (за-умовою
-         ((вузол-графа-досяжний? (перше candidates) name graph (як-є ()))
-          (сполучити (перше candidates)
-                (імена-сильно-зв'язаної-компоненти name (решта candidates) graph)))
-         ((атом? ()) (імена-сильно-зв'язаної-компоненти name (решта candidates) graph))))
-      ((атом? ()) (імена-сильно-зв'язаної-компоненти name (решта candidates) graph)))))
+         ((вузол-графа-досяжний? (перше кандидати) імя-символу граф (як-є ()))
+          (сполучити (перше кандидати)
+                (імена-сильно-зв'язаної-компоненти імя-символу (решта кандидати) граф)))
+         ((атом? ()) (імена-сильно-зв'язаної-компоненти імя-символу (решта кандидати) граф))))
+      ((атом? ()) (імена-сильно-зв'язаної-компоненти імя-символу (решта кандидати) граф)))))
 
 (визначити my-select-defs-by-names
-  (функція (forms names)
+  (функція (форми імена)
     (за-умовою
       
-      ((атом? forms)  (як-є ()))
-      ((my-symbol-member? (друге (перше forms)) names)
-       (сполучити (перше forms)
-             (відібрати-визначення-іменованої-групи (решта forms) names)))
-      ((атом? ()) (відібрати-визначення-іменованої-групи (решта forms) names)))))
+      ((атом? форми)  (як-є ()))
+      ((my-symbol-member? (друге (перше форми)) імена)
+       (сполучити (перше форми)
+             (відібрати-визначення-іменованої-групи (решта форми) імена)))
+      ((атом? ()) (відібрати-визначення-іменованої-групи (решта форми) імена)))))
 
 (визначити my-remove-defs-by-names
-  (функція (forms names)
+  (функція (форми імена)
     (за-умовою
       
-      ((атом? forms)  (як-є ()))
-      ((my-symbol-member? (друге (перше forms)) names)
-       (вилучити-з-блоку-визначення-заданих-імен (решта forms) names))
+      ((атом? форми)  (як-є ()))
+      ((my-symbol-member? (друге (перше форми)) імена)
+       (вилучити-з-блоку-визначення-заданих-імен (решта форми) імена))
       ((атом? ())
-       (сполучити (перше forms)
-             (вилучити-з-блоку-визначення-заданих-імен (решта forms) names))))))
+       (сполучити (перше форми)
+             (вилучити-з-блоку-визначення-заданих-імен (решта форми) імена))))))
 
 (визначити my-last-lambda-def-name
-  (функція (forms)
+  (функція (форми)
     (за-умовою
-      ((хибне? (атом? (решта forms))) (друге (перше forms)))
-      ((атом? (решта forms))  (друге (перше forms)))
-      ((атом? ()) (my-last-lambda-def-name (решта forms))))))
+      ((хибне? (атом? (решта форми))) (друге (перше форми)))
+      ((атом? (решта форми))  (друге (перше форми)))
+      ((атом? ()) (my-last-lambda-def-name (решта форми))))))
 
 (визначити my-eval-lambda-components
-  (функція (forms graph env-ref final-name)
+  (функція (форми граф посилання-оточення остаточне-імя)
     (за-умовою
       
-      ((атом? forms)  (сполучити env-ref (знайти-значення-імені-в-лексичному-середовищі final-name env-ref)))
+      ((атом? форми)  (сполучити посилання-оточення (знайти-значення-імені-в-лексичному-середовищі остаточне-імя посилання-оточення)))
       ((атом? ())
-       (нехай ((name (друге (перше forms))))
+       (нехай ((імя-символу (друге (перше форми))))
          (нехай ((component-names
                  (імена-сильно-зв'язаної-компоненти
-                   name
-                   (my-lambda-def-names forms)
-                   graph)))
+                   імя-символу
+                   (my-lambda-def-names форми)
+                   граф)))
            (за-умовою
              ; A singleton stays on the ordinary top-level path. That path
              ; already gives self-recursive definitions a finite
              ; recursive-closure without falsely inventing a group.
-             ((хибне? (атом? (решта component-names))) (нехай ((result (обчислити-форму-та-оновити-оточення (перше forms) env-ref)))
+             ((хибне? (атом? (решта component-names))) (нехай ((результат-виразу (обчислити-форму-та-оновити-оточення (перше форми) посилання-оточення)))
                 (my-eval-lambda-components
-                  (решта forms)
-                  graph
-                  (перше result)
-                  final-name)))
-             ((атом? (решта component-names))  (нехай ((result (обчислити-форму-та-оновити-оточення (перше forms) env-ref)))
+                  (решта форми)
+                  граф
+                  (перше результат-виразу)
+                  остаточне-імя)))
+             ((атом? (решта component-names))  (нехай ((результат-виразу (обчислити-форму-та-оновити-оточення (перше форми) посилання-оточення)))
                 (my-eval-lambda-components
-                  (решта forms)
-                  graph
-                  (перше result)
-                  final-name)))
+                  (решта форми)
+                  граф
+                  (перше результат-виразу)
+                  остаточне-імя)))
              ((атом? ())
               (нехай ((component
-                      (відібрати-визначення-іменованої-групи forms component-names)))
-                (нехай ((group-env (встановити-взаєморекурсивні-замикання component env-ref)))
+                      (відібрати-визначення-іменованої-групи форми component-names)))
+                (нехай ((group-env (встановити-взаєморекурсивні-замикання component посилання-оточення)))
                   (my-eval-lambda-components
-                    (вилучити-з-блоку-визначення-заданих-імен forms component-names)
-                    graph
+                    (вилучити-з-блоку-визначення-заданих-імен форми component-names)
+                    граф
                     group-env
-                    final-name)))))))))))
+                    остаточне-імя)))))))))))
 
 (визначити обчислити-блок-взаємних-визначень
-  (функція (forms env-ref)
-    (нехай ((graph (побудувати-граф-залежностей-визначень forms))
-          (final-name (my-last-lambda-def-name forms)))
-      (my-eval-lambda-components forms graph env-ref final-name))))
+  (функція (форми посилання-оточення)
+    (нехай ((граф (побудувати-граф-залежностей-визначень форми))
+          (остаточне-імя (my-last-lambda-def-name форми)))
+      (my-eval-lambda-components форми граф посилання-оточення остаточне-імя))))
 
 ; `my-eval-program` validates each contiguous top-level non-Canon
 ; lambda-definition block, builds its explicit dependency graph, and gives
@@ -1222,18 +1222,18 @@
 ; no-op program and preserves the supplied environment exactly, so TASK-001's
 ; empty-program witness is unchanged.
 (визначити my-eval-program
-  (функція (forms env-ref)
+  (функція (форми посилання-оточення)
     (за-умовою
-      ((атом? forms)  (сполучити env-ref (як-є ())))
+      ((атом? форми)  (сполучити посилання-оточення (як-є ())))
       ((атом? ())
-       (нехай ((program-env (my-ensure-shared-frame env-ref)))
+       (нехай ((program-env (my-ensure-shared-frame посилання-оточення)))
          (за-умовою
-           ((визначення-лямбди-на-верхньому-рівні? (перше forms))
-            (нехай ((block (my-take-lambda-def-group forms)))
-              (нехай ((problem (my-lambda-def-group-error block)))
+           ((визначення-лямбди-на-верхньому-рівні? (перше форми))
+            (нехай ((block (my-take-lambda-def-group форми)))
+              (нехай ((проблема (my-lambda-def-group-error block)))
                 (за-умовою
                   
-                  ((атом? problem)  (нехай ((rest (my-drop-lambda-def-group forms)))
+                  ((атом? проблема)  (нехай ((rest (my-drop-lambda-def-group форми)))
                      (нехай ((block-result
                              (обчислити-блок-взаємних-визначень block program-env)))
                        (за-умовою
@@ -1246,16 +1246,16 @@
                   ((атом? ())
                    (сполучити
                      program-env
-                     (my-lambda-invalid-form problem)))))))
+                     (my-lambda-invalid-form проблема)))))))
            ((атом? ())
-            (нехай ((result (обчислити-форму-та-оновити-оточення (перше forms) program-env)))
+            (нехай ((результат-виразу (обчислити-форму-та-оновити-оточення (перше форми) program-env)))
               (за-умовою
                 
-                ((атом? (решта forms))  result)
+                ((атом? (решта форми))  результат-виразу)
                 ((атом? ())
                  (обчислити-послідовність-форм
-                   (решта forms)
-                   (перше result))))))))))))
+                   (решта форми)
+                   (перше результат-виразу))))))))))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити зв'язати-аргументи-з-лямбда-параметрами bind-params)
