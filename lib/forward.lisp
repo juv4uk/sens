@@ -67,7 +67,7 @@
 (визначити ствердити-факт!
   (make-macro
     (функція (факт)
-      (список (як-є def) (як-є *working-memory*) (список (як-є сполучити) факт (як-є *working-memory*))))))
+      (список (як-є визначити) (як-є *working-memory*) (список (як-є сполучити) факт (як-є *working-memory*))))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in
@@ -238,7 +238,7 @@
 (визначити ствердити-факти!
   (make-macro
     (функція (факти)
-      (список (як-є def) (як-є *working-memory*) (список (як-є додати-нові) факти (як-є *working-memory*))))))
+      (список (як-є визначити) (як-є *working-memory*) (список (як-є додати-нові) факти (як-є *working-memory*))))))
 
 ; Step 5a: plain `retract-fact` — removes one matching fact (compared via
 ; `equal?`, same as everywhere else facts are compared) from a fact list.
@@ -281,7 +281,7 @@
 (визначити retract-fact!
   (make-macro
     (функція (fact)
-      (список (як-є def) (як-є *working-memory*) (список (як-є retract-fact) fact (як-є *working-memory*))))))
+      (список (як-є визначити) (як-є *working-memory*) (список (як-є retract-fact) fact (як-є *working-memory*))))))
 
 ; Step 5b: a real (if minimal) truth maintenance system. A *justified fact*
 ; is `(fact . supports)`: `supports` is the list of facts a rule consumed to
@@ -417,12 +417,12 @@
 (визначити assert-fact-tms!
   (make-macro
     (функція (fact)
-      (список (як-є def) (як-є *justified-memory*) (список (як-є додати-нові-обґрунтований) (список (як-є list) (список (як-є axiom) fact)) (як-є *justified-memory*))))))
+      (список (як-є визначити) (як-є *justified-memory*) (список (як-є додати-нові-обґрунтований) (список (як-є list) (список (як-є axiom) fact)) (як-є *justified-memory*))))))
 
 (визначити run-tms!
   (make-macro
     (функція (rules)
-      (список (як-є def) (як-є *justified-memory*) (список (як-є run-tms) rules (як-є *justified-memory*))))))
+      (список (як-є визначити) (як-є *justified-memory*) (список (як-є run-tms) rules (як-є *justified-memory*))))))
 
 (визначити remove-justified
   (функція (fact entries)
@@ -457,7 +457,7 @@
 (визначити retract-fact-tms!
   (make-macro
     (функція (fact)
-      (список (як-є def) (як-є *justified-memory*) (список (як-є відкликати-факт-система-істини) fact (як-є *justified-memory*))))))
+      (список (як-є визначити) (як-є *justified-memory*) (список (як-є відкликати-факт-система-істини) fact (як-є *justified-memory*))))))
 
 ; Step 5c: multiple justifications per fact — the limitation Step 5b
 ; documented and deliberately left open. An entry is now `(fact
@@ -592,12 +592,12 @@
 (визначити assert-fact-jtms!
   (make-macro
     (функція (fact)
-      (список (як-є def) (як-є *jtms-memory*) (список (як-є додати-обґрунтування) fact (список (як-є quote) (як-є ())) (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є додати-обґрунтування) fact (список (як-є quote) (як-є ())) (як-є *jtms-memory*))))))
 
 (визначити run-jtms!
   (make-macro
     (функція (rules)
-      (список (як-є def) (як-є *jtms-memory*) (список (як-є run-jtms) rules (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є run-jtms) rules (як-є *jtms-memory*))))))
 
 ; Step 14: JTMS grows a multi-condition twin, the same way Step 6 grew
 ; `fire-rule-multi`/`run-multi` alongside the Step 1-5 single-condition
@@ -746,7 +746,7 @@
 (визначити run-jtms-multi!
   (make-macro
     (функція (rules)
-      (список (як-є def) (як-є *jtms-memory*) (список (як-є run-jtms-multi) rules (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є run-jtms-multi) rules (як-є *jtms-memory*))))))
 
 (визначити prune-justifications
   (функція (fact justifications)
@@ -807,7 +807,7 @@
 (визначити retract-fact-jtms!
   (make-macro
     (функція (fact)
-      (список (як-є def) (як-є *jtms-memory*) (список (як-є відкликати-факт-система-обґрунтувань) fact (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є відкликати-факт-система-обґрунтувань) fact (як-є *jtms-memory*))))))
 
 ; Step 6: a shared rule language with `lib/reason.lisp`. Steps 1-5c used a
 ; forward-only `(pattern template)` shape, matched against exactly one
