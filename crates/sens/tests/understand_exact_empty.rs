@@ -29,7 +29,7 @@ fn run(session: &mut Session, source: &str) -> String {
 #[test]
 fn empty_word_lists_never_evaluate_car() {
     let mut session = loaded();
-    for name in ["strip-article", "understand", "understand-query"] {
+    for name in ["прибрати-артикль", "розібрати", "розібрати-запит"] {
         let program = format!("({name} (001 ()))");
         assert_eq!(run(&mut session, &program), "()", "{name}");
     }
@@ -39,11 +39,11 @@ fn empty_word_lists_never_evaluate_car() {
 fn ordinary_nonempty_words_preserve_exact_advice_taker_laws() {
     let mut session = loaded();
     for (program, expected) in [
-        ("(strip-article (001 (a mars)))", "(mars)"),
-        ("(strip-article (001 (an mars)))", "(mars)"),
-        ("(strip-article (001 (mars)))", "(mars)"),
-        ("(understand (001 (mars orbits sun)))", "((orbits mars sun))"),
-        ("(understand-query (001 (is mars a planet)))", "(planet mars)"),
+        ("(прибрати-артикль (001 (a mars)))", "(mars)"),
+        ("(прибрати-артикль (001 (an mars)))", "(mars)"),
+        ("(прибрати-артикль (001 (mars)))", "(mars)"),
+        ("(розібрати (001 (mars orbits sun)))", "((orbits mars sun))"),
+        ("(розібрати-запит (001 (is mars a planet)))", "(planet mars)"),
     ] {
         assert_eq!(run(&mut session, program), expected, "{program}");
     }

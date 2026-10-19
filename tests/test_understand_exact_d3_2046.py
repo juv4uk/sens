@@ -97,7 +97,27 @@ CURRENT_HEADS = {
     "решта-решти": "0111", "друге": "1001",
     "список": "1110", "третє": "10011", "четверте": "100111",
 }
-SOURCE_ALIASES = {
+LOCAL_HELPERS = {
+    "прибрати-артикль": "strip-article",
+    "побудувати-факт-є": "understand-is",
+    "побудувати-факт-відношення": "understand-relation",
+    "побудувати-універсальне-правило": "understand-universal",
+    "розібрати-контрольоване-твердження": "understand",
+    "побудувати-запит-є": "understand-query-is",
+    "побудувати-запит-відношення": "understand-query-relation",
+    "розібрати-контрольований-запит": "understand-query",
+}
+LOCAL_FORMALS = {
+    "слова": "words",
+    "підмет": "subject",
+    "після-є": "after-is",
+    "клас-підмета": "subject-class",
+    "властивість": "property",
+    "гілки": "clauses",
+    "після": "after",
+}
+LOCAL_NAME_HISTORY = {**LOCAL_HELPERS, **LOCAL_FORMALS}
+RESIDENT_HISTORY = {
     "розібрати-є": "understand-is",
     "розібрати-відношення": "understand-relation",
     "розібрати-загальний": "understand-universal",
@@ -105,6 +125,16 @@ SOURCE_ALIASES = {
     "розібрати-запит-є": "understand-query-is",
     "розібрати-запит-відношення": "understand-query-relation",
     "розібрати-запит": "understand-query",
+}
+HISTORICAL_RESIDENT_HEADS = set(RESIDENT_HISTORY.values())
+SOURCE_ALIASES = {
+    "розібрати-є": "побудувати-факт-є",
+    "розібрати-відношення": "побудувати-факт-відношення",
+    "розібрати-загальний": "побудувати-універсальне-правило",
+    "розібрати": "розібрати-контрольоване-твердження",
+    "розібрати-запит-є": "побудувати-запит-є",
+    "розібрати-запит-відношення": "побудувати-запит-відношення",
+    "розібрати-запит": "розібрати-контрольований-запит",
 }
 
 
@@ -114,8 +144,8 @@ def normalize_current_source_forms(source_forms):
         raise AssertionError("8 чинних законів + 7 українських D9-аліасів очікуються")
     definitions = source_forms[:len(FROZEN)]
     aliases = source_forms[len(FROZEN):]
-    if {row[1] for row in definitions} != set(FROZEN):
-        raise AssertionError("втрачений чи дубльований основний закон")
+    if {row[1] for row in definitions} != set(LOCAL_HELPERS):
+        raise AssertionError("втрачене, дубльоване або неукраїнське локальне визначення")
     if any(not isinstance(row, list) or len(row) != 3
            or row[0] != "визначити" for row in aliases):
         raise AssertionError("неправильна форма D9-аліаса")
@@ -124,7 +154,9 @@ def normalize_current_source_forms(source_forms):
 
     def lower(node):
         if isinstance(node, str):
-            return {"так": "#d1:1", "ні": "#d1:0"}.get(node, node)
+            return {"так": "#d1:1", "ні": "#d1:0"}.get(
+                node, LOCAL_NAME_HISTORY.get(node, node)
+            )
         if not node:
             return []
         head = node[0]
@@ -133,11 +165,13 @@ def normalize_current_source_forms(source_forms):
             return ["001"] + deepcopy(node[1:])
         if isinstance(head, str) and head in CURRENT_HEADS:
             return [CURRENT_HEADS[head]] + [lower(x) for x in node[1:]]
-        # Ці D9 людські проєкції викликають вже визначені Lisp closures.
-        # Повертаємо ТІЛЬКИ виконавчі голови, не рядки/цитати/імена визначень.
-        if isinstance(head, str) and head in SOURCE_ALIASES:
-            return [SOURCE_ALIASES[head]] + [lower(x) for x in node[1:]]
-        if isinstance(head, str) and head in SOURCE_ALIASES.values():
+        # Поточні D9-імена та україномовні помічники інвертуються
+        # лише в копії для звірки історичного AST.
+        if isinstance(head, str) and head in RESIDENT_HISTORY:
+            return [RESIDENT_HISTORY[head]] + [lower(x) for x in node[1:]]
+        if isinstance(head, str) and head in LOCAL_HELPERS:
+            return [LOCAL_HELPERS[head]] + [lower(x) for x in node[1:]]
+        if isinstance(head, str) and head in HISTORICAL_RESIDENT_HEADS:
             raise AssertionError("застаріла латинська виклична голова: " + head)
         if isinstance(head, str) and re.fullmatch(r"[01]{3,6}", head):
             raise AssertionError("старий виконавчий бітовий голов лишився: " + head)
@@ -291,7 +325,7 @@ class UnderstandExactD3Witness(unittest.TestCase):
         mutant = deepcopy(self.source_forms)
         # Навіть одна зворотна латинська голова порушує міграційний контракт.
         for form in mutant[:8]:
-            if form[1] == "understand":
+            if form[1] == "розібрати-контрольоване-твердження":
                 form[2][2][2][1][0] = "understand-universal"
                 break
         with self.assertRaisesRegex(AssertionError, "застаріла латинська"):
@@ -310,6 +344,15 @@ class UnderstandExactD3Witness(unittest.TestCase):
         bad_legacy[0][0] = "0011"
         with self.assertRaisesRegex(AssertionError, "старий виконавчий"):
             normalize_current_source_forms(bad_legacy)
+
+    def test_all_local_helpers_and_formals_use_full_ukr_names(self):
+        definitions = self.source_forms[:len(FROZEN)]
+        self.assertEqual({form[1] for form in definitions}, set(LOCAL_HELPERS))
+        self.assertTrue(all(form[2][1] == ["слова"] for form in definitions))
+        self.assertEqual(
+            {tuple(form[1:]) for form in self.source_forms[len(FROZEN):]},
+            set(SOURCE_ALIASES.items()),
+        )
 
     def test_all_eight_functions_preserve_original_laws(self):
         verify_unchanged_laws(self.forms)

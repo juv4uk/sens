@@ -84,7 +84,7 @@
 
 ### understand.lisp (8)
 
-`strip-article`, `understand`, `understand-is`, `understand-query`, `understand-query-is`, `understand-query-relation`, `understand-relation`, `understand-universal`
+`прибрати-артикль`, `розібрати-контрольоване-твердження`, `побудувати-факт-є`, `розібрати-контрольований-запит`, `побудувати-запит-є`, `побудувати-запит-відношення`, `побудувати-факт-відношення`, `побудувати-універсальне-правило`
 
 ### unify.lisp (15)
 

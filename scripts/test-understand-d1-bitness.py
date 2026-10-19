@@ -5,7 +5,7 @@ Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/understand.lisp has no bare host truthiness (t / T / NIL)
   2. Every one of 3 unconditional COND branches uses exact D1:1 ‘так’
-  3. Key surface present (understand / understand-query / strip-article)
+  3. Key surface present (розібрати / розібрати-запит / прибрати-артикль)
   4. Pairs with narrate (structure<->text bridge)
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
@@ -26,14 +26,14 @@ ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
 D1_TRUE = re.compile(r"(?m)^\s*\(так(?=\s|\))")
 REQUIRED = (
-    "strip-article",
-    "understand-is",
-    "understand-relation",
-    "understand-universal",
-    "understand",
-    "understand-query",
-    "understand-query-is",
-    "understand-query-relation",
+    "прибрати-артикль",
+    "побудувати-факт-є",
+    "побудувати-факт-відношення",
+    "побудувати-універсальне-правило",
+    "розібрати-контрольоване-твердження",
+    "розібрати-контрольований-запит",
+    "побудувати-запит-є",
+    "побудувати-запит-відношення",
 )
 
 
