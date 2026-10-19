@@ -156,7 +156,6 @@
   (функція (елементи-масиву)
     (strcat "[" (json-encode-array-items елементи-масиву "") "]")))
 
-(визначити json-encode кодувати-значення-формат-обміну-даними)
 
 ; ---------------------------------------------------------------------------
 ; Message / tool-call accessors and JSON -> internal conversion
@@ -253,7 +252,7 @@
 
 (визначити build-request-body
   (функція (model messages)
-    (json-encode
+    (кодувати-значення-формат-обміну-даними
      (список (сполучити "model" model)
            (сполучити "messages" (відобразити encode-message messages))
            (сполучити "tools" (список (bash-tool-schema)))))))
