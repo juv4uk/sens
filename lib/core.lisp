@@ -548,12 +548,12 @@
        (як-є (class-membership string nonmember)))
       ((атом? value) 
        (за-умовою
-         ((тотожне? (рядок-перший (write-to-string value))
-              (рядок-перший (write-to-string "")))
+         ((тотожне? (рядок-перший (значення-у-текст value))
+              (рядок-перший (значення-у-текст "")))
           
           (як-є (class-membership string member)))
-         ((тотожне? (рядок-перший (write-to-string value))
-              (рядок-перший (write-to-string "")))
+         ((тотожне? (рядок-перший (значення-у-текст value))
+              (рядок-перший (значення-у-текст "")))
           
           (як-є (class-membership string nonmember)))))
       ((атом? value) 
@@ -630,7 +630,7 @@
     (за-умовою
       ((атом? value)
        (за-умовою
-         ((тотожне? value (string->symbol (write-to-string value)))
+         ((тотожне? value (текст-у-символ (значення-у-текст value)))
           (атом? (як-є ())))
          ((атом? ()) ні)))
       ((атом? ()) ні))))
@@ -797,8 +797,8 @@
       ((тотожне? n 0)  acc)
       ((тотожне? n 0) 
        (number->string-onto
-         (частка n #d10)
-         (рядок-додати (відобразити-доки-істина (модульна-остача n #d10)) acc))))))
+         (частка n 10)
+         (рядок-додати (відобразити-доки-істина (модульна-остача n 10)) acc))))))
 
 (визначити number->string
   (функція (n)
@@ -811,7 +811,7 @@
     ; its misleading error surfaced as an apparent memory corruption.
     ; Delegation, not re-implementation: write-to-string is already the
     ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
-    (write-to-string n)))
+    (значення-у-текст n)))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
 ; without deep nesting (PLAN.md item / clean-code policy).
