@@ -13,8 +13,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = {
-    "lib/narrate.lisp": ("54008fcb00d661c8", 25),
-    "lib/machine/block-exact.lisp": ("400d82e03cba2c17", 6),
+    "lib/narrate.lisp": ("ce86818639d2bb14", 26),
+    "lib/machine/block-exact.lisp": ("f7db9b992da3ef23", 6),
 }
 # Історичні виклики на рядках із D9 без доказу callable не переписуються
 # за схожими бітами. Залишкові D4 супутники цих самих рядків також
@@ -249,8 +249,8 @@ class UkrainianNarrateBlockProjectionTests(unittest.TestCase):
         self.assertEqual(source.count("(визначити "), 6)
         self.assertEqual(source.count("(функція "), 6)
         self.assertIn("(як-є ())", source)
-        self.assertIn("(список form)", source)
-        self.assertIn("(приєднати block (список form))", source)
+        self.assertIn("(список форма)", source)
+        self.assertIn("(приєднати блок (список форма))", source)
 
 
 if __name__ == "__main__":
