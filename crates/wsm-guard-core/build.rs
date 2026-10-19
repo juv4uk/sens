@@ -31,11 +31,14 @@ fn main() {
         .unwrap_or_else(|error| {
             panic!(
                 concat!(
-                    "Guard exact-source transport requires pinned Zig {pinned}; cannot execute ",
-                    "{compiler_label}: {error}. On Windows run ",
+                    "Guard exact-source transport requires pinned Zig {0}; cannot execute ",
+                    "{1}: {2}. On Windows run ",
                     "`.\\scripts\\with-pinned-zig.ps1 cargo build` from the repository root, ",
                     "or set ZIG to the pinned zig.exe."
-                )
+                ),
+                pinned,
+                compiler_label,
+                error
             )
         });
     assert!(probe.status.success(), "Guard Zig version probe failed");
