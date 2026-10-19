@@ -195,6 +195,7 @@ pub mod semantic_registry_export {
     }
 }
 pub mod syntax;
+pub mod source_projection;
 mod text7;
 mod text7_projection;
 mod value;
