@@ -133,7 +133,7 @@ PINNED = {
   },
   "lib/bridge/prolog-to-datalog.lisp": {
     "sha": "501173f6423c20ed8b089e81979ab6f1346dcdb5",
-    "changed": 35,
+    "changed": 38,
     "edits": [
       [
         591,
@@ -459,6 +459,32 @@ def invert(text, edits, authority):
         text = text[:offset] + old + text[offset + len(new):]
     return text
 
+BRIDGE_HEAD_PROJECTIONS = (
+    (
+      "(знайти-за-ключем (як-є source-ref) (решта observation))",
+      "(11100 (001 source-ref) (011 observation))",
+    ),
+    (
+      "(знайти-за-ключем (як-є variable) (решта observation))",
+      "(11100 (001 variable) (011 observation))",
+    ),
+    (
+      "(знайти-за-ключем (як-є values) (решта observation))",
+      "(11100 (001 values) (011 observation))",
+    ),
+)
+
+def restore_bridge_source_layer(text):
+    for projected, encoded in BRIDGE_HEAD_PROJECTIONS:
+        assert text.count(projected) == 1, f'Очікувалася рівно одна проєкція {projected}'
+        text = text.replace(projected, encoded, 1)
+    return text
+
+def restore_source(path, text, witness, authority):
+    if path == 'lib/bridge/prolog-to-datalog.lisp':
+        text = restore_bridge_source_layer(text)
+    return invert(text, witness['edits'], authority)
+
 def blob_sha(text):
     raw = text.encode('utf-8')
     return hashlib.sha1(b'blob ' + str(len(raw)).encode('ascii') + b'\0' + raw).hexdigest()
@@ -475,14 +501,14 @@ class ExactDomainMigrationTests(unittest.TestCase):
         for path, witness in PINNED.items():
             with self.subTest(path=path):
                 src = (ROOT / path).read_text(encoding='utf-8')
-                restored = invert(src, witness['edits'], self.authority)
+                restored = restore_source(path, src, witness, self.authority)
                 self.assertEqual(blob_sha(restored), witness['sha'])
 
     def test_no_new_encoded_literals_on_changed_lines(self):
         for path, witness in PINNED.items():
             with self.subTest(path=path):
                 src = (ROOT / path).read_text(encoding='utf-8')
-                old = invert(src, witness['edits'], self.authority)
+                old = restore_source(path, src, witness, self.authority)
                 previous, current = old.splitlines(), src.splitlines()
                 self.assertEqual(len(previous), len(current))
                 changed = [i + 1 for i, (x, y) in enumerate(zip(previous, current)) if x != y]
@@ -513,7 +539,12 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 with self.subTest(path=path, name=name):
                     self.assertIn('(визначити ' + name, src)
         bridge = (ROOT / 'lib/bridge/prolog-to-datalog.lisp').read_text(encoding='utf-8')
-        self.assertIn('(11100 (001 source-ref)', bridge)
+        for field in ('source-ref', 'variable', 'values'):
+            with self.subTest(field=field):
+                projected = f'(знайти-за-ключем (як-є {field}) (решта observation))'
+                encoded = f'(11100 (001 {field}) (011 observation))'
+                self.assertIn(projected, bridge)
+                self.assertNotIn(encoded, bridge)
 
     def test_incorrect_projection_is_not_accepted(self):
         path = 'lib/unify-observe.lisp'

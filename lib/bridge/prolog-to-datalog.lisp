@@ -57,6 +57,6 @@
                        (перетворити-значення-пролог-на-факти-даталог
                          (перше (решта variable-row))
                          (решта values-row)))))))))))
-     (11100 (001 source-ref) (011 observation))
-     (11100 (001 variable) (011 observation))
-     (11100 (001 values) (011 observation)))))
+     (знайти-за-ключем (як-є source-ref) (решта observation))
+     (знайти-за-ключем (як-є variable) (решта observation))
+     (знайти-за-ключем (як-є values) (решта observation)))))
