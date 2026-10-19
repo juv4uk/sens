@@ -42,16 +42,16 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertNotIn("(визначити четверте fourth)", core)
 
         with self.subTest(file="lib/core4.lisp"):
-            # Core4 intentionally preserves two different laws:
-            # legacy pair constructs a two-element list; D8 пара zips sequences.
+            # Допоміжний двоелементний список і D8 «пара» — різні закони.
             self.assertIn(
-                "(визначити pair\\n  (функція (лівий-аргумент правий-аргумент)",
+                "(визначити створити-список-із-двох-значень\\n  (функція (лівий-аргумент правий-аргумент)",
                 core4,
             )
             self.assertIn(
                 "(визначити пара\\n  (функція (ліві праві)\\n    (спарувати-послідовності ліві праві)))",
                 core4,
             )
+            self.assertNotIn("(визначити pair\\n  (функція", core4)
             self.assertNotIn("(визначити pair пара)", core4)
             self.assertIn("(визначити second друге)", core4)
             self.assertIn("(визначити third третє)", core4)
