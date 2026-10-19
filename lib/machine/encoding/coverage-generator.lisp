@@ -5,8 +5,8 @@
 ; The old Rust 32-row classification is migration evidence only.
 
 (визначити encoder-coverage-str+
-  (функція args
-    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
+  (функція аргументи
+    (згорнути (функція (накопичене фрагмент) (рядок-додати накопичене фрагмент)) "" аргументи)))
 
 ; Coverage authority uses exact D1 PredicateBit for every control decision.
 ; Deep structural equality is Lisp-owned here and is built only from current
