@@ -415,9 +415,8 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
     ROOT = Path(__file__).resolve().parents[1]
     SOURCES = {
         "lib/world.lisp": {
-            # Exact world source after undoing only these peer call-head edits;
-            # later primary D9 definition names intentionally remain intact.
-            "blob": "39e4726fea5b1c870f4d7c55bcfdd765f144c3cd",
+            # Layered inverse: primary D9 projection first, then these peer call heads.
+            "blob": "4bf077ae35d7d61b96df9244b3334946180ecb94",
             "edits": [
                 ("opposite-knowledge-head", "отримати-протилежну-голову-твердження-знання", 1),
                 ("reason-in-world", "міркувати-у-світ", 1),
@@ -432,6 +431,8 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
             "edits": [("advice-batch-conflict", "виявити-суперечність-у-групі-порад", 1)],
         },
     }
+    WORLD_PRIMARY_PARENT_BLOB = "82c875ca5a7a8a425b7b83e6db0c697214debe56"
+
     DOMAIN_PEERS = (
         (9, "111101001", "reason-in-world", "міркувати-у-світ"),
         (9, "111000110", "advice-decision-in-world", "порада-рішення-у-світ"),
@@ -440,6 +441,58 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
         (10, "0010001011", "advice-batch-conflict", "виявити-суперечність-у-групі-порад"),
         (10, "0010100100", "world-journal-prefix", "отримати-префікс-журналу-світу"),
     )
+
+    @classmethod
+    def _reverse_world_primary_projection(cls, source):
+        """Recover the exact parent blob before layered D9 peer-call inversion."""
+        edits = (
+            ("(визначити створити-світ\n", "(визначити make-world\n"),
+            ("(визначити порожній-світ\n", "(визначити empty-world\n"),
+            ("(визначити світ-батько (функція (world) (друге world)))",
+             "(визначити world-parent (функція (world) (друге world)))"),
+            ("(визначити світ-журнал (функція (world) (третє world)))",
+             "(визначити world-journal (функція (world) (третє world)))"),
+            ("(визначити світ-метадані (функція (world) (третє (решта world))))",
+             "(визначити world-metadata (функція (world) (третє (решта world))))"),
+            ("(визначити світ-запис\n", "(визначити world-record\n"),
+            ("(визначити світ-повідомити\n", "(визначити world-tell\n"),
+            ("(визначити світ-відкликати\n", "(визначити world-retract\n"),
+            ("(визначити знання-вміст-адреса\n", "(визначити knowledge-content-address\n"),
+            ("(визначити світ-адреса-вміст\n", "(визначити world-address-content\n"),
+            ("(визначити світ-вміст-адреса\n", "(визначити world-content-address\n"),
+            ("(визначити knowledge-content-address знання-вміст-адреса)",
+             "(визначити знання-вміст-адреса knowledge-content-address)"),
+            ("(визначити make-world створити-світ)",
+             "(визначити створити-світ make-world)"),
+            ("(визначити world-address-content світ-адреса-вміст)",
+             "(визначити світ-адреса-вміст world-address-content)"),
+            ("(визначити world-journal світ-журнал)",
+             "(визначити світ-журнал world-journal)"),
+            ("(визначити world-metadata світ-метадані)",
+             "(визначити світ-метадані world-metadata)"),
+            ("(визначити world-parent світ-батько)",
+             "(визначити світ-батько world-parent)"),
+            ("(визначити world-record світ-запис)",
+             "(визначити світ-запис world-record)"),
+            ("(визначити world-tell світ-повідомити)",
+             "(визначити світ-повідомити world-tell)"),
+            ("; opt-in повна укр-поверхня: первинні D9-визначення в цьому блоці названі укр.",
+             "; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації."),
+        )
+        for current, previous in edits:
+            if source.count(current) != 1:
+                raise AssertionError(
+                    "world primary inverse input missing/ambiguous: " + current
+                )
+            source = source.replace(current, previous, 1)
+        aliases = (
+            "\n(визначити empty-world порожній-світ)\n"
+            "(визначити world-retract світ-відкликати)\n"
+            "(визначити world-content-address світ-вміст-адреса)\n"
+        )
+        if source.count(aliases) != 1:
+            raise AssertionError("world primary inverse alias tail missing/ambiguous")
+        return source.replace(aliases, "\n", 1)
 
     @staticmethod
     def _rewrite_call_heads(source, edits):
@@ -615,6 +668,13 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
                 source = (self.ROOT / path).read_text(encoding="utf-8")
                 inverse = [(ukrainian, english, count)
                            for english, ukrainian, count in evidence["edits"]]
+                if path == "lib/world.lisp":
+                    source = self._reverse_world_primary_projection(source)
+                    self.assertEqual(
+                        self._git_blob_sha(source),
+                        self.WORLD_PRIMARY_PARENT_BLOB,
+                        "world: inverse of primary D9 migration must recover exact parent blob",
+                    )
                 if path == "lib/knowledge.lisp":
                     source = self._reverse_knowledge_alpha(source)
                     self.assertEqual(
