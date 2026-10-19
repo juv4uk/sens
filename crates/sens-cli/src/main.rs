@@ -221,6 +221,12 @@ fn contract_source_zig_only() -> Result<String, String> {
 /// Byte-only carrier for SENS REPL core (lib/repl-core.lisp). Zig owns transport.
 
 
+/// Explicit REPL-only switches must not be confused with the implicit
+/// Ukrainian REPL default: file execution never requested a surface.
+fn explicit_repl_surface_flag(args: &[String]) -> bool {
+    args.iter().skip(1).any(|arg| arg == "--surface" || arg.starts_with("--surface="))
+}
+
 fn main() {
     // Physical .sens is the exact binary entrypoint and needs no legacy
     // bootstrap or ambient host capabilities. Reject extra flags instead of
@@ -620,8 +626,9 @@ fn main() {
             }
         }
 
-        // `--surface` належить інтерактивному REPL, а не semantics/file execution.
-        if repl_surface != repl::ReplSurface::Core || sens_loop {
+        // Only an EXPLICIT REPL option is invalid in file mode. The
+        // UkrainianFull default is a REPL preference, not a file-mode flag.
+        if explicit_repl_surface_flag(&raw_args) || sens_loop {
             eprintln!("sens: --surface / --sens-loop are available only when starting the interactive REPL");
             process::exit(2);
         }
@@ -689,6 +696,22 @@ fn main() {
 #[cfg(test)]
 mod core_profile_bootstrap_tests {
     use super::*;
+
+    #[test]
+    fn implicit_ukrainian_repl_default_does_not_reject_file_mode() {
+        let file_args = vec!["sens".to_owned(), "програма.lisp".to_owned()];
+        let (_, default_surface) = extract_repl_surface(file_args.clone())
+            .expect("implicit surface default");
+        assert_eq!(default_surface, repl::ReplSurface::UkrainianFull);
+        assert!(!explicit_repl_surface_flag(&file_args),
+            "default REPL preference is not a user-requested file flag");
+
+        let explicit = vec!["sens".to_owned(), "--surface=укр".to_owned(), "програма.lisp".to_owned()];
+        assert!(explicit_repl_surface_flag(&explicit));
+        assert!(explicit_repl_surface_flag(&[
+            "sens".to_owned(), "--surface".to_owned(), "укр".to_owned(), "програма.lisp".to_owned()
+        ]));
+    }
 
     #[test]
     fn default_repl_surface_is_full_ukr_and_compact_remains_explicit() {
