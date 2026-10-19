@@ -193,6 +193,32 @@ class FullUkrFileProgressTests(TempTree):
         self.assertEqual(audit["full_ukr_files"], 1)
 
 
+class CatalogueD11NonExecutableTests(TempTree):
+    def test_ratified_d6_call_is_not_ambiguous_with_d11_candidate(self):
+        d = self.tree({
+            "lib/domains/d6.lisp":
+                "(000000 (ук довжина) (укр довжина) (san ()) (en length) (LISP LENGTH) (sym ()))\n",
+            "lib/domains/d11.lisp":
+                "(00000000000 (ук довжина) (укр довжина) (san ()) (en length) (LISP LENGTH) (sym ()))\n",
+            "lib/довжина.lisp": "(довжина (як-є (а б)))\n",
+        })
+        status = mod.audit_executable_ukr_files(d)
+        self.assertEqual(status["eligible_files"], 1)
+        self.assertEqual(status["full_ukr_files"], 1)
+
+    def test_d11_full_spelling_cannot_make_d6_compact_name_full(self):
+        d = self.tree({
+            "lib/domains/d6.lisp":
+                "(000000 (ук довжина) (укр розмір-списку) (san ()) (en length) (LISP LENGTH) (sym ()))\n",
+            "lib/domains/d11.lisp":
+                "(00000000000 (ук довжина) (укр довжина) (san ()) (en length) (LISP LENGTH) (sym ()))\n",
+            "lib/довжина.lisp": "(довжина (як-є (а б)))\n",
+        })
+        status = mod.audit_executable_ukr_files(d)
+        self.assertEqual(status["full_ukr_files"], 0)
+        self.assertEqual(status["pending_files"][0]["reason"], "compact-instead-of-full-ukr")
+
+
 class ExecutableUkrProgressTests(TempTree):
     def test_active_file_percentage_counts_call_heads_not_one_cyrillic_symbol(self):
         root = self.tree({
