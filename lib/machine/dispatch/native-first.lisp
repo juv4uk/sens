@@ -27,22 +27,22 @@
       ((атом? (решта cons-expression))
        (native-first-fallback expression))
       (так
-       (native-first-plan-car-cons-u64-rest-left
+       (нативний-план-пари-ліва-частина
          expression
          (решта cons-expression))))))
 
-(визначити native-first-plan-car-cons-u64-rest-left
+(визначити нативний-план-пари-ліва-частина
   (функція (expression cons-arguments)
     (за-умовою
       ((атом? (решта cons-arguments))
        (native-first-fallback expression))
       (так
-       (native-first-plan-car-cons-u64-rest-right
+       (нативний-план-пари-права-частина
          expression
          cons-arguments
          (решта cons-arguments))))))
 
-(визначити native-first-plan-car-cons-u64-rest-right
+(визначити нативний-план-пари-права-частина
   (функція (expression cons-arguments rest-after-left)
     (за-умовою
       ((порожній? (решта rest-after-left))
@@ -127,7 +127,7 @@
 
 ; Доменною шириною та формою керує SENS. Пошкоджені списки
 ; відхиляються до D3 CAR/CDR/EQ: жодного часткового збігу бітів.
-(визначити native-first-domain-key3-shape?
+(визначити нативна-форма-трибітного-ключа?
   (функція (форма-доменного-ключа біт-перший-очікуваний біт-другий-очікуваний біт-третій-очікуваний)
     (за-умовою
       ((атом? форма-доменного-ключа) ні)
@@ -135,13 +135,13 @@
       ((порожній? (решта (решта форма-доменного-ключа)))
        (за-умовою
          ((тотожне? (перше форма-доменного-ключа) 3)
-          (native-first-domain-key3-bits?
+          (нативні-біти-трибітного-ключа?
             (перше (решта форма-доменного-ключа))
             біт-перший-очікуваний біт-другий-очікуваний біт-третій-очікуваний))
          (так ні)))
       (так ні))))
 
-(визначити native-first-domain-key3-bits?
+(визначити нативні-біти-трибітного-ключа?
   (функція (біти-ключа-д3 біт-перший-очікуваний біт-другий-очікуваний біт-третій-очікуваний)
     (за-умовою
       ((атом? біти-ключа-д3) ні)
@@ -159,7 +159,7 @@
 
 (визначити native-first-domain-d3-car?
   (функція (shape-or-empty value)
-    (native-first-domain-key3-shape?
+    (нативна-форма-трибітного-ключа?
       (shape-or-empty value)
       так
       ні
@@ -167,7 +167,7 @@
 
 (визначити native-first-domain-d3-cons?
   (функція (shape-or-empty value)
-    (native-first-domain-key3-shape?
+    (нативна-форма-трибітного-ключа?
       (shape-or-empty value)
       так
       так
