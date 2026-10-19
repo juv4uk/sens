@@ -117,44 +117,44 @@
      (fpga absent))))
 
 (визначити machine-capability-find-domain-row
-  (функція (width bits rows)
+  (функція (ширина-домену біти-домену рядки-доменів)
     (за-умовою
-      ((атом? rows) ())
-      ((тотожне? width (перше (перше rows)))
+      ((атом? рядки-доменів) ())
+      ((тотожне? ширина-домену (перше (перше рядки-доменів)))
        (за-умовою
-         ((тотожне? bits (перше (решта (перше rows)))) (перше rows))
+         ((тотожне? біти-домену (перше (решта (перше рядки-доменів)))) (перше рядки-доменів))
          (так
           (machine-capability-find-domain-row
-            width bits (решта rows)))))
+            ширина-домену біти-домену (решта рядки-доменів)))))
       (так
        (machine-capability-find-domain-row
-         width bits (решта rows))))))
+         ширина-домену біти-домену (решта рядки-доменів))))))
 
-; Current lookup: explicit width + packed-bits mechanism key only.
+; Current lookup: explicit ширина-домену + packed-bits mechanism key only.
 (визначити machine-capabilities-for-domain
-  (функція (width bits)
+  (функція (ширина-домену біти-домену)
     (за-умовою
       ((атом? (machine-capability-find-domain-row
-                width bits machine-capability-axis-v3)) ())
+                ширина-домену біти-домену machine-capability-axis-v3)) ())
       (так
        (перше (решта (решта
          (machine-capability-find-domain-row
-           width bits machine-capability-axis-v3))))))))
+           ширина-домену біти-домену machine-capability-axis-v3))))))))
 
 (визначити machine-capability-find-row
-  (функція (key rows)
+  (функція (ключ-можливості рядки-можливостей)
     (за-умовою
-      ((атом? rows) ())
-      ((тотожне? key (перше (перше rows))) (перше rows))
+      ((атом? рядки-можливостей) ())
+      ((тотожне? ключ-можливості (перше (перше рядки-можливостей))) (перше рядки-можливостей))
       (так
-       (machine-capability-find-row key (решта rows))))))
+       (machine-capability-find-row ключ-можливості (решта рядки-можливостей))))))
 
 (визначити machine-target-witness-status
-  (функція (target)
+  (функція (цільова-платформа)
     (за-умовою
       ((атом? (machine-capability-find-row
-                target machine-target-witness-status-v1)) (як-є absent))
+                цільова-платформа machine-target-witness-status-v1)) (як-є absent))
       (так
        (перше (решта
          (machine-capability-find-row
-           target machine-target-witness-status-v1)))))))
+           цільова-платформа machine-target-witness-status-v1)))))))
