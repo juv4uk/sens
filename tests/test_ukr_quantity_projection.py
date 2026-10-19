@@ -71,15 +71,16 @@ PUBLIC_PROJECTIONS = (
     ("scientific-constant->clauses", "науковий-константа-клаузи", "111100111"),
 )
 PUBLIC_ALIAS_BLOCK = (
-    "; Повні українські назви — первинні визначення за точними проєкціями D9.\\n"
-    "; Англійські назви — лише сумісні псевдоніми тих самих Lisp-замикань.\\n"
-    "; Ключі залишаються в lib/domains/d9.lisp; цей файл не вводить бінарних call-heads.\\n"
-    + "\\n".join(
+    "; Повні українські назви — первинні визначення за точними проєкціями D9.\n"
+    "; Англійські назви — лише сумісні псевдоніми тих самих Lisp-замикань.\n"
+    "; Ключі залишаються в lib/domains/d9.lisp; цей файл не вводить бінарних call-heads.\n"
+    + "\n".join(
         f"(визначити {english} {ukrainian})"
         for english, ukrainian, _bits in PUBLIC_PROJECTIONS
     )
 )
-PUBLIC_ALIASES = "\\n" + PUBLIC_ALIAS_BLOCK + "\\n"
+PUBLIC_ALIASES = "\n" + PUBLIC_ALIAS_BLOCK + "\n"
+
 
 def restore_local_helper_layer(source: str) -> str:
     """Точний обернений прохід проєкцій; читача чи обчислювача не запускає."""
@@ -118,6 +119,7 @@ def apply_local_helper_layer(source: str) -> str:
     if set(projected_public) != set(forward):
         raise AssertionError("не вдалося точно застосувати всі первинні назви Quantity")
     return body + PUBLIC_ALIASES + LOCAL_ALIASES
+
 
 
 def project_heads(text: str, mapping: dict[str, str]) -> tuple[str, dict[str, int]]:
@@ -216,77 +218,23 @@ def project_literals(text: str, mapping: dict[str, str]) -> tuple[str, dict[str,
 
 
 def project_public_names(text: str, mapping: dict[str, str]) -> tuple[str, dict[str, int]]:
-    """Project only callable heads and DEFINE targets; comments/data/strings copy verbatim."""
+    """Project callable heads plus DEFINE targets, copying comments and strings."""
+    projected, seen = project_heads(text, mapping)
     chunks: list[str] = []
-    seen: dict[str, int] = {}
-    i, n = 0, len(text)
-    while i < n:
-        ch = text[i]
-        if ch == ";":
-            j = text.find("\\n", i)
-            if j < 0:
-                j = n
-            chunks.append(text[i:j])
-            i = j
+    for line in projected.splitlines(keepends=True):
+        match = re.match(r"^(\s*\(визначити\s+)([^\s()]+)", line)
+        if match is None:
+            chunks.append(line)
             continue
-        if ch == '"':
-            j = i + 1
-            while j < n:
-                if text[j] == "\\\\":
-                    j += 2
-                elif text[j] == '"':
-                    j += 1
-                    break
-                else:
-                    j += 1
-            chunks.append(text[i:j])
-            i = j
-            continue
-        if ch != "(":
-            chunks.append(ch)
-            i += 1
-            continue
-
-        chunks.append(ch)
-        i += 1
-        j = i
-        while j < n and text[j].isspace():
-            j += 1
-        chunks.append(text[i:j])
-        i = j
-        if i >= n or text[i] in '();"' :
-            continue
-
-        k = i + 1
-        while k < n and not (text[k].isspace() or text[k] in '();"'):
-            k += 1
-        head = text[i:k]
-        mapped = mapping.get(head)
-        chunks.append(head if mapped is None else mapped)
-        if mapped is not None:
-            seen[head] = seen.get(head, 0) + 1
-        i = k
-
-        if head != "визначити":
-            continue
-
-        j = i
-        while j < n and text[j].isspace():
-            j += 1
-        chunks.append(text[i:j])
-        i = j
-        if i >= n or text[i] in '();"' :
-            continue
-        k = i + 1
-        while k < n and not (text[k].isspace() or text[k] in '();"'):
-            k += 1
-        name = text[i:k]
+        name = match.group(2)
         renamed = mapping.get(name)
-        chunks.append(name if renamed is None else renamed)
-        if renamed is not None:
-            seen[name] = seen.get(name, 0) + 1
-        i = k
+        if renamed is None:
+            chunks.append(line)
+            continue
+        chunks.append(line[:match.start(2)] + renamed + line[match.end(2):])
+        seen[name] = seen.get(name, 0) + 1
     return "".join(chunks), seen
+
 
 
 def git_blob(text: str) -> str:
@@ -314,7 +262,7 @@ class QuantityUkrProjection(unittest.TestCase):
 
     def test_public_quantity_names_match_ratified_d9_keys(self):
         source = self.source
-        d9 = read = (ROOT / "lib" / "domains" / "d9.lisp").read_text(encoding="utf-8")
+        d9 = (ROOT / "lib" / "domains" / "d9.lisp").read_text(encoding="utf-8")
         for english, ukrainian, bits in PUBLIC_PROJECTIONS:
             with self.subTest(english=english, bits=bits):
                 self.assertEqual(len(bits), 9, f"D9 key has wrong width: {bits}")
@@ -327,14 +275,15 @@ class QuantityUkrProjection(unittest.TestCase):
                 self.assertIn(f"(укр {ukrainian})", rows[0])
                 self.assertRegex(
                     source,
-                    rf"(?m)^\\(визначити\\s+{re.escape(ukrainian)}(?=\\s|\\))",
+                    rf"(?m)^\(визначити\s+{re.escape(ukrainian)}(?=\s|\))",
                 )
                 self.assertIn(f"(визначити {english} {ukrainian})", source)
                 self.assertNotRegex(
                     source,
-                    rf"(?m)^\\s*\\({bits}(?:\\s|\\))",
+                    rf"(?m)^\s*\({bits}(?:\s|\))",
                     "укр source must not make a D9 coordinate directly callable",
                 )
+
 
     def restore_previous(self):
         canonical_local = restore_local_helper_layer(self.source)
