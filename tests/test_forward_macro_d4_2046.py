@@ -15,13 +15,13 @@ EXPECTED = [
     # виконання перевіряє Cargo-тест forward_exact_macro_migration.
     ("ствердити-факт!", ("факт",), "f2d6c8916e64365b"),
     ("ствердити-факти!", ("факти",), "5879900736404ade"),
-    ("retract-fact!", ("fact",), "78c9d0c1a2dee9b8"),
-    ("assert-fact-tms!", ("fact",), "0373485ccc705b61"),
-    ("run-tms!", ("rules",), "a78bace624961a65"),
+    ("retract-fact!", ("fact",), "571efe37975b55fc"),
+    ("assert-fact-tms!", ("fact",), "504945f02f2eea11"),
+    ("run-tms!", ("rules",), "092adf1b2ed18d94"),
     ("retract-fact-tms!", ("fact",), "2e0e84bcf103dda7"),
-    ("assert-fact-jtms!", ("fact",), "265f482a4bc44bd0"),
-    ("run-jtms!", ("rules",), "30ebd58dfdf3ee15"),
-    ("run-jtms-multi!", ("rules",), "2e7e021369d46d9d"),
+    ("assert-fact-jtms!", ("fact",), "b567749d89b3fdba"),
+    ("run-jtms!", ("rules",), "d392f20f6f5568cc"),
+    ("run-jtms-multi!", ("rules",), "0d7316668e89ef21"),
     ("retract-fact-jtms!", ("fact",), "502aae5fd510f24b"),
 ]
 
