@@ -37,7 +37,7 @@
               (сполучити (як-є si)
                 (сполучити
                   (як-є (science-source/1 bipm-si-brochure-9 2019))
-                  (як-є ())))))))))
+                  (як-є ()))))))))))
 
 (визначити si:defining-cesium-frequency
   (як-є
