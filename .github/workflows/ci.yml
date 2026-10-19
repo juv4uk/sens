@@ -43,7 +43,7 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/install-zig
-        if: ${{ matrix.shard == 1 }}
+        if: ${{ matrix.shard == 1 || matrix.shard == 19 }}
 
       - name: Запустити неперетинний набір тестів
         shell: bash
