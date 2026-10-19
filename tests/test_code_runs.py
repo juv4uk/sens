@@ -778,6 +778,10 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         "compiler-d4-law-second-child": "компілятор-другий-дочірній-елемент-закону-д4",
         "compiler-role-from-d4-bootstrap-bits": "компілятор-роль-основи-д4-за-бітами",
         "compiler-role-from-d4-bootstrap": "компілятор-роль-основи-д4",
+        "compiler-cond-child-expressions": "компілятор-вирази-гілок-умови",
+        "compiler-reverse-onto": "компілятор-зворот-до",
+        "compiler-program-list-continue": "компілятор-продовжити-список-програми",
+        "compiler-program-list-acc": "компілятор-список-програми-з-накопичувачем",
     }
     LOCAL_FORMALS_UKR = {
         "compiler-authority-find": {
@@ -1082,6 +1086,19 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             },
             "компілятор-роль-основи-д4": {
                 "розкласти-ідентичність": "decompose", "закон-домену": "law",
+            },
+            "компілятор-вирази-гілок-умови": {"гілки-умов": "clauses"},
+            "компілятор-зворот-до": {"елементи": "items", "накопичувач": "accumulator"},
+            "компілятор-продовжити-список-програми": {
+                "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
+                "результат-вузла": "node-result", "решта-вузлів": "remaining",
+                "закон-д3": "d3-law", "закон-д4": "d4-law", "доказ-д3": "d3-proof",
+                "доказ-д4": "d4-proof", "накопичувач": "accumulator",
+            },
+            "компілятор-список-програми-з-накопичувачем": {
+                "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
+                "вузли": "nodes", "закон-д3": "d3-law", "закон-д4": "d4-law",
+                "доказ-д3": "d3-proof", "доказ-д4": "d4-proof", "накопичувач": "accumulator",
             },
             "compiler-lowering-role-from-l1-l5": {
                 "розкласти-ідентичність": "decompose", "закон-домену": "law",
