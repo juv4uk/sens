@@ -19,6 +19,10 @@ jobs:
   lisp-surface:
     name: Українська проєкція та заборона сирих літералів
     runs-on: ubuntu-24.04
+    # Попередні запуски займали GitHub-hosted слоти годинами; типовий зелений
+    # прогін триває близько двох хвилин. Не дозволяємо тихим зависанням
+    # вичерпати доступний пул і заблокувати наступні коміти.
+    timeout-minutes: 25
     steps:
       - name: Підтвердити виконання на GitHub-hosted, не на комп'ютері власника
         shell: bash
@@ -94,6 +98,9 @@ jobs:
 
       - name: Код запускається — entry-points, читач і кодек на реальних файлах
         if: ${{ always() }}
+        # Саме цей етап зависав у 20 одночасних виконаннях 19.10.2026.
+        # TIMEOUT означає несправність виконання тестів, не HOLD/FREEZE джерел.
+        timeout-minutes: 12
         run: |
           set -euo pipefail
           python3 -m unittest tests/test_capability_axis_ukr_projection.py -v
