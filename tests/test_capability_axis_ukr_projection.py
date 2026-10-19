@@ -42,14 +42,45 @@ def git_blob_sha(data: bytes) -> str:
     ).hexdigest()
 
 
+def restore_d1_truth_fallbacks(source: str) -> str:
+    """Reverse five exact last-branch changes for the historical blob witness only."""
+    edits = (
+        (
+            "         (так\n          (machine-capability-find-domain-row\n            width bits (решта rows)))))",
+            "         (#d1:1\n          (machine-capability-find-domain-row\n            width bits (решта rows)))))",
+        ),
+        (
+            "      (так\n       (machine-capability-find-domain-row\n         width bits (решта rows))))))",
+            "      (#d1:1\n       (machine-capability-find-domain-row\n         width bits (решта rows))))))",
+        ),
+        (
+            "      (так\n       (перше (решта (решта\n         (machine-capability-find-domain-row\n           width bits machine-capability-axis-v3))))))))",
+            "      (#d1:1\n       (перше (решта (решта\n         (machine-capability-find-domain-row\n           width bits machine-capability-axis-v3))))))))",
+        ),
+        (
+            "      (так\n       (machine-capability-find-row key (решта rows))))))",
+            "      (#d1:1\n       (machine-capability-find-row key (решта rows))))))",
+        ),
+        (
+            "      (так\n       (перше (решта\n         (machine-capability-find-row\n           target machine-target-witness-status-v1)))))))",
+            "      (#d1:1\n       (перше (решта\n         (machine-capability-find-row\n           target machine-target-witness-status-v1)))))))",
+        ),
+    )
+    for current, historical in edits:
+        count = source.count(current)
+        if count != 1:
+            raise AssertionError(
+                "кількість точних безумовних гілок для історичного обернення "
+                f"змінилася: очікувалося 1, знайдено {count}"
+            )
+        source = source.replace(current, historical, 1)
+    return source
+
+
 def restore_operator_heads(source: str) -> str:
-    # Незмінний pre-projection Git-свідок містить п'ять #d1:1.
-    # Поточна програма замінила їх на мовний доказ D1:YES через D3 ATOM.
-    # У зворотній проєкції відновлюємо ЛИШЕ ці п'ять місць,
-    # потім повертаємо первісні назви операторів до бітів.
-    derived = "((атом? (як-є ()))"
-    assert source.count(derived) == 5, "кількість замінених D1-істин змінилася"
-    before_d1_cutover = source.replace(derived, "(#d1:1")
+    # Спершу обертаємо п'ять точних D1 truth-branch змін лише в тимчасовому
+    # свідку; живе джерело не повертає #d1:1. Далі відновлюємо старі голови.
+    before_d1_cutover = restore_d1_truth_fallbacks(source)
     return HEAD_PATTERN.sub(lambda match: "(" + RESTORE[match.group(1)], before_d1_cutover)
 
 
@@ -86,9 +117,10 @@ class CapabilityAxisUkrProjectionTests(unittest.TestCase):
         source = SOURCE.read_text(encoding="utf-8")
         self.assertIsNone(RAW_PATTERN.search(source),
                           "no raw D1-D4 operation heads in this source")
+        self.assertNotIn("#d1:1", source, "live source must not return encoded D1:YES")
         for surface, count in (
-            ("визначити", 7), ("функція", 4), ("як-є", 9), ("за-умовою", 5),
-            ("атом?", 9), ("тотожне?", 3), ("перше", 10), ("решта", 7),
+            ("визначити", 7), ("функція", 4), ("як-є", 4), ("за-умовою", 5),
+            ("атом?", 4), ("тотожне?", 3), ("перше", 10), ("решта", 7),
         ):
             pattern = re.compile(r"[(]" + re.escape(surface) + r"(?=\s)")
             self.assertEqual(len(pattern.findall(source)), count, surface)
