@@ -1,2 +1,2 @@
-; Negative: LAST1 is defined for nonempty proper lists, not NIL.
+; Негативне свідчення: останній елемент існує лише у непорожньому правильному списку.
 (останній (як-є ()))
