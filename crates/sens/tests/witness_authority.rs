@@ -352,11 +352,6 @@ fn init_meta_session() -> Session {
     load_core_library(&mut session).expect("core library");
     load_meta_evaluator_library(&mut session).expect("meta evaluator");
     load_witness_library(&mut session);
-    eval_program(
-        include_str!("../../../lib/generated/meta-semantic-registry.lisp"),
-        &mut session,
-    )
-    .expect("generated semantic registry");
     eval_program("(def --witness-meta-env-- (quote ()))", &mut session)
         .expect("meta environment init");
     session
