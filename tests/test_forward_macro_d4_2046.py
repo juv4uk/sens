@@ -23,6 +23,8 @@ EXPECTED = [
     ("retract-fact-jtms!", ("fact",), "e1eced4762943cfd"),
 ]
 OLD_OTHER_FINGERPRINT = "9a9b6f936871476d"
+D10_UKR_HEAD = "підстановка-позначає-невдачу?"
+D10_EN_HEAD = "failed-subst?"
 TOKENS = re.compile(r'"(?:\\.|[^"\\])*"|;[^\n]*|[()]|[^\s();]+')
 MASK64 = (1 << 64) - 1
 
@@ -69,6 +71,19 @@ def fingerprint(form):
     return f"{value:016x}"
 
 
+def normalize_d10_projection(form):
+    """Reverse only the three D10 укр call heads for the frozen AST oracle."""
+    if not isinstance(form, list):
+        return 0
+    count = 0
+    if form and form[0] == D10_UKR_HEAD:
+        form[0] = D10_EN_HEAD
+        count += 1
+    for item in form:
+        count += normalize_d10_projection(item)
+    return count
+
+
 def validate_forward(forms):
     if len(forms) != 83:
         raise AssertionError("втрачена верхньорівнева форма")
@@ -103,8 +118,12 @@ def validate_forward(forms):
             other.append(form)
     if set(found) != set(expected):
         raise AssertionError("втрачено одне чи більше визначень")
-    if len(other) != 73 or fingerprint(other) != OLD_OTHER_FINGERPRINT:
-        raise AssertionError("змінено незаймані 73 форми")
+    normalized_other = deepcopy(other)
+    projected_heads = sum(normalize_d10_projection(form) for form in normalized_other)
+    if projected_heads != 3:
+        raise AssertionError("D10:1100011111 має рівно три голови проєкції укр")
+    if len(other) != 73 or fingerprint(normalized_other) != OLD_OTHER_FINGERPRINT:
+        raise AssertionError("змінено незаймані 73 форми поза точною D10-проєкцією")
     return found
 
 
@@ -217,6 +236,65 @@ class ForwardMacroD4Witness(unittest.TestCase):
                     break
         with self.assertRaisesRegex(AssertionError, "незаймані 73"):
             validate_forward(altered)
+
+
+class ForwardD10UkrCallsiteProjectionTests(unittest.TestCase):
+    """The D10 укр peer changes only names at three existing Lisp call sites."""
+
+    SOURCE = FORWARD
+    D10 = ROOT / "lib" / "domains" / "d10.lisp"
+    ORIGINAL_BLOB = "3557229662e39346935d646d87abe664d2ec19d8"
+    CALLS = (
+        (80, "1100011111", "failed-subst?", "підстановка-позначає-невдачу?"),
+        (673, "1100011111", "failed-subst?", "підстановка-позначає-невдачу?"),
+        (880, "1100011111", "failed-subst?", "підстановка-позначає-невдачу?"),
+    )
+
+    @staticmethod
+    def _blob_sha(source):
+        import hashlib
+        raw = source.encode("utf-8")
+        return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw).hexdigest()
+
+    @classmethod
+    def _restore_original(cls, source):
+        lines = source.splitlines(keepends=True)
+        for line_no, bits, en, ukr in cls.CALLS:
+            pattern = re.compile(r"\\(\\s*\\(\\s*" + re.escape(ukr) + r"(?=\\s|\\))")
+            index = line_no - 1
+            found = list(pattern.finditer(lines[index]))
+            if len(found) != 1:
+                raise AssertionError(
+                    f"CALLSITE_COUNT D10:{bits} {ukr} line={line_no} actual={len(found)}"
+                )
+            lines[index] = pattern.sub(
+                lambda match: match.group().replace(ukr, en), lines[index], count=1
+            )
+        return "".join(lines)
+
+    def test_exact_d10_ukr_peer_inverse_and_wrong_peer(self):
+        source = self.SOURCE.read_bytes().decode("utf-8")
+        table = self.D10.read_bytes().decode("utf-8").splitlines()
+        rows = [line for line in table if line.lstrip().startswith("(1100011111 ")]
+        self.assertEqual(len(rows), 1)
+        self.assertIn("(укр підстановка-позначає-невдачу?)", rows[0])
+        self.assertIn("(en failed-subst?)", rows[0])
+        self.assertIn("(LISP FAILED-SUBST?)", rows[0])
+
+        for line_no, bits, en, ukr in self.CALLS:
+            with self.subTest(line=line_no, bits=bits):
+                pattern = re.compile(r"\\(\\s*\\(\\s*" + re.escape(ukr) + r"(?=\\s|\\))")
+                self.assertEqual(len(list(pattern.finditer(source.splitlines()[line_no - 1]))), 1)
+
+        restored = self._restore_original(source)
+        self.assertEqual(self._blob_sha(restored), self.ORIGINAL_BLOB)
+
+        wrong = source.splitlines(keepends=True)
+        wrong[79] = wrong[79].replace(
+            "підстановка-позначає-невдачу?", "підстановка-невдала?", 1
+        )
+        with self.assertRaisesRegex(AssertionError, "CALLSITE_COUNT"):
+            self._restore_original("".join(wrong))
 
 
 if __name__ == "__main__":

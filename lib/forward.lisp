@@ -77,7 +77,7 @@
 (визначити fire-rule
   (функція (rule fact)
     ((функція (pattern template) ((функція (bindings) (за-умовою
-          ((failed-subst? bindings) (як-є no-match))
+          ((підстановка-позначає-невдачу? bindings) (як-є no-match))
           (так (застосувати-підстановка template bindings)))) (уніфікувати pattern fact (як-є ())))) (перше rule) (друге rule))))
 
 ; Step 2: apply one rule to every fact in a list, collecting the new facts
@@ -670,7 +670,7 @@
       
       ((атом? facts)  (як-є ()))
       (так ((функція (s) (за-умовою
-             ((failed-subst? s) (зіставити-звичайну-умову-з-фактами-система-обґрунтувань condition (решта facts) state))
+             ((підстановка-позначає-невдачу? s) (зіставити-звичайну-умову-з-фактами-система-обґрунтувань condition (решта facts) state))
              (так (сполучити (система-обґрунтувань-створити-стан s (сполучити (перше facts) (отримати-використані-факти-зі-стану-система-обґрунтувань state)))
                        (зіставити-звичайну-умову-з-фактами-система-обґрунтувань condition (решта facts) state))))) (уніфікувати condition (перше facts) (отримати-підстановку-зі-стану-система-обґрунтувань state)))))))
 
@@ -877,7 +877,7 @@
       
       ((атом? facts)  (як-є ()))
       (так ((функція (s) (за-умовою
-             ((failed-subst? s) (зіставити-умову-із-набором-фактів condition (решта facts) bindings))
+             ((підстановка-позначає-невдачу? s) (зіставити-умову-із-набором-фактів condition (решта facts) bindings))
              (так (сполучити s (зіставити-умову-із-набором-фактів condition (решта facts) bindings))))) (уніфікувати condition (перше facts) bindings))))))
 
 ; Step 7: negation as failure — `(not (pattern))` conditions. This is the
