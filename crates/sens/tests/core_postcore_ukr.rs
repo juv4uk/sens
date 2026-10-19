@@ -23,12 +23,12 @@ fn core_peer_lookup_returns_first_matching_group_or_empty() {
     let mut session = core_session();
     assert_eq!(
         execute(&mut session,
-            "(my-postcore-peer-group (як-є другий) (як-є ((перший альфа) (другий бета))))"),
+            "(знайти-групу-відповідників (як-є другий) (як-є ((перший альфа) (другий бета))))"),
         "(другий бета)"
     );
     assert_eq!(
         execute(&mut session,
-            "(my-postcore-peer-group (як-є невідомий) (як-є ((перший альфа) (другий бета))))"),
+            "(знайти-групу-відповідників (як-є невідомий) (як-є ((перший альфа) (другий бета))))"),
         "()"
     );
 }
@@ -54,7 +54,7 @@ fn core_missing_peers_skip_existing_and_retain_source_order() {
     let mut session = core_session();
     assert_eq!(
         execute(&mut session,
-            "(my-postcore-missing-peers (як-є джерело) (як-є (джерело перший другий третій)) (як-є ((\"перший\" привязка))))"),
+            "(знайти-відсутні-відповідники (як-є джерело) (як-є (джерело перший другий третій)) (як-є ((\"перший\" привязка))))"),
         "(другий третій)"
     );
 }
@@ -108,5 +108,24 @@ fn core_sublis_and_maplist_execute_in_sens_without_host_oracle() {
         execute(&mut session,
             "(відобразити-залишки (як-є (а б)) (функція (хвіст) (перше хвіст)))"),
         execute(&mut session, "(як-є (а б))")
+    );
+}
+
+#[test]
+fn core_subst_obeys_d5_atom_and_nested_pair_laws_in_real_sens() {
+    let mut session = core_session();
+    // Історична помилка викликала CAR/CDR на атомі. Перевіряємо обидва випадки.
+    assert_eq!(
+        execute(&mut session, "(замінити (як-є нове) (як-є старе) (як-є старе))"),
+        execute(&mut session, "(як-є нове)")
+    );
+    assert_eq!(
+        execute(&mut session, "(замінити (як-є нове) (як-є старе) (як-є інше))"),
+        execute(&mut session, "(як-є інше)")
+    );
+    assert_eq!(
+        execute(&mut session,
+            "(замінити (як-є нове) (як-є старе) (як-є (старе (пара старе) кінець)))"),
+        execute(&mut session, "(як-є (нове (пара нове) кінець))")
     );
 }
