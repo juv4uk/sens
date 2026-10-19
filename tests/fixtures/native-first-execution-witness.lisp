@@ -1,6 +1,6 @@
 ; #506 — native-first execution bridge witness.
-; This fixture proves route choice, CPU execution, ordinary evaluator fallback,
-; source parsing, and the non-masking rule after a native plan has been chosen.
+; Route choice, CPU execution, evaluator fallback, source parsing, non-masking.
+; Ukrainian projection: Sid8/Sens8 → D3/D4/D8.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
@@ -11,43 +11,40 @@
 (load "lib/machine/dispatch/native-first.lisp")
 (load "lib/machine/dispatch/native-first-execute.lisp")
 
-(0011 native-first-execution-witness-check
-  (0010 (actual expected)
-    (110
-      ((11110111 actual expected)
-       (1)
-       (001 pass))
-      ((11110111 actual expected)
-       (0)
-       (1110 (001 fail) actual expected)))))
+(визначити native-first-execution-witness-check
+  (функція (actual expected)
+    (за-умовою
+      ((однакові? actual expected) (як-є pass))
+      ((однакові? actual expected) (як-є ні)
+       (список (як-є fail) actual expected)))))
 
-(0011 native-first-execution-witness
-  (0010 ()
-    (1110
-      ; Supported bounded structural slice really reaches the CPU.
+(визначити native-first-execution-witness
+  (функція ()
+    (список
+      ; Supported bounded structural slice reaches the CPU.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (001 (car (cons 2 3))))
-        (001
+          (як-є (перше (сполучити 2 3))))
+        (як-є
           (execution-route native
             (status completed)
             (value 2))))
 
-      ; Unsupported ordinary Lisp is not an error: it stays evaluator-owned.
+      ; Unsupported ordinary Lisp stays evaluator-owned.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (001 (+ 2 3)))
-        (001
+          (як-є (+ 2 3)))
+        (як-є
           (execution-route evaluator
             (status completed)
             (value 5))))
 
-      ; Source text is parsed, then every top-level form is routed separately.
+      ; Source text is parsed; each top-level form is routed separately.
       (native-first-execution-witness-check
         (native-first-execute-source
           "(+ 1 2)
 (car (cons 7 9))")
-        (001
+        (як-є
           (source-execution
             ((execution-route evaluator
                (status completed)
@@ -57,14 +54,13 @@
                (value 7))))))
 
       ; Once a native plan exists, admission rejection stays visibly native.
-      ; The bridge must NOT hide this bug by evaluating (+ 40 2) instead.
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (001
+          (як-є
             (native-plan
               ((definitely-not-an-admitted-machine-form))
               0)))
-        (001
+        (як-є
           (execution-route native
             (status rejected)
             (detail
@@ -72,11 +68,11 @@
                 unadmitted-machine-form
                 (definitely-not-an-admitted-machine-form))))))
 
-      ; Malformed native plans also fail closed on the native route.
+      ; Malformed native plans fail closed on the native route.
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (001 (native-plan ((ret)))))
-        (001
+          (як-є (native-plan ((ret)))))
+        (як-є
           (execution-route native
             (status rejected)
             (detail
