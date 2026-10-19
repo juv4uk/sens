@@ -1141,7 +1141,9 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             },
         }
         for name, bindings in newer_formals.items():
-            inverse_helpers[name] = name
+            # Preserve an existing reverse mapping for a helper whose head is
+            # already projected; identity fallback is only for unchanged heads.
+            inverse_helpers.setdefault(name, name)
             inverse_formals[name] = bindings
 
         restored, counts, unclassified, forms = self._rewrite_heads(
