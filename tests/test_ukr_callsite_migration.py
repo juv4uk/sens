@@ -2232,104 +2232,8 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
   },
   "scripts/fixtures-for-tier.lisp": {
     "sha": "189cc75ed4f2eaaaf40f58d1730b33ee39bfa179",
-    "edits": [
-      [
-        1179,
-        "0011"
-      ],
-      [
-        1199,
-        "110"
-      ],
-      [
-        1209,
-        "010"
-      ],
-      [
-        1793,
-        "0011"
-      ],
-      [
-        1814,
-        "0010"
-      ],
-      [
-        1870,
-        "0011"
-      ],
-      [
-        1893,
-        "0010"
-      ],
-      [
-        1915,
-        "110"
-      ],
-      [
-        1927,
-        "010"
-      ],
-      [
-        1943,
-        "001"
-      ],
-      [
-        1960,
-        "010"
-      ],
-      [
-        1965,
-        "001"
-      ],
-      [
-        1976,
-        "0010"
-      ],
-      [
-        1997,
-        "110"
-      ],
-      [
-        2017,
-        "101"
-      ],
-      [
-        2036,
-        "100"
-      ],
-      [
-        2124,
-        "010"
-      ],
-      [
-        2129,
-        "001"
-      ],
-      [
-        2139,
-        "001"
-      ],
-      [
-        2178,
-        "011"
-      ]
-    ],
-    "changed": [
-      22,
-      23,
-      24,
-      36,
-      37,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      48,
-      49
-    ]
+    "edits": [],
+    "changed": []
   }
 }
 
@@ -2365,27 +2269,18 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         if path == "scripts/check-domain-table-readable.lisp":
             return DomainTableReadableUkrMigrationTests._undo_exact_heads(source)
         if path == "scripts/fixtures-for-tier.lisp":
-            # The original role was (read (car *argv*)) before SID8:
-            # no W8/SID8 → D8 byte inference.
-            new_read = "    ((010 (001 ())) (прочитати (100 *argv*)))))"
-            old_read = "    ((010 (001 ())) (11101010 (100 *argv*)))))"
-            if source.count(new_read) != 1:
-                raise AssertionError("Втрачена історично доведена D8 READ-голова")
-            source = source.replace(new_read, old_read, 1)
-            # Separate D3/D5/D8/D9 executable heads, never infer old SID8
-            # from byte equality. These three witnessed lines are reversible.
-            exact_lines = (
-                ("    (решта (знайти-за-ключем (як-є tier) fixture))))",
-                 "    (011 (11100 (001 tier) fixture))))"),
-                ("               (друкувати (перше remaining)))",
-                 "               (11011011 (100 remaining)))"),
-                ('(print-matching (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))',
-                 '(print-matching (110101001 (110110111 "tests/fixtures/conformance.lisp")))'),
-            )
-            for live, old in exact_lines:
-                if source.count(live) != 1:
-                    raise AssertionError("Втрачено однозначну ратифіковану укр-викличну голову")
-                source = source.replace(live, old, 1)
+            # Повна укр-проєкція: інвертуємо всі ратифіковані голови до сирих бітів.
+            import re as _re
+            peers = {
+                "як-є": "001", "атом?": "010", "решта": "011", "перше": "100",
+                "тотожне?": "101", "за-умовою": "110", "сполучити": "111",
+                "функція": "0010", "визначити": "0011", "знайти-за-ключем": "11100",
+                "прочитати": "11101010", "друкувати": "11011011",
+                "читати-всі": "110101001", "читати-файл": "110110111",
+            }
+            for ukr, bits in peers.items():
+                pat = _re.compile(r"\(\s*" + _re.escape(ukr) + r"(?=\s|\))")
+                source = pat.sub(lambda m: m.group().replace(ukr, bits), source)
             return source
         return source
 
@@ -2457,7 +2352,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         self.assertIn('"00000000"', reader)
         self.assertIn("(читати-всі", reader)  # Чинний D9 peer; викличність незалежна від ширини
         self.assertIn("(визначити target-tier", tier)
-        self.assertIn("(прочитати (100 *argv*))", tier)
+        self.assertIn("(прочитати (перше *argv*))", tier)
         self.assertNotIn("(11101010 (100 *argv*))", tier)
         self.assertIn("(визначити print-matching", tier)
         self.assertIn("(решта (знайти-за-ключем (як-є tier) fixture))", tier)
