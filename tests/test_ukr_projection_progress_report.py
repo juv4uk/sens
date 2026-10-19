@@ -234,6 +234,24 @@ class ExecutableUkrProgressTests(TempTree):
         self.assertEqual(progress.active_latin_head_sites, 0)
 
 
+class ExecutableFullUkrSyntaxTests(TempTree):
+    def test_english_syntax_is_not_mistaken_for_full_ukr(self):
+        root = self.tree({
+            "lib/english.lisp": "(define річ (lambda (аргумент) (quote аргумент)))\n",
+            "lib/bit-head.lisp": "(визначити річ (функція (аргумент) (101 аргумент)))\n",
+            "lib/quoted.lisp": "(визначити річ (як-є (define старе (lambda (х) х))))\n",
+        })
+        report = mod.audit_executable_ukr_files(root)
+        findings = {item["path"]: item for item in report["pending_files"]}
+        self.assertEqual(report["eligible_files"], 3)
+        self.assertEqual(report["full_ukr_files"], 1)
+        self.assertEqual(findings["lib/english.lisp"]["reason"], "latin-call-head")
+        self.assertEqual(findings["lib/english.lisp"]["head"], "define")
+        self.assertEqual(findings["lib/english.lisp"]["line"], 1)
+        self.assertEqual(findings["lib/bit-head.lisp"]["reason"], "encoded-or-bit-head")
+        self.assertEqual(findings["lib/bit-head.lisp"]["head"], "101")
+
+
 class ProgressTests(unittest.TestCase):
     def test_percentages_and_pending(self):
         p = mod.Progress(lisp_files=4, files_with_pairs=2, pairs_total=8,
