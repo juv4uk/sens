@@ -1,5 +1,5 @@
 use sens::{
-    eval_program, load_macro_library, parse_mixed_exact_domain_macro_source, Environment, Expr,
+    eval_program, load_macro_library, parse_mixed_exact_domain, Environment, Expr,
     ExprKind, Session, Value, MACRO_LIBRARY_SOURCE,
 };
 use std::rc::Rc;
@@ -64,8 +64,8 @@ fn migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda()
         "lib/macro.lisp must not retain executable/data SID8 tokens: {legacy_words:?}"
     );
 
-    let parsed = parse_mixed_exact_domain_macro_source("lib/macro.lisp", MACRO_LIBRARY_SOURCE)
-        .expect("migrated macro source must use its exact-domain reader");
+    let parsed = parse_mixed_exact_domain(MACRO_LIBRARY_SOURCE)
+        .expect("macro source must use the ordinary exact-domain reader");
     let mut legacy = 0;
     let mut d3 = Vec::new();
     let mut d4 = Vec::new();
@@ -77,10 +77,15 @@ fn migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda()
         assert!(d3.contains(&required), "missing D3:{required:03b}");
     }
     assert!(
-        d4.iter().filter(|&&bits| bits == 0b0010).count() >= 2,
-        "D4:0010 must exist both as the bootstrap lambda and generated code data"
+        d4.contains(&0b0010),
+        "the executable macro constructor must use the exact D4 LAMBDA resident"
     );
-    assert!(d4.contains(&0b0011), "generated DEFINE must be exact D4:0011");
+    assert!(!d4.contains(&0b0011),
+        "quoted Ukrainian DEFINE is data until the expansion is lowered");
+    assert!(MACRO_LIBRARY_SOURCE.contains("(як-є визначити)"));
+    assert!(MACRO_LIBRARY_SOURCE.contains("(як-є функція)"));
+    assert!(!MACRO_LIBRARY_SOURCE.contains("(як-є 0010)"));
+    assert!(!MACRO_LIBRARY_SOURCE.contains("(як-є 0011)"));
 
     let environment = Environment::root();
     let mut session = Session { environment };
