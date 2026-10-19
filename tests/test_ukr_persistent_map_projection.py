@@ -18,6 +18,14 @@ POST_D3D4_BLOB = "b6b84716702e7546cb2c0f031524210cb7d7b956"
 # Після вже перевіреної D1/D3/D4 проєкції ці три викличні голови
 # перейшли на наявні Lisp-owned українські alias bindings. Не виводимо
 # викличність D9:MAP-INSERT з одного ратифікованого рядка таблиці.
+MAP_FORMALS = (
+    ("мапа-вставити", (("key", "ключ", 5), ("value", "значення", 4), ("entries", "записи", 6))),
+    ("мапа-отримати", (("key", "ключ", 3), ("entries", "записи", 5))),
+    ("мапа-містить?", (("key", "ключ", 2), ("entries", "записи", 2))),
+    ("мапа-список", (("entries", "записи", 2),)),
+)
+
+
 RECENT_CALLS = (
     ("(map-insert key value (решта entries))",
      "(внутрішня-мапа-вставити key value (решта entries))"),
@@ -26,6 +34,112 @@ RECENT_CALLS = (
     ("(map-get key entries)",
      "(мапа-отримати key entries)"),
 )
+
+
+def _rewrite_map_formals(source: str, function_name: str, edits) -> str:
+    """Rename exact local atoms in one map definition; strings/comments are data."""
+    anchors = list(re.finditer(
+        r"(?m)^\\(визначити\\s+" + re.escape(function_name) + r"(?=\\s|\\))",
+        source,
+    ))
+    if len(anchors) != 1:
+        raise AssertionError(
+            f"{function_name}: очікувалося одне визначення, знайдено {len(anchors)}"
+        )
+    start = anchors[0].start()
+    depth = 0
+    in_string = escaped = in_comment = False
+    end = None
+    for index in range(start, len(source)):
+        char = source[index]
+        if in_comment:
+            if char == "\n":
+                in_comment = False
+            continue
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == ";":
+            in_comment = True
+        elif char == '"':
+            in_string = True
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                end = index + 1
+                break
+            if depth < 0:
+                raise AssertionError(f"{function_name}: незбалансована форма")
+    if end is None:
+        raise AssertionError(f"{function_name}: незакрита форма")
+    form = source[start:end]
+    mappings = {old: (new, expected) for old, new, expected in edits}
+    counts = {old: 0 for old in mappings}
+    chunks = []
+    index = 0
+    while index < len(form):
+        char = form[index]
+        if char == ";":
+            stop = form.find("\n", index)
+            if stop < 0:
+                stop = len(form)
+            chunks.append(form[index:stop])
+            index = stop
+            continue
+        if char == '"':
+            stop = index + 1
+            while stop < len(form):
+                if form[stop] == "\\":
+                    stop += 2
+                elif form[stop] == '"':
+                    stop += 1
+                    break
+                else:
+                    stop += 1
+            chunks.append(form[index:stop])
+            index = stop
+            continue
+        if char.isspace() or char in "();'":
+            chunks.append(char)
+            index += 1
+            continue
+        stop = index
+        while stop < len(form) and not form[stop].isspace() and form[stop] not in "();'\\\"":
+            stop += 1
+        atom = form[index:stop]
+        if atom in mappings:
+            renamed, _expected = mappings[atom]
+            chunks.append(renamed)
+            counts[atom] += 1
+        else:
+            chunks.append(atom)
+        index = stop
+    for old, (_new, expected) in mappings.items():
+        if counts[old] != expected:
+            raise AssertionError(
+                f"{function_name}: кількість атомів {old}: очікувалося {expected}, знайдено {counts[old]}"
+            )
+    return source[:start] + "".join(chunks) + source[end:]
+
+
+def apply_map_formals(source: str) -> str:
+    for name, edits in MAP_FORMALS:
+        source = _rewrite_map_formals(source, name, edits)
+    return source
+
+
+def undo_map_formals(source: str) -> str:
+    for name, edits in reversed(MAP_FORMALS):
+        inverse = tuple((ukrainian, english, count) for english, ukrainian, count in edits)
+        source = _rewrite_map_formals(source, name, inverse)
+    return source
 
 
 def undo_primary_projection(source: str) -> str:
@@ -162,6 +276,7 @@ PEERS = {1: ("1", "так"), 3: ("001", "як-є"), 4: ("0011", "визначи�
 
 
 def restore_exact_previous(source: str) -> str:
+    source = undo_map_formals(source)
     source = undo_primary_projection(source)
     source = undo_recent_calls(source)
     restored = []
@@ -225,9 +340,9 @@ class PersistentMapUkrTests(unittest.TestCase):
 
     def test_immutable_map_mechanism_and_aliases_unchanged(self):
         for form in (
-            "(внутрішня-мапа-вставити key value (решта entries))",
-            "(мапа-отримати key (решта entries))",
-            "(мапа-отримати key entries)",
+            "(внутрішня-мапа-вставити ключ значення (решта записи))",
+            "(мапа-отримати ключ (решта записи))",
+            "(мапа-отримати ключ записи)",
             "(визначити внутрішня-мапа-вставити мапа-вставити)",
             "(визначити внутрішня-мапа-отримати мапа-отримати)",
             "(визначити внутрішня-мапа-містить мапа-містить?)",
@@ -242,18 +357,32 @@ class PersistentMapUkrTests(unittest.TestCase):
             self.assertIn(form, self.source)
         verify(self.source)
 
+    def test_map_formals_are_ukrainian_and_exactly_reversible(self):
+        expected = (
+            ("мапа-вставити", "(функція (ключ значення записи)", "(функція (key value entries)"),
+            ("мапа-отримати", "(функція (ключ записи)", "(функція (key entries)"),
+            ("мапа-містить?", "(функція (ключ записи)", "(функція (key entries)"),
+            ("мапа-список", "(функція (записи)", "(функція (entries)"),
+        )
+        for name, ukrainian, legacy in expected:
+            with self.subTest(function=name):
+                self.assertIn(f"(визначити {name}", self.source)
+                self.assertIn(ukrainian, self.source)
+                self.assertNotIn(legacy, self.source)
+        self.assertEqual(apply_map_formals(undo_map_formals(self.source)), self.source)
+
     def test_fail_closed_for_wrong_op_bit_or_data(self):
         for mutation in (
             self.source.replace("(визначити мапа-порожній", "(функція мапа-порожній", 1),
             self.source.replace("(як-є ())", "(атом? ())", 1),
             self.source.replace("(так", "(ні", 1),
-            self.source.replace("(сполучити key value)", "(сполучити value key)", 1),
+            self.source.replace("(сполучити ключ значення)", "(сполучити значення ключ)", 1),
             self.source.replace("(визначити внутрішня-мапа-отримати мапа-отримати)",
                                 "(визначити внутрішня-мапа-отримати мапа-містить?)", 1),
-            self.source.replace("(мапа-отримати key entries)",
-                                "(мапа-містить? key entries)", 1),
-            self.source.replace("(внутрішня-мапа-вставити key value",
-                                "(мапа-вставити key value", 1),
+            self.source.replace("(мапа-отримати ключ записи)",
+                                "(мапа-містить? ключ записи)", 1),
+            self.source.replace("(внутрішня-мапа-вставити ключ значення",
+                                "(мапа-вставити ключ значення", 1),
         ):
             with self.assertRaises(AssertionError):
                 verify(mutation)
@@ -266,6 +395,7 @@ class PersistentMapUkrTests(unittest.TestCase):
         again = re.sub(r"\(#d1:1(?=\s|$)", "(так", again, flags=re.M)
         again = apply_recent_calls(again)
         again = apply_primary_projection(again)
+        again = apply_map_formals(again)
         self.assertEqual(again, self.source)
 
 
