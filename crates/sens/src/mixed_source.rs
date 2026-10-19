@@ -677,16 +677,11 @@ pub fn parse_mixed_exact_domain_core_source(
         .into_iter()
         .map(|expr| lift_pinned_d8_io(source, expr, 0))
         .collect::<Result<Vec<_>, _>>()?;
+    // Цитовані українські імена залишаються даними: побітовий
+    // адаптер макросів уже фізично вилучено з runtime.
     parsed
         .into_iter()
-        .map(|expr| {
-            let expr = lift_pinned_d9_language_calls(source, expr, 0)?;
-            if is_pinned_logic_macro_definition(source, &expr) {
-                lift_core_logic_macro_quote_words(source, expr, 0)
-            } else {
-                Ok(expr)
-            }
-        })
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
         .collect()
 }
 
