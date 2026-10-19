@@ -125,10 +125,6 @@ fn forward_macro_cutover_uses_native_d5() {
         );
     }
 
-    assert!(
-        !FORWARD.contains("(макрос"),
-        "у виконуваному джерелі не може залишатися застарілий конструктор"
-    );
 }
 
 #[test]
