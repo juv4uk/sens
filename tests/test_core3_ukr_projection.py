@@ -84,7 +84,7 @@ def projection():
 
 def canonicalize(ast, names):
     if not isinstance(ast, list):
-        return ast
+        return {"ідентичність": "sid", "виконавець": "executor"}.get(ast, ast)
     if not ast:
         return []
     head = ast[0]
@@ -140,7 +140,7 @@ class Core3UkrProjectionTests(unittest.TestCase):
     def test_negative_wrong_d4_peer_breaks_law(self):
         for corrupted in (
             self.source.replace("(визначити core3-route", "(функція core3-route", 1),
-            self.source.replace("(функція (sid executor)", "(визначити (sid executor)", 1),
+            self.source.replace("(функція (ідентичність виконавець)", "(визначити (ідентичність виконавець)", 1),
         ):
             self.assertNotEqual(corrupted, self.source)
             with self.assertRaisesRegex(AssertionError, "law or quoted data"):

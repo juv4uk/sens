@@ -21,16 +21,16 @@
           (як-є ()))))))
 
 (визначити core3-route
-  (функція (sid executor)
-    (вибрати-механізм sid executor)))
+  (функція (ідентичність виконавець)
+    (вибрати-механізм ідентичність виконавець)))
 
 (визначити core3-add-routes
-  (функція (sid)
+  (функція (ідентичність)
     (список
-      (core3-route sid (як-є common-lisp))
-      (core3-route sid (як-є prolog))
-      (core3-route sid (як-є clips))
-      (core3-route sid (як-є datalog)))))
+      (core3-route ідентичність (як-є common-lisp))
+      (core3-route ідентичність (як-є prolog))
+      (core3-route ідентичність (як-є clips))
+      (core3-route ідентичність (як-є datalog)))))
 
 (визначити core3-profile-status
   (функція ()
