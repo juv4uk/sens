@@ -18,7 +18,29 @@ OLD_BLOB = "ea9c7a89b02777058b9f2704bd96cead69a7608c"
 EDIT_RECEIPT = [[3013,"101","тотожне?"],[3026,"001","як-є"],[3036,"11010","менше?"],[3044,"100","перше"],[3057,"1001","друге"],[3082,"101","тотожне?"],[3095,"001","як-є"],[3105,"11110111","однакові?"],[3116,"100","перше"],[3129,"1001","друге"],[3154,"101","тотожне?"],[3167,"001","як-є"],[3177,"11011","більше?"],[3186,"100","перше"],[3199,"1001","друге"],[3697,"101","тотожне?"],[3712,"001","як-є"],[3722,"01010","додати"],[3730,"100","перше"],[3743,"1001","друге"],[3765,"101","тотожне?"],[3780,"001","як-є"],[3790,"01011","відняти"],[3799,"100","перше"],[3812,"1001","друге"],[3834,"101","тотожне?"],[3849,"001","як-є"],[3859,"10110","помножити"],[3870,"100","перше"],[3883,"1001","друге"],[4356,"10011","третє"]]
 
 
+ALPHA_TO_HISTORY = {
+    "назва": "name",
+    "оточення": "ctx",
+    "значення": "value",
+    "параметри": "params",
+    "аргументи": "args",
+    "вирази": "exprs",
+    "тіло": "body",
+    "умови": "clauses",
+    "оператор": "op",
+    "виклична-функція": "fn",
+    "вираз": "expr",
+}
+
+
+def undo_alpha(text: str) -> str:
+    """Інверсія тільки лексичних імен; цитати та рядки не змінюються."""
+    token = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();"]+|\s+|.')
+    return token.sub(lambda match: ALPHA_TO_HISTORY.get(match.group(), match.group()), text)
+
+
 def reconstruct(text: str) -> str:
+    text = undo_alpha(text)
     for offset, bits, peer in reversed(EDIT_RECEIPT):
         new = "(" + peer
         if text[offset:offset + len(new)] != new:
@@ -56,16 +78,20 @@ class MetaFirstClassUkrRemaining(unittest.TestCase):
         # Цей source не містить інших двійкових головів у quoted data.
         start = self.current.index("(визначити my-fc-primitive")
         self.assertEqual(re.findall(r"\([01]{3,9}(?=[\s(])", self.current[start:]), [])
+        self.assertIn("(функція (вираз оточення)", self.current)
+        self.assertNotIn("(функція (expr ctx)", self.current)
 
     def test_negative_wrong_peer_fails_closed(self):
         offset, bits, peer = EDIT_RECEIPT[0]
-        mutant = self.current[:offset] + "(хибна-проєкція" + self.current[offset + len(peer) + 1:]
+        pre_alpha = undo_alpha(self.current)
+        mutant = pre_alpha[:offset] + "(хибна-проєкція" + pre_alpha[offset + len(peer) + 1:]
         with self.assertRaisesRegex(AssertionError, "неправильна/зсунута"):
             reconstruct(mutant)
 
     def test_negative_reintroduced_old_byte_fails_closed(self):
         offset, bits, peer = EDIT_RECEIPT[-1]
-        mutant = self.current[:offset] + "(" + bits + self.current[offset + len(peer) + 1:]
+        pre_alpha = undo_alpha(self.current)
+        mutant = pre_alpha[:offset] + "(" + bits + pre_alpha[offset + len(peer) + 1:]
         with self.assertRaisesRegex(AssertionError, "неправильна/зсунута"):
             reconstruct(mutant)
 
