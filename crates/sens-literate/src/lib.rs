@@ -173,7 +173,7 @@ mod human_ukrainian_projection_tests {
     #[test]
     fn fenced_ukrainian_arithmetic_uses_the_same_source_projection() {
         let mut session = Session::default();
-        let source = "# Український SENS\\n\\n```sens\\n(частка 2 3)\\n```\\n";
+        let source = "# Український SENS\n\n```sens\n(частка 2 3)\n```\n";
         let (result, forms) = eval_literate_ukr(
             source,
             SourceMode::Literate,
