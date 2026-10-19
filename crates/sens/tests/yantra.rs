@@ -36,7 +36,7 @@ fn http_transport_success_passes_body_through() {
     // here; success-path framing is verified structurally instead:
     let src = r#"
       (let ((r (list 0 "{\"ok\":true}" "")))
-        (list (http-transport-exit r) (http-transport-body r)))
+        (list (код-завершення-передачі r) (тіло-передачі r)))
     "#;
     let rendered = eval_with_agent(src);
     assert!(rendered.contains("(0"), "unexpected: {rendered}");
@@ -50,9 +50,9 @@ fn http_transport_success_passes_body_through() {
 fn transport_failure_becomes_blocked_result_with_evidence() {
     // curl to a port nothing listens on: fast refusal, exit != 0.
     let src = r#"
-      (let ((r (http-post-json "http://127.0.0.1:1/x" "{}")))
-        (cond ((= (http-transport-exit r) 0) 1 "UNEXPECTED-SUCCESS")
-              ((= (http-transport-exit r) 0) 0 (http-transport-exit r))))
+      (let ((r (надіслати-запит-формат-обміну-даними "http://127.0.0.1:1/x" "{}")))
+        (cond ((= (код-завершення-передачі r) 0) 1 "UNEXPECTED-SUCCESS")
+              ((= (код-завершення-передачі r) 0) 0 (код-завершення-передачі r))))
     "#;
     let rendered = eval_with_agent(src);
     assert!(!rendered.contains("UNEXPECTED-SUCCESS"), "{rendered}");
@@ -92,13 +92,13 @@ fn yantra_message_and_tool_accessors_execute_with_ukrainian_bindings() {
     // Перевіряємо дані, а не кількість перейменувань чи симуляцію в Rust.
     let mut session = agent_session();
     for (reader, key, expected) in [
-        ("msg-role", "role", "людина"),
-        ("msg-content", "content", "вміст"),
-        ("msg-tool-calls", "tool-calls", "виклики"),
-        ("msg-tool-call-id", "tool-call-id", "ідентифікатор"),
-        ("tc-id", "id", "ідентифікатор"),
-        ("tc-name", "name", "назва"),
-        ("tc-arguments", "arguments", "параметри"),
+        ("роль-повідомлення", "роль", "людина"),
+        ("зміст-повідомлення", "зміст", "вміст"),
+        ("виклики-повідомлення", "виклики-інструментів", "виклики"),
+        ("ідентифікатор-виклику-повідомлення", "ідентифікатор-виклику", "ідентифікатор"),
+        ("ідентифікатор-виклику", "ідентифікатор", "ідентифікатор"),
+        ("назва-інструмента", "назва", "назва"),
+        ("аргументи-виклику", "аргументи", "параметри"),
     ] {
         let source = format!("({reader} (як-є (({key} . {expected}))))");
         let actual = eval_program(&source, &mut session)
@@ -117,11 +117,11 @@ fn yantra_tool_call_encoding_uses_exact_d10_ukrainian_function() {
     let mut session = agent_session();
     let source = r#"
         (кодувати-повідомлення
-          (як-є ((role . "assistant")
-                 (content . "готово")
-                 (tool-calls . (((id . "call-1")
-                                 (name . "bash")
-                                 (arguments . "{}")))))))
+          (як-є ((роль . "assistant")
+                 (зміст . "готово")
+                 (виклики-інструментів . (((ідентифікатор . "call-1")
+                                 (назва . "bash")
+                                 (аргументи . "{}")))))))
     "#;
     let oracle = r#"
         (список
@@ -155,36 +155,36 @@ fn yantra_evidence_cannot_use_partial_tool_results() {
         (
             r#"(завершується-власними-результатами?
                 (як-є (
-                  ((role . "assistant") (tool-calls . (((id . а)) ((id . б)))))
-                  ((role . "tool") (tool-call-id . а))
-                  ((role . "tool") (tool-call-id . б))
-                  ((role . "assistant") (content . "виконано"))
+                  ((роль . "assistant") (виклики-інструментів . (((ідентифікатор . а)) ((ідентифікатор . б)))))
+                  ((роль . "tool") (ідентифікатор-виклику . а))
+                  ((роль . "tool") (ідентифікатор-виклику . б))
+                  ((роль . "assistant") (зміст . "виконано"))
                 )))"#,
             true,
         ),
         (
             r#"(завершується-власними-результатами?
                 (як-є (
-                  ((role . "assistant") (tool-calls . (((id . а)) ((id . б)))))
-                  ((role . "tool") (tool-call-id . а))
-                  ((role . "assistant") (content . "виконано"))
+                  ((роль . "assistant") (виклики-інструментів . (((ідентифікатор . а)) ((ідентифікатор . б)))))
+                  ((роль . "tool") (ідентифікатор-виклику . а))
+                  ((роль . "assistant") (зміст . "виконано"))
                 )))"#,
             false,
         ),
         (
             r#"(завершується-власними-результатами?
                 (як-є (
-                  ((role . "assistant") (tool-calls . (((id . а))))))
-                  ((role . "tool") (tool-call-id . сторонній))
-                  ((role . "assistant") (content . "виконано"))
+                  ((роль . "assistant") (виклики-інструментів . (((ідентифікатор . а))))))
+                  ((роль . "tool") (ідентифікатор-виклику . сторонній))
+                  ((роль . "assistant") (зміст . "виконано"))
                 )))"#,
             false,
         ),
         (
             r#"(завершується-власними-результатами?
                 (як-є (
-                  ((role . "assistant") (tool-calls . (((id . а))))))
-                  ((role . "assistant") (content . "виконано"))
+                  ((роль . "assistant") (виклики-інструментів . (((ідентифікатор . а))))))
+                  ((роль . "assistant") (зміст . "виконано"))
                 )))"#,
             false,
         ),
@@ -200,22 +200,38 @@ fn yantra_evidence_cannot_use_partial_tool_results() {
 fn yantra_blocked_transport_is_not_a_completed_answer() {
     let mut session = agent_session();
     let result = eval_program(
-        r#"(result-status
-            (agent-loop
-              (функція (повідомлення) (як-є (blocked "відмова транспорту")))
+        r#"(стан-результату
+            (цикл-агента
+              (функція (повідомлення) (як-є (заблоковано "відмова транспорту")))
               (як-є ())
               0))"#,
         &mut session,
     ).expect("справжній SENS має завершити цикл заблокованим статусом");
-    assert_eq!(result.value.to_string(), "blocked");
+    assert_eq!(result.value.to_string(), "заблоковано");
 }
 
 #[test]
 fn yantra_missing_json_key_is_safe_and_empty() {
     let mut session = agent_session();
     let actual = eval_program(
-        "(alist-ref (як-є відсутній) (як-є ((наявний . значення))))",
+        "(знайти-значення-за-ключем (як-є відсутній) (як-є ((наявний . значення))))",
         &mut session,
     ).expect("відсутній ключ не повинен викликати помилку SENS");
     assert_eq!(actual.value.to_string(), "()");
+}
+
+
+#[test]
+fn yantra_rejects_duplicate_evidence_identifiers() {
+    let mut session = agent_session();
+    let source = r#"(завершується-власними-результатами?
+      (як-є (
+        ((роль . "assistant") (виклики-інструментів . (((ідентифікатор . а)) ((ідентифікатор . б)))))
+        ((роль . "tool") (ідентифікатор-виклику . а))
+        ((роль . "tool") (ідентифікатор-виклику . а))
+        ((роль . "assistant") (зміст . "виконано"))
+      )))"#;
+    let actual = eval_program(source, &mut session)
+        .expect("справжній SENS перевіряє власність результатів");
+    assert_eq!(actual.value.as_predicate_bit(), Some(false));
 }
