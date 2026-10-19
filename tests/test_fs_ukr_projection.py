@@ -73,7 +73,8 @@ def old_identity(node):
     if not isinstance(node, list):
         if node == "так":
             return "#d1:1"
-        return {"шлях": "path", "декодоване": "decoded", "текст": "text"}.get(node, node)
+        return {"шлях": "path", "декодоване": "decoded", "текст": "text",
+                "читати-файл": "read-file", "записати-файл": "write-file"}.get(node, node)
     items = [old_identity(value) for value in node]
     if items and isinstance(items[0], str):
         reversed_peers = {value: key for key, value in REQUIRED.items()}
@@ -89,6 +90,8 @@ def source_to_previous(text: str) -> str:
         if line.lstrip().startswith(";"):
             result.append(line)
             continue
+        line = line.replace("(визначити читати-файл", "(визначити read-file")
+        line = line.replace("(визначити записати-файл", "(визначити write-file")
         line = re.sub(r"\(визначити(?=\s)", "(0011", line)
         line = re.sub(r"\(функція(?=\s)", "(0010", line)
         line = re.sub(r"\(так(?=\s|$)", "(#d1:1", line)
@@ -149,8 +152,8 @@ class FsUkrProjectionTests(unittest.TestCase):
         self.assertEqual(code.count("(функція "), 3)
         self.assertIn("(так", code)
 
-    def test_host_io_boundary_and_public_names_untouched(self):
-        for literal in ("(визначити read-file", "(визначити write-file",
+    def test_host_io_boundary_and_public_ukr_names(self):
+        for literal in ("(визначити читати-файл", "(визначити записати-файл",
                         "(read-file-utf8-raw шлях)",
                         "(write-file-bytes шлях (кодування-юнікод-8-кодувати-рядок текст))"):
             self.assertIn(literal, self.source)
@@ -160,7 +163,7 @@ class FsUkrProjectionTests(unittest.TestCase):
         for changed in (
             self.source.replace("(тотожне?", "(сполучити", 1),
             self.source.replace("(так", "(ні", 1),
-            self.source.replace("(визначити read-file", "(функція read-file", 1),
+            self.source.replace("(визначити читати-файл", "(функція читати-файл", 1),
             self.source.replace("read-file-utf8-raw", "read-file-bytes", 1),
         ):
             with self.assertRaises(AssertionError):
@@ -180,7 +183,7 @@ class FsUkrProjectionTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             verify(self.source.replace("(перше", "(00000101", 1))
         with self.assertRaises(ValueError):
-            parse("(визначити read-file (функція (path)")
+            parse("(визначити читати-файл (функція (шлях)")
 
 
 if __name__ == "__main__":
