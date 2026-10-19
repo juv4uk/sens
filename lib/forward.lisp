@@ -139,8 +139,8 @@
 ; Convenience wrapper reading the current global working memory rather than
 ; requiring the caller to pass it explicitly.
 (визначити fire-rule-on-working-memory
-  (функція (rule)
-    (запустити-правило-на-факти rule *working-memory*)))
+  (функція (правило-для-робочої-памяті)
+    (запустити-правило-на-факти правило-для-робочої-памяті *working-memory*)))
 
 ; Step 3: apply every rule in a rule set to a fact list (still a single
 ; pass — no fixpoint loop yet, so a fact produced by one rule isn't itself
@@ -161,16 +161,16 @@
 ; Fan-out-Form, die `prove-goal` in lib/reason.lisp nutzt, um jede Regel gegen
 ; ein Ziel zu versuchen.
 (визначити fire-rules-on-facts
-  (функція (rules facts)
+  (функція (правила-для-фактів факти-для-правил)
     (за-умовою
       
-      ((атом? rules)  (як-є ()))
-      (так (приєднати (запустити-правило-на-факти (перше rules) facts)
-                  (запустити-правила-на-факти (решта rules) facts))))))
+      ((атом? правила-для-фактів)  (як-є ()))
+      (так (приєднати (запустити-правило-на-факти (перше правила-для-фактів) факти-для-правил)
+                  (запустити-правила-на-факти (решта правила-для-фактів) факти-для-правил))))))
 
 (визначити fire-rules-on-working-memory
-  (функція (rules)
-    (запустити-правила-на-факти rules *working-memory*)))
+  (функція (правила-робочої-памяті)
+    (запустити-правила-на-факти правила-робочої-памяті *working-memory*)))
 
 ; Step 4: `run` — the fixpoint loop. Repeatedly fires the whole rule set
 ; against the current fact list, folding newly produced facts (deduplicated
@@ -216,11 +216,11 @@
 ; Unlike historical D5 MEMBER, it must not call CAR on an empty list,
 ; nor require an unadmitted D8 EQUAL mechanism for compound facts.
 (визначити факт-наявний?
-  (функція (fact memory)
+  (функція (факт-для-пошуку память-для-пошуку)
     (за-умовою
-      ((порожній? memory) ні)
-      ((unify-equal? fact (перше memory)) так)
-      (так (факт-наявний? fact (решта memory))))))
+      ((порожній? память-для-пошуку) ні)
+      ((unify-equal? факт-для-пошуку (перше память-для-пошуку)) так)
+      (так (факт-наявний? факт-для-пошуку (решта память-для-пошуку))))))
 
 (визначити додати-нові
   (функція (нові-факти наявні-факти)
@@ -277,12 +277,12 @@
 ; Entfernen einer Unterstützung kaskadieren kann; das ist Schritt 5b, ein
 ; separat abgestimmter Schritt, hier nicht unterstellt.
 (визначити retract-fact
-  (функція (fact facts)
+  (функція (факт-для-вилучення факти-перед-вилученням)
     (за-умовою
       
-      ((атом? facts)  (як-є ()))
-      ((unify-equal? fact (перше facts)) (решта facts))
-      (так (сполучити (перше facts) (відкликати-факт fact (решта facts)))))))
+      ((атом? факти-перед-вилученням)  (як-є ()))
+      ((unify-equal? факт-для-вилучення (перше факти-перед-вилученням)) (решта факти-перед-вилученням))
+      (так (сполучити (перше факти-перед-вилученням) (відкликати-факт факт-для-вилучення (решта факти-перед-вилученням)))))))
 
 (визначити retract-fact!
   (make-macro
@@ -349,19 +349,19 @@
 ; getrennte globale Variable, sodass bestehende Aufrufer von
 ; `run`/`assert-fact!`/`retract-fact!` unberührt bleiben.
 (визначити make-justified
-  (функція (fact supports)
-    (сполучити fact supports)))
+  (функція (факт-із-підставами підстави-факту)
+    (сполучити факт-із-підставами підстави-факту)))
 
-(визначити fact-of (функція (entry) (перше entry)))
-(визначити supports-of (функція (entry) (решта entry)))
-(визначити axiom (функція (fact) (створити-обґрунтований fact (як-є ()))))
+(визначити fact-of (функція (запис-обґрунтування) (перше запис-обґрунтування)))
+(визначити supports-of (функція (запис-обґрунтування) (решта запис-обґрунтування)))
+(визначити axiom (функція (аксіоматичний-факт) (створити-обґрунтований аксіоматичний-факт (як-є ()))))
 
 (визначити map-fact-of
-  (функція (entries)
+  (функція (записи-обґрунтувань)
     (за-умовою
       
-      ((атом? entries)  (як-є ()))
-      (так (сполучити (факт-від (перше entries)) (мапа-факт-від (решта entries)))))))
+      ((атом? записи-обґрунтувань)  (як-є ()))
+      (так (сполучити (факт-від (перше записи-обґрунтувань)) (мапа-факт-від (решта записи-обґрунтувань)))))))
 
 ; Same `fire-rule` as Step 1, but wraps a successful result with the
 ; single supporting fact that produced it.
