@@ -3725,7 +3725,7 @@
       "callable": false
     },
     {
-      "name": "compiler-d4-law-children",
+      "name": "компілятор-дочірні-елементи-закону-д4",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/compiler-nucleus.lisp:function",
       "origin_ids": [
@@ -3738,7 +3738,7 @@
       "callable": false
     },
     {
-      "name": "compiler-d4-law-first-child",
+      "name": "компілятор-перший-дочірній-елемент-закону-д4",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/compiler-nucleus.lisp:function",
       "origin_ids": [
@@ -3751,7 +3751,7 @@
       "callable": false
     },
     {
-      "name": "compiler-d4-law-second-child",
+      "name": "компілятор-другий-дочірній-елемент-закону-д4",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/compiler-nucleus.lisp:function",
       "origin_ids": [
@@ -3764,7 +3764,7 @@
       "callable": false
     },
     {
-      "name": "compiler-d4-law-width",
+      "name": "компілятор-ширина-закону-д4",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/compiler-nucleus.lisp:function",
       "origin_ids": [
@@ -4115,7 +4115,7 @@
       "callable": false
     },
     {
-      "name": "compiler-role-from-d4-bootstrap",
+      "name": "компілятор-роль-основи-д4",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/compiler-nucleus.lisp:function",
       "origin_ids": [
@@ -4128,7 +4128,7 @@
       "callable": false
     },
     {
-      "name": "compiler-role-from-d4-bootstrap-bits",
+      "name": "компілятор-роль-основи-д4-за-бітами",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/compiler-nucleus.lisp:function",
       "origin_ids": [

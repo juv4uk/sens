@@ -772,6 +772,12 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         "compiler-law-l5-atom-bits": "біти-атома-остова-л5-компілятора",
         "compiler-law-l5-head-bits": "біти-голови-остова-л5-компілятора",
         "compiler-law-l5-cond-bits": "біти-умови-остова-л5-компілятора",
+        "compiler-d4-law-width": "компілятор-ширина-закону-д4",
+        "compiler-d4-law-children": "компілятор-дочірні-елементи-закону-д4",
+        "compiler-d4-law-first-child": "компілятор-перший-дочірній-елемент-закону-д4",
+        "compiler-d4-law-second-child": "компілятор-другий-дочірній-елемент-закону-д4",
+        "compiler-role-from-d4-bootstrap-bits": "компілятор-роль-основи-д4-за-бітами",
+        "compiler-role-from-d4-bootstrap": "компілятор-роль-основи-д4",
     }
     LOCAL_FORMALS_UKR = {
         "compiler-authority-find": {
@@ -1040,6 +1046,9 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         self.assertIn("(визначити бітові-послідовності-однакові?", source)
         self.assertIn("(визначити compiler-nucleus", source)
         self.assertIn("(визначити compiler-domain-shape", source)
+        self.assertIn("(визначити компілятор-ширина-закону-д4", source)
+        self.assertNotIn("(визначити compiler-d4-law-width", source)
+        self.assertIn("(визначити компілятор-роль-основи-д4-за-бітами", source)
         self.assertIn("(визначити compiler-lowering-role-from-laws", source)
 
         inverse_helpers = {ukr: old for old, ukr in self.LOCAL_HELPERS_UKR.items()}
@@ -1064,14 +1073,14 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             "compiler-role-from-l1-l5": {
                 "розкласти-ідентичність": "decompose", "закон-домену": "law",
             },
-            "compiler-d4-law-width": {"закон-домену": "law"},
-            "compiler-d4-law-children": {"закон-домену": "law"},
-            "compiler-d4-law-first-child": {"закон-домену": "law"},
-            "compiler-d4-law-second-child": {"закон-домену": "law"},
-            "compiler-role-from-d4-bootstrap-bits": {
+            "компілятор-ширина-закону-д4": {"закон-домену": "law"},
+            "компілятор-дочірні-елементи-закону-д4": {"закон-домену": "law"},
+            "компілятор-перший-дочірній-елемент-закону-д4": {"закон-домену": "law"},
+            "компілятор-другий-дочірній-елемент-закону-д4": {"закон-домену": "law"},
+            "компілятор-роль-основи-д4-за-бітами": {
                 "початковий-код": "seed", "біти-координати": "bits", "закон-домену": "law",
             },
-            "compiler-role-from-d4-bootstrap": {
+            "компілятор-роль-основи-д4": {
                 "розкласти-ідентичність": "decompose", "закон-домену": "law",
             },
             "compiler-lowering-role-from-l1-l5": {

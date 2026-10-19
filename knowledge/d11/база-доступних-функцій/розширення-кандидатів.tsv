@@ -118,10 +118,10 @@ SENS_LIBRARY	compiler-bits-equal	api:COMPILER-BITS-EQUAL	lib/compiler-nucleus.li
 SENS_LIBRARY	compiler-compile-program	api:COMPILER-COMPILE-PROGRAM	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-compile-program-artifact	api:COMPILER-COMPILE-PROGRAM-ARTIFACT	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-cond-clauses-valid	api:COMPILER-COND-CLAUSES-VALID	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
-SENS_LIBRARY	compiler-d4-law-children	api:COMPILER-D4-LAW-CHILDREN	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
-SENS_LIBRARY	compiler-d4-law-first-child	api:COMPILER-D4-LAW-FIRST-CHILD	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
-SENS_LIBRARY	compiler-d4-law-second-child	api:COMPILER-D4-LAW-SECOND-CHILD	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
-SENS_LIBRARY	compiler-d4-law-width	api:COMPILER-D4-LAW-WIDTH	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	компілятор-дочірні-елементи-закону-д4	api:COMPILER-D4-LAW-CHILDREN	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	компілятор-перший-дочірній-елемент-закону-д4	api:COMPILER-D4-LAW-FIRST-CHILD	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	компілятор-другий-дочірній-елемент-закону-д4	api:COMPILER-D4-LAW-SECOND-CHILD	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	компілятор-ширина-закону-д4	api:COMPILER-D4-LAW-WIDTH	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-domain-children	api:COMPILER-DOMAIN-CHILDREN	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-domain-result	api:COMPILER-DOMAIN-RESULT	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-exactly-one	api:COMPILER-EXACTLY-ONE	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
@@ -148,8 +148,8 @@ SENS_LIBRARY	compiler-result-fail	api:COMPILER-RESULT-FAIL	lib/compiler-nucleus.
 SENS_LIBRARY	compiler-result-ok	api:COMPILER-RESULT-OK	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-result-requests	api:COMPILER-RESULT-REQUESTS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-result-success	api:COMPILER-RESULT-SUCCESS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
-SENS_LIBRARY	compiler-role-from-d4-bootstrap	api:COMPILER-ROLE-FROM-D4-BOOTSTRAP	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
-SENS_LIBRARY	compiler-role-from-d4-bootstrap-bits	api:COMPILER-ROLE-FROM-D4-BOOTSTRAP-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	компілятор-роль-основи-д4	api:COMPILER-ROLE-FROM-D4-BOOTSTRAP	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	компілятор-роль-основи-д4-за-бітами	api:COMPILER-ROLE-FROM-D4-BOOTSTRAP-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-role-from-l1-l5	api:COMPILER-ROLE-FROM-L1-L5	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-role-from-l1-l5-bits	api:COMPILER-ROLE-FROM-L1-L5-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
 SENS_LIBRARY	compiler-role-shape-valid	api:COMPILER-ROLE-SHAPE-VALID	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
