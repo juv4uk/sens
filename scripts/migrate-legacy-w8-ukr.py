@@ -167,7 +167,7 @@ def main():
                 # (machine-profile/1 (rows (00000010 sequence "...") ...)).
                 # Числові ключі в rows не є викличними головами.
                 # Стару таблицю залишаємо provenance, не підміняємо D8.
-                if re.search(r"(?m)^\\(machine-profile/1(?:\\s|$)", text):
+                if re.search(r"(?m)^\(machine-profile/1(?:\s|$)", text):
                     report.append({
                         "file": str(rel),
                         "status": "skipped-nonexecutable",
