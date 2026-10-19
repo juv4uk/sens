@@ -77,7 +77,7 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
     def test_world_operations_compose_through_ukr_primary_names(self):
         source, _ = read_sources()
         primary = source.split(ALIAS_MARKER, 1)[0]
-        primary_code = "\\n".join(
+        primary_code = "\n".join(
             line for line in primary.splitlines()
             if not line.lstrip().startswith(";")
         )
