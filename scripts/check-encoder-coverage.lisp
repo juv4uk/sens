@@ -21,9 +21,9 @@
       (як-є
         (encoder-coverage-check
           (status pass))))
-     (encoder-coverage-d1-yes
+     (так
       (перше (читати-всі "(encoder-coverage-check (status fail) (reason projection-mismatch))")))))
-  (encoder-coverage-d1-yes
+  (так
    (список
      (як-є encoder-coverage-check)
      (як-є (status fail))
