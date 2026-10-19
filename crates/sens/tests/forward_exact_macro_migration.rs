@@ -6,8 +6,8 @@ use sens::{
 const FORWARD: &str = include_str!("../../../lib/forward.lisp");
 
 const MIGRATED_MACROS: &[&str] = &[
-    "assert-fact!",
-    "assert-facts!",
+    "ствердити-факт!",
+    "ствердити-факти!",
     "retract-fact!",
     "assert-fact-tms!",
     "run-tms!",
@@ -116,8 +116,10 @@ fn forward_macro_cutover_is_exact_width_and_bit_neutral() {
         "forward.lisp must have no executable eight-bit compatibility heads: {heads:?}"
     );
 
+    assert_eq!(FORWARD.matches("(як-є визначити)").count(), MIGRATED_MACROS.len());
+    assert!(!FORWARD.contains("(як-є def)"), "legacy def macro expansion forbidden");
     for name in MIGRATED_MACROS {
-        let define = format!("(0011 {name}\n  (make-macro\n    (0010 ");
+        let define = format!("(визначити {name}\n  (make-macro\n    (функція ");
         assert!(
             FORWARD.contains(&define),
             "{name} must be D4 DEFINE -> make-macro -> D4 LAMBDA"
@@ -146,13 +148,18 @@ fn all_ten_forward_macros_are_real_macro_values() {
 #[test]
 fn migrated_macros_drive_plain_tms_and_jtms_state_transitions() {
     let mut session = session();
+    // Реальний SENS-виклик: стан змінюється D4 DEFINE, потім відкликається.
+    eval(&mut session, "(ствердити-факт! (як-є альфа))");
+    assert_eq!(eval(&mut session, "*working-memory*"), "(альфа)");
+    eval(&mut session, "(retract-fact! (як-є альфа))");
+    assert_eq!(eval(&mut session, "*working-memory*"), "()");
 
     for source in [
-        "(assert-fact! (quote alpha))",
-        "(assert-facts! (quote (beta gamma)))",
-        "(retract-fact! (quote alpha))",
-        "(retract-fact! (quote beta))",
-        "(retract-fact! (quote gamma))",
+        "(ствердити-факт! (як-є альфа))",
+        "(ствердити-факти! (як-є (бета гамма)))",
+        "(retract-fact! (як-є альфа))",
+        "(retract-fact! (як-є бета))",
+        "(retract-fact! (як-є гамма))",
         "(assert-fact-tms! (quote delta))",
         "(run-tms! (quote ()))",
         "(retract-fact-tms! (quote delta))",
