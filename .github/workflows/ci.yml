@@ -9,8 +9,8 @@ on:
 permissions:
   contents: read
 
-# На кожен коміт запускається один workflow, а старі запуски тієї самої
-# гілки не забирають чергу GitHub-hosted раннерів після нового push.
+# На кожен коміт запускається один workflow; нові push скасовують застарілі
+# push-запуски тієї самої гілки, щоб вони не займали чергу раннерів.
 concurrency:
   group: sens-lisp-surface-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'push' }}
