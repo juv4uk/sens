@@ -5,7 +5,9 @@ use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Sess
 
 #[test]
 fn repl_core_loads_and_derives_d1_through_sens_meta_environment() {
-    let mut session = Session::default();
+    // Явний bootstrap: Session::default уже встановлює макрос;
+    // load_core_library робить це сам для Session::bare без подвійної реєстрації.
+    let mut session = Session::bare();
     sens::load_core_library(&mut session).expect("SENS core");
     sens::load_meta_evaluator_library(&mut session).expect("SENS meta evaluator");
     let source = std::fs::read_to_string(concat!(
