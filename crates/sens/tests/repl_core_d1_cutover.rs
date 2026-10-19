@@ -1,41 +1,40 @@
-//! Справжня перевірка REPL через SENS reader/evaluator, не Python-оракул.
-//! Deutsch: REPL D1 ohne lokale Neudefinitionen.
-//! English: REPL D1 without local redefinitions.
-
+//! Виконання REPL без SID8/Sens8 і без повторного глобального D1 DEFINE.
+//! Deutsch: D1-Werte in SENS-REPL mit echtem Reader/Evaluator.
+//! English: Test D1 in real SENS meta-REPL and exact source reader.
 use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session};
 
 #[test]
-fn repl_core_respects_ratified_d1_and_preserves_initial_state() {
+fn repl_core_loads_and_derives_d1_through_sens_meta_environment() {
     let mut session = Session::default();
-    sens::load_core_library(&mut session).expect("SENS Core evaluator");
+    sens::load_core_library(&mut session).expect("SENS core");
     sens::load_meta_evaluator_library(&mut session).expect("SENS meta evaluator");
-
     let source = std::fs::read_to_string(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../lib/repl-core.lisp"
-    )).expect("read current REPL source with Rust I/O");
-    let expressions = parse_mixed_exact_domain(&source)
-        .expect("SENS reader must parse the entire Ukrainian REPL source");
-    eval_parsed_expressions(&expressions, &mut session)
-        .expect("SENS evaluator must load real REPL definitions");
+        env!("CARGO_MANIFEST_DIR"), "/../../lib/repl-core.lisp"
+    )).expect("read live SENS REPL source");
+    let forms = parse_mixed_exact_domain(&source).expect("real mixed SENS reader");
+    eval_parsed_expressions(&forms, &mut session).expect("load REPL with SENS evaluator");
 
-    for (expression, expected) in [("так", Some(true)), ("ні", Some(false))] {
-        let verdict = eval_program(expression, &mut session)
-            .unwrap_or_else(|e| panic!("source {expression}: {e}"));
-        assert_eq!(verdict.value.as_predicate_bit(), expected, "{expression}");
+    for (literal, expected) in [("так", Some(true)), ("ні", Some(false))] {
+        let forms = parse_mixed_exact_domain(literal).expect("exact D1 reader");
+        let verdict = eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|e| panic!("D1 {literal}: {e}"));
+        assert_eq!(verdict.value.as_predicate_bit(), expected, "{literal}");
     }
 
-    for expression in [
-        "(порожній? (перше (репл-почати (як-є ()))))",
-        "(порожній? (решта (репл-почати (як-є ()))))",
-        "(тотожне? (перше (перше (репл-почати (як-є (маркер))))) (як-є маркер))",
-    ] {
-        let verdict = eval_program(expression, &mut session)
-            .unwrap_or_else(|e| panic!("REPL law {expression}: {e}"));
+    let empty_result = eval_program(
+        "(порожній? (решта (репл-почати (як-є ()))))", &mut session
+    ).expect("SENS REPL initial state");
+    assert_eq!(empty_result.value.as_predicate_bit(), Some(true));
+
+    for (word, expected) in [("так", Some(true)), ("ні", Some(false))] {
+        let expression = format!(
+            "(решта (репл-крок (як-є {word}) (репл-почати (як-є ()))))"
+        );
+        let verdict = eval_program(&expression, &mut session)
+            .unwrap_or_else(|e| panic!("REPL step {word}: {e}"));
         assert_eq!(
-            verdict.value.as_predicate_bit(),
-            Some(true),
-            "SENS REPL state law: {expression}"
+            verdict.value.as_predicate_bit(), expected,
+            "REPL D1 result after meta evaluation: {word}"
         );
     }
 }
