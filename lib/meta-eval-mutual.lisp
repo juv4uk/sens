@@ -76,7 +76,7 @@
            captured-env
            (сполучити
              (сполучити (друге form)
-                   (my-group-closure-from-def form group captured-env))
+                   (створити-замикання-взаєморекурсивної-групи form group captured-env))
              out))) (перше forms))))))
 
 (визначити my-build-group-env
@@ -87,7 +87,7 @@
   (функція (fn args)
     ((функція (group-env) (my-eval-body
         (my-fourth fn)
-        (bind-params
+        (зв'язати-аргументи-з-лямбда-параметрами
           (третє fn)
           args
           group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) (my-sixth fn)))))
@@ -130,7 +130,7 @@
       ((це-замикання-рекурсивної-групи? fn)
        ((функція (group-env) (my-group-eval-body
            (my-fourth fn)
-           (bind-params (третє fn) args group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) (my-sixth fn))))
+           (зв'язати-аргументи-з-лямбда-параметрами (третє fn) args group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) (my-sixth fn))))
       (так (my-apply fn args)))))
 
 (визначити my-group-eval
@@ -191,3 +191,7 @@
 (визначити знайти-значення-імені-в-лексичному-середовищі env-lookup)
 (визначити обчислити-форму-та-оновити-оточення my-eval-top-form)
 (визначити перевірити-форму-лямбда? my-lambda-form?)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас.
+(визначити зв'язати-аргументи-з-лямбда-параметрами bind-params)
+(визначити створити-замикання-взаєморекурсивної-групи my-group-closure-from-def)
