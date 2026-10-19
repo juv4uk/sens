@@ -76,3 +76,28 @@ fn invalid_predicate_types_and_binder_mismatch_fail_closed() {
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(parse_mixed_exact_domain_machine_source("lib/not-machine.lisp", SOURCE).is_err());
 }
+
+
+#[test]
+fn ukrainian_lambda_bindings_preserve_plan_and_tag_semantics() {
+    // Справжній SENS evaluator: позитивні/негативні маршрути D3 EQ/ATOM
+    // та варіанти списку; цитовані теги не перейменовуються лексичним binder.
+    let mut s = session();
+    for (source, expected) in [
+        ("(native-first-plan-tag-state (як-є (native-plan 8 9)) (як-є native-plan))", "same"),
+        ("(native-first-plan-tag-state (як-є (native-plan 8 9)) (як-є evaluator-fallback))", "distinct"),
+        ("(native-first-plan-tag-state (як-є ((native-plan) 8 9)) (як-є native-plan))", "distinct"),
+        ("(native-first-plan-tag-state (як-є ()) (як-є native-plan))", "distinct"),
+    ] {
+        let actual = eval(&mut s, source).expect("SENS D3 comparison must execute");
+        assert_eq!(actual.to_string(), expected, "{source}");
+    }
+    for (source, expected) in [
+        ("(native-first-proper-list-length-2? (як-є (one two)))", true),
+        ("(native-first-proper-list-length-2? (як-є (one two three)))", false),
+        ("(native-first-proper-list-length-2? (як-є ()))", false),
+    ] {
+        let actual = eval(&mut s, source).expect("SENS list shape law must execute");
+        assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
+    }
+}
