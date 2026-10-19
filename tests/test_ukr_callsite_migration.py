@@ -767,8 +767,23 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
             self._git_blob(parity.replace(new_p, old_p, 1)),
             "bc6a7e27a83192d667ba6791e4da4d867ed80971",
         )
+        # Зворотна проєкція всіх виконаних міграцій D3/D4, доведена
+        # історією Git; ці англійські голови не повертаються в Lisp-джерело.
+        historic_coverage = coverage
+        for modern, historic in (
+            ('(representative (перше (сполучити 2 3)))',
+             '(representative (car (cons 2 3)))'),
+            ('(representative (перше (сполучити "native-limits" 3)))',
+             '(representative (car (cons "native-limits" 3)))'),
+            ('(representative (сполучити 2 3))',
+             '(representative (cons 2 3))'),
+            ('(representative ((функція (x) (+ x 1)) 41))',
+             '(representative ((lambda (x) (+ x 1)) 41))'),
+        ):
+            self.assertEqual(historic_coverage.count(modern), 1)
+            historic_coverage = historic_coverage.replace(modern, historic, 1)
         self.assertEqual(
-            self._git_blob(coverage.replace(new_c, old_c, 1)),
+            self._git_blob(historic_coverage.replace(new_c, old_c, 1)),
             "7161b6c631d661b5a30d22acc4fd0331ec3e6379",
         )
 
