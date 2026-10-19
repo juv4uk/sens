@@ -52,3 +52,36 @@ fn core4_point_witness_crosses_predicates_strings_macros_and_fresh_symbols() {
         .value;
     assert!(matches!(fresh, Value::Symbol(_)));
 }
+
+#[test]
+fn core4_d6_filter_and_reduce_execute_ukrainian_sources() {
+    let mut session = migrated_core();
+    // Справжній SENS evaluator, а не пошук лексичних шаблонів у файлі.
+    for (source, expected) in [
+        (
+            "(відсіяти (функція (елемент) (тотожне? елемент (як-є б))) (як-є (а б в б)))",
+            "(б б)",
+        ),
+        (
+            "(відсіяти (функція (елемент) (тотожне? елемент (як-є б))) (як-є (а в)))",
+            "()",
+        ),
+        (
+            "(відсіяти (функція (елемент) (тотожне? елемент (як-є б))) (як-є ()))",
+            "()",
+        ),
+        (
+            "(згорнути (функція (сума число) (додати сума число)) 0 (як-є (1 2 3 4)))",
+            "10",
+        ),
+        (
+            "(згорнути (функція (сума число) (додати сума число)) 7 (як-є ()))",
+            "7",
+        ),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS Core4 failed for {source}: {error:?}"))
+            .value;
+        assert_eq!(value.to_string(), expected, "{source}");
+    }
+}
