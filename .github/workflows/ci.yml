@@ -82,8 +82,8 @@ jobs:
               python3 -m unittest tests/test_ukr_machine_projection_parity.py -v
               ;;
             11)
-              python3 -m unittest tests/test_native_first_exact_d1_cutover.py -v
-              python3 -m unittest tests/test_native_first_execute_d1_cutover.py -v
+              # Реальні D1 runtime-випробування замість застарілого SHA/літерального snapshot.
+              cargo test --locked -p sens --test native_first_d1_cutover --test native_first_execute_d1_cutover -- --nocapture
               ;;
             12)
               python3 -m unittest tests/test_ukr_native_first_dispatch_projection.py -v
