@@ -84,7 +84,14 @@ def projection():
 
 def canonicalize(ast, names):
     if not isinstance(ast, list):
-        return {"ідентичність": "sid", "виконавець": "executor"}.get(ast, ast)
+        return {
+            "ідентичність": "sid",
+            "виконавець": "executor",
+            "ядро3-виконавці": "core3-executors",
+            "ядро3-маршрут": "core3-route",
+            "ядро3-додати-маршрути": "core3-add-routes",
+            "ядро3-стан-профілю": "core3-profile-status",
+        }.get(ast, ast)
     if not ast:
         return []
     head = ast[0]
@@ -131,7 +138,7 @@ class Core3UkrProjectionTests(unittest.TestCase):
         names = projection()
         self.assertEqual(names["визначити"], "0011")
         self.assertEqual(names["функція"], "0010")
-        self.assertEqual(self.source.count("(визначити core3-"), 4)
+        self.assertEqual(self.source.count("(визначити ядро3-"), 4)
         self.assertEqual(self.source.count("(функція ("), 3)
         self.assertTrue(verify(self.source))
         self.assertNotIn("(0011 core3-", self.source)
@@ -139,7 +146,7 @@ class Core3UkrProjectionTests(unittest.TestCase):
 
     def test_negative_wrong_d4_peer_breaks_law(self):
         for corrupted in (
-            self.source.replace("(визначити core3-route", "(функція core3-route", 1),
+            self.source.replace("(визначити ядро3-маршрут", "(функція ядро3-маршрут", 1),
             self.source.replace("(функція (ідентичність виконавець)", "(визначити (ідентичність виконавець)", 1),
         ):
             self.assertNotEqual(corrupted, self.source)

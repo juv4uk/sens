@@ -47,7 +47,7 @@ class Core3SourceCutover(unittest.TestCase):
     def test_current_ukrainian_d6_let_and_two_field_predicate_law(self):
         source = TARGET.read_text(encoding="utf-8")
         self.assertEqual(
-            source.count("(нехай ((selection (core3-route c3-plus-sid executor)))"), 1
+            source.count("(нехай ((вибір-механізму (ядро3-маршрут ідентичність-плюса виконавець)))"), 1
         )
         self.assertNotIn("(001000 ", source)
         current = deproject_ukr_heads(source)

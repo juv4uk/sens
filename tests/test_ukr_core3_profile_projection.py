@@ -79,7 +79,7 @@ class Core3ProfileUkrProjection(unittest.TestCase):
     def test_inverse_preserves_semantic_shape_and_quote_data(self):
         source = SOURCE.read_text(encoding="utf-8")
         restored = inverse_projection(source)
-        self.assertIn("(нехай ((selection (core3-route c3-plus-sid executor)))", restored)
+        self.assertIn("(нехай ((вибір-механізму (ядро3-маршрут ідентичність-плюса виконавець)))", restored)
         self.assertNotIn("(001000 ", restored)
         self.assertIn("(001 yes)", restored)
 
