@@ -378,7 +378,7 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         first = (root / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
         mutual = (root / "lib/meta-eval-mutual.lisp").read_text(encoding="utf-8")
         self.assertIn("(сполучити (як-є atom) (my-fc-primitive (як-є atom)))", first)
-        self.assertIn("(тотожне? (перше form) (як-є def))", mutual)
+        self.assertIn("(тотожне? (перше форма) (як-є def))", mutual)
         # Джерело зберігає історичний #d1:1 у коментарі; заборона діє
         # лише для виконуваного SENS-коду, а не для provenance.
         active_first = "\n".join(
