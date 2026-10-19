@@ -1,11 +1,4 @@
-"""Свідок opt-in міграції lib/narrate.lisp на повну SENS укр.
-
-Той самий протокол, що й tests/test_ukr_optin_sources.py: перевіряємо форму
-вихідних S-expressions і ratified identity — НЕ Python-семантику SENS.
-Латинські call-heads у тілах замінено на повну укр-поверхню; історичні
-латинські імена лишаються визначеними; кожна повна укр-назва має exact-value
-DEFINE-аліас на історичне ім'я.
-"""
+"""Перевірки первинної повної укр-проєкції lib/narrate.lisp."""
 from __future__ import annotations
 
 import re
@@ -14,25 +7,36 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NARRATE = ROOT / "lib/narrate.lisp"
+D9 = ROOT / "lib/domains/d9.lisp"
 D10 = ROOT / "lib/domains/d10.lisp"
 
-TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
+TOKEN = re.compile(r';[^\\n]*|"(?:\\\\.|[^"\\\\])*"|[()]|[^\\s();]+')
 
-# (координата, історичне ім'я, повна укр-назва)
-PEERS = (
-    ("0010101110", "narrate-invalid-outcome-shape",
+# (ширина, точний ключ, сумісне англійське ім'я, повне укр-ім'я)
+PRIMARY = (
+    (9, "000011000", "narrate-fact", "пояснити-факт"),
+    (9, "000010110", "provenance-goal", "походження-ціль"),
+    (9, "000101001", "provenance-source", "походження-джерело"),
+    (9, "000001111", "provenance-rule", "походження-правило"),
+    (9, "000011100", "provenance-derived-from", "походження-похідний-з"),
+    (9, "000111000", "narrate-derivation", "пояснити-виведення"),
+    (9, "000011011", "narrate-provenance", "пояснити-походження"),
+    (9, "000000001", "narrate-answer", "пояснити-відповідь"),
+    (9, "000100110", "narrate-outcome", "пояснити-підсумок"),
+    (10, "0010101101", "narrate-proved-outcome", "пояснити-результат-із-доказом"),
+    (10, "0010101110", "narrate-invalid-outcome-shape",
      "пояснити-неприпустиму-структуру-результату"),
-    ("0010010110", "result-proper-list?", "результат-є-правильним-списком?"),
-    ("0010101101", "narrate-proved-outcome", "пояснити-результат-із-доказом"),
 )
-# result-proper-list? живе в іншому модулі — тут лише як ціль аліаса.
-HISTORIC = ("narrate-invalid-outcome-shape", "narrate-proved-outcome",
-            "narrate-fact", "narrate-derivation", "narrate-provenance",
-            "narrate-answer", "narrate-outcome")
+
+# result-proper-list? — зовнішній binding з lib/result-status.lisp;
+# цей файл лише зберігає на нього повну укр-проєкцію.
+EXTERNAL_PEER = ("0010010110", "result-proper-list?", "результат-є-правильним-списком?")
+HISTORIC = tuple(en for _width, _bits, en, _ukr in PRIMARY)
 
 
 def read_forms(source: str):
-    words = [m.group() for m in TOKEN.finditer(source) if not m.group().startswith(";")]
+    words = [m.group() for m in TOKEN.finditer(source)
+             if not m.group().startswith(";")]
     position = 0
 
     def read():
@@ -62,7 +66,8 @@ def read_forms(source: str):
 def definitions(source: str):
     result = {}
     for form in read_forms(source):
-        if not isinstance(form, list) or len(form) != 3 or form[0] not in ("0011", "визначити"):
+        if (not isinstance(form, list) or len(form) != 3
+                or form[0] not in ("0011", "визначити")):
             raise AssertionError("кожне верхнє визначення — D4:0011")
         name = form[1]
         if not isinstance(name, str) or name in result:
@@ -72,7 +77,7 @@ def definitions(source: str):
 
 
 def call_heads(expr):
-    """Усі викличні голови форми (quoted data не чіпаємо)."""
+    """Викличні голови форми; цитовані структури лишаються даними."""
     if not isinstance(expr, list) or not expr:
         return set()
     if expr[0] in ("як-є", "001"):
@@ -88,39 +93,66 @@ class NarrateUkrPeerTests(unittest.TestCase):
     def setUpClass(cls):
         cls.src = NARRATE.read_text(encoding="utf-8")
         cls.defs = definitions(cls.src)
-        cls.d10 = D10.read_text(encoding="utf-8")
+        cls.domains = {
+            9: D9.read_text(encoding="utf-8"),
+            10: D10.read_text(encoding="utf-8"),
+        }
 
-    def test_peers_are_exact_value_aliases(self):
-        for _bits, historic, full in PEERS:
-            self.assertEqual(self.defs.get(full), historic,
-                             f"{full}: потрібний exact-value DEFINE alias на {historic}")
+    def test_primary_ukr_names_match_exact_ratified_domain_rows(self):
+        for width, bits, english, ukrainian in PRIMARY:
+            with self.subTest(domain=width, bits=bits):
+                self.assertEqual(len(bits), width)
+                rows = [
+                    line.strip() for line in self.domains[width].splitlines()
+                    if line.lstrip().startswith(f"({bits} ")
+                ]
+                self.assertEqual(len(rows), 1, f"D{width}:{bits}: expected one row")
+                self.assertIn(f"(en {english})", rows[0])
+                self.assertIn(f"(укр {ukrainian})", rows[0])
+                self.assertIsInstance(self.defs.get(ukrainian), list,
+                                      f"{ukrainian}: full name must own the SENS body")
+                self.assertEqual(self.defs.get(english), ukrainian,
+                                 f"{english}: English must point to the full укр closure")
+                self.assertNotRegex(
+                    self.src,
+                    rf"(?m)^\\s*\\({bits}(?:\\s|\\))",
+                    "domain key must not become a raw executable head",
+                )
 
-    def test_historic_entrypoints_survive(self):
-        for name in HISTORIC:
-            self.assertIn(name, self.defs, f"історичний entrypoint {name} утрачено")
+    def test_external_result_status_alias_is_not_redefined_as_a_new_closure(self):
+        bits, english, ukrainian = EXTERNAL_PEER
+        self.assertEqual(len(bits), 10)
+        rows = [
+            line.strip() for line in self.domains[10].splitlines()
+            if line.lstrip().startswith(f"({bits} ")
+        ]
+        self.assertEqual(len(rows), 1)
+        self.assertIn(f"(en {english})", rows[0])
+        self.assertIn(f"(укр {ukrainian})", rows[0])
+        self.assertEqual(self.defs.get(ukrainian), english)
 
-    def test_d10_rows_carry_these_exact_full_spellings(self):
-        for bits, historic, full in PEERS:
-            rows = [l.strip() for l in self.d10.splitlines()
-                    if l.lstrip().startswith(f"({bits} ")]
-            self.assertEqual(len(rows), 1, f"D10:{bits}: рівно один ratified рядок")
-            self.assertIn(f"(en {historic})", rows[0])
-            self.assertIn(f"(укр {full})", rows[0])
+    def test_all_historical_entrypoints_survive_as_aliases(self):
+        for _width, _bits, english, ukrainian in PRIMARY:
+            with self.subTest(entrypoint=english):
+                self.assertIn(english, self.defs)
+                self.assertEqual(self.defs[english], ukrainian)
 
-    def test_bodies_use_the_full_ukr_head(self):
-        for _bits, historic, full in PEERS:
-            self.assertNotIn(historic, call_heads(self.defs["narrate-outcome"]),
-                             f"{historic}: латинська голова лишилась у тілі")
+    def test_outcome_body_uses_full_ukr_heads(self):
+        heads = call_heads(self.defs["пояснити-підсумок"])
+        english_names = set(HISTORIC)
+        self.assertTrue(english_names.isdisjoint(heads), heads)
+        self.assertIn("пояснити-неприпустиму-структуру-результату", heads)
+        self.assertIn("пояснити-результат-із-доказом", heads)
 
-    def test_negative_reverting_a_peer_is_caught(self):
+    def test_negative_wrong_alias_is_caught(self):
         broken = self.src.replace(
-            "(визначити пояснити-результат-із-доказом narrate-proved-outcome)",
-            "(визначити пояснити-щось-інше narrate-proved-outcome)", 1)
+            "(визначити narrate-proved-outcome пояснити-результат-із-доказом)",
+            "(визначити narrate-proved-outcome пояснити-щось-інше)", 1)
         self.assertNotEqual(broken, self.src)
+        broken_defs = definitions(broken)
         with self.assertRaises(AssertionError):
-            for _bits, historic, full in PEERS:
-                if definitions(broken).get(full) != historic:
-                    raise AssertionError("exact-value DEFINE alias втрачено")
+            if broken_defs.get("narrate-proved-outcome") != "пояснити-результат-із-доказом":
+                raise AssertionError("exact-value DEFINE alias втрачено")
 
     def test_malformed_forms_rejected(self):
         with self.assertRaisesRegex(ValueError, "незакритий"):
