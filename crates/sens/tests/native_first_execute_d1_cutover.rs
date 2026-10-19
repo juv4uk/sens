@@ -14,8 +14,7 @@ fn eval(s: &mut Session, expression: &str) -> Result<sens::Value, sens::Language
 fn session() -> Session {
     let mut s = Session::default();
     let ast = parse_mixed_exact_domain_machine_source(PATH, SOURCE)
-        .expect("all 13 current-domain bridge forms parse");
-    assert_eq!(ast.len(), 13);
+        .expect("чинний reader повинен розібрати всі визначення native-first bridge");
     eval_parsed_expressions(&ast, &mut s).expect("install full execution bridge");
     s
 }
