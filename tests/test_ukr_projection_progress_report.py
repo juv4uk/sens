@@ -193,6 +193,47 @@ class FullUkrFileProgressTests(TempTree):
         self.assertEqual(audit["full_ukr_files"], 1)
 
 
+class ExecutableUkrProgressTests(TempTree):
+    def test_active_file_percentage_counts_call_heads_not_one_cyrillic_symbol(self):
+        root = self.tree({
+            "lib/готовий.lisp":
+                "(визначити робота (функція (аргумент) (сполучити аргумент (як-є ()))))\n",
+            "lib/залишок.lisp":
+                "(визначити програма (функція (аргумент) (legacy-call аргумент)))\n",
+            "docs/історія.lisp": "(legacy-call інший)\n",
+            "lib/domains/d3.lisp":
+                "(010 (ук атом?) (укр атом?) (san ()) (en atom) (LISP ATOM) (sym ()))\n",
+        })
+        progress = mod.measure(root)
+        self.assertEqual(progress.active_executable_files, 2)
+        self.assertEqual(progress.active_files_without_latin_heads, 1)
+        self.assertEqual(progress.active_files_pct, 50.0)
+        self.assertEqual(progress.active_latin_head_sites, 1)
+        self.assertGreater(progress.active_ukr_head_sites, 0)
+        self.assertLess(progress.active_heads_pct, 100.0)
+        self.assertIn("1/2 (50.0%, лексично)", mod.render(progress))
+
+    def test_no_executable_ukrainian_head_is_not_false_completion(self):
+        root = self.tree({
+            "lib/порожній.lisp": "; українська лише в коментарі\n",
+            "lib/старий.lisp": "(legacy-call 1)\n",
+        })
+        progress = mod.measure(root)
+        self.assertEqual(progress.active_executable_files, 2)
+        self.assertEqual(progress.active_files_without_latin_heads, 0)
+        self.assertEqual(progress.active_files_pct, 0.0)
+        self.assertEqual(progress.active_latin_head_sites, 1)
+
+    def test_quoted_old_name_is_data_and_does_not_block_real_ukr_head(self):
+        root = self.tree({
+            "lib/цитати.lisp": "(визначити згадка (як-є (legacy-call 1)))\n",
+        })
+        progress = mod.measure(root)
+        self.assertEqual(progress.active_executable_files, 1)
+        self.assertEqual(progress.active_files_without_latin_heads, 1)
+        self.assertEqual(progress.active_latin_head_sites, 0)
+
+
 class ProgressTests(unittest.TestCase):
     def test_percentages_and_pending(self):
         p = mod.Progress(lisp_files=4, files_with_pairs=2, pairs_total=8,
