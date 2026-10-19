@@ -79,9 +79,14 @@ for name,(domain,coord,resident) in expected_lower.items():
     assert resident in row["lower_identity"]
 
 # Internal helpers are explicitly classified internal by the public-surface inventory.
-for name in ("largest-chunk","nondecreasing-from?","nonincreasing-from?","digit->string"):
-    assert by_name[name]["decision"]=="INTERNAL-HELPER"
-    assert name in uk_inventory
+for registry_name, current_binding in (
+    ("largest-chunk", "знайти-найбільший-блок-частки"),
+    ("nondecreasing-from?", "перевірити-неспадання-значень?"),
+    ("nonincreasing-from?", "перевірити-незростання-значень?"),
+    ("digit->string", "digit->string"),
+):
+    assert by_name[registry_name]["decision"]=="INTERNAL-HELPER"
+    assert current_binding in uk_inventory
 
 assert by_name["invoke"]["decision"]=="HOLD-MECHANISM"
 assert by_name["invoke"]["selected_d9_candidate"] is False

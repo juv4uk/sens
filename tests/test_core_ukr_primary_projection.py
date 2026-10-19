@@ -83,6 +83,9 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             ("класифікувати-непорожність-рядка", "nonempty-string-membership-helper"),
             ("знайти-пару-підстановки", "sublis-pair"),
             ("підготувати-цитовані-аргументи", "apply-quote-args"),
+            ("знайти-найбільший-блок-частки", "largest-chunk"),
+            ("перевірити-неспадання-значень?", "nondecreasing-from?"),
+            ("перевірити-незростання-значень?", "nonincreasing-from?"),
         )
         for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
             with self.subTest(file=filename, migration="internal helper names"):
@@ -103,6 +106,19 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
                 self.assertNotIn("(string-membership-helper ", code)
         inventory = source("lib/surface/uk-inventory.lisp")
         for ukrainian, legacy in helpers:
+            with self.subTest(inventory=legacy):
+                self.assertIn(ukrainian, inventory)
+                self.assertNotIn(legacy, inventory)
+
+        # These three helpers deliberately have no D-domain resident names:
+        # keep them internal, Ukrainian, and exactly reversible at the callsite.
+        for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
+            with self.subTest(file=filename, migration="arithmetic helpers"):
+                for ukrainian, legacy in helpers[-3:]:
+                    self.assertIn(f"(визначити {ukrainian}", code)
+                    self.assertNotIn(f"({legacy} ", code)
+        inventory = source("lib/surface/uk-inventory.lisp")
+        for ukrainian, legacy in helpers[-3:]:
             with self.subTest(inventory=legacy):
                 self.assertIn(ukrainian, inventory)
                 self.assertNotIn(legacy, inventory)

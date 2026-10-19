@@ -42,8 +42,8 @@
   (internal
     ((bootstrap (make-macro))
      (core-library
-       (довжина-до reverse-onto map-onto filter-onto largest-chunk
-        nondecreasing-from? nonincreasing-from? digit->string
+       (довжина-до reverse-onto map-onto filter-onto знайти-найбільший-блок-частки
+        перевірити-неспадання-значень? перевірити-незростання-значень? digit->string
         number->string-onto sqrt-iter isqrt-step truthy?
         класифікувати-рядкове-значення порівняти-рядки-за-кодовими-точками класифікувати-непорожність-рядка
         знайти-пару-підстановки підготувати-цитовані-аргументи

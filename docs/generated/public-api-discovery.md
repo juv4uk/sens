@@ -170,11 +170,11 @@
 | `lib/core4.lisp` | function | `класифікувати-непорожність-рядка` | unreviewed |
 | `lib/core4.lisp` | function | `string<?` | unreviewed |
 | `lib/core4.lisp` | function | `symbol?` | unreviewed |
-| `lib/core4.lisp` | function | `largest-chunk` | unreviewed |
+| `lib/core4.lisp` | function | `знайти-найбільший-блок-частки` | unreviewed |
 | `lib/core4.lisp` | function | `quotient` | unreviewed |
 | `lib/core4.lisp` | function | `mod` | unreviewed |
-| `lib/core4.lisp` | function | `nondecreasing-from?` | unreviewed |
-| `lib/core4.lisp` | function | `nonincreasing-from?` | unreviewed |
+| `lib/core4.lisp` | function | `перевірити-неспадання-значень?` | unreviewed |
+| `lib/core4.lisp` | function | `перевірити-незростання-значень?` | unreviewed |
 | `lib/core4.lisp` | function | `<=` | unreviewed |
 | `lib/core4.lisp` | function | `>=` | unreviewed |
 | `lib/core4.lisp` | function | `digit->string` | unreviewed |
