@@ -134,7 +134,7 @@ class Core4WidthFirewall(unittest.TestCase):
         heads = active_heads(self.source)
         self.assertEqual(heads["00001010"], 0)
         self.assertEqual(heads["make-macro"], 7)
-        for name in ["and", "or", "let", "let*", "->", "->>", "my-postcore-materialize-stable-peers"]:
+        for name in ["and", "or", "let", "let*", "->", "->>", "матеріалізувати-сталі-відповідники"]:
             self.assertIn(f"(0011 {name}", self.source)
 
     def test_negative_old_macro_head_is_rejected(self):

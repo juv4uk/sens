@@ -47,9 +47,9 @@
         number->string-onto уточнити-корінь-ітерацією крок-цілого-кореня truthy?
         класифікувати-рядкове-значення порівняти-рядки-за-кодовими-точками класифікувати-непорожність-рядка
         знайти-пару-підстановки підготувати-цитовані-аргументи
-        my-postcore-stable-peer-projection my-postcore-peer-group
-        my-postcore-binding-status my-postcore-missing-peers
-        my-postcore-build-definitions my-postcore-materialize-stable-peers))))
+        сталі-відповідники-за-адресами знайти-групу-відповідників-за-адресою
+        стан-зв'язування-відповідника відсутні-відповідники
+        побудувати-визначення-відповідників матеріалізувати-сталі-відповідники))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
   (public-predicates
     (атом? eq? < = > numeric-buffer? string<? string? not? equal? member?
