@@ -211,21 +211,20 @@ def verify(ep: str, store: str, core: str, domains: dict[int, str]):
         if actual != golden:
             raise AssertionError(f"{name}: після peer normalization змінився SENS закон")
 
-    expected_empty = ["0010", [], "map-empty"]
-    if restore_call_heads(storedefs["empty-content-store"])[0:2] != expected_empty[0:2]:
-        raise AssertionError("empty-content-store: змінені arity/форма D4 LAMBDA")
-    if storedefs["empty-content-store"] != ["функція", [], "мапа-порожній"]:
+    if storedefs.get("порожній-вміст-сховище") != ["функція", [], "мапа-порожній"]:
         raise AssertionError("порожнє сховище має посилатися на чинний SENS peer")
+    if storedefs.get("empty-content-store") != "порожній-вміст-сховище":
+        raise AssertionError("empty-content-store: історичний вхід має бути alias-ом укр-замикання")
 
     # Інші історичні входи та shapes сховища лишаються дієвими.
     for name in ("content-store-put", "content-store-get", "content-store-contains?",
                  "content-store-put-world", "content-store-size"):
         if name not in storedefs:
             raise AssertionError(f"content-store: утрачене визначення {name}")
-    if storedefs.get("вміст-сховище-покласти") != "content-store-put":
-        raise AssertionError("content-store-put: історичний/укр alias не тотожний")
-    if storedefs.get("вміст-сховище-покласти-світ") != "content-store-put-world":
-        raise AssertionError("content-store-put-world: історичний/укр alias не тотожний")
+    if storedefs.get("content-store-put") != "вміст-сховище-покласти":
+        raise AssertionError("content-store-put: сумісний вхід має вести до первинного укр-замикання")
+    if storedefs.get("content-store-put-world") != "вміст-сховище-покласти-світ":
+        raise AssertionError("content-store-put-world: сумісний вхід має вести до первинного укр-замикання")
     return True
 
 
