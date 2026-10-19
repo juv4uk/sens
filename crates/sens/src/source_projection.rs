@@ -29,7 +29,13 @@ pub fn project_ukr_decimal_integer_literals(
 }
 
 fn integer_lexeme<'a>(expr: &Expr, source: &'a str) -> Option<&'a str> {
-    if !matches!(expr.kind, ExprKind::Number(_, _)) {
+    if matches!(
+        expr.kind,
+        ExprKind::DomainCall(..)
+            | ExprKind::Call(..)
+            | ExprKind::List(..)
+            | ExprKind::Pair(..)
+    ) {
         return None;
     }
     let token = source.get(expr.span.start..expr.span.end)?;
@@ -184,7 +190,7 @@ mod tests {
         let ExprKind::List(items) = &projected[0].kind else {
             panic!("expected list")
         };
-        assert!(matches!(items[1].kind, ExprKind::Symbol(_)));
-        assert!(!matches!(items[2].kind, ExprKind::BinaryNumber(_)));
+        assert!(matches!(&items[1].kind, ExprKind::Symbol(_)));
+        assert!(!matches!(&items[2].kind, ExprKind::BinaryNumber(_)));
     }
 }
