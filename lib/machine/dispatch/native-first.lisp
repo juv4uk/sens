@@ -69,7 +69,7 @@
        (native-first-fallback expression))
       (так
        (за-умовою
-         ((атом? (перше argument))
+         ((хибне? (атом? (перше argument)))
           (native-first-fallback expression))
          (так
           (за-умовою
@@ -97,7 +97,7 @@
        (native-first-fallback expression))
       (так
        (за-умовою
-         ((атом? (перше expression))
+         ((хибне? (атом? (перше expression)))
           (native-first-fallback expression))
          (так
           (за-умовою
