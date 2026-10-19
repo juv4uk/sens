@@ -631,7 +631,12 @@ fn parse_mixed_source(
     source: &str,
     descend_legacy_machine_wrappers: bool,
 ) -> Result<Vec<Expr>, LanguageError> {
-    let expressions = crate::parser::parse(source)?;
+    let parsed = crate::parser::parse(source)?;
+    // Project ordinary Ukrainian decimal leaves before callable heads become
+    // DomainIdentity nodes, so D5 arithmetic trees can choose one exact width.
+    // The projector preserves quote payloads and already typed domain data.
+    let expressions =
+        crate::source_projection::project_ukr_decimal_integer_literals(&parsed, source)?;
     // Call-head source spellings are NOT authoritative domain identities
     // when this very source declares the spelling as a DEFINE or LAMBDA
     // binding. Protect all such names across this source until the owner
@@ -658,7 +663,7 @@ fn parse_mixed_source(
             )
         })
         .collect::<Result<Vec<_>, _>>()?;
-    crate::source_projection::project_ukr_decimal_integer_literals(&lifted, source)
+    Ok(lifted)
 }
 
 fn binding_form(source: &str, head: &Expr) -> Option<u16> {
