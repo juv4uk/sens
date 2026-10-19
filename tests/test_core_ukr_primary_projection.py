@@ -44,14 +44,14 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         with self.subTest(file="lib/core4.lisp"):
             # Допоміжний двоелементний список і D8 «пара» — різні закони.
             self.assertIn(
-                "(визначити створити-список-із-двох-значень\\n  (функція (лівий-аргумент правий-аргумент)",
+                "(визначити створити-список-із-двох-значень\n  (функція (лівий-аргумент правий-аргумент)",
                 core4,
             )
             self.assertIn(
-                "(визначити пара\\n  (функція (ліві праві)\\n    (спарувати-послідовності ліві праві)))",
+                "(визначити пара\n  (функція (ліві праві)\n    (спарувати-послідовності ліві праві)))",
                 core4,
             )
-            self.assertNotIn("(визначити pair\\n  (функція", core4)
+            self.assertNotIn("(визначити pair\n  (функція", core4)
             self.assertNotIn("(визначити pair пара)", core4)
             self.assertIn("(визначити second друге)", core4)
             self.assertIn("(визначити third третє)", core4)
