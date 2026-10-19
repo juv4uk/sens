@@ -128,10 +128,15 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
 
         with self.subTest(file="racket/boot/core.lisp", migration="decimal-symbol helper"):
             racket_core = source("racket/boot/core.lisp")
-            self.assertIn("(0011 взяти-десятковий-символ", racket_core)
-            self.assertIn("(взяти-десятковий-символ ", racket_core)
-            self.assertNotIn("(0011 digit->string", racket_core)
+            self.assertIn("(визначити взяти-десятковий-символ", racket_core)
+            self.assertIn("(рядок-додати (взяти-десятковий-символ ", racket_core)
+            self.assertNotIn("(0011 взяти-десятковий-символ", racket_core)
+            self.assertNotIn("(110011110 (взяти-десятковий-символ", racket_core)
             self.assertNotIn("(digit->string ", racket_core)
+            start = racket_core.index("(визначити взяти-десятковий-символ")
+            end = racket_core.index("\n\n", start)
+            helper_source = racket_core[start:end]
+            self.assertNotRegex(helper_source, r"\([01]{3,9}(?=\s|\))")
 
         dependency_classifier = source("scripts/build-dependency-classification.lisp")
         with self.subTest(file="scripts/build-dependency-classification.lisp", migration="decimal-symbol helper"):
