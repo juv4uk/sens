@@ -1,8 +1,7 @@
-"""Перевірка єдиного показника: повністю українські .lisp-файли.
+"""Поведінкові перевірки єдиної файлової метрики української розкладки.
 
-Справжні випробування повнофайлової перевірки: рядки та коментарі
-не є винятками; будь-який недоступний з розкладки символ знімає файл із
-лічильника, незалежно від семантики Lisp.
+На відміну від звіту викличних голів, перевіряємо кожен символ повного файла,
+зокрема коментарі, рядкові дані та файли історичних каталогів.
 """
 from __future__ import annotations
 
@@ -10,190 +9,209 @@ import contextlib
 import importlib.util
 import io
 import json
+import os
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "report_ukr_projection_progress.py"
-
-_spec = importlib.util.spec_from_file_location("report_ukr_projection_progress", SCRIPT)
-mod = importlib.util.module_from_spec(_spec)
-sys.modules["report_ukr_projection_progress"] = mod
-_spec.loader.exec_module(mod)
-
-
-class TempTree(unittest.TestCase):
-    def tree(self, files: dict[str, str]) -> Path:
-        path = Path(tempfile.mkdtemp(prefix="ukr-proj-"))
-        self.addCleanup(lambda: shutil.rmtree(path, ignore_errors=True))
-        for name, source in files.items():
-            file = path / name
-            file.parent.mkdir(parents=True, exist_ok=True)
-            file.write_text(source, encoding="utf-8")
-        return path
-
-    def run_report(self, *args: str):
-        stdout = io.StringIO()
-        with contextlib.redirect_stdout(stdout):
-            status = mod.main(list(args))
-        return status, stdout.getvalue()
+spec = importlib.util.spec_from_file_location("report_ukr_projection_progress", SCRIPT)
+assert spec is not None and spec.loader is not None
+report = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = report
+spec.loader.exec_module(report)
 
 
-class WholeFileKeyboardTests(TempTree):
-    def test_comment_and_string_with_latin_make_the_whole_file_incomplete(self):
+class FileTree(unittest.TestCase):
+    def tree(self, files: dict[str, str | bytes]) -> Path:
+        root = Path(tempfile.mkdtemp(prefix="sens-ukr-files-"))
+        self.addCleanup(shutil.rmtree, root, ignore_errors=True)
+        for name, value in files.items():
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if isinstance(value, bytes):
+                path.write_bytes(value)
+            else:
+                path.write_text(value, encoding="utf-8")
+        return root
+
+    def cli(self, *args: str) -> tuple[int, str]:
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            code = report.main(list(args))
+        return code, output.getvalue()
+
+
+class WholeFileMetricTests(FileTree):
+    def test_every_character_in_comments_and_strings_is_checked(self):
         root = self.tree({
-            "lib/готовий.lisp": "(визначити число -125,5)\n; українською\n",
-            "lib/коментар.lisp": "(визначити число 1)\n; TODO\n",
-            "lib/рядок.lisp": '(визначити імʼя "English")\n',
+            "lib/повністю.lisp": '(визначити річ "текст")\n; Примітка\n',
+            "lib/також.lisp": "(визначити сума (додати 12 30))\n",
+            "lib/коментар.lisp": "(визначити річ 1)\n; TODO\n",
+            "lib/рядок.lisp": '(визначити річ "English")\n',
+            "lib/код.lisp": "(визначити legacy 1)\n",
+            "research/архів.lisp": "; Old version\n",
+            "not-lisp.txt": "English",
         })
-        report = mod.measure(root)
-        self.assertEqual(report["files_total"], 3)
-        self.assertEqual(report["files_fully_ukrainian"], 1)
-        self.assertEqual(report["files_remaining"], 2)
-        self.assertEqual(report["pct"], 33.3)
-        reasons = {item["path"]: item for item in report["pending_files"]}
-        self.assertEqual(reasons["lib/коментар.lisp"]["character"], "T")
-        self.assertEqual(reasons["lib/коментар.lisp"]["line"], 2)
-        self.assertEqual(reasons["lib/коментар.lisp"]["column"], 3)
-        self.assertEqual(reasons["lib/рядок.lisp"]["character"], "ʼ")
-
-    def test_quoted_english_text_alone_is_not_allowed(self):
-        root = self.tree({
-            "lib/текст.lisp": '(визначити текст "English")\n',
+        result = report.measure(root)
+        self.assertEqual(result.total_lisp_files, 6)
+        self.assertEqual(result.full_ukr_files, 2)
+        self.assertEqual(result.percentage, 33.3)
+        self.assertEqual(len(result.unfinished), 4)
+        self.assertEqual({r.path for r in result.unfinished}, {
+            "lib/коментар.lisp", "lib/рядок.lisp",
+            "lib/код.lisp", "research/архів.lisp",
         })
-        issue = mod.measure(root)["pending_files"][0]
-        self.assertEqual((issue["line"], issue["column"], issue["character"]),
-                         (1, 19, "E"))
-
-    def test_ukrainian_punctuation_numbers_spaces_and_newlines_are_allowed(self):
-        root = self.tree({
-            "приклад.lisp": "(визначити число -25,25)\n"
-                           "; Ґ ґ Ї ї Є є І і ' \" № ₴ + = ? : ! \\ /\t\n",
-        })
-        report = mod.measure(root)
-        self.assertEqual(report["files_fully_ukrainian"], 1)
-        self.assertEqual(report["pct"], 100.0)
-
-    def test_typographic_apostrophe_and_machine_hash_fail(self):
-        root = self.tree({
-            "типографіка.lisp": "(визначити об’єкт 1)\n",
-            "машинний.lisp": "(визначити вміст #d1:1)\n",
-        })
-        report = mod.measure(root)
-        self.assertEqual(report["files_fully_ukrainian"], 0)
-        chars = [x["character"] for x in report["pending_files"]]
-        self.assertEqual(chars, ["#", "’"])
-
-    def test_percentage_changes_only_when_the_entire_file_is_correct(self):
-        root = self.tree({
-            "lib/готовий.lisp": "(визначити річ 1)\n",
-            "lib/не-готовий.lisp": "(визначити річ 1)\n; TODO\n",
-        })
-        self.assertEqual(mod.measure(root)["pct"], 50.0)
-        (root / "lib/не-готовий.lisp").write_text(
-            "(визначити річ 1)\n; готово\n", encoding="utf-8")
-        self.assertEqual(mod.measure(root)["pct"], 100.0)
-
-    def test_all_directories_count_including_tables_history_and_tests(self):
-        root = self.tree({
-            "lib/domains/d4.lisp": "(укр назва)\n",
-            "research/archive/old.lisp": "(legacy)\n",
-            "tests/тест.lisp": "(українська)\n",
-            "ignore.txt": "(legacy)\n",
-            ".git/objects/example.lisp": "(legacy)\n",
-        })
-        report = mod.measure(root)
-        self.assertEqual(report["files_total"], 3)
-        self.assertEqual(report["files_fully_ukrainian"], 2)
-
-    def test_empty_and_whitespace_only_files_are_not_completed(self):
-        root = self.tree({
-            "порожній.lisp": "",
-            "пробіли.lisp": "\n \t\n",
-        })
-        report = mod.measure(root)
-        self.assertEqual(report["files_fully_ukrainian"], 0)
-        self.assertTrue(all(p["reason"] == "порожній файл"
-                            for p in report["pending_files"]))
-
-    def test_invalid_utf8_is_not_silently_ignored(self):
-        root = self.tree({"зіпсований.lisp": "(визначити 1)\n"})
-        (root / "зіпсований.lisp").write_bytes(b"\xff")
-        report = mod.measure(root)
-        self.assertEqual(report["files_fully_ukrainian"], 0)
-        self.assertEqual(report["pending_files"][0]["reason"],
-                         "неможливо прочитати UTF-8")
-
-    def test_symlink_is_not_assumed_to_be_completed(self):
-        root = self.tree({"основний.lisp": "(визначити число 1)\n"})
-        (root / "посилання.lisp").symlink_to(root / "основний.lisp")
-        report = mod.measure(root)
-        self.assertEqual(report["files_total"], 2)
-        self.assertEqual(report["files_fully_ukrainian"], 1)
-        self.assertIn("посилання", report["pending_files"][0]["reason"])
-
-    def test_empty_tree_is_not_one_hundred_percent(self):
-        report = mod.measure(self.tree({}))
-        self.assertEqual(report["files_total"], 0)
-        self.assertEqual(report["files_fully_ukrainian"], 0)
-        self.assertEqual(report["pct"], 0.0)
-
-    def test_order_and_counts_are_deterministic(self):
-        root = self.tree({"в.lisp": "(legacy)\n", "а.lisp": "(назва)\n"})
-        self.assertEqual(mod.measure(root), mod.measure(root))
-        self.assertEqual(mod.measure(root)["pending_files"][0]["path"], "в.lisp")
-
-
-class ReportInterfaceTests(TempTree):
-    def test_stdout_and_json_contain_only_the_same_file_metric(self):
-        root = self.tree({
-            "а.lisp": "(визначити а 1)\n",
-            "б.lisp": "(define b 1)\n",
-        })
-        output = root / "report.json"
-        status, stdout = self.run_report(
-            "--root", str(root), "--no-annotation", "--json", str(output))
-        self.assertEqual(status, 0)
         self.assertEqual(
-            stdout.strip(), "ПОВНІСТЮ УКРАЇНСЬКІ .lisp: 1/2 (50.0%); залишилося 1 файлів")
-        data = json.loads(output.read_text(encoding="utf-8"))
-        self.assertEqual(data["files_fully_ukrainian"], 1)
-        self.assertEqual(data["files_total"], 2)
-        self.assertEqual(data["pct"], 50.0)
-        self.assertEqual(len(data["pending_files"]), 1)
-        self.assertNotIn("pairs_pct", data)
-        self.assertNotIn("active_heads_pct", data)
-        self.assertNotIn("executable_ukr", data)
+            report.render(result),
+            "УКР-ПРОЄКЦІЯ .lisp: повністю українські файли 2/6 (33.3%)",
+        )
 
-    def test_list_shows_first_illegal_character_and_location(self):
-        root = self.tree({"а.lisp": "(назва)\n; TODO\n", "б.lisp": "(other)\n"})
-        status, stdout = self.run_report(
-            "--root", str(root), "--no-annotation", "--list", "--top", "1")
-        self.assertEqual(status, 0)
-        self.assertIn("а.lisp:2:3: символ поза українською розкладкою U+0054 'T'", stdout)
+    def test_english_comment_removal_really_increments_the_numerator(self):
+        root = self.tree({"lib/завдання.lisp": "(визначити річ 1)\n; TODO\n"})
+        self.assertEqual(report.measure(root).full_ukr_files, 0)
+        (root / "lib/завдання.lisp").write_text(
+            "(визначити річ 1)\n; Виконано\n", encoding="utf-8"
+        )
+        self.assertEqual(report.measure(root).full_ukr_files, 1)
+
+    def test_strings_and_nested_comments_are_not_skipped(self):
+        root = self.tree({
+            "lib/блок.lisp": "(визначити річ 1)\n#| англійське TODO |#\n",
+            "lib/рядок.lisp": '(визначити річ "привіт old")',
+            "lib/український.lisp": '(визначити річ "привіт; друг")',
+        })
+        state = report.measure(root)
+        self.assertEqual(state.full_ukr_files, 1)
+        self.assertIn("lib/блок.lisp", [x.path for x in state.unfinished])
+        self.assertIn("lib/рядок.lisp", [x.path for x in state.unfinished])
+
+    def test_special_unavailable_symbols_and_ukrainian_apostrophe(self):
+        root = self.tree({
+            "дозволено.lisp": "(визначити ім'я 123)\t; Ґрунт, №1 і ₴20\r\n",
+            "типографіка.lisp": "(визначити імʼя 1)\n",
+            "значок.lisp": "; тест 🙂\n",
+            "машинне.lisp": "(визначити назва #d1:1)\n",
+        })
+        result = report.measure(root)
+        self.assertEqual(result.full_ukr_files, 1)
+        reasons = {item.path: item.reason for item in result.unfinished}
+        self.assertIn("U+02BC", reasons["типографіка.lisp"])
+        self.assertIn("U+1F642", reasons["значок.lisp"])
+        self.assertIn("U+0023", reasons["машинне.lisp"])
+
+    def test_empty_file_satisfies_literal_every_character_condition(self):
+        root = self.tree({"порожній.lisp": "", "пробіли.lisp": " \t\r\n"})
+        result = report.measure(root)
+        self.assertEqual(result.full_ukr_files, 2)
+        self.assertEqual(result.percentage, 100.0)
+
+    def test_invalid_utf8_and_symlink_cannot_count_as_completed(self):
+        root = self.tree({"lib/зіпсований.lisp": b"\xff", "lib/ціль.txt": "тест"})
+        (root / "lib/посилання.lisp").symlink_to(root / "lib/ціль.txt")
+        result = report.measure(root)
+        self.assertEqual(result.total_lisp_files, 2)
+        self.assertEqual(result.full_ukr_files, 0)
+        reasons = {item.path: item.reason for item in result.unfinished}
+        self.assertIn("UnicodeDecodeError", reasons["lib/зіпсований.lisp"])
+        self.assertIn("символічне посилання", reasons["lib/посилання.lisp"])
+
+    def test_no_files(self):
+        result = report.measure(self.tree({}))
+        self.assertEqual(result.total_lisp_files, 0)
+        self.assertEqual(result.full_ukr_files, 0)
+        self.assertEqual(result.percentage, 0.0)
+
+
+class ReportCliTests(FileTree):
+    def test_default_output_contains_only_requested_metric(self):
+        root = self.tree({
+            "lib/так.lisp": "(визначити відповідь так)\n",
+            "lib/ні.lisp": "(визначити answer так)\n",
+        })
+        with patch.dict(os.environ, {"GITHUB_ACTIONS": "false"}):
+            code, stdout = self.cli("--root", str(root))
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            stdout.splitlines(),
+            ["УКР-ПРОЄКЦІЯ .lisp: повністю українські файли 1/2 (50.0%)"],
+        )
+        self.assertNotIn("ук==укр", stdout)
+        self.assertNotIn("викличні голови", stdout)
+
+    def test_diagnostics_and_limit(self):
+        root = self.tree({
+            "a.lisp": "; TODO\n",
+            "b.lisp": '(визначити а "OLD")\n',
+            "c.lisp": "(визначити а)\n",
+        })
+        code, stdout = self.cli("--root", str(root), "--list", "--top", "1",
+                                "--no-annotation")
+        self.assertEqual(code, 0)
+        self.assertIn("1/3 (33.3%)", stdout)
+        self.assertIn("a.lisp: 1:3: U+0054", stdout)
         self.assertIn("… ще 1", stdout)
+        self.assertNotIn("b.lisp:", stdout)
 
-    def test_annotation_is_information_only(self):
-        root = self.tree({"а.lisp": "(legacy)\n"})
-        status, stdout = self.run_report("--root", str(root))
-        self.assertEqual(status, 0)
-        self.assertIn("::notice::ПОВНІСТЮ УКРАЇНСЬКІ .lisp:", stdout)
-        self.assertNotIn("::error::", stdout)
+    def test_json_has_only_count_denominator_percentage(self):
+        root = self.tree({"перший.lisp": "(визначити річ)\n", "другий.lisp": "; TODO\n"})
+        destination = root / "report.json"
+        code, _ = self.cli("--root", str(root), "--json", str(destination),
+                           "--no-annotation")
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(destination.read_text(encoding="utf-8")), {
+            "total_lisp_files": 2,
+            "full_ukr_files": 1,
+            "percentage": 50.0,
+        })
 
-    def test_bad_root_is_usage_error(self):
+    def test_errors_on_absent_root(self):
         stderr = io.StringIO()
         with contextlib.redirect_stderr(stderr):
-            status, _ = self.run_report("--root", "/no/such/dir/report-ukr")
-        self.assertEqual(status, 2)
+            code, _ = self.cli("--root", "/no/such/ukr-source/dir")
+        self.assertEqual(code, 2)
+        self.assertIn("--root не є текою", stderr.getvalue())
 
-    def test_bad_top_is_usage_error(self):
-        root = self.tree({})
-        status, _ = self.run_report("--root", str(root), "--top", "-1")
-        self.assertEqual(status, 2)
+    def test_github_annotation_can_be_suppressed(self):
+        root = self.tree({"a.lisp": "(визначити річ)\n"})
+        with patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}):
+            self.assertIn("::notice::", self.cli("--root", str(root))[1])
+            self.assertNotIn("::notice::", self.cli(
+                "--root", str(root), "--no-annotation")[1])
+
+    def test_json_and_file_order_are_deterministic(self):
+        root = self.tree({"z.lisp": "; TODO\n", "a.lisp": "(визначити а)\n"})
+        original = (root / "a.lisp").read_bytes()
+        self.assertEqual(report.measure(root), report.measure(root))
+        dest = root / "metrics.json"
+        self.cli("--root", str(root), "--json", str(dest), "--no-annotation")
+        first = dest.read_bytes()
+        self.cli("--root", str(root), "--json", str(dest), "--no-annotation")
+        self.assertEqual(first, dest.read_bytes())
+        self.assertEqual(original, (root / "a.lisp").read_bytes())
+
+
+class CurrentRepositoryTests(unittest.TestCase):
+    def test_real_repository_is_scanned_without_archive_exclusions(self):
+        progress = report.measure(ROOT)
+        self.assertGreater(progress.total_lisp_files, 100)
+        self.assertEqual(len(progress.unfinished),
+                         progress.total_lisp_files - progress.full_ukr_files)
+        self.assertGreaterEqual(progress.percentage, 0)
+        self.assertLessEqual(progress.percentage, 100)
+
+    def test_keyboard_contract_matches_ratified_projection_guard(self):
+        from tests.test_ukrainian_domain_projection_rules import (
+            UKRAINIAN_KEYBOARD_OUTPUTS,
+        )
+        self.assertEqual(report.UKRAINIAN_KEYBOARD_OUTPUTS,
+                         UKRAINIAN_KEYBOARD_OUTPUTS)
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
