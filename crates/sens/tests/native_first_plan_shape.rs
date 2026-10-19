@@ -99,7 +99,7 @@ fn execute_domain_key(source: &str) -> String {
 fn three_bit_domain_keys_reject_malformed_lists() {
     let exact = r#"
         (за-умовою
-          ((native-first-domain-key3-bits?
+          ((нативні-біти-трибітного-ключа?
              (сполучити так (сполучити ні (сполучити ні (як-є ()))))
              так ні ні)
            (як-є прийнято))
@@ -113,7 +113,7 @@ fn three_bit_domain_keys_reject_malformed_lists() {
         "(сполучити так (сполучити ні (сполучити ні 7)))",
     ] {
         let source = format!(
-            "(за-умовою ((native-first-domain-key3-bits? {malformed} так ні ні) \
+            "(за-умовою ((нативні-біти-трибітного-ключа? {malformed} так ні ні) \
              (як-є помилково-прийнято)) (так (як-є відхилено)))"
         );
         assert_eq!(
@@ -128,7 +128,7 @@ fn three_bit_domain_keys_reject_malformed_lists() {
 fn domain_key_shape_requires_exact_width_and_two_fields() {
     let bits = "(сполучити так (сполучити ні (сполучити ні (як-є ()))))";
     let exact = format!(
-        "(за-умовою ((native-first-domain-key3-shape? \
+        "(за-умовою ((нативна-форма-трибітного-ключа? \
          (сполучити 3 (сполучити {bits} (як-є ()))) так ні ні) \
          (як-є прийнято)) (так (як-є відхилено)))"
     );
@@ -140,7 +140,7 @@ fn domain_key_shape_requires_exact_width_and_two_fields() {
         format!("(сполучити 3 (сполучити {bits} (сполучити 9 (як-є ()))))"),
     ] {
         let source = format!(
-            "(за-умовою ((native-first-domain-key3-shape? {malformed_shape} так ні ні) \
+            "(за-умовою ((нативна-форма-трибітного-ключа? {malformed_shape} так ні ні) \
              (як-є помилково-прийнято)) (так (як-є відхилено)))"
         );
         assert_eq!(
