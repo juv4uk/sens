@@ -32,7 +32,7 @@
 ; encoding policy belongs to Lisp, host only persists bytes.
 (визначити write-file
   (функція (шлях текст)
-    (друге (список (write-file-bytes шлях (utf8-encode-string текст)) текст))))
+    (друге (список (write-file-bytes шлях (кодування-юнікод-8-кодувати-рядок текст)) текст))))
 
 ; Stable surface peers are projected by load_fs_library after the public
 ; file closures exist. Avoid the retired per-file post-core materializer.
