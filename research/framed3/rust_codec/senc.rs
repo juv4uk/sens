@@ -21,6 +21,7 @@
 use std::cmp::Ordering;
 use std::sync::OnceLock;
 
+#[allow(dead_code)]
 mod canonical_form_capacity;
 
 use canonical_form_capacity::FormProfile;
@@ -765,6 +766,7 @@ pub struct Carrier {
 /// Мінімум фізичних байтів серед трьох маршрутів. За рівності перемагає T5.
 /// Повертає `.sens` (T5) або саморозрізнюваний `.senc` з однобайтовою міткою.
 /// Це **не** доказ глобальної оптимальності всіх можливих кодеків.
+#[allow(dead_code)]
 pub fn encode_smallest(words: &[String]) -> Result<Carrier, SencError> {
     let words = check_words(words)?;
     let t5 = t5_encode(&words)?;
