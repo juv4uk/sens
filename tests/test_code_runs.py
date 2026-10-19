@@ -76,7 +76,7 @@ class PythonEntrypointsRunTests(unittest.TestCase):
 
     def test_ukr_projection_report_runs(self):
         p = self._assert_runs("scripts/report_ukr_projection_progress.py", "--no-annotation")
-        self.assertIn("УКР-ПРОЄКЦІЯ", p.stdout)
+        self.assertIn("ПОВНІСТЮ УКРАЇНСЬКІ .lisp:", p.stdout)
 
     def test_ukr_projection_report_counts_complete_files_not_partial_names(self):
         # Повноцінний файл містить тільки доступні символи; латиниця
@@ -93,7 +93,7 @@ class PythonEntrypointsRunTests(unittest.TestCase):
             self.assertEqual(p.returncode, 0)
             self.assertEqual(
                 p.stdout.strip(),
-                "УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 1/2 (50.0%)")
+                "ПОВНІСТЮ УКРАЇНСЬКІ .lisp: 1/2 (50.0%); залишилося 1 файлів")
 
     def test_ukr_projection_report_bad_root_is_usage_error(self):
         p = run_entrypoint("scripts/report_ukr_projection_progress.py", "--root", "/no/such/dir")
