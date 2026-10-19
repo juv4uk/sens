@@ -84,3 +84,27 @@ fn yantra_json_object_predicate_is_actual_d1_behavior() {
         );
     }
 }
+
+
+#[test]
+fn yantra_message_and_tool_accessors_execute_with_ukrainian_bindings() {
+    // Справжній SENS reader/evaluator завантажує повний lib/yantra.lisp.
+    // Перевіряємо дані, а не кількість перейменувань чи симуляцію в Rust.
+    let mut session = agent_session();
+    for (reader, key, expected) in [
+        ("msg-role", "role", "людина"),
+        ("msg-content", "content", "вміст"),
+        ("msg-tool-calls", "tool-calls", "виклики"),
+        ("msg-tool-call-id", "tool-call-id", "ідентифікатор"),
+        ("tc-id", "id", "ідентифікатор"),
+        ("tc-name", "name", "назва"),
+        ("tc-arguments", "arguments", "параметри"),
+    ] {
+        let source = format!("({reader} (як-є (({key} . {expected}))))");
+        let actual = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS не виконав {reader}: {error}"))
+            .value
+            .to_string();
+        assert_eq!(actual, expected, "SENS accessor {reader} must select {key}");
+    }
+}
