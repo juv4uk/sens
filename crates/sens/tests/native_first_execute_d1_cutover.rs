@@ -22,7 +22,8 @@ fn session() -> Session {
 #[test]
 fn exact_d1_words_not_synthetic_predicate_calls() {
     for (source, expected) in [("так", true), ("ні", false)] {
-        let ast = parse(source).expect("чинний reader D1 проєкції");
+        let ast = parse_mixed_exact_domain_machine_source(PATH, source)
+            .expect("чинний точнодоменний reader D1 проєкції");
         assert!(matches!(&ast[0].kind, ExprKind::DomainIdentity(DomainIdentity::D1(_))));
         let mut s = Session::default();
         assert_eq!(eval(&mut s, source).unwrap().as_predicate_bit(), Some(expected));
