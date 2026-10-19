@@ -20,92 +20,92 @@
 ; NULL is the admitted exact D4 empty-list predicate and returns D1.
 ; It avoids trying to call atom-only EQ on structural ().
 (визначити narrate-proper-list?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((порожній? value)
+      ((порожній? значення)
        так)
-      ((атом? value)
+      ((атом? значення)
        ні)
       (так
-       (narrate-proper-list? (решта value))))))
+       (narrate-proper-list? (решта значення))))))
 
 ; Structural arity checks return exact D1:YES only at the requested boundary.
 ; Rejecting cases short-circuit before CDR walks; NULL safely recognizes ().
 (визначити narrate-list-exact-two?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((хибне? (narrate-proper-list? value))
+      ((хибне? (narrate-proper-list? значення))
        ні)
-      ((порожній? value)
+      ((порожній? значення)
        ні)
-      ((атом? value)
+      ((атом? значення)
        ні)
-      ((порожній? (решта value))
+      ((порожній? (решта значення))
        ні)
-      ((порожній? (решта (решта value)))
+      ((порожній? (решта (решта значення)))
        так)
       (так
        ні))))
 
 (визначити narrate-list-exact-three?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((хибне? (narrate-proper-list? value))
+      ((хибне? (narrate-proper-list? значення))
        ні)
-      ((порожній? value)
+      ((порожній? значення)
        ні)
-      ((атом? value)
+      ((атом? значення)
        ні)
-      ((порожній? (решта value))
+      ((порожній? (решта значення))
        ні)
-      ((порожній? (решта (решта value)))
+      ((порожній? (решта (решта значення)))
        ні)
-      ((порожній? (решта (решта (решта value))))
+      ((порожній? (решта (решта (решта значення))))
        так)
       (так
        ні))))
 
 (визначити narrate-fact
-  (функція (fact)
+  (функція (факт)
     (за-умовою
-      ((narrate-list-exact-two? fact)
-       (список (друге fact) (як-є is) (як-є a) (перше fact)))
-      ((narrate-list-exact-three? fact)
-       (список (друге fact) (перше fact) (третє fact)))
-      (так fact))))
+      ((narrate-list-exact-two? факт)
+       (список (друге факт) (як-є is) (як-є a) (перше факт)))
+      ((narrate-list-exact-three? факт)
+       (список (друге факт) (перше факт) (третє факт)))
+      (так факт))))
 
-(визначити provenance-goal (функція (prov) (друге prov)))
-(визначити provenance-source (функція (prov) (друге (третє prov))))
-(визначити provenance-rule (функція (prov) (друге (четверте prov))))
-(визначити provenance-derived-from (функція (prov) (друге (п'ятий prov))))
+(визначити provenance-goal (функція (походження) (друге походження)))
+(визначити provenance-source (функція (походження) (друге (третє походження))))
+(визначити provenance-rule (функція (походження) (друге (четверте походження))))
+(визначити provenance-derived-from (функція (походження) (друге (п'ятий походження))))
 
 (визначити narrate-derivation
-  (функція (derivations)
+  (функція (виведення)
     (за-умовою
-      ((атом? derivations) (як-є ()))
-      ((атом? (решта derivations)) (narrate-provenance (перше derivations)))
+      ((атом? виведення) (як-є ()))
+      ((атом? (решта виведення)) (пояснити-походження (перше виведення)))
       (так
-       (приєднати (narrate-provenance (перше derivations))
-         (сполучити (як-є and) (narrate-derivation (решта derivations))))))))
+       (приєднати (пояснити-походження (перше виведення))
+         (сполучити (як-є and) (пояснити-виведення (решта виведення))))))))
 
 (визначити narrate-provenance
-  (функція (prov)
+  (функція (походження)
     (за-умовою
-      ((тотожне? (походження-джерело prov) (як-є fact)) (narrate-fact (походження-правило prov)))
+      ((тотожне? (походження-джерело походження) (як-є fact)) (пояснити-факт (походження-правило походження)))
       (так
-       (приєднати (narrate-fact (походження-правило prov))
-         (сполучити (як-є because) (narrate-derivation (походження-похідний-з prov))))))))
+       (приєднати (пояснити-факт (походження-правило походження))
+         (сполучити (як-є because) (пояснити-виведення (походження-похідний-з походження))))))))
 
 ; `narrate-answer` grounds the conclusion with the caller's actual query while
 ; retaining the proof's real premises.
 (визначити narrate-answer
-  (функція (goal proof)
-    (нехай ((derivations (походження-похідний-з (походження proof))))
+  (функція (мета доказ)
+    (нехай ((виведення (походження-похідний-з (походження доказ))))
       (за-умовою
-        ((атом? derivations) (narrate-fact goal))
+        ((атом? виведення) (пояснити-факт мета))
         (так
-         (приєднати (narrate-fact goal)
-           (сполучити (як-є because) (narrate-derivation derivations))))))))
+         (приєднати (пояснити-факт мета)
+           (сполучити (як-є because) (пояснити-виведення виведення))))))))
 
 ; ----------------------------------------------------------------------
 ; Structured reasoning-outcome presentation (B2)
@@ -118,84 +118,84 @@
 ; sentence. Reuses result-proper-list? from the migrated result-status surface.
 
 (визначити narrate-proved-outcome
-  (функція (outcome)
-    (нехай ((statement (друге outcome))
-          (results (третє outcome)))
+  (функція (підсумок)
+    (нехай ((твердження (друге підсумок))
+          (результати (третє підсумок)))
       (за-умовою
-        ((атом? results) (список (як-є proved) statement (як-є without-proof-result)))
+        ((атом? результати) (список (як-є proved) твердження (як-є without-proof-result)))
         (так
          (приєднати
            (список (як-є proved))
-           (narrate-answer statement (друге (перше results)))))))))
+           (пояснити-відповідь твердження (друге (перше результати)))))))))
 
 (визначити narrate-invalid-outcome-shape
-  (функція (outcome)
-    (список (як-є invalid) (як-є outcome-shape) outcome)))
+  (функція (підсумок)
+    (список (як-є invalid) (як-є outcome-shape) підсумок)))
 
 ; Outcome arity is structural: the exact D3/D4 helpers above own the shape check.
 
 (визначити narrate-outcome
-  (функція (outcome)
+  (функція (підсумок)
     (за-умовою
-      ((атом? outcome) (пояснити-неприпустиму-структуру-результату outcome))
-      ((хибне? (результат-є-правильним-списком? outcome))
-       (пояснити-неприпустиму-структуру-результату outcome))
-      ((хибне? (атом? (перше outcome)))
-       (список (як-є invalid) (як-є outcome-tag) (перше outcome)))
-      ((хибне? (символ? (перше outcome)))
-       (список (як-є invalid) (як-є outcome-tag) (перше outcome)))
-      ((тотожне? (перше outcome) (як-є proved))
+      ((атом? підсумок) (пояснити-неприпустиму-структуру-результату підсумок))
+      ((хибне? (результат-є-правильним-списком? підсумок))
+       (пояснити-неприпустиму-структуру-результату підсумок))
+      ((хибне? (атом? (перше підсумок)))
+       (список (як-є invalid) (як-є outcome-tag) (перше підсумок)))
+      ((хибне? (символ? (перше підсумок)))
+       (список (як-є invalid) (як-є outcome-tag) (перше підсумок)))
+      ((тотожне? (перше підсумок) (як-є proved))
        (за-умовою
-         ((narrate-list-exact-three? outcome) (пояснити-результат-із-доказом outcome))
-         (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((тотожне? (перше outcome) (як-є unknown))
+         ((narrate-list-exact-three? підсумок) (пояснити-результат-із-доказом підсумок))
+         (так (пояснити-неприпустиму-структуру-результату підсумок))))
+      ((тотожне? (перше підсумок) (як-є unknown))
        (за-умовою
-         ((narrate-list-exact-two? outcome)
+         ((narrate-list-exact-two? підсумок)
           (список
             (як-є unknown)
             (як-є because)
             (як-є no-proof-found-for)
-            (друге outcome)))
-         (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((тотожне? (перше outcome) (як-є partial))
+            (друге підсумок)))
+         (так (пояснити-неприпустиму-структуру-результату підсумок))))
+      ((тотожне? (перше підсумок) (як-є partial))
        (за-умовою
-         ((narrate-list-exact-three? outcome)
+         ((narrate-list-exact-three? підсумок)
           (список
             (як-є partial)
             (як-є value)
-            (друге outcome)
+            (друге підсумок)
             (як-є bound)
-            (третє outcome)))
-         (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((тотожне? (перше outcome) (як-є blocked))
+            (третє підсумок)))
+         (так (пояснити-неприпустиму-структуру-результату підсумок))))
+      ((тотожне? (перше підсумок) (як-є blocked))
        (за-умовою
-         ((narrate-list-exact-two? outcome)
+         ((narrate-list-exact-two? підсумок)
           (список
             (як-є blocked)
             (як-є because)
-            (друге outcome)))
-         (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((тотожне? (перше outcome) (як-є disputed))
+            (друге підсумок)))
+         (так (пояснити-неприпустиму-структуру-результату підсумок))))
+      ((тотожне? (перше підсумок) (як-є disputed))
        (за-умовою
-         ((narrate-list-exact-two? outcome)
+         ((narrate-list-exact-two? підсумок)
           (список
             (як-є disputed)
             (як-є because)
             (як-є both-sides-have-evidence)
-            (друге outcome)))
-         (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((тотожне? (перше outcome) (як-є invalid))
+            (друге підсумок)))
+         (так (пояснити-неприпустиму-структуру-результату підсумок))))
+      ((тотожне? (перше підсумок) (як-є invalid))
        (за-умовою
-         ((narrate-list-exact-three? outcome)
+         ((narrate-list-exact-three? підсумок)
           (список
             (як-є invalid)
             (як-є because)
-            (друге outcome)
+            (друге підсумок)
             (як-є payload)
-            (третє outcome)))
-         (так (пояснити-неприпустиму-структуру-результату outcome))))
+            (третє підсумок)))
+         (так (пояснити-неприпустиму-структуру-результату підсумок))))
       (так
-       (список (як-є invalid) (як-є outcome-tag) (перше outcome))))))
+       (список (як-є invalid) (як-є outcome-tag) (перше підсумок))))))
 
 ; D9 Ukrainian callable projections. Names/codes: lib/domains/d9.lisp;
 ; source laws: knowledge/d9-semantic-layer-harvest-v1.json.
