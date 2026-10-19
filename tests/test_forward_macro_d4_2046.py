@@ -23,8 +23,6 @@ EXPECTED = [
     ("retract-fact-jtms!", ("fact",), "e1eced4762943cfd"),
 ]
 OLD_OTHER_FINGERPRINT = "9a9b6f936871476d"
-D10_UKR_HEAD = "підстановка-позначає-невдачу?"
-D10_EN_HEAD = "failed-subst?"
 TOKENS = re.compile(r'"(?:\\.|[^"\\])*"|;[^\n]*|[()]|[^\s();]+')
 MASK64 = (1 << 64) - 1
 
@@ -71,19 +69,6 @@ def fingerprint(form):
     return f"{value:016x}"
 
 
-def normalize_d10_projection(form):
-    """Reverse only the three D10 укр call heads for the frozen AST oracle."""
-    if not isinstance(form, list):
-        return 0
-    count = 0
-    if form and form[0] == D10_UKR_HEAD:
-        form[0] = D10_EN_HEAD
-        count += 1
-    for item in form:
-        count += normalize_d10_projection(item)
-    return count
-
-
 def validate_forward(forms):
     if len(forms) != 83:
         raise AssertionError("втрачена верхньорівнева форма")
@@ -118,12 +103,8 @@ def validate_forward(forms):
             other.append(form)
     if set(found) != set(expected):
         raise AssertionError("втрачено одне чи більше визначень")
-    normalized_other = deepcopy(other)
-    projected_heads = sum(normalize_d10_projection(form) for form in normalized_other)
-    if projected_heads != 3:
-        raise AssertionError("D10:1100011111 має рівно три голови проєкції укр")
-    if len(other) != 73 or fingerprint(normalized_other) != OLD_OTHER_FINGERPRINT:
-        raise AssertionError("змінено незаймані 73 форми поза точною D10-проєкцією")
+    if len(other) != 73 or fingerprint(other) != OLD_OTHER_FINGERPRINT:
+        raise AssertionError("змінено незаймані 73 форми")
     return found
 
 
