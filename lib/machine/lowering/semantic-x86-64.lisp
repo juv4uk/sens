@@ -16,10 +16,10 @@
 ; RAX carries the result per SysV x86-64. RCX is caller-saved, so the proof
 ; routine does not violate the host ABI by clobbering a callee-saved register.
 (визначити x86-lower-add-u64-forms
-  (функція (left right)
+  (функція (лівий-операнд-машини правий-операнд-машини)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) left)
-      (список (як-є mov-r64-imm64) (як-є rcx) right)
+      (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд-машини)
+      (список (як-є mov-r64-imm64) (як-є rcx) правий-операнд-машини)
       (список (як-є add-r64-r64) (як-є rax) (як-є rcx))
       (список (як-є ret)))))
 
@@ -27,18 +27,18 @@
 ; describe machine forms. Selection is guarded below by exact D5 evaluation,
 ; so SUB/IMUL are used only when inputs and the exact result all fit u64.
 (визначити x86-lower-difference-u64-forms
-  (функція (left right)
+  (функція (лівий-операнд-машини правий-операнд-машини)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) left)
-      (список (як-є mov-r64-imm64) (як-є rcx) right)
+      (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд-машини)
+      (список (як-є mov-r64-imm64) (як-є rcx) правий-операнд-машини)
       (список (як-є sub-r64-r64) (як-є rax) (як-є rcx))
       (список (як-є ret)))))
 
 (визначити x86-lower-times-u64-forms
-  (функція (left right)
+  (функція (лівий-операнд-машини правий-операнд-машини)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) left)
-      (список (як-є mov-r64-imm64) (як-є rcx) right)
+      (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд-машини)
+      (список (як-є mov-r64-imm64) (як-є rcx) правий-операнд-машини)
       (список (як-є imul-r64-r64) (як-є rax) (як-є rcx))
       (список (як-є ret)))))
 
@@ -47,10 +47,10 @@
 ; The narrow relation guarantees exact divisibility without borrowing a
 ; spelling, historical SID8 remainder helper, or truncating rational semantics.
 (визначити x86-lower-quotient-i64-equal-forms
-  (функція (left right)
+  (функція (лівий-операнд-машини правий-операнд-машини)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) left)
-      (список (як-є mov-r64-imm64) (як-є rcx) right)
+      (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд-машини)
+      (список (як-є mov-r64-imm64) (як-є rcx) правий-операнд-машини)
       (список (як-є cqo))
       (список (як-є idiv-r64) (як-є rcx))
       (список (як-є ret)))))
