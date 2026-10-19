@@ -75,8 +75,8 @@ fn machine_atoms_project_exactly_to_current_admitted_forms() {
 fn machine_block_composition_is_deterministic_and_encodes_via_176_path() {
     let mut session = machine_session();
 
-    let append_path = "(machine-block-append (machine-block-append (machine-block-append (machine-block-one (x86-mov-r64-imm64 (quote rax) 2)) (x86-mov-r64-imm64 (quote rcx) 3)) (x86-add-r64-r64 (quote rax) (quote rcx))) (x86-ret))";
-    let concat_path = "(machine-block-concat (machine-block-concat (machine-block-one (x86-mov-r64-imm64 (quote rax) 2)) (machine-block-one (x86-mov-r64-imm64 (quote rcx) 3))) (machine-block-concat (machine-block-one (x86-add-r64-r64 (quote rax) (quote rcx))) (machine-block-one (x86-ret))))";
+    let append_path = "(додати-форму-до-блоку (додати-форму-до-блоку (додати-форму-до-блоку (блок-з-однієї-форми (x86-mov-r64-imm64 (quote rax) 2)) (x86-mov-r64-imm64 (quote rcx) 3)) (x86-add-r64-r64 (quote rax) (quote rcx))) (x86-ret))";
+    let concat_path = "(поєднати-машинні-блоки (поєднати-машинні-блоки (блок-з-однієї-форми (x86-mov-r64-imm64 (quote rax) 2)) (блок-з-однієї-форми (x86-mov-r64-imm64 (quote rcx) 3))) (поєднати-машинні-блоки (блок-з-однієї-форми (x86-add-r64-r64 (quote rax) (quote rcx))) (блок-з-однієї-форми (x86-ret))))";
 
     let append_block = eval_value(append_path, &mut session);
     let concat_block = eval_value(concat_path, &mut session);
@@ -107,7 +107,7 @@ fn unadmitted_machine_atom_fails_closed_before_byte_materialization() {
     let mut session = machine_session();
     assert_eq!(
         eval_value(
-            "(x86-encode-machine-block (machine-block-one (x86-unary-gpr64-form (quote shl-r64) (quote rbx))))",
+            "(x86-encode-machine-block (блок-з-однієї-форми (x86-unary-gpr64-form (quote shl-r64) (quote rbx))))",
             &mut session,
         ),
         "(rejected unadmitted-machine-form (shl-r64 rbx))"
@@ -116,7 +116,7 @@ fn unadmitted_machine_atom_fails_closed_before_byte_materialization() {
 
 #[test]
 fn machine_atom_names_do_not_mint_public_semantic_surfaces() {
-    for machine_only in ["x86-ret","x86-mov-r64-imm64","x86-add-r64-r64","x86-jnz-rel8","machine-block"] {
+    for machine_only in ["x86-ret","x86-mov-r64-imm64","x86-add-r64-r64","x86-jnz-rel8","машинний-блок"] {
         assert!(
             sens::semantic_registry_export::semantic_id_for_admitted_surface(machine_only)
                 .is_none(),

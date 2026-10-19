@@ -89,7 +89,7 @@ fn assert_canonical_round_trip(forms: &str, session: &mut Session) {
 fn composed_machine_block_round_trips_through_independent_decoder() {
     let mut session = machine_session();
     let block = eval_value(
-        "(machine-block-append (machine-block-append (machine-block-append (machine-block-one (x86-mov-r64-imm64 (quote rax) 2)) (x86-mov-r64-imm64 (quote rcx) 3)) (x86-add-r64-r64 (quote rax) (quote rcx))) (x86-ret))",
+        "(додати-форму-до-блоку (додати-форму-до-блоку (додати-форму-до-блоку (блок-з-однієї-форми (x86-mov-r64-imm64 (quote rax) 2)) (x86-mov-r64-imm64 (quote rcx) 3)) (x86-add-r64-r64 (quote rax) (quote rcx))) (x86-ret))",
         &mut session,
     );
     let encoded = eval_value(
@@ -150,7 +150,7 @@ fn current_observer_subset_has_bidirectional_canonical_round_trip() {
 fn independent_decoder_fails_closed_on_truncated_machine_block() {
     let mut session = machine_session();
     let encoded = eval_value(
-        "(x86-encode-machine-block (machine-block-one (x86-mov-r64-imm64 (quote rax) 42)))",
+        "(x86-encode-machine-block (блок-з-однієї-форми (x86-mov-r64-imm64 (quote rax) 42)))",
         &mut session,
     );
     let mut bytes = parse_byte_list(&encoded);

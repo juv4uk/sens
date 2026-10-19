@@ -152,7 +152,7 @@ fn operand_type_success_does_not_bypass_instruction_admission() {
     // means to exercise.
     assert_eq!(
         eval_value(
-            "(x86-encode-machine-block (machine-block-one (list (quote shl-r64) (x86-gpr64-value (x86-gpr64 (quote rbx))))))",
+            "(x86-encode-machine-block (блок-з-однієї-форми (list (quote shl-r64) (x86-gpr64-value (x86-gpr64 (quote rbx))))))",
             &mut session,
         ),
         "(rejected unadmitted-machine-form (shl-r64 rbx))"

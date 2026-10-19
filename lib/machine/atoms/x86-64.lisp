@@ -626,4 +626,4 @@
 
 (визначити x86-encode-machine-block
   (функція (block)
-    (x86-encode-admitted-program-or-reject (machine-block-forms block))))
+    (x86-encode-admitted-program-or-reject (форми-машинного-блоку block))))
