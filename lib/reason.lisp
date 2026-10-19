@@ -249,7 +249,7 @@
       ((атом? rules)  (зворот acc))
       (так
        (нехай ((rule-results
-               (prove-rule goal (перше rules) bindings all-rules depth)))
+               (застосувати-правило-для-доведення-мети goal (перше rules) bindings all-rules depth)))
          (prove-goal-scan
            goal
            (решта rules)
@@ -275,8 +275,9 @@
       ((атом? lst)  (як-є ()))
       (так (сполучити (f (перше lst)) (map-proofs f (решта lst)))))))
 
+; D10:0101101100 — повна ратифікована голова укр; доказ і рекурсія належать Lisp.
 ; Try one rule, then wrap every successful body result in its proof node.
-(визначити prove-rule
+(визначити застосувати-правило-для-доведення-мети
   (функція (goal rule bindings all-rules depth)
     (нехай ((renamed-rule (розрізнити-логічні-змінні-правила-на-глибині rule depth)))
       (нехай ((new-subst (уніфікувати goal (перше renamed-rule) bindings)))
@@ -302,6 +303,9 @@
 
 ; Prove a conjunction while threading `(subst proofs)` through the shared
 ; conjunction walker from lib/unify.lisp.
+; Сумісність старої зовнішньої назви: той самий замикальний об’єкт.
+(визначити prove-rule застосувати-правило-для-доведення-мети)
+
 (визначити prove-goals
   (функція (goals bindings all-rules depth)
     (потік-виконання-кон'юнкція
