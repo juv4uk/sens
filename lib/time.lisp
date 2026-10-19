@@ -6,7 +6,7 @@
 ; but lives in Lisp so we can prove that calendar semantics do not belong to
 ; the host. Scope is non-negative Unix days; utc-now already rejects times
 ; before the Unix epoch.
-(визначити civil-from-days
+(визначити грегоріанська-дата-з-числа-днів
   (функція (дні-від-епохи)
     ((функція (зміщені-дні)
       ((функція (ера)
@@ -43,7 +43,6 @@
 
 
 ; Канонічна D10:1010111110 проєкція укр того самого Lisp-замикання.
-(визначити грегоріанська-дата-з-числа-днів civil-from-days)
 
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
 ; data. The host owns clock observation; this function owns deterministic
@@ -104,7 +103,7 @@
 ; AND/OR consume only that typed answer. All COND clauses are two-field
 ; (test expression). Predicate constants are direct one-bit values, not
 ; Number 0/1, T/NIL, structural () or rich classifiers used as truth.
-(визначити internet-time-mode-valid?
+(визначити інтернет-час-режим-припустимий?
   (функція (mode)
     (за-умовою
       ((тотожне? mode 4) так)
@@ -112,7 +111,7 @@
       (так ні)))
 )
 
-(визначити internet-time-stratum-valid?
+(визначити інтернет-час-рівень-припустимий?
   (функція (stratum)
     (за-умовою
       ((більше? stratum 0)
@@ -122,7 +121,7 @@
       (так ні)))
 )
 
-(визначити internet-time-fields->observation
+(визначити тлумачити-поля-відповіді-часу
   (функція (host mode stratum ntp-seconds fraction)
     (за-умовою
       ((інтернет-час-режим-припустимий? mode)
@@ -143,7 +142,7 @@
 ;   (ntp-fields host mode stratum ntp-seconds fraction)
 ; or a transport-level rejection such as (rejected receive-failed).
 ; Lisp owns every protocol interpretation after that raw observation boundary.
-(визначити internet-time-raw->observation
+(визначити перетворити-сирі-дані-часу-на-спостереження
   (функція (raw)
     (за-умовою
       ((тотожне? (перше raw) (як-є ntp-fields))
@@ -165,7 +164,7 @@
 
 
 ; Turning an accepted timestamp into calendar meaning is also language policy.
-(визначити internet-time-observation->utc
+(визначити дати-календарне-значення-схваленому-часу
   (функція (observation)
     (за-умовою
       ((тотожне? (перше observation) (як-є accepted))
@@ -227,7 +226,7 @@
 ;   (timezone-declarations tz-value etc-timezone-value)
 ; where each value is either a non-empty string or (). Lisp owns source
 ; precedence and the public detected/unknown result shape.
-(визначити timezone-declarations->observation
+(визначити обрати-достовірне-джерело-часового-поясу
   (функція (tz-value etc-timezone-value)
     ; D3 COND is exactly two clauses. First distinguish absent TZ; for a
     ; present TZ, distinguish empty from non-empty in a nested two-clause COND.
@@ -278,7 +277,7 @@
     )
   )
 )
-(визначити timezone-raw->observation
+(визначити часовий-пояс-сирий-до-спостереження
   (функція (raw)
     (за-умовою
       ((тотожне? (перше raw) (як-є timezone-declarations))
@@ -295,7 +294,7 @@
       (часовий-пояс-оголошення-сирий))))
 
 
-(визначити timezone-config
+(визначити створити-перевірене-значення-поясу
   (функція (name offset-seconds)
     (за-умовою
       ((string? name)
@@ -328,13 +327,7 @@
 ; Монотонний D10-механізм задає bootstrap; тут лишаються окремі raw host wrappers.
 (визначити крайній-час-з deadline-from)
 (визначити крайній-час-досягнуто-у? deadline-reached-at?)
-(визначити тлумачити-поля-відповіді-часу internet-time-fields->observation)
-(визначити інтернет-час-режим-припустимий? internet-time-mode-valid?)
-(визначити перетворити-сирі-дані-часу-на-спостереження internet-time-raw->observation)
-(визначити інтернет-час-рівень-припустимий? internet-time-stratum-valid?)
 (визначити мілісекунди-з-наносекунди milliseconds-from-nanoseconds)
-(визначити обрати-достовірне-джерело-часового-поясу timezone-declarations->observation)
-(визначити часовий-пояс-сирий-до-спостереження timezone-raw->observation)
 (визначити юнікс-час-спостереження-узгоджений-час unix-time-observation->utc)
 (визначити узгоджений-час-з-юнікс utc-from-unix)
 
