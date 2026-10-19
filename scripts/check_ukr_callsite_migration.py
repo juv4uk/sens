@@ -323,6 +323,10 @@ def measure(root: Path) -> dict:
     active_cyrillic = active_ambiguous_cyr = 0
     active_full_ukr = active_compact_only = active_unknown_ukr = 0
     skipped = scanned = 0
+    # Справжня файлова частка: лише активні .lisp зі здійснюваними головами.
+    # Доменні таблиці, архіви, fixture і файли без викликів не в знаменнику.
+    active_files_with_calls = active_files_full_ukr = 0
+    active_files_mixed = active_files_no_ratified_ukr = 0
     for path in files:
         rel = path.relative_to(root)
         archival = (not rel.parts
@@ -343,14 +347,18 @@ def measure(root: Path) -> dict:
         scanned += 1
         try:
             forms = parse(path.read_text(encoding='utf-8'))
+            file_heads = file_full = file_nonfull = 0
             for head in candidate_heads(forms):
+                file_heads += 1
                 if ENCODED_HEAD.fullmatch(head.text):
+                    file_nonfull += 1
                     encoded.append({'file': rel.as_posix(), 'line': head.line,
                                     'column': head.column, 'head': head.text,
                                     'scope': scope})
                     archive_encoded += int(archival)
                     active_encoded += int(not archival)
                 elif LATIN.search(head.text):
+                    file_nonfull += 1
                     candidates = index.get(head.text.casefold(), [])
                     latin.append({'file': rel.as_posix(), 'line': head.line,
                                   'column': head.column, 'head': head.text,
@@ -367,17 +375,32 @@ def measure(root: Path) -> dict:
                     kinds = roles.get(spelling, set())
                     candidates = index.get(spelling, [])
                     if len(candidates) > 1:
+                        file_nonfull += 1
                         ambiguous_cyr += 1
                         active_ambiguous_cyr += int(not archival)
                     elif 'укр' in kinds:
+                        file_full += 1
                         full_ukr += 1
                         active_full_ukr += int(not archival)
                     elif 'ук' in kinds:
+                        file_nonfull += 1
                         compact_only += 1
                         active_compact_only += int(not archival)
                     else:
+                        # Локальні кириличні функції — окрема категорія, не
+                        # прирівнюються без доказу до ратифікованої укр.
                         unknown_ukr += 1
                         active_unknown_ukr += int(not archival)
+                else:
+                    file_nonfull += 1
+            if not archival and file_heads:
+                active_files_with_calls += 1
+                if file_full and not file_nonfull:
+                    active_files_full_ukr += 1
+                elif file_full:
+                    active_files_mixed += 1
+                else:
+                    active_files_no_ratified_ukr += 1
         except (UnicodeError, OSError, SourceError, RecursionError) as exc:
             errors.append({'file': rel.as_posix(), 'reason': str(exc), 'scope': scope})
             archive_unclassified += int(archival)
@@ -401,6 +424,14 @@ def measure(root: Path) -> dict:
             'active_compact_only_head_sites': active_compact_only,
             'active_local_cyrillic_head_sites': active_unknown_ukr,
             'active_ambiguous_cyrillic_head_sites': active_ambiguous_cyr,
+            'active_files_with_calls': active_files_with_calls,
+            'active_files_full_ukr': active_files_full_ukr,
+            'active_files_mixed': active_files_mixed,
+            'active_files_no_ratified_ukr': active_files_no_ratified_ukr,
+            'active_files_full_ukr_pct': (
+                round(100 * active_files_full_ukr / active_files_with_calls, 1)
+                if active_files_with_calls else 0.0
+            ),
             'ukr_call_head_pct': round(100 * cyrillic / total, 1) if total else 0.0,
             'unclassified_files': errors, 'latin_sites': latin,
             'peer_index': peers,
@@ -412,6 +443,12 @@ def render(m: dict, *, limit: int = 15) -> str:
         f"УКР-ВИКЛИКИ: кириличних голів {m['ukr_call_heads']}, латинських "
         f"{m['latin_call_heads']} ({m['ukr_call_head_pct']}% укр); "
         f"оглянуто .lisp {m['files_scanned']}/{m['files_total']}",
+        f"АКТИВНІ ФАЙЛИ на повній укр-проєкції: "
+        f"{m['active_files_full_ukr']}/{m['active_files_with_calls']} "
+        f"({m['active_files_full_ukr_pct']}%); "
+        f"змішані={m['active_files_mixed']}, "
+        f"без ратифікованої укр={m['active_files_no_ratified_ukr']}. "
+        "Статична проєкція, не SENS-eval.",
         f"ACTIVE-SCOPE: Latin={m['active_latin_heads']}, encoded={m['active_encoded_head_sites']}, "
         f"ambiguous-укр={m['active_ambiguous_cyrillic_head_sites']}, "
         f"unclassified={m['active_unclassified_files']}, укр={m['active_ukr_call_heads']}",
