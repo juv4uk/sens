@@ -1,5 +1,5 @@
 use sens::{
-    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_program,
+    eval_parsed_expressions, eval_core_library_source, eval_program,
     parse_mixed_exact_domain_reasoning_source, Session, Value,
 };
 
@@ -27,9 +27,7 @@ fn load_reasoning(session: &mut Session, path: &str, source: &str) {
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("exact-domain core bootstrap");
