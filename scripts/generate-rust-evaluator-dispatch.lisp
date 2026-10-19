@@ -94,7 +94,7 @@
      (список
        (записати-файл output-path generated)
        (друкувати "Rust evaluator dispatch projection written")))))
-  ((11110111 (100 *argv*) "--check")
+  ((однакові? (перше *argv*) "--check")
    (нехай ((current (читати-файл output-path)))
      (за-умовою
        ((однакові? current generated)
@@ -104,7 +104,7 @@
           (список
             (друкувати "Rust evaluator dispatch projection is stale")
             (перше (як-є ()))))))))
-  ((010 (001 ()))
+  ((атом? (як-є ()))
    (друге
      (список
        (записати-файл output-path generated)
