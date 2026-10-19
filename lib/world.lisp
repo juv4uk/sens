@@ -16,11 +16,11 @@
 ;; Vorgänger, und das neue Journal teilt das vollständige alte Journal als
 ;; Cons-Ende. Kein veränderliches Hostobjekt und kein Rust-Primitiv ist nötig.
 
-(визначити make-world
+(визначити створити-світ
   (функція (parent journal metadata)
     (список (як-є world) parent journal metadata)))
 
-(визначити empty-world
+(визначити порожній-світ
   (функція ()
     (створити-світ (як-є ()) (як-є ()) (як-є ()))))
 
@@ -40,27 +40,27 @@
          (так ні)))
       (так ні))))
 
-(визначити world-parent (функція (world) (друге world)))
-(визначити world-journal (функція (world) (третє world)))
+(визначити світ-батько (функція (world) (друге world)))
+(визначити світ-журнал (функція (world) (третє world)))
 ; D6:100111 CADDDR has no admitted evaluator mechanism; derive the
 ; same fourth-field projection as exact D5:10011 CADDR after D3:011 CDR.
-(визначити world-metadata (функція (world) (третє (решта world))))
+(визначити світ-метадані (функція (world) (третє (решта world))))
 
 ;; Events intentionally have the same data shape as `lib/knowledge.lisp`'s
 ;; journal, so a later migration can reuse packages and projections unchanged.
 ;; Події навмисно мають ту саму форму, що й журнал `lib/knowledge.lisp`.
 ;; Ereignisse haben absichtlich dieselbe Form wie in `lib/knowledge.lisp`.
-(визначити world-record
+(визначити світ-запис
   (функція (world event)
     (створити-світ world
                 (сполучити event (світ-журнал world))
                 (світ-метадані world))))
 
-(визначити world-tell
+(визначити світ-повідомити
   (функція (world module-name clause)
     (світ-запис world (список (як-є tell) module-name clause))))
 
-(визначити world-retract
+(визначити світ-відкликати
   (функція (world module-name clause)
     (світ-запис world (список (як-є retract) module-name clause))))
 
@@ -647,25 +647,25 @@
 ;; dieselbe Adresse. Die Weltadresse umfasst Journal und Metadaten; der
 ;; Vorgänger wird nicht rekursiv dupliziert. Dies ist ein exakter Schlüssel,
 ;; kein kryptographischer Digest; ein späteres SHA kann diesen Schlüssel kürzen.
-(визначити knowledge-content-address
+(визначити знання-вміст-адреса
   (функція (knowledge)
     (значення-у-текст knowledge)))
 
-(визначити world-address-content
+(визначити світ-адреса-вміст
   (функція (world)
     (список (як-є world-history)
             (світ-журнал world)
             (світ-метадані world))))
 
-(визначити world-content-address
+(визначити світ-вміст-адреса
   (функція (world)
     (знання-вміст-адреса (світ-адреса-вміст world))))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+; opt-in повна укр-поверхня: первинні D9-визначення в цьому блоці названі укр.
 (визначити порадити-всі-світ advise-all-world)
-(визначити знання-вміст-адреса knowledge-content-address)
-(визначити створити-світ make-world)
-(визначити світ-адреса-вміст world-address-content)
+(визначити knowledge-content-address знання-вміст-адреса)
+(визначити make-world створити-світ)
+(визначити world-address-content світ-адреса-вміст)
 (визначити отримати-світ-на-заданій-глибині-від-поточного world-at-depth-from)
 (визначити світ-клаузи world-clauses)
 (визначити піднятись-ланцюгом-світу-до-заданої-глибини world-climb-to-depth)
@@ -673,17 +673,20 @@
 (визначити вирівняний-спільний-предок-двох-світів world-common-ancestor-aligned)
 (визначити світ-глибина world-depth)
 (визначити світ-різниця world-diff)
-(визначити світ-журнал world-journal)
-(визначити світ-метадані world-metadata)
+(визначити world-journal світ-журнал)
+(визначити world-metadata світ-метадані)
 (визначити світ-модуль-події world-module-events)
 (визначити світ-модуль-відомий? world-module-known?)
 (визначити світи-не-мають-спільного-предка? world-no-common-ancestor?)
 (визначити цей-світ-не-є-предком-іншого? world-not-ancestor?)
-(визначити світ-батько world-parent)
-(визначити світ-запис world-record)
-(визначити світ-повідомити world-tell)
+(визначити world-parent світ-батько)
+(визначити world-record світ-запис)
+(визначити world-tell світ-повідомити)
 (визначити світ-повідомити-всі world-tell-all)
 
+(визначити empty-world порожній-світ)
+(визначити world-retract світ-відкликати)
+(визначити world-content-address світ-вміст-адреса)
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити перетворити-клаузи-на-події-повідомлення clauses->tell-events)
 (визначити клауза-бази-знань-коректна? knowledge-clause-valid?)
