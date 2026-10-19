@@ -205,7 +205,9 @@ fn required_width_in_math_tree(
 
 fn is_quoted_source_form(expr: &Expr, source: &str) -> bool {
     let ExprKind::List(items) = &expr.kind else {
-        return false;
+        // A parser-owned historical call node is opaque as a whole. It must
+        // not be deconstructed here to discover numeric operands.
+        return matches!(expr.kind, ExprKind::Call(..) | ExprKind::Sid(..));
     };
     let Some(head) = items.first() else {
         return false;
@@ -215,10 +217,14 @@ fn is_quoted_source_form(expr: &Expr, source: &str) -> bool {
     {
         return true;
     }
-    matches!(&head.kind, ExprKind::Symbol(name)
+    if matches!(&head.kind, ExprKind::Symbol(name)
         if matches!(name.as_ref(), "як-є" | "quote" | "'"))
-        || source.get(head.span.start..head.span.end)
-            .is_some_and(|spelling| spelling == "001" || spelling == "'")
+    {
+        return true;
+    }
+    source.get(head.span.start..head.span.end).is_some_and(|spelling| {
+        matches!(spelling, "001" | "'" | "00000001")
+    })
 }
 
 fn project_expr(
@@ -376,12 +382,18 @@ mod tests {
 
     #[test]
     fn quoted_source_data_keeps_decimal_atoms_and_nested_code_unchanged() {
+        for source in [
+            "(як-є (сполучити 2 (сполучити -3 (як-є ()))))",
+            "(00000001 (100 x))",
+        ] {
+            let parsed = crate::parse(source).expect("source parses");
+            let projected = project_ukr_decimal_integer_literals(&parsed, source)
+                .expect("quoted source data remains opaque");
+            assert_eq!(projected, parsed, "projection must not recurse beneath QUOTE: {source}");
+        }
         let source = "(як-є (сполучити 2 (сполучити -3 (як-є ()))))";
         let parsed = crate::parse(source).expect("source parses");
-        let projected = project_ukr_decimal_integer_literals(&parsed, source)
-            .expect("quoted source data remains opaque");
-        assert_eq!(projected, parsed, "projection must not recurse beneath QUOTE");
-        let ExprKind::List(outer) = &projected[0].kind else { panic!("outer QUOTE"); };
+        let ExprKind::List(outer) = &parsed[0].kind else { panic!("outer QUOTE"); };
         let ExprKind::List(data) = &outer[1].kind else { panic!("quoted list data"); };
         assert!(matches!(&data[1].kind, ExprKind::Number(value, _) if *value == 2.0));
     }
