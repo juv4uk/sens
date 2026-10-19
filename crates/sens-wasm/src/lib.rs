@@ -113,14 +113,14 @@ struct WebSession {
 impl WebSession {
     fn new(mut session: Session) -> Result<Self, String> {
         let base_environment = session.environment.clone();
-        let surface_environment = build_surface_layer(&base_environment, WebSurface::Core)?;
+        let surface_environment = build_surface_layer(&base_environment, WebSurface::UkrainianFull)?;
         let user_environment = surface_environment.child();
         session.environment = user_environment.clone();
         Ok(Self {
             session,
             base_environment,
             user_environment,
-            surface: WebSurface::Core,
+            surface: WebSurface::UkrainianFull,
         })
     }
 
@@ -386,6 +386,20 @@ mod tests {
             let state = guard.as_ref().unwrap();
             assert!(state.session.environment.get("атом?").is_none());
             assert!(state.session.environment.get("додай-крок").is_some());
+        });
+    }
+
+    #[test]
+    fn web_session_starts_on_full_ukrainian_projection() {
+        reset_session();
+        init_if_needed().expect("full Ukrainian default surface");
+        SESSION.with(|slot| {
+            let guard = slot.borrow();
+            let state = guard.as_ref().expect("initialized web session");
+            assert_eq!(state.surface, WebSurface::UkrainianFull);
+            let full = eval_program("(порожній-текст? \"\")", &mut state.session.clone())
+                .expect("full Ukrainian call head works by default");
+            assert_eq!(full.value.to_string(), "(1)");
         });
     }
 
