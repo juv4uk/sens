@@ -1,6 +1,9 @@
 """Regression checks for the pinned Zig Windows build path."""
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -58,6 +61,31 @@ class PinnedZigWindowsSetupTests(unittest.TestCase):
             self.assertIn('env::var("CARGO_CFG_TARGET_ARCH")', source)
             self.assertIn('format!("{target_arch}-windows-msvc")', source)
             self.assertIn('.arg("-target")', source)
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows-only pinned Zig cache")
+    def test_cargo_build_finds_cached_pinned_zig_without_ZIG(self):
+        """RustRover starts Cargo without the shell wrapper's ZIG override."""
+        cached_zig = (
+            Path(os.environ["LOCALAPPDATA"])
+            / "SENS"
+            / "zig"
+            / f"zig-x86_64-windows-{VERSION}"
+            / "zig.exe"
+        )
+        if not cached_zig.is_file():
+            self.skipTest(f"pinned Zig cache is absent: {cached_zig}")
+
+        environment = os.environ.copy()
+        environment.pop("ZIG", None)
+        result = subprocess.run(
+            ["cargo", "build", "-p", "sens-cli", "--locked"],
+            cwd=ROOT,
+            env=environment,
+            text=True,
+            capture_output=True,
+            timeout=600,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":

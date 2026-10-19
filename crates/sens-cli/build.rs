@@ -3,6 +3,24 @@
 // Standalone SENS core/WASM do not inherit the sens-cli physical backend.
 use std::{env, path::PathBuf, process::Command};
 
+fn pinned_zig_compiler(pinned: &str) -> std::ffi::OsString {
+    if let Some(compiler) = env::var_os("ZIG") {
+        return compiler;
+    }
+    #[cfg(windows)]
+    if let Some(local_app_data) = env::var_os("LOCALAPPDATA") {
+        let cached = PathBuf::from(local_app_data)
+            .join("SENS")
+            .join("zig")
+            .join(format!("zig-x86_64-windows-{pinned}"))
+            .join("zig.exe");
+        if cached.is_file() {
+            return cached.into_os_string();
+        }
+    }
+    "zig".into()
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=../../.zig-version");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5/t5.zig");
@@ -57,6 +75,7 @@ fn main() {
     // after its compiler selection changes, bypassing the pinned version probe.
     println!("cargo:rerun-if-env-changed=ZIG");
     println!("cargo:rerun-if-env-changed=PATH");
+    println!("cargo:rerun-if-env-changed=LOCALAPPDATA");
     if env::var_os("CARGO_FEATURE_ZIG_TRANSPORT").is_none() {
         return;
     }
@@ -72,9 +91,9 @@ fn main() {
         "libsens_zig_transport.a"
     };
     let archive = out.join(archive_name);
-    let compiler = env::var_os("ZIG").unwrap_or_else(|| "zig".into());
     // Toolchain identity is not SENS semantic authority. Refuse version drift.
     let pinned = include_str!("../../.zig-version").trim();
+    let compiler = pinned_zig_compiler(pinned);
     let version = Command::new(&compiler)
         .arg("version")
         .output()

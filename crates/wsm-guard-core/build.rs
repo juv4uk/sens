@@ -3,6 +3,24 @@
 // or any source-file byte carrier is unavailable.
 use std::{env, path::PathBuf, process::Command};
 
+fn pinned_zig_compiler(pinned: &str) -> std::ffi::OsString {
+    if let Some(compiler) = env::var_os("ZIG") {
+        return compiler;
+    }
+    #[cfg(windows)]
+    if let Some(local_app_data) = env::var_os("LOCALAPPDATA") {
+        let cached = PathBuf::from(local_app_data)
+            .join("SENS")
+            .join("zig")
+            .join(format!("zig-x86_64-windows-{pinned}"))
+            .join("zig.exe");
+        if cached.is_file() {
+            return cached.into_os_string();
+        }
+    }
+    "zig".into()
+}
+
 fn main() {
     for path in [
         "../../.zig-version",
@@ -15,6 +33,7 @@ fn main() {
     }
     println!("cargo:rerun-if-env-changed=ZIG");
     println!("cargo:rerun-if-env-changed=PATH");
+    println!("cargo:rerun-if-env-changed=LOCALAPPDATA");
     // Explicit compatibility builds may compile the host but cannot load
     // SENS Guard sources. The Rust adapter below fails closed in that mode.
     if env::var_os("CARGO_FEATURE_ZIG_SOURCE").is_none() {
@@ -22,9 +41,9 @@ fn main() {
     }
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
         .join("../..");
-    let compiler = env::var_os("ZIG").unwrap_or_else(|| "zig".into());
-    let compiler_label = PathBuf::from(&compiler).display().to_string();
     let pinned = include_str!("../../.zig-version").trim();
+    let compiler = pinned_zig_compiler(pinned);
+    let compiler_label = PathBuf::from(&compiler).display().to_string();
     let probe = Command::new(&compiler)
         .arg("version")
         .output()
