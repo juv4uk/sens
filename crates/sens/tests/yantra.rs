@@ -59,3 +59,28 @@ fn transport_failure_becomes_blocked_result_with_evidence() {
 }
 
 
+
+#[test]
+fn yantra_json_object_predicate_is_actual_d1_behavior() {
+    // Не симуляція JSON у Rust: завантажуємо повний lib/yantra.lisp
+    // тим самим SENS evaluator, що й інші інтеграційні свідки.
+    let mut session = agent_session();
+    for (source, expected) in [
+        ("(об'єкт-формат-обміну-даними? (як-є ((назва . сонце))))", true),
+        (
+            "(об'єкт-формат-обміну-даними? (як-є ((назва . ((тип . зоря))))))",
+            true,
+        ),
+        ("(об'єкт-формат-обміну-даними? (як-є ()))", false),
+        ("(об'єкт-формат-обміну-даними? (як-є (назва сонце)))", false),
+        ("(об'єкт-формат-обміну-даними? (як-є назва))", false),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS eval не виконав {source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "D1 не відповідає фактичній структурі JSON даних: {source}"
+        );
+    }
+}
