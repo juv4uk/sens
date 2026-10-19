@@ -49,98 +49,98 @@
 ; right) -- the identical shape lib/persistent-map.lisp's node uses.
 
 (визначити vec-empty (сполучити 0 (як-є ())))
-(визначити vec-count (функція (v) (перше v)))
-(визначити vec-tree (функція (v) (решта v)))
+(визначити vec-count (функція (вектор-лічильника) (перше вектор-лічильника)))
+(визначити vec-tree (функція (вектор-дерева) (решта вектор-дерева)))
 
-(визначити vnode-index (функція (n) (перше n)))
-(визначити vnode-value (функція (n) (друге n)))
-(визначити vnode-height (функція (n) (третє n)))
+(визначити vnode-index (функція (вузол-для-індексу) (перше вузол-для-індексу)))
+(визначити vnode-value (функція (вузол-для-значення) (друге вузол-для-значення)))
+(визначити vnode-height (функція (вузол-для-висоти) (третє вузол-для-висоти)))
 (визначити vnode-left
-  (функція (node)
-    (третє (решта node))))
+  (функція (вузол-лівого-піддерева)
+    (третє (решта вузол-лівого-піддерева))))
 (визначити vnode-right
-  (функція (node)
-    (третє (решта (решта node)))))
+  (функція (вузол-правого-піддерева)
+    (третє (решта (решта вузол-правого-піддерева)))))
 
 (визначити vheight-of
-  (функція (n) (за-умовою 
-                    ((атом? n)  0) (так (vnode-height n)))))
+  (функція (вузол-для-визначення-висоти) (за-умовою 
+                    ((атом? вузол-для-визначення-висоти)  0) (так (vnode-height вузол-для-визначення-висоти)))))
 
 (визначити vmax2
-  (функція (a b)
+  (функція (ліва-висота права-висота)
     (за-умовою
-      ((менше? a b)  b)
-      ((хибне? (менше? a b)) a))))
+      ((менше? ліва-висота права-висота)  права-висота)
+      ((хибне? (менше? ліва-висота права-висота)) ліва-висота))))
 
 (визначити vmake-balanced-node
-  (функція (index value left right)
-    (список index value (додати 1 (vmax2 (vheight-of left) (vheight-of right))) left right)))
+  (функція (індекс-нового-вузла значення-нового-вузла ліве-піддерево праве-піддерево)
+    (список індекс-нового-вузла значення-нового-вузла (додати 1 (vmax2 (vheight-of ліве-піддерево) (vheight-of праве-піддерево))) ліве-піддерево праве-піддерево)))
 
 (визначити vbalance-factor
-  (функція (n) (відняти (vheight-of (vnode-left n)) (vheight-of (vnode-right n)))))
+  (функція (вузол-коефіцієнта-балансу) (відняти (vheight-of (vnode-left вузол-коефіцієнта-балансу)) (vheight-of (vnode-right вузол-коефіцієнта-балансу)))))
 
 (визначити vrotate-left
-  (функція (n)
-    ((функція (r)
-      (vmake-balanced-node (vnode-index r) (vnode-value r)
-        (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-left n) (vnode-left r))
-        (vnode-right r))) (vnode-right n))))
+  (функція (вузол-лівого-повороту)
+    ((функція (праве-піддерево-лівого-повороту)
+      (vmake-balanced-node (vnode-index праве-піддерево-лівого-повороту) (vnode-value праве-піддерево-лівого-повороту)
+        (vmake-balanced-node (vnode-index вузол-лівого-повороту) (vnode-value вузол-лівого-повороту) (vnode-left вузол-лівого-повороту) (vnode-left праве-піддерево-лівого-повороту))
+        (vnode-right праве-піддерево-лівого-повороту))) (vnode-right вузол-лівого-повороту))))
 
 (визначити vrotate-right
-  (функція (n)
-    ((функція (l)
-      (vmake-balanced-node (vnode-index l) (vnode-value l)
-        (vnode-left l)
-        (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-right l) (vnode-right n)))) (vnode-left n))))
+  (функція (вузол-правого-повороту)
+    ((функція (ліве-піддерево-правого-повороту)
+      (vmake-balanced-node (vnode-index ліве-піддерево-правого-повороту) (vnode-value ліве-піддерево-правого-повороту)
+        (vnode-left ліве-піддерево-правого-повороту)
+        (vmake-balanced-node (vnode-index вузол-правого-повороту) (vnode-value вузол-правого-повороту) (vnode-right ліве-піддерево-правого-повороту) (vnode-right вузол-правого-повороту)))) (vnode-left вузол-правого-повороту))))
 
 (визначити vbalance
-  (функція (n)
+  (функція (вузол-для-балансування)
     (за-умовою
       
-      ((атом? n)  n)
-      ((більше? (vbalance-factor n) 1) 
+      ((атом? вузол-для-балансування)  вузол-для-балансування)
+      ((більше? (vbalance-factor вузол-для-балансування) 1) 
        (за-умовою
-         ((менше? (vbalance-factor (vnode-left n)) 0) 
-          (vrotate-right (vmake-balanced-node (vnode-index n) (vnode-value n)
-                           (vrotate-left (vnode-left n)) (vnode-right n))))
-         (так (vrotate-right n))))
-      ((менше? (vbalance-factor n) -1) 
+         ((менше? (vbalance-factor (vnode-left вузол-для-балансування)) 0) 
+          (vrotate-right (vmake-balanced-node (vnode-index вузол-для-балансування) (vnode-value вузол-для-балансування)
+                           (vrotate-left (vnode-left вузол-для-балансування)) (vnode-right вузол-для-балансування))))
+         (так (vrotate-right вузол-для-балансування))))
+      ((менше? (vbalance-factor вузол-для-балансування) -1) 
        (за-умовою
-         ((більше? (vbalance-factor (vnode-right n)) 0) 
-          (vrotate-left (vmake-balanced-node (vnode-index n) (vnode-value n)
-                          (vnode-left n) (vrotate-right (vnode-right n)))))
+         ((більше? (vbalance-factor (vnode-right вузол-для-балансування)) 0) 
+          (vrotate-left (vmake-balanced-node (vnode-index вузол-для-балансування) (vnode-value вузол-для-балансування)
+                          (vnode-left вузол-для-балансування) (vrotate-right (vnode-right вузол-для-балансування)))))
 
-         (так (vrotate-left n))))
-      (так n))))
+         (так (vrotate-left вузол-для-балансування))))
+      (так вузол-для-балансування))))
 
 ; Returns a new tree with `index`/`value` inserted (or `value` replacing
 ; an existing entry at `index`) -- the original tree is untouched.
 (визначити vtree-insert
-  (функція (index value tree)
+  (функція (індекс-вставки-вектора значення-вставки-вектора дерево-вставки-вектора)
     (за-умовою
       
-      ((атом? tree)  (vmake-balanced-node index value (як-є ()) (як-є ())))
-      ((тотожне? index (vnode-index tree))
-       (vmake-balanced-node index value (vnode-left tree) (vnode-right tree)))
-      ((менше? index (vnode-index tree)) 
-       (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
-                   (vtree-insert index value (vnode-left tree))
-                   (vnode-right tree))))
+      ((атом? дерево-вставки-вектора)  (vmake-balanced-node індекс-вставки-вектора значення-вставки-вектора (як-є ()) (як-є ())))
+      ((тотожне? індекс-вставки-вектора (vnode-index дерево-вставки-вектора))
+       (vmake-balanced-node індекс-вставки-вектора значення-вставки-вектора (vnode-left дерево-вставки-вектора) (vnode-right дерево-вставки-вектора)))
+      ((менше? індекс-вставки-вектора (vnode-index дерево-вставки-вектора)) 
+       (vbalance (vmake-balanced-node (vnode-index дерево-вставки-вектора) (vnode-value дерево-вставки-вектора)
+                   (vtree-insert індекс-вставки-вектора значення-вставки-вектора (vnode-left дерево-вставки-вектора))
+                   (vnode-right дерево-вставки-вектора))))
       (так
-       (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
-                   (vnode-left tree)
-                   (vtree-insert index value (vnode-right tree))))))))
+       (vbalance (vmake-balanced-node (vnode-index дерево-вставки-вектора) (vnode-value дерево-вставки-вектора)
+                   (vnode-left дерево-вставки-вектора)
+                   (vtree-insert індекс-вставки-вектора значення-вставки-вектора (vnode-right дерево-вставки-вектора))))))))
 
 ; O(log n): the AVL tree is height-balanced, so this recursion depth
 ; (and therefore the work done) never exceeds ~1.44*log2(count).
 (визначити vtree-get
-  (функція (index tree)
+  (функція (шуканий-індекс-вектора дерево-пошуку-вектора)
     (за-умовою
       
-      ((атом? tree)  (як-є ()))
-      ((тотожне? index (vnode-index tree)) (список (vnode-value tree)))
-      ((менше? index (vnode-index tree))  (vtree-get index (vnode-left tree)))
-      (так (vtree-get index (vnode-right tree))))))
+      ((атом? дерево-пошуку-вектора)  (як-є ()))
+      ((тотожне? шуканий-індекс-вектора (vnode-index дерево-пошуку-вектора)) (список (vnode-value дерево-пошуку-вектора)))
+      ((менше? шуканий-індекс-вектора (vnode-index дерево-пошуку-вектора))  (vtree-get шуканий-індекс-вектора (vnode-left дерево-пошуку-вектора)))
+      (так (vtree-get шуканий-індекс-вектора (vnode-right дерево-пошуку-вектора))))))
 
 ; `vec-nth` returns the classic "maybe" shape ('() or (value)), the same
 ; idiom lib/persistent-map.lisp's map-get already uses -- deliberately NOT
@@ -150,31 +150,31 @@
 ; accidental-vs-intentional confusion this session already spent a long
 ; conversation on with macro hygiene -- named differently on purpose.
 (визначити vec-nth
-  (функція (index v) (vtree-get index (vec-tree v))))
+  (функція (індекс-для-читання-вектора вектор-для-читання) (vtree-get індекс-для-читання-вектора (vec-tree вектор-для-читання))))
 
 ; O(log n): appends `value` at the current end (index = current count),
 ; then increments count. The new count/tree pair shares every subtree
 ; the insert path didn't touch with the original vector.
 (визначити vec-conj
-  (функція (value v)
-    (сполучити (додати 1 (вектор-кількість v))
-          (vtree-insert (вектор-кількість v) value (vec-tree v)))))
+  (функція (значення-для-додавання-вектора вектор-до-додавання)
+    (сполучити (додати 1 (вектор-кількість вектор-до-додавання))
+          (vtree-insert (вектор-кількість вектор-до-додавання) значення-для-додавання-вектора (vec-tree вектор-до-додавання)))))
 
 ; In-order traversal over an index-keyed BST comes back in index order
 ; for free, the same free side effect lib/persistent-map.lisp's map->list
 ; already relies on. Top-level helper, not a nested letrec -- my-lisp
 ; has no letrec; `def` at top level is how a helper refers to itself.
 (визначити vtree->list
-  (функція (tree)
+  (функція (дерево-для-проєкції-списку)
     (за-умовою
       
-      ((атом? tree)  (як-є ()))
-      (так (приєднати (vtree->list (vnode-left tree))
-                 (сполучити (vnode-value tree)
-                       (vtree->list (vnode-right tree))))))))
+      ((атом? дерево-для-проєкції-списку)  (як-є ()))
+      (так (приєднати (vtree->list (vnode-left дерево-для-проєкції-списку))
+                 (сполучити (vnode-value дерево-для-проєкції-списку)
+                       (vtree->list (vnode-right дерево-для-проєкції-списку))))))))
 
 (визначити vec->list
-  (функція (v) (vtree->list (vec-tree v))))
+  (функція (вектор-для-проєкції-списку) (vtree->list (vec-tree вектор-для-проєкції-списку))))
 
 ; Builds a persistent vector from an ordinary list, in list order --
 ; the on-ramp for adopting existing O(n)-vector code without hand-writing
@@ -185,11 +185,11 @@
 ; before any conj runs), reversing the list into the vector -- caught
 ; before this file was ever tested, not after.
 (визначити vec-from-list-onto
-  (функція (lst acc)
+  (функція (список-для-побудови-вектора накопичувач-побудови-вектора)
     (за-умовою
       
-      ((атом? lst)  acc)
-      (так (vec-from-list-onto (решта lst) (вектор-додати (перше lst) acc))))))
+      ((атом? список-для-побудови-вектора)  накопичувач-побудови-вектора)
+      (так (vec-from-list-onto (решта список-для-побудови-вектора) (вектор-додати (перше список-для-побудови-вектора) накопичувач-побудови-вектора))))))
 
 (визначити vec-from-list
-  (функція (lst) (vec-from-list-onto lst vec-empty)))
+  (функція (вхідний-список-вектора) (vec-from-list-onto вхідний-список-вектора vec-empty)))

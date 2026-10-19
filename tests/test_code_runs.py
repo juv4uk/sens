@@ -1597,3 +1597,342 @@ class ReasonIndexPrivateHelperUkrProjectionTests(unittest.TestCase):
         self.assertNotEqual(mutant, source)
         with self.assertRaisesRegex(AssertionError, "projection call count drift"):
             self._restore(mutant)
+
+
+
+class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
+    """Лише лексична укр-проєкція локальних параметрів; жодного SENS-оракула."""
+
+    SOURCE = ROOT / "lib" / "persistent-vector.lisp"
+    ORIGINAL_SOURCE_BLOB = "b0e3984f5f93f9e2503e887ba2fcd103296d0a91"
+    CURRENT_PROJECTED_SOURCE_BLOB = "31ac1e577e696d8919f97d8894ab296aef9b7df8"
+    FORMALS_UKR = {
+    "vec-count": {
+        "v": "вектор-лічильника"
+    },
+    "vec-tree": {
+        "v": "вектор-дерева"
+    },
+    "vnode-index": {
+        "n": "вузол-для-індексу"
+    },
+    "vnode-value": {
+        "n": "вузол-для-значення"
+    },
+    "vnode-height": {
+        "n": "вузол-для-висоти"
+    },
+    "vnode-left": {
+        "node": "вузол-лівого-піддерева"
+    },
+    "vnode-right": {
+        "node": "вузол-правого-піддерева"
+    },
+    "vheight-of": {
+        "n": "вузол-для-визначення-висоти"
+    },
+    "vmax2": {
+        "a": "ліва-висота",
+        "b": "права-висота"
+    },
+    "vmake-balanced-node": {
+        "index": "індекс-нового-вузла",
+        "value": "значення-нового-вузла",
+        "left": "ліве-піддерево",
+        "right": "праве-піддерево"
+    },
+    "vbalance-factor": {
+        "n": "вузол-коефіцієнта-балансу"
+    },
+    "vrotate-left": {
+        "n": "вузол-лівого-повороту"
+    },
+    "vrotate-right": {
+        "n": "вузол-правого-повороту"
+    },
+    "vbalance": {
+        "n": "вузол-для-балансування"
+    },
+    "vtree-insert": {
+        "index": "індекс-вставки-вектора",
+        "value": "значення-вставки-вектора",
+        "tree": "дерево-вставки-вектора"
+    },
+    "vtree-get": {
+        "index": "шуканий-індекс-вектора",
+        "tree": "дерево-пошуку-вектора"
+    },
+    "vec-nth": {
+        "index": "індекс-для-читання-вектора",
+        "v": "вектор-для-читання"
+    },
+    "vec-conj": {
+        "value": "значення-для-додавання-вектора",
+        "v": "вектор-до-додавання"
+    },
+    "vtree->list": {
+        "tree": "дерево-для-проєкції-списку"
+    },
+    "vec->list": {
+        "v": "вектор-для-проєкції-списку"
+    },
+    "vec-from-list-onto": {
+        "lst": "список-для-побудови-вектора",
+        "acc": "накопичувач-побудови-вектора"
+    },
+    "vec-from-list": {
+        "lst": "вхідний-список-вектора"
+    }
+}
+    NESTED_FORMALS_UKR = {
+    "vrotate-left": [
+        {
+            "r": "праве-піддерево-лівого-повороту"
+        }
+    ],
+    "vrotate-right": [
+        {
+            "l": "ліве-піддерево-правого-повороту"
+        }
+    ]
+}
+
+    @staticmethod
+    def _blob_sha(source: str) -> str:
+        data = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\\0" + data
+        ).hexdigest()
+
+    @staticmethod
+    def _parse(source: str):
+        tokens = []
+        i = 0
+        while i < len(source):
+            ch = source[i]
+            if ch.isspace():
+                i += 1
+                continue
+            if ch == ";":
+                while i < len(source) and source[i] != "\\n":
+                    i += 1
+                continue
+            if source.startswith("#|", i):
+                depth = 1
+                i += 2
+                while i < len(source) and depth:
+                    if source.startswith("#|", i):
+                        depth += 1
+                        i += 2
+                    elif source.startswith("|#", i):
+                        depth -= 1
+                        i += 2
+                    else:
+                        i += 1
+                if depth:
+                    raise AssertionError("unclosed block comment")
+                continue
+            if ch == '"':
+                start = i
+                i += 1
+                escaped = False
+                closed = False
+                while i < len(source):
+                    cur = source[i]
+                    i += 1
+                    if escaped:
+                        escaped = False
+                    elif cur == "\\\\":
+                        escaped = True
+                    elif cur == '"':
+                        closed = True
+                        break
+                if not closed:
+                    raise AssertionError("unclosed string")
+                tokens.append({"kind": "string", "text": source[start:i],
+                               "start": start, "end": i})
+                continue
+            if ch in "()":
+                tokens.append({"kind": "open" if ch == "(" else "close",
+                               "text": ch, "start": i, "end": i + 1})
+                i += 1
+                continue
+            start = i
+            while (i < len(source) and not source[i].isspace()
+                   and source[i] not in '()";'):
+                i += 1
+            if i == start:
+                i += 1
+                continue
+            tokens.append({"kind": "atom", "text": source[start:i],
+                           "start": start, "end": i})
+
+        cursor = 0
+        def expression():
+            nonlocal cursor
+            if cursor >= len(tokens):
+                raise AssertionError("unexpected end of source")
+            token = tokens[cursor]
+            cursor += 1
+            if token["kind"] == "close":
+                raise AssertionError("unexpected close")
+            if token["kind"] != "open":
+                return {"kind": token["kind"], "token": token, "items": None}
+            items = []
+            while cursor < len(tokens) and tokens[cursor]["kind"] != "close":
+                items.append(expression())
+            if cursor >= len(tokens):
+                raise AssertionError("unclosed list")
+            cursor += 1
+            return {"kind": "list", "items": items}
+        roots = []
+        while cursor < len(tokens):
+            roots.append(expression())
+        return roots
+
+    @classmethod
+    def _rewrite(cls, source, function_map, nested_map):
+        roots = cls._parse(source)
+        edits, counts, per_function = [], {}, {}
+        def replace(token, value, key, owner):
+            if token["text"] == value:
+                return
+            edits.append((token["start"], token["end"], value))
+            counts[key] = counts.get(key, 0) + 1
+            per_function.setdefault(owner, {})
+            per_function[owner][key] = per_function[owner].get(key, 0) + 1
+
+        def visit(node, bound, owner, nested_index, quoted=False):
+            if node["kind"] != "list":
+                if (not quoted and node["kind"] == "atom"
+                        and node["token"]["text"] in bound):
+                    tok = node["token"]
+                    replace(tok, bound[tok["text"]], tok["text"], owner)
+                return nested_index
+            items = node["items"]
+            head_node = items[0] if items and items[0]["kind"] == "atom" else None
+            head = head_node["token"]["text"] if head_node else None
+            if quoted:
+                return nested_index
+            if head_node and head in bound:
+                replace(head_node["token"], bound[head], head, owner)
+            if head in {"як-є", "001"}:
+                return nested_index
+            if (head == "функція" and len(items) > 1
+                    and items[1]["kind"] == "list"):
+                choices = nested_map.get(owner, [])
+                nested_formals = choices[nested_index] if nested_index < len(choices) else {}
+                scoped = dict(bound)
+                for param in items[1]["items"]:
+                    if (param["kind"] == "atom"
+                            and param["token"]["text"] in nested_formals):
+                        old_name = param["token"]["text"]
+                        scoped[old_name] = nested_formals[old_name]
+                        replace(param["token"], nested_formals[old_name], old_name, owner)
+                next_index = nested_index + (1 if nested_formals else 0)
+                for child in items[2:]:
+                    next_index = visit(child, scoped, owner, next_index)
+                return next_index
+            next_index = nested_index
+            for child in items[1 if head_node else 0:]:
+                next_index = visit(child, bound, owner, next_index)
+            return next_index
+
+        functions = 0
+        for root in roots:
+            if root["kind"] != "list":
+                continue
+            items = root["items"]
+            if (len(items) < 3 or items[0]["kind"] != "atom"
+                    or items[0]["token"]["text"] != "визначити"
+                    or items[1]["kind"] != "atom"):
+                continue
+            name = items[1]["token"]["text"]
+            formals = function_map.get(name)
+            fn = items[2]
+            if (formals is None or fn["kind"] != "list" or not fn["items"]
+                    or fn["items"][0]["kind"] != "atom"
+                    or fn["items"][0]["token"]["text"] != "функція"
+                    or len(fn["items"]) < 2 or fn["items"][1]["kind"] != "list"):
+                continue
+            functions += 1
+            bound = {}
+            for param in fn["items"][1]["items"]:
+                if (param["kind"] == "atom"
+                        and param["token"]["text"] in formals):
+                    old_name = param["token"]["text"]
+                    bound[old_name] = formals[old_name]
+                    replace(param["token"], formals[old_name], old_name, name)
+            nested_index = 0
+            for child in fn["items"][2:]:
+                nested_index = visit(child, bound, name, nested_index)
+
+        projected = source
+        for start, end, replacement in sorted(edits, reverse=True):
+            projected = projected[:start] + replacement + projected[end:]
+        return projected, counts, per_function, functions, len(roots)
+
+    def test_full_ukr_local_bindings_have_byte_exact_inverse(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        self.assertEqual(self._blob_sha(source), self.CURRENT_PROJECTED_SOURCE_BLOB)
+        inverse_formals = {
+            fn: {ukr: old for old, ukr in formals.items()}
+            for fn, formals in self.FORMALS_UKR.items()
+        }
+        inverse_nested = {
+            fn: [{ukr: old for old, ukr in formals.items()} for formals in forms]
+            for fn, forms in self.NESTED_FORMALS_UKR.items()
+        }
+        restored, inverse_counts, _, functions, roots = self._rewrite(
+            source, inverse_formals, inverse_nested
+        )
+        self.assertEqual(roots, 23)
+        self.assertEqual(functions, 22)
+        self.assertTrue(all(name in inverse_counts
+                            for forms in inverse_formals.values() for name in forms.values()))
+        self.assertEqual(self._blob_sha(restored), self.ORIGINAL_SOURCE_BLOB)
+
+        projected, forward_counts, per_function, functions2, roots2 = self._rewrite(
+            restored, self.FORMALS_UKR, self.NESTED_FORMALS_UKR
+        )
+        self.assertEqual((functions2, roots2), (22, 23))
+        self.assertEqual(projected, source)
+        for fn, formals in self.FORMALS_UKR.items():
+            self.assertTrue(all(name in per_function.get(fn, {})
+                                for name in formals), (fn, per_function.get(fn, {})))
+        for fn, forms in self.NESTED_FORMALS_UKR.items():
+            self.assertTrue(all(name in per_function.get(fn, {})
+                                for formals in forms for name in formals),
+                            (fn, per_function.get(fn, {})))
+
+    def test_wrong_local_peer_fails_exact_inverse(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mutant = source.replace(
+            "вузол-для-індексу", "вузол-для-значення", 1
+        )
+        self.assertNotEqual(mutant, source)
+        inverse_formals = {
+            fn: {ukr: old for old, ukr in formals.items()}
+            for fn, formals in self.FORMALS_UKR.items()
+        }
+        inverse_nested = {
+            fn: [{ukr: old for old, ukr in formals.items()} for formals in forms]
+            for fn, forms in self.NESTED_FORMALS_UKR.items()
+        }
+        restored, _, _, _, _ = self._rewrite(mutant, inverse_formals, inverse_nested)
+        self.assertNotEqual(self._blob_sha(restored), self.ORIGINAL_SOURCE_BLOB)
+
+    def test_local_ukr_names_do_not_create_domain_residents(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        names = [name for formals in self.FORMALS_UKR.values()
+                 for name in formals.values()]
+        names += [name for forms in self.NESTED_FORMALS_UKR.values()
+                  for formals in forms for name in formals.values()]
+        self.assertEqual(len(names), len(set(names)))
+        for width in range(1, 12):
+            table = ROOT / "lib" / "domains" / f"d{width}.lisp"
+            data = table.read_text(encoding="utf-8")
+            for name in names:
+                self.assertNotIn(name, data, f"D{width}: local spelling became a resident")
+        self.assertIn("(визначити vec-empty", source)
+        self.assertIn("(визначити vec-from-list", source)
