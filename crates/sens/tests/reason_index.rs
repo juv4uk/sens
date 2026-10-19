@@ -188,10 +188,10 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
 fn reason_index_builder_diagnostic_first_failing_stage() {
     let mut s = session();
     let probes = [
-        ("(reason-term-predicate (quote (p a)))", "p"),
-        ("(reason-rule-predicate (quote ((p a))))", "p"),
-        ("(reason-index-add-reversed (quote p) (quote ((p a))) (quote ()))", "((p ((p a))))"),
-        ("(reason-index-normalize-buckets (reason-index-add-reversed (quote p) (quote ((p a))) (quote ())))", "((p ((p a))))"),
+        ("(предикат-терма-міркування (quote (p a)))", "p"),
+        ("(предикат-правила-міркування (quote ((p a))))", "p"),
+        ("(додати-правило-до-оберненого-індексу (quote p) (quote ((p a))) (quote ()))", "((p ((p a))))"),
+        ("(упорядкувати-кошики-індексу-міркування (додати-правило-до-оберненого-індексу (quote p) (quote ((p a))) (quote ())))", "((p ((p a))))"),
         ("(reason-index-build-scan (quote ()) (quote ()) (quote ()) *reason-index-fuel*)",
          "(reason-index/1 indexed () ())"),
         ("(reason-make-index (quote (((p a)))))",
