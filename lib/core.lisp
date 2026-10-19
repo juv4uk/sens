@@ -17,10 +17,11 @@
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
-(визначити binary
+(визначити бінарний
   (функція (ширина)
     (список (як-є binary) ширина)))
-(визначити бінарний binary)
+; Історична зовнішня назва посилається на той самий закон.
+(визначити binary бінарний)
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -408,24 +409,8 @@
 ; Returns exact PredicateBit D1 `так` or `ні`, never a quoted list.
 ; Canonical three-part `cond` consumes the answer explicitly; a two-part
 ; clause selects only on a «yes» answer.
-(визначити equal?
-  (функція (лівий правий)
-    (за-умовою
-      ((порожній? лівий) (порожній? правий))
-      ((порожній? правий) ні)
-      ((атом? лівий)
-       (за-умовою
-         ((атом? правий) (тотожне? лівий правий))
-         (так ні)))
-      ((атом? правий) ні)
-      ((однакові? (перше лівий) (перше правий))
-       (однакові? (решта лівий) (решта правий)))
-      (так ні))))
-
-; D8:11110111 ratified укр surface; mechanism is the existing Lisp-owned equal?.
-; Guard's standalone core bootstrap must bind it without loading all of core4.
-; D8-поверхня «однакові?» повертає точний D1 результат, не список (так)/(ні).
-; Закон реалізовано мовою SENS через ратифіковані структурні операції.
+; D8:11110111. Єдиний нормативний закон структурної рівності належить «однакові?».
+; `equal?` — історична назва того самого замикання, без другого обчислювача.
 (визначити однакові?
   (функція (ліве праве)
     (за-умовою
@@ -439,6 +424,7 @@
       ((однакові? (перше ліве) (перше праве))
        (однакові? (решта ліве) (решта праве)))
       (так ні))))
+(визначити equal? однакові?)
 
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
