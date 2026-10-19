@@ -28,7 +28,7 @@ DEF = re.compile(r'\((?:0011|визначити)\s+([^\s()]+)\s')
 MIGRATED = ("lib/time.lisp", "lib/reason.lisp", "lib/utf8.lisp",
             "lib/meta-eval-mutual.lisp", "lib/knowledge.lisp", "lib/narrate.lisp",
             "lib/forward.lisp", "lib/clips-import.lisp", "lib/meta-eval.lisp",
-            "lib/world.lisp", "lib/content-store.lisp", "lib/lisp-fs.lisp", "lib/linter.lisp",
+            "lib/world.lisp", "lib/content-store.lisp", "lib/persistent-vector.lisp", "lib/lisp-fs.lisp", "lib/linter.lisp",
             "lib/unify.lisp", "lib/yantra.lisp",
             "lib/repl-core.lisp", "lib/unify-observe.lisp",
             "lib/surface/uk-docs.lisp", "lib/surface/uk-inventory.lisp",
