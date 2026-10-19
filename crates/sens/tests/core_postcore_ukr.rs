@@ -1,11 +1,13 @@
 //! Живе виконання виправлених post-core функцій через справжній SENS evaluator.
 //! Не підмінює семантику Rust або Python; Rust лише викликає SENS та звіряє результат.
-use sens::{eval_program, Session};
+use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session};
 
 fn core_session() -> Session {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
-    .expect("чинний core має завантажуватися реальним SENS reader/evaluator");
+    let forms = parse_mixed_exact_domain(include_str!("../../../lib/core.lisp"))
+        .expect("чинний Core має читатися загальним SENS reader");
+    eval_parsed_expressions(&forms, &mut session)
+        .expect("чинний Core має виконуватися SENS evaluator без legacy adapter");
     session
 }
 
