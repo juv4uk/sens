@@ -1,7 +1,6 @@
 """Regression checks for the pinned Zig Windows build path."""
 from __future__ import annotations
 
-import re
 import unittest
 from pathlib import Path
 
@@ -31,7 +30,7 @@ class PinnedZigWindowsSetupTests(unittest.TestCase):
         self.assertIn("$env:ZIG = $zigExe", SCRIPT)
         self.assertIn('& $Command @CommandArgs', SCRIPT)
         self.assertIn("exit $LASTEXITCODE", SCRIPT)
-        self.assertNotIn("setx PATH", SCRIPT.lower())
+        self.assertNotIn("setx path", SCRIPT.lower())
 
     def test_build_error_points_to_windows_helper_and_keeps_fail_closed_pin(self):
         self.assertIn("include_str!(\"../../.zig-version\")", BUILD_RS)
