@@ -406,8 +406,27 @@ def audit_executable_ukr_files(root: Path) -> dict:
     import check_ukr_callsite_migration as calls
 
     root = root.resolve()
-    index, authority = calls.peer_index(root)
-    roles = calls.peer_roles(root)
+    # D11 is a catalogue of candidates, not an executable domain. Its
+    # overlapping names must never make a ratified D1..D10 head ambiguous.
+    # Keep the original all-domain authority separately for information.
+    _, authority = calls.peer_index(root)
+    index: dict[str, set[str]] = {}
+    roles: dict[str, set[str]] = {}
+    for width in range(1, 11):
+        table = root / "lib" / "domains" / f"d{width}.lisp"
+        if not table.is_file():
+            continue
+        for row in table.read_text(encoding="utf-8").splitlines():
+            match = calls.ROW.fullmatch(row)
+            if match is None or len(match.group(1)) != width:
+                continue
+            bits, uk, ukr, _san, _en, _lisp, _sym = match.groups()
+            for kind, spelling in (("ук", uk), ("укр", ukr)):
+                if spelling == "()":
+                    continue
+                key = spelling.casefold()
+                index.setdefault(key, set()).add(f"D{width}:{bits}")
+                roles.setdefault(key, set()).add(kind)
     eligible = converted = unclassified = without_heads = excluded = 0
     pending_files: list[dict] = []
     for path in iter_lisp_files(root):
