@@ -20,167 +20,167 @@
 ; These two predicates return D1:0 on negative branches so callers can
 ; compose them inside D3 COND without historical truthiness.
 (визначити my-group-closure?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((атом? value) ні)
-      (так (тотожне? (перше value) (як-є recursive-group-closure))))))
+      ((атом? значення) ні)
+      (так (тотожне? (перше значення) (як-є recursive-group-closure))))))
 
 (визначити my-sixth
-  (функція (values)
-    (перше (решта (решта (решта (решта (решта values))))))))
+  (функція (значення)
+    (перше (решта (решта (решта (решта (решта значення))))))))
 
 (визначити my-lambda-def-form?
-  (функція (form)
+  (функція (форма)
     (за-умовою
-      ((атом? form) ні)
-      ((тотожне? (перше form) (як-є def))
-       (перевірити-форму-лямбда? (третє form)))
+      ((атом? форма) ні)
+      ((тотожне? (перше форма) (як-є def))
+       (перевірити-форму-лямбда? (третє форма)))
       (так ні))))
 
 (визначити my-take-lambda-def-group
-  (функція (forms)
+  (функція (форми)
     (за-умовою
-      ((атом? forms) (як-є ()))
-      ((визначення-лямбди-на-верхньому-рівні? (перше forms))
-       (сполучити (перше forms)
-            (my-take-lambda-def-group (решта forms))))
+      ((атом? форми) (як-є ()))
+      ((визначення-лямбди-на-верхньому-рівні? (перше форми))
+       (сполучити (перше форми)
+            (my-take-lambda-def-group (решта форми))))
       (так (як-є ())))))
 
 (визначити my-drop-lambda-def-group
-  (функція (forms)
+  (функція (форми)
     (за-умовою
-      ((атом? forms) (як-є ()))
-      ((визначення-лямбди-на-верхньому-рівні? (перше forms))
-       (my-drop-lambda-def-group (решта forms)))
-      (так forms))))
+      ((атом? форми) (як-є ()))
+      ((визначення-лямбди-на-верхньому-рівні? (перше форми))
+       (my-drop-lambda-def-group (решта форми)))
+      (так форми))))
 
 (визначити my-group-closure-from-def
-  (функція (form group captured-env)
+  (функція (форма група захоплене-оточення)
     ((функція (lambda-form) (список (як-є recursive-group-closure)
-            (друге form)
+            (друге форма)
             (друге lambda-form)
             (решта (решта lambda-form))
-            group
-            captured-env)) (третє form))))
+            група
+            захоплене-оточення)) (третє форма))))
 
 ; Build onto the captured environment so later definitions in the same group
 ; appear earlier in the alist, matching same-frame overwrite order.
 (визначити my-build-group-env-onto
-  (функція (forms group captured-env out)
+  (функція (форми група захоплене-оточення накопичувач)
     (за-умовою
-      ((атом? forms) out)
+      ((атом? форми) накопичувач)
       (так
        ((функція (form) (my-build-group-env-onto
-           (решта forms)
-           group
-           captured-env
+           (решта форми)
+           група
+           захоплене-оточення
            (сполучити
              (сполучити (друге form)
-                   (створити-замикання-взаєморекурсивної-групи form group captured-env))
-             out))) (перше forms))))))
+                   (створити-замикання-взаєморекурсивної-групи form група захоплене-оточення))
+             накопичувач))) (перше форми))))))
 
 (визначити my-build-group-env
-  (функція (group captured-env)
-    (my-build-group-env-onto group group captured-env captured-env)))
+  (функція (група захоплене-оточення)
+    (my-build-group-env-onto група група захоплене-оточення захоплене-оточення)))
 
 (визначити my-apply-group-closure
-  (функція (fn args)
+  (функція (викликана-функція аргументи)
     ((функція (group-env) (my-eval-body
-        (my-fourth fn)
+        (my-fourth викликана-функція)
         (зв'язати-аргументи-з-лямбда-параметрами
-          (третє fn)
-          args
-          group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) (my-sixth fn)))))
+          (третє викликана-функція)
+          аргументи
+          group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth викликана-функція) (my-sixth викликана-функція)))))
 
 ; Apply wrapper: group closures go through group path; others reuse my-apply.
 (визначити my-group-apply
-  (функція (fn args)
+  (функція (викликана-функція аргументи)
     (за-умовою
-      ((це-замикання-рекурсивної-групи? fn) (my-apply-group-closure fn args))
-      (так (my-apply fn args)))))
+      ((це-замикання-рекурсивної-групи? викликана-функція) (my-apply-group-closure викликана-функція аргументи))
+      (так (my-apply викликана-функція аргументи)))))
 
 (визначити my-group-eval-list
-  (функція (exprs env)
+  (функція (вирази оточення)
     (за-умовою
-      ((атом? exprs) (як-є ()))
+      ((атом? вирази) (як-є ()))
       (так
-       (сполучити (my-group-eval (перше exprs) env)
-            (my-group-eval-list (решта exprs) env))))))
+       (сполучити (my-group-eval (перше вирази) оточення)
+            (my-group-eval-list (решта вирази) оточення))))))
 
 (визначити my-group-eval-body
-  (функція (body env)
+  (функція (тіло-функції оточення)
     (за-умовою
-      ((атом? (решта body)) (my-group-eval (перше body) env))
+      ((атом? (решта тіло-функції)) (my-group-eval (перше тіло-функції) оточення))
       (так
        ((функція ()
-          (my-group-eval (перше body) env)
-          (my-group-eval-body (решта body) env)))))))
+          (my-group-eval (перше тіло-функції) оточення)
+          (my-group-eval-body (решта тіло-функції) оточення)))))))
 
 (визначити my-group-eval-cond
-  (функція (clauses env)
+  (функція (гілки-умов оточення)
     (за-умовою
-      ((атом? clauses) (як-є ()))
-      ((my-group-eval (перше (перше clauses)) env)
-       (my-group-eval (друге (перше clauses)) env))
-      (так (my-group-eval-cond (решта clauses) env)))))
+      ((атом? гілки-умов) (як-є ()))
+      ((my-group-eval (перше (перше гілки-умов)) оточення)
+       (my-group-eval (друге (перше гілки-умов)) оточення))
+      (так (my-group-eval-cond (решта гілки-умов) оточення)))))
 
 (визначити my-group-apply-owned
-  (функція (fn args)
+  (функція (викликана-функція аргументи)
     (за-умовою
-      ((це-замикання-рекурсивної-групи? fn)
+      ((це-замикання-рекурсивної-групи? викликана-функція)
        ((функція (group-env) (my-group-eval-body
-           (my-fourth fn)
-           (зв'язати-аргументи-з-лямбда-параметрами (третє fn) args group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) (my-sixth fn))))
-      (так (my-apply fn args)))))
+           (my-fourth викликана-функція)
+           (зв'язати-аргументи-з-лямбда-параметрами (третє викликана-функція) аргументи group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth викликана-функція) (my-sixth викликана-функція))))
+      (так (my-apply викликана-функція аргументи)))))
 
 (визначити my-group-eval
-  (функція (expr env)
+  (функція (вираз оточення)
     (за-умовою
-      ((атом? expr) (знайти-значення-імені-в-лексичному-середовищі expr env))
-      ((атом? (перше expr))
+      ((атом? вираз) (знайти-значення-імені-в-лексичному-середовищі вираз оточення))
+      ((атом? (перше вираз))
        (за-умовою
-         ((тотожне? (перше expr) (як-є quote)) (друге expr))
-         ((тотожне? (перше expr) (як-є cond))
-          (my-group-eval-cond (решта expr) env))
-         ((тотожне? (перше expr) (як-є lambda))
-          (список (як-є closure) (друге expr) (решта (решта expr)) env))
+         ((тотожне? (перше вираз) (як-є quote)) (друге вираз))
+         ((тотожне? (перше вираз) (як-є cond))
+          (my-group-eval-cond (решта вираз) оточення))
+         ((тотожне? (перше вираз) (як-є lambda))
+          (список (як-є closure) (друге вираз) (решта (решта вираз)) оточення))
          (так
           ((функція (fn) (за-умовою
               ((my-macro? fn)
-               (my-group-eval (my-apply fn (решта expr)) env))
+               (my-group-eval (my-apply fn (решта вираз)) оточення))
               (так
                (my-group-apply-owned
                  fn
-                 (my-group-eval-list (решта expr) env))))) (my-group-eval (перше expr) env)))))
+                 (my-group-eval-list (решта вираз) оточення))))) (my-group-eval (перше вираз) оточення)))))
       (так
        (my-group-apply-owned
-         (my-group-eval (перше expr) env)
-         (my-group-eval-list (решта expr) env))))))
+         (my-group-eval (перше вираз) оточення)
+         (my-group-eval-list (решта вираз) оточення))))))
 
 (визначити my-group-eval-top-form
-  (функція (form env)
+  (функція (форма оточення)
     (за-умовою
-      ((атом? form) (сполучити env (my-group-eval form env)))
-      ((тотожне? (перше form) (як-є def))
-       ((функція (value) (сполучити (сполучити (сполучити (друге form) value) env) value)) (my-group-eval (третє form) env)))
-      ((тотожне? (перше form) (як-є defmacro))
-       (обчислити-форму-та-оновити-оточення form env))
-      (так (сполучити env (my-group-eval form env))))))
+      ((атом? форма) (сполучити оточення (my-group-eval форма оточення)))
+      ((тотожне? (перше форма) (як-є def))
+       ((функція (value) (сполучити (сполучити (сполучити (друге форма) value) оточення) value)) (my-group-eval (третє форма) оточення)))
+      ((тотожне? (перше форма) (як-є defmacro))
+       (обчислити-форму-та-оновити-оточення форма оточення))
+      (так (сполучити оточення (my-group-eval форма оточення))))))
 
 (визначити my-eval-program-with-groups
-  (функція (forms env)
+  (функція (форми оточення)
     (за-умовою
-      ((визначення-лямбди-на-верхньому-рівні? (перше forms))
+      ((визначення-лямбди-на-верхньому-рівні? (перше форми))
        ((функція (group) ((функція (rest) ((функція (group-env) (за-умовою
                ((атом? rest) (сполучити group-env (решта (перше group-env))))
-               (так (my-eval-program-with-groups rest group-env)))) (побудувати-лексичні-зв'язки-рекурсивної-групи group env))) (my-drop-lambda-def-group forms))) (my-take-lambda-def-group forms)))
+               (так (my-eval-program-with-groups rest group-env)))) (побудувати-лексичні-зв'язки-рекурсивної-групи group оточення))) (my-drop-lambda-def-group форми))) (my-take-lambda-def-group форми)))
       (так
        ((функція (result) (за-умовою
-           ((атом? (решта forms)) result)
+           ((атом? (решта форми)) result)
            (так
             (my-eval-program-with-groups
-              (решта forms)
-              (перше result))))) (my-group-eval-top-form (перше forms) env))))))
+              (решта форми)
+              (перше result))))) (my-group-eval-top-form (перше форми) оточення))))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити побудувати-лексичні-зв'язки-рекурсивної-групи my-build-group-env)
