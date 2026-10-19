@@ -39,7 +39,7 @@
             (001 (готово (джерело інше)))))
         ; Порівняння планувальника залишається даними, не host EQUAL.
         (життя--рівні?
-          (life-scheduler-field
+          (життя-поле-запису
             (001 (pending-invocation
                    (producer datalog)
                    (trigger (projection-ready prolog-to-datalog))
@@ -49,7 +49,7 @@
             (001 trigger))
           (001 (projection-ready prolog-to-datalog)))
         (101
-          (life-scheduler-projection-ready?
+          (життя-проєкція-готова?
             (001 (pending-invocation
                    (producer datalog)
                    (trigger (projection-ready prolog-to-datalog))
@@ -59,7 +59,7 @@
             (001 ((projection-ready prolog-to-datalog observation-42))))
           (001 present))
         (101
-          (life-scheduler-projection-ready?
+          (життя-проєкція-готова?
             (001 (pending-invocation
                    (producer datalog)
                    (trigger (projection-ready prolog-to-datalog))
@@ -69,7 +69,7 @@
             (001 ((projection-ready prolog-to-datalog observation-99))))
           (001 absent))
         (101
-          (life-scheduler-projection-ready?
+          (життя-проєкція-готова?
             (001 (pending-invocation
                    (producer datalog)
                    (trigger (projection-ready prolog-to-datalog))
@@ -79,7 +79,7 @@
             (001 ((projection-ready another-contract observation-42))))
           (001 absent))
         (життя--рівні?
-          (life-scheduler-pending
+          (життя-очікування
             (1110
               (001 (pending-invocation
                      (producer datalog)
@@ -101,20 +101,20 @@
               (priority ordinary)
               (semantic-id 00001100)))))
         (життя--рівні?
-          (life-scheduler-quiescence
+          (життя-спокій
             (001 ()) (001 ()) (001 no-transition-required))
           (001 (quiescence-state quiescent)))
         ; LIFE-1 select-ready: порожня черга, готовий виклик, пропуск неготового.
         (життя--рівні?
-          (life-scheduler-select-ready (001 ()) (001 ()))
+          (життя-обрати-готове (001 ()) (001 ()))
           (001 (scheduler-selection none)))
         (життя--рівні?
-          (life-scheduler-select-ready
+          (життя-обрати-готове
             (001 ((pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100))))
             (001 ((projection-ready prolog-to-datalog observation-42))))
           (001 (scheduler-selection ready (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100)) ())))
         (життя--рівні?
-          (life-scheduler-select-ready
+          (життя-обрати-готове
             (001 ((pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-99) (priority ordinary) (semantic-id 00001100)) (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100))))
             (001 ((projection-ready prolog-to-datalog observation-42))))
           (001 (scheduler-selection ready (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100)) ())))
