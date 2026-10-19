@@ -493,32 +493,58 @@
       ((однакові? (msg-role (перше messages)) role) (додати 1 (count-with-role role (решта messages))))
       (так (count-with-role role (решта messages))))))
 
-(визначити agent-loop
-  (функція (complete messages turn)
+; Невдалий HTTP-запит не є повідомленням помічника і не може
+; потрапляти до пошуку полів або до статусу completed.
+(визначити заблокована-відповідь?
+  (функція (відповідь)
     (за-умовою
-      ((не-менше? turn max-turns)
-       (список (сполучити (як-є status) (як-є max-turns-reached))
-             (сполучити (як-є turn) turn)
-             (сполучити (як-є messages) messages)))
+      ((атом? відповідь) так)
+      ((атом? (перше відповідь))
+       (тотожне? (перше відповідь) (як-є blocked)))
+      (так ні))))
+
+(визначити agent-loop
+  (функція (завершити повідомлення крок)
+    (за-умовою
+      ((не-менше? крок max-turns)
+       (список
+         (сполучити (як-є status) (як-є max-turns-reached))
+         (сполучити (як-є turn) крок)
+         (сполучити (як-є messages) повідомлення)))
       (так
-       (нехай-послідовно ((assistant-msg (complete messages))
-              (with-reply (приєднати messages (список assistant-msg)))
-              (tcs (msg-tool-calls assistant-msg)))
-         (за-умовою
-           
-           ((атом? tcs)  (за-умовою
-              ((припустима-завершальна-відповідь? assistant-msg with-reply)
-               (список (сполучити (як-є status) (як-є completed))
-                     (сполучити (як-є epistemic-status) (як-є hypothesis))
-                     (сполучити (як-є answer) (msg-content assistant-msg))
-                     (сполучити (як-є turn) turn)
-                     (сполучити (як-є messages) with-reply)))
-              (так (agent-loop complete
-                             (приєднати with-reply (список invalid-completion-nudge))
-                             (додати turn 1)))))
-           (так (agent-loop complete
-                          (приєднати with-reply (append-tool-results tcs (як-є ())))
-                          (додати turn 1)))))))))
+       ((функція (відповідь)
+          (за-умовою
+            ((заблокована-відповідь? відповідь)
+             (список
+               (сполучити (як-є status) (як-є blocked))
+               (сполучити (як-є detail) відповідь)
+               (сполучити (як-є turn) крок)
+               (сполучити (як-є messages) повідомлення)))
+            (так
+             ((функція (з-відповіддю)
+                ((функція (виклики-інструментів)
+                   (за-умовою
+                     ((порожній? виклики-інструментів)
+                      (за-умовою
+                        ((припустима-завершальна-відповідь? відповідь з-відповіддю)
+                         (список
+                           (сполучити (як-є status) (як-є completed))
+                           (сполучити (як-є epistemic-status) (як-є hypothesis))
+                           (сполучити (як-є answer) (msg-content відповідь))
+                           (сполучити (як-є turn) крок)
+                           (сполучити (як-є messages) з-відповіддю)))
+                        (так
+                         (agent-loop завершити
+                           (приєднати з-відповіддю (список invalid-completion-nudge))
+                           (додати крок 1)))))
+                     (так
+                      (agent-loop завершити
+                        (приєднати з-відповіддю
+                          (append-tool-results виклики-інструментів (як-є ())))
+                        (додати крок 1)))))
+                 (msg-tool-calls відповідь)))
+              (приєднати повідомлення (список відповідь))))))
+        (завершити повідомлення))))))
 
 (визначити run-agent
   (функція (complete system-prompt user-prompt)
