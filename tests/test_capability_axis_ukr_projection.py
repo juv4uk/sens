@@ -26,7 +26,7 @@ HEADS = {
     "011": "решта",
 }
 RAW_PATTERN = re.compile(
-    r"[(](" + "|".join(HEADS.keys()) + r")(?=\\s)"
+    r"[(](" + "|".join(HEADS.keys()) + r")(?=\s)"
 )
 
 
@@ -34,7 +34,7 @@ def assert_exact_projection(testcase, table_path, bits, surface, english, lisp):
     table = table_path.read_text(encoding="utf-8")
     rows = [
         line for line in table.splitlines()
-        if re.match(rf"^\\s*[(]{re.escape(bits)}\\s", line)
+        if re.match(rf"^\s*[(]{re.escape(bits)}\s", line)
     ]
     testcase.assertEqual(len(rows), 1, f"{bits}: expected one exact-width row")
     testcase.assertIn(f"(укр {surface})", rows[0])
@@ -70,14 +70,14 @@ class CapabilityAxisUkrProjectionTests(unittest.TestCase):
             ("визначити", 7), ("функція", 4), ("як-є", 4), ("за-умовою", 5),
             ("атом?", 4), ("тотожне?", 3), ("перше", 10), ("решта", 7),
         ):
-            pattern = re.compile(r"[(]" + re.escape(surface) + r"(?=\\s)")
+            pattern = re.compile(r"[(]" + re.escape(surface) + r"(?=\s)")
             self.assertEqual(len(pattern.findall(source)), count, surface)
         # Five unconditional branches return the owner-ratified D1:YES surface.
-        self.assertEqual(len(re.findall(r"(?m)^\\s*\\(так\\s*$", source)), 5)
+        self.assertEqual(len(re.findall(r"(?m)^\s*\(так\s*$", source)), 5)
         self.assertNotIn("(ні", source, "a false D1 value must not replace a true branch")
 
     def test_negative_surface_mutant_is_not_accepted_as_ratified_projection(self):
         source = SOURCE.read_text(encoding="utf-8")
         mutated = source.replace("(так", "(ні", 1)
         self.assertNotEqual(mutated, source)
-        self.assertEqual(len(re.findall(r"(?m)^\\s*\\(так\\s*$", mutated)), 4)
+        self.assertEqual(len(re.findall(r"(?m)^\s*\(так\s*$", mutated)), 4)
