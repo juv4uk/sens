@@ -305,6 +305,45 @@ mod tests {
     }
 
     #[test]
+    fn projected_ukr_quotient_reaches_the_exact_d5_resident() {
+        // This reproduces the IDE's source -> exact-domain AST -> evaluator
+        // boundary. The registered D5:10111 operation must return exact RATIO,
+        // not fall through to the Lisp-owned integer-quotient helper.
+        let source = "(частка 1 3)";
+        let parsed = crate::parse(source).expect("source parses");
+        let projected = project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("source decimal integers become D24 words");
+        let lowered = crate::lower_program(&projected);
+        assert!(matches!(
+            &lowered[0].kind,
+            ExprKind::DomainCall(identity, _)
+                if identity.width() == 5 && identity.packed_bits() == 0b10111
+        ), "D5:10111 must be the immutable call head, not a rebindable Lisp name");
+
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("Core library loads");
+        let result = crate::eval_parsed_expressions(&projected, &mut session)
+            .expect("exact D5 quotient evaluates");
+        assert_eq!(result.value.to_string(), "1/3",
+            "D5:10111 must preserve the exact rational composition");
+        assert!(matches!(result.value, crate::Value::NumericComposition(_)));
+    }
+
+    #[test]
+    fn projected_nested_ukr_quotients_remain_exact_under_addition() {
+        let source = "(додати (частка 1 3) (частка 1 3))";
+        let parsed = crate::parse(source).expect("source parses");
+        let projected = project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("source decimal integers become D24 words");
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("Core library loads");
+        let result = crate::eval_parsed_expressions(&projected, &mut session)
+            .expect("exact D5 nested arithmetic evaluates");
+        assert_eq!(result.value.to_string(), "2/3",
+            "D5 arithmetic must preserve canonical exact RATIO");
+    }
+
+    #[test]
     fn fractional_and_symbol_tokens_are_not_silently_reinterpreted_as_integers() {
         let source = "(приклад радіо 0.25)";
         let parsed = crate::parse(source).expect("source parses");
