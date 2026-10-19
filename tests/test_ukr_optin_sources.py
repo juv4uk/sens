@@ -415,7 +415,9 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
     ROOT = Path(__file__).resolve().parents[1]
     SOURCES = {
         "lib/world.lisp": {
-            "blob": "4bf077ae35d7d61b96df9244b3334946180ecb94",
+            # Exact world source after undoing only these peer call-head edits;
+            # later primary D9 definition names intentionally remain intact.
+            "blob": "39e4726fea5b1c870f4d7c55bcfdd765f144c3cd",
             "edits": [
                 ("opposite-knowledge-head", "отримати-протилежну-голову-твердження-знання", 1),
                 ("reason-in-world", "міркувати-у-світ", 1),

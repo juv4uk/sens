@@ -81,11 +81,11 @@ class ContentStoreUkrPrimaryProjectionTests(unittest.TestCase):
         source, _ = read_sources()
         for required in (
             "(функція () мапа-порожній)",
-            "(внутрішня-мапа-вставити (знання-вміст-адреса value) value store)",
-            "(внутрішня-мапа-отримати address store)",
-            "(внутрішня-мапа-містить address store)",
-            "(внутрішня-довжина store)",
-            "(світ-адреса-вміст world)",
+            "(внутрішня-мапа-вставити (знання-вміст-адреса значення) значення сховище)",
+            "(внутрішня-мапа-отримати адреса сховище)",
+            "(внутрішня-мапа-містить адреса сховище)",
+            "(внутрішня-довжина сховище)",
+            "(світ-адреса-вміст світ)",
         ):
             with self.subTest(expression=required):
                 self.assertIn(required, source)

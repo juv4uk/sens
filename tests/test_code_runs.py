@@ -1724,7 +1724,8 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
 
     SOURCE = ROOT / "lib" / "persistent-vector.lisp"
     ORIGINAL_SOURCE_BLOB = "b0e3984f5f93f9e2503e887ba2fcd103296d0a91"
-    CURRENT_PROJECTED_SOURCE_BLOB = "31ac1e577e696d8919f97d8894ab296aef9b7df8"
+    PRE_D9_PRIMARY_SOURCE_BLOB = "31ac1e577e696d8919f97d8894ab296aef9b7df8"
+    CURRENT_PROJECTED_SOURCE_BLOB = "e6ca41305b953dcbdbd92880c71fca94930d49ac"
     FORMALS_UKR = {
     "vec-count": {
         "v": "вектор-лічильника"
@@ -1822,6 +1823,35 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
         return hashlib.sha1(
             b"blob " + str(len(data)).encode("ascii") + b"\0" + data
         ).hexdigest()
+
+    @classmethod
+    def _undo_d9_primary_projection(cls, source: str) -> str:
+        """Undo only the later D9 resident rename before checking local binders."""
+        marker = "; Повні укр-імена — первинні Lisp-owned визначення"
+        if source.count(marker) != 1:
+            raise AssertionError("persistent-vector: D9 primary tail missing/ambiguous")
+        prefix = source.split(marker, 1)[0]
+        if not prefix.endswith("\n\n"):
+            raise AssertionError("persistent-vector: expected one blank line before D9 tail")
+        source = prefix[:-1]
+
+        pairs = (
+            ("(визначити вектор-порожній ", "(визначити vec-empty "),
+            ("(визначити вектор-кількість ", "(визначити vec-count "),
+            ("(визначити вектор-н-тий\n", "(визначити vec-nth\n"),
+            ("(визначити вектор-додати\n", "(визначити vec-conj\n"),
+            ("(визначити вектор-список\n", "(визначити vec->list\n"),
+            ("(визначити вектор-з-список\n", "(визначити vec-from-list\n"),
+            ("vec-from-list-onto вхідний-список-вектора вектор-порожній))",
+             "vec-from-list-onto вхідний-список-вектора vec-empty))"),
+        )
+        for current, previous in pairs:
+            if source.count(current) != 1:
+                raise AssertionError(
+                    f"persistent-vector: D9 inverse input missing/ambiguous: {current}"
+                )
+            source = source.replace(current, previous, 1)
+        return source
 
     @staticmethod
     def _parse(source: str):
@@ -1992,8 +2022,10 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
         return projected, counts, per_function, functions, len(roots)
 
     def test_full_ukr_local_bindings_have_byte_exact_inverse(self):
-        source = self.SOURCE.read_text(encoding="utf-8")
-        self.assertEqual(self._blob_sha(source), self.CURRENT_PROJECTED_SOURCE_BLOB)
+        current = self.SOURCE.read_text(encoding="utf-8")
+        self.assertEqual(self._blob_sha(current), self.CURRENT_PROJECTED_SOURCE_BLOB)
+        source = self._undo_d9_primary_projection(current)
+        self.assertEqual(self._blob_sha(source), self.PRE_D9_PRIMARY_SOURCE_BLOB)
         inverse_formals = {
             fn: {ukr: old for old, ukr in formals.items()}
             for fn, formals in self.FORMALS_UKR.items()
@@ -2032,7 +2064,8 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
                             (fn, per_function.get(fn, {})))
 
     def test_wrong_local_peer_fails_exact_inverse(self):
-        source = self.SOURCE.read_text(encoding="utf-8")
+        current = self.SOURCE.read_text(encoding="utf-8")
+        source = self._undo_d9_primary_projection(current)
         mutant = source.replace(
             "вузол-для-індексу", "вузол-для-значення", 1
         )
