@@ -413,7 +413,7 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         # І лише тоді починає діяти старий незмінний D1/D3/D4 receipt нижче.
         # Таким чином pinned Git blob ніколи не послаблюється.
         from tests.test_meta_eval_fc_ukr_remaining import reconstruct as undo_latest_projection
-        self.assertIn("(додати (перше args) (друге args))", current_src)
+        self.assertIn("(додати (перше аргументи) (друге аргументи))", current_src)
         src = undo_latest_projection(current_src)
         originals = (
         (634, "0011"),
