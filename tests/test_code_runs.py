@@ -752,6 +752,11 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         "функція": 57, "визначити": 57,
     }
     LOCAL_HELPERS_UKR = {
+        "compiler-shape-width": "компілятор-ширина-форми",
+        "compiler-shape-bits": "компілятор-біти-форми",
+        "compiler-law-width": "компілятор-ширина-закону",
+        "compiler-law-empty-bits": "компілятор-порожні-біти-закону",
+        "compiler-law-xor-mask": "компілятор-маска-виключного-або-закону",
         "compiler-authority-find": "знайти-авторитет-компілятора",
         "compiler-true": "істина-компілятора",
         "compiler-false": "хиба-компілятора",
@@ -1043,11 +1048,11 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         newer_formals = {
             "compiler-domain-shape": {"розкласти": "decompose"},
             "compiler-list-end?": {"значення": "value"},
-            "compiler-shape-width": {"форма": "shape"},
-            "compiler-shape-bits": {"форма": "shape"},
-            "compiler-law-width": {"закон": "law"},
-            "compiler-law-empty-bits": {"закон": "law"},
-            "compiler-law-xor-mask": {"закон": "law"},
+            "компілятор-ширина-форми": {"форма": "shape"},
+            "компілятор-біти-форми": {"форма": "shape"},
+            "компілятор-ширина-закону": {"закон": "law"},
+            "компілятор-порожні-біти-закону": {"закон": "law"},
+            "компілятор-маска-виключного-або-закону": {"закон": "law"},
             "compiler-result-ok": {"запити": "requests"},
             "compiler-result-success": {"результат": "result"},
             "compiler-result-requests": {"результат": "result"},
