@@ -236,6 +236,35 @@ class ExactDomainMigrationTests(unittest.TestCase):
             "(функція (x) (перше x))",
         )
 
+    def test_legacy_W8_rewrite_preserves_quotes_and_exact_ukr(self):
+        # Це тест механічного сканера, НЕ Python-evaluator SENS.
+        old = "00000101"  # історичний SID8: CAR, не D8:00000101
+        proven = {old: mod.Identity("D3", "100", "CAR", "перше")}
+        source = (
+            "; (00000101 дані)\\n"
+            "(00000101 аргумент)\\n"
+            "(як-є (00000101 дані))\\n"
+            "'(00000101 теж-дані)\\n"
+            "(визначити сі:назва (як-є 3))\\n"
+        ).replace("\\n", "\n")
+        untouched = []
+        edits = mod.plan(source, {}, legacy_heads=proven, unresolved=untouched)
+        self.assertEqual(untouched, [])
+        self.assertEqual(len(edits), 1)
+        expected = source.replace("(00000101 аргумент)", "(перше аргумент)")
+        self.assertEqual(mod.apply_edits(source, edits), expected)
+
+    def test_legacy_audit_checks_real_ukr_si_source_without_invented_w8(self):
+        # #5872 не має позначати будь-який файл із namespaced-symbol
+        # або довільною формою LAMBDA як невдалу міграцію старого байта.
+        for path in ("lib/si-derived.lisp", "lib/repl-core.lisp"):
+            with self.subTest(path=path):
+                source = (ROOT / path).read_text(encoding="utf-8")
+                unproved = []
+                edits = mod.plan(source, {}, legacy_heads={}, unresolved=unproved)
+                self.assertEqual(edits, [])
+                self.assertEqual(unproved, [])
+
     def test_unqualified_eight_bit_head_never_infers_d8(self):
         for source in ("(00100111 evaluator-fallback expression)",
                        "(00000101 x)", "(00000001 (car x))", "(11110001 x)"):
