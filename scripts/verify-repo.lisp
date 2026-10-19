@@ -9,7 +9,7 @@
   (функція args
     (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
-(визначити fail
+(визначити повідомити-про-помилку-репозиторію
   (функція (message)
     (друге (список (друкувати (str+ "FAIL: " message)) (перше (як-є ()))))))
 
@@ -34,13 +34,13 @@
     (нехай ((missing (missing-needles (читати-файл path) needles)))
       (за-умовою
         ((атом? missing) () (pass name))
-        ((атом? missing) (ні) (провал (str+ name ": " path " missing " (значення-у-текст missing))))))))
+        ((атом? missing) (ні) (повідомити-про-помилку-репозиторію (str+ name ": " path " missing " (значення-у-текст missing))))))))
 
 (визначити forbid-needle
   (функція (name path needle)
     (за-умовою
       ((contains? (читати-файл path) needle) t
-       (провал (str+ name ": " path " must not contain " (значення-у-текст needle))))
+       (повідомити-про-помилку-репозиторію (str+ name ": " path " must not contain " (значення-у-текст needle))))
       (t t t))))
 
 (визначити any-needle?
@@ -62,7 +62,7 @@
          (за-умовою
            ((any-needle? doc (як-є ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
             t
-            (провал (str+ path ": implementation wording must not imply that Rust itself owns semantics")))
+            (повідомити-про-помилку-репозиторію (str+ path ": implementation wording must not imply that Rust itself owns semantics")))
            (t t
             (за-умовою
               ((any-needle? doc (як-є ("канонічне розширення вихідного коду — **`.lisp`**"
@@ -77,11 +77,11 @@
                     ((contains? doc "`.wsm`") t
                      (за-умовою
                        ((contains? doc "`.my`") t t)
-                       (t t (провал (str+ path ": must name `.my` as a legacy alias")))))
-                    (t t (провал (str+ path ": must name `.wsm` as a legacy alias")))))
-                 (t t (провал (str+ path ": must call `.wsm`/`.my` legacy aliases")))))
-              (t t (провал (str+ path ": must state `.lisp` as the canonical extension")))))))
-        (t t (провал (str+ path ": must describe Rust as a reference implementation")))))))
+                       (t t (повідомити-про-помилку-репозиторію (str+ path ": must name `.my` as a legacy alias")))))
+                    (t t (повідомити-про-помилку-репозиторію (str+ path ": must name `.wsm` as a legacy alias")))))
+                 (t t (повідомити-про-помилку-репозиторію (str+ path ": must call `.wsm`/`.my` legacy aliases")))))
+              (t t (повідомити-про-помилку-репозиторію (str+ path ": must state `.lisp` as the canonical extension")))))))
+        (t t (повідомити-про-помилку-репозиторію (str+ path ": must describe Rust as a reference implementation")))))))
 
 (check-doc-identity "README.md")
 (check-doc-identity "docs/language-core.md")
@@ -99,7 +99,7 @@
          (нехай ((text (читати-файл manifest)))
            (за-умовою
              ((contains? text "[package]\nname = \"my-lisp") t
-              (провал (str+ "cargo package prefix regression: " manifest " uses my-lisp*")))
+              (повідомити-про-помилку-репозиторію (str+ "cargo package prefix regression: " manifest " uses my-lisp*")))
              (t t (check-manifests (решта entries))))))))))
 
 (check-manifests (read-dir "crates"))
@@ -116,10 +116,10 @@
 ; «executable conformance» / «Executable conformance».
 (за-умовою
   ((any-needle? (читати-файл "docs/semantic-authority-map.md") (як-є ("Ratified ADR" "ratified ADR"))) t t)
-  (t t (провал "docs/semantic-authority-map.md must mention ratified ADRs")))
+  (t t (повідомити-про-помилку-репозиторію "docs/semantic-authority-map.md must mention ratified ADRs")))
 (за-умовою
   ((any-needle? (читати-файл "docs/semantic-authority-map.md") (як-є ("Executable conformance" "executable conformance"))) t t)
-  (t t (провал "docs/semantic-authority-map.md must mention executable conformance")))
+  (t t (повідомити-про-помилку-репозиторію "docs/semantic-authority-map.md must mention executable conformance")))
 (pass "public-docs-point-to-semantic-authority")
 
 ; --- host-semantic-surface-documentation-tracks-time-ownership ---
@@ -171,7 +171,7 @@
       (за-умовою
         ((11110111 (перше result) 0) (1) (pass name))
         ((11110111 (перше result) 0) (0)
-         (провал (str+ name " failed\n" (друге result) (третє result))))))))
+         (повідомити-про-помилку-репозиторію (str+ name " failed\n" (друге result) (третє result))))))))
 
 (run-python "meta-eval-evidence-matrix" "scripts/check-meta-eval-evidence.py" (як-є ()))
 (run-python "meta-eval-human-evidence-projection" "scripts/generate-meta-eval-evidence.py" (як-є ("--check")))
@@ -221,7 +221,7 @@
     (нехай ((found (знайти-за-ключем id stable-uk)))
       (за-умовою
         ((атом? found) (0) (решта found))
-        (t t (провал (str+ "документаційний ID " id " не має stable UK projection у registry")))))))
+        (t t (повідомити-про-помилку-репозиторію (str+ "документаційний ID " id " не має stable UK projection у registry")))))))
 
 (визначити all-bits?
   (функція (text)
@@ -238,14 +238,14 @@
          ((менше? 10 predicates) 1
           (за-умовою
             ((менше? 0 mutations) 1 t)
-            (t t (провал "публічний каталог мутацій схлопнувся"))))
-         (t t (провал "публічний каталог предикатів схлопнувся"))))
+            (t t (повідомити-про-помилку-репозиторію "публічний каталог мутацій схлопнувся"))))
+         (t t (повідомити-про-помилку-репозиторію "публічний каталог предикатів схлопнувся"))))
       ((атом? docs) (0)
        (нехай ((id (doc-id (перше docs))) (kind (doc-kind (перше docs))))
          (за-умовою
            ((11110111 (110100010 id) 8) (0)
-            (провал (str+ "документаційний join key має бути 8-бітним SID: " id)))
-           ((all-bits? id) () (провал (str+ "документаційний join key має бути 8-бітним SID: " id)))
+            (повідомити-про-помилку-репозиторію (str+ "документаційний join key має бути 8-бітним SID: " id)))
+           ((all-bits? id) () (повідомити-про-помилку-репозиторію (str+ "документаційний join key має бути 8-бітним SID: " id)))
            (t t
             (нехай ((uk (uk-name-for id)))
               (001000 ((question (11110111 (last-char uk) "?"))
@@ -254,14 +254,14 @@
                     (mutation (11110111 kind (як-є mutation))))
                 (за-умовою
                   ((11110111 question predicate) (0)
-                   (провал (str+ "українська назва " uk ": знак ? і predicate мусять збігатися")))
+                   (повідомити-про-помилку-репозиторію (str+ "українська назва " uk ": знак ? і predicate мусять збігатися")))
                   ((11110111 bang mutation) (0)
-                   (провал (str+ uk ": ! зарезервований для мутації")))
+                   (повідомити-про-помилку-репозиторію (str+ uk ": ! зарезервований для мутації")))
                   (mutation (1)
                    (за-умовою
                      ((11110111 uk "встановити-елемент-вектора!") (1)
                       (check-docs (решта docs) predicates (додати mutations 1)))
-                     (t t (провал (str+ "несподівана мутація: " uk)))))
+                     (t t (повідомити-про-помилку-репозиторію (str+ "несподівана мутація: " uk)))))
                   (predicate (1)
                    (check-docs (решта docs) (додати predicates 1) mutations))
                   (t t (check-docs (решта docs) predicates mutations))))))))))))
@@ -282,11 +282,11 @@
            ((атом? (знайти-за-ключем id (відобразити (функція (doc) (сполучити (doc-id doc) t)) uk-docs))) ()
             (check-md-rows (решта pairs)))
            ((рядок-містить? (str+ "| `" uk "` |") api-md) t (check-md-rows (решта pairs)))
-           (t t (провал (str+ "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
+           (t t (повідомити-про-помилку-репозиторію (str+ "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
 
 (за-умовою
   ((менше? 50 (count-items stable-uk)) 1 (check-md-rows stable-uk))
-  (t t (провал "замало stable UK-назв у таблиці")))
+  (t t (повідомити-про-помилку-репозиторію "замало stable UK-назв у таблиці")))
 (pass "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku")
 
 ; Смисловий аудит назв: підсумок збігається з даними.
@@ -301,9 +301,9 @@
      ((11110111 renamed (count-items audit-renames)) (1)
       (за-умовою
         ((11110111 reviewed (count-items uk-docs)) (1) t)
-        (t t (провал "смисловий аудит мусить покривати рівно documented UK-покриття"))))
-     (t t (провал "(renamed N) розійшовся з фактичною кількістю (rename ...)"))))
-  (t t (провал "stable-reviewed мусить дорівнювати renamed+retained")))
+        (t t (повідомити-про-помилку-репозиторію "смисловий аудит мусить покривати рівно documented UK-покриття"))))
+     (t t (повідомити-про-помилку-репозиторію "(renamed N) розійшовся з фактичною кількістю (rename ...)"))))
+  (t t (повідомити-про-помилку-репозиторію "stable-reviewed мусить дорівнювати renamed+retained")))
 (pass "smyslovyi-audyt-summary-zbihaietsia-z-faktychnymy-danymy")
 
 (визначити uk-surface (читати-файл "lib/surface/uk.lisp"))
@@ -331,7 +331,7 @@
 
 (за-умовою
   ((11010 (pos-of uk-surface "(00001001 середовище env)" 0) 0) t
-   (провал "uk.lisp: (00001001 середовище env) мусить бути лише в реєстрі, не в поверхні"))
+   (повідомити-про-помилку-репозиторію "uk.lisp: (00001001 середовище env) мусить бути лише в реєстрі, не в поверхні"))
   (t t t))
 (pass "seredovyshche-ne-maie-povtornoho-surface-binding")
 
@@ -347,7 +347,7 @@
                      semantic-registry)))
          (за-умовою
            ((атом? sens) ()
-            (провал
+            (повідомити-про-помилку-репозиторію
               (str+ "audit EN surface missing from semantic registry: "
                     (11101110 en-symbol))))
            ((110101000
@@ -356,7 +356,7 @@
             t
             (check-aliases (решта renames)))
            (t t
-            (провал
+            (повідомити-про-помилку-репозиторію
               (str+ "missing exact-SENS compatibility alias (00001001 "
                     (11101110 old-symbol) " " (11110100 sens) ")")))))))))
 (check-aliases audit-renames)
@@ -380,7 +380,7 @@
       ((атом? pairs) (0)
        (за-умовою
          ((typeable? (решта (перше pairs))) t (check-typeable (решта pairs)))
-         (t t (провал (str+ "Ukrainian name needs another keyboard layout: " (решта (перше pairs))))))))))
+         (t t (повідомити-про-помилку-репозиторію (str+ "Ukrainian name needs another keyboard layout: " (решта (перше pairs))))))))))
 (check-typeable stable-uk)
 (pass "every-stable-ukrainian-name-is-typeable-on-the-ukrainian-layout")
 
@@ -419,7 +419,7 @@
     (нехай ((found (latin-in-code (читати-файл path) () () "")))
       (за-умовою
         ((110011100 found) (1) (pass name))
-        (t t (провал (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
+        (t t (повідомити-про-помилку-репозиторію (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
 
 (require-no-latin "ukrainian-acceptance-program-code-never-requires-latin-layout"
   "lib/surface/uk-acceptance.lisp")
@@ -432,9 +432,9 @@
     (нехай ((text (читати-файл path)))
       (за-умовою
         ((рядок-містить? "language-contract.my" text) t
-         (провал (str+ path " still contains removed path language-contract.my")))
+         (повідомити-про-помилку-репозиторію (str+ path " still contains removed path language-contract.my")))
         ((рядок-містить? "contracts/my-lisp/lock.my" text) t
-         (провал (str+ path " still contains removed path contracts/my-lisp/lock.my")))
+         (повідомити-про-помилку-репозиторію (str+ path " still contains removed path contracts/my-lisp/lock.my")))
         (t t
          (require-needles "contract-workflows-use-canonical-lisp-paths" path
            (як-є ("default: contracts/my-lisp/language-contract.lisp"
@@ -446,6 +446,5 @@
 (друкувати "verify-repo: all checks passed")
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити провал fail)
 (визначити згорнути reduce)
 (визначити рядок-додати string-append)
