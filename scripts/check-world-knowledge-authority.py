@@ -55,8 +55,15 @@ for axiom_id, (value, dim, record) in expected.items():
     assert f"({axiom_id}\n      (value . {value})" in axiom_canonical
     assert f"(dimension-vector7 . {dim})" in axiom_canonical
     assert record in axiom_surface
-    # Donor lib must still carry the exact same value while migration is in flight.
-    assert value in si
+    # Ordinary source digits are admitted as exact D24+ values. A rational
+    # is constructed by the ratified D5:10111 operation, not read from a N/D
+    # token or a hidden width tag.
+    source_value = {
+        "010": "(частка 132521403 200000000000000000000000000000000000000000)",
+        "011": "(частка 801088317 5000000000000000000000000000)",
+        "100": "(частка 1380649 100000000000000000000000000000)",
+    }.get(axiom_id, value)
+    assert source_value in si
 
 # Model-law dependencies must use canonical axiom ids, not SI names.
 assert surface_marker in laws
