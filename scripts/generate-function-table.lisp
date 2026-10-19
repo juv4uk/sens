@@ -90,7 +90,7 @@
 (визначити mccarthy-label
   (функція (sid)
     (нехай ((row (find-historical-row sid historical-rows)))
-      (110 ((010 row) "()") ((010 (001 ())) (str+ (11110100 (100111 row)) " (" (11110100 (110110101 row)) ")"))))))
+      (за-умовою ((атом? row) "()") ((атом? (як-є ())) (str+ (значення-у-текст (четверте row)) " (" (значення-у-текст (п'ятий row)) ")"))))))
 
 ; A surface word is usually a symbol (write-to-string strips the
 ; Lisp-level Symbol wrapping down to bare text); the reconstructed
@@ -268,7 +268,7 @@
       (список
         (записати-файл wsm-output-path wsm-output)
         (записати-файл md-output-path md-output)
-        (11011011
+        (друкувати
           (str+
             "function-table: "
             (число-рядок (довжина entries))
@@ -285,7 +285,7 @@
         ((тотожне? current-wsm wsm-output)
          (за-умовою
            ((тотожне? current-md md-output)
-            (11011011
+            (друкувати
               (str+
                 "function-table: "
                 (число-рядок (довжина entries))
