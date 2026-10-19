@@ -124,6 +124,8 @@ jobs:
           python3 -m unittest tests.test_domain_ladder_source_batch.BatchSourceTests.test_guard_reference_uses_ukrainian_heads_without_filename_hold -v
           cargo test --locked -p sens --test guard
           cargo test --locked -p sens --lib source_projection::tests:: -- --nocapture
+          # Виконання D9/укр, а не лише наявність згенерованої таблиці.
+          cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
           cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection
           python3 -m unittest tests/test_ukr_macro_bridge_unify_effects.py -v
           python3 -m unittest tests/test_ukr_machine_projection_parity.py -v
