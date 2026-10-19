@@ -148,7 +148,8 @@
 ; не друге визначення), бо реальні виклики вже пишуть саме так
 ; (lib/reason.lisp мав власний локальний (def cadddr ...) до цього,
 ; посимвольно ідентичний тілу fourth).
-(визначити cadddr fourth)
+(визначити четверте fourth)
+(визначити cadddr четверте)
 
 ; fifth — same single-parameter primitive-chain pattern as second/third/
 ; fourth, one step deeper. Found duplicated in two places at once:
@@ -169,7 +170,8 @@
   (функція (значення-функції)
     (перше-першого значення-функції)))
 
-(визначити cadr second)
+(визначити друге second)
+(визначити cadr друге)
 
 (визначити cddr
   (функція (значення-функції)
@@ -259,9 +261,10 @@
 ; korrekter Reihenfolge wieder auf — zwei endrekursive Durchläufe statt
 ; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
 ; Rust-Stack-sicheres append.
-(визначити append
+(визначити приєднати
   (функція (лівий-операнд правий-операнд)
     (зворот-до (зворот лівий-операнд) правий-операнд)))
+(визначити append приєднати)
 
 ; MAP is derived in Lisp: D4 NULL detects exactly the empty list,
 ; while D3 ATOM excludes improper non-pair tails. Both produce D1 control
