@@ -10,7 +10,7 @@
 ; and adds stable content-addressed IDs plus mechanically observed forms.
 ; Never hand-edit the generated file.
 
-(0011 fixtures (110101001 (110110111 "tests/fixtures/conformance.lisp")))
+(визначити fixtures (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
 
 ;; ---- Helpers ----
 
@@ -34,7 +34,7 @@
 (визначити uniq
   (функція (lst)
     (за-умовою ((атом? lst) ()) ((атом? (як-є ())) (за-умовою
-           ((11101 (100 lst) (011 lst)) (uniq (011 lst)))
+           ((значення-у-списку? (перше lst) (решта lst)) (uniq (решта lst)))
            ((атом? (як-є ())) (сполучити (перше lst) (uniq (решта lst)))))))))
 
 ;; Structural walk to collect observed-forms
@@ -49,19 +49,19 @@
 
 (визначити walk-observed
   (функція (v)
-    (110 ((010 v) ()) ((010 (001 ())) (001000 ((head (100 v)))
+    (за-умовою ((атом? v) ()) ((атом? (як-є ())) (нехай ((head (перше v)))
          (за-умовою ((атом? head) (за-умовою
               ((тотожне? head (як-є quote))
                (список (як-є quote)))
               ((тотожне? head (як-є lambda))
                (сполучити (як-є lambda)
-                     (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
+                     (за-умовою ((атом? (решта-решти v)) ()) ((атом? (як-є ())) (walk-observed (перше (решта-решти v)))))))
               ((тотожне? head (як-є def))
                (сполучити (як-є def)
-                     (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
+                     (за-умовою ((атом? (решта-решти v)) ()) ((атом? (як-є ())) (walk-observed (перше (решта-решти v)))))))
               ((тотожне? head (як-є defmacro))
                (сполучити (як-є defmacro)
-                     (110 ((010 (0111 v)) ())
+                     (за-умовою ((атом? (решта-решти v)) ())
                            ((атом? (решта (решта-решти v))) ())
                            ((атом? (як-є ())) (walk-observed (перше (решта (решта-решти v))))))))
               ((тотожне? head (як-є cond))
@@ -89,7 +89,7 @@
       ((тотожне? error-kind "NumericOverflow")
        ())
       ((атом? (як-є ()))
-       (001000 ((forms (110101001 expr-str)))
+       (нехай ((forms (читати-всі expr-str)))
          (за-умовою ((атом? forms) ()) ((атом? (як-є ())) (uniq (walk-observed (перше forms))))))))))
 
 ;; Build identity record and compute ID
@@ -101,17 +101,17 @@
 ;; is actually evidence for.
 (визначити compute-id
   (функція (expr axioms outcome-kind outcome-value)
-    (001001 ((identity-record (1110 (111 (001 expr) expr)
+    (нехай-послідовно ((identity-record (список (сполучити (як-є expr) expr)
                           (сполучити (як-є axioms) axioms)
                           (сполучити outcome-kind outcome-value)))
-          (encoded (11110100 identity-record))
-          (hash (110011000 encoded)))
-      (110011110 "F-" (110100011 hash 0 16)))))
+          (encoded (значення-у-текст identity-record))
+          (hash (геш-256-шістнадцятковий encoded)))
+      (рядок-додати "F-" (рядок-зріз hash 0 16)))))
 
 ;; Process one fixture -> emit inventory record
 (визначити emit-fixture
   (функція (fixture)
-    (001001 ((expr (assoc-str (001 expr) fixture))
+    (нехай-послідовно ((expr (assoc-str (як-є expr) fixture))
           (expected (assoc-str (як-є expected) fixture))
           (error-kind (assoc-str (як-є error) fixture))
           (tier (assoc-str (як-є tier) fixture))
@@ -123,7 +123,7 @@
           (outcome-value (за-умовою (expected expected) ((атом? (як-є ())) error-kind)))
           (id (compute-id expr axioms outcome-kind outcome-value))
           (observed-forms (get-observed-forms expr error-kind)))
-      (11011011 (1110 (001 fixture)
+      (друкувати (список (як-є fixture)
                    (сполучити (як-є id) id)
                    (сполучити (як-є tier) tier)
                    (сполучити (як-є axioms) axioms)
@@ -137,13 +137,13 @@
 ;; Emit all fixtures
 (визначити emit-all
   (функція (remaining)
-    (110 ((010 remaining) (001 ())) ((010 (001 ())) (001000 ((printed (emit-fixture (100 remaining))))
+    (за-умовою ((атом? remaining) (як-є ())) ((атом? (як-є ())) (нехай ((printed (emit-fixture (перше remaining))))
          (emit-all (решта remaining)))))))
 
 ;; Header
-(11011011 (111 (001 about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
-(11011011 (111 (001 generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
-(11011011 (111 (001 source) "tests/fixtures/conformance.lisp"))
+(друкувати (сполучити (як-є about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
+(друкувати (сполучити (як-є generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
+(друкувати (сполучити (як-є source) "tests/fixtures/conformance.lisp"))
 
 (emit-all fixtures)
 
