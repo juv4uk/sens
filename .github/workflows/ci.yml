@@ -7,9 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Кожен exact-SHA запуск має власну групу: новий push не скасовує
+# попередній workflow і не витісняє його з pending черги.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+  group: ${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
