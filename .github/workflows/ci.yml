@@ -161,6 +161,7 @@ jobs:
           python3 -m unittest tests/test_persistent_map_ukr_primary_projection.py -v
           python3 -m unittest tests/test_content_store_ukr_primary_projection.py -v
           python3 -m unittest tests/test_persistent_vector_ukr_primary_projection.py -v
+          python3 -m unittest tests/test_world_ukr_primary_projection.py -v
           python3 scripts/test-content-store-d1-bitness.py
           # Борг active Latin call heads лишається видимим у звіті й JSON.
           # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
