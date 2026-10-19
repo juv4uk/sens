@@ -281,7 +281,7 @@
 (визначити retract-fact!
   (make-macro
     (функція (fact)
-      (список (як-є визначити) (як-є *working-memory*) (список (як-є retract-fact) fact (як-є *working-memory*))))))
+      (список (як-є визначити) (як-є *working-memory*) (список (як-є відкликати-факт) fact (як-є *working-memory*))))))
 
 ; Step 5b: a real (if minimal) truth maintenance system. A *justified fact*
 ; is `(fact . supports)`: `supports` is the list of facts a rule consumed to
@@ -417,12 +417,12 @@
 (визначити assert-fact-tms!
   (make-macro
     (функція (fact)
-      (список (як-є визначити) (як-є *justified-memory*) (список (як-є додати-нові-обґрунтований) (список (як-є список) (список (як-є axiom) fact)) (як-є *justified-memory*))))))
+      (список (як-є визначити) (як-є *justified-memory*) (список (як-є додати-нові-обґрунтований) (список (як-є список) (список (як-є аксіома) fact)) (як-є *justified-memory*))))))
 
 (визначити run-tms!
   (make-macro
     (функція (rules)
-      (список (як-є визначити) (як-є *justified-memory*) (список (як-є run-tms) rules (як-є *justified-memory*))))))
+      (список (як-є визначити) (як-є *justified-memory*) (список (як-є запустити-система-істини) rules (як-є *justified-memory*))))))
 
 (визначити remove-justified
   (функція (fact entries)
@@ -597,7 +597,7 @@
 (визначити run-jtms!
   (make-macro
     (функція (rules)
-      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є run-jtms) rules (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є запустити-система-обґрунтувань) rules (як-є *jtms-memory*))))))
 
 ; Step 14: JTMS grows a multi-condition twin, the same way Step 6 grew
 ; `fire-rule-multi`/`run-multi` alongside the Step 1-5 single-condition
@@ -746,7 +746,7 @@
 (визначити run-jtms-multi!
   (make-macro
     (функція (rules)
-      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є run-jtms-multi) rules (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є запустити-система-обґрунтувань-мульти) rules (як-є *jtms-memory*))))))
 
 (визначити prune-justifications
   (функція (fact justifications)
