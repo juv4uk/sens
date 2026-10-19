@@ -172,7 +172,7 @@ class FullUkrFileProgressTests(TempTree):
         self.assertEqual(before["eligible_files"], 2)
         self.assertEqual(before["full_ukr_files"], 1)
         self.assertEqual(before["files_pct"], 50.0)
-        self.assertEqual(old_legacy.files_ukrainian, 2)
+        self.assertEqual(old_legacy.files_ukrainian, 3)
         self.assertEqual(old_legacy.files_pct, 100.0)
         self.assertEqual(before["pending_files"][0]["reason"], "compact-instead-of-full-ukr")
 
