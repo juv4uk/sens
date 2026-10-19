@@ -156,6 +156,43 @@ class FileMetricTests(TempTree):
         self.assertEqual(p.files_pct, 0.0)
 
 
+class FullUkrFileProgressTests(TempTree):
+    def test_full_ukr_file_percentage_moves_when_compact_call_becomes_full(self):
+        # Обидва файли вже містять кирилицю: стара files_pct = 100%,
+        # але тільки один має повне ратифіковане ім'я з колонки укр.
+        d = self.tree({
+            "lib/domains/d4.lisp":
+                "(0010 (ук коротко) (укр повна-назва) (san test) "
+                "(en example) (LISP EXAMPLE) (sym ()))\n",
+            "lib/готовий.lisp": "(повна-назва)\n",
+            "lib/ще-ні.lisp": "(коротко)\n",
+        })
+        old_legacy = mod.measure(d)
+        before = mod.audit_executable_ukr_files(d)
+        self.assertEqual(before["eligible_files"], 2)
+        self.assertEqual(before["full_ukr_files"], 1)
+        self.assertEqual(before["files_pct"], 50.0)
+        self.assertEqual(old_legacy.files_ukrainian, 2)
+        self.assertEqual(old_legacy.files_pct, 100.0)
+        self.assertEqual(before["pending_files"][0]["reason"], "compact-instead-of-full-ukr")
+
+        (d / "lib/ще-ні.lisp").write_text("(повна-назва)\n", encoding="utf-8")
+        after = mod.audit_executable_ukr_files(d)
+        self.assertEqual(after["eligible_files"], 2)
+        self.assertEqual(after["full_ukr_files"], 2)
+        self.assertEqual(after["files_pct"], 100.0)
+        self.assertEqual(mod.measure(d).files_pct, 100.0)
+        self.assertIn("2/2 (100.0%)", mod.render(mod.measure(d), after))
+
+    def test_quoted_latin_data_not_counted_as_executable_head(self):
+        d = self.tree({
+            "lib/програма.lisp": "(визначити результат (як-є (legacy-call)))\n",
+        })
+        audit = mod.audit_executable_ukr_files(d)
+        self.assertEqual(audit["eligible_files"], 1)
+        self.assertEqual(audit["full_ukr_files"], 1)
+
+
 class ProgressTests(unittest.TestCase):
     def test_percentages_and_pending(self):
         p = mod.Progress(lisp_files=4, files_with_pairs=2, pairs_total=8,
