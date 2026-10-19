@@ -1,15 +1,13 @@
 //! Живий oracle: реальний Lisp-owned occurs-check, без симуляції helper.
 //! D6 LET вилучений, body перенесений до точної D4 LAMBDA.
 use sens::{
-    eval_parsed_expressions, eval_pinned_legacy_core_source,
+    eval_parsed_expressions, eval_core_library_source,
     parse_mixed_exact_domain, parse_mixed_exact_domain_reasoning_source, Session,
 };
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("legacy bootstrap must load by pinned path");
