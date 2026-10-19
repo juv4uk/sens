@@ -30,7 +30,7 @@ pub fn project_ukr_decimal_integer_literals(
 
 fn integer_lexeme<'a>(expr: &Expr, source: &'a str) -> Option<&'a str> {
     if matches!(
-        expr.kind,
+        &expr.kind,
         ExprKind::DomainCall(..)
             | ExprKind::Call(..)
             | ExprKind::List(..)
