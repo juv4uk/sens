@@ -394,8 +394,8 @@ mod tests {
         reset_session();
         init_if_needed().expect("full Ukrainian default surface");
         SESSION.with(|slot| {
-            let guard = slot.borrow();
-            let state = guard.as_ref().expect("initialized web session");
+            let mut guard = slot.borrow_mut();
+            let state = guard.as_mut().expect("initialized web session");
             assert_eq!(state.surface, WebSurface::UkrainianFull);
             let full = eval_program("(порожній-текст? \"\")", &mut state.session.clone())
                 .expect("full Ukrainian call head works by default");
