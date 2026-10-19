@@ -94,7 +94,7 @@ def source_to_previous(text: str) -> str:
         line = re.sub(r"\(так(?=\s|$)", "(#d1:1", line)
         line = line.replace("(кодування-юнікод-8-кодувати-рядок ", "(utf8-encode-string ")
         for нове, старе in (("шлях", "path"), ("декодоване", "decoded"), ("текст", "text")):
-            line = re.sub(r"(?<![\\w-])" + нове + r"(?![\\w-])", старе, line)
+            line = re.sub(r"(?<![\w-])" + нове + r"(?![\w-])", старе, line)
         result.append(line)
     return "".join(result)
 
