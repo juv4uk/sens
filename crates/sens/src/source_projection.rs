@@ -324,9 +324,15 @@ mod tests {
         crate::load_core_library(&mut session).expect("Core library loads");
         let result = crate::eval_parsed_expressions(&projected, &mut session)
             .expect("exact D5 quotient evaluates");
-        assert_eq!(result.value.to_string(), "1/3",
-            "D5:10111 must preserve the exact rational composition");
-        assert!(matches!(result.value, crate::Value::NumericComposition(_)));
+        let crate::Value::NumericComposition(composition) = result.value else {
+            panic!("D5:10111 must produce an exact RATIO composition");
+        };
+        let (_, numerator, denominator) = composition.as_parts();
+        assert_eq!(numerator.to_unsigned_decimal_string(), "1");
+        assert_eq!(
+            denominator.expect("nonintegral quotient has denominator").to_unsigned_decimal_string(),
+            "3"
+        );
     }
 
     #[test]
@@ -339,8 +345,15 @@ mod tests {
         crate::load_core_library(&mut session).expect("Core library loads");
         let result = crate::eval_parsed_expressions(&projected, &mut session)
             .expect("exact D5 nested arithmetic evaluates");
-        assert_eq!(result.value.to_string(), "2/3",
-            "D5 arithmetic must preserve canonical exact RATIO");
+        let crate::Value::NumericComposition(composition) = result.value else {
+            panic!("D5 arithmetic must produce an exact RATIO composition");
+        };
+        let (_, numerator, denominator) = composition.as_parts();
+        assert_eq!(numerator.to_unsigned_decimal_string(), "2");
+        assert_eq!(
+            denominator.expect("nonintegral sum has denominator").to_unsigned_decimal_string(),
+            "3"
+        );
     }
 
     #[test]
