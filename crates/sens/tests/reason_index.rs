@@ -147,7 +147,17 @@ fn binary_sens_migration_witness_checks_atom_eq_and_domain_boundaries() {
     }
     widths.sort_unstable();
     widths.dedup();
-    assert_eq!(widths, vec![1, 3, 4], "D1 results; D3 structure; D4 empty-list predicate");
+    // На цьому етапі reader зберігає D3/D4 як українські людські
+    // імена до exact-domain lowering; у цьому AST явним є лише D1.
+    // Бітовий закон ATOM/EQ та реальна поведінка індексу перевірені
+    // вище виконанням SENS, а не самим підрахунком AST-позначок.
+    assert_eq!(widths, vec![1], "лише явні D1 значення до lowering");
+    assert!(helper_source.contains("(атом? значення)"), "D3 ATOM українською");
+    assert!(helper_source.contains("(порожній? значення)"), "D4 NULL українською");
+    let d3 = include_str!("../../../lib/domains/d3.lisp");
+    let d4 = include_str!("../../../lib/domains/d4.lisp");
+    assert!(d3.contains("(010 (ук атом?) (укр атом?)"), "ратифікована D3:010");
+    assert!(d4.contains("(0101 (ук порожнє?) (укр порожній?)"), "ратифікована D4:0101");
     assert!(!helper_source.contains("000000"), "D6 LENGTH must not return to arity helpers");
     assert!(!helper_source.contains("11110111"), "D8 EQUAL must not return to arity helpers");
 }
