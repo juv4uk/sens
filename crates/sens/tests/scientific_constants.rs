@@ -1,4 +1,10 @@
-use sens::{eval_program, Session};
+use sens::{eval_parsed_expressions, parse, Session};
+
+fn eval_ukr(source: &str, session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
+    let parsed = parse(source)?;
+    let projected = sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)?;
+    eval_parsed_expressions(&projected, session)
+}
 
 fn eval_science(source: &str) -> String {
     let mut session = Session::default();
@@ -7,9 +13,10 @@ fn eval_science(source: &str) -> String {
         include_str!("../../../lib/quantity.lisp"),
         include_str!("../../../lib/si.lisp"),
     ] {
-        eval_program(library, &mut session).expect("science library should load");
+        eval_ukr(library, &mut session)
+            .unwrap_or_else(|e| panic!("science library should load: {e}"));
     }
-    eval_program(source, &mut session)
+    eval_ukr(source, &mut session)
         .unwrap_or_else(|e| panic!("science expression failed: {e}\nsource: {source}"))
         .value
         .to_string()
@@ -27,9 +34,10 @@ fn eval_science_knowledge(source: &str) -> String {
         include_str!("../../../lib/quantity.lisp"),
         include_str!("../../../lib/si.lisp"),
     ] {
-        eval_program(library, &mut session).expect("science/knowledge library should load");
+        eval_ukr(library, &mut session)
+            .unwrap_or_else(|e| panic!("science/knowledge library should load: {e}"));
     }
-    eval_program(source, &mut session)
+    eval_ukr(source, &mut session)
         .unwrap_or_else(|e| panic!("science knowledge expression failed: {e}\nsource: {source}"))
         .value
         .to_string()
