@@ -9,15 +9,29 @@ on:
 permissions:
   contents: read
 
+# На кожен коміт запускається один workflow, а старі запуски тієї самої
+# гілки не забирають чергу GitHub-hosted раннерів після нового push.
 concurrency:
-  group: sens-lisp-surface-${{ github.repository }}-${{ github.sha }}
-  cancel-in-progress: false
+  group: sens-lisp-surface-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 jobs:
   lisp-surface:
     name: Українська проєкція та заборона сирих літералів
     runs-on: ubuntu-24.04
     steps:
+      - name: Підтвердити виконання на GitHub-hosted, не на комп'ютері власника
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'RUNNER_ROUTING environment=%s os=%s arch=%s name=%s\\n' \\
+            "${RUNNER_ENVIRONMENT:-unset}" "${RUNNER_OS:-unset}" \\
+            "${RUNNER_ARCH:-unset}" "${RUNNER_NAME:-unset}"
+          if [[ "${RUNNER_ENVIRONMENT:-}" != 'github-hosted' ]]; then
+            echo '::error::SENS jobs must run on GitHub-hosted runners only'
+            exit 1
+          fi
+
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
           persist-credentials: false
