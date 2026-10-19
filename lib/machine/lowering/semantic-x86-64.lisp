@@ -158,10 +158,10 @@
 ; primitives. Do not route this boundary through Core4's deferred legacy
 ; reverse-onto/COND implementation: tests and authority remain language-owned.
 (визначити x86-machine-append-forms
-  (функція (values tail)
+  (функція (форми хвіст)
     (за-умовою
-      ((атом? values) tail)
-      ((атом? ()) (сполучити (перше values) (x86-machine-append-forms (решта values) tail))))))
+      ((атом? форми) хвіст)
+      (так (сполучити (перше форми) (x86-machine-append-forms (решта форми) хвіст))))))
 
 ; The bounded native pair witness has a fixed six-instruction shape. Build it
 ; directly rather than routing through generic append/reverse: those Core4 list
