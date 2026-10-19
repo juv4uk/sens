@@ -104,8 +104,8 @@ fn profile_size(distractors: usize) -> (u128, u128, u128, u128, u128, usize) {
         "(def bench-rules (module-clauses-now (quote bench)))",
     );
 
-    let indexed_direct = "(length (reason (quote (valuable target)) bench-rules))";
-    let linear_direct = "(length (prove-goal (quote (valuable target)) bench-rules (quote ()) (reason-index-linear bench-rules) 0))";
+    let indexed_direct = "(length (міркувати (quote (valuable target)) bench-rules))";
+    let linear_direct = "(length (довести-ціль (quote (valuable target)) bench-rules (quote ()) (лінійний-індекс-міркування bench-rules) 0))";
     let raw_reason = "(result-status (reason-observe (quote (valuable target)) bench-rules))";
     let end_to_end = "(result-status (reason-in-observe (quote bench) (quote (valuable target))))";
 
@@ -213,10 +213,10 @@ fn profile_repeated_queries(distractors: usize) {
     );
     eval_session(
         &mut session,
-        "(def bench-index (reason-make-index bench-rules))",
+        "(def bench-index (побудувати-індекс-міркування bench-rules))",
     );
     assert_eq!(
-        eval_session(&mut session, "(reason-index-mode bench-index)"),
+        eval_session(&mut session, "(режим-індексу-міркування bench-index)"),
         "indexed"
     );
 
@@ -253,7 +253,7 @@ fn profile_repeated_queries(distractors: usize) {
     let index_batch_ns = median_ns(|| {
         timed_repeated_eval(
             &mut session,
-            "(reason-index-mode (reason-make-index bench-rules))",
+            "(режим-індексу-міркування (побудувати-індекс-міркування bench-rules))",
             "indexed",
         )
     });
