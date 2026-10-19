@@ -93,7 +93,7 @@ class PythonEntrypointsRunTests(unittest.TestCase):
             self.assertEqual(p.returncode, 0)
             self.assertEqual(
                 p.stdout.strip(),
-                "УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 1/2 (50.0%)")
+                "УКР-ПРОЄКЦІЯ .lisp: повністю українські файли 1/2 (50.0%)")
 
     def test_ukr_projection_report_bad_root_is_usage_error(self):
         p = run_entrypoint("scripts/report_ukr_projection_progress.py", "--root", "/no/such/dir")
