@@ -181,7 +181,7 @@
 (визначити tc-arguments (функція (виклик-інструмента) (alist-ref (як-є arguments) виклик-інструмента)))
 
 ; OpenAI's content field is null when the assistant emits only tool calls.
-(визначити json-message-content
+(визначити зміст-повідомлення-формат-обміну-даними
   (функція (jm)
     ((функція (c)
       (за-умовою
@@ -189,7 +189,7 @@
         (так c)))
      (alist-ref "content" jm))))
 
-(визначити json->tool-call
+(визначити виклик-інструмента-з-формат-обміну-даними
   (функція (jtc)
     ((функція (fn)
       (список (сполучити (як-є id) (alist-ref "id" jtc))
@@ -197,7 +197,7 @@
             (сполучити (як-є arguments) (alist-ref "arguments" fn))))
      (alist-ref "function" jtc))))
 
-(визначити json->message
+(визначити повідомлення-з-формат-обміну-даними
   (функція (jm)
     ((функція (tcs)
       (приєднати (список (сполучити (як-є role) (alist-ref "role" jm))
@@ -207,7 +207,7 @@
                 )))
      (alist-ref "tool_calls" jm))))
 
-(визначити extract-assistant-message
+(визначити витягти-відповідь-помічника
   (функція (response-json)
     (нехай-послідовно ((choices (alist-ref "choices" response-json))
            (choice (перше choices)))
@@ -217,14 +217,14 @@
 ; Request encoding (raw-data builders; one json-encode at the leaf)
 ; ---------------------------------------------------------------------------
 
-(визначити encode-tool-call
+(визначити кодувати-виклик-інструмента
   (функція (tc)
     (список (сполучити "id" (tc-id tc))
           (сполучити "type" "function")
           (сполучити "function" (список (сполучити "name" (tc-name tc))
                                  (сполучити "arguments" (tc-arguments tc)))))))
 
-(визначити encode-message
+(визначити кодувати-повідомлення
   (функція (m)
     (за-умовою
       ((однакові? (msg-role m) "tool")
@@ -250,7 +250,7 @@
                                                                 (сполучити "description" "The bash command to execute")))))
                                   (сполучити "required" (список "cmd")))))))))
 
-(визначити build-request-body
+(визначити створити-тіло-запиту
   (функція (model messages)
     (кодувати-значення-формат-обміну-даними
      (список (сполучити "model" model)
@@ -356,14 +356,14 @@
       ((рядок-містить? (перше markers) text) так)
       (так (markers-contained? (решта markers) text)))))
 
-(визначити claims-execution?
+(визначити стверджує-виконання?
   (функція (text) (markers-contained? claim-markers text)))
 
 
 ; Does the conversation contain any tool result at all? Coarse - kept
 ; for callers that only need existence; the claim validator below uses
 ; the stricter owned-evidence rule instead.
-(визначити has-tool-result?
+(визначити є-результат-інструмента?
   (функція (messages)
     (за-умовою
       
@@ -397,7 +397,7 @@
       ((однакові? id (перше ids)) так)
       (так (id-in-list? id (решта ids))))))
 
-(визначити all-covered?
+(визначити усі-ідентифікатори-покриті?
   (функція (ids candidates)
     (за-умовою
       
@@ -409,7 +409,7 @@
 ; [... assistant(tool-calls) tool* ] where every trailing tool result's
 ; id belongs to that assistant message. The final reply itself is dropped
 ; first - it is the message being validated, never its own evidence.
-(визначити ends-with-owned-tool-results?
+(визначити завершується-власними-результатами?
   (функція (messages)
     (за-умовою
       
@@ -439,7 +439,7 @@
 ; A turn may finish only if its text claims no execution - or if its
 ; execution claims are backed by tool results owned by this turn's own
 ; tool calls, directly preceding the reply.
-(визначити valid-final?
+(визначити припустима-завершальна-відповідь?
   (функція (assistant-msg messages)
     (за-умовою
       ((стверджує-виконання? (msg-content assistant-msg))
@@ -534,24 +534,12 @@
                                       (за-умовою ((рядок-порожній? e) "")
                                             (так (рядок-додати "\n" e))))))))))))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити усі-ідентифікатори-покриті? all-covered?)
-(визначити стверджує-виконання? claims-execution?)
-(визначити завершується-власними-результатами? ends-with-owned-tool-results?)
-(визначити витягти-відповідь-помічника extract-assistant-message)
-(визначити є-результат-інструмента? has-tool-result?)
-(визначити припустима-завершальна-відповідь? valid-final?)
+; Функції нижче визначені безпосередньо за чинною повною проєкцією укр.
 
 ; Повні ратифіковані D10-проєкції чинних Lisp-функцій, не нові машинні інструкції.
 ; D10:0100010110
-(визначити зміст-повідомлення-формат-обміну-даними json-message-content)
 ; D10:0100011000
-(визначити повідомлення-з-формат-обміну-даними json->message)
 ; D10:0100010111
-(визначити виклик-інструмента-з-формат-обміну-даними json->tool-call)
 ; D10:0100011010
-(визначити кодувати-виклик-інструмента encode-tool-call)
 ; D10:0100011011
-(визначити кодувати-повідомлення encode-message)
 ; D10:0100011100
-(визначити створити-тіло-запиту build-request-body)
