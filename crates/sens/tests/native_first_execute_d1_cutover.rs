@@ -56,12 +56,12 @@ fn real_bridge_accepts_both_d1_answers_and_keeps_short_circuit() {
 fn bridge_maintains_explicit_outcome_shapes_without_cpu() {
     let mut s = session();
     let completed = eval(&mut s,
-        "(native-first-execution-completed (як-є evaluator) (як-є success))")
+        "(нативне-виконання-завершено (як-є evaluator) (як-є success))")
         .expect("route envelope construction");
     assert!(completed.to_string().contains("execution-route"));
     assert!(completed.to_string().contains("completed"));
     let rejected = eval(&mut s,
-        "(native-first-execution-rejected (як-є native) (як-є denied))")
+        "(нативне-виконання-відхилено (як-є native) (як-є denied))")
         .expect("native rejection is data, not hidden evaluator fallback");
     assert!(rejected.to_string().contains("rejected"));
     assert!(rejected.to_string().contains("denied"));
@@ -85,18 +85,18 @@ fn ukrainian_lambda_bindings_preserve_plan_and_tag_semantics() {
     // та варіанти списку; цитовані теги не перейменовуються лексичним binder.
     let mut s = session();
     for (source, expected) in [
-        ("(native-first-plan-tag-state (як-є (native-plan 8 9)) (як-є native-plan))", "same"),
-        ("(native-first-plan-tag-state (як-є (native-plan 8 9)) (як-є evaluator-fallback))", "distinct"),
-        ("(native-first-plan-tag-state (як-є ((native-plan) 8 9)) (як-є native-plan))", "distinct"),
-        ("(native-first-plan-tag-state (як-є ()) (як-є native-plan))", "distinct"),
+        ("(нативний-стан-мітки-плану (як-є (native-plan 8 9)) (як-є native-plan))", "same"),
+        ("(нативний-стан-мітки-плану (як-є (native-plan 8 9)) (як-є evaluator-fallback))", "distinct"),
+        ("(нативний-стан-мітки-плану (як-є ((native-plan) 8 9)) (як-є native-plan))", "distinct"),
+        ("(нативний-стан-мітки-плану (як-є ()) (як-є native-plan))", "distinct"),
     ] {
         let actual = eval(&mut s, source).expect("SENS D3 comparison must execute");
         assert_eq!(actual.to_string(), expected, "{source}");
     }
     for (source, expected) in [
-        ("(native-first-proper-list-length-2? (як-є (one two)))", true),
-        ("(native-first-proper-list-length-2? (як-є (one two three)))", false),
-        ("(native-first-proper-list-length-2? (як-є ()))", false),
+        ("(нативний-список-двох-елементів? (як-є (one two)))", true),
+        ("(нативний-список-двох-елементів? (як-є (one two three)))", false),
+        ("(нативний-список-двох-елементів? (як-є ()))", false),
     ] {
         let actual = eval(&mut s, source).expect("SENS list shape law must execute");
         assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
