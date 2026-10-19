@@ -821,8 +821,8 @@
   ; mirrors this file and fpga-lisp's assembler.lisp carries its own local
   ; variant — removal is a separate mirrored-surface decision, not a
   ; silent one.
-  (функція (d)
-    (елемент-списку-за-індексом d (як-є ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+  (функція (цифра)
+    (елемент-списку-за-індексом цифра (як-є ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
 (визначити number->string-onto
   (функція (число накопичувач-функції)
