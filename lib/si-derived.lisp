@@ -1,60 +1,62 @@
-; lib/si-derived.lisp — exact constants derived only from the 7 SI defining constants
-; Точні похідні константи, виведені лише з 7 визначальних констант SI
+; Точні похідні константи SI мовою SENS.
 ;
-; Migrated: pure exact-rational composition. No host truthiness. No COND.
-; No decimal approximations. Width is identity; every bit valued.
+; Джерело чисел — сім визначальних констант із lib/si.lisp.
+; Тут немає незалежних наближених значень або нових визначальних
+; констант. Кожний результат обчислюється з вихідних значень.
 ;
-; Reuses (2000+ surface):
-;   si:avogadro-constant, si:elementary-charge, si:boltzmann-constant,
-;   si:planck-constant (lib/si.lisp defining records),
-;   exact multiply (D5:10110) and exact rational quotient (D5:10111).
+; Усі операції — ратифіковані D4 «визначити» та D5 «помножити»,
+; «частка». Десяткове число 2 є математичним операндом D24+.
+; Жодних машинних бітових голів, літералів ширини, SID8/Sens8
+; або обхідного числового інтерпретатора тут немає.
 ;
-; No decimal approximations are stored here. Every value below is an exact
-; Rational expression over exact SI defining constants from lib/si.lisp.
-; Якщо результат має нескінченний десятковий запис, він усе одно лишається
-; точним як раціональне число.
-;
-; This file intentionally excludes quantities that require an experimentally
-; measured constant (for example alpha) or an irrational constant such as pi.
+; Імена si:… — наявні наукові ідентифікатори значень, а не
+; викличні голови чи нові доменні координати.
 
-; Faraday constant: F = N_A * e
-; Exact: 120606665154137523 / 1250000000000 C mol^-1
+; Стала Фарадея: число Авогадро, помножене на елементарний заряд.
 (визначити si:faraday-constant
-  (помножити si:avogadro-constant
-     si:elementary-charge))
+  (помножити
+    si:avogadro-constant
+    si:elementary-charge))
 
-; Molar gas constant: R = N_A * k_B
-; Exact: 207861565453831 / 25000000000000 J mol^-1 K^-1
+; Молярна газова стала: число Авогадро та стала Больцмана.
 (визначити si:molar-gas-constant
-  (помножити si:avogadro-constant
-     si:boltzmann-constant))
+  (помножити
+    si:avogadro-constant
+    si:boltzmann-constant))
 
-; Josephson constant: K_J = 2e / h
-; Exact: 21362355120000000000000 / 44173801 Hz V^-1
+; Стала Джозефсона: подвоєний заряд, поділений на сталу Планка.
 (визначити si:josephson-constant
-  (частка (помножити 2 si:elementary-charge)
-     si:planck-constant))
+  (частка
+    (помножити 2 si:elementary-charge)
+    si:planck-constant))
 
-; von Klitzing constant: R_K = h / e^2
-; Exact: 5521725125000000000000 / 213914163877964163 ohm
+; Стала фон Клітцинга: стала Планка, поділена на квадрат заряду.
 (визначити si:von-klitzing-constant
-  (частка si:planck-constant
-     (помножити si:elementary-charge si:elementary-charge)))
+  (частка
+    si:planck-constant
+    (помножити
+      si:elementary-charge
+      si:elementary-charge)))
 
-; Magnetic flux quantum: Phi_0 = h / (2e)
-; Exact: 44173801 / 21362355120000000000000 Wb
+; Квант магнітного потоку: стала Планка на подвоєний заряд.
 (визначити si:magnetic-flux-quantum
-  (частка si:planck-constant
-     (помножити 2 si:elementary-charge)))
+  (частка
+    si:planck-constant
+    (помножити 2 si:elementary-charge)))
 
-; Conductance quantum: G_0 = 2e^2 / h
-; Exact: 213914163877964163 / 2760862562500000000000 S
+; Квант провідності: подвоєний квадрат заряду на сталу Планка.
+; Бінарні множення роблять арність кожного D5 виклику явною.
 (визначити si:conductance-quantum
-  (частка (помножити 2 si:elementary-charge si:elementary-charge)
-     si:planck-constant))
+  (частка
+    (помножити
+      2
+      (помножити
+        si:elementary-charge
+        si:elementary-charge))
+    si:planck-constant))
 
-; Molar Planck constant: N_A * h
-; Exact: 19951563564467157 / 50000000000000000000000000 J s mol^-1
+; Молярна стала Планка: число Авогадро та стала Планка.
 (визначити si:molar-planck-constant
-  (помножити si:avogadro-constant
-     si:planck-constant))
+  (помножити
+    si:avogadro-constant
+    si:planck-constant))
