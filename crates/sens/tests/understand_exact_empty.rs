@@ -1,13 +1,11 @@
 //! Реальний Rust-оракул мігрованого Advice Taker Lisp джерела.
 //! Без обхідних host-макетів: завантажуємо source-pinned ядро й справжній
 //! `lib/understand.lisp` через точнодоменний D3/D4 reader.
-use sens::{eval_parsed_expressions, eval_pinned_legacy_core_source, parse_mixed_exact_domain, Session};
+use sens::{eval_parsed_expressions, eval_core_library_source, parse_mixed_exact_domain, Session};
 
 fn loaded() -> Session {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("точнодоменне ядро має завантажитись");
