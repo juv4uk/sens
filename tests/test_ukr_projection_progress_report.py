@@ -60,25 +60,25 @@ class WholeFileMetricTests(FileTree):
         })
         result = report.measure(root)
         self.assertEqual(result.total_lisp_files, 6)
-        self.assertEqual(result.full_ukr_files, 2)
-        self.assertEqual(result.percentage, 33.3)
-        self.assertEqual(len(result.unfinished), 4)
-        self.assertEqual({r.path for r in result.unfinished}, {
+        self.assertEqual(result.fully_ukrainian_files, 2)
+        self.assertEqual(result.percent, 33.3)
+        self.assertEqual(len(result.pending), 4)
+        self.assertEqual({r.path for r in result.pending}, {
             "lib/коментар.lisp", "lib/рядок.lisp",
             "lib/код.lisp", "research/архів.lisp",
         })
         self.assertEqual(
             report.render(result),
-            "УКР-ПРОЄКЦІЯ .lisp: повністю українські файли 2/6 (33.3%)",
+            "УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 2/6 (33.3%)",
         )
 
     def test_english_comment_removal_really_increments_the_numerator(self):
         root = self.tree({"lib/завдання.lisp": "(визначити річ 1)\n; TODO\n"})
-        self.assertEqual(report.measure(root).full_ukr_files, 0)
+        self.assertEqual(report.measure(root).fully_ukrainian_files, 0)
         (root / "lib/завдання.lisp").write_text(
             "(визначити річ 1)\n; Виконано\n", encoding="utf-8"
         )
-        self.assertEqual(report.measure(root).full_ukr_files, 1)
+        self.assertEqual(report.measure(root).fully_ukrainian_files, 1)
 
     def test_strings_and_nested_comments_are_not_skipped(self):
         root = self.tree({
@@ -87,9 +87,9 @@ class WholeFileMetricTests(FileTree):
             "lib/український.lisp": '(визначити річ "привіт; друг")',
         })
         state = report.measure(root)
-        self.assertEqual(state.full_ukr_files, 1)
-        self.assertIn("lib/блок.lisp", [x.path for x in state.unfinished])
-        self.assertIn("lib/рядок.lisp", [x.path for x in state.unfinished])
+        self.assertEqual(state.fully_ukrainian_files, 1)
+        self.assertIn("lib/блок.lisp", [x.path for x in state.pending])
+        self.assertIn("lib/рядок.lisp", [x.path for x in state.pending])
 
     def test_special_unavailable_symbols_and_ukrainian_apostrophe(self):
         root = self.tree({
@@ -99,33 +99,33 @@ class WholeFileMetricTests(FileTree):
             "машинне.lisp": "(визначити назва #d1:1)\n",
         })
         result = report.measure(root)
-        self.assertEqual(result.full_ukr_files, 1)
-        reasons = {item.path: item.reason for item in result.unfinished}
+        self.assertEqual(result.fully_ukrainian_files, 1)
+        reasons = {item.path: item.reason for item in result.pending}
         self.assertIn("U+02BC", reasons["типографіка.lisp"])
         self.assertIn("U+1F642", reasons["значок.lisp"])
         self.assertIn("U+0023", reasons["машинне.lisp"])
 
-    def test_empty_file_satisfies_literal_every_character_condition(self):
+    def test_empty_file_does_not_count_as_completed_program(self):
         root = self.tree({"порожній.lisp": "", "пробіли.lisp": " \t\r\n"})
         result = report.measure(root)
-        self.assertEqual(result.full_ukr_files, 2)
-        self.assertEqual(result.percentage, 100.0)
+        self.assertEqual(result.fully_ukrainian_files, 0)
+        self.assertEqual(result.percent, 0.0)
 
     def test_invalid_utf8_and_symlink_cannot_count_as_completed(self):
         root = self.tree({"lib/зіпсований.lisp": b"\xff", "lib/ціль.txt": "тест"})
         (root / "lib/посилання.lisp").symlink_to(root / "lib/ціль.txt")
         result = report.measure(root)
         self.assertEqual(result.total_lisp_files, 2)
-        self.assertEqual(result.full_ukr_files, 0)
-        reasons = {item.path: item.reason for item in result.unfinished}
+        self.assertEqual(result.fully_ukrainian_files, 0)
+        reasons = {item.path: item.reason for item in result.pending}
         self.assertIn("UnicodeDecodeError", reasons["lib/зіпсований.lisp"])
         self.assertIn("символічне посилання", reasons["lib/посилання.lisp"])
 
     def test_no_files(self):
         result = report.measure(self.tree({}))
         self.assertEqual(result.total_lisp_files, 0)
-        self.assertEqual(result.full_ukr_files, 0)
-        self.assertEqual(result.percentage, 0.0)
+        self.assertEqual(result.fully_ukrainian_files, 0)
+        self.assertEqual(result.percent, 0.0)
 
 
 class ReportCliTests(FileTree):
@@ -139,7 +139,7 @@ class ReportCliTests(FileTree):
         self.assertEqual(code, 0)
         self.assertEqual(
             stdout.splitlines(),
-            ["УКР-ПРОЄКЦІЯ .lisp: повністю українські файли 1/2 (50.0%)"],
+            ["УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 1/2 (50.0%)"],
         )
         self.assertNotIn("ук==укр", stdout)
         self.assertNotIn("викличні голови", stdout)
@@ -158,7 +158,7 @@ class ReportCliTests(FileTree):
         self.assertIn("… ще 1", stdout)
         self.assertNotIn("b.lisp:", stdout)
 
-    def test_json_has_only_count_denominator_percentage(self):
+    def test_json_has_only_count_denominator_percent(self):
         root = self.tree({"перший.lisp": "(визначити річ)\n", "другий.lisp": "; TODO\n"})
         destination = root / "report.json"
         code, _ = self.cli("--root", str(root), "--json", str(destination),
@@ -166,8 +166,8 @@ class ReportCliTests(FileTree):
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(destination.read_text(encoding="utf-8")), {
             "total_lisp_files": 2,
-            "full_ukr_files": 1,
-            "percentage": 50.0,
+            "fully_ukrainian_files": 1,
+            "percent": 50.0,
         })
 
     def test_errors_on_absent_root(self):
@@ -200,10 +200,10 @@ class CurrentRepositoryTests(unittest.TestCase):
     def test_real_repository_is_scanned_without_archive_exclusions(self):
         progress = report.measure(ROOT)
         self.assertGreater(progress.total_lisp_files, 100)
-        self.assertEqual(len(progress.unfinished),
-                         progress.total_lisp_files - progress.full_ukr_files)
-        self.assertGreaterEqual(progress.percentage, 0)
-        self.assertLessEqual(progress.percentage, 100)
+        self.assertEqual(len(progress.pending),
+                         progress.total_lisp_files - progress.fully_ukrainian_files)
+        self.assertGreaterEqual(progress.percent, 0)
+        self.assertLessEqual(progress.percent, 100)
 
     def test_keyboard_contract_matches_ratified_projection_guard(self):
         from tests.test_ukrainian_domain_projection_rules import (
