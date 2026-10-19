@@ -61,97 +61,25 @@ mod paired {
     }
 
 
-    // The source spelling, not a host f64, owns the decimal input digits.
-    fn decimal_lexeme<'a>(expr: &Expr, source: &'a str) -> Option<&'a str> {
-        if matches!(&expr.kind, ExprKind::DomainCall(..) | ExprKind::Call(..)
-            | ExprKind::List(..) | ExprKind::Pair(..))
-        {
-            return None;
-        }
-        let token = source.get(expr.span.start..expr.span.end)?;
-        let digits = token.strip_prefix('-').or_else(|| token.strip_prefix('+'))
-            .unwrap_or(token);
-        (!digits.is_empty() && digits.bytes().all(|ch| ch.is_ascii_digit()))
-            .then_some(token)
-    }
-
-    fn decimal_width(value: i128) -> usize {
-        for width in [24usize, 48, 96] {
-            let bound = 1i128 << (width - 1);
-            if value >= -bound && value < bound {
-                return width;
-            }
-        }
-        192
-    }
-
-    fn decimal_word(token: &str, width: usize, span: sens::Span) -> Result<Expr, String> {
-        let value: i128 = token.parse().map_err(|_| {
-            format!("SENS decimal source: integer out of exact input range: {token}")
-        })?;
-        // Two's complement, including sign-extension beyond 128 bits.
-        let bits: Vec<u8> = (0..width).rev().map(|position| {
-            if position >= 128 { u8::from(value.is_negative()) }
-            else { ((value >> position) & 1) as u8 }
-        }).collect();
-        let number = BinaryNumber::from_numeric_domain_bits(width, &bits)
-            .ok_or("SENS decimal source: invalid D24+ signed value")?;
-        Ok(Expr { kind: ExprKind::BinaryNumber(number), span })
-    }
-
-    // This narrow math-source adapter admits decimal integer atoms to D24+.
-    // Only a D5 mathematical call gives them that role. Zig still only packs
-    // exact words; SENS alone executes the domain semantics.
-    fn project_decimal_math(expr: &Expr, source: &str, depth: usize)
-        -> Result<Expr, String>
-    {
-        if depth > 64 {
-            return Err("SENS decimal source: nesting exceeds limit".into());
-        }
-        let ExprKind::DomainCall(identity, args) = &expr.kind else {
-            return Ok(expr.clone());
-        };
-        let mut width = 24usize;
-        let mut decimal = false;
-        let mut tagged = false;
-        for arg in args.iter() {
-            if let Some(token) = decimal_lexeme(arg, source) {
-                let value: i128 = token.parse().map_err(|_| {
-                    format!("SENS decimal source: integer out of exact input range: {token}")
-                })?;
-                width = width.max(decimal_width(value));
-                decimal = true;
-            } else if matches!(&arg.kind,
-                ExprKind::BinaryNumber(number) if number.numeric_domain_width().is_some())
-            {
-                tagged = true;
-            }
-        }
-        if decimal && tagged {
-            return Err("SENS decimal source: do not mix decimal and tagged operands".into());
-        }
-        let mut operands = Vec::with_capacity(args.len());
-        for arg in args.iter() {
-            operands.push(match decimal_lexeme(arg, source) {
-                Some(token) => decimal_word(token, width, arg.span)?,
-                None => project_decimal_math(arg, source, depth + 1)?,
-            });
-        }
-        Ok(Expr { kind: ExprKind::DomainCall(*identity, operands.into()), span: expr.span })
-    }
-
     fn qualify(source: &str) -> Result<Expr, String> {
-        let parsed = sens::parse(source).map_err(|e| format!("SENS reader: {e}"))?;
-        let lowered = sens::lower_program(&parsed);
+        let parsed = sens::parse(source).map_err(|error| format!("SENS reader: {error}"))?;
+        // Share the owner-ratified source projection with WASM and the IDE:
+        // decimal source text is converted before domain lowering, never by
+        // the physical T5M codec and never via host floating point.
+        let projected = sens::source_projection::project_ukr_decimal_integer_literals(
+            &parsed,
+            source,
+        )
+        .map_err(|error| format!("SENS decimal source: {error}"))?;
+        let lowered = sens::lower_program(&projected);
         let [root] = lowered.as_slice() else {
             return Err("SENS admission: expected exactly one mathematical form".into());
         };
         if !matches!(&root.kind, ExprKind::DomainCall(_, _)) {
             return Err("SENS admission: bare numeric data is not executable".into());
         }
-        let projected = project_decimal_math(root, source, 0)?;
-        admit(&projected, 0)?;
-        Ok(projected)
+        admit(root, 0)?;
+        Ok(root.clone())
     }
 
     fn word(width: usize, bits: Vec<u8>) -> Result<ExactT5Word, String> {
