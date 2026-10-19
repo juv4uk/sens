@@ -127,6 +127,7 @@ jobs:
           python3 -m unittest tests/test_ukr_core1_bootstrap_projection.py -v
           python3 -m unittest tests/test_core_ukr_primary_projection.py -v
           python3 -m unittest tests/test_code_runs.py -v
+          python3 -m unittest tests/test_translation_ukr_primary_projection.py -v
           python3 -m unittest tests.test_forward_macro_d4_2046.ForwardD10UkrCallsiteProjectionTests -v
           python3 -m unittest tests/test_migration_publish_pair.py -v
           python3 -m unittest tests/test_migrate_one_to_sens.py -v
