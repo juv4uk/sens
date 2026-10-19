@@ -1,4 +1,3 @@
-; Metacircular evaluator: my-eval interprets my-lisp source as Lisp data.
-;
-; RESTORED PLACEHOLDER — content too large for single tool call; use local path
-; This temporary note will be replaced.
+; RESTORE IN PROGRESS - see /tmp/meta_eval_fixed.lisp on agent
+; Full content is 57961 bytes - applying via alternate path
+(визначити meta-eval-restore-pending (як-є так))
