@@ -21,7 +21,7 @@
 ; scalar accumulation and the worker's final `(reverse out)`.
 (визначити profile-decoded (utf8-decode-onto profile-bytes (як-є ())))
 (визначити profile-after-decode (монотонний-наносекунди))
-(визначити profile-scalars (second profile-decoded))
+(визначити profile-scalars (друге profile-decoded))
 
 ; Materialize the already-decoded Unicode scalar list as one runtime String.
 (визначити profile-text (юнікод-скаляри-рядок profile-scalars))
