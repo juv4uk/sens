@@ -93,7 +93,7 @@ impl ClipsKernel {
 #[cfg(feature = "native-clips")]
 mod native {
     use super::ClipsKernelError;
-    use std::ffi::{c_char, c_longlong, c_ulong, c_void, CStr, CString, OsStr};
+    use std::ffi::{c_char, c_longlong, c_ulong, c_void, CStr, OsStr};
     use std::path::{Path, PathBuf};
     use std::rc::Rc;
 
@@ -142,6 +142,7 @@ mod native {
     #[cfg(unix)]
     mod loader {
         use super::*;
+        use std::ffi::CString;
 
         const RTLD_NOW: i32 = 2;
         const RTLD_GLOBAL: i32 = 0x100;

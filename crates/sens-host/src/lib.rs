@@ -712,7 +712,7 @@ mod install_tests {
             .expect("installed raw monotonic observation");
         let second = super::observe_monotonic_nanoseconds(&[], &env, span)
             .expect("second monotonic observation");
-        let (Value::BinaryNumber(a), Value::BinaryNumber(b)) = (first, second) else {
+        let (Value::BinaryNumber(a), Value::BinaryNumber(b)) = (&first, &second) else {
             panic!("mono-ns must return D96, never host Rational or float");
         };
         assert_eq!(a.numeric_domain_width(), Some(96));
