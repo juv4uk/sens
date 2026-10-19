@@ -3,7 +3,8 @@
 
 Static receipt, NOT a substitute for runtime SENS semantic evidence.
 A projected source can be inverted to the exact Git blob of the old file;
-quotes, comments, tags and direct D1:0/1 remain byte-identical.
+quotes and comments remain byte-identical, and the old forbidden D1 tags
+(#d1:1/#d1:0) invert exactly from the ratified так/ні projection.
 """
 from __future__ import annotations
 
@@ -30,18 +31,40 @@ RX = re.compile(
     r"\((" + "|".join(map(re.escape, sorted(UKR_TO_BITS, key=len, reverse=True)))
     + r")(?=\s|\))"
 )
+# Цілі токени D1 так/ні (межі захищають «ні» у «порожній?»).
+D1_YES = re.compile(r"(?<![\w-])так(?![\w-])")
+D1_NO = re.compile(r"(?<![\w-])ні(?![\w-])")
+# #5872: закодовані D3/D4/D1 у даних зняті на ратифіковані поверхові імена
+# (як-є сполучити / як-є перше) — інвертуємо їх у точні біти.
+QUOTED_SURFACE = (
+    ("(як-є сполучити)", "(як-є 111)"),
+    ("(як-є перше)", "(як-є 100)"),
+    # #5872: D4 NULL (порожній?) замінив D3 EQ до (), а складена голова тепер
+    # захищена (атом? (перше plan)); інвертуємо до точних бітів.
+    ("(порожній? (решта (решта (решта value))))",
+     "(тотожне? (решта (решта (решта value))) ())"),
+    ("; D3 EQ порівнює атоми; складена голова — некоректний тег плану.\n      ((атом? (перше plan))\n       (за-умовою\n         ((тотожне? (перше plan) tag)\n          (як-є same))\n         (так\n          (як-є distinct))))",
+     "((тотожне? (перше plan) tag)\n       (як-є same))"),
+)
 BASELINE = {
     "lib/machine/dispatch/native-first.lisp": (
         "b3411d2514fb9be55dbaf1ed9410fa556991320a", 131, 17, 24, 6
     ),
     "lib/machine/dispatch/native-first-execute.lisp": (
-        "64b8fa69d1ecb507da506efb3a6b520d69cebdb8", 121, 13, 12, 7
+        "64b8fa69d1ecb507da506efb3a6b520d69cebdb8", 125, 13, 13, 7
     ),
 }
 
 
 def undo_ukr_heads(text: str) -> str:
+    # Спершу повертаємо цитовані поверхні в їхні точні біти, потім — голови.
+    for new, old in QUOTED_SURFACE:
+        text = text.replace(new, old)
     restored = RX.sub(lambda m: "(" + UKR_TO_BITS[m.group(1)], text)
+    # Заборонені текстові теги D1 (#d1:1/#d1:0) тепер є ратифікованою
+    # українською проєкцією так/ні; інвертуємо окремими токенами.
+    restored = D1_YES.sub("#d1:1", restored)
+    restored = D1_NO.sub("#d1:0", restored)
     # Лише історична інверсія для Git SHA, не executable SID8 alias.
     # D8:01001011=ABS∘RECIP; чинний READ-ALL є D9:110101001.
     current = "(читати-всі source)"
@@ -75,10 +98,10 @@ class NativeFirstUkrProjection(unittest.TestCase):
                 self.assertEqual(git_blob(old), sha, "невідновлюваний source")
                 self.assertEqual(len(list(RX.finditer(data))), expected)
                 self.assertEqual(data.count("(визначити "), definitions)
-                self.assertEqual((data.count("#d1:1"), data.count("#d1:0")),
+                self.assertEqual((len(D1_YES.findall(data)), len(D1_NO.findall(data))),
                                  (yes, no))
                 count += expected
-        self.assertEqual(count, 252)
+        self.assertEqual(count, 256)
 
     def test_current_d9_read_all_and_wrong_d8_peer_negative(self):
         second = (ROOT / "lib/machine/dispatch/native-first-execute.lisp").read_text()
