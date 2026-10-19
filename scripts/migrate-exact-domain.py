@@ -462,9 +462,18 @@ def plan(source: str, surfaces, *, legacy_heads=None, unresolved=None):
             i += 1
             continue
         start = i
-        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in ("(", ")", "'", '"', ";", ","):
+        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in ("(", ")", "'", '"', ";"):
             if source.startswith("#|", i):
                 break
+            if source[i] == ",":
+                # Українська десяткова кома належить числу, не quasiquote.
+                # Лише один роздільник між ASCII-цифрами; решта ком — синтаксис.
+                prefix = source[start:i]
+                if not (re.fullmatch(r"-?[0-9]+", prefix)
+                        and i + 1 < len(source)
+                        and source[i + 1].isascii()
+                        and source[i + 1].isdigit()):
+                    break
             i += 1
         if i == start:
             raise ValueError("unsupported reader character")
