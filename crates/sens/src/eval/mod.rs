@@ -553,21 +553,27 @@ fn dispatch_domain_call(
             .map(EvalStep::Value);
     }
 
-    if let Some(bound) = environment.domain_code_slot(identity) {
-        match &bound {
-            Value::Macro(closure) => {
-                return closures::apply_macro(closure.clone(), arguments, environment, span);
+    // Admitted D5 Core mechanisms are identity-owned. Do not let a
+    // language-owned closure bound to the same resident (for compatibility
+    // callers) shadow its ratified arithmetic law. All other D5 definitions
+    // retain the ordinary language-defined fast path below.
+    if !d5_arithmetic::has_mechanism(identity) {
+        if let Some(bound) = environment.domain_code_slot(identity) {
+            match &bound {
+                Value::Macro(closure) => {
+                    return closures::apply_macro(closure.clone(), arguments, environment, span);
+                }
+                Value::Closure(_) if !canon::has_language_result_boundary(identity) => {
+                    return closures::apply(bound.clone(), arguments, environment, span);
+                }
+                // #3060: exact D5 MEMBER keeps the same Lisp closure/search law,
+                // but its canonical result must cross the D1 PredicateBit boundary.
+                // Fall through to evaluated-value invocation so canon can normalize
+                // only the final result carrier; every other closure keeps the
+                // ordinary tail-call fast path above.
+                Value::Closure(_) => {}
+                _ => {}
             }
-            Value::Closure(_) if !canon::has_language_result_boundary(identity) => {
-                return closures::apply(bound.clone(), arguments, environment, span);
-            }
-            // #3060: exact D5 MEMBER keeps the same Lisp closure/search law,
-            // but its canonical result must cross the D1 PredicateBit boundary.
-            // Fall through to evaluated-value invocation so canon can normalize
-            // only the final result carrier; every other closure keeps the
-            // ordinary tail-call fast path above.
-            Value::Closure(_) => {}
-            _ => {}
         }
     }
 
