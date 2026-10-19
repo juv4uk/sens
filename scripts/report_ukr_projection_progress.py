@@ -37,6 +37,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 import sys
@@ -231,6 +232,12 @@ class Progress:
     pairs_same: int = 0
     files_ukrainian: int = 0
     files: list[FileReport] = field(default_factory=list)
+    active_executable_files: int = 0
+    active_files_without_latin_heads: int = 0
+    active_ukr_head_sites: int = 0
+    active_latin_head_sites: int = 0
+    active_encoded_head_sites: int = 0
+    active_unreadable_files: int = 0
 
     @property
     def pairs_pct(self) -> float:
@@ -244,12 +251,25 @@ class Progress:
     def pairs_pending(self) -> int:
         return self.pairs_total - self.pairs_same
 
+    @property
+    def active_files_pct(self) -> float:
+        return (round(100.0 * self.active_files_without_latin_heads /
+                      self.active_executable_files, 1)
+                if self.active_executable_files else 0.0)
+
+    @property
+    def active_heads_pct(self) -> float:
+        total = self.active_ukr_head_sites + self.active_latin_head_sites
+        return round(100.0 * self.active_ukr_head_sites / total, 1) if total else 0.0
+
     def to_dict(self) -> dict:
         d = asdict(self)
         d.pop("files", None)
         d["pairs_pct"] = self.pairs_pct
         d["files_pct"] = self.files_pct
         d["pairs_pending"] = self.pairs_pending
+        d["active_files_pct"] = self.active_files_pct
+        d["active_heads_pct"] = self.active_heads_pct
         return d
 
 
@@ -257,8 +277,25 @@ def iter_lisp_files(root: Path) -> list[Path]:
     return sorted(p for p in root.rglob("*.lisp") if ".git" not in p.parts)
 
 
+def _callsite_audit():
+    """Reuse the existing source parser; do not invent a second lexical oracle."""
+    name = "_sens_ukr_callsite_report"
+    if name in sys.modules:
+        return sys.modules[name]
+    spec = importlib.util.spec_from_file_location(
+        name, Path(__file__).with_name("check_ukr_callsite_migration.py"))
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Немає чинного аудитора викличних голів")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 def measure(root: Path) -> Progress:
     files: list[FileReport] = []
+    audit = _callsite_audit()
+    live_count = live_clean = live_ukr = live_latin = live_encoded = live_bad = 0
     for path in iter_lisp_files(root):
         text = path.read_text(encoding="utf-8", errors="ignore")
         pairs = [(a, b) for a, b in iter_pairs(text)]
@@ -270,6 +307,30 @@ def measure(root: Path) -> Progress:
             pairs_same=same,
             ukrainian_code=has_ukrainian,
         ))
+        rel = path.relative_to(root)
+        archival = (not rel.parts or rel.parts[0] not in audit.LIVE_SOURCE_DIRS
+                    or 'tests' in rel.parts or 'fixtures' in rel.parts
+                    or (rel.parts[0] == 'examples' and 'history' in rel.parts))
+        if archival or audit.excluded_metadata(rel):
+            continue
+        live_count += 1
+        if path.is_symlink() or not path.resolve().is_relative_to(root):
+            live_bad += 1
+            continue
+        try:
+            heads = list(audit.candidate_heads(audit.parse(text)))
+        except (audit.SourceError, RecursionError, UnicodeError):
+            live_bad += 1
+            continue
+        latin = sum(bool(audit.LATIN.search(head.text)) for head in heads)
+        encoded = sum(bool(audit.ENCODED_HEAD.fullmatch(head.text)) for head in heads)
+        ukr = sum(bool(audit.UKRAINIAN.search(head.text)) for head in heads)
+        live_latin += latin
+        live_encoded += encoded
+        live_ukr += ukr
+        # Purely lexical completion, NOT proof of executable SENS semantics.
+        if ukr and not latin and not encoded:
+            live_clean += 1
     return Progress(
         lisp_files=len(files),
         files_with_pairs=sum(1 for f in files if f.pairs_total),
@@ -277,6 +338,12 @@ def measure(root: Path) -> Progress:
         pairs_same=sum(f.pairs_same for f in files),
         files_ukrainian=sum(1 for f in files if f.ukrainian_code),
         files=files,
+        active_executable_files=live_count,
+        active_files_without_latin_heads=live_clean,
+        active_ukr_head_sites=live_ukr,
+        active_latin_head_sites=live_latin,
+        active_encoded_head_sites=live_encoded,
+        active_unreadable_files=live_bad,
     )
 
 
@@ -363,7 +430,16 @@ def render(p: Progress, executable_ukr: dict | None = None) -> str:
         f"{p.pairs_same}/{p.pairs_total} ({p.pairs_pct}%) "
         f"у {p.files_with_pairs} файлах; "
         f".lisp-файлів з укр-поверхнею {p.files_ukrainian}/{p.lisp_files} "
-        f"({p.files_pct}%)"
+        f"({p.files_pct}% — лише наявність кирилиці, НЕ завершення); "
+        f"активні .lisp без латинських викличних голів "
+        f"{p.active_files_without_latin_heads}/{p.active_executable_files} "
+        f"({p.active_files_pct}%, лексично); "
+        f"активні українські викличні голови "
+        f"{p.active_ukr_head_sites}/"
+        f"{p.active_ukr_head_sites + p.active_latin_head_sites} "
+        f"({p.active_heads_pct}%); "
+        f"сирих кодів={p.active_encoded_head_sites}, "
+        f"непрочитаних={p.active_unreadable_files}"
     )
     if executable_ukr is None:
         return legacy
