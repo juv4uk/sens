@@ -39,12 +39,12 @@ fn core_peer_binding_presence_and_absence_are_observable() {
     let bindings = "(як-є ((\"перший\" альфа) (\"другий\" бета)))";
     assert_eq!(
         execute(&mut session,
-            &format!("(стан-зв'язування-відповідника (як-є другий) {bindings})")),
+            &format!("(стан-привязки-відповідника (як-є другий) {bindings})")),
         "present"
     );
     assert_eq!(
         execute(&mut session,
-            &format!("(стан-зв'язування-відповідника (як-є третій) {bindings})")),
+            &format!("(стан-привязки-відповідника (як-є третій) {bindings})")),
         "absent"
     );
 }
