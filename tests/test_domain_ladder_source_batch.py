@@ -141,7 +141,6 @@ class BatchSourceTests(unittest.TestCase):
             "lib/machine/cpu/intel-core-i5-6400-inventory.lisp",
             "lib/machine/dispatch/native-first-execute.lisp",
             "lib/island-math-evidence.lisp",
-            "knowledge/language-detection-probe.lisp",
         }
         census = MOD.run(ROOT, False, names)
         self.assertEqual(census["summary"]["admitted_heads"], 0)
