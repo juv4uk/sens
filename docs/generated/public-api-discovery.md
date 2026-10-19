@@ -200,10 +200,10 @@
 | `lib/core4.lisp` | function | `divmod` | unreviewed |
 | `lib/core4.lisp` | function | `null?` | unreviewed |
 | `lib/core4.lisp` | function | `subst` | unreviewed |
-| `lib/core4.lisp` | function | `sublis-pair` | unreviewed |
+| `lib/core4.lisp` | function | `знайти-пару-підстановки` | unreviewed |
 | `lib/core4.lisp` | function | `sublis` | unreviewed |
 | `lib/core4.lisp` | function | `maplist` | unreviewed |
-| `lib/core4.lisp` | function | `apply-quote-args` | unreviewed |
+| `lib/core4.lisp` | function | `підготувати-цитовані-аргументи` | unreviewed |
 | `lib/core4.lisp` | function | `apply` | unreviewed |
 | `lib/core4.lisp` | function | `answer-not` | unreviewed |
 | `lib/core4.lisp` | function | `answer-and` | unreviewed |

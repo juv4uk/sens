@@ -46,7 +46,7 @@
         nondecreasing-from? nonincreasing-from? digit->string
         number->string-onto sqrt-iter isqrt-step truthy?
         класифікувати-рядкове-значення порівняти-рядки-за-кодовими-точками класифікувати-непорожність-рядка
-        sublis-pair apply-quote-args
+        знайти-пару-підстановки підготувати-цитовані-аргументи
         my-postcore-stable-peer-projection my-postcore-peer-group
         my-postcore-binding-status my-postcore-missing-peers
         my-postcore-build-definitions my-postcore-materialize-stable-peers))))

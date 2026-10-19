@@ -81,6 +81,8 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             ("класифікувати-рядкове-значення", "string-membership-helper"),
             ("порівняти-рядки-за-кодовими-точками", "string-order-helper"),
             ("класифікувати-непорожність-рядка", "nonempty-string-membership-helper"),
+            ("знайти-пару-підстановки", "sublis-pair"),
+            ("підготувати-цитовані-аргументи", "apply-quote-args"),
         )
         for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
             with self.subTest(file=filename, migration="internal helper names"):
