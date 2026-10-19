@@ -612,7 +612,7 @@
 ; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
 ; Canonical three-part `cond` consumes the answer explicitly; a two-part
 ; clause selects only on a «yes» answer.
-(визначити equal?
+(визначити однакові?
   (функція (перший-аргумент другий-аргумент)
     (за-умовою
       ((порожній? перший-аргумент) (порожній? другий-аргумент))
@@ -628,7 +628,7 @@
 
 ; D8:11110111 EQUAL — ratified Ukrainian surface for SENS-owned structural equality.
 ; The identity is already admitted; this is a name projection, not a new opcode.
-(визначити однакові? equal?)
+(визначити equal? однакові?)
 
 ; NOT is a strict PredicateBit combinator. Any non-D1 input is rejected by
 ; D3 COND instead of being coerced through retired host truthiness.
