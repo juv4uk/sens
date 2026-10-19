@@ -80,7 +80,7 @@ fn meta_result(program: &str) -> String {
 
     eval_program(
         &format!(
-            r#"(cdr (my-eval-program (read-all "{}") (quote ())))"#,
+            r#"(cdr (обчислити-послідовність-форм (read-all "{}") (quote ())))"#,
             escaped(program)
         ),
         &mut session,

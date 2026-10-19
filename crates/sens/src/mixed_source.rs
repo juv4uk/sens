@@ -914,7 +914,7 @@ fn lift_expression(
                 span,
             })
         }
-        ExprKind::Symbol(name) if !bound_names.contains(name.as_ref()) => {
+        ExprKind::Symbol(name) => {
             if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(&name) {
                 Ok(Expr {
                     kind: ExprKind::DomainIdentity(identity),
@@ -1087,6 +1087,18 @@ mod tests {
                     if identity.width() == 1 && identity.packed_bits() == bits
             ), "{surface} має лишитися значенням D1:{bits}");
         }
+    }
+
+    #[test]
+    fn d1_values_are_not_shadowed_by_source_binding_inventory() {
+        let source = "(визначити тестове-імя (функція (так) так)) так";
+        let expressions = parse_mixed_exact_domain(source)
+            .expect("D1 source values remain exact even beside a same-spelled binder");
+        assert!(matches!(
+            expressions.last().map(|expression| &expression.kind),
+            Some(ExprKind::DomainIdentity(identity))
+                if identity.width() == 1 && identity.packed_bits() == 1
+        ));
     }
 
     #[test]

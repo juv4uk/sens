@@ -9,10 +9,10 @@ pub(super) struct D5DefinitionBinding {
 }
 
 pub(super) const D5_DEFINITION_BINDINGS: &[D5DefinitionBinding] = &[
-    D5DefinitionBinding { name: "reverse", bits: 0b10100 },
-    D5DefinitionBinding { name: "reverse-onto", bits: 0b10101 },
-    D5DefinitionBinding { name: "quotient", bits: 0b10111 },
-    D5DefinitionBinding { name: "assoc", bits: 0b11100 },
-    D5DefinitionBinding { name: "member?", bits: 0b11101 },
-    D5DefinitionBinding { name: "subst", bits: 0b11111 },
+    D5DefinitionBinding { name: "зворот", bits: 0b10100 },
+    D5DefinitionBinding { name: "зворот-до", bits: 0b10101 },
+    D5DefinitionBinding { name: "частка", bits: 0b10111 },
+    D5DefinitionBinding { name: "знайти-за-ключем", bits: 0b11100 },
+    D5DefinitionBinding { name: "значення-у-списку?", bits: 0b11101 },
+    D5DefinitionBinding { name: "замінити", bits: 0b11111 },
 ];

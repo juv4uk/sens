@@ -23,11 +23,11 @@
 
 (0011 registry-meta-value
   (0010 (source)
-    (my-eval (11101010 source) (001 ()))))
+    (обчислити-мета-вираз (11101010 source) (001 ()))))
 
 (0011 registry-meta-program-result
   (0010 (source)
-    (011 (my-eval-program (110101001 source) (001 ())))))
+    (011 (обчислити-послідовність-форм (110101001 source) (001 ())))))
 
 (0011 registry-witness-failure
   (0010 (case actual expected)

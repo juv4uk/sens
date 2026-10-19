@@ -1,19 +1,18 @@
-; D5 definition-to-identity mechanism projection.
-; Projection only: semantic authority is #3331 / #3305.
-; Existing Lisp definition names supply mechanisms for already-ratified exact D5 identities.
-; They do not choose or create semantic meaning.
+; Українська проєкція визначень на механізми тотожностей D5.
+; Лише проєкція: семантична влада належить #3331 / #3305.
+; Наявні українські визначення надають механізм уже ратифікованим точним D5.
+; Вони не обирають і не створюють семантичного значення.
 ;
-; Row format:
-; (row "SOURCE-NAME" "D5-BITS")
+; Рядок зіставляє ім'я визначення з уже ратифікованим словом D5.
 
 (d5-definition-bindings
   (schema d5-definition-bindings/1)
   (status projection-only)
   (authority "#3331/#3305")
-  (row "reverse" "10100")
-  (row "reverse-onto" "10101")
-  (row "quotient" "10111")
-  (row "assoc" "11100")
-  (row "member?" "11101")
-  (row "subst" "11111")
+  (рядок "зворот" "10100")
+  (рядок "зворот-до" "10101")
+  (рядок "частка" "10111")
+  (рядок "знайти-за-ключем" "11100")
+  (рядок "значення-у-списку?" "11101")
+  (рядок "замінити" "11111")
 )

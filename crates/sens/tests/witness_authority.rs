@@ -361,7 +361,7 @@ fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
     let expr = escape_lisp_string(&row.expr);
     eval_program(
         &format!(
-            "(def --witness-meta-step-- (my-eval-program (read-all \"{expr}\") --witness-meta-env--))"
+            "(def --witness-meta-step-- (обчислити-послідовність-форм (read-all \"{expr}\") --witness-meta-env--))"
         ),
         session,
     )

@@ -1,77 +1,70 @@
-; core-math-ontology-witness — semantic witness in binary SENS.
+; Свідок онтології ядра математики у людській українській проєкції.
 ;
-; Axiom: width = address = identity.
-; Same bits in different domains do NOT share meaning.
-; A bit pattern without a proved law is not a Core-Math law.
-; Semantics owned by SENS, not Python / not Rust harness.
+; Аксіома свідка: бітовий вміст і мітка домену розглядаються окремо.
+; Однакові біти з різними мітками не зливаються в один об'єкт.
+; Мітки «д1» і «д2» тут — лише дані для перевірки відмінності;
+; вони не є доменними identity чи доказом резидентності.
+; Виконуваних законів Core-Math цей свідок не заявляє.
 ;
-; Witnesses:
-;   1. D1 PredicateBit carriers exact.
-;   2. Domain tag is part of the semantic object (pair bits+domain).
-;   3. Equal bit-strings under unequal domains are not EQ as semantic objects.
-;   4. No executable law claimed — status is ontology-only until #2425.
-;
-; Run under my-lisp / SENS fixture loader.
+; Завантажувач тестових свідків уже підключає lib/core.lisp.
+; lib/core-math.lisp поки містить лише онтологічні домовленості.
 
-(load "lib/core.lisp")
-(load "lib/core-math.lisp")
+(визначити д1-так так)
+(визначити д1-ні ні)
 
-(0011 d1-true  (010 (001 ())))
-(0011 d1-false (101 (001 (0)) (001 (1))))
+; Модель об'єкта з окремими полями бітів і мітки.
+(визначити створити-об'єкт-математики
+  (функція (біти мітка-домену)
+    (список (як-є об'єкт-ядра-математики) біти мітка-домену)))
 
-; Semantic object skeleton: (bits domain) — domain is exact-width address.
-(0011 make-math-object
-  (0010 (bits domain)
-    (1110 (001 core-math-object) bits domain)))
+; Однакове числове значення, але різні мітки у межах цієї моделі.
+(визначити об'єкт-д1-нуль
+  (створити-об'єкт-математики 0 (як-є д1)))
+(визначити об'єкт-д2-нуль
+  (створити-об'єкт-математики 0 (як-є д2)))
 
-; Two objects with identical bits but different domain tags.
-(0011 obj-d1-zero (make-math-object (001 0) (001 d1)))
-(0011 obj-d2-zero (make-math-object (001 0) (001 d2)))
+; Порівнюється цілий об'єкт: мітка є частиною структури.
+(визначити однакові-математичні-об'єкти?
+  (функція (лівий-об'єкт правий-об'єкт)
+    (тотожне? лівий-об'єкт правий-об'єкт)))
 
-; Structural EQ of full objects — domains differ => not equal.
-(0011 same-semantic-object?
-  (0010 (a b)
-    (110
-      ((101 a b) d1-true)
-      ((010 (001 ())) d1-false))))
+(визначити біти-математичного-об'єкта
+  (функція (об'єкт)
+    (друге об'єкт)))
 
-; Bits-only projection (lab tool, not Core-Math meaning).
-(0011 math-object-bits
-  (0010 (obj)
-    (1001 obj)))
+(визначити мітка-математичного-об'єкта
+  (функція (об'єкт)
+    (третє об'єкт)))
 
-(0011 math-object-domain
-  (0010 (obj)
-    (10011 obj)))
+(визначити свідок-онтології-ядра-математики
+  (функція ()
+    (за-умовою
+      ((однакові-математичні-об'єкти? об'єкт-д1-нуль об'єкт-д2-нуль)
+       (список (як-є свідок-онтології)
+               (як-є помилка)
+               (як-є різні-мітки-злиті)))
+      ((тотожне?
+         (біти-математичного-об'єкта об'єкт-д1-нуль)
+         (біти-математичного-об'єкта об'єкт-д2-нуль))
+       (за-умовою
+         ((тотожне? (мітка-математичного-об'єкта об'єкт-д1-нуль)
+                    (як-є д1))
+          (за-умовою
+            ((тотожне? (мітка-математичного-об'єкта об'єкт-д2-нуль)
+                       (як-є д2))
+             (список (як-є свідок-онтології)
+                     (як-є стан) (як-є успіх)
+                     (як-є біти-збігаються-мітки-різні)
+                     (як-є так)
+                     (як-є виконувані-закони) (як-є не-заявлено)))
+            (так
+             (список (як-є свідок-онтології)
+                     (як-є помилка) (як-є мітка-д2-не-збіглася)))))
+         (так
+          (список (як-є свідок-онтології)
+                  (як-є помилка) (як-є мітка-д1-не-збіглася)))))
+      (так
+       (список (як-є свідок-онтології)
+               (як-є помилка) (як-є біти-не-збіглися))))))
 
-(0011 core-math-ontology-witness
-  (0010 ()
-    (110
-      ; identical bits under d1 vs d2 must not collapse to one meaning
-      ((101 (same-semantic-object? obj-d1-zero obj-d2-zero) d1-false)
-       (110
-         ; bits projection may match while domain differs
-         ((101 (math-object-bits obj-d1-zero) (math-object-bits obj-d2-zero))
-          (110
-            ((101 (math-object-domain obj-d1-zero) (001 d1))
-             (110
-               ((101 (math-object-domain obj-d2-zero) (001 d2))
-                (001 (core-math-ontology
-                       (status pass)
-                       (same-bits-different-domain not-eq)
-                       (executable-laws none-until-2425)
-                       (axiom width-equals-address))))
-               ((010 (001 ()))
-                (001 (core-math-ontology
-                       (status fail) (d2-domain mismatch))))))
-            ((010 (001 ()))
-             (001 (core-math-ontology
-                    (status fail) (d1-domain mismatch))))))
-         ((010 (001 ()))
-          (001 (core-math-ontology
-                 (status fail) (bits-projection mismatch))))))
-      ((010 (001 ()))
-       (001 (core-math-ontology
-              (status fail) (cross-domain-collapse)))))))
-
-(core-math-ontology-witness)
+(свідок-онтології-ядра-математики)

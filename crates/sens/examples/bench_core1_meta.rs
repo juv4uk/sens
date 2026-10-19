@@ -85,7 +85,7 @@ fn main() {
     let mut different = 0usize;
     for (i, case) in CASES.iter().enumerate() {
         let c_source = format!("(C1-EVAL {} (quote ()) (quote ()))", case.quoted_form);
-        let m_source = format!("(my-eval {} (quote ()))", case.quoted_form);
+        let m_source = format!("(обчислити-мета-вираз {} (quote ()))", case.quoted_form);
         let c_ast = lower_program(&parse(&c_source).expect("Core1 case parse"));
         let m_ast = lower_program(&parse(&m_source).expect("Meta case parse"));
         let c_out = run_once(&mut core_session, &c_ast);

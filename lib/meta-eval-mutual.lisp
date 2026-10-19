@@ -4,8 +4,8 @@
 ; Міграція: 10 однозв'язувальних D6:001000 LET усунено через чинну D4:0010 LAMBDA.
 ; Семантика: те саме одноразове обчислення аргументу, те саме локальне зв'язування.
 ; Двопольний D3 COND; резервна умова — прямий однобітний D1:YES.
-; Reuses existing meta-eval surface: my-apply, my-eval-body, bind-params,
-; env-lookup, my-macro?, my-lambda-form?, my-fifth, my-fourth.
+; Reuses existing evaluator application/body logic, argument binding,
+; lexical lookup, macro and lambda predicates, and positional accessors.
 ; Width is identity; every bit of the domain address is valued.
 ;
 ; Consecutive top-level `(def name (lambda ...))` forms are treated as one
@@ -189,7 +189,6 @@
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити знайти-значення-імені-в-лексичному-середовищі env-lookup)
-(визначити обчислити-форму-та-оновити-оточення my-eval-top-form)
 (визначити перевірити-форму-лямбда? my-lambda-form?)
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас.

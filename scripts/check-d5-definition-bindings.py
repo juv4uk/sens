@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guard the binding-only projection from existing Lisp definitions to ratified D5 identities."""
+"""Перевірка української проєкції визначень на ратифіковані тотожності D5."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ SOURCE = ROOT / "lib/surface/d5-definition-bindings.lisp"
 GENERATED = ROOT / "crates/sens/src/d5_definition_bindings_generated.rs"
 AUTHORITY = ROOT / "knowledge/d5-ratified.json"
 
-ROW = re.compile(r'^\s*\(row\s+"([^"]+)"\s+"([01]{5})"\)\s*$')
+ROW = re.compile(r'^\s*\(рядок\s+"([^"]+)"\s+"([01]{5})"\)\s*$')
 
 
 def fail(message: str) -> None:
@@ -23,7 +23,7 @@ def fail(message: str) -> None:
 def parse_rows() -> list[tuple[str, str]]:
     rows = []
     for line_number, line in enumerate(SOURCE.read_text(encoding="utf-8").splitlines(), 1):
-        if not line.lstrip().startswith("(row "):
+        if not line.lstrip().startswith("(рядок "):
             continue
         match = ROW.match(line)
         if not match:
@@ -54,12 +54,12 @@ def render(rows: list[tuple[str, str]]) -> str:
 
 def validate(rows: list[tuple[str, str]]) -> None:
     expected = {
-        "reverse": ("10100", "REVERSE"),
-        "reverse-onto": ("10101", "REVERSE-ONTO"),
-        "quotient": ("10111", "QUOTIENT"),
-        "assoc": ("11100", "ASSOC"),
-        "member?": ("11101", "MEMBER"),
-        "subst": ("11111", "SUBST"),
+        "зворот": ("10100", "REVERSE"),
+        "зворот-до": ("10101", "REVERSE-ONTO"),
+        "частка": ("10111", "QUOTIENT"),
+        "знайти-за-ключем": ("11100", "ASSOC"),
+        "значення-у-списку?": ("11101", "MEMBER"),
+        "замінити": ("11111", "SUBST"),
     }
     if dict(rows) != {name: bits for name, (bits, _) in expected.items()}:
         fail("binding projection differs from the approved first slice")

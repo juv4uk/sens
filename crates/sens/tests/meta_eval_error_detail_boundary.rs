@@ -1,15 +1,11 @@
-use sens::{eval_program, ErrorKind, Session};
-
-fn escaped(source: &str) -> String {
-    source.replace('\\', "\\\\").replace('"', "\\\"")
-}
+use sens::{eval_program, load_core_library, ErrorKind, Session};
 
 fn meta_eval(source: &str) -> String {
-    let mut session = Session::default();
-    sens::load_core_library(&mut session).expect("core bootstrap");
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("core bootstrap");
     sens::load_meta_evaluator_library(&mut session).expect("meta-eval bootstrap");
     eval_program(
-        &format!(r#"(my-eval (read "{}") (quote ()))"#, escaped(source)),
+        &format!("(обчислити-мета-вираз (quote {source}) (quote ()))"),
         &mut session,
     )
     .expect("host must successfully run the meta-evaluator")
@@ -23,17 +19,20 @@ fn meta_eval(source: &str) -> String {
 
 #[test]
 fn equivalent_surface_failures_need_not_have_identical_source_spans() {
-    let mut en_session = Session::default();
-    let en = eval_program("(define car 42)", &mut en_session).expect_err("Canon rebinding must fail");
+    let mut first_session = Session::bare();
+    load_core_library(&mut first_session).expect("core bootstrap");
+    let first = eval_program("(визначити атом? 42)", &mut first_session)
+        .expect_err("Canonical rebinding must fail");
 
-    let mut uk_session = Session::default();
-    let uk = eval_program("(визначити car 42)", &mut uk_session)
-        .expect_err("the Ukrainian surface must reject the same Canon rebinding");
+    let mut second_session = Session::bare();
+    load_core_library(&mut second_session).expect("core bootstrap");
+    let second = eval_program("(визначити тотожне? 42)", &mut second_session)
+        .expect_err("Canonical rebinding must fail");
 
-    assert_eq!(en.kind, ErrorKind::InvalidForm);
-    assert_eq!(uk.kind, ErrorKind::InvalidForm);
+    assert_eq!(first.kind, ErrorKind::InvalidForm);
+    assert_eq!(second.kind, ErrorKind::InvalidForm);
     assert_ne!(
-        en.span, uk.span,
+        first.span, second.span,
         "source-location metadata is allowed to follow the concrete surface spelling"
     );
 }
@@ -41,22 +40,23 @@ fn equivalent_surface_failures_need_not_have_identical_source_spans() {
 #[test]
 fn meta_structured_diagnostics_remain_available_without_becoming_rust_prose() {
     assert_eq!(
-        meta_eval("((lambda (x y) x) 1)"),
+        meta_eval("((функція (аргумент інший) аргумент) 1)"),
         "(error arity (expected (exact 2) received 1))"
     );
     assert_eq!(
-        meta_eval("((lambda (x y . rest) x) 1)"),
+        meta_eval("((функція (аргумент інший . хвіст) аргумент) 1)"),
         "(error arity (expected (at-least 2) received 1))"
     );
     assert_eq!(
-        meta_eval("(lambda (x x) x)"),
-        "(error invalid-form (lambda-parameters duplicate-parameter x))"
+        meta_eval("(функція (аргумент аргумент) аргумент)"),
+        "(error invalid-form (lambda-parameters duplicate-parameter аргумент))"
     );
 
     // The reference side intentionally proves only the contractual kind here.
     // Its human message/span are not parsed into the Lisp diagnostic shape.
-    let mut session = Session::default();
-    let native = eval_program("((lambda (x y) x) 1)", &mut session)
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("core bootstrap");
+    let native = eval_program("((функція (аргумент інший) аргумент) 1)", &mut session)
         .expect_err("reference arity witness must fail");
     assert_eq!(native.kind, ErrorKind::Arity);
 }

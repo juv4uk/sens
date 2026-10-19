@@ -1,18 +1,11 @@
-use sens::{eval_program, ErrorKind, Session};
-
-fn escape_lisp_string(source: &str) -> String {
-    source.replace('\\', "\\\\").replace('"', "\\\"")
-}
+use sens::{eval_program, load_core_library, ErrorKind, Session};
 
 fn eval_meta(source: &str) -> String {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("core bootstrap");
     sens::load_meta_evaluator_library(&mut session).unwrap();
 
-    let wrapper = format!(
-        r#"(my-eval (read "{}") (quote ()))"#,
-        escape_lisp_string(source),
-    );
+    let wrapper = format!("(обчислити-мета-вираз (quote {source}) (quote ()))");
 
     eval_program(&wrapper, &mut session)
         .unwrap()
@@ -21,9 +14,10 @@ fn eval_meta(source: &str) -> String {
 }
 
 fn eval_native_error(source: &str, expected_kind: ErrorKind, normalized: &str) -> String {
-    let mut session = Session::default();
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("core bootstrap");
     let error = eval_program(source, &mut session).unwrap_err();
-    assert_eq!(error.kind, expected_kind, "wrong native error kind for {source}");
+    assert_eq!(error.kind, expected_kind, "wrong native error kind for {source}: {error}");
 
     // Error wording and source spans are presentation details. S2 contracts the
     // named category; tests normalize only the semantic observation shared with
@@ -33,7 +27,7 @@ fn eval_native_error(source: &str, expected_kind: ErrorKind, normalized: &str) -
 
 #[test]
 fn unresolved_callable_has_named_error_parity() {
-    for symbol in ["missing", "future-function", "not-defined-yet"] {
+    for symbol in ["відсутнє", "майбутня-функція", "ще-не-визначене"] {
         let source = format!("({symbol})");
         let expected = format!("(error unbound-symbol {symbol})");
         let via_meta = eval_meta(&source);
@@ -50,7 +44,7 @@ fn unresolved_callable_has_named_error_parity() {
 fn non_callable_values_are_type_failures_not_unknown_symbols() {
     for (source, expected) in [
         ("(42)", "(error not-callable 42)"),
-        ("((quote missing))", "(error not-callable missing)"),
+        ("((як-є відсутнє))", "(error not-callable відсутнє)"),
     ] {
         let via_meta = eval_meta(source);
         let via_native = eval_native_error(source, ErrorKind::Type, expected);
@@ -66,11 +60,11 @@ fn non_callable_values_are_type_failures_not_unknown_symbols() {
 fn fixed_lambda_arity_mismatch_is_named_lisp_data() {
     for (source, expected) in [
         (
-            "((lambda (x y) x) 1)",
+            "((функція (аргумент перший) аргумент) 1)",
             "(error arity (expected (exact 2) received 1))",
         ),
         (
-            "((lambda (x y) x) 1 2 3)",
+            "((функція (аргумент перший) аргумент) 1 2 3)",
             "(error arity (expected (exact 2) received 3))",
         ),
     ] {
@@ -83,7 +77,7 @@ fn fixed_lambda_arity_mismatch_is_named_lisp_data() {
 
 #[test]
 fn dotted_lambda_reports_minimum_arity_not_exact_arity() {
-    let source = "((lambda (x y . rest) x) 1)";
+    let source = "((функція (аргумент перший . хвіст) аргумент) 1)";
     let expected = "(error arity (expected (at-least 2) received 1))";
 
     let via_meta = eval_meta(source);
@@ -96,15 +90,15 @@ fn dotted_lambda_reports_minimum_arity_not_exact_arity() {
 fn invalid_lambda_list_structure_has_named_error_parity() {
     for (source, expected) in [
         (
-            "(lambda (1) 1)",
+            "(функція (1) 1)",
             "(error invalid-form (lambda-parameters non-symbol-parameter 1))",
         ),
         (
-            "(lambda (x x) x)",
-            "(error invalid-form (lambda-parameters duplicate-parameter x))",
+            "(функція (аргумент аргумент) аргумент)",
+            "(error invalid-form (lambda-parameters duplicate-parameter аргумент))",
         ),
         (
-            "(lambda (x . 1) x)",
+            "(функція (аргумент . 1) аргумент)",
             "(error invalid-form (lambda-parameters invalid-rest 1))",
         ),
     ] {
@@ -120,8 +114,8 @@ fn invalid_lambda_list_structure_has_named_error_parity() {
 
 #[test]
 fn malformed_inline_lambda_does_not_degrade_to_not_callable() {
-    let source = "((lambda (x x) x) 1 2)";
-    let expected = "(error invalid-form (lambda-parameters duplicate-parameter x))";
+    let source = "((функція (аргумент аргумент) аргумент) 1 2)";
+    let expected = "(error invalid-form (lambda-parameters duplicate-parameter аргумент))";
 
     let via_meta = eval_meta(source);
     let via_native = eval_native_error(source, ErrorKind::InvalidForm, expected);
