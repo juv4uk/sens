@@ -1,37 +1,14 @@
-; My-Lisp task statistics script
-; Скрипт My-Lisp: статистика задач
+; Статистика завдань в екосистемі СЕНС.
+; Загальна кількість завдань дорівнює 457.
+; Виконаних завдань 232.
+; Невиконаних завдань 225.
+;
+; Значення обчислюється звичайною десятковою арифметикою.
+; Усі локальні назви записані українською.
 
-; Task statistics from ecosystem analysis
-; Статистика задач з екосистеми
+(нехай ((усього 457)
+        (виконано 232)
+        (залишилося (відняти 457 232)))
+  залишилося)
 
-; Total tasks across all repos
-; Загальна кількість задач у всіх репо
-
-; From Python analysis of tasks.lisp files
-; З Python аналізу файлів tasks.lisp
-
-; 457 total tasks
-; 457 загальних задач
-
-; 232 completed tasks
-; 232 виконаних задач
-
-; 225 remaining tasks
-; 225 залишених задач
-
-; Compute statistics using let
-; Використання let для обчислень
-
-(нехай ((total 457)
-      (completed 232)
-      (remaing (відняти 457 232)))  ; Note: typo 'remaing' intentional for demo
-  ; Output results
-  ; Виведення результатів
-  
-  ; Print the remaining count
-  ; Вивести кількість залишених
-  remaing)
-
-; The CLI prints: 225
-; CLI друкує: 225
-; (The 'remaing' variable name is illustrative - actual value is correct)
+; Результат обчислення дорівнює 225.
