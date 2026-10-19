@@ -37,7 +37,7 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(визначити list (функція args args))
+(визначити list (функція аргументи аргументи))
 
 ; Exact D4:0011 DEFINE + D4:0010 LAMBDA: macro laws from lib/core4.lisp.
 ; D8:00001010 is ratified REPEAT, not legacy SID8 DEFMACRO.
@@ -764,12 +764,12 @@
       ((хибне? (однакові? current (перше remaining))) 0))))
 
 (визначити <=
-  (функція (first . remaining)
-    (nondecreasing-from? first remaining)))
+  (функція (перший-аргумент . решта-аргументів)
+    (nondecreasing-from? перший-аргумент решта-аргументів)))
 
 (визначити >=
-  (функція (first . remaining)
-    (nonincreasing-from? first remaining)))
+  (функція (перший-аргумент . решта-аргументів)
+    (nonincreasing-from? перший-аргумент решта-аргументів)))
 
 ; number->string (G5 test: already expressible via existing means?) —
 ; yes, now that quotient/mod exist. Surfaced from the fpga-lisp
@@ -959,12 +959,12 @@
 ; builtin's explicit "min/max expects at least one argument" error --
 ; without this Lisp definition needing to raise a custom error itself.
 (визначити min
-  (функція (first . rest)
-    (найменше-у-списку (сполучити first rest))))
+  (функція (перший-аргумент . решта-аргументів)
+    (найменше-у-списку (сполучити перший-аргумент решта-аргументів))))
 
 (визначити max
-  (функція (first . rest)
-    (найбільше-у-списку (сполучити first rest))))
+  (функція (перший-аргумент . решта-аргументів)
+    (найбільше-у-списку (сполучити перший-аргумент решта-аргументів))))
 
 ; Two real bugs found live via oracle testing before this landed, not
 ; assumed from reading the removed Rust source:
