@@ -672,7 +672,7 @@ class Core1D3D4UkrSourceProjectionTests(unittest.TestCase):
         for ukr in ("визначити", "функція", "за-умовою", "тотожне?", "перше", "як-є"):
             self.assertIn(ukr, heads)
         self.assertIn("(визначити C1-SECOND", src)
-        self.assertIn("(функція (X)", src)
+        self.assertIn("(функція (значення)", src)
 
     def test_core1_quotes_and_legacy_w8_are_not_assigned_new_identity(self):
         root = Path(__file__).resolve().parents[1]

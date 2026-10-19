@@ -31,9 +31,9 @@ class Core1CurrentSourceTests(unittest.TestCase):
         )
 
         # Негативний свідок: повернення старої D3:011 call-head має бути виявлене.
-        needle = "(решта TOKENS)"
+        needle = "(решта лексеми)"
         self.assertIn(needle, source, "очікуваний поточний D3-виклик відсутній")
-        mutant = source.replace(needle, "(011 TOKENS)", 1)
+        mutant = source.replace(needle, "(011 лексеми)", 1)
         mutant_findings = find_forbidden_literals(mutant, path=path)
         self.assertTrue(
             any(item.token == "011" and item.reason == "numeric function/opcode head"
