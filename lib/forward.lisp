@@ -67,7 +67,7 @@
 (визначити assert-fact!
   (make-macro
     (функція (факт)
-      (список (як-є def) (як-є *working-memory*) (список (як-є 111) факт (як-є *working-memory*))))))
+      (список (як-є def) (як-є *working-memory*) (список (як-є сполучити) факт (як-є *working-memory*))))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in
