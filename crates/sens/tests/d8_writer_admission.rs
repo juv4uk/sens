@@ -1,92 +1,89 @@
-//! Exact D8 WRITE-TO-STRING admission; no historical-byte reconstitution.
-use sens::{parse_mixed_exact_domain_legacy_core_source, eval_parsed_expressions, Session};
+//! D8 text and reader mechanisms are exercised from the live Ukrainian projection.
+//! No W8 numeric call heads, generated bit-tag output or path-pinned Core parser.
+use sens::{eval_parsed_expressions, load_core_library, parse_mixed_exact_domain, Session};
+
+fn run(source: &str, session: &mut Session) -> Result<sens::Value, sens::LanguageError> {
+    let forms = parse_mixed_exact_domain(source)?;
+    Ok(eval_parsed_expressions(&forms, session)?.value)
+}
+
+fn session() -> Session {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("Core library loads through its canonical loader");
+    session
+}
 
 #[test]
-fn d8_writer_serializes_structural_data_by_ratified_identity() {
-    let mut session = Session::default();
+fn d8_writer_serializes_structural_values_without_machine_width_tags() {
+    let mut session = session();
     for (source, expected) in [
-        ("(11110100 (001 (a b)))", "\"(a b)\""),
-        ("(11110100 (001 ()))", "\"()\""),
-        ("(11110100 7)", "\"#q2:111/1\""),
+        ("(значення-у-текст (як-є (a b)))", "\"(a b)\""),
+        ("(значення-у-текст (як-є ()))", "\"()\""),
+        ("(значення-у-текст 7)", "\"7\""),
     ] {
-        let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", source)
-            .unwrap_or_else(|e| panic!("D8 surface must be an exact call head: {source}: {e:?}"));
-        let result = eval_parsed_expressions(&parsed, &mut session)
-            .unwrap_or_else(|e| panic!("D8 writer must use a direct mechanism: {source}: {e:?}"));
-        assert_eq!(result.value.to_string(), expected, "writer mismatch {source}");
+        let actual = run(source, &mut session)
+            .unwrap_or_else(|error| panic!("D8 text projection {source}: {error:?}"));
+        assert_eq!(actual.to_string(), expected, "writer mismatch for {source}");
+        assert!(!actual.to_string().contains("#q2"), "machine tags are not human output");
     }
 }
 
 #[test]
-fn pinned_d8_writer_survives_d4_and_legacy_wrapped_closures() {
-    let mut session = Session::default();
-    for definition in [
-        "(0011 внутрішній-d8 (0010 (value) (11110100 value)))",
-        "(00001001 внутрішній-d8-старий (00001000 (value) (11110100 value)))",
+fn d8_writer_survives_d4_lambdas_and_user_defined_calls() {
+    let mut session = session();
+    run("(визначити внутрішній-текст (функція (значення) (значення-у-текст значення)))", &mut session)
+        .expect("ordinary Ukrainian DEFINE/LAMBDA must load");
+    for (source, expected) in [
+        ("(внутрішній-текст (як-є (a b)))", "\"(a b)\""),
+        ("(внутрішній-текст 7)", "\"7\""),
     ] {
-        let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", definition)
-            .expect("D8 writer closure parses");
-        eval_parsed_expressions(&parsed, &mut session)
-            .unwrap_or_else(|e| panic!("D8 writer closure installs {definition}: {e:?}"));
-    }
-    for head in ["внутрішній-d8", "внутрішній-d8-старий"] {
-        let call = format!("({head} (quote (a b)))");
-        let result = sens::eval_program(&call, &mut session)
-            .unwrap_or_else(|e| panic!("D8 closure body lost identity {call}: {e:?}"));
-        assert_eq!(result.value.to_string(), "\"(a b)\"");
+        assert_eq!(
+            run(source, &mut session).expect("user D4 closure calls current D8 mechanism").to_string(),
+            expected
+        );
     }
 }
 
 #[test]
-fn d8_read_write_round_trip_uses_only_exact_ratified_d8_coordinates() {
-    let mut session = Session::default();
+fn d8_read_write_round_trip_uses_current_ukrainian_residents() {
+    let mut session = session();
     for (source, expected) in [
-        ("(11101010 \"(a b)\")", "(a b)"),
-        ("(11101010 (11110100 (001 (a b))))", "(a b)"),
-        ("(11101010 (11110100 7))", "7"),
+        ("(прочитати \"(a b)\")", "(a b)"),
+        ("(прочитати (значення-у-текст (як-є (a b))))", "(a b)"),
+        ("(прочитати (значення-у-текст 7))", "7"),
     ] {
-        let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", source)
-            .expect("path-bound D8 READ/WRITE must parse");
-        let result = eval_parsed_expressions(&parsed, &mut session)
-            .unwrap_or_else(|e| panic!("D8 READ/WRITE {source}: {e:?}"));
-        assert_eq!(result.value.to_string(), expected, "D8 wire round trip");
+        let actual = run(source, &mut session)
+            .unwrap_or_else(|error| panic!("current D8 read/write {source}: {error:?}"));
+        assert_eq!(actual.to_string(), expected);
     }
 }
 
 #[test]
 fn d8_string_to_symbol_is_exact_and_rejects_non_strings() {
-    let mut session = Session::default();
-    let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11101101 \"zoo\")")
-        .expect("D8 scalar conversion must parse by exact binary head");
-    let result = eval_parsed_expressions(&parsed, &mut session)
-        .expect("ratified D8 symbol conversion");
-    assert_eq!(result.value.to_string(), "zoo");
-
-    let bad = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11101101 7)")
-        .expect("invalid argument is a runtime type failure, not parser rewriting");
+    let mut session = session();
     assert_eq!(
-        eval_parsed_expressions(&bad, &mut session)
-            .expect_err("a number is not a text carrier").kind,
-        sens::ErrorKind::Type
+        run("(текст-у-символ \"zoo\")", &mut session)
+            .expect("ratified Ukrainian D8 text-to-symbol")
+            .to_string(),
+        "zoo"
     );
+    let error = run("(текст-у-символ 7)", &mut session)
+        .expect_err("number is not text");
+    assert_eq!(error.kind, sens::ErrorKind::Type);
 }
 
 #[test]
 fn d8_read_rejects_excess_arguments() {
-    let mut session = Session::default();
-    let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11101010 \"a\" \"b\")")
-        .expect("exact D8 READ expression parses");
-    let error = eval_parsed_expressions(&parsed, &mut session)
-        .expect_err("D8 READ cannot accept two inputs");
+    let mut session = session();
+    let error = run("(прочитати \"a\" \"b\")", &mut session)
+        .expect_err("D8 reader accepts exactly one input");
     assert_eq!(error.kind, sens::ErrorKind::Arity);
 }
 
 #[test]
 fn d8_writer_rejects_incorrect_arity() {
-    let mut session = Session::default();
-    let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11110100 1 2)")
-        .expect("D8 writer reference parses");
-    let error = eval_parsed_expressions(&parsed, &mut session)
-        .expect_err("writer accepts exactly one value");
+    let mut session = session();
+    let error = run("(значення-у-текст 1 2)", &mut session)
+        .expect_err("D8 writer accepts exactly one input");
     assert_eq!(error.kind, sens::ErrorKind::Arity);
 }
