@@ -606,7 +606,7 @@ class UnderstandMapUkrSourceTests(unittest.TestCase):
             ("lib/understand.lisp", ("визначити", "функція", "атом?",
                                       "решта-решти", "третє", "четверте"), 15),
             ("lib/persistent-map.lisp", ("визначити", "функція",
-                                         "за-умовою", "тотожне?", "так"), 14),
+                                         "за-умовою", "тотожне?", "так"), 15),
         ):
             with self.subTest(file=file):
                 source = (root / file).read_text(encoding="utf-8")
@@ -637,7 +637,7 @@ class UnderstandMapUkrSourceTests(unittest.TestCase):
         mapped = (root / "lib/persistent-map.lisp").read_text(encoding="utf-8")
         self.assertIn("(як-є has)", understand)
         self.assertIn("(як-є var)", understand)
-        self.assertIn("(визначити map-empty (як-є ()))", mapped)
+        self.assertIn("(визначити мапа-порожній (як-є ()))", mapped)
         self.assertEqual(len([line for line in understand.splitlines()
                               if line.strip().startswith("(так")]), 3)
         self.assertIn("(1 (ук так) (укр так)", (root / "lib/domains/d1.lisp").read_text(encoding="utf-8"))
