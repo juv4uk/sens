@@ -268,7 +268,9 @@ jobs:
 
       - name: Реальна SENS-семантика post-core зв'язувань (#5871)
         if: ${{ always() }}
-        run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
+        run: |
+          cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
+          cargo test --locked -p sens --test repl_core_d1_cutover -- --nocapture
 
       - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
         if: ${{ always() }}

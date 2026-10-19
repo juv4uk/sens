@@ -1,11 +1,10 @@
 //! Живе виконання виправлених post-core функцій через справжній SENS evaluator.
 //! Не підмінює семантику Rust або Python; Rust лише викликає SENS та звіряє результат.
-use sens::{eval_pinned_legacy_core_source, eval_program, Session};
+use sens::{eval_program, Session};
 
 fn core_session() -> Session {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
+    sens::eval_core_library_source(
         include_str!("../../../lib/core.lisp"),
         &mut session,
     )
