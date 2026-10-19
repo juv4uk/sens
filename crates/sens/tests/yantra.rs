@@ -108,3 +108,40 @@ fn yantra_message_and_tool_accessors_execute_with_ukrainian_bindings() {
         assert_eq!(actual, expected, "SENS accessor {reader} must select {key}");
     }
 }
+
+
+#[test]
+fn yantra_tool_call_encoding_uses_exact_d10_ukrainian_function() {
+    // Дійсний виклик SENS D10 ENCODE-MESSAGE → D6 MAP → D10 ENCODE-TOOL-CALL.
+    // Не замінюємо виконання пошуком рядків або Python-симуляцією.
+    let mut session = agent_session();
+    let source = r#"
+        (кодувати-повідомлення
+          (як-є ((role . "assistant")
+                 (content . "готово")
+                 (tool-calls . (((id . "call-1")
+                                 (name . "bash")
+                                 (arguments . "{}")))))))
+    "#;
+    let oracle = r#"
+        (список
+          (сполучити "role" "assistant")
+          (сполучити "content" "готово")
+          (сполучити "tool_calls"
+            (список
+              (список
+                (сполучити "id" "call-1")
+                (сполучити "type" "function")
+                (сполучити "function"
+                  (список
+                    (сполучити "name" "bash")
+                    (сполучити "arguments" "{}")))))))
+    "#;
+    let actual = eval_program(source, &mut session)
+        .unwrap_or_else(|error| panic!("D10 ENCODE-MESSAGE failed: {error}"))
+        .value.to_string();
+    let expected = eval_program(oracle, &mut session)
+        .unwrap_or_else(|error| panic!("SENS oracle failed: {error}"))
+        .value.to_string();
+    assert_eq!(actual, expected, "tool-call encoding must preserve all fields");
+}
