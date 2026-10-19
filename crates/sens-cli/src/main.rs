@@ -694,7 +694,7 @@ mod core_profile_bootstrap_tests {
     fn default_repl_surface_is_full_ukr_and_compact_remains_explicit() {
         let (args, surface) = extract_repl_surface(vec!["sens".to_owned()])
             .expect("default surface");
-        assert_eq!(args, vec!["sens"]);
+        assert_eq!(args, vec!["sens".to_owned()]);
         assert_eq!(surface, repl::ReplSurface::UkrainianFull);
 
         let (_, compact) = extract_repl_surface(vec![
