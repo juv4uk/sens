@@ -90,7 +90,7 @@ class PersistentVectorUkrPrimaryProjectionTests(unittest.TestCase):
     def test_internal_call_heads_use_primary_ukr_names(self):
         source, _ = read_sources()
         primary = source.split(ALIAS_MARKER, 1)[0]
-        primary_code = "\\n".join(
+        primary_code = "\n".join(
             line for line in primary.splitlines()
             if not line.lstrip().startswith(";")
         )
