@@ -9,8 +9,8 @@
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
 (визначити binary
-  (функція (width)
-    (список (як-є binary) width)))
+  (функція (ширина)
+    (список (як-є binary) ширина)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
