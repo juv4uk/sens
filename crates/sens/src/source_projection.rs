@@ -1,30 +1,33 @@
 //! Projection of human-facing Ukrainian decimal integers into exact SENS D24+ values.
 //!
 //! The source spelling supplies the digits; it is not itself a domain identity.
-//! This boundary is deliberately explicit and shared by embedders. It never
-//! promotes D1-D10 domain words, host numbers, or fractions into arithmetic.
-//! Fractions remain expressible with the admitted Ukrainian `частка` operation.
+//! This boundary is shared by embedders. It never promotes D1-D10 words or
+//! host numbers into arithmetic. Fractions remain expressible with the admitted
+//! Ukrainian `частка` operation.
 //!
-//! The current source adapter accepts values representable as i128 and fails
-//! with a named NumericOverflow beyond that range. No float round-trip occurs.
+//! Integers are source-qualified to the smallest signed D24/D48/D96/D192 word
+//! that contains their value. Within one connected D5 numeric expression tree,
+//! all source integer leaves receive the same widest required domain. This
+//! prevents an expression such as `(додати 8388608 1)` from mixing D48 and D24.
+//! Values outside i128 fail by a named NumericOverflow, never through float.
 
 use crate::syntax::{Expr, ExprKind, Span};
 use crate::{BinaryNumber, ErrorKind, LanguageError};
 use std::rc::Rc;
 
-/// Project every integer literal written in a human Ukrainian SENS source
-/// expression to its exact signed D24/D48/D96/D192 numeric-domain word.
+/// Project integer literals in Ukrainian source before evaluation.
 ///
-/// Call this after `sens::parse` and before `eval_parsed_expressions`.
-/// Spans refer to the original source, so diagnostics retain their coordinates.
-/// The owning source surface selects when this conversion is applicable.
+/// Numeric literals in one connected D5 call tree share the widest required
+/// numeric domain; independent values retain their smallest exact domain.
+/// Source spans are preserved for diagnostics. The owning surface chooses when
+/// this conversion is applicable.
 pub fn project_ukr_decimal_integer_literals(
     expressions: &[Expr],
     source: &str,
 ) -> Result<Vec<Expr>, LanguageError> {
     expressions
         .iter()
-        .map(|expr| project_expr(expr, source))
+        .map(|expr| project_expr(expr, source, None))
         .collect()
 }
 
@@ -57,7 +60,7 @@ fn numeric_domain_width(value: i128) -> usize {
     192
 }
 
-fn project_integer(token: &str, span: Span) -> Result<Expr, LanguageError> {
+fn integer_width(token: &str, span: Span) -> Result<usize, LanguageError> {
     let value: i128 = token.parse().map_err(|_| {
         LanguageError::new(
             ErrorKind::NumericOverflow,
@@ -65,10 +68,20 @@ fn project_integer(token: &str, span: Span) -> Result<Expr, LanguageError> {
             span,
         )
     })?;
-    let width = numeric_domain_width(value);
-    // Preserve sign using the ratified D24+ two's-complement integer law.
-    // For D192, sign extension above i128 does not shift a host integer by
-    // 128 or more; each emitted bit is still part of the exact-width word.
+    Ok(numeric_domain_width(value))
+}
+
+fn project_integer(token: &str, span: Span, width: usize) -> Result<Expr, LanguageError> {
+    let value: i128 = token.parse().map_err(|_| {
+        LanguageError::new(
+            ErrorKind::NumericOverflow,
+            format!("Ukrainian decimal integer exceeds the exact source range: {token}"),
+            span,
+        )
+    })?;
+    let width = width.max(numeric_domain_width(value));
+    // Two's complement, including sign-extension for D192 values. Never shift
+    // a host integer by 128 or more; those upper bits are explicit sign bits.
     let bits: Vec<u8> = (0..width)
         .rev()
         .map(|position| {
@@ -92,22 +105,93 @@ fn project_integer(token: &str, span: Span) -> Result<Expr, LanguageError> {
     })
 }
 
-fn project_expr(expr: &Expr, source: &str) -> Result<Expr, LanguageError> {
+/// Human source remains symbol-headed at reader level. Consult the canonical
+/// registry instead of maintaining a local list of D5 function names.
+fn is_d5_call(expr: &Expr) -> bool {
+    let ExprKind::List(items) = &expr.kind else {
+        return false;
+    };
+    let Some(Expr { kind: ExprKind::Symbol(name), .. }) = items.first() else {
+        return false;
+    };
+    crate::semantic_registry_export::admitted_core_domain_for_surface(name)
+        .is_some_and(|identity| identity.width() == 5)
+}
+
+fn required_width_in_math_tree(
+    expr: &Expr,
+    source: &str,
+    depth: usize,
+) -> Result<Option<usize>, LanguageError> {
+    if depth > 768 {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            "Ukrainian numeric source exceeds nesting limit",
+            expr.span,
+        ));
+    }
     if let Some(token) = integer_lexeme(expr, source) {
-        return project_integer(token, expr.span);
+        return integer_width(token, expr.span).map(Some);
+    }
+    if !is_d5_call(expr) {
+        return Ok(None);
+    }
+    let ExprKind::List(items) = &expr.kind else {
+        unreachable!("is_d5_call requires a list")
+    };
+    let mut width = None;
+    for argument in items.iter().skip(1) {
+        if let Some(required) = required_width_in_math_tree(argument, source, depth + 1)? {
+            width = Some(width.map_or(required, |current: usize| current.max(required)));
+        }
+    }
+    Ok(width)
+}
+
+fn project_expr(
+    expr: &Expr,
+    source: &str,
+    inherited_math_width: Option<usize>,
+) -> Result<Expr, LanguageError> {
+    if let Some(token) = integer_lexeme(expr, source) {
+        let width = match inherited_math_width {
+            Some(width) => width.max(integer_width(token, expr.span)?),
+            None => integer_width(token, expr.span)?,
+        };
+        return project_integer(token, expr.span, width);
     }
 
     let kind = match &expr.kind {
+        ExprKind::List(items) if is_d5_call(expr) => {
+            let required = required_width_in_math_tree(expr, source, 0)?.unwrap_or(24);
+            let width = inherited_math_width.map_or(required, |outer| outer.max(required));
+            ExprKind::List(
+                items
+                    .iter()
+                    .enumerate()
+                    .map(|(index, item)| {
+                        if index == 0 {
+                            Ok(item.clone())
+                        } else {
+                            project_expr(item, source, Some(width))
+                        }
+                    })
+                    .collect::<Result<Vec<_>, LanguageError>>()?
+                    .into(),
+            )
+        }
         ExprKind::List(items) => ExprKind::List(
             items
                 .iter()
-                .map(|item| project_expr(item, source))
+                // A data/syntax form starts a fresh numeric context. An actual
+                // D5 call discovers its own required domain when visited.
+                .map(|item| project_expr(item, source, None))
                 .collect::<Result<Vec<_>, _>>()?
                 .into(),
         ),
         ExprKind::Pair(car, cdr) => ExprKind::Pair(
-            Rc::new(project_expr(car, source)?),
-            Rc::new(project_expr(cdr, source)?),
+            Rc::new(project_expr(car, source, None)?),
+            Rc::new(project_expr(cdr, source, None)?),
         ),
         _ => expr.kind.clone(),
     };
@@ -153,6 +237,45 @@ mod tests {
         assert_eq!(values[1].to_decimal_string(), "-8388608");
         assert_eq!(values[2].to_decimal_string(), "8388607");
         assert_eq!(values[3].to_decimal_string(), "8388608");
+    }
+
+    #[test]
+    fn one_math_tree_uses_one_exact_width_for_all_decimal_leaves() {
+        let source = "(додати 8388608 1)";
+        let parsed = crate::parse(source).expect("source parses");
+        let projected = project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("both operands receive one common exact domain");
+        let [Expr { kind: ExprKind::List(items), .. }] = projected.as_slice() else {
+            panic!("expected one list form");
+        };
+        let widths: Vec<_> = items.iter().skip(1).map(|expr| match &expr.kind {
+            ExprKind::BinaryNumber(number) => number.numeric_domain_width(),
+            _ => None,
+        }).collect();
+        assert_eq!(widths, vec![Some(48), Some(48)]);
+    }
+
+    #[test]
+    fn nested_math_tree_propagates_the_required_width_without_coercing_values() {
+        let source = "(додати 1 (помножити 8388608 2))";
+        let parsed = crate::parse(source).expect("source parses");
+        let projected = project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("one math tree has a shared source-selected domain");
+        let [Expr { kind: ExprKind::List(items), .. }] = projected.as_slice() else {
+            panic!("expected one list form");
+        };
+        let ExprKind::BinaryNumber(left) = &items[1].kind else {
+            panic!("expected outer integer")
+        };
+        let ExprKind::List(nested) = &items[2].kind else {
+            panic!("expected nested multiply")
+        };
+        assert_eq!(left.numeric_domain_width(), Some(48));
+        let widths: Vec<_> = nested.iter().skip(1).map(|expr| match &expr.kind {
+            ExprKind::BinaryNumber(number) => number.numeric_domain_width(),
+            _ => None,
+        }).collect();
+        assert_eq!(widths, vec![Some(48), Some(48)]);
     }
 
     #[test]
