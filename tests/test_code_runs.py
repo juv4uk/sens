@@ -1459,87 +1459,113 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
 
 
 class ForwardD9UkrCallsiteProjectionTests(unittest.TestCase):
-    """D9 heads in forward.lisp use exact current Ukrainian domain projections."""
+    """Первинні Forward-функції визначені тільки повними ратифікованими іменами укр."""
 
     SOURCE = ROOT / "lib" / "forward.lisp"
     D9 = ROOT / "lib" / "domains" / "d9.lisp"
-    ORIGINAL_BLOB = "aa37f1a5b627f0343cc2d425056086488067ebe1"
-    CALLS = (
-        (118, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
-        (119, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
-        (121, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
-        (122, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
-        (123, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
-        (123, "101001000", "fire-rule", "запустити-правило"),
-        (129, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
-        (154, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
-        (155, "010101010", "fire-rules-on-facts", "запустити-правила-на-факти"),
-        (159, "010101010", "fire-rules-on-facts", "запустити-правила-на-факти"),
-        (222, "010101010", "fire-rules-on-facts", "запустити-правила-на-факти"),
-        (222, "010001011", "run", "запустити"),
-        (265, "001001000", "retract-fact", "відкликати-факт"),
-        (357, "101001000", "fire-rule", "запустити-правило"),
-        (399, "001101000", "run-tms", "запустити-система-істини"),
-        (507, "101001000", "fire-rule", "запустити-правило"),
-        (574, "010000100", "run-jtms", "запустити-система-обґрунтувань"),
-        (730, "010110010", "run-jtms-multi", "запустити-система-обґрунтувань-мульти"),
-        (754, "010000011", "prune-entry", "обрізати-запис"),
-        (754, "010100011", "prune-all-entries", "обрізати-всі-записи"),
-        (761, "010101101", "unsupported-facts", "непідтримані-факти"),
-        (762, "010101101", "unsupported-facts", "непідтримані-факти"),
-        (763, "010101101", "unsupported-facts", "непідтримані-факти"),
-        (784, "010101101", "unsupported-facts", "непідтримані-факти"),
-        (784, "010100011", "prune-all-entries", "обрізати-всі-записи"),
+    PRIMARY = (
+        ("101001000", "fire-rule", "запустити-правило"),
+        ("010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
+        ("001011101", "fire-rule-on-working-memory", "запустити-правило-на-робоча-пам'ять"),
+        ("010101010", "fire-rules-on-facts", "запустити-правила-на-факти"),
+        ("001001100", "fire-rules-on-working-memory", "запустити-правила-на-робоча-пам'ять"),
+    )
+    OTHER_PEERS = (
+        ("010001011", "run", "запустити"),
+        ("001001000", "retract-fact", "відкликати-факт"),
+        ("001101000", "run-tms", "запустити-система-істини"),
+        ("010000100", "run-jtms", "запустити-система-обґрунтувань"),
+        ("010110010", "run-jtms-multi", "запустити-система-обґрунтувань-мульти"),
+        ("010000011", "prune-entry", "обрізати-запис"),
+        ("010100011", "prune-all-entries", "обрізати-всі-записи"),
+        ("010101101", "unsupported-facts", "непідтримані-факти"),
     )
 
-    @classmethod
-    def _blob_sha(cls, source):
-        import hashlib
-        raw = source.encode("utf-8")
-        return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+    @staticmethod
+    def _active_source(source):
+        # Preserve line breaks; comments and strings are inert to call-head checks.
+        out = []
+        state = "code"
+        escaped = False
+        for char in source:
+            if state == "comment":
+                out.append("\n" if char == "\n" else " ")
+                if char == "\n":
+                    state = "code"
+                continue
+            if state == "string":
+                out.append("\n" if char == "\n" else " ")
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    state = "code"
+                continue
+            if char == ";":
+                out.append(" ")
+                state = "comment"
+            elif char == '"':
+                out.append(" ")
+                state = "string"
+                escaped = False
+            else:
+                out.append(char)
+        return "".join(out)
 
-    @classmethod
-    def _restore_original(cls, source):
-        lines = source.splitlines(keepends=True)
-        for line_no, bits, en, ukr in reversed(cls.CALLS):
-            pattern = re.compile(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))")
-            index = line_no - 1
-            found = list(pattern.finditer(lines[index]))
-            if len(found) != 1:
-                raise AssertionError(
-                    f"CALLSITE_COUNT D9:{bits} {ukr} line={line_no} actual={len(found)}"
+    def _verify_primary(self, source):
+        domain_lines = self.D9.read_text(encoding="utf-8").splitlines()
+        active = self._active_source(source)
+        for bits, english, ukrainian in self.PRIMARY:
+            with self.subTest(domain=bits, ukrainian=ukrainian):
+                self.assertEqual(len(bits), 9)
+                rows = [line for line in domain_lines
+                        if line.lstrip().startswith(f"({bits} ")]
+                self.assertEqual(len(rows), 1,
+                                 f"D9:{bits} має бути рівно одним записом")
+                self.assertIn(f"(укр {ukrainian})", rows[0])
+                self.assertIn(f"(en {english})", rows[0])
+                self.assertIn(f"(LISP {english.upper()})", rows[0])
+
+                definition = re.compile(
+                    r"(?m)^\(визначити " + re.escape(ukrainian) +
+                    r"(?=\s|\))"
                 )
-            lines[index] = pattern.sub(lambda m: m.group().replace(ukr, en), lines[index], count=1)
-        return "".join(lines)
+                self.assertEqual(len(definition.findall(active)), 1,
+                                 f"{ukrainian}: потрібно одне первинне визначення")
+                self.assertRegex(active, re.compile(
+                    r"(?m)^\(визначити " + re.escape(ukrainian) +
+                    r"\s*\n\s*\(функція\b"
+                ), f"{ukrainian}: тіло має належати повному імені укр")
+                self.assertNotRegex(active, re.compile(
+                    r"(?m)^\(визначити " + re.escape(english) + r"(?=\s|\))"
+                ), f"{english}: застаріле визначення не вилучене")
+                self.assertNotRegex(active, re.compile(
+                    r"\(\s*" + re.escape(english) + r"(?=\s|\))"
+                ), f"{english}: лишився активний англійський виклик")
+                self.assertNotIn(f"(визначити {ukrainian} {english})", active,
+                                 "не залишати псевдонім-дубль")
 
-    def test_ratified_d9_peers_and_exact_forward_inverse(self):
-        source = self.SOURCE.read_bytes().decode("utf-8")
-        table = self.D9.read_bytes().decode("utf-8").splitlines()
-        for bits, en, ukr in sorted({(bits, en, ukr) for _, bits, en, ukr in self.CALLS}):
-            with self.subTest(bits=bits, en=en):
-                rows = [line for line in table if line.lstrip().startswith(f"({bits} ")]
-                self.assertEqual(len(rows), 1, f"D9 row count drift for {bits}")
-                self.assertIn(f"(укр {ukr})", rows[0])
-                self.assertIn(f"(en {en})", rows[0])
-                self.assertIn(f"(LISP {en.upper()})", rows[0])
-        for line_no, bits, en, ukr in self.CALLS:
-            with self.subTest(line=line_no, bits=bits):
-                pattern = re.compile(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))")
-                found = list(pattern.finditer(source.splitlines()[line_no - 1]))
-                self.assertEqual(len(found), 1)
-        restored = self._restore_original(source)
+        for bits, english, ukrainian in self.OTHER_PEERS:
+            with self.subTest(peer=english, domain=bits):
+                rows = [line for line in domain_lines
+                        if line.lstrip().startswith(f"({bits} ")]
+                self.assertEqual(len(rows), 1)
+                self.assertIn(f"(укр {ukrainian})", rows[0])
+                self.assertIn(f"(en {english})", rows[0])
+                self.assertIn(f"(LISP {english.upper()})", rows[0])
+        return True
 
-    def test_wrong_d9_peer_is_rejected_by_exact_inverse(self):
-        lines = self.SOURCE.read_bytes().decode("utf-8").splitlines(keepends=True)
-        line_no = 118
-        lines[line_no - 1] = lines[line_no - 1].replace(
-            "(запустити-правило-на-факти", "(відкликати-факт", 1
-        )
-        mutant = "".join(lines)
-        with self.assertRaisesRegex(AssertionError, "CALLSITE_COUNT"):
-            self._restore_original(mutant)
+    def test_primary_functions_are_owned_by_full_ukr_names(self):
+        self._verify_primary(self.SOURCE.read_text(encoding="utf-8"))
 
-
+    def test_wrong_primary_projection_is_rejected(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        old = "(визначити запустити-правило\n  (функція"
+        mutant = source.replace(old, "(визначити відкликати-факт\n  (функція", 1)
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(AssertionError, "запустити-правило"):
+            self._verify_primary(mutant)
 
 
 class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):

@@ -238,11 +238,11 @@
 | `lib/epistemic.lisp` | function | `intent-capabilities-satisfied?` | unreviewed |
 | `lib/forward.lisp` | function | `*working-memory*` | unreviewed |
 | `lib/forward.lisp` | macro | `assert-fact!` | unreviewed |
-| `lib/forward.lisp` | function | `fire-rule` | unreviewed |
-| `lib/forward.lisp` | function | `fire-rule-on-facts` | unreviewed |
-| `lib/forward.lisp` | function | `fire-rule-on-working-memory` | unreviewed |
-| `lib/forward.lisp` | function | `fire-rules-on-facts` | unreviewed |
-| `lib/forward.lisp` | function | `fire-rules-on-working-memory` | unreviewed |
+| `lib/forward.lisp` | function | `запустити-правило` | unreviewed |
+| `lib/forward.lisp` | function | `запустити-правило-на-факти` | unreviewed |
+| `lib/forward.lisp` | function | `запустити-правило-на-робоча-пам'ять` | unreviewed |
+| `lib/forward.lisp` | function | `запустити-правила-на-факти` | unreviewed |
+| `lib/forward.lisp` | function | `запустити-правила-на-робоча-пам'ять` | unreviewed |
 | `lib/forward.lisp` | function | `append-new` | unreviewed |
 | `lib/forward.lisp` | function | `run` | unreviewed |
 | `lib/forward.lisp` | macro | `assert-facts!` | unreviewed |
