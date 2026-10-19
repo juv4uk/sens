@@ -106,21 +106,23 @@ fn x86_lowerer_has_no_legacy_let() {
 }
 
 #[test]
-fn x86_lowerer_seven_d4_local_apps_and_62_opaque_w8_rows() {
+fn x86_lowerer_is_exact_domain_only_and_has_seven_d4_local_apps() {
     let source = include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp");
+    assert!(!source.contains("x86-legacy-sid-lowering-profile-v1"));
+    assert!(!source.contains("#d11"));
+    assert!(!source.contains("#d24"));
     let ast = parse_mixed_exact_domain_machine_source(
         "lib/machine/lowering/semantic-x86-64.lisp", source
     ).expect("точнодоменний x86");
-    assert_eq!(ast.len(), 37);
+    assert_eq!(ast.len(), 36, "active forms contain no SID8 provenance table");
     // Шість мігрованих LET + одна раніше ратифікована локальна LAMBDA.
     assert_eq!(source.matches("((0010 (forms)").count(), 7);
-    let history = source.split_once("; First executable semantic-lowering witness.").unwrap().0;
-    let rows = history.lines().filter(|line| {
-        let b = line.trim().trim_start_matches('(').as_bytes();
-        b.len() > 9 && b[8] == b' '
-            && b[..8].iter().all(|v| *v == b'0' || *v == b'1')
+    let encoded_rows = source.lines().filter(|line| {
+        let row = line.trim().trim_start_matches('(').as_bytes();
+        row.len() > 9 && row[8] == b' '
+            && row[..8].iter().all(|v| *v == b'0' || *v == b'1')
     }).count();
-    assert_eq!(rows, 62, "цитовані W8 не є D8-викликами");
+    assert_eq!(encoded_rows, 0, "активний lowerer не містить восьмибітних ключів");
 }
 
 #[test]
