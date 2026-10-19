@@ -15,7 +15,7 @@ const KNOWLEDGE_D3: &str = include_str!("../../../lib/knowledge.lisp");
 
 fn session() -> Session {
     let mut session = Session::default();
-    sens::eval_pinned_legacy_core_source("lib/core.lisp", CORE, &mut session)
+    sens::eval_core_library_source(CORE, &mut session)
         .expect("source-pinned exact-width legacy core bootstrap");
     for (path, source) in [
         ("lib/unify.lisp", UNIFY),
