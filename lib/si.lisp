@@ -22,6 +22,23 @@
 ; same unit data is directly admissible to the Advice Taker knowledge grammar.
 ; Unit algebra itself is not claimed here.
 
+; Точний запис SI складається мовою SENS. Значення (зокрема частки) обчислюється
+; D24+ арифметикою до включення у скінченні дані; reader-літералів виду N/D немає.
+(визначити si:створити-запис-константи
+  (функція (ім'я значення одиниця)
+    (сполучити (як-є scientific-constant/1)
+      (сполучити ім'я
+        (сполучити
+          (сполучити (як-є quantity/1)
+            (сполучити значення
+              (сполучити одиниця (як-є ()))))
+          (сполучити (як-є exact-by-definition)
+            (сполучити (як-є physical-defining)
+              (сполучити (як-є si)
+                (сполучити
+                  (як-є (science-source/1 bipm-si-brochure-9 2019))
+                  (як-є ())))))))))
+
 (визначити si:defining-cesium-frequency
   (як-є
     (scientific-constant/1 si:cesium-frequency
@@ -42,40 +59,34 @@
       (science-source/1 bipm-si-brochure-9 2019))))
 
 (визначити si:defining-planck-constant
-  (як-є
-    (scientific-constant/1 si:planck-constant
-      (quantity/1
-        132521403/200000000000000000000000000000000000000000
-        (unit/1
-          (dimension/1 kilogram 1)
-          (dimension/1 metre 2)
-          (dimension/1 second -1)))
-      exact-by-definition physical-defining si
-      (science-source/1 bipm-si-brochure-9 2019))))
+  (si:створити-запис-константи
+    (як-є si:planck-constant)
+    (частка 132521403 200000000000000000000000000000000000000000)
+    (як-є
+      (unit/1
+        (dimension/1 kilogram 1)
+        (dimension/1 metre 2)
+        (dimension/1 second -1)))))
 
 (визначити si:defining-elementary-charge
-  (як-є
-    (scientific-constant/1 si:elementary-charge
-      (quantity/1
-        801088317/5000000000000000000000000000
-        (unit/1
-          (dimension/1 ampere 1)
-          (dimension/1 second 1)))
-      exact-by-definition physical-defining si
-      (science-source/1 bipm-si-brochure-9 2019))))
+  (si:створити-запис-константи
+    (як-є si:elementary-charge)
+    (частка 801088317 5000000000000000000000000000)
+    (як-є
+      (unit/1
+        (dimension/1 ampere 1)
+        (dimension/1 second 1)))))
 
 (визначити si:defining-boltzmann-constant
-  (як-є
-    (scientific-constant/1 si:boltzmann-constant
-      (quantity/1
-        1380649/100000000000000000000000000000
-        (unit/1
-          (dimension/1 kilogram 1)
-          (dimension/1 metre 2)
-          (dimension/1 second -2)
-          (dimension/1 kelvin -1)))
-      exact-by-definition physical-defining si
-      (science-source/1 bipm-si-brochure-9 2019))))
+  (si:створити-запис-константи
+    (як-є si:boltzmann-constant)
+    (частка 1380649 100000000000000000000000000000)
+    (як-є
+      (unit/1
+        (dimension/1 kilogram 1)
+        (dimension/1 metre 2)
+        (dimension/1 second -2)
+        (dimension/1 kelvin -1)))))
 
 (визначити si:defining-avogadro-constant
   (як-є
