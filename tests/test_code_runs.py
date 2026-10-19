@@ -995,7 +995,7 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         d1 = self.D1.read_text(encoding="utf-8")
         self.assertIn("(0 (ук ні) (укр ні)", d1)
         self.assertIn("(1 (ук так) (укр так)", d1)
-        self.assertIn("decompose", source)
+        self.assertIn("розкласти", source)
 
     def test_current_head_census_and_source_structure(self):
         source = self.SOURCE.read_text(encoding="utf-8")
@@ -1051,8 +1051,46 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         # Відновлюємо їх через наявний scope-aware AST-прохід; старий SHA
         # залишається незмінним і так само ловить сторонні зміни закону.
         newer_formals = {
+            # Exact inverse of each currently migrated local/formal spelling.
+            "compiler-nucleus": {"джерело-авторитету": "authority"},
             "compiler-domain-shape": {"розкласти": "decompose"},
             "compiler-list-end?": {"значення": "value"},
+            "compiler-role-from-l1-l5-bits": {
+                "початковий-код": "seed", "біти-координати": "bits", "закон-домену": "law",
+            },
+            "compiler-lowering-role-from-l1-l5-bits": {
+                "початковий-код": "seed", "біти-координати": "bits", "закон-домену": "law",
+            },
+            "compiler-role-from-l1-l5": {
+                "розкласти-ідентичність": "decompose", "закон-домену": "law",
+            },
+            "compiler-d4-law-width": {"закон-домену": "law"},
+            "compiler-d4-law-children": {"закон-домену": "law"},
+            "compiler-d4-law-first-child": {"закон-домену": "law"},
+            "compiler-d4-law-second-child": {"закон-домену": "law"},
+            "compiler-role-from-d4-bootstrap-bits": {
+                "початковий-код": "seed", "біти-координати": "bits", "закон-домену": "law",
+            },
+            "compiler-role-from-d4-bootstrap": {
+                "розкласти-ідентичність": "decompose", "закон-домену": "law",
+            },
+            "compiler-lowering-role-from-l1-l5": {
+                "розкласти-ідентичність": "decompose", "закон-домену": "law",
+            },
+            "compiler-lowering-role-from-laws": {
+                "розкласти-ідентичність": "decompose", "закон-д3": "d3-law", "закон-д4": "d4-law",
+            },
+            "compiler-request-from-role": {
+                "початковий-код": "seed", "роль-виконання": "role", "посилання-на-доказ": "proof-ref",
+            },
+            "compiler-request-from-l1-l5": {
+                "розкласти-ідентичність": "decompose", "закон-домену": "law",
+                "посилання-на-доказ": "proof-ref",
+            },
+            "compiler-request-from-laws": {
+                "розкласти-ідентичність": "decompose", "закон-д3": "d3-law", "закон-д4": "d4-law",
+                "доказ-д3": "d3-proof", "доказ-д4": "d4-proof",
+            },
             "компілятор-ширина-форми": {"форма": "shape"},
             "компілятор-біти-форми": {"форма": "shape"},
             "компілятор-ширина-закону": {"закон": "law"},
@@ -1069,6 +1107,38 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             "compiler-at-least-two": {"аргументи": "arguments"},
             "compiler-request-role": {"запит": "request"},
             "compiler-cond-clauses-valid": {"клаузи": "clauses"},
+            "compiler-role-shape-valid": {"запит-компіляції": "request", "аргументи-форми": "arguments"},
+            "compiler-domain-children": {"запит-компіляції": "request", "аргументи-форми": "arguments"},
+            "compiler-domain-result": {
+                "запит-компіляції": "request", "аргументи-форми": "arguments",
+                "результат-нащадків": "child-result",
+            },
+            "compiler-program-list": {
+                "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
+                "вузли": "nodes", "закон-д3": "d3-law", "закон-д4": "d4-law",
+                "доказ-д3": "d3-proof", "доказ-д4": "d4-proof",
+            },
+            "compiler-program-node": {
+                "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
+                "вузол": "node", "закон-д3": "d3-law", "закон-д4": "d4-law",
+                "доказ-д3": "d3-proof", "доказ-д4": "d4-proof",
+            },
+            "compiler-compile-program": {
+                "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
+                "програма": "program", "закон-д3": "d3-law", "закон-д4": "d4-law",
+                "доказ-д3": "d3-proof", "доказ-д4": "d4-proof",
+            },
+            "compiler-artifact-field": {"назва-поля": "name", "значення-поля": "value"},
+            "compiler-artifact-from-result": {
+                "відбиток": "digest", "ша256-пакованої-програми": "program-wire-sha256",
+                "походження-артефакту": "artifact-provenance", "результат-компіляції": "result",
+            },
+            "compiler-compile-program-artifact": {
+                "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
+                "відбиток": "digest", "програма": "program", "закон-д3": "d3-law", "закон-д4": "d4-law",
+                "доказ-д3": "d3-proof", "доказ-д4": "d4-proof", "походження-запиту": "request-provenance",
+                "походження-артефакту": "artifact-provenance", "ша256-пакованої-програми": "program-wire-sha256",
+            },
         }
         for name, bindings in newer_formals.items():
             inverse_helpers[name] = name
@@ -1308,7 +1378,7 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
 
     SOURCE = ROOT / "lib" / "core.lisp"
     OLD_CHUNK_CALL = "(quotient (01011 a (100 chunk+mult)) b)"
-    UKR_CHUNK_CALL = "(частка (відняти ділене (перше chunk+mult)) дільник)"
+    UKR_CHUNK_CALL = "(частка (відняти ділене (перше частина-та-множник)) дільник)"
     OLD_REMAINDER_CALL = "(01011 a (10110 b (quotient a b)))"
     UKR_REMAINDER_CALL = "(відняти ділене (помножити дільник (частка ділене дільник)))"
 
