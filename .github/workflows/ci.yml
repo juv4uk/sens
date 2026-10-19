@@ -60,6 +60,7 @@ jobs:
               cargo test --locked -p sens --test guard
           # Реальний SENS macro/DEFINE: 10 розгортань D4, не Python-оракул.
           cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
+              cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match -- --exact --nocapture
               cargo test --locked -p sens --lib source_projection::tests:: -- --nocapture
               cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
               cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection
