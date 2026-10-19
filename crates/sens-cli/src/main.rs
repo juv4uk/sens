@@ -29,11 +29,11 @@ fn extract_repl_surface(args: Vec<String>) -> Result<(Vec<String>, repl::ReplSur
     let mut output = Vec::with_capacity(args.len());
     let mut input = args.into_iter();
     let Some(program) = input.next() else {
-        return Ok((output, repl::ReplSurface::Core));
+        return Ok((output, repl::ReplSurface::UkrainianFull));
     };
     output.push(program);
     let mut input = input.peekable();
-    let mut surface = repl::ReplSurface::Core;
+    let mut surface = repl::ReplSurface::UkrainianFull;
     let mut seen = false;
 
     while let Some(arg) = input.next() {
@@ -41,7 +41,7 @@ fn extract_repl_surface(args: Vec<String>) -> Result<(Vec<String>, repl::ReplSur
             Some(
                 input
                     .next()
-                    .ok_or_else(|| "--surface requires uk|en|sa|core".to_string())?,
+                    .ok_or_else(|| "--surface requires ук|укр|en|sa|core".to_string())?,
             )
         } else {
             arg.strip_prefix("--surface=").map(str::to_string)
@@ -689,6 +689,31 @@ fn main() {
 #[cfg(test)]
 mod core_profile_bootstrap_tests {
     use super::*;
+
+    #[test]
+    fn default_repl_surface_is_full_ukr_and_compact_remains_explicit() {
+        let (args, surface) = extract_repl_surface(vec!["sens".to_owned()])
+            .expect("default surface");
+        assert_eq!(args, vec!["sens"]);
+        assert_eq!(surface, repl::ReplSurface::UkrainianFull);
+
+        let (_, compact) = extract_repl_surface(vec![
+            "sens".to_owned(),
+            "--surface=ук".to_owned(),
+        ])
+        .expect("explicit compact surface");
+        assert_eq!(compact, repl::ReplSurface::Ukrainian);
+
+        let (_, core) = extract_repl_surface(vec![
+            "sens".to_owned(),
+            "--surface=core".to_owned(),
+        ])
+        .expect("explicit core surface");
+        assert_eq!(core, repl::ReplSurface::Core);
+
+        let (_, no_args) = extract_repl_surface(Vec::new()).expect("empty arg vector");
+        assert_eq!(no_args, repl::ReplSurface::UkrainianFull);
+    }
 
     #[test]
     fn explicit_physical_t5_is_a_pure_binary_entrypoint_not_an_alias() {
