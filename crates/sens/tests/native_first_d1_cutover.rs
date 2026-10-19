@@ -63,6 +63,18 @@ fn real_native_first_classifier_handles_atomic_and_compound_heads() {
 }
 
 #[test]
+fn dotted_tail_is_not_a_valid_single_argument_car_plan() {
+    let mut s = session();
+    // Це реальна Lisp-структура, прочитана SENS, а не текстовий підрахунок.
+    let source = "(native-first-plan (як-є (перше (сполучити 2 3) . зайвий-хвіст)))";
+    let result = eval(&mut s, source).expect("SENS має відхилити dotted CAR до x86");
+    assert!(
+        result.to_string().starts_with("(evaluator-fallback "),
+        "пошкоджена арність не повинна створювати native-plan: {result}"
+    );
+}
+
+#[test]
 fn no_coercion_from_empty_list_or_numeric_one_into_d1() {
     let mut s = session();
     for source in ["(хибне? (як-є ()))", "(хибне? 1)"] {
