@@ -334,18 +334,21 @@ mod tests {
     }
 
     #[test]
-    fn exact_domain_words_inside_quoted_code_data_keep_their_original_width() {
-        let source = "(як-є 0011)";
-        let parsed = crate::parse(source).expect("quoted exact D4 code data parses");
-        let projected = project_ukr_decimal_integer_literals(&parsed, source)
-            .expect("only ordinary decimal integer leaves should be projected");
-        let ExprKind::List(items) = &projected[0].kind else {
-            panic!("expected quoted list")
+    fn already_typed_domain_data_is_not_reinterpreted_as_decimal_source() {
+        let source = "0011";
+        let word = crate::parse_binary_source_words(source)
+            .expect("fixture uses the exact-width source-word reader");
+        let identity = crate::DomainIdentity::from_source_word(word[0].word);
+        let typed = Expr {
+            kind: ExprKind::DomainIdentity(identity),
+            span: Span { start: 0, end: source.len() },
         };
-        assert!(matches!(&items[1].kind,
+        let projected = project_ukr_decimal_integer_literals(&[typed], source)
+            .expect("already-typed domain identity remains a domain identity");
+        assert!(matches!(&projected[0].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 4 && identity.packed_bits() == 0b0011
-        ), "the D4 code datum must not be reinterpreted as decimal eleven");
+        ), "domain width and exact bits must survive source projection unchanged");
     }
 
     #[test]
