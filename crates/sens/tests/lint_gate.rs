@@ -1,5 +1,5 @@
 use sens::{
-    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_program,
+    eval_parsed_expressions, eval_core_library_source, eval_program,
     parse_mixed_exact_domain, parse_mixed_exact_domain_fs_source,
     parse_mixed_exact_domain_utf8_source, Session,
 };
@@ -18,7 +18,7 @@ fn linter_gate() {
 
     // Evaluate the libraries directly to load them into the environment
     let core_src = fs::read_to_string("../../lib/core.lisp").unwrap();
-    eval_pinned_legacy_core_source("lib/core.lisp", &core_src, &mut session)
+    eval_core_library_source(&core_src, &mut session)
         .expect("pin legacy Core source to exact domain reader");
     let utf8_src = fs::read_to_string("../../lib/utf8.lisp").unwrap();
     let utf8_forms = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", &utf8_src)
