@@ -9,10 +9,8 @@
 (
   (schema function-table-mechanisms/1)
   (authority "lib/domains/d1.lisp…d10.lisp")
-  (lifecycle transitional)
-  (retirement-issue 1046)
   (rows
-    ; Керувальні форми та спискові механізми мають точні D3/D4 identity.
+    ; Керувальні форми та спискові механізми мають точні D3/D4 ідентичності.
     (як-є evaluator quote-form)
     (атом? evaluator atom-primitive)
     (тотожне? evaluator eq-primitive)
@@ -22,8 +20,8 @@
     (за-умовою evaluator cond-form)
     (функція evaluator lambda-form)
     (визначити evaluator define-form)
-    ; Рядки механізмів додають виконавця до вже визначеної D5:01010 функції,
-    ; але не визначають арифметичного закону додавання.
+    ; Ці записи додають виконавця до вже визначеної D5 функції додавання;
+    ; вони не визначають її арифметичного закону.
     (додати common-lisp bounded-exact-add)
     (додати prolog bounded-exact-add)
     (додати clips bounded-exact-add)
