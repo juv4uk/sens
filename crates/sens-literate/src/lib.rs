@@ -76,10 +76,32 @@ pub fn parse_literate(source: &str, mode: SourceMode) -> Result<Vec<Expr>, Langu
     parse(&concatenated).map_err(|e| remap_error(e, &offset_maps))
 }
 
+/// Eval of the canonical human Ukrainian source surface for embedded IDEs.
+/// Decimal source tokens are projected by SENS into exact D24+ operands before
+/// the existing SENS evaluator sees them. This is the same operation as the
+/// SENS file-mode CLI, not a host-owned arithmetic interpreter.
+pub fn eval_literate_ukr(
+    source: &str,
+    mode: SourceMode,
+    session: &mut Session,
+) -> Result<(EvalResult, Vec<Expr>), LanguageError> {
+    eval_literate_with_source_projection(source, mode, session, true)
+}
+
+/// Legacy/core entrypoint does not silently change canonical data identities.
 pub fn eval_literate(
     source: &str,
     mode: SourceMode,
     session: &mut Session,
+) -> Result<(EvalResult, Vec<Expr>), LanguageError> {
+    eval_literate_with_source_projection(source, mode, session, false)
+}
+
+fn eval_literate_with_source_projection(
+    source: &str,
+    mode: SourceMode,
+    session: &mut Session,
+    ukrainian_decimal_source: bool,
 ) -> Result<(EvalResult, Vec<Expr>), LanguageError> {
     let (concatenated, offset_maps) = extract_code(source, mode == SourceMode::Literate);
 
@@ -93,7 +115,16 @@ pub fn eval_literate(
         ));
     }
 
-    let forms = parse(&concatenated).map_err(|e| remap_error(e, &offset_maps))?;
+    let parsed = parse(&concatenated).map_err(|e| remap_error(e, &offset_maps))?;
+    let forms = if ukrainian_decimal_source {
+        sens::source_projection::project_ukr_decimal_integer_literals(
+            &parsed,
+            &concatenated,
+        )
+        .map_err(|e| remap_error(e, &offset_maps))?
+    } else {
+        parsed
+    };
 
     // Canonical bootstrap order: language-owned macro layer first, then core.my.
     sens::load_core_library(session).map_err(|e| remap_error(e, &offset_maps))?;
@@ -101,4 +132,55 @@ pub fn eval_literate(
     let result =
         eval_parsed_expressions(&forms, session).map_err(|e| remap_error(e, &offset_maps))?;
     Ok((result, forms))
+}
+
+#[cfg(test)]
+mod human_ukrainian_projection_tests {
+    use super::{eval_literate_ukr, SourceMode};
+    use sens::Session;
+
+    #[test]
+    fn gui_uses_the_same_exact_d24_quotient_as_sens_file_mode() {
+        let mut session = Session::default();
+        let (result, forms) = eval_literate_ukr(
+            "(частка 1 3)",
+            SourceMode::PureLisp,
+            &mut session,
+        )
+        .expect("ratified Ukrainian quotient of human decimal operands");
+        assert_eq!(result.value.to_string(), "1/3");
+        assert_eq!(forms.len(), 1);
+    }
+
+    #[test]
+    fn gui_retains_a_bound_decimal_value_between_ukrainian_evaluations() {
+        let mut session = Session::default();
+        eval_literate_ukr(
+            "(визначити крок 42)",
+            SourceMode::PureLisp,
+            &mut session,
+        )
+        .expect("human decimal value bound by native SENS");
+        let (result, _) = eval_literate_ukr(
+            "(додати крок 8)",
+            SourceMode::PureLisp,
+            &mut session,
+        )
+        .expect("existing SENS session and D24 addition");
+        assert_eq!(result.value.to_string(), "50");
+    }
+
+    #[test]
+    fn fenced_ukrainian_arithmetic_uses_the_same_source_projection() {
+        let mut session = Session::default();
+        let source = "# Український SENS\n\n```sens\n(частка 2 3)\n```\n";
+        let (result, forms) = eval_literate_ukr(
+            source,
+            SourceMode::Literate,
+            &mut session,
+        )
+        .expect("fenced human Ukrainian source");
+        assert_eq!(result.value.to_string(), "2/3");
+        assert_eq!(forms.len(), 1);
+    }
 }

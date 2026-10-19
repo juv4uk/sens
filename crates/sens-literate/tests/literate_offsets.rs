@@ -1,70 +1,70 @@
-use sens::{Exactness, Value};
+use sens::Session;
 use sens_literate::SourceMode;
 
 #[test]
 fn test_literate_offsets() {
     let source = r#"
-# Literate Test
+# Український SENS
 
-This is a test document.
+Це виконуваний документ.
 
 ```sens
-(def foo (lambda (x)
-  (+ x 1)))
+(визначити крок (функція (лічильник)
+  (додати лічильник 1)))
 ```
 
-Some more text.
+Між блоками є звичайний текст.
 
 ```sens
-(foo 41)
+(крок 41)
 ```
 "#;
 
-    let mut session = sens::Session::default();
-    let result = sens_literate::eval_literate(source, SourceMode::Literate, &mut session)
+    let mut session = Session::default();
+    let result = sens_literate::eval_literate_ukr(source, SourceMode::Literate, &mut session)
         .expect("should evaluate successfully");
 
-    assert_eq!(result.0.value, Value::Number(42.0, Exactness::Exact));
+    assert_eq!(result.0.value.to_string(), "42");
 }
 
 #[test]
 fn test_fallback_no_markdown() {
-    let source = "(+ 10 20)";
-    let mut session = sens::Session::default();
-    let result = sens_literate::eval_literate(source, SourceMode::PureLisp, &mut session)
+    let source = "(додати 10 20)";
+    let mut session = Session::default();
+    let result = sens_literate::eval_literate_ukr(source, SourceMode::PureLisp, &mut session)
         .expect("should evaluate fallback");
-    assert_eq!(result.0.value, Value::Number(30.0, Exactness::Exact));
+    assert_eq!(result.0.value.to_string(), "30");
 }
 
 #[test]
 fn test_error_offsets_remapped() {
     let source = r#"
-# Error Test
+# Помилка у блоці SENS
 
 ```sens
-(+ 1 2)
+(додати 1 2)
 ```
 
-Now an error:
+Далі навмисно невідома функція:
 
 ```sens
-(foo-bar 42)
+(невідома-функція 42)
 ```
 "#;
 
-    let mut session = sens::Session::default();
-    let error = sens_literate::eval_literate(source, SourceMode::Literate, &mut session)
+    let mut session = Session::default();
+    let error = sens_literate::eval_literate_ukr(source, SourceMode::Literate, &mut session)
         .expect_err("should fail on unknown symbol");
 
     // Check if the span matches the original source
     let error_text = &source[error.span.start..error.span.end];
-    assert_eq!(error_text, "foo-bar");
+    assert_eq!(error_text, "невідома-функція");
 }
 #[test]
 fn test_literate_evaluation() {
-    let source = "# Literate Lisp\n\nThis is a literate program.\n\n```sens\n(def x 10)\n(* x 2)\n```\n\nIt ignores non-code blocks.";
-    let mut session = sens::Session::default();
+    let source = "# Український SENS\n\nЦе виконувана програма.\n\n```sens\n(визначити значення 10)\n(помножити значення 2)\n```\n\nТекст поза блоком ігнорується.";
+    let mut session = Session::default();
     let (res, _) =
-        sens_literate::eval_literate(source, SourceMode::Literate, &mut session).unwrap();
+        sens_literate::eval_literate_ukr(source, SourceMode::Literate, &mut session).unwrap();
     assert_eq!(res.value.to_string(), "20");
 }
