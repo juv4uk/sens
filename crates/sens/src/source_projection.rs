@@ -35,7 +35,10 @@ fn integer_lexeme<'a>(expr: &Expr, source: &'a str) -> Option<&'a str> {
     if matches!(
         &expr.kind,
         ExprKind::DomainCall(..)
+            | ExprKind::DomainIdentity(..)
             | ExprKind::Call(..)
+            | ExprKind::Sid(..)
+            | ExprKind::BinaryNumber(..)
             | ExprKind::List(..)
             | ExprKind::Pair(..)
     ) {
@@ -328,6 +331,21 @@ mod tests {
             _ => None,
         }).collect();
         assert_eq!(widths, vec![Some(48), Some(48)]);
+    }
+
+    #[test]
+    fn exact_domain_words_inside_quoted_code_data_keep_their_original_width() {
+        let source = "(як-є 0011)";
+        let parsed = crate::parse(source).expect("quoted exact D4 code data parses");
+        let projected = project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("only ordinary decimal integer leaves should be projected");
+        let ExprKind::List(items) = &projected[0].kind else {
+            panic!("expected quoted list")
+        };
+        assert!(matches!(&items[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0011
+        ), "the D4 code datum must not be reinterpreted as decimal eleven");
     }
 
     #[test]
