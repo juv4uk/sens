@@ -90,9 +90,10 @@
 ; разом із текстовими й символьними операціями утворює унікальний символ.
 ; Префікс обов'язковий; значення за замовчуванням поки не додаємо без
 ; реального потребуючого виклику.
-(визначити gensym
+(визначити створити-символ
   (функція (prefix)
     (текст-у-символ (рядок-додати prefix (значення-у-текст (монотонний-наносекунди))))))
+(визначити gensym створити-символ)
 
 (визначити pair
   (функція (left right)
@@ -2641,10 +2642,10 @@
       ((тотожне? n 0)  acc)
       ((тотожне? n 0) 
        (number->string-onto
-         (частка n #d10)
-         (рядок-додати (digit->string (модульна-остача n #d10)) acc))))))
+         (частка n 10)
+         (рядок-додати (digit->string (модульна-остача n 10)) acc))))))
 
-(визначити number->string
+(визначити число-рядок
   (функція (n)
     ; Canonical serialization for every number (FIX-NUMBER-TO-STRING-
     ; RATIONAL, docs/BUG-number-to-string-rational.md): integers render
@@ -2656,6 +2657,7 @@
     ; Delegation, not re-implementation: write-to-string is already the
     ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
     (значення-у-текст n)))
+(визначити number->string число-рядок)
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
 ; without deep nesting (PLAN.md item / clean-code policy).
@@ -2730,12 +2732,13 @@
        (sqrt-iter (поділити (додати guess (поділити x guess)) 2) x (відняти n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
-(визначити isqrt
+(визначити цілий-корінь
   (функція (n)
     (за-умовою
       ((менше? n 2)  n)
       ((хибне? (менше? n 2))
        (isqrt-step n (частка n 2))))))
+(визначити isqrt цілий-корінь)
 
 (визначити isqrt-step
   (функція (n g)
