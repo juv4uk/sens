@@ -103,8 +103,8 @@
 ; A scientific-constant/1 record stores its quantity in the third field; a
 ; quantity/1 stores its numeric value in the second field.
 (визначити si:constant-value
-  (функція (constant)
-    (друге (третє constant))))
+  (функція (наукова-константа)
+    (друге (третє наукова-константа))))
 
 ; Backward-compatible arithmetic surface, derived from the records above.
 (визначити si:cesium-frequency (si:constant-value si:defining-cesium-frequency))
