@@ -50,9 +50,11 @@ fn main() {
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
-    // The native MSVC linker expects a .lib archive; MinGW/Unix linkers use .a.
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH");
+    // rustc resolves `static=sens_zig_guard_sources` to this MSVC archive name.
+    // MinGW/Unix linkers use the conventional lib-prefixed .a archive.
     let archive_name = if target_env == "msvc" {
-        "libsens_zig_guard_sources.lib"
+        "sens_zig_guard_sources.lib"
     } else {
         "libsens_zig_guard_sources.a"
     };
@@ -66,6 +68,11 @@ fn main() {
         .arg("ReleaseSafe")
         .arg("-fcompiler-rt")
         .arg("-lc");
+    if target_env == "msvc" {
+        command
+            .arg("-target")
+            .arg(format!("{target_arch}-windows-msvc"));
+    }
     if target_os != "windows" {
         command.arg("-fPIC");
     }

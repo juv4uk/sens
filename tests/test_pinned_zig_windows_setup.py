@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 VERSION = (ROOT / ".zig-version").read_text(encoding="utf-8").strip()
 SCRIPT = (ROOT / "scripts" / "with-pinned-zig.ps1").read_text(encoding="utf-8")
 BUILD_RS = (ROOT / "crates" / "wsm-guard-core" / "build.rs").read_text(encoding="utf-8")
+CLI_BUILD_RS = (ROOT / "crates" / "sens-cli" / "build.rs").read_text(encoding="utf-8")
 
 
 class PinnedZigWindowsSetupTests(unittest.TestCase):
@@ -27,6 +28,12 @@ class PinnedZigWindowsSetupTests(unittest.TestCase):
         self.assertIn("68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e", SCRIPT)
         self.assertIn("Expand-Archive -LiteralPath $archive", SCRIPT)
 
+    def test_truncated_archive_is_rejected_before_extraction(self):
+        self.assertIn('$expectedSize = [long]$asset.size', SCRIPT)
+        self.assertIn('$actualSize = (Get-Item -LiteralPath $archive).Length', SCRIPT)
+        self.assertIn('$actualSize -ne $expectedSize', SCRIPT)
+        self.assertIn('Zig archive size mismatch:', SCRIPT)
+
     def test_only_pinned_zig_is_passed_to_child_command(self):
         self.assertIn("if ($actualVersion -ne $version)", SCRIPT)
         self.assertIn("$env:ZIG = $zigExe", SCRIPT)
@@ -41,9 +48,16 @@ class PinnedZigWindowsSetupTests(unittest.TestCase):
 
     def test_msvc_archive_and_pic_flags_follow_target_platform(self):
         self.assertIn('if target_env == "msvc"', BUILD_RS)
-        self.assertIn('"libsens_zig_guard_sources.lib"', BUILD_RS)
+        self.assertIn('"sens_zig_guard_sources.lib"', BUILD_RS)
         self.assertIn('if target_os != "windows"', BUILD_RS)
         self.assertIn('command.arg("-fPIC")', BUILD_RS)
+
+    def test_msvc_builds_pass_cargo_target_to_both_zig_compilers(self):
+        for source in (BUILD_RS, CLI_BUILD_RS):
+            self.assertIn('env::var("CARGO_CFG_TARGET_ENV")', source)
+            self.assertIn('env::var("CARGO_CFG_TARGET_ARCH")', source)
+            self.assertIn('format!("{target_arch}-windows-msvc")', source)
+            self.assertIn('.arg("-target")', source)
 
 
 if __name__ == "__main__":

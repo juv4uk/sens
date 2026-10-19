@@ -26,6 +26,19 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/persistent-vector.lisp");
     println!("cargo:rerun-if-changed=../../lib/time.lisp");
     println!("cargo:rerun-if-changed=../../lib/epistemic.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d1.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d2.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d3.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d4.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d5.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d6.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d7.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d8.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d9.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains/d10.lisp");
+    println!("cargo:rerun-if-changed=../../lib/generated/meta-semantic-registry.lisp");
+    println!("cargo:rerun-if-changed=../../lib/meta-eval.lisp");
+    println!("cargo:rerun-if-changed=../../lib/repl-core.lisp");
     println!("cargo:rerun-if-changed=../../language-contract.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/sa.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");
@@ -50,7 +63,15 @@ fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
         .join("../..");
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
-    let archive = out.join("libsens_zig_transport.a");
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH");
+    let archive_name = if target_env == "msvc" {
+        "sens_zig_transport.lib"
+    } else {
+        "libsens_zig_transport.a"
+    };
+    let archive = out.join(archive_name);
     let compiler = env::var_os("ZIG").unwrap_or_else(|| "zig".into());
     // Toolchain identity is not SENS semantic authority. Refuse version drift.
     let pinned = include_str!("../../.zig-version").trim();
@@ -62,7 +83,8 @@ fn main() {
     let actual = std::str::from_utf8(&version.stdout)
         .expect("zig-transport: Zig version output is not UTF-8").trim();
     assert_eq!(actual, pinned, "zig-transport: wrong Zig version, expected repository .zig-version");
-    let result = Command::new(&compiler)
+    let mut command = Command::new(&compiler);
+    command
         .current_dir(&root)
         .arg("build-lib")
         .arg("zig_transport_root.zig")
@@ -74,8 +96,16 @@ fn main() {
         // Preserve ReleaseSafe stack probes: provide __zig_probe_stack through
         // Zig compiler-rt instead of disabling stack checks or inventing a stub.
         .arg("-fcompiler-rt")
-        .arg("-lc")
-        .arg("-fPIC")
+        .arg("-lc");
+    if target_env == "msvc" {
+        command
+            .arg("-target")
+            .arg(format!("{target_arch}-windows-msvc"));
+    }
+    if target_os != "windows" {
+        command.arg("-fPIC");
+    }
+    let result = command
         .arg(format!("-femit-bin={}", archive.display()))
         .status()
         .expect("zig-transport requested: Zig compiler unavailable");

@@ -62,11 +62,19 @@ if ($installedVersion -ne $version) {
     if ($indexHash -ne $expectedHash) {
         throw "Official Zig index digest differs from the repository pin for $version."
     }
+    $expectedSize = [long]$asset.size
+    if ($expectedSize -le 0) {
+        throw "Official Zig index did not provide a valid archive size for $version."
+    }
 
     $archive = Join-Path $env:TEMP "sens-zig-$version-$PID.zip"
     $extractRoot = Join-Path $env:TEMP "sens-zig-extract-$PID"
     try {
         Invoke-WebRequest -UseBasicParsing -Uri $expectedUri -OutFile $archive
+        $actualSize = (Get-Item -LiteralPath $archive).Length
+        if ($actualSize -ne $expectedSize) {
+            throw "Zig archive size mismatch: expected $expectedSize bytes, got $actualSize."
+        }
         $actualHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
         if ($actualHash -ne $expectedHash) {
             throw "Zig archive SHA-256 mismatch: expected $expectedHash, got $actualHash."
