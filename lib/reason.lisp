@@ -39,15 +39,15 @@
 ; Повертаємо точний D1 без обхідного ATOM(QUOTE(...)).
 ; Перевірка schema лишається D3 EQ виключно після guard ATOM(value).
 (визначити reason-index?
-  (функція (value)
+  (функція (вхідне-значення)
     (за-умовою
-      ((атом? value) ні)
-      ((порожній? value) ні)
+      ((атом? вхідне-значення) ні)
+      ((порожній? вхідне-значення) ні)
       ; An ordinary rule list can start with a compound CAR.
       ; D3 EQ accepts atoms only, so establish ATOM(CAR(value)) first.
-      ((атом? (перше value))
+      ((атом? (перше вхідне-значення))
        (за-умовою
-         ((тотожне? (перше value) *reason-index-schema*) так)
+         ((тотожне? (перше вхідне-значення) *reason-index-schema*) так)
          (так ні)))
       (так ні))))
 
@@ -59,19 +59,19 @@
 ; These are admitted call heads; D7 is text/data only.
 
 (визначити міркування-пошук-кошика
-  (функція (predicate buckets)
+  (функція (предикат кошики)
     (за-умовою
-      ((атом? buckets) (як-є ()))
-      ((атом? (перше buckets)) (як-є ()))
-      ((атом? (перше-першого buckets))
+      ((атом? кошики) (як-є ()))
+      ((атом? (перше кошики)) (як-є ()))
+      ((атом? (перше-першого кошики))
        (за-умовою
-         ((тотожне? predicate (перше-першого buckets)) (перше buckets))
-         (так (міркування-пошук-кошика predicate (решта buckets)))))
+         ((тотожне? предикат (перше-першого кошики)) (перше кошики))
+         (так (міркування-пошук-кошика предикат (решта кошики)))))
       (так (як-є ())))))
 
 (визначити лінійний-індекс-міркування
-  (функція (rules)
-    (список *reason-index-schema* (як-є linear) rules (як-є ()))))
+  (функція (правила)
+    (список *reason-index-schema* (як-є linear) правила (як-є ()))))
 
 ; Only ordinary predicate-headed compound terms are safe index keys.
 ; `(var x)` is deliberately excluded: as a logic variable it can unify with
@@ -79,125 +79,125 @@
 ; Власний D3-предикат змінної, без непрозорого SID8 або D9-виклику.
 ; EQ приймає лише атоми: тому спочатку ATOM(term), потім ATOM(CAR(term)).
 (визначити reason-var-form?
-  (функція (term)
+  (функція (терм)
     (за-умовою
-      ((атом? term) ні)
-      ((атом? (перше term))
+      ((атом? терм) ні)
+      ((атом? (перше терм))
        (за-умовою
-         ((тотожне? (перше term) (як-є var)) так)
+         ((тотожне? (перше терм) (як-є var)) так)
          (так ні)))
       (так ні))))
 
 ; Невідомі/складені голови залишаються на лінійному шляху.
 (визначити reason-term-predicate
-  (функція (term)
+  (функція (терм)
     (за-умовою
-      ((атом? term) (як-є ()))
-      ((reason-var-form? term) (як-є ()))
-      ((атом? (перше term)) (перше term))
+      ((атом? терм) (як-є ()))
+      ((reason-var-form? терм) (як-є ()))
+      ((атом? (перше терм)) (перше терм))
       (так (як-є ())))))
 
 (визначити reason-rule-predicate
-  (функція (rule)
+  (функція (поточне-правило)
     (за-умовою
       
-      ((атом? rule)  (як-є ()))
-      (так (reason-term-predicate (перше rule))))))
+      ((атом? поточне-правило)  (як-є ()))
+      (так (reason-term-predicate (перше поточне-правило))))))
 
 ; Buckets accumulate reversed source order. Finite structural fuel bounds the
 ; number of DISTINCT predicates, without unqualified numeric arithmetic.
 (визначити reason-index-add-reversed
-  (функція (predicate rule buckets)
+  (функція (предикат поточне-правило кошики)
     (за-умовою
       
-      ((атом? buckets)  (список (список predicate rule)))
-      ((тотожне? predicate (перше-першого buckets))
+      ((атом? кошики)  (список (список предикат поточне-правило)))
+      ((тотожне? предикат (перше-першого кошики))
        (сполучити
-         (сполучити predicate (сполучити rule (решта-першого buckets)))
-         (решта buckets)))
+         (сполучити предикат (сполучити поточне-правило (решта-першого кошики)))
+         (решта кошики)))
       (так
        (сполучити
-         (перше buckets)
-         (reason-index-add-reversed predicate rule (решта buckets)))))))
+         (перше кошики)
+         (reason-index-add-reversed предикат поточне-правило (решта кошики)))))))
 
 (визначити reason-index-normalize-buckets
-  (функція (buckets)
+  (функція (кошики)
     (за-умовою
       
-      ((атом? buckets)  (як-є ()))
+      ((атом? кошики)  (як-є ()))
       (так
        (сполучити
-         (сполучити (перше-першого buckets) (зворот (решта-першого buckets)))
-         (reason-index-normalize-buckets (решта buckets)))))))
+         (сполучити (перше-першого кошики) (зворот (решта-першого кошики)))
+         (reason-index-normalize-buckets (решта кошики)))))))
 
 (визначити сканувати-індекс-міркування
-  (функція (remaining original buckets fuel)
+  (функція (залишок початкове кошики паливо)
     (за-умовою
       
-      ((атом? remaining)  (список
+      ((атом? залишок)  (список
          *reason-index-schema*
          (як-є indexed)
-         original
-         (reason-index-normalize-buckets buckets)))
+         початкове
+         (reason-index-normalize-buckets кошики)))
       (так
-       (нехай ((predicate (reason-rule-predicate (перше remaining))))
+       (нехай ((предикат (reason-rule-predicate (перше залишок))))
          (за-умовою
            ; One non-indexable head is enough to require the exact historical
            ; scan, because that head may unify with predicates outside a bucket.
-           ((тотожне? predicate (як-є ())) (лінійний-індекс-міркування original))
+           ((тотожне? предикат (як-є ())) (лінійний-індекс-міркування початкове))
            (так
-            (нехай ((entry (міркування-пошук-кошика predicate buckets)))
+            (нехай ((запис (міркування-пошук-кошика предикат кошики)))
               (за-умовою
                 
                 ; Новий ключ: порожній запас => чесний linear fallback.
-                ((атом? entry)
+                ((атом? запис)
                  (за-умовою
-                   ((атом? fuel) (лінійний-індекс-міркування original))
+                   ((атом? паливо) (лінійний-індекс-міркування початкове))
                    (так
                     (сканувати-індекс-міркування
-                      (решта remaining)
-                      original
+                      (решта залишок)
+                      початкове
                       (reason-index-add-reversed
-                        predicate (перше remaining) buckets)
-                      (решта fuel)))))
+                        предикат (перше залишок) кошики)
+                      (решта паливо)))))
                 ; Повторений ключ не займає жодного нового біта бюджету.
                 (так
                  (сканувати-індекс-міркування
-                   (решта remaining)
-                   original
+                   (решта залишок)
+                   початкове
                    (reason-index-add-reversed
-                     predicate (перше remaining) buckets)
-                   fuel)))))))))))
+                     предикат (перше залишок) кошики)
+                   паливо)))))))))))
 
 (визначити reason-make-index
-  (функція (rules)
-    (сканувати-індекс-міркування rules rules (як-є ()) *reason-index-fuel*)))
+  (функція (правила)
+    (сканувати-індекс-міркування правила правила (як-є ()) *reason-index-fuel*)))
 
 (визначити reason-ensure-index
-  (функція (rules-or-index)
+  (функція (правила-або-індекс)
     (за-умовою
-      ((reason-index? rules-or-index) rules-or-index)
-      (так (reason-make-index rules-or-index)))))
+      ((reason-index? правила-або-індекс) правила-або-індекс)
+      (так (reason-make-index правила-або-індекс)))))
 
 ; If indexing is safe, only rules whose head starts with the same predicate
 ; can unify with this goal. Bucket order is exactly source rule order. Any
 ; unsafe goal or disabled index returns every original rule unchanged.
 (визначити reason-index-candidates
-  (функція (goal rules-or-index)
-    (нехай ((початкова-позиція-підрядка (reason-ensure-index rules-or-index)))
+  (функція (ціль правила-або-індекс)
+    (нехай ((початкова-позиція-підрядка (reason-ensure-index правила-або-індекс)))
       (за-умовою
         ((тотожне? (режим-індексу-міркування початкова-позиція-підрядка) (як-є linear))
          (правила-індексу-міркування початкова-позиція-підрядка))
         (так
-         (нехай ((predicate (reason-term-predicate goal)))
+         (нехай ((предикат (reason-term-predicate ціль)))
            (за-умовою
-             ((тотожне? predicate (як-є ())) (правила-індексу-міркування початкова-позиція-підрядка))
+             ((тотожне? предикат (як-є ())) (правила-індексу-міркування початкова-позиція-підрядка))
              (так
-              (нехай ((entry (міркування-пошук-кошика predicate (кошики-індексу-міркування початкова-позиція-підрядка))))
+              (нехай ((запис (міркування-пошук-кошика предикат (кошики-індексу-міркування початкова-позиція-підрядка))))
                 (за-умовою
                   
-                  ((атом? entry)  (як-є ()))
-                  (так (решта entry))))))))))))
+                  ((атом? запис)  (як-є ()))
+                  (так (решта запис))))))))))))
 
 ; Окремий структурний лічильник перейменування: початкова цитована
 ; одноелементна структура, потім D3:111 CONS(QUOTE (), depth) на кожен рівень.
@@ -208,11 +208,11 @@
 ; There is no hidden cache or invalidation: an index continues to describe the
 ; exact rule list captured when it was constructed.
 (визначити reason
-  (функція (goal rules-or-index)
-    (нехай ((початкова-позиція-підрядка (reason-ensure-index rules-or-index)))
+  (функція (ціль правила-або-індекс)
+    (нехай ((початкова-позиція-підрядка (reason-ensure-index правила-або-індекс)))
       (довести-ціль
-        goal
-        (reason-index-candidates goal початкова-позиція-підрядка)
+        ціль
+        (reason-index-candidates ціль початкова-позиція-підрядка)
         (як-є ())
         початкова-позиція-підрядка
         (як-є (()))))))
@@ -221,59 +221,59 @@
 ; Walking `results` left-to-right and consing each item means `acc` is always
 ; exactly the reverse of every result seen so far.
 (визначити prove-goal-accumulate
-  (функція (results acc)
+  (функція (результати накопичувач)
     (за-умовою
       
-      ((атом? results)  acc)
+      ((атом? результати)  накопичувач)
       (так (prove-goal-accumulate
-           (решта results)
-           (сполучити (перше results) acc))))))
+           (решта результати)
+           (сполучити (перше результати) накопичувач))))))
 
 ; Tail-recursive rule scan. `all-rules` may be a plain historical rule list or
 ; a B5 reason-index/1. We normalize it once here; recursive body goals then
 ; reuse the same finite index instead of rebuilding it at every depth.
 (визначити prove-goal
-  (функція (goal rules bindings all-rules depth)
+  (функція (ціль правила привязки повні-правила рівень-глибини)
     (prove-goal-scan
-      goal
-      rules
-      bindings
-      (reason-ensure-index all-rules)
-      depth
+      ціль
+      правила
+      привязки
+      (reason-ensure-index повні-правила)
+      рівень-глибини
       (як-є ()))))
 
 (визначити prove-goal-scan
-  (функція (goal rules bindings all-rules depth acc)
+  (функція (ціль правила привязки повні-правила рівень-глибини накопичувач)
     (за-умовою
       
-      ((атом? rules)  (зворот acc))
+      ((атом? правила)  (зворот накопичувач))
       (так
-       (нехай ((rule-results
-               (застосувати-правило-для-доведення-мети goal (перше rules) bindings all-rules depth)))
+       (нехай ((результати-правила
+               (застосувати-правило-для-доведення-мети ціль (перше правила) привязки повні-правила рівень-глибини)))
          (prove-goal-scan
-           goal
-           (решта rules)
-           bindings
-           all-rules
-           depth
-           (prove-goal-accumulate rule-results acc)))))))
+           ціль
+           (решта правила)
+           привязки
+           повні-правила
+           рівень-глибини
+           (prove-goal-accumulate результати-правила накопичувач)))))))
 
 ; Recursively rename variables in a term to include the depth counter.
 (визначити rename-vars
-  (функція (term depth)
+  (функція (терм рівень-глибини)
     (за-умовою
-      ((атом? term) term)
-      ((reason-var-form? term)
-       (список (як-є var) (сполучити (друге term) depth)))
-      (так (сполучити (розрізнити-логічні-змінні-правила-на-глибині (перше term) depth)
-                   (розрізнити-логічні-змінні-правила-на-глибині (решта term) depth))))))
+      ((атом? терм) терм)
+      ((reason-var-form? терм)
+       (список (як-є var) (сполучити (друге терм) рівень-глибини)))
+      (так (сполучити (розрізнити-логічні-змінні-правила-на-глибині (перше терм) рівень-глибини)
+                   (розрізнити-логічні-змінні-правила-на-глибині (решта терм) рівень-глибини))))))
 
 (визначити map-proofs
-  (функція (f lst)
+  (функція (функція-значення список-даних)
     (за-умовою
       
-      ((атом? lst)  (як-є ()))
-      (так (сполучити (f (перше lst)) (map-proofs f (решта lst)))))))
+      ((атом? список-даних)  (як-є ()))
+      (так (сполучити (функція-значення (перше список-даних)) (map-proofs функція-значення (решта список-даних)))))))
 
 ; D10:0101101100 — повна ратифікована голова укр; доказ і рекурсія належать Lisp.
 ; Try one rule, then wrap every successful body result in its proof node.
@@ -307,171 +307,171 @@
 (визначити prove-rule застосувати-правило-для-доведення-мети)
 
 (визначити prove-goals
-  (функція (goals bindings all-rules depth)
+  (функція (цілі привязки повні-правила рівень-глибини)
     (потік-виконання-кон'юнкція
-      goals
-      (список bindings (як-є ()))
-      (функція (goal state)
-        (довести-мету-зі-збереженням-підстановок-та-доказів goal state all-rules depth)))))
+      цілі
+      (список привязки (як-є ()))
+      (функція (ціль стан)
+        (довести-мету-зі-збереженням-підстановок-та-доказів ціль стан повні-правила рівень-глибини)))))
 
 ; A body goal, including `(not P)`, is an ordinary reasoning goal. Historical
 ; negation-as-failure fabricated `(proved-not P)` merely because P had no proof.
 ; Under #219/#244 that absence remains Canon 0. Explicit negative evidence may
 ; still prove `(not P)` through an actual rule/fact whose head is `(not P)`.
 (визначити prove-goal-state
-  (функція (goal state all-rules depth)
-    (нехай ((bindings (перше state))
-          (proofs (друге state))
-          (початкова-позиція-підрядка (reason-ensure-index all-rules)))
+  (функція (ціль стан повні-правила рівень-глибини)
+    (нехай ((привязки (перше стан))
+          (доведення (друге стан))
+          (початкова-позиція-підрядка (reason-ensure-index повні-правила)))
       (приєднати-докази-до-кожної-успішної-підстановки
         (довести-ціль
-          goal
-          (reason-index-candidates goal початкова-позиція-підрядка)
-          bindings
+          ціль
+          (reason-index-candidates ціль початкова-позиція-підрядка)
+          привязки
           початкова-позиція-підрядка
-          depth)
-        proofs))))
+          рівень-глибини)
+        доведення))))
 
 (визначити map-goal-results
-  (функція (results proofs)
+  (функція (результати доведення)
     (за-умовою
       
-      ((атом? results)  (як-є ()))
+      ((атом? результати)  (як-є ()))
       (так
        (сполучити
          (список
-           (перше-першого results)
-           (приєднати proofs (список (друге (перше results)))))
-         (приєднати-докази-до-кожної-успішної-підстановки (решта results) proofs))))))
+           (перше-першого результати)
+           (приєднати доведення (список (друге (перше результати)))))
+         (приєднати-докази-до-кожної-успішної-підстановки (решта результати) доведення))))))
 
 (визначити explain-proof
-  (функція (proof)
-    (explain-proof-node proof 0)))
+  (функція (доказ)
+    (explain-proof-node доказ 0)))
 
 (визначити explain-proof-node
-  (функція (node level)
+  (функція (вузол рівень)
     (за-умовою
-      ((тотожне? (перше node) (як-є proved))
+      ((тотожне? (перше вузол) (як-є proved))
        (нехай-послідовно ((_2 (друкувати (як-є Proved:)))
-              (_3 (друкувати (друге node)))
+              (_3 (друкувати (друге вузол)))
               (_4 (друкувати (як-є using)))
               (_5 (друкувати (як-є rule:)))
-              (_6 (друкувати (третє node))))
-         (explain-proof-list (четверте node) (додати level 1))))
-      ((тотожне? (перше node) (як-є proved-not))
+              (_6 (друкувати (третє вузол))))
+         (explain-proof-list (четверте вузол) (додати рівень 1))))
+      ((тотожне? (перше вузол) (як-є proved-not))
        (нехай-послідовно ((_2 (друкувати (як-є Proved)))
               (_3 (друкувати (як-є by)))
               (_4 (друкувати (як-є failure:)))
               (_5 (друкувати (як-є not)))
-              (_6 (друкувати (друге node))))
+              (_6 (друкувати (друге вузол))))
          (як-є ())))
       )))
 
 (визначити explain-proof-list
-  (функція (nodes level)
+  (функція (вузли рівень)
     (за-умовою
       
-      ((атом? nodes)  (як-є ()))
+      ((атом? вузли)  (як-є ()))
       (так
-       (нехай-послідовно ((_1 (print-indent level))
+       (нехай-послідовно ((_1 (print-indent рівень))
               (_2 (друкувати (як-є |-)))
-              (_3 (explain-proof-node (перше nodes) level)))
-         (explain-proof-list (решта nodes) level))))))
+              (_3 (explain-proof-node (перше вузли) рівень)))
+         (explain-proof-list (решта вузли) рівень))))))
 
 (визначити print-indent
-  (функція (level)
+  (функція (рівень)
     (за-умовою
-      ((тотожне? level 0) (як-є ()))
+      ((тотожне? рівень 0) (як-є ()))
       (так
        (нехай ((_ (друкувати (як-є ..))))
-         (print-indent (відняти level 1)))))))
+         (print-indent (відняти рівень 1)))))))
 
 ; Human-facing compatibility explanation. Structured reasoning outcomes are
 ; provided separately by lib/result-status.lisp / reason-observe.
 (визначити reason-explain
-  (функція (goal rules)
-    (нехай ((results (міркувати goal rules)))
+  (функція (ціль правила)
+    (нехай ((результати (міркувати ціль правила)))
       (за-умовою
         
-        ((атом? results)  (нехай-послідовно ((_1 (друкувати (як-є Cannot)))
+        ((атом? результати)  (нехай-послідовно ((_1 (друкувати (як-є Cannot)))
                 (_2 (друкувати (як-є prove:)))
-                (_3 (друкувати goal)))
+                (_3 (друкувати ціль)))
            (як-є ())))
-        (так (пояснити-доказ (друге (перше results))))))))
+        (так (пояснити-доказ (друге (перше результати))))))))
 
 (визначити add-usage
-  (функція (entry alist)
+  (функція (запис асоціативний-список)
     (за-умовою
       
-      ((атом? alist)  (список entry))
-      ((unify-equal? (перше-першого alist) (перше entry))
+      ((атом? асоціативний-список)  (список запис))
+      ((unify-equal? (перше-першого асоціативний-список) (перше запис))
        (сполучити
          (сполучити
-           (перше entry)
-           (додати (решта entry) (решта (перше alist))))
-         (решта alist)))
-      (так (сполучити (перше alist) (add-usage entry (решта alist)))))))
+           (перше запис)
+           (додати (решта запис) (решта (перше асоціативний-список))))
+         (решта асоціативний-список)))
+      (так (сполучити (перше асоціативний-список) (add-usage запис (решта асоціативний-список)))))))
 
 (визначити merge-usage
-  (функція (a b)
+  (функція (ліве праве)
     (за-умовою
       
-      ((атом? a)  b)
-      (так (підсумувати-лічильники-використання-правил (решта a) (add-usage (перше a) b))))))
+      ((атом? ліве)  праве)
+      (так (підсумувати-лічильники-використання-правил (решта ліве) (add-usage (перше ліве) праве))))))
 
 (визначити count-usage
-  (функція (node)
+  (функція (вузол)
     (за-умовою
-      ((тотожне? (перше node) (як-є proved))
+      ((тотожне? (перше вузол) (як-є proved))
        (add-usage
-         (сполучити (третє node) 1)
-         (count-usage-list (четверте node))))
+         (сполучити (третє вузол) 1)
+         (count-usage-list (четверте вузол))))
       )))
 
 (визначити count-usage-list
-  (функція (nodes)
+  (функція (вузли)
     (за-умовою
       
-      ((атом? nodes)  (як-є ()))
+      ((атом? вузли)  (як-є ()))
       (так
        (підсумувати-лічильники-використання-правил
-         (порахувати-правила-у-дереві-доказу (перше nodes))
-         (count-usage-list (решта nodes)))))))
+         (порахувати-правила-у-дереві-доказу (перше вузли))
+         (count-usage-list (решта вузли)))))))
 
 (визначити source-of
-  (функція (node)
+  (функція (вузол)
     (за-умовою
       
-      ((атом? (четверте node))  (як-є fact))
+      ((атом? (четверте вузол))  (як-є fact))
       (так (як-є rule)))))
 
 (визначити provenance
-  (функція (node)
+  (функція (вузол)
     (за-умовою
-      ((тотожне? (перше node) (як-є proved))
+      ((тотожне? (перше вузол) (як-є proved))
        (список
          (як-є statement)
-         (друге node)
-         (список (як-є source) (джерело-від node))
-         (список (як-є rule) (третє node))
+         (друге вузол)
+         (список (як-є source) (джерело-від вузол))
+         (список (як-є rule) (третє вузол))
          (список
            (як-є derived-from)
-           (provenance-list (четверте node)))))
+           (provenance-list (четверте вузол)))))
       (так
        (список
          (як-є statement)
-         (друге node)
+         (друге вузол)
          (список (як-є source) (як-є not-proved)))))))
 
 (визначити provenance-list
-  (функція (nodes)
+  (функція (вузли)
     (за-умовою
       
-      ((атом? nodes)  (як-є ()))
+      ((атом? вузли)  (як-є ()))
       (так
        (сполучити
-         (походження (перше nodes))
-         (provenance-list (решта nodes)))))))
+         (походження (перше вузли))
+         (provenance-list (решта вузли)))))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити порахувати-правила-у-дереві-доказу count-usage)
