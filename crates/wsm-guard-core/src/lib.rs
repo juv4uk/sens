@@ -2,7 +2,7 @@
 //! Rust loads the executable WSM policy and validates the returned value's
 //! outer protocol shape. Meaning and policy remain in lib/guard.lisp.
 
-use sens::{eval_pinned_legacy_core_source, eval_pinned_reasoning_source, eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session, Value};
+use sens::{eval_pinned_reasoning_source, eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session, Value};
 
 // Three exact source byte transfers. Zig copies bytes and never decides
 // what a SENS word, Guard policy or executable function means.
@@ -77,7 +77,9 @@ pub fn guard_source() -> Result<String, String> {
 pub fn load_session() -> Result<Session, String> {
     let mut session = Session::default();
     let core = core_source()?;
-    eval_pinned_legacy_core_source("lib/core.lisp", &core, &mut session)
+    let core_forms =
+        parse_mixed_exact_domain(&core).map_err(|error| format!("core-parse: {error}"))?;
+    eval_parsed_expressions(&core_forms, &mut session)
         .map_err(|error| format!("core: {error}"))?;
     // Guard reuses the existing exact-D1 structural comparator. Load the
     // domain-aware reasoning source through its pinned reader.
