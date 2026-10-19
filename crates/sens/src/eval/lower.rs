@@ -214,14 +214,16 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
                 if let Some(identity) = semantic_registry::d9_uk_source_identity(head)
                     .filter(|identity| canon::has_d9_string_mechanism(*identity))
                 {
-                    let mut lowered = Vec::with_capacity(items.len());
-                    lowered.push(Expr {
-                        kind: ExprKind::DomainIdentity(identity),
-                        span: items[0].span,
-                    });
-                    lowered.extend(arguments.iter().map(|arg| lower(arg, depth + 1, mode)));
+                    // D9 here has an explicitly admitted resident mechanism.
+                    // Lower once to its typed call, not to an intermediate
+                    // List(D9 head) that changes on a second lowering pass.
+                    let core = identity.core_operation()
+                        .expect("admitted D9 string identity keeps its exact core carrier");
                     return Expr {
-                        kind: ExprKind::List(lowered.into()),
+                        kind: ExprKind::DomainCall(
+                            core,
+                            lower_domain_arguments(core, arguments, depth, mode),
+                        ),
                         span: expression.span,
                     };
                 }
@@ -260,13 +262,10 @@ mod ratified_d9_string_surface_tests {
         let source = "(рядок-додати \"Привіт, \" \"світе\")";
         let parsed = crate::parse(source).expect("канонічна українська Lisp-форма");
         let lowered = lower_program(&parsed);
-        let ExprKind::List(items) = &lowered[0].kind else {
-            panic!("джерело має залишатися списком з точним D9 head");
-        };
-        assert!(matches!(&items[0].kind,
-            ExprKind::DomainIdentity(crate::DomainIdentity::D9(word))
-                if word.word().packed_bits() == 0b110011110
-        ), "D9 identity may not alias the old SID8 row");
+        assert!(matches!(&lowered[0].kind,
+            ExprKind::DomainCall(crate::CoreDomainIdentity::D9(word), args)
+                if word.word().packed_bits() == 0b110011110 && args.len() == 2
+        ), "D9 call must have exact nine-bit identity without an old SID8 row");
         assert_eq!(lower_program(&lowered), lowered, "D9 source lowering is idempotent");
 
         let result = crate::eval_parsed_expressions(&parsed, &mut crate::Session::default())
