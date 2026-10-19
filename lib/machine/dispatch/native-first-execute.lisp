@@ -49,27 +49,27 @@
   (функція (value)
     (за-умовою
       ((атом? value)
-       #d1:0)
+       ні)
       ((атом? (решта value))
-       #d1:0)
+       ні)
       ((порожній? (решта (решта value)))
-       #d1:1)
-      (#d1:1
-       #d1:0))))
+       так)
+      (так
+       ні))))
 
 (визначити native-first-proper-list-length-3?
   (функція (value)
     (за-умовою
       ((атом? value)
-       #d1:0)
+       ні)
       ((атом? (решта value))
-       #d1:0)
+       ні)
       ((атом? (решта (решта value)))
-       #d1:0)
+       ні)
       ((тотожне? (решта (решта (решта value))) ())
-       #d1:1)
-      (#d1:1
-       #d1:0))))
+       так)
+      (так
+       ні))))
 
 (визначити native-first-plan-tag-state
   (функція (plan tag)
@@ -78,7 +78,7 @@
        (як-є distinct))
       ((тотожне? (перше plan) tag)
        (як-є same))
-      (#d1:1
+      (так
        (як-є distinct)))))
 
 (визначити native-first-execute-native-plan-result
@@ -88,7 +88,7 @@
        (native-first-execution-completed (як-є native) result))
       ((тотожне? (перше result) (як-є rejected))
        (native-first-execution-rejected (як-є native) result))
-      (#d1:1
+      (так
        (native-first-execution-completed (як-є native) result)))))
 
 (визначити native-first-execute-native-plan
@@ -106,7 +106,7 @@
        (за-умовою
          ((native-first-proper-list-length-3? plan)
           (native-first-execute-native-plan plan))
-         (#d1:1
+         (так
           (native-first-execution-rejected
             (як-є native)
             (native-first-list-2 (як-є malformed-native-plan) plan)))))
@@ -118,7 +118,7 @@
              (native-first-execution-completed
                (як-є evaluator)
                (обчислити (перше (решта plan)))))
-            (#d1:1
+            (так
              (native-first-execution-rejected
                (як-є invalid-plan)
                (native-first-list-2
@@ -128,11 +128,11 @@
           (native-first-execution-rejected
             (як-є invalid-plan)
             (native-first-list-2 (як-є unknown-native-first-plan) plan)))
-         (#d1:1
+         (так
           (native-first-execution-rejected
             (як-є invalid-plan)
             (native-first-list-2 (як-є malformed-fallback-tag-state) plan)))))
-      (#d1:1
+      (так
        (native-first-execution-rejected
          (як-є invalid-plan)
          (native-first-list-2 (як-є unknown-native-first-plan) plan))))))
@@ -148,7 +148,7 @@
        (за-умовою
          ((тотожне? forms ())
           (як-є ()))
-         (#d1:1
+         (так
           (сполучити
             (native-first-execution-rejected
               (як-є evaluator)
@@ -156,7 +156,7 @@
                 (як-є malformed-source-form-tail)
                 forms))
             (як-є ())))))
-      (#d1:1
+      (так
        (сполучити
          (native-first-execute-expression (перше forms))
          (native-first-execute-source-forms (решта forms)))))))
