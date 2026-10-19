@@ -23,11 +23,16 @@ fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
         .join("../..");
     let compiler = env::var_os("ZIG").unwrap_or_else(|| "zig".into());
+    let compiler_label = PathBuf::from(&compiler).display().to_string();
     let pinned = include_str!("../../.zig-version").trim();
     let probe = Command::new(&compiler)
         .arg("version")
         .output()
-        .expect("Guard exact-source transport requires pinned Zig");
+        .unwrap_or_else(|error| {
+            panic!(
+                "Guard exact-source transport requires pinned Zig {pinned}; cannot execute                  {compiler_label}: {error}. On Windows run                  `.\\scripts\\with-pinned-zig.ps1 cargo build` from the repository root,                  or set ZIG to the pinned zig.exe."
+            )
+        });
     assert!(probe.status.success(), "Guard Zig version probe failed");
     let actual = std::str::from_utf8(&probe.stdout)
         .expect("Zig version is not UTF-8")
@@ -35,16 +40,28 @@ fn main() {
     assert_eq!(actual, pinned, "Guard source transport Zig version mismatch");
 
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
-    let archive = out.join("libsens_zig_guard_sources.a");
-    let result = Command::new(&compiler)
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    // The native MSVC linker expects a .lib archive; MinGW/Unix linkers use .a.
+    let archive_name = if target_env == "msvc" {
+        "libsens_zig_guard_sources.lib"
+    } else {
+        "libsens_zig_guard_sources.a"
+    };
+    let archive = out.join(archive_name);
+    let mut command = Command::new(&compiler);
+    command
         .current_dir(root)
         .arg("build-lib")
         .arg("guard_source_root.zig")
         .arg("-O")
         .arg("ReleaseSafe")
         .arg("-fcompiler-rt")
-        .arg("-lc")
-        .arg("-fPIC")
+        .arg("-lc");
+    if target_os != "windows" {
+        command.arg("-fPIC");
+    }
+    let result = command
         .arg(format!("-femit-bin={}", archive.display()))
         .status()
         .expect("Cannot execute Zig Guard source compiler");
