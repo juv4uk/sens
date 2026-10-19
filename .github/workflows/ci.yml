@@ -159,6 +159,9 @@ jobs:
           output="$RUNNER_TEMP/sid8-ukr-migration"
           mkdir -p "$output"
           timeout 90s git fetch --no-tags --depth=1 origin "$historical_sha"
+          # Фізично вилучений SID8 ledger потрібен лише для Git provenance
+          # мігратора, не для будь-якого runtime, parser або executor.
+          timeout 90s git fetch --no-tags --depth=1 origin 364c20e89429962928ea39027651f2bb47875aa0
           set +e
           python3 scripts/migrate-legacy-w8-ukr.py lib/ \
             --source-ref "$historical_sha" --write --report "$output/report.json"
