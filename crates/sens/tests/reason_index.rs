@@ -111,12 +111,12 @@ fn binary_sens_migration_witness_checks_atom_eq_and_domain_boundaries() {
     // пошуком історичних 8-бітних текстових шаблонів у сучасному джерелі.
     // Складена голова не може потрапити до атомарного D3 EQ.
     for (source, expected) in [
-        ("(reason-index? (як-є ()))", false),
-        ("(reason-index? (як-є ((складена-голова) запис)))", false),
-        ("(reason-index? (як-є (reason-index/1 indexed ())))", true),
+        ("(індекс-міркування? (як-є ()))", false),
+        ("(індекс-міркування? (як-є ((складена-голова) запис)))", false),
+        ("(індекс-міркування? (як-є (reason-index/1 indexed ())))", true),
     ] {
         let result = eval_program(source, &mut s)
-            .unwrap_or_else(|error| panic!("реальна перевірка reason-index?: {error}; джерело: {source}"));
+            .unwrap_or_else(|error| panic!("реальна перевірка індекс-міркування?: {error}; джерело: {source}"));
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
