@@ -3,12 +3,12 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(визначити identity (функція (значення-аргументу) значення-аргументу))
+(визначити тотожність (функція (значення-аргументу) значення-аргументу))
 
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
-(визначити binary
+(визначити бінарний
   (функція (ширина)
     (список (як-є binary) ширина)))
 
@@ -3514,7 +3514,7 @@
       (так (збільшити-на-один (рядок-довжина (рядок-решта текст)))))))
 
 ; D9:110101110 IDENTITY — projection of already defined Lisp identity.
-(визначити тотожність identity)
+(визначити identity тотожність)
 
 ; D9:001110110 CANON-LAW-CDR-IMPROPER: atomic dotted tail survives CONS/CDR.
 ; Does not claim a new independent primitive or direct D9 opcode admission.
@@ -5838,7 +5838,7 @@
 ; D9:110101100
 (визначити символ? symbol?)
 ; D9:110110110
-(визначити бінарний binary)
+(визначити binary бінарний)
 ; D9:110111001
 ; D9:110111111
 (визначити divmod частка-остача)
