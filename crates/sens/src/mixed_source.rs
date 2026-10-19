@@ -646,7 +646,7 @@ fn parse_mixed_source(
             descend_legacy_machine_wrappers,
         );
     }
-    expressions
+    let lifted = expressions
         .into_iter()
         .map(|expression| {
             lift_expression(
@@ -657,7 +657,8 @@ fn parse_mixed_source(
                 descend_legacy_machine_wrappers,
             )
         })
-        .collect()
+        .collect::<Result<Vec<_>, _>>()?;
+    crate::source_projection::project_ukr_decimal_integer_literals(&lifted, source)
 }
 
 fn binding_form(source: &str, head: &Expr) -> Option<u16> {
