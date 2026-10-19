@@ -182,9 +182,9 @@
 | `lib/core4.lisp` | function | `number->string` | unreviewed |
 | `lib/core4.lisp` | macro | `->` | unreviewed |
 | `lib/core4.lisp` | macro | `->>` | unreviewed |
-| `lib/core4.lisp` | function | `sqrt-iter` | unreviewed |
+| `lib/core4.lisp` | function | `уточнити-корінь-ітерацією` | unreviewed |
 | `lib/core4.lisp` | function | `isqrt` | unreviewed |
-| `lib/core4.lisp` | function | `isqrt-step` | unreviewed |
+| `lib/core4.lisp` | function | `крок-цілого-кореня` | unreviewed |
 | `lib/core4.lisp` | function | `sqrt` | unreviewed |
 | `lib/core4.lisp` | function | `abs` | unreviewed |
 | `lib/core4.lisp` | function | `min` | unreviewed |

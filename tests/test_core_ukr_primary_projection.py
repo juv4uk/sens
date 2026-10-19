@@ -84,6 +84,8 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             ("знайти-пару-підстановки", "sublis-pair"),
             ("підготувати-цитовані-аргументи", "apply-quote-args"),
             ("взяти-десятковий-символ", "digit->string"),
+            ("уточнити-корінь-ітерацією", "sqrt-iter"),
+            ("крок-цілого-кореня", "isqrt-step"),
             ("знайти-найбільший-блок-частки", "largest-chunk"),
             ("перевірити-неспадання-значень?", "nondecreasing-from?"),
             ("перевірити-незростання-значень?", "nonincreasing-from?"),
@@ -115,7 +117,7 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         # keep them internal, Ukrainian, and exactly reversible at the callsite.
         for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
             with self.subTest(file=filename, migration="arithmetic helpers"):
-                for ukrainian, legacy in helpers[-3:]:
+                for ukrainian, legacy in helpers[5:8]:
                     self.assertIn(f"(визначити {ukrainian}", code)
                     self.assertNotIn(f"({legacy} ", code)
         inventory = source("lib/surface/uk-inventory.lisp")
@@ -135,6 +137,13 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         with self.subTest(file="scripts/build-dependency-classification.lisp", migration="decimal-symbol helper"):
             self.assertIn("взяти-десятковий-символ", dependency_classifier)
             self.assertNotIn("digit->string", dependency_classifier)
+
+        # Numeric iteration workers are internal helpers, not domain residents.
+        for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
+            with self.subTest(file=filename, migration="numeric iteration helpers"):
+                for ukrainian, legacy in helpers[-2:]:
+                    self.assertIn(f"(визначити {ukrainian}", code)
+                    self.assertNotIn(f"({legacy} ", code)
 
         # Exact keys and full Ukrainian labels come from their owning domains.
         # In particular, D6:100111's label "четверте" is only a projection;
