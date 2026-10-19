@@ -217,3 +217,25 @@ fn language_owned_defmacro_can_build_control_flow() {
     );
     assert_eq!(value, "success");
 }
+
+// Реальний SENS evaluator, не перевірка тексту вихідних файлів.
+// Багатоаргументні форми змушують макрос згенерувати рекурсивну голову
+// «та»/«або»; гілки з невідомою функцією доводять коротке замикання.
+#[test]
+fn українські_макроси_короткого_замикання_дійсно_виконуються() {
+    for (source, expected) in [
+        ("(та (атом? (як-є а)) (атом? (як-є б)) (атом? (як-є в)))", true),
+        ("(та (атом? (як-є (а))) (невідомий-виклик))", false),
+        ("(або (атом? (як-є (а))) (атом? (як-є (б))) (атом? (як-є в)))", true),
+        ("(або (атом? (як-є а)) (невідомий-виклик))", true),
+    ] {
+        let mut session = Session::default();
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS macro {source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "точний D1 та правильний порядок обчислення: {source}"
+        );
+    }
+}
