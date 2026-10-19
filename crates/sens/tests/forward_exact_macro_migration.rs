@@ -8,14 +8,14 @@ const FORWARD: &str = include_str!("../../../lib/forward.lisp");
 const MIGRATED_MACROS: &[&str] = &[
     "ствердити-факт!",
     "ствердити-факти!",
-    "retract-fact!",
-    "assert-fact-tms!",
-    "run-tms!",
-    "retract-fact-tms!",
-    "assert-fact-jtms!",
-    "run-jtms!",
-    "run-jtms-multi!",
-    "retract-fact-jtms!",
+    "відкликати-факт!",
+    "ствердити-факт-система-істини!",
+    "запустити-система-істини!",
+    "відкликати-факт-система-істини!",
+    "ствердити-факт-система-обґрунтувань!",
+    "запустити-система-обґрунтувань!",
+    "запустити-система-обґрунтувань-мульти!",
+    "відкликати-факт-система-обґрунтувань!",
 ];
 
 fn load_reasoning(session: &mut Session, path: &str, source: &str) {
@@ -149,22 +149,22 @@ fn migrated_macros_drive_plain_tms_and_jtms_state_transitions() {
     // Реальний SENS-виклик: стан змінюється D4 DEFINE, потім відкликається.
     eval(&mut session, "(ствердити-факт! (як-є альфа))");
     assert_eq!(eval(&mut session, "*working-memory*"), "(альфа)");
-    eval(&mut session, "(retract-fact! (як-є альфа))");
+    eval(&mut session, "(відкликати-факт! (як-є альфа))");
     assert_eq!(eval(&mut session, "*working-memory*"), "()");
 
     for source in [
         "(ствердити-факт! (як-є альфа))",
         "(ствердити-факти! (як-є (бета гамма)))",
-        "(retract-fact! (як-є альфа))",
-        "(retract-fact! (як-є бета))",
-        "(retract-fact! (як-є гамма))",
-        "(assert-fact-tms! (quote delta))",
-        "(run-tms! (quote ()))",
-        "(retract-fact-tms! (quote delta))",
-        "(assert-fact-jtms! (quote epsilon))",
-        "(run-jtms! (quote ()))",
-        "(run-jtms-multi! (quote ()))",
-        "(retract-fact-jtms! (quote epsilon))",
+        "(відкликати-факт! (як-є альфа))",
+        "(відкликати-факт! (як-є бета))",
+        "(відкликати-факт! (як-є гамма))",
+        "(ствердити-факт-система-істини! (quote delta))",
+        "(запустити-система-істини! (quote ()))",
+        "(відкликати-факт-система-істини! (quote delta))",
+        "(ствердити-факт-система-обґрунтувань! (quote epsilon))",
+        "(запустити-система-обґрунтувань! (quote ()))",
+        "(запустити-система-обґрунтувань-мульти! (quote ()))",
+        "(відкликати-факт-система-обґрунтувань! (quote epsilon))",
     ] {
         let _ = eval(&mut session, source);
     }

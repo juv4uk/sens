@@ -15,14 +15,14 @@ EXPECTED = [
     # виконання перевіряє Cargo-тест forward_exact_macro_migration.
     ("ствердити-факт!", ("факт",), "f2d6c8916e64365b"),
     ("ствердити-факти!", ("факти",), "5879900736404ade"),
-    ("retract-fact!", ("fact",), "571efe37975b55fc"),
-    ("assert-fact-tms!", ("fact",), "504945f02f2eea11"),
-    ("run-tms!", ("rules",), "092adf1b2ed18d94"),
-    ("retract-fact-tms!", ("fact",), "2e0e84bcf103dda7"),
-    ("assert-fact-jtms!", ("fact",), "b567749d89b3fdba"),
-    ("run-jtms!", ("rules",), "d392f20f6f5568cc"),
-    ("run-jtms-multi!", ("rules",), "0d7316668e89ef21"),
-    ("retract-fact-jtms!", ("fact",), "502aae5fd510f24b"),
+    ("відкликати-факт!", ("поточний-факт",), "71e7ac257c7a8bb3"),
+    ("ствердити-факт-система-істини!", ("поточний-факт",), "3abd2e6ebaa69a10"),
+    ("запустити-система-істини!", ("поточні-правила",), "8073b14708e8379b"),
+    ("відкликати-факт-система-істини!", ("поточний-факт",), "de58cdd2ed2cd03a"),
+    ("ствердити-факт-система-обґрунтувань!", ("поточний-факт",), "4c1c45b6831324b1"),
+    ("запустити-система-обґрунтувань!", ("поточні-правила",), "edf975261de81f21"),
+    ("запустити-система-обґрунтувань-мульти!", ("поточні-правила",), "16a4aa72fceaaf90"),
+    ("відкликати-факт-система-обґрунтувань!", ("поточний-факт",), "777b71bbce95dda6"),
 ]
 
 TOKENS = re.compile(r'"(?:\\.|[^"\\])*"|;[^\n]*|[()]|[^\s();]+')
@@ -196,12 +196,12 @@ class ForwardMacroD4Witness(unittest.TestCase):
     def test_negative_body_and_parameter_mutation(self):
         altered = deepcopy(self.forms)
         forms = validate_forward(altered)
-        forms["run-tms!"][2][1][2][0] = "1111"
+        forms["запустити-система-істини!"][2][1][2][0] = "1111"
         with self.assertRaisesRegex(AssertionError, "AST-тіло"):
             validate_forward(altered)
         altered = deepcopy(self.forms)
         forms = validate_forward(altered)
-        forms["run-tms!"][2][1][1][0] = "facts"
+        forms["запустити-система-істини!"][2][1][1][0] = "facts"
         with self.assertRaisesRegex(AssertionError, "аргументів"):
             validate_forward(altered)
 
