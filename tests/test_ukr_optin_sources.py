@@ -104,23 +104,38 @@ def definitions(source: str):
     return result
 
 
-def restore_call_heads(tree):
-    """Обернена зміна ТІЛЬКИ executable head; параметри й quoted data не чіпаємо."""
+# Alpha-проєкція є лише перейменуванням зв'язаних імен у двох чинних законах.
+# Жодне цитоване значення не змінюється; історичний виклик залишається D9/D10.
+ALPHA_INVERSE = {
+    "supporting-evidence": {
+        "доказ": "evidence",
+        "посилання-на-твердження": "claim-ref",
+    },
+    "intent-capabilities-satisfied?": {
+        "намір": "intent",
+        "доступні-можливості": "effective-capabilities",
+    },
+}
+
+
+def restore_call_heads(tree, alpha=None):
+    """Обернути викличні назви і лексичні параметри, не торкаючись даних QUOTE."""
+    alpha = alpha or {}
     if not isinstance(tree, list):
-        return "#d1:0" if tree == "ні" else tree
+        return "#d1:0" if tree == "ні" else alpha.get(tree, tree)
     if not tree:
         return []
     first = tree[0]
-    if first == "001":
-        return tree  # quoted data збереглися побайтово за логічною формою
+    if first in ("001", "як-є"):
+        return ["001", *tree[1:]]  # цитована структура незмінна
     restorations = {**UNDO, "хибне?": "0100", "тотожне?": "101",
                     "як-є": "001", "функція": "0010",
                     "так": "#d1:1",
                     "знайти-за-ключем": "11100",
                     "значення-у-списку?": "11101",
                     "атом?": "010", "решта": "011", "перше": "100", "за-умовою": "110", "сполучити": "111", "застосувати": "0000", "обчислити": "0001", "визначити": "0011", "порожній?": "0101", "решта-першого": "0110", "решта-решти": "0111", "перше-першого": "1000", "друге": "1001", "знайти": "1010", "зв'язати": "1011", "обчислити-умови": "1100", "обчислити-список": "1101", "список": "1110", "приєднати": "1111"}
-    head = restorations.get(first, first) if isinstance(first, str) else restore_call_heads(first)
-    return [head] + [restore_call_heads(arg) for arg in tree[1:]]
+    head = restorations.get(first, alpha.get(first, first)) if isinstance(first, str) else restore_call_heads(first, alpha)
+    return [head] + [restore_call_heads(arg, alpha) for arg in tree[1:]]
 
 
 def verify(ep: str, store: str, core: str, domains: dict[int, str]):
@@ -192,7 +207,7 @@ def verify(ep: str, store: str, core: str, domains: dict[int, str]):
         ("intent-capabilities-satisfied?", EXPECTED_INTENT),
     ):
         golden = definitions(frozen)[name]
-        actual = restore_call_heads(epdefs[name])
+        actual = restore_call_heads(epdefs[name], ALPHA_INVERSE[name])
         if actual != golden:
             raise AssertionError(f"{name}: після peer normalization змінився SENS закон")
 
@@ -250,7 +265,7 @@ class OptInUkrMigrationTests(unittest.TestCase):
         self.assertTrue(set(UNDO).issubset(left), left)
 
     def test_negative_old_latin_call(self):
-        broken = self.ep.replace("(доказ? evidence)", "(evidence? evidence)", 1)
+        broken = self.ep.replace("(доказ? доказ)", "(evidence? доказ)", 1)
         self.assertNotEqual(broken, self.ep)
         with self.assertRaisesRegex(AssertionError, "SENS закон"):
             verify(broken, self.store, self.core, self.domains)
