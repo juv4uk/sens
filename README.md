@@ -13,7 +13,7 @@
 [![CI](https://github.com/juv4uk/sens/actions/workflows/ci.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/ci.yml)
 [![WASM](https://github.com/juv4uk/sens/actions/workflows/wasm-browser-test.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/wasm-browser-test.yml)
 
-**Українська — перша мова проєкту.**
+**Українська — перша мова проєкту.** Типова людська поверхня CLI та Web REPL — повна проєкція `укр`; компактна `ук` лишається доступною через явний вибір.
 
 </div>
 
