@@ -1749,14 +1749,14 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
     """Лише лексична укр-проєкція локальних параметрів; жодного SENS-оракула."""
 
     SOURCE = ROOT / "lib" / "persistent-vector.lisp"
-    ORIGINAL_SOURCE_BLOB = "b0e3984f5f93f9e2503e887ba2fcd103296d0a91"
-    PRE_D9_PRIMARY_SOURCE_BLOB = "31ac1e577e696d8919f97d8894ab296aef9b7df8"
-    CURRENT_PROJECTED_SOURCE_BLOB = "e6ca41305b953dcbdbd92880c71fca94930d49ac"
+    ORIGINAL_SOURCE_BLOB = "54538c440d3eec8edc0e89d15d5ea36ff5f031c4"
+    PRE_D9_PRIMARY_SOURCE_BLOB = "925283c4d8415251255af9b0ae9651822b849cbd"
+    CURRENT_PROJECTED_SOURCE_BLOB = "dd6e953fd259ccc6ef00bc92ed45ac7ef2558610"
     FORMALS_UKR = {
     "vec-count": {
         "v": "вектор-лічильника"
     },
-    "vec-tree": {
+    "отримати-дерево-вектора": {
         "v": "вектор-дерева"
     },
     "vnode-index": {
@@ -1799,12 +1799,12 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
     "vbalance": {
         "n": "вузол-для-балансування"
     },
-    "vtree-insert": {
+    "вставити-в-дерево-вектора": {
         "index": "індекс-вставки-вектора",
         "value": "значення-вставки-вектора",
         "tree": "дерево-вставки-вектора"
     },
-    "vtree-get": {
+    "отримати-з-дерева-вектора": {
         "index": "шуканий-індекс-вектора",
         "tree": "дерево-пошуку-вектора"
     },
@@ -1816,13 +1816,13 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
         "value": "значення-для-додавання-вектора",
         "v": "вектор-до-додавання"
     },
-    "vtree->list": {
+    "перетворити-дерево-вектора-на-список": {
         "tree": "дерево-для-проєкції-списку"
     },
     "vec->list": {
         "v": "вектор-для-проєкції-списку"
     },
-    "vec-from-list-onto": {
+    "створити-вектор-зі-списку-до": {
         "lst": "список-для-побудови-вектора",
         "acc": "накопичувач-побудови-вектора"
     },
@@ -1868,8 +1868,8 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
             ("(визначити вектор-додати\n", "(визначити vec-conj\n"),
             ("(визначити вектор-список\n", "(визначити vec->list\n"),
             ("(визначити вектор-з-список\n", "(визначити vec-from-list\n"),
-            ("vec-from-list-onto вхідний-список-вектора вектор-порожній))",
-             "vec-from-list-onto вхідний-список-вектора vec-empty))"),
+            ("створити-вектор-зі-списку-до вхідний-список-вектора вектор-порожній))",
+             "створити-вектор-зі-списку-до вхідний-список-вектора vec-empty))"),
         )
         for current, previous in pairs:
             if source.count(current) != 1:

@@ -622,7 +622,7 @@
 | `lib/persistent-map.lisp` | function | `map->list` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vec-empty` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vec-count` | unreviewed |
-| `lib/persistent-vector.lisp` | function | `vec-tree` | unreviewed |
+| `lib/persistent-vector.lisp` | function | `отримати-дерево-вектора` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vnode-index` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vnode-value` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vnode-height` | unreviewed |
@@ -635,13 +635,13 @@
 | `lib/persistent-vector.lisp` | function | `vrotate-left` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vrotate-right` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vbalance` | unreviewed |
-| `lib/persistent-vector.lisp` | function | `vtree-insert` | unreviewed |
-| `lib/persistent-vector.lisp` | function | `vtree-get` | unreviewed |
+| `lib/persistent-vector.lisp` | function | `вставити-в-дерево-вектора` | unreviewed |
+| `lib/persistent-vector.lisp` | function | `отримати-з-дерева-вектора` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vec-nth` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vec-conj` | unreviewed |
-| `lib/persistent-vector.lisp` | function | `vtree->list` | unreviewed |
+| `lib/persistent-vector.lisp` | function | `перетворити-дерево-вектора-на-список` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vec->list` | unreviewed |
-| `lib/persistent-vector.lisp` | function | `vec-from-list-onto` | unreviewed |
+| `lib/persistent-vector.lisp` | function | `створити-вектор-зі-списку-до` | unreviewed |
 | `lib/persistent-vector.lisp` | function | `vec-from-list` | unreviewed |
 | `lib/process.lisp` | function | `process-raw-exit-code` | unreviewed |
 | `lib/process.lisp` | function | `process-raw-stdout-bytes` | unreviewed |

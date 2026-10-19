@@ -60,7 +60,7 @@
 
 ### persistent-vector.lisp (23)
 
-`vbalance`, `vbalance-factor`, `vec->list`, `vec-conj`, `vec-count`, `vec-empty`, `vec-from-list`, `vec-from-list-onto`, `vec-nth`, `vec-tree`, `vheight-of`, `vmake-balanced-node`, `vmax2`, `vnode-height`, `vnode-index`, `vnode-left`, `vnode-right`, `vnode-value`, `vrotate-left`, `vrotate-right`, `vtree->list`, `vtree-get`, `vtree-insert`
+`vbalance`, `vbalance-factor`, `vec->list`, `vec-conj`, `vec-count`, `vec-empty`, `vec-from-list`, `створити-вектор-зі-списку-до`, `vec-nth`, `отримати-дерево-вектора`, `vheight-of`, `vmake-balanced-node`, `vmax2`, `vnode-height`, `vnode-index`, `vnode-left`, `vnode-right`, `vnode-value`, `vrotate-left`, `vrotate-right`, `перетворити-дерево-вектора-на-список`, `отримати-з-дерева-вектора`, `вставити-в-дерево-вектора`
 
 ### quantity.lisp (42)
 
