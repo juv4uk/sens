@@ -740,6 +740,19 @@ pub(super) fn apply_macro(
     let expanded_value = evaluate(last, &local_environment)?;
     let expanded_expr = value_to_expr(expanded_value, span)?;
 
+    // Macro-produced source is lowered by the same ratified surface→domain
+    // rule as ordinary source before it re-enters evaluation. This lets Lisp
+    // construct code with quoted Ukrainian heads (e.g. `визначити`/`функція`)
+    // and removes any need to smuggle D4 identities through numeric-looking
+    // tokens or a path-specific reader.
+    let mut exact_expansion =
+        super::lower::lower_exact_domain_program(std::slice::from_ref(&expanded_expr));
+    let expanded_expr = exact_expansion.pop().ok_or_else(|| LanguageError::new(
+        ErrorKind::InvalidForm,
+        "macro expansion produced no expression",
+        span,
+    ))?;
+
     Ok(EvalStep::TailCall {
         expression: expanded_expr,
         environment: calling_environment.clone(),

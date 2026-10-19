@@ -1,7 +1,7 @@
 ; lib/macro.lisp — bootstrap макровизначення на точних доменах.
 ;
-; Migrated: COND fallback is exact D1:1 (010 (001 ())). Width is identity;
-; every bit of the domain address is valued. No host truthiness.
+; Умовні макроси використовують точний D1 результат через мовний предикат;
+; немає host truthiness або числової підміни істини.
 ;
 ; Семантична identity тут уже не 8-бітна площина:
 ;   D3:001 QUOTE, D3:010 ATOM, D3:011 CDR, D3:100 CAR,
@@ -10,8 +10,9 @@
 ; `make-macro` — вузький host-substrate Closure -> Macro. Він не створює
 ; окремої SENS identity. Сам DEFMACRO лишається мовно-виведеним.
 ;
-; Дві цитовані форми 0010/0011 нижче є саме code-data identities. Path-pinned
-; reader lib/macro.lisp матеріалізує їх як D4 DomainIdentity, не як числа.
+; Шаблон коду зберігається людськими іменами. Після розгортання загальний
+; exact-domain lowering перетворює визначити/функція на ратифіковані D4 голови.
+; Код не переносить координати доменів у рядки чисел.
 ;
 ; Reuses (2000+ surface): D3 ATOM/EQ/CAR/CDR/COND/CONS, D4 LAMBDA/DEFINE,
 ; make-macro host substrate only for Closure->Macro tag.
@@ -23,13 +24,13 @@
        (make-macro))
       ((атом? (решта передані-аргументи-макроса))
        (make-macro))
-      ((атом? (як-є ()))
-       (сполучити (як-є 0011)
+      (так
+       (сполучити (як-є визначити)
          (сполучити (перше передані-аргументи-макроса)
            (сполучити
              (сполучити (як-є make-macro)
                (сполучити
-                 (сполучити (як-є 0010)
+                 (сполучити (як-є функція)
                    (сполучити
                      (перше (решта передані-аргументи-макроса))
                      (решта (решта передані-аргументи-макроса))))

@@ -64,7 +64,7 @@
 
 (визначити *working-memory* (як-є ()))
 
-(визначити assert-fact!
+(визначити ствердити-факт!
   (make-macro
     (функція (факт)
       (список (як-є def) (як-є *working-memory*) (список (як-є сполучити) факт (як-є *working-memory*))))))
@@ -235,10 +235,10 @@
          (так (запустити правила злиті-факти))))
      (додати-нові (запустити-правила-на-факти правила факти) факти))))
 
-(визначити assert-facts!
+(визначити ствердити-факти!
   (make-macro
-    (функція (facts)
-      (список (як-є def) (як-є *working-memory*) (список (як-є додати-нові) facts (як-є *working-memory*))))))
+    (функція (факти)
+      (список (як-є def) (як-є *working-memory*) (список (як-є додати-нові) факти (як-є *working-memory*))))))
 
 ; Step 5a: plain `retract-fact` — removes one matching fact (compared via
 ; `equal?`, same as everywhere else facts are compared) from a fact list.

@@ -727,30 +727,6 @@ fn lift_macro_bootstrap_code_data(
     })
 }
 
-/// Read only `lib/macro.lisp` after its domain-ladder cutover.
-///
-/// Executable heads are lifted by the ordinary exact-domain bridge. The two
-/// quoted D4 identities used as generated code data (LAMBDA=0010,
-/// DEFINE=0011) are materialized as DomainIdentity values rather than numeric
-/// data. No other quoted payload is retyped and no legacy W8 authority is used.
-pub fn parse_mixed_exact_domain_macro_source(
-    path: &str,
-    source: &str,
-) -> Result<Vec<Expr>, LanguageError> {
-    if path != "lib/macro.lisp" {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "macro bootstrap exact-domain reader is restricted to lib/macro.lisp",
-            Span::default(),
-        ));
-    }
-
-    parse_mixed_source(source, false)?
-        .into_iter()
-        .map(|expr| lift_macro_bootstrap_code_data(source, expr, 0))
-        .collect()
-}
-
 /// Parse the process/TCP Lisp-owned adapters with exact current-domain call heads.
 /// This exception is path-bound to these two source files; ordinary source must
 /// never infer semantic width from short numeric-looking literals. QUOTE keeps
@@ -2414,43 +2390,27 @@ mod tests {
     }
 
     #[test]
-    fn macro_reader_types_only_the_d4_code_templates_inside_quote() {
-        let source = "(make-macro (0010 args (111 (001 0011) (111 (001 0010) (001 (0010))))))";
-        let parsed = parse_mixed_exact_domain_macro_source("lib/macro.lisp", source)
-            .expect("path-pinned macro bootstrap source");
+    fn macro_code_templates_keep_ukrainian_names_as_data_until_expansion() {
+        let source = "(як-є визначити) (як-є функція)";
+        let parsed = parse_mixed_exact_domain(source)
+            .expect("macro code templates use ordinary ratified Ukrainian source");
+        assert_eq!(parsed.len(), 2);
 
-        let ExprKind::List(top) = &parsed[0].kind else { panic!("top list"); };
-        let ExprKind::List(lambda) = &top[1].kind else { panic!("lambda"); };
-        assert!(matches!(
-            &lambda[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 4 && identity.packed_bits() == 0b0010
-        ));
+        for (expression, expected) in parsed.iter().zip(["визначити", "функція"]) {
+            let ExprKind::List(form) = &expression.kind else { panic!("QUOTE form"); };
+            assert!(matches!(
+                &form[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 3 && identity.packed_bits() == 0b001
+            ), "code-data constructor must be the exact D3 QUOTE resident");
+            assert!(matches!(
+                &form[1].kind,
+                ExprKind::Symbol(name) if name.as_ref() == expected
+            ), "{expected} is ordinary quoted source data until macro expansion");
+        }
 
-        let ExprKind::List(cons) = &lambda[2].kind else { panic!("CONS"); };
-        let ExprKind::List(quoted_define) = &cons[1].kind else { panic!("quoted DEFINE"); };
-        assert!(matches!(
-            &quoted_define[1].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 4 && identity.packed_bits() == 0b0011
-        ));
-
-        let ExprKind::List(tail) = &cons[2].kind else { panic!("CONS tail"); };
-        let ExprKind::List(quoted_lambda) = &tail[1].kind else { panic!("quoted LAMBDA"); };
-        assert!(matches!(
-            &quoted_lambda[1].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 4 && identity.packed_bits() == 0b0010
-        ));
-
-        let ExprKind::List(quoted_list) = &tail[2].kind else { panic!("quoted list"); };
-        let ExprKind::List(data) = &quoted_list[1].kind else { panic!("quoted list payload"); };
-        assert!(
-            !matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
-            "nested quoted numeric-looking data must stay data"
-        );
-
-        assert!(parse_mixed_exact_domain_macro_source("lib/not-macro.lisp", source).is_err());
+        assert!(!crate::MACRO_LIBRARY_SOURCE.contains("(як-є 0010)"));
+        assert!(!crate::MACRO_LIBRARY_SOURCE.contains("(як-є 0011)"));
     }
 
     #[test]
