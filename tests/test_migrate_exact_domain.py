@@ -243,6 +243,15 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "UNQUALIFIED_W8_HEAD"):
                     self.rewrite(source)
 
+    def test_ukrainian_decimal_comma_is_one_numeric_operand(self):
+        # Перевірка сканера, НЕ доказ виконання арифметики SENS/D24+.
+        source = "(додати 3,14 -7,25)\n"
+        self.assertEqual(self.rewrite(source), source)
+        for invalid in ("(додати 1,2,3 4)", "(додати число,інше 0)"):
+            with self.subTest(source=invalid):
+                with self.assertRaises(ValueError):
+                    self.rewrite(invalid)
+
     def test_quoted_eight_bit_is_data_not_a_call(self):
         for source in ("'(00000101 x)", "(як-є (00000101 x))", "('00000101 x)"):
             self.assertEqual(self.rewrite(source), source)
