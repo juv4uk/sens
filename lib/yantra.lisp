@@ -172,14 +172,14 @@
       ((знайти-за-ключем ключ пари-списку) (решта (знайти-за-ключем ключ пари-списку)))
       )))
 
-(визначити msg-role (функція (m) (alist-ref (як-є role) m)))
-(визначити msg-content (функція (m) (alist-ref (як-є content) m)))
-(визначити msg-tool-calls (функція (m) (alist-ref (як-є tool-calls) m)))
-(визначити msg-tool-call-id (функція (m) (alist-ref (як-є tool-call-id) m)))
+(визначити msg-role (функція (повідомлення) (alist-ref (як-є role) повідомлення)))
+(визначити msg-content (функція (повідомлення) (alist-ref (як-є content) повідомлення)))
+(визначити msg-tool-calls (функція (повідомлення) (alist-ref (як-є tool-calls) повідомлення)))
+(визначити msg-tool-call-id (функція (повідомлення) (alist-ref (як-є tool-call-id) повідомлення)))
 
-(визначити tc-id (функція (tc) (alist-ref (як-є id) tc)))
-(визначити tc-name (функція (tc) (alist-ref (як-є name) tc)))
-(визначити tc-arguments (функція (tc) (alist-ref (як-є arguments) tc)))
+(визначити tc-id (функція (виклик-інструмента) (alist-ref (як-є id) виклик-інструмента)))
+(визначити tc-name (функція (виклик-інструмента) (alist-ref (як-є name) виклик-інструмента)))
+(визначити tc-arguments (функція (виклик-інструмента) (alist-ref (як-є arguments) виклик-інструмента)))
 
 ; OpenAI's content field is null when the assistant emits only tool calls.
 (визначити json-message-content
