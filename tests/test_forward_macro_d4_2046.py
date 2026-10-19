@@ -220,11 +220,13 @@ class ForwardMacroD4Witness(unittest.TestCase):
 
 
 class ForwardD10UkrCallsiteProjectionTests(unittest.TestCase):
-    """The D10 укр peer changes only names at three existing Lisp call sites."""
+    """Перевіряє точну D10-проєкцію трьох наявних голів виклику."""
 
     SOURCE = FORWARD
     D10 = ROOT / "lib" / "domains" / "d10.lisp"
-    ORIGINAL_BLOB = "3557229662e39346935d646d87abe664d2ec19d8"
+    # Контрольна точка враховує пізніше впорядкування D9-аліасів у 5536fa0;
+    # після інверсії лише трьох D10-голів має відновитися саме цей blob.
+    RESTORED_BLOB = "87e4502668ed2b754cecbff214b0c94180820998"
     CALLS = (
         (80, "1100011111", "failed-subst?", "підстановка-позначає-невдачу?"),
         (673, "1100011111", "failed-subst?", "підстановка-позначає-невдачу?"),
@@ -268,7 +270,7 @@ class ForwardD10UkrCallsiteProjectionTests(unittest.TestCase):
                 self.assertEqual(len(list(pattern.finditer(source.splitlines()[line_no - 1]))), 1)
 
         restored = self._restore_original(source)
-        self.assertEqual(self._blob_sha(restored), self.ORIGINAL_BLOB)
+        self.assertEqual(self._blob_sha(restored), self.RESTORED_BLOB)
 
         wrong = source.splitlines(keepends=True)
         wrong[79] = wrong[79].replace(
