@@ -42,6 +42,9 @@
   ))
 
 
+; Канонічна D10:1010111110 проєкція укр того самого Lisp-замикання.
+(визначити грегоріанська-дата-з-числа-днів civil-from-days)
+
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
 ; data. The host owns clock observation; this function owns deterministic
 ; calendar semantics.
@@ -61,7 +64,7 @@
           )
             (частка секунди-доби 3600))
         )
-          (civil-from-days дні))
+          (грегоріанська-дата-з-числа-днів дні))
       )
         (модульна-остача секунди-юнікс 86400))
     )
