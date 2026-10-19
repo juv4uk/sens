@@ -1701,7 +1701,7 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
     def _blob_sha(source: str) -> str:
         data = source.encode("utf-8")
         return hashlib.sha1(
-            b"blob " + str(len(data)).encode("ascii") + b"\\0" + data
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
         ).hexdigest()
 
     @staticmethod
@@ -1714,7 +1714,7 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
                 i += 1
                 continue
             if ch == ";":
-                while i < len(source) and source[i] != "\\n":
+                while i < len(source) and source[i] != "\n":
                     i += 1
                 continue
             if source.startswith("#|", i):
@@ -1742,7 +1742,7 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
                     i += 1
                     if escaped:
                         escaped = False
-                    elif cur == "\\\\":
+                    elif cur == "\\":
                         escaped = True
                     elif cur == '"':
                         closed = True
