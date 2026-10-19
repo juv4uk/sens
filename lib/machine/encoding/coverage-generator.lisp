@@ -333,7 +333,9 @@
 (визначити encoder-coverage-index-valid?
   (функція ()
     (encoder-coverage-all?
-      (відобразити 1001 (encoder-coverage-index-checks)))))
+      (відобразити
+        (функція (перевірка) (друге перевірка))
+        (encoder-coverage-index-checks)))))
 
 (визначити encoder-coverage-committed-row-matches?
   (функція (index-row coverage-row partial-row)
