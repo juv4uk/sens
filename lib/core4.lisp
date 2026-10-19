@@ -632,7 +632,7 @@
 
 ; NOT is a strict PredicateBit combinator. Any non-D1 input is rejected by
 ; D3 COND instead of being coerced through retired host truthiness.
-(визначити not?
+(визначити хибне?
   (функція (значення-аргументу)
     (за-умовою
       (значення-аргументу (атом? (як-є (ні))))
@@ -6166,6 +6166,6 @@
 ; нативну назву операції не можна читати як звичайне Lisp-значення.
 (визначити приєднати append)
 (визначити входження-тотожність memq)
-(визначити хибне? not?)
+(визначити not? хибне?)
 (визначити порожній? null?)
 (визначити частка quotient)
