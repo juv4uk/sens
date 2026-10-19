@@ -494,7 +494,7 @@
 ; calls whose head is the D1 predicate. Flatten each admitted pair into
 ; predicate, result, then the remaining clauses. D3 handles the traversal;
 ; no new domain coordinate or callable slot is created.
-(визначити compiler-cond-child-expressions
+(визначити компілятор-вирази-гілок-умови
   (функція (гілки-умов)
     (за-умовою
       ((атом? гілки-умов) ())
@@ -503,7 +503,7 @@
          (перше (перше гілки-умов))
          (сполучити
            (перше (решта (перше гілки-умов)))
-           (compiler-cond-child-expressions (решта гілки-умов)))))
+           (компілятор-вирази-гілок-умови (решта гілки-умов)))))
       (так ()))))
 
 (визначити compiler-domain-children
@@ -516,7 +516,7 @@
       ((тотожне? (compiler-request-role запит-компіляції) (як-є define-form))
        (решта аргументи-форми))
       ((тотожне? (compiler-request-role запит-компіляції) (як-є cond-form))
-       (compiler-cond-child-expressions аргументи-форми))
+       (компілятор-вирази-гілок-умови аргументи-форми))
       ((істина-компілятора ()) аргументи-форми))))
 
 (визначити compiler-domain-result
@@ -537,21 +537,21 @@
 ; Tail-position list traversal keeps stack bounded by expression nesting,
 ; not by the number of sibling forms. The accumulator stores requests reversed.
 ; Request selection and failure remain entirely SENS-owned.
-(визначити compiler-reverse-onto
+(визначити компілятор-зворот-до
   (функція (елементи накопичувач)
     (за-умовою
       ((атом? елементи) накопичувач)
       ((істина-компілятора ())
-       (compiler-reverse-onto
+       (компілятор-зворот-до
          (решта елементи)
          (сполучити (перше елементи) накопичувач))))))
 
-(визначити compiler-program-list-continue
+(визначити компілятор-продовжити-список-програми
   (функція
     (форма-або-порожнє розкласти-ідентичність результат-вузла решта-вузлів закон-д3 закон-д4 доказ-д3 доказ-д4 походження накопичувач)
     (за-умовою
       ((compiler-result-success результат-вузла)
-       (compiler-program-list-acc
+       (компілятор-список-програми-з-накопичувачем
          форма-або-порожнє
          розкласти-ідентичність
          решта-вузлів
@@ -560,20 +560,20 @@
          доказ-д3
          доказ-д4
          походження
-         (compiler-reverse-onto
+         (компілятор-зворот-до
            (compiler-result-requests результат-вузла)
            накопичувач)))
       ((істина-компілятора ()) (compiler-result-fail)))))
 
-(визначити compiler-program-list-acc
+(визначити компілятор-список-програми-з-накопичувачем
   (функція
     (форма-або-порожнє розкласти-ідентичність вузли закон-д3 закон-д4 доказ-д3 доказ-д4 походження накопичувач)
     (за-умовою
       ((compiler-list-end? вузли)
-       (compiler-result-ok (compiler-reverse-onto накопичувач ())))
+       (compiler-result-ok (компілятор-зворот-до накопичувач ())))
       ((атом? вузли) (compiler-result-fail))
       ((істина-компілятора ())
-       (compiler-program-list-continue
+       (компілятор-продовжити-список-програми
          форма-або-порожнє
          розкласти-ідентичність
          (compiler-program-node
@@ -596,7 +596,7 @@
 (визначити compiler-program-list
   (функція
     (форма-або-порожнє розкласти-ідентичність вузли закон-д3 закон-д4 доказ-д3 доказ-д4 походження)
-    (compiler-program-list-acc
+    (компілятор-список-програми-з-накопичувачем
       форма-або-порожнє
       розкласти-ідентичність
       вузли
