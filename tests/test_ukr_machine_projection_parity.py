@@ -853,7 +853,11 @@ class MachineUkrMigrationTests(unittest.TestCase):
         self.assertEqual(self.authority[(3, '101')], 'тотожне?')
         self.assertNotEqual('однакові?', self.authority[(3, '101')])
         core4 = (ROOT / 'lib/core4.lisp').read_text(encoding='utf-8')
-        self.assertRegex(core4, r'\((?:0011|визначити)\s+однакові\?\s+equal\?\)')
+        # Після міграції D8:11110111 є первинним українським визначенням;
+        # equal? збережено лише як посилання сумісності на те саме замикання.
+        self.assertIn('(визначити однакові?\n  (функція', core4)
+        self.assertIn('(визначити equal? однакові?)', core4)
+        self.assertNotIn('(визначити однакові? equal?)', core4)
         parity = (ROOT / 'lib/machine/dispatch/native-first-parity.lisp').read_text(encoding='utf-8')
         self.assertIn('(однакові? результат-обчислювача очікуване)', parity)
         self.assertIn('(однакові? evaluator-value expected)',
