@@ -750,47 +750,52 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
                         if r.strip().startswith(f"({bits} (ук ")]
                 self.assertEqual(len(rows), 1)
                 self.assertIn(f"(укр {spelling})", rows[0])
+
         parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
-        # Незмінні frozen-тести перевіряють оригінальний Git blob після
-        # строгого зворотного α-перейменування (точно 59 входжень).
         from tests.test_ukr_machine_projection_parity import undo_current_lexical_binders
         parity = undo_current_lexical_binders("lib/machine/dispatch/native-first-parity.lisp", parity)
-        coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
         new_p = "(error-class (перше (решта (решта (решта (решта row))))))"
         old_p = "(error-class (110110101 row))"
-        new_c = "(визначити native-first-coverage-ledger"
-        old_c = "(0011 native-first-coverage-ledger"
         self.assertEqual(parity.count(new_p), 1)
-        self.assertEqual(coverage.count(new_c), 1)
         self.assertEqual(
             self._git_blob(parity.replace(new_p, old_p, 1)),
             "bc6a7e27a83192d667ba6791e4da4d867ed80971",
         )
-        # Зворотна проєкція всіх виконаних міграцій D3/D4, доведена
-        # історією Git; ці англійські голови не повертаються в Lisp-джерело.
-        historic_coverage = coverage
-        for modern, historic in (
-            ('(representative (перше (сполучити 2 3)))',
-             '(representative (car (cons 2 3)))'),
-            ('(representative (перше (сполучити "native-limits" 3)))',
-             '(representative (car (cons "native-limits" 3)))'),
-            ('(representative (сполучити 2 3))',
-             '(representative (cons 2 3))'),
-            ('(representative ((функція (x) (+ x 1)) 41))',
-             '(representative ((lambda (x) (+ x 1)) 41))'),
-        ):
-            self.assertEqual(historic_coverage.count(modern), 1)
-            historic_coverage = historic_coverage.replace(modern, historic, 1)
-        self.assertEqual(
-            self._git_blob(historic_coverage.replace(new_c, old_c, 1)),
-            "7161b6c631d661b5a30d22acc4fd0331ec3e6379",
-        )
+
+        # Дані журналу лишаються шістьма записами; тільки D4 DEFINE та
+        # D3 QUOTE активні, цитовані зразки ніколи не стають call-head.
+        coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
+        forms = mod.parse(coverage)
+        self.assertEqual(len(forms), 1)
+        definition = forms[0]
+        self.assertEqual(mod.atom(definition.values[0]), "визначити")
+        self.assertEqual(mod.atom(definition.values[1]), "журнал-нативного-покриття")
+        quote_form = definition.values[2]
+        self.assertEqual(mod.atom(quote_form.values[0]), "як-є")
+        records = quote_form.values[1].values
+        self.assertEqual(len(records), 6)
+        self.assertTrue(all(mod.atom(record.values[0]) == "native-coverage"
+                            for record in records))
+        statuses = []
+        for record in records:
+            fields = {mod.atom(field.values[0]): mod.atom(field.values[1])
+                      for field in record.values[1:]}
+            self.assertIn("representative", fields)
+            self.assertIn("reason", fields)
+            self.assertIn("evidence", fields)
+            statuses.append(fields["status"])
+        self.assertCountEqual(statuses, [
+            "native-supported",
+            "fallback-required", "fallback-required",
+            "blocked-runtime-prerequisite",
+            "blocked-runtime-prerequisite", "blocked-runtime-prerequisite",
+        ])
+        self.assertNotIn("(001\\n", coverage)
+        self.assertNotIn("(110 ((101 ", coverage)
 
     def test_wrong_peer_mutant_and_quoted_native_data(self):
         root = Path(__file__).resolve().parents[1]
         parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
-        # Незмінні frozen-тести перевіряють оригінальний Git blob після
-        # строгого зворотного α-перейменування (точно 59 входжень).
         from tests.test_ukr_machine_projection_parity import undo_current_lexical_binders
         parity = undo_current_lexical_binders("lib/machine/dispatch/native-first-parity.lisp", parity)
         coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
@@ -799,8 +804,8 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
         self.assertGreaterEqual(heads.count("решта"), 4)
         self.assertNotIn("п", heads)
         self.assertNotIn("110110101", heads)
-        self.assertIn("(001\n    ((native-coverage", coverage)
-        self.assertIn("(110 ((101 (001 000) (001 001)) 0)", coverage)
+        self.assertIn("(як-є\\n    ((native-coverage", coverage)
+        self.assertIn("(representative (додати 2 3))", coverage)
         mutant = parity.replace("(error-class (перше (решта (решта (решта (решта row))))))",
                                 "(error-class (перше (решта (решта (решта row)))))", 1)
         restored = mutant.replace("(error-class (перше (решта (решта (решта (решта row))))))",
@@ -808,10 +813,10 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
         self.assertNotEqual(self._git_blob(restored),
                             "bc6a7e27a83192d667ba6791e4da4d867ed80971")
         wrong_declaration = coverage.replace(
-            "(визначити native-first-coverage-ledger",
-            "(функція native-first-coverage-ledger", 1,
+            "(визначити журнал-нативного-покриття",
+            "(функція журнал-нативного-покриття", 1,
         )
-        self.assertNotIn("(визначити native-first-coverage-ledger", wrong_declaration)
+        self.assertNotIn("(визначити журнал-нативного-покриття", wrong_declaration)
 
 
 
