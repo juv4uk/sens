@@ -115,12 +115,10 @@ fn malformed_constant_cannot_project_into_knowledge() {
     assert_eq!(eval_science(source), "()");
 }
 
-/// `si` defines `rest` (`"name value)"`) — by SENS code 00001001 or the old
-/// `def` name.
+/// Перевіряти чинну українську D4:0011-проєкцію визначень у SI.
+/// Історичні SID8-голови і `def` не є допустимими активними визначеннями.
 fn si_defines(si: &str, rest: &str) -> bool {
-    ["(00001001 ", "(def "]
-        .iter()
-        .any(|head| si.contains(&format!("{head}{rest}")))
+    si.contains(&format!("(визначити {rest}"))
 }
 
 #[test]
