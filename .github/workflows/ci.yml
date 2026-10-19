@@ -52,6 +52,8 @@ jobs:
           set -euo pipefail
           case "$SHARD" in
             1)
+              # SENS reader/evaluator: позитивні й негативні native-first плани (#5872).
+              cargo test --locked -p sens --test native_first_plan_shape -- --nocapture
               cargo test --locked -p sens --test guard
               cargo test --locked -p sens --lib source_projection::tests:: -- --nocapture
               cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
