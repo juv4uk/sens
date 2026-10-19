@@ -21,24 +21,22 @@ jobs:
     # Pull-request code stays on an ephemeral hosted runner; trusted pushes and
     # manual dispatch use the owner's self-hosted Linux x64 runners.
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04' || fromJSON('["self-hosted","Linux","X64"]') }}
-    # Попередні запуски займали GitHub-hosted слоти годинами; типовий зелений
-    # прогін триває близько двох хвилин. Не дозволяємо тихим зависанням
-    # вичерпати доступний пул і заблокувати наступні коміти.
+    # Обмеження часу захищає локальні ранери та чергу від завислих перевірок.
     timeout-minutes: 25
     steps:
       - name: Перевірити середовище вибраного раннера
         shell: bash
         env:
-          EVENT_NAME: \${{ github.event_name }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          printf 'RUNNER_ROUTING event=%s environment=%s os=%s arch=%s name=%s\n' "$EVENT_NAME" "\${RUNNER_ENVIRONMENT:-unset}" "\${RUNNER_OS:-unset}" "\${RUNNER_ARCH:-unset}" "\${RUNNER_NAME:-unset}"
+          printf 'RUNNER_ROUTING event=%s environment=%s os=%s arch=%s name=%s\n' "$EVENT_NAME" "${RUNNER_ENVIRONMENT:-unset}" "${RUNNER_OS:-unset}" "${RUNNER_ARCH:-unset}" "${RUNNER_NAME:-unset}"
           if [[ "$EVENT_NAME" == 'pull_request' ]]; then
             expected='github-hosted'
           else
             expected='self-hosted'
           fi
-          if [[ "\${RUNNER_ENVIRONMENT:-}" != "$expected" ]]; then
+          if [[ "${RUNNER_ENVIRONMENT:-}" != "$expected" ]]; then
             echo "::error::SENS expected $expected runner for event $EVENT_NAME"
             exit 1
           fi
