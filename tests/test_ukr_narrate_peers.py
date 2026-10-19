@@ -10,7 +10,7 @@ NARRATE = ROOT / "lib/narrate.lisp"
 D9 = ROOT / "lib/domains/d9.lisp"
 D10 = ROOT / "lib/domains/d10.lisp"
 
-TOKEN = re.compile(r';[^\\n]*|"(?:\\\\.|[^"\\\\])*"|[()]|[^\\s();]+')
+TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
 
 # (ширина, точний ключ, сумісне англійське ім'я, повне укр-ім'я)
 PRIMARY = (
@@ -115,7 +115,7 @@ class NarrateUkrPeerTests(unittest.TestCase):
                                  f"{english}: English must point to the full укр closure")
                 self.assertNotRegex(
                     self.src,
-                    rf"(?m)^\\s*\\({bits}(?:\\s|\\))",
+                    rf"(?m)^\s*\({bits}(?:\s|\))",
                     "domain key must not become a raw executable head",
                 )
 
