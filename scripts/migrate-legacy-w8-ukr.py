@@ -208,7 +208,10 @@ def main():
                 print(f"{rel}: НЕ ЗМІНЮВАТИ — {error}", file=sys.stderr)
         if args.report:
             args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        return 2 if any(x["status"] != "ok" for x in report) else 0
+        # Історична невиконувана схема явно показана як SKIP, але не є
+        # помилкою міграції виконуваного Lisp. Незавершені й несправні
+        # активні файли й надалі повертають ненульовий код.
+        return 2 if any(x["status"] in {"error", "partial"} for x in report) else 0
     except (OSError, ValueError) as error:
         print(f"ПОМИЛКА: {error}", file=sys.stderr)
         return 2
