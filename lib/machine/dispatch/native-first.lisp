@@ -73,7 +73,7 @@
           (native-first-fallback expression))
          (так
           (за-умовою
-            ((тотожне? (перше argument) (як-є 111))
+            ((тотожне? (перше argument) (як-є сполучити))
              (native-first-plan-car-cons-u64 expression argument))
             (так
              (native-first-fallback expression)))))))))
@@ -101,7 +101,7 @@
           (native-first-fallback expression))
          (так
           (за-умовою
-            ((тотожне? (перше expression) (як-є 100))
+            ((тотожне? (перше expression) (як-є перше))
              (native-first-plan-car expression))
             (так
              (native-first-fallback expression)))))))))
