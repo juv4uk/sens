@@ -46,7 +46,7 @@ class D10RawNotResidents(unittest.TestCase):
         self.assertEqual(donor["new_D10_coordinates"], 0)
         self.assertEqual(len(donor["selected_exact_name_duplicates"]), 6)
         names = {d["name"] for d in donor["definitions"]}
-        self.assertIn("reason-index-build-scan", names)
+        self.assertIn("сканувати-індекс-міркування", names)
         self.assertIn("prove-goal-state", names)
         self.assertIn("prove-rule", donor["selected_exact_name_duplicates"])
         self.assertIn("map-goal-results", donor["selected_exact_name_duplicates"])
