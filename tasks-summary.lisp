@@ -1,24 +1,11 @@
-; My-Lisp swarm tasks summary script
-; Підсумок задач roe My-Lisp
+; Підсумок завдань екосистеми СЕНС.
+; Загальна кількість завдань 457.
+; Виконано 232 завдання.
+; Залишилося 225 завдань.
+;
+; Обчислюємо різницю між загальною та виконаною кількістю.
+; Останній вираз повертає 225.
 
-; Summary statistics (from Python analysis of all tasks.lisp files)
-; Статистика з аналізу всіх файлів tasks.lisp
-
-; Total tasks across all repos: 457
-; Загальна кількість задач у всіх репо: 457
-
-; Completed tasks: 232
-; Виконано задач: 232
-
-; Remaining tasks: 225
-; Залишилося задач: 225
-
-; Compute remaining: 457 - 232
-; Обчислити залишене: 457 - 232
-
-(нехай ((total 457) (completed 232))
-  (відняти total completed))
-
-; The my-lisp CLI prints the result of the last expression
-; my-lisp CLI друкує результат останнього виразу
-; Result: 225
+(нехай ((усього 457)
+        (виконано 232))
+  (відняти усього виконано))
