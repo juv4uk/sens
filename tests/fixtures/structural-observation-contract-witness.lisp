@@ -6,173 +6,128 @@
 ; two pieces of semantic data. The contract remains authoritative; this witness
 ; only reads its fields and checks the required domain facts.
 
-(0011 so-field
-  (0010 (entry field)
-    (001000 ((found (11100 field entry)))
-      (110
-        ((010 found) () (001 ()))
-        ((010 found) (1) (001 ()))
-        (t (011 found))))))
+(визначити so-field
+  (функція (entry field)
+    (нехай ((found (знайти-за-ключем field entry)))
+      (за-умовою
+        ((атом? found) (як-є ()))
+        (так (решта found))))))
 
-(0011 so-find
-  (0010 (identity entries)
-    (110
-      ((010 entries) () (001 ()))
-      ((010 entries) (1) (001 ()))
-      ((11110111 (so-field (100 entries) (001 identity)) identity)
-       (100 entries))
-      (t (so-find identity (011 entries))))))
+(визначити so-find
+  (функція (identity entries)
+    (за-умовою
+      ((атом? entries) (як-є ()))
+      ((однакові? (so-field (перше entries) (як-є identity)) identity)
+       (перше entries))
+      (так (so-find identity (решта entries))))))
 
-(0011 so-entry
-  (0010 (identity)
-    (so-find identity (011 structural-observation-document))))
+(визначити so-entry
+  (функція (identity)
+    (so-find identity (решта structural-observation-document))))
 
-(0011 so-case-find
-  (0010 (case-name cases)
-    (110
-      ((010 cases) () (001 ()))
-      ((010 cases) (1) (001 ()))
-      ((11110111 (so-field (100 cases) (001 when)) case-name)
-       (100 cases))
-      (t (so-case-find case-name (011 cases))))))
+(визначити so-case-find
+  (функція (case-name cases)
+    (за-умовою
+      ((атом? cases) (як-є ()))
+      ((однакові? (so-field (перше cases) (як-є when)) case-name)
+       (перше cases))
+      (так (so-case-find case-name (решта cases))))))
 
-(0011 so-expect
-  (0010 (identity field expected)
-    (001000 ((entry (so-entry identity)))
-      (110
-        ((010 entry) () (1110 (001 missing-entry) identity))
-        ((010 entry) (1) (1110 (001 missing-entry) identity))
-        ((11110111 (so-field entry field) expected) (001 ()))
-        (t (1110 (001 mismatch) identity field expected
+(визначити so-expect
+  (функція (identity field expected)
+    (нехай ((entry (so-entry identity)))
+      (за-умовою
+        ((атом? entry) (список (як-є missing-entry) identity))
+        ((однакові? (so-field entry field) expected) (як-є ()))
+        (так (список (як-є mismatch) identity field expected
                  (so-field entry field)))))))
 
-(0011 so-expect-case
-  (0010 (identity case-name expected-result)
-    (001000 ((entry (so-entry identity)))
-      (110
-        ((010 entry) () (1110 (001 missing-entry) identity))
-        ((010 entry) (1) (1110 (001 missing-entry) identity))
-        (t
-         (001000 ((case-entry
-                 (so-case-find case-name (so-field entry (001 cases)))))
-           (110
-             ((010 case-entry) () (1110 (001 missing-case) identity case-name))
-             ((010 case-entry) (1) (1110 (001 missing-case) identity case-name))
-             ((11110111 (so-field case-entry (001 result)) expected-result)
-              (001 ()))
-             (t
-              (1110
-                (001 case-mismatch)
+(визначити so-expect-case
+  (функція (identity case-name expected-result)
+    (нехай ((entry (so-entry identity)))
+      (за-умовою
+        ((атом? entry) (список (як-є missing-entry) identity))
+        (так
+         (нехай ((case-entry
+                 (so-case-find case-name (so-field entry (як-є cases)))))
+           (за-умовою
+             ((атом? case-entry) (список (як-є missing-case) identity case-name))
+             ((однакові? (so-field case-entry (як-є result)) expected-result)
+              (як-є ()))
+             (так
+              (список
+                (як-є case-mismatch)
                 identity
                 case-name
                 expected-result
-                (so-field case-entry (001 result)))))))))))
+                (so-field case-entry (як-є result)))))))))))
 
-(0011 so-first-failure
-  (0010 (checks)
-    (110
-      ((010 checks) () (001 ()))
-      ((010 checks) (1) (001 ()))
-      ((010 (100 checks)) () (so-first-failure (011 checks)))
-      ((010 (100 checks)) (1) (so-first-failure (011 checks)))
-      (t (100 checks)))))
+(визначити so-first-failure
+  (функція (checks)
+    (за-умовою
+      ((атом? checks) (як-є ()))
+      ((атом? (перше checks)) (so-first-failure (решта checks)))
+      (так (перше checks)))))
 
-(0011 structural-observation-contract-witness
-  (0010 ()
-    (001000 ((failure
+(визначити structural-observation-contract-witness
+  (функція ()
+    (нехай ((failure
             (so-first-failure
-              (1110
-                ; #369: symbol? is a runtime class observation, not universal
-                ; truth. Demand the explicit Lisp-owned result algebra first;
-                ; this commit is intentionally RED until the contract is ratified.
-                (so-expect "1023" (001 result-form) (001 class-membership))
-                (so-expect "1023" (001 target-class) (001 symbol))
-                (so-expect-case
-                  "1023"
-                  (001 symbol)
-                  (001 (class-membership symbol member)))
-                (so-expect-case
-                  "1023"
-                  (001 non-symbol)
-                  (001 (class-membership symbol nonmember)))
-                (so-expect "1023" (001 generic-truth-coercion) (001 forbidden))
-                (so-expect "1023" (001 control-dispatch) (001 explicit-result-equality))
-
-                ; #369: symbol? is a runtime class observation, not universal
-                ; truth. Demand the explicit Lisp-owned result algebra first;
-                ; this commit is intentionally RED until the contract is ratified.
-                (so-expect "1023" (quote result-form) (quote class-membership))
-                (so-expect "1023" (quote target-class) (quote symbol))
-                (so-expect-case
-                  "1023"
-                  (quote symbol)
-                  (quote (class-membership symbol member)))
-                (so-expect-case
-                  "1023"
-                  (quote non-symbol)
-                  (quote (class-membership symbol nonmember)))
-                (so-expect "1023" (quote generic-truth-coercion) (quote forbidden))
-                (so-expect "1023" (quote control-dispatch) (quote explicit-result-equality))
-
-                ; #218 broader type/text queries: first make the witness demand
-                ; explicit domain-owned result records. The contract update that
-                ; satisfies these checks lands only after this witness is seen RED.
-                (so-expect "1024" (001 result-form) (001 class-membership))
-                (so-expect "1024" (001 target-class) (001 string))
+              (список
+                (so-expect "1024" (як-є result-form) (як-є class-membership))
+                (so-expect "1024" (як-є target-class) (як-є string))
                 (so-expect-case
                   "1024"
-                  (001 string)
-                  (001 (class-membership string member)))
+                  (як-є string)
+                  (як-є (class-membership string member)))
                 (so-expect-case
                   "1024"
-                  (001 non-string)
-                  (001 (class-membership string nonmember)))
-                (so-expect "1024" (001 generic-truth-coercion) (001 forbidden))
-                (so-expect "1024" (001 control-dispatch) (001 explicit-result-equality))
+                  (як-є non-string)
+                  (як-є (class-membership string nonmember)))
+                (so-expect "1024" (як-є generic-truth-coercion) (як-є forbidden))
+                (so-expect "1024" (як-є control-dispatch) (як-є explicit-result-equality))
 
-                (so-expect "1025" (001 input-domain) (001 (string string)))
-                (so-expect "1025" (001 result-form) (001 text-order))
+                (so-expect "1025" (як-є input-domain) (як-є (string string)))
+                (so-expect "1025" (як-є result-form) (як-є text-order))
                 (so-expect-case
                   "1025"
-                  (001 left-before-right)
-                  (001 (text-order before)))
+                  (як-є left-before-right)
+                  (як-є (text-order before)))
                 (so-expect-case
                   "1025"
-                  (001 same-text)
-                  (001 (text-order same)))
+                  (як-є same-text)
+                  (як-є (text-order same)))
                 (so-expect-case
                   "1025"
-                  (001 left-after-right)
-                  (001 (text-order after)))
-                (so-expect "1025" (001 outside-domain) (001 type-error))
-                (so-expect "1025" (001 generic-truth-coercion) (001 forbidden))
-                (so-expect "1025" (001 control-dispatch) (001 explicit-result-equality))
+                  (як-є left-after-right)
+                  (як-є (text-order after)))
+                (so-expect "1025" (як-є outside-domain) (як-є type-error))
+                (so-expect "1025" (як-є generic-truth-coercion) (як-є forbidden))
+                (so-expect "1025" (як-є control-dispatch) (як-є explicit-result-equality))
 
-                (so-expect "1026" (001 result-form) (001 class-membership))
-                (so-expect "1026" (001 target-class) (001 numeric-buffer))
+                (so-expect "1026" (як-є result-form) (як-є class-membership))
+                (so-expect "1026" (як-є target-class) (як-є numeric-buffer))
                 (so-expect-case
                   "1026"
-                  (001 numeric-buffer)
-                  (001 (class-membership numeric-buffer member)))
+                  (як-є numeric-buffer)
+                  (як-є (class-membership numeric-buffer member)))
                 (so-expect-case
                   "1026"
-                  (001 non-numeric-buffer)
-                  (001 (class-membership numeric-buffer nonmember)))
-                (so-expect "1026" (001 generic-truth-coercion) (001 forbidden))
-                (so-expect "1026" (001 control-dispatch) (001 explicit-result-equality))))))
-      (110
-        ((0100 (101 (100 structural-observation-document)
-                  (001 structural-observation-contract/1)))
-         (1110 (001 structural-observation-contract-witness)
-               (1110 (001 status) (001 fail))
-               (1110 (001 detail) (001 schema))))
-        ((010 failure) () (1110 (001 structural-observation-contract-witness)
-               (1110 (001 status) (001 pass))
-               (1110 (001 detail) (001 explicit-domain-results))))
-        ((010 failure) (1) (1110 (001 structural-observation-contract-witness)
-               (1110 (001 status) (001 pass))
-               (1110 (001 detail) (001 explicit-domain-results))))
-        (t
-         (1110 (001 structural-observation-contract-witness)
-               (1110 (001 status) (001 fail))
-               (1110 (001 detail) failure)))))))
+                  (як-є non-numeric-buffer)
+                  (як-є (class-membership numeric-buffer nonmember)))
+                (so-expect "1026" (як-є generic-truth-coercion) (як-є forbidden))
+                (so-expect "1026" (як-є control-dispatch) (як-є explicit-result-equality))))))
+      (за-умовою
+        ((хибне? (тотожне? (перше structural-observation-document)
+                  (як-є structural-observation-contract/1)))
+         (список (як-є structural-observation-contract-witness)
+               (список (як-є status) (як-є fail))
+               (список (як-є detail) (як-є schema))))
+        ((атом? failure)
+         (список (як-є structural-observation-contract-witness)
+               (список (як-є status) (як-є pass))
+               (список (як-є detail) (як-є explicit-domain-results))))
+        (так
+         (список (як-є structural-observation-contract-witness)
+               (список (як-є status) (як-є fail))
+               (список (як-є detail) failure)))))))
