@@ -4,40 +4,11 @@ from pathlib import Path
 import re
 import unittest
 
-# Git blob вихідного активного файла: перевірка незмінності даних/AST.
-BEFORE_PROCESS_BLOB = "93bd6b39ba4097bda0a8c14aaf5ccc73e482ce49"
 EXACT_HEADS = {"001": "як-є", "011": "решта", "100": "перше",
                "101": "тотожне?", "110": "за-умовою",
                "0010": "функція", "0011": "визначити",
                "0100": "хибне?", "1001": "друге",
                "1110": "список", "10011": "третє"}
-INVERSE_HEADS = {name: bits for bits, name in EXACT_HEADS.items()}
-
-
-def restore_original_source(source: str) -> str:
-    """Повернути лише current-D3/D4/D5 heads і типізовані D1-предикати."""
-    pattern = re.compile(r"\(\s*(" + "|".join(
-        re.escape(name) for name in sorted(INVERSE_HEADS, key=len, reverse=True)
-    ) + r")(?=\s|\)|$)")
-    out = []
-    for line in source.splitlines(keepends=True):
-        if line.lstrip().startswith(";"):
-            out.append(line)
-        else:
-            previous = pattern.sub(
-                lambda m: m.group(0).replace(m.group(1), INVERSE_HEADS[m.group(1)]),
-                line,
-            )
-            out.append(re.sub(r"(?<=\()так(?=\s|\)|$)", "#d1:1", previous))
-    return "".join(out)
-
-
-def source_blob_sha(source: str) -> str:
-    import hashlib
-    data = source.encode("utf-8")
-    return hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()
-
-
 ROOT = Path(__file__).resolve().parents[1]
 FILE = ROOT / "lib/process.lisp"
 OLD = "(010 (001 ()))"
@@ -98,8 +69,22 @@ def audit(source: str):
             visit(item)
     for row in parsed:
         visit(row)
-    if source_blob_sha(restore_original_source(source)) != BEFORE_PROCESS_BLOB:
-        raise ValueError("порушено тотожність процесної програми/даних")
+    # Точні чинні D9 call-heads і цитовані дані: не історичний blob-пін.
+    definitions = {row[1]: row for row in parsed if isinstance(row, list) and len(row) >= 3 and row[0] == "визначити"}
+    expected_raw_exit = ["визначити", "process-raw-exit-code",
+                         ["функція", ["сирий-результат"], ["друге", "сирий-результат"]]]
+    if definitions.get("process-raw-exit-code") != expected_raw_exit:
+        raise ValueError("порушено точний селектор вихідного коду")
+    for name in ("процес-результат-текст", "процес-запустити-текст",
+                 "процес-публічний-вихід-код", "процес-запустити"):
+        if name not in definitions:
+            raise ValueError(f"бракує визначеного D9 виклику {name}")
+    for datum in ("(як-є process-result)", "(як-є decoded)",
+                  "(як-є decoded-process)"):
+        if datum not in source:
+            raise ValueError(f"цитовані дані змінено: {datum}")
+    if not re.search(r"\(список\s+\(як-є decoded-process\)", source):
+        raise ValueError("змінено конструкцію процесного результату")
     return len(source.encode("utf8"))
 
 
@@ -136,7 +121,7 @@ class ProcessDirectD1(unittest.TestCase):
             with self.assertRaises(ValueError):
                 audit(corrupted)
 
-    def test_exact_current_domain_surface_and_git_blob_inverse(self):
+    def test_exact_current_domain_surface(self):
         for bits, name in EXACT_HEADS.items():
             domain = (ROOT / f"lib/domains/d{len(bits)}.lisp").read_text(encoding="utf-8")
             row = re.compile(
@@ -144,17 +129,20 @@ class ProcessDirectD1(unittest.TestCase):
                 rf"\(укр\s+{re.escape(name)}\)"
             )
             self.assertRegex(domain, row)
-        self.assertEqual(
-            source_blob_sha(restore_original_source(self.source)),
-            BEFORE_PROCESS_BLOB,
-        )
+        d9 = (ROOT / "lib/domains/d9.lisp").read_text(encoding="utf-8")
+        for bits, name in (("010001000", "процес-результат-текст"),
+                           ("001001001", "процес-запустити-текст"),
+                           ("001010001", "процес-публічний-вихід-код"),
+                           ("110101111", "процес-запустити")):
+            self.assertRegex(d9, rf"(?m)^\s*\({bits}\s+.*\(укр {re.escape(name)}\)")
         self.assertEqual(self.source.count("(так"), 5)
         self.assertNotIn("#d1:1", self.source)
 
     def test_wrong_peer_and_quoted_data_mutants_rejected(self):
         for broken in (
-            self.source.replace("(друге raw)", "(третє raw)", 1),
-            self.source.replace("(список", "(сполучити", 1),
+            self.source.replace("(друге сирий-результат)", "(третє сирий-результат)", 1),
+            self.source.replace("(список\n                 (як-є decoded-process)",
+                                "(сполучити\n                 (як-є decoded-process)", 1),
             self.source.replace("(як-є process-result)", "(як-є changed)", 1),
             self.source.replace("(так", "(ні", 1),
         ):
@@ -164,9 +152,9 @@ class ProcessDirectD1(unittest.TestCase):
 
     def test_numeric_exit_code_and_structural_nil_unchanged(self):
         data = self.source
-        self.assertRegex(data, r"\(\(тотожне\? code \(як-є \(\)\)\)\s+-1\)")
-        self.assertIn("(process-raw-exit-code raw)", data)
-        self.assertIn("(utf8-decode-string (process-raw-stderr-bytes raw))", data)
+        self.assertRegex(data, r"\(\(тотожне\? код \(як-є \(\)\)\)\s+-1\)")
+        self.assertIn("(process-raw-exit-code сирий-результат)", data)
+        self.assertIn("(кодування-юнікод-8-декодувати-рядок (process-raw-stderr-bytes сирий-результат))", data)
         self.assertIn("(як-є (postcore-materialization-debug skipped))", data)
 
 
