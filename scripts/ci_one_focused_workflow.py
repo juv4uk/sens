@@ -46,37 +46,30 @@ def verify_migration_source_shapes():
     try:
         reason = (ROOT / "lib/reason.lisp").read_text(encoding="utf-8")
         selectors = (
-            "(0011 reason-index-mode\n  (0010 (index)\n    (1001 index)))",
-            "(0011 reason-index-rules\n  (0010 (index)\n    (10011 index)))",
-            "(0011 reason-index-buckets\n  (0010 (index)\n    (10011 (011 index))))",
+            "(визначити режим-індексу-міркування\n  (функція (індекс-правил)\n    (друге індекс-правил)))",
+            "(визначити правила-індексу-міркування\n  (функція (індекс-правил)\n    (третє індекс-правил)))",
+            "(визначити кошики-індексу-міркування\n  (функція (індекс-правил)\n    (третє (решта індекс-правил))))",
         )
         for selector in selectors:
             if selector not in reason:
-                errors.append("reason.lisp: exact-domain index selector migration missing")
-        for old_alias in ("(0011 reason-index-mode second)",
-                          "(0011 reason-index-rules third)",
-                          "(0011 reason-index-buckets fourth)"):
-            if old_alias in reason:
-                errors.append("reason.lisp: host selector alias returned")
-        start = reason.find("(0011 reason-index?")
-        end = reason.find("(0011 міркування-пошук-кошика", start)
-        if end < 0:
-            end = reason.find("(0011 reason-index-linear", start)
+                errors.append("reason.lisp: змінено структуру українських D4/D5 селекторів")
+        start = reason.find("(визначити індекс-міркування?")
+        end = reason.find("(визначити міркування-пошук-кошика", start)
         if start < 0 or end < 0:
-            errors.append("reason.lisp: cannot isolate reason-index? production form")
+            errors.append("reason.lisp: неможливо виокремити індекс-міркування?")
         else:
             body = reason[start:end]
-            ordered = [
-                "((010 value) #d1:0)",
-                "((0101 value) #d1:0)",
-                "((010 (100 value))",
-                "((101 (100 value) *reason-index-schema*)",
-            ]
+            ordered = (
+                "((атом? вхідне-значення) ні)",
+                "((порожній? вхідне-значення) ні)",
+                "((атом? (перше вхідне-значення))",
+                "((тотожне? (перше вхідне-значення) *reason-index-schema*)",
+            )
             positions = [body.find(token) for token in ordered]
             if any(position < 0 for position in positions) or positions != sorted(positions):
                 errors.append(
-                    "reason.lisp: require exact D1 atom-reject, D4 NULL, "
-                    "D3 ATOM(CAR), then D3 EQ in that order"
+                    "reason.lisp: потрібен порядок D3 ATOM, D4 NULL, "
+                    "D3 ATOM(CAR), далі D3 EQ"
                 )
     except OSError as exc:
         errors.append(f"reason.lisp: {exc}")
