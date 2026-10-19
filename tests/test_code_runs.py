@@ -1271,9 +1271,9 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
 
     SOURCE = ROOT / "lib" / "core.lisp"
     OLD_CHUNK_CALL = "(quotient (01011 a (100 chunk+mult)) b)"
-    UKR_CHUNK_CALL = "(quotient (відняти a (перше chunk+mult)) b)"
+    UKR_CHUNK_CALL = "(частка (відняти a (перше chunk+mult)) b)"
     OLD_REMAINDER_CALL = "(01011 a (10110 b (quotient a b)))"
-    UKR_REMAINDER_CALL = "(відняти a (помножити b (quotient a b)))"
+    UKR_REMAINDER_CALL = "(відняти a (помножити b (частка a b)))"
 
     @classmethod
     def _restore(cls, source: str) -> str:
@@ -1298,7 +1298,7 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
         d3 = (ROOT / "lib" / "domains" / "d3.lisp").read_text(encoding="utf-8")
         d5 = (ROOT / "lib" / "domains" / "d5.lisp").read_text(encoding="utf-8")
         self.assertRegex(d3, r"(?m)^  \(100 \(ук перше\) \(укр перше\)")
-        for bits, peer in (("01011", "відняти"), ("10110", "помножити")):
+        for bits, peer in (("01011", "відняти"), ("10110", "помножити"), ("10111", "частка")):
             row = next(line for line in d5.splitlines() if line.lstrip().startswith(f"({bits} "))
             self.assertIn(f"(укр {peer})", row)
         self.assertIn(self.UKR_CHUNK_CALL, source)
@@ -1313,7 +1313,7 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
         source = self.SOURCE.read_text(encoding="utf-8")
         mutant = source.replace(
             self.UKR_REMAINDER_CALL,
-            "(відняти a (частка b (quotient a b)))",
+            "(відняти a (частка b (частка a b)))",
             1,
         )
         self.assertNotEqual(mutant, source)
