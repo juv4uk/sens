@@ -131,6 +131,23 @@ def verify(text):
     if text.count(FIFTH_WITNESS) != 2:
         raise AssertionError("втрачено точний D9 FIFTH через D3 CAR/CDR")
     projected = text.replace(FIFTH_WITNESS, FIFTH_BINARY)
+    # Історичний Git receipt стосується стану до українізації локальних
+    # параметрів. Відновлюємо виключно alpha-перейменування першої функції;
+    # це не runtime alias, семантику SENS визначає сам evaluator.
+    ukrainian_lambda = (
+        '(визначити encoder-coverage-str+\n'
+        '  (функція аргументи\n'
+        '    (згорнути (функція (накопичене фрагмент) '
+        '(рядок-додати накопичене фрагмент)) "" аргументи)))'
+    )
+    historical_lambda = (
+        '(визначити encoder-coverage-str+\n'
+        '  (функція args\n'
+        '    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))'
+    )
+    if projected.count(ukrainian_lambda) != 1:
+        raise AssertionError("змінилася структура українського варіативного LAMBDA")
+    projected = projected.replace(ukrainian_lambda, historical_lambda, 1)
     inverse = {name: bits for bits, (name, _) in combined.items()}
     edits = []
     census = Counter()
@@ -161,7 +178,7 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
         self.assertEqual(sum(verify(self.text).values()) + 2, 317)
 
     def test_other_domain_heads_and_quoted_data_untouched(self):
-        self.assertIn("(рядок-додати acc s)", self.text)
+        self.assertIn("(рядок-додати накопичене фрагмент)", self.text)
         self.assertIn("(нехай ", self.text)
         self.assertIn("(як-є encoder-coverage-yes)", self.text)
         verify(self.text)
