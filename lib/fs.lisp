@@ -18,7 +18,7 @@
 
 ; Historical read-file returns decoded text directly. Invalid UTF-8 returns
 ; the same explicit rejection utf8-decode-string produces for process/TCP.
-(визначити read-file
+(визначити читати-файл
   (функція (шлях)
     ((функція (декодоване)
       (за-умовою
@@ -30,7 +30,7 @@
 
 ; Historical write-file returns the text after successful write;
 ; encoding policy belongs to Lisp, host only persists bytes.
-(визначити write-file
+(визначити записати-файл
   (функція (шлях текст)
     (друге (список (write-file-bytes шлях (кодування-юнікод-8-кодувати-рядок текст)) текст))))
 
