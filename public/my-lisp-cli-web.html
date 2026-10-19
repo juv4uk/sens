@@ -110,7 +110,7 @@
       // переобчислення всього буфера не потрібне й не бажане.
       const history = [];
       let historyIndex = -1;
-      let currentSurface = "core";
+      let currentSurface = "укр";
       const promptEl = document.getElementById("prompt");
 
       function updatePrompt() {
@@ -154,9 +154,9 @@
         }
 
         try {
-          currentSurface = wasmModule.set_surface("uk");
+          currentSurface = wasmModule.set_surface("укр");
         } catch (error) {
-          printLine("Помилка запуску української поверхні: " + String(error), "line-error");
+          printLine("Помилка запуску повної української поверхні: " + String(error), "line-error");
         }
         updatePrompt();
         printLine("my-lisp-cli · Web — українська поверхня над тим самим семантичним ядром.", "line-system");
