@@ -12,9 +12,7 @@ fn eval_guard_ukr(source: &str) -> String {
 
 fn eval_guard_with_source(source: &str, exact_ukr: bool) -> String {
     let mut session = Session::default();
-    sens::eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .unwrap();
