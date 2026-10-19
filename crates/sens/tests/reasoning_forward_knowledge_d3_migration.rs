@@ -64,3 +64,30 @@ fn reasoning_d3_d9_projections_replay_frozen_bounded_behavior() {
         assert_eq!(observed(program), expected, "current reasoning behavior changed: {program}");
     }
 }
+
+// Цей свідок виконує поточні lib/core, lib/unify, lib/reason, lib/forward
+// через справжній SENS reader/evaluator, не Python-симуляцію.
+#[test]
+fn compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match() {
+    let mut runtime = session();
+    for (program, expected) in [
+        (
+            "(запустити-правило-на-факти (як-є ((факт а) (наслідок а))) (як-є ((факт а) (факт б))))",
+            "((наслідок а))",
+        ),
+        (
+            "(запустити-правило-на-факти (як-є ((факт а) (наслідок а))) (як-є ((факт б))))",
+            "()",
+        ),
+        (
+            "(запустити-правило-на-факти (як-є ((факт а) (наслідок а))) (як-є ((факт а) (факт б) (факт а))))",
+            "((наслідок а) (наслідок а))",
+        ),
+    ] {
+        let value = eval_program(program, &mut runtime)
+            .unwrap_or_else(|error| panic!("SENS Forward failed for {program}: {error:?}"))
+            .value
+            .to_string();
+        assert_eq!(value, expected, "Forward must preserve successful compound facts and their order");
+    }
+}
