@@ -42,6 +42,121 @@ LOCAL_HELPERS = (
     ("science-seventh", "науковий-сьомий", 2),
 )
 LOCAL_ALIASES = "\n; Українські локальні імена є тими самими Lisp-замиканнями.\n; Старі імена лишаються сумісними проєкціями для зовнішніх споживачів.\n; Це не нові D9/D10 identity, не новий механізм і не D24+ математика.\n(визначити science-proper-list? науковий-список-правильний?)\n(визначити science-list-length-equals? науковий-список-довжина-дорівнює?)\n(визначити science-sixth науковий-шостий)\n(визначити science-seventh науковий-сьомий)\n"
+QUANTITY_FORMALS = (
+    ("науковий-список-правильний?", (("x", "значення", 4),)),
+    ("науковий-список-довжина-дорівнює?", (("items", "елементи", 3), ("remaining", "залишок", 4))),
+    ("науковий-шостий", (("values", "поля", 2),)),
+    ("науковий-сьомий", (("values", "поля", 2),)),
+)
+
+
+def _rewrite_definition_atoms(source: str, function_name: str, edits) -> str:
+    """Rename only bound local atoms in one exact Lisp definition."""
+    anchors = list(re.finditer(
+        r"(?m)^\(визначити\s+" + re.escape(function_name) + r"(?=\s|\))",
+        source,
+    ))
+    if len(anchors) != 1:
+        raise AssertionError(
+            f"{function_name}: очікувалося одне визначення, знайдено {len(anchors)}"
+        )
+    start = anchors[0].start()
+    depth = 0
+    in_string = escaped = in_comment = False
+    end = None
+    for index in range(start, len(source)):
+        char = source[index]
+        if in_comment:
+            if char == "\n":
+                in_comment = False
+            continue
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == ";":
+            in_comment = True
+        elif char == '"':
+            in_string = True
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                end = index + 1
+                break
+            if depth < 0:
+                raise AssertionError(f"{function_name}: незбалансоване визначення")
+    if end is None:
+        raise AssertionError(f"{function_name}: незакрите визначення")
+
+    form = source[start:end]
+    counts = {old: 0 for old, _new, _expected in edits}
+    chunks = []
+    index = 0
+    while index < len(form):
+        char = form[index]
+        if char == ";":
+            stop = form.find("\n", index)
+            if stop < 0:
+                stop = len(form)
+            chunks.append(form[index:stop])
+            index = stop
+            continue
+        if char == '"':
+            stop = index + 1
+            while stop < len(form):
+                if form[stop] == "\\":
+                    stop += 2
+                elif form[stop] == '"':
+                    stop += 1
+                    break
+                else:
+                    stop += 1
+            chunks.append(form[index:stop])
+            index = stop
+            continue
+        if char.isspace() or char in "();'":
+            chunks.append(char)
+            index += 1
+            continue
+        stop = index
+        while stop < len(form) and not form[stop].isspace() and form[stop] not in ("(", ")", ";", '"', "'"):
+            stop += 1
+        atom = form[index:stop]
+        edit = next((item for item in edits if item[0] == atom), None)
+        if edit is None:
+            chunks.append(atom)
+        else:
+            chunks.append(edit[1])
+            counts[atom] += 1
+        index = stop
+    for old, _new, expected in edits:
+        if counts[old] != expected:
+            raise AssertionError(
+                f"{function_name}: кількість локальних атомів {old}: "
+                f"очікувалося {expected}, знайдено {counts[old]}"
+            )
+    return source[:start] + "".join(chunks) + source[end:]
+
+
+def project_quantity_formals(source: str) -> str:
+    for name, edits in QUANTITY_FORMALS:
+        source = _rewrite_definition_atoms(source, name, edits)
+    return source
+
+
+def restore_quantity_formals(source: str) -> str:
+    for name, edits in QUANTITY_FORMALS:
+        inverse = tuple((ukrainian, english, count) for english, ukrainian, count in edits)
+        source = _rewrite_definition_atoms(source, name, inverse)
+    return source
+
+
 PUBLIC_PROJECTIONS = (
     ("make-dimension", "створити-розмірність", "111001100"),
     ("dimension?", "розмірність?", "111010000"),
@@ -94,6 +209,7 @@ def restore_local_helper_layer(source: str) -> str:
     body, restored_public = project_public_names(body, inverse)
     if set(restored_public) != set(inverse):
         raise AssertionError("не вдалося точно відновити всі первинні назви Quantity")
+    body = restore_quantity_formals(body)
     for english, ukrainian, calls in LOCAL_HELPERS:
         if (body.count("(" + ukrainian) != calls
                 or body.count("(визначити " + ukrainian) != 1):
@@ -118,6 +234,7 @@ def apply_local_helper_layer(source: str) -> str:
     body, projected_public = project_public_names(body, forward)
     if set(projected_public) != set(forward):
         raise AssertionError("не вдалося точно застосувати всі первинні назви Quantity")
+    body = project_quantity_formals(body)
     return body + PUBLIC_ALIASES + LOCAL_ALIASES
 
 
@@ -293,6 +410,24 @@ class QuantityUkrProjection(unittest.TestCase):
         self.assertEqual(peer_counts, {"символ?": 3, "п'ятий": 2})
         self.assertEqual(git_blob(previous), PRE_REPAIR_BLOB)
         return previous
+
+    def test_internal_helper_formals_are_ukrainian_and_reversible(self):
+        expected = (
+            ("науковий-список-правильний?", "(функція (значення)", "(функція (x)"),
+            ("науковий-список-довжина-дорівнює?", "(функція (елементи залишок)", "(функція (items remaining)"),
+            ("науковий-шостий", "(функція (поля)", "(функція (values)"),
+            ("науковий-сьомий", "(функція (поля)", "(функція (values)"),
+        )
+        for name, ukrainian_formals, legacy_formals in expected:
+            with self.subTest(function=name):
+                anchor = f"(визначити {name}"
+                start = self.source.index(anchor)
+                next_definition = self.source.find("\n(визначити ", start + len(anchor))
+                form = self.source[start:] if next_definition < 0 else self.source[start:next_definition]
+                self.assertIn(ukrainian_formals, form)
+                self.assertNotIn(legacy_formals, form)
+        historical = restore_local_helper_layer(self.source)
+        self.assertEqual(apply_local_helper_layer(historical), self.source)
 
     def test_exact_original_git_blob_recoverable(self):
         previous = self.restore_previous()
