@@ -1048,6 +1048,17 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             "compiler-law-width": {"закон": "law"},
             "compiler-law-empty-bits": {"закон": "law"},
             "compiler-law-xor-mask": {"закон": "law"},
+            "compiler-result-ok": {"запити": "requests"},
+            "compiler-result-success": {"результат": "result"},
+            "compiler-result-requests": {"результат": "result"},
+            "compiler-append": {"лівий": "left", "правий": "right"},
+            "compiler-merge-results": {"лівий": "left", "правий": "right"},
+            "compiler-exactly-one": {"аргументи": "arguments"},
+            "compiler-exactly-two": {"аргументи": "arguments"},
+            "compiler-proper-tail?": {"хвіст": "tail"},
+            "compiler-at-least-two": {"аргументи": "arguments"},
+            "compiler-request-role": {"запит": "request"},
+            "compiler-cond-clauses-valid": {"клаузи": "clauses"},
         }
         for name, bindings in newer_formals.items():
             inverse_helpers[name] = name

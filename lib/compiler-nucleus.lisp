@@ -370,46 +370,46 @@
       ((істина-компілятора ідентичність) ()))))
 
 (визначити compiler-result-ok
-  (функція (requests)
-    (сполучити (істина-компілятора ()) requests)))
+  (функція (запити)
+    (сполучити (істина-компілятора ()) запити)))
 
 (визначити compiler-result-fail
   (функція ()
     (сполучити (хиба-компілятора ()) ())))
 
 (визначити compiler-result-success
-  (функція (result)
-    (перше result)))
+  (функція (результат)
+    (перше результат)))
 
 (визначити compiler-result-requests
-  (функція (result)
-    (решта result)))
+  (функція (результат)
+    (решта результат)))
 
 (визначити compiler-append
-  (функція (left right)
+  (функція (лівий правий)
     (за-умовою
-      ((атом? left) right)
+      ((атом? лівий) правий)
       ((істина-компілятора ())
        (сполучити
-         (перше left)
-         (compiler-append (решта left) right))))))
+         (перше лівий)
+         (compiler-append (решта лівий) правий))))))
 
 (визначити compiler-merge-results
-  (функція (left right)
+  (функція (лівий правий)
     (за-умовою
-      ((compiler-result-success left)
+      ((compiler-result-success лівий)
        (за-умовою
-         ((compiler-result-success right)
+         ((compiler-result-success правий)
           (compiler-result-ok
             (compiler-append
-              (compiler-result-requests left)
-              (compiler-result-requests right))))
+              (compiler-result-requests лівий)
+              (compiler-result-requests правий))))
          ((істина-компілятора ()) (compiler-result-fail))))
       ((істина-компілятора ()) (compiler-result-fail)))))
 
 (визначити compiler-request-role
-  (функція (request)
-    (перше (решта request))))
+  (функція (запит)
+    (перше (решта запит))))
 
 ; Validate source shape only after SENS has already derived the abstract role.
 ; This is deliberately role -> arity/shape, never domain-bits -> shape.
@@ -417,48 +417,48 @@
 ; must be tested using the D3 ATOM predicate on the tail, not a D4
 ; operator applied to an already-computed D1 predicate bit.
 (визначити compiler-exactly-one
-  (функція (arguments)
+  (функція (аргументи)
     (за-умовою
-      ((атом? arguments) (хиба-компілятора ()))
-      ((compiler-list-end? (решта arguments)) (істина-компілятора ()))
+      ((атом? аргументи) (хиба-компілятора ()))
+      ((compiler-list-end? (решта аргументи)) (істина-компілятора ()))
       ((істина-компілятора ()) (хиба-компілятора ())))))
 
 (визначити compiler-exactly-two
-  (функція (arguments)
+  (функція (аргументи)
     (за-умовою
-      ((атом? arguments) (хиба-компілятора ()))
-      ((атом? (решта arguments)) (хиба-компілятора ()))
-      ((compiler-list-end? (решта (решта arguments))) (істина-компілятора ()))
+      ((атом? аргументи) (хиба-компілятора ()))
+      ((атом? (решта аргументи)) (хиба-компілятора ()))
+      ((compiler-list-end? (решта (решта аргументи))) (істина-компілятора ()))
       ((істина-компілятора ()) (хиба-компілятора ())))))
 
 ; Proper variadic tails: only the exact EMPTY terminates a list.
 ; D3 ATOM detects a malformed nonempty atom; EQ sees EMPTY only after ATOM.
 ; The already-admitted compiler-list-end? owns that distinction in SENS.
 (визначити compiler-proper-tail?
-  (функція (tail)
+  (функція (хвіст)
     (за-умовою
-      ((compiler-list-end? tail) (істина-компілятора ()))
-      ((атом? tail) (хиба-компілятора ()))
-      (так (compiler-proper-tail? (решта tail))))))
+      ((compiler-list-end? хвіст) (істина-компілятора ()))
+      ((атом? хвіст) (хиба-компілятора ()))
+      (так (compiler-proper-tail? (решта хвіст))))))
 
 ; D4 LAMBDA is parameters plus one-or-more body expressions.
 ; Both mandatory argument cells must be pairs, and all remaining cells must
 ; form a proper list; nested data elements may themselves be dotted pairs.
 (визначити compiler-at-least-two
-  (функція (arguments)
+  (функція (аргументи)
     (за-умовою
-      ((атом? arguments) (хиба-компілятора ()))
-      ((атом? (решта arguments)) (хиба-компілятора ()))
-      (так (compiler-proper-tail? (решта (решта arguments)))))))
+      ((атом? аргументи) (хиба-компілятора ()))
+      ((атом? (решта аргументи)) (хиба-компілятора ()))
+      (так (compiler-proper-tail? (решта (решта аргументи)))))))
 
 ; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
 (визначити compiler-cond-clauses-valid
-  (функція (clauses)
+  (функція (клаузи)
     (за-умовою
-      ((compiler-list-end? clauses) (істина-компілятора ()))
-      ((атом? clauses) (хиба-компілятора ()))
-      ((compiler-exactly-two (перше clauses))
-       (compiler-cond-clauses-valid (решта clauses)))
+      ((compiler-list-end? клаузи) (істина-компілятора ()))
+      ((атом? клаузи) (хиба-компілятора ()))
+      ((compiler-exactly-two (перше клаузи))
+       (compiler-cond-clauses-valid (решта клаузи)))
       ((істина-компілятора ()) (хиба-компілятора ())))))
 
 (визначити compiler-role-shape-valid
