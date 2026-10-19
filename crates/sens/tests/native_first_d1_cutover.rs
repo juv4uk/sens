@@ -78,3 +78,31 @@ fn exact_reader_does_not_generalize_machine_source_paths() {
     assert!(!SOURCE.contains("(визначити native-first-domain-false"));
     assert!(parse_mixed_exact_domain_machine_source("lib/untrusted.lisp", SOURCE).is_err());
 }
+
+
+#[test]
+fn lexical_shape_callback_preserves_exact_d3_width_and_predicate_bits() {
+    // Реальний SENS eval викликає лексичну функцію форма-або-порожньо
+    // у позиції голови, а не SID8/D8 dispatcher.
+    // SHAPE-OR-EMPTY повертає (width (D1 D1 D1)).
+    let mut s = session();
+    for (width, a, b, c, expected_car, expected_cons) in [
+        (3, "так", "ні", "ні", true, false),
+        (3, "так", "так", "так", false, true),
+        (4, "так", "ні", "ні", false, false),
+    ] {
+        let callback = format!(
+            "(функція (проба) (сполучити {width} (сполучити \
+             (сполучити {a} (сполучити {b} (сполучити {c} ()))) ())))"
+        );
+        for (head, expected) in [
+            ("нативний-домен-перше?", expected_car),
+            ("нативний-домен-сполучити?", expected_cons),
+        ] {
+            let source = format!("({head} {callback} (як-є довільне))");
+            let actual = eval(&mut s, &source)
+                .expect("SENS must apply the lexically bound shape callback");
+            assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
+        }
+    }
+}
