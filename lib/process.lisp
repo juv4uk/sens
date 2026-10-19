@@ -45,8 +45,8 @@
                (список (як-є rejected) (як-є stderr-invalid-utf8)))))
            (так
             (список (як-є rejected) (як-є stdout-invalid-utf8)))))
-       (utf8-decode-string (process-raw-stdout-bytes raw))
-       (utf8-decode-string (process-raw-stderr-bytes raw))))
+       (кодування-юнікод-8-декодувати-рядок (process-raw-stdout-bytes raw))
+       (кодування-юнікод-8-декодувати-рядок (process-raw-stderr-bytes raw))))
       (так
        (список (як-є rejected) (як-є invalid-process-result))))))
 
