@@ -30,14 +30,14 @@ fn eval(session: &mut Session, source: &str) -> String {
 fn indexed_bucket_preserves_source_rule_order_exactly() {
     let mut s = session();
     let source = r#"
-      (def rules
-        (quote
+      (визначити rules
+        (як-є
           (((p first))
            ((q irrelevant))
            ((p second))
            ((r irrelevant))
            ((p third)))))
-      (reason-index-candidates (quote (p target)) (reason-make-index rules))
+      (reason-index-candidates (як-є (p target)) (reason-make-index rules))
     "#;
     assert_eq!(
         eval(&mut s, source),
@@ -51,9 +51,9 @@ fn variable_goal_falls_back_to_every_rule() {
     // Довжина як некваліфіковане число нині не є D24+ арифметикою.
     // Перевіряємо сильніший інваріант: усі правила + первісний порядок.
     let source = r#"
-      (def rules (quote (((p one)) ((q two)) ((r three)))))
+      (визначити rules (як-є (((p one)) ((q two)) ((r three)))))
       (reason-index-candidates
-        (quote (var x))
+        (як-є (var x))
         (reason-make-index rules))
     "#;
     assert_eq!(
@@ -66,8 +66,8 @@ fn variable_goal_falls_back_to_every_rule() {
 fn variable_rule_head_disables_index_instead_of_changing_unification() {
     let mut s = session();
     let source = r#"
-      (def rules
-        (quote
+      (визначити rules
+        (як-є
           (((p one))
            ((var whole-head))
            ((q two)))))
@@ -79,7 +79,7 @@ fn variable_rule_head_disables_index_instead_of_changing_unification() {
 #[test]
 fn too_many_distinct_predicates_fall_back_to_linear_mode() {
     let mut s = session();
-    let mut source = String::from("(reason-index-mode (reason-make-index (quote (");
+    let mut source = String::from("(reason-index-mode (reason-make-index (як-є (");
     for i in 0..65 {
         source.push_str(&format!("((pred{i} value))"));
     }
@@ -193,13 +193,13 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
 fn reason_index_builder_diagnostic_first_failing_stage() {
     let mut s = session();
     let probes = [
-        ("(предикат-терма-міркування (quote (p a)))", "p"),
-        ("(предикат-правила-міркування (quote ((p a))))", "p"),
-        ("(додати-правило-до-оберненого-індексу (quote p) (quote ((p a))) (quote ()))", "((p ((p a))))"),
-        ("(упорядкувати-кошики-індексу-міркування (додати-правило-до-оберненого-індексу (quote p) (quote ((p a))) (quote ())))", "((p ((p a))))"),
-        ("(reason-index-build-scan (quote ()) (quote ()) (quote ()) *reason-index-fuel*)",
+        ("(предикат-терма-міркування (як-є (p a)))", "p"),
+        ("(предикат-правила-міркування (як-є ((p a))))", "p"),
+        ("(додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ()))", "((p ((p a))))"),
+        ("(упорядкувати-кошики-індексу-міркування (додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ())))", "((p ((p a))))"),
+        ("(reason-index-build-scan (як-є ()) (як-є ()) (як-є ()) *reason-index-fuel*)",
          "(reason-index/1 indexed () ())"),
-        ("(reason-make-index (quote (((p a)))))",
+        ("(reason-make-index (як-є (((p a)))))",
          "(reason-index/1 indexed (((p a))) ((p ((p a)))))"),
     ];
     for (probe, expected) in probes {
