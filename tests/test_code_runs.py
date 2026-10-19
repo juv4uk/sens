@@ -1287,9 +1287,9 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
 
     SOURCE = ROOT / "lib" / "core.lisp"
     OLD_CHUNK_CALL = "(quotient (01011 a (100 chunk+mult)) b)"
-    UKR_CHUNK_CALL = "(частка (відняти a (перше chunk+mult)) b)"
+    UKR_CHUNK_CALL = "(частка (відняти ділене (перше chunk+mult)) дільник)"
     OLD_REMAINDER_CALL = "(01011 a (10110 b (quotient a b)))"
-    UKR_REMAINDER_CALL = "(відняти a (помножити b (частка a b)))"
+    UKR_REMAINDER_CALL = "(відняти ділене (помножити дільник (частка ділене дільник)))"
 
     @classmethod
     def _restore(cls, source: str) -> str:
@@ -1329,7 +1329,7 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
         source = self.SOURCE.read_text(encoding="utf-8")
         mutant = source.replace(
             self.UKR_REMAINDER_CALL,
-            "(відняти a (частка b (частка a b)))",
+            "(відняти ділене (частка дільник (частка ділене дільник)))",
             1,
         )
         self.assertNotEqual(mutant, source)
