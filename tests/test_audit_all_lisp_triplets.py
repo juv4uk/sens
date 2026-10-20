@@ -70,10 +70,10 @@ class AllLispTripletCensusTests(unittest.TestCase):
         # Лексичні #| ... |# не створюють виконуваних слів D2/T5M.
         # Дужки та символи старих мов усередині коментаря інертні.
         self.put("lib/опис.lisp",
-                 "#| зовнішній (define fake 1)\\n"
-                 "  #| внутрішній ; () |#\\n"
-                 "  завершення |#\\n; ще опис\\n".replace("\\n", "\n"))
-        self.put("lib/програма.lisp", "(визначити проба так)\\n".replace("\\n", "\n"))
+                 "#| зовнішній (define fake 1)\n"
+                 "  #| внутрішній ; () |#\n"
+                 "  завершення |#\n; ще опис\n")
+        self.put("lib/програма.lisp", "(визначити проба так)\n")
         report = scan(self.root)
         self.assertEqual(report["total_lisp_files"], 2)
         self.assertEqual(report["comment_only_nonprogram_lisp"], 1)
@@ -85,7 +85,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(report["release_ready"])
 
     def test_unclosed_block_comment_is_not_exempted(self):
-        self.put("lib/помилка.lisp", "#| незакритий коментар (визначити проба так)\\n".replace("\\n", "\n"))
+        self.put("lib/помилка.lisp", "#| незакритий коментар (визначити проба так)\n")
         report = scan(self.root)
         self.assertEqual(report["comment_only_nonprogram_lisp"], 0)
         self.assertEqual(report["potential_program_files"], 1)
@@ -95,7 +95,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
 
     def test_executable_code_after_block_comment_still_needs_sens(self):
         self.put("lib/програма.lisp",
-                 "#| інертний опис |#\\n(визначити проба так)\\n".replace("\\n", "\n"))
+                 "#| інертний опис |#\n(визначити проба так)\n")
         report = scan(self.root)
         self.assertEqual(report["comment_only_nonprogram_lisp"], 0)
         self.assertEqual(report["potential_program_missing_sens"], 1)
