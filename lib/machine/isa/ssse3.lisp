@@ -1,4 +1,5 @@
-; SSSE3 instruction-family catalogue. Physical ISA facts only.
+; Каталог машинних команд SSSE3; лише факти фізичної архітектури.
+; Мнемоніки та поля залишаються точними даними ISA.
 
 (isa-catalogue/1
   (extension SSSE3)
