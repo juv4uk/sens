@@ -118,24 +118,24 @@
 ; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
 ; einfach seinen Akkumulator zurück.
 (0011 length-onto
-  (0010 (values acc)
+  (0010 (значення накопичувач)
     (110
-      ((010 values) acc)
-      (t (length-onto (011 values) (01010 acc 1))))))
+      ((010 значення) накопичувач)
+      (t (length-onto (011 значення) (01010 накопичувач 1))))))
 
 (0011 length
-  (0010 (values)
-    (length-onto values 0)))
+  (0010 (значення)
+    (length-onto значення 0)))
 
 (0011 reverse-onto
-  (0010 (values acc)
+  (0010 (значення накопичувач)
     (110
-      ((010 values) acc)
-      (t (reverse-onto (011 values) (111 (100 values) acc))))))
+      ((010 значення) накопичувач)
+      (t (reverse-onto (011 значення) (111 (100 значення) накопичувач))))))
 
 (0011 reverse
-  (0010 (values)
-    (reverse-onto values (001 ()))))
+  (0010 (значення)
+    (reverse-onto значення (001 ()))))
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
@@ -152,35 +152,35 @@
 ; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
 ; Rust-Stack-sicheres append.
 (0011 append
-  (0010 (left right)
-    (reverse-onto (reverse left) right)))
+  (0010 (лівий правий)
+    (reverse-onto (reverse лівий) правий)))
 
 (0011 map-onto
-  (0010 (f values acc)
+  (0010 (перетворення значення накопичувач)
     (110
-      ((010 values) (reverse acc))
-      (t (map-onto f (011 values) (111 (f (100 values)) acc))))))
+      ((010 значення) (reverse накопичувач))
+      (t (map-onto перетворення (011 значення) (111 (перетворення (100 значення)) накопичувач))))))
 
 (0011 map
-  (0010 (f values)
-    (map-onto f values (001 ()))))
+  (0010 (перетворення значення)
+    (map-onto перетворення значення (001 ()))))
 
 (0011 filter-onto
-  (0010 (predicate values acc)
+  (0010 (предикат значення накопичувач)
     (110
-      ((010 values) (reverse acc))
-      ((predicate (100 values)) (filter-onto predicate (011 values) (111 (100 values) acc)))
-      (t (filter-onto predicate (011 values) acc)))))
+      ((010 значення) (reverse накопичувач))
+      ((предикат (100 значення)) (filter-onto предикат (011 значення) (111 (100 значення) накопичувач)))
+      (t (filter-onto предикат (011 значення) накопичувач)))))
 
 (0011 filter
-  (0010 (predicate values)
-    (filter-onto predicate values (001 ()))))
+  (0010 (предикат значення)
+    (filter-onto предикат значення (001 ()))))
 
 (0011 reduce
-  (0010 (f acc values)
+  (0010 (операція накопичувач значення)
     (110
-      ((010 values) acc)
-      (t (reduce f (f acc (100 values)) (011 values))))))
+      ((010 значення) накопичувач)
+      (t (reduce операція (операція накопичувач (100 значення)) (011 значення))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
