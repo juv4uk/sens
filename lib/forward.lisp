@@ -1,68 +1,20 @@
-; Чинний Forward: точні ратифіковані D1–D10 і повна українська проєкція.
-; Активне джерело не використовує історичні SID8/Sens8 і закодовані
-; машинні літерали. D1 так/ні — предикати,
-; десяткові математичні значення — D24+; T5M фізично пакує їх окремо.
-; Deutsch: Kein historischer Byte-Fallback; die Sprache bleibt in SENS.
-; English: No legacy byte execution; exact domains own current behavior.
-; A forward-chaining rule engine (CLIPS-style: working memory of facts +
-; pattern/action rules), the other half of classic symbolic AI from
-; `lib/reason.lisp`'s backward-chaining (Prolog-style) engine. Grown natively
-; in my-lisp instead of embedding the actual CLIPS C library, the same
-; choice this project makes everywhere: reuse the existing kernel
-; (`unify`/`apply-subst` from `lib/unify.lisp`) rather than adding a new
-; dependency or a new Rust primitive.
+; Чинний рушій прямого виведення СЕНС: ратифіковані D1–D10
+; та повна українська проєкція викличних голів.
+; Історичні SID8/Sens8 і закодовані машинні літерали не виконуються.
+; Істина та хиба — точні значення D1; десяткові математичні значення
+; належать D24+, а T5M лише фізично пакує їх.
 ;
-; Step 1 (deliberately small, by explicit agreement before writing this):
-; one working-memory list, and firing exactly *one* rule against exactly
-; *one* fact. No agenda, no fixpoint loop over the whole working memory, no
-; retract, no truth maintenance — those are later steps, each to be agreed
-; on before starting, same as every other step in this project.
+; Рушій працює з пам'яттю фактів і правилами зіставлення та дії,
+; як у CLIPS. Це доповнення до зворотного виведення в lib/reason.lisp.
+; Використано мовні функції уніфікації та підстановки з lib/unify.lisp,
+; без вбудовування бібліотеки CLIPS і без нових примітивів Rust.
 ;
-; A rule is `(pattern template)`: `pattern` may contain `(var name)` logic
-; variables (see `lib/unify.lisp`); `template` is the new fact to produce,
-; typically reusing those same variables so `fire-rule` can substitute in
-; whatever `pattern` bound them to.
+; Перший крок: застосувати одне правило до одного факту.
+; Плану черги, пошуку нерухомої точки, відкликання фактів і підтримки
+; обґрунтувань на цьому кроці немає — це окремі можливості.
+; Правило є парою (шаблон зразок). Шаблон може містити логічні змінні
+; протоколу (var name); зразок підставляє отримані зв'язування.
 ;
-; Рушій forward-chaining (у стилі CLIPS: working memory фактів + правила
-; шаблон/дія) — інша половина класичного символьного AI, ніж
-; backward-chaining (Prolog-подібний) рушій у `lib/reason.lisp`. Вирощений
-; нативно в my-lisp замість вбудовування самої C-бібліотеки CLIPS — той
-; самий вибір, що й скрізь у проєкті: перевикористати наявне ядро
-; (`unify`/`apply-subst` з `lib/unify.lisp`), а не додавати нову залежність чи
-; новий Rust-примітив.
-;
-; Крок 1 (свідомо маленький, за явною домовленістю перед написанням): один
-; список working memory, і застосування рівно *одного* правила до рівно
-; *одного* факту. Без agenda, без fixpoint-циклу по всій working memory,
-; без retract, без truth maintenance — це пізніші кроки, кожен узгоджується
-; окремо перед стартом, як і решта кроків цього проєкту.
-;
-; Правило — це `(pattern template)`: `pattern` може містити логічні змінні
-; `(var name)` (див. `lib/unify.lisp`); `template` — новий факт, зазвичай з
-; тими самими змінними, щоб `fire-rule` міг підставити те, що `pattern`
-; зв'язав.
-;
-; Eine Forward-Chaining-Regel-Engine (im CLIPS-Stil: Working Memory aus
-; Fakten + Muster-/Aktionsregeln) — die andere Hälfte klassischer
-; symbolischer KI neben der Backward-Chaining-Engine (Prolog-artig) in
-; `lib/reason.lisp`. Nativ in my-lisp gewachsen statt die eigentliche
-; CLIPS-C-Bibliothek einzubetten — dieselbe Wahl, die dieses Projekt überall
-; trifft: den vorhandenen Kern wiederverwenden (`unify`/`apply-subst` aus
-; `lib/unify.lisp`) statt eine neue Abhängigkeit oder ein neues Rust-Primitiv
-; hinzuzufügen.
-;
-; Schritt 1 (bewusst klein, nach ausdrücklicher Absprache vor dem
-; Schreiben): eine Working-Memory-Liste, und genau *eine* Regel auf genau
-; *einen* Fakt angewendet. Keine Agenda, keine Fixpunkt-Schleife über die
-; gesamte Working Memory, kein Retract, keine Truth Maintenance — das sind
-; spätere Schritte, jeder einzeln vor Beginn abzustimmen, wie jeder andere
-; Schritt in diesem Projekt.
-;
-; Eine Regel ist `(pattern template)`: `pattern` kann Logikvariablen
-; `(var name)` enthalten (siehe `lib/unify.lisp`); `template` ist der neue zu
-; erzeugende Fakt, typischerweise mit denselben Variablen, damit
-; `fire-rule` einsetzen kann, woran `pattern` sie gebunden hat.
-
 (визначити *робоча-пам'ять* (як-є ()))
 
 (визначити ствердити-факт!
@@ -70,13 +22,11 @@
     (функція (факт)
       (список (як-є визначити) (як-є *робоча-пам'ять*) (список (як-є сполучити) факт (як-є *робоча-пам'ять*))))))
 
-; Tries to unify a rule's pattern against a single fact. On success,
-; returns the rule's template with the resulting bindings substituted in
-; — the new fact this rule application would produce. On failure, returns
-; `'no-match` rather than `'()` — an empty list would be ambiguous with a
-; template that legitimately evaluates to `()`.
-; Мовні зв'язування: правило/факт → шаблон/зразок → зв'язування.
-; Стан середовища та маркер невдачі no-match не змінюються.
+; Зіставляємо шаблон правила з одним фактом. За успіху
+; повертаємо зразок із підставленими зв'язуваннями — новий факт.
+; За невдачі повертаємо протокольний атом no-match, а не порожній
+; список: порожній список може бути коректним результатом правила.
+; Імена та значення зовнішнього протоколу залишаються незмінними.
 (визначити запустити-правило
   (функція (правило факт)
     ((функція (шаблон зразок)
@@ -89,34 +39,13 @@
      (перше правило)
      (друге правило))))
 
-; Step 2: apply one rule to every fact in a list, collecting the new facts
-; it produces. Still just one rule (not the whole rule set) and still no
-; assertion back into `*робоча-пам'ять*` or fixpoint looping — this stays a
-; pure function over an explicit fact list, same shape as `count-usage-list`
-; in `lib/reason.lisp`. `no-match` results are silently dropped, same as a
-; failed match dropping out of `prove-goal`'s search in the backward-chaining
-; engine.
-;
-; Крок 2: застосувати одне правило до кожного факту в списку, зібравши нові
-; факти, які воно породжує. Досі лише одне правило (не весь набір правил) і
-; досі без запису назад у `*робоча-пам'ять*` чи fixpoint-циклу — це чиста
-; функція над явним списком фактів, той самий підхід, що й `count-usage-list`
-; у `lib/reason.lisp`. Результати `no-match` мовчки відкидаються, так само як
-; невдале зіставлення випадає з пошуку `prove-goal` у backward-chaining рушії.
-;
-; Schritt 2: eine Regel auf jeden Fakt einer Liste anwenden und die dabei
-; erzeugten neuen Fakten sammeln. Immer noch nur eine Regel (nicht das ganze
-; Regelwerk) und immer noch keine Rückschreibung in `*робоча-пам'ять*` oder
-; Fixpunkt-Schleife — dies bleibt eine reine Funktion über eine explizite
-; Faktenliste, dieselbe Form wie `count-usage-list` in `lib/reason.lisp`.
-; `no-match`-Ergebnisse werden stillschweigend verworfen, genau wie ein
-; fehlgeschlagener Abgleich aus der Suche von `prove-goal` in der
-; Backward-Chaining-Engine herausfällt.
-; Guards the `eq` with `(atom result)` first, same pattern as `var?` in
-; lib/unify.lisp: `result` is `'no-match` (an atom) on failure, but on success
-; it's whatever `template` was — which may itself be a compound list (e.g.
-; `(has-mass earth)`) — and `eq` errors on non-atom arguments instead of
-; just correctly answering "not the no-match atom".
+; Другий крок: застосувати одне правило до кожного факту списку
+; та зібрати нові факти. Це чиста функція без запису в робочу
+; пам'ять, без обходу всього набору правил і без циклу до стабілізації.
+; Невдалі зіставлення з маркером no-match відкидаються.
+; Перед перевіркою тотожності атома результату потрібно впевнитися,
+; що результат атомарний. Успіх може породити складений список,
+; для якого атомарне порівняння непридатне.
 (визначити запустити-правило-на-факти
   (функція (правило факти)
     (за-умовою
