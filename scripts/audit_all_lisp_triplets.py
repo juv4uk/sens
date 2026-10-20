@@ -15,7 +15,7 @@ import json
 from pathlib import Path
 import sys
 
-from report_ukr_projection_progress import examine_file
+from report_ukr_projection_progress import examine_file, tokenize_lisp
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "sens-all-lisp-reversibility-census/v1"
@@ -83,12 +83,15 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             raise ValueError("механічний свідок не дозволяє семантичний або релізний допуск")
         return codec
 
-    # Коментарний профіль без форм не є програмою. Визнаємо тільки
-    # порожні рядки та ;коментарі, ніякої довільної декларативної
-    # Lisp-форми автоматично до не-програм не зараховуємо.
+    # Лексичний облік, а не підрахунок рядків: вкладені #| ... |#
+    # і ;коментарі не створюють програму, навіть із дужками всередині.
+    # Незакриті коментарі, неправильний UTF-8 і справжні форми
+    # залишаються в обліку потенційних програм, а не звільняються.
     def only_line_comments(file: Path) -> bool:
-        return all(not line.strip() or line.lstrip().startswith(b";")
-                   for line in file.read_bytes().splitlines())
+        try:
+            return not tokenize_lisp(file.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, ValueError):
+            return False
 
     # Не прирівнюємо історичний T5 до сучасного фізичного T5M.
     counts = dict(ukrainian_keyboard=0, with_sens=0, with_view=0,
