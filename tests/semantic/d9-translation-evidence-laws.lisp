@@ -1,7 +1,7 @@
-; D9:000111011 / 000000011 / 000001110.
-; Donor lib/translation.lisp: rejected/ambiguous observations enter a
-; durable journal; accepted knowledge is not a rejection entry.
-; Eight D1:YES witnesses; malformed schema and accepted status are negatives.
+; Вісім мовних свідків дев'ятого домену для журналу перекладів.
+; Відхилені та неоднозначні спостереження фіксуємо окремо;
+; прийняте знання не підміняємо записом відхилення.
+
 (список
   (переклад-доказ-вартий?
     (створити-переклад-перевірка
@@ -37,7 +37,3 @@
         (як-є accepted) (як-є admitted) (як-є пропозиція) (як-є ()))
       (як-є (попередній-доказ)))
     (як-є (попередній-доказ))))
-
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити список list)
-(визначити хибне? not?)
