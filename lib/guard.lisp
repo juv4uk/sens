@@ -2,13 +2,14 @@
 ; Guard не є окремим reasoner-ом: він пакує спостережений стан, чинний
 ; контракт, різницю, вплив, пораду та докази у стабільне WSM-значення.
 ;
-; guard.lisp — shared engineering-advice shape for the owner and agents.
-; Guard is not another reasoner: it packages observed state, the active
-; contract, their difference, impact, guidance, and evidence as one stable
-; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
+; Модуль захисту не створює окремого механізму міркування.
+; Він збирає спостереження, контракт, різницю, вплив, пораду й докази
+; у стале значення СЕНС. Адаптери Rust тільки спостерігають механізми;
+; тлумачення належить самій мові.
 ;
-; Predicate results now use direct typed one-bit W1 projections without ATOM/NOT.
-; Two-field COND only. Width is identity; every bit of the domain address valued.
+; Результати предикатів використовують точну однобітну проєкцію,
+; без підміни через ATOM або NOT. Умови мають рівно два поля.
+; Ширина входить до ідентичності; кожен біт адреси є значущим.
 
 (визначити захист-рішення?
   (функція (рішення)
@@ -28,8 +29,8 @@
       ((тотожне? стан-доказу (як-є broken)) так)
       (так ні))))
 
-; UNKNOWN is a routing state, not a dead end. These routes distinguish
-; distributed local knowledge, owner authority, and external research.
+; Невідомий результат означає потребу в маршрутизації, а не глухий кут.
+; Розрізняємо локальні знання, повноваження власника та зовнішнє дослідження.
 ; UNKNOWN — це стан маршрутизації, а не глухий кут. Маршрути розрізняють
 ; розподілене локальне знання, владу власника і зовнішнє дослідження.
 (визначити захист-невідоме-маршрути
@@ -74,7 +75,7 @@
              ((тотожне? рішення (як-є unknown)) (захист-невідоме-маршрути))
              (так (як-є ())))))))))
 
-; A missing fact is UNKNOWN, never an implicit rejection.
+; Відсутність факту означає невизначеність, а не неявне відхилення.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
 (визначити захист-невідоме
   (функція (предмет відсутні-докази порада)
@@ -89,8 +90,8 @@
       порада
       (як-є ()))))
 
-; Oracle gives expected semantic truth; an observer gives actual truth;
-; Guard explains the relation without replacing either authority.
+; Оракул дає очікувану семантичну відповідь, спостерігач — фактичну.
+; Модуль пояснює відношення між ними, не замінюючи жодного джерела.
 ; Oracle дає очікувану семантику, observer — фактичний стан, Guard пояснює
 ; їхнє співвідношення, не підміняючи жодне джерело.
 
@@ -124,8 +125,8 @@
          (як-є reconcile-observation-with-contract)
          докази)))))
 
-; Synchronization is verified by observed completion and recorded drift.
-; No repository-wide commit freeze or administrative HOLD is required.
+; Синхронізацію підтверджує фактичне завершення й записані розбіжності.
+; Загальне заморожування комітів або адміністративний HOLD не потрібні.
 ; Синхронізація: спочатку фактичне виконання, потім запис змін.
 ; Незалежні коміти не заморожуються; невідоме повертає локальне WARN.
 (визначити захист-синхронізувати-вікно
@@ -184,9 +185,9 @@
          (так (друге запис))))
      (захист-знайти-запис поле (решта посилання)))))
 
-; --- OWNER LANGUAGE FIREWALL 2026-10-16 ---
-; SENS Lisp owns semantics. Zig handles domain-ladder codes. Rust consumes them.
-; Unknown language or wrong role is always rejected.
+; --- Власницька межа дозволених мов, 2026-10-16 ---
+; Семантику визначає Lisp СЕНС, Zig обслуговує коди доменної драбини,
+; а Rust споживає їх. Невідома мова або недозволена роль відхиляється.
 (визначити захист-мова-дозволена?
   (функція (мова роль)
     (за-умовою
@@ -207,7 +208,7 @@
 
 ; D9:000110011 GUARD-SYNC-WINDOW — українська поверхня SENS.
 ; Чинний закон guard-sync-window залишається джерелом семантики;
-; це не host fallback і не direct D9 opcode.
+; це не запасний механізм хоста й не прямий машинний виклик D9.
 (визначити guard-sync-window захист-синхронізувати-вікно)
 
 ; Історичні викличні поверхні Guard — ті самі closure, без дублювання.
