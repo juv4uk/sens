@@ -1,29 +1,27 @@
-; #408 / #305 — preserve the useful law carried by the stale Rust oracle
-; before deleting it. A well-formed explicit negative goal is a valid query;
-; when neither that goal nor its positive counterpart is proved, the current
-; reasoning-honesty contract leaves the observation at empty rather
-; than fabricating epistemic unknown.
-;
-; Ukrainian projection only.
+; Свідчення #408/#305: належна заперечна ціль є допустимим запитом.
+; Якщо не доведено ані заперечення, ані його позитивної форми,
+; спостереження за чинним законом міркування залишається порожнім.
+; Зовнішній виконавець не може вигадувати значення «невідомо».
+; Мітки результату та тестовий вираз є історичними даними протоколу.
 
 (load "lib/unify.lisp")
 (load "lib/reason.lisp")
 (load "lib/result-status.lisp")
 
-(визначити explicit-negative-reason-observe-check
+(визначити перевірити-спостереження-заперечної-цілі
   (функція ()
-    (нехай ((goal (як-є (not? (planet earth))))
-           (actual (reason-observe goal (як-є ())))
-           (expected (як-є ())))
+    (нехай ((ціль (як-є (not? (planet earth))))
+            (фактичне (міркувати-спостерігати ціль (як-є ())))
+            (очікуване (як-є ())))
       (за-умовою
-        ((тотожне? actual expected)
+        ((тотожне? фактичне очікуване)
          (як-є (explicit-negative-reason-observe-witness (status pass))))
         (так
          (список
            (як-є explicit-negative-reason-observe-witness)
            (як-є (status fail))
            (як-є (law explicit-negative-valid-no-evidence-canon-zero))
-           (список (як-є expected) expected)
-           (список (як-є actual) actual)))))))
+           (список (як-є expected) очікуване)
+           (список (як-є actual) фактичне)))))))
 
-(explicit-negative-reason-observe-check)
+(перевірити-спостереження-заперечної-цілі)
