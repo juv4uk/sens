@@ -12,7 +12,7 @@
 (load "lib/machine/dispatch/native-first-execute.lisp")
 (load "lib/machine/dispatch/native-first-parity.lisp")
 
-(0011 native-first-parity-corpus
+(визначити нативний-паритет-корпус
   '
     ((car-cons-u64-zero
        (перше (сполучити 0 1))
@@ -35,23 +35,23 @@
        pure
        not-applicable)))
 
-(0011 native-first-parity-verdicts
-  (native-first-parity-run native-first-parity-corpus))
+(визначити нативний-паритет-вердикти
+  (нативний-паритет-перевірити-корпус нативний-паритет-корпус))
 
-(0011 native-first-parity-witness
-  (0010 ()
-    (110
-      ((11110111 (native-first-parity-all-pass? native-first-parity-verdicts) t)
-       (1)
-       (1110
-         (001 native-first-parity-witness)
-         (001 (status pass))
-         (1110 (001 cases) (000000 native-first-parity-corpus))))
-      ((11110111 (native-first-parity-all-pass? native-first-parity-verdicts) t)
-       (0)
-       (1110
-         (001 native-first-parity-witness)
-         (001 (status fail))
-         (1110 (001 verdicts) native-first-parity-verdicts))))))
+(визначити нативний-паритет-свідок
+  (функція ()
+    (за-умовою
+      ((однакові? (нативний-паритет-усі-вердикти-успішні? нативний-паритет-вердикти) t)
+       (так)
+       (список
+         (як-є нативний-паритет-свідок)
+         (як-є (status pass))
+         (список (як-є cases) (довжина нативний-паритет-корпус))))
+      ((однакові? (нативний-паритет-усі-вердикти-успішні? нативний-паритет-вердикти) t)
+       (ні)
+       (список
+         (як-є нативний-паритет-свідок)
+         (як-є (status fail))
+         (список (як-є verdicts) нативний-паритет-вердикти))))))
 
-(native-first-parity-witness)
+(нативний-паритет-свідок)
