@@ -5,7 +5,7 @@
 //! historical flat W8 slots never supply callability.
 
 use super::{
-    arithmetic, builtins, closures, necessary_forms,
+    builtins, closures, necessary_forms,
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
