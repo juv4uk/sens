@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Fail-closed lexical preflight for SENS Lisp migration patches.
+"""Fail-closed lexical preflight for Ukrainian SENS Lisp migrations.
 
-Uses existing three-pass parser, never a second Lisp reader or domain table.
-A PASS verifies lexical context only, NOT runtime semantic equivalence.
+Uses the existing three-pass parser and ratified domain tables; no new reader.
+Only same-domain same-code call-head rewrites to Ukrainian or exact bits pass.
+A PASS proves lexical identity only, NOT runtime semantic equivalence.
 Use --before old.lisp --after new.lisp or --git-base origin/main.
 """
 from __future__ import annotations
@@ -10,8 +11,8 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+from functools import lru_cache
 from pathlib import Path
-import re
 import subprocess
 import sys
 
@@ -24,16 +25,49 @@ if spec is None or spec.loader is None:
 parser = importlib.util.module_from_spec(spec)
 sys.modules[MODULE] = parser
 spec.loader.exec_module(parser)
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+from domain_tables import read_domain_table
 
 DEFINITIONS = {"00001001", "0011", "DEFINE", "define", "def"}
 LAMBDAS = {"00001000", "0010", "LAMBDA", "lambda"}
 QUOTES = {"00000001", "001", "QUOTE", "quote"}
 LETS = {"001000", "001001", "LET", "LET*", "let", "let*"}
-EXACT_WORD = re.compile(r"[01]{3,9}\Z")
-
-
 class Blocked(ValueError):
     pass
+
+
+@lru_cache(maxsize=1)
+def _ratified_head_spellings():
+    """Перевірка адресної тотожності, а не виконавчий дозвіл SENS.
+
+    D2 — структурні розділювачі, D7 — текст. Неоднозначність = відмова.
+    """
+    by_surface = {}
+    ukrainian_targets = {}
+    for width in (1, 3, 4, 5, 6, 8, 9, 10):
+        for row in read_domain_table(ROOT / "lib" / "domains" / f"d{width}.lisp"):
+            if row.role == "display":
+                continue
+            identity = (row.domain, row.bits)
+            for spelling in (row.uk, row.ukr, row.en, row.lisp, row.bits):
+                if spelling and spelling != "()":
+                    by_surface.setdefault(spelling, set()).add(identity)
+            ukrainian_targets[identity] = frozenset(
+                item for item in (row.uk, row.ukr, row.bits)
+                if item and item != "()"
+            )
+    return by_surface, ukrainian_targets
+
+
+def _assert_same_ratified_head(old: str, new: str) -> None:
+    by_surface, ukrainian_targets = _ratified_head_spellings()
+    common = by_surface.get(old, set()) & by_surface.get(new, set())
+    if len(common) != 1:
+        raise Blocked("call-head identity not preserved: " + old + " -> " + new)
+    identity = next(iter(common))
+    if new not in ukrainian_targets[identity]:
+        raise Blocked("replacement must be ratified Ukrainian or exact-domain code: " + new)
 
 
 def _head(x):
@@ -92,8 +126,7 @@ def _check(old, new, bindings, quoted=False, head=False):
             raise Blocked("non-head atom altered: " + a + " -> " + b)
         if a in bindings:
             raise Blocked("locally bound callable rewritten: " + a + " -> " + b)
-        if not EXACT_WORD.fullmatch(b):
-            raise Blocked("replacement not exact-domain binary: " + b)
+        _assert_same_ratified_head(a, b)
         return
     if isinstance(old, parser.String):
         if old.tok.text != new.tok.text:
