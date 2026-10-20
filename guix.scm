@@ -32,7 +32,7 @@
            ;; Cargo читає vendored crates із .cargo/config.toml; мережа не потрібна.
            (setenv "RUSTFLAGS" "-C linker=gcc")
            (invoke "cargo" "build" "--release" "--offline"
-                   "-p" "sens-cli" "--bin" "sens" "--bin" "my-lisp"
+                   "-p" "sens-cli" "--bin" "sens"
                    "-p" "swarm-node" "--bin" "swarm-node")))
        (replace 'check (lambda _ #t))
        (replace 'install
@@ -40,16 +40,14 @@
            (let* ((out (assoc-ref outputs "out"))
                   (bin (string-append out "/bin")))
              (install-file "target/release/sens" bin)
-             ;; Compatibility surface: не вилучати без окремого рішення контракту.
-             (install-file "target/release/my-lisp" bin)
              (install-file "target/release/swarm-node" bin)))))))
   (native-inputs
    `(("rust" ,rust)
      ("cargo" ,rust "cargo")))
   (synopsis "SENS runtime, CLI and swarm coordination node")
   (description
-   "Hermetic Guix build of the SENS CLI together with its compatibility CLI
-and the swarm-node coordination executable.  Semantic authority remains in
-SENS sources; this package only defines a reproducible execution substrate.")
+   "Hermetic Guix build of the SENS CLI and swarm-node coordination executable.
+   Відтворювана збірка CLI SENS і вузла координації; семантична authority
+   залишається у джерелах SENS.")
   (home-page "https://github.com/juv4uk/sens")
   (license license:expat))

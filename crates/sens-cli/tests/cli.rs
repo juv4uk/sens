@@ -1,6 +1,6 @@
-//! Integration tests for the `my-lisp` CLI binary.
-//! Intehratsiini testy dlia CLI-binarnyka `my-lisp`.
-//! Integrationstests für die `my-lisp`-CLI-Binärdatei.
+//! Integration tests for the `sens` CLI binary.
+//! Intehratsiini testy dlia CLI-binarnyka `sens`.
+//! Integrationstests für die `sens`-CLI-Binärdatei.
 //!
 //! These exercise the compiled binary as a black box (argv in, stdout/stderr/exit
 //! code out) instead of calling internal functions directly, since main.rs itself
@@ -17,17 +17,10 @@
 use std::process::Command;
 
 /// Every test here spawns the compiled binary with the sens repo root as
-/// its working directory, matching how the legacy `my-lisp` binary is actually invoked in
+/// its working directory, matching how the `sens` binary is invoked in
 /// practice (and specifically required by `--oracle-help`, which reads
 /// `knowledge/guard-reference.lisp` relative to the caller's cwd so new
 /// reference entries take effect without a rebuild).
-fn legacy_bin() -> Command {
-    let repo_root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
-    let mut command = Command::new(env!("CARGO_BIN_EXE_my-lisp"));
-    command.current_dir(repo_root);
-    command
-}
-
 fn sens() -> Command {
     let repo_root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
     let mut command = Command::new(env!("CARGO_BIN_EXE_sens"));
@@ -37,7 +30,7 @@ fn sens() -> Command {
 
 #[test]
 fn version_flag_prints_the_crate_version() {
-    let output = legacy_bin()
+    let output = sens()
         .arg("--version")
         .output()
         .expect("binary should run");
@@ -50,31 +43,9 @@ fn version_flag_prints_the_crate_version() {
 }
 
 #[test]
-fn sens_and_my_lisp_binaries_execute_the_same_direct_8_bit_program() {
-    let path = std::env::temp_dir().join("sens-cli-parity-direct-8-bit.lisp");
-    std::fs::write(&path, "(00000001 42)").expect("should write parity fixture");
-
-    let legacy = legacy_bin()
-        .arg(&path)
-        .output()
-        .expect("my-lisp binary should run");
-    let canonical = sens()
-        .arg(&path)
-        .output()
-        .expect("sens binary should run");
-    let _ = std::fs::remove_file(&path);
-
-    assert_eq!(canonical.status.code(), legacy.status.code());
-    assert_eq!(canonical.stdout, legacy.stdout);
-    assert_eq!(canonical.stderr, legacy.stderr);
-    assert!(canonical.status.success());
-    assert_eq!(String::from_utf8_lossy(&canonical.stdout).trim(), "42");
-}
-
-#[test]
 fn short_version_flags_match_the_long_form() {
     for flag in ["-V", "-v"] {
-        let output = legacy_bin().arg(flag).output().expect("binary should run");
+        let output = sens().arg(flag).output().expect("binary should run");
         assert!(output.status.success());
         let stdout = String::from_utf8_lossy(&output.stdout);
         assert_eq!(
@@ -86,15 +57,13 @@ fn short_version_flags_match_the_long_form() {
 
 #[test]
 fn help_flag_prints_usage() {
-    let output = legacy_bin().arg("--help").output().expect("binary should run");
+    let output = sens().arg("--help").output().expect("binary should run");
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Usage: sens [file]"));
-    assert!(stdout.contains(".wsm"));
-    assert!(stdout.contains(".my"));
     assert!(stdout.contains(".lisp"));
     assert!(stdout.contains(".sens"));
-    assert!(stdout.contains(".сенс"));
+    assert!(stdout.contains("physical .sens is packed T5"));
     assert!(stdout.contains("--oracle-check <file|->"));
     assert!(stdout.contains("--core=3|4"));
 }
@@ -136,7 +105,7 @@ fn oracle_check_file_is_agent_friendly_and_side_effect_free() {
     let path = std::env::temp_dir().join("my-lisp-oracle-check-unclosed.lisp");
     std::fs::write(&path, "(def answer (+ 40 2)").expect("should write fixture");
 
-    let output = legacy_bin()
+    let output = sens()
         .args(["--oracle-check", path.to_str().expect("UTF-8 temp path")])
         .output()
         .expect("binary should run");
@@ -157,7 +126,7 @@ fn oracle_check_valid_file_returns_zero_without_evaluating_it() {
     // accept it. This proves the command does not silently become eval.
     std::fs::write(&path, "(not-defined-here 1)").expect("should write fixture");
 
-    let output = legacy_bin()
+    let output = sens()
         .args(["--oracle-check", path.to_str().expect("UTF-8 temp path")])
         .output()
         .expect("binary should run");
@@ -171,7 +140,7 @@ fn oracle_check_valid_file_returns_zero_without_evaluating_it() {
 
 #[test]
 fn oracle_help_lists_curated_agent_tools_from_wsm() {
-    let output = legacy_bin()
+    let output = sens()
         .arg("--oracle-help")
         .output()
         .expect("binary should run");
@@ -184,7 +153,7 @@ fn oracle_help_lists_curated_agent_tools_from_wsm() {
 
 #[test]
 fn oracle_help_explains_one_tool_with_invocation_and_verification() {
-    let output = legacy_bin()
+    let output = sens()
         .args(["--oracle-help", "agent-send"])
         .output()
         .expect("binary should run");
@@ -211,7 +180,7 @@ fn oracle_help_explains_one_tool_with_invocation_and_verification() {
 
 #[test]
 fn oracle_help_explains_a_reference_topic_that_is_not_a_tool() {
-    let output = legacy_bin()
+    let output = sens()
         .args(["--oracle-help", "lsp-server"])
         .output()
         .expect("binary should run");
@@ -231,7 +200,7 @@ fn oracle_help_flags_a_name_present_in_both_directories_as_ambiguous() {
     // a curated tool (guard-script-directory) and a reference topic
     // (guard-reference-directory) use it. This proves guard-ask never
     // silently prefers one -- the caller decides.
-    let output = legacy_bin()
+    let output = sens()
         .args(["--oracle-help", "resource-preflight"])
         .output()
         .expect("binary should run");
@@ -250,7 +219,7 @@ fn oracle_help_flags_a_name_present_in_both_directories_as_ambiguous() {
 
 #[test]
 fn oracle_help_reports_not_found_when_absent_from_both_directories() {
-    let output = legacy_bin()
+    let output = sens()
         .args(["--oracle-help", "definitely-not-a-real-guard-name"])
         .output()
         .expect("binary should run");
@@ -267,7 +236,7 @@ fn running_a_source_file_prints_its_result() {
     let path = dir.join("my-lisp-cli-test-ok.lisp");
     std::fs::write(&path, "(+ 1 2)").expect("should write temp file");
 
-    let output = legacy_bin().arg(&path).output().expect("binary should run");
+    let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
 
     assert!(output.status.success());
@@ -286,7 +255,7 @@ fn textual_compatibility_extensions_do_not_claim_sens_binary_identity() {
         let path = dir.join(format!("my-lisp-cli-test-ext{ext}"));
         std::fs::write(&path, code).expect("should write compatibility source");
 
-        let output = legacy_bin().arg(&path).output().expect("binary should run");
+        let output = sens().arg(&path).output().expect("binary should run");
         let _ = std::fs::remove_file(&path);
 
         assert!(
@@ -351,7 +320,7 @@ fn running_a_file_with_an_evaluation_error_exits_nonzero() {
     let path = dir.join("my-lisp-cli-test-eval-error.lisp");
     std::fs::write(&path, "(car (quote ()))").expect("should write temp file");
 
-    let output = legacy_bin().arg(&path).output().expect("binary should run");
+    let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
 
     assert!(!output.status.success());
@@ -365,7 +334,7 @@ fn running_a_file_with_a_parse_error_exits_nonzero() {
     let path = dir.join("my-lisp-cli-test-parse-error.lisp");
     std::fs::write(&path, "(1 2").expect("should write temp file");
 
-    let output = legacy_bin().arg(&path).output().expect("binary should run");
+    let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
 
     assert!(!output.status.success());
@@ -375,7 +344,7 @@ fn running_a_file_with_a_parse_error_exits_nonzero() {
 
 #[test]
 fn running_a_missing_file_reports_a_read_error() {
-    let output = legacy_bin()
+    let output = sens()
         .arg("this-file-does-not-exist-my-lisp-cli.lisp")
         .output()
         .expect("binary should run");
@@ -401,7 +370,7 @@ fn repl_history_persists_across_separate_sessions() {
     let run = |input: &str| {
         use std::io::Write;
         use std::process::Stdio;
-        let mut child = legacy_bin()
+        let mut child = sens()
             .env("HOME", &dir)
             .env("USERPROFILE", &dir)
             .stdin(Stdio::piped())
@@ -438,7 +407,7 @@ fn repl_echoes_a_lone_unknown_symbol_as_a_greeting_not_an_error() {
     let dir = std::env::temp_dir().join(format!("my-lisp-cli-test-echo-{}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("should create temp home dir");
 
-    let mut child = legacy_bin()
+    let mut child = sens()
         .env("HOME", &dir)
         .env("USERPROFILE", &dir)
         .stdin(Stdio::piped())
@@ -479,7 +448,7 @@ fn file_mode_still_errors_on_a_lone_unknown_symbol() {
     let path = dir.join("my-lisp-cli-test-lone-symbol.lisp");
     std::fs::write(&path, "мама").expect("should write temp file");
 
-    let output = legacy_bin().arg(&path).output().expect("binary should run");
+    let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
 
     assert!(!output.status.success());
@@ -499,7 +468,7 @@ fn read_with_no_arguments_reads_one_line_from_real_stdin() {
     let path = dir.join("my-lisp-cli-test-read-stdin.lisp");
     std::fs::write(&path, "(eval (read))").expect("should write temp file");
 
-    let mut child = legacy_bin()
+    let mut child = sens()
         .arg(&path)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -532,7 +501,7 @@ fn core_lib_is_preloaded_before_running_a_file() {
     let path = dir.join("my-lisp-cli-test-core-lib.lisp");
     std::fs::write(&path, "(identity 5)").expect("should write temp file");
 
-    let output = legacy_bin().arg(&path).output().expect("binary should run");
+    let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
 
     assert!(output.status.success());
@@ -552,7 +521,7 @@ fn argv_carries_everything_after_the_filename() {
     let path = dir.join("my-lisp-cli-test-argv.lisp");
     std::fs::write(&path, "*argv*").expect("should write temp file");
 
-    let output = legacy_bin()
+    let output = sens()
         .arg(&path)
         .arg("0.4.4")
         .arg("extra")
@@ -571,7 +540,7 @@ fn argv_is_empty_when_nothing_follows_the_filename() {
     let path = dir.join("my-lisp-cli-test-argv-empty.lisp");
     std::fs::write(&path, "*argv*").expect("should write temp file");
 
-    let output = legacy_bin().arg(&path).output().expect("binary should run");
+    let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
 
     assert!(output.status.success());
@@ -621,7 +590,7 @@ fn spawn_sexpr_server() -> (std::process::Child, u16) {
     use std::io::BufRead;
     use std::process::Stdio;
 
-    let mut child = legacy_bin()
+    let mut child = sens()
         .args(["--tcp=0", "--protocol=sexpr"])
         .stderr(Stdio::piped())
         .stdout(Stdio::null())

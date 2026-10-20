@@ -5,10 +5,6 @@ edition = "2021"
 license-file = "../../LICENSE"
 
 [[bin]]
-name = "my-lisp"
-path = "src/bin/my-lisp.rs"
-
-[[bin]]
 name = "sens"
 path = "src/main.rs"
 
