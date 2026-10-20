@@ -288,9 +288,15 @@ class EncoderCoverageLispDiagnosticsTests(unittest.TestCase):
                 text = (ROOT / path).read_text(encoding="utf-8")
                 parse(text)  # Відсутність зламаних дужок або рядків.
                 for form in forms:
-                    self.assertEqual(text.count(form), 1, (path, form))
-                    mutant = text.replace(form, "(як-є (пошкоджене-повідомлення))", 1)
-                    self.assertNotIn(form, mutant)
+                    # Додатні й від'ємні випадки перевіряємо за токенами,
+                    # не за форматуванням багаторядкової Lisp-форми.
+                    tokens = re.findall(r"[()]|[^()\\s]+", form)
+                    expression = r"\\s*".join(re.escape(token) for token in tokens)
+                    self.assertEqual(len(re.findall(expression, text)), 1, (path, form))
+                    mutant = re.sub(
+                        expression, "(як-є (пошкоджене-повідомлення))", text, count=1
+                    )
+                    self.assertNotRegex(mutant, expression)
                 self.assertNotIn('(перше (читати-всі "', text)
                 self.assertEqual(text.count("(читати-всі"), file_readers)
                 self.assertIn("(так", text)
