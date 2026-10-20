@@ -77,6 +77,26 @@ class StageTwoProjectionsTests(unittest.TestCase):
             )
             self.assertFalse((mirror / "програма.sens").exists())
 
+    def test_komentari_ne_zminyuyut_programu_i_ne_potraplyayut_u_kodek(self):
+        # Одна програма з різним оформленням дає ту саму точну проєкцію.
+        with tempfile.TemporaryDirectory(prefix="sens-two-comments-") as td:
+            root = Path(td) / "input"
+            root.mkdir()
+            source = root / "branch.lisp"
+            original = ("; Це коментар, а не SENS-команда\\n"
+                        + (ROOT / self.BRANCH).read_text(encoding="utf-8"))
+            source.write_text(original, encoding="utf-8")
+            mirror = Path(td) / "mirror"
+            report = pair.stage(root, mirror, ["branch.lisp"], "current", True)
+            self.assertEqual(report["summary"]["files_created"], 2)
+            self.assertEqual((mirror / "branch.lisp").read_bytes(),
+                             (ROOT / self.BRANCH).read_bytes())
+            self.assertEqual((mirror / "branch").read_bytes(),
+                             (ROOT / self.BRANCH).with_suffix("").read_bytes())
+            self.assertEqual(source.read_text(encoding="utf-8"), original)
+            self.assertFalse((mirror / "branch.sens").exists())
+            self.assertFalse(report["release_admitted"])
+
     def test_preview_creates_nothing(self):
         with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
             mirror = Path(td) / "mirror"

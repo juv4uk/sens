@@ -78,8 +78,9 @@ def prepare(root: Path, supplied: str, source_era: str, maps: tuple) -> dict:
         d9_residents=set(data["domains"].get("D9", {}).get("residents", {})),
     )
     try:
+        source = original.decode("utf-8")
         projection = three_pass.migrate_file(
-            original.decode("utf-8"), resolver, text7, source_surface="укр"
+            source, resolver, text7, source_surface="укр"
         )
         words = projection.split()
         if not words or any(BITS.fullmatch(word) is None for word in words):
@@ -87,8 +88,12 @@ def prepare(root: Path, supplied: str, source_era: str, maps: tuple) -> dict:
         # The existing bounded canonical UK renderer is independent of the
         # physical packing choice: no Zig/T5M encode or decode happens here.
         canonical_uk = canonical_uk_from_words(words)
-        if project_current_uk(canonical_uk) != words:
-            raise ProjectionBlocked("UK -> typed words roundtrip changed identity")
+        # Доказ двосторонній: не можна реконструювати довільно
+        # іншу програму і називати її зворотністю первісного Lisp.
+        # Коментарі й пробіли не є частиною програмної тотожності.
+        if (project_current_uk(source) != words
+                or project_current_uk(canonical_uk) != words):
+            raise ProjectionBlocked("Український Lisp не тотожний точним словам")
         uk = canonical_uk.encode("utf-8")
         view = (" ".join(words) + "\n").encode("ascii")
     except (UnicodeError, ValueError, RecursionError, three_pass.MigrationError) as exc:
