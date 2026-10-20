@@ -38,10 +38,12 @@ def main(argv: list[str] | None = None) -> int:
     s = r.get("summary")
     rows = r.get("files")
     failed = r.get("failed_required")
+    unpaired = r.get("unpaired_lisp_sources")
     keys = (
         "physical_pairs_seen", "physical_blocked", "view_missing",
         "view_invalid_or_unsafe", "view_present_valid",
         "uk_oracle_verified", "release_admitted",
+        "lisp_sources_seen", "lisp_with_physical", "lisp_without_physical",
     )
     if (
         not isinstance(s, dict)
@@ -49,6 +51,14 @@ def main(argv: list[str] | None = None) -> int:
         or not isinstance(rows, list)
         or not isinstance(failed, list)
         or not all(isinstance(item, str) for item in failed)
+        or not isinstance(unpaired, list)
+        or not all(
+            isinstance(item, str) and item.endswith(".lisp")
+            and not item.startswith("/") and "\\\\" not in item
+            and all(part not in ("", ".", "..") for part in item.split("/"))
+            for item in unpaired
+        )
+        or len(set(unpaired)) != len(unpaired)
         or len(rows) != s["physical_pairs_seen"]
         or not all(isinstance(row, dict) for row in rows)
     ):
@@ -56,7 +66,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     physical = s["physical_pairs_seen"]
     if (
-        s["view_present_valid"] + s["view_missing"] + s["view_invalid_or_unsafe"] != physical
+        s["lisp_with_physical"] + s["lisp_without_physical"] != s["lisp_sources_seen"]
+        or s["lisp_with_physical"] > physical
+        or s["lisp_without_physical"] != len(unpaired)
+        or s["view_present_valid"] + s["view_missing"] + s["view_invalid_or_unsafe"] != physical
         or s["physical_blocked"] > s["view_invalid_or_unsafe"]
         or s["uk_oracle_verified"] > physical
         or s["release_admitted"] > physical
@@ -95,6 +108,7 @@ def main(argv: list[str] | None = None) -> int:
             "PHYSICAL_VIEW_ONLY_UK_PENDING",
         )
         or r.get("strict") is not True
+        or s["lisp_without_physical"] != 0
         or s.get("original_executable_migrations_certified") != 0
         or s["uk_oracle_verified"] != 0
         or s["release_admitted"] != 0
@@ -119,6 +133,7 @@ def main(argv: list[str] | None = None) -> int:
         status != 0
         or bool(failed)
         or physical == 0
+        or s["lisp_without_physical"] != 0
         or s["physical_blocked"] != 0
         or s["view_missing"] != 0
         or s["view_invalid_or_unsafe"] != 0
@@ -128,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     if blocked:
         print(
-            "RELEASE_BLOCKED: some packed T5 views are absent/invalid, "
+            "RELEASE_BLOCKED: unpaired Lisp sources, missing/invalid T5 views, "
             "or canonical Ukrainian <-> current semantics and independent "
             "oracle admission for all release-scoped executables remain unproved",
             file=sys.stderr,
