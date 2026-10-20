@@ -1,18 +1,12 @@
-; Experimental immutable filesystem-shaped store for WSM.
-; This is a model of file objects and roots, not a disk driver or POSIX FS.
+; Незмінне файлове сховище СЕНС для WSM — мовна модель об'єктів
+; і кореневих станів, не драйвер диска та не інтерфейс POSIX.
 ;
-; Експериментальне незмінне сховище у формі файлової системи для WSM.
-; Це модель об'єктів і коренів, а не драйвер диска та не POSIX-файлова система.
-;
-; A filesystem snapshot is (fs objects bindings revision). Objects are kept
-; in the existing content-addressed store; bindings map names to addresses.
-; Every write returns a new snapshot and its address. The previous snapshot
-; is never mutated. Missing names return (not-found name), never bare nil.
-;
-; Snapshot: (fs objects bindings revision). Об'єкти живуть у наявному
-; content-store; bindings зіставляє імена з адресами. Кожен запис повертає
-; новий snapshot і адресу, попередній не змінюється. Відсутнє ім'я дає
-; (not-found name), а не голий nil.
+; Знімок файлової системи має протокольну форму
+; (fs objects bindings revision). Об'єкти зберігаються за адресою вмісту;
+; зв'язування зіставляють імена з адресами. Кожен запис повертає
+; новий знімок та адресу й не змінює попереднього стану.
+; Невідоме ім'я дає (not-found name), а не неозначений nil.
+; Англомовні ключі та маркери — дані протоколу, не викличні голови.
 
 ; Міграція трьох селекторів: точна ширина є семантичною адресою.
 ; W8:00000101/00101111/00110000 — лише архівне походження;
@@ -35,10 +29,9 @@
       (список (як-є wsm-fs-root)
             (фс-зв'язки система)))))
 
-; fs-write returns (new-fs content-address). The caller chooses whether to
-; retain the old root, enabling immutable branching and rollback.
-; fs-write повертає (new-fs content-address); викликач сам вирішує, чи
-; зберігати старий корінь, тому branching і rollback лишаються можливими.
+; Запис повертає (new-fs content-address): новий незмінний стан
+; і адресу вмісту. Викликач сам обирає, чи зберегти старий корінь;
+; це дозволяє створювати незалежні гілки стану й відновлювати попередні.
 (визначити фс-записати
   (функція (система назва значення)
     (нехай-похідне ((адреса (знання-вміст-адреса значення)))
@@ -49,8 +42,8 @@
           (додати-1 (фс-ревізія система)))
         адреса))))
 
-; fs-read returns (found value address) or (not-found name).
-; fs-read повертає (found value address) або (not-found name).
+; Читання повертає протокольні дані (found value address)
+; або (not-found name); значення маркерів не перейменовуємо.
 (визначити фс-читати
   (функція (система назва)
     (нехай-похідне ((зв'язок (внутрішня-мапа-отримати назва (фс-зв'язки система))))
@@ -79,9 +72,8 @@
   (функція (система назва)
     (хибне? (атом? (внутрішня-мапа-отримати назва (фс-зв'язки система))))))
 
-; Versioned data-only envelopes. They are ordinary alists and are never
-; evaluated by the filesystem layer.
-; Версіоновані data-only оболонки є звичайними alist і ніколи не виконуються.
+; Версіоновані оболонки є звичайними списками пар із даними.
+; Файлова система не обчислює їх як програмні форми.
 (визначити *fs-format-version* (як-є (ні 1)))
 
 (визначити фс-об'єкт-пакет
@@ -113,13 +105,14 @@
   (функція (значення)
     (хибне? значення)))
 
-; Structural alist lookup derived from D3 pair/atom/EQ and D4 NULL.
-; D5 ASSOC is not the authority for event-envelope field extraction.
-; Keys are atoms; the returned tail is the original value, not an evaluated
-; source form. Unknown and malformed keys have no invented value.
-; Селектори застосовуються лише до перевіреного alist-entry.
-; Некоректні записи ніколи не стають читабельними полями, навіть поза
-; fs-journal-event-decision. Немає host truth і немає нового D24 механізму.
+; Структурний пошук у списку пар похідний від законів D3 і D4.
+; Одна лише резидентність D5 ASSOC не дозволяє обходити перевірку
+; полів оболонки події. Ключі є атомами, а повернений хвіст — це
+; початкове значення даних, а не обчислена вихідна форма.
+; Невідомі й некоректні записи не отримують вигаданих значень.
+; Селектори застосовують лише після перевірки форми пари.
+; Це правило діє і поза рішенням щодо події журналу;
+; істинність належить D1, нового числового механізму D24 немає.
 (визначити фс-пакет-поле
   (функція (назва пакет)
     (за-умовою
@@ -156,11 +149,13 @@
   (функція (текст)
     (рішення-щодо-пакета-об'єкта-файлової-системи (прочитати текст))))
 
-; F2 root envelopes validate their own format/version/revision/bindings/objects.
-; Object-envelope address/value fields do not exist in a root envelope.
-; The historical knowledge proper-list checker returns host T and cannot
-; control exact D3 COND. Derive a local D1 proper-list law: NIL is proper,
-; pair tails recurse, non-NIL atoms are improper.
+; Коренева оболонка F2 перевіряє власні формат, версію, ревізію,
+; зв'язування та об'єкти. Поля адреси й значення об'єктової оболонки
+; не є полями кореневої оболонки.
+; Історичний предикат правильного списку повертав істину хоста;
+; це не дозволено використовувати як результат умови D3.
+; Локальний закон D1: порожній список правильний, для пари
+; перевіряємо хвіст рекурсивно, інші атоми не є правильним списком.
 (визначити внутрішній-правильний-список?
   (функція (значення)
     (за-умовою
@@ -193,15 +188,14 @@
   (функція (текст)
     (рішення-щодо-кореневого-пакета-файлової-системи (прочитати текст))))
 
-; Rebuild an in-memory snapshot from data-only envelopes. No envelope is
-; evaluated. Missing referenced objects are rejected before a snapshot is
-; returned, so reconstruction is atomic from the caller's perspective.
-; Відновлює snapshot із data-only оболонок. Жодна оболонка не виконується.
-; Відсутні object-и відхиляються до повернення snapshot, тому реконструкція
-; атомарна з погляду викликачa.
-; Terminate ONLY at structural NIL. A nonempty proper list must
-; validate and insert every package; a non-NIL atom is rejected. The prior
-; NOT(ATOM packages) branch silently accepted every nonempty list.
+; Відновлюємо знімок у пам'яті лише з оболонок-даних.
+; Жодна оболонка не виконується. Якщо посилання веде на відсутній
+; об'єкт, відновлення відхиляється до повернення стану:
+; викликач бачить атомарний результат.
+; Обхід закінчується лише на структурній порожнечі.
+; Кожен пакет непорожнього правильного списку треба перевірити
+; і додати; непорожній атом відхиляємо. Старий тест заперечення
+; атомарності помилково пропускав будь-який непорожній список.
 (визначити фс-побудувати-об'єкт-сховище
   (функція (пакети сховище)
     (за-умовою
@@ -215,9 +209,10 @@
                  (решта пакети)
                  (вміст-сховище-покласти сховище (друге рішення))))))))))
 
-; All-addresses checks are exact D1 folds: NIL returns YES; improper
-; tails and missing content return NO. No host T, structural EMPTY, or
-; permissive truth coercion may leave these predicates.
+; Перевірки наявності всіх адрес є згортками з точними результатами D1:
+; порожній список дає істину, неправильний хвіст або відсутній
+; вміст — хибу. Не допускаються істина хоста, підміна порожнечею
+; або неявне перетворення довільних значень на предикатний результат.
 (визначити усі-адреси-об'єктів-файлової-системи-наявні?
   (функція (адреси сховище)
     (за-умовою
@@ -272,12 +267,10 @@
            (решта записи)
            (внутрішня-мапа-вставити (перше (перше записи)) (решта (перше записи)) зв'язки))))))
 
-; F3 journal records are data-only append-only events.  Replay starts from
-; fs-empty and returns either (accepted fs) or (rejected reason); unknown or
-; malformed events never become partial state.
-; Журнал F3 — це лише data-only події append-only. Replay починається з
-; fs-empty і повертає (accepted fs) або (rejected reason); невідомі чи
-; пошкоджені події не стають частковим станом.
+; Записи журналу F3 є лише даними, події додаються без стирання історії.
+; Відтворення починається з порожнього стану файлової системи
+; й повертає (accepted fs) або (rejected reason) як дані протоколу.
+; Невідомі та пошкоджені події не можуть створювати частковий стан.
 (визначити *fs-journal-version* (як-є (ні 1)))
 
 (визначити фс-журнал-подія
@@ -314,10 +307,11 @@
   (функція (журнал подія)
     (приєднати журнал (список подія))))
 
-; Journal validation is a D1-controlled Lisp derivation, not borrowed D8
-; EQUAL/AND/OR. Field existence is checked separately from field value so
-; storing literal EMPTY does not turn a valid WRITE into a missing field.
-; Exact D1:1/0. Не довіряємо nested CAR без перевірки форми.
+; Перевірка журналу — мовне виведення з точною істинністю D1,
+; без запозичення недоведеної викличності похідних операцій D8.
+; Наявність поля перевіряється окремо від його значення:
+; структурна порожнеча, записана в поле, не означає відсутності поля.
+; Перед вкладеними селекторами завжди перевіряємо форму даних.
 (визначити фс-пакет-має-поле?
   (функція (назва пакет)
     (за-умовою
@@ -329,8 +323,9 @@
       ((тотожне? назва (перше (перше пакет))) так)
       (так (фс-пакет-має-поле? назва (решта пакет))))))
 
-; F3 uses exactly the two-element atomic version (0 1). The tests are
-; shape-bounded before CAR/CDR and every branch returns an exact D1 bit.
+; Версія F3 складається рівно з двох атомарних елементів (0 1).
+; Перед селекторами перевіряємо форму, а кожна гілка повертає
+; точне предикатне значення D1.
 (визначити фс-версія-журналу-чинна?
   (функція (кандидат)
     (за-умовою
@@ -414,8 +409,9 @@
       (фс-зв'язки-без-імені (внутрішня-мапа-список (фс-зв'язки система)) назва мапа-порожній)
       (додати-1 (фс-ревізія система)))))
 
-; Root-commit equivalence over immutable trees, derived from D3
-; ATOM/EQ/CAR/CDR and D4 NULL; returns exact D1 at every recursion level.
+; Тотожність зафіксованих коренів незмінних дерев випливає
+; зі структурних законів D3 і D4; кожен рівень рекурсії
+; повертає точне предикатне значення D1.
 (визначити внутрішня-рівність-структур
   (функція (ліве праве)
     (за-умовою
@@ -491,11 +487,10 @@
   (функція (текст)
     (фс-журнал-повторити (прочитати текст))))
 
-; F4 commit boundary model. Objects and journal may be written first, but a
-; snapshot becomes visible only when the root-pointer stage completes.
-; Модель межі commit F4. Objects і journal можна записати раніше, але
-; snapshot стає видимим лише після завершення root-pointer.
-; Commit-stage membership returns exact D1, never host T or implicit NIL.
+; Межа фіксації F4: об'єкти та журнал дозволено записати раніше,
+; але знімок стає видимим лише після завершення етапу кореневого
+; покажчика. Перевірка допустимості етапу повертає точне D1,
+; а не істину хоста чи неявну порожнечу.
 (визначити фс-етап-коміту?
   (функція (етап)
     (за-умовою
@@ -524,8 +519,9 @@
              (список (як-є recovered) пакет-кандидат))
             ((атом? ()) (список (як-є recovered) старий-пакет (як-є rejected-candidate)))))))))
 
-; Ratified D9 exact-width FS surfaces; donor closures above own semantics.
-; The file system here is immutable SENS data, not a host syscall or new opcode.
+; Ратифіковані дев'ятибітні українські проєкції файлової системи D9.
+; Їхні закони визначені мовними замиканнями вище, а не викликами
+; хоста чи новими машинними операціями.
 ; D9:001010000
 (визначити fs-objects фс-об'єкти)
 ; D9:010000001
@@ -551,8 +547,9 @@
 ; D9:001111100
 (визначити fs-serialize-journal фс-серіалізувати-журнал)
 
-; D9 canonical Ukrainian SENS aliases for persistent functional FS laws.
-; No unqualified domain conversion, new machine mechanisms or host I/O path.
+; Канонічні українські назви D9 для похідних функцій сховища.
+; Жодного неявного перетворення доменів, нових машинних
+; механізмів або обходу мовної семантики через ввід-вивід хоста.
 ; D9:010000010
 (визначити fs-write фс-записати)
 ; D9:010110011
