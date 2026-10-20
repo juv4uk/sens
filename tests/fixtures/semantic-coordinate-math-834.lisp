@@ -3,23 +3,23 @@
 ; The Rust observer checks only structure and the named pass envelope.
 (load "lib/core.lisp")
 
-(def semantic-coordinate-math-834
+(визначити semantic-coordinate-math-834
   (функція ()
     (за-умовою
-      ((equal? (+ 1/3 1/6) 1/2)
+      ((однакові? (+ 1/3 1/6) 1/2)
        (як-є (structural-relation same))
        (за-умовою
-         ((equal? (тотожне? (як-є radio) (як-є radio))
+         ((однакові? (тотожне? (як-є radio) (як-є radio))
                   (як-є (identity-relation same)))
           (як-є (structural-relation same))
           (за-умовою
-            ((equal? (сполучити 41 42) (як-є (41 . 42)))
+            ((однакові? (сполучити 41 42) (як-є (41 . 42)))
              (як-є (structural-relation same))
              (за-умовою
-               ((equal? (перше (сполучити 41 42)) 41)
+               ((однакові? (перше (сполучити 41 42)) 41)
                 (як-є (structural-relation same))
                 (за-умовою
-                  ((equal? (решта (сполучити 41 42)) 42)
+                  ((однакові? (решта (сполучити 41 42)) 42)
                    (як-є (structural-relation same))
                    (як-є
                      (semantic-coordinate-math-834
