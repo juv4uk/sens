@@ -1,28 +1,29 @@
-; #211 — replaceability witness.
-; CI runs this after physically moving lib/machine out of the checkout.
-; Ukrainian projection only: no SID8 binary call heads, no #b machine width tags.
-; Exact decimal arithmetic and D3 surfaces.
+; Свідчення #211: СЕНС має працювати без машинного каталогу.
+; Цей файл виконується після фізичного вилучення lib/machine з робочого дерева.
+; Перевіряються десяткова арифметика та операції третього домену.
+; Результат має точну цитовану структуру; зовнішній виконавець
+; лише звіряє її з очікуваним записом, не встановлюючи семантику.
 
-(визначити machine-replaceability-add
+(визначити машинозамінність-сума
   (додати 2 3))
 
-(визначити machine-replaceability-eq-cond
+(визначити машинозамінність-рівність-умова
   (за-умовою
     ((тотожне? 2 2)
      111)))
 
-(визначити machine-replaceability-car-cons
+(визначити машинозамінність-перше-сполучення
   (перше (сполучити 2 3)))
 
-; Every assertion is a strict one-clause COND. If any assertion is NO, COND
-; yields (), so the shell's exact pass-envelope check fails closed.
-(визначити machine-replaceability-verdict
+; Кожна перевірка має одну умовну гілку.
+; Якщо перевірка хибна, успішний результат не утворюється.
+(визначити висновок-машинозамінності
   (за-умовою
-    ((тотожне? machine-replaceability-add 5)
+    ((тотожне? машинозамінність-сума 5)
      (за-умовою
-       ((тотожне? machine-replaceability-eq-cond 111)
+       ((тотожне? машинозамінність-рівність-умова 111)
         (за-умовою
-          ((тотожне? machine-replaceability-car-cons 2)
+          ((тотожне? машинозамінність-перше-сполучення 2)
            (як-є (machine-replaceability-witness (status pass))))))))))
 
-machine-replaceability-verdict
+висновок-машинозамінності
