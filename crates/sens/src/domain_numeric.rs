@@ -587,7 +587,7 @@ mod tests {
             let v = |data: &[u8]| signed(width, data);
             let verify = |op: &str, a: &[u8], b: &[u8], result_width: usize,
                           expected: Vec<u8>| {
-                let Value::BinaryNumber(n) = compute(op, &v(a), &v(b)).expect("точна сума Dn") else {
+                let Value::BinaryNumber(ref n) = compute(op, &v(a), &v(b)).expect("точна сума Dn") else {
                     panic!("результат має бути цілим");
                 };
                 assert_eq!(n.numeric_domain_width(), Some(result_width));
@@ -644,7 +644,7 @@ mod tests {
                 else if a.unsigned_abs() <= (1 << 32) && b.unsigned_abs() <= (1 << 32) {
                     assert_eq!(got, (a*b).to_string());
                 }
-                let Value::BinaryNumber(bits) = actual else { panic!("D96 or D192") };
+                let Value::BinaryNumber(ref bits) = actual else { panic!("D96 or D192") };
                 let w = bits.numeric_domain_width().unwrap();
                 assert!(w == 96 || w == 192);
                 assert_eq!(bits.exact_numeric_domain_bits().unwrap().len(), w);
@@ -653,7 +653,7 @@ mod tests {
             }
         }
         let big = compute("*", &word(96,MIN), &word(96,MIN)).unwrap();
-        let Value::BinaryNumber(big_word) = big else { panic!("D192 full word"); };
+        let Value::BinaryNumber(ref big_word) = big else { panic!("D192 full word"); };
         assert_eq!(big_word.numeric_domain_width(), Some(192));
         let bits = big_word.exact_numeric_domain_bits().unwrap();
         assert_eq!(bits.iter().filter(|&&x| x == 1).count(), 1);
@@ -677,7 +677,7 @@ mod tests {
                 for (op, oracle) in [("+", a + b), ("-", a - b)] {
                     let result = compute(op, &word(96, a), &word(96, b)).unwrap();
                     assert_eq!(result.to_string(), oracle.to_string());
-                    let Value::BinaryNumber(bits) = result else { panic!("integer D96/D192") };
+                    let Value::BinaryNumber(ref bits) = result else { panic!("integer D96/D192") };
                     let limit = 1_i128 << 95;
                     let width = if (-limit..=limit - 1).contains(&oracle) { 96 } else { 192 };
                     assert_eq!(bits.numeric_domain_width(), Some(width));
@@ -706,7 +706,7 @@ mod tests {
                                     ("*", i128::from(a) * i128::from(b))] {
                     let output = compute(op, &make(48, i128::from(a)), &make(48, i128::from(b))).unwrap();
                     assert_eq!(output.to_string(), oracle.to_string());
-                    let Value::BinaryNumber(word) = output else { panic!("D48/D96 word"); };
+                    let Value::BinaryNumber(ref word) = output else { panic!("D48/D96 word"); };
                     let limit = 1_i128 << 47;
                     let w = if (-limit..=limit - 1).contains(&oracle) { 48 } else { 96 };
                     assert_eq!(word.numeric_domain_width(), Some(w));
