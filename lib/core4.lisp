@@ -819,8 +819,8 @@
   (функція (аргумент-х)
     (перше (решта (решта (решта аргумент-х))))))
 
-; Canonical D6 name projections for the already-defined four-step selectors.
-; These are ordinary Lisp aliases to D3 CAR/CDR closures, not direct D6 opcode admission.
+; Канонічні українські назви D6 для вже визначених чотирикрокових селекторів.
+; Це звичайні посилання на замикання D3 CAR/CDR, не прямий допуск коду D6.
 (визначити рппп р-п-п-п)
 (визначити решта-перше-перше-перше р-п-п-п)
 (визначити cdaaar р-п-п-п)
@@ -998,12 +998,12 @@
 ; D1 bits stay predicates at the boundary; base-3 math uses D24 trits.
 (визначити т5м-д24-тріт
   (функція (значення)
-    ; Input is a D1 PredicateBit, so use it as control, never as a number.
+    ; Вхід — точний біт предиката D1, керує вибором, а не є числом.
     (за-умовою
       (значення 1)
       (так 0))))
 
-; Decoder exposes D1 bits again, not D24 surrogate bits.
+; Декодер повертає біти D1, а не числові замінники D24.
 (визначити т5м-біт-д1
   (функція (значення)
     (за-умовою
@@ -1413,7 +1413,7 @@
 ; Закон: [b0,b1,b2] = [0,0,0]; для тріта t повторити V := 3V+t.
 ; T5M three-byte streaming step. Direct D4 LAMBDA applications bind v0/v1/v2;
 ; LET macro projection is not an authority for domain-qualified numbers.
-; Each step is exact D24: (3 × byte + trit + previous carry).
+; Кожен крок виконує точну арифметику D24: 3 × байт + тріт + попереднє перенесення.
 (визначити т5м-байтовий-крок
   (функція (тріт байти)
     (т5м-байтовий-крок-другий
@@ -2226,8 +2226,9 @@
     (решта (перше (перше (перше (решта (решта (решта значення)))))))))
 
 ; D8:00010111 PLUSP / D8:11111010 MINUSP: strict signs on D24+ values.
-; Numeric zero is derived as D5:01011 DIFFERENCE(x,x), never an unqualified literal.
-; These are SENS-owned derived definitions, not direct D8 call-head admission.
+; Числовий нуль виводимо як D5:01011 DIFFERENCE(x,x),
+; а не як некваліфікований літерал.
+; Ці функції визначені мовою СЕНС і не допускають прямої викличної голови D8.
 (визначити додатне?
   (функція (аргумент-х) (менше? (відняти аргумент-х аргумент-х) аргумент-х)))
 (визначити від'ємне?
@@ -2312,11 +2313,11 @@
      (відобразити дія елементи))))
 
 ; D9:010011100 CANON-LAW-CAR-CONS — D3 projection of pair head.
-; For an atomic witness, EQ(CAR(CONS(a,b)), a) = D1:1.
+; Для атомарного свідка EQ(CAR(CONS(a,b)), a) повертає точну істину D1.
 ; D9:001000110 CANON-LAW-CDR-CONS — D3 projection of pair tail.
 ; D9:010000111 CANON-LAW-ATOM-CONS — NOT(ATOM(CONS(a,b))) = D1:1.
-; Owner-ratified names in D9 (#4008); these are derived SENS witnesses,
-; not independent primitive laws and not direct D9 code-call admission.
+; Імена D9 ратифіковані власником у #4008.
+; Це похідні свідки СЕНС, не незалежні примітиви й не прямий виклик коду D9.
 (визначити канон-закон-перше-пара
   (функція (ліве праве)
     (тотожне? (перше (сполучити ліве праве)) ліве)))
@@ -2341,7 +2342,7 @@
       (так так))))
 
 ; D9:010000000 CDR-PROPER. Observational equality of the proper list tail.
-; The only construction/deconstruction is ratified D3 CONS/CDR.
+; Створення та розбір структури виконують лише ратифіковані CONS/CDR домену D3.
 (визначити канон-закон-решта-правильний
   (функція (голова хвіст)
     (однакові? (решта (сполучити голова хвіст)) хвіст)))
@@ -2353,8 +2354,9 @@
     (тотожне? (решта (сполучити голова хвіст)) хвіст)))
 
 ; D9:001110010 CANON-LAW-EQ-REFLEXIVE-ATOM — owner #4008.
-; Atom(x) => EQ(x,x)=D1:1. Pair carrier rejected via CAR(D3:000).
-; Lower D3 laws only; no new D9 call mechanism or independent primitive.
+; Для атома x рівність EQ(x,x) дає точну істину D1.
+; Непридатний носій пари відхиляє CAR(D3:000).
+; Використовуємо лише нижчі закони D3, без нової викличності D9 чи примітива.
 (визначити канон-закон-рівність-рефлексивний-атом
   (функція (значення)
     (за-умовою
@@ -2363,8 +2365,8 @@
 
 ; D9 Canon law harvest from lib/canon.lisp (owner-ratified D9 #4008).
 ; D9:001111001 CANON-EMPTY-LIST is structural D3:000, never D1:0.
-; The following D9 laws return the donor's explicit three-field result
-; (canon-law-result law status), not a coerced truth value or a new primitive.
+; Наведені закони D9 повертають явний результат джерела з трьома полями:
+; (canon-law-result закон стан), а не приведену істину чи новий примітив.
 (визначити канон-порожній-список (як-є ()))
 
 (визначити канон-запис-закону
@@ -2382,7 +2384,7 @@
        (канон-запис-закону (як-є empty-list) (як-є violated))))))
 
 ; D9:010111100 CANON-LAW-QUOTE-SUPPRESSES-EVALUATION.
-; Undefined names remain quoted data, never an evaluated lookup.
+; Невизначені імена залишаються цитованими даними й не шукаються в оточенні.
 (визначити канон-закон-цитування-пригнічує-обчислення
   (функція ()
     (за-умовою
@@ -2395,7 +2397,7 @@
          (як-є quote-suppresses-evaluation) (як-є violated))))))
 
 ; D9:010101100 CANON-LAW-COND-FIRST-MATCH-SHORT-CIRCUIT.
-; An unselected undefined test must not execute.
+; Невибрана умовна гілка з невизначеним тестом не повинна виконуватися.
 (визначити канон-закон-умова-перший-збіг-короткий-ланцюг
   (функція ()
     (за-умовою
