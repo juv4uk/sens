@@ -1,17 +1,17 @@
 ; Санскритська проєкція канонічних примітивів і похідної лексики ядра.
 ; संस्कृत-पृष्ठम् — санскритська мовна проєкція.
 ;
-; Canon 0+7 names are NOT defined here. The immutable Canon resolver owns the
-; ratified Sanskrit spellings directly, before ordinary lexical lookup.
-; Everything below Canon remains language-owned aliases over the same semantic
-; environment, except identities migrated under ADR-007: those peer spellings
-; are installed directly by the runtime and are not defined here.
+; Імена Канону 0+7 тут НЕ визначаються. Незмінний канонічний розв'язувач
+; розпізнає ратифіковані санскритські назви перед звичайним пошуком імен.
+; Поза Каноном мова визначає псевдоніми тих самих семантичних
+; сутностей. Виняток — тотожності ADR-007: їхні рівноправні назви
+; надає сам виконавець, тому тут їх не перевизначаємо.
 ;
 ; Принцип: одна семантична реалізація, кілька людських проєкцій.
 ;
-; Status legend:
-;   stable    — ratified against primary sources (Canon 0+7 calibration doc)
-;   candidate — proposed in Batch 1 research, pending ratification
+; Пояснення станів:
+;   stable    — ратифіковано за першоджерелами калібрування Канону 0+7
+;   candidate — дослідницька пропозиція, що очікує ратифікації
 ;
 ; Порядок завантаження повного профілю: macro.lisp → core.lisp → unify.lisp → reason.lisp →
 ; forward.lisp → knowledge.lisp → persistent-map.lisp → persistent-vector.lisp →
@@ -22,73 +22,73 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; svarūpa, aṇu, abheda, saṃyuj, ādi, śeṣa, anukrama
-; are reserved Canon spellings and are intentionally not ordinary bindings.
+; — зарезервовані написання Канону, а не звичайні зв'язування.
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 1 — арифметика (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; ADR-007/008 / 0104, 1001–1003: yoga, viyoga, guṇana and haraṇa
-; are ratified stable peers installed directly by the runtime together with
-; Ukrainian and symbolic spellings. None is defined through another surface.
-; rūpa = absolute value (candidate — polysemous)
+; — ратифіковані рівноправні назви, які виконавець встановлює разом
+; з українськими й символьними, а не через іншу мовну проєкцію.
+; rūpa — модуль числа (кандидат; багатозначне слово).
 (визначити rūpa модуль)
-; alpatara = least (alpa + -tara comparative)
+; alpatara — найменше (alpa + порівняльний суфікс -tara).
 (визначити alpatara найменше)
-; brhattara = greatest (bṛhat + -tara comparative)
+; brhattara — найбільше (bṛhat + порівняльний суфікс -tara).
 (визначити brhattara найбільше)
-; avasiṣṭa = remainder (ava-śiṣ; ≠ śeṣa CDR)
+; avasiṣṭa — модульна остача (ava-śiṣ; не śeṣa — CDR).
 (визначити avasiṣṭa модульна-остача)
-; bhāga = quotient (result of division)
+; bhāga — частка від ділення.
 (визначити bhāga частка)
-; mūla = square root
+; mūla — квадратний корінь.
 (визначити mūla корінь)
-; sakalamūla = integer square root
+; sakalamūla — цілочисельний квадратний корінь.
 (визначити sakalamūla цілий-корінь)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 1 — порівняння (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; ADR-007/008 / 1014–1016: hīna?, adhika? and sama? are ratified
-; stable peers installed directly by the runtime with UK and symbolic names.
-; na-adhika = not-greater (compound)
+; ADR-007/008 / 1014–1016: hīna?, adhika? та sama? ратифіковано;
+; виконавець надає їх поряд з українськими й символьними назвами.
+; na-adhika — не більше (складене слово).
 (визначити na-adhika? не-більше?)
-; na-hīna = not-lesser (compound)
+; na-hīna — не менше (складене слово).
 (визначити na-hīna? не-менше?)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 1 — предикати (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; na = not (universal negation)
-; tulya = structurally equal (≠ abheda eq, sama =)
+; na — загальне заперечення.
+; tulya — структурна рівність (не abheda/eq і не sama/=).
 (визначити tulya? однакові?)
-; nāman = symbol/name (Pāṇini 1.1.62)
+; nāman — символ/ім'я (Паніні 1.1.62).
 (визначити nāman? символ?)
-; śabda = string/text
+; śabda — рядок/текст.
 (визначити śabda-hīna? текст-передує?)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 1 — списки (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; śreṇī = ordered sequence
+; śreṇī — упорядкована послідовність.
 (визначити śreṇī список)
-; pramāṇa = measure/quantity
+; pramāṇa — міра/кількість.
 (визначити pramāṇa довжина)
-; saṅkalana = collection (≠ saṃyuj CONS)
+; saṅkalana — збирання (не saṃyuj — CONS).
 (визначити saṅkalana приєднати)
-; viloma = reverse order
+; viloma — зворотний порядок.
 (визначити viloma зворот)
-; kramāṅka = ordinal number (candidate)
+; kramāṅka — порядковий номер (кандидат).
 (визначити kramāṅka елемент-списку-за-індексом)
-; sambaddha = included/bound (candidate)
+; sambaddha — належність до набору (кандидат).
 (визначити sambaddha? значення-у-списку?)
-; saṃbandha = relation/connection
+; saṃbandha — зв'язок/відношення.
 (визначити saṃbandha знайти-за-ключем)
 ; «dvandva» лишається назвою проєкції у реєстрі поверхонь.
-; Тут не створюємо викличний alias: доменна identity сама не дає допуску.
+; Тут не створюємо викличного псевдоніма: сама доменна тотожність не дає допуску.
 ; Порядкові селектори повертають елемент, а не хвіст списку.
 (визначити dvitīya друге)
 (визначити tṛtīya третє)
@@ -99,68 +99,68 @@
 ;; Добірка 1 — функції вищого порядку (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; āvartana = repeated application (candidate — no direct traditional source)
+; āvartana — повторне застосування (кандидат; прямого традиційного джерела немає).
 (визначити āvartana відобразити)
-; kalpana = selection/postulation (Mīmāṃsā)
+; kalpana — добір/припущення (Міманса).
 (визначити kalpana відсіяти)
-; saṅgraha = comprehension/collection
+; saṅgraha — згортання/збирання.
 (визначити saṅgraha згорнути)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 1 — рядки (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; śabdasaṃyoga = joining of words (≠ saṃyuj CONS)
-; śūnya = empty/void
-; pūrva = preceding (≠ ādi CAR)
-; prathamavarṇa = first letter (≠ ādi CAR)
-; śeṣavarṇa = rest of letters (≠ śeṣa CDR)
-; cheda = cut/slice
+; śabdasaṃyoga — поєднання слів (не saṃyuj — CONS).
+; śūnya — порожнеча.
+; pūrva — попередній (не ādi — CAR).
+; prathamavarṇa — перша літера (не ādi — CAR).
+; śeṣavarṇa — решта літер (не śeṣa — CDR).
+; cheda — розріз/зріз.
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 1 — інші (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; svabhāva = own nature/identity (≠ svarūpa QUOTE)
+; svabhāva — власна природа/тотожність (не svarūpa — QUOTE).
 (визначити svabhāva тотожність)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 2 — введення/виведення (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; mudraṇa = impression/printing
-; darśana = showing/display
-; pāṭhana = reading
-; likhana = writing
-; vicāraṇa = deliberation/evaluation
-; āśraya = substrate/environment
+; mudraṇa — друк.
+; darśana — показ.
+; pāṭhana — читання.
+; likhana — запис.
+; vicāraṇa — міркування/обчислення.
+; āśraya — основа/середовище.
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 2 — вектори (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; samūha = collection/aggregate
+; samūha — зібрання/сукупність.
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 2 — перетворення (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; saṅkhyā-śabda = number-to-word
+; saṅkhyā-śabda — число в текст.
 (визначити saṅkhyā-śabda число-рядок)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 2 — час (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; kāla = time
+; kāla — час.
 (визначити kāla-adya узгоджений-час-зараз)
 (визначити kāla-mono-ms монотонний-мс)
 (визначити kāla-millisecondāni мілісекунди-з-наносекунди)
-; deśa-kāla = timezone
+; deśa-kāla — часовий пояс.
 (визначити deśa-kāla-nāma часовий-пояс-ім'я)
 (визначити deśa-kāla-jñāna часовий-пояс-визначити)
 (визначити deśa-kāla-śeṣa часовий-пояс-зсув-секунди)
-;avadhi = deadline
+; avadhi — крайній термін.
 (визначити avadhi-gatā? крайній-час-досягнуто?)
 (визначити avadhi-gatā-kadā? крайній-час-досягнуто-у?)
 (визначити avadhi-nirmāṇa крайній-час-з)
@@ -171,7 +171,7 @@
 ;; Добірка 2 — незмінна мапа (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; kośa = repository/map
+; kośa — сховище/мапа.
 (визначити kośa-śūnya мапа-порожній)
 (визначити kośa-grahaṇa мапа-отримати)
 (визначити kośa-niveśana мапа-вставити)
@@ -193,17 +193,17 @@
 ;; Добірка 2 — знання й міркування (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; jñāna = knowledge
+; jñāna — знання.
 (визначити jñāna-satya? є-факт?)
 (визначити varṇana описати)
 (визначити jñāna-saṅgraha зібрати-факти-про)
 (визначити aṇu-sambaddha? містить-атом?)
-; abhimukha = forward
+; abhimukha — пряме виведення.
 (визначити abhimukha-anumāna вперед-у)
-; anumāna = inference
+; anumāna — висновок.
 (визначити anumāna міркувати-у)
 (визначити virodha-parīkṣā перевірити-конфлікт)
-; pramāṇa-siddhi = proof
+; pramāṇa-siddhi — доказ.
 (визначити siddhi-sādhana довести-ціль)
 (визначити siddhi-sādhana-sarva довести-цілі)
 (визначити siddhi-vyākhyā пояснити-доказ)
@@ -218,24 +218,24 @@
 (визначити cihna? змінна?)
 (визначити pratyāroha застосувати-підстановка)
 (визначити vicāraṇa-gamana пройти)
-(визначити parivṛtti-parīkṣā occurs-check)
+(визначити parivṛtti-parīkṣā входить-перевірити?)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Добірка 2 — епістеміка (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; pratyaya = claim/conviction
+; pratyaya — твердження/переконання.
 (визначити pratyaya? твердження?)
 (визначити pratyaya-vākya твердження-твердження)
 (визначити pratyaya-parīkṣā твердження-перевірка)
-; pramāṇa = evidence
+; pramāṇa — доказ.
 (визначити pramāṇa? доказ?)
 (визначити pramāṇa-vidhi доказ-метод)
 (визначити pramāṇa-phala доказ-підсумок)
-; pratyakṣa = observation
+; pratyakṣa — спостереження.
 (визначити pratyakṣa? спостереження?)
 (визначити pratyakṣa-vākya спостереження-твердження)
-; saṅkalpa = intent
+; saṅkalpa — намір.
 (визначити saṅkalpa? намір?)
 (визначити saṅkalpa-lakṣya намір-ціль)
 (визначити sahāya-pramāṇa підтверджувальний-доказ)
@@ -244,5 +244,5 @@
 ;; Добірка 2 — доповнення санскритської проєкції (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-; nāman-nirmāṇa = name generation
+; nāman-nirmāṇa — утворення імен.
 (визначити nāman-nirmāṇa створити-символ)
