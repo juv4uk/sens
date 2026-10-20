@@ -27,7 +27,7 @@ class BinarySourceExtensionsTests(unittest.TestCase):
             with self.subTest(source=relative):
                 path = ROOT / relative
                 source = path.read_text(encoding="ascii")
-                self.assertTrue(re.fullmatch(r"[01\\s]+", source))
+                self.assertTrue(re.fullmatch(r"[01\s]+", source))
                 words = source.split()
                 self.assertTrue(words)
                 self.assertTrue(all(1 <= len(word) <= 11 for word in words))
@@ -45,7 +45,7 @@ class BinarySourceExtensionsTests(unittest.TestCase):
                 continue
             with self.subTest(source=path.relative_to(ROOT).as_posix()):
                 source = path.read_text(encoding="utf-8")
-                self.assertFalse(re.fullmatch(r"[01\\s]+", source),
+                self.assertFalse(re.fullmatch(r"[01\s]+", source),
                                  "для точних бітових слів призначено .bits")
 
 
