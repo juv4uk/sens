@@ -31,6 +31,8 @@ unsafe extern "C" {
     fn sens_i24_sub_exact(left: i64, right: i64) -> i64;
     fn sens_i24_mul_exact(left: i64, right: i64) -> i64;
     fn sens_i48_mul_exact(left: i64, right: i64, high: *mut i64) -> i64;
+    fn sens_i96_add_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
+    fn sens_i96_sub_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
 }
 
 /// Цілочисельний механізм для рівно двох НАЯВНИХ знакових слів D24.
@@ -97,6 +99,37 @@ pub(crate) fn exact_i48_integer_op(op: &str, left: i64, right: i64) -> Option<i1
         "+" => Some(i128::from(left) + i128::from(right)),
         "-" => Some(i128::from(left) - i128::from(right)),
         "*" => Some(i128::from(left) * i128::from(right)),
+        _ => None,
+    }
+}
+
+
+/// Точні знакові D96 +/−: 97-бітний результат без усічення й f64.
+/// Результат i128 є лише носієм, вибір D96/D192 належить SENS.
+pub(crate) fn exact_i96_add_sub(op: &str, left: i128, right: i128) -> Option<i128> {
+    const MIN: i128 = -(1_i128 << 95);
+    const MAX: i128 = (1_i128 << 95) - 1;
+    if !(MIN..=MAX).contains(&left) || !(MIN..=MAX).contains(&right) { return None; }
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    {
+        let mut high = 0_i64;
+        // SAFETY: обидва числа D96 знакові, System V ABI, &mut high
+        // є чинним місцем для старшого машинного слова.
+        let low = unsafe {
+            match op {
+                "+" => sens_i96_add_exact(left as u64, (left >> 64) as i64,
+                                           right as u64, (right >> 64) as i64, &mut high),
+                "-" => sens_i96_sub_exact(left as u64, (left >> 64) as i64,
+                                           right as u64, (right >> 64) as i64, &mut high),
+                _ => return None,
+            }
+        };
+        return Some((i128::from(high) << 64) | i128::from(low));
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    match op {
+        "+" => left.checked_add(right),
+        "-" => left.checked_sub(right),
         _ => None,
     }
 }
@@ -244,6 +277,39 @@ mod tests {
                                 ("*", i128::from(a) * i128::from(b))] {
                 assert_eq!(exact_i48_integer_op(op, a, b), Some(value));
             }
+        }
+    }
+    #[test]
+    fn d96_asm_signed_boundaries_and_carry_borrow() {
+        const MIN: i128 = -(1_i128 << 95);
+        const MAX: i128 = (1_i128 << 95) - 1;
+        for a in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
+            for b in [MIN, -1, 0, 1, MAX] {
+                assert_eq!(exact_i96_add_sub("+", a, b), Some(a + b));
+                assert_eq!(exact_i96_add_sub("-", a, b), Some(a - b));
+            }
+        }
+        assert_eq!(exact_i96_add_sub("+", MAX, 1), Some(1_i128 << 95));
+        assert_eq!(exact_i96_add_sub("-", MIN, 1), Some(MIN - 1));
+        assert_eq!(exact_i96_add_sub("+", MAX + 1, 0), None);
+        assert_eq!(exact_i96_add_sub("-", MIN - 1, 0), None);
+        assert_eq!(exact_i96_add_sub("*", 2, 3), None);
+    }
+
+    #[test]
+    fn d96_asm_matches_independent_i128_seeded_oracle() {
+        let mut state = 0x63b9_8af5_1d0c_27e4_u64;
+        let mut next = || {
+            state ^= state << 13; state ^= state >> 7; state ^= state << 17;
+            state
+        };
+        for _ in 0..4096 {
+            let left = (u128::from(next()) << 32) | u128::from(next() & 0xffff_ffff);
+            let right = (u128::from(next()) << 32) | u128::from(next() & 0xffff_ffff);
+            let a = ((left as i128) << 32) >> 32;
+            let b = ((right as i128) << 32) >> 32;
+            assert_eq!(exact_i96_add_sub("+", a, b), a.checked_add(b));
+            assert_eq!(exact_i96_add_sub("-", a, b), a.checked_sub(b));
         }
     }
 }

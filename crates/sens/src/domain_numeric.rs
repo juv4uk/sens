@@ -167,6 +167,27 @@ fn signed_small_integer_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -
     Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
 }
 
+/// Машинна сума/різниця двох допущених D96 з точним виходом D96/D192.
+/// Знак старших бітів D192 продовжує знак результату i128.
+fn signed_d96_add_sub_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
+    if lhs.numeric_domain_width() != Some(96) || rhs.numeric_domain_width() != Some(96) {
+        return None;
+    }
+    let decode = |number: &BinaryNumber| -> Option<i128> {
+        let bits = number.exact_numeric_domain_bits()?;
+        if bits.len() != 96 { return None; }
+        let word = bits.into_iter().fold(0_u128, |v, bit| (v << 1) | u128::from(bit));
+        Some(((word as i128) << 32) >> 32)
+    };
+    let value = crate::machine_math::exact_i96_add_sub(op, decode(lhs)?, decode(rhs)?)?;
+    let limit = 1_i128 << 95;
+    let out_width = if (-limit..=limit - 1).contains(&value) { 96 } else { 192 };
+    let bits = (0..out_width).rev().map(|shift| {
+        if shift >= 128 { u8::from(value < 0) } else { ((value >> shift) & 1) as u8 }
+    }).collect::<Vec<_>>();
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
+}
+
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
@@ -177,6 +198,12 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
     if matches!(width, 24 | 48) && matches!(operator, "+" | "-" | "*") {
         if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
             return signed_small_integer_fast(operator, left, right);
+        }
+    }
+    // Тільки D96 +/-: множення зберігає точний багатослівний механізм.
+    if width == 96 && matches!(operator, "+" | "-") {
+        if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
+            return signed_d96_add_sub_fast(operator, left, right);
         }
     }
     let (_, x_neg, x_num, x_den) = ingredients(lhs)?;
@@ -276,6 +303,35 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    #[test]
+    fn d96_assembly_widens_into_exact_d192_and_preserves_laws() {
+        const MIN: i128 = -(1_i128 << 95);
+        const MAX: i128 = (1_i128 << 95) - 1;
+        let word = |w: usize, n: i128| -> Value {
+            let bits = (0..w).rev().map(|shift| {
+                if shift >= 128 { u8::from(n < 0) } else { ((n >> shift) & 1) as u8 }
+            }).collect::<Vec<_>>();
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(w, &bits).unwrap())
+        };
+        for a in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
+            for b in [MIN, -1, 0, 1, MAX] {
+                for (op, oracle) in [("+", a + b), ("-", a - b)] {
+                    let result = compute(op, &word(96, a), &word(96, b)).unwrap();
+                    assert_eq!(result.to_string(), oracle.to_string());
+                    let Value::BinaryNumber(bits) = result else { panic!("integer D96/D192") };
+                    let limit = 1_i128 << 95;
+                    let width = if (-limit..=limit - 1).contains(&oracle) { 96 } else { 192 };
+                    assert_eq!(bits.numeric_domain_width(), Some(width));
+                    assert_eq!(bits.exact_numeric_domain_bits().unwrap().len(), width);
+                }
+            }
+        }
+        assert!(compute("+", &word(96, 1), &word(48, 1)).is_none());
+        assert!(compute("+", &word(96, 1), &word(192, 1)).is_none());
+        assert_eq!(compute("/", &word(96, 1), &word(96, 2)).unwrap().to_string(), "1/2");
+        assert_eq!(compute("*", &word(96, 3), &word(96, 7)).unwrap().to_string(), "21");
     }
 
     #[test]

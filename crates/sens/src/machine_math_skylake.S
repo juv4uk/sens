@@ -109,4 +109,31 @@ sens_i48_mul_exact:
     ret
 .size sens_i48_mul_exact,.-sens_i48_mul_exact
 
+/* Точне двослівне D96 ADD/SUB, System V:
+ * RDI=a_low RSI=a_high, RDX=b_low RCX=b_high, R8=out_high.
+ * RAX=out_low, ADC/SBB переносить біт між половинами. */
+.p2align 4
+.globl sens_i96_add_exact
+.type sens_i96_add_exact,@function
+sens_i96_add_exact:
+    mov %rdi,%rax
+    add %rdx,%rax
+    mov %rsi,%r10
+    adc %rcx,%r10
+    mov %r10,(%r8)
+    ret
+.size sens_i96_add_exact,.-sens_i96_add_exact
+
+.p2align 4
+.globl sens_i96_sub_exact
+.type sens_i96_sub_exact,@function
+sens_i96_sub_exact:
+    mov %rdi,%rax
+    sub %rdx,%rax
+    mov %rsi,%r10
+    sbb %rcx,%r10
+    mov %r10,(%r8)
+    ret
+.size sens_i96_sub_exact,.-sens_i96_sub_exact
+
 .section .note.GNU-stack,"",@progbits
