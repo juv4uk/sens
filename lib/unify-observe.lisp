@@ -1,37 +1,28 @@
-; unify-observe — observation boundary for historical unification.
-;
-; Migrated: COND else (010 ()) → exact D1:1 (010 (001 ())).
-; Width is identity. No host truthiness. No crutches.
-;
-; D4:0011 owns definitions; D4:0010 owns argument binding.
-; D3:010 ATOM tests raw shape before D3:101 EQ on the private atom fail.
-; Empty substitution () is successful data, never D1:0.
-; Surface unify is the existing compatibility mechanism — invoked once.
-;
-; Reuses: unify, D3 ATOM/EQ/CONS/COND, D4 DEFINE/LAMBDA.
-;
-; (unify-observe 'radio 'radio '())  → (unified ())
-; (unify-observe 'radio 'antenna '()) → (unification-failure radio antenna ())
-;
-; Binary self-witness: tests/fixtures/unify-observe-d1-witness.lisp
+; Спостереження за історичною уніфікацією.
+; Закон умовного вибору належить третьому домену.
+; Результат успішної уніфікації може містити порожню підстановку.
+; У разі невдачі повертається окремий запис із двома аргументами.
+; Службові позначки результату зберігаються без перекладу,
+; адже вони є значеннями чинного протоколу, а не викличними головами.
+; Обчислення виконує наявна українська функція уніфікувати.
 
 (визначити уніфікація-спостереження-стан
-  (функція (raw left right substitution)
+  (функція (сирий-результат ліве праве підстановка)
     (за-умовою
-      ((атом? raw)
+      ((атом? сирий-результат)
        (за-умовою
-         ((тотожне? raw (як-є fail))
-          (список (як-є unification-failure) left right substitution))
+         ((тотожне? сирий-результат (як-є fail))
+          (список (як-є unification-failure) ліве праве підстановка))
          ((атом? (як-є ()))
-          (список (як-є unified) raw))))
+          (список (як-є unified) сирий-результат))))
       ((атом? (як-є ()))
-       (список (як-є unified) raw)))))
+       (список (як-є unified) сирий-результат)))))
 
 (визначити unify-observe
-  (функція (left right substitution)
+  (функція (ліве праве підстановка)
     (уніфікація-спостереження-стан
-      (уніфікувати left right substitution)
-      left right substitution)))
+      (уніфікувати ліве праве підстановка)
+      ліве праве підстановка)))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити уніфікувати unify)
