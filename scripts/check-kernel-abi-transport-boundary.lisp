@@ -1,6 +1,6 @@
-; #1117 — executable Lisp-owned policy for kernel ABI identity scope.
-; Host tooling may mechanically inspect files, but the admitted direction and
-; forbidden reverse authority are owned here.
+; #1117 — виконувана політика межі ABI ядра, якою володіє Lisp СЕНС.
+; Хостові інструменти можуть механічно оглядати файли, але допущений напрям
+; і заборонений зворотний авторитет визначено тут.
 
 (визначити друге (функція (х) (перше (решта х))))
 (визначити третє (функція (х) (перше (решта (решта х)))))
