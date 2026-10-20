@@ -252,9 +252,9 @@ fn root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails() {
 fn world_module_membership_is_d1_and_not_unary_cons() {
     let mut session = session();
     for (src, expected) in [
-        ("(world-module-missing? (empty-world) (quote zoo))", true),
-        ("(world-module-known? (empty-world) (quote zoo))", false),
-        ("(world-module-known? (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))) (quote zoo))", true),
+        ("(внутрішній-світ-модуль-відсутній? (порожній-світ) (як-є zoo))", true),
+        ("(світ-модуль-відомий? (порожній-світ) (як-є zoo))", false),
+        ("(світ-модуль-відомий? (світ-повідомити (порожній-світ) (як-є zoo) (як-є ((has-fur cat)))) (як-є zoo))", true),
     ] {
         let result = eval_program(src, &mut session)
             .unwrap_or_else(|e| panic!("world module membership {src}: {e:?}")).value;
