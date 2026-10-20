@@ -12,7 +12,7 @@
 ; Не змінювати породжений файл вручну! Змінюйте вихідні випробування
 ; або тексти принципів і аксіом нижче, після чого запускайте:
 ;
-;   cargo run -p sens-cli -- scripts/build-constitution.lisp > my-lisp-constitution.lisp
+;   cargo run -p sens-cli --bin sens -- scripts/build-constitution.lisp > my-lisp-constitution.lisp
 ;
 ; Командний виконавець також друкує значення останнього виразу
 ; (див. crates/sens-cli/tests/cli.rs). Тому сценарій завершується
@@ -25,7 +25,7 @@
 
 (друкувати (сполучити (як-є status) "draft — not yet ratified; will become read-only once ratified"))
 
-(друкувати (сполучити (як-є generated) "This file is GENERATED — do not hand-edit it. It is a projection over tests/fixtures/conformance.lisp (facts and tags in one record) plus this script's own principle/axiom text. Edit tests/fixtures/conformance.lisp or scripts/build-constitution.lisp, then run: cargo run -p sens-cli -- scripts/build-constitution.lisp > my-lisp-constitution.lisp . Written as sens data, not JSON: readable directly via (read-all (read-file \"my-lisp-constitution.lisp\")), no foreign parser needed — the same reason conformance.lisp itself moved off JSON."))
+    (друкувати (сполучити (як-є generated) "This file is GENERATED — do not hand-edit it. It is a projection over tests/fixtures/conformance.lisp (facts and tags in one record) plus this script's own principle/axiom text. Edit tests/fixtures/conformance.lisp or scripts/build-constitution.lisp, then run: cargo run -p sens-cli --bin sens -- scripts/build-constitution.lisp > my-lisp-constitution.lisp . Written as sens data, not JSON: readable directly via (read-all (read-file \"my-lisp-constitution.lisp\")), no foreign parser needed — the same reason conformance.lisp itself moved off JSON."))
 
 (друкувати (сполучити (як-є self-contained) "principles and axioms below are the canonical one-line statements from docs/language-core-axioms.md, kept here so this file can be read and understood on its own; docs/language-core-axioms.md remains the single source of the full prose rationale, examples, and open questions — not duplicated here, to avoid two sources of truth for the same wording drifting apart"))
 

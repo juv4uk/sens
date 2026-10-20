@@ -3,8 +3,8 @@
 ; Генератор читає Lisp-таблицю як структуровані дані власним читачем.
 ; Раст отримує тільки похідний механічний опис, не право визначати семантику.
 ; Виконання з кореня репозиторію:
-;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp
-;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp --check
+;   cargo run -p sens-cli --bin sens -- scripts/generate-rust-semantic-registry.lisp
+;   cargo run -p sens-cli --bin sens -- scripts/generate-rust-semantic-registry.lisp --check
 ; Рядки генерації та назви полів вихідного коду Раст збережені без перекладу.
 ; Протокольні позначки перевірки типу та зовнішні аргументи теж не змінюємо.
 

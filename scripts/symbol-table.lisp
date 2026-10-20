@@ -15,7 +15,7 @@
 ; Числа, рядки й структурні порожні значення не включаємо.
 ;
 ; Запуск:
-;   cargo run -p my-lisp-cli -- scripts/symbol-table.lisp > symbol-table.txt
+;   cargo run -p sens-cli --bin sens -- scripts/symbol-table.lisp > symbol-table.txt
 ; Вихід: одна пара (назва . номер) на рядок, сортування за назвою.
 ; Перетворення пар на директиви .define належить окремому інструменту.
 

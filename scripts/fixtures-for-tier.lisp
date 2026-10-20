@@ -3,7 +3,7 @@
 ; потрібного рівня, зберігаючи їхній порядок і вміст.
 ;
 ; Запуск:
-;   cargo run -p my-lisp-cli -- scripts/fixtures-for-tier.lisp 1
+;   cargo run -p sens-cli --bin sens -- scripts/fixtures-for-tier.lisp 1
 ; У *argv* рівень передається текстом. Поле tier у прикладі є
 ; частиною незмінної схеми даних, а не виконуваною функцією.
 

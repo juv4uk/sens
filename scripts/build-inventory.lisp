@@ -5,7 +5,7 @@
 ; Інвентар — похідна проєкція, а не окреме джерело істини.
 ; Змінюйте conformance.lisp і повторно запускайте:
 ;
-;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp
+;   cargo run -p sens-cli --bin sens -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp
 ;
 ; Кожен запис зберігає авторитетні поля випробування й додає
 ; сталі ідентифікатори за вмістом та спостережені форми.
@@ -141,7 +141,7 @@
          (вивести-всі (решта залишок)))))))
 
 ;; Заголовок породженого файла.
-(друкувати (сполучити (як-є about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
+(друкувати (сполучити (як-є about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p sens-cli --bin sens -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
 (друкувати (сполучити (як-є generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
 (друкувати (сполучити (як-є source) "tests/fixtures/conformance.lisp"))
 

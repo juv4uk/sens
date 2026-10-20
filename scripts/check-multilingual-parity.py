@@ -211,7 +211,7 @@ def check_section_parity(path: Path, findings: list[str]) -> None:
 
 
 def check_generated_tables(root: Path, table_cfgs: list[dict], findings: list[str]) -> None:
-    binary = root / "target" / "debug" / "my-lisp"
+    binary = root / "target" / "debug" / "sens"
     gen_script = root / "scripts" / "gen-functions.lisp"
     live = live_builtin_count(binary, gen_script)
     for cfg in table_cfgs:

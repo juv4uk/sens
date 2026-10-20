@@ -18,7 +18,7 @@
 ;   lib/generated/uk-surface-audit.lisp
 ;
 ; Запуск із кореня репозиторію:
-;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-uk-surface-audit.lisp
+;   cargo run -p sens-cli --bin sens -- scripts/generate-uk-surface-audit.lisp
 
 (визначити рядок+
   (функція аргументи (згорнути (функція (накопичувач с) (рядок-додати накопичувач с)) "" аргументи)))
