@@ -41,12 +41,12 @@ class ProjectionBlocked(ValueError):
 
 
 def uk_surface(width: int) -> dict[str, str]:
-    """Read exact 'ук' cells from owner's domain table, never English aliases."""
+    """Read full 'укр' names from ratified domain table, never compact or English aliases."""
     if width not in (1, 3, 4):
         raise ProjectionBlocked("no ratified Ukrainian renderer for this width")
     # Parse structural () through the canonical table reader. Regex token
     # matching excluded D3:000 and wrongly blocked the whole D3 authority.
-    rows = [(row.bits, row.uk) for row in read_domain_table(
+    rows = [(row.bits, row.ukr) for row in read_domain_table(
         ROOT / f"lib/domains/d{width}.lisp"
     )]
     if (len(rows) != 2 ** width or
