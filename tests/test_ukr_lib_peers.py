@@ -120,6 +120,10 @@ class LibUkrPeerTests(unittest.TestCase):
         # повторно прив'язувати їх до історичної латинської поверхні.
         # Дані протоколу в лапках і таблицях залишаються незмінними.
         retired = {
+            "lib/knowledge.lisp": (
+                "(визначити check-conflict перевірити-конфлікт?)",
+                "(визначити *knowledge-package-version* *версія-пакета-знань*)",
+            ),
             "scripts/symbol-table.lisp": (
                 "(визначити список LIST)",
                 "(визначити значення-у-списку? MEMBER)",
