@@ -1,4 +1,4 @@
-; Machine-readable semantic/intuitive audit of the stable Ukrainian surface.
+; Машинно-читаний семантичний/інтуїтивний аудит стабільної української поверхні.
 ; Машинно-читаний смисловий та інтуїтивний аудит stable української поверхні.
 
 (uk-name-audit
