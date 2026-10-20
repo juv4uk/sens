@@ -121,6 +121,16 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertIn("необґрунтований", str(report["blocked_sample"]))
         self.assertFalse(report["release_ready"])
 
+    def test_one_file_with_two_real_causes_is_one_blocked_file(self):
+        # Одна несправна програма: дві причини, але один файл.
+        self.put("lib/english.lisp", "(define foo 1)\n")
+        report = scan(self.root)
+        self.assertEqual(report["blocked_count"], 2)
+        self.assertEqual(report["blocked_file_count"], 1)
+        self.assertEqual(report["potential_program_missing_complete_triplet"], 1)
+        self.assertEqual(report["potential_program_without_bounded_proof"], 1)
+        self.assertFalse(report["all_bounded_reverse_verified"])
+
     def test_every_directory_counts_including_history(self):
         self.put("lib/один.lisp", "(визначити один так)\n")
         self.put("lib/один.sens", b"\x01")
