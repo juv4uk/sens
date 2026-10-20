@@ -16,7 +16,7 @@
 (визначити tri-fail
   (функція (kind detail)
     (нехай ((shown
-            (print
+            (друкувати
               (список
                 (як-є trilingual-surface-error)
                 kind
@@ -31,9 +31,9 @@
       ((атом? values) (structural-kind atom) (як-є malformed))
       ((атом? values) (structural-kind pair)
        (за-умовою
-         ((equal? value (перше values)) (structural-relation same)
+         ((однакові? value (перше values)) (structural-relation same)
           (як-є present))
-         ((equal? value (перше values)) (structural-relation distinct)
+         ((однакові? value (перше values)) (structural-relation distinct)
           (tri-member-state value (решта values))))))))
 
 (визначити tri-triple-state
@@ -61,12 +61,12 @@
 (визначити tri-special-quote-sym-state
   (функція (field)
     (за-умовою
-      ((equal?
+      ((однакові?
          field
          (список (як-є sym) (список (як-є quote) (як-є stable))))
        (structural-relation same)
        (як-є yes))
-      ((equal?
+      ((однакові?
          field
          (список (як-є sym) (список (як-є quote) (як-є stable))))
        (structural-relation distinct)
@@ -369,10 +369,10 @@
          (за-умовою
            ((атом? rest) (structural-kind empty-list)
             (за-умовою
-              ((equal? (перше argv) "--require-complete")
+              ((однакові? (перше argv) "--require-complete")
                (structural-relation same)
                (як-є require-complete))
-              ((equal? (перше argv) "--require-complete")
+              ((однакові? (перше argv) "--require-complete")
                (structural-relation distinct)
                (tri-fail (як-є unknown-argument) (перше argv)))))
            ((атом? rest) (structural-kind atom)
@@ -383,7 +383,7 @@
 (визначити tri-registry-form
   (перше
     (читати-всі
-      (read-file "lib/surface/semantic-registry.lisp"))))
+      (читати-файл "lib/surface/semantic-registry.lisp"))))
 
 (визначити tri-rows
   (за-умовою
