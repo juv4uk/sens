@@ -153,13 +153,8 @@ pub(super) fn prim_01001111(args: &[Value], _env: &Environment, _span: Span) -> 
         Ok(Value::vector(args.iter().cloned()))
     }
 
-/// mono-ns
-pub(super) fn prim_01011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-    monotonic_nanoseconds(args, _env, span)
-}
-
-/// Спільне фізичне виконання для старого адаптера й явного механізму
-/// D10:0011110110; вибір identity залишається зовні цього helper.
+/// Фізичний виконавець точного механізму D10:0011110110.
+/// Інших ідентичностей для монотонного годинника немає.
 pub(super) fn monotonic_nanoseconds(
     args: &[Value],
     _env: &Environment,
