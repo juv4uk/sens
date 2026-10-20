@@ -1,45 +1,45 @@
-; #1347 ASYMMETRIC-SEMANTIC-FIREWALL
+; #1347 — асиметричний захист джерела семантичних повноважень.
+; Перевірка не забороняє локальні реалізації семантики у Rust,
+; хості, компіляторі чи зовнішніх виконавцях. Захищено лише напрям:
 ;
-; This guard no longer restricts local semantics in Rust/host/backend code.
-; The protected direction is only:
+;   семантика реалізації хоста → нормативні мовні закони SENS.
 ;
-;   host/backend implementation semantics -> Lisp language authority
-;
-; Rust may depend on my-lisp. Lisp language authority must not become
-; semantically derived from Rust implementation artifacts.
+; Rust може використовувати SENS. Натомість нормативне джерело мови
+; не може виводити свої закони з артефактів реалізації хоста.
+; Усі англомовні позначки далі — точні дані протоколу та шляхи.
 
-(визначити changed
+(визначити зміни-повноважень
   (рядок-містить? (читати-файл "tests/semantic-authority-changes.lisp")))
 
-(визначити exact-text?
-  (функція (left right)
+(визначити тексти-однакові?
+  (функція (лівий правий)
     (за-умовою
-      ((однакові? left right) (так) так)
+      ((однакові? лівий правий) (так) так)
       (так так ()))))
 
-(визначити contains-any?
-  (функція (source needles)
+(визначити текст-містить-будь-який?
+  (функція (джерело зразки)
     (за-умовою
-      ((атом? needles) () ())
-      ((рядок-містить? (перше needles) source) так)
-      (так (contains-any? source (решта needles))))))
+      ((атом? зразки) () ())
+      ((рядок-містить? (перше зразки) джерело) так)
+      (так (текст-містить-будь-який? джерело (решта зразки))))))
 
-(визначити language-authority-source?
-  (функція (path)
+(визначити джерело-повноважень-мови?
+  (функція (шлях)
     (або
-      (рядок-префікс? "lib/" path)
-      (рядок-префікс? "contracts/" path)
-      (exact-text? path "language-contract.lisp")
-      (exact-text? path "my-lisp-constitution.lisp")
-      ; Synthetic protected path used only by the guard self-test.
-      (exact-text? path "tests/semantic-authority-guard-probe.lisp")
-      ; Підтримувані (не канонічні) розширення СЕНС теж захищені.
-      (exact-text? path "tests/semantic-authority-guard-probe.сенс"))))
+      (рядок-префікс? "lib/" шлях)
+      (рядок-префікс? "contracts/" шлях)
+      (тексти-однакові? шлях "language-contract.lisp")
+      (тексти-однакові? шлях "my-lisp-constitution.lisp")
+      ; Штучний захищений шлях використовує тільки власний тест перевірки.
+      (тексти-однакові? шлях "tests/semantic-authority-guard-probe.lisp")
+      ; Підтримувані, але не канонічні розширення SENS теж захищені.
+      (тексти-однакові? шлях "tests/semantic-authority-guard-probe.сенс"))))
 
-(визначити host-marker?
-  (функція (source)
-    (contains-any?
-      source
+(визначити маркер-хоста?
+  (функція (джерело)
+    (текст-містить-будь-який?
+      джерело
       (як-є
         (".rs"
          "crates/"
@@ -50,10 +50,10 @@
          "CanonicalIdentity"
          "NecessaryFormIdentity")))))
 
-(визначити semantic-authority-claim?
-  (функція (source)
-    (contains-any?
-      source
+(визначити заява-семантичних-повноважень?
+  (функція (джерело)
+    (текст-містить-будь-який?
+      джерело
       (як-є
         ("semantic-authority-source"
          "authority-source"
@@ -62,60 +62,58 @@
          "Authority:"
          "generated-from-host")))))
 
-(визначити violation-class
-  (функція (path source)
+(визначити клас-порушення-повноважень
+  (функція (шлях джерело)
     (за-умовою
-      ; Host/runtime/compiler/backend files are intentionally unrestricted.
-      ; They may have local meaning tables, enums, fallbacks, dispatch, etc.
-      ((хибне? (language-authority-source? path))
+      ; Семантика хоста, компілятора та зовнішніх виконавців локально не обмежена.
+      ((хибне? (джерело-повноважень-мови? шлях))
        (як-є allowed-local-implementation))
-      ; A protected Lisp-owned source may mention Rust as evidence/history.
-      ; It becomes a violation only when host implementation is explicitly
-      ; claimed as a semantic authority/source of truth.
+      ; Згадування Rust у мовному джерелі саме по собі не є порушенням:
+      ; порушення виникає лише за явної претензії хоста бути джерелом закону.
       ((та
-         (host-marker? source)
-         (semantic-authority-claim? source))
+         (маркер-хоста? джерело)
+         (заява-семантичних-повноважень? джерело))
        (як-є host-to-language-authority-leak))
       (так (як-є allowed-language-source)))))
 
-(визначити scan
-  (функція (rows)
+(визначити просканувати-повноваження
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) () (як-є (semantic-authority-ok)))
+      ((атом? рядки) () (як-є (semantic-authority-ok)))
       (так
-       (нехай-послідовно ((row (перше rows))
-               (path (друге row)))
+       (нехай-послідовно ((рядок-зміни (перше рядки))
+               (шлях (друге рядок-зміни)))
           (за-умовою
-            ; Crucial asymmetry: do not even inspect host implementation text.
-            ((хибне? (language-authority-source? path))
-             (накопичувати (решта rows)))
+            ; Не читаємо навіть текст реалізації хоста: це принцип асиметрії.
+            ((хибне? (джерело-повноважень-мови? шлях))
+             (накопичувати (решта рядки)))
             (так
-             (нехай ((raw-source (читати-файл path)))
+             (нехай ((сирий-текст-джерела (читати-файл шлях)))
                (за-умовою
-                 ((хибне? (рядок? raw-source))
+                 ((хибне? (рядок? сирий-текст-джерела))
                   (список
                     (як-є semantic-authority-violation)
-                    path
+                    шлях
                     (як-є unreadable-language-authority-source)
                     "protected Lisp language source must be readable text"))
                  (так
-                  (нехай ((class (violation-class path raw-source)))
+                  (нехай ((категорія (клас-порушення-повноважень шлях сирий-текст-джерела)))
                     (за-умовою
-                      ((тотожне? class (як-є host-to-language-authority-leak))
+                      ((тотожне? категорія (як-є host-to-language-authority-leak))
                        (список
                          (як-є semantic-authority-violation)
-                         path
-                         class
+                         шлях
+                         категорія
                          "Lisp language authority must not derive semantic truth from host/Rust implementation artifacts"))
                       (так
-                       (накопичувати (решта rows)))))))))))))))
+                       (накопичувати (решта рядки)))))))))))))))
 
-(друкувати (накопичувати changed))
+(друкувати (накопичувати зміни-повноважень))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+; Перехідні прив'язки наявних механізмів, без нових доменних законів.
 (визначити однакові? EQUAL)
 (визначити список LIST)
 (визначити рядок-містить? STRING-CONTAINS?)
 (визначити рядок-префікс? STRING-PREFIX?)
 (визначити рядок? STRINGP)
-(визначити накопичувати scan)
+(визначити накопичувати просканувати-повноваження)
