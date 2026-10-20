@@ -1,40 +1,47 @@
-; tests/fixtures/world-transition-witness.lisp — Lisp-owned witness for #1312.
-;
-; Verifies that world state transitions and observations conform to
-; contracts/world-transition-contract.lisp without host coercion.
-; Ukrainian projection only.
+; Свідчення #1312: закони переходів та спостережень світу визначає СЕНС.
+; Звіряємо результати з contracts/world-transition-contract.lisp.
+; Українські викличні назви взято з ратифікованої колонки «укр» Д9.
+; Історичні дані й мітки протоколу залишаються без змін.
 
-(визначити wt-verify-law
-  (функція (name observed expected)
+(визначити перевірити-закон-переходу-світу
+  (функція (назва спостережене очікуване)
     (за-умовою
-      ((однакові? observed expected) (список (як-є ok) name))
-      (так (список (як-є fail) name (як-є observed) observed (як-є expected) expected)))))
+      ((однакові? спостережене очікуване) (список (як-є ok) назва))
+      (так (список (як-є fail) назва (як-є observed) спостережене
+                    (як-є expected) очікуване)))))
 
-(визначити wt-run-witness
+(визначити перевірити-переходи-світів
   (функція ()
-    (нехай ((w0 (empty-world)))
-      (нехай ((w1 (world-tell w0 (як-є zoo) (як-є ((has-fur cat))))))
-        (нехай ((w2 (world-tell w1 (як-є zoo) (як-є ((has-fur dog))))))
-          (нехай ((addr1 (world-content-address w1))
-                (addr2 (world-content-address w2)))
+    (нехай ((початковий-світ (порожній-світ)))
+      (нехай ((перший-світ
+                (світ-повідомити початковий-світ (як-є zoo)
+                                (як-є ((has-fur cat))))))
+        (нехай ((другий-світ
+                  (світ-повідомити перший-світ (як-є zoo)
+                                  (як-є ((has-fur dog))))))
+          (нехай ((перша-адреса (світ-вміст-адреса перший-світ))
+                  (друга-адреса (світ-вміст-адреса другий-світ)))
             (список
-              ; 1. Parent structural relation
-              (wt-verify-law (як-є parent-relation)
-                             (однакові? w0 (world-parent w1))
-                             (як-є (1)))
-              ; 2. Content address self-identity (atoms compare via eq)
-              (wt-verify-law (як-є address-identity-same)
-                             (тотожне? addr1 addr1)
-                             (як-є (1)))
-              ; 3. Distinct world histories produce distinct content address identity
-              (wt-verify-law (як-є address-identity-distinct)
-                             (тотожне? addr1 addr2)
-                             (як-є (0)))
-              ; 4. World at depth recovery
-              (wt-verify-law (як-є depth-recovery)
-                             (однакові? w0 (world-at-depth w2 0))
-                             (як-є (1)))
-              ; 5. Universal truth forbidden: structural equality does not equal atom t
-              (wt-verify-law (як-є universal-t-forbidden)
-                             (однакові? (однакові? w0 w0) (як-є (1)))
-                             (як-є (1))))))))))
+              ; Батьківський зв'язок має точну структурну рівність.
+              (перевірити-закон-переходу-світу (як-є parent-relation)
+                (однакові? початковий-світ (світ-батько перший-світ))
+                (як-є (1)))
+              ; Атомна адреса тотожна самій собі.
+              (перевірити-закон-переходу-світу (як-є address-identity-same)
+                (тотожне? перша-адреса перша-адреса)
+                (як-є (1)))
+              ; Різні історії мають різні адреси вмісту.
+              (перевірити-закон-переходу-світу (як-є address-identity-distinct)
+                (тотожне? перша-адреса друга-адреса)
+                (як-є (0)))
+              ; Повернення до світу на заданій глибині.
+              (перевірити-закон-переходу-світу (як-є depth-recovery)
+                (однакові? початковий-світ (світ-у-глибина другий-світ 0))
+                (як-є (1)))
+              ; Структурна рівність не означає загальної істинності.
+              (перевірити-закон-переходу-світу (як-є universal-t-forbidden)
+                (однакові? (однакові? початковий-світ початковий-світ)
+                           (як-є (1)))
+                (як-є (1))))))))))
+
+(перевірити-переходи-світів)
