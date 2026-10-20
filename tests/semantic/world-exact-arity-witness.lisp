@@ -1,10 +1,10 @@
-; SENS-owned witness for the actual Lisp predicate world?.
-; All primitive operators retain exact identities: D3 EQ/QUOTE and D1 bits.
-; world? is a local Lisp binding, not an admitted D10 callable identity; do not
-; invent a D10 call head merely to force this fixture into the pure .bits reader.
+; Мовний свідок фактичного предиката світ?.
+; Примітиви зберігають точні тотожності D3 і предикатні значення D1.
+; Світ? — локальна Lisp-функція, не ратифікована виклична адреса D10.
+; Не вигадуємо нового машинного слова заради бітового читача.
 ;
-; Each form is a self-verdict: EQ compares world?'s actual D1 result to the
-; expected D1 bit. The host runner checks only that every form returns D1 YES.
+; Кожна форма порівнює фактичний D1-наслідок зі сподіваним.
+; Зовнішній виконавець лише перевіряє отримання точної істини D1.
 
 (тотожне? (світ? (як-є (world () () ()))) так)
 (тотожне? (світ? (як-є (world))) ні)
@@ -19,9 +19,9 @@
 (тотожне? (внутрішня-рівність-версій (світ-батько (порожній-світ)) (як-є ())) так)
 (тотожне? (внутрішня-рівність-версій (світ-журнал (порожній-світ)) (як-є ())) так)
 (тотожне? (внутрішня-рівність-версій (світ-метадані (порожній-світ)) (як-є ())) так)
-(тотожне? (world-module-missing? (порожній-світ) (як-є unknown)) так)
+(тотожне? (внутрішній-світ-модуль-відсутній? (порожній-світ) (як-є unknown)) так)
 (тотожне? (внутрішня-рівність-версій
-      (world-remove-first (як-є x) (як-є (a x b)))
+      (внутрішній-світ-прибрати-перше (як-є x) (як-є (a x b)))
       (як-є (a b))) так)
 
 ; SENS verifies the actual aligned-ancestor law, not a Rust/Python truth table.
