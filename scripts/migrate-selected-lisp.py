@@ -143,6 +143,13 @@ def check_oracle(verifier: Path, source: Path, physical: Path,
     }
 
 def run(args) -> dict:
+    # Retired source eras must be rejected BEFORE other mode checks:
+    # the reason of a negative migration witness is itself part of the proof.
+    if args.source_era != "auto":
+        raise ValueError(
+            "RETIRED_SOURCE_ERA: legacy/current cannot authorize binary "
+            "callability; use the single current AUTO scan"
+        )
     # This retired T5 adapter is read-only. Physical publication belongs to
     # the current Zig/T5M triplet publisher, never the Python reference codec.
     if not args.inspect and not args.dry_run:
@@ -150,14 +157,6 @@ def run(args) -> dict:
             "LEGACY_T5_PUBLICATION_DISABLED: use scripts/migrate-one-to-sens.py "
             "for Zig-produced T5M .sens and its same-stem exact-bit view; "
             "only --inspect and --dry-run remain supported here"
-        )
-    # A command-line epoch must never override the ratified D1-D10 ladder.
-    # Retain retired spellings in the parser only to return a structured
-    # BLOCKED receipt rather than silently reinterpreting W8 as D8.
-    if args.source_era != "auto":
-        raise ValueError(
-            "RETIRED_SOURCE_ERA: legacy/current cannot authorize binary "
-            "callability; use the single current AUTO scan"
         )
     rel, source = selection(args.source)
     if args.source_blob != "HEAD" and not HEX40.fullmatch(args.source_blob):
