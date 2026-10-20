@@ -1,20 +1,15 @@
-; #1047 — mechanism selection after Canon()/function-table identity resolution.
-; Exact parent: #1046 function-table mechanism authority.
-; This file never decides what a SID means. It only selects among executor
-; routes already admitted by transitional #1046 mechanism metadata.
-;
-; Migrated: duplicate mutually-exclusive EQ arms removed; NOT(ATOM) guard
-; replaced by exact two-field D3 COND + D1 ATOM for empty. Fallback uses
-; (010 (001 ())) = D1:1. Width is identity; every bit of domain address valued.
+; Добір механізму після розв'язання тотожності функції.
+; Модуль користується допущеними маршрутами; не встановлює семантику кодів.
+; Умови — двопольові, предикати — точні значення першого домену.
 
-(визначити mechanism-selector-registry
+(визначити реєстр-вибору-механізму
   (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
-(визначити mechanism-selector-metadata
+(визначити метадані-вибору-механізму
   (перше (читати-всі (читати-файл "lib/function-table-mechanisms.lisp"))))
 
-(визначити mechanism-selector-registry-rows
-  mechanism-selector-registry)
+(визначити рядки-реєстру-механізму
+  реєстр-вибору-механізму)
 
 (визначити механізм-знайти-секцію
   (функція (назва секції)
@@ -24,10 +19,10 @@
       ((атом? (як-є ()))
        (механізм-знайти-секцію назва (решта секції))))))
 
-(визначити mechanism-selector-routes
+(визначити маршрути-вибору-механізму
   (решта (механізм-знайти-секцію
          (як-є rows)
-         mechanism-selector-metadata)))
+         метадані-вибору-механізму)))
 
 (визначити реєстр-містить-ідентичність?
   (функція (ідентичність рядки)
@@ -58,7 +53,7 @@
     (за-умовою
       ((тотожне?
          (реєстр-містить-ідентичність?
-           ідентичність mechanism-selector-registry-rows)
+           ідентичність рядки-реєстру-механізму)
          (як-є no))
        (список
          (як-є mechanism-selection-failure)
@@ -73,7 +68,7 @@
              (список (як-є mechanism-selected)
                ідентичність виконавець (третє маршрут)))))
         (механізм-знайти-маршрут
-          ідентичність виконавець mechanism-selector-routes))))))
+          ідентичність виконавець маршрути-вибору-механізму))))))
 
 
 ; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень.
@@ -81,3 +76,9 @@
 (визначити mechanism-selector-registry-has-sid? реєстр-містить-ідентичність?)
 (визначити mechanism-selector-find-route механізм-знайти-маршрут)
 (визначити mechanism-select вибрати-механізм)
+
+; Сумісні зовнішні назви вказують на ті самі значення, без другої реалізації.
+(визначити mechanism-selector-registry реєстр-вибору-механізму)
+(визначити mechanism-selector-metadata метадані-вибору-механізму)
+(визначити mechanism-selector-registry-rows рядки-реєстру-механізму)
+(визначити mechanism-selector-routes маршрути-вибору-механізму)
