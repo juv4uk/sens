@@ -13,6 +13,8 @@ enum { N = 65536, ROUNDS = 2048 };
 extern double sens_dot_scalar(const double *, const double *, size_t);
 #elif defined(SENS_ASM_AVX2)
 extern double sens_dot_avx2(const double *, const double *, size_t);
+#elif defined(SENS_ZIG)
+extern double sens_dot_zig(const double *, const double *, size_t);
 #endif
 
 
@@ -36,6 +38,8 @@ int main(void) {
         dot = sens_dot_scalar(a, b, N);
 #elif defined(SENS_ASM_AVX2)
         dot = sens_dot_avx2(a, b, N);
+#elif defined(SENS_ZIG)
+        dot = sens_dot_zig(a, b, N);
 #else
         for (int i = 0; i < N; i++) {
             dot += a[i] * b[i];
