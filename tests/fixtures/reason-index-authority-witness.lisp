@@ -1,54 +1,48 @@
 ; #305 — retire stale Rust truth-sentinel oracles from reason_index.rs.
-; The semantic verdicts for reason-index parity belong to Lisp. Rust may keep
-; observing index order, mode and finite bounds, but it must not freeze the
-; result of `equal?` as historical `t`.
-;
-; Laws preserved here before the Rust assertions are deleted:
-;   1. indexed and forced-linear backward reasoning are structurally equal;
-;   2. an explicitly prepared reason-index/1 is an immutable snapshot;
-;   3. indexed recursion and negation match the forced-linear path.
+; The semantic verdicts for reason-index parity belong to Lisp.
+; Ukrainian projection only.
 
 (load "lib/unify.lisp")
 (load "lib/reason.lisp")
 
-(0011 reason-index-authority-witness
-  (0010 ()
-    (001001 ((parity-rules
-             (001
+(визначити reason-index-authority-witness
+  (функція ()
+    (нехай ((parity-rules
+             (як-є
                (((seed a))
                 ((noise one))
                 ((path (var x) left) (seed (var x)))
                 ((noise two))
                 ((path (var x) right) (seed (var x)))
                 ((reachable (var x)) (path (var x) (var side))))))
-           (indexed (101001110 (001 (reachable a)) parity-rules))
+           (indexed (міркувати-за-індексом (як-є (reachable a)) parity-rules))
            (linear
-             (101011011
-               (001 (reachable a))
+             (міркувати-лінійно
+               (як-є (reachable a))
                parity-rules
-               (001 ())
+               (як-є ())
                (лінійний-індекс-міркування parity-rules)
                0))
-           (parity-relation (11110111 indexed linear))
+           (parity-relation (однакові? indexed linear))
 
            (old-rules
-             (001
+             (як-є
                (((seed a))
                 ((reachable (var x)) (seed (var x))))))
            (prepared (побудувати-індекс-міркування old-rules))
            (newer-rules
-             (1111 old-rules (001 (((later yes))))))
+             (додати-в-кінець old-rules (як-є (((later yes))))))
            (snapshot-relation
-             (11110111
-               (101001110 (001 (reachable a)) old-rules)
-               (101001110 (001 (reachable a)) prepared)))
+             (однакові?
+               (міркувати-за-індексом (як-є (reachable a)) old-rules)
+               (міркувати-за-індексом (як-є (reachable a)) prepared)))
            (prepared-later-empty
-             (11110111 (101001110 (001 (later yes)) prepared) (001 ())))
+             (однакові? (міркувати-за-індексом (як-є (later yes)) prepared) (як-є ())))
            (rebuilt-later-count
-             (11110111 (000000 (101001110 (001 (later yes)) newer-rules)) 1))
+             (однакові? (довжина (міркувати-за-індексом (як-є (later yes)) newer-rules)) 1))
 
            (recursive-rules
-             (001
+             (як-є
                (((parent alice bob))
                 ((parent bob carol))
                 ((ancestor (var x) (var y)) (parent (var x) (var y)))
@@ -57,73 +51,64 @@
                   (ancestor (var z) (var y)))
                 ((safe (var x)) (not? (blocked (var x))))
                 ((noise irrelevant)))))
-           (goal (001 (ancestor alice carol)))
-           (recursive-indexed (101001110 goal recursive-rules))
+           (goal (як-є (ancestor alice carol)))
+           (recursive-indexed (міркувати-за-індексом goal recursive-rules))
            (recursive-linear
-             (101011011
+             (міркувати-лінійно
                goal
                recursive-rules
-               (001 ())
+               (як-є ())
                (лінійний-індекс-міркування recursive-rules)
                0))
-           (recursive-relation (11110111 recursive-indexed recursive-linear))
-           (negation-relation
-             (11110111
-               (101001110 (001 (safe alice)) recursive-rules)
-               (101011011
-                 (001 (safe alice))
-                 recursive-rules
-                 (001 ())
-                 (лінійний-індекс-міркування recursive-rules)
-                 0))))
-      (110
-        (parity-relation (1)
-          (110
-            (snapshot-relation (1)
-              (110
-                (prepared-later-empty (1)
-                  (110
-                    (rebuilt-later-count (1)
-                      (110
-                        (recursive-relation (1)
-                          (110
-                            (negation-relation (1)
-                              (001
-                                (reason-index-authority-witness
-                                  (status pass)
-                                  (laws
-                                    indexed-linear-parity
-                                    immutable-prepared-snapshot
-                                    recursion-negation-parity))))
-                            (negation-relation (0)
-                              (001
-                                (reason-index-authority-witness
-                                  (status fail)
-                                  (law recursion-negation-parity))))))
-                        (recursive-relation (0)
-                          (001
-                            (reason-index-authority-witness
-                              (status fail)
-                              (law recursion-parity))))))
-                    (rebuilt-later-count (0)
-                      (001
-                        (reason-index-authority-witness
-                          (status fail)
-                          (law rebuilt-snapshot-sees-new-rule))))))
-                (prepared-later-empty (0)
-                  (001
-                    (reason-index-authority-witness
-                      (status fail)
-                      (law prepared-snapshot-is-immutable))))))
-            (snapshot-relation (0)
-              (001
-                (reason-index-authority-witness
-                  (status fail)
-                  (law prepared-snapshot-preserves-old-result))))))
-        (parity-relation (0)
-          (001
-            (reason-index-authority-witness
-              (status fail)
-              (law indexed-linear-parity))))))))
+           (recursive-parity (однакові? recursive-indexed recursive-linear))
+           (negation-goal (як-є (safe alice)))
+           (negation-indexed (міркувати-за-індексом negation-goal recursive-rules))
+           (negation-linear
+             (міркувати-лінійно
+               negation-goal
+               recursive-rules
+               (як-є ())
+               (лінійний-індекс-міркування recursive-rules)
+               0))
+           (negation-parity (однакові? negation-indexed negation-linear)))
+      (за-умовою
+        (parity-relation
+          (за-умовою
+            (snapshot-relation
+              (за-умовою
+                (prepared-later-empty
+                  (за-умовою
+                    (rebuilt-later-count
+                      (за-умовою
+                        (recursive-parity
+                          (за-умовою
+                            (negation-parity
+                              (як-є (reason-index-authority-witness
+                                      (status pass)
+                                      (laws
+                                        indexed-linear-parity
+                                        prepared-snapshot-preserves-old-result
+                                        prepared-snapshot-is-immutable
+                                        rebuilt-snapshot-sees-new-rule
+                                        recursive-parity
+                                        negation-parity))))
+                            (так (як-є (reason-index-authority-witness
+                                        (status fail)
+                                        (law negation-parity))))))
+                        (так (як-є (reason-index-authority-witness
+                                    (status fail)
+                                    (law recursive-parity))))))
+                    (так (як-є (reason-index-authority-witness
+                                (status fail)
+                                (law rebuilt-snapshot-sees-new-rule))))))
+                (так (як-є (reason-index-authority-witness
+                            (status fail)
+                            (law prepared-snapshot-is-immutable))))))
+            (так (як-є (reason-index-authority-witness
+                        (status fail)
+                        (law prepared-snapshot-preserves-old-result))))))
+        (так (як-є (reason-index-authority-witness
+                    (status fail)
+                    (law indexed-linear-parity))))))))
 
 (reason-index-authority-witness)
