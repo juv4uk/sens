@@ -1,5 +1,5 @@
-; Synthetic RED for #1347.
-; A SENS-owned semantic source must not derive its semantic truth from Rust.
+; Синтетичний RED для #1347.
+; Семантичне джерело, що належить SENS, не повинно виводити свою семантичну істину з Rust.
 
 (language-contract
   (semantic-authority-source "crates/sens/src/eval/canon.rs")
