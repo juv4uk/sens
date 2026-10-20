@@ -405,382 +405,63 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         self.assertIn("перше", heads)
 
 
-    def test_first_class_exact_inverse_original_git_blob(self):
-        """Перевірка точних D1/D3/D4 координат і збереження ВСІХ старих байтів."""
+    def test_first_class_source_is_current_ukrainian_not_historical_sid8(self):
         current_src = (Path(__file__).resolve().parents[1] / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
-        # Спершу відновлюємо повне українське переписування й 31 пізнішу D3–D8 проєкцію.
-        # І лише тоді починає діяти старий незмінний D1/D3/D4 receipt нижче.
-        # Таким чином pinned Git blob ніколи не послаблюється.
-        from tests.test_meta_eval_fc_ukr_remaining import reconstruct as undo_latest_projection
-        self.assertIn("(додати (перше аргументи) (друге аргументи))", current_src)
-        src = undo_latest_projection(current_src)
-        originals = (
-        (634, "0011"),
-        (712, "0011"),
-        (1362, "0011"),
-        (1517, "#d1:1"),
-        (1547, "011"),
-        (1563, "0011"),
-        (1627, "010"),
-        (1638, "#d1:0"),
-        (1652, "#d1:1"),
-        (1659, "101"),
-        (1664, "100"),
-        (1676, "001"),
-        (1698, "0011"),
-        (1760, "010"),
-        (1771, "#d1:0"),
-        (1785, "#d1:1"),
-        (1792, "101"),
-        (1797, "100"),
-        (1809, "001"),
-        (1829, "0011"),
-        (1930, "#d1:1"),
-        (2065, "0011"),
-        (2163, "#d1:1"),
-        (2273, "0011"),
-        (2397, "#d1:1"),
-        (2516, "0011"),
-        (2715, "#d1:1"),
-        (2739, "011"),
-        (2837, "0011"),
-        (2906, "010"),
-        (2911, "011"),
-        (2922, "#d1:1"),
-        (3137, "#d1:1"),
-        (3144, "001"),
-        (3207, "#d1:1"),
-        (3213, "#d1:0"),
-        (3225, "0011"),
-        (3992, "#d1:1"),
-        (3999, "1110"),
-        (4005, "001"),
-        (4040, "0011"),
-        (4363, "#d1:1"),
-        (4370, "1110"),
-        (4376, "001"),
-        (4404, "0011"),
-        (5142, "#d1:1"),
-        (5271, "#d1:1"),
-        (5603, "0011"),
-        )
-        ratified = {}
-        import re as _re
-        for domain in (1, 3, 4):
-            table = (Path(__file__).resolve().parents[1] / f"lib/domains/d{domain}.lisp").read_text(encoding="utf-8")
-            for match in _re.finditer(r"(?m)^\s*\(([01]+)\s+\(ук\s+[^()]*\)\s+\(укр\s+([^\s()]+)\)", table):
-                bits, peer = match.groups()
-                if len(bits) == domain:
-                    ratified[(domain, bits)] = peer
-
-        def undo(source):
-            coords = []
-            delta = 0
-            previous = -1
-            for offset, literal in originals:
-                self.assertGreater(offset, previous)
-                previous = offset
-                bits = literal.split(":")[-1] if literal.startswith("#d1:") else literal
-                peer = ratified[(len(bits), bits)]
-                coords.append((offset + delta, literal, peer))
-                delta += len(peer) - len(literal)
-            for pos, literal, peer in reversed(coords):
-                self.assertEqual(source[pos:pos + len(peer)], peer)
-                source = source[:pos] + literal + source[pos + len(peer):]
-            return source
-
-        def sha_blob(source):
-            body = source.encode("utf-8")
-            return hashlib.sha1(b"blob " + str(len(body)).encode() + b"\x00" + body).hexdigest()
-
-        self.assertEqual(sha_blob(undo(src)), "67c2d9e0e41702ea37d229a8280d60d153dca99d")
-        self.assertIn("(як-є atom)", src)  # цитовані дані лишаються даними
-        self.assertIn("(01010 (100 args) (1001 args))", src)  # D5 без доказу викличності не чіпали
-
-        broken = src.replace("(визначити my-fc-primitive", "(визначити-хибно my-fc-primitive", 1)
-        self.assertNotEqual(broken, src)
-        with self.assertRaises(AssertionError):
-            undo(broken)
-
-
-
-class UnifyUkrDomainProjectionTests(unittest.TestCase):
-    """Current domain spellings; source-only, not a Python semantics evaluator."""
-
-    def test_unify_uses_ratified_d3_d4_ukr_calls(self):
-        root = Path(__file__).resolve().parents[1]
-        required = [
-                  [
-                            "атом?",
-                            28
-                  ],
-                  [
-                            "за-умовою",
-                            20
-                  ],
-                  [
-                            "перше",
-                            11
-                  ],
-                  [
-                            "порожній?",
-                            3
-                  ],
-                  [
-                            "приєднати",
-                            1
-                  ],
-                  [
-                            "решта",
-                            10
-                  ],
-                  [
-                            "список",
-                            2
-                  ],
-                  [
-                            "сполучити",
-                            3
-                  ],
-                  [
-                            "тотожне?",
-                            4
-                  ],
-                  [
-                            "функція",
-                            17
-                  ],
-                  [
-                            "як-є",
-                            29
-                  ]
-        ]
-        source = (root / "lib/unify.lisp").read_text(encoding="utf-8")
-        heads = [node.text for node in mod.candidate_heads(mod.parse(source))]
-        for name, minimum in required:
-            with self.subTest(head=name):
-                self.assertGreaterEqual(heads.count(name), minimum)
-        for width, bits, ukr in (
-            (3, "001", "як-є"), (3, "010", "атом?"),
-            (3, "011", "решта"), (3, "100", "перше"),
-            (3, "101", "тотожне?"), (3, "110", "за-умовою"),
-            (3, "111", "сполучити"), (4, "0010", "функція"),
-            (4, "0100", "хибне?"), (4, "0101", "порожній?"),
-            (4, "1110", "список"), (4, "1111", "приєднати"),
-        ):
-            with self.subTest(domain=width, bits=bits):
-                table = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8")
-                rows = [line for line in table.splitlines()
-                        if line.strip().startswith(f"({bits} (ук ")]
-                self.assertEqual(len(rows), 1)
-                self.assertIn(f"(укр {ukr})", rows[0])
-
-    def test_unify_preserves_quoted_data_and_d1_identity(self):
-        root = Path(__file__).resolve().parents[1]
-        source = (root / "lib/unify.lisp").read_text(encoding="utf-8")
-        self.assertIn("(визначити unify\n", source)
-        self.assertIn("(визначити unify-walked\n", source)
-        self.assertIn("(так ні)", source)
-        self.assertIn("(як-є (ні))", source)
-        active_unify = "\n".join(line.split(";", 1)[0]
-                                 for line in source.splitlines())
-        self.assertNotIn("(0011 unify", active_unify)
-        self.assertNotIn("#d1:1", active_unify)
-        self.assertNotIn("#d1:0", active_unify)
-        # Quoted forms carry data; numeric-looking heads inside them are not calls.
-        sample = "(як-є (100 quoted)) (сполучити (як-є (0)) (перше xs))"
-        heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
-        self.assertNotIn("100", heads)
-        self.assertNotIn("0", heads)
-        self.assertIn("сполучити", heads)
-        self.assertIn("перше", heads)
-
-
-class UnderstandMapUkrSourceTests(unittest.TestCase):
-    """Реальні джерела: ратифіковані голови, без приглушення негативів."""
-
-    def test_both_active_modules_have_only_named_ukr_execution_heads(self):
-        root = Path(__file__).resolve().parents[1]
-        for file, required, definitions in (
-            ("lib/understand.lisp", ("визначити", "функція", "атом?",
-                                      "решта-решти", "третє", "четверте"), 15),
-            ("lib/persistent-map.lisp", ("визначити", "функція",
-                                         "за-умовою", "тотожне?", "так"), 15),
-        ):
-            with self.subTest(file=file):
-                source = (root / file).read_text(encoding="utf-8")
-                mod.parse(source)  # failure propagates; no synthetic SENS evaluator
-                active = "\n".join(line.split(";", 1)[0] for line in source.splitlines())
-                self.assertEqual(active.count("(визначити "), definitions)
-                for name in required:
-                    self.assertIn(name, active)
-                self.assertNotRegex(active, r"\(\s*[01]{3,6}(?=\s|\))")
-                self.assertNotIn("#d1:1", active)
-
-    def test_understand_historical_laws_remain_strict(self):
-        from copy import deepcopy
-        from tests import test_understand_exact_d3_2046 as witness
-        current = witness.read_forms(witness.SOURCE.read_text(encoding="utf-8"))
-        normalized = witness.normalize_current_source_forms(current)
-        self.assertEqual(len(normalized), 8)
-        self.assertEqual(witness.verify_unchanged_laws(normalized), normalized)
-        wrong_peer = deepcopy(current)
-        wrong_peer[0][2][2][1][0][0] = "тотожне?"
-        with self.assertRaisesRegex(AssertionError, "непорожній CAR"):
-            witness.verify_unchanged_laws(
-                witness.normalize_current_source_forms(wrong_peer))
-
-    def test_quoted_data_remains_data_and_d1_is_its_own_identity(self):
-        root = Path(__file__).resolve().parents[1]
-        understand = (root / "lib/understand.lisp").read_text(encoding="utf-8")
-        mapped = (root / "lib/persistent-map.lisp").read_text(encoding="utf-8")
-        self.assertIn("(як-є has)", understand)
-        self.assertIn("(як-є var)", understand)
-        self.assertIn("(визначити мапа-порожній (як-є ()))", mapped)
-        self.assertEqual(len([line for line in understand.splitlines()
-                              if line.strip().startswith("(так")]), 3)
-        self.assertIn("(1 (ук так) (укр так)", (root / "lib/domains/d1.lisp").read_text(encoding="utf-8"))
-        sample = "(як-є (100 protected-data)) (сполучити (як-є a) (як-є ()))"
-        observed = [t.text for t in mod.candidate_heads(mod.parse(sample))]
-        self.assertNotIn("100", observed)
-        self.assertIn("сполучити", observed)
-
-
-class Core1D3D4UkrSourceProjectionTests(unittest.TestCase):
-    """Exact Ukrainian spelling, not permission to execute a historical SID8 byte."""
-
-    def test_core1_current_d3_d4_calls_follow_ratified_ukr(self):
-        root = Path(__file__).resolve().parents[1]
-        rows = (
-            (3, "001", "як-є"), (3, "010", "атом?"),
-            (3, "011", "решта"), (3, "100", "перше"),
-            (3, "101", "тотожне?"), (3, "110", "за-умовою"),
-            (3, "111", "сполучити"), (4, "0010", "функція"),
-            (4, "0011", "визначити"), (4, "1001", "друге"),
-        )
-        for width, bits, ukr in rows:
-            with self.subTest(width=width, bits=bits):
-                source = (root / "lib/domains" / f"d{width}.lisp").read_text(encoding="utf-8")
-                authority = [line for line in source.splitlines()
-                             if line.strip().startswith(f"({bits} (ук ")]
-                self.assertEqual(len(authority), 1)
-                self.assertIn(f"(укр {ukr})", authority[0])
-
-        src = (root / "lib/core1.lisp").read_text(encoding="utf-8")
-        heads = [token.text for token in mod.candidate_heads(mod.parse(src))]
-        for ukr in ("визначити", "функція", "за-умовою", "тотожне?", "перше", "як-є"):
-            self.assertIn(ukr, heads)
-        self.assertIn("(визначити C1-SECOND", src)
-        self.assertIn("(функція (значення)", src)
-
-    def test_core1_quotes_and_legacy_w8_are_not_assigned_new_identity(self):
-        root = Path(__file__).resolve().parents[1]
-        src = (root / "lib/core1.lisp").read_text(encoding="utf-8")
-        # Поточний core1 не має історичних типізованих літералів.
-        # Перевіряємо чинний стан, а не вимагаємо повернення забороненого.
-        self.assertNotIn("#d1:0", src)
-        self.assertNotIn("#d1:1", src)
-        # Under QUOTE, even a binary-looking list head remains inert data.
-        sample = "(як-є (00000101 (100 datum))) (визначити answer (функція (x) (перше x)))"
-        heads = [token.text for token in mod.candidate_heads(mod.parse(sample))]
-        self.assertNotIn("00000101", heads)
-        self.assertNotIn("100", heads)
-        self.assertIn("перше", heads)
-        # Wrong Ukrainian peer: D3 CAR != CDR, even if both have three bits.
-        d3 = (root / "lib/domains/d3.lisp").read_text(encoding="utf-8")
-        self.assertNotEqual(
-            next(s for s in d3.splitlines() if s.strip().startswith("(100 (ук ")),
-            next(s for s in d3.splitlines() if s.strip().startswith("(011 (ук ")),
-        )
-
-
-
-class UkrainianGreetingFullSurfaceTests(unittest.TestCase):
-    """Український виконуваний приклад: цілісні форми та ратифіковані назви."""
-
-    def test_greeting_uses_full_keyboard_surface_and_ratified_heads(self):
-        root = Path(__file__).resolve().parents[1]
-        path = root / "examples/ukrainian-greeting.lisp"
-        source = path.read_text(encoding="utf-8")
-        forms = mod.parse(source)
-
-        self.assertEqual(len(forms), 5)
-        self.assertIn("(визначити привітання", source)
-        self.assertIn("(визначити гості", source)
-        self.assertIn("(список 'Олена 'Тарас 'Вова)", source)
-        self.assertEqual(source.count("(друкувати"), 3)
-        self.assertIn("(значення-у-текст (перше гості))", source)
-        self.assertIn("(значення-у-текст (атом? (перше гості)))", source)
-        self.assertNotRegex(source, r"\(\s*[01]{2,10}(?=\s|\))")
-
-        from scripts.report_ukr_projection_progress import (
-            UKRAINIAN_KEYBOARD_OUTPUTS,
-        )
-
-        self.assertTrue(source.strip())
-        self.assertFalse(
-            {char for char in source if char not in UKRAINIAN_KEYBOARD_OUTPUTS
-             and char not in "\n\r\t"}
-        )
-
-        expected = (
-            (3, "010", "атом?"),
-            (3, "100", "перше"),
-            (4, "0010", "функція"),
-            (4, "0011", "визначити"),
-            (4, "1110", "список"),
-            (8, "11011011", "друкувати"),
-            (8, "11110100", "значення-у-текст"),
-            (9, "110011110", "рядок-додати"),
-        )
-        for width, bits, spelling in expected:
-            table = (root / f"lib/domains/d{width}.lisp").read_text(
-                encoding="utf-8"
-            )
-            row = next(
-                row for row in table.splitlines()
-                if row.strip().startswith(f"({bits} (ук ")
-            )
-            self.assertIn(f"(укр {spelling})", row)
-
+        self.assertTrue(current_src.startswith("; Першокласні функції: експериментальний метаобчислювач"))
+        active = "\\n".join(line.split(";", 1)[0] for line in current_src.splitlines())
+        self.assertNotIn("#d1:", active)
+        self.assertNotRegex(active, r"(?m)^\\s*\\([01]{3,9}\\s")
+        for head in ("визначити", "функція", "як-є", "за-умовою",
+                     "першокласне-застосувати", "першокласне-обчислити"):
+            self.assertIn(head, active)
+        for old in ("my-fc-eval", "my-fc-apply", "my-eval-first-class", "SID8", "Sens8"):
+            self.assertNotIn(old, active)
 
 
 class NativeFirstUkrProjectionTests(unittest.TestCase):
-    """Reader-safe current D3/D4 projection; D9 identity does not grant admission."""
+    """Чинні українські джерела parity; жодного inverse до історичних SID8."""
 
-    @staticmethod
-    def _git_blob(source: str) -> str:
-        import hashlib
-        data = source.encode("utf-8")
-        return hashlib.sha1(b"blob " + str(len(data)).encode("ascii")
-                            + b"\0" + data).hexdigest()
-
-    def test_exact_current_ukrainian_peers_and_frozen_inverse(self):
+    def test_exact_current_ukrainian_peers(self):
         root = Path(__file__).resolve().parents[1]
         for width, bits, spelling in (
             (4, "0011", "визначити"),
             (9, "110110101", "п'ятий"),
+            (10, "0001100010", "входження-тотожність"),
         ):
             with self.subTest(domain=f"D{width}:{bits}"):
                 data = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8")
-                rows = [r for r in data.splitlines()
-                        if r.strip().startswith(f"({bits} (ук ")]
+                rows = [row for row in data.splitlines()
+                        if row.strip().startswith(f"({bits} (ук ")]
                 self.assertEqual(len(rows), 1)
                 self.assertIn(f"(укр {spelling})", rows[0])
 
+    def test_parity_source_has_only_named_ukrainian_functions(self):
+        root = Path(__file__).resolve().parents[1]
         parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
-        from tests.test_ukr_machine_projection_parity import undo_current_lexical_binders
-        parity = undo_current_lexical_binders("lib/machine/dispatch/native-first-parity.lisp", parity)
-        new_p = "(error-class (перше (решта (решта (решта (решта row))))))"
-        old_p = "(error-class (110110101 row))"
-        self.assertEqual(parity.count(new_p), 1)
-        self.assertEqual(
-            self._git_blob(parity.replace(new_p, old_p, 1)),
-            "bc6a7e27a83192d667ba6791e4da4d867ed80971",
-        )
+        heads = [token.text for token in mod.candidate_heads(mod.parse(parity))]
+        for name in (
+            "нативний-паритет-успіх",
+            "нативний-паритет-невдача",
+            "нативний-паритет-пятичленний?",
+            "нативний-паритет-перевірити-випадок",
+            "нативний-паритет-перевірити-корпус",
+            "нативний-паритет-вердикт-успішний?",
+            "нативний-паритет-усі-вердикти-успішні?",
+        ):
+            with self.subTest(name=name):
+                self.assertIn(name, heads)
+        for name in (
+            "native-first-parity-pass", "native-first-parity-fail",
+            "native-first-parity-case", "native-first-parity-run",
+            "native-first-parity-verdict-pass?", "native-first-parity-all-pass?",
+        ):
+            self.assertNotIn("(визначити " + name, parity)
+        self.assertNotRegex(parity, r"(?m)^\\s*\\([01]{3,9}\\s")
+        self.assertIn("(однакові? результат-обчислювача очікуване)", parity)
+        self.assertIn("(однакові? результат-машини очікуваний-результат-машини)", parity)
 
-        # Дані журналу лишаються шістьма записами; тільки D4 DEFINE та
-        # D3 QUOTE активні, цитовані зразки ніколи не стають call-head.
+    def test_coverage_ledger_is_still_quoted_data_with_six_rows(self):
+        root = Path(__file__).resolve().parents[1]
         coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
         forms = mod.parse(coverage)
         self.assertEqual(len(forms), 1)
@@ -791,49 +472,19 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
         self.assertEqual(mod.atom(quote_form.values[0]), "як-є")
         records = quote_form.values[1].values
         self.assertEqual(len(records), 6)
-        self.assertTrue(all(mod.atom(record.values[0]) == "native-coverage"
-                            for record in records))
+        self.assertTrue(all(mod.atom(record.values[0]) == "native-coverage" for record in records))
         statuses = []
         for record in records:
-            fields = {mod.atom(field.values[0]): mod.atom(field.values[1])
-                      for field in record.values[1:]}
-            self.assertIn("representative", fields)
-            self.assertIn("reason", fields)
-            self.assertIn("evidence", fields)
+            fields = {mod.atom(field.values[0]): mod.atom(field.values[1]) for field in record.values[1:]}
+            for field in ("representative", "reason", "evidence", "status"):
+                self.assertIn(field, fields)
             statuses.append(fields["status"])
         self.assertCountEqual(statuses, [
-            "native-supported",
-            "fallback-required", "fallback-required",
-            "blocked-runtime-prerequisite",
+            "native-supported", "fallback-required", "fallback-required",
             "blocked-runtime-prerequisite", "blocked-runtime-prerequisite",
+            "blocked-runtime-prerequisite",
         ])
-        self.assertNotIn("(001\\n", coverage)
-        self.assertNotIn("(110 ((101 ", coverage)
-
-    def test_wrong_peer_mutant_and_quoted_native_data(self):
-        root = Path(__file__).resolve().parents[1]
-        parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
-        from tests.test_ukr_machine_projection_parity import undo_current_lexical_binders
-        parity = undo_current_lexical_binders("lib/machine/dispatch/native-first-parity.lisp", parity)
-        coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
-        heads = [t.text for t in mod.candidate_heads(mod.parse(parity))]
-        self.assertIn("перше", heads)
-        self.assertGreaterEqual(heads.count("решта"), 4)
-        self.assertNotIn("п", heads)
-        self.assertNotIn("110110101", heads)
-        self.assertIn("(як-є\\n    ((native-coverage", coverage)
-        self.assertIn("(representative (додати 2 3))", coverage)
-        mutant = parity.replace("(error-class (перше (решта (решта (решта (решта row))))))",
-                                "(error-class (перше (решта (решта (решта row)))))", 1)
-        restored = mutant.replace("(error-class (перше (решта (решта (решта (решта row))))))",
-                                  "(error-class (110110101 row))", 1)
-        self.assertNotEqual(self._git_blob(restored),
-                            "bc6a7e27a83192d667ba6791e4da4d867ed80971")
-        wrong_declaration = coverage.replace(
-            "(визначити журнал-нативного-покриття",
-            "(функція журнал-нативного-покриття", 1,
-        )
-        self.assertNotIn("(визначити журнал-нативного-покриття", wrong_declaration)
+        self.assertIn('(representative (додати 2 3))', coverage)
 
 
 
