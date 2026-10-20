@@ -24,6 +24,6 @@ jobs:
           cd research/asm-t5m
           as --64 -o t5m_pack.o t5m_pack.S
           zig build-obj t5m_ref.zig -O ReleaseFast -femit-bin=t5m_ref.o
-          rustc -O --edition 2021 --crate-type staticlib t5m_ref.rs -o librust_t5m_ref.a
-          zig cc -O2 -DHAVE_RUST bench.c t5m_pack.o t5m_ref.o librust_t5m_ref.a -o bench
+          rustc -O --edition 2021 --crate-type lib --emit obj -C panic=abort -o rust_t5m_ref.o t5m_ref.rs
+          zig cc -O2 -DHAVE_RUST bench.c t5m_pack.o t5m_ref.o rust_t5m_ref.o -o bench
           ./bench
