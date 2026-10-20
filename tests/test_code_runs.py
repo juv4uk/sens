@@ -1667,13 +1667,11 @@ class QuantityUkrLocalHelpersTests(unittest.TestCase):
         ("science-sixth", "науковий-шостий", 2),
         ("science-seventh", "науковий-сьомий", 2),
     )
-    ALIAS_BLOCK = "\n; Українські локальні імена є тими самими Lisp-замиканнями.\n; Старі імена лишаються сумісними проєкціями для зовнішніх споживачів.\n; Це не нові D9/D10 identity, не новий механізм і не D24+ математика.\n(визначити science-proper-list? науковий-список-правильний?)\n(визначити science-list-length-equals? науковий-список-довжина-дорівнює?)\n(визначити science-sixth науковий-шостий)\n(визначити science-seventh науковий-сьомий)\n"
-
     @classmethod
     def restore_original(cls, source):
-        if not source.endswith(cls.ALIAS_BLOCK):
-            raise AssertionError("не вистачає сумісних Lisp-аліасів")
-        body = source[:-len(cls.ALIAS_BLOCK)]
+        if re.search(r"(?m)^\\(визначити\\s+(?:science-|make-|dimension)", source):
+            raise AssertionError("у чинному Lisp залишено історичні аліаси")
+        body = source
         for english, ukrainian, calls in cls.PAIRS:
             definition = "(визначити " + ukrainian
             actual_calls = body.count("(" + ukrainian)
@@ -1690,10 +1688,8 @@ class QuantityUkrLocalHelpersTests(unittest.TestCase):
     def test_current_ukrainian_definitions_and_exact_git_inverse(self):
         source = self.SOURCE.read_text(encoding="utf-8")
         for english, ukrainian, _ in self.PAIRS:
-            self.assertIn(
-                "(визначити " + english + " " + ukrainian + ")",
-                source,
-            )
+            self.assertIn("(визначити " + ukrainian, source)
+            self.assertNotIn("(визначити " + english + " ", source)
         restored = self.restore_original(source)
         raw = restored.encode("utf-8")
         blob = hashlib.sha1(

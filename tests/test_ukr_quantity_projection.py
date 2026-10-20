@@ -43,7 +43,7 @@ LOCAL_HELPERS = (
     ("science-source-authority", "авторитет-наукового-джерела", 1),
     ("science-source-edition", "видання-наукового-джерела", 1),
 )
-LOCAL_ALIASES = "\n; Українські локальні імена є тими самими Lisp-замиканнями.\n; Старі імена лишаються сумісними проєкціями для зовнішніх споживачів.\n; Це не нові D9/D10 identity, не новий механізм і не D24+ математика.\n(визначити science-proper-list? науковий-список-правильний?)\n(визначити science-list-length-equals? науковий-список-довжина-дорівнює?)\n(визначити science-sixth науковий-шостий)\n(визначити science-seventh науковий-сьомий)\n(визначити science-source-authority авторитет-наукового-джерела)\n(визначити science-source-edition видання-наукового-джерела)\n"
+SCHEMA_ARCHIVE_BLOCK = "\n; Сумісні історичні імена схем залишаються зовнішніми\n; посиланнями на ті самі дані. Усі живі внутрішні звернення\n; вже використовують українські зв'язування.\n(визначити *dimension-schema* схема-розмірності)\n(визначити *unit-schema* схема-одиниці-виміру)\n(визначити *quantity-schema* схема-величини)\n(визначити *science-source-schema* схема-наукового-джерела)\n(визначити *scientific-constant-schema* схема-наукової-константи)\n"
 QUANTITY_FORMALS = (
     ("науковий-список-правильний?", (("x", "значення", 4),)),
     ("науковий-список-довжина-дорівнює?", (("items", "елементи", 3), ("remaining", "залишок", 4))),
@@ -215,26 +215,12 @@ PUBLIC_PROJECTIONS = (
     ("scientific-constant-source", "науковий-константа-джерело", "111110110"),
     ("scientific-constant->clauses", "науковий-константа-клаузи", "111100111"),
 )
-PUBLIC_ALIAS_BLOCK = (
-    "; Повні українські назви — первинні визначення за точними проєкціями D9.\n"
-    "; Англійські назви — лише сумісні псевдоніми тих самих Lisp-замикань.\n"
-    "; Ключі залишаються в lib/domains/d9.lisp; цей файл не вводить бінарних call-heads.\n"
-    + "\n".join(
-        f"(визначити {english} {ukrainian})"
-        for english, ukrainian, _bits in PUBLIC_PROJECTIONS
-    )
-)
-PUBLIC_ALIASES = "\n" + PUBLIC_ALIAS_BLOCK + "\n"
-
-
 def restore_local_helper_layer(source: str) -> str:
     """Точний обернений прохід проєкцій; читача чи обчислювача не запускає."""
-    if not source.endswith(LOCAL_ALIASES):
-        raise AssertionError("відсутні сумісні локальні аліаси Quantity")
-    body = source[:-len(LOCAL_ALIASES)]
-    if not body.endswith(PUBLIC_ALIASES):
-        raise AssertionError("відсутні сумісні псевдоніми основних функцій Quantity")
-    body = body[:-len(PUBLIC_ALIASES)]
+    # Архівний шар відтворюємо лише в перевірці походження, не в живій бібліотеці.
+    if re.search(r"(?m)^\\(визначити\\s+[A-Za-z*]", source):
+        raise AssertionError("у чинному Lisp залишено латинське визначення")
+    body = source + SCHEMA_ARCHIVE_BLOCK
     # Local binders belong to the Ukrainian primary definitions; undo them
     # before the public-name inverse changes those definition heads to English.
     body = restore_quantity_formals(body)
@@ -267,7 +253,9 @@ def apply_local_helper_layer(source: str) -> str:
     if set(projected_public) != set(forward):
         raise AssertionError("не вдалося точно застосувати всі первинні назви Quantity")
     body = project_quantity_formals(body)
-    return body + PUBLIC_ALIASES + LOCAL_ALIASES
+    if not body.endswith(SCHEMA_ARCHIVE_BLOCK):
+        raise AssertionError("історичні дані схем не відтворилися точно")
+    return body[:-len(SCHEMA_ARCHIVE_BLOCK)]
 
 
 
@@ -426,7 +414,7 @@ class QuantityUkrProjection(unittest.TestCase):
                     source,
                     rf"(?m)^\(визначити\s+{re.escape(ukrainian)}(?=\s|\))",
                 )
-                self.assertIn(f"(визначити {english} {ukrainian})", source)
+                self.assertNotIn(f"(визначити {english} ", source)
                 self.assertNotRegex(
                     source,
                     rf"(?m)^\s*\({bits}(?:\s|\))",
