@@ -83,19 +83,20 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             ("класифікувати-непорожність-рядка", "nonempty-string-membership-helper"),
             ("знайти-пару-підстановки", "sublis-pair"),
             ("підготувати-цитовані-аргументи", "apply-quote-args"),
-            ("взяти-десятковий-символ", "digit->string"),
             ("уточнити-корінь-ітерацією", "sqrt-iter"),
             ("крок-цілого-кореня", "isqrt-step"),
             ("знайти-найбільший-блок-частки", "largest-chunk"),
             ("перевірити-неспадання-значень?", "nondecreasing-from?"),
             ("перевірити-незростання-значень?", "nonincreasing-from?"),
         )
-        for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
-            with self.subTest(file=filename, migration="internal helper names"):
-                for ukrainian, legacy in helpers:
-                    with self.subTest(helper=ukrainian):
-                        self.assertIn(f"(визначити {ukrainian}", code)
-                        self.assertNotIn(f"({legacy} ", code)
+        # Core4 owns these remaining internal helper definitions. The smaller
+        # Ukrainian core.lisp no longer carries duplicate number-rendering code.
+        for ukrainian, legacy in helpers:
+            with self.subTest(file="lib/core4.lisp", helper=ukrainian):
+                self.assertIn(f"(визначити {ukrainian}", core4)
+                self.assertNotIn(f"({legacy} ", core4)
+        self.assertNotIn("взяти-десятковий-символ", core4)
+        self.assertNotIn("number->string-onto", core4)
         live_callers = (
             "lib/yantra.lisp",
             "lib/translation.lisp",
@@ -115,40 +116,42 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
 
         # These three helpers deliberately have no D-domain resident names:
         # keep them internal, Ukrainian, and exactly reversible at the callsite.
-        for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
-            with self.subTest(file=filename, migration="arithmetic helpers"):
-                for ukrainian, legacy in helpers[5:8]:
-                    self.assertIn(f"(визначити {ukrainian}", code)
-                    self.assertNotIn(f"({legacy} ", code)
+        for ukrainian, legacy in (
+            ("уточнити-корінь-ітерацією", "sqrt-iter"),
+            ("крок-цілого-кореня", "isqrt-step"),
+        ):
+            self.assertIn(f"(визначити {ukrainian}", core4)
+            self.assertNotIn(f"({legacy} ", core4)
         inventory = source("lib/surface/uk-inventory.lisp")
         for ukrainian, legacy in helpers[-3:]:
             with self.subTest(inventory=legacy):
                 self.assertIn(ukrainian, inventory)
                 self.assertNotIn(legacy, inventory)
 
-        with self.subTest(file="racket/boot/core.lisp", migration="decimal-symbol helper"):
+        with self.subTest(file="racket/boot/core.lisp", migration="canonical decimal rendering"):
             racket_core = source("racket/boot/core.lisp")
-            self.assertIn("(визначити взяти-десятковий-символ", racket_core)
-            self.assertIn("(рядок-додати (взяти-десятковий-символ ", racket_core)
-            self.assertNotIn("(0011 взяти-десятковий-символ", racket_core)
-            self.assertNotIn("(110011110 (взяти-десятковий-символ", racket_core)
-            self.assertNotIn("(digit->string ", racket_core)
-            start = racket_core.index("(визначити взяти-десятковий-символ")
-            end = racket_core.index("\n\n", start)
-            helper_source = racket_core[start:end]
-            self.assertNotRegex(helper_source, r"\([01]{3,9}(?=\s|\))")
+            self.assertIn("(визначити число-рядок", racket_core)
+            self.assertIn("(значення-у-текст число-аргумент)", racket_core)
+            self.assertNotIn("взяти-десятковий-символ", racket_core)
+            self.assertNotIn("number->string-onto", racket_core)
+            start = racket_core.index("(визначити число-рядок")
+            end = racket_core.index("; -> / ->> (thread-first / thread-last macros)", start)
+            renderer = racket_core[start:end]
+            self.assertNotRegex(renderer, r"\\([01]{3,9}(?=\\s|\\))")
 
         dependency_classifier = source("scripts/build-dependency-classification.lisp")
-        with self.subTest(file="scripts/build-dependency-classification.lisp", migration="decimal-symbol helper"):
-            self.assertIn("взяти-десятковий-символ", dependency_classifier)
-            self.assertNotIn("digit->string", dependency_classifier)
+        with self.subTest(file="scripts/build-dependency-classification.lisp", migration="canonical decimal rendering"):
+            self.assertIn("number->string", dependency_classifier)
+            self.assertNotIn("взяти-десятковий-символ", dependency_classifier)
+            self.assertNotIn("number->string-onto", dependency_classifier)
 
-        # Numeric iteration workers are internal helpers, not domain residents.
-        for filename, code in (("lib/core.lisp", core), ("lib/core4.lisp", core4)):
-            with self.subTest(file=filename, migration="numeric iteration helpers"):
-                for ukrainian, legacy in helpers[-2:]:
-                    self.assertIn(f"(визначити {ukrainian}", code)
-                    self.assertNotIn(f"({legacy} ", code)
+        # Numeric iteration workers remain ordinary Ukrainian library helpers.
+        for ukrainian, legacy in (
+            ("уточнити-корінь-ітерацією", "sqrt-iter"),
+            ("крок-цілого-кореня", "isqrt-step"),
+        ):
+            self.assertIn(f"(визначити {ukrainian}", core4)
+            self.assertNotIn(f"({legacy} ", core4)
 
         # Exact keys and full Ukrainian labels come from their owning domains.
         # In particular, D6:100111's label "четверте" is only a projection;
