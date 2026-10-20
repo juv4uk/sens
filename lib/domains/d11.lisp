@@ -1,14 +1,14 @@
-; D11 testing vocabulary — exact-width 11-bit keys, 2048 capacity.
-; Authority: knowledge/d11-testing-vocabulary-ratified.json
-; Ratified by owner for binary SENS semantic tests.
-; Columns: ук → укр → san → en → LISP → sym
-; Predicate marker: ? in ук/укр/en; Sanskrit marker-free.
-; The separate knowledge/d11-selector-seed.json contains 512 RESEARCH_ONLY_NOT_RATIFIED
-; selector candidates. They are not residents here, are not reserved, and are not callable.
-; Audit exact derivation/collisions with scripts/check_d11_selector_seed.py. Owner-directed
-; full-projection refresh (2026-10-19): `ук` is compact; `укр` is the full Ukrainian
-; peer wording. All 43 test-only identities and exact 11-bit keys remain unchanged;
-; none of these labels admits a callable Core primitive.
+; Д11 — тестовий словник: одинадцять бітів, місткість 2048.
+; Ратифікація: knowledge/d11-testing-vocabulary-ratified.json.
+; Власник дозволив цю таблицю для двійкових семантичних тестів.
+; Колонки: ук → укр → san → en → LISP → sym.
+; Ознака предиката — ? в ук/укр/en, але не в san.
+; Окремий knowledge/d11-selector-seed.json містить 512 кандидатів
+; RESEARCH_ONLY_NOT_RATIFIED: вони не є мешканцями й не викличні.
+; Походження й колізії перевіряє scripts/check_d11_selector_seed.py.
+; Рішення власника від 19.10.2026: ук — коротка, укр — повна назва.
+; Усі 43 тестові тотожності й ключі залишаються незмінними.
+; Жодна з цих назв не додає викличного примітива Core.
 
 (domain-table/1
   (00000000000 (ук прочитати-файл) (укр прочитати-вміст-файла) (san paṭhana-sañcikā) (en read-file) (LISP READ-FILE) (sym ()))

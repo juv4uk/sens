@@ -1,35 +1,27 @@
-; CANON 0+7 — semantic laws with exact D3 call-head coordinates.
-; CANON 0+7 — виконуваний семантичний контракт, написаний самою my-lisp.
-;
-; Authority rule:
-;   the language states the laws; host runtimes implement mechanisms and
-;   must conform to these laws. This file is semantic evidence over an already
-;   existing immutable Canon; it must never create or rebind Canon spellings.
-;
-; Binary admission companion: tests/fixtures/canon-ladder-logic.sens
-; All callable D3 heads in these laws are canonical exact three-bit words;
-; quoted ordinary names remain projected symbols until D7/T5 admission.
-;
-; Contract 6.0 boundary:
-;   (), quote/як-є/svarūpa, atom/атом?/aṇu, eq/тотожне?/abheda,
-;   cons/сполучити/saṃyuj, car/перше/ādi, cdr/решта/śeṣa and
-;   cond/за-умовою/anukrama are supplied by the immutable Canon resolver.
-;   This file only names witnesses and laws above that foundation.
+; КАНОН 0+7 — мовний семантичний контракт із точними викличними головами Д3.
+; Саме СЕНС визначає закони; зовнішні виконавці реалізують механізми,
+; що мають відповідати вже наявному незмінному Канону.
+; Цей файл не створює і не перевизначає канонічних імен.
+; Двійковий свідок: tests/fixtures/canon-ladder-logic.sens.
+; Викличні голови Д3 — точні трирозрядні слова; цитовані імена
+; залишаються символами проєкції до допуску Д7/T5.
+; Контракт 6.0: (), як-є, атом?, тотожне?, сполучити, перше, решта
+; та за-умовою надає незмінний розв'язувач Канону.
+; Тут визначено тільки свідків і закони над цією основою.
+; Нульовий елемент Канону не має лексичного псевдоніма;
+; свідок порожнього списку перебуває поза зарезервованими іменами.
 
-; Canon 0 has no lexical alias as part of Canon itself. This ordinary witness
-; is intentionally outside the reserved set and is used only by the laws below.
 (визначити канон-порожній-список (як-є ()))
 
-; QUOTE and COND are evaluation-control forms, not ordinary first-class values.
-; Callable Canon primitives are first-class immutable operation handles.
+; «Як-є» та «за-умовою» керують обчисленням, а не є звичайними значеннями.
+; Викличні примітиви Канону мають незмінні значення операцій.
 ;
-; Keyboard-symbol surface (typed without leaving the Ukrainian layout):
+; Символьна поверхня української клавіатури:
 ;   '  .?  =?  :  :п  :р  ?:
-; These are spellings of the same 0+7 identities, never additional primitives.
+; Це інші написання тотожностей 0+7, а не додаткові примітиви.
 
-; --- Canon V2 result records ----------------------------------------------
-; A law does not return universal TRUE/FALSE. It returns explicit Lisp data.
-; Закон не повертає універсальні TRUE/FALSE, а явний Lisp-запис.
+; --- Записи результатів Канону V2 ----------------------------------------
+; Закон повертає явний запис даних Lisp, а не універсальну істину чи хибу.
 
 (визначити канон-закон-результат
   (функція (закон стан)
@@ -55,7 +47,7 @@
       (як-є canon-conformance)
       (сполучити стан (як-є ())))))
 
-; --- Constitutive laws ----------------------------------------------------
+; --- Основоположні закони ------------------------------------------------
 ; Кожна гілка використовує поточні D3:110 COND, D3:010 ATOM і D3:101 EQ
 ; через ратифіковані українські surface; керування лише точним D1 PredicateBit.
 ; Структурне () не є хибним предикатом.
@@ -104,7 +96,7 @@
       (так
        (канон-закон-порушений (як-є eq-reflexive-atom))))))
 
-; `решта` must be a pair projection, not a human-language "second element".
+; `решта` — хвіст пари, а не «другий елемент» у звичайній мові.
 (визначити канон-закон-решта-крапковий
   (функція ()
     (за-умовою
@@ -135,7 +127,7 @@
       (так
        (канон-закон-порушений (як-є cdr-proper))))))
 
-; EQ is atom-only, so the improper tail is checked through atom projections.
+; Тотожність Д3 визначено для атомів; неправильний хвіст перевіряємо як атом.
 (визначити канон-закон-решта-неправильний
   (функція ()
     (за-умовою
@@ -148,13 +140,12 @@
       (так
        (канон-закон-порушений (як-є cdr-improper))))))
 
-; Evaluation-control laws: quoted/unselected unknown symbols must never be
-; evaluated. If a host eagerly evaluates them, execution errors before a law
-; record can be produced.
+; Цитовані й невибрані невідомі символи не можна обчислювати.
+; Передчасне обчислення спричинить помилку до запису результату закону.
 (визначити канон-закон-цитування-пригнічує-обчислення
   (функція ()
     (за-умовою
-      ((тотожне? (як-є never-defined-canon-symbol)
+      ((тотожне? (як-є ніколи-не-визначений-символ-канону)
                   (як-є never-defined-canon-symbol))
        (канон-закон-виконаний (як-є quote-suppresses-evaluation)))
       (так
@@ -172,10 +163,10 @@
       (так
        (канон-закон-порушений (як-є cond-first-match-short-circuit))))))
 
-; The compact Ukrainian-keyboard surface denotes the same seven operations.
-; Legacy witness name retained for compatibility; the law now executes
-; exact D3 heads. Surface spelling parity belongs to projection checks.
-; No historical T/NIL truthiness is admitted.
+; Коротка українська поверхня означає ті самі сім операцій.
+; Історичне ім'я свідка збережено для сумісності; голови Д3 точні.
+; Відповідність написань перевіряється окремо.
+; Історична неявна істинність T/NIL тут неприпустима.
 (визначити канон-закон-символьний-поверхня
   (функція ()
     (за-умовою
@@ -190,8 +181,8 @@
       (так
        (канон-закон-порушений (як-є symbolic-surface))))))
 
-; Aggregate explicit law records recursively. The empty list terminates the
-; result list structurally; it does not mean FALSE.
+; Записи результатів збираються рекурсивно. Порожній список
+; завершує структуру результатів, а не означає логічну хибу.
 (визначити канон-відповідність-з
   (функція (результати)
     (за-умовою
@@ -210,14 +201,14 @@
          (так
           (канон-відповідність-результат (як-є violated))))))))
 
-; One language-level explicit conformance record used by runtime observers.
+; Єдиний явний мовний запис відповідності для спостерігачів виконавця.
 (визначити канон-відповідає?
   (функція ()
     (канон-відповідність-з
       (сполучити
         (канон-закон-порожній-список)
         (сполучити
-          (канон-закон-атом-пара (як-є x) (як-є y))
+          (канон-закон-атом-пара (як-є ліве) (як-є праве))
           (сполучити
             (канон-закон-перше-пара (як-є x) (як-є y))
             (сполучити
