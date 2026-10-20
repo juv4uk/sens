@@ -121,6 +121,8 @@ class LibUkrPeerTests(unittest.TestCase):
         # Дані протоколу в лапках і таблицях залишаються незмінними.
         retired = {
             "lib/knowledge.lisp": (
+                "(визначити advice-negative-head-conflict суперечність-запереченій-голові-правила)",
+                "(визначити opposite-knowledge-head отримати-протилежну-голову-твердження-знання)",
                 "(визначити check-conflict перевірити-конфлікт?)",
                 "(визначити *knowledge-package-version* *версія-пакета-знань*)",
                 "(визначити module-journal-has-module? журнал-містить-записи-модуля?)",
