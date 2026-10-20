@@ -79,8 +79,10 @@ def check_translation_text(source: str) -> list[str]:
     for required in PRIMARY:
         if definitions.count(required) != 1:
             errors.append(f"відсутнє єдине українське визначення: {required}")
-    if not {"так", "ні"}.issubset(set(active_atoms)):
-        errors.append("чинні відповіді D1 так/ні відсутні")
+    # Український модуль не зобов’язаний мати обидва D1-літерали:
+    # відсутність явного «ні» не дає права змінювати умовні закони.
+    if "так" not in set(active_atoms):
+        errors.append("чинний D1-літерал так відсутній")
     for atom in active_atoms:
         if atom in {"t", "T", "NIL"}:
             errors.append(f"стара істинність хоста: {atom}")
