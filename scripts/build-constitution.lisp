@@ -1,24 +1,23 @@
-; scripts/build-constitution.lisp — regenerate my-lisp-constitution.lisp from
-; its real sources of truth, written in sens itself (2026-08-09,
-; replacing the old Python version now that both real () are gone:
-; tests/fixtures/conformance.lisp is native sens data, readable via
-; read-file/read-all with no JSON parser needed, and `print` now escapes
-; strings correctly, so a plain (print value) call is enough to emit
-; correct, re-readable .lisp output — no string-append needed either.
+; Побудова my-lisp-constitution.lisp із чинних першоджерел.
+; Сценарій написано мовою СЕНС (2026-08-09), замість колишнього Python.
+; Випробування з tests/fixtures/conformance.lisp уже є власними даними
+; СЕНС, доступними через читання файла й усіх форм без розбирача JSON.
+; Друк правильно екранує рядки: отриманий файл повторно читається
+; тим самим читачем. Для цього не потрібне окреме зчеплення рядків.
 ;
-; my-lisp-constitution.lisp is a *projection*, not a second source of truth
-; — the same pattern lib/knowledge.lisp's *knowledge-journal* uses (one
-; append-only log, current state computed on demand), applied here to
-; documentation instead of runtime state. Never hand-edit the generated
-; file; edit tests/fixtures/conformance.lisp (or this script's own
-; PRINCIPLES/AXIOMS text below), then rerun this script:
+; my-lisp-constitution.lisp — лише похідна проєкція, а не друге джерело
+; істини. Такий самий принцип застосовує журнал знань: один журнал,
+; а поточний стан обчислюється за потреби. Тут його використано
+; для документації, а не для стану виконання.
+; Не змінювати породжений файл вручну! Змінюйте вихідні випробування
+; або тексти принципів і аксіом нижче, після чого запускайте:
 ;
 ;   cargo run -p sens-cli -- scripts/build-constitution.lisp > my-lisp-constitution.lisp
 ;
-; The CLI always echoes the final expression's value after the print
-; transcript (see crates/sens-cli/tests/cli.rs) — this script ends with
-; a bare '() for exactly that reason, so the echoed extra line is a
-; harmless "()" a reader can skip, not a duplicated fixture.
+; Командний виконавець також друкує значення останнього виразу
+; (див. crates/sens-cli/tests/cli.rs). Тому сценарій завершується
+; порожнім списком: додатковий надрукований () не є ще одним
+; випробуванням і безпечно ігнорується читачем.
 
 (визначити фікстури (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
 
