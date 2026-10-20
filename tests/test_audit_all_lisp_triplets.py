@@ -236,8 +236,32 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertEqual(evidence["bounded_verified_t5m"], 1)
         self.assertEqual(evidence["bounded_verified_legacy_t5"], 0)
         self.assertTrue(evidence["all_bounded_reverse_verified"])
+        self.assertTrue(evidence["all_current_t5m_bounded_reverse_verified"])
+        self.assertEqual(evidence["current_t5m_without_bounded_proof"], 0)
         self.assertFalse(evidence["semantic_runtime_proven"])
         self.assertFalse(evidence["release_ready"])
+
+    def test_legacy_t5_bounded_proof_is_not_current_t5m_completion(self):
+        from sens_t5_codec import encode_words, parse_words
+        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        target = self.root / "lib" / "branch"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for suffix in (".lisp", ".sens", ""):
+            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        # Явно створюємо історичний T5 із тих самих точних слів.
+        words = parse_words(target.read_text(encoding="ascii"))
+        target.with_suffix(".sens").write_bytes(encode_words(words))
+        report = scan(self.root, verify_bounded=True)
+        self.assertEqual(report["bounded_verified"], 1, report["blocked_sample"])
+        self.assertEqual(report["bounded_verified_legacy_t5"], 1)
+        self.assertEqual(report["bounded_verified_t5m"], 0)
+        self.assertTrue(report["all_bounded_reverse_verified"])
+        self.assertFalse(report["all_current_t5m_bounded_reverse_verified"])
+        self.assertEqual(report["current_t5m_without_bounded_proof"], 1)
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main([
+                "--root", str(self.root), "--verify-bounded", "--require-reversible"
+            ]), 2)
 
     def test_t5m_receipt_cannot_claim_legacy_t5_roundtrip_as_well(self):
         from sens_t5_codec import encode_t5m_projection
