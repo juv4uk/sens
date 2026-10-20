@@ -1,12 +1,12 @@
-; LIFE substrate-independence contract (#809).
+; Контракт незалежності від субстрату LIFE (#809).
 ;
-; This is a Lisp-owned parity admission contract. It does not implement GraalVM
-; or Rust execution. Both substrates are witnesses; neither owns expected truth.
+; Це контракт допуску паритету, що належить Lisp. Він не реалізує GraalVM
+; чи виконання Rust. Обидва субстрати — свідки; жоден не володіє очікуваною істиною.
 ;
-; A parity row may become GREEN only when all required evidence is present:
-; exact upstream pin, Lisp-owned expected datum, Rust observation, Graal
-; observation, and substrate provenance. Missing Graal mechanism is an execution
-; limitation, never a semantic mutation.
+; Рядок паритету може стати GREEN лише коли присутнє все потрібне свідчення:
+; точне закріплення upstream, очікуваний датум, що належить Lisp, спостереження Rust, Graal
+; спостереження і походження субстрату. Відсутній механізм Graal — це обмеження
+; виконання, ніколи не семантична мутація.
 
 (life-substrate-parity/1
   ((owner . my-lisp)
@@ -24,7 +24,7 @@
    (semantic-mutation-on-missing-mechanism . forbidden)
    (parity-admission . all-required-evidence))
 
-  ; #93 has not yet supplied a real Graal differential execution witness.
-  ; Keep this empty instead of manufacturing parity from Rust-only evidence.
+  ; #93 ще не надав справжнього свідка диференційного виконання Graal.
+  ; Тримайте це порожнім замість виготовлення паритету зі свідчень лише Rust.
   (rows
   ))
