@@ -1,4 +1,4 @@
-name: T5M-3 — асемблер проти Zig і Rust
+name: T5M — асемблер проти Zig і Rust
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   t5m-asm-bench:
-    name: T5M-3 pack/unpack — asm vs Zig vs Rust
+    name: T5M pack/unpack — asm vs Zig vs Rust
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
