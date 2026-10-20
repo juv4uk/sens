@@ -36,6 +36,11 @@ for line in EXPECTED:
 
 assert "(owner-ratification . #3202)" in ratified
 
+assert "(semantic-duals" in ratified
+for left, right in [("EMPTY", "CONS"), ("QUOTE", "COND"), ("ATOM", "EQ"), ("CDR", "CAR")]:
+    assert f"({left} {right})" in ratified, "D3 duality modified without ratification"
+assert "(як-є COND)" not in ratified, "D3 law must preserve QUOTE semantic symbol"
+
 for word, name in [
     ("000", "EMPTY"), ("001", "QUOTE"), ("010", "ATOM"), ("011", "CDR"),
     ("100", "CAR"), ("101", "EQ"), ("110", "COND"), ("111", "CONS"),
