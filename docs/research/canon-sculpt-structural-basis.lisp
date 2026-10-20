@@ -1,17 +1,17 @@
-; #419 structural-basis research notes.
-; Research data only; NOT semantic authority and NOT a proof of irreducibility.
+; #419 дослідницькі нотатки структурної основи.
+; Лише дослідницькі дані; НЕ семантична влада і НЕ доказ незвідності.
 ;
-; Purpose: turn vague "seems primitive" claims into explicit restricted-basis
-; hypotheses that a future bounded term search or constructive derivation can
-; falsify.
+; Мета: перетворити розпливчасті твердження «здається примітивним» на явні
+; гіпотези обмеженої основи, які майбутній обмежений пошук термів або
+; конструктивне виведення зможуть сфальсифікувати.
 
 (canon-sculpt-structural-basis
   (schema-version 1)
   (base-main 04084f1003ebd78c946a4b135b8a9febfc7e040e)
   (status hypotheses-awaiting-bounded-search)
 
-  ; These existing helpers are NOT lower alternatives: current source already
-  ; defines them from the Canon operations named here.
+  ; Ці наявні допоміжні НЕ є нижчими альтернативами: поточне джерело вже
+  ; визначає їх із названих тут операцій Canon.
   (derived-helper-dependencies
     (equal?
       (uses PRIM_ATOM PRIM_EQ PRIM_CAR PRIM_CDR PRIM_COND PRIM_QUOTE))
