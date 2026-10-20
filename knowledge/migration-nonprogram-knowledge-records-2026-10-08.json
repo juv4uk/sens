@@ -10,22 +10,22 @@
   "entries": [
     {
       "path": "knowledge/agent-discoveries.lisp",
-      "git_blob_sha1": "c58f21e2e8c00376f0d777e5a75cc74ea09ee283",
+      "git_blob_sha1": "075f19ef8559889e9358e99073b23cc9eae36843",
       "record_head": "agent-discoveries"
     },
     {
       "path": "knowledge/canon-authority-inventory.lisp",
-      "git_blob_sha1": "48fab4ace633815945cbb36308cc5aa3aa5c70cd",
+      "git_blob_sha1": "dd2804f937bc9b6178a8cb7c44d09dc28b225b4a",
       "record_head": "schema"
     },
     {
       "path": "knowledge/core4-predicate-record-inventory.lisp",
-      "git_blob_sha1": "7189f69bf93e8e01ad94885508310dce33a09f71",
+      "git_blob_sha1": "15e45242227208c80619b9b2c76c13e8b09eaa6a",
       "record_head": "core4-predicate-record-inventory/2"
     },
     {
       "path": "knowledge/function-table-sculpt-audit.lisp",
-      "git_blob_sha1": "24c83a1632abd69596a144abad421ff31eb98be8",
+      "git_blob_sha1": "d79860436474ae0b08744256b18de77cdddc25fe",
       "record_head": "function-table-sculpt-audit/1"
     },
     {
@@ -35,17 +35,17 @@
     },
     {
       "path": "knowledge/repo-tooling-inventory.lisp",
-      "git_blob_sha1": "bbdeb9a441caa2208146b7c9fd487109e9c55856",
+      "git_blob_sha1": "db460f4fe86de9a9f40d5f1623d6a760a291d6d8",
       "record_head": "about"
     },
     {
       "path": "knowledge/sanskrit-cyrillic-audit.lisp",
-      "git_blob_sha1": "9a875c3fdd4f27cf0311f8a23f306da73b0a4a66",
+      "git_blob_sha1": "2e9b261c7ea670fa9329619975b5bc67cd018385",
       "record_head": "sanskrit-cyrillic-audit"
     },
     {
       "path": "knowledge/sanskrit-cyrillic-keyboard.lisp",
-      "git_blob_sha1": "b375630abbff97c3135c070aac1931decff3279d",
+      "git_blob_sha1": "a432e6a571b3f6630118f056d42a4c3a928dd997",
       "record_head": "sanskrit-cyrillic-keyboard"
     },
     {
@@ -55,7 +55,7 @@
     },
     {
       "path": "knowledge/semantic-lineage-core-v1.lisp",
-      "git_blob_sha1": "0e27d9c03d858481fa4a319b06816a3e528513e6",
+      "git_blob_sha1": "89cba624494295ab9673c9e985d4e96bf159b6e1",
       "record_head": "semantic-lineage/1"
     },
     {
@@ -65,17 +65,17 @@
     },
     {
       "path": "knowledge/sens-primary.lisp",
-      "git_blob_sha1": "a909f0be4ac99d8094eae1e6350b35edae47ce4e",
+      "git_blob_sha1": "00f986961e4620186057921e0042d14e2134e46b",
       "record_head": "sens-primary/2"
     },
     {
       "path": "knowledge/silent-fallback-inventory.lisp",
-      "git_blob_sha1": "faec56d38f5060bc15322fc86c8592c3bd16952f",
+      "git_blob_sha1": "94970575b9ff92f446dc308a6ba7dfb6c252a326",
       "record_head": "silent-fallback-inventory"
     },
     {
       "path": "knowledge/structure-not-ontology-inventory.lisp",
-      "git_blob_sha1": "f286a30d5aa481fbe681763368541fb657511f78",
+      "git_blob_sha1": "3dc44595ffef6448b836d06fa4a9a09d835c2012",
       "record_head": "structure-not-ontology/1"
     }
   ]
