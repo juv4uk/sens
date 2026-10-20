@@ -1,94 +1,125 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: translation PredicateBit + domain bitness.
+"""Легка перевірка української Lisp-проєкції перекладу та ширин D1–D10.
 
-Axiom: the binary key width IS the domain address.
-Checks:
-  1. lib/translation.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:YES textual projection #d1:1 is present
-  3. Reuses knowledge validators (knowledge-proper-list?, knowledge-clause-valid?)
-  4. Key translation surface present
-  5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
-
-Does not prove runtime callability or T5 physical execution. Run:
-
-    python3 scripts/test-translation-d1-bitness.py
+Не виконує семантику SENS і не підтверджує T5M або готовність релізу.
+Цитовані протокольні поля зберігаються як дані.
 """
 from __future__ import annotations
 
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-TRANS = ROOT / "lib" / "translation.lisp"
-ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
-HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "#d1:1"
-REQUIRED = (
-    "translation-status-valid?",
-    "translation-kind-valid?",
-    "translation-envelope-valid?",
-    "translation-review",
-    "translation-admittable?",
-    "knowledge-proper-list?",
-    "knowledge-clause-valid?",
-    "knowledge-goal-valid?",
-    "advice-decision",
+from domain_tables import read_domain_table
+from report_ukr_projection_progress import (
+    LispAtom, LispForm, LispOpaque, LispQuoted,
+    _projection_reasons, parse_lisp_tokens, tokenize_lisp,
 )
 
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "lib/translation.lisp"
+PRIMARY = (
+    "переклад-стан",
+    "переклад-вид",
+    "статус-запису-перекладу-коректний?",
+    "запис-огляду-перекладу-коректний?",
+    "переклад-перевірка",
+    "переклад-доказ-запис",
+)
+RAW_WIDTH = re.compile(r"#(?:d[0-9]+:|b|q2:)", re.IGNORECASE)
+LATIN = re.compile(r"[A-Za-z]")
 
-def check_translation() -> list[str]:
-    errs: list[str] = []
-    if not TRANS.is_file():
-        return [f"missing {TRANS.relative_to(ROOT)}"]
-    text = TRANS.read_text(encoding="utf-8")
-    for m in HOST.finditer(text):
-        line_start = text.rfind("\n", 0, m.start()) + 1
-        line = text[line_start : text.find("\n", m.start())]
-        if line.lstrip().startswith(";"):
+
+def check_translation_text(source: str) -> list[str]:
+    """Структурний аудит лише виконуваних форм; ніколи не oracle."""
+    errors: list[str] = []
+    try:
+        roots = parse_lisp_tokens(tokenize_lisp(source))
+        errors.extend(_projection_reasons(source))
+    except ValueError as exc:
+        return [f"некоректна структура Lisp: {exc}"]
+
+    definitions: list[str] = []
+    active_atoms: list[str] = []
+
+    def walk(node: object) -> None:
+        if isinstance(node, (LispQuoted, LispOpaque)):
+            return
+        if isinstance(node, LispAtom):
+            active_atoms.append(node.token.value)
+            return
+        if not isinstance(node, LispForm):
+            return
+        if node.items and isinstance(node.items[0], LispAtom):
+            head = node.items[0].token.value
+            if head == "як-є":
+                return   # дані: не перекладати, не тлумачити як виклики
+        for child in node.items:
+            walk(child)
+
+    for node in roots:
+        if not isinstance(node, LispForm) or len(node.items) != 3:
+            errors.append("верхній рівень має містити лише (визначити назва вираз)")
             continue
-        errs.append(f"translation: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("translation: exact D1:YES textual projection #d1:1 missing")
-    for fn in REQUIRED:
-        if fn not in text:
-            errs.append(f"translation: required surface missing: {fn}")
-    return errs
+        head, name, _expression = node.items
+        if not isinstance(head, LispAtom) or head.token.value != "визначити":
+            errors.append("замість українського DEFINE знайдено іншу форму")
+            continue
+        if not isinstance(name, LispAtom):
+            errors.append("неправильна назва визначення")
+            continue
+        definitions.append(name.token.value)
+        walk(_expression)
+
+    if len(definitions) != len(set(definitions)):
+        errors.append("дубльовані визначення")
+    for name in definitions:
+        if LATIN.search(name):
+            errors.append(f"англомовне DEFINE-зв'язування: {name}")
+    for required in PRIMARY:
+        if definitions.count(required) != 1:
+            errors.append(f"відсутнє єдине українське визначення: {required}")
+    if not {"так", "ні"}.issubset(set(active_atoms)):
+        errors.append("чинні відповіді D1 так/ні відсутні")
+    for atom in active_atoms:
+        if atom in {"t", "T", "NIL"}:
+            errors.append(f"стара істинність хоста: {atom}")
+        if RAW_WIDTH.match(atom):
+            errors.append(f"застарілий машинний літерал у програмі: {atom}")
+    return errors
 
 
-def check_domain(n: int) -> list[str]:
-    path = ROOT / "lib" / "domains" / f"d{n}.lisp"
-    errs: list[str] = []
+def check_domain(width: int, root: Path = ROOT) -> list[str]:
+    path = root / f"lib/domains/d{width}.lisp"
     if not path.is_file():
-        return [f"D{n}: missing"]
-    keys = ROW.findall(path.read_text(encoding="utf-8"))
-    expect = 1 << n
-    if len(keys) != expect:
-        errs.append(f"D{n}: expected {expect} rows, got {len(keys)}")
-    bad = [k for k in keys if len(k) != n]
-    if bad:
-        errs.append(f"D{n}: key width {len(bad[0])} != {n}")
-    if len(set(keys)) != len(keys):
-        errs.append(f"D{n}: duplicate coordinates")
-    return errs
+        return [f"D{width}: таблицю не знайдено"]
+    try:
+        rows = read_domain_table(path)
+    except (ValueError, OSError) as exc:
+        return [f"D{width}: некоректна таблиця: {exc}"]
+    keys = [row.bits for row in rows]
+    if len(keys) != 1 << width:
+        return [f"D{width}: очікувано {1 << width} координат, отримано {len(keys)}"]
+    if len(set(keys)) != len(keys) or any(
+        len(bits) != width or set(bits) - {"0", "1"} for bits in keys
+    ):
+        return [f"D{width}: повторена, не двійкова чи неточна координата"]
+    if set(keys) != {f"{i:0{width}b}" for i in range(1 << width)}:
+        return [f"D{width}: неповна ратифікована драбина"]
+    return []
 
 
 def main() -> int:
-    all_errs: list[str] = []
-    all_errs.extend(check_translation())
-    for n in range(1, 11):
-        all_errs.extend(check_domain(n))
-
-    if all_errs:
-        print("TRANSLATION+BITNESS: BLOCKED", file=sys.stderr)
-        for e in all_errs:
-            print(f"  {e}", file=sys.stderr)
+    errors = check_translation_text(SOURCE.read_text(encoding="utf-8"))
+    for width in range(1, 11):
+        errors.extend(check_domain(width))
+    if errors:
+        print("ПЕРЕКЛАД+ДОМЕНИ: SOURCE_BLOCKED", file=sys.stderr)
+        for item in errors:
+            print(f"  {item}", file=sys.stderr)
         return 1
-
-    print("TRANSLATION: PASS — no host truthiness, exact D1, knowledge reuse")
-    for n in range(1, 11):
-        print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
-    print("BITNESS: PASS — every domain key width equals domain address")
+    print("ПЕРЕКЛАД+ДОМЕНИ: SOURCE_PASS, SEMANTIC_UNVERIFIED")
+    print("Українські Lisp-форми D1–D10 перевірено статично; фізична оборотність та виконання потребують SENS")
     return 0
 
 
