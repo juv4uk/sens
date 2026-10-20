@@ -1,33 +1,24 @@
-; my-lisp bootstrap library: derived behavior belongs in the language itself.
-; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
-; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
+; Початкова бібліотека Ліспу: похідна поведінка належить самій мові.
+; Основні функції мають українські імена; старі назви нижче — сумісні зв'язування.
+; Історичні двійкові виклики збережено як дані первісної реалізації.
 
 (0011 тотожність (0010 (значення) значення))
 (0011 identity тотожність)
 
-; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
-; The reader treats the following source forms as binary data until the next
-; top-level source is read; decimal integers remain ordinary decimal values.
+; Мовний описувач історичної восьмибітної двійкової форми.
+; Читач трактує наступні джерельні форми як двійкові дані до наступної
+; форми верхнього рівня. Десяткові цілі залишаються звичайними числами.
+; Цей архівний опис не надає сучасним доменам нової семантики.
 (0011 binary
   (0010 (ширина)
     (1110 (001 binary) ширина)))
 
-; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
-; 2026-08-09 once variadic lambda parameters existed to express it: a bare
-; symbol as the parameter list binds every argument, evaluated left to
-; right, as one list. This is pure sugar over `cons`/`'()`, exactly the
-; kind of thing G4/G5 (docs/language-core-axioms.md) say belongs in the
-; language itself once the core can already express it, not bolted onto
-; the host. Kept first in this file (not wherever it happens to be used)
-; because `let`/`let*` below build their expansion with it.
-; `list` раніше був спеціальною формою Rust (`evaluate_list_func`) —
-; перенесено сюди 2026-08-09, щойно з'явились варіативні параметри lambda,
-; якими його можна виразити: голий символ як список параметрів зв'язує
-; кожен аргумент, обчислений зліва направо, в один список. Це чистий цукор
-; над `cons`/`'()` — саме те, що G4/G5 (docs/language-core-axioms.md)
-; кажуть має належати самій мові, щойно ядро вже може це виразити, не
-; хосту. Лишено першим у файлі (не там, де випадково використовується),
-; бо `let`/`let*` нижче будують свою розгортку через нього.
+; «список» раніше був спеціальною формою виконавця Rust.
+; Від 09.08.2026 змінна-список параметрів функції приймає всі аргументи
+; у порядку зліва направо; тому список визначається всередині Lisp.
+; Це похідна мовна операція, а не окремий закон зовнішнього виконавця.
+; Розміщена до макросів «let» і «let*», які потребують побудови списків.
+; Історичний псевдонім «list» залишений для сумісності споживачів.
 (0011 список (0010 аргументи аргументи))
 (0011 list список)
 
