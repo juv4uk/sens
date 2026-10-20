@@ -1,19 +1,21 @@
-; #1134 — authoritative Core3 experimental kernel profile.
+; #1134 — історичний контракт експериментального профілю Core3.
 ;
-; Core3 is pinned to Language Contract 7.0 and exists as the laboratory in
-; which multiple execution kernels may compete under one shared SID identity.
-; It never permits a backend result to become language law by accident.
+; Версія 7.0 та спільний SID у цьому записі свідчать про попередню
+; архітектуру. Вони НЕ задають чинної адреси функції з драбини Д1–Д10.
+; Нова реалізація мусить брати тотожність із ратифікованого домену
+; та точного двійкового слова, без повернення до SID8.
+; Відповідь зовнішнього виконавця не може самостійно стати законом мови.
 ;
-; Current implementation status is intentionally PARTIAL:
-; - mechanism selection is merged in lib/mechanism-selector.lisp (#1047/#1152);
-; - Lisp-owned lowering is merged on main via #1158;
-; - CLIPS producer-native result observation is merged via #1164;
-; - four real kernels preserve native domains and the shared invocation SID;
-; - #992 is still required because the current four-kernel witness uses one
-;   opaque INVOKE_ID plus mechanism-specific native payloads, not one
-;   Canon/function-table operation lowered from one Lisp-owned corpus row.
+; Нижче збережено історичний стан робіт, а не сучасний звіт готовності:
+; - добір механізму був доданий у #1047/#1152;
+; - мовне зниження — у #1158;
+; - спостереження рідних результатів CLIPS — у #1164;
+; - чотири ядра зберігали окремі домени та спільний SID виклику;
+; - #992 тоді ще вимагав переходу від непрозорого INVOKE_ID
+;   до операції Канону з одного мовного рядка.
 ;
-; This file is Lisp-owned authority data.
+; Контрактні поля, ідентифікатори, хеші та позначки станів є
+; історичними даними. Не використовувати їх як нові викличні голови.
 
 (core3-profile-contract/1
   ((identity . authority)
