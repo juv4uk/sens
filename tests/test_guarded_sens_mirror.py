@@ -69,7 +69,7 @@ class GuardedMirrorTests(unittest.TestCase):
         self.driver = self.work / "fake" / "driver.py"
         self.driver.parent.mkdir()
         self.driver.write_text(FAKE_DRIVER)
-        self.foundation = self.work / "d1-d9.json"
+        self.foundation = self.work / "d1-d11.json"
         self.foundation.write_text("{}")
         self.previous = os.environ.get("SENS_SCRIPTS")
         os.environ["SENS_SCRIPTS"] = str(ROOT / "scripts")
@@ -85,6 +85,16 @@ class GuardedMirrorTests(unittest.TestCase):
         return mirror.transaction(root=self.root, out=self.output,
                                   driver=self.driver,
                                   foundation=self.foundation)
+
+    def test_default_foundation_is_current_d1_d11_in_cli_and_transaction(self):
+        # Both entrypoints share one ratified foundation, never the retired D1–D9 default.
+        self.assertEqual(mirror.DEFAULT_FOUNDATION,
+                         ROOT / "knowledge/d1-d11-foundation.json")
+        self.assertEqual(mirror.transaction.__kwdefaults__["foundation"],
+                         mirror.DEFAULT_FOUNDATION)
+        self.assertTrue(mirror.DEFAULT_FOUNDATION.is_file())
+        self.assertNotIn("knowledge/d1-d9-foundation.json",
+                         SCRIPT.read_text(encoding="utf-8"))
 
     def test_two_sources_publish_all_together_as_binary_t5(self):
         (self.root / "one.lisp").write_text("10 01")
