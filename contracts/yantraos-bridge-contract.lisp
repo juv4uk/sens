@@ -1,11 +1,11 @@
-; yantraos-bridge-contract.lisp — v1 data-only boundary between
-; SENS semantic authority and yantraOS execution.
+; yantraos-bridge-contract.lisp — версія 1, межа обміну лише даними між
+; семантичними повноваженнями СЕНС і виконанням у yantraOS.
 ;
-; SENS owns intent/meaning/policy/provenance.
-; yantraOS owns host routing, confirmation, sandboxing, execution and audit.
-; Neither side may reinterpret the other's authority.
+; СЕНС відповідає за намір, значення, політику та походження даних.
+; yantraOS відповідає за маршрутизацію на хості, підтвердження, ізоляцію, виконання та аудит.
+; Жодна зі сторін не має права переосмислювати повноваження іншої.
 ;
-; This is a contract document, not a new semantic primitive or public SID.
+; Це контракт, а не новий семантичний примітив чи загальнодоступний SID.
 
 (yantraos-bridge-contract/1
   ((envelope
