@@ -9,18 +9,19 @@
     cargo build -p sens-cli --bin sens-trit
     git hash-object lib/ВАШ-ФАЙЛ.lisp
 
-Потім:
+Потім — **тільки історичний dry-run, без фізичного запису**:
 
     python3 scripts/migrate-selected-lisp.py \
       --source lib/ВАШ-ФАЙЛ.lisp \
       --source-blob ВАШ_40_СИМВОЛЬНИЙ_GIT_SHA \
       --source-era auto \
-      --out-root /tmp/sens-admitted \
+      --out-root /tmp/sens-inspection \
       --reader target/debug/sens-trit \
       --oracle /absolute/path/to/independent-verifier \
+      --dry-run \
       --report /tmp/sens-one-file.json
 
-Вихід: /tmp/sens-admitted/lib/ВАШ-ФАЙЛ.sens. Далі його слід додати у PR із доказами й CI; CLI не мерджить автоматично.
+Це створює лише звіт `VERIFIED_DRY_RUN`, **не** `.sens`. Для чинного запису існує `scripts/migrate-one-to-sens.py`: він створює Zig/T5M `.sens` і однойменний двійковий перегляд після точнодоменного перетворення. Окремі SENS-свідки виконання та згода власника залишаються умовами релізу.
 
 ## Що гарантовано
 
@@ -31,7 +32,7 @@
 - Python робить точний T5 roundtrip. Справжній Rust sens-trit відкриває фізичний файл і перевіряє D2-граматику. Це ще НЕ є перевіркою семантики.
 - Для публікації потрібен окремий незалежний oracle executable: аргументи — шляхи до старого .lisp і тимчасового фізичного .sens. JSON stdout містить schema=sens-historical-current-oracle/v1, status=PASS, source_blob_sha, physical_sha256, typed_word_sha256, historical_observable, current_observable та evidence. Спостереження мають бути однакові.
 - CLI звіряє SHA й порівняння оракулів, але не може довести, що сторонній verifier дійсно запустив старий рантайм. Reviewer мусить верифікувати його незалежність; тестовий oracle stub лише перевіряє протокол, не є семантичним доказом. Окремий Cargo-тест у workflow виконує справжній чинний D4-оракул.
-- Вхідне .lisp не змінюється. Існуючий .sens ніколи не перезаписується. Атомарне створення з no-clobber, --dry-run лише валідує. JSON-звіт містить BLOCKED, VERIFIED_DRY_RUN або WRITTEN.
+- Вхідне `.lisp` не змінюється. Цей історичний адаптер **не має права створювати** `.sens`: доступні лише `--inspect` та `--dry-run`; звіт містить `BLOCKED`, `SYNTAX_ONLY_UNVERIFIED` або `VERIFIED_DRY_RUN`. Спроба старого запису дає `LEGACY_T5_PUBLICATION_DISABLED`. Жоден його PASS не є семантичним допуском.
 - Архіви бенчмарків, схеми, ISA-каталоги й quoted/data witness не вважаються виконуваним оригінальним кодом. Новий канарковий приклад не скорочує число 491.
 
 
@@ -59,4 +60,4 @@
 
 Параметр --source-blob HEAD прив'язує вхід до ТОЧНОГО Git blob перевіреного коміту; незакомічена зміна блокується. Також можна передати 40-символьний blob SHA явно. Інспекція повертає BLOCKED (код 2 і точна причина) або SYNTAX_ONLY_UNVERIFIED (код 0). ОБИДВА стани означають нуль нових .sens і не є доказом збереження семантики.
 
-Режим --inspect взаємовиключний із --dry-run. Для фактичного запису обов'язковий незалежний історичний/current verifier. GitHub workflow інспектує три РЕАЛЬНІ вихідні файли benchmarks/closures.lisp, benchmarks/parser.lisp, lib/machine/block.lisp і публікує артефакт sens-original-lisp-triage, не створюючи фізичного файла. Це дослідження заблокованих джерел, а не успішна міграція.
+Режим `--inspect` взаємовиключний із `--dry-run`. Для чинної фізичної публікації потрібен окремий Zig/T5M-маршрут та незалежні докази SENS-виконання; старий адаптер не публікує файлів навіть із позитивним історичним оракулом. GitHub workflow інспектує три РЕАЛЬНІ вихідні файли benchmarks/closures.lisp, benchmarks/parser.lisp, lib/machine/block.lisp і публікує артефакт sens-original-lisp-triage, не створюючи фізичного файла. Це дослідження заблокованих джерел, а не успішна міграція.
