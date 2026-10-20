@@ -1,5 +1,5 @@
-; D9 exact world records from lib/world.lisp, eight D1 YES laws.
-; Parent is immutable, journal prepend is persistent and shares old tail.
+; D9 точні записи світу з lib/world.lisp, вісім D1-законів YES.
+; Батько незмінний, додавання до журналу є сталим і поділяє старий хвіст.
 (список
   (однакові?
     (створити-світ (як-є ()) (як-є ()) (як-є ()))
