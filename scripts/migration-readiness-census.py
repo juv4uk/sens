@@ -71,11 +71,10 @@ def _candidate_class(statuses: dict[str, str]) -> str:
 
 
 def build_report() -> dict:
-    """Report THREE independent source-era projections without publishing.
+    """Report the single current AUTO source scan without publishing.
 
-    The existing release gate still judges only the fail-closed AUTO scan.
-    Historical/current passes are diagnostics, not an instruction to pick a
-    convenient meaning for an 8-bit word; neither can write any .sens bytes.
+    Retired historical source eras are not an alternative language authority.
+    The mechanical census cannot certify native SENS execution or release.
     """
     with tempfile.TemporaryDirectory(prefix="sens-t5-readiness-") as td:
         work = Path(td)
@@ -108,7 +107,7 @@ def build_report() -> dict:
 
         # 25 ISA + 21 schema + 8 evidence + 13 expr-record DATA sources have
         # already been reviewed and Git-blob-pinned in original-corpus work.
-        # Check them against this EXACT three-era unpaired source set, or fail.
+        # Check them against this EXACT AUTO unpaired source set, or fail.
         reviewed = load_nonprogram_classification(ROOT)
         if not set(reviewed).issubset(original_paths):
             missing = sorted(set(reviewed) - original_paths)
@@ -198,6 +197,8 @@ def build_report() -> dict:
             "source_era": "auto",
             "ratified_foundation_sha256": auto.get("authority", {}).get("foundation_sha256"),
             "mode": "original unpaired .lisp only; one physical-free dry-run (SID8/Sens8 eras retired)",
+            "release_status": "NO-GO-NATIVE-SENS-ORACLE-UNVERIFIED",
+            "all_executable_lisp_roundtrip_verified": False,
             "skipped_existing_sens_pairs": sorted(original_paired),
             "migrator_exit_code": views["auto"]["exit"],
             "migrator_summary": summary,
@@ -232,7 +233,7 @@ def build_report() -> dict:
                     and not nonarchive_auto
                     and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                 ),
-                "rule": "read-only readiness census: it emits no .sens and grants no executable credit; this report is evidence, not an authority; nothing here blocks a publication",
+                "rule": "read-only AUTO census PASS means only complete bookkeeping; it emits no .sens, grants no executable credit and cannot authorize release",
             },
         }
         return result
