@@ -1,58 +1,65 @@
-;;;; Виконуваний математичний свідок у справжньому SBCL, не SENS runtime.
-;;;; Узагальнення CLHS floating DECODE-FLOAT до точної раціональної арифметики.
+;;;; Виконуваний математичний свідок у справжньому SBCL, не обчислювач СЕНС.
+;;;; Узагальнення CLHS DECODE-FLOAT на точну раціональну арифметику.
+;;;; Власні функції та змінні мають українські імена; форми Common Lisp незмінні.
 
-(defun normalize-exact-radix (x b)
-  (unless (and (rationalp x) (integerp b) (>= b 2))
-    (error "RADIX-NORMALIZE-EXACT: expected exact rational and integer radix >=2"))
-  (when (= x 0) (return-from normalize-exact-radix (values 0 0)))
-  (let ((mantissa (abs x))
-        (exponent 0))
-    (loop while (>= mantissa b) do
-          (setf mantissa (/ mantissa b))
-          (incf exponent))
-    (loop while (< mantissa 1) do
-          (setf mantissa (* mantissa b))
-          (decf exponent))
-    (values (if (minusp x) (- mantissa) mantissa) exponent)))
+(defun нормалізувати-за-основою (значення основа)
+  (unless (and (rationalp значення) (integerp основа) (>= основа 2))
+    (error "RADIX-NORMALIZE-EXACT: потрібні точне раціональне число та ціла основа >=2"))
+  (when (= значення 0)
+    (return-from нормалізувати-за-основою (values 0 0)))
+  (let ((мантиса (abs значення))
+        (показник 0))
+    (loop while (>= мантиса основа) do
+          (setf мантиса (/ мантиса основа))
+          (incf показник))
+    (loop while (< мантиса 1) do
+          (setf мантиса (* мантиса основа))
+          (decf показник))
+    (values (if (minusp значення) (- мантиса) мантиса) показник)))
 
-(defun assert-witness (x b want-m want-e)
-  (multiple-value-bind (m e) (normalize-exact-radix x b)
-    (unless (and (eql m want-m) (eql e want-e)
-                 (eql x (* m (expt b e)))
-                 (or (zerop x) (and (<= 1 (abs m)) (< (abs m) b))))
-      (error "RADIX-NORMALIZE-EXACT mismatch x=~S b=~S got=(~S,~S) expected=(~S,~S)"
-             x b m e want-m want-e))))
+(defun перевірити-свідчення (значення основа очікувана-мантиса очікуваний-показник)
+  (multiple-value-bind (мантиса показник)
+      (нормалізувати-за-основою значення основа)
+    (unless (and (eql мантиса очікувана-мантиса)
+                 (eql показник очікуваний-показник)
+                 (eql значення (* мантиса (expt основа показник)))
+                 (or (zerop значення)
+                     (and (<= 1 (abs мантиса)) (< (abs мантиса) основа))))
+      (error "RADIX-NORMALIZE-EXACT: невідповідність значення=~S основа=~S отримано=(~S,~S) очікувано=(~S,~S)"
+             значення основа мантиса показник
+             очікувана-мантиса очікуваний-показник))))
 
-(defun rejects (x b)
+(defun перевірити-відхилення (значення основа)
   (unless (handler-case
-              (progn (normalize-exact-radix x b) nil)
+              (progn (нормалізувати-за-основою значення основа) nil)
             (error () t))
-    (error "RADIX-NORMALIZE-EXACT improperly accepted (~S,~S)" x b)))
+    (error "RADIX-NORMALIZE-EXACT: помилково прийнято (~S,~S)" значення основа)))
 
 (format t "DONOR-REFERENCE-LANGUAGE ~A~%" (lisp-implementation-version))
-(assert-witness 3/4 2 3/2 -1)
-(assert-witness -40/3 2 -5/3 3)
-(assert-witness 8 2 1 3)
-(assert-witness 1/1000 10 1 -3)
-(assert-witness 0 2 0 0)
-(assert-witness -1/8 2 -1 -3)
-(assert-witness 1000 10 1 3)
-(assert-witness 7/3 3 7/3 0)
-(loop for base from 2 to 11 do
-      (loop for n from -31 to 31 do
-            (loop for d from 1 to 15 do
-                  (let ((x (/ n d)))
-                    (multiple-value-bind (m e)
-                        (normalize-exact-radix x base)
-                      (unless (and (eql x (* m (expt base e)))
-                                   (if (zerop x)
-                                       (and (zerop m) (zerop e))
-                                       (and (<= 1 (abs m))
-                                            (< (abs m) base)
-                                            (= (signum x) (signum m)))))
-                        (error "RADIX witness failed: x=~S radix=~S" x base)))))))
-(rejects 1 1)
-(rejects 1 0)
-(rejects 0.75 2)
-(rejects 1 2.0)
+(перевірити-свідчення 3/4 2 3/2 -1)
+(перевірити-свідчення -40/3 2 -5/3 3)
+(перевірити-свідчення 8 2 1 3)
+(перевірити-свідчення 1/1000 10 1 -3)
+(перевірити-свідчення 0 2 0 0)
+(перевірити-свідчення -1/8 2 -1 -3)
+(перевірити-свідчення 1000 10 1 3)
+(перевірити-свідчення 7/3 3 7/3 0)
+(loop for основа from 2 to 11 do
+      (loop for чисельник from -31 to 31 do
+            (loop for знаменник from 1 to 15 do
+                  (let ((значення (/ чисельник знаменник)))
+                    (multiple-value-bind (мантиса показник)
+                        (нормалізувати-за-основою значення основа)
+                      (unless (and (eql значення (* мантиса (expt основа показник)))
+                                   (if (zerop значення)
+                                       (and (zerop мантиса) (zerop показник))
+                                       (and (<= 1 (abs мантиса))
+                                            (< (abs мантиса) основа)
+                                            (= (signum значення) (signum мантиса)))))
+                        (error "RADIX: невдале свідчення значення=~S основа=~S"
+                               значення основа)))))))
+(перевірити-відхилення 1 1)
+(перевірити-відхилення 1 0)
+(перевірити-відхилення 0.75 2)
+(перевірити-відхилення 1 2.0)
 (format t "D10-EXACT-RADIX-SBCL: PASS 9450 exact-rational reconstruction cases plus boundary/error witnesses~%")
