@@ -35,11 +35,11 @@
   (target-projection-may-be-replaceable required)
   (semantic-observable-preserved required)
 
-  ; #4381 — no implicit target-state channel may cross effect composition.
-  ; Semantically relevant outputs belong to the canonical effect object.
-  ; A target may realize those outputs through internal mechanisms such as
-  ; processor flags, carry chains, predicate masks, or explicit wires, but a
-  ; downstream effect consumes only explicit canonical outputs.
+  ; #4381 — через композицію ефектів не можна передавати неявний стан цілі.
+  ; Усі семантично значущі виходи належать канонічному об'єкту ефекту.
+  ; Цільова машина може здійснити їх через прапорці процесора,
+  ; перенесення розрядів, маски предикатів або явні провідники.
+  ; Наступний ефект споживає лише явно названі канонічні виходи.
   (effect-output-contract explicit-complete)
   (effect-explicit-outputs required)
   (effect-hidden-target-state forbidden)
