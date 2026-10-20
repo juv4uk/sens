@@ -1,6 +1,6 @@
-;; Silent-fallback inventory (#2134).
-;; Baseline for scripts/check-silent-fallback-classes.py: a known site passes,
-;; a NEW unnamed site fails. Regenerate with --emit-inventory.
+;; Інвентар тихих відкатів (#2134).
+;; Базис для scripts/check-silent-fallback-classes.py: відомий сайт проходить,
+;; НОВИЙ неіменований сайт не проходить. Перегенерувати з --emit-inventory.
 ;; Classes: total-serializer-fallback | implicit-default-flag |
 ;;          fail-fast-hides-suites | silent-regeneration.
 (silent-fallback-inventory
