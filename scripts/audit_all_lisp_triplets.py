@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -33,6 +34,35 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
     if verify_bounded and validator is None:
         from verify_uk_t5_triplet import verify
         validator = verify
+
+    def require_bounded_receipt(witness: object, source: Path, physical: Path, view: Path) -> None:
+        """Read-only integrity of the real bounded oracle receipt, never runtime GO."""
+        if not isinstance(witness, dict):
+            raise ValueError("немає структурованого доказу")
+        if (witness.get("schema") != "sens-uk-t5-view-bounded-proof/v1"
+                or witness.get("status") != "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION"):
+            raise ValueError("непідтверджена схема або статус обмеженого свідка")
+        for key in ("canonical_uk_roundtrip", "physical_T5_roundtrip",
+                    "canonical_view_roundtrip"):
+            if witness.get(key) is not True:
+                raise ValueError("не доведено " + key)
+        for key, expected in (("source", source), ("sens", physical), ("view", view)):
+            if witness.get(key) != str(expected):
+                raise ValueError("свідок посилається на інший файл: " + key)
+        for key, file in (("source_sha256", source), ("physical_sha256", physical),
+                          ("view_sha256", view)):
+            expected = hashlib.sha256(file.read_bytes()).hexdigest()
+            if witness.get(key) != expected:
+                raise ValueError("зміст файла розходиться зі свідком: " + key)
+        typed = witness.get("typed_word_sha256")
+        if (not isinstance(typed, str) or len(typed) != 64
+                or any(char not in "0123456789abcdef" for char in typed)
+                or type(witness.get("typed_word_count")) is not int
+                or witness["typed_word_count"] < 1):
+            raise ValueError("свідок не містить коректних точнодоменних слів")
+        if (witness.get("runtime_oracle_admitted_by_this_audit") is not False
+                or witness.get("old_originals_migrated_by_this_audit") != 0):
+            raise ValueError("механічний свідок не дозволяє семантичний або релізний допуск")
 
     counts = dict(ukrainian_keyboard=0, with_sens=0, with_view=0,
                   complete_triplets=0, bounded_verified=0)
@@ -68,8 +98,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if verify_bounded:
             try:
                 witness = validator(source, physical, view)
-                if not isinstance(witness, dict) or not witness.get("canonical_uk_roundtrip"):
-                    raise ValueError("перевірник не підтвердив канонічний оберт")
+                require_bounded_receipt(witness, source, physical, view)
             except (OSError, ValueError, UnicodeError) as exc:
                 reject(relative, "обмежена зворотність BLOCKED: " + str(exc))
             else:
