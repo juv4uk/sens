@@ -1,4 +1,6 @@
-; RDSEED instruction-family catalogue. Physical ISA facts only.
+; Каталог родини машинних інструкцій RDSEED.
+; Описує тільки фізичні факти ISA, не семантичні закони СЕНС.
+; Поля, мнемоніки й апаратні ознаки є незмінними даними.
 
 (isa-catalogue/1
   (extension RDSEED)
