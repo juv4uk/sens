@@ -1,15 +1,15 @@
 ; tests/fixtures/semantic/eq-1bit-v1.lisp — #1709, закон #1705.
-; EQ відповідає рівно одним бітом на admitted-діапазоні та іменованою помилкою
-; поза ним. Пара не є допустимим аргументом EQ, тому вона не має типу
-; (ні true, ні false) — вона поза доменом предиката.
+; Предикат тотожності атомів повертає рівно один біт у допустимій області
+; аргументів та іменовану помилку поза нею.
 ;
-;   same admitted atom  -> 1
-;   distinct atoms      -> 0
-;   any pair argument   -> named error (Type), not a bit
+;   однакові допустимі атоми  → 1 (ТАК)
+;   різні допустимі атоми    → 0 (НІ)
+;   хоча б один аргумент-пара → помилка типу Type, а не біт
 ;
-; EQ answers with exactly one bit on the admitted domain and a named error
-; outside it. A pair is not an admitted EQ argument, so it has no predicate
-; type at all — it is outside the domain, not a false answer.
+; Пара не належить області визначення атомарного EQ. Тому
+; відхилення пари не можна мовчки прирівнювати до відповіді НІ.
+; Двійкові рядки, позначки `semantic-id` та імена тестових полів
+; нижче — історичні дані, їхня фізична форма тут не змінюється.
 
 ((expect . expect-value)
  (expr . "(10110110 (00000001 alpha) (00000001 alpha))")
