@@ -98,12 +98,12 @@ fn check_critical(relative: &str, source: &str) -> Vec<String> {
         errors.push(format!("critical source unexpectedly short ({} bytes)", source.len()));
     }
     for marker in FORBIDDEN {
-        if source.contains(marker) {
+        if source.contains(*marker) {
             errors.push(format!("forbidden intermediate marker {marker:?}"));
         }
     }
     for form in forms {
-        if !source.contains(form) {
+        if !source.contains(*form) {
             errors.push(format!("missing required entry point {form}"));
         }
     }
@@ -267,10 +267,10 @@ mod tests {
             assert!(check_critical(relative, &baseline).is_empty(), "{relative}");
             for marker in FORBIDDEN {
                 let changed = format!("{baseline}\n; {marker}");
-                assert!(check_critical(relative, &changed).iter().any(|e| e.contains(marker)));
+                assert!(check_critical(relative, &changed).iter().any(|e| e.contains(*marker)));
             }
             for form in forms {
-                let changed = baseline.replacen(form, "ВИЛУЧЕНО", 1);
+                let changed = baseline.replacen(*form, "ВИЛУЧЕНО", 1);
                 assert!(check_critical(relative, &changed).iter().any(|e| e.contains("missing required entry point")));
             }
             assert!(check_critical(relative, "()").iter().any(|e| e.contains("unexpectedly short")));
