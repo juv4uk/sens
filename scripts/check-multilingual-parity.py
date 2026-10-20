@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MYLISP-MULTILINGUAL-PARITY-GATE.
+"""SENS-MULTILINGUAL-PARITY-GATE.
 
 A lightweight, read-only parity check for the repo's trilingual (EN/UK/DE)
 documentation. It detects missing or stale language counterparts and stale
@@ -33,7 +33,7 @@ three in step is what this gate protects.
 
 --------------------
 
-MYLISP-MULTILINGUAL-PARITY-GATE — легка, лише-для-читання перевірка
+SENS-MULTILINGUAL-PARITY-GATE — легка, лише-для-читання перевірка
 тримовної (EN/UK/DE) документації репозиторію. Вона виявляє відсутні або
 застарілі мовні відповідники та застарілі згенеровані таблиці, НЕ
 припускаючи, що якась мова не використовується, і НЕ видаляючи/редагуючи
@@ -66,7 +66,7 @@ EN/UK/DE документація живе в lib/*.lisp і README репози�
 
 --------------------
 
-MYLISP-MULTILINGUAL-PARITY-GATE — eine leichte, rein lesende Prüfung der
+SENS-MULTILINGUAL-PARITY-GATE — eine leichte, rein lesende Prüfung der
 dreisprachigen (EN/UK/DE) Dokumentation des Repos. Sie erkennt fehlende oder
 veraltete Sprach-Gegenstücke und veraltete generierte Tabellen, OHNE
 anzunehmen, dass eine Sprache ungenutzt ist, und OHNE Dateien zu löschen oder
@@ -134,8 +134,9 @@ AUTHORITATIVE_DOCS = [
 GENERATED_TABLES = [
     {
         "path": "docs/FUNCTIONS.md",
-        # e.g. '**Всього:** 23 builtin'ів + 421 бібліотечних функцій'
-        "count_re": r"(\d+)\s+builtin",
+        # Supports the current English header and the earlier Ukrainian form.
+        # e.g. '**Builtin count:** 30 root builtins' or '**Всього:** 23 builtin'ів'
+        "count_re": r"(\d+)\s+(?:root\s+)?builtins?",
     },
 ]
 
