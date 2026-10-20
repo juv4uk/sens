@@ -1,34 +1,38 @@
-; #4365 — one current semantic DomainIdentity -> target-neutral effect seam.
-;
-; This module owns only the direction:
-;   exact current (domain-width, packed-bits)
-;        -> canonical target-neutral machine-effect request
-;
-; It contains no target, ISA, register, encoding, feature, layout, or host fact.
-; The current coordinate is mechanically guarded against
-; knowledge/d1-d9-foundation.json by the focused Rust witness.
-;
-; Generic effect-definition modules must not copy this router.
+; Пониження поточної точної доменної тотожності до машинного ефекту.
+; Цей шар не створює законів мови, машинних кодів чи нових доменів.
+; Він лише вибирає наявні цільово-незалежні механізми.
+; Ширина та бітове слово перевіряються разом, без відгадування домену.
+; Чинний закон арифметики належить п'ятому домену.
+; Іноземні назви нижніх машинних механізмів залишено без зміни
+; до одночасного перенесення їхніх визначень і споживачів.
+; Історичні публічні імена тут лишаються сумісними зв'язуваннями
+; тих самих українських замикань, а не дубльованими реалізаціями.
 
-(визначити machine-effect-current-domain-key?
-  (функція (width bits expected-width expected-bits)
+(визначити машинний-ефект-збігається-поточний-домен?
+  (функція (ширина біти очікувана-ширина очікувані-біти)
     (за-умовою
-      ((тотожне? width expected-width)
-       (тотожне? bits expected-bits))
+      ((тотожне? ширина очікувана-ширина)
+       (тотожне? біти очікувані-біти))
       (так
        ні))))
 
-; Current bounded arithmetic mappings. Exact D5 identity remains upstream
-; semantic authority; this seam only selects already-defined target-neutral
-; mechanism requests.
-(визначити machine-lower-current-binary-effect
-  (функція (width bits left right)
+(визначити machine-effect-current-domain-key?
+  машинний-ефект-збігається-поточний-домен?)
+
+; Три обмежені арифметичні маршрути залишаються тими самими.
+; Їхні числові параметри тут є історичними даними механізму,
+; а не дозволом обчислювати або перепризначати код функції.
+(визначити машинний-ефект-знизити-поточне-двійкове
+  (функція (ширина біти ліве праве)
     (за-умовою
-      ((machine-effect-current-domain-key? width bits 5 10)
-       (machine-effect-bounded-u64-add left right))
-      ((machine-effect-current-domain-key? width bits 5 11)
-       (machine-effect-bounded-u64-sub left right))
-      ((machine-effect-current-domain-key? width bits 5 22)
-       (machine-effect-bounded-u64-mul left right))
+      ((машинний-ефект-збігається-поточний-домен? ширина біти 5 10)
+       (machine-effect-bounded-u64-add ліве праве))
+      ((машинний-ефект-збігається-поточний-домен? ширина біти 5 11)
+       (machine-effect-bounded-u64-sub ліве праве))
+      ((машинний-ефект-збігається-поточний-домен? ширина біти 5 22)
+       (machine-effect-bounded-u64-mul ліве праве))
       (так
        (як-є machine-effect-not-applicable)))))
+
+(визначити machine-lower-current-binary-effect
+  машинний-ефект-знизити-поточне-двійкове)
