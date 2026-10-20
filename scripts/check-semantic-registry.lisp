@@ -1,10 +1,10 @@
-; #528 — Lisp-owned replacement for scripts/check_semantic_registry.py.
-; Tooling/governance validation only. Semantic authority remains
-; lib/surface/semantic-registry.lisp.
+; #528 — мовна заміна scripts/check_semantic_registry.py.
+; Це перевірка інструментів і правил супроводу, а не семантичний
+; авторитет. Джерелом є lib/surface/semantic-registry.lisp.
 ;
-; The outer pass tokenizes source text instead of using read-all because the
-; canonical reader would turn lexical ID 0001 into numeric value 1 and erase
-; the required "at least four digits" evidence.
+; Зовнішній прохід розбирає текст на лексеми, а не читає всі форми:
+; канонічний читач перетворив би запис 0001 на числове значення 1,
+; утративши свідчення про потрібну мінімальну довжину коду.
 
 (визначити ср-однакові?
   (функція (лівий правий)
@@ -92,7 +92,7 @@
   (функція (текст)
     (ср-лексемизувати-у текст "" (як-є ()) (як-є ()))))
 
-; Parse result shapes:
+; Форми результатів розбору:
 ;   ("ok" value remaining-tokens)
 ;   ("error" message)
 (визначити ср-розібрати-список
@@ -188,10 +188,9 @@
   (функція (значення низький високий)
     (та (>= значення низький) (<= значення високий))))
 
-; Alphabetic coverage for every current human surface, including Latin
-; Extended Additional used by Sanskrit transliteration (ṃ/ṇ/ṛ/ṣ), plus common
-; future scripts. The guarded law is that punctuation-only spellings may not
-; live under a human-language surface.
+; Перевіряємо літери всіх людських проєкцій, зокрема
+; санскритські діакритичні знаки (ṃ/ṇ/ṛ/ṣ) та інші писемності.
+; Людське написання не може складатися лише з розділових знаків.
 (визначити ср-код-літери?
   (функція (код)
     (або
@@ -237,10 +236,10 @@
     (нехай ((а (показати "semantic registry error: "))
           (б (показати (значення-у-текст подробиця)))
           (в (показати "\n")))
-      ; Deliberately cross a real UnknownSymbol boundary after printing the
-      ; diagnostic. The dynamically constructed missing symbol carries the
-      ; rejection payload in the error itself, so redirected stdout buffering
-      ; cannot erase the useful detail before the non-zero process exit.
+      ; Після друку навмисно викликаємо справжню відмову UnknownSymbol.
+      ; Динамічний невідомий символ містить причину відхилення
+      ; в самій помилці. Навіть буферизований stdout не приховає
+      ; пояснення перед завершенням із ненульовим кодом.
       (обчислити
         (список
           (текст-у-символ
@@ -248,7 +247,7 @@
               "semantic-registry-check-failed:"
               (значення-у-текст подробиця))))))))
 
-; Result: ("ok" updated-all-surfaces has-sym), or sr-fail.
+; Результат: ("ok" updated-all-surfaces has-sym), або відмова.
 (визначити ср-перевірити-поверхні
   (функція (тотожність поверхні мови-запису усі-поверхні має-sym?)
     (за-умовою
