@@ -423,6 +423,7 @@ jobs:
           python3 -m unittest tests/test_ukr_narrate_peers.py -v
           python3 -m unittest tests/test_ukr_lib_peers.py -v
           python3 -m unittest tests/test_ukr_verify_repo_domain_calls.py -v
+          python3 -m unittest tests.test_d3_legacy_logic_guard.LegacyD3GuardTests.test_dependency_classifier_exact_d1_cond_and_negative_guards -v
           python3 -m unittest tests/test_clips_exact_d3_slot_2046.py -v
           python3 -m unittest tests/test_persistent_map_ukr_primary_projection.py -v
           python3 -m unittest tests/test_content_store_ukr_primary_projection.py -v
