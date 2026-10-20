@@ -1,18 +1,19 @@
-; #790 BLACKBOARD-1 — evidence-backed coordination audit.
+; #790 BLACKBOARD-1 — аудит координації на підставі свідчень.
 ;
-; Research data only. It does not make a shared blackboard semantic authority.
+; Лише дослідницькі дані. Спільна дошка стану не стає
+; джерелом семантичних законів СЕНС.
 ;
-; Classical blackboard precedent:
-; - independent knowledge sources with condition/action structure
-; - shared problem state observed indirectly
-; - separate monitor/scheduler control component
-; - opportunistic scheduling to constrain activation explosion
-; - quiescence/termination as a control concern
+; Розглянуті властивості класичної архітектури спільної дошки:
+; - незалежні джерела знань зі структурою «умова — дія»;
+; - непряме спостереження спільного стану задачі;
+; - окремий складник керування спостерігачем і планувальником;
+; - вибіркове планування для обмеження лавинного запуску дій;
+; - відсутність активних задач і завершення як питання керування.
 ;
-; Decisions:
-;   borrow-mechanism
-;   adapt-explicitly
-;   reject-ontology
+; Значення рішень у даних:
+;   borrow-mechanism — запозичити механізм;
+;   adapt-explicitly — пристосувати явно;
+;   reject-ontology — відхилити спільну онтологію.
 
 (blackboard-pattern-audit/1
   ((pattern . independent-knowledge-sources)

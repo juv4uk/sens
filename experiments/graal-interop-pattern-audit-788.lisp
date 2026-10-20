@@ -1,20 +1,20 @@
-; #788 GRAAL-INTEROP-1 — capability/message interop audit.
+; #788 GRAAL-INTEROP-1 — аудит взаємодії через можливості та повідомлення.
 ;
-; Research data only. GraalVM/Truffle is treated as a precedent for
-; capability-based foreign-object interaction, not as a universal value
-; ontology for the archipelago.
+; Лише дослідницькі дані. GraalVM/Truffle — зразок взаємодії
+; з чужими об'єктами за заявленими можливостями, а не універсальна
+; модель значень для незалежних мовних виконавців.
 ;
-; Evidence consulted:
-; - Truffle interoperability protocol uses standardized messages
-; - foreign values expose capabilities such as array/member/executable traits
-; - consumers probe capabilities before performing operations
-; - unsupported access/conversion is an explicit failure mode
-; - Polyglot APIs may eagerly convert/re-type foreign values
+; Розглянуті свідчення:
+; - протокол сумісності Truffle використовує усталені повідомлення;
+; - сторонні значення можуть надавати доступ до масиву, полів або виклику;
+; - споживач перевіряє можливості до виконання відповідної операції;
+; - непідтриманий доступ чи перетворення породжує явну відмову;
+; - багатомовні API можуть завчасно перетворювати типи сторонніх значень.
 ;
-; Decisions:
-;   borrow-mechanism
-;   adapt-explicitly
-;   reject-ontology
+; Значення рішень у протоколі:
+;   borrow-mechanism — запозичити механізм;
+;   adapt-explicitly — пристосувати явно;
+;   reject-ontology — відхилити спільну онтологію.
 
 (graal-interop-pattern-audit/1
   ((pattern . capability-probe-before-operation)

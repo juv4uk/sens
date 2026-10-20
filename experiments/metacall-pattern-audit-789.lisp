@@ -1,18 +1,18 @@
-; #789 METACALL-1 — evidence-backed runtime lifecycle audit.
+; #789 METACALL-1 — аудит життєвого циклу зовнішнього виконавця.
 ;
-; Research data only. This does not define my-lisp semantics.
+; Це дослідницькі дані, а не визначення семантики СЕНС.
 ;
-; MetaCall precedent examined:
-; - extensible/embeddable polyglot runtime
-; - language loaders/plugins
-; - load -> handle -> invoke -> unload lifecycle
-; - dynamic-link handles and explicit unload
-; - shared metacall_value foreign-value representation
+; Розглянуті можливості MetaCall:
+; - розширюване багатомовне середовище, придатне до вбудовування;
+; - завантажувачі та модулі для окремих мов;
+; - явний цикл завантаження, отримання дескриптора, виклику і вивантаження;
+; - дескриптори динамічних бібліотек та кероване вивантаження;
+; - спільне представлення сторонніх значень metacall_value.
 ;
-; Decision vocabulary:
-;   borrow-mechanism
-;   adapt-explicitly
-;   reject-ontology
+; Значення рішень у даних:
+;   borrow-mechanism — запозичити механізм;
+;   adapt-explicitly — пристосувати явно;
+;   reject-ontology — відхилити спільну онтологію.
 
 (metacall-pattern-audit/1
   ((pattern . loader-plugin-boundary)

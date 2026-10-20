@@ -1,22 +1,22 @@
-; #792 KIF-1 — explicit bridge admission audit.
+; #792 KIF-1 — аудит допуску явного міжмовного мосту.
 ;
-; Research data only. KIF is treated as a historical interchange precedent,
-; not as a required universal language for the archipelago.
+; Лише дослідницькі дані. KIF — історичний приклад обміну знаннями,
+; але не обов'язкова універсальна мова для незалежних виконавців.
 ;
-; Core precedent:
-; - KIF was designed for interchange of knowledge among heterogeneous systems.
-; - Its semantics are declarative and logic-oriented.
-; - Interchange works by mapping heterogeneous source knowledge into a shared
-;   representation language.
+; Основні спостереження:
+; - KIF створено для обміну знаннями між різнорідними системами;
+; - його семантика має декларативний і логічний характер;
+; - обмін спирається на відображення різнорідних джерел
+;   у спільну мову представлення знань.
 ;
-; my-lisp adopts the discipline of explicit interchange contracts, but rejects
-; the requirement that all island-native results be normalized into one
-; universal knowledge representation.
+; СЕНС запозичує дисципліну явних контрактів обміну,
+; проте не вимагає перетворювати всі рідні результати
+; незалежних виконавців на єдине універсальне представлення.
 ;
-; Decision vocabulary:
-;   borrow-mechanism
-;   adapt-explicitly
-;   reject-ontology
+; Значення рішень у даних:
+;   borrow-mechanism — запозичити механізм;
+;   adapt-explicitly — пристосувати явно;
+;   reject-ontology — відхилити спільну онтологію.
 
 (kif-bridge-audit/1
   ((pattern . declarative-interchange-contract)
