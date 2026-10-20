@@ -16,6 +16,7 @@ struct SurfaceEntry {
     names: Vec<SurfaceName>,
 }
 
+#[cfg(test)]
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct SurfaceDoc {
     category: String,
@@ -226,6 +227,7 @@ fn expr_symbol(expr: &Expr) -> Option<&str> {
     }
 }
 
+#[cfg(test)]
 fn expr_string(expr: &Expr) -> Option<&str> {
     match &expr.kind {
         ExprKind::String(text) => Some(text.as_ref()),
@@ -235,6 +237,7 @@ fn expr_string(expr: &Expr) -> Option<&str> {
 
 /// Historical documentation key, not a modern function identity.
 /// The compatibility reader keeps its exact eight glyphs as inert data.
+#[cfg(test)]
 fn expr_documentation_key(expr: &Expr) -> Option<String> {
     match &expr.kind {
         ExprKind::Symbol(bits)
@@ -246,6 +249,7 @@ fn expr_documentation_key(expr: &Expr) -> Option<String> {
     }
 }
 
+#[cfg(test)]
 fn uk_docs_source_zig_only() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
@@ -258,6 +262,7 @@ fn uk_docs_source_zig_only() -> Result<String, String> {
     }
 }
 
+#[cfg(test)]
 fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
     let source = uk_docs_source_zig_only()?;
     let program = parse(&source).map_err(|error| {

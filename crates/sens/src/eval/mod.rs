@@ -199,6 +199,7 @@ pub(crate) enum EvalStep {
     },
 }
 
+#[cfg(test)]
 pub(crate) fn invoke_value(
     function: &Value,
     arguments: &[Value],
@@ -217,13 +218,14 @@ pub(crate) fn invoke_value(
             }
             match environment.domain_code_slot(*identity).as_ref() {
                 Some(Value::Builtin(builtin)) => (builtin.func)(arguments, environment, span),
-                Some(Value::Closure(closure)) => closures::apply_values(closure.clone(), arguments, span),
+                Some(Value::Closure(closure)) => {
+                    closures::apply_values(closure.clone(), arguments, span)
+                }
                 _ => Err(LanguageError::new(
                     ErrorKind::Type,
                     format!(
                         "domain identity is not callable under its ratified law: D{} {}",
-                        identity.width(),
-                        identity
+                        identity.width(), identity
                     ),
                     span,
                 )),
@@ -234,8 +236,8 @@ pub(crate) fn invoke_value(
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
-            format!(
-                "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar (носій: {})",
+                format!(
+                    "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar (носій: {})",
                 match function {
                     Value::Nil => "порожня структура",
                     Value::Bool(_) => "історичний булевий носій",

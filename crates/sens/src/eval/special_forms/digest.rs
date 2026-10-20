@@ -1,37 +1,7 @@
-//! `sha256-hex` — a genuine Rust mechanism, in the same category as the
-//! bitwise ops documented in language-core.md. The algorithm stays in Rust;
-//! callable identity is an ordinary first-class builtin owned by the root
-//! environment rather than evaluator name dispatch.
+//! Низькорівневе обчислення SHA-256, потрібне host-адаптерам ядра.
+//! Цей модуль не реєструє мовний резидент і не надає викличності.
 //!
 //! Pure-std implementation (no external crate), SHA-256 per FIPS 180-4.
-
-use crate::{ErrorKind, LanguageError, Span, Value};
-
-pub(crate) fn sha256_hex_values(
-    arguments: &[Value],
-    span: Span,
-) -> Result<Value, LanguageError> {
-    if arguments.len() != 1 {
-        return Err(LanguageError::new(
-            ErrorKind::Arity,
-            "sha256-hex expects exactly 1 argument(s)",
-            span,
-        ));
-    }
-    let Value::String(text) = &arguments[0] else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "sha256-hex expects a string · sha256-hex ochikuie riadok · sha256-hex erwartet eine Zeichenkette",
-            span,
-        ));
-    };
-    let digest = sha256(text.as_bytes());
-    let mut hex = String::with_capacity(64);
-    for byte in digest {
-        hex.push_str(&format!("{byte:02x}"));
-    }
-    Ok(Value::String(std::rc::Rc::from(hex.as_str())))
-}
 
 /// SHA-256 (FIPS 180-4), returns the 32-byte digest.
 pub(crate) fn sha256(input: &[u8]) -> [u8; 32] {

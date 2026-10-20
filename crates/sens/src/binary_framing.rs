@@ -1,8 +1,8 @@
-use crate::BinaryNumber;
 use crate::domain_numeric::{self, DomainNumericComposition};
-use crate::Value;
-use crate::{Rational, CoreDomainIdentity, Text7};
+use crate::BinaryNumber;
 use crate::DomainIdentity;
+use crate::Value;
+use crate::{CoreDomainIdentity, Rational, Text7};
 use std::fmt;
 
 /// Host-side view of one self-describing SENS framing record.
@@ -33,17 +33,40 @@ pub enum BinaryFrame {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BinaryFrameError {
-    NonBit { index: usize, value: u8 },
-    UnexpectedEnd { index: usize },
-    LengthOverflow { index: usize },
-    ReservedExtension { index: usize },
-    UnsupportedDomainWidth { index: usize, width: usize },
-    NonCanonicalNumber { index: usize },
-    InvalidNumber { index: usize },
-    UnexpectedClose { index: usize },
-    UnclosedStructure { index: usize, depth: usize },
+    NonBit {
+        index: usize,
+        value: u8,
+    },
+    UnexpectedEnd {
+        index: usize,
+    },
+    LengthOverflow {
+        index: usize,
+    },
+    ReservedExtension {
+        index: usize,
+    },
+    UnsupportedDomainWidth {
+        index: usize,
+        width: usize,
+    },
+    NonCanonicalNumber {
+        index: usize,
+    },
+    InvalidNumber {
+        index: usize,
+    },
+    UnexpectedClose {
+        index: usize,
+    },
+    UnclosedStructure {
+        index: usize,
+        depth: usize,
+    },
     /// Індекс кадру, який не має права потрапляти до точнодоменної програми.
-    LegacyFrameForbidden { index: usize },
+    LegacyFrameForbidden {
+        index: usize,
+    },
 }
 
 const CONTROL_SPACE: [u8; 2] = [0, 0];
@@ -154,9 +177,9 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
                     // [frame extension][gamma0(0)][gamma0(Dn width)][Dn bits]
                     encode_len_into(0, &mut out)?;
                     encode_len_into(domain_width, &mut out)?;
-                    let exact = number.exact_numeric_domain_bits().ok_or(
-                        BinaryFrameError::InvalidNumber { index: 0 },
-                    )?;
+                    let exact = number
+                        .exact_numeric_domain_bits()
+                        .ok_or(BinaryFrameError::InvalidNumber { index: 0 })?;
                     if exact.len() != domain_width {
                         return Err(BinaryFrameError::InvalidNumber { index: 0 });
                     }
@@ -170,7 +193,7 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
             out.extend_from_slice(&EXT_NUMERIC_COMPOSITION);
             let width = value.domain_width();
             if !BinaryNumber::is_numeric_domain_width(width) {
-                return Err(BinaryFrameError::UnsupportedDomainWidth {index: 0, width});
+                return Err(BinaryFrameError::UnsupportedDomainWidth { index: 0, width });
             }
             let (negative, numerator, denominator) = value.as_parts();
             // Shape: EXT=11; gamma0(Dn width); is_ratio; is_negative;
@@ -179,32 +202,34 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
             encode_len_into(width, &mut out)?;
             out.push(u8::from(denominator.is_some()));
             out.push(u8::from(negative));
-            let word = numerator.exact_numeric_domain_bits()
-                .ok_or(BinaryFrameError::InvalidNumber {index: 0})?;
+            let word = numerator
+                .exact_numeric_domain_bits()
+                .ok_or(BinaryFrameError::InvalidNumber { index: 0 })?;
             if word.len() != width || word.iter().all(|&v| v == 0) {
-                return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
+                return Err(BinaryFrameError::NonCanonicalNumber { index: 0 });
             }
             out.extend(word);
             if let Some(d) = denominator {
-                let denominator_word = d.exact_numeric_domain_bits()
-                    .ok_or(BinaryFrameError::InvalidNumber {index: 0})?;
+                let denominator_word = d
+                    .exact_numeric_domain_bits()
+                    .ok_or(BinaryFrameError::InvalidNumber { index: 0 })?;
                 if denominator_word.len() != width {
-                    return Err(BinaryFrameError::InvalidNumber {index: 0});
+                    return Err(BinaryFrameError::InvalidNumber { index: 0 });
                 }
                 out.extend(denominator_word);
             } else if !negative {
-                return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
+                return Err(BinaryFrameError::NonCanonicalNumber { index: 0 });
             }
             // Replay constructor against the actual operands. For negative
             // integers the denominator is the exact Dn(1), not the magnitude.
             let mut one_word = vec![0u8; width];
             one_word[width - 1] = 1;
             let unit = BinaryNumber::from_numeric_domain_bits(width, &one_word)
-                .ok_or(BinaryFrameError::InvalidNumber {index: 0})?;
-            let canonical = domain_numeric::canonical_parts(
-                negative, numerator, denominator.unwrap_or(&unit));
+                .ok_or(BinaryFrameError::InvalidNumber { index: 0 })?;
+            let canonical =
+                domain_numeric::canonical_parts(negative, numerator, denominator.unwrap_or(&unit));
             if canonical != Some(Value::NumericComposition(value.clone())) {
-                return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
+                return Err(BinaryFrameError::NonCanonicalNumber { index: 0 });
             }
         }
         BinaryFrame::Text(text) => {
@@ -242,26 +267,27 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
 /// is a distinct authority and MUST NOT interpret these records as its words.
 pub fn encode_numeric_value_frame(value: &Value) -> Result<Vec<u8>, BinaryFrameError> {
     match value {
-        Value::BinaryNumber(n) if n.numeric_domain_width().is_some() =>
-            encode_binary_frame(&BinaryFrame::BinaryNumber(n.clone())),
-        Value::NumericComposition(c) =>
-            encode_binary_frame(&BinaryFrame::NumericComposition(c.clone())),
-        _ => Err(BinaryFrameError::InvalidNumber {index: 0}),
+        Value::BinaryNumber(n) if n.numeric_domain_width().is_some() => {
+            encode_binary_frame(&BinaryFrame::BinaryNumber(n.clone()))
+        }
+        Value::NumericComposition(c) => {
+            encode_binary_frame(&BinaryFrame::NumericComposition(c.clone()))
+        }
+        _ => Err(BinaryFrameError::InvalidNumber { index: 0 }),
     }
 }
 
 /// Reconstruct exact Dn-qualified natural/negative/reduced-rational Value.
 /// Reject every other frame rather than losing a domain or normalizing away
 /// a noncanonical wire representation.
-pub fn decode_numeric_value_frame(bits: &[u8])
-    -> Result<(Value, usize), BinaryFrameError>
-{
+pub fn decode_numeric_value_frame(bits: &[u8]) -> Result<(Value, usize), BinaryFrameError> {
     let (frame, consumed) = decode_binary_frame(bits)?;
     let value = match frame {
-        BinaryFrame::BinaryNumber(n) if n.numeric_domain_width().is_some() =>
-            Value::BinaryNumber(n),
+        BinaryFrame::BinaryNumber(n) if n.numeric_domain_width().is_some() => {
+            Value::BinaryNumber(n)
+        }
         BinaryFrame::NumericComposition(c) => Value::NumericComposition(c),
-        _ => return Err(BinaryFrameError::InvalidNumber {index: 0}),
+        _ => return Err(BinaryFrameError::InvalidNumber { index: 0 }),
     };
     Ok((value, consumed))
 }
@@ -271,14 +297,13 @@ pub fn decode_numeric_value_frame(bits: &[u8])
 /// new transport grammar, magic header, semantic opcode or .sens/T5 claim.
 /// The pair (bytes, exact meaningful bit length) is required to reconstruct
 /// the record; raw bytes alone must not guess a numeric domain/last bit.
-pub fn encode_packed_numeric_value(value: &Value)
-    -> Result<crate::PackedBitstream, BinaryFrameError>
-{
+pub fn encode_packed_numeric_value(
+    value: &Value,
+) -> Result<crate::PackedBitstream, BinaryFrameError> {
     let bits = encode_numeric_value_frame(value)?;
     let mut packer = crate::BitPacker::new();
     for bit in bits {
-        let word = crate::Bit1::new(bit)
-            .ok_or(BinaryFrameError::InvalidNumber {index: 0})?;
+        let word = crate::Bit1::new(bit).ok_or(BinaryFrameError::InvalidNumber { index: 0 })?;
         packer.push(word);
     }
     Ok(packer.finish())
@@ -286,18 +311,18 @@ pub fn encode_packed_numeric_value(value: &Value)
 
 /// Recover from existing byte+meaningful-bit-length container, validate one
 /// complete canonical frame and refuse appended/trailing meaningful bits.
-pub fn decode_packed_numeric_value(packed: &crate::PackedBitstream)
-    -> Result<Value, BinaryFrameError>
-{
+pub fn decode_packed_numeric_value(
+    packed: &crate::PackedBitstream,
+) -> Result<Value, BinaryFrameError> {
     let bits = (0..packed.bit_len())
         .map(|index| (packed.bytes()[index / 8] >> (7 - index % 8)) & 1)
         .collect::<Vec<_>>();
     let (value, consumed) = decode_numeric_value_frame(&bits)?;
     if consumed != bits.len() {
-        return Err(BinaryFrameError::NonCanonicalNumber {index: consumed});
+        return Err(BinaryFrameError::NonCanonicalNumber { index: consumed });
     }
     if encode_numeric_value_frame(&value)? != bits {
-        return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
+        return Err(BinaryFrameError::NonCanonicalNumber { index: 0 });
     }
     Ok(value)
 }
@@ -416,9 +441,7 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
             let t0 = reader.read_bit()?;
             let t1 = reader.read_bit()?;
             match [t0, t1] {
-                TYPE_FUNCTION => {
-                    Err(BinaryFrameError::LegacyFrameForbidden { index: frame_start })
-                }
+                TYPE_FUNCTION => Err(BinaryFrameError::LegacyFrameForbidden { index: frame_start }),
                 TYPE_NUMBER => decode_number(reader, frame_start),
                 TYPE_TEXT => decode_text(reader),
                 TYPE_EXTENSION => {
@@ -431,7 +454,7 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
                         EXT_NUMERIC_COMPOSITION => decode_numeric_composition(reader, frame_start),
                         _ => Err(BinaryFrameError::ReservedExtension { index: type_start }),
                     }
-                },
+                }
                 _ => unreachable!("read_bit returns only 0 or 1"),
             }
         }
@@ -445,32 +468,35 @@ fn decode_numeric_composition(
 ) -> Result<BinaryFrame, BinaryFrameError> {
     let width = reader.read_len()?;
     if !BinaryNumber::is_numeric_domain_width(width) {
-        return Err(BinaryFrameError::UnsupportedDomainWidth {index: frame_start, width});
+        return Err(BinaryFrameError::UnsupportedDomainWidth {
+            index: frame_start,
+            width,
+        });
     }
     // All numeric component words are exactly width bits and the tag is
     // self-delimiting; rejecting truncation before allocation is mandatory.
     let ratio = reader.read_bit()? == 1;
     let negative = reader.read_bit()? == 1;
     if !ratio && !negative {
-        return Err(BinaryFrameError::NonCanonicalNumber {index: frame_start});
+        return Err(BinaryFrameError::NonCanonicalNumber { index: frame_start });
     }
     let n = reader.read_bit_string(width)?;
     let n = n.bytes().map(|v| v - b'0').collect::<Vec<_>>();
     let numerator = BinaryNumber::from_numeric_domain_bits(width, &n)
-        .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?;
+        .ok_or(BinaryFrameError::InvalidNumber { index: frame_start })?;
     let denominator = if ratio {
         let d = reader.read_bit_string(width)?;
         let d = d.bytes().map(|v| v - b'0').collect::<Vec<_>>();
         BinaryNumber::from_numeric_domain_bits(width, &d)
-            .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?
+            .ok_or(BinaryFrameError::InvalidNumber { index: frame_start })?
     } else {
         let mut one = vec![0; width];
-        one[width-1] = 1;
+        one[width - 1] = 1;
         BinaryNumber::from_numeric_domain_bits(width, &one)
-            .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?
+            .ok_or(BinaryFrameError::InvalidNumber { index: frame_start })?
     };
     let canonical = domain_numeric::canonical_parts(negative, &numerator, &denominator)
-        .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?;
+        .ok_or(BinaryFrameError::InvalidNumber { index: frame_start })?;
     match &canonical {
         Value::NumericComposition(c) => {
             if c.domain_width() != width
@@ -478,11 +504,11 @@ fn decode_numeric_composition(
                 || c.as_parts().1 != &numerator
                 || c.as_parts().2.is_some_and(|d| d != &denominator)
             {
-                return Err(BinaryFrameError::NonCanonicalNumber {index: frame_start});
+                return Err(BinaryFrameError::NonCanonicalNumber { index: frame_start });
             }
             Ok(BinaryFrame::NumericComposition(c.clone()))
-        },
-        _ => Err(BinaryFrameError::NonCanonicalNumber {index: frame_start}),
+        }
+        _ => Err(BinaryFrameError::NonCanonicalNumber { index: frame_start }),
     }
 }
 
@@ -521,13 +547,16 @@ fn decode_binary_number(
         let domain_width = reader.read_len()?;
         if !BinaryNumber::is_numeric_domain_width(domain_width) {
             return Err(BinaryFrameError::UnsupportedDomainWidth {
-                index: frame_start, width: domain_width,
+                index: frame_start,
+                width: domain_width,
             });
         }
         // Read only after validating width: avoids allocating for arbitrary
         // attacker-supplied lengths not belonging to the numeric ladder.
         let bits = reader.read_bit_string(domain_width)?;
-        let word = bits.bytes().map(|c| if c == b'1' { 1 } else { 0 })
+        let word = bits
+            .bytes()
+            .map(|c| if c == b'1' { 1 } else { 0 })
             .collect::<Vec<_>>();
         let number = BinaryNumber::from_numeric_domain_bits(domain_width, &word)
             .ok_or(BinaryFrameError::InvalidNumber { index: frame_start })?;
@@ -753,7 +782,10 @@ impl fmt::Display for BinaryFrameError {
                 write!(f, "invalid exact Number frame begins at bit {index}")
             }
             Self::UnexpectedClose { index } => {
-                write!(f, "canonical Control2 program closes unopened structure at bit {index}")
+                write!(
+                    f,
+                    "canonical Control2 program closes unopened structure at bit {index}"
+                )
             }
             Self::UnclosedStructure { index, depth } => {
                 write!(
@@ -844,14 +876,12 @@ mod tests {
             assert_eq!(decoded, frame);
             assert_eq!(consumed, encoded.len());
         }
-
     }
 
     #[test]
     fn d9_uses_explicit_wide_domain_extension_and_round_trips_high_bit() {
         let d9 = BinaryFrame::Domain(
-            crate::BinarySourceWord::W9(crate::Bit9::new(0b1_00000001).unwrap())
-                .domain_identity(),
+            crate::BinarySourceWord::W9(crate::Bit9::new(0b1_00000001).unwrap()).domain_identity(),
         );
         let encoded = encode_binary_frame(&d9).unwrap();
 
@@ -864,7 +894,10 @@ mod tests {
             crate::BinarySourceWord::W8(crate::Bit8::new(1).unwrap()).domain_identity(),
         );
         assert_eq!(&encode_binary_frame(&d8).unwrap()[..6], &[1, 1, 1, 1, 0, 0]);
-        assert_ne!(encode_binary_frame(&d9).unwrap(), encode_binary_frame(&d8).unwrap());
+        assert_ne!(
+            encode_binary_frame(&d9).unwrap(),
+            encode_binary_frame(&d8).unwrap()
+        );
     }
 
     #[test]
@@ -883,16 +916,32 @@ mod tests {
     }
 
     #[test]
-    fn all_function8_values_round_trip_exactly() {
-        for packed in 0u16..=255 {
-            let frame = BinaryFrame::Function(CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(packed as u8).expect("8-bit source word"))).expect("exact domain word"));
-            let encoded = encode_binary_frame(&frame).unwrap();
-            assert_eq!(&encoded[..4], &[1, 1, 0, 0]);
-            assert_eq!(encoded.len(), 12);
+    fn legacy_function8_frames_are_rejected_and_w8_admission_is_exact() {
+        let admitted = [
+            0b1110_0000,
+            0b1110_1010,
+            0b1110_1101,
+            0b1110_1110,
+            0b1111_0100,
+        ];
 
-            let (decoded, consumed) = decode_binary_frame(&encoded).unwrap();
-            assert_eq!(decoded, frame);
-            assert_eq!(consumed, encoded.len());
+        for packed in 0u16..=255 {
+            let source = crate::BinarySourceWord::W8(
+                crate::Bit8::new(packed as u8).expect("exact eight-bit source word"),
+            );
+            let identity = CoreDomainIdentity::from_source_word(source);
+            if admitted.contains(&(packed as u8)) {
+                let frame = BinaryFrame::Function(identity.expect("admitted D8 mechanism"));
+                assert!(matches!(
+                    encode_binary_frame(&frame),
+                    Err(BinaryFrameError::LegacyFrameForbidden { index: 0 })
+                ));
+            } else {
+                assert!(
+                    identity.is_none(),
+                    "unadmitted W8 {packed:08b} became callable"
+                );
+            }
         }
     }
 
@@ -933,7 +982,9 @@ mod tests {
     fn control2_stream_keeps_real_space_and_nested_structure() {
         let frames = vec![
             BinaryFrame::Open,
-            BinaryFrame::Function(crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(0b01010).expect("plus")))),
+            BinaryFrame::Function(crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(
+                crate::Bit5::new(0b01010).expect("plus"),
+            ))),
             BinaryFrame::Space,
             BinaryFrame::Number(number("10", "1")),
             BinaryFrame::Space,
@@ -1025,7 +1076,9 @@ mod tests {
                 let (decoded, consumed) = decode_binary_frame(&encoded).unwrap();
                 assert_eq!(decoded, frame);
                 assert_eq!(consumed, encoded.len());
-                let BinaryFrame::BinaryNumber(decoded_number) = decoded else { unreachable!() };
+                let BinaryFrame::BinaryNumber(decoded_number) = decoded else {
+                    unreachable!()
+                };
                 assert_eq!(decoded_number.numeric_domain_width(), Some(width));
                 assert_eq!(decoded_number.exact_numeric_domain_bits(), Some(word));
                 // Removing one bit must never silently re-interpret a
@@ -1036,26 +1089,36 @@ mod tests {
             }
         }
         let d24 = BinaryFrame::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap());
+            BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap(),
+        );
         let d48 = BinaryFrame::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap());
-        assert_ne!(encode_binary_frame(&d24).unwrap(), encode_binary_frame(&d48).unwrap());
+            BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap(),
+        );
+        assert_ne!(
+            encode_binary_frame(&d24).unwrap(),
+            encode_binary_frame(&d48).unwrap()
+        );
     }
 
     #[test]
     fn d24_numeric_frame_rejects_invalid_domain_and_payload() {
         let mut header = Vec::from([1, 1, 1, 1, 0, 1, 1]); // ext + gamma0(0)
         encode_len_into(25, &mut header).unwrap();
-        assert!(matches!(decode_binary_frame(&header), Err(BinaryFrameError::UnsupportedDomainWidth { width: 25, .. })));
+        assert!(matches!(
+            decode_binary_frame(&header),
+            Err(BinaryFrameError::UnsupportedDomainWidth { width: 25, .. })
+        ));
         let mut incomplete = Vec::from([1, 1, 1, 1, 0, 1, 1]);
         encode_len_into(24, &mut incomplete).unwrap();
         incomplete.extend_from_slice(&vec![0; 23]);
-        assert!(matches!(decode_binary_frame(&incomplete), Err(BinaryFrameError::UnexpectedEnd { .. })));
-        let unqualified = BinaryFrame::BinaryNumber(BinaryNumber::from_bits([1,0,1]).unwrap());
+        assert!(matches!(
+            decode_binary_frame(&incomplete),
+            Err(BinaryFrameError::UnexpectedEnd { .. })
+        ));
+        let unqualified = BinaryFrame::BinaryNumber(BinaryNumber::from_bits([1, 0, 1]).unwrap());
         let encoded = encode_binary_frame(&unqualified).unwrap();
         assert_eq!(decode_binary_frame(&encoded).unwrap().0, unqualified);
     }
-
 
     fn domain_frame(width: usize, bits: u16) -> BinaryFrame {
         let source = match width {
@@ -1103,7 +1166,10 @@ mod tests {
         let d8 = domain_frame(8, 0b1010_1000);
         let d9 = domain_frame(9, 0b0_1010_1000);
         assert_ne!(d3, d4, "D3:010 and D4:0010 remain different identities");
-        assert_ne!(d8, d9, "D8:10101000 and D9:010101000 are different identities despite equal payload");
+        assert_ne!(
+            d8, d9,
+            "D8:10101000 and D9:010101000 are different identities despite equal payload"
+        );
     }
 
     #[test]
@@ -1124,7 +1190,10 @@ mod tests {
             BinaryFrame::Close,
         ];
         let encoded = BinaryFrame::encode_exact_domain_program(&frames).unwrap();
-        assert_eq!(BinaryFrame::decode_exact_domain_program(&encoded).unwrap(), frames);
+        assert_eq!(
+            BinaryFrame::decode_exact_domain_program(&encoded).unwrap(),
+            frames
+        );
         assert_eq!(decode_binary_program(&encoded).unwrap(), frames);
         assert_ne!(qualified_numeric_word(24), qualified_numeric_word(48));
     }
@@ -1132,17 +1201,15 @@ mod tests {
     #[test]
     fn exact_program_rejects_legacy_frames_on_encode_and_decode_without_breaking_archive_reads() {
         let historical_frames = [
-            BinaryFrame::Function(crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload")))),
+            BinaryFrame::Function(crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                crate::Bit8::new(0b10101000).expect("legacy W8 payload"),
+            ))),
             BinaryFrame::Number(number("1", "10")),
             BinaryFrame::BinaryNumber(BinaryNumber::parse("1").unwrap()),
         ];
 
         for historical in historical_frames {
-            let sequence = [
-                BinaryFrame::Open,
-                historical.clone(),
-                BinaryFrame::Close,
-            ];
+            let sequence = [BinaryFrame::Open, historical.clone(), BinaryFrame::Close];
             assert!(matches!(
                 BinaryFrame::encode_exact_domain_program(&sequence),
                 Err(BinaryFrameError::LegacyFrameForbidden { index: 1 })
@@ -1168,11 +1235,13 @@ mod tests {
             BinaryFrame::Close,
         ];
         let encoded = BinaryFrame::encode_exact_domain_program(&frames).unwrap();
-        assert_eq!(BinaryFrame::decode_exact_domain_program(&encoded).unwrap(), frames);
+        assert_eq!(
+            BinaryFrame::decode_exact_domain_program(&encoded).unwrap(),
+            frames
+        );
         assert!(matches!(
             BinaryFrame::encode_exact_domain_program(&[BinaryFrame::Close]),
             Err(BinaryFrameError::UnexpectedClose { index: 0 })
         ));
     }
-
 }

@@ -1,9 +1,6 @@
-//! String/symbol mechanisms that genuinely need the Rust substrate.
-//!
-//! Callable identity does not belong here. Every operation in this module is
-//! value-level (`&[Value] -> Value`) so the root environment can expose it as an
-//! ordinary first-class builtin. The evaluator therefore has no reason to know
-//! any of these operation names.
+//! Рядкові й символьні механізми на Rust.
+//! Identity та допуск визначає доменний диспетчер; тут лише виконавчі функції
+//! для явно підключених маршрутів.
 
 use crate::{ErrorKind, LanguageError, Span, Value};
 use std::rc::Rc;
@@ -22,82 +19,6 @@ fn exact_value_arity(
         ));
     }
     Ok(())
-}
-
-/// Return the half-open character-indexed slice of a string.
-///
-/// Indices count Unicode scalar values, matching `string-first` and
-/// `string-rest`, rather than UTF-8 bytes. Bounds are clamped to the string
-/// length; an inverted or empty range returns the empty string.
-pub(crate) fn evaluate_string_slice(
-    arguments: &[Value],
-    span: Span,
-) -> Result<Value, LanguageError> {
-    if arguments.len() != 3 {
-        return Err(LanguageError::new(
-            ErrorKind::Arity,
-            "string-slice expects a string, start, and end · string-slice ochikuie riadok, pochatok i kinets · string-slice erwartet Zeichenkette, Anfang und Ende",
-            span,
-        ));
-    }
-    let Value::String(text) = &arguments[0] else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "string-slice expects a string as its first argument · string-slice ochikuie riadok pershym arhumentom · string-slice erwartet eine Zeichenkette als erstes Argument",
-            span,
-        ));
-    };
-    let start = slice_index(&arguments[1], span)?;
-    let end = slice_index(&arguments[2], span)?;
-    let result = crate::string_slice_text(text, start, end);
-    Ok(Value::String(Rc::from(result.as_str())))
-}
-
-fn slice_index(value: &Value, span: Span) -> Result<usize, LanguageError> {
-    let integer = match value {
-        Value::Number(number, crate::Exactness::Exact)
-            if number.is_finite() && number.fract() == 0.0 =>
-        {
-            if *number < 0.0 {
-                return Err(LanguageError::new(
-                    ErrorKind::Type,
-                    "string-slice indices must be non-negative exact integers · indeksy string-slice maiut buty nevidiemni tochnymy tsilymy · string-slice-Indizes müssen nichtnegative exakte Ganzzahlen sein",
-                    span,
-                ));
-            }
-            (*number as u128).try_into().map_err(|_| {
-                LanguageError::new(
-                    ErrorKind::NumericOverflow,
-                    "string-slice index is too large · indeks string-slice zavelykyi · string-slice-Index ist zu groß",
-                    span,
-                )
-            })?
-        }
-        Value::Rational(rational) if rational.is_integer() => {
-            let number = rational.as_precise_i64().ok_or_else(|| {
-                LanguageError::new(
-                    ErrorKind::NumericOverflow,
-                    "string-slice index is too large · indeks string-slice zavelykyi · string-slice-Index ist zu groß",
-                    span,
-                )
-            })?;
-            usize::try_from(number).map_err(|_| {
-                LanguageError::new(
-                    ErrorKind::Type,
-                    "string-slice indices must be non-negative exact integers · indeksy string-slice maiut buty nevidiemni tochnymy tsilymy · string-slice-Indizes müssen nichtnegative exakte Ganzzahlen sein",
-                    span,
-                )
-            })?
-        }
-        _ => {
-            return Err(LanguageError::new(
-                ErrorKind::Type,
-                "string-slice indices must be non-negative exact integers · indeksy string-slice maiut buty nevidiemni tochnymy tsilymy · string-slice-Indizes müssen nichtnegative exakte Ganzzahlen sein",
-                span,
-            ));
-        }
-    };
-    Ok(integer)
 }
 
 pub(crate) fn string_append_values(
@@ -120,14 +41,6 @@ pub(crate) fn string_append_values(
         ));
     };
     Ok(Value::String(Rc::from(format!("{left}{right}").as_str())))
-}
-
-pub(crate) fn string_predicate_values(
-    arguments: &[Value],
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_value_arity("string?", arguments, 1, span)?;
-    Ok(Value::predicate_bit(matches!(arguments[0], Value::String(_))))
 }
 
 pub(crate) fn symbol_to_string_values(

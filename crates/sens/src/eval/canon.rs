@@ -237,7 +237,7 @@ fn invoke_domain_primitive(
                 // D8:11100000 is the explicit Unicode scalar -> D24 boundary.
                 // Temporary lower helpers may already return D24 or an exact
                 // unqualified scalar; neither escapes this canonical route.
-                let scalar = builtins::prim_01000101(args, environment, span)?;
+                let scalar = builtins::string_to_codepoint(args, environment, span)?;
                 match &scalar {
                     Value::BinaryNumber(numeric)
                         if numeric.numeric_domain_width() == Some(24) =>
@@ -338,16 +338,16 @@ pub(crate) fn invoke_d9_string_mechanism(
                 super::special_forms::string_append_values(args, span)?
             }
             D9StringPrimitiveKind::Empty => {
-                super::builtins::prim_00111100(args, environment, span)?
+                super::builtins::string_empty(args, environment, span)?
             }
             D9StringPrimitiveKind::Rest => {
-                super::builtins::prim_01000000(args, environment, span)?
+                super::builtins::string_rest(args, environment, span)?
             }
             D9StringPrimitiveKind::Prefix => {
-                super::builtins::prim_00111101(args, environment, span)?
+                super::builtins::string_prefix(args, environment, span)?
             }
             D9StringPrimitiveKind::First => {
-                super::builtins::prim_00111111(args, environment, span)?
+                super::builtins::string_first(args, environment, span)?
             }
         };
         if matches!(kind, D9StringPrimitiveKind::Empty | D9StringPrimitiveKind::Prefix)

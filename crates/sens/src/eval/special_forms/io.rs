@@ -1,6 +1,5 @@
-//! `print`/`princ`/`write-to-string`, `read`/`eval`/`read-all`, and the one
-//! place in the crate that touches real stdin (`read_stdin_line`, behind
-//! `(read)` with no arguments).
+//! Поточні механізми `write-to-string`, `read`/`eval` та єдине місце ядра,
+//! що читає stdin (`read_stdin_line`, лише для `(read)` без аргументів).
 //!
 //! These operations are value-level mechanisms. Their callable identities are
 //! ordinary root `Value::Builtin` bindings; the evaluator does not dispatch on
@@ -10,28 +9,6 @@ use super::core::quoted;
 use crate::eval::{closures, evaluate, lower};
 use crate::{Environment, ErrorKind, Expr, LanguageError, Span, Value};
 use std::rc::Rc;
-
-pub(crate) fn print_values(
-    arguments: &[Value],
-    environment: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_values("print", arguments, 1, span)?;
-    let value = arguments[0].clone();
-    environment.print(value.to_string());
-    Ok(value)
-}
-
-pub(crate) fn princ_values(
-    arguments: &[Value],
-    environment: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_values("princ", arguments, 1, span)?;
-    let value = arguments[0].clone();
-    environment.print(value.to_princ_string());
-    Ok(value)
-}
 
 fn contains_predicate_bit(value: &Value) -> bool {
     match value {
@@ -139,30 +116,6 @@ pub(crate) fn eval_values(
     let expression = closures::value_to_expr(datum, span)?;
     let lowered = lower::lower_program(std::slice::from_ref(&expression));
     evaluate(&lowered[0], environment)
-}
-
-pub(crate) fn read_all_values(
-    arguments: &[Value],
-    _environment: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_values("read-all", arguments, 1, span)?;
-    let Value::String(text) = &arguments[0] else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "read-all expects a string · read-all ochikuie riadok · read-all erwartet eine Zeichenkette",
-            span,
-        ));
-    };
-    let expressions = crate::parse(text).map_err(|mut error| {
-        error.span = span;
-        error
-    })?;
-    let mut values = Vec::with_capacity(expressions.len());
-    for expression in &expressions {
-        values.push(quoted(expression)?);
-    }
-    Ok(Value::list(values))
 }
 
 fn exact_values(

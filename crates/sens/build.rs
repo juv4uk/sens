@@ -1,5 +1,9 @@
 use serde_json::Value as Json;
-use std::{collections::HashSet, env, fs, path::PathBuf};
+use std::{
+    collections::HashSet,
+    env, fs,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Clone)]
 enum Expr {
@@ -129,7 +133,7 @@ fn add_entry(
     out.push_str(&format!("    Entry {{ source: ProjectionSource::{source}, domain: {domain}, bits: {}, column: {}, value: ProjectionValue::{kind}({}) }},\n", rust_str(bits), rust_str(column), rust_str(text)));
 }
 
-fn domain_tables(root: &PathBuf, out: &mut String) {
+fn domain_tables(root: &Path, out: &mut String) {
     for domain in 1..=11u16 {
         let relative = format!("lib/domains/d{domain}.lisp");
         let path = root.join(&relative);
@@ -212,7 +216,7 @@ fn domain_tables(root: &PathBuf, out: &mut String) {
 }
 
 fn json_source(
-    root: &PathBuf,
+    root: &Path,
     relative: &str,
     source_name: &str,
     domain: u16,

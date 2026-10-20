@@ -1,8 +1,5 @@
-//! `json-parse` — JSON wire-format decoding mechanism.
-//!
-//! The decoder remains implemented in Rust for now, but callable identity is
-//! no longer evaluator syntax: `json-parse` is installed as an ordinary
-//! first-class builtin.  Agent/message/tool policy remains in `.my` libraries.
+//! JSON wire-format decoder exposed to host adapters as a plain parser.
+//! This module does not register a language resident or grant callability.
 //!
 //! Representation handed back to the language:
 //! - object  → alist of dotted pairs `("key" . value)`
@@ -16,32 +13,8 @@
 //! Hand-rolled, no external dependency — this crate's zero-dependency policy
 //! (see Cargo.toml) predates and outlives this mechanism.
 
-use crate::{ErrorKind, LanguageError, Span, Value};
+use crate::Value;
 use std::rc::Rc;
-
-/// Value-level callable form used by the root builtin registry.
-pub(crate) fn json_parse_values(
-    arguments: &[Value],
-    span: Span,
-) -> Result<Value, LanguageError> {
-    if arguments.len() != 1 {
-        return Err(LanguageError::new(
-            ErrorKind::Arity,
-            "json-parse expects exactly 1 argument(s)",
-            span,
-        ));
-    }
-    let Value::String(text) = &arguments[0] else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "json-parse expects a string · json-parse ochikuie riadok · json-parse erwartet einen String",
-            span,
-        ));
-    };
-    parse_json(text).map_err(|message| {
-        LanguageError::new(ErrorKind::Parse, format!("json-parse: {message}"), span)
-    })
-}
 
 /// Plain-function form of the canonical JSON decoder, for host adapters
 /// (LSP, CLI tooling) that must consume JSON without going through `eval`.

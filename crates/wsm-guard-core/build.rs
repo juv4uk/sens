@@ -3,7 +3,7 @@
 // or any source-file byte carrier is unavailable.
 use std::{env, path::PathBuf, process::Command};
 
-fn pinned_zig_compiler(pinned: &str) -> std::ffi::OsString {
+fn pinned_zig_compiler(_pinned: &str) -> std::ffi::OsString {
     if let Some(compiler) = env::var_os("ZIG") {
         return compiler;
     }
@@ -12,7 +12,7 @@ fn pinned_zig_compiler(pinned: &str) -> std::ffi::OsString {
         let cached = PathBuf::from(local_app_data)
             .join("SENS")
             .join("zig")
-            .join(format!("zig-x86_64-windows-{pinned}"))
+            .join(format!("zig-x86_64-windows-{_pinned}"))
             .join("zig.exe");
         if cached.is_file() {
             return cached.into_os_string();
