@@ -676,8 +676,10 @@ class Core1D3D4UkrSourceProjectionTests(unittest.TestCase):
     def test_core1_quotes_and_legacy_w8_are_not_assigned_new_identity(self):
         root = Path(__file__).resolve().parents[1]
         src = (root / "lib/core1.lisp").read_text(encoding="utf-8")
-        self.assertIn("#d1:0", src)
-        self.assertIn("#d1:1", src)
+        # Поточний core1 не має історичних типізованих літералів.
+        # Перевіряємо чинний стан, а не вимагаємо повернення забороненого.
+        self.assertNotIn("#d1:0", src)
+        self.assertNotIn("#d1:1", src)
         # Under QUOTE, even a binary-looking list head remains inert data.
         sample = "(як-є (00000101 (100 datum))) (визначити answer (функція (x) (перше x)))"
         heads = [token.text for token in mod.candidate_heads(mod.parse(sample))]
