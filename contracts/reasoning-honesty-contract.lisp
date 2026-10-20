@@ -1,5 +1,5 @@
-; #219/#244 — Lisp-owned reasoning honesty contract.
-; Pure data: reasoning may specialize only what it actually establishes.
+; #219/#244 — контракт чесності міркування, власність Lisp.
+; Чисті дані: міркування може спеціалізувати лише те, що справді встановлює.
 
 (reasoning-honesty-contract/1
   ((law . no-proof-is-not-negation)
