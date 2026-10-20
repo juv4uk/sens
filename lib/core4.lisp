@@ -243,11 +243,6 @@
 (визначити caddr п-р-р)
 (визначити third третє)
 
-; cadddr — the classical car/cdr-composition name for the exact same
-; operation fourth already performs; kept as an alias (same closure
-; object, not a second definition) since real callers already spell it
-; this way (lib/reason.lisp had its own local (def cadddr ...) before
-; this, character-for-character identical to fourth's body).
 ; cadddr — класична car/cdr-композиційна назва для тієї самої операції,
 ; що вже виконує fourth; лишено як псевдонім (той самий об'єкт-closure,
 ; не друге визначення), бо реальні виклики вже пишуть саме так
@@ -255,11 +250,6 @@
 ; посимвольно ідентичний тілу fourth).
 (визначити cadddr fourth)
 
-; fifth — same single-parameter primitive-chain pattern as second/third/
-; fourth, one step deeper. Found duplicated in two places at once:
-; lib/narrate.lisp's own local (def fifth ...), character-for-character
-; identical, and lib/persistent-map.lisp's node-right, same operation
-; spelled out by hand rather than named.
 ; fifth — той самий однопараметричний ланцюжок примітивів, що й
 ; second/third/fourth, ще на крок глибший. Знайдено дубльованим одразу
 ; у двох місцях: власний локальний (def fifth ...) у lib/narrate.lisp,
@@ -366,20 +356,11 @@
 ; виклику значень у точному домені. Канонічні назви задано в
 ; lib/domains/d5.lisp; не перевизначати ці незмінні імена в Core4.
 
-; (reverse-onto (reverse left) right): reversing left first and then
-; consing it back onto right, one element at a time, rebuilds
-; left ++ right in the correct order — two tail-recursive passes instead
-; of one non-tail pass, trading a little work for a Rust-stack-safe append.
 ; (reverse-onto (reverse left) right): спершу розвертаємо left, а тоді
 ; консимо його назад на right по елементу — відбудовує left ++ right у
 ; правильному порядку — два хвостово-рекурсивні проходи замість одного
 ; не-хвостового, невелика доплата роботою заради append, безпечного для
 ; Rust-стека.
-; (reverse-onto (reverse left) right): left zuerst umkehren und dann
-; Element für Element wieder auf right konsen, baut left ++ right in
-; korrekter Reihenfolge wieder auf — zwei endrekursive Durchläufe statt
-; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
-; Rust-Stack-sicheres append.
 (визначити приєднати
   (функція (лівий-аргумент правий-аргумент)
     (зворот-до (зворот лівий-аргумент) правий-аргумент)))
@@ -391,17 +372,17 @@
     (за-умовою ((порожній? значення) (зворот акумулятор)) ((хибне? (порожній? значення)) (відобразити-до дія (решта значення) (сполучити (дія (перше значення)) акумулятор))))))
 (визначити map-onto відобразити-до)
 
-; D10 research / PAIP list family: owner codebook coordinates, not F1-F4
-; machine admission. Each definition is native SENS over already-ratified
-; D3 CONS/CAR/CDR, D4 NULL/COND and D5 APPEND. Archive:
-; knowledge/d10-crossrepo-paip-v1.json and lib/domains/d10.lisp.
-; Runtime boundary (2026-10-18): after Core4 loads, an exact D10 word may
-; invoke only the root closure bound to that coordinate's concrete definition.
-; This is neither a primitive/F1-F4 admission nor callability inferred from width.
+; Дослідження D10 / родина спискових функцій PAIP: координати з таблиці
+; власника не означають машинного допуску F1–F4. Кожну функцію визначено
+; мовою SENS через уже ратифіковані D3 CONS/CAR/CDR, D4 NULL/COND і D5 APPEND.
+; Історичні свідки: knowledge/d10-crossrepo-paip-v1.json та lib/domains/d10.lisp.
+; Межа виконання від 18.10.2026: після завантаження Core4 точне слово D10
+; викликає тільки кореневе замикання реально визначеної функції,
+; без автоматичного допуску примітива чи виведення викличності з ширини.
 ; Межа виконання: точне слово D10 викликає лише реально визначене замикання;
 ; ширина та сама наявність координати не створюють функцію.
-; D10:0011010111 MKLIST: () remains (); an atom becomes a singleton;
-; an existing nonempty list is returned unchanged.
+; D10:0011010111 MKLIST: () залишається (); атом стає одноелементним
+; списком, а наявний непорожній список повертається без змін.
 (визначити утворити-список
   (функція (значення)
     (за-умовою
@@ -409,8 +390,8 @@
       ((атом? значення) (сполучити значення (як-є ())))
       (так значення))))
 
-; D10:0011001010 MAPPEND: concatenate callback-produced proper lists
-; in original input order. No destructive append or implicit coercions.
+; D10:0011001010 MAPPEND: об'єднати правильні списки, які повернула дія,
+; зберігаючи порядок входу; без руйнівного додавання чи прихованих перетворень.
 (визначити відобразити-й-додати
   (функція (дія елементи)
     (за-умовою
@@ -420,24 +401,25 @@
        (приєднати (дія (перше елементи))
                (відобразити-й-додати дія (решта елементи)))))))
 
-; D10:0011001110 FLATTEN: PAIP donor specifies exactly ONE level,
-; not an arbitrary recursive tree flatten.
+; D10:0011001110 FLATTEN: закон PAIP розкриває рівно ОДИН рівень,
+; а не довільну глибину дерева.
 (визначити сплющити
   (функція (елементи)
     (відобразити-й-додати
       (функція (елемент) (утворити-список елемент))
       елементи)))
 
-; D10 PAIP/MAL follow-on, language-derived only (no D10 F1-F4 admission).
-; D10:0011001101 LAST1: CAR(last cons) for a nonempty proper list,
-; not the final cons cell. Donor knowledge/d10-crossrepo-paip-v1.json.
+; D10 PAIP/MAL: лише похідне мовне визначення без машинного допуску F1–F4.
+; D10:0011001101 LAST1 повертає голову останньої пари непорожнього
+; правильного списку, а не саму останню пару.
+; Джерело: knowledge/d10-crossrepo-paip-v1.json.
 (визначити останній
   (функція (елементи)
     (перше (останній-хвіст елементи))))
 
-; D10:0100001100 LISTP: both NIL and any CONS cell are list-shaped;
-; distinct from PROPER-LIST? and from D3:010 ATOM.
-; Donor knowledge/d10-crossrepo-mal-v1.json.
+; D10:0100001100 LISTP: і NIL, і будь-яка пара CONS мають форму списку;
+; це відмінне від PROPER-LIST? та D3:010 ATOM.
+; Джерело: knowledge/d10-crossrepo-mal-v1.json.
 (визначити список?
   (функція (значення)
     (за-умовою
