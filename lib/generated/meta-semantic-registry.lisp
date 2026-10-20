@@ -1,7 +1,7 @@
-; GENERATED FILE — DO NOT EDIT.
-; Source authority: lib/surface/semantic-registry.lisp
-; Generator: scripts/generate-meta-semantic-registry.lisp
-; Registry surfaces; empty and reader-only apostrophe surfaces omitted.
+; ЗГЕНЕРОВАНИЙ ФАЙЛ — НЕ РЕДАГУВАТИ.
+; Джерело влади: lib/surface/semantic-registry.lisp
+; Генератор: scripts/generate-meta-semantic-registry.lisp
+; Поверхні реєстру; порожні й лише-читальні апостроф-поверхні пропущено.
 
 (0011 my-semantic-surface-registry
   (001 (
