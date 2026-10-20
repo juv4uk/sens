@@ -328,47 +328,26 @@ class LegacyD3GuardTests(unittest.TestCase):
             f.rule for f in MODULE.scan_lisp(regression, path)
         ])
 
-    def test_meta_semantic_generator_redundant_atom_paths_retired(self):
+    def test_meta_semantic_generator_current_ukrainian_and_no_fake_pass(self):
         path = "scripts/generate-meta-semantic-registry.lisp"
         source = (ROOT / path).read_text(encoding="utf-8")
-        findings = MODULE.scan_lisp(source, path)
-        kinds = [finding.rule for finding in findings]
+        kinds = [finding.rule for finding in MODULE.scan_lisp(source, path)]
 
-        # Four obsolete result-match forms were replaced by exact D1
-        # two-field D3 clauses. Any reintroduction is a CI regression.
-        self.assertEqual(kinds.count("COND_NOT_TWO_FIELDS"), 0)
+        # Ця проєкція вже використовує українські D3-форми, а не
+        # історичні голі біти. Перевіряємо чинний файл, не вимагаємо
+        # давно вилучені ((010 surface)) та хостове t як доказ.
+        self.assertNotIn("COND_NOT_TWO_FIELDS", kinds)
         self.assertNotIn("COND_HOST_TRUTH", kinds)
+        self.assertIn("(функція (назва-поверхні)", source)
+        self.assertIn("((атом? запис-поверхні) (як-є ()))", source)
+        self.assertIn("(так (перше запис-поверхні))", source)
+        self.assertNotIn("((010 surface)", source)
+        self.assertNotIn("(t t)", source)
 
-        exact = "((010 surface) ())"
-        self.assertIn(exact, source)
-        reverted = source.replace(exact, "((010 surface) (1) ())", 1)
-        self.assertGreater(
-            [f.rule for f in MODULE.scan_lisp(reverted, path)].count(
-                "COND_NOT_TWO_FIELDS"
-            ),
-            kinds.count("COND_NOT_TWO_FIELDS"),
-        )
-
-        fallback = "((010 (001 ())) t)"
-        self.assertIn(fallback, source)
-        reverted = source.replace(fallback, "(t t)", 1)
-        self.assertIn(
-            "COND_HOST_TRUTH",
-            [f.rule for f in MODULE.scan_lisp(reverted, path)],
-        )
-
-        # Inject historical 3-field result matching in each of the two
-        # newly migrated equality sites; strict audit must reject both.
-        for predicate in (
-            '((101 current generated)',
-            '((101 (100 *argv*) "--check")',
-        ):
-            with self.subTest(predicate=predicate):
-                self.assertIn(predicate, source)
-                drift = source.replace(predicate, predicate + ' (1)', 1)
-                self.assertIn("COND_NOT_TWO_FIELDS", [
-                    f.rule for f in MODULE.scan_lisp(drift, path)
-                ])
+        # Порожній шаблон реєстру НЕ надає готовність виконання.
+        self.assertIn("lib/surface/semantic-registry.lisp", source)
+        self.assertIn("(status not-verified)", source)
+        self.assertNotIn("(status pass)", source)
 
     def test_uk_surface_audit_generator_exact_atom_pairs_with_bounded_debt(self):
         path = "scripts/generate-uk-surface-audit.lisp"
