@@ -1,88 +1,99 @@
-; Executable Lisp-owned witness for LIFE-1 contract.
-; Ukrainian projection only.
+; Свідок договору LIFE-1: семантичні перевірки належать СЕНС.
+; Функції, змінні й викличні голови мають українські назви.
+; Цитовані поля договору та результати залишено без змін.
 
-(визначити life-1-schema
+(визначити схема-договору-життя-1
   (функція () (перше life-1-document)))
 
-(визначити life-1-entries
+(визначити записи-договору-життя-1
   (функція () (решта life-1-document)))
 
-(визначити life-1-field
-  (функція (entry field)
-    (нехай ((found (знайти-за-ключем field entry)))
+(визначити поле-договору-життя-1
+  (функція (рядок поле)
+    (нехай ((знайдене (знайти-за-ключем поле рядок)))
       (за-умовою
-        ((атом? found) (як-є ()))
-        (так (решта found))))))
+        ((атом? знайдене) (як-є ()))
+        (так (решта знайдене))))))
 
-(визначити life-1-find
-  (функція (identity entries)
+(визначити знайти-рядок-договору-життя-1
+  (функція (тотожність записи)
     (за-умовою
-      ((атом? entries) (як-є ()))
+      ((атом? записи) (як-є ()))
       (так
        (за-умовою
-         ((тотожне? (life-1-field (перше entries) (як-є identity)) identity)
-          (перше entries))
-         (так (life-1-find identity (решта entries))))))))
+         ((тотожне? (поле-договору-життя-1 (перше записи) (як-є identity)) тотожність)
+          (перше записи))
+         (так (знайти-рядок-договору-життя-1 тотожність (решта записи))))))))
 
-(визначити life-1-entry
-  (функція (identity)
-    (life-1-find identity (life-1-entries))))
+(визначити рядок-договору-життя-1
+  (функція (тотожність)
+    (знайти-рядок-договору-життя-1 тотожність (записи-договору-життя-1))))
 
-(визначити life-1-check
-  (функція (identity field expected)
-    (нехай ((entry (life-1-entry identity)))
+(визначити перевірити-вимогу-договору-життя-1
+  (функція (тотожність поле очікуване)
+    (нехай ((рядок (рядок-договору-життя-1 тотожність)))
       (за-умовою
-        ((атом? entry)
-         (список (як-є missing-entry) identity))
+        ((атом? рядок)
+         (список (як-є missing-entry) тотожність))
         (так
          (за-умовою
-           ((тотожне? (life-1-field entry field) expected)
+           ((тотожне? (поле-договору-життя-1 рядок поле) очікуване)
             (як-є ()))
            (так
-            (список (як-є mismatch) identity field expected
-                  (life-1-field entry field)))))))))
+            (список (як-є mismatch) тотожність поле очікуване
+                  (поле-договору-життя-1 рядок поле)))))))))
 
-(визначити life-1-first-failure
-  (функція (checks)
+(визначити перша-помилка-договору-життя-1
+  (функція (перевірки)
     (за-умовою
-      ((атом? checks) (як-є ()))
+      ((атом? перевірки) (як-є ()))
       (так
        (за-умовою
-         ((атом? (перше checks))
-          (life-1-first-failure (решта checks)))
-         (так (перше checks)))))))
+         ((атом? (перше перевірки))
+          (перша-помилка-договору-життя-1 (решта перевірки)))
+         (так (перше перевірки)))))))
 
-(визначити life-1-contract-witness
+(визначити свідок-договору-життя-1
   (функція ()
-    (нехай ((failure
-            (life-1-first-failure
+    (нехай ((помилка
+            (перша-помилка-договору-життя-1
               (список
-                (life-1-check (як-є life-trace) (як-є owner) (як-є sens))
-                (life-1-check (як-є life-trace) (як-є truth-value) (як-є forbidden))
-                (life-1-check (як-є source-observation) (як-є native-domain-preserved) (як-є yes))
-                (life-1-check (як-є source-observation) (як-є universal-result-normalization) (як-є forbidden))
-                (life-1-check (як-є projection) (як-є explicit) (як-є yes))
-                (life-1-check (як-є projection) (як-є partial) (як-є yes))
-                (life-1-check (як-є projection) (як-є semantic-equivalence-assumed) (як-є no))
-                (life-1-check (як-є target-invocation) (як-є kernel-reinterpretation) (як-є forbidden))
-                (life-1-check (як-є missing-source-kernel) (як-є changes-semantic-id-meaning) (як-є no))
-                (life-1-check (як-є first-vertical-slice) (як-є source) (як-є prolog))
-                (life-1-check (як-є first-vertical-slice) (як-є target) (як-є datalog))
-                (life-1-check (як-є first-vertical-slice) (як-є shared-result-type) (як-є forbidden))
-                (life-1-check (як-є liveness) (як-є fresh-checkout) (як-є required))))))
+                (перевірити-вимогу-договору-життя-1 (як-є life-trace) (як-є owner) (як-є sens))
+                (перевірити-вимогу-договору-життя-1 (як-є life-trace) (як-є truth-value) (як-є forbidden))
+                (перевірити-вимогу-договору-життя-1 (як-є source-observation) (як-є native-domain-preserved) (як-є yes))
+                (перевірити-вимогу-договору-життя-1 (як-є source-observation) (як-є universal-result-normalization) (як-є forbidden))
+                (перевірити-вимогу-договору-життя-1 (як-є projection) (як-є explicit) (як-є yes))
+                (перевірити-вимогу-договору-життя-1 (як-є projection) (як-є partial) (як-є yes))
+                (перевірити-вимогу-договору-життя-1 (як-є projection) (як-є semantic-equivalence-assumed) (як-є no))
+                (перевірити-вимогу-договору-життя-1 (як-є target-invocation) (як-є kernel-reinterpretation) (як-є forbidden))
+                (перевірити-вимогу-договору-життя-1 (як-є missing-source-kernel) (як-є changes-semantic-id-meaning) (як-є no))
+                (перевірити-вимогу-договору-життя-1 (як-є first-vertical-slice) (як-є source) (як-є prolog))
+                (перевірити-вимогу-договору-життя-1 (як-є first-vertical-slice) (як-є target) (як-є datalog))
+                (перевірити-вимогу-договору-життя-1 (як-є first-vertical-slice) (як-є shared-result-type) (як-є forbidden))
+                (перевірити-вимогу-договору-життя-1 (як-є liveness) (як-є fresh-checkout) (як-є required))))))
       (за-умовою
-        ((тотожне? (life-1-schema) (як-є life-1-contract/1))
+        ((тотожне? (схема-договору-життя-1) (як-є life-1-contract/1))
          (за-умовою
-           ((атом? failure)
+           ((атом? помилка)
             (список (як-є life-1-contract-witness)
                   (список (як-є status) (як-є pass))
                   (список (як-є detail) (як-є provenance-not-truth))))
            (так
             (список (як-є life-1-contract-witness)
                   (список (як-є status) (як-є fail))
-                  (список (як-є detail) failure)))))
+                  (список (як-є detail) помилка)))))
         (так
          (список (як-є life-1-contract-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail)
-                     (список (як-є schema) (life-1-schema)))))))))
+                     (список (як-є schema) (схема-договору-життя-1)))))))))
+
+; Історичні зовнішні імена збережено як посилання на українські визначення.
+(визначити life-1-schema схема-договору-життя-1)
+(визначити life-1-entries записи-договору-життя-1)
+(визначити life-1-field поле-договору-життя-1)
+(визначити life-1-find знайти-рядок-договору-життя-1)
+(визначити life-1-entry рядок-договору-життя-1)
+(визначити life-1-check перевірити-вимогу-договору-життя-1)
+(визначити life-1-first-failure перша-помилка-договору-життя-1)
+(визначити life-1-contract-witness свідок-договору-життя-1)
