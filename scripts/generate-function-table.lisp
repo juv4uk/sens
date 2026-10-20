@@ -1,47 +1,46 @@
-; scripts/generate-function-table.lisp — regenerate the ECO-CANON-1 function
-; table (my-lisp#75) from its real source of truth, written in my-lisp
-; itself (2026-09-12), replacing the retired scripts/generate-function-table.py
-; per issue #76 (ECO-LISP-SCRIPTS-1): repo-owned tooling must not add new
-; Python scripting surface, and tooling should be written directly in
-; my-lisp/wsm rather than migrated later.
+; Генератор таблиці функцій ECO-CANON-1 (my-lisp#75).
+; Відтворює таблицю з чинного джерела даних засобами самої мови.
+; Від 12.09.2026 замінює історичний скрипт на Python.
+; За #76 (ECO-LISP-SCRIPTS-1) інструменти репозиторію
+; пишуться мовою СЕНС, без додавання нового шару сценаріїв Python.
 ;
-; This script renders the historical flat registry only as a migration/review
-; projection. Canonical language authority is exact domain identity + admitted
-; law. Row count and legacy eight-bit position are not language invariants.
-; Reads the historical surface registry as ordinary my-lisp data
-; (read-file/read-all), not text/regex — the registry is already valid
-; my-lisp source, so no foreign parser is needed.
+; Історичний плоский реєстр відображається лише для міграції
+; та перевірки. Канонічне джерело значення — точна доменна
+; тотожність і допущений закон; кількість рядків та старі
+; восьмибітні позиції не є інваріантами мови.
+; Історичний реєстр читаємо як дані Lisp, не регулярними виразами
+; і не стороннім аналізатором тексту.
 ;
-; The human projection may also join processor-specific realization metadata.
-; That metadata is deliberately NOT semantic authority: the Intel Core i5-6400
-; profile is keyed by existing semantic IDs and only says how an already-known
-; meaning can reach that processor's x86-64 ISA.
+; До людської проєкції можуть долучатися відомості реалізації
+; для конкретного процесора. Вони не наділені семантичними
+; повноваженнями: профіль Intel Core i5-6400 прив'язаний
+; до наявних тотожностей і лише описує машинний шлях x86-64.
 ;
-; Writes two generated views directly (write-file is language-owned,
-; lib/fs.lisp, over the host's read-file-bytes/write-file-bytes):
-;   lib/generated/function-table.lisp  (schema ft/2, machine-readable projection)
-;   docs/generated/function-table.md  (human table, column order
-;     ук -> укр -> English -> Sanskrit -> Intel Core i5-6400 / Skylake)
+; Безпосередньо створює дві похідні проєкції через мовний
+; запис файлів із lib/fs.lisp, поверх транспортного вводу-виводу:
+;   lib/generated/function-table.lisp — схема ft/2, машинні дані;
+;   docs/generated/function-table.md — людська таблиця зі стовпцями
+;   ук → укр → англійська → санскрит → Intel Core i5-6400 / Skylake.
 ;
-; Usage (from the repo root):
+; Виклик із кореня репозиторію:
 ;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function-table.lisp
 ;
-; `ук` is the current/compact Ukrainian surface.
-; `укр` is the full Ukrainian peer surface of the SAME semantic identity.
-; Both are read directly from semantic-registry.lisp; this generator never
-; invents names and never duplicates `укр` under another full-UK column.
+; «ук» — коротка українська проєкція, «укр» — повна назва
+; тієї самої семантичної тотожності. Обидві читаються
+; безпосередньо з semantic-registry.lisp. Генератор не створює
+; нових назв і не дублює повну проєкцію в іншому стовпці.
 
-; Registry surfaces are fixed two-element rows: (namespace spelling-or-()).
-; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
-; registry remains ordinary re-readable Lisp data without a special reconstruction path.
+; Поверхні реєстру — двоелементні рядки: (простір назва-або-()).
+; Назви з апострофами серіалізуються як рядки, щоб реєстр
+; залишався звичайними даними Lisp, придатними для повторного читання.
 (визначити форма-реєстру (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 (визначити рядки-реєстру форма-реєстру)
-; Historical rows are retained only for migration/provenance consumers.
-; Their eight-bit coordinates do not create canonical language identity.
+; Історичні рядки збережені тільки для міграції та походження
+; даних. Їхні восьмибітні координати не визначають тотожність мови.
 (визначити записи рядки-реєстру)
 
-; Processor realization projection. Its rows never create an identity: they
-; may only annotate IDs that already exist in `entries` above.
+; Проєкція машинної реалізації лише доповнює вже наявні
+; семантичні ідентичності; вона не створює нових.
 (визначити форма-профілю-машини
   (перше (читати-всі (читати-файл "lib/machine/intel-core-i5-6400.lisp"))))
 
@@ -69,10 +68,10 @@
     (нехай ((рядок (знайти-рядок-машини ід рядки-машини)))
       (за-умовою ((атом? рядок) "()") ((атом? (як-є ())) (третє рядок))))))
 
-; Historical (McCarthy 1960 / Lisp 1.5) realization projection. Its rows
-; never create an identity: they may only annotate IDs that already exist
-; in `entries` above. Reverse-authority is forbidden by the contract file
-; itself -- a historical name never mints a new my-lisp SID.
+; Історична проєкція реалізації Маккарті 1960 / Lisp 1.5.
+; Її рядки лише пояснюють наявні ідентичності.
+; Зворотне наділення повноваженнями заборонено контрактом:
+; історична назва не створює нового SID чи доменної тотожності.
 (визначити форма-історичного-профілю
   (перше (читати-всі (читати-файл "contracts/core1-historical-sid-map.lisp"))))
 
@@ -92,10 +91,10 @@
     (нехай ((рядок (знайти-історичний-рядок ід рядки-історичні)))
       (за-умовою ((атом? рядок) "()") ((атом? (як-є ())) (рядок+ (значення-у-текст (четверте рядок)) " (" (значення-у-текст (п'ятий рядок)) ")"))))))
 
-; A surface word is usually a symbol (write-to-string strips the
-; Lisp-level Symbol wrapping down to bare text); the reconstructed
-; apostrophe case above is already a plain string. For prose contexts
-; (the human .md table) the bare apostrophe is fine either way.
+; Слово поверхні зазвичай є символом; під час текстового
+; відображення зникає обгортка Symbol. Випадок апострофа
+; вже поданий звичайним рядком. У людській таблиці Markdown
+; сам апостроф не потребує додаткового кодування.
 (визначити текст-слова-поверхні
   (функція (слово)
     (за-умовою
@@ -105,24 +104,22 @@
       ((тотожне? (класифікувати-рядкове-значення слово) (class-membership string nonmember))
        (значення-у-текст слово)))))
 
-; For the machine-readable .lisp output specifically, a bare apostrophe
-; word must NOT be re-embedded unquoted: a future reader of this
-; generated file would hit the exact same "'" quote-shorthand collision
-; this script itself just worked around on the way in. write-to-string
-; already does exactly the right thing per Value type -- a String gets
-; quoted/escaped (read-back-safe), a Symbol stays bare -- so this is
-; just write-to-string directly, named for what it's used for here.
+; У машинному файлі .lisp окремий апостроф не можна виводити
+; без лапок: наступний читач сприйме його як скорочення цитування.
+; Значення типу String треба екранувати та взяти в лапки,
+; а Symbol лишити символом. Цю відмінність уже забезпечує
+; чинне перетворення значення в текст.
 (визначити текст-слова-машинної-проєкції значення-у-текст)
 
-; --- string-append is exactly binary; this repo's scripts routinely need
-; more pieces joined than that, so a small variadic wrapper over reduce.
+; Додавання рядків є двомісним; для довільної кількості
+; складників використовуємо невелику обгортку над згортанням.
 (визначити рядок+
   (функція аргументи (згорнути (функція (накопичувач с) (рядок-додати накопичувач с)) "" аргументи)))
 
-; SID already arrives from the registry as an exact 8-bit string. This generator
-; must preserve it verbatim; formatting identity is owned by the registry.
+; Історичний SID надходить із реєстру як точний восьмибітний
+; текст; генератор зберігає його дослівно й не змінює формат.
 
-; --- surfaces are fixed (lang word) slots; word is spelling or () ---
+; Поверхні містять фіксовані пари (мова слово), де слово — назва або ().
 (визначити знайти-поверхню
   (функція (мова поверхні)
     (за-умовою
@@ -143,10 +140,10 @@
   (функція (слово)
     (хибне? (однакові? слово (як-є ())))))
 
-; --- formal identity stub: first present name among en/ук/sa, else bare id ---
-; SID is already a first-class exact eight-bit identity. Its canonical printer
-; preserves the exact spelling including leading zeroes; do not reinterpret it
-; as arithmetic data merely to reconstruct the same source identity.
+; Формальна назва для історичної проєкції: перша наявна
+; серед en, ук і sa; інакше сам історичний ідентифікатор.
+; Восьмибітний SID у цій таблиці зберігаємо текстом, зокрема
+; початкові нулі: арифметичне перетворення тут неприпустиме.
 (визначити біти-ід
   (функція (ід)
     (значення-у-текст ід)))
@@ -165,15 +162,15 @@
          (рядок+ "identity:" (біти-ід ід) "/surface:" (текст-слова-поверхні санскр)))
         ((атом? (як-є ())) (рядок-додати "identity:" (біти-ід ід)))))))
 
-; Historical projection intentionally has no 256-row completeness law.
-; Exact domains grow under their own widths, occupancy maps, and admitted laws.
+; Для історичної проєкції немає вимоги повноти в 256 рядків.
+; Точні домени розвиваються за власними ширинами, зайнятістю
+; координат і допущеними законами.
 
-; --- string-join with newline, since core.lisp has none yet. Accumulator-
-; based (not "car + recurse-in-argument-position"), matching core.lisp's own
-; map-onto/reverse-onto/length-onto pattern -- a naive recursive version
-; is not tail-recursive (the recursive call sits inside str+'s argument
-; list, not in tail position) and overflows the host stack well before
-; this registry's complete row set.
+; З'єднання рядків через новий рядок із накопичувачем.
+; Наївна рекурсія тут не є хвостовою, бо виклик міститься
+; в аргументах додавання рядків. Вона переповнила б стек
+; до оброблення всіх рядків реєстру. Тому використовуємо
+; схему накопичення, сумісну з іншими обходами ядра.
 (визначити зєднати-новим-рядком-у
   (функція (рядки-рядків накопичувач)
     (за-умовою
@@ -274,9 +271,9 @@
             (число-рядок (довжина записи))
             " historical projection rows written"))))))
 
-; The projection payloads and argv selector below are strings, hence atoms.
-; Use exact D3:101 EQ (3 bits), not the wider D8:11110111 structural EQUAL.
-; This is a source-identity narrowing only; no physical T5 size claim follows.
+; Значення проєкцій і перемикач аргументів — рядки, тобто атоми.
+; Зіставляємо їх точним D3:101 EQ, а не ширшим D8:11110111 EQUAL.
+; Це уточнення мовної тотожності, без тверджень про розмір T5.
 (визначити перевірити-проєкції
   (функція ()
     (нехай ((поточна-машинна-проєкція (читати-файл шлях-машинної-проєкції))
