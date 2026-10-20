@@ -41,6 +41,26 @@ def classify(reason: str) -> str:
     return reason.split(":", 1)[0]
 
 
+def checked_original_source(root: Path, name: str) -> Path:
+    """Захистити джерело до розіменування: жодного symlink чи підміни шляху.
+
+    Облік не створює .sens і не заявляє семантичного допуску.
+    """
+    if (not isinstance(name, str) or not name.endswith(".lisp")
+            or "\\" in name or Path(name).is_absolute()
+            or any(part in ("", ".", "..") for part in name.split("/"))
+            or Path(name).as_posix() != name):
+        raise RuntimeError(f"unsafe/missing source in original census: {name}")
+    candidate = root
+    for part in name.split("/"):
+        candidate = candidate / part
+        if candidate.is_symlink():
+            raise RuntimeError(f"symlink source in original census: {name}")
+    if not candidate.is_file() or not candidate.resolve().is_relative_to(root.resolve()):
+        raise RuntimeError(f"unsafe/missing source in original census: {name}")
+    return candidate
+
+
 def _checked_rows(state: dict, era: str) -> dict[str, dict]:
     summary = state["summary"]
     rows = state["files"]
@@ -116,9 +136,7 @@ def build_report() -> dict:
         queues: collections.Counter[str] = collections.Counter()
         queue_rows: list[dict] = []
         for path in sorted(original_paths):
-            source = (ROOT / path).resolve()
-            if not source.is_relative_to(ROOT) or source.is_symlink() or not source.is_file():
-                raise RuntimeError(f"unsafe/missing source in original census: {path}")
+            source = checked_original_source(ROOT, path)
             reviewed_row = reviewed.get(path)
             if reviewed_row is not None:
                 if git_blob_sha(source) != reviewed_row["source_git_blob_sha"]:
