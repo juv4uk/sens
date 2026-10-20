@@ -92,7 +92,7 @@ class RealBatchTest(unittest.TestCase):
 
     def test_auto_resolves_historical_w8_as_sid8(self):
         # No source in the corpus carries D8, so an eight-bit head has no live
-        # D8 reading: auto resolves the historical SID8 head through the same
+        # D8 reading: auto resolves the historical сід8 head through the same
         # registry the legacy era uses, instead of blocking a vacuous W8/D8
         # ambiguity (owner: that check was dumb).
         p = self.call("lib/third.lisp", write=True, era=None)
