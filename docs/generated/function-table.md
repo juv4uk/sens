@@ -1,14 +1,14 @@
-# Function table (generated projection)
+# Таблиця функцій (похідна проєкція)
 
-**Status:** historical migration projection. Canonical identity comes from exact domains and admitted laws, not this flat table.
+**Статус:** історична міграційна проєкція. Канонічну тотожність задають точні домени та допущені закони, а не ця плоска таблиця.
 
-**Machine projection:** `lib/machine/intel-core-i5-6400.lisp` — physical execution paths only; it does not create language meaning.
+**Машинна проєкція:** `lib/machine/intel-core-i5-6400.lisp` описує лише фізичні шляхи виконання; семантики мови не створює.
 
-**Historical projection:** `contracts/core1-historical-sid-map.lisp` — one-way SID → McCarthy 1960 / Lisp 1.5 mechanism comparison, pinned against `juv4uk/mccarthy-eval`; it never mints a new identity and does not create language meaning.
+**Історична проєкція:** `contracts/core1-historical-sid-map.lisp` — одностороннє зіставлення SID з механізмами Маккарті 1960 / Lisp 1.5, звірене з `juv4uk/mccarthy-eval`. Воно не створює нових тотожностей і не визначає семантику.
 
-Regenerate: `cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function-table.lisp`
+Відтворити: `cargo run -p sens-cli --bin sens -- scripts/generate-function-table.lisp`
 
-| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake | McCarthy 1960 / Lisp 1.5 (Core1) |
+| ІД | ук | укр | Англійська | Санскрит | Символ | Intel Core i5-6400 / Skylake | Маккарті 1960 / Lisp 1.5 (Core1) |
 |----|----|-----|---------|----------|--------|------------------------------|-----------------------------------|
 | `00000000` | () | () | () | () | () | () | NIL (mccarthy-1960) |
 | `00000001` | як-є | як-є | quote | svarūpa | ' | () | QUOTE (mccarthy-1960) |
