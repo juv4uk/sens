@@ -1,6 +1,6 @@
-; Owner-ratified SENS D7 keyboard migration profile — 2026-10-13.
-; Supersedes the historical D7 v1 sound/Text7 glyph mapping as normative
-; for NEW migrated text data. Old payloads MUST be decoded as v1 first.
+; Ратифікований власником профіль міграції клавіатури SENS D7 — 2026-10-13.
+; Замінює історичне відображення гліфів D7 v1 sound/Text7 як нормативне
+; для НОВИХ мігрованих текстових даних. Старі payload-и ТРЕБА спершу декодувати як v1.
 (
   (schema . d7-ratification/2)
   (status . owner-ratified)
