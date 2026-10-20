@@ -1,9 +1,9 @@
-; #793 LIFE-2 — evidence-based architecture pattern catalog.
+; #793 LIFE-2 — каталог архітектурних шаблонів на основі свідчень.
 ;
-; This catalog aggregates accepted research directions. It is not a runtime
-; implementation and does not redefine island semantics.
+; Цей каталог збирає прийняті дослідницькі напрями. Він не є реалізацією
+; часу виконання і не перевизначає семантику острова.
 ;
-; Source audits:
+; Джерельні аудити:
 ; #787 Poplog
 ; #788 GraalVM/Truffle
 ; #789 MetaCall
@@ -11,10 +11,10 @@
 ; #791 OpenCog AtomSpace
 ; #792 KIF
 ;
-; Decision vocabulary:
-;   borrow
-;   adapt
-;   reject
+; Словник рішень:
+;   позичити
+;   адаптувати
+;   відкинути
 
 (life-2-pattern-catalog/1
   ((concern . runtime-availability)
