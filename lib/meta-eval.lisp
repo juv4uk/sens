@@ -963,12 +963,11 @@
   (функція (вираз посилання-оточення)
     (решта (обчислити-вираз-з-наслідком вираз посилання-оточення))))
 
-; Top-level sequencing. `def` and `defmacro` return `(new-env . value)` so
-; the environment can be threaded explicitly to the next form. Under
-; Обчислення послідовності форм updates the ADR-009 shared definition frame;
-; direct calls without a marker retain the historical plain-alist behavior.
-;
-; Contract 6 rejects Canon definition names before value construction.
+; Верхньорівневі форми передають оточення явно.
+; Визначення функції й макроса повертають пару (нове-оточення . значення).
+; Послідовність оновлює спільний кадр ADR-009; окремий виклик
+; без його позначки зберігає звичайний асоціативний список.
+; Договір 6 відхиляє визначення імен Канону до створення значення.
 (визначити обчислити-форму-та-оновити-оточення
   (функція (форма посилання-оточення)
     (за-умовою
@@ -1014,9 +1013,9 @@
               значення-макросу)))))
       (так (сполучити посилання-оточення (обчислити-мета-вираз форма посилання-оточення))))))
 
-; Dependency analysis for top-level lambda definitions stays in Lisp data.
-; A graph entry is `(name dependencies)`, where dependencies are only free
-; references to names from the same contiguous lambda-definition block.
+; Залежності верхньорівневих визначень залишаються даними Lisp.
+; Запис графа: (ім'я залежності). Враховуємо лише вільні посилання
+; на імена тієї самої неперервної групи визначень.
 (визначити ім'я-зв'язане-формальними-параметрами?
   (функція (імя-символу параметри)
     (за-умовою
@@ -1044,18 +1043,18 @@
          ((символ? форма) (тотожне? форма імя-символу))
          (так ні)))
       ((хибне? (атом? (перше форма))) (за-умовою
-         ; Quoted data is not a lexical dependency.
+         ; Цитовані дані не створюють лексичної залежності.
          ((ім'я-форми-як-є? (перше форма)) ні)
-         ; A nested lambda can shadow a candidate top-level name.
+         ; Вкладена лямбда може затінити ім'я верхнього рівня.
          ((ім'я-форми-лямбда? (перше форма))
           (за-умовою
             ((ім'я-зв'язане-формальними-параметрами? імя-символу (друге форма)) ні)
             (так (форма-посилається-на-ім'я? (решта (решта форма)) імя-символу))))
          (так (форма-посилається-на-ім'я? форма імя-символу))))
       ((атом? (перше форма))  (за-умовою
-         ; Quoted data is not a lexical dependency.
+         ; Цитовані дані не створюють лексичної залежності.
          ((ім'я-форми-як-є? (перше форма)) ні)
-         ; A nested lambda can shadow a candidate top-level name.
+         ; Вкладена лямбда може затінити ім'я верхнього рівня.
          ((ім'я-форми-лямбда? (перше форма))
           (за-умовою
             ((ім'я-зв'язане-формальними-параметрами? імя-символу (друге форма)) ні)
@@ -1140,9 +1139,10 @@
       граф
       (сполучити початковий-вузол відвідані))))
 
-; The SCC containing `name` is the set of block names mutually reachable
-; with it. `name` itself is always retained so an acyclic node is a singleton
-; component; only components with 2+ members use recursive-group-closure.
+; Сильно зв'язана компонента містить усі імена, взаємно досяжні
+; з поточного імені. Воно завжди належить власній компоненті,
+; навіть без циклу. Лише компоненти із двох або більше учасників
+; використовують замикання взаємної рекурсії.
 (визначити імена-сильно-зв'язаної-компоненти
   (функція (імя-символу кандидати граф)
     (за-умовою
@@ -1231,17 +1231,15 @@
           (остаточне-імя (останнє-ім'я-визначення-лямбди форми)))
       (обчислити-компоненти-лямбди форми граф посилання-оточення остаточне-імя))))
 
-; `обчислити-послідовність-форм` validates each contiguous top-level non-Canon
-; lambda-definition block, builds its explicit dependency graph, and gives
-; recursive-group-closure only to real multi-member strongly-connected
-; components. Independent or one-way-dependent definitions stay on the
-; ordinary singleton path. This prevents adjacency itself from inventing
-; recursion while keeping finite Lisp data for genuine mutual recursion.
-;
-; For every non-empty program ADR-009 installs one finite shared-frame marker.
-; Recursive calls reuse that same marker. An empty form list remains a valid
-; no-op program and preserves the supplied environment exactly, so TASK-001's
-; empty-program witness is unchanged.
+; Послідовність форм перевіряє неперервні групи верхньорівневих
+; неканонічних лямбда-визначень і будує їхній граф залежностей.
+; Лише сильно зв'язані компоненти з кількома учасниками
+; отримують замикання взаємної рекурсії.
+; Незалежні й однобічно залежні визначення залишаються поодинокими:
+; близькість форм не є доказом рекурсії.
+; Для непорожньої програми ADR-009 створює єдиний скінченний
+; спільний кадр, повторно використаний у рекурсивних викликах.
+; Порожня програма зберігає оточення без змін, як у свідку TASK-001.
 (визначити обчислити-послідовність-форм
   (функція (форми посилання-оточення)
     (за-умовою
