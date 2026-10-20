@@ -1,4 +1,5 @@
-; x87 floating-point instruction-family catalogue. Physical ISA facts only.
+; Каталог машинних команд x87 для обчислень із рухомою комою.
+; Це фізичні факти набору команд, не закони математики SENS.
 
 (isa-catalogue/1
   (extension X87)
