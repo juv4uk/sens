@@ -1,7 +1,7 @@
-; #432 research-only RED probe.
-; Candidate route under test: if ordinary CONS data were a Church pair,
-; calling it with a right selector could derive CDR without PRIM_CDR.
-; Expected current result: named callable/type failure, because CONS creates data.
+; Дослідне негативне свідчення щодо отримання другого складника пари.
+; Побудована звичайним сполученням пара є даними, а не замиканням.
+; Спроба застосувати правий селектор повинна дати помилку типу.
 
-(def pair-value (cons (quote fresh-left) (quote fresh-right)))
-(pair-value (lambda (left right) right))
+(визначити значення-пари
+  (сполучити (як-є свіже-ліве) (як-є свіже-праве)))
+(значення-пари (функція (ліве праве) праве))
