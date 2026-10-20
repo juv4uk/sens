@@ -831,7 +831,7 @@ def binary_rewrite(
                 except BinaryMigrationError:
                     raise
                 except ValueError as error:
-                    # NEW REALITY: an eight-bit head is a retired SID8-era head;
+                    # NEW REALITY: an eight-bit head is a retired сід8-era head;
                     # the resolver rejects it with a plain ValueError, but the
                     # migration must fail closed with its own uniform error.
                     raise BinaryMigrationError(
