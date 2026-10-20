@@ -187,3 +187,26 @@ fn ukr_machine_key_projection_preserves_width_and_legacy_calls() {
         assert_eq!(historical, ukr, "historical binding must preserve behavior");
     }
 }
+
+#[test]
+fn ukrainian_machine_effect_and_atom_aliases_keep_execution_parity() {
+    let mut session = machine_session();
+    // Порівнюємо фактичне обчислення, не лише наявність рядків у файлах.
+    let pairs = [
+        ("machine-effect-bounded-u64-add 2 3", "машинний-ефект-додавання-64 2 3"),
+        ("machine-effect-bounded-u64-sub 5 3", "машинний-ефект-віднімання-64 5 3"),
+        ("machine-effect-bounded-u64-mul 2 3", "машинний-ефект-множення-64 2 3"),
+        ("machine-effect-bounded-u64-sub 2 3", "машинний-ефект-віднімання-64 2 3"),
+        ("machine-effect-u32-carrier? -1", "машинний-ефект-носій-беззнаковий-32? -1"),
+        ("x86-ret", "машинна-команда-повернення"),
+        ("x86-add-r64-r64 (як-є rax) (як-є rcx)", "машинна-команда-додати-64-розрядні-регістри (як-є rax) (як-є rcx)"),
+        ("x86-jnz-rel8 11", "машинна-команда-перехід-якщо-не-нуль 11"),
+    ];
+    for (historical, ukrainian) in pairs {
+        let previous = eval_value(&format!("({historical})"), &mut session);
+        let current = eval_value(&format!("({ukrainian})"), &mut session);
+        assert_eq!(current, previous, "{historical} must retain its exact SENS result");
+    }
+    assert_eq!(eval_value("(машинний-ефект-додавання-64 2 3)", &mut session), "(bounded-u64-add 2 3)");
+    assert_eq!(eval_value("(машинна-команда-повернення)", &mut session), "(ret)");
+}
