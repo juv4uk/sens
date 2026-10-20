@@ -1,11 +1,10 @@
-; Semantic -> x86-64 lowering projection.
-; Language meaning remains owned by Contract 11.8 + ratified exact-domain laws.
-; ISA identity/encoding remains owned by lib/machine/isa + lib/machine/encoding.
-; Rows here only say how an already-existing semantic identity may be realized.
+; Українська проєкція зниження семантики СЕНС до x86-64.
+; Значення мови належить чинному контракту та ратифікованим законам доменів.
+; Набір інструкцій і кодування належать lib/machine/isa та lib/machine/encoding.
+; Цей файл визначає лише реалізацію вже наявної семантичної тотожності.
 ;
-; Executable lowerings produce structured machine forms. Byte materialization
-; belongs to the closed Lisp-owned admission layer and is deliberately not
-; re-exported from semantic lowering as a compatibility convenience.
+; Зниження повертає структуровані машинні форми. Фізичні байти створює
+; окремий закритий шар допуску; прямого обхідного інтерфейсу тут немає.
 
 ; First executable semantic-lowering witness.
 ; Semantic identity 00001100 already exists before this file is loaded. This
@@ -88,19 +87,19 @@
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
-        x86-pair-car-offset
+        x86-пара-перше-зсув
         лівий-регістр)
       (список (як-є mov-r64-imm64) правий-регістр правий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
-        x86-pair-cdr-offset
+        x86-пара-решта-зсув
         правий-регістр)
       (список
         (як-є mov-r64-mem-disp8)
         (як-є rax)
         (як-є rdi)
-        x86-pair-car-offset)
+        x86-пара-перше-зсув)
       (список (як-є ret)))))
 
 ; Third bounded #196 slice: compose runtime COND/EQ choice with structural
@@ -124,8 +123,8 @@
 
 ; Bounded structural witness for semantic identities 00000100/00000101/00000110.
 ; The host contributes only a raw writable arena pointer in RDI. Lisp owns
-; the fact that one admitted pair cell has head at x86-pair-car-offset and
-; tail at x86-pair-cdr-offset. These routines produce structured STORE/LOAD
+; the fact that one admitted pair cell has head at x86-пара-перше-зсув and
+; tail at x86-пара-решта-зсув. These routines produce structured STORE/LOAD
 ; forms; admission and the encoder produce physical bytes only afterwards.
 ;
 ; This is deliberately not a claim that arbitrary first-class pair values may
@@ -138,13 +137,13 @@
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
-        x86-pair-car-offset
+        x86-пара-перше-зсув
         (як-є rax))
       (список (як-є mov-r64-imm64) (як-є rax) правий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
-        x86-pair-cdr-offset
+        x86-пара-решта-зсув
         (як-є rax)))))
 
 ; Historical internal name retained as an explicit forwarding closure.
@@ -175,19 +174,19 @@
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
-        x86-pair-car-offset
+        x86-пара-перше-зсув
         (як-є rax))
       (список (як-є mov-r64-imm64) (як-є rax) правий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
-        x86-pair-cdr-offset
+        x86-пара-решта-зсув
         (як-є rax))
       (список
         (як-є mov-r64-mem-disp8)
         (як-є rax)
         (як-є rdi)
-        x86-pair-car-offset)
+        x86-пара-перше-зсув)
       (список (як-є ret)))))
 
 (визначити x86-lower-cons-car-u64-forms знизити-складену-пару-до-машинних-форм)
@@ -199,19 +198,19 @@
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
-        x86-pair-car-offset
+        x86-пара-перше-зсув
         (як-є rax))
       (список (як-є mov-r64-imm64) (як-є rax) правий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
-        x86-pair-cdr-offset
+        x86-пара-решта-зсув
         (як-є rax))
       (список
         (як-є mov-r64-mem-disp8)
         (як-є rax)
         (як-є rdi)
-        x86-pair-cdr-offset)
+        x86-пара-решта-зсув)
       (список (як-є ret)))))
 
 ; Bounded semantic entry for the Vertical Day CAR witness.
@@ -226,7 +225,7 @@
       (x86-lower-cons-car-u64-forms
         (перше значення-пари)
         (решта значення-пари))
-      x86-pair-cell-bytes)))
+      x86-пара-байти-комірки)))
 
 
 ; #3989/#4001 current exact-domain D5 arithmetic entry.
