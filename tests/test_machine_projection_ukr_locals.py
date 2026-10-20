@@ -20,25 +20,6 @@ SOURCE = {
             "forms": "форми",
         },
     ),
-    "lib/machine/dispatch/native-first-parity.lisp": (
-        "28e99dfd9e3125a19c8068d2600ff8d4df672df6",
-        {
-            "name": "назва",
-            "effect-class": "клас-ефекту",
-            "error-class": "клас-помилки",
-            "kind": "різновид",
-            "expected": "очікуване",
-            "actual": "фактичне",
-            "row": "рядок",
-            "expression": "вираз",
-            "evaluator-value": "результат-обчислювача",
-            "native-outcome": "результат-машини",
-            "expected-native-outcome": "очікуваний-результат-машини",
-            "rows": "рядки",
-            "verdict": "вердикт",
-            "verdicts": "вердикти",
-        },
-    ),
 }
 
 
