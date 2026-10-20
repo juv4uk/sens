@@ -497,9 +497,15 @@ mod tests {
             assert_eq!(exact_words_mul_unsigned(&max, &zero), Some(vec![0; 2 * n]));
             assert_eq!(exact_words_mul_unsigned(&max, &one),
                        Some([max.clone(), vec![0; n]].concat()));
-            assert_eq!(exact_words_mul_unsigned(&max, &max).unwrap()[0], 1);
-            assert_eq!(exact_words_mul_unsigned(&max, &max).unwrap()[2 * n - 1],
-                       u64::MAX);
+            // Алгебраїчна тотожність (2^(64*n)-1)^2 = 2^(128*n)-2^(64*n+1)+1.
+            // У молодшому слові 1, у слові n значення MAX-1,
+            // у решті старших слів MAX. Для n=1 найстарше саме MAX-1.
+            let mut expected = vec![0_u64; 2 * n];
+            expected[0] = 1;
+            expected[n] = u64::MAX - 1;
+            expected[n + 1..].fill(u64::MAX);
+            assert_eq!(exact_words_mul_unsigned(&max, &max), Some(expected),
+                       "повний квадрат (2^(64*{n})-1)");
         }
         assert_eq!(exact_words_mul_unsigned(&[], &[]), None);
         assert_eq!(exact_words_mul_unsigned(&[1], &[1, 2]), None);
