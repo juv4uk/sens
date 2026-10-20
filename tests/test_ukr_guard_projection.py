@@ -209,7 +209,7 @@ class GuardProjectionTests(unittest.TestCase):
 
     def test_no_authority_for_unratified_helpers_was_invented(self):
         for name in ["guard-unknown", "guard-compare", "guard-reference-field",
-                     "guard-language-allowed?", "guard-language-decision"]:
+                     "захист-мова-дозволена?", "guard-language-decision"]:
             with self.subTest(name=name):
                 self.assertIn("(визначити " + name + "\n", self.text)
         self.assertIn("(визначити захист-синхронізувати-вікно guard-sync-window)",
