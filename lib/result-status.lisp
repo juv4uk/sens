@@ -1,4 +1,4 @@
-; SOURCE UKR: лише ратифіковані D1/D3–D6 і підтверджені D9 peer-виклики.
+; Повні українські первинні визначення D9/D10 згідно з ратифікованою драбинoю.
 ; Три D9 без доказу викличного укр closure збережені як точні бітові голови:
 ; 101001110 (reason), 101010010 (module-known?), 110000011 (module-clauses-now).
 ; Код висновків, теги цитованих даних і історичні публічні назви незмінні.
@@ -29,31 +29,31 @@
 ; callable D9-or-lower resident stay named and fail closed rather than being
 ; guessed into D7/D10 or a historical W8 slot.
 
-(визначити make-proved
+(визначити створити-доведений
   (функція (твердження результати)
     (список (як-є proved) твердження результати)))
 
-(визначити make-unknown
+(визначити створити-невідоме
   (функція (предмет)
     (список (як-є unknown) предмет)))
 
-(визначити make-partial
+(визначити створити-частковий
   (функція (значення межа)
     (список (як-є partial) значення межа)))
 
-(визначити make-blocked
+(визначити створити-заблокований
   (функція (причина)
     (список (як-є blocked) причина)))
 
-(визначити make-disputed
+(визначити створити-спірний
   (функція (доказ)
     (список (як-є disputed) доказ)))
 
-(визначити make-invalid
+(визначити створити-некоректний
   (функція (причина вміст)
     (список (як-є invalid) причина вміст)))
 
-(визначити result-tagged?
+(визначити результат-позначений?
   (функція (результат)
     (за-умовою
       ((атом? результат) ні)
@@ -65,13 +65,13 @@
       ((тотожне? (перше результат) (як-є invalid)) так)
       (так ні))))
 
-(визначити result-status
+(визначити результат-стан
   (функція (результат)
     (за-умовою
       ((результат-позначений? результат) (перше результат))
       (так (як-є ())))))
 
-(визначити result-payload
+(визначити результат-вміст
   (функція (результат)
     (за-умовою
       ((результат-позначений? результат) (решта результат))
@@ -80,7 +80,7 @@
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
 ; passed to it merely to ask whether that pair is `()`.
-(визначити result-proper-list?
+(визначити результат-є-правильним-списком?
   (функція (значення)
     (за-умовою
       ((атом? значення)
@@ -92,7 +92,7 @@
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
-(визначити result-not-head?
+(визначити результат-не-є-головою-правила?
   (функція (голова)
     (за-умовою
       ((тотожне? голова (як-є not?)) так)
@@ -105,7 +105,7 @@
 ; valid nested goal, so malformed `(not?)` / `(not? a b)` cannot be mislabeled as
 ; logical `unknown`.
 ; Arity check uses exact D3 ATOM/CDR + D4 selector; no W8 / D6 LENGTH.
-(визначити result-goal?
+(визначити результат-ціль?
   (функція (ціль)
     (за-умовою
       ((атом? ціль) ні)
@@ -123,14 +123,14 @@
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
 ; every other goal gets wrapped in `not?`.
-(визначити result-negated-goal?
+(визначити результат-заперечений-ціль?
   (функція (ціль)
     (за-умовою
       ((хибне? (результат-ціль? ціль)) ні)
       ((результат-не-є-головою-правила? (перше ціль)) так)
       (так ні))))
 
-(визначити result-opposite-goal
+(визначити результат-протилежний-ціль
   (функція (ціль)
     (за-умовою
       ((результат-заперечений-ціль? ціль) (друге ціль))
@@ -154,7 +154,7 @@
 ; repeated-query callers may retain the prepared index themselves. There is no
 ; hidden cache or invalidation policy: a retained index continues to represent
 ; the exact rules captured when it was built.
-(визначити reason-observe
+(визначити міркувати-спостерігати
   (функція (ціль правила-або-індекс)
     (за-умовою
       ((хибне? (результат-ціль? ціль))
@@ -184,7 +184,7 @@
 ; well-formed module name is absent after scanning the concrete append-only
 ; knowledge journal, that absence is already established: reasoning is blocked
 ; by a known missing precondition rather than epistemically `unknown`.
-(визначити reason-in-observe
+(визначити міркувати-у-спостерігати
   (функція (назва-модуля ціль)
     (за-умовою
       ((хибне? (символ? назва-модуля))
@@ -197,8 +197,22 @@
        (створити-заблокований
          (список (як-є module-not-found) назва-модуля))))))
 
-; D9:000010000 REASON-OBSERVE and D9:000110100 REASON-IN-OBSERVE.
-; Ukrainian SENS bindings to the existing source-owned reasoning laws.
-; No direct D9 machine admission.
-(визначити міркувати-спостерігати reason-observe)
-(визначити міркувати-у-спостерігати reason-in-observe)
+
+; Англійські сумісні входи посилаються на ті самі замикання.
+; Це мовні проєкції D9/D10, а не нові функції та не SID8/Sens8.
+(визначити make-proved створити-доведений)
+(визначити make-unknown створити-невідоме)
+(визначити make-partial створити-частковий)
+(визначити make-blocked створити-заблокований)
+(визначити make-disputed створити-спірний)
+(визначити make-invalid створити-некоректний)
+(визначити result-tagged? результат-позначений?)
+(визначити result-status результат-стан)
+(визначити result-payload результат-вміст)
+(визначити result-proper-list? результат-є-правильним-списком?)
+(визначити result-not-head? результат-не-є-головою-правила?)
+(визначити result-goal? результат-ціль?)
+(визначити result-negated-goal? результат-заперечений-ціль?)
+(визначити result-opposite-goal результат-протилежний-ціль)
+(визначити reason-observe міркувати-спостерігати)
+(визначити reason-in-observe міркувати-у-спостерігати)
