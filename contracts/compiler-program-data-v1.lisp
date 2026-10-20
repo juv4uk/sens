@@ -1,9 +1,10 @@
 ; contracts/compiler-program-data-v1.lisp
-; sens#3838 — canonical program-data transport for the self-host fixed point.
+; sens#3838 — канонічний транспорт програмних даних для самокомпіляції.
 ;
-; This contract RATIFIES the existing SW\x01 syntax wire as transport.  It does
-; not define compiler meaning.  The host may encode/decode this representation
-; mechanically; role/proof selection remains owned by executable SENS laws.
+; Контракт ратифікує наявний дротовий синтаксис SW\\x01 як транспорт.
+; Він не визначає семантику компілятора. Зовнішній виконавець
+; може механічно кодувати й декодувати це подання, проте вибір
+; ролей і доказів визначають лише виконувані закони СЕНС.
 
 (
   (schema . compiler-program-data/1)
