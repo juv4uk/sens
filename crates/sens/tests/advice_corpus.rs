@@ -62,7 +62,7 @@ fn eval_advice_corpus(source: &str) -> String {
 fn direct_controlled_fact_reaches_proved_narration() {
     let source = r#"
         (advise astronomy (understand (001 (earth is a planet))))
-        (narrate-outcome
+        (пояснити-підсумок
           (reason-in-observe (001 astronomy) (001 (planet earth))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved earth is a planet)");
@@ -79,7 +79,7 @@ fn multistep_rules_survive_admission_reasoning_and_presentation() {
           )))
         (let* ((outcome
                  (reason-in-observe (001 science) (001 (valuable earth))))
-               (words (narrate-outcome outcome)))
+               (words (пояснити-підсумок outcome)))
           (list (result-status outcome) (100 words)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved proved)");
@@ -101,7 +101,7 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
                  (reason-in-observe
                    (001 family)
                    (001 (ancestor alice charlie))))
-               (words (narrate-outcome outcome)))
+               (words (пояснити-підсумок outcome)))
           (list (result-status outcome) (100 words)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved proved)");
@@ -129,7 +129,7 @@ fn knowledge_package_round_trip_precedes_reasoning_without_eval_of_package_data(
             (001 (((planet mars))))))
         (def *knowledge-journal* (001 ()))
         (import-knowledge-package package)
-        (narrate-outcome
+        (пояснити-підсумок
           (reason-in-observe (001 archive) (001 (planet mars))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved mars is a planet)");

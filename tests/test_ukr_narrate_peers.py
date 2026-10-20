@@ -37,7 +37,7 @@ HISTORIC = tuple(en for _width, _bits, en, _ukr in PRIMARY)
     "provenance-goal", "provenance-source",
     "provenance-rule", "provenance-derived-from",
     "narrate-derivation", "narrate-provenance", "narrate-answer",
-    "narrate-proved-outcome", "narrate-invalid-outcome-shape",
+    "narrate-outcome", "narrate-proved-outcome", "narrate-invalid-outcome-shape",
 }
 
 
@@ -157,6 +157,13 @@ class NarrateUkrPeerTests(unittest.TestCase):
                     self.assertNotIn(english, self.defs)
                 else:
                     self.assertEqual(self.defs.get(english), ukrainian)
+
+    def test_narrate_outcome_has_only_primary_ukrainian_entrypoint(self):
+        self.assertIn("пояснити-підсумок", self.defs)
+        self.assertNotIn("narrate-outcome", self.defs)
+        self.assertEqual(
+            self.defs["пояснити-підсумок"][0], "функція"
+        )
 
     def test_outcome_body_uses_full_ukr_heads(self):
         heads = call_heads(self.defs["пояснити-підсумок"])
