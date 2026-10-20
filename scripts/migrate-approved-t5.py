@@ -163,6 +163,12 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
             raise engine.SensT5Error(
                 "ZIG_MIGRATION_REFERENCE_MISMATCH: no physical carrier publication"
             )
+        # Незалежна перевірка фізичного T5M через реальний Zig;
+        # байтова тотожність не надає семантичного допуску.
+        bridge.verify_t5(
+            zig_binary, payload, codec="t5m",
+            trusted_source_sha256=hashlib.sha256(reference).hexdigest(),
+        )
 
     rel = source.relative_to(root)
     dest = engine.sens_destination(rel)
@@ -178,6 +184,8 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
         "passes": resolver.counts,
         "status": "ready",
         "physical_producer": "ZIG_ATTESTED" if zig_binary is not None else "REFERENCE_PREVIEW_ONLY",
+        "physical_codec": "T5M",
+        "semantic_oracle": "NOT_VERIFIED",
     }
 
 
