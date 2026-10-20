@@ -1,81 +1,81 @@
-; #1422 — generate the mechanical Core×SENS mechanism-admission projection.
+; #1422 — генерація механічної проєкції допуску механізмів Core×SENS.
+; Джерело повноважень: lib/function-table-mechanisms.lisp, розділ profile-routes.
+; Раст отримує лише координати та вид маршруту, без власних законів,
+; проєкцій назв, синтаксису ядра чи незалежних даних допуску.
+; Рядки вихідного Расту та протокольні назви залишаються незмінними.
 ;
-; Authority: lib/function-table-mechanisms.lisp (profile-routes section).
-; Rust receives only coordinates + route kind. No law, surface, kernel syntax,
-; result semantics, or independently editable admission data may live there.
-;
-; Usage:
+; Запуск:
 ;   cargo run -p sens-cli -- scripts/generate-rust-profile-mechanism-routes.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-profile-mechanism-routes.lisp --check
 
-(визначити source-path "lib/function-table-mechanisms.lisp")
-(визначити output-path "crates/sens/src/eval/profile_mechanisms_generated.rs")
+(визначити шлях-джерела "lib/function-table-mechanisms.lisp")
+(визначити шлях-результату "crates/sens/src/eval/profile_mechanisms_generated.rs")
 
-(визначити str+
-  (функція args
-    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
+(визначити зчепити-рядки
+  (функція аргументи
+    (згорнути (функція (накопичувач частина) (рядок-додати накопичувач частина)) "" аргументи)))
 
-(визначити metadata
-  (перше (читати-всі (читати-файл source-path))))
+(визначити метадані
+  (перше (читати-всі (читати-файл шлях-джерела))))
 
-(визначити find-section
-  (функція (name sections)
+(визначити знайти-розділ
+  (функція (назва розділи)
     (за-умовою
-      ((атом? sections) () (як-є ()))
-      ((атом? sections) (0)
+      ((атом? розділи) () (як-є ()))
+      ((атом? розділи) (0)
        (за-умовою
-         ((тотожне? (перше (перше sections)) name) (1)
-          (перше sections))
-         ((тотожне? (перше (перше sections)) name) (0)
-          (find-section name (решта sections))))))))
+         ((тотожне? (перше (перше розділи)) назва) (1)
+          (перше розділи))
+         ((тотожне? (перше (перше розділи)) назва) (0)
+          (знайти-розділ назва (решта розділи))))))))
 
-(визначити profile-rows
-  (решта (find-section (як-є profile-routes) metadata)))
+(визначити рядки-профілів
+  (решта (знайти-розділ (як-є profile-routes) метадані)))
 
-(визначити rust-profile
-  (функція (profile)
+(визначити профіль-раст
+  (функція (профіль)
     (за-умовою
-      ((тотожне? profile (як-є core3))
+      ((тотожне? профіль (як-є core3))
        (1)
        "CoreProfile::Core3")
       (t (перше (як-є ()))))))
 
-(визначити rust-route-kind
-  (функція (mechanism)
+(визначити вид-маршруту-раст
+  (функція (механізм)
     (за-умовою
-      ((тотожне? mechanism (як-є registered-host-mechanism))
+      ((тотожне? механізм (як-є registered-host-mechanism))
        (1)
        "ProfileMechanismRouteKind::RegisteredHostMechanism")
       (t (перше (як-є ()))))))
 
-(визначити render-row
-  (функція (row)
-    (нехай-послідовно ((profile (rust-profile (перше row)))
-           (sid (друге row))
-           (kind (rust-route-kind (третє row))))
+(визначити подати-рядок
+  (функція (рядок)
+    (нехай-послідовно ((профіль (профіль-раст (перше рядок)))
+           (ідентичність-сенс (друге рядок))
+           (вид-маршруту (вид-маршруту-раст (третє рядок))))
       (за-умовою
-        ((атом? profile) () "")
-        ((атом? kind) () "")
+        ((атом? профіль) () "")
+        ((атом? вид-маршруту) () "")
         (t
-         (str+
+         (зчепити-рядки
            "    ProfileMechanismRoute { profile: "
-           profile
+           профіль
            ", sens: crate::sens!("
-           (значення-у-текст sid)
+           (значення-у-текст ідентичність-сенс)
            "), kind: "
-           kind
+           вид-маршруту
            " },\n"))))))
 
-(визначити render-rows
-  (функція (rows)
+(визначити подати-рядки
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) () "")
-      ((атом? rows) (0)
-       (str+ (render-row (перше rows))
-             (render-rows (решта rows)))))))
+      ((атом? рядки) () "")
+      ((атом? рядки) (0)
+       (зчепити-рядки (подати-рядок (перше рядки))
+             (подати-рядки (решта рядки)))))))
 
-(визначити header
-  (str+
+(визначити заголовок
+  (зчепити-рядки
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/function-table-mechanisms.lisp (profile-routes)\n"
     "// Generator: scripts/generate-rust-profile-mechanism-routes.lisp\n\n"
@@ -93,8 +93,8 @@
     "}\n\n"
     "const PROFILE_MECHANISM_ROUTES: &[ProfileMechanismRoute] = &[\n"))
 
-(визначити footer
-  (str+
+(визначити закінчення
+  (зчепити-рядки
     "];\n\n"
     "pub(crate) fn profile_mechanism_route(\n"
     "    profile: CoreProfile,\n"
@@ -106,24 +106,24 @@
     "        .map(|row| row.kind)\n"
     "}\n"))
 
-(визначити generated
-  (str+ header (render-rows profile-rows) footer))
+(визначити згенерований-вміст
+  (зчепити-рядки заголовок (подати-рядки рядки-профілів) закінчення))
 
 (за-умовою
   ((атом? *argv*)
    ()
    (друге
      (список
-       (записати-файл output-path generated)
+       (записати-файл шлях-результату згенерований-вміст)
        (друкувати "Rust profile mechanism projection written"))))
   ((однакові? (перше *argv*) "--check")
    (1)
-   (нехай ((current (читати-файл output-path)))
+   (нехай ((чинний-вміст (читати-файл шлях-результату)))
      (за-умовою
-       ((однакові? current generated)
+       ((однакові? чинний-вміст згенерований-вміст)
         (1)
         (друкувати "Rust profile mechanism projection is current"))
-       ((однакові? current generated)
+       ((однакові? чинний-вміст згенерований-вміст)
         (0)
         (друге
           (список
@@ -133,5 +133,5 @@
    write-projection
    (друге
      (список
-       (записати-файл output-path generated)
+       (записати-файл шлях-результату згенерований-вміст)
        (друкувати "Rust profile mechanism projection written")))))
