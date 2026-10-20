@@ -1,6 +1,6 @@
-; Eight D1 one-bit negative controls, each independent.
-; Compared line-wise to meta-eval-lexical-shadow-d1-law.lisp.
-; Same live calls, same quoted data; only EQ expected D1 flips.
+; Вісім D1 однобітових негативних контролів, кожен незалежний.
+; Порівнюються порядово з meta-eval-lexical-shadow-d1-law.lisp.
+; Ті самі живі виклики, ті самі цитовані дані; змінюється лише очікувана D1 від EQ.
 
 ; case=1 quoted-reference-is-inert
 (за-умовою ((тотожне? (вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? (як-є (як-є target)) (як-є target)) так) так) (так (ні)))
