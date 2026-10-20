@@ -1,11 +1,11 @@
-;;; phonetics.my — S-expression Phonetic Knowledge Base & Derivation Rules
-;;; Epistemic Layer: Layer 6 (Engineering & Runtime) / Layer 2 (Pāṇinian Mechanics)
-;;; Conformance: language-contract 2.0 (explicit quote, zero reader-macro sugar)
+;;; phonetics.my — фонетична база знань у S-виразах і правила виведення
+;;; Епістемічний шар: шар 6 (інженерія й виконання) / шар 2 (механіка Паніні)
+;;; Відповідність: language-contract 2.0 (явний quote, жодного цукру reader-макросів)
 
 ((knowledge-base . phonetics-v1)
  (description . "Authoritative phonological facts, feature matrices, and Sūtra inference rules for My-Lisp.")
 
- ;; 1. Place of Articulation (Sthāna) Facts
+ ;; 1. Факти місця артикуляції (Sthāna)
  (sthana-definitions . (
    (kanthya   . ((code . 1) (name . "Guttural / Velar") (slp1-sounds . ("a" "A" "k" "K" "g" "G" "N" "h"))))
    (talavya   . ((code . 2) (name . "Palatal")          (slp1-sounds . ("i" "I" "c" "C" "j" "J" "Y" "y" "S"))))
@@ -14,7 +14,7 @@
    (oshthya   . ((code . 5) (name . "Labial")           (slp1-sounds . ("u" "U" "p" "P" "b" "B" "m" "v"))))
  ))
 
- ;; 2. Classical Pratyāhāra 64-Bit Bitmask Specifications
+ ;; 2. Специфікації 64-бітових бітмасок класичного Pratyāhāra
  (pratyahara-masks . (
    (ac  . ((mask . #x00000000000001FF) (description . "All 9 vowels (sūtras 1-4)")))
    (hal . ((mask . #x000007FFFFFFFE00) (description . "All 33 consonants (sūtras 5-14)")))
@@ -27,7 +27,7 @@
    (Jal . ((mask . #x000003FFFF000200) (description . "Stops, sibilants, and h")))
  ))
 
- ;; 3. Sūtra Reasoning Rules
+ ;; 3. Правила міркування за сутрами
  (rules . (
    ;; Sūtra 1.1.9: tulyāsyaprayatnaṁ savarṇam
    (rule-savarna . (
@@ -39,7 +39,7 @@
      (derivation-target . homogeneity)
    ))
 
-   ;; Sūtra 8.2.39: jhalāṁ jaśo'nte (Word-final stop voicing to Jaś)
+   ;; Sūtra 8.2.39: jhalāṁ jaśo'nte (дзвінкість кінцевого приголосного до Jaś)
    (rule-sandhi-jhal-jas . (
      (sutra . "8.2.39")
      (sanskrit-text . "झलां जशोऽन्ते")
@@ -48,7 +48,7 @@
      (transform . (lambda (p) (sandhi-voice p)))
    ))
 
-   ;; Sūtra 8.4.40: stoḥ ścunā ścuḥ (Dental to Palatal Assimilation)
+   ;; Sūtra 8.4.40: stoḥ ścunā ścuḥ (зубний до палатальної асиміляції)
    (rule-sandhi-scuna-scu . (
      (sutra . "8.4.40")
      (sanskrit-text . "स्तोः श्चुना श्चुः")
@@ -57,7 +57,7 @@
    ))
  ))
 
- ;; 4. Cross-Language Ukrainian Extensions
+ ;; 4. Міжмовні українські розширення
  (ukrainian-extensions . (
    (palatalized-dentals . ("т'" "д'" "н'" "л'" "с'" "з'" "ц'"))
    (bit-modifier . #x4000)
