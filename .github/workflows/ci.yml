@@ -311,6 +311,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Старий Python/T5-запис повністю заблоковано: він не є Zig/T5M.
+          python3 -m unittest tests/test_retired_t5_publisher.py -v
           # Це тести канонічної фізичної тотожності, НЕ незалежний SENS-eval.
           # Нові помилки у міграторі, інвентарі або свідках мають робити CI червоним.
           python3 -m unittest tests/test_verify_uk_t5_triplet.py -v
