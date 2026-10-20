@@ -897,6 +897,23 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertIn("ONE-SHOT — фізичні T5M-пари", guards)
 
 
+    def test_current_nonprogram_sha_pins_are_real_and_d10_d11_are_data(self):
+        # The owner-reviewed current manifests remain SHA-pinned, not a
+        # permanent historical 2026-10-08 blocker for every live program.
+        for _, name, count in mod.NONPROGRAM_MANIFESTS:
+            content = (ROOT / name).read_bytes()
+            sha = mod.hashlib.sha1(
+                b"blob " + str(len(content)).encode("ascii") + b"\\0" + content
+            ).hexdigest()
+            self.assertEqual(mod.NONPROGRAM_MANIFEST_BLOB_SHA[name], sha, name)
+            record = json.loads(content)
+            self.assertEqual(len(record["entries"]), count, name)
+            self.assertIs(record["automatic_sens_companion"], False)
+        for domain in ("d10", "d11"):
+            with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"):
+                mod.reject_reviewed_nonprogram_source(ROOT / f"lib/domains/{domain}.lisp")
+
+
     def test_minimal_cli_defaults_to_current_ratified_foundation(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)

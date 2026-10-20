@@ -1388,14 +1388,17 @@ NONPROGRAM_MANIFESTS = (
 )
 
 
+# Поточні Git-blob свідки семи структурно перевірених маніфестів.
+# Старі SHA до українізації не мають блокувати кожну виконувану програму.
+# Вміст, схема, кількість і кожен власний source-blob усе ще перевіряються.
 NONPROGRAM_MANIFEST_BLOB_SHA = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "bb954b9cfec2cae4176746f80ec64ee0a185dbd7",
-    "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "a59eb63f123c2b98ca94fd777c9547e94f66e7d1",
-    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "9e77c672054be168d54846a01448d180dd12140a",
-    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "621c449ee859db4f29cc94ed4e9ffac9cca5d5f8",
-    "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "2f07df13cbd31edf76dcf105a2dc6dea922e4af8",
-    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "c83fb0b6a7c12b1a9131d541306ed67ad4b7d620",
-    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "60f44e5d6e278a7f43c2fe2c02016d314b53c801",
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "c50c5bb4544d5f99c095ede8f9e7e00247b5e591",
+    "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "2c92d4c427155229f07cc50a0dcbad58410b6bb3",
+    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "fb9126852941b96cc271c79dfc6d841e03f1aca5",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "b775db90022f89bf36e11c3802add2ca566b2874",
+    "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "dcf286108ad9dfd1323a57a488c08716c767de64",
+    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "215eb5c91140dda07fd986574a698cac5497031f",
+    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "b6cce65609c4ba85d2977363872de96071061ffc",
 }
 
 
@@ -1436,7 +1439,7 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
             if not isinstance(entry, dict) or entry.get("path") != relative:
                 continue
             scoped = (
-                (cohort == "domain-table" and bool(re.fullmatch(r"lib/domains/d[1-9]\.lisp", relative)))
+                (cohort == "domain-table" and bool(re.fullmatch(r"lib/domains/d(?:[1-9]|10|11)\.lisp", relative)))
                 or (cohort == "comment-only-loader" and relative in ("lib/core2.lisp", "lib/surface/ukr.lisp"))
                 or (cohort == "isa" and relative.startswith("lib/machine/isa/"))
                 or (cohort == "schema" and relative.startswith(("contracts/", "lib/", "tests/fixtures/")))
