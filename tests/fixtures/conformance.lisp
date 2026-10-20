@@ -1,16 +1,16 @@
-; tests/fixtures/conformance.my — the implementation-independent contract
-; (see CLAUDE.md): any future my-lisp implementation — C, HDL, whatever —
-; should reproduce these results once it has the seven primitives and
-; lambda/def/defmacro right. One flat alist per fixture, one fixture per
-; top-level form (read via `read-all`, not one big wrapping list) —
-; appending a fixture is normally just adding one more line at the end, never
-; touching a shared closing paren. Git preserves historical values; this file
-; itself is the CURRENT contract, so a ratified semantic cutover may update an
-; existing fact key when the old result has been explicitly superseded.
-; Fact keys (expr/expected/error/mode) are the contract itself; tag keys
-; (tier/axioms/role/note) are this project's own classification of that
-; contract, kept in the same record on purpose (2026-08-09) — my-lisp
-; can tell them apart by name without two physically separate files.
+; Початкове джерело: tests/fixtures/conformance.my. Чинний договір мови
+; незалежний від реалізації, як установлено в CLAUDE.md.
+; Будь-яка майбутня реалізація — C, HDL чи інша — мусить відтворити
+; встановлені результати після підтримки семи примітивів і форм
+; lambda, def, defmacro.
+; Кожне свідчення є окремим верхньорівневим асоціативним списком,
+; який читають послідовно, без спільної зовнішньої обгортки.
+; Додавання свідчення не повинне змінювати завершальні дужки сусідів.
+; Історичні значення зберігає Git; чинний договір може змінити очікування
+; лише після доведеного ратифікованого переходу семантики.
+; Ключі expr/expected/error/mode задають договір.
+; Ключі tier/axioms/role/note позначають класифікацію свідка.
+; Обидва набори навмисно зберігаються в одному записі.
 ((expr . "(quote radio)") (expected . "radio") (tier . 1) (axioms . (G3)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
 ((expr . "(010 (quote radio))") (expected . "1") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
 ((expr . "(010 (quote ()))") (expected . "1") (tier . 1) (axioms . (G2)) (role . "constitutive") (meta-eval . t))
@@ -36,38 +36,35 @@
 ((expr . "12345678901234567890.12345678901234567890") (expected . "123456789012345678901234567890123456789/10000000000000000000") (tier . 2) (axioms . (S1)))
 ((expr . "1e100") (expected . "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") (tier . 2) (axioms . (S1)))
 ((expr . "1e-100") (expected . "1/10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") (tier . 2) (axioms . (S1)))
-; A lone `.` is reader punctuation (#1696), not a malformed number: outside a
-; dotted pair it is a Parse error, so it no longer belongs to this family.
-; Covered by parser::tests::a_lone_dot_outside_a_dotted_pair_is_a_parse_error.
+; Окрема крапка є синтаксичним знаком читача (#1696), не хибним числом.
+; За межами крапкової пари вона спричиняє помилку Parse, тому
+; не входить до класу некоректних числових літералів.
+; Історичне свідчення: parser::tests::a_lone_dot_outside_a_dotted_pair_is_a_parse_error.
 ((expr . ".e3") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
 ((expr . "1e") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
 ((expr . "1e+") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
 ((expr . "1e-") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
 ((expr . "1.2.3") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
-; A syntactically valid decimal literal whose exponent exceeds the parser's
-; resource cap is a *named* failure (NumericOverflow), never a silent symbol —
-; closing the S3-shaped hole where 1e100001 used to become an identifier.
-; Syntaksychno korektnyi desiatkovyi literal, chyia eksponenta perevyshchuie
-; resursnu mezhu parsera, — *nazvanyi* proval (NumericOverflow), nikoly ne
-; movchaznyi symvol — zakryvaie otvir formy S3, de 1e100001 ranishe stav identyfikatorom.
+; Синтаксично правильний десятковий літерал із показником степеня
+; за межами ресурсного обмеження читача повинен спричиняти
+; іменовану помилку NumericOverflow, а не перетворюватися на символ.
+; Це усуває помилку класу S3, коли 1e100001 раніше читався як ім'я.
 ((expr . "1e100001") (error . "NumericOverflow") (tier . 2) (axioms . (S3)))
 ((expr . "1e-100001") (error . "NumericOverflow") (tier . 2) (axioms . (S3)))
-; The same refusal must hold when the literal is nested inside a form — a valid
-; numeric literal cannot be repurposed as an identifier by position in a list.
-; Ta sama vidmova musi diiaty, koly literal vkladeno v formu — korektnyi chyslovyi
-; literal ne mozhe buty pereosmyslenyi yak identyfikator cherez pozytsiiu v spysku.
+; Та сама відмова обов'язкова для числового літерала всередині форми:
+; розташування у списку не змінює правильне число на ідентифікатор.
 ((expr . "(def 1e100001 5)") (error . "NumericOverflow") (tier . 2) (axioms . (S3)))
 ((expr . "1ee3") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
 ((expr . "--0.5") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
-; Reframed 2026-09-11: the original expected value here was the printed
-; representation string "#<builtin +>" -- that pinned display FORMAT as
-; contract, not the actual fact contract 2.1 needs (that a bare `+`/`-`
-; reference is first-class: passable as an ordinary value, callable when
-; applied). Display representation is free to vary (docs/COMPILER-AUTHORITY-BOUNDARY.md,
-; #66) -- callability is not. Passing the bare builtin into a lambda and
-; calling it there proves first-classness without coupling the fixture
-; to Value::Builtin's current print format, which a future
-; Lisp/CML/FPGA-backed `+` need not reproduce byte-for-byte.
+; Перегляд від 11.09.2026: давнє очікування "#<builtin +>"
+; помилково вважало формат друку частиною договору.
+; Договір 2.1 натомість вимагає, щоб посилання на + та -
+; були повноцінними значеннями, які можна передавати й викликати.
+; Подання для людини може змінюватися (див.
+; docs/COMPILER-AUTHORITY-BOUNDARY.md, #66), викличність — ні.
+; Передавання примітива в лямбду та його виклик підтверджують
+; цю властивість без залежності від друку Value::Builtin
+; у конкретній реалізації Lisp/CML/FPGA.
 ((expr . "((lambda (f) (f 3 4)) +)") (expected . "7") (tier . 2) (since-contract . (2 1)) (requires . (first-class-builtins builtin-add)) (axioms . (S2)) (note . "bare + passed as an ordinary value and called -- proves first-classness without pinning #<builtin +>'s print format as contract"))
 ((expr . "((lambda (f) (f 10 4)) -)") (expected . "6") (tier . 2) (since-contract . (2 1)) (requires . (first-class-builtins builtin-subtract)) (axioms . (S2)) (note . "same reframing for -"))
 ((expr . ".5") (expected . "1/2") (tier . 2) (axioms . (S1)))
@@ -226,7 +223,7 @@
 ((expr . "(101 cadddr fourth)") (expected . "1") (tier . 3) (axioms . (G5)) (note . "cadddr is a literal alias for fourth, same closure object -- lib/reason.my had its own character-for-character-identical local cadddr before this dedup"))
 ((expr . "(fifth (quote (v w x y z)))") (expected . "z") (tier . 3) (axioms . (G5)) (note . "found duplicated in two places at once: lib/narrate.my's own local fifth (identical), and lib/persistent-map.my's node-right (same operation, no name)"))
 ((expr . "(+ 123456789012345678901234567890 1)") (expected . "123456789012345678901234567891") (tier . 2) (axioms . (S1)) (note . "bare integer literals use arbitrary precision beyond f64's exact 2^53 range; exact syntax never silently rounds"))
-; Canonical serialization law — portable wire-format facts, not Rust snapshots.
+; Канонічна серіалізація — переносний протокольний закон, а не знімок стану Rust.
 ((expr . "(write-to-string (quote radio))") (expected . "\"radio\"") (tier . 2) (axioms . (G6 S1)) (note . "canonical serialization: readable symbol"))
 ((expr . "(equal? (read (write-to-string (quote radio))) (quote radio))") (expected . "(1)") (tier . 2) (axioms . (G6 S1)) (note . "canonical serialization round-trip: symbol"))
 ((expr . "(write-to-string \"line\\n\\t\\\"\\\\\")") (expected . "\"\\\"line\\\\n\\\\t\\\\\\\"\\\\\\\\\\\"\"") (tier . 2) (axioms . (G6 S1)) (note . "canonical serialization: string escapes"))
@@ -247,15 +244,17 @@
 ((expr . "(->> 5 (- 2))") (expected . "-3") (tier . 3) (axioms . (G5)))
 ((expr . "(-> 5)") (expected . "5") (tier . 3) (axioms . (G5)))
 ((expr . "(->> 5)") (expected . "5") (tier . 3) (axioms . (G5)))
-; FIX-NUMBER-TO-STRING-RATIONAL / #1623: number->string delegates to the
-; canonical machine wire. Exact numbers are tagged base-2 rationals; human
-; rational presentation remains a separate projection. Regression for the
-; historical cdr-crash remains covered without reintroducing decimal wire aliases.
+; FIX-NUMBER-TO-STRING-RATIONAL / #1623: number->string використовує
+; канонічне машинне подання. Точні числа передаються як двійкові
+; раціональні з тегом, а людський раціональний запис — інша проєкція.
+; Історична помилка звернення до CDR перевіряється без повернення
+; десяткових псевдонімів у машинний протокол.
 ((expr . "(number->string 1/3)") (expected . "\"#q2:1/11\"") (tier . 3) (axioms . (G5 S1)) (note . "number->string delegates to canonical machine wire; human rational presentation is a separate projection"))
 ((expr . "(number->string 10/20)") (expected . "\"#q2:1/10\"") (tier . 3) (axioms . (G5 S1)) (note . "reduced exact value in the same tagged binary wire as write-to-string"))
 ((expr . "(number->string -10/4)") (expected . "\"#q2:-101/10\"") (tier . 3) (axioms . (G5 S1)) (note . "negative reduced exact value in canonical binary wire"))
-; Contract 2.2: immutable fixed-width buffers make an explicit, portable
-; representation boundary for bulk compute without weakening exact arithmetic.
+; Договір 2.2: незмінні буфери сталої розрядності встановлюють
+; явну переносну межу представлення для масових обчислень,
+; не послаблюючи законів точної арифметики.
 ((expr . "#i32(1 -2 3)") (expected . "#i32(1 -2 3)") (tier . 2) (since-contract . (2 2)) (requires . (typed-numeric-buffers)) (axioms . (G6 G7 S1)))
 ((expr . "(i32-buffer 1 -2 3)") (expected . "#i32(1 -2 3)") (tier . 2) (since-contract . (2 2)) (requires . (typed-numeric-buffers)) (axioms . (G6 G7 S1)))
 ((expr . "(f32-buffer 1 1/10 -2.5)") (expected . "#f32(1.0 0.1 -2.5)") (tier . 2) (since-contract . (2 2)) (requires . (typed-numeric-buffers)) (axioms . (G6 G7 S1)) (note . "f32 conversion is explicit and returns inexact elements"))
@@ -263,18 +262,19 @@
 ((expr . "(101 (read (write-to-string #f32(1.0 0.1 -2.5))) #f32(1.0 0.1 -2.5))") (expected . "1") (tier . 2) (since-contract . (2 2)) (requires . (typed-numeric-buffers)) (axioms . (G6 G7 S1)))
 ((expr . "(i32-buffer 2147483648)") (error . "NumericOverflow") (tier . 2) (since-contract . (2 2)) (requires . (typed-numeric-buffers)) (axioms . (S2 S3)))
 ((expr . "(i32-buffer 1/2)") (error . "Type") (tier . 2) (since-contract . (2 2)) (requires . (typed-numeric-buffers)) (axioms . (S1 S2)))
-; Contract 2.3: the canonical semantic operation CML ComputeBackends must match.
+; Договір 2.3: обчислювальні механізми CML повинні давати
+; однакову канонічну семантичну відповідь.
 ((expr . "(numeric-buffer-map (lambda (x) (+ x 1)) #i32(1 2 3))") (expected . "#i32(2 3 4)") (tier . 2) (since-contract . (2 3)) (requires . (typed-numeric-buffers numeric-buffer-map)) (axioms . (G6 G7 S1)))
 ((expr . "(numeric-buffer-map (lambda (x) (+ x 0.5)) #f32(1.0 2.0))") (expected . "#f32(1.5 2.5)") (tier . 2) (since-contract . (2 3)) (requires . (typed-numeric-buffers numeric-buffer-map)) (axioms . (G6 G7 S1)))
 ((expr . "(numeric-buffer-map (lambda (x) (+ x 1)) #i32(2147483647))") (error . "NumericOverflow") (tier . 2) (since-contract . (2 3)) (requires . (typed-numeric-buffers numeric-buffer-map)) (axioms . (S2 S3)))
 
-; abs/min/max/min-list/max-list — migrated from Rust builtins.rs to
-; lib/core.my 2026-09-11 (docs/VERTICAL-SLICE-1-ABS-MIN-MAX-2026-09-11.md).
-; Semantic truth for these now lives here, not in
-; crates/my-lisp/tests/builtin_to_lisp_migration.rs's Rust assertions --
-; per the standing principle "semantic truth tests live with the
-; language; Rust tests only mechanism." Tier 3 (library, derived from
-; Canon/necessary-form primitives, not itself constitutive).
+; abs/min/max/min-list/max-list перенесено 11.09.2026
+; із Rust builtins.rs до lib/core.my
+; (docs/VERTICAL-SLICE-1-ABS-MIN-MAX-2026-09-11.md).
+; Їхній семантичний закон тепер визначається тут, а не перевірками
+; Rust у crates/my-lisp/tests/builtin_to_lisp_migration.rs.
+; Доказ семантики належить мові; Rust перевіряє тільки механізм.
+; Це третій рівень бібліотечних законів, похідних від Канону.
 ((expr . "(abs -5)") (expected . "5") (tier . 3) (axioms . (G5)))
 ((expr . "(abs 5.5)") (expected . "11/2") (tier . 3) (axioms . (G5 S1)))
 ((expr . "(abs (/ -3 4))") (expected . "3/4") (tier . 3) (axioms . (G5 S1)))
