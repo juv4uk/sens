@@ -27,6 +27,20 @@ class MigrationLexicalSafety(unittest.TestCase):
         self.assertEqual(result["status"], "LEXICAL_CONTEXT_ONLY")
         self.assertEqual(result["semantic_parity"], "NOT_CHECKED")
 
+    def test_ukrainian_heads_preserve_exact_d3_identity(self):
+        result = mod.audit_edit("(CAR (CDR x))", "(перше (решта x))")
+        self.assertEqual(result["status"], "LEXICAL_CONTEXT_ONLY")
+        self.assertEqual(result["semantic_parity"], "NOT_CHECKED")
+
+    def test_matching_width_is_not_matching_program(self):
+        self.blocked("(CAR x)", "(011 x)", "call-head identity")
+        self.blocked("(CAR x)", "(решта x)", "call-head identity")
+        self.blocked("(CDR x)", "(100 x)", "call-head identity")
+        self.blocked("(CAR x)", "(вигадана-операція x)", "call-head identity")
+
+    def test_quoted_ukrainian_function_names_remain_data(self):
+        self.blocked("'(CAR x)", "'(перше x)", "quoted/data")
+
     def test_actual_machine_pair_schema_keys_are_data(self):
         old = (ROOT / "lib/machine/layout/pair-x86-64.lisp").read_text()
         self.assertIn("(car (offset-bytes 0)", old)
