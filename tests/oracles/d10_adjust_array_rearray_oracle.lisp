@@ -1,61 +1,61 @@
-;;; Source-backed executable witness for Common Lisp ADJUST-ARRAY laws.
-;;; Runs on SBCL; it is not an oracle for the historical MacLisp implementation.
-(defun witness (name condition)
-  (unless condition (error "D10 ADJUST-ARRAY witness failed: ~A" name))
-  (format t "PASS ~A~%" name))
+;;; Виконуване свідчення законів ADJUST-ARRAY у Common Lisp.
+;;; Перевіряється у SBCL і не є оракулом історичної реалізації MacLisp.
+(defun witness (назва умова)
+  (unless умова (error "D10 ADJUST-ARRAY witness failed: ~A" назва))
+  (format t "PASS ~A~%" назва))
 
-;; Adjustable arrays preserve object identity under adjustment.
-(let* ((a (make-array 2 :adjustable t :initial-contents '(alpha beta)))
-       (result (adjust-array a 4 :initial-element :new)))
-  (witness "adjustable-array-identity" (eq result a))
+;; Масив, розмір якого дозволено змінювати, зберігає свою тотожність.
+(let* ((масив (make-array 2 :adjustable t :initial-contents '(alpha beta)))
+       (результат (adjust-array масив 4 :initial-element :new)))
+  (witness "adjustable-array-identity" (eq результат масив))
   (witness "in-bounds-elements-preserved"
-           (and (eq (aref result 0) 'alpha)
-                (eq (aref result 1) 'beta)))
+           (and (eq (aref результат 0) 'alpha)
+                (eq (aref результат 1) 'beta)))
   (witness "new-tail-initialized"
-           (and (eq (aref result 2) :new) (eq (aref result 3) :new))))
+           (and (eq (aref результат 2) :new) (eq (aref результат 3) :new))))
 
-;; If an implementation returns a distinct array, the original must stay unchanged.
-(let* ((a (make-array 3 :initial-contents '(alpha beta gamma)))
-       (before (copy-seq a))
-       (result (adjust-array a 2)))
-  (witness "adjust-result-dimensions" (= (array-total-size result) 2))
+;; Якщо повернуто інший масив, вихідний мусить залишитися незмінним.
+(let* ((масив (make-array 3 :initial-contents '(alpha beta gamma)))
+       (до-зміни (copy-seq масив))
+       (результат (adjust-array масив 2)))
+  (witness "adjust-result-dimensions" (= (array-total-size результат) 2))
   (witness "distinct-result-preserves-original"
-           (or (eq result a) (equalp a before))))
+           (or (eq результат масив) (equalp масив до-зміни))))
 
-;; INITIAL-CONTENTS is a replacement, not preservation of old contents.
-(let* ((a (make-array 2 :adjustable t :initial-contents '(old-a old-b)))
-       (result (adjust-array a 2 :initial-contents '(new-a new-b))))
+;; INITIAL-CONTENTS замінює вміст, а не зберігає попередні елементи.
+(let* ((масив (make-array 2 :adjustable t :initial-contents '(old-a old-b)))
+       (результат (adjust-array масив 2 :initial-contents '(new-a new-b))))
   (witness "initial-contents-replaces-old-data"
-           (and (eq (aref result 0) 'new-a) (eq (aref result 1) 'new-b))))
+           (and (eq (aref результат 0) 'new-a) (eq (aref результат 1) 'new-b))))
 
-;; FILL-POINTER T tracks the adjusted vector's new size.
-(let* ((v (make-array 2 :adjustable t :fill-pointer 1
+;; FILL-POINTER T після зміни розміру відображає нову довжину вектора.
+(let* ((вектор (make-array 2 :adjustable t :fill-pointer 1
                       :initial-contents '(alpha beta)))
-       (result (adjust-array v 4 :fill-pointer t :initial-element :extra)))
+       (результат (adjust-array вектор 4 :fill-pointer t :initial-element :extra)))
   (witness "fill-pointer-t-tracks-size"
-           (and (eq result v) (= (fill-pointer result) 4))))
+           (and (eq результат вектор) (= (fill-pointer результат) 4))))
 
-;; Displaced arrays share backing storage and report the immediate base + offset.
-(let* ((base (make-array 6 :initial-contents '(0 1 2 3 4 5)))
-       (src (make-array 2 :adjustable t :initial-contents '(8 9)))
-       (result (adjust-array src 3 :displaced-to base
+;; Зміщені масиви поділяють сховище й повідомляють основу та зсув.
+(let* ((основа (make-array 6 :initial-contents '(0 1 2 3 4 5)))
+       (джерело (make-array 2 :adjustable t :initial-contents '(8 9)))
+       (результат (adjust-array джерело 3 :displaced-to основа
                              :displaced-index-offset 2)))
-  (multiple-value-bind (backing offset) (array-displacement result)
+  (multiple-value-bind (підкладка зсув) (array-displacement результат)
     (witness "displacement-base-and-offset"
-             (and (eq backing base) (= offset 2))))
-  (setf (aref result 0) 77)
-  (witness "displacement-alias-visible" (= (aref base 2) 77)))
+             (and (eq підкладка основа) (= зсув 2))))
+  (setf (aref результат 0) 77)
+  (witness "displacement-alias-visible" (= (aref основа 2) 77)))
 
-;; Displacement-chain semantics retain the intermediate object after adjustment.
-(let* ((c (make-array 8 :initial-contents '(0 1 2 3 4 5 6 7)))
-       (b (make-array 5 :adjustable t :displaced-to c
+;; Ланцюг зміщення зберігає посилання на безпосередній проміжний масив.
+(let* ((основа (make-array 8 :initial-contents '(0 1 2 3 4 5 6 7)))
+       (середній (make-array 5 :adjustable t :displaced-to основа
                       :displaced-index-offset 1))
-       (a (make-array 3 :displaced-to b :displaced-index-offset 1)))
-  (adjust-array b 4 :initial-element 99)
-  (multiple-value-bind (backing offset) (array-displacement a)
+       (зміщений (make-array 3 :displaced-to середній :displaced-index-offset 1)))
+  (adjust-array середній 4 :initial-element 99)
+  (multiple-value-bind (підкладка зсув) (array-displacement зміщений)
     (witness "chain-keeps-immediate-middle"
-             (and (eq backing b) (= offset 1))))
-  (setf (aref a 0) 88)
-  (witness "chain-mutates-adjusted-middle" (= (aref b 1) 88)))
+             (and (eq підкладка середній) (= зсув 1))))
+  (setf (aref зміщений 0) 88)
+  (witness "chain-mutates-adjusted-middle" (= (aref середній 1) 88)))
 
 (format t "D10-ADJUST-ARRAY-SBCL-ORACLE: PASS~%")
