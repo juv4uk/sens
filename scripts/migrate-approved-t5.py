@@ -12,7 +12,7 @@ Manifest formats:
   {"files": [{"path": "...", "sha256": "..."}, ...]}
 
 No repository-wide traversal, no partial publication, no source rewrite, no
-overwrite, no extensionless output, and no success on an incomplete batch.
+overwrite, a same-stem exact-bit view, and no success on an incomplete batch.
 """
 from __future__ import annotations
 
@@ -225,14 +225,37 @@ def publish_batch(staged: list[tuple[Path, bytes]], output_root: Path) -> None:
     """
     created: list[Path] = []
     try:
+        # Validate every output path before creating a directory or byte.
+        # A symlink in an intermediate directory must not redirect a
+        # current T5M program outside the chosen output mirror.
+        for rel, _ in staged:
+            if (not isinstance(rel, Path) or rel.is_absolute()
+                    or rel.suffix != ".sens" or not rel.parts
+                    or any(part in (".", "..") for part in rel.parts)):
+                raise engine.SensT5Error("expected safe relative .sens destination")
+            target = output_root / rel
+            for prefix_length in range(len(rel.parts)):
+                directory = output_root.joinpath(*rel.parts[:prefix_length])
+                if directory.is_symlink():
+                    raise engine.SensT5Error(
+                        f"symlink output directory is forbidden: {directory}"
+                    )
+            view = target.with_suffix("")
+            if (target.exists() or target.is_symlink()
+                    or view.exists() or view.is_symlink()):
+                raise engine.SensT5Error(
+                    f"physical or view output exists; refusing overwrite: {rel.as_posix()}"
+                )
         for rel, payload in staged:
-            if rel.suffix != ".sens":
-                raise engine.SensT5Error("expected physical .sens destination")
             target = output_root / rel
             view = target.with_suffix("")
             target.parent.mkdir(parents=True, exist_ok=True)
-            if target.parent.is_symlink():
-                raise engine.SensT5Error("symlink output directory is forbidden")
+            for prefix_length in range(len(rel.parts)):
+                directory = output_root.joinpath(*rel.parts[:prefix_length])
+                if directory.is_symlink():
+                    raise engine.SensT5Error(
+                        f"symlink output directory is forbidden: {directory}"
+                    )
             if (target.exists() or target.is_symlink()
                     or view.exists() or view.is_symlink()):
                 raise engine.SensT5Error(

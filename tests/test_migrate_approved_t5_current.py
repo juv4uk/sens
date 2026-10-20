@@ -95,6 +95,51 @@ class CurrentManifestMigrationTests(unittest.TestCase):
                 approved.publish_batch([(rel, physical)], out)
             self.assertEqual((out / rel).read_bytes(), physical)
 
+    def test_nested_symlink_cannot_redirect_current_t5m_outside_mirror(self):
+        # Попередня перевірка лише target.parent не виявляла
+        # symlink на проміжному рівні й створювала файли за межами mirror.
+        _, physical, _ = approved.migrate_one(
+            SOURCE, ROOT, self.maps, source_era="current",
+        )
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-path-safety-") as temp:
+            base = Path(temp)
+            mirror = base / "mirror"
+            outside = base / "outside"
+            mirror.mkdir()
+            outside.mkdir()
+            (mirror / "alias").symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(approved.engine.SensT5Error, "symlink"):
+                approved.publish_batch([
+                    (Path("alias/nested/program.sens"), physical),
+                ], mirror)
+            self.assertFalse((outside / "nested").exists())
+            self.assertFalse((outside / "program.sens").exists())
+            self.assertFalse((mirror / "alias/nested/program.sens").exists())
+            # Звичайна вкладена тека продовжує працювати.
+            approved.publish_batch([
+                (Path("ordinary/nested/program.sens"), physical),
+            ], mirror)
+            self.assertEqual(
+                (mirror / "ordinary/nested/program.sens").read_bytes(), physical
+            )
+            self.assertTrue((mirror / "ordinary/nested/program").is_file())
+
+    def test_relative_path_escape_rejected_without_any_output(self):
+        _, physical, _ = approved.migrate_one(
+            SOURCE, ROOT, self.maps, source_era="current",
+        )
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-path-escape-") as temp:
+            mirror = Path(temp) / "mirror"
+            mirror.mkdir()
+            for rel in (Path("../escape.sens"), Path("/tmp/escape.sens")):
+                with self.subTest(rel=str(rel)):
+                    with self.assertRaisesRegex(
+                        approved.engine.SensT5Error, "safe relative"
+                    ):
+                        approved.publish_batch([(rel, physical)], mirror)
+            self.assertEqual(list(mirror.iterdir()), [])
+            self.assertFalse((Path(temp) / "escape.sens").exists())
+
     def test_later_view_collision_rolls_back_earlier_pair(self):
         _, physical, _ = approved.migrate_one(
             SOURCE, ROOT, self.maps, source_era="current",
