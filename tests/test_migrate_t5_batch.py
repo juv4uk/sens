@@ -99,9 +99,9 @@ class CurrentBatchTransportTests(unittest.TestCase):
         self.assertFalse((self.out / "lib/branch.sens").exists())
         self.assertFalse((self.out / "lib/branch").exists())
 
-    def test_unknown_source_is_blocked_instead_of_minted(self):
+    def test_unrepresentable_source_is_blocked_instead_of_minted(self):
         unknown = self.root / "lib/unknown.lisp"
-        unknown.write_text("(NOT_DEFINED ())\n", encoding="utf-8")
+        unknown.write_text("(НЕВІДОМА_☃ ())\n", encoding="utf-8")
         p = self.call("lib/unknown.lisp")
         self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
         state = json.loads(self.report.read_text(encoding="utf-8"))
