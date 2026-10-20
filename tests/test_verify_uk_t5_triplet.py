@@ -88,7 +88,8 @@ class BoundedUkTripletTests(unittest.TestCase):
         # keyboard/v2 table (width 7, 128/128) and fails closed on the donor.
         import json
         foundation = mod.three_pass.load_foundation(
-            ROOT / "knowledge/d1-d9-foundation.json")
+            ROOT / "knowledge/d1-d11-foundation.json")
+        self.assertIn("D11", foundation["current_domains"])
         donor = ROOT / "crates/sens/src/text7_projection_generated.rs"
         self.assertIn("No executable or display mapping",
                       donor.read_text(encoding="utf-8"))
