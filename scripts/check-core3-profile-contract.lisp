@@ -1,7 +1,4 @@
-; #1134 — виконувана перевірка профілю третього ядра.
-; Українська назва отримання ідентичності вже визначена в
-; lib/surface/semantic-registry-api.lisp; старий латинський псевдонім
-; тут не потрібен. Назви зовнішніх виконавців і поля звіту — дані.
+; #1134 — executable witness for the thin Core3 profile.
 
 (load "lib/core4.lisp")
 (load "lib/surface/semantic-registry-api.lisp")
