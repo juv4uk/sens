@@ -4,18 +4,18 @@
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
   "cohort": "comment-only compatibility/profile loader markers",
-  "reason": "Both exact historical .lisp Git blobs contain only semicolon comments and blank lines; no executable Lisp forms. They remain source/profile metadata and must never be counted as executable migrations.",
+  "reason": "Обидва поточні файли містять лише коментарі та порожні рядки; жодної виконуваної Lisp-форми. Українські коментарі оновлено, а Git blob SHA перевірено за фактичним вмістом; незмінна класифікація не є допуском машинної програми.",
   "automatic_sens_companion": false,
   "not_executable_programs": true,
   "not_physical_migration_credit": true,
   "entries": [
     {
       "path": "lib/core2.lisp",
-      "git_blob_sha1": "0f6fa3fe1d125a604e921cb04ec42e66b1b0519b"
+      "git_blob_sha1": "c1965220941df77917c06c0dd7be70bc897c6073"
     },
     {
       "path": "lib/surface/ukr.lisp",
-      "git_blob_sha1": "f5577917e72f2661cb64b277afc85122276d13c7"
+      "git_blob_sha1": "7a746a6db2a5d2ccae21d9530779ee31ff2c442f"
     }
   ]
 }
