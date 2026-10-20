@@ -3108,11 +3108,12 @@
         255
         (машина-кодувати-модрм 3 1 (машина-молодші-три-біти код)))) (машина-код-регістра регістр))))
 
-; NOT r64 / NEG r64: group-3 opcode 0xF7, /reg extension (not a register
-; operand) selects the operation -- NOT is /2, NEG is /3 -- per #175's
-; pinned XED evidence (`PATTERN : 0xF7 MOD[0b11] MOD=3 REG[0b010] RM[nnn]`
-; / `REG[0b011]`). This matches INC/DEC's group-5 shape: always REX.W,
-; REX.B only for r8-r15.
+; NOT r64 / NEG r64: код операції групи 3 — 0xF7.
+; Розширення /reg означає вид операції, а не операнд-регістр:
+; для NOT — /2, для NEG — /3, згідно із закріпленим XED #175
+; (`PATTERN : 0xF7 MOD[0b11] MOD=3 REG[0b010] RM[nnn]`,
+; відповідно `REG[0b011]`). Як і в INC/DEC групи 5,
+; REX.W обов'язковий; REX.B потрібен лише для r8–r15.
 (визначити машина-кодувати-побітове-заперечення-регістра-64
   (функція (регістр)
     ((функція (код) (список
@@ -3184,23 +3185,24 @@
 (визначити машина-кодувати-перехід-за-менше-або-рівно-зі-знаком-зі-зсувом-8 (функція (зміщення) (машина-кодувати-умовний-перехід-зі-зсувом-8 14 зміщення)))
 (визначити машина-кодувати-перехід-за-більше-зі-знаком-зі-зсувом-8 (функція (зміщення) (машина-кодувати-умовний-перехід-зі-зсувом-8 15 зміщення)))
 
-; JMP rel8: opcode 0xEB followed by a signed 8-bit relative displacement,
-; confirmed against #175's pinned XED evidence
-; (`PATTERN : 0xEB mode64 norex2_prefix FORCE64() BRDISP8()`). Unlike Jcc,
-; JMP is unconditional -- no condition-code byte, no ModRM, no REX -- but
-; reuses the same x86-disp8-byte two's-complement conversion.
+; JMP rel8: код 0xEB із наступним відносним зсувом зі знаком шириною 8 біт.
+; Підтверджено закріпленим XED #175
+; (`PATTERN : 0xEB mode64 norex2_prefix FORCE64() BRDISP8()`).
+; На відміну від Jcc, JMP безумовний: немає байта умови, ModRM або REX.
+; Перетворення двійкового доповнення спільне з x86-disp8-byte.
 (визначити машина-кодувати-безумовний-перехід-зі-зсувом-8
   (функція (зміщення)
     (список
       235
       (машина-байт-восьмибітного-зсуву зміщення))))
 
-; Two's-complement little-endian bytes for a rel32 value already known to be
-; in [-2147483648,2147483647]. Same wrap-before-split fix #199 proved for
-; disp8 (x86-disp8-byte) and this file's own x86-u64-bytes lack for
-; mov-r64-imm64 (#220's truth-sentinel audit documented this being an
-; existing, out-of-scope gap) -- `mod` in this Lisp does not wrap negative operands, so
-; adding 2^32 before reducing mod 2^32 is exact for the whole rel32 domain.
+; Для rel32 відомо, що значення лежить у межах [-2147483648,2147483647].
+; Байти у двійковому доповненні записуються від молодшого до старшого.
+; Спершу обертаємо значення в діапазон, потім ділимо на байти — як
+; доведено в #199 для disp8 (x86-disp8-byte). Потребу окремого
+; виправлення x86-u64-bytes для mov-r64-imm64 відзначено в #220.
+; Операція `mod` тут не обгортає від'ємні операнди, тому перед
+; остачею за модулем 2^32 точно додаємо 2^32.
 (визначити машина-байти-відносного-зсуву-32
   (функція (зміщення)
     (машина-байти-32
@@ -3210,31 +3212,29 @@
           4294967296
           1)))))
 
-; CALL rel32: opcode 0xE8 followed by a signed 32-bit relative displacement
-; (from the address of the *next* instruction), confirmed against #175's
-; pinned XED evidence (`PATTERN : 0xE8 mode64 norex2_prefix BRDISP32()
-; DF64() FORCE64()`). No REX, no ModRM -- like JMP rel8/Jcc rel8, this is a
-; control-transfer, not a GPR operation. Unlike JMP, CALL also pushes the
-; return address (XED_REG_STACKPUSH) -- on real hardware this is the actual
-; RSP-based machine stack, so a CALL executed through native-call-u64-raw
-; pushes/pops for real; nothing in the arena model needs to know about it,
-; the same "guest ABI is Lisp's, host mechanism is the CPU's" split #204
-; already established for the Windows/Linux execution adapters.
+; CALL rel32: код 0xE8 та відносний зсув зі знаком шириною 32 біти
+; від адреси наступної команди. Підтвердження — XED #175:
+; `PATTERN : 0xE8 mode64 norex2_prefix BRDISP32() DF64() FORCE64()`.
+; Префіксів REX і поля ModRM немає: це передавання керування.
+; На відміну від JMP, CALL кладе адресу повернення у справжній
+; машинний стек через RSP (XED_REG_STACKPUSH). Виклик через
+; native-call-u64-raw використовує реальний стек; області машинних
+; даних не потрібно окремо відтворювати його. Розмежування
+; угоди виклику СЕНС та механізму процесора вже встановлено в #204.
 (визначити машина-кодувати-виклик-зі-зсувом-32
   (функція (зміщення)
     (сполучити 232 (машина-байти-відносного-зсуву-32 зміщення))))
 
-; Jcc rel32: opcode 0x0F, then 0x80+cc, then a signed 32-bit relative
-; displacement -- the conditional counterpart to JMP rel32, needed for the
-; same reason: #196's own growth-v0 witnesses lean on CMP+Jcc far more than
-; unconditional JMP (an arena-bounds check is inherently a Jcc), and their
-; hand-derived disp8 offsets (e.g. "JNZ +11", "JNZ +33") will not survive
-; much further composition. Confirmed against #175's pinned XED evidence
-; (`PATTERN : 0x0F 0x8<cc> mode64 norex2_prefix FORCE64() BRANCH_HINT()
-; BRDISP32()` for each ICLASS in the identical order the rel8 family
-; already uses: JO,JNO,JB,JNB,JZ,JNZ,JBE,JNBE,JS,JNS,JP,JNP,JL,JNL,JLE,
-; JNLE) -- reuses that same condition-code-to-opcode-offset mapping, just
-; with a 2-byte opcode and a 4-byte displacement instead of 1+1.
+; Jcc rel32: байти 0x0F, 0x80+cc та відносний зсув зі знаком
+; шириною 32 біти. Це умовний відповідник JMP rel32.
+; Свідки #196 використовують CMP+Jcc, зокрема для перевірок меж,
+; тому ручні короткі зсуви «JNZ +11», «JNZ +33» непридатні
+; для подальшого складення.
+; XED #175: `PATTERN : 0x0F 0x8<cc> mode64 norex2_prefix FORCE64()
+; BRANCH_HINT() BRDISP32()`. Порядок ICLASS відповідає rel8:
+; JO,JNO,JB,JNB,JZ,JNZ,JBE,JNBE,JS,JNS,JP,JNP,JL,JNL,JLE,JNLE.
+; Відповідність коду умови збережено, але код займає 2 байти,
+; а зсув — 4 байти замість одного.
 (визначити машина-кодувати-умовний-перехід-зі-зсувом-32
   (функція (код-умови зміщення)
     (сполучити
@@ -3260,28 +3260,26 @@
 (визначити машина-кодувати-перехід-за-менше-або-рівно-зі-знаком-зі-зсувом-32 (функція (зміщення) (машина-кодувати-умовний-перехід-зі-зсувом-32 14 зміщення)))
 (визначити машина-кодувати-перехід-за-більше-зі-знаком-зі-зсувом-32 (функція (зміщення) (машина-кодувати-умовний-перехід-зі-зсувом-32 15 зміщення)))
 
-; JMP rel32: opcode 0xE9 followed by a signed 32-bit relative displacement,
-; confirmed against #175's pinned XED evidence (`PATTERN : 0xE9 mode64
-; norex2_prefix FORCE64() BRDISP32()`). Matches JMP rel8's own
-; unconditional, no-ModRM, no-REX shape -- only the opcode byte and
-; displacement width differ.
+; JMP rel32: код 0xE9 та відносний зсув зі знаком шириною 32 біти.
+; Підтверджено XED #175 (`PATTERN : 0xE9 mode64
+; norex2_prefix FORCE64() BRDISP32()`). Як і JMP rel8, перехід
+; безумовний, без ModRM і REX; відмінні лише код та ширина зсуву.
 (визначити машина-кодувати-безумовний-перехід-зі-зсувом-32
   (функція (зміщення)
     (сполучити 233 (машина-байти-відносного-зсуву-32 зміщення))))
 
-; CALL r64 / JMP r64 (indirect through a register): group-5 opcode 0xFF,
-; /reg extension selects the operation -- CALL is /2, JMP is /4 -- per
-; #175's pinned XED evidence (`PATTERN : 0xFF MOD[0b11] MOD=3 REG[0b010]
-; RM[nnn] DF64() ...` for CALL, `REG[0b100]` for JMP). Both are `DF64()`
-; (default 64-bit operand size in long mode), matching PUSH/POP's own
-; default-64-bit shape, so no REX.W is emitted -- only REX.B, and only for
-; r8-r15. Unlike CALL rel32,
-; the target here is whatever absolute address the admitted register holds
-; at runtime, not a displacement fixed at encode time; CALL still pushes a
-; real return address via XED_REG_STACKPUSH, onto the same real machine
-; stack #204 already established. This is the first indirect (register-
-; target) control transfer the encoder admits: the destination is
-; genuinely a runtime value, not something knowable from the bytes alone.
+; CALL r64 / JMP r64: непряме передавання керування через регістр.
+; Код групи 5 — 0xFF, а поле /reg обирає операцію:
+; CALL — /2, JMP — /4. Джерело XED #175:
+; `PATTERN : 0xFF MOD[0b11] MOD=3 REG[0b010] RM[nnn] DF64() ...`
+; для CALL, `REG[0b100]` для JMP.
+; Обидві команди мають стандартну ширину DF64() у довгому режимі.
+; REX.W не створюємо, REX.B потрібен лише для r8–r15.
+; Адреса цілі береться з регістра під час виконання, на відміну
+; від відносного зсуву CALL rel32. CALL кладе адресу повернення
+; у справжній стек (XED_REG_STACKPUSH), як установлено в #204.
+; Це перший допущений непрямий машинний перехід; адресу
+; неможливо визначити лише за байтами програми.
 (визначити машина-кодувати-непряму-команду-групи-пять
   (функція (розширення-коду-операції регістр)
     ((функція (код) (за-умовою
