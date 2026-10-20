@@ -1,9 +1,10 @@
-; Canonical human-readable domain table.
-; D5: exact-width 5-bit keys only.
-; The binary key width is the domain address.
-; Columns: ук → укр → san → en → LISP → sym
-; Predicate marker rule: ук/укр/en end in ?, Sanskrit does not.
-; Empty/missing: ()
+; Канонічна таблиця людських проєкцій домену Д5.
+; Д5: лише ключі точної ширини 5 біт.
+; Ширина двійкового слова є частиною доменної адреси.
+; Стовпці: ук → укр → san → en → LISP → sym.
+; Позначку питання мають предикати в українській та англійській колонках;
+; санскритський запис не має такого закінчення.
+; Порожнє або відсутнє значення: ().
 
 (domain-table/1
   (00000 (ук обчислити-як-є) (укр обчислити-як-є) (san svarūpa-vicāraṇa) (en evalquote) (LISP EVALQUOTE) (sym ()))
