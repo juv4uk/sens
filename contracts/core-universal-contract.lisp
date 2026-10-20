@@ -1,24 +1,22 @@
-; #1664 — Core1–4 shared ATOM/EQ/COND binary foundation.
+; #1664 — спільна двійкова основа АТОМ/ТОТОЖНІСТЬ/УМОВА для Core1–4.
 ;
-; One executable foundation contract shared by Core1, Core2, Core3 and Core4.
-; The shared foundation is deliberately small and stable; experimental Core4
-; logic must not redefine it. Core profiles may grow outward; they do not fork
-; the predicate/control foundation.
+; Це один виконуваний контракт основи для Core1, Core2, Core3 і Core4.
+; Спільна основа навмисно мала й стабільна. Експериментальна логіка
+; Core4 не має права перевизначати її.
+; Профілі ядра можуть розширюватися, але не розділяють основу
+; предикатів і керування на несумісні варіанти.
 ;
-; Odna vykonuvana kontrakt-osnova dlia Core1–4. Spilna osnova navmysne mala
-; i stabilna; eksperymentalna lohika Core4 yii ne perevyznachaie. Profili
-; rostut nazovni, ale ne rozshchepliuiut osnovu predykativ/kontroliu.
-;
-; The law below is observable law, never human surface spelling. The corpus
-; that proves it lives in `tests/fixtures/semantic/` (#1709) and is consumed
-; here, not duplicated.
+; Наведений нижче закон визначає спостережувану поведінку,
+; а не людське написання назв. Корпус доказів зберігається
+; у `tests/fixtures/semantic/` (#1709); його використовують,
+; а не дублюють у цьому контракті.
 
 (core-universal-contract/1
 
   ((scope . core1-core4-universal-foundation)
    (governs . "#1664")
    (corpus . "tests/fixtures/semantic")
-   (principle . "Core profiles may grow outward; they do not fork the predicate/control foundation."))
+   (principle . "Профілі ядра можуть розширюватися, але не розділяють основу предикатів і керування."))
 
   ((predicate-answer . one-bit)
    (yes . 1)
@@ -68,4 +66,4 @@
                         (core1 . not-yet-exercisable)
                         (core4 . not-yet-exercisable)))
    (divergence-is-a-defect . t)
-   (note . "Coverage is measured, not assumed: core2 is a pinned blocker and core1/core4 have no corpus loader yet.")))
+   (note . "Покриття вимірюється, а не припускається: для core2 зафіксовано непрохідний стан, а core1/core4 ще не мають завантажувача корпусу.")))
