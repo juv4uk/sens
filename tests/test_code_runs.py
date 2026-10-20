@@ -141,131 +141,70 @@ def _law_no_literals(source: str, path: str = "source.lisp"):
 
 
 class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
-    """Ратифікована укр-проєкція шести дійсних селекторів перекладу."""
+    """Чинні селектори й предикати перекладу, без реконструкції старих SID."""
 
-    ORIGINAL_BLOB = "c1edb3da644cffb86507d964c9f7474c685c1f76"
+    # domain D9 exact-word, primary UKR name, parameter, selected field
     SELECTORS = (
-        ("translation-kind", "proposal", 5, "10011"),
-        ("translation-source", "proposal", 6, "100111"),
-        ("translation-payload", "proposal", 9, "110110101"),
-        ("translation-review-code", "review", 5, "10011"),
-        ("translation-review-proposal", "review", 6, "100111"),
-        ("translation-review-detail", "review", 9, "110110101"),
+        ("000101100", "переклад-вид", "пропозиція", "третє"),
+        ("000010100", "переклад-джерело", "пропозиція", "четверте"),
+        ("000101110", "переклад-вміст", "пропозиція", "п'ятий"),
+        ("000100011", "переклад-перевірка-код", "огляд", "третє"),
+        ("000100101", "переклад-перевірка-пропозиція", "огляд", "четверте"),
+        ("000101111", "переклад-перевірка-деталь", "огляд", "п'ятий"),
     )
 
-    def _restore_original(self, source):
-        from domain_tables import read_domain_table
-        surfaces = {
-            width: {row.bits: row.ukr for row in read_domain_table(
-                ROOT / "lib" / "domains" / f"d{width}.lisp"
-            )}
-            for width in (1, 3, 4, 5, 6, 9)
-        }
-        self.assertEqual(surfaces[4]["0010"], "функція")
-        for name, argument, width, bits in self.SELECTORS:
-            peer = surfaces[width][bits]
-            new = f"(визначити {name}\n  (функція ({argument}) ({peer} {argument})))"
-            old = f"(визначити {name}\n  (0010 ({argument}) ({bits} {argument})))"
-            self.assertEqual(source.count(new), 1, f"хибна укр-проєкція {name}")
-            self.assertNotIn(old, source)
-            source = source.replace(new, old, 1)
-        # Дві додаткові перевірки стану й виду вже перейшли з
-        # канонічних D1/D3/D9 слів на точні українські проєкції.
-        # Відновлюємо їх ДО порівняння з тим самим незмінним Git blob.
-        self.assertEqual(surfaces[1]["1"], "так")
-        self.assertEqual(surfaces[3]["101"], "тотожне?")
-        self.assertEqual(surfaces[3]["001"], "як-є")
-        self.assertEqual(surfaces[9]["110101100"], "символ?")
-        eq, quote, symbol, yes = (
-            surfaces[3]["101"],
-            surfaces[3]["001"],
-            surfaces[9]["110101100"],
-            surfaces[1]["1"],
-        )
-        for name, arg, answer_tokens in (
-            ("translation-status-valid?", "status", ("candidate", "ambiguous", "rejected")),
-            ("translation-kind-valid?", "kind", ("clause", "batch", "query")),
-        ):
-            original = (
-                f"(визначити {name}\n"
-                f"  (функція ({arg})\n"
-                "    (за-умовою\n"
-                f"      ((101 (110101100 {arg}) (001 ())) (001 ()))\n"
-                + "".join(
-                    f"      ((101 {arg} (001 {token})) #d1:1)\n"
-                    for token in answer_tokens
-                )
-                + "      (#d1:1 (001 ())))))"
-            )
-            current = (
-                f"(визначити {name}\n"
-                f"  (функція ({arg})\n"
-                "    (за-умовою\n"
-                f"      (({eq} ({symbol} {arg}) ({quote} ())) ({quote} ()))\n"
-                + "".join(
-                    f"      (({eq} {arg} ({quote} {token})) {yes})\n"
-                    for token in answer_tokens
-                )
-                + f"      ({yes} ({quote} ())))))"
-            )
-            self.assertEqual(source.count(current), 1, name)
-            self.assertNotIn(original, source)
-            source = source.replace(current, original, 1)
-        # Новий вузький зріз: D3 ATOM/CDR/QUOTE + D1 YES тільки у
-        # translation-alternatives-valid?, без зміни числових даних або правил.
-        self.assertEqual(surfaces[3]["010"], "атом?")
-        self.assertEqual(surfaces[3]["011"], "решта")
-        anchor = "(визначити translation-alternatives-valid?\\n".replace("\\n", "\n")
-        end_marker = "\n\n; Ambiguity is evidence only"
-        start = source.index(anchor)
-        end = source.index(end_marker, start)
-        fragment = source[start:end]
-        expected_atom_cdr = f"(({surfaces[3]['010']} ({surfaces[3]['011']} alternatives)) {yes})"
-        previous_atom_cdr = "((010 (011 alternatives)) #d1:1)"
-        expected_else = f"({yes} ({quote} ())))))"
-        previous_else = "(#d1:1 (001 ())))))"
-        self.assertEqual(fragment.count(expected_atom_cdr), 1)
-        self.assertEqual(fragment.count(expected_else), 1)
-        fragment = fragment.replace(expected_atom_cdr, previous_atom_cdr, 1)
-        fragment = fragment.replace(expected_else, previous_else, 1)
-        source = source[:start] + fragment + source[end:]
-        return source
+    def _assert_selectors(self, source):
+        domain = (ROOT / "lib/domains/d9.lisp").read_text(encoding="utf-8")
+        for bits, name, arg, selector in self.SELECTORS:
+            expected = f"(визначити {name}\n  (функція ({arg}) ({selector} {arg})))"
+            self.assertEqual(source.count(expected), 1, name)
+            rows = [line for line in domain.splitlines()
+                    if line.lstrip().startswith(f"({bits} ")]
+            self.assertEqual(len(rows), 1, bits)
+            self.assertIn(f"(укр {name})", rows[0])
+            self.assertEqual(len(bits), 9)
+
+    def _assert_symbol_guards(self, source):
+        # Окремі валідатори пропозиції та її огляду мусять мати
+        # перевірку символу: втрата будь-якої — регресія.
+        self.assertEqual(source.count("(хибне? (символ? стан))"), 2)
+        self.assertEqual(source.count("(хибне? (символ? вид))"), 1)
+
+    def _assert_alternative_guard(self, source):
+        self.assertIn("((атом? (решта альтернативи)) так)", source)
+
+    def test_ratified_primary_selectors_without_old_aliases(self):
+        source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
+        self._assert_selectors(source)
+        self._assert_symbol_guards(source)
+        self._assert_alternative_guard(source)
+        self.assertNotRegex(source, r"(?m)^\(визначити (?:translation-|make-translation-review)")
+        self.assertNotRegex(source, r"(?m)^\(визначити \*translation-")
+        self.assertEqual(_law_no_literals(source, "lib/translation.lisp"), [])
 
     def test_wrong_alternative_selector_peer_is_rejected(self):
-        source = (ROOT / "lib" / "translation.lisp").read_text(encoding="utf-8")
-        correct = "((атом? (решта alternatives)) так)"
+        source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
+        correct = "((атом? (решта альтернативи)) так)"
         self.assertEqual(source.count(correct), 1)
-        mutated = source.replace(correct, "((атом? (перше alternatives)) так)", 1)
+        mutated = source.replace(correct, "((атом? (перше альтернативи)) так)", 1)
         with self.assertRaises(AssertionError):
-            self._restore_original(mutated)
-
-    @staticmethod
-    def _git_blob_sha(source):
-        raw = source.encode("utf-8")
-        return hashlib.sha1(b"blob " + str(len(raw)).encode() + bytes((0,)) + raw).hexdigest()
-
-    def test_ratified_peers_and_exact_inverse_preserve_original(self):
-        source = (ROOT / "lib" / "translation.lisp").read_text(encoding="utf-8")
-        parsed = three_pass.Parser(
-            three_pass.tokenize(three_pass.strip_comments(source))
-        ).parse_program()
-        self.assertTrue(parsed)
-        # ЗАКОН: літерали заборонені (старий blob більше не еталон).
-        self.assertEqual(_law_no_literals(source, "lib/translation.lisp"), [])
+            self._assert_alternative_guard(mutated)
 
     def test_wrong_validator_peer_is_rejected(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
-        self.assertIn("(символ? status)", source)
-        mutated = source.replace("(символ? status)", "(атом? status)", 1)
+        self._assert_symbol_guards(source)
+        mutated = source.replace("(символ? стан)", "(атом? стан)", 1)
         with self.assertRaises(AssertionError):
-            self._restore_original(mutated)
+            self._assert_symbol_guards(mutated)
 
     def test_wrong_selector_peer_is_rejected(self):
-        source = (ROOT / "lib" / "translation.lisp").read_text(encoding="utf-8")
-        self.assertIn("(третє proposal)", source)
-        mutated = source.replace("(третє proposal)", "(четверте proposal)", 1)
+        source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
+        self._assert_selectors(source)
+        correct = "(визначити переклад-вид\n  (функція (пропозиція) (третє пропозиція)))"
+        mutated = source.replace(correct,
+            "(визначити переклад-вид\n  (функція (пропозиція) (четверте пропозиція)))", 1)
         with self.assertRaises(AssertionError):
-            self._restore_original(mutated)
+            self._assert_selectors(mutated)
 
 
 class MachineEffectU64UkrProjectionTests(unittest.TestCase):
