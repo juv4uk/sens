@@ -1,11 +1,11 @@
 ; knowledge/sens-primary.lisp
-; Status: operational doctrine (not language-contract authority).
-; Issues: #1590 #3020 #4248 #4247 #4250
-; Rule: SENS-primary exact-width binary authority; human names are projections.
+; Статус: операційна доктрина, а не джерело повноважень мовного контракту.
+; Пов'язані завдання: #1590 #3020 #4248 #4247 #4250
+; Правило: СЕНС первинний; джерело істини — точні бітові слова з визначеною шириною, а людські назви є проєкціями.
 ;
-; This file does not create semantic authority. It records how agents and
-; mechanisms must consume the ratified contract without recreating a textual,
-; byte-width, opcode, or backend-owned surrogate.
+; Цей файл не встановлює семантичних повноважень. Він фіксує, як агенти та
+; механізми мають застосовувати ратифікований контракт, не відтворюючи його через
+; текстовий, байтовий, машинно-кодовий чи залежний від виконавця замінник.
 
 (sens-primary/2
   (status operational)
@@ -86,12 +86,12 @@
     (rename-preserves-identity true))
 
   (design-question
-    "Як би система виглядала, якби exact-width binary SENS був первинним з 1958,
-     а людські назви, storage containers і backends з'явилися пізніше?")
+    "Який вигляд мала б система, якби СЕНС із точними двійковими словами був первинним від 1958 року,
+     а людські назви, носії зберігання та виконавці з'явилися пізніше?")
 
   (classification-question
-    "На якому шарі ця властивість: identity, law, D2 source structure,
-     storage container, transport/framing, execution mechanism чи projection?")
+    "До якого шару належить ця властивість: тотожність, закон, структура джерела Д2,
+     носій зберігання, транспорт і обрамлення, механізм виконання чи проєкція?")
 
   (anti-patterns
     (treat-u8-as-language-width)
