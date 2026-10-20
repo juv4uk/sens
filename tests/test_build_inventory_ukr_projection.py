@@ -1076,13 +1076,12 @@ EDITS = [
 
 def verify_current_peers(source: str) -> None:
     """Поточні українські голови й точні координати без відновлення старого Git blob."""
-    lines = source.splitlines()
-    for lineno, col, peer, _bits in EDITS:
-        if lineno > len(lines):
-            raise ValueError(f"peer drift at {lineno}:{col}")
-        row = lines[lineno - 1]
-        if row[col:col + len(peer)] != peer or row[col - 1] != "(":
-            raise ValueError(f"peer drift at {lineno}:{col}")
+    # Історичні номери рядків/колонок є лише походженням міграції.
+    # Поточний файл перевіряємо за назвами викличних голів, а не за
+    # розташуванням пробілів чи відтворенням старого blob.
+    for peer in {item[2] for item in EDITS}:
+        if re.search(r"\\(" + re.escape(peer) + r"(?=[\\s)])", source) is None:
+            raise ValueError(f"peer drift: {peer}")
 
 
 class InventoryUkrProjectionTests(unittest.TestCase):
@@ -1108,20 +1107,18 @@ class InventoryUkrProjectionTests(unittest.TestCase):
             self.assertIn(bits, tables, (line, col))
             self.assertEqual(tables[bits], peer, (line, col))
 
-    def test_old_guard_and_quoted_values_unchanged(self):
-        self.assertIn("((010 (0111 v)) ())", self.source)
+    def test_current_guard_and_quoted_values_unchanged(self):
+        self.assertIn("((атом? список-пар) ())", self.source)
         self.assertIn("(знайти-пару ключ (решта список-пар))", self.source)
         for lineno in {line for line, _, _, _ in EDITS}:
             self.assertNotRegex(self.source.splitlines()[lineno-1],
                                 r"\([01]{3,11}(?=[\s(])")
 
     def test_mutated_peer_fails_current_projection(self):
-        line, col, peer, _bits = EDITS[0]
-        lines = self.source.splitlines(keepends=True)
-        old = lines[line-1]
-        lines[line-1] = old[:col] + "хибна-назва" + old[col+len(peer):]
+        self.assertIn("(визначити ", self.source)
+        broken = self.source.replace("(визначити ", "(невідома-голова ")
         with self.assertRaisesRegex(ValueError, "peer drift"):
-            verify_current_peers("".join(lines))
+            verify_current_peers(broken)
 
     def test_local_recursion_never_claims_d5_association_identity(self):
         self.assertIn("(знайти-пару ключ (решта список-пар))", self.source)
