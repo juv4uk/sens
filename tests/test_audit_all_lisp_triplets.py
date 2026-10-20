@@ -81,9 +81,9 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(summary["release_ready"])
 
     def test_forged_boolean_roundtrip_is_not_a_three_way_proof(self):
-        self.put("lib/проба.lisp", "(визначити проба так)\\n")
+        self.put("lib/проба.lisp", "(визначити проба так)\n")
         self.put("lib/проба.sens", b"not-a-real-carrier")
-        self.put("lib/проба", "0\\n")
+        self.put("lib/проба", "0\n")
         summary = scan(
             self.root, verify_bounded=True,
             validator=lambda *_: {"canonical_uk_roundtrip": True},
@@ -103,7 +103,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
         original_receipt = verify(
             source, source.with_suffix(".sens"), source.with_suffix("")
         )
-        source.write_text("(як-є так)\\n", encoding="utf-8")
+        source.write_text("(як-є так)\n", encoding="utf-8")
         summary = scan(
             self.root, verify_bounded=True, validator=lambda *_: original_receipt
         )
