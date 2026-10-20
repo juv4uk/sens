@@ -19,7 +19,10 @@
 Для C, Zig й обох варіантів асемблера використовується **один драйвер `dot.c`**.
 Zig компілює саме `dot.zig` в об'єктний код (`zig build-obj -O ReleaseFast -mcpu skylake`),
 який лінкується зі спільним C-драйвером; `zig cc` не видається за реалізацію Zig.
-Функції у `dot-skylake.S` використовують System V x86‑64 ABI.
+Один машинний файл `crates/sens/src/machine_math_skylake.S` використовується в ядрі SENS
+та в бенчмарку — без подвоєння ASM. Виклики Rust `sens::machine_math::dot_f64`
+і `squared_norm_f64` перевіряють AVX2/FMA і мають скалярний резервний шлях.
+Це лише механізми наближених `f64`, не нові визначення точних D24+.
 Усі компілятори отримують одну ціль `-march=skylake` або
 `-C target-cpu=skylake` або `zig -mcpu skylake`; без `-ffast-math`. AVX‑512 не використовується.
 

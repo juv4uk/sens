@@ -41,6 +41,9 @@ build_variant() {
   end="$(date +%s%N)"
   printf '%s\t%s\t%s\n' "$lang" "$((end-start))" "$(stat -c %s "$scratch/dot-$lang")" >> "$scratch/build.tsv"
 }
+# Адресні тести машинного ядра, без важкого Cargo workspace.
+rustc --edition=2021 --test -C opt-level=2 crates/sens/src/machine_math.rs -o "$scratch/machine-math-tests"
+"$scratch/machine-math-tests"
 build_variant fortran gfortran -O3 -march=skylake -std=f2008 -Wall benchmarks/language-fit/dot.f90 -o "$scratch/dot-fortran"
 build_variant c gcc -O3 -march=skylake -std=c11 -Wall -Wextra benchmarks/language-fit/dot.c -o "$scratch/dot-c"
 build_variant rust rustc -C opt-level=3 -C target-cpu=skylake -C debuginfo=0 benchmarks/language-fit/dot.rs -o "$scratch/dot-rust"
@@ -51,8 +54,8 @@ build_zig() {
   gcc -O3 -march=skylake -std=c11 -Wall -Wextra -DSENS_ZIG benchmarks/language-fit/dot.c "$scratch/dot-zig.o" -o "$scratch/dot-zig"
 }
 build_variant zig build_zig
-build_variant asm-scalar gcc -O3 -march=skylake -std=c11 -Wall -Wextra -DSENS_ASM_SCALAR benchmarks/language-fit/dot.c benchmarks/language-fit/dot-skylake.S -o "$scratch/dot-asm-scalar"
-build_variant asm-avx2 gcc -O3 -march=skylake -std=c11 -Wall -Wextra -DSENS_ASM_AVX2 benchmarks/language-fit/dot.c benchmarks/language-fit/dot-skylake.S -o "$scratch/dot-asm-avx2"
+build_variant asm-scalar gcc -O3 -march=skylake -std=c11 -Wall -Wextra -DSENS_ASM_SCALAR benchmarks/language-fit/dot.c crates/sens/src/machine_math_skylake.S -o "$scratch/dot-asm-scalar"
+build_variant asm-avx2 gcc -O3 -march=skylake -std=c11 -Wall -Wextra -DSENS_ASM_AVX2 benchmarks/language-fit/dot.c crates/sens/src/machine_math_skylake.S -o "$scratch/dot-asm-avx2"
 
 # Незалежний аналітичний контроль: кожна зміна a[k]
 # впливає рівно на (2048-k) наступних скалярних добутків.
@@ -127,7 +130,7 @@ done
       c) files=(benchmarks/language-fit/dot.c) ;;
       rust) files=(benchmarks/language-fit/dot.rs) ;;
       zig) files=(benchmarks/language-fit/dot.zig benchmarks/language-fit/dot.c) ;;
-      asm-*) files=(benchmarks/language-fit/dot.c benchmarks/language-fit/dot-skylake.S) ;;
+      asm-*) files=(benchmarks/language-fit/dot.c crates/sens/src/machine_math_skylake.S) ;;
     esac
     hash="$(cat "${files[@]}" | sha256sum | cut -d ' ' -f 1)"
     median_ms="$(awk -v ns="$median_ns" 'BEGIN {printf "%.3f", ns/1000000}')"

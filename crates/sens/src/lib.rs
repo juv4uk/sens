@@ -12,6 +12,7 @@ mod bignum;
 mod bit9;
 mod binary_number;
 mod domain_numeric;
+pub mod machine_math;
 mod bits;
 pub mod d7_keyboard;
 mod canonical_reader;
