@@ -491,6 +491,3 @@
    (identity-relation distinct)
    тримовний-звіт))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити читати-всі read-all)
-(визначити спеціальна-змінна special)
