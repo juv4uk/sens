@@ -5,6 +5,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 IMPL = ROOT / "scripts/stage-two-projections.py"
@@ -129,6 +130,29 @@ class StageTwoProjectionsTests(unittest.TestCase):
             with self.assertRaises(pair.ProjectionBlocked):
                 pair.stage(ROOT, mirror, [self.BRANCH], "auto", True)
             self.assertEqual((mirror / self.BRANCH).read_bytes(), original)
+
+    def test_failed_second_projection_rolls_back_files_and_new_directories(self):
+        # Помилка другої проєкції не залишає файлів та каталогів.
+        with tempfile.TemporaryDirectory(prefix="sens-two-atomic-") as td:
+            mirror = Path(td) / "mirror"
+            source = ROOT / self.BRANCH
+            original = source.read_bytes()
+            publish = pair.publish_new
+            calls = 0
+
+            def interrupted(target, content):
+                nonlocal calls
+                calls += 1
+                if calls == 2:
+                    raise OSError("імітація помилки другого запису")
+                publish(target, content)
+
+            with patch.object(pair, "publish_new", side_effect=interrupted):
+                with self.assertRaisesRegex(OSError, "другого запису"):
+                    pair.stage(ROOT, mirror, [self.BRANCH], "current", True)
+            self.assertEqual(calls, 2)
+            self.assertFalse(mirror.exists())
+            self.assertEqual(source.read_bytes(), original)
 
     def test_path_traversal_and_duplicate_sources_are_rejected(self):
         with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
