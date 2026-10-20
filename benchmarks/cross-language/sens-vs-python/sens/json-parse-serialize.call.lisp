@@ -1,2 +1,2 @@
-; This exact D9 identity currently has no admitted callable Core mechanism.
+; Ця точна тотожність D9 наразі не має допущеного викликного механізму Core.
 (110100100 json-input)
