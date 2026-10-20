@@ -2249,10 +2249,12 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         },
         "scripts/generate-rust-evaluator-dispatch.lisp": {
             "blob": "489b46e8b5faa3e08344f7a3e9363eae8d0107b7",
-            "counts": {"100": 8, "110": 7, "111": 1, "1001": 4, "1110": 3, "11011011": 4,
-                       "11110100": 1, "11110111": 3, "110011110": 1, "110101001": 1,
+            # Newly surfaced raw heads add four calls: two D1, one D3, one D8;
+            # the inverse projection still restores the pinned source blob.
+            "counts": {"100": 9, "110": 7, "111": 1, "1001": 4, "1110": 3, "11011011": 4,
+                       "11110100": 1, "11110111": 4, "110011110": 1, "110101001": 1,
                        "110110111": 2, "110111100": 2, "11100": 2, "001000": 2, "101110": 1,
-                       "0011": 12, "0010": 7, "001": 14, "011": 5, "010": 11},
+                       "0011": 12, "0010": 7, "001": 15, "011": 5, "010": 12},
         },
         "scripts/generate-rust-function-signatures.lisp": {
             "blob": "a64b16690225bcae6919c2f84fd6059551f2d62b",

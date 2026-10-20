@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NARRATE = ROOT / "lib/narrate.lisp"
 D9 = ROOT / "lib/domains/d9.lisp"
 D10 = ROOT / "lib/domains/d10.lisp"
+RESULT_STATUS = ROOT / "lib/result-status.lisp"
 
 TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
 
@@ -93,6 +94,7 @@ class NarrateUkrPeerTests(unittest.TestCase):
     def setUpClass(cls):
         cls.src = NARRATE.read_text(encoding="utf-8")
         cls.defs = definitions(cls.src)
+        cls.result_status_defs = definitions(RESULT_STATUS.read_text(encoding="utf-8"))
         cls.domains = {
             9: D9.read_text(encoding="utf-8"),
             10: D10.read_text(encoding="utf-8"),
@@ -129,7 +131,12 @@ class NarrateUkrPeerTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertIn(f"(en {english})", rows[0])
         self.assertIn(f"(укр {ukrainian})", rows[0])
-        self.assertEqual(self.defs.get(ukrainian), english)
+        # Предикат належить result-status; narrate лише викликає його укр-ім'ям.
+        self.assertNotIn(ukrainian, self.defs)
+        self.assertIsInstance(self.result_status_defs.get(ukrainian), list)
+        self.assertEqual(self.result_status_defs.get(english), ukrainian)
+        self.assertIn(ukrainian, call_heads(self.defs["пояснити-підсумок"]))
+        self.assertNotIn(english, call_heads(self.defs["пояснити-підсумок"]))
 
     def test_all_historical_entrypoints_survive_as_aliases(self):
         for _width, _bits, english, ukrainian in PRIMARY:
