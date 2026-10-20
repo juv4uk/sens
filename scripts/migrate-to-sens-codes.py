@@ -7,7 +7,7 @@ Two outputs are deliberately different:
    Conservative source migration: rewrite only admitted executable call heads.
 2. --sens-mirror (NEW canonical migration destination)
    Preserve the input name, replacing .lisp with .sens, and write real
-   physically packed T5 bytes; block non-binary leftovers; no overwrite.
+   physically packed T5M bytes via pinned Zig; block non-binary leftovers; no overwrite.
 3. --binary-mirror (legacy staging ONLY, NEVER a .sens deliverable)
    Produce visible-binary SENS source:
    - D2 owns list structure: 10=open, 01=close, 11=dot, 00=separator;
@@ -31,7 +31,10 @@ import re
 import sys
 import os
 import tempfile
-from sens_t5_codec import SensT5Error, encode_projection, decode_bytes, parse_words, typed_sha256
+from sens_t5_codec import (
+    SensT5Error, encode_t5m_projection, decode_t5m_bytes,
+    parse_t5m_words, typed_sha256,
+)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -1000,7 +1003,7 @@ def main():
     parser.add_argument("--apply", action="store_true", help="rewrite supported source in place")
     parser.add_argument(
         "--sens-mirror", type=Path,
-        help="write NEW packed T5 .sens files with same stem as .lisp; no overwrite",
+        help="write NEW packed Zig/T5M .sens files with same stem as .lisp; no overwrite",
     )
     parser.add_argument("--mirror", type=Path, help="write conservative migrated mirror")
     parser.add_argument(
@@ -1103,13 +1106,13 @@ def main():
                 else:
                     if args.sens_mirror:
                         target = args.sens_mirror / rel.with_suffix(".sens")
-                        source_words = parse_words(converted)
-                        reference = encode_projection(converted)
-                        if decode_bytes(reference) != source_words:
-                            raise SensT5Error("physical T5 roundtrip changed exact typed words")
+                        source_words = parse_t5m_words(converted)
+                        reference = encode_t5m_projection(converted)
+                        if decode_t5m_bytes(reference) != source_words:
+                            raise SensT5Error("physical T5M roundtrip changed exact typed words")
                         expected_sha = sha256(reference).hexdigest()
                         physical = zig_codec_bridge.carry_t5(
-                            zig_binary, converted, codec="t5",
+                            zig_binary, converted, codec="t5m",
                             trusted_source_sha256=expected_sha,
                         )
                         if physical != reference:
@@ -1120,7 +1123,7 @@ def main():
                                 f"actual_sha256={sha256(physical).hexdigest()} first_byte={first}"
                             )
                         receipt = zig_codec_bridge.verify_t5(
-                            zig_binary, physical, codec="t5",
+                            zig_binary, physical, codec="t5m",
                             trusted_source_sha256=expected_sha,
                         )
                         if (receipt.get("physical_sha256") != expected_sha
@@ -1134,7 +1137,7 @@ def main():
                             "physical_bytes": len(physical),
                             "physical_sha256": sha256(physical).hexdigest(),
                             "typed_word_sha256": typed_sha256(source_words),
-                            "physical_producer": "PINNED_ZIG_T5_CARRY",
+                            "physical_producer": "PINNED_ZIG_T5M_CARRY",
                             "semantic_admitted": False,
                         }
                     else:
