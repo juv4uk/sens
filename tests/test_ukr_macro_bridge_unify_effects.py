@@ -7,28 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PINNED = {
-  "lib/unify-observe.lisp": {
-    "sha": "ae97885c67a24ab457966b4093331021abb084be",
-    "changed": 4,
-    "edits": [
-      [
-        709,
-        "0011"
-      ],
-      [
-        747,
-        "0010"
-      ],
-      [
-        1077,
-        "0011"
-      ],
-      [
-        1099,
-        "0010"
-      ]
-    ]
-  },
   "lib/bridge/prolog-to-datalog.lisp": {
     "sha": "501173f6423c20ed8b089e81979ab6f1346dcdb5",
     "changed": 38,
@@ -439,7 +417,7 @@ class ExactDomainMigrationTests(unittest.TestCase):
 
     def test_public_names_and_unknown_d5_preserved(self):
         checks = {
-            'lib/unify-observe.lisp': ('unify-observe', 'уніфікація-спостереження-стан'),
+            'lib/unify-observe.lisp': ('спостерігати-уніфікацію', 'уніфікація-спостереження-стан'),
             'lib/machine/lowering/semantic-effects.lisp': (
                 'machine-effect-current-domain-key?', 'machine-lower-current-binary-effect'),
         }
@@ -464,13 +442,15 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 self.assertIn(projected, bridge)
                 self.assertNotIn(encoded, bridge)
 
-    def test_incorrect_projection_is_not_accepted(self):
-        path = 'lib/unify-observe.lisp'
-        src = (ROOT / path).read_text(encoding='utf-8')
-        mutated = src.replace('(визначити unify-observe', '(визначити-неправильно unify-observe', 1)
+    def test_obsolete_unify_alias_cannot_replace_ukrainian_boundary(self):
+        src = (ROOT / 'lib/unify-observe.lisp').read_text(encoding='utf-8')
+        required = '(визначити спостерігати-уніфікацію'
+        self.assertEqual(src.count(required), 1)
+        self.assertNotIn('(визначити unify-observe ', src)
+        mutated = src.replace(required, '(визначити unify-observe', 1)
         self.assertNotEqual(src, mutated)
-        with self.assertRaises(AssertionError):
-            invert(mutated, PINNED[path]['edits'], self.authority)
+        self.assertNotIn(required, mutated)
+        self.assertIn('(визначити unify-observe', mutated)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
