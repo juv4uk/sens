@@ -1,22 +1,25 @@
-; #225 — current executable mathematical-result anchors.
-; These are arithmetic results, not propositions and never logical statuses.
+; #225 — канонічні перевірки математичних результатів.
+; Арифметичні відповіді не є твердженнями чи логічними статусами.
+; Голів викликів дотримано за ратифікованими Д5: додати та частка.
+; Дробові й десяткові операнди лишаються точними людськими числами.
+; Назви полів, випадків та очікувані результати — незмінні дані протоколу.
 
-((expr . "(+ 1/3 1/6)")
+((expr . "(додати 1/3 1/6)")
  (expected . "1/2")
  (active . t)
  (case . exact-rational-sum))
 
-((expr . "(/ 1 8)")
+((expr . "(частка 1 8)")
  (expected . "1/8")
  (active . t)
  (case . exact-rational-division))
 
-((expr . "(+ 2 3)")
+((expr . "(додати 2 3)")
  (expected . "5")
  (active . t)
  (case . exact-integer-result))
 
-((expr . "(+ 0.1 0.2)")
+((expr . "(додати 0.1 0.2)")
  (expected . "3/10")
  (active . t)
  (case . exact-decimal-source-result))
