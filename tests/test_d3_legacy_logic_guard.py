@@ -269,18 +269,17 @@ class LegacyD3GuardTests(unittest.TestCase):
             MODULE.scan_lisp(source, "scripts/build-dependency-classification.lisp"), []
         )
 
-        # A host fallback and a historical ATOM/result-matching clause are
-        # independently invalid even when the rest of the generator is current.
-        fallback = "((010 (001 ())) rest)"
-        self.assertIn(fallback, source)
-        bad_truth = source.replace(fallback, "(t rest)", 1)
+        # Старі двійкові тіла з цього файлу давно вилучено. Перевіряємо
+        # фактичну українську форму та незалежні негативні мутації:
+        # ані host t, ані третє поле COND не можуть пройти D3 guard.
+        self.assertIn("(визначити класифікувати-залежності-збірки", source)
+        self.assertNotIn("(визначити build-dependency-classification", source)
+        bad_truth = source + "\n(за-умовою (t (як-є помилка)))\n"
         self.assertIn(
             "COND_HOST_TRUTH",
             [f.rule for f in MODULE.scan_lisp(bad_truth, "scripts/build-dependency-classification.lisp")],
         )
-        clause = "((010 form) rest)"
-        self.assertIn(clause, source)
-        bad_arity = source.replace(clause, "((010 form) (1) rest)", 1)
+        bad_arity = source + "\n(за-умовою ((атом? форма) (як-є так) (як-є ні)))\n"
         self.assertIn(
             "COND_NOT_TWO_FIELDS",
             [f.rule for f in MODULE.scan_lisp(bad_arity, "scripts/build-dependency-classification.lisp")],
