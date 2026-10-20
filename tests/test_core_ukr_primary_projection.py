@@ -163,10 +163,14 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertNotRegex(renderer, r"\([01]{3,9}(?=\s|\))")
 
         dependency_classifier = source("scripts/build-dependency-classification.lisp")
-        with self.subTest(file="scripts/build-dependency-classification.lisp", migration="canonical decimal rendering"):
-            self.assertIn("number->string", dependency_classifier)
-            self.assertNotIn("взяти-десятковий-символ", dependency_classifier)
-            self.assertNotIn("number->string-onto", dependency_classifier)
+        with self.subTest(file="scripts/build-dependency-classification.lisp",
+                          migration="українська виклична поверхня"):
+            self.assertIn("(визначити класифікувати-залежності-збірки", dependency_classifier)
+            self.assertIn("(класифікувати-залежності-збірки)", dependency_classifier)
+            self.assertNotIn("(визначити build-dependency-classification", dependency_classifier)
+            self.assertNotRegex(dependency_classifier, r"\([01]{3,11}(?=\s|\))")
+            # Ключі зовнішньої цитованої схеми не перекладаємо наосліп.
+            self.assertIn("(sid8-call-heads retired)", dependency_classifier)
 
         # Numeric iteration workers remain ordinary Ukrainian library helpers.
         for ukrainian, legacy in (
