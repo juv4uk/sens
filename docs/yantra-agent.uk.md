@@ -1,7 +1,7 @@
-# my-lisp-yantra — мінімальний coding agent у `.lisp`
+# SENS Yantra — мінімальний coding agent у `.lisp`
 
 > Yantra — мінімальний evidence-aware агент, уся керувальна логіка якого
-> написана безпосередньо мовою my-lisp.
+> написана безпосередньо мовою SENS.
 
 Yantra є власною реалізацією Володимира. Її ідентичність та архітектуру
 визначають код цього репозиторію й явний контракт доказів.
@@ -59,7 +59,7 @@ Transport failure не маскується під порожню JSON-відп�
 Цільова перевірка:
 
 ```bash
-cargo test -p my-lisp --test yantra
+cargo test -p sens --test yantra
 ```
 
 На 2026-09-08 перевірено 10/10 тестів: JSON round-trip, реальний bash,

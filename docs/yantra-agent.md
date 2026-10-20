@@ -1,9 +1,9 @@
-# my-lisp-yantra — the smallest coding agent in .lisp
+# SENS Yantra — the smallest coding agent in .lisp
 
-> A minimal evidence-aware coding agent whose control logic lives entirely in my-lisp.
+> A minimal evidence-aware coding agent whose control logic lives entirely in SENS.
 > The host boundary is one generic primitive; everything else is `.lisp`.
 
-Yantra is Volodymyr's own my-lisp agent implementation. Its identity and
+Yantra is Volodymyr's own SENS agent implementation. Its identity and
 architecture are defined by this repository's code and evidence contract.
 
 Українська версія: [`yantra-agent.uk.md`](yantra-agent.uk.md).
@@ -64,26 +64,26 @@ while the bash tool itself executes for real.
 ```bash
 printf '%s\n' '(load "lib/yantra.lisp")' \
   '(print (result-status (run-agent ollama-complete "You are yantra." "What is 2+2?")))' \
-  | ./target/debug/my-lisp --allow-process=bash,curl
+  | ./target/debug/sens --allow-process=bash,curl
 ```
 
 ## Tests
 
-`crates/my-lisp/tests/yantra.rs`: pure question finishes without a tool;
+`crates/sens/tests/yantra.rs`: pure question finishes without a tool;
 filesystem question invokes real bash; textual-claim-only reply can never
 finish (MAX_TURNS); tool results correlated by `tool_call_id`; hard
 MAX_TURNS limit; JSON encode/parse round trip.
 
 ## yantraOS execution-plane bridge
 
-The local `lib/yantra.lisp` agent remains Lisp-owned. The external
+The local `lib/yantra.lisp` agent remains SENS-owned. The external
 `AIYantra/yantraOS` project can be used as an execution plane rather than
 as a semantic authority.
 
 The v1 bridge contract is `contracts/yantraos-bridge-contract.lisp`:
 
 ```text
-my-lisp:
+SENS:
   World / intent / probabilistic decision / policy / provenance
         ↓
   typed action envelope
@@ -93,7 +93,7 @@ yantraOS:
         ↓
   typed execution observation
         ↓
-my-lisp:
+SENS:
   interpret observation / update World / continue or stop
 ```
 

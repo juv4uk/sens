@@ -4,8 +4,9 @@ Status: design accepted 2026-08-12 (owner decision, after single-server model
 was already running and agents flagged restart-state-loss as the main pain
 point). Supersedes the single-shared-server model described in
 `docs/swarm-coordination.md` and `docs/swarm-autonomy.md` for **coordination**
-traffic. The existing `my-lisp --tcp --protocol=sexpr` semantic oracle on
-`:9999` is unaffected and keeps running as-is — see "Two planes" below.
+traffic. The existing `sens --tcp --protocol=sexpr` semantic oracle on
+`:9999` is unaffected and keeps running as-is — see "Two planes" below. At
+this design's 2026-08-12 approval, its executable was named `my-lisp`.
 
 ## Why change
 

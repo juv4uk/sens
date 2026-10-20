@@ -2,12 +2,12 @@
 
 ## English
 
-**my-lisp** is homoiconic: code and data share one notation. Wrapping an expression in `(quote ...)` tells the evaluator "treat this as inert data, don't run it." Delete that wrapper and the exact same text becomes a running program. This tutorial is a five-stage `.lisp` file: run each block with the `(quote ...)`, read the printed result, then delete the `quote` wrapper and run it again.
+**SENS** is homoiconic: code and data share one notation. Wrapping an expression in `(quote ...)` tells the evaluator "treat this as inert data, don't run it." Delete that wrapper and the exact same text becomes a running program. This tutorial is a five-stage `.lisp` file: run each block with the `(quote ...)`, read the printed result, then delete the `quote` wrapper and run it again.
 
 Try each pair with the CLI:
 
 ```powershell
-cargo run --manifest-path crates/my-lisp-cli/Cargo.toml -- your-file.lisp
+cargo run --manifest-path crates/sens-cli/Cargo.toml -- your-file.lisp
 ```
 
 ### Stage 1 — data vs. arithmetic
@@ -75,7 +75,7 @@ Prints `different`. `unless` did not exist in the language a moment ago; you jus
 
 ### Stage 6 — the trick taken all the way
 
-`quote` treats code as data; `defmacro` builds new code from data. The next step is a program that *runs* code passed to it as data — an evaluator. [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) is one, written entirely in my-lisp, using `read` to turn text into data (see stage 1) and its own `car`/`cdr`/`cons`/`atom`/`eq`/`cond`/`lambda` to interpret it — the same primitives this tutorial has used throughout, now dispatching to themselves:
+`quote` treats code as data; `defmacro` builds new code from data. The next step is a program that *runs* code passed to it as data — an evaluator. [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) is one, written with SENS, using `read` to turn text into data (see stage 1) and its own `car`/`cdr`/`cons`/`atom`/`eq`/`cond`/`lambda` to interpret it — the same primitives this tutorial has used throughout, now dispatching to themselves:
 
 ```lisp
 (my-eval (read "((lambda (x) (* x x)) 6)") (quote ()))
@@ -84,12 +84,12 @@ Prints `36`. Load it alongside `lib/core.lisp` and read the file's own header co
 
 ## Українська
 
-**my-lisp** гомоіконічна: код і дані записуються однаково. Обгортання виразу в `(quote ...)` каже evaluator'у "став до цього як до інертних даних, не виконуй". Приберіть цю обгортку — і той самий текст стає програмою, що виконується. Цей туторіал — `.lisp`-файл із п'яти етапів: запустіть кожен блок з `(quote ...)`, подивіться на надрукований результат, потім приберіть `quote`-обгортку і запустіть знову.
+**SENS** гомоіконічна: код і дані записуються однаково. Обгортання виразу в `(quote ...)` каже evaluator'у "став до цього як до інертних даних, не виконуй". Приберіть цю обгортку — і той самий текст стає програмою, що виконується. Цей туторіал — `.lisp`-файл із п'яти етапів: запустіть кожен блок з `(quote ...)`, подивіться на надрукований результат, потім приберіть `quote`-обгортку і запустіть знову.
 
 Перевіряйте кожну пару через CLI:
 
 ```powershell
-cargo run --manifest-path crates/my-lisp-cli/Cargo.toml -- your-file.lisp
+cargo run --manifest-path crates/sens-cli/Cargo.toml -- your-file.lisp
 ```
 
 ### Етап 1 — дані проти арифметики
@@ -157,7 +157,7 @@ cargo run --manifest-path crates/my-lisp-cli/Cargo.toml -- your-file.lisp
 
 ### Етап 6 — прийом, доведений до кінця
 
-`quote` ставиться до коду як до даних; `defmacro` будує новий код із даних. Наступний крок — програма, що *виконує* код, переданий їй як дані — evaluator. [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) — саме такий, написаний повністю самою my-lisp, через `read`, що перетворює текст на дані (див. етап 1), і власні `car`/`cdr`/`cons`/`atom`/`eq`/`cond`/`lambda` для інтерпретації — ті самі примітиви, що й у цьому туторіалі, тепер диспетчеризовані самі на себе:
+`quote` ставиться до коду як до даних; `defmacro` будує новий код із даних. Наступний крок — програма, що *виконує* код, переданий їй як дані — evaluator. [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) — саме такий, написаний засобами SENS, через `read`, що перетворює текст на дані (див. етап 1), і власні `car`/`cdr`/`cons`/`atom`/`eq`/`cond`/`lambda` для інтерпретації — ті самі примітиви, що й у цьому туторіалі, тепер диспетчеризовані самі на себе:
 
 ```lisp
 (my-eval (read "((lambda (x) (* x x)) 6)") (quote ()))
@@ -166,12 +166,12 @@ cargo run --manifest-path crates/my-lisp-cli/Cargo.toml -- your-file.lisp
 
 ## Deutsch
 
-**my-lisp** ist homoikonisch: Code und Daten teilen sich eine Notation. Ein Ausdruck, der in `(quote ...)` gewickelt ist, sagt dem Evaluator "behandle dies als reglose Daten, führe es nicht aus". Entfernen Sie diesen Wrapper, und derselbe Text wird zu einem laufenden Programm. Dieses Tutorial ist eine fünfstufige `.lisp`-Datei: Führen Sie jeden Block mit `(quote ...)` aus, lesen Sie das ausgegebene Ergebnis, entfernen Sie dann den `quote`-Wrapper und führen Sie ihn erneut aus.
+**SENS** ist homoikonisch: Code und Daten teilen sich eine Notation. Ein Ausdruck, der in `(quote ...)` gewickelt ist, sagt dem Evaluator "behandle dies als reglose Daten, führe es nicht aus". Entfernen Sie diesen Wrapper, und derselbe Text wird zu einem laufenden Programm. Dieses Tutorial ist eine fünfstufige `.lisp`-Datei: Führen Sie jeden Block mit `(quote ...)` aus, lesen Sie das ausgegebene Ergebnis, entfernen Sie dann den `quote`-Wrapper und führen Sie ihn erneut aus.
 
 Jedes Paar mit der CLI ausprobieren:
 
 ```powershell
-cargo run --manifest-path crates/my-lisp-cli/Cargo.toml -- your-file.lisp
+cargo run --manifest-path crates/sens-cli/Cargo.toml -- your-file.lisp
 ```
 
 ### Stufe 1 — Daten gegen Arithmetik
@@ -239,7 +239,7 @@ Gibt `different` aus. Einen Moment zuvor existierte `unless` noch nicht in der S
 
 ### Stufe 6 — der Trick zu Ende gedacht
 
-`quote` behandelt Code als Daten; `defmacro` baut neuen Code aus Daten. Der nächste Schritt ist ein Programm, das als Daten übergebenen Code *ausführt* — ein Evaluator. [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) ist genau das, vollständig in my-lisp geschrieben, mit `read`, das Text in Daten verwandelt (siehe Stufe 1), und den eigenen Primitiven `car`/`cdr`/`cons`/`atom`/`eq`/`cond`/`lambda` zur Interpretation — dieselben Primitive, die dieses Tutorial durchgehend benutzt hat, jetzt auf sich selbst angewendet:
+`quote` behandelt Code als Daten; `defmacro` baut neuen Code aus Daten. Der nächste Schritt ist ein Programm, das als Daten übergebenen Code *ausführt* — ein Evaluator. [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) ist genau das, mit SENS geschrieben, mit `read`, das Text in Daten verwandelt (siehe Stufe 1), und den eigenen Primitiven `car`/`cdr`/`cons`/`atom`/`eq`/`cond`/`lambda` zur Interpretation — dieselben Primitive, die dieses Tutorial durchgehend benutzt hat, jetzt auf sich selbst angewendet:
 
 ```lisp
 (my-eval (read "((lambda (x) (* x x)) 6)") (quote ()))
