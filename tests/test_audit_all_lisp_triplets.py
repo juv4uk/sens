@@ -80,6 +80,41 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(summary["semantic_runtime_proven"])
         self.assertFalse(summary["release_ready"])
 
+    def test_current_t5m_triplet_is_counted_only_after_real_reverse_proof(self):
+        from sens_t5_codec import encode_t5m_projection
+        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        target = self.root / "lib" / "branch"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for suffix in (".lisp", ".sens", ""):
+            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        words = target.read_text(encoding="ascii")
+        target.with_suffix(".sens").write_bytes(encode_t5m_projection(words))
+        evidence = scan(self.root, verify_bounded=True)
+        self.assertEqual(evidence["complete_triplets"], 1)
+        self.assertEqual(evidence["bounded_verified"], 1, evidence["blocked_sample"])
+        self.assertTrue(evidence["all_bounded_reverse_verified"])
+        self.assertFalse(evidence["semantic_runtime_proven"])
+        self.assertFalse(evidence["release_ready"])
+
+    def test_t5m_receipt_cannot_claim_legacy_t5_roundtrip_as_well(self):
+        from sens_t5_codec import encode_t5m_projection
+        from verify_uk_t5_triplet import verify
+        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        target = self.root / "lib" / "branch"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for suffix in (".lisp", ".sens", ""):
+            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        target.with_suffix(".sens").write_bytes(encode_t5m_projection(
+            target.read_text(encoding="ascii")
+        ))
+        genuine = verify(target.with_suffix(".lisp"), target.with_suffix(".sens"), target)
+        self.assertEqual(genuine["physical_codec"], "t5m")
+        genuine["physical_T5_roundtrip"] = True
+        evidence = scan(self.root, verify_bounded=True, validator=lambda *_: genuine)
+        self.assertEqual(evidence["bounded_verified"], 0)
+        self.assertIn("T5/T5M", str(evidence["blocked_sample"]))
+        self.assertFalse(evidence["release_ready"])
+
     def test_forged_boolean_roundtrip_is_not_a_three_way_proof(self):
         self.put("lib/проба.lisp", "(визначити проба так)\n")
         self.put("lib/проба.sens", b"not-a-real-carrier")
