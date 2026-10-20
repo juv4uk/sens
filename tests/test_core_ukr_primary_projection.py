@@ -17,6 +17,23 @@ def source(path: str) -> str:
 
 
 class CoreUkrPrimaryProjectionTests(unittest.TestCase):
+    def test_generated_function_table_headers_match_ukrainian_generator(self):
+        # Синхронізація похідних даних, не семантичний тест SENS.
+        generator = source("scripts/generate-function-table.lisp")
+        machine = source("lib/generated/function-table.lisp")
+        document = source("docs/generated/function-table.md")
+        for row in machine.splitlines()[:8]:
+            with self.subTest(machine=row):
+                self.assertIn('"' + row + '"', generator)
+        for row in document.splitlines()[:12]:
+            if row and not row.startswith("|----"):
+                with self.subTest(document=row[:48]):
+                    self.assertIn('"' + row + '"', generator)
+        current = "cargo run -p sens-cli --bin sens -- scripts/generate-function-table.lisp"
+        self.assertIn(current, document)
+        self.assertIn(current, generator)
+        self.assertNotIn("my-lisp-cli --bin my-lisp", document)
+
     def test_core_sources_follow_full_ukrainian_projection_without_changing_domain_identity(self):
         core = source("lib/core.lisp")
         core4 = source("lib/core4.lisp")
