@@ -1,60 +1,31 @@
-;; LEGACY_MIGRATION_DEBT #5605 / owner prohibition #5789: old #d1:0/#d1:1
-;; are NOT current SENS literals. Do not introduce any new literal carrier.
-;; The old parse() path is legacy provenance, not permission or language law.
-;; Retire only with positional D1 reader, positive/negative native SENS
-;; witnesses and exact physical Zig T5 round-trip; never numeric substitution.
-;; knowledge.lisp - A module system for the Lisp Knowledge Representation
-;; Direct predicates use exact D1:1/D1:0; D3 ATOM only tests actual shapes.
-
-;; --- append-only fact journal --------------------------------------------
-;; Earlier, `*knowledge-base*` held one snapshot per module — every
-;; `defmodule`/`tell-knowledge` call replaced it outright. That snapshot
-;; could never answer "when did the module learn this?", and there was no
-;; way to take a fact back at all (`retract-knowledge` didn't exist).
-;; `*knowledge-journal*` replaces it as the single source of truth: a
-;; flat, ever-growing list of `(tell module-name clause)`/`(retract
-;; module-name clause)` events, newest first (the same `cons`-prepend
-;; convention `*working-memory*`/`*usage-counts*` already use elsewhere in
-;; this project). No timestamps — my-lisp has no clock primitive, and
-;; inventing one here would be exactly the kind of unearned precision
-;; McCarthy principle 6 warns against; list order (oldest to newest once
-;; reversed) is the only ordering this journal actually has, and it's
-;; honest about that. A module's current clause list is now a *projection*
-;; over the journal (`module-clauses-now`), computed on demand, not stored
-;; anywhere directly.
+;; Історичний борг читача #5605; власницька заборона #5789.
+;; Старі #d1:0/#d1:1 не є чинними літералами СЕНС.
+;; Не вводити нових текстових носіїв точного доменного коду.
+;; Історичний parse() засвідчує походження старої реалізації,
+;; але не визначає теперішнього закону мови.
+;; Міграція можлива лише через позиційний читач D1, позитивні та
+;; негативні свідчення справжнього виконання СЕНС і точний
+;; фізичний круговий перехід Zig/T5. Числова підміна заборонена.
 ;;
-;; Раніше `*knowledge-base*` тримав один знімок на модуль — кожен виклик
-;; `defmodule`/`tell-knowledge` повністю його переписував. Той знімок
-;; ніколи не міг відповісти "коли модуль це дізнався?", і не було способу
-;; забрати факт назад узагалі (`retract-knowledge` не існував).
-;; `*knowledge-journal*` замінює його як єдине джерело правди: плаский,
-;; постійно зростаючий список подій `(tell module-name clause)`/`(retract
-;; module-name clause)`, найновіші спершу (той самий `cons`-паттерн, що й
-;; `*working-memory*`/`*usage-counts*` уже використовують деінде в
-;; проєкті). Без часових міток — my-lisp не має примітиву годинника, і
-;; вигадати його тут було б саме тією невиправданою точністю, проти якої
-;; застерігає принцип 6 МакКарті; порядок списку (від найстарішого до
-;; найновішого після розвороту) — єдиний порядок, який цей журнал
-;; насправді має, і це чесно визнано. Поточний список clause модуля тепер
-;; — *проекція* журналу (`module-clauses-now`), обчислена на вимогу, а не
-;; збережена десь напряму.
+;; Мовна система модулів представлення знань.
+;; Предикати повертають точні D1-значення; D3 атом? перевіряє
+;; форму даних, а не підмінює собою істинність.
 ;;
-;; Früher hielt `*knowledge-base*` einen Schnappschuss pro Modul — jeder
-;; `defmodule`/`tell-knowledge`-Aufruf ersetzte ihn vollständig. Dieser
-;; Schnappschuss konnte nie beantworten "wann hat das Modul das gelernt?",
-;; und es gab keine Möglichkeit, einen Fakt überhaupt zurückzunehmen
-;; (`retract-knowledge` existierte nicht). `*knowledge-journal*` ersetzt
-;; ihn als einzige Quelle der Wahrheit: eine flache, stetig wachsende
-;; Liste von `(tell module-name clause)`/`(retract module-name
-;; clause)`-Ereignissen, neueste zuerst (dieselbe `cons`-Präfix-Konvention,
-;; die `*working-memory*`/`*usage-counts*` anderswo im Projekt bereits
-;; verwenden). Keine Zeitstempel — my-lisp hat kein Uhr-Primitiv, und eines
-;; hier zu erfinden wäre genau die unverdiente Präzision, vor der
-;; McCarthy-Prinzip 6 warnt; die Listenreihenfolge (älteste zuerst nach
-;; Umkehrung) ist die einzige Ordnung, die dieses Journal tatsächlich hat,
-;; und das wird ehrlich anerkannt. Die aktuelle Clause-Liste eines Moduls
-;; ist jetzt eine *Projektion* über das Journal (`module-clauses-now`), auf
-;; Anfrage berechnet, nicht irgendwo direkt gespeichert.
+;; Журнал фактів із додаванням подій без перезапису історії.
+;; Раніше *knowledge-base* зберігав один знімок на модуль:
+;; кожен виклик defmodule або tell-knowledge замінював його цілком.
+;; За таким знімком не можна встановити послідовність надходження
+;; фактів або відкликати попереднє твердження.
+;;
+;; Натомість *knowledge-journal* є джерелом поточного стану:
+;; події (tell назва-модуля клауза) і (retract назва-модуля клауза)
+;; додаються на початок списку. Імена подій є значеннями
+;; чинного протоколу, тому їх не змінено на українські.
+;; Позначок часу немає: порядок подій задає сам список;
+;; додавання неіснуючого джерела часу створило б хибну точність.
+;; Поточні клаузи модуля обчислюються як проєкція журналу
+;; за запитом, а не зберігаються в окремому знімку.
+;;
 (визначити *knowledge-journal* (як-є ()))
 
 (визначити перетворити-клаузи-на-події-повідомлення
