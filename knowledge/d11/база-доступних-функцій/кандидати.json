@@ -22,10 +22,10 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 149,
+    "total": 150,
     "historical": 15,
-    "library": 134,
-    "distinct_families": 19
+    "library": 135,
+    "distinct_families": 20
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -2528,6 +2528,22 @@
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
         "original_file": "lib/world.lisp",
         "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "вибрати-механізм",
+      "source_family": "mechanism-selector",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/mechanism-selector.lisp",
+        "blob_sha": "5d44c329da403b33ae5c022b377ceb9de04f9fb1",
+        "snapshot_not_live_proof": false
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
