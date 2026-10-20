@@ -1,24 +1,24 @@
-; Legacy Intel Core i5-6400 / Skylake SID8 compatibility projection.
+; Історична сумісна проєкція SID8 для Intel Core i5-6400 / Skylake.
 ;
-; This file is NOT current semantic authority. It preserves the historical
-; byte-SID projection as compatibility/provenance only. Current exact-domain
-; machine rows live in lib/machine/profile/current-domain-x86-64.lisp and are
-; keyed by exact DomainIdentity values.
+; Цей файл НЕ є чинним джерелом семантичних повноважень.
+; Він зберігає стару побайтову проєкцію SID лише для сумісності
+; та відстеження походження. Сучасні рядки точних доменів розміщено
+; в lib/machine/profile/current-domain-x86-64.lisp; їхні ключі —
+; точні значення DomainIdentity, а не історичні байти SID8.
 ;
-; The projection deliberately distinguishes a one/few-instruction fast path
-; from a wider Lisp/runtime implementation.  For example `+` keeps arbitrary-
-; precision exact semantics even though small exact integers can use ADD.
+; Проєкція розрізняє швидкий шлях з однієї або кількох інструкцій
+; та повнішу реалізацію Lisp/виконавця. Наприклад, дія `+` зберігає
+; необмежену точну арифметику, хоча малі цілі числа допускають ADD.
 ;
-; Row schema:
+; Схема одного рядка:
 ;   (semantic-id class "machine path")
 ;
-; class is descriptive only:
-;   direct    — one/few ordinary ISA operations are the natural realization
-;   fast-path — ISA operation covers a bounded representation; Lisp fallback remains
-;   sequence  — several ordinary ISA operations implement the semantic action
-;   runtime   — allocation/iteration/runtime state is required
-;   control   — maps naturally to CPU control flow
-
+; Класи є лише описом механізмів, а не новими значеннями мови:
+;   direct    — одна або декілька звичайних інструкцій ISA;
+;   fast-path — прискорення лише в доведених межах; інші входи — Lisp;
+;   sequence  — послідовність кількох інструкцій ISA;
+;   runtime   — потрібні виділення пам'яті, обхід або стан виконавця;
+;   control   — керувальний потік процесора.
 (machine-profile/1
   (cpu intel-core-i5-6400)
   (microarchitecture skylake)
