@@ -1,6 +1,6 @@
-; D9 provenance and Guard reference fields, ratified exact 9-bit residents.
-; Eight positive/negative D1 witnesses with canonical quoted data, no
-; immediate numeric LAMBDA-head and no D7 substitute for resident identities.
+; D9 поля походження та Guard-посилань, ратифіковані точні 9-бітові резиденти.
+; Вісім позитивних/негативних D1-свідків із канонічними цитованими даними, без
+; безпосереднього числового LAMBDA-гола і без D7-заміни резидентних ідентичностей.
 (список
   (однакові? (походження-ціль (як-є (statement мета (source факт) (rule правило) (derived-from (дитина))))) (як-є мета))
   (однакові? (походження-правило (як-є (statement мета (source факт) (rule правило) (derived-from (дитина))))) (як-є правило))
