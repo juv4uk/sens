@@ -1,4 +1,4 @@
-(verification-only
-  (issue 432)
-  (lifecycle never-merge)
-  (purpose "execute bounded CAR/CDR research search only"))
+(лише-дослідницька-перевірка
+  (завдання 432)
+  (життєвий-цикл без-злиття)
+  (мета "Виконати лише обмежений дослідницький пошук виведення першого та решти"))
