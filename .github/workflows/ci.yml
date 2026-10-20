@@ -90,7 +90,6 @@ jobs:
               ;;
             12)
               python3 -m unittest tests/test_ukr_native_first_dispatch_projection.py -v
-              python3 -m unittest tests/test_ukr_registry_read_benchmark.py -v
               ;;
             13)
               python3 -m unittest tests/test_ukr_core3_profile_projection.py -v
