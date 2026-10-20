@@ -20,7 +20,9 @@ Gates (each is a script; missing scripts are reported UNVERIFIED, never PASS):
   rust-isolated        scripts/check_rust_isolated_only_zig.py   (G6,S2)
   rust-lisp-sens-io    scripts/check_rust_lisp_sens_io.py        (G1,S2)
 
-Exit 1 until independent Ukrainian/SENS oracle, T5 triples, exact-SHA CI,\nand owner authorization are verified by their separate release gates.\nPassing structural guards alone is RELEASE_STRUCTURAL_GATES_GO, not publication GO.
+Exit 1 until independent Ukrainian/SENS oracle, T5 triples, exact-SHA CI,
+and owner authorization are verified by their separate release gates.
+Passing structural guards alone is RELEASE_STRUCTURAL_GATES_GO, not publication GO.
 """
 from __future__ import annotations
 
