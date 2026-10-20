@@ -136,4 +136,60 @@ sens_i96_sub_exact:
     ret
 .size sens_i96_sub_exact,.-sens_i96_sub_exact
 
+/* Беззнаковий 96x96 -> 192, чотири MUL (64x64).
+ * SysV RDI=a0, RSI=a1 (32 bits), RDX=b0, RCX=b1 (32 bits)
+ * R8=middle_out, R9=high_out; RAX=low output.
+ * Перш ніж повернути результат, додаємо обидва перенесення
+ * середнього слова. Повної ширини результату не відкидаємо. */
+.p2align 4
+.globl sens_u96_mul_exact
+.type sens_u96_mul_exact,@function
+sens_u96_mul_exact:
+    push %rbx
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+    sub $32,%rsp
+    mov %rdi,%r12
+    mov %rsi,%r13
+    mov %rdx,%r14
+    mov %rcx,%r15
+    mov %r8,%rbx
+    mov %r9,0(%rsp)
+    mov %r12,%rax
+    mul %r14
+    mov %rax,%r10
+    mov %rdx,8(%rsp)
+    mov %r12,%rax
+    mul %r15
+    mov %rax,24(%rsp)
+    mov %rdx,16(%rsp)
+    mov %r13,%rax
+    mul %r14
+    mov 8(%rsp),%rcx
+    xor %r11d,%r11d
+    add 24(%rsp),%rcx
+    adc $0,%r11
+    add %rax,%rcx
+    adc $0,%r11
+    mov %rcx,(%rbx)
+    mov %rdx,%r9
+    add 16(%rsp),%r9
+    add %r11,%r9
+    mov %r13,%rax
+    mul %r15
+    add %rax,%r9
+    mov 0(%rsp),%rax
+    mov %r9,(%rax)
+    mov %r10,%rax
+    add $32,%rsp
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
+    pop %rbx
+    ret
+.size sens_u96_mul_exact,.-sens_u96_mul_exact
+
 .section .note.GNU-stack,"",@progbits

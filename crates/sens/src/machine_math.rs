@@ -33,6 +33,8 @@ unsafe extern "C" {
     fn sens_i48_mul_exact(left: i64, right: i64, high: *mut i64) -> i64;
     fn sens_i96_add_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
     fn sens_i96_sub_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
+    fn sens_u96_mul_exact(a_low: u64, a_high: u64, b_low: u64, b_high: u64,
+                           out_middle: *mut u64, out_high: *mut u64) -> u64;
 }
 
 /// Цілочисельний механізм для рівно двох НАЯВНИХ знакових слів D24.
@@ -131,6 +133,35 @@ pub(crate) fn exact_i96_add_sub(op: &str, left: i128, right: i128) -> Option<i12
         "+" => left.checked_add(right),
         "-" => left.checked_sub(right),
         _ => None,
+    }
+}
+
+
+/// Повні 192 біти множення двох БЕЗЗНАКОВИХ механічних модулів до 96 біт.
+/// Підписи, ратифіковані домени й композиції НЕ вирішуються асемблером.
+/// Результат: [молодші 64, середні 64, старші 64] без усічення.
+pub(crate) fn exact_u96_multiply(a: u128, b: u128) -> Option<[u64; 3]> {
+    if (a >> 96) != 0 || (b >> 96) != 0 { return None; }
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    {
+        let (mut middle, mut high) = (0_u64, 0_u64);
+        // SAFETY: a,b мають не більше 96 бітів, SysV ABI,
+        // обидва вихідні вказівники чинні й не перекриваються.
+        let low = unsafe {
+            sens_u96_mul_exact(a as u64, (a >> 64) as u64,
+                               b as u64, (b >> 64) as u64,
+                               &mut middle, &mut high)
+        };
+        return Some([low, middle, high]);
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    {
+        let (a0,a1,b0,b1) = (a as u64 as u128,(a >> 64),
+                              b as u64 as u128,(b >> 64));
+        let (p00,p01,p10,p11) = (a0*b0,a0*b1,a1*b0,a1*b1);
+        let middle = (p00 >> 64) + u128::from(p01 as u64) + u128::from(p10 as u64);
+        let high = (middle >> 64) + (p01 >> 64) + (p10 >> 64) + p11;
+        Some([p00 as u64, middle as u64, high as u64])
     }
 }
 
@@ -310,6 +341,31 @@ mod tests {
             let b = ((right as i128) << 32) >> 32;
             assert_eq!(exact_i96_add_sub("+", a, b), a.checked_add(b));
             assert_eq!(exact_i96_add_sub("-", a, b), a.checked_sub(b));
+        }
+    }
+    #[test]
+    fn d96_full_unsigned_product_retains_all_192_bits() {
+        const MAX: u128 = (1_u128 << 96) - 1;
+        assert_eq!(exact_u96_multiply(0, MAX), Some([0,0,0]));
+        assert_eq!(exact_u96_multiply(1, MAX), Some([u64::MAX, u32::MAX as u64, 0]));
+        assert_eq!(exact_u96_multiply(1_u128 << 95, 1_u128 << 95),
+                   Some([0, 0, 1_u64 << 62]));
+        assert_eq!(exact_u96_multiply(MAX, MAX),
+                   Some([1, 0xffff_fffe_0000_0000, u64::MAX]));
+        assert_eq!(exact_u96_multiply(1_u128 << 96, 1), None);
+    }
+
+    #[test]
+    fn d96_multiply_exact_matches_independent_u128_oracle() {
+        let mut state = 0x9e37_41c6_f02a_b8d5_u64;
+        for _ in 0..4096 {
+            state ^= state << 13; state ^= state >> 7; state ^= state << 17;
+            let a = u128::from(state & ((1_u64 << 60) - 1));
+            state ^= state << 13; state ^= state >> 7; state ^= state << 17;
+            let b = u128::from(state & ((1_u64 << 60) - 1));
+            let result = a * b;
+            let limbs = exact_u96_multiply(a,b).unwrap();
+            assert_eq!(limbs, [result as u64, (result >> 64) as u64, 0]);
         }
     }
 }

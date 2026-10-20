@@ -167,6 +167,40 @@ fn signed_small_integer_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -
     Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
 }
 
+/// Точний D96 × D96 -> D96 або D192, включно зі знаком і переповненням.
+/// СЕНС уже перевірив однакові домени; ASM множить лише 96-бітні модулі.
+fn signed_d96_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
+    if lhs.numeric_domain_width() != Some(96) || rhs.numeric_domain_width() != Some(96) {
+        return None;
+    }
+    let decode = |number: &BinaryNumber| -> Option<i128> {
+        let word = number.exact_numeric_domain_bits()?;
+        if word.len() != 96 { return None; }
+        let raw = word.into_iter().fold(0_u128, |acc, bit| (acc << 1) | u128::from(bit));
+        Some(((raw as i128) << 32) >> 32)
+    };
+    let (a,b) = (decode(lhs)?,decode(rhs)?);
+    let mut limbs = crate::machine_math::exact_u96_multiply(a.unsigned_abs(), b.unsigned_abs())?;
+    let negative = (a < 0) != (b < 0) && limbs != [0,0,0];
+    // Межа двійково-доповняльного D96: додатні <2^95,
+    // від'ємні можуть дорівнювати -2^95.
+    let fits = limbs[2] == 0 && (limbs[1] < (1_u64 << 31) ||
+        (negative && limbs[1] == (1_u64 << 31) && limbs[0] == 0));
+    let width = if fits { 96 } else { 192 };
+    if negative {
+        let mut carry = 1_u128;
+        for limb in &mut limbs {
+            let result = u128::from(!*limb) + carry;
+            *limb = result as u64;
+            carry = result >> 64;
+        }
+    }
+    let bits = (0..width).rev().map(|shift| {
+        ((limbs[shift / 64] >> (shift % 64)) & 1) as u8
+    }).collect::<Vec<_>>();
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits)?))
+}
+
 /// Машинна сума/різниця двох допущених D96 з точним виходом D96/D192.
 /// Знак старших бітів D192 продовжує знак результату i128.
 fn signed_d96_add_sub_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
@@ -200,10 +234,14 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
             return signed_small_integer_fast(operator, left, right);
         }
     }
-    // Тільки D96 +/-: множення зберігає точний багатослівний механізм.
-    if width == 96 && matches!(operator, "+" | "-") {
+    // Два допущені цілі D96: +/- через ADC/SBB, * через повний 192-бітний MUL.
+    if width == 96 && matches!(operator, "+" | "-" | "*") {
         if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
-            return signed_d96_add_sub_fast(operator, left, right);
+            return if operator == "*" {
+                signed_d96_mul_fast(left, right)
+            } else {
+                signed_d96_add_sub_fast(operator, left, right)
+            };
         }
     }
     let (_, x_neg, x_num, x_den) = ingredients(lhs)?;
@@ -303,6 +341,46 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    #[test]
+    fn d96_machine_signed_product_retains_full_d192_and_compositions() {
+        const MIN: i128 = -(1_i128 << 95);
+        const MAX: i128 = (1_i128 << 95) - 1;
+        let word = |width: usize, value: i128| -> Value {
+            let bits = (0..width).rev().map(|shift| {
+                if shift >= 128 { u8::from(value < 0) }
+                else { ((value >> shift) & 1) as u8 }
+            }).collect::<Vec<_>>();
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
+        };
+        for a in [MIN, MIN + 1, -2, -1, 0, 1, 2, MAX - 1, MAX] {
+            for b in [MIN, -1, 0, 1, MAX] {
+                let actual = compute("*", &word(96,a), &word(96,b)).expect("D96*D96");
+                let got = actual.to_string();
+                let expected_negative = (a < 0) != (b < 0) && a != 0 && b != 0;
+                // Високобітний знак контролюється незалежною композицією,
+                // а мала частина — вбудованим точним i128 оракулом.
+                if a == 0 || b == 0 { assert_eq!(got, "0"); }
+                else if a.unsigned_abs() <= (1 << 32) && b.unsigned_abs() <= (1 << 32) {
+                    assert_eq!(got, (a*b).to_string());
+                }
+                let Value::BinaryNumber(bits) = actual else { panic!("D96 or D192") };
+                let w = bits.numeric_domain_width().unwrap();
+                assert!(w == 96 || w == 192);
+                assert_eq!(bits.exact_numeric_domain_bits().unwrap().len(), w);
+                let negative = bits.exact_numeric_domain_bits().unwrap()[0] == 1;
+                assert_eq!(negative, expected_negative);
+            }
+        }
+        let big = compute("*", &word(96,MIN), &word(96,MIN)).unwrap();
+        let Value::BinaryNumber(big_word) = big else { panic!("D192 full word"); };
+        assert_eq!(big_word.numeric_domain_width(), Some(192));
+        let bits = big_word.exact_numeric_domain_bits().unwrap();
+        assert_eq!(bits.iter().filter(|&&x| x == 1).count(), 1);
+        assert_eq!(bits[1], 1); // 2^190 in a 192-bit D192 word
+        assert!(compute("*", &word(96,1), &word(48,1)).is_none());
+        assert_eq!(compute("/", &word(96,1), &word(96,2)).unwrap().to_string(), "1/2");
     }
 
     #[test]
