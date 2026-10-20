@@ -13,9 +13,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: issue-333-readfile-stage-profile
-      - name: Build my-lisp CLI
-        run: cargo build -p sens-cli --bin my-lisp
+      - name: Build SENS CLI
+        run: cargo build -p sens-cli --bin sens
       - name: Profile Lisp-owned read-file stages
         run: |
           /usr/bin/time -f 'profile_wall_seconds=%e' \
-            ./target/debug/my-lisp scripts/profile-read-file-stages.lisp
+            ./target/debug/sens scripts/profile-read-file-stages.lisp

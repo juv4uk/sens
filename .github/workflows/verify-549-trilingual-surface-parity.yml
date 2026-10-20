@@ -10,15 +10,15 @@ jobs:
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Build release my-lisp
-        run: cargo build --release -p sens-cli --bin my-lisp
+      - name: Build release SENS CLI
+        run: cargo build --release -p sens-cli --bin sens
 
       - name: Positive Python and Lisp reports
         shell: bash
         run: |
           set -euo pipefail
           python3 scripts/check_trilingual_surface.py > /tmp/tri-python.txt
-          ./target/release/my-lisp scripts/check-trilingual-surface.lisp > /tmp/tri-lisp.txt
+          ./target/release/sens scripts/check-trilingual-surface.lisp > /tmp/tri-lisp.txt
           cat /tmp/tri-python.txt
           cat /tmp/tri-lisp.txt
 
@@ -47,7 +47,7 @@ jobs:
           set +e
           python3 scripts/check_trilingual_surface.py --require-complete > /tmp/tri-python-complete.txt 2>&1
           py_rc=$?
-          ./target/release/my-lisp scripts/check-trilingual-surface.lisp --require-complete > /tmp/tri-lisp-complete.txt 2>&1
+          ./target/release/sens scripts/check-trilingual-surface.lisp --require-complete > /tmp/tri-lisp-complete.txt 2>&1
           lisp_rc=$?
           set -e
           test "$py_rc" -ne 0
@@ -64,7 +64,7 @@ jobs:
           set +e
           python3 scripts/check_trilingual_surface.py > /tmp/tri-python-negative.txt 2>&1
           py_rc=$?
-          ./target/release/my-lisp scripts/check-trilingual-surface.lisp > /tmp/tri-lisp-negative.txt 2>&1
+          ./target/release/sens scripts/check-trilingual-surface.lisp > /tmp/tri-lisp-negative.txt 2>&1
           lisp_rc=$?
           set -e
 

@@ -23,11 +23,11 @@ jobs:
         shell: bash
         run: |
           set -u
-          printf '(1 2' > /tmp/my-lisp-524-bad.lisp
+          printf '(1 2' > /tmp/sens-524-bad.lisp
           set +e
-          ./target/debug/my-lisp /tmp/my-lisp-524-bad.lisp >/tmp/parse.out 2>/tmp/parse.err
+          ./target/debug/sens /tmp/sens-524-bad.lisp >/tmp/parse.out 2>/tmp/parse.err
           parse_code=$?
-          timeout 3s ./target/debug/my-lisp --tcp=0 --protocol=sexpr >/tmp/tcp.out 2>/tmp/tcp.err
+          timeout 3s ./target/debug/sens --tcp=0 --protocol=sexpr >/tmp/tcp.out 2>/tmp/tcp.err
           tcp_code=$?
           set -e
           echo "PARSE_EXIT=$parse_code"

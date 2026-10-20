@@ -12,6 +12,6 @@ jobs:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - name: Run exact runtime-peer target
-        run: cargo test -p my-lisp --test runtime_peer_operators
+        run: cargo test -p sens --test runtime_peer_operators
       - name: Child diff hygiene
         run: git diff --check HEAD^ HEAD

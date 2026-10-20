@@ -20,7 +20,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          output=$(cargo run -q -p sens-cli --bin my-lisp -- docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin sens -- docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"
@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          output=$(cargo run -q -p sens-cli --bin my-lisp -- docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin sens -- docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"
@@ -44,8 +44,8 @@ jobs:
           fi
           printf '%s\n' "$output" | grep -Eqi 'UnknownSymbol|unknown symbol|nevidomyi symvol|unbekanntes Symbol'
 
-      - name: Canonical explicit-result cond witness remains green
-        run: cargo test -p my-lisp --test control_dispatch_contract -- --nocapture
+      - name: Canonical explicit-result COND witness remains green
+        run: cargo test -p sens --test quantity_d1_direct_cutover cond_short_circuit_does_not_evaluate_unsupported_branch -- --exact --nocapture
 
       - name: Verification-only child has no whitespace errors
         run: git diff --check "origin/${{ github.base_ref }}...HEAD"

@@ -12,5 +12,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Run Lisp-owned comparison peer topology witness
         run: |
-          output="$(cargo run --quiet -p sens-cli --bin my-lisp -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp)"
-          printf 'actual: %s\\n' "$output"\n          test "$output" = "(runtime-peer-comparison-topology-witness (status pass))"
+          output="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp)"
+          printf 'actual: %s\n' "$output"
+          test "$output" = "(runtime-peer-comparison-topology-witness (status pass))"

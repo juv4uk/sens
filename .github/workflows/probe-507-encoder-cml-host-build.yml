@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - name: Checkout my-lisp
+      - name: Checkout SENS
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
@@ -24,7 +24,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Move pinned CML outside my-lisp Cargo workspace
+      - name: Move pinned CML outside SENS Cargo workspace
         shell: bash
         run: |
           rm -rf /tmp/cml-pinned
@@ -34,14 +34,14 @@ jobs:
         shell: bash
         run: |
           set +e
-          output="$(cd /tmp/cml-pinned && cargo run --quiet --bin cml -- build "$GITHUB_WORKSPACE/lib/machine/encoding/x86-64.lisp" -o /tmp/my-lisp-encoder-host 2>&1)"
+          output="$(cd /tmp/cml-pinned && cargo run --quiet --bin cml -- build "$GITHUB_WORKSPACE/lib/machine/encoding/x86-64.lisp" -o /tmp/sens-encoder-host 2>&1)"
           status=$?
           set -e
           printf '%s\n' "$output"
           echo "CML_HOST_ENCODER_EXIT_STATUS=$status"
           if [[ "$status" -eq 0 ]]; then
-            test -x /tmp/my-lisp-encoder-host
-            file /tmp/my-lisp-encoder-host
+            test -x /tmp/sens-encoder-host
+            file /tmp/sens-encoder-host
           fi
 
       - name: Compare interpreted and compiled x86-encode-ret bytes
@@ -53,7 +53,7 @@ jobs:
           (x86-encode-ret)
           LISP
 
-          interpreted="$(cargo run --quiet -p sens-cli --bin my-lisp -- /tmp/encoder-ret-interpreted.lisp)"
+          interpreted="$(cargo run --quiet -p sens-cli --bin sens -- /tmp/encoder-ret-interpreted.lisp)"
           printf 'INTERPRETED_ENCODER_RET=%s\n' "$interpreted"
 
           list_def_count="$(grep -Fxc '(def list (lambda args args))' lib/core.lisp)"
@@ -78,7 +78,7 @@ jobs:
           (x86-encode-mov-r64-imm64 (quote rax) 42)
           LISP
 
-          interpreted_mov="$(cargo run --quiet -p sens-cli --bin my-lisp -- /tmp/encoder-mov-interpreted.lisp)"
+          interpreted_mov="$(cargo run --quiet -p sens-cli --bin sens -- /tmp/encoder-mov-interpreted.lisp)"
           printf 'INTERPRETED_ENCODER_MOV=%s\n' "$interpreted_mov"
 
           list_def_count="$(grep -Fxc '(def list (lambda args args))' lib/core.lisp)"
@@ -104,8 +104,8 @@ jobs:
           printf '(native-call-u64-raw (quote %s))\n' "$interpreted_program" > /tmp/run-interpreted-bytes.lisp
           printf '(native-call-u64-raw (quote %s))\n' "$compiled_program" > /tmp/run-compiled-bytes.lisp
 
-          result_a="$(cargo run --quiet -p sens-cli --bin my-lisp -- /tmp/run-interpreted-bytes.lisp)"
-          result_b="$(cargo run --quiet -p sens-cli --bin my-lisp -- /tmp/run-compiled-bytes.lisp)"
+          result_a="$(cargo run --quiet -p sens-cli --bin sens -- /tmp/run-interpreted-bytes.lisp)"
+          result_b="$(cargo run --quiet -p sens-cli --bin sens -- /tmp/run-compiled-bytes.lisp)"
           printf 'CPU_FROM_INTERPRETED_BYTES=%s\n' "$result_a"
           printf 'CPU_FROM_COMPILED_BYTES=%s\n' "$result_b"
 

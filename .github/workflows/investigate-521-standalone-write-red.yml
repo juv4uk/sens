@@ -15,7 +15,7 @@ jobs:
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Build release CLI
-        run: cargo build --release -p sens-cli --bin my-lisp
+        run: cargo build --release -p sens-cli --bin sens
       - name: Generate identical 81791-char control and write witnesses
         shell: bash
         run: |
@@ -31,12 +31,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./target/release/my-lisp "$control" >/dev/null
+          ./target/release/sens "$control" >/dev/null
       - name: RED probe — standalone Lisp-owned write-file
         shell: bash
         run: |
           set -euo pipefail
-          ./target/release/my-lisp "$witness" >/dev/null
+          ./target/release/sens "$witness" >/dev/null
       - name: Verify exact output size
         shell: bash
         run: |

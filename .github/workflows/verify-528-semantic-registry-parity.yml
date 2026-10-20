@@ -10,8 +10,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/install-zig
-      - name: Build my-lisp
-        run: cargo build --release -p sens-cli --bin my-lisp
+      - name: Build SENS CLI
+        run: cargo build --release -p sens-cli --bin sens
 
       - name: Require Lisp replacement
         shell: bash
@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/check_semantic_registry.py > /tmp/python-positive.out
-          ./target/release/my-lisp scripts/check-semantic-registry.lisp > /tmp/lisp-positive.raw
+          ./target/release/sens scripts/check-semantic-registry.lisp > /tmp/lisp-positive.raw
           grep -v '^$' /tmp/lisp-positive.raw | grep -v '^semantic-registry-ok$' > /tmp/lisp-positive.out
           diff -u /tmp/python-positive.out /tmp/lisp-positive.out
           cat /tmp/python-positive.out
@@ -66,7 +66,7 @@ jobs:
             set +e
             python3 scripts/check_semantic_registry.py > "/tmp/python-$case_name.out" 2>&1
             python_status=$?
-            ./target/release/my-lisp scripts/check-semantic-registry.lisp > "/tmp/lisp-$case_name.out" 2>&1
+            ./target/release/sens scripts/check-semantic-registry.lisp > "/tmp/lisp-$case_name.out" 2>&1
             lisp_status=$?
             set -e
 

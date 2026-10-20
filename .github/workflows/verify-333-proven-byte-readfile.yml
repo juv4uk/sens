@@ -13,9 +13,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: verify-333-proven-byte-readfile
-      - name: Build my-lisp CLI
-        run: cargo build -p sens-cli --bin my-lisp
+      - name: Build SENS CLI
+        run: cargo build -p sens-cli --bin sens
       - name: Measure proven-byte read-file candidate
         run: |
           /usr/bin/time -f 'proven_byte_profile_wall_seconds=%e' \
-            ./target/debug/my-lisp scripts/profile-proven-byte-readfile-candidate.lisp
+            ./target/debug/sens scripts/profile-proven-byte-readfile-candidate.lisp
