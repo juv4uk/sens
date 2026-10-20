@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: content-store surface + domain bitness.
+"""Точковий огляд українських визначень сховища та бітності доменів.
 
 Axiom: the binary key width IS the domain address.
 Checks:
@@ -28,17 +28,11 @@ REQUIRED = (
     "вміст-сховище-містить?",
     "вміст-сховище-покласти-світ",
     "вміст-сховище-розмір",
-    "empty-content-store",
-    "content-store-put",
-    "content-store-get",
-    "content-store-contains?",
-    "content-store-put-world",
-    "content-store-size",
     "мапа-порожній",
     "внутрішня-мапа-вставити",
     "внутрішня-мапа-отримати",
     "внутрішня-мапа-містить",
-    "внутрішня-довжина",
+    "довжина",
     "знання-вміст-адреса",
     "світ-адреса-вміст",
 )
@@ -88,8 +82,6 @@ def check_cs() -> list[str]:
         )
         if len(primary) != 1:
             errs.append(f"content-store: expected exactly one primary definition {ukrainian}")
-        if f"(визначити {english} {ukrainian})" not in text:
-            errs.append(f"content-store: compatibility entrypoint {english} must alias {ukrainian}")
 
     active = "\n".join(
         line for line in text.splitlines() if not line.lstrip().startswith(";")

@@ -51,9 +51,9 @@ fn derived_length_handles_empty_and_nonempty_lists() {
     let mut session = Session::default();
     load_core(&mut session);
     for (source, expected) in [
-        ("(внутрішня-довжина (як-є ()))", "0"),
-        ("(внутрішня-довжина (як-є (a)))", "1"),
-        ("(внутрішня-довжина (як-є (a b)))", "2"),
+        ("(довжина (як-є ()))", "0"),
+        ("(довжина (як-є (a)))", "1"),
+        ("(довжина (як-є (a b)))", "2"),
     ] {
         let actual = eval_ukr(source, &mut session)
             .unwrap_or_else(|error| panic!("довжина списку {source}: {error:?}"))

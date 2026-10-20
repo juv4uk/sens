@@ -8,7 +8,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PATH = ROOT / "lib" / "content-store.lisp"
 D9_PATH = ROOT / "lib" / "domains" / "d9.lisp"
-ALIAS_MARKER = "; opt-in повна укр-поверхня"
 
 RESIDENTS = {
     "000010111": ("вміст-сховище-розмір", "content-store-size"),
@@ -50,8 +49,7 @@ class ContentStoreUkrPrimaryProjectionTests(unittest.TestCase):
 
     def test_full_ukr_definitions_are_primary_lisp_closures(self):
         source, _ = read_sources()
-        self.assertIn(ALIAS_MARKER, source)
-        primary = source.split(ALIAS_MARKER, 1)[0]
+        primary = source
         for _bits, (ukr, _english) in RESIDENTS.items():
             with self.subTest(name=ukr):
                 self.assertRegex(
@@ -59,21 +57,20 @@ class ContentStoreUkrPrimaryProjectionTests(unittest.TestCase):
                     rf"(?m)^\(визначити\s+{re.escape(ukr)}\s+\(функція\b",
                 )
 
-    def test_english_names_are_compatibility_aliases_to_same_ukr_closures(self):
+    def test_full_file_is_ukrainian_without_duplicate_english_definitions(self):
         source, _ = read_sources()
-        aliases = source.split(ALIAS_MARKER, 1)[1]
-        for _bits, (ukr, english) in RESIDENTS.items():
+        self.assertIsNone(re.search(r"[A-Za-z]", source))
+        for _bits, (_ukr, english) in RESIDENTS.items():
             with self.subTest(name=english):
-                self.assertRegex(
-                    aliases,
-                    rf"(?m)^\(визначити\s+{re.escape(english)}\s+{re.escape(ukr)}\)\s*$",
+                self.assertNotRegex(
+                    source,
+                    rf"(?m)^\\(визначити\\s+{re.escape(english)}(?=\\s|\\))",
                 )
 
     def test_no_raw_binary_call_heads_or_reinferred_width(self):
         source, _ = read_sources()
         self.assertNotRegex(source, r"\(\s*[01]{9}(?:\s|\))")
-        self.assertIn("Exact 9-bit identities live in lib/domains/d9.lisp", source)
-        self.assertIn("жодної нової диспетчеризації", source)
+        self.assertIn("не вводить нових координат", source)
         self.assertNotIn("(визначити 168 ", source)
         self.assertNotIn("(binary 9)", source)
 
@@ -84,7 +81,7 @@ class ContentStoreUkrPrimaryProjectionTests(unittest.TestCase):
             "(внутрішня-мапа-вставити (знання-вміст-адреса значення) значення сховище)",
             "(внутрішня-мапа-отримати адреса сховище)",
             "(внутрішня-мапа-містить адреса сховище)",
-            "(внутрішня-довжина сховище)",
+            "(довжина сховище)",
             "(світ-адреса-вміст світ)",
         ):
             with self.subTest(expression=required):
