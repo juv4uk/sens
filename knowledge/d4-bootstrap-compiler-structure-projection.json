@@ -17,14 +17,14 @@
     "d8_admission": false,
     "human_name_routing": false
   },
-  "projection_sha256": "fd63f6378b29f3040eda4f38c4eb0f8e1a45617a173e73091322397feb5f8f08",
+  "projection_sha256": "7846b928b8a231f3de6ea0c9adb606bdd182acf29c201a2c9e63eeffaa0dc985",
   "schema": "d4-bootstrap-compiler-structure-projection/1",
   "semantic_authority": {
-    "git_blob_sha1": "9f398d9b5fff4c724603f5339bbb248109ec3c34",
+    "git_blob_sha1": "bdef87fb9523ea7bba023d1ce33ba404f123441a",
     "owner_ratification": "#3272",
     "path": "contracts/d4-bootstrap-ratification.lisp",
     "schema": "d4-bootstrap-ratification/1",
-    "sha256": "73e682c8fdcd1345a51d2c32fbcebadb91922c6011cc7ce2be29592ecd534ee3"
+    "sha256": "a4fc8a87fb058c15d1a56ce28eb6c8bff23e64f68846328cc296cadf02f2bd6f"
   },
   "status": "generated-projection-only"
 }

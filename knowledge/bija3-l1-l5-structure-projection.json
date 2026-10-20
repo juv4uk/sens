@@ -19,14 +19,14 @@
     "d8_admission": false,
     "human_name_routing": false
   },
-  "projection_sha256": "e57a6ee1184c23cf31dde7c03d950476ea38e24e05fca2a62e6e2bc386dbb898",
+  "projection_sha256": "fbd7310c82730846eb72086cdb835b712bdc0b48eaae54c22c2f9a12173322bb",
   "schema": "bija3-l1-l5-structure-projection/1",
   "semantic_authority": {
-    "git_blob_sha1": "2dff6997345baad3bedf989b8772ea97c2e7d46a",
+    "git_blob_sha1": "fb5218c8eefb825fd9971b0a29416eb6e9d9507f",
     "owner_ratification": "#3202",
     "path": "contracts/bija3-l1-l5-ratification.lisp",
     "schema": "bija3-l1-l5-ratification/1",
-    "sha256": "8c76e07c9e41d495b8e475a69389620c40ceac8187d80716d2a3da8e21ab9680"
+    "sha256": "d32c789baacd1d273ce65313e27bec1bd6d9aa50953b190ac650c915e3bf9283"
   },
   "status": "generated-projection-only"
 }
