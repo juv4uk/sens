@@ -363,7 +363,7 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
     def _assert_row(self, path: Path, bits: str, ukr: str, english: str, lisp_name: str):
         rows = [
             line for line in path.read_text(encoding="utf-8").splitlines()
-            if re.match(rf"^\\s*\\({re.escape(bits)}\\s", line)
+            if re.match(rf"^\s*\({re.escape(bits)}\s", line)
         ]
         self.assertEqual(len(rows), 1, f"{bits}: exact-width row must be unique")
         self.assertIn(f"(укр {ukr})", rows[0])
