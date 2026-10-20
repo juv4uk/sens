@@ -1,24 +1,24 @@
-; The second half of the "text <-> structure" bridge from
-; private/lisp-to-knowledge.md §6 — `lib/understand.lisp` goes text-shaped
-; word list -> knowledge clause; `narrate` goes the other way, structure ->
-; text-shaped word list. Same controlled, non-statistical spirit: fixed
-; structural shapes, matched by list length and position, not a real NLP
-; model. `narrate-fact` is the exact structural inverse of
-; `understand-is`/`understand-relation` — round-tripping a sentence through
-; `understand` then `narrate-fact` returns the original words.
+; Друга частина мосту між контрольованим текстом та структурами знань.
+; Модуль розуміння переводить список слів у твердження.
+; Цей модуль виконує зворотну дію, повертаючи структуровані слова.
+; Використовуються сталі структури й позиції елементів.
+; Статистичного мовного аналізу немає.
+; Пояснення факту обертає побудову факту чи відношення.
+; Перетворення правильного речення в структуру та назад
+; зберігає початковий порядок слів.
 ;
-; Exact-domain source uses the one-bit D1 words 0/1 directly; no compatibility projection.
-; Reuses result-proper-list? from lib/result-status.lisp and existing
-; project selectors. Width is identity; every bit of the domain address valued.
+; Точні відповіді належать однобітному першому домену.
+; Перевірки використовують спільний предикат правильного списку
+; та ратифіковані селектори, кожен зі своєю доменною тотожністю.
 ;
-; `narrate-provenance` explains *why*, walking a `provenance` record
-; (lib/reason.lisp) into a word list joined by `because`/`and`. It narrates
-; each node's `rule` field, not its `goal` field.
+; Пояснення походження обходить дерево доведення.
+; Причини та поєднання складаються у словесний список.
+; Пояснюється правило вузла, а не його мета.
 
-; Structural list-shape tests replace D6 LENGTH + D8 EQUAL and naked 2/3.
-; All branches return exact D1; list data never acquires numeric truthiness.
-; NULL is the admitted exact D4 empty-list predicate and returns D1.
-; It avoids trying to call atom-only EQ on structural ().
+; Форма списку перевіряється структурно, без числової довжини.
+; Кожна гілка повертає точну відповідь першого домену.
+; Порожність визначає ратифікований предикат четвертого домену.
+; Порівняння атомів не застосовується до складених списків.
 (визначити список-завершується-порожнім?
   (функція (значення)
     (за-умовою
@@ -29,8 +29,8 @@
       (так
        (список-завершується-порожнім? (решта значення))))))
 
-; Structural arity checks return exact D1:YES only at the requested boundary.
-; Rejecting cases short-circuit before CDR walks; NULL safely recognizes ().
+; Точна кількість елементів перевіряється до доступу до хвостів.
+; Неправильні форми відхиляються без небезпечного обходу.
 (визначити список-із-рівно-двох-елементів?
   (функція (значення)
     (за-умовою
@@ -96,8 +96,8 @@
        (приєднати (пояснити-факт (походження-правило походження))
          (сполучити (як-є because) (пояснити-виведення (походження-похідний-з походження))))))))
 
-; `narrate-answer` grounds the conclusion with the caller's actual query while
-; retaining the proof's real premises.
+; Пояснення відповіді зберігає справжню мету запиту
+; разом із фактичними передумовами доведення.
 (визначити пояснити-відповідь
   (функція (мета доказ)
     (нехай ((виведення (походження-похідний-з (походження доказ))))
@@ -108,14 +108,14 @@
            (сполучити (як-є because) (пояснити-виведення виведення))))))))
 
 ; ----------------------------------------------------------------------
-; Structured reasoning-outcome presentation (B2)
+; Подання структурованих результатів міркування.
 ; ----------------------------------------------------------------------
-; Exact reader: unconditional COND guards are the one-bit D1:YES (1).
-; Semantic meaning stays in lib/result-status.lisp. These functions only turn a
-; canonical outcome into a controlled word/data list for presentation. They
-; deliberately keep the status word visible so `unknown`, `disputed`,
-; `blocked`, and `invalid` can never collapse back into one "cannot prove"
-; sentence. Reuses result-proper-list? from the migrated result-status surface.
+; Безумовні умови використовують точну істину першого домену.
+; Семантика належить бібліотеці станів результату.
+; Ці функції перетворюють висновки на контрольовані слова.
+; Вид результату зберігається явно.
+; Невідомі, спірні, обмежені й недійсні висновки не змішуються.
+; Структура списку перевіряється спільним предикатом.
 
 (визначити пояснити-результат-із-доказом
   (функція (підсумок)
@@ -132,7 +132,7 @@
   (функція (підсумок)
     (список (як-є invalid) (як-є outcome-shape) підсумок)))
 
-; Outcome arity is structural: the exact D3/D4 helpers above own the shape check.
+; Кількість полів результату визначають структурні предикати.
 
 (визначити пояснити-підсумок
   (функція (підсумок)
@@ -197,29 +197,29 @@
       (так
        (список (як-є invalid) (як-є outcome-tag) (перше підсумок))))))
 
-; Full укр names below are the primary Lisp-owned closures for their D9/D10 residents.
-; Exact keys stay in lib/domains/d9.lisp and lib/domains/d10.lisp; no raw binary dispatch.
-; English compatibility names at the end of this file point to these same closures.
-; D9:000011000
+; Основні українські замикання відповідають ратифікованим резидентам.
+; Їхні адреси зберігаються в канонічних таблицях доменів.
+; Зовнішні сумісні імена посилаються на ці самі замикання.
+; Дев'ятий домен: пояснення факту.
 (визначити narrate-fact пояснити-факт)
-; D9:000111000
+; Дев'ятий домен: пояснення виведення.
 (визначити narrate-derivation пояснити-виведення)
-; D9:000011011
+; Дев'ятий домен: пояснення походження.
 (визначити narrate-provenance пояснити-походження)
-; D9:000000001
+; Дев'ятий домен: пояснення відповіді.
 (визначити narrate-answer пояснити-відповідь)
-; D9:000100110
+; Дев'ятий домен: пояснення підсумку.
 (визначити narrate-outcome пояснити-підсумок)
 
-; D10 full-ukr peers: exact identity = lib/domains/d10.lisp; DEFINE alias, no new dispatch.
-; D10:0010101110
+; Сумісні посилання десятого домену не вводять нових виконавців.
+; Десятий домен: діагностика неправильної форми.
 (визначити narrate-invalid-outcome-shape пояснити-неприпустиму-структуру-результату)
-; D10:0010010110
+; Десятий домен: перевірка правильного списку.
 (визначити результат-є-правильним-списком? result-proper-list?)
-; D10:0010101101
+; Десятий домен: пояснення підтвердженого результату.
 (визначити narrate-proved-outcome пояснити-результат-із-доказом)
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+; Зовнішні посилання не створюють нових кодів або механізмів.
 (визначити provenance-derived-from походження-похідний-з)
 (визначити provenance-rule походження-правило)
 (визначити provenance-source походження-джерело)
