@@ -1,13 +1,9 @@
-; Process-result interpretation owned by Lisp.
-; Інтерпретація результату процесу, якою володіє Lisp.
-;
-; Two-field D3 COND with exact direct D1:1 fallback values; D3 () stays data.
-; Reuses utf8-decode-string from lib/utf8.lisp and process-run-raw host.
-; Width is identity; every bit of the domain address is valued.
-;
-; Host capability `process-run-raw` owns only process execution, allowlisting,
-; exit observation, and byte capture. This layer owns UTF-8 interpretation.
-; Load `lib/utf8.lisp` before this file.
+; Інтерпретація текстового результату процесу належить мові СЕНС.
+; Зовнішній виконавець запускає дозволені процеси й повертає сирі байти.
+; Спільний мовний декодер визначає точні результати та відмови.
+; Умовні форми мають дві частини, а істина належить першому домену.
+; Використовується спільне визначення перевірки декодування.
+; Бібліотеку кодування потрібно завантажити перед цим файлом.
 
 (визначити process-raw-exit-code
   (функція (сирий-результат)
@@ -29,13 +25,13 @@
       ((тотожне? (перше сирий-результат) (як-є process-result))
        ((функція (результат-виводу результат-помилок)
         (за-умовою
-           ((хибне? (тотожне? (перше результат-виводу) (як-є decoded)))
+           ((хибне? (успішно-декодовано? результат-виводу))
             (список (як-є rejected) (як-є stdout-invalid-utf8)))
-           ((тотожне? (перше результат-виводу) (як-є decoded))
+           ((успішно-декодовано? результат-виводу)
             (за-умовою
-              ((хибне? (тотожне? (перше результат-помилок) (як-є decoded)))
+              ((хибне? (успішно-декодовано? результат-помилок))
                (список (як-є rejected) (як-є stderr-invalid-utf8)))
-              ((тотожне? (перше результат-помилок) (як-є decoded))
+              ((успішно-декодовано? результат-помилок)
                (список
                  (як-є decoded-process)
                  (process-raw-exit-code сирий-результат)
@@ -54,8 +50,8 @@
   (функція (програма аргументи)
     (процес-результат-текст (process-run-raw програма аргументи))))
 
-; Public compatibility surface. Valid UTF-8 preserves the historical
-; 3-element result shape. Invalid UTF-8 returns explicit rejection.
+; Зовнішня сумісна поверхня повертає три поля для належного тексту.
+; Пошкоджене кодування повертає явну відмову.
 (визначити процес-публічний-вихід-код
   (функція (код)
     (за-умовою
@@ -77,6 +73,6 @@
         (так результат)))
        (процес-запустити-текст програма аргументи))))
 
-; #469: numeric identity only. The registry-derived bootstrap cache decides
-; whether this post-core closure currently has any additional stable peers.
+; Додаткові публічні назви визначає чинне зв'язування з реєстру.
+; Файл не створює нової машинної тотожності.
 (як-є (postcore-materialization-debug skipped))
