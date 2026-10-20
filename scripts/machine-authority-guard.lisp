@@ -1,9 +1,11 @@
-; #150/#211/#4057 — executable one-way machine authority + anti-hybrid guard.
-; Admitted authority direction remains semantic-to-machine; reverse authority is RED.
-; Current semantic authority is Contract 11.8 + ratified exact-domain laws.
-; Every bounded machine capability must name an independent exact-domain
-; semantic witness. Native/host results may realize meaning but may never
-; become their own answer key.
+; #150/#211/#4057 — виконуваний захист односторонніх машинних
+; повноважень і заборона змішування шарів.
+; Дозволений напрямок — від семантики до машини; зворотний заборонено.
+; Джерело семантики — Контракт 11.8 і ратифіковані закони доменів.
+; Кожна обмежена машинна можливість повинна мати незалежний
+; семантичний доказ з точною доменною тотожністю.
+; Результат зовнішнього виконавця може реалізувати значення,
+; але не може слугувати сам собі еталоном.
 
 (визначити друге (функція (х) (перше (решта х))))
 (визначити третє (функція (х) (перше (решта (решта х)))))
@@ -104,8 +106,9 @@
          ((тотожне? (перше рядок) (як-є authority-edge)) (0)
           (як-є denied)))))))
 
-; Deliberately unbound diagnostic symbols make fail-closed violations visible
-; even when stdout is buffered. CI requires the exact diagnostic name.
+; Навмисно незв'язані діагностичні символи показують відмови
+; навіть за буферизованого стандартного виводу.
+; Автоматична перевірка вимагає точного імені діагностики.
 (визначити провал-машинної-авторитетності
   (функція (рядок)
     (machine-authority-boundary-violation рядок)))
