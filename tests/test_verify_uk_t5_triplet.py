@@ -10,6 +10,8 @@ import sys
 import tempfile
 import unittest
 
+from scripts.sens_t5_codec import encode_t5m_projection
+
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts/verify_uk_t5_triplet.py"
 SPEC = importlib.util.spec_from_file_location("verify_uk_triplet", SOURCE)
@@ -56,6 +58,22 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.assertEqual(record["old_originals_migrated_by_this_audit"], 0)
         self.assertEqual((self.lisp.read_bytes(), self.sens.read_bytes(),
                           self.view.read_bytes()), original)
+
+    def test_current_t5m_ukr_source_and_reverse_are_byte_identical(self):
+        # Keep the historic fixture read-only: modern T5M is checked in temp.
+        physical = encode_t5m_projection(WORDS)
+        self.sens.write_bytes(physical)
+        report = mod.verify(self.lisp, self.sens, self.view, codec="t5m")
+        self.assertEqual(report["physical_codec"], "t5m")
+        self.assertTrue(report["physical_T5M_roundtrip"])
+        self.assertFalse(report["physical_T5_roundtrip"])
+        self.assertTrue(report["canonical_uk_roundtrip"])
+        self.assertEqual(self.sens.read_bytes(), physical)
+        self.assertEqual(self.view.read_text(encoding="ascii"), WORDS + "\n")
+        self.assertEqual(mod.verify(self.lisp, self.sens, self.view)["physical_codec"], "t5m")
+        self.view.write_text("0\n", encoding="ascii")
+        with self.assertRaisesRegex(mod.ProjectionBlocked, "view"):
+            mod.verify(self.lisp, self.sens, self.view, codec="t5m")
 
     def test_exact_ratified_uk_surfaces_from_domain_tables(self):
         self.assertEqual(mod.uk_surface(1), {"0": "ні", "1": "так"})
