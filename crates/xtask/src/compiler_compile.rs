@@ -181,7 +181,7 @@ fn compile_t5_triplet_on_worker(
         .collect::<Vec<_>>()
         .join(" ");
     let mut canonical_view = visible.as_bytes().to_vec();
-    canonical_view.push(b'\\n');
+    canonical_view.push(b'\n');
     if visible_view != canonical_view.as_slice() {
         return Err("T5M: похідний бітовий перегляд не збігається зі словами Zig".into());
     }
@@ -521,7 +521,7 @@ mod tests {
         let source = "(як-є ())\n".as_bytes();
         let view = b"10 001 00 000 01\n";
         let exact = std::str::from_utf8(view).expect("точний двійковий перегляд")
-            .trim_end_matches('\\n').split(' ')
+            .trim_end_matches('\n').split(' ')
             .map(|word| sens_cli::zig_transport::ExactT5Word::new(
                 word.len(), word.bytes().map(|bit| bit - b'0').collect(),
             ).expect("точне бітове слово"))
