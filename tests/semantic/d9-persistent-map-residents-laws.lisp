@@ -1,7 +1,7 @@
-; D9 resident projections over the active immutable persistent-map mechanism.
-; Exact identities: MAP-EMPTY D9:101100011; MAP-GET D9:101100101;
+; D9-проєкції резидентів над активним механізмом незмінної persistent-map.
+; Точні ідентичності: MAP-EMPTY D9:101100011; MAP-GET D9:101100101;
 ; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
-; The source mechanism returns () or (value), and stores ordered dotted entries.
+; Вихідний механізм повертає () або (value) і зберігає впорядковані точкові записи.
 (load "lib/core.lisp")
 (load "lib/persistent-map.lisp")
 (список
