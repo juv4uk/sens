@@ -325,7 +325,7 @@ class TripletInventoryTests(unittest.TestCase):
         report["files"][0]["release_admitted"] = True
         checked = self.release_verdict(report)
         self.assertEqual(checked.returncode, 1, checked.stdout + checked.stderr)
-        self.assertIn("physical inventory cannot certify", checked.stderr)
+        self.assertIn("RELEASE_BLOCKED: mechanical inventory cannot assert native SENS semantic", checked.stderr)
         self.assertNotIn("RELEASE_TRIPLE_FULL_CORPUS_PASS", checked.stdout)
 
     def test_release_gate_rejects_informational_inventory_without_strict_proof(self):
