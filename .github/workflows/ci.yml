@@ -329,6 +329,8 @@ jobs:
           python3 -m unittest tests/test_binary_examples_source_boundary.py -v
           python3 -m unittest tests/test_audit_t5_file_pairs.py -v
           python3 -m unittest tests/test_check_release_triple_corpus.py -v
+          # Тільки незмінні Lisp-токени дозволяють переприв'язувати SHA після українізації коментарів.
+          python3 -m unittest tests/test_refresh_nonprogram_comment_pins.py -v
           python3 -m unittest tests/test_report_t5_triplet_inventory.py -v
           # Залишковий історичний борг видно в кожному запуску; не підміняти
           # частковий прогрес загальним релізним NO-GO чи фальшивим GREEN.
