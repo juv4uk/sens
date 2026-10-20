@@ -1,6 +1,6 @@
-; #419 PRE-1.0 Canon sculpture audit
-; Evidence map only. This file does not define language semantics.
-; Classification is intentionally provisional and falsifiable.
+; #419 — Дослідницький аудит побудови Канону перед версією 1.0.
+; Це лише карта доказів, а не визначення семантики мови.
+; Класифікація попередня: кожне твердження допускає спростування.
 
 (canon-sculpt-audit
   (schema-version 1)
@@ -24,7 +24,7 @@
     (lower-concepts ())
     (classification ground-value)
     (falsification-question
-      "Can every current use of Canon 0 be replaced by a derived value without introducing a second ground identity?"))
+      "Чи можна замінити кожне чинне використання Канону 0 похідним значенням, не вводячи другої первинної тотожності?"))
 
   (candidate
     (identity PRIM_QUOTE)
@@ -32,7 +32,7 @@
     (observable-laws (return-form-without-ordinary-evaluation))
     (classification syntax-rule-candidate)
     (falsification-question
-      "Can quote be defined as an ordinary callable Lisp function without already possessing a mechanism that suppresses argument evaluation?"))
+      "Чи можна визначити цитування як звичайну викличну функцію Ліспу, не маючи заздалегідь механізму, який припиняє обчислення аргументу?"))
 
   (candidate
     (identity PRIM_ATOM)
@@ -43,7 +43,7 @@
       ((atom non-pair-non-empty) (structural-kind atom)))
     (classification insufficient-evidence)
     (falsification-question
-      "Can structural-kind be derived without calling atom, an alias of atom, a host representation tag, or an equivalent primitive structural classifier?"))
+      "Чи можна вивести вид структури без виклику atom, його псевдоніма, позначки представлення зовнішнього виконавця або рівносильного примітивного класифікатора структури?"))
 
   (candidate
     (identity PRIM_EQ)
@@ -52,7 +52,7 @@
       (returns-identity-relation-result-not-generic-truth))
     (classification insufficient-evidence)
     (falsification-question
-      "Can identity-relation be derived from lower Lisp concepts without importing pointer/host equality or recursively invoking eq through another surface?"))
+      "Чи можна вивести відношення тотожності з базовіших понять Ліспу без запозичення рівності вказівників або зовнішнього виконавця та без рекурсивного виклику eq через іншу проєкцію?"))
 
   (candidate
     (identity PRIM_CONS)
@@ -60,7 +60,7 @@
     (observable-laws (construct-pair))
     (classification irreducible-candidate)
     (falsification-question
-      "Can a pair be constructed without already having a pair constructor or a stronger aggregate constructor in the semantic ground?"))
+      "Чи можна побудувати пару, не маючи вже конструктора пар або потужнішого конструктора складених значень у семантичній основі?"))
 
   (candidate
     (identity PRIM_CAR)
@@ -68,7 +68,7 @@
     (observable-laws (observe-first-component-of-pair))
     (classification insufficient-evidence)
     (falsification-question
-      "Can first-component observation be derived from cons plus other lower concepts without smuggling in pair destructuring?"))
+      "Чи можна вивести отримання першої складової пари через cons та базовіші поняття, не додаючи приховано механізму розбирання пари?"))
 
   (candidate
     (identity PRIM_CDR)
@@ -76,7 +76,7 @@
     (observable-laws (observe-second-component-of-pair))
     (classification insufficient-evidence)
     (falsification-question
-      "Can second-component observation be derived from cons plus other lower concepts without smuggling in pair destructuring?"))
+      "Чи можна вивести отримання другої складової пари через cons та базовіші поняття, не додаючи приховано механізму розбирання пари?"))
 
   (candidate
     (identity PRIM_COND)
@@ -86,14 +86,14 @@
       (evaluate-selected-consequent-only))
     (classification syntax-rule-candidate)
     (falsification-question
-      "Can cond be macro-derived from a smaller evaluation-control form while preserving observable evaluation order and without making that smaller form an undeclared semantic primitive?"))
+      "Чи можна вивести cond макросом із простішої форми керування обчисленням, зберігши спостережуваний порядок обчислення і не проголошуючи приховано простішу форму новим семантичним примітивом?"))
 
   (audit-law
     (name no-historical-privilege)
-    (statement "Being named primitive in an earlier contract is evidence to inspect, not proof of irreducibility."))
+    (statement "Назва «примітив» у попередньому контракті — це свідчення для перевірки, а не доказ невивідності."))
   (audit-law
     (name no-host-proof)
-    (statement "A Rust implementation, runtime tag, pointer identity, or backend shortcut cannot by itself prove semantic irreducibility."))
+    (statement "Реалізація на Rust, позначка часу виконання, тотожність вказівників або обхідний шлях у виконавці самі собою не доводять семантичної невивідності."))
   (audit-law
     (name preserve-before-delete)
-    (statement "No candidate may be removed until its observable laws are preserved by independent Lisp-owned witnesses and a non-circular derivation is demonstrated.")))
+    (statement "Жодного кандидата не можна вилучати, доки його спостережувані закони не збережено незалежними свідками, визначеними самим Ліспом, і не доведено їхнє некругове виведення.")))
