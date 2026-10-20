@@ -1,156 +1,187 @@
-;;;; Independent historical AI mathematical donor oracle, NOT binary SENS code.
-;;;; Reiter (1987) finite conflict -> subset-minimal hitting-set diagnoses.
-;;;; This oracle enumerates whole integer-mask power set rather than using
-;;;; the Python oracle's recursive uncovered-conflict branching algorithm.
+;;;; Незалежний історичний математичний Lisp-оракул діагностування Райтерa (1987).
+;;;; Це дослідницьке свідчення у Common Lisp, а не двійковий код СЕНС.
+;;;; Скінченні конфлікти перетворюються на мінімальні за включенням діагнози.
+;;;; На відміну від рекурсивного Python-оракула, тут перебирається весь
+;;;; простір підмножин через цілочисельні маски.
+;;;; Протокольні ключі :diagnoses та :no-diagnosis не перейменовуються.
+
 (defpackage :d10-reiter-diagnoses (:use :cl))
 (in-package :d10-reiter-diagnoses)
 
-(defvar *checks* 0)
-(defvar *family-count* 0)
-(defun expect (label actual wanted)
-  (unless (equal actual wanted)
-    (error "~A: got ~S, expected ~S" label actual wanted))
-  (incf *checks*))
+(defvar *перевірок* 0)
+(defvar *родин-конфліктів* 0)
 
-(defun valid-input? (universe conflicts)
-  (and (listp universe) (listp conflicts)
-       (every #'symbolp universe)
-       (= (length universe) (length (remove-duplicates universe)))
-       (every (lambda (c)
-                (and (listp c)
-                     (every (lambda (v) (member v universe)) c)))
-              conflicts)))
+(defun перевірити (назва фактичне очікуване)
+  (unless (equal фактичне очікуване)
+    (error "~A: отримано ~S, очікувано ~S" назва фактичне очікуване))
+  (incf *перевірок*))
 
-(defun hits-all? (selection conflicts)
-  (every (lambda (conflict)
-           (intersection selection conflict :test #'eq)) conflicts))
+(defun коректний-вхід? (множина конфлікти)
+  (and (listp множина)
+       (listp конфлікти)
+       (every #'symbolp множина)
+       (= (length множина) (length (remove-duplicates множина)))
+       (every (lambda (конфлікт)
+                (and (listp конфлікт)
+                     (every (lambda (значення)
+                              (member значення множина))
+                            конфлікт)))
+              конфлікти)))
 
-(defun ordered-subsets (items)
-  (let ((result '()))
-    (loop for mask from 0 below (ash 1 (length items))
-          do (push (loop for v in items
-                         for bit from 0
-                         when (logbitp bit mask) collect v)
-                   result))
-    (nreverse result)))
+(defun покриває-всі-конфлікти? (вибір конфлікти)
+  (every (lambda (конфлікт)
+           (intersection вибір конфлікт :test #'eq))
+         конфлікти))
 
-(defun lex-indices-before (left right universe)
-  (let ((l (mapcar (lambda (v) (position v universe)) left))
-        (r (mapcar (lambda (v) (position v universe)) right)))
-    (loop for x in l
-          for y in r
-          when (/= x y) do (return (< x y))
-          finally (return (< (length l) (length r))))))
+(defun впорядковані-підмножини (елементи)
+  (let ((результат '()))
+    (loop for маска from 0 below (ash 1 (length елементи))
+          do (push (loop for значення in елементи
+                         for біт from 0
+                         when (logbitp біт маска)
+                           collect значення)
+                   результат))
+    (nreverse результат)))
 
-(defun source-diagnose (universe conflicts)
-  (unless (valid-input? universe conflicts)
-    (error "invalid conflict universe or conflict source labels"))
-  (loop for conflict in conflicts for index from 0
-        when (null conflict)
-          do (return-from source-diagnose
-               (list :no-diagnosis index)))
-  (let* ((hits (remove-if-not
-                (lambda (candidate) (hits-all? candidate conflicts))
-                (ordered-subsets universe)))
-         (minimal
+(defun індекси-лексикографічно-раніше? (ліві праві множина)
+  (let ((ліві-індекси
+          (mapcar (lambda (значення)
+                    (position значення множина))
+                  ліві))
+        (праві-індекси
+          (mapcar (lambda (значення)
+                    (position значення множина))
+                  праві)))
+    (loop for лівий in ліві-індекси
+          for правий in праві-індекси
+          when (/= лівий правий) do (return (< лівий правий))
+          finally (return (< (length ліві-індекси)
+                             (length праві-індекси))))))
+
+(defun діагностувати-за-джерелом (множина конфлікти)
+  (unless (коректний-вхід? множина конфлікти)
+    (error "Некоректні позначки множини компонентів або конфліктів"))
+  (loop for конфлікт in конфлікти
+        for індекс from 0
+        when (null конфлікт)
+          do (return-from діагностувати-за-джерелом
+               (list :no-diagnosis індекс)))
+  (let* ((покриття
+           (remove-if-not
+             (lambda (кандидат)
+               (покриває-всі-конфлікти? кандидат конфлікти))
+             (впорядковані-підмножини множина)))
+         (мінімальні
            (remove-if
-            (lambda (candidate)
-              (some (lambda (other)
-                      (and (< (length other) (length candidate))
-                           (subsetp other candidate :test #'eq)))
-                    hits))
-            hits)))
-    (setf minimal (sort minimal
-                        (lambda (a b) (lex-indices-before a b universe))))
+             (lambda (кандидат)
+               (some (lambda (інший)
+                       (and (< (length інший) (length кандидат))
+                            (subsetp інший кандидат :test #'eq)))
+                     покриття))
+             покриття)))
+    (setf мінімальні
+          (sort мінімальні
+                (lambda (лівий правий)
+                  (індекси-лексикографічно-раніше?
+                    лівий правий множина))))
     (list :diagnoses
-          (mapcar (lambda (diag)
-                    (list diag
-                          (loop for component in diag
+          (mapcar (lambda (діагноз)
+                    (list діагноз
+                          (loop for компонент in діагноз
                                 collect
-                                (list component
-                                      (or (loop for edge in conflicts
-                                                for k from 0
+                                (list компонент
+                                      (or (loop for ребро in конфлікти
+                                                for індекс from 0
                                                 when (equal
-                                                      (intersection diag edge :test #'eq)
-                                                      (list component))
-                                                  return k)
-                                          (error "minimal witness missing"))))))
-                  minimal))))
+                                                       (intersection діагноз ребро
+                                                                     :test #'eq)
+                                                       (list компонент))
+                                                  return індекс)
+                                          (error "Бракує свідка мінімальності"))))))
+                  мінімальні))))
 
-(defun refuses? (thunk)
-  (handler-case (progn (funcall thunk) nil) (error () t)))
+(defun відхилено? (дія)
+  (handler-case (progn (funcall дія) nil)
+    (error () t)))
 
-(defun suite ()
-  (expect "two incomparable minimal diagnoses"
-          (source-diagnose '(a b c) '((a b) (b c)))
-          '(:diagnoses (((a c) ((a 0) (c 1)))
-                        ((b) ((b 0))))))
-  (expect "empty conflict family -> one empty diagnosis"
-          (source-diagnose '(a b) nil)
-          '(:diagnoses ((nil nil))))
-  (expect "empty universe with empty conflict collection"
-          (source-diagnose nil nil)
-          '(:diagnoses ((nil nil))))
-  (expect "one empty conflict blocks all"
-          (source-diagnose '(a b) '(nil))
-          '(:no-diagnosis 0))
-  (expect "earliest empty conflict index"
-          (source-diagnose '(a) '((a) nil nil))
-          '(:no-diagnosis 1))
-  (expect "both independent components required"
-          (source-diagnose '(a b) '((a) (b)))
-          '(:diagnoses (((a b) ((a 0) (b 1))))))
-  (expect "duplicate conflict does not multiply diagnoses"
-          (source-diagnose '(a b) '((a b) (a b)))
-          '(:diagnoses (((a) ((a 0))) ((b) ((b 0))))))
-  (expect "one component conflicts with itself"
-          (source-diagnose '(a b c) '((b) (a b c)))
-          '(:diagnoses (((b) ((b 0))))))
-  (expect "duplicate universe labels invalid"
-          (refuses? (lambda () (source-diagnose '(a a) '((a)))))
-          t)
-  (expect "unknown conflict element invalid"
-          (refuses? (lambda () (source-diagnose '(a b) '((c)))))
-          t)
-  (expect "non-list conflict invalid"
-          (refuses? (lambda () (source-diagnose '(a) '(a))))
-          t)
-  (expect "component source positions lex order"
-          (source-diagnose '(b a c) '((b a) (a c)))
-          '(:diagnoses (((b c) ((b 0) (c 1)))
-                        ((a) ((a 0))))))
-  (expect "lex witness first original conflict index"
-          (source-diagnose '(a) '((a) (a)))
-          '(:diagnoses (((a) ((a 0))))))
+(defun набір-перевірок ()
+  (перевірити "Два непорівнянні мінімальні діагнози"
+             (діагностувати-за-джерелом '(a b c) '((a b) (b c)))
+             '(:diagnoses (((a c) ((a 0) (c 1)))
+                           ((b) ((b 0))))))
+  (перевірити "Без конфліктів існує один порожній діагноз"
+             (діагностувати-за-джерелом '(a b) nil)
+             '(:diagnoses ((nil nil))))
+  (перевірити "Порожня множина без конфліктів"
+             (діагностувати-за-джерелом nil nil)
+             '(:diagnoses ((nil nil))))
+  (перевірити "Один порожній конфлікт виключає всі діагнози"
+             (діагностувати-за-джерелом '(a b) '(nil))
+             '(:no-diagnosis 0))
+  (перевірити "Перший індекс порожнього конфлікту"
+             (діагностувати-за-джерелом '(a) '((a) nil nil))
+             '(:no-diagnosis 1))
+  (перевірити "Обидва незалежні компоненти обов'язкові"
+             (діагностувати-за-джерелом '(a b) '((a) (b)))
+             '(:diagnoses (((a b) ((a 0) (b 1))))))
+  (перевірити "Повтор конфлікту не множить діагнози"
+             (діагностувати-за-джерелом '(a b) '((a b) (a b)))
+             '(:diagnoses (((a) ((a 0))) ((b) ((b 0))))))
+  (перевірити "Конфлікт компонента із собою"
+             (діагностувати-за-джерелом '(a b c) '((b) (a b c)))
+             '(:diagnoses (((b) ((b 0))))))
+  (перевірити "Повторені назви компонентів відхилено"
+             (відхилено? (lambda ()
+                           (діагностувати-за-джерелом '(a a) '((a)))))
+             t)
+  (перевірити "Невідомий елемент конфлікту відхилено"
+             (відхилено? (lambda ()
+                           (діагностувати-за-джерелом '(a b) '((c)))))
+             t)
+  (перевірити "Конфлікт не є списком"
+             (відхилено? (lambda ()
+                           (діагностувати-за-джерелом '(a) '(a))))
+             t)
+  (перевірити "Лексикографічний порядок вихідних індексів"
+             (діагностувати-за-джерелом '(b a c) '((b a) (a c)))
+             '(:diagnoses (((b c) ((b 0) (c 1)))
+                           ((a) ((a 0))))))
+  (перевірити "Перший індекс вихідного конфлікту для свідка"
+             (діагностувати-за-джерелом '(a) '((a) (a)))
+             '(:diagnoses (((a) ((a 0))))))
 
-  ;; Exhaustive 3-component families with 0/1/2 possible conflict edges,
-  ;; including the empty conflict set. Verify minimality and completeness.
-  (let ((edges (ordered-subsets '(a b c))))
-    (dolist (family (cons nil
-                          (append (mapcar #'list edges)
-                                  (loop for first in edges
-                                        append (loop for second in edges
-                                                     collect (list first second))))))
-      (let ((result (source-diagnose '(a b c) family)))
-        (if (member nil family)
-            (unless (eq (first result) :no-diagnosis)
-              (error "empty conflict edge not rejected"))
+  ;; Повний перебір родин із трьома компонентами та нулем, одним
+  ;; чи двома можливими конфліктами, включно з порожнім конфліктом.
+  ;; Перевіряємо мінімальність і повноту результату.
+  (let ((ребра (впорядковані-підмножини '(a b c))))
+    (dolist (родина
+             (cons nil
+                   (append (mapcar #'list ребра)
+                           (loop for перше-ребро in ребра
+                                 append
+                                 (loop for друге-ребро in ребра
+                                       collect (list перше-ребро друге-ребро))))))
+      (let ((результат (діагностувати-за-джерелом '(a b c) родина)))
+        (if (member nil родина)
+            (unless (eq (first результат) :no-diagnosis)
+              (error "Порожній конфлікт не відхилено"))
             (progn
-              (unless (eq (first result) :diagnoses)
-                (error "no diagnostics despite satisfiable family"))
-              (dolist (entry (second result))
-                (let ((diag (first entry)))
-                  (unless (hits-all? diag family)
-                    (error "some conflict unhit"))
-                  (dolist (component diag)
-                    (when (hits-all? (remove component diag) family)
-                      (error "diagnosis is not subset-minimal"))))))))
-      (incf *family-count*)))
+              (unless (eq (first результат) :diagnoses)
+                (error "Немає діагнозів для задовільної родини"))
+              (dolist (запис (second результат))
+                (let ((діагноз (first запис)))
+                  (unless (покриває-всі-конфлікти? діагноз родина)
+                    (error "Залишився непокритий конфлікт"))
+                  (dolist (компонент діагноз)
+                    (when (покриває-всі-конфлікти?
+                            (remove компонент діагноз) родина)
+                      (error "Діагноз не мінімальний за включенням"))))))))
+      (incf *родин-конфліктів*)))
   (format t "D10 REITER real SBCL source oracle PASS ~D witnesses + ~D finite families~%"
-          *checks* *family-count*)
+          *перевірок* *родин-конфліктів*)
   (finish-output))
 
-(handler-case (suite)
-  (error (condition)
-    (format *error-output* "D10 REITER SBCL donor FAIL ~A~%" condition)
+(handler-case (набір-перевірок)
+  (error (помилка)
+    (format *error-output* "D10 REITER SBCL donor FAIL ~A~%" помилка)
     (sb-ext:exit :code 1)))
