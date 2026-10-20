@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""No partial T5 .sens files may be published from a mixed source batch."""
+"""No partial T5M .sens files may be published from a mixed source batch."""
 from __future__ import annotations
 
 import importlib.util
@@ -22,7 +22,7 @@ FAKE_DRIVER = r"""
 import argparse, hashlib, json, os, sys
 from pathlib import Path
 sys.path.insert(0, os.environ["SENS_SCRIPTS"])
-from sens_t5_codec import encode_projection, typed_sha256, decode_bytes
+from sens_t5_codec import encode_t5m_projection, typed_sha256, decode_t5m_bytes
 p=argparse.ArgumentParser()
 p.add_argument("root", type=Path)
 p.add_argument("--foundation")
@@ -41,13 +41,13 @@ for src in sorted(a.root.rglob("*.lisp")):
                      "empties":[{"reason":"unmapped domain"}]})
         blocked+=1
         continue
-    raw=encode_projection(content)
+    raw=encode_t5m_projection(content)
     destination=a.sens_mirror/target
     destination.parent.mkdir(parents=True,exist_ok=True)
     destination.write_bytes(raw)
     row={"path":name, "output":target.as_posix(),
          "status":"sens-written", "physical_sha256":hashlib.sha256(raw).hexdigest(),
-         "typed_word_sha256":typed_sha256(decode_bytes(raw))}
+         "typed_word_sha256":typed_sha256(decode_t5m_bytes(raw))}
     rows.append(row)
     written+=1
 report={"summary":{"files_seen":len(rows), "files_written":written,
@@ -135,7 +135,7 @@ class GuardedMirrorTests(unittest.TestCase):
             "destination.write_bytes(raw)",
             "destination.write_bytes(bytes([243]))"
         ))
-        with self.assertRaisesRegex(mirror.TransactionBlocked, "invalid physical T5"):
+        with self.assertRaisesRegex(mirror.TransactionBlocked, "invalid physical T5M"):
             self.migrate()
         self.assertFalse(self.output.exists())
 
