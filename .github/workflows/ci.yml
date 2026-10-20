@@ -306,6 +306,8 @@ jobs:
           # Легкі інтеграційні перевірки поточного D1–D11/T5M, без Zig build та SENS-eval.
           python3 -m unittest tests/test_migrate_t5_batch.py -v
           python3 -m unittest tests/test_migrate_approved_t5_current.py -v
+          # Чинна інспекція D1–D11: жодного повернення до D1–D9/SID8.
+          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_one_file_resolver_uses_current_ukr_and_rejects_ambiguous_w8 -v
           # На кожному push: чинний D1–D11, точні слова та беззаписний dry-run.
           # Повна перевірка 2026-10-08 SHA-маніфестів зберігається суворою
           # у workflow_dispatch migration-readiness-census; застарілий пін
