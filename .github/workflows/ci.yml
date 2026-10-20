@@ -7,11 +7,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Кожен запуск зберігається; новий push не скасовує попередні запуски гілки.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
-
 permissions:
   contents: read
 
