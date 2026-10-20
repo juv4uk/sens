@@ -16,9 +16,9 @@
 ;     (probe-id  . BITSTRING) ; SID intentionally used by this semantic witness
 ;     (status    . SYMBOL))  ; live | integration-gated | historical | absent
 ;
-; IMPORTANT: a mechanical ABI test that merely preserves an opaque byte is
-; NOT a semantic witness, even when that byte happens to equal a registry SID.
-; Such probes are recorded separately under opaque-kernel-probe-evidence/1.
+; ВАЖЛИВО: механічний ABI-тест, що лише зберігає непрозорий байт, НЕ є
+; семантичним свідком, навіть якщо цей байт випадково дорівнює SID реєстру.
+; Такі проби записано окремо під opaque-kernel-probe-evidence/1.
 ;
 ; Відсутність witness-а коректна: вона фіксує, що жодне ядро поки не
 ; виконує цю ідентичність, а не те, що ідентичність не визначена.
@@ -136,9 +136,9 @@
 
 
 ; ---------------------------------------------------------------------------
-; Mechanical ABI provenance — explicitly NOT semantic execution witnesses.
-; These rows prove only that an opaque u8 survives the shared boundary while
-; the native payload is executed by the named kernel.
+; Механічне походження ABI — явно НЕ семантичні свідки виконання.
+; Ці рядки доводять лише, що непрозорий u8 переживає спільну межу, поки
+; рідне корисне навантаження виконується названим ядром.
 ; ---------------------------------------------------------------------------
 
 (opaque-kernel-probe-evidence/1
