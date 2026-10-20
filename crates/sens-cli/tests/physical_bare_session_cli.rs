@@ -1,6 +1,6 @@
 //! CLI boundary checks for current T5M and the Ukrainian source surface.
-//! Preserve fail-closed treatment of historical physical fixtures and assert
-//! real CLI behavior, not merely unit-level identity or successful exit.
+//! Assert the current T5M open path and real CLI behavior, not merely
+//! unit-level identity or successful exit.
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -9,7 +9,7 @@ use std::{
 };
 static NONCE: AtomicU64 = AtomicU64::new(0);
 
-const MIGRATION_FIXTURES_NOT_CURRENT_T5M: &[&str] = &[
+const DEFAULT_T5M_OPEN_FIXTURES: &[&str] = &[
     "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens",
     "tests/fixtures/migration-multiform-cohort-main/two-forms.sens",
     "tests/fixtures/migration-eq-cond-cohort-main/eq-cond-select.sens",
@@ -21,6 +21,13 @@ fn repo_path(relative: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../..")
         .join(relative)
+}
+fn trit_open(path: &Path) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("open")
+        .arg(path)
+        .output()
+        .expect("execute default-T5M read-only open")
 }
 fn physical_sens(path: &Path) -> Output {
     Command::new(env!("CARGO_BIN_EXE_sens"))
@@ -37,34 +44,17 @@ fn full_macro_baseline(path: &Path) -> Output {
 }
 
 #[test]
-fn migration_fixtures_are_not_admitted_by_current_t5m() {
-    for relative in MIGRATION_FIXTURES_NOT_CURRENT_T5M {
+fn sens_trit_open_reads_default_t5m_fixtures_without_execution_or_mutation() {
+    for relative in DEFAULT_T5M_OPEN_FIXTURES {
         let file = repo_path(relative);
         let original = fs::read(&file).expect("real tracked physical fixture");
-        assert!(original.iter().all(|byte| *byte < 243));
-        let bare = physical_sens(&file);
-        let original_default = full_macro_baseline(&file);
-        assert_eq!(
-            bare.status, original_default.status,
-            "{relative} rejection parity"
-        );
-        assert!(
-            !bare.status.success(),
-            "migration fixture {relative} must not enter current T5M execution"
-        );
-        assert!(
-            bare.stdout.is_empty(),
-            "{relative}: rejection emitted output"
-        );
-        assert!(
-            String::from_utf8_lossy(&bare.stderr).contains("Zig physical T5M rejected"),
-            "{relative}: unexpected native diagnostic: {}",
-            String::from_utf8_lossy(&bare.stderr)
-        );
-        assert!(
-            !original_default.status.success(),
-            "{relative}: T5M baseline admitted the historical fixture"
-        );
+        let words = sens::decode_ternary_words(&original)
+            .unwrap_or_else(|error| panic!("{relative}: exact-width reference decode: {error:?}"));
+        let expected = format!("{}\n", sens::render_ternary_words_spaced(&words));
+        let opened = trit_open(&file);
+        assert!(opened.status.success(), "{relative}: {}", String::from_utf8_lossy(&opened.stderr));
+        assert_eq!(opened.stdout, expected.as_bytes(), "{relative}: default T5M projection");
+        assert!(opened.stderr.is_empty(), "{relative}: open must not execute or warn");
         assert_eq!(
             fs::read(&file).unwrap(),
             original,

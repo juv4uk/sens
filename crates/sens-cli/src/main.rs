@@ -842,7 +842,7 @@ mod core_profile_bootstrap_tests {
     #[cfg(not(feature = "zig-transport"))]
     #[test]
     fn physical_main_refuses_to_bypass_unavailable_zig_transport() {
-        let physical = [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91];
+        let physical = [0x63, 0x89, 0x06, 0xa1];
         let error = decode_physical_t5_words(&physical).expect_err("no Zig means no .sens ingress");
         assert!(error.contains("no Rust fallback"));
     }

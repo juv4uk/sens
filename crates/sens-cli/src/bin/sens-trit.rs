@@ -1015,9 +1015,9 @@ mod eval_tests {
     fn zig_encode_route_uses_t5m_by_default_without_rust_physical_decoder() {
         // SENS owns source parsing and D2 admission, Zig owns default T5M bytes.
         let projection = "10 001 00 000 01";
-        let legacy_t5 = sens::encode_binary_projection_ternary(projection)
-            .expect("legacy T5 compatibility reference");
-        assert_eq!(&legacy_t5, &[0x63, 0x89, 0x06, 0xa1]);
+        let compatibility_reference = sens::encode_binary_projection_ternary(projection)
+            .expect("five-trit compatibility reference");
+        assert_eq!(&compatibility_reference, &[0x63, 0x89, 0x06, 0xa1]);
         let expected = sens::parse_binary_source_words(projection)
             .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
         let actual = admitted_source_words(projection)
@@ -1027,8 +1027,9 @@ mod eval_tests {
                    [2, 3, 2, 3, 2]);
         let zig_bytes = zig_transport::encode_t5_direct(&actual)
             .expect("Zig sole default T5M encoder");
-        assert_eq!(zig_bytes, [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91]);
-        assert_ne!(zig_bytes, legacy_t5, "default must no longer emit legacy T5");
+        assert_eq!(zig_bytes, [0x63, 0x89, 0x06, 0xa1]);
+        assert_eq!(zig_bytes, compatibility_reference,
+            "T5M default uses the canonical five-trits-per-byte wire");
         assert_eq!(zig_transport::decode_t5_words(&zig_bytes).unwrap(), actual);
         verify_companion(projection, &zig_bytes).expect("Zig replay + SENS D2");
         // A one-bit D2-close on its own cannot be published as a program.
@@ -1144,7 +1145,7 @@ mod d7_zig_cli_boundary_tests {
             .expect("Zig-only physical T5 output");
         let source_trits = words.iter().map(|word| word.width()).sum::<usize>()
             + words.len() - 1;
-        assert_eq!(carrier.len(), source_trits.div_ceil(15) * 3);
+        assert_eq!(carrier.len(), source_trits.div_ceil(5));
         let restored = zig_transport::decode_t5_words(&carrier)
             .expect("Zig-only physical T5 ingress");
         assert_eq!(restored, words);
