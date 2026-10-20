@@ -16,7 +16,9 @@
 #   scripts/migrate-active-lib-exact.sh            # check only (default)
 #   scripts/migrate-active-lib-exact.sh --apply    # attempt all + report fixes
 #
-# Exit: 0 only if all active sources have convertible=0 and consumers passed.
+# Exit: --check=0 means only exact source scan PASS (NOT runtime/release GO).
+#       --apply=0 means all conversions and one consumer sweep PASS; it is
+#       still not a physical T5M or independent semantic roundtrip certificate.
 
 set -euo pipefail
 
@@ -84,8 +86,17 @@ verify_consumers() {
 }
 
 if (( ${#offenders[@]} == 0 )); then
-  echo "OK: every active file reports convertible=0 — completion gate satisfied."
-  exit 0
+  if [[ "$MODE" == "check" ]]; then
+    echo "EXACT_SOURCE_SCAN_PASS: convertible=0; consumers=NOT_CHECKED; SENS/T5M=NOT_CERTIFIED"
+    exit 0
+  fi
+  # Even a source with zero pending rewrites needs one actual consumer check.
+  if verify_consumers; then
+    echo "MIGRATION_SOURCE_CONSUMERS_PASS: no pending rewrites; SENS/T5M=NOT_CERTIFIED"
+    exit 0
+  fi
+  echo "MIGRATION_INCOMPLETE: consumer failures above; no source freeze"
+  exit 1
 fi
 echo "offenders: ${#offenders[@]} file(s)"
 if [[ "$MODE" != "apply" ]]; then
@@ -111,17 +122,23 @@ for entry in "${offenders[@]}"; do
     echo "    REPAIR_REQUIRED: converter error; source stays available, no file ban"
     continue
   fi
-  if verify_consumers; then
-    applied+=("$f")
-    echo "    CONSUMERS_PASS: $f"
-  else
-    needs_repair+=("$f:consumer-failure")
-    echo "    REPAIR_REQUIRED: consumer failure; keep changed source to fix identity"
-  fi
+  applied+=("$f")
+  echo "    SOURCE_REWRITTEN: $f; consumers await one shared verification"
 done
 
+# Many source files must not trigger many identical heavy cargo suites.
+# Check consumers once, after ALL intended rewrites, never per source.
+if (( ${#applied[@]} > 0 )); then
+  if verify_consumers; then
+    echo "CONSUMERS_PASS: one shared run for ${#applied[@]} rewritten file(s)"
+  else
+    needs_repair+=("consumer-sweep:failed")
+    echo "REPAIR_REQUIRED: consumer failure; preserve migrated sources for repair"
+  fi
+fi
+
 echo
-echo "consumers-pass: ${#applied[@]}   needs-repair: ${#needs_repair[@]}"
+echo "source-rewritten: ${#applied[@]}   needs-repair: ${#needs_repair[@]}"
 for item in "${needs_repair[@]}"; do echo "  REPAIR_REQUIRED: $item"; done
 
 # A report is not a semantic pass. Show every remaining convertible source,
@@ -134,5 +151,5 @@ if (( ${#needs_repair[@]} != 0 || ${#offenders[@]} != 0 )); then
   echo "MIGRATION_INCOMPLETE: actionable diagnostics above; NO FILE HOLD"
   exit 1
 fi
-echo "MIGRATION_COMPLETE: exact-domain sources and consumers verified"
+echo "MIGRATION_SOURCE_CONSUMERS_PASS: exact-domain source+consumers; SENS/T5M=NOT_CERTIFIED"
 exit 0
