@@ -1,307 +1,320 @@
-; probabilistic-decision-jev-like.lisp — first pure-Lisp System One / Jev-like slice.
-;
-; This is an experimental mechanism/data layer. It does NOT create a semantic SID,
-; does not add a runtime Value variant, and does not treat probability/confidence
-; as truth. A future model adapter may produce these observations, but my-lisp
-; owns the typed question, validation, provenance and deterministic policy.
-;
-; Fixed 2026-09-24: `atom`/`eq`/`equal?` and the custom `pd-*?` predicates below
-; return structural records (`(structural-kind ...)`, `(identity-relation ...)`)
-; or the classic `t`/`()` pair — never exact-Q 1/0. Every canonical-cond clause
-; that tested one of those against a literal `1`/`0` tag could never match,
-; surfacing as "canonical cond: no query matched" at runtime. Only the raw
-; arithmetic comparisons (`<`, `=`) genuinely return exact-Q 1/0, and keep their
-; literal tag. Every other clause below uses the two-part migration-compatible
-; form instead, which `evaluate_cond` resolves via generic/structural truthiness.
+; Експериментальний шар імовірнісних спостережень мовою СЕНС.
+; Жодного нового семантичного домену чи типу значення.
+; Імовірність не є істинністю, а законом і походженням керує СЕНС.
+; Протокольні мітки збережено; старі назви лишаються прив'язками.
 
-(визначити pd-question-choice
-  (функція (name options)
-    (список (як-є choice-question/1) name options)))
+(визначити запит-вибору
+  (функція (назва варіанти)
+    (список (як-є choice-question/1) назва варіанти)))
 
-(визначити pd-question-noul
-  (функція (name)
-    (список (як-є noul-question/1) name)))
+(визначити запит-так-ні
+  (функція (назва)
+    (список (як-є noul-question/1) назва)))
 
-(визначити pd-question-score
-  (функція (name levels)
-    (список (як-є score-question/1) name levels)))
+(визначити запит-шкали
+  (функція (назва рівні)
+    (список (як-є score-question/1) назва рівні)))
 
-(визначити pd-member?
-  (функція (value values)
+(визначити рішення-містить?
+  (функція (значення значення-списку)
     (за-умовою
-      ((010 values) () (001 ()))
-      ((010 values) (1) (001 ()))
-      ((11110111 value (100 values)) (1) t)
-      (t (pd-member? value (решта values))))))
+      ((атом? значення-списку) () (як-є ()))
+      ((атом? значення-списку) (1) (як-є ()))
+      ((однакові? значення (перше значення-списку)) (1) t)
+      (t (рішення-містить? значення (решта значення-списку))))))
 
-(визначити pd-proper-list?
-  (функція (value)
+(визначити рішення-правильний-список?
+  (функція (значення)
     (за-умовою
-      ((010 value) () (110
-         ((101 value (001 ())) t)
+      ((атом? значення) () (за-умовою
+         ((тотожне? значення (як-є ())) t)
          (t (як-є ()))))
-      ((010 value) (1) (110
-         ((101 value (001 ())) t)
+      ((атом? значення) (1) (за-умовою
+         ((тотожне? значення (як-є ())) t)
          (t (як-є ()))))
-      (t (pd-proper-list? (решта value))))))
+      (t (рішення-правильний-список? (решта значення))))))
 
-(визначити pd-probability-valid?
-  (функція (probability)
+(визначити допустима-ймовірність?
+  (функція (ймовірність)
     (за-умовою
-      ((11010 probability 0) 1 (001 ()))
-      ((11010 1 probability) 1 (001 ()))
+      ((менше? ймовірність 0) 1 (як-є ()))
+      ((менше? 1 ймовірність) 1 (як-є ()))
       (t t))))
 
-(визначити pd-sum-probabilities
-  (функція (distribution)
+(визначити сума-ймовірностей
+  (функція (розподіл)
     (за-умовою
-      ((010 distribution) () 0)
-      ((010 distribution) (1) 0)
+      ((атом? розподіл) () 0)
+      ((атом? розподіл) (1) 0)
       (t
-       (01010 (1001 (100 distribution))
-          (pd-sum-probabilities (решта distribution)))))))
+       (додати (друге (перше розподіл))
+          (сума-ймовірностей (решта розподіл)))))))
 
-(визначити pd-distribution-entries-valid?
-  (функція (distribution options seen)
+(визначити записи-розподілу-допустимі?
+  (функція (розподіл варіанти переглянуті)
     (за-умовою
-      ((010 distribution) () t)
-      ((010 distribution) (1) t)
+      ((атом? розподіл) () t)
+      ((атом? розподіл) (1) t)
       (t
-       (001000 ((entry (100 distribution)))
+       (нехай ((запис (перше розподіл)))
          (за-умовою
-           ((11110111 (000000 entry) 2) 1
-            (001000 ((entry-key-ref (100 entry))
-                  (probability (друге entry)))
+           ((однакові? (довжина запис) 2) 1
+            (нехай ((ключ-запису (перше запис))
+                  (ймовірність (друге запис)))
               (за-умовою
-                ((pd-member? entry-key-ref options)
+                ((рішення-містить? ключ-запису варіанти)
                  (за-умовою
-                   ((pd-member? entry-key-ref seen) (як-є ()))
-                   ((pd-probability-valid? probability)
-                    (pd-distribution-entries-valid?
-                      (решта distribution)
-                      options
-                      (сполучити entry-key-ref seen)))
+                   ((рішення-містить? ключ-запису переглянуті) (як-є ()))
+                   ((допустима-ймовірність? ймовірність)
+                    (записи-розподілу-допустимі?
+                      (решта розподіл)
+                      варіанти
+                      (сполучити ключ-запису переглянуті)))
                    (t (як-є ()))))
                 (t (як-є ())))))
            (t (як-є ()))))))))
 
-(визначити pd-all-options-present?
-  (функція (options distribution)
+(визначити усі-варіанти-присутні?
+  (функція (варіанти розподіл)
     (за-умовою
-      ((010 options) () t)
-      ((010 options) (1) t)
+      ((атом? варіанти) () t)
+      ((атом? варіанти) (1) t)
       (t
        (за-умовою
-         ((pd-member? (100 options) (101000 (0010 (entry) (100 entry)) distribution))
-          (pd-all-options-present? (решта options) distribution))
+         ((рішення-містить? (перше варіанти) (відобразити (функція (запис) (перше запис)) розподіл))
+          (усі-варіанти-присутні? (решта варіанти) розподіл))
          (t (як-є ())))))))
 
-(визначити pd-distribution-valid?
-  (функція (options distribution)
+(визначити допустимий-розподіл?
+  (функція (варіанти розподіл)
     (за-умовою
-      ((pd-proper-list? options)
+      ((рішення-правильний-список? варіанти)
        (за-умовою
-         ((pd-proper-list? distribution)
+         ((рішення-правильний-список? розподіл)
           (за-умовою
-            ((010 options) () (001 ()))
-            ((010 options) (1) (001 ()))
-            ((010 distribution) () (001 ()))
-            ((010 distribution) (1) (001 ()))
-            ((pd-distribution-entries-valid? distribution options (001 ()))
+            ((атом? варіанти) () (як-є ()))
+            ((атом? варіанти) (1) (як-є ()))
+            ((атом? розподіл) () (як-є ()))
+            ((атом? розподіл) (1) (як-є ()))
+            ((записи-розподілу-допустимі? розподіл варіанти (як-є ()))
              (за-умовою
-               ((11110111 (pd-sum-probabilities distribution) 1) 1
-                (pd-all-options-present? options distribution))
+               ((однакові? (сума-ймовірностей розподіл) 1) 1
+                (усі-варіанти-присутні? варіанти розподіл))
                (t (як-є ()))))
             (t (як-є ()))))
          (t (як-є ()))))
       (t (як-є ())))))
 
-(визначити pd-max-probability
-  (функція (distribution current)
+(визначити найбільша-ймовірність
+  (функція (розподіл поточна)
     (за-умовою
-      ((010 distribution) () current)
-      ((010 distribution) (1) current)
+      ((атом? розподіл) () поточна)
+      ((атом? розподіл) (1) поточна)
       (t
-       (001000 ((probability (1001 (100 distribution))))
+       (нехай ((ймовірність (друге (перше розподіл))))
          (за-умовою
-           ((11010 current probability) 1
-            (pd-max-probability (решта distribution) probability))
+           ((менше? поточна ймовірність) 1
+            (найбільша-ймовірність (решта розподіл) ймовірність))
            (t
-            (pd-max-probability (решта distribution) current))))))))
+            (найбільша-ймовірність (решта розподіл) поточна))))))))
 
-(визначити pd-confidence
-  (функція (distribution)
-    (pd-max-probability distribution 0)))
+(визначити упевненість-розподілу
+  (функція (розподіл)
+    (найбільша-ймовірність розподіл 0)))
 
-(визначити pd-choice-observe
-  (функція (question distribution source)
+(визначити спостерегти-вибір
+  (функція (запит розподіл джерело)
     (за-умовою
-      ((pd-distribution-valid? (10011 question) distribution)
+      ((допустимий-розподіл? (третє запит) розподіл)
        (список
          (як-є choice-observation/1)
-         question
-         distribution
-         (pd-confidence distribution)
-         source))
+         запит
+         розподіл
+         (упевненість-розподілу розподіл)
+         джерело))
       (t
-       (make-invalid
+       (створити-некоректний
          (як-є malformed-choice-distribution)
-         (список question distribution))))))
+         (список запит розподіл))))))
 
-(визначити pd-noul-observe
-  (функція (question yes-probability source)
+(визначити спостерегти-так-ні
+  (функція (запит ймовірність-так джерело)
     (за-умовою
-      ((pd-probability-valid? yes-probability)
-       (001000 ((distribution
-               (1110
-                 (1110 (001 yes) yes-probability)
-                 (1110 (001 no) (01011 1 yes-probability)))))
+      ((допустима-ймовірність? ймовірність-так)
+       (нехай ((розподіл
+               (список
+                 (список (як-є yes) ймовірність-так)
+                 (список (як-є no) (відняти 1 ймовірність-так)))))
          (список
            (як-є noul-observation/1)
-           question
-           distribution
-           (pd-confidence distribution)
-           source)))
+           запит
+           розподіл
+           (упевненість-розподілу розподіл)
+           джерело)))
       (t
-       (make-invalid
+       (створити-некоректний
          (як-є malformed-noul-probability)
-         (список question yes-probability))))))
+         (список запит ймовірність-так))))))
 
-(визначити pd-score-observe
-  (функція (question distribution source)
+(визначити спостерегти-шкалу
+  (функція (запит розподіл джерело)
     (за-умовою
-      ((pd-distribution-valid? (10011 question) distribution)
+      ((допустимий-розподіл? (третє запит) розподіл)
        (список
          (як-є score-observation/1)
-         question
-         distribution
-         (pd-confidence distribution)
-         source))
+         запит
+         розподіл
+         (упевненість-розподілу розподіл)
+         джерело))
       (t
-       (make-invalid
+       (створити-некоректний
          (як-є malformed-score-distribution)
-         (список question distribution))))))
+         (список запит розподіл))))))
 
-(визначити pd-observation-confidence
-  (функція (observation)
-    (100111 observation)))
+(визначити упевненість-спостереження
+  (функція (спостереження)
+    (четверте спостереження)))
 
-(визначити pd-observation-provenance
-  (функція (observation)
-    (110110101 observation)))
+(визначити походження-спостереження
+  (функція (спостереження)
+    (п'ятий спостереження)))
 
-(визначити pd-noul-policy
-  (функція (observation threshold)
+(визначити правило-так-ні
+  (функція (спостереження поріг)
     (за-умовою
-      ((11110111 (100 observation) (001 noul-observation/1)) (1)
+      ((однакові? (перше спостереження) (як-є noul-observation/1)) (1)
        (за-умовою
-         ((pd-probability-valid? threshold)
-          (001000 ((probability (1001 (100 (10011 observation)))))
+         ((допустима-ймовірність? поріг)
+          (нехай ((ймовірність (друге (перше (третє спостереження)))))
             (за-умовою
-              ((11010 probability threshold) 1
+              ((менше? ймовірність поріг) 1
                (список (як-є decision/1)
                      (як-є defer)
-                     observation
-                     (список (як-є threshold) threshold)))
+                     спостереження
+                     (список (як-є поріг) поріг)))
               (t
                (список (як-є decision/1)
                      (як-є accept)
-                     observation
-                     (список (як-є threshold) threshold))))))
+                     спостереження
+                     (список (як-є поріг) поріг))))))
          (t
-          (make-invalid
+          (створити-некоректний
             (як-є malformed-policy-threshold)
-            threshold))))
+            поріг))))
       (t
-       (make-invalid
+       (створити-некоректний
          (як-є unsupported-decision-observation)
-         observation)))))
+         спостереження)))))
 
-(визначити pd-choice-policy
-  (функція (observation option threshold)
+(визначити правило-вибору
+  (функція (спостереження варіант поріг)
     (за-умовою
-      ((11110111 (100 observation) (001 choice-observation/1)) (1)
+      ((однакові? (перше спостереження) (як-є choice-observation/1)) (1)
        (за-умовою
-         ((pd-probability-valid? threshold)
-          (001000 ((entry (pd-find-option option (10011 observation))))
+         ((допустима-ймовірність? поріг)
+          (нехай ((запис (знайти-варіант-рішення варіант (третє спостереження))))
             (за-умовою
-              ((010 entry) () (make-invalid
+              ((атом? запис) () (створити-некоректний
                  (як-є option-not-observed)
-                 (список option observation)))
-              ((010 entry) (1) (make-invalid
+                 (список варіант спостереження)))
+              ((атом? запис) (1) (створити-некоректний
                  (як-є option-not-observed)
-                 (список option observation)))
-              ((11010 (1001 entry) threshold) 1
+                 (список варіант спостереження)))
+              ((менше? (друге запис) поріг) 1
                (список (як-є decision/1)
                      (як-є defer)
-                     observation
-                     (список (як-є option) option)
-                     (список (як-є threshold) threshold)))
+                     спостереження
+                     (список (як-є варіант) варіант)
+                     (список (як-є поріг) поріг)))
               (t
                (список (як-є decision/1)
                      (як-є accept)
-                     observation
-                     (список (як-є option) option)
-                     (список (як-є threshold) threshold))))))
+                     спостереження
+                     (список (як-є варіант) варіант)
+                     (список (як-є поріг) поріг))))))
          (t
-          (make-invalid
+          (створити-некоректний
             (як-є malformed-policy-threshold)
-            threshold))))
+            поріг))))
       (t
-       (make-invalid
+       (створити-некоректний
          (як-є unsupported-decision-observation)
-         observation)))))
+         спостереження)))))
 
-(визначити pd-find-option
-  (функція (option distribution)
+(визначити знайти-варіант-рішення
+  (функція (варіант розподіл)
     (за-умовою
-      ((010 distribution) () (001 ()))
-      ((010 distribution) (1) (001 ()))
-      ((11110111 option (100 (100 distribution))) (1) (100 distribution))
-      (t (pd-find-option option (решта distribution))))))
+      ((атом? розподіл) () (як-є ()))
+      ((атом? розподіл) (1) (як-є ()))
+      ((однакові? варіант (перше (перше розподіл))) (1) (перше розподіл))
+      (t (знайти-варіант-рішення варіант (решта розподіл))))))
 
-(визначити pd-two-question-consistency
-  (функція (left right relation)
+(визначити узгодженість-двох-запитів
+  (функція (ліве праве зв'язок)
     (за-умовою
-      ((101 relation (001 independent)) (1)
+      ((тотожне? зв'язок (як-є independent)) (1)
        (список
          (як-є decision-relation/1)
          (як-є independent)
-         left
-         right))
-      ((101 relation (001 agree)) (1)
+         ліве
+         праве))
+      ((тотожне? зв'язок (як-є agree)) (1)
        (за-умовою
-         ((11110111 (10011 left) (10011 right)) (1)
-          (список (як-є decision-relation/1) (як-є agree) left right))
-         (t (make-disputed (список left right)))))
+         ((однакові? (третє ліве) (третє праве)) (1)
+          (список (як-є decision-relation/1) (як-є agree) ліве праве))
+         (t (створити-спірний (список ліве праве)))))
       (t
-       (make-invalid
+       (створити-некоректний
          (як-є unsupported-question-relation)
-         (список relation left right))))))
+         (список зв'язок ліве праве))))))
 
-(визначити pd-synthetic-witness
-  (функція (state choice-question noul-question score-question)
+(визначити синтетичний-свідок-рішення
+  (функція (стан запит-вибору запит-так-ні запит-шкали)
     (список
       (як-є probabilistic-witness/1)
-      state
-      (pd-choice-observe
-        choice-question
+      стан
+      (спостерегти-вибір
+        запит-вибору
         (як-є ((billing 3/4) (technical 1/4)))
-        (список (як-є source)
+        (список (як-є джерело)
               (як-є synthetic-witness)
-              (як-є state)
-              state))
-      (pd-noul-observe
-        noul-question
+              (як-є стан)
+              стан))
+      (спостерегти-так-ні
+        запит-так-ні
         2/3
-        (список (як-є source)
+        (список (як-є джерело)
               (як-є synthetic-witness)
-              (як-є state)
-              state))
-      (pd-score-observe
-        score-question
+              (як-є стан)
+              стан))
+      (спостерегти-шкалу
+        запит-шкали
         (як-є ((low 1/4) (medium 1/2) (high 1/4)))
-        (список (як-є source)
+        (список (як-є джерело)
               (як-є synthetic-witness)
-              (як-є state)
-              state)))))
+              (як-є стан)
+              стан)))))
+
+; Сумісні прив'язки до тих самих українських функцій.
+(визначити pd-question-choice запит-вибору)
+(визначити pd-question-noul запит-так-ні)
+(визначити pd-question-score запит-шкали)
+(визначити pd-member? рішення-містить?)
+(визначити pd-proper-list? рішення-правильний-список?)
+(визначити pd-probability-valid? допустима-ймовірність?)
+(визначити pd-sum-probabilities сума-ймовірностей)
+(визначити pd-distribution-entries-valid? записи-розподілу-допустимі?)
+(визначити pd-all-options-present? усі-варіанти-присутні?)
+(визначити pd-distribution-valid? допустимий-розподіл?)
+(визначити pd-max-probability найбільша-ймовірність)
+(визначити pd-confidence упевненість-розподілу)
+(визначити pd-choice-observe спостерегти-вибір)
+(визначити pd-noul-observe спостерегти-так-ні)
+(визначити pd-score-observe спостерегти-шкалу)
+(визначити pd-observation-confidence упевненість-спостереження)
+(визначити pd-observation-provenance походження-спостереження)
+(визначити pd-noul-policy правило-так-ні)
+(визначити pd-choice-policy правило-вибору)
+(визначити pd-find-option знайти-варіант-рішення)
+(визначити pd-two-question-consistency узгодженість-двох-запитів)
+(визначити pd-synthetic-witness синтетичний-свідок-рішення)
