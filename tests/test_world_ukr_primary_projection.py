@@ -88,6 +88,24 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertIn("(внутрішній-світ-модуль-відсутній? (порожній-світ)", witness)
         self.assertNotIn("(world-module-missing?", witness)
 
+    def test_d10_ancestor_predicates_have_only_current_ukrainian_bindings(self):
+        source, _ = read_sources()
+        d10 = (ROOT / "lib/domains/d10.lisp").read_text(encoding="utf-8")
+        for bits, ukrainian, english in (
+            ("0010101000", "світи-не-мають-спільного-предка?", "world-no-common-ancestor?"),
+            ("0010110100", "цей-світ-не-є-предком-іншого?", "world-not-ancestor?"),
+        ):
+            with self.subTest(bits=bits):
+                self.assertRegex(
+                    source, rf"(?m)^\(визначити\s+{re.escape(ukrainian)}\s+\(функція\b"
+                )
+                self.assertNotRegex(source, rf"\(визначити\s+{re.escape(english)}\b")
+                rows = [line for line in d10.splitlines()
+                        if line.startswith(f"  ({bits} ")]
+                self.assertEqual(len(rows), 1, f"D10:{bits} exact identity")
+                self.assertIn(f"(укр {ukrainian})", rows[0])
+                self.assertIn(f"(en {english})", rows[0])
+
     def test_world_operations_compose_through_ukr_primary_names(self):
         source, _ = read_sources()
         primary = source.split(ALIAS_MARKER, 1)[0]
