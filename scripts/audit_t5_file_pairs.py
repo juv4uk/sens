@@ -40,6 +40,25 @@ def candidates(root: Path, include_untracked: bool = False) -> list[Path]:
     return sorted(result)
 
 
+def source_candidates(root: Path, include_untracked: bool = False) -> list[Path]:
+    """Find all Lisp sources, INCLUDING those without a same-stem SENS carrier."""
+    if not include_untracked:
+        proc = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--", "*.lisp"],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False,
+        )
+        if proc.returncode == 0:
+            return sorted(root / os.fsdecode(rel)
+                          for rel in proc.stdout.split(b"\0") if rel)
+    result: list[Path] = []
+    for directory, names, files in os.walk(root, followlinks=False):
+        names[:] = sorted(name for name in names if name not in SKIP_DIRS)
+        for name in sorted(files):
+            if name.endswith(".lisp"):
+                result.append(Path(directory) / name)
+    return sorted(result)
+
+
 def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -153,12 +172,20 @@ def require_changed_views(report: dict, changed_sens: list[str]) -> None:
 
 def inspect(root: Path, *, strict_semantic: bool = False,
             include_untracked: bool = False,
-            require_spaced_view: bool = False) -> dict:
+            require_spaced_view: bool = False,
+            require_complete_sources: bool = False) -> dict:
     root = root.resolve(strict=True)
     if not root.is_dir():
         raise ValueError("root must be directory")
+    physical_files = candidates(root, include_untracked)
+    physical_paths = {file.relative_to(root).as_posix() for file in physical_files}
+    lisp_paths = sorted(file.relative_to(root).as_posix()
+                        for file in source_candidates(root, include_untracked))
+    # A .sens-first audit cannot see missing .sens artifacts without this census.
+    missing_sens = [path for path in lisp_paths
+                    if Path(path).with_suffix(".sens").as_posix() not in physical_paths]
     entries: list[dict] = []
-    for file in candidates(root, include_untracked):
+    for file in physical_files:
         try:
             rel = file.relative_to(root)
         except ValueError:
@@ -269,9 +296,13 @@ def inspect(root: Path, *, strict_semantic: bool = False,
         "mode": "tracked-only" if not include_untracked else "all-files",
         "strict_semantic": strict_semantic,
         "require_spaced_view": require_spaced_view,
+        "require_complete_sources": require_complete_sources,
         "empty_is_not_certification": len(entries) == 0,
         "summary": {
             "sens_files": len(entries),
+            "lisp_files": len(lisp_paths),
+            "lisp_with_sens": len(lisp_paths) - len(missing_sens),
+            "lisp_without_sens": len(missing_sens),
             "physical_pass": len(entries) - physical_empties,
             "physical_blocked": physical_empties,
             "exact_binary_source_pairs": exact_binary,
@@ -284,16 +315,19 @@ def inspect(root: Path, *, strict_semantic: bool = False,
         "status": (
             "BLOCKED" if (physical_empties or view_blocked
                           or (require_spaced_view and view_missing)
-                          or (strict_semantic and pending_oracle))
+                          or (strict_semantic and pending_oracle)
+                          or (require_complete_sources and missing_sens))
             else "NO_FILES" if not entries else
             "MECHANICAL_ONLY" if pending_oracle else "EXACT_BINARY_PAIRS"
         ),
         "files": entries,
+        "lisp_without_sens": missing_sens,
         "warning": (
             "Physical T5M/T5 and a source pair do not prove parser/oracle semantics. "
             "Missing extensionless views are NOT certified unless explicitly "
             "required for a scoped admitted cohort. Symbolic Lisp remains "
-            "PENDING_ORACLE; no automatic execution."
+            "PENDING_ORACLE; no automatic execution. Missing .sens twins "
+            "are separately counted across all .lisp files."
         ),
     }
 
@@ -308,11 +342,16 @@ def main(argv: list[str] | None = None) -> int:
                         help="scan all .sens files; default scans only git-tracked files")
     parser.add_argument("--require-spaced-view", action="store_true",
                         help="fail if any checked .sens has no canonical same-stem ASCII view; scope to an admitted cohort")
+    parser.add_argument("--require-complete-sources", action="store_true",
+                        help="fail if any .lisp lacks a same-stem .sens; NOT semantic proof")
+    parser.add_argument("--inventory-only", action="store_true",
+                        help="report actual debt without blocking normal migration CI; NOT release GO")
     args = parser.parse_args(argv)
     try:
         report = inspect(args.root, strict_semantic=args.strict_semantic,
                          include_untracked=args.include_untracked,
-                         require_spaced_view=args.require_spaced_view)
+                         require_spaced_view=args.require_spaced_view,
+                         require_complete_sources=args.require_complete_sources)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(
@@ -321,6 +360,9 @@ def main(argv: list[str] | None = None) -> int:
             )
         print(json.dumps({"status": report["status"], **report["summary"]},
                          ensure_ascii=False, sort_keys=True))
+        if args.inventory_only:
+            print("T5_SOURCE_INVENTORY_ONLY: release admission NOT certified")
+            return 0
         return 2 if report["status"] == "BLOCKED" else 0
     except (OSError, ValueError) as exc:
         print(f"T5 FILE-PAIR AUDIT ERROR: {exc}", file=sys.stderr)

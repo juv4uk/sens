@@ -328,6 +328,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests/test_ukr_projection_progress_report.py -v
+          python3 -m unittest tests/test_audit_t5_file_pairs.py -v
+          # Звіт включає .lisp без .sens і не є релізним допуском.
+          python3 scripts/audit_t5_file_pairs.py --inventory-only --output "$RUNNER_TEMP/t5-source-census.json"
           # Прогрес поступової міграції — інформативна метрика, не глобальний стоп.
           # Компактне ук та повне укр — різні peer spellings; їхня рівність
           # не є вимогою semantic identity чи міграційним критерієм.
