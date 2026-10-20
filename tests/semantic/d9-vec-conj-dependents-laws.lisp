@@ -1,7 +1,5 @@
-; D9:101011101 VEC-CONJ and D9:001011100 DEPENDENTS-OF.
-; Eight exact D1 YES witnesses: list vector order/nesting and TMS support
-; membership, absent support, multiple dependents, and wrong-order falsifier.
-; Donor: lib/forward.lisp (fact . supports). No direct D9 opcode.
+; Вісім законів додавання до вектора та обліку залежних фактів.
+; Перевіряються порядок, вкладеність, відсутні й повторні залежності.
 (список
   (однакові? (вектор-додати (як-є ()) (як-є а)) (список (як-є а)))
   (однакові? (вектор-додати (список (як-є а) (як-є б)) (як-є в))
@@ -30,6 +28,3 @@
         (сполучити (як-є похідний-б)
                    (список (як-є стороннє) (як-є джерело)))))
     (список (як-є похідний-а) (як-є похідний-б))))
-
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити хибне? not?)
