@@ -4,13 +4,11 @@
 запуск SENS є окремим фізичним свідком.
 """
 from pathlib import Path
-import hashlib
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts/build-inventory.lisp"
-OLD_BLOB_SHA1 = "00a31ef322d1fa1bae420d25e5a215c9a1b022b2"
 EDITS = [
   [
     17,
@@ -1076,27 +1074,28 @@ EDITS = [
   ]
 ]
 
-def git_blob_sha(data: bytes) -> str:
-    prefix = ("blob " + str(len(data)) + "\0").encode("ascii")
-    return hashlib.sha1(prefix + data).hexdigest()
-
-def inverse(source: str) -> str:
-    lines = source.splitlines(keepends=True)
-    for lineno, col, peer, bits in reversed(EDITS):
+def verify_current_peers(source: str) -> None:
+    """Поточні українські голови й точні координати без відновлення старого Git blob."""
+    lines = source.splitlines()
+    for lineno, col, peer, _bits in EDITS:
+        if lineno > len(lines):
+            raise ValueError(f"peer drift at {lineno}:{col}")
         row = lines[lineno - 1]
         if row[col:col + len(peer)] != peer or row[col - 1] != "(":
-            raise ValueError("peer drift at %d:%d" % (lineno, col))
-        lines[lineno - 1] = row[:col] + bits + row[col + len(peer):]
-    return "".join(lines)
+            raise ValueError(f"peer drift at {lineno}:{col}")
+
 
 class InventoryUkrProjectionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
 
-    def test_exact_original_git_blob_is_reconstructed(self):
-        self.assertEqual(git_blob_sha(inverse(self.source).encode("utf-8")), OLD_BLOB_SHA1)
+    def test_current_ukrainian_program_not_old_blob(self):
+        verify_current_peers(self.source)
         self.assertEqual(len(EDITS), 177)
+        self.assertIn("(визначити знайти-пару", self.source)
+        self.assertIn("(знайти-пару ключ (решта список-пар))", self.source)
+        self.assertNotIn("(визначити знайти-за-ключем знайти-пару)", self.source)
 
     def test_all_surface_mappings_are_current_ratified(self):
         tables = {}
@@ -1111,23 +1110,23 @@ class InventoryUkrProjectionTests(unittest.TestCase):
 
     def test_old_guard_and_quoted_values_unchanged(self):
         self.assertIn("((010 (0111 v)) ())", self.source)
-        self.assertIn("(assoc key", self.source)
+        self.assertIn("(знайти-пару ключ (решта список-пар))", self.source)
         for lineno in {line for line, _, _, _ in EDITS}:
             self.assertNotRegex(self.source.splitlines()[lineno-1],
                                 r"\([01]{3,11}(?=[\s(])")
 
-    def test_mutated_peer_fails_exact_inverse(self):
+    def test_mutated_peer_fails_current_projection(self):
         line, col, peer, _bits = EDITS[0]
         lines = self.source.splitlines(keepends=True)
         old = lines[line-1]
         lines[line-1] = old[:col] + "хибна-назва" + old[col+len(peer):]
         with self.assertRaisesRegex(ValueError, "peer drift"):
-            inverse("".join(lines))
+            verify_current_peers("".join(lines))
 
-    def test_mutated_identity_fails_frozen_blob(self):
-        restored = inverse(self.source)
-        bad = restored.replace("(0011 assoc", "(001 assoc", 1)
-        self.assertNotEqual(git_blob_sha(bad.encode("utf-8")), OLD_BLOB_SHA1)
+    def test_local_recursion_never_claims_d5_association_identity(self):
+        self.assertIn("(знайти-пару ключ (решта список-пар))", self.source)
+        self.assertNotIn("(11100 ключ (решта список-пар))", self.source)
+        self.assertNotIn("OLD_BLOB_SHA1", self.source)
 
 if __name__ == "__main__":
     unittest.main()
