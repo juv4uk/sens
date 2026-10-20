@@ -1,6 +1,5 @@
-; D8:11110111 structural EQUAL and strict D3 EQ must not disagree on NIL.
-; Eight exact D1 positives/negatives, including proper and dotted pairs.
-; No local DEFINE and no direct numeric/English semantic function heads.
+; Вісім законів структурної рівності порожніх та непорожніх списків.
+; Перевіряються правильні списки, пари й розрізнення різних атомів.
 (список
   (однакові? (як-є ()) (як-є ()))
   (хибне? (однакові? (як-є ()) (як-є а)))
@@ -13,5 +12,3 @@
   (однакові? (сполучити (як-є а) (як-є хвіст))
              (сполучити (як-є а) (як-є хвіст))))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити хибне? not?)
