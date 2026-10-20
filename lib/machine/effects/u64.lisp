@@ -62,14 +62,15 @@
          ((атом? (як-є ())) (як-є machine-effect-rejected))))
       ((атом? (як-є ())) (як-є machine-effect-rejected)))))
 
-; #4358 replay — target-neutral bounded DIFFERENCE/TIMES mechanism requests.
+; Відтворення #4358: цільово-незалежні обмежені механізми
+; віднімання та множення.
 ;
-; These constructors preserve the already-proved bounded rectangles:
-;   DIFFERENCE: exact non-negative u64 inputs with left >= right;
-;   TIMES: exact non-negative u32 inputs, whose product is guaranteed u64.
+; Конструктори зберігають уже доведені області допустимих операндів:
+;   віднімання — точні невід'ємні 64-бітні числа, ліве не менше правого;
+;   множення — точні невід'ємні 32-бітні числа, добуток у межах 64 біт.
 ;
-; No target, ISA, register, flag, encoding, surface spelling, or domain
-; coordinate belongs in this generic effect-definition module.
+; Цей модуль не визначає процесор, набір команд, регістри, прапорці,
+; машинне кодування, людську назву чи координату домену.
 
 (визначити машинний-ефект-носій-беззнаковий-64?
   (функція (значення)
