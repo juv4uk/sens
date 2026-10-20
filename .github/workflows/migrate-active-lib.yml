@@ -1,4 +1,4 @@
-name: Migrate active lib (exact domain)
+name: Міграція активних lib-файлів (точні домени)
 
 # Runs the CANONICAL converter (sens-to-sens) over the active authored lib —
 # the same tool the completion gate uses — and uploads the rewritten files.
@@ -19,11 +19,15 @@ jobs:
 
       # Invoke via `bash` so the script does not need the executable bit
       # (the GitHub contents API commits files as 100644).
-      - name: Gate check (report only)
-        run: bash scripts/migrate-active-lib-exact.sh --check || true
+      - name: Перевірити наявні заміни (звіт, без допуску)
+        id: scan
+        continue-on-error: true
+        run: bash scripts/migrate-active-lib-exact.sh --check
 
-      - name: Apply canonical migration
-        run: bash scripts/migrate-active-lib-exact.sh --apply || true
+      - name: Перенести код і перевірити споживачів один раз
+        id: apply
+        continue-on-error: true
+        run: bash scripts/migrate-active-lib-exact.sh --apply
 
       - name: Collect changed files
         run: |
@@ -37,9 +41,22 @@ jobs:
             echo "no changes" > migrated-active-lib.tgz
           fi
 
-      - name: Upload migration artifact
+      - name: Зберегти результати міграції навіть при помилці
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: migrated-active-lib
           path: migrated-active-lib.tgz
-          if-no-files-found: warn
+          if-no-files-found: error
+
+      - name: Не приховувати несправну міграцію
+        if: always()
+        shell: bash
+        env:
+          APPLY_OUTCOME: ${{ steps.apply.outcome }}
+        run: |
+          if [ "$APPLY_OUTCOME" != success ]; then
+            echo "::error::MIGRATION_INCOMPLETE: виправити причину; файли доступні в артефакті"
+            exit 1
+          fi
+          echo "SOURCE_MIGRATION_OK; фізична T5M та семантична оберненість = UNVERIFIED"
