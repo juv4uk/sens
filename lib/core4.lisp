@@ -461,43 +461,18 @@
 
 (визначити reduce згорнути)
 
-; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
-; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
-; the `unless` example in docs/quote-tutorial.md. Bindings are evaluated in
-; the *outer* environment before the new lexical frame exists (so
-; `(let ((x 1) (y x)) ...)` fails — `y`'s value expression can't see `x`
-; yet), matching Scheme/Racket's parallel `let`. Exactly two arguments,
-; `body` a single expression: `defmacro` uses the same fixed-arity
-; parameter binding as `lambda` (see docs/language-core.md), so there is no
-; variadic/rest-body support to lean on. For a sequence of expressions,
-; wrap them the same way the rest of this codebase already does —
-; `(let (...) ((lambda () expr1 expr2)))`.
-; `let` розгортається в негайно викликану `lambda`: `(let ((x 1) (y 2))
-; тіло)` розгортається в `((lambda (x y) тіло) 1 2)` — класичний прийом,
-; тієї самої форми, що й приклад `unless` у docs/quote-tutorial.md.
-; Bindings обчислюються в *зовнішньому* середовищі до того, як з'явиться
-; новий лексичний фрейм (тож `(let ((x 1) (y x)) ...)` провалиться — вираз
-; значення `y` ще не бачить `x`), як і паралельний `let` у Scheme/Racket.
-; Рівно два аргументи, `body` — один вираз: `defmacro` використовує те
-; саме зв'язування параметрів фіксованої арності, що й `lambda` (див.
-; docs/language-core.md), тож немає variadic/rest-body, на яке можна
-; спертись. Для послідовності виразів загортай так само, як і решта цього
-; коду вже робить — `(let (...) ((lambda () вираз1 вираз2)))`.
-; `let` entzuckert sich zu einem sofort aufgerufenen `lambda`:
-; `(let ((x 1) (y 2)) rumpf)` wird zu `((lambda (x y) rumpf) 1 2)` — der
-; klassische Trick, dieselbe Form wie das `unless`-Beispiel in
-; docs/quote-tutorial.md. Bindings werden in der *äußeren* Umgebung
-; ausgewertet, bevor der neue lexikalische Frame existiert (daher
-; scheitert `(let ((x 1) (y x)) ...)` — der Wertausdruck von `y` sieht `x`
-; noch nicht), passend zu Schemes/Rackets parallelem `let`. Genau zwei
-; Argumente, `body` ein einzelner Ausdruck: `defmacro` nutzt dieselbe
-; Parameterbindung fester Arität wie `lambda` (siehe docs/language-core.md),
-; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
-; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
-; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
-; Build the parallel LET expansion from current D3 list and predicate laws.
-; Do not depend on legacy list/map helpers whose predicates may return (1)/(0)
-; while executing under strict D3:110 COND.
+; Паралельне зв'язування «нехай» розгортається у негайний виклик функції.
+; Історична форма `(let ((x 1) (y 2)) body)` означає
+; `((lambda (x y) body) 1 2)`, як у docs/quote-tutorial.md.
+; Значення зв'язувань обчислюються в зовнішньому середовищі, до створення
+; нового лексичного рівня. Тому у `(let ((x 1) (y x)) ...)`
+; другий вираз не бачить першого зв'язування, як у Scheme/Racket.
+; Макрос має фіксовану арність й одну форму тіла: кілька виразів
+; об'єднуємо окремим викликом функції без параметрів.
+; Розгортання будуємо зі спискових та предикатних законів D3.
+; Старі помічники зі структурними відповідями (1)/(0) не можуть
+; керувати строгим двопольовим D3:110 COND.
+
 (визначити параметри-привязок
   (функція (привязки)
     (за-умовою
@@ -530,39 +505,18 @@
 ; Тимчасове сумісне ім'я для наявних викликів під час переходу поверхні.
 (визначити let нехай)
 
-; `let*` is `let` with sequential (not parallel) dependency: each binding's
-; value expression can see every binding before it. Expands recursively —
-; `(let* ((x 1) (y (+ x 1))) body)` becomes
-; `(let ((x 1)) (let* ((y (+ x 1))) body))`, peeling one binding into its
-; own nested `let` at a time until none are left, at which point `body`
-; evaluates directly. Each expansion step is itself new code handed back to
-; the evaluator, the same macro-expansion mechanism `unless` and `let`
-; already use — `let*` calling `let*` is ordinary recursion, not a special
-; case the evaluator needs to know about.
-; `let*` — це `let` з послідовною (не паралельною) залежністю: вираз
-; значення кожного binding бачить усі попередні. Розгортається
-; рекурсивно — `(let* ((x 1) (y (+ x 1))) тіло)` стає
-; `(let ((x 1)) (let* ((y (+ x 1))) тіло))`, знімаючи по одному binding у
-; власний вкладений `let`, поки жодного не лишиться, і тоді `тіло`
-; обчислюється напряму. Кожен крок розгортання сам є новим кодом,
-; переданим назад evaluator'у, тим самим механізмом розгортання макросів,
-; що вже використовують `unless` і `let` — виклик `let*` із `let*` —
-; звичайна рекурсія, не особливий випадок, про який має знати evaluator.
-; `let*` ist `let` mit sequenzieller (nicht paralleler) Abhängigkeit: der
-; Wertausdruck jedes Bindings sieht alle vorherigen. Entfaltet sich
-; rekursiv — `(let* ((x 1) (y (+ x 1))) rumpf)` wird zu
-; `(let ((x 1)) (let* ((y (+ x 1))) rumpf))`, wobei jeweils ein Binding in
-; ein eigenes verschachteltes `let` geschält wird, bis keines mehr übrig
-; ist, woraufhin `rumpf` direkt ausgewertet wird. Jeder Entfaltungsschritt
-; ist selbst neuer Code, der an den Evaluator zurückgegeben wird, derselbe
-; Makro-Expansionsmechanismus, den `unless` und `let` bereits nutzen —
-; `let*`, das `let*` aufruft, ist gewöhnliche Rekursion, kein Sonderfall,
-; von dem der Evaluator wissen müsste.
-; `eq` is deliberately atom-only per McCarthy's original primitive (see
-; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
-; structurally. `equal?` is the structural/deep-equality counterpart, built
-; on top of `eq` and `atom` rather than replacing them. Structural equality
-; walks SENS pairs and returns exact D1 values built from current D3 laws.
+; Послідовне «нехай-послідовно» відрізняється від паралельного «нехай»:
+; кожне наступне зв'язування бачить усі попередні.
+; Історична форма `(let* ((x 1) (y (+ x 1))) body)` розгортається у
+; `(let ((x 1)) (let* ((y (+ x 1))) body))`.
+; Кожний крок створює вкладене зв'язування, а без нових зв'язувань
+; обчислюється тіло. Це звичайна рекурсія Lisp-макроса, не спеціальна
+; команда виконавця.
+;
+; Первісна рівність Маккарті `eq` визначена лише на атомах.
+; Структурна рівність «однакові?» обходить пари СЕНС рекурсивно,
+; повертаючи точні D1-значення за законами D3 без заміни `eq`.
+
 (визначити однакові?
   (функція (перший-аргумент другий-аргумент)
     (за-умовою
@@ -582,8 +536,9 @@
       (так
        ні))))
 
-; D8:11110111 EQUAL — ratified Ukrainian surface for SENS-owned structural equality.
-; The identity is already admitted; this is a name projection, not a new opcode.
+; D8:11110111 EQUAL — ратифікована українська поверхня
+; структурної рівності, визначеної мовою СЕНС.
+; Псевдонім не створює нової машинної команди.
 (визначити equal? однакові?)
 
 ; NOT is a strict PredicateBit combinator. Any non-D1 input is rejected by
