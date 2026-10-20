@@ -510,4 +510,10 @@ jobs:
             echo "::error::Manual full runtime check was skipped"
             exit 1
           fi
-          echo "SENS CI passed: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT"
+          # Поверхневі Lisp-тести не доводять виконання SENS runtime.
+          if [[ "$SHARDS_RESULT" == "skipped" ]]; then
+            echo "SENS SURFACE PASS: guards=$GUARDS_RESULT; runtime=NOT_TESTED; release=NOT_CERTIFIED"
+            echo "::notice::SENS surface only: runtime shards were skipped; no release proof"
+          else
+            echo "SENS CHECKS PASS: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT; release requires corpus admission"
+          fi
