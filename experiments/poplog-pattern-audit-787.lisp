@@ -1,20 +1,19 @@
-; #787 POPLOG-1 — аудит архітектурних підходів за першоджерелами.
+; #787 POPLOG-1 — аудит патернів на основі свідчень.
 ;
-; Це дослідницькі дані, а не джерело законів мови. Тут зафіксовано,
-; які підходи Poplog СЕНС може запозичити, пристосувати або відхилити
-; до розширення оркестрації LIFE-1.
+; Це дослідницькі дані, не мовна влада. Вони фіксують, що my-lisp може
+; запозичити/адаптувати/відкинути з Poplog, перш ніж LIFE-1 наростить більше оркестрації.
 ;
-; Використані першоджерела:
+; Використані первинні свідчення:
 ; - OpenPoplog HELP SUBSYSTEMS
 ; - OpenPoplog DOC SYSSPEC
 ; - OpenPoplog REF PROLOG
 ; - OpenPoplog DOC CONTINUATION
 ; - OpenPoplog REF EXTERNAL
 ;
-; Значення рішень, які залишаються незмінними даними протоколу:
-;   borrow-mechanism — запозичити механізм;
-;   adapt-explicitly — пристосувати явно;
-;   reject-architecture — відхилити архітектуру.
+; Словник рішень:
+;   borrow-mechanism
+;   adapt-explicitly
+;   reject-architecture
 
 (poplog-pattern-audit/1
   ((pattern . subsystem-descriptor)
