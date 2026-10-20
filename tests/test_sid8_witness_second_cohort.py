@@ -25,7 +25,6 @@ COHORT = {
     "tests/fixtures/structural-observation-contract-witness.lisp": ("6e9f54d513052ae39e18e70571bb14fa39e78c28", 184),
     "tests/fixtures/native-first-dispatch-witness.lisp": ("1fce83fa91b0af40d108d5f52874648480d65cb0", 22),
     "tests/fixtures/native-first-execution-witness.lisp": ("10da52de43829fbf27afc714dd2a7c6e5f3522fd", 20),
-    "tests/fixtures/native-first-parity-witness.lisp": ("20dc71a12a239ee1d2851abfcb0916a562c039f6", 18),
     "tests/fixtures/native-first-totality-witness.lisp": ("1d5cb2f71e126b46c3475a2c5f90e463882312df", 14),
     "tests/fixtures/mechanism-selector-1047-witness.lisp": ("d4d35c29bd802aba82e5bb28647b6de87e097c9f", 48),
     "tests/fixtures/mathematical-result-taxonomy-witness.lisp": ("d82fb203b0bb24dd35b0e72f603a27d8204bea8c", 143),
@@ -53,8 +52,21 @@ class SecondWitnessCohort(unittest.TestCase):
                 count = sum(x != y for x, y in zip(a, b))
                 self.assertEqual(count, expected)
                 total += count
-        self.assertEqual(len(COHORT), 11)
-        self.assertEqual(total, 1061)
+        self.assertEqual(len(COHORT), 10)
+        self.assertEqual(total, 1043)
+
+    def test_native_parity_witness_is_current_ukrainian_source(self):
+        path = ROOT / "tests/fixtures/native-first-parity-witness.lisp"
+        source = path.read_text(encoding="utf-8")
+        active = "\\n".join(line.split(";", 1)[0] for line in source.splitlines())
+        self.assertIn("(визначити нативний-паритет-корпус", active)
+        self.assertIn("(визначити нативний-паритет-вердикти", active)
+        self.assertIn("(визначити нативний-паритет-свідок", active)
+        self.assertIn("(нативний-паритет-перевірити-корпус нативний-паритет-корпус)", active)
+        self.assertNotRegex(active, r"(?m)^\\s*\\([01]{3,10}\\s")
+        for legacy in ("native-first-parity-run", "native-first-parity-all-pass?",
+                       "native-first-parity-corpus", "native-first-parity-witness"):
+            self.assertNotIn(legacy, active)
 
     def test_quoted_x86_machine_data_retained(self):
         path = "tests/fixtures/x86-64-instruction-set-witness.lisp"
