@@ -22,10 +22,10 @@
         (encoder-coverage-check
           (status pass))))
      (так
-      (перше (читати-всі "(encoder-coverage-check (status fail) (reason projection-mismatch))")))))
+      (як-є (encoder-coverage-check (status fail) (reason projection-mismatch))))))
   (так
    (список
      (як-є encoder-coverage-check)
      (як-є (status fail))
-     (перше (читати-всі "(reason invalid-coverage-input-projection)"))
+     (як-є (reason invalid-coverage-input-projection))
      (сполучити (як-є checks) (покриття-кодувальника-перевірки-індексу)))))

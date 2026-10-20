@@ -22,4 +22,4 @@
           (список (як-є partial) (довжина покриття-кодувальника-часткові-записи)))))))
   (так
    (друкувати
-     (перше (читати-всі "(encoder-coverage-generate (status rejected) (reason invalid-coverage-input-projection))")))))
+     (як-є (encoder-coverage-generate (status rejected) (reason invalid-coverage-input-projection))))))
