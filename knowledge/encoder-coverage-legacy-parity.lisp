@@ -1,6 +1,6 @@
-; #604 migration-only witness. This is not coverage authority.
-; It freezes the last 32-row Rust partial projection and proves that every
-; legacy partial pair survives inside the derived Lisp-owned 122-pair projection.
+; #604 свідок лише міграції. Це не влада покриття.
+; Він фіксує останню 32-рядкову часткову проєкцію Rust і доводить, що кожна
+; застаріла часткова пара зберігається в похідній 122-парній проєкції, що належить Lisp.
 
 (encoder-coverage-legacy-parity/1
   (legacy-pair-count #b100000)
