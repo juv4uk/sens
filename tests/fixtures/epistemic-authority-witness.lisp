@@ -1,51 +1,51 @@
-; #220/#287 — epistemic relation and round-trip verdicts belong to Lisp.
-; Rust may execute this witness and observe its named status envelope, but it
-; must not author the semantic expected shape for equal?/eq results.
+; #220/#287 — епістемічні відношення та перевірки зворотного читання належать Lisp.
+; Rust виконує свідка й читає його іменований статус, але не визначає
+; семантичний очікуваний результат структурної рівності й тотожності.
 ;
-; The rows preserve the laws previously hidden behind Rust `== "t"` checks:
-; supporting-evidence returns the concrete matching record; canonical
-; epistemic records and current core result values survive write/read; and a
-; genuine external JSON Bool(false) remains distinct from its read-back ().
+; Рядки зберігають закони, раніше приховані перевірками Rust `== "t"`:
+; підтверджувальний-доказ повертає конкретний відповідний запис; канонічні
+; епістемічні записи й результати ядра переживають запис/читання; зовнішнє
+; JSON Bool(false) лишається відмінним від прочитаного назад ().
 
-(визначити epistemic-authority-rows
+(визначити епістемічні-рядки
   (функція ()
-    (нехай-послідовно ((simple-claim-ref (як-є (claim-ref cml-build-available)))
-           (simple-evidence
-             (make-evidence
-               simple-claim-ref
+    (нехай-послідовно ((просте-посилання-на-твердження (як-є (claim-ref cml-build-available)))
+           (простий-доказ
+             (створити-доказ
+               просте-посилання-на-твердження
                (як-є live-test)
                (як-є supports)
                (як-є (digest "d"))))
-           (structural-claim-ref
+           (структурне-посилання-на-твердження
              (як-є
                (claim-ref
                  (claim
                    (statement (build cml succeeds))
                    (source (observation local-run))
                    (review proposed)))))
-           (structural-evidence
-             (make-evidence
-               structural-claim-ref
+           (структурний-доказ
+             (створити-доказ
+               структурне-посилання-на-твердження
                (як-є live-test)
                (як-є supports)
                (як-є (digest "d"))))
-           (observation
-             (make-observation
+           (спостереження
+             (створити-спостереження
                (як-є (digest "sha256:abc"))
                (як-є (build cml succeeds))))
-           (claim
-             (make-claim
+           (твердження
+             (створити-структуроване-твердження
                (як-є (build cml succeeds))
                (як-є (observation local-run))
                (як-є proposed)))
-           (evidence
-             (make-evidence
+           (доказ
+             (створити-доказ
                (як-є (claim-ref cml-build-available))
                (як-є live-test)
                (як-є supports)
                (як-є (test (fixture conformance.my) (case exact-rational-division)))))
-           (intent
-             (make-intent
+           (намір
+             (створити-намір
                (як-є (build cml))
                (як-є (process:cargo tcp-client))
                (як-є (missing-capability))
@@ -53,75 +53,76 @@
       (список
         (список
           (як-є supporting-evidence-simple)
-          (однакові? (supporting-evidence simple-evidence simple-claim-ref) simple-evidence)
+          (однакові? (підтверджувальний-доказ простий-доказ просте-посилання-на-твердження) простий-доказ)
           (як-є (structural-relation same)))
         (список
           (як-є supporting-evidence-structural)
-          (однакові? (supporting-evidence structural-evidence structural-claim-ref) structural-evidence)
+          (однакові? (підтверджувальний-доказ структурний-доказ структурне-посилання-на-твердження) структурний-доказ)
           (як-є (structural-relation same)))
         (список
           (як-є observation-round-trip)
-          (однакові? (read (write-to-string observation)) observation)
+          (однакові? (прочитати (значення-у-текст спостереження)) спостереження)
           (як-є (structural-relation same)))
         (список
           (як-є claim-round-trip)
-          (однакові? (read (write-to-string claim)) claim)
+          (однакові? (прочитати (значення-у-текст твердження)) твердження)
           (як-є (structural-relation same)))
         (список
           (як-є evidence-round-trip)
-          (однакові? (read (write-to-string evidence)) evidence)
+          (однакові? (прочитати (значення-у-текст доказ)) доказ)
           (як-є (structural-relation same)))
         (список
           (як-є intent-round-trip)
-          (однакові? (read (write-to-string intent)) intent)
+          (однакові? (прочитати (значення-у-текст намір)) намір)
           (як-є (structural-relation same)))
         (список
           (як-є empty-list-round-trip)
-          (однакові? (read (write-to-string (як-є ()))) (як-є ()))
+          (однакові? (прочитати (значення-у-текст (як-є ()))) (як-є ()))
           (як-є (structural-relation same)))
         (список
           (як-є eq-result-round-trip)
-          (однакові? (read (write-to-string (eq 1 1))) (eq 1 1))
+          (однакові? (прочитати (значення-у-текст (тотожне? (як-є а) (як-є а))))
+            (тотожне? (як-є а) (як-є а)))
           (як-є (structural-relation same)))
         (список
           (як-є exact-less-false-round-trip)
-          (однакові? (read (write-to-string (< 2 1))) (< 2 1))
+          (однакові? (прочитати (значення-у-текст (< 2 1))) (< 2 1))
           (як-є (structural-relation same)))
         (список
           (як-є exact-less-true-round-trip)
-          (однакові? (read (write-to-string (< 1 2))) (< 1 2))
+          (однакові? (прочитати (значення-у-текст (< 1 2))) (< 1 2))
           (як-є (structural-relation same)))
         (список
           (як-є external-json-false-remains-distinct)
           (однакові?
-            (read (write-to-string (json-parse "false")))
-            (json-parse "false"))
+            (прочитати (значення-у-текст (формат-обміну-даними-розібрати "false")))
+            (формат-обміну-даними-розібрати "false"))
           (як-є (structural-relation distinct)))))))
 
-(визначити epistemic-authority-check
-  (функція (rows)
+(визначити перевірити-епістемічні-рядки
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) (structural-kind empty-list)
+      ((порожній? рядки)
        (як-є (epistemic-authority-witness (status pass))))
-      ((атом? rows) (structural-kind atom)
+      ((атом? рядки)
        (список
          (як-є epistemic-authority-witness)
          (список (як-є status) (як-є fail))
          (список (як-є case) (як-є malformed-row-tail))
-         (список (як-є actual) rows)))
-      ((атом? rows) (structural-kind pair)
-       (нехай ((row (перше rows)))
+         (список (як-є actual) рядки)))
+      ((хибне? (атом? рядки))
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((однакові? (друге row) (третє row)) (structural-relation same)
-            (epistemic-authority-check (решта rows)))
-           ((однакові? (друге row) (третє row)) (structural-relation distinct)
+           ((однакові? (друге рядок) (третє рядок))
+            (перевірити-епістемічні-рядки (решта рядки)))
+           ((хибне? (однакові? (друге рядок) (третє рядок)))
             (список
               (як-є epistemic-authority-witness)
               (список (як-є status) (як-є fail))
-              (список (як-є case) (перше row))
-              (список (як-є actual) (друге row))
-              (список (як-є expected) (третє row))))))))))
+              (список (як-є case) (перше рядок))
+              (список (як-є actual) (друге рядок))
+              (список (як-є expected) (третє рядок))))))))))
 
-(визначити epistemic-authority-witness
+(визначити свідок-епістеміки
   (функція ()
-    (epistemic-authority-check (epistemic-authority-rows))))
+    (перевірити-епістемічні-рядки (епістемічні-рядки))))

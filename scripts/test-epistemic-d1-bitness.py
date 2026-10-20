@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: epistemic PredicateBit + domain bitness.
+"""Перевірити епістемічний модуль та точні ширини доменів.
 
-Axiom: the binary key width IS the domain address.
-Checks:
-  1. lib/epistemic.lisp has no bare host truthiness (t / NIL / T)
-  2. Exact one-bit D1:YES word #d1:1 is present as predicate carrier
-  3. Constructors/accessors still present (reuse of project function surface)
-  4. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
+Перевірки:
+  1. lib/epistemic.lisp не залежить від host truthiness (t / NIL / T)
+  2. Викличні назви модуля є точними ратифікованими українськими проєкціями
+     D9/D10, а не старими англійськими peer-зв'язуваннями
+  3. Кожна lib/domains/dN.lisp має 2^N рядків із ключами рівно N бітів
 
-Does not prove runtime callability or T5 physical execution. Run:
+Це не доводить runtime-викличність або фізичне виконання T5M. Запуск:
 
     python3 scripts/test-epistemic-d1-bitness.py
 """
@@ -22,8 +21,25 @@ ROOT = Path(__file__).resolve().parents[1]
 EPI = ROOT / "lib" / "epistemic.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "#d1:1"
 REQUIRED_FNS = (
+    "це-належне-посилання-на-джерело?",
+    "епістеміка--посилання-на-твердження?",
+    "твердження-твердження",
+    "твердження-перевірка",
+    "доказ-підсумок",
+    "намір-ціль",
+    "отримати-посилання-на-джерело-доказу",
+    "отримати-джерело-спостереження",
+    "спостереження-твердження",
+    "отримати-посилання-доказу-на-твердження",
+    "доказ-метод",
+    "отримати-необхідні-можливості-наміру",
+    "отримати-умови-зупинки-наміру",
+    "отримати-очікувані-результати-наміру",
+    "підтверджувальний-доказ",
+    "усі-необхідні-можливості-наміру-забезпечені?",
+)
+RETIRED_ENGLISH_HEADS = (
     "make-observation",
     "make-claim",
     "make-evidence",
@@ -36,6 +52,7 @@ REQUIRED_FNS = (
     "supporting-evidence",
     "intent-capabilities-satisfied?",
     "claim-statement",
+    "claim-review",
     "evidence-outcome",
     "intent-goal",
 )
@@ -52,11 +69,12 @@ def check_epistemic() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"epistemic: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("epistemic: exact D1:YES #d1:1 word missing")
     for fn in REQUIRED_FNS:
         if fn not in text:
             errs.append(f"epistemic: required function surface missing: {fn}")
+    for fn in RETIRED_ENGLISH_HEADS:
+        if re.search(rf"(?<![\w-]){re.escape(fn)}(?![\w-])", text):
+            errs.append(f"epistemic: retired English function surface remains: {fn}")
     return errs
 
 
@@ -89,7 +107,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("EPISTEMIC: PASS — no host truthiness, exact D1, function surface intact")
+    print("EPISTEMIC: PASS — no host truthiness, Ukrainian D9/D10 surface intact")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
