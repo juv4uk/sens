@@ -1,49 +1,42 @@
-; #1257 — Core4 predicate-answer carrier matrix.
+; #1257 — Матриця носіїв результату предиката четвертого ядра.
 ;
-; Research only.  This file does not choose the final public carrier.
-; It asks the running language to prove what today's smallest existing
-; representations actually do across write -> read.
-;
-; Invariants under test:
-; - exact eight bare bits remain Sid8 and round-trip unchanged;
-; - the existing Lisp `binary` binding is currently a descriptor constructor,
-;   not a carrier for one concrete short bit spelling;
-; - a numeric-looking Symbol such as "00" cannot be a transparent source
-;   carrier if write/read changes its identity;
-; - String preserves exact spelling and is therefore a collision-free
-;   transport baseline only, not automatically the final semantic answer.
+; Лише дослідження: файл не визначає остаточного носія.
+; Мова перевіряє круговий перехід запис → читання.
+; Історичний Sid8 не тотожний сучасному домену D8.
+; Символ з написанням "00" може змінити ідентичність після читання.
+; Рядок точно зберігає написання як транспортні дані,
+; але не встановлює нової семантичної тотожності.
+(0011 матриця-символ (11101101 "00"))
+(0011 матриця-записаний-символ (11110100 матриця-символ))
+(0011 матриця-прочитаний-символ (11101010 матриця-записаний-символ))
 
-(0011 cam-symbol (11101101 "00"))
-(0011 cam-symbol-written (11110100 cam-symbol))
-(0011 cam-symbol-read (11101010 cam-symbol-written))
+(визначити матриця-рядок "00")
+(0011 матриця-записаний-рядок (11110100 матриця-рядок))
+(0011 матриця-прочитаний-рядок (11101010 матриця-записаний-рядок))
 
-(визначити cam-string "00")
-(0011 cam-string-written (11110100 cam-string))
-(0011 cam-string-read (11101010 cam-string-written))
+(визначити матриця-історичний-сід 00000011)
+(0011 матриця-записаний-сід (11110100 матриця-історичний-сід))
+(0011 матриця-прочитаний-сід (11101010 матриця-записаний-сід))
 
-(визначити cam-sid 00000011)
-(0011 cam-sid-written (11110100 cam-sid))
-(0011 cam-sid-read (11101010 cam-sid-written))
+(0011 матриця-описувач-двійкового (110110110 2))
 
-(0011 cam-binary-descriptor (110110110 2))
-
-(визначити cam-observed
+(визначити матриця-спостережене
   (список
-    (список (як-є binary-descriptor) cam-binary-descriptor)
-    (список (як-є symbol-written) cam-symbol-written)
-    (список (як-є symbol-read) cam-symbol-read)
+    (список (як-є binary-descriptor) матриця-описувач-двійкового)
+    (список (як-є symbol-written) матриця-записаний-символ)
+    (список (як-є symbol-read) матриця-прочитаний-символ)
     (список (як-є symbol-roundtrip)
-          (11110111 cam-symbol cam-symbol-read))
-    (список (як-є string-written) cam-string-written)
-    (список (як-є string-read) cam-string-read)
+          (11110111 матриця-символ матриця-прочитаний-символ))
+    (список (як-є string-written) матриця-записаний-рядок)
+    (список (як-є string-read) матриця-прочитаний-рядок)
     (список (як-є string-roundtrip)
-          (11110111 cam-string cam-string-read))
-    (список (як-є sid-written) cam-sid-written)
-    (список (як-є sid-read) cam-sid-read)
+          (11110111 матриця-рядок матриця-прочитаний-рядок))
+    (список (як-є sid-written) матриця-записаний-сід)
+    (список (як-є sid-read) матриця-прочитаний-сід)
     (список (як-є sid-roundtrip)
-          (11110111 cam-sid cam-sid-read))))
+          (11110111 матриця-історичний-сід матриця-прочитаний-сід))))
 
-(визначити cam-expected
+(визначити матриця-очікуване
   (список
     (список (як-є binary-descriptor) (список (як-є binary) 2))
     (список (як-є symbol-written) "00")
@@ -57,9 +50,9 @@
     (1110 (001 sid-roundtrip) (001 (1)))))
 
 (за-умовою
-  ((11110111 cam-observed cam-expected)
+  ((11110111 матриця-спостережене матриця-очікуване)
    (як-є (core4-answer-carrier-matrix-ok)))
   ((атом? (як-є ()))
    (список (як-є core4-answer-carrier-matrix-mismatch)
-         cam-expected
-         cam-observed)))
+         матриця-очікуване
+         матриця-спостережене)))
