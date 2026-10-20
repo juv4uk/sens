@@ -131,7 +131,7 @@ fn lisp_owned_mathematical_result_taxonomy_is_self_consistent() {
     ))
     .expect("#225 mathematical taxonomy witness");
     eval_program(&witness, &mut session).expect("mathematical taxonomy witness must load");
-    let verdict = eval_program("(mathematical-result-taxonomy-witness)", &mut session)
+    let verdict = eval_program("(свідок-класифікації-математичного-результату)", &mut session)
         .expect("mathematical taxonomy witness must execute")
         .value
         .to_string();
