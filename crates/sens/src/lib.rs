@@ -1044,7 +1044,7 @@ mod core4_bootstrap_cache_tests {
         let first = eval_program("(створити-символ \"probe-\")", &mut session)
             .expect("створити-символ викликає D10-годинник і D8-проєкцію тексту");
         let second = eval_program("(створити-символ \"probe-\")", &mut session)
-            .expect("Core4 gensym returns another fresh symbol");
+            .expect("створити-символ повертає інший свіжий символ");
         assert!(matches!(first.value, Value::Symbol(_)));
         assert!(matches!(second.value, Value::Symbol(_)));
         assert_ne!(first.value, second.value);
