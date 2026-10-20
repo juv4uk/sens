@@ -9,20 +9,20 @@
 ; semantically derived from Rust implementation artifacts.
 
 (визначити changed
-  (рядок-містить? (READ-FILE "tests/semantic-authority-changes.lisp")))
+  (рядок-містить? (читати-файл "tests/semantic-authority-changes.lisp")))
 
 (визначити exact-text?
   (функція (left right)
     (за-умовою
-      ((однакові? left right) (так) t)
-      (t t ()))))
+      ((однакові? left right) (так) так)
+      (так так ()))))
 
 (визначити contains-any?
   (функція (source needles)
     (за-умовою
       ((атом? needles) () ())
-      ((рядок-містить? (перше needles) source) t)
-      (t (contains-any? source (решта needles))))))
+      ((рядок-містить? (перше needles) source) так)
+      (так (contains-any? source (решта needles))))))
 
 (визначити language-authority-source?
   (функція (path)
@@ -72,25 +72,25 @@
       ; A protected Lisp-owned source may mention Rust as evidence/history.
       ; It becomes a violation only when host implementation is explicitly
       ; claimed as a semantic authority/source of truth.
-      ((AND
+      ((та
          (host-marker? source)
          (semantic-authority-claim? source))
        (як-є host-to-language-authority-leak))
-      (t (як-є allowed-language-source)))))
+      (так (як-є allowed-language-source)))))
 
 (визначити scan
   (функція (rows)
     (за-умовою
       ((атом? rows) () (як-є (semantic-authority-ok)))
-      (t
+      (так
        (нехай-послідовно ((row (перше rows))
                (path (друге row)))
           (за-умовою
             ; Crucial asymmetry: do not even inspect host implementation text.
             ((хибне? (language-authority-source? path))
              (накопичувати (решта rows)))
-            (t
-             (нехай ((raw-source (READ-FILE path)))
+            (так
+             (нехай ((raw-source (читати-файл path)))
                (за-умовою
                  ((хибне? (рядок? raw-source))
                   (список
@@ -98,7 +98,7 @@
                     path
                     (як-є unreadable-language-authority-source)
                     "protected Lisp language source must be readable text"))
-                 (t
+                 (так
                   (нехай ((class (violation-class path raw-source)))
                     (за-умовою
                       ((тотожне? class (як-є host-to-language-authority-leak))
@@ -107,7 +107,7 @@
                          path
                          class
                          "Lisp language authority must not derive semantic truth from host/Rust implementation artifacts"))
-                      (t
+                      (так
                        (накопичувати (решта rows)))))))))))))))
 
 (друкувати (накопичувати changed))
