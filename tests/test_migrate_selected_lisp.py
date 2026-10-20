@@ -156,7 +156,11 @@ class SelectedOriginalT5(unittest.TestCase):
     def test_one_file_resolver_uses_current_ukr_and_rejects_ambiguous_w8(self):
         # Historical SID8 bytes are not a source of ratified D8 callability.
         migration = app.load_migrator()
-        foundation = migration.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
+        foundation = migration.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
+        self.assertEqual(foundation["current_domains"], [f"D{i}" for i in range(1, 12)])
+        self.assertEqual(len(foundation["domains"]["D10"]["residents"]), 1024)
+        # D11 is a testing inventory: residency must not imply callability.
+        self.assertEqual(len(foundation["domains"]["D11"]["residents"]), 43)
         my, upper, bridge = migration.build_three_pass_maps(
             foundation,
             ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
