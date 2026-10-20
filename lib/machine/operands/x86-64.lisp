@@ -192,7 +192,7 @@
     (за-умовою
       ((рядок-порожній? text) (як-є ()))
       ((тотожне? (рядок-перший text) "/")
-       (let ((rest (рядок-решта text)))
+       (нехай ((rest (рядок-решта text)))
          (за-умовою
            ((рядок-порожній? rest) (як-є ()))
            ((тотожне? (рядок-перший rest) "1")
@@ -204,7 +204,7 @@
 
 (визначити x86-exact-integer?
   (функція (value)
-    (let ((wire (значення-у-текст value)))
+    (нехай ((wire (значення-у-текст value)))
       (за-умовою
         ((рядок-префікс? "#q2:" wire) (x86-wire-denominator-one? wire))
         ((тотожне? 0 0) (як-є ()))))))
@@ -232,7 +232,7 @@
          
          ((атом? (решта operand))  (як-є ()))
          ((тотожне? (решта (решта operand)) (як-є ()))
-          (let ((value (друге operand)))
+          (нехай ((value (друге operand)))
             (за-умовою
               ((x86-exact-integer? value)
                (x86-operand-in-inclusive-range? value 0 18446744073709551615))
@@ -275,7 +275,7 @@
          
          ((атом? (решта operand))  (як-є ()))
          ((тотожне? (решта (решта operand)) (як-є ()))
-          (let ((value (друге operand)))
+          (нехай ((value (друге operand)))
             (за-умовою
               ((x86-exact-integer? value)
                (x86-operand-in-inclusive-range? value -128 127))
@@ -323,11 +323,11 @@
 
 (визначити x86-mem64-disp8
   (функція (base displacement)
-    (let ((typed-base (x86-as-gpr64 base)))
+    (нехай ((typed-base (x86-as-gpr64 base)))
       (за-умовою
         ((x86-machine-rejected? typed-base) typed-base)
         ((атом? ())
-         (let ((typed-displacement (x86-as-disp8 displacement)))
+         (нехай ((typed-displacement (x86-as-disp8 displacement)))
            (за-умовою
              ((x86-machine-rejected? typed-displacement) typed-displacement)
              ((атом? ())
