@@ -261,6 +261,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests/test_audit_all_lisp_triplets.py -v
+          python3 -m unittest tests/test_migration_readiness_contract.py -v
           python3 scripts/audit_all_lisp_triplets.py --verify-bounded --limit 8
 
       - name: SENS-визначення — баланс дужок і дублікати
