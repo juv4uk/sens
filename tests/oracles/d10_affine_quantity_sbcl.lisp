@@ -1,96 +1,148 @@
-;;;; Independent real SBCL mathematical model — D10 donor research only.
+;;;; Д10: незалежна точна математична модель на SBCL, лише для дослідження.
 ;;;; (role research-only)
 ;;;; (semantic-authority-change none)
-;;;; Sources: NIST SP811 §8.5 and BIPM kelvin.
-;;;; These are NOT executable .sens words or an original SENS interpreter oracle.
+;;;; Джерела: NIST SP 811, розділ 8.5, та BIPM (кельвін).
+;;;; Це не виконувані слова .sens і не первинний оракул обчислювача СЕНС.
+
 (defpackage :d10-affine-measure (:use :cl))
 (in-package :d10-affine-measure)
-(defvar *tests* 0)
-(defun is (name actual expected)
-  (unless (equal actual expected)
-    (error "~a: expected ~s, got ~s" name expected actual))
-  (incf *tests*))
-(defun refuses? (thunk)
-  (handler-case (progn (funcall thunk) nil) (error () t)))
-(defstruct (unit (:constructor raw-unit (dims factor origin)))
-  dims factor origin)
-(defun make-exact-unit (dims factor origin)
-  (unless (and (listp dims) (= (length dims) 7)
-               (every #'rationalp dims)
-               (rationalp factor) (> factor 0)
-               (rationalp origin))
-    (error "Invalid exact 7-dimension unit"))
-  (raw-unit dims factor origin))
-(defun convert-value (x kind from to)
-  (unless (and (rationalp x) (member kind '(:point :delta)))
-    (error "Exact rational POINT or DELTA required"))
-  (unless (and (unit-p from) (unit-p to)
-               (equal (unit-dims from) (unit-dims to)))
-    (error "Dimension mismatch"))
-  ;; Use separately-derived relative affine coefficients, rather than
-  ;; the Python model's two-step physical base-coordinate intermediary.
-  (let* ((relative-factor (/ (unit-factor from) (unit-factor to)))
-         (relative-origin (if (eq kind :point)
-                              (/ (- (unit-origin from) (unit-origin to))
-                                 (unit-factor to)) 0)))
-    (list (+ (* relative-factor x) relative-origin) kind)))
-(defparameter *temp* '(0 0 0 0 1 0 0))
-(defparameter *length* '(1 0 0 0 0 0 0))
-(defparameter *k* (make-exact-unit *temp* 1 0))
-(defparameter *c* (make-exact-unit *temp* 1 5463/20)) ; 273.15 K
-(defparameter *f* (make-exact-unit *temp* 5/9 45967/180))
-(defparameter *metre* (make-exact-unit *length* 1 0))
-(defun run ()
-  (is "Celsius point to Kelvin" (convert-value 0 :point *c* *k*)
-      '(5463/20 :point))
-  (is "Celsius delta to Kelvin" (convert-value 5 :delta *c* *k*)
-      '(5 :delta))
-  (is "Fahrenheit point to Kelvin" (convert-value 32 :point *f* *k*)
-      '(5463/20 :point))
-  (is "Fahrenheit delta to Kelvin" (convert-value 9 :delta *f* *k*)
-      '(5 :delta))
-  (is "Kelvin back to Celsius" (convert-value 5463/20 :point *k* *c*)
-      '(0 :point))
-  (is "Boiling in F" (convert-value 100 :point *c* *f*)
-      '(212 :point))
-  (is "difference 100 C equals 180 F" (convert-value 100 :delta *c* *f*)
-      '(180 :delta))
-  (is "0 C is not 0 K" (equal (convert-value 0 :point *c* *k*)
-                              '(0 :point)) nil)
-  (is "absolute roundtrip" (convert-value
-                            (first (convert-value -75/13 :point *f* *k*))
-                            :point *k* *f*)
-      '(-75/13 :point))
-  (is "delta roundtrip" (convert-value
-                         (first (convert-value 17/19 :delta *f* *c*))
-                         :delta *c* *f*)
-      '(17/19 :delta))
-  (is "offset cancels for deltas" (convert-value 7 :delta *c* *k*)
-      '(7 :delta))
-  (is "mismatched dimensions rejected"
-      (refuses? (lambda () (convert-value 1 :point *c* *metre*))) t)
-  (is "inexact floating values rejected"
-      (refuses? (lambda () (convert-value 0.5 :point *c* *k*))) t)
-  (is "zero factor rejected"
-      (refuses? (lambda () (make-exact-unit *temp* 0 0))) t)
-  (is "bad dimension cardinality rejected"
-      (refuses? (lambda () (make-exact-unit '(1 0) 1 0))) t)
-  (is "bad kind rejected"
-      (refuses? (lambda () (convert-value 1 :unknown *c* *k*))) t)
-  (is "non-exact origin rejected"
-      (refuses? (lambda () (make-exact-unit *temp* 1 0.1))) t)
-  (let* ((source (make-exact-unit *temp* 4/5 11/13))
-         (middle (make-exact-unit *temp* 7/9 -3/8))
-         (target (make-exact-unit *temp* 5/11 2/3)))
-    (dolist (kind '(:point :delta))
-      (let* ((x -333/7)
-             (y (first (convert-value x kind source middle)))
-             (via (convert-value y kind middle target))
-             (direct (convert-value x kind source target)))
-        (is "multi-unit composition" via direct))))
-  (format t "D10 AFFINE-QUANTITY real SBCL donor oracle PASS ~D checks~%" *tests*)
+
+(defvar *перевірок* 0)
+
+(defun перевірити (назва фактичне очікуване)
+  (unless (equal фактичне очікуване)
+    (error "~A: очікувалося ~S, отримано ~S" назва очікуване фактичне))
+  (incf *перевірок*))
+
+(defun відхилено? (дія)
+  (handler-case
+      (progn (funcall дія) nil)
+    (error () t)))
+
+(defstruct (одиниця (:constructor сира-одиниця (розмірності множник початок)))
+  розмірності множник початок)
+
+(defun створити-точну-одиницю (розмірності множник початок)
+  (unless (and (listp розмірності)
+               (= (length розмірності) 7)
+               (every #'rationalp розмірності)
+               (rationalp множник)
+               (> множник 0)
+               (rationalp початок))
+    (error "Некоректна точна одиниця із сімома розмірностями"))
+  (сира-одиниця розмірності множник початок))
+
+(defun перетворити-значення (значення вид звідки куди)
+  (unless (and (rationalp значення)
+               (member вид '(:point :delta)))
+    (error "Потрібне точне раціональне значення POINT або DELTA"))
+  (unless (and (одиниця-p звідки)
+               (одиниця-p куди)
+               (equal (одиниця-розмірності звідки)
+                      (одиниця-розмірності куди)))
+    (error "Несумісні розмірності"))
+  ;; Коефіцієнти відносного афінного перетворення обчислюємо безпосередньо,
+  ;; без двокрокового переходу через базову фізичну координату моделі Python.
+  (let* ((відносний-множник (/ (одиниця-множник звідки)
+                               (одиниця-множник куди)))
+         (відносний-початок
+           (if (eq вид :point)
+               (/ (- (одиниця-початок звідки)
+                     (одиниця-початок куди))
+                  (одиниця-множник куди))
+               0)))
+    (list (+ (* відносний-множник значення) відносний-початок)
+          вид)))
+
+(defparameter *температура* '(0 0 0 0 1 0 0))
+(defparameter *довжина* '(1 0 0 0 0 0 0))
+(defparameter *кельвін* (створити-точну-одиницю *температура* 1 0))
+(defparameter *цельсій* (створити-точну-одиницю *температура* 1 5463/20)) ; 273,15 К
+(defparameter *фаренгейт* (створити-точну-одиницю *температура* 5/9 45967/180))
+(defparameter *метр* (створити-точну-одиницю *довжина* 1 0))
+
+(defun перевірити-набір ()
+  (перевірити "Точка Цельсія в кельвінах"
+             (перетворити-значення 0 :point *цельсій* *кельвін*)
+             '(5463/20 :point))
+  (перевірити "Різниця Цельсія в кельвінах"
+             (перетворити-значення 5 :delta *цельсій* *кельвін*)
+             '(5 :delta))
+  (перевірити "Точка Фаренгейта в кельвінах"
+             (перетворити-значення 32 :point *фаренгейт* *кельвін*)
+             '(5463/20 :point))
+  (перевірити "Різниця Фаренгейта в кельвінах"
+             (перетворити-значення 9 :delta *фаренгейт* *кельвін*)
+             '(5 :delta))
+  (перевірити "Повернення з кельвінів до Цельсія"
+             (перетворити-значення 5463/20 :point *кельвін* *цельсій*)
+             '(0 :point))
+  (перевірити "Кипіння у градусах Фаренгейта"
+             (перетворити-значення 100 :point *цельсій* *фаренгейт*)
+             '(212 :point))
+  (перевірити "Різниця 100 Цельсія дорівнює 180 Фаренгейта"
+             (перетворити-значення 100 :delta *цельсій* *фаренгейт*)
+             '(180 :delta))
+  (перевірити "Нуль Цельсія не дорівнює нулю кельвінів"
+             (equal (перетворити-значення 0 :point *цельсій* *кельвін*)
+                    '(0 :point))
+             nil)
+  (перевірити "Зворотність перетворення точки"
+             (перетворити-значення
+               (first (перетворити-значення -75/13 :point *фаренгейт* *кельвін*))
+               :point *кельвін* *фаренгейт*)
+             '(-75/13 :point))
+  (перевірити "Зворотність перетворення різниці"
+             (перетворити-значення
+               (first (перетворити-значення 17/19 :delta *фаренгейт* *цельсій*))
+               :delta *цельсій* *фаренгейт*)
+             '(17/19 :delta))
+  (перевірити "Початок відліку не впливає на різниці"
+             (перетворити-значення 7 :delta *цельсій* *кельвін*)
+             '(7 :delta))
+  (перевірити "Несумісні розмірності відхиляються"
+             (відхилено? (lambda ()
+                           (перетворити-значення 1 :point *цельсій* *метр*)))
+             t)
+  (перевірити "Неточні дійсні числа відхиляються"
+             (відхилено? (lambda ()
+                           (перетворити-значення 0.5 :point *цельсій* *кельвін*)))
+             t)
+  (перевірити "Нульовий множник відхиляється"
+             (відхилено? (lambda ()
+                           (створити-точну-одиницю *температура* 0 0)))
+             t)
+  (перевірити "Неправильна кількість розмірностей відхиляється"
+             (відхилено? (lambda ()
+                           (створити-точну-одиницю '(1 0) 1 0)))
+             t)
+  (перевірити "Невідомий вид відхиляється"
+             (відхилено? (lambda ()
+                           (перетворити-значення 1 :unknown *цельсій* *кельвін*)))
+             t)
+  (перевірити "Неточний початок відліку відхиляється"
+             (відхилено? (lambda ()
+                           (створити-точну-одиницю *температура* 1 0.1)))
+             t)
+  (let* ((джерело (створити-точну-одиницю *температура* 4/5 11/13))
+         (проміжна (створити-точну-одиницю *температура* 7/9 -3/8))
+         (цільова (створити-точну-одиницю *температура* 5/11 2/3)))
+    (dolist (вид '(:point :delta))
+      (let* ((значення -333/7)
+             (проміжне-значення
+               (first (перетворити-значення значення вид джерело проміжна)))
+             (через-проміжну
+               (перетворити-значення проміжне-значення вид проміжна цільова))
+             (безпосереднє
+               (перетворити-значення значення вид джерело цільова)))
+        (перевірити "Композиція перетворень одиниць"
+                   через-проміжну безпосереднє))))
+  ;; Формат підсумкового повідомлення — зовнішній протокол.
+  (format t "D10 AFFINE-QUANTITY real SBCL donor oracle PASS ~D checks~%"
+          *перевірок*)
   (finish-output))
-(handler-case (run)
-  (error (err)
-    (format *error-output* "D10 AFFINE-QUANTITY SBCL FAIL ~A~%" err)
+
+(handler-case (перевірити-набір)
+  (error (помилка)
+    (format *error-output* "D10 AFFINE-QUANTITY SBCL FAIL ~A~%" помилка)
     (sb-ext:exit :code 1)))
