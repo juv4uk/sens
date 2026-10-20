@@ -270,6 +270,60 @@ fn signed_wide_add_sub_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) ->
     Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(result_width, &bits)?))
 }
 
+/// Точне ASM-множення знакових D192/D384/... без семантичного дублювання.
+///
+/// Тільки числа з двох однакових ратифікованих доменів. Машинний
+/// механізм множить модулі, а SENS встановлює знак та Dn/D(2n).
+fn signed_wide_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
+    let width = lhs.numeric_domain_width()?;
+    if width < 192 || width % 64 != 0 || rhs.numeric_domain_width() != Some(width) {
+        return None;
+    }
+    let n = width / 64;
+    let double_width = width.checked_mul(2)?;
+    let unsigned_magnitude = |number: &BinaryNumber| -> Option<(bool, Vec<u64>)> {
+        let bits = number.exact_numeric_domain_bits()?;
+        if bits.len() != width { return None; }
+        let negative = bits[0] == 1;
+        let mut limbs = bits.rchunks(64)
+            .map(|part| part.iter().fold(0_u64, |acc, bit| (acc << 1) | u64::from(*bit)))
+            .collect::<Vec<_>>();
+        if negative {
+            let mut carry = true;
+            for word in &mut limbs {
+                let (value, next) = (!*word).overflowing_add(u64::from(carry));
+                *word = value;
+                carry = next;
+            }
+        }
+        Some((negative, limbs))
+    };
+    let (left_sign, left) = unsigned_magnitude(lhs)?;
+    let (right_sign, right) = unsigned_magnitude(rhs)?;
+    let mut product = crate::machine_math::exact_words_mul_unsigned(&left, &right)?;
+    if product.len() != n.checked_mul(2)? { return None; }
+    let negative = left_sign != right_sign && product.iter().any(|&word| word != 0);
+    let fits = product[n..].iter().all(|&word| word == 0)
+        && (product[n - 1] < (1_u64 << 63)
+            || (negative && product[n - 1] == (1_u64 << 63)
+                && product[..n - 1].iter().all(|&word| word == 0)));
+    let out_width = if fits { width } else { double_width };
+    if negative {
+        let mut carry = true;
+        for word in &mut product {
+            let (value, next) = (!*word).overflowing_add(u64::from(carry));
+            *word = value;
+            carry = next;
+        }
+    }
+    let result_words = if fits { &product[..n] } else { &product[..] };
+    let mut bits = Vec::with_capacity(out_width);
+    for &word in result_words.iter().rev() {
+        for shift in (0..64).rev() { bits.push(((word >> shift) & 1) as u8); }
+    }
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
+}
+
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
@@ -292,11 +346,14 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
             };
         }
     }
-    // D192 і наступні ратифіковані ширини: тільки знакові цілі +/−,
-    // без неявної зміни доменів, дробових композицій або нового opcode.
-    if width >= 192 && matches!(operator, "+" | "-") {
+    // D192+ цілі: ASM ADD/SUB/MUL; доменний закон зберігає знак і Dn.
+    if width >= 192 && matches!(operator, "+" | "-" | "*") {
         if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
-            return signed_wide_add_sub_fast(operator, left, right);
+            return if operator == "*" {
+                signed_wide_mul_fast(left, right)
+            } else {
+                signed_wide_add_sub_fast(operator, left, right)
+            };
         }
     }
     let (_, x_neg, x_num, x_den) = ingredients(lhs)?;
@@ -396,6 +453,39 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    #[test]
+    fn wide_asm_multiplication_matches_original_exact_binary_law() {
+        let admitted = |width: usize, word: Vec<u8>| -> Value {
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &word).unwrap())
+        };
+        for width in [192_usize, 384, 768] {
+            let zero = vec![0; width];
+            let one = { let mut x = zero.clone(); x[width - 1] = 1; x };
+            let neg_one = vec![1; width];
+            let max = { let mut x = neg_one.clone(); x[0] = 0; x };
+            let min = { let mut x = zero.clone(); x[0] = 1; x };
+            let two = { let mut x = zero.clone(); x[width - 2] = 1; x };
+            let inputs = [zero, one, neg_one, max, min, two];
+            for (i,j) in [(0,0),(0,3),(1,1),(1,4),(2,2),(2,3),(3,3),(3,4),(4,4),(5,2)] {
+                let a = admitted(width, inputs[i].clone());
+                let b = admitted(width, inputs[j].clone());
+                let (_,an,am,ad) = ingredients(&a).unwrap();
+                let (_,bn,bm,bd) = ingredients(&b).unwrap();
+                let old = canonical(an ^ bn, am.mul(&bm), ad.mul(&bd), width)
+                    .expect("попередній точний математичний закон");
+                let new = compute("*", &a, &b).expect("повний ASM-добуток");
+                assert_eq!(new, old, "D{width}: випадок {i}x{j}");
+            }
+        }
+        let one = |w: usize| {
+            let mut bits = vec![0; w]; bits[w - 1] = 1;
+            admitted(w, bits)
+        };
+        assert!(compute("*", &one(192), &one(384)).is_none());
+        assert_eq!(compute("/", &one(192), &one(192)).unwrap().to_string(), "1");
+        assert_eq!(compute("+", &one(384), &one(384)).unwrap().to_string(), "2");
     }
 
     #[test]
