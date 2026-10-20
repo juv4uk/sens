@@ -1,6 +1,6 @@
-; #419 PRE-1.0 Canon sculpture audit — integrated research snapshot
-; Base main: 04084f1003ebd78c946a4b135b8a9febfc7e040e
-; Research data only. This file is NOT semantic authority and does not change language behavior.
+; #419 аудит скульптури Canon до 1.0 — інтегрований дослідницький знімок
+; База main: 04084f1003ebd78c946a4b135b8a9febfc7e040e
+; Лише дослідницькі дані. Цей файл НЕ семантична влада і не змінює поведінки мови.
 
 (canon-sculpt-audit
   (schema-version 4)
@@ -55,9 +55,9 @@
       (or derives-through-cond)
       (assoc derives-through-cond)))
 
-  ; Current evaluator inventory: every path that sees source Expr before
-  ; ordinary eager argument evaluation. This is a dependency map, not proof
-  ; that the list is globally minimal.
+  ; Поточний інвентар оцінювача: кожен шлях, що бачить вихідний Expr
+  ; до звичайного енергійного обчислення аргументів. Це карта залежностей,
+  ; а не доказ, що перелік глобально мінімальний.
   (evaluation-delay-mechanism-inventory
     (quote
       (mechanism canonical-special-form)
