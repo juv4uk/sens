@@ -1,8 +1,9 @@
-; #305 — presentation of an explicitly established epistemic unknown is a
-; Lisp-owned law. Ukrainian projection only.
-;
-; #369 additionally preserves the public rejection of a non-symbol outcome tag
-; before narrate-outcome stops consuming the historical t/() shape of symbol?.
+; Свідчення #305: явне незнання має точне пояснення мовою СЕНС.
+; Висновок належить бібліотеці Lisp, а не зовнішньому перевіряльнику.
+; Закон #369 додатково відхиляє несимвольний тег результату
+; без повернення до історичних значень істинності t/().
+; Виклики «пояснити-підсумок» і «створити-невідоме» ратифіковано в Д9.
+; Цитовані мітки результатів та некоректні форми — дані протоколу.
 
 (load "lib/result-status.lisp")
 (load "lib/narrate.lisp")
@@ -12,21 +13,21 @@
     (список
       (список
         (як-є explicit-unknown-presentation)
-        (narrate-outcome
-          (make-unknown (як-є (parent bob alice))))
+        (пояснити-підсумок
+          (створити-невідоме (як-є (parent bob alice))))
         (як-є
           (unknown because no-proof-found-for (parent bob alice))))
       (список
         (як-є non-symbol-tag-is-invalid)
-        (narrate-outcome (як-є (42 payload)))
+        (пояснити-підсумок (як-є (42 payload)))
         (як-є (invalid outcome-tag 42)))
       (список
         (як-є pair-tag-is-invalid)
-        (narrate-outcome (як-є ((bad-tag) payload)))
+        (пояснити-підсумок (як-є ((bad-tag) payload)))
         (як-є (invalid outcome-tag (bad-tag))))
       (список
         (як-є empty-list-tag-is-invalid)
-        (narrate-outcome (як-є (() payload)))
+        (пояснити-підсумок (як-є (() payload)))
         (як-є (invalid outcome-tag ()))))))
 
 (визначити перевірити-рядки-свідка-результату
