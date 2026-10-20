@@ -383,6 +383,7 @@ jobs:
           python3 -m unittest tests/test_migrated_two_projections.py -v
           # Охорона українських QUOTE/DEFINE/LAMBDA/LET від хибних замін.
           python3 -m unittest tests/test_audit_lisp_migration_edits.py -v
+          python3 -m unittest tests/test_build_inventory_ukr_projection.py -v
           python3 -m unittest tests/test_stage_two_projections.py -v
           # Текстовий .bits — не фізичний T5M .sens; D10/D11 мають власні ширини.
           python3 -m unittest tests/test_sens_domain_spaces.py -v
