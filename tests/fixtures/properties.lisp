@@ -1,7 +1,7 @@
 (
   (name . "addition-is-commutative")
   (types . ("int" "int"))
-  (expr . "(= (додати x y) (додати y x))")
+  (expr . "(числовий-рівність (додати x y) (додати y x))")
 )
 (
   (name . "string-append-is-associative")
@@ -31,7 +31,7 @@
 (
   (name . "world-monotonicity")
   (types . ("string-list" "string" "string"))
-  (expr . "(нехай ((світ (побудувати-світ x (порожній-світ)))) (= (додати 1 (довжина (світ-журнал світ))) (довжина (світ-журнал (світ-повідомити світ y z)))))")
+  (expr . "(нехай ((світ (побудувати-світ x (порожній-світ)))) (числовий-рівність (додати 1 (довжина (світ-журнал світ))) (довжина (світ-журнал (світ-повідомити світ y z)))))")
 )
 (
   (name . "world-rollback-identity")
@@ -41,7 +41,7 @@
 (
   (name . "knowledge-journal-append-only-monotonicity")
   (types . ("string-list" "string" "string"))
-  (expr . "(нехай ((проміжне-один (визначити *knowledge-journal* (як-є ()))) (проміжне-два (повідомити-всі-події x)) (попередня-довжина (довжина *knowledge-journal*)) (проміжне-три (визначити-модуль \"mod\" (список z)))) (= (додати 1 попередня-довжина) (довжина *knowledge-journal*)))")
+  (expr . "(нехай ((проміжне-один (визначити *knowledge-journal* (як-є ()))) (проміжне-два (повідомити-всі-події x)) (попередня-довжина (довжина *knowledge-journal*)) (проміжне-три (визначити-модуль \"mod\" (список z)))) (числовий-рівність (додати 1 попередня-довжина) (довжина *knowledge-journal*)))")
 )
 (
   (name . "knowledge-journal-retract-inverse-of-tell")
