@@ -35,7 +35,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         from verify_uk_t5_triplet import verify
         validator = verify
 
-    def require_bounded_receipt(witness: object, source: Path, physical: Path, view: Path) -> None:
+    def require_bounded_receipt(witness: object, source: Path, physical: Path, view: Path) -> str:
         """Read-only integrity of the real bounded oracle receipt, never runtime GO."""
         if not isinstance(witness, dict):
             raise ValueError("немає структурованого доказу")
@@ -72,9 +72,12 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if (witness.get("runtime_oracle_admitted_by_this_audit") is not False
                 or witness.get("old_originals_migrated_by_this_audit") != 0):
             raise ValueError("механічний свідок не дозволяє семантичний або релізний допуск")
+        return codec
 
+    # Не прирівнюємо історичний T5 до сучасного фізичного T5M.
     counts = dict(ukrainian_keyboard=0, with_sens=0, with_view=0,
-                  complete_triplets=0, bounded_verified=0)
+                  complete_triplets=0, bounded_verified=0,
+                  bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
     blocked: list[dict[str, str]] = []
 
     def reject(path: str, reason: str) -> None:
@@ -107,11 +110,13 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if verify_bounded:
             try:
                 witness = validator(source, physical, view)
-                require_bounded_receipt(witness, source, physical, view)
+                codec = require_bounded_receipt(witness, source, physical, view)
             except (OSError, ValueError, UnicodeError) as exc:
                 reject(relative, "обмежена зворотність BLOCKED: " + str(exc))
             else:
                 counts["bounded_verified"] += 1
+                counts["bounded_verified_t5m" if codec == "t5m"
+                       else "bounded_verified_legacy_t5"] += 1
 
     all_verified = bool(sources) and (
         counts["bounded_verified"] == len(sources)
