@@ -58,7 +58,7 @@ def historical_local_names(source):
     for ukrainian, historical in sorted(LOCAL_UKR_NAMES.items(), key=lambda row: -len(row[0])):
         source = source.replace(ukrainian, historical)
     # Restore the exact formal only; do not rewrite compounds like рядки-індексу.
-    return re.sub(r"(?<![\\w?-])рядки(?![\\w?-])", "rows", source)
+    return re.sub(r"(?<![\w?-])рядки(?![\w?-])", "rows", source)
 
 EXPECTED = {
     "100": ("перше", 36), "101": ("тотожне?", 3),
