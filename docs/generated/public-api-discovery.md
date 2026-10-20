@@ -132,7 +132,7 @@
 | `lib/core4.lisp` | function | `list` | unreviewed |
 | `lib/core4.lisp` | macro | `and` | unreviewed |
 | `lib/core4.lisp` | macro | `or` | unreviewed |
-| `lib/core4.lisp` | function | `gensym` | unreviewed |
+| `lib/core4.lisp` | function | `створити-символ` | unreviewed |
 | `lib/core4.lisp` | function | `pair` | unreviewed |
 | `lib/core4.lisp` | function | `second` | unreviewed |
 | `lib/core4.lisp` | function | `third` | unreviewed |
