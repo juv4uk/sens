@@ -447,7 +447,7 @@ def self_test() -> None:
     else:
         raise ValueError("missing sources were admitted")
     # Механізми backend, що вже не відновлюють історичну identity,
-    # більше не можуть повернути Sens8 навіть один раз: CANONICAL fail-closed.
+    # більше не можуть повернути сенс8 навіть один раз: CANONICAL fail-closed.
     if "crates/sens/src/eval/builtins.rs" not in CANONICAL:
         raise ValueError("migrated backend lost canonical-identity guard")
     for forbidden in ("use crate::Sens8;", "exact_args(crate::sens!(01010000), args, 1, span)?;"):
