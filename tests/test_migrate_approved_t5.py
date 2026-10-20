@@ -23,7 +23,7 @@ class ApprovedT5MigrationTests(unittest.TestCase):
         # Publication requires the real Rust reader; do not let missing
         # --reader turn negative tests into accidental successes.
         build = subprocess.run(
-            ["cargo", "build", "--locked", "-p", "sens-cli", "--bin", "sens-trit"],
+            ["cargo", "build", "--locked", "-p", "sens-cli", "--features", "zig-transport", "--bin", "sens-trit"],
             cwd=ROOT, capture_output=True, text=True, timeout=240,
         )
         if build.returncode != 0:
@@ -57,8 +57,8 @@ class ApprovedT5MigrationTests(unittest.TestCase):
         self.assertEqual(len(maps), 3, "expected current (my, upper, text7), not retired legacy map")
         my, upper, text7 = maps
         self.assertTrue(my and upper and text7, "current domain + D7 maps must be populated")
-        foundation = approved.engine.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
-        for domain, width, count in (("D8", 8, 256), ("D9", 9, 512)):
+        foundation = approved.engine.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
+        for domain, width, count in (("D8", 8, 256), ("D9", 9, 512), ("D10", 10, 1024)):
             residents = foundation["domains"][domain]["residents"]
             self.assertEqual(len(residents), count)
             self.assertTrue(all(len(bits) == width and set(bits) <= {"0", "1"}
@@ -117,7 +117,7 @@ class ApprovedT5MigrationTests(unittest.TestCase):
             self.assertNotEqual(run.returncode, 0)
             self.assertFalse(out.exists() and any(out.rglob("*.sens")))
 
-    def test_success_publishes_physical_t5_and_rerun_refuses_overwrite(self):
+    def test_success_publishes_physical_t5m_and_rerun_refuses_overwrite(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
             manifest = base / "manifest.json"
@@ -131,6 +131,7 @@ class ApprovedT5MigrationTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), EXPECTED_PHYSICAL)
             receipt = json.loads(report.read_text(encoding="utf-8"))
             self.assertEqual(receipt["files"][0]["physical_producer"], "ZIG_ATTESTED")
+            self.assertEqual(receipt["files"][0]["physical_codec"], "T5M")
             self.assertEqual(receipt["files"][0]["semantic_oracle"], "NOT_VERIFIED")
             rerun = self.run_cli(manifest, out, report)
             self.assertNotEqual(rerun.returncode, 0)
