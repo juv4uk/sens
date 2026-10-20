@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release GO-gate aggregator: what is already GO, from executable checks (#4196).
+"""Structural release preflight; NEVER a full release GO certificate (#4196).
 
 The release stays NO-GO until a set of gates pass on ONE SHA (RELEASE.md). This
 script does not *assert* GO -- it RUNS the gates that are executable here and
@@ -20,7 +20,7 @@ Gates (each is a script; missing scripts are reported UNVERIFIED, never PASS):
   rust-isolated        scripts/check_rust_isolated_only_zig.py   (G6,S2)
   rust-lisp-sens-io    scripts/check_rust_lisp_sens_io.py        (G1,S2)
 
-Exit 0 = RELEASE_GATE_GO (every gate GO); exit 1 = RELEASE_GATE_NO_GO.
+Exit 1 until independent Ukrainian/SENS oracle, T5 triples, exact-SHA CI,\nand owner authorization are verified by their separate release gates.\nPassing structural guards alone is RELEASE_STRUCTURAL_GATES_GO, not publication GO.
 """
 from __future__ import annotations
 
@@ -120,7 +120,9 @@ def main() -> int:
     if ns.json:
         import json
         Path(ns.json).write_text(json.dumps({"schema": "sens-release-go-gate/v1",
-                                             "gates": rows, "go": go, "total": len(rows)},
+                                             "gates": rows, "go": go, "total": len(rows),
+                                             "release_go": False,
+                                             "release_admission": "NOT_VERIFIED"},
                                             ensure_ascii=False, indent=2) + "\n",
                                  encoding="utf-8")
 
@@ -128,10 +130,13 @@ def main() -> int:
         print("\nRELEASE_GATE_NO_GO (red is red -- fix the gate, do not greenwash)")
         return 1
     if unver:
-        print("\nRELEASE_GATE_PARTIAL (some gates UNVERIFIED here -- not GO, not a fake PASS)")
+        print("\nRELEASE_GATE_PARTIAL (some structural gates UNVERIFIED; release NO-GO)")
         return 1
-    print("\nRELEASE_GATE_GO every executable gate is GO")
-    return 0
+    print("\nRELEASE_STRUCTURAL_GATES_GO 10/10 (NOT release admission)")
+    print("RELEASE_GATE_NO_GO: exact candidate SHA, full T5 triplets, native SENS "
+          "semantic oracles, independent CI and owner authorization are "
+          "outside this structural-only checker; never infer publication GO")
+    return 1
 
 
 if __name__ == "__main__":
