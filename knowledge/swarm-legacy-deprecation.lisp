@@ -3,8 +3,8 @@
 ; Стару coordination surface на my-lisp :9999 фізично видалено; ці назви
 ; лишаються тут як migration data та не мають dispatch path у semantic oracle.
 
-(0011 *swarm-legacy-coordination*
-  (001
+(визначити *swarm-legacy-coordination*
+  (як-є
     ((schema . swarm-legacy-deprecation/1)
      (status . deprecated)
      (physical-status . removed)
