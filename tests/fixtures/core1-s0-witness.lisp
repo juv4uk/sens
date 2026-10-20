@@ -1,33 +1,34 @@
-((FUNCTION (LAMBDA (X) X)) (QUOTE HISTORICAL-FUNARG))
-(C1-FUNARGP
-  (C1-EVAL
-    (QUOTE (LAMBDA (X) X))
-    NIL
-    NIL))
+; core1-s0 historical funarg / DEFINE / VECTOR. Ukrainian projection only.
 
+((функція (функція (x) x)) (як-є historical-funarg))
+(c1-funargp
+  (обчислити
+    (як-є (функція (x) x))
+    (як-є ())
+    (як-є ())))
 
-(C1-EVAL
-  (QUOTE
-    (((LAMBDA (X)
-        (LAMBDA (Y)
-          (CONS X Y)))
-      (QUOTE A))
-     (QUOTE B)))
-  NIL
-  NIL)
+(обчислити
+  (як-є
+    (((функція (x)
+        (функція (y)
+          (сполучити x y)))
+      (як-є A))
+     (як-є B)))
+  (як-є ())
+  (як-є ()))
 
-(C1-WORLD-VALUE
-  (C1-EVAL-PROGRAM
-    (QUOTE
-      ((DEFINE LAST
-         (LAMBDA (XS)
-           (COND
-             ((EQ (CDR XS) NIL) (CAR XS))
-             (T (LAST (CDR XS))))))
-       (LAST (QUOTE (A B C)))))
-    NIL))
+(c1-world-value
+  (обчислити-програму
+    (як-є
+      ((визначити last
+         (функція (xs)
+           (за-умовою
+             ((тотожне? (решта xs) (як-є ())) (перше xs))
+             (так (last (решта xs))))))
+       (last (як-є (A B C)))))
+    (як-є ())))
 
-(C1-EVAL
-  (QUOTE (VECTOR (QUOTE A)))
-  NIL
-  NIL)
+(обчислити
+  (як-є (вектор (як-є A)))
+  (як-є ())
+  (як-є ()))

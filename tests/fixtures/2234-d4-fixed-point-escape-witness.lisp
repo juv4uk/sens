@@ -1,23 +1,25 @@
-(C1-EVAL
-  (QUOTE
-    (((LAMBDA (MARK)
-        ((LAMBDA (FIX)
-           (FIX
-             (LAMBDA (RECUR)
-               (LAMBDA (XS)
-                 (COND
-                   ((EQ XS NIL) MARK)
-                   (T (RECUR (CDR XS))))))))
-         (LAMBDA (F)
-           ((LAMBDA (X)
-              (F
-                (LAMBDA (V)
-                  ((X X) V))))
-            (LAMBDA (X)
-              (F
-                (LAMBDA (V)
-                  ((X X) V))))))))
-      (QUOTE CAPTURED))
-     (QUOTE (A B))))
-  NIL
-  NIL)
+; #2234 — D4 fixed-point capture escape. Ukrainian projection only.
+
+(обчислити
+  (як-є
+    (((функція (mark)
+        ((функція (fix)
+           (fix
+             (функція (recur)
+               (функція (xs)
+                 (за-умовою
+                   ((тотожне? xs (як-є ())) mark)
+                   (так (recur (решта xs))))))))
+         (функція (f)
+           ((функція (x)
+              (f
+                (функція (v)
+                  ((x x) v))))
+            (функція (x)
+              (f
+                (функція (v)
+                  ((x x) v))))))))
+      (як-є captured))
+     (як-є (A B))))
+  (як-є ())
+  (як-є ()))

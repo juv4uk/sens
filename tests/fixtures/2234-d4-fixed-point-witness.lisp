@@ -1,21 +1,23 @@
-(C1-EVAL
-  (QUOTE
-    ((LAMBDA (FIX)
-       ((FIX
-          (LAMBDA (SELF)
-            (LAMBDA (XS)
-              (COND
-                ((EQ XS NIL) (QUOTE DONE))
-                (T (SELF (CDR XS)))))))
-        (QUOTE (A))))
-     (LAMBDA (F)
-       ((LAMBDA (X)
-          (F
-            (LAMBDA (V)
-              ((X X) V))))
-        (LAMBDA (X)
-          (F
-            (LAMBDA (V)
-              ((X X) V))))))))
-  NIL
-  NIL)
+; #2234 — D4 fixed-point combinator. Ukrainian projection only.
+
+(обчислити
+  (як-є
+    ((функція (fix)
+       ((fix
+          (функція (self)
+            (функція (xs)
+              (за-умовою
+                ((тотожне? xs (як-є ())) (як-є done))
+                (так (self (решта xs)))))))
+        (як-є (A))))
+     (функція (f)
+       ((функція (x)
+          (f
+            (функція (v)
+              ((x x) v))))
+        (функція (x)
+          (f
+            (функція (v)
+              ((x x) v))))))))
+  (як-є ())
+  (як-є ()))
