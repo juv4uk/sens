@@ -1,6 +1,6 @@
-; x86 base ISA catalogue — physical machine facts, not my-lisp semantics.
-; Authority: Intel SDM / Intel XED.  No row in this file may allocate a
-; my-lisp semantic identity.
+; Базовий каталог команд x86 — фізичні відомості, а не семантика СЕНС.
+; Джерело технічних відомостей: Intel SDM та Intel XED.
+; Жоден рядок не створює семантичної тотожності мови.
 
 (isa-catalogue/1
   (extension X86-BASE)
