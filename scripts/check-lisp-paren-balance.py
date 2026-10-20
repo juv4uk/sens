@@ -95,11 +95,11 @@ REQUIRED_ENCODER_FORMS = (
     "(0011 x86-encode-program",
 )
 REQUIRED_ADMISSION_FORMS = (
-    "(0011 x86-admitted-program?",
-    "(0011 x86-admitted-instruction?",
-    "(0011 x86-first-unadmitted-form",
-    "(0011 x86-encode-admitted-instruction",
-    "(0011 x86-encode-admitted-program-or-reject",
+    "(визначити машина-програма-допущена?",
+    "(визначити машина-команда-допущена?",
+    "(визначити машина-перша-недопущена-форма",
+    "(визначити машина-кодувати-допущену-команду",
+    "(визначити машина-кодувати-допущену-програму-або-відхилити",
 )
 
 # Every marker the #5423 forensics observed being committed in place of real

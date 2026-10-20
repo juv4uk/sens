@@ -40,7 +40,7 @@ fn parse_byte_list(rendered: &str) -> Vec<u8> {
 }
 
 fn sens_bytes(form: &str, session: &mut Session) -> Vec<u8> {
-    let source = format!("(x86-encode-admitted-program (quote ({form})))");
+    let source = format!("(машина-кодувати-допущену-програму (quote ({form})))");
     let rendered = eval_program(&source, session)
         .unwrap_or_else(|error| panic!("SENS encoder rejected {form}: {error}"))
         .value
@@ -269,15 +269,15 @@ fn x86_encoder_callability_stage_probe() {
         ("умова_без_REX_XMM", "(менше? (додати (x86-high1 (x86-xmm-reg-code (quote xmm0))) (x86-high1 (x86-xmm-reg-code (quote xmm1)))) 1)"),
         ("SSE_66_енкодер", "(x86-encode-sse-66-map-xmm-xmm 56 220 (quote xmm0) (quote xmm1))"),
         ("AESENC_енкодер", "(x86-encode-aesenc-xmm-xmm (quote xmm0) (quote xmm1))"),
-        ("PCLMUL_exact_integer", "(x86-admission-exact-integer? 17)"),
-        ("PCLMUL_range_uimm8", "(x86-admission-within-inclusive-integer-range? 17 0 255)"),
-        ("PCLMUL_uimm8", "(x86-admission-uimm8? 17)"),
-        ("PCLMUL_pattern_match", "(x86-admission-pattern-match? (quote (pclmulqdq-xmm-xmm-imm8 xmm-register xmm-register uimm8)) (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
-        ("PCLMUL_admitted", "(x86-admitted-instruction? (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
+        ("PCLMUL_exact_integer", "(машина-допуск-точне-ціле? 17)"),
+        ("PCLMUL_range_uimm8", "(машина-допуск-ціле-у-включних-межах? 17 0 255)"),
+        ("PCLMUL_uimm8", "(машина-допуск-беззнакове-число-8? 17)"),
+        ("PCLMUL_pattern_match", "(машина-допуск-збіг-шаблону? (quote (pclmulqdq-xmm-xmm-imm8 xmm-register xmm-register uimm8)) (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
+        ("PCLMUL_admitted", "(машина-команда-допущена? (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
         ("PCLMUL_SSE_map", "(x86-encode-sse-66-map-xmm-xmm 58 104 (quote xmm0) (quote xmm1))"),
         ("PCLMUL_encoder_direct", "(x86-encode-pclmulqdq-xmm-xmm-imm8 (quote xmm0) (quote xmm1) 17)"),
-        ("PCLMUL_instruction_encoder", "(x86-encode-admitted-instruction (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
-        ("PCLMUL_whole_program", "(x86-encode-admitted-program (quote ((pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17))))"),
+        ("PCLMUL_instruction_encoder", "(машина-кодувати-допущену-команду (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
+        ("PCLMUL_whole_program", "(машина-кодувати-допущену-програму (quote ((pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17))))"),
         ("старий_LIST", "(00100111 72 1 200)"),
         ("чинний_LIST", "(list 72 1 200)"),
         ("старий_LET", "(10011100 ((n 1)) n)"),
@@ -285,11 +285,11 @@ fn x86_encoder_callability_stage_probe() {
         ("байти_add", "(x86-encode-add-r64-r64 (quote rax) (quote rcx))"),
         (
             "одна_інструкція",
-            "(x86-encode-admitted-instruction (quote (add-r64-r64 rax rcx)))",
+            "(машина-кодувати-допущену-команду (quote (add-r64-r64 rax rcx)))",
         ),
         (
             "повна_програма",
-            "(x86-encode-admitted-program (quote ((add-r64-r64 rax rcx))))",
+            "(машина-кодувати-допущену-програму (quote ((add-r64-r64 rax rcx))))",
         ),
     ];
     let mut failed = Vec::new();

@@ -47,8 +47,8 @@ fn exhausted_instruction_patterns_return_exact_d1_no_not_structural_empty() {
 
     // Порожній перелік шаблонів — це предикат D1:0, а не структурне D3:000.
     for source in [
-        "(x86-admitted-instruction-against? (00000001 ()) (00000001 ud2))",
-        "(x86-admitted-instruction-against? (00000001 ()) (00000001 ()))",
+        "(машина-команда-відповідає-допуску? (00000001 ()) (00000001 ud2))",
+        "(машина-команда-відповідає-допуску? (00000001 ()) (00000001 ()))",
     ] {
         let result = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"));
@@ -70,9 +70,9 @@ fn x86_exact_integer_wire_checks_return_typed_d1() {
     // Перевірка справді проходить крізь лексичні прив'язки wire/rest.
     // Недопустимі числа не можна заміняти структурним () чи Number 0.
     for (source, expected) in [
-        ("(x86-admission-exact-integer? 7)", true),
-        ("(x86-admission-exact-integer? -7)", true),
-        ("(x86-admission-exact-integer? (00000001 not-an-integer))", false),
+        ("(машина-допуск-точне-ціле? 7)", true),
+        ("(машина-допуск-точне-ціле? -7)", true),
+        ("(машина-допуск-точне-ціле? (00000001 not-an-integer))", false),
     ] {
         let result = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"));
@@ -92,14 +92,14 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
 
     let cases = [
-        ("(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ud2)))", false),
-        ("(x86-admission-pattern-match? (00000001 (ret)) (00000001 ret))", false),
-        ("(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret extra)))", false),
-        ("(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret)))", true),
-        ("(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 7)))", true),
-        ("(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 notareg 7)))", false),
-        ("(x86-admission-pattern-match? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) (00000001 (vaddps-xmm-xmm-xmm xmm0 xmm1 xmm2)))", true),
-        ("(x86-admission-pattern-match? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) (00000001 (vaddps-xmm-xmm-xmm xmm0 notaxmm xmm2)))", false),
+        ("(машина-допуск-збіг-шаблону? (00000001 (ret)) (00000001 (ud2)))", false),
+        ("(машина-допуск-збіг-шаблону? (00000001 (ret)) (00000001 ret))", false),
+        ("(машина-допуск-збіг-шаблону? (00000001 (ret)) (00000001 (ret extra)))", false),
+        ("(машина-допуск-збіг-шаблону? (00000001 (ret)) (00000001 (ret)))", true),
+        ("(машина-допуск-збіг-шаблону? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 7)))", true),
+        ("(машина-допуск-збіг-шаблону? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 notareg 7)))", false),
+        ("(машина-допуск-збіг-шаблону? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) (00000001 (vaddps-xmm-xmm-xmm xmm0 xmm1 xmm2)))", true),
+        ("(машина-допуск-збіг-шаблону? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) (00000001 (vaddps-xmm-xmm-xmm xmm0 notaxmm xmm2)))", false),
     ];
 
     for (source, expected) in cases {
@@ -148,8 +148,8 @@ fn x86_admitted_program_rejects_ud2_with_typed_d1_no() {
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
 
     for program in [
-        "(x86-admitted-program? (00000001 ((ud2))))",
-        "(x86-admitted-program? (00000001 ((mov-r64-imm64 notareg 1))))",
+        "(машина-програма-допущена? (00000001 ((ud2))))",
+        "(машина-програма-допущена? (00000001 ((mov-r64-imm64 notareg 1))))",
     ] {
         let result = eval_program(program, &mut session)
             .unwrap_or_else(|error| panic!("{program}: {error}"));

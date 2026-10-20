@@ -149,13 +149,13 @@ fn disp8_admission_uses_the_finite_lisp_encoder_table_without_math() {
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
 
     for (source, accepted) in [
-        ("(x86-admission-disp8? -128)", true),
-        ("(x86-admission-disp8? -1)", true),
-        ("(x86-admission-disp8? 0)", true),
-        ("(x86-admission-disp8? 127)", true),
-        ("(x86-admission-disp8? -129)", false),
-        ("(x86-admission-disp8? 128)", false),
-        ("(x86-admission-disp8? #q2:1/10)", false),
+        ("(машина-допуск-зсув-8? -128)", true),
+        ("(машина-допуск-зсув-8? -1)", true),
+        ("(машина-допуск-зсув-8? 0)", true),
+        ("(машина-допуск-зсув-8? 127)", true),
+        ("(машина-допуск-зсув-8? -129)", false),
+        ("(машина-допуск-зсув-8? 128)", false),
+        ("(машина-допуск-зсув-8? #q2:1/10)", false),
     ] {
         let result = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source} must return an admission predicate: {error}"));
@@ -424,7 +424,7 @@ fn semantics_blind_raw_executor_accepts_optional_arena_bytes() {
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
     let result = eval_program(
-        "(native-call-u64-raw (x86-encode-admitted-program (машина-знизити-додавання-беззнакових-64-до-форм 2 3)) 16)",
+        "(native-call-u64-raw (машина-кодувати-допущену-програму (машина-знизити-додавання-беззнакових-64-до-форм 2 3)) 16)",
         &mut session,
     )
     .expect("raw host mechanism must receive only bytes materialized from admitted structured forms");
@@ -481,18 +481,18 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     // Failure-only stage inventory for Contract 11.8 callability diagnosis.
     // These probes report but never turn a failed stage into a passing test.
     for (name, source) in [
-        ("wire-denominator-zero", "(x86-admission-wire-denominator-one? \"0/1\")"),
+        ("wire-denominator-zero", "(машина-допуск-знаменник-одиниця? \"0/1\")"),
         ("ge-lower-zero", "(не-менше? 0 -128)"),
         ("ge-normalize-zero", "(тотожне? (не-менше? 0 -128) 1)"),
         ("le-upper-zero", "(не-більше? 0 127)"),
         ("le-normalize-zero", "(тотожне? (не-більше? 0 127) 1)"),
         ("eq-number-control", "(тотожне? 1 1)"),
-        ("exact-integer-zero", "(x86-admission-exact-integer? 0)"),
-        ("disp8-zero", "(x86-admission-disp8? 0)"),
-        ("disp8-eight", "(x86-admission-disp8? 8)"),
-        ("pattern-store", "(x86-admission-pattern-match? (quote (mov-mem-disp8-r64 register disp8 register)) (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
-        ("instruction-store", "(x86-admitted-instruction? (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
-        ("whole-admission", "(x86-admitted-program? (quote ((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax) (mov-r64-mem-disp8 rax rdi 0) (ret))))"),
+        ("exact-integer-zero", "(машина-допуск-точне-ціле? 0)"),
+        ("disp8-zero", "(машина-допуск-зсув-8? 0)"),
+        ("disp8-eight", "(машина-допуск-зсув-8? 8)"),
+        ("pattern-store", "(машина-допуск-збіг-шаблону? (quote (mov-mem-disp8-r64 register disp8 register)) (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("instruction-store", "(машина-команда-допущена? (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("whole-admission", "(машина-програма-допущена? (quote ((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax) (mov-r64-mem-disp8 rax rdi 0) (ret))))"),
     ] {
         let result = eval_program(source, &mut session)
             .map(|value| format!("{:?}", value.value))
@@ -505,13 +505,13 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     // alter the critical assertion below.
     for (name, source) in [
         ("lowered-car-forms", "(знизити-складену-пару-до-машинних-форм 2 3)"),
-        ("lowered-car-admission", "(x86-admitted-program? (знизити-складену-пару-до-машинних-форм 2 3))"),
-        ("encode-mov-imm-left", "(x86-encode-admitted-instruction (quote (mov-r64-imm64 rax 2)))"),
-        ("encode-store-car", "(x86-encode-admitted-instruction (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
-        ("encode-mov-imm-right", "(x86-encode-admitted-instruction (quote (mov-r64-imm64 rax 3)))"),
-        ("encode-store-cdr", "(x86-encode-admitted-instruction (quote (mov-mem-disp8-r64 rdi 8 rax)))"),
-        ("encode-load-car", "(x86-encode-admitted-instruction (quote (mov-r64-mem-disp8 rax rdi 0)))"),
-        ("encode-ret", "(x86-encode-admitted-instruction (quote (ret)))"),
+        ("lowered-car-admission", "(машина-програма-допущена? (знизити-складену-пару-до-машинних-форм 2 3))"),
+        ("encode-mov-imm-left", "(машина-кодувати-допущену-команду (quote (mov-r64-imm64 rax 2)))"),
+        ("encode-store-car", "(машина-кодувати-допущену-команду (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("encode-mov-imm-right", "(машина-кодувати-допущену-команду (quote (mov-r64-imm64 rax 3)))"),
+        ("encode-store-cdr", "(машина-кодувати-допущену-команду (quote (mov-mem-disp8-r64 rdi 8 rax)))"),
+        ("encode-load-car", "(машина-кодувати-допущену-команду (quote (mov-r64-mem-disp8 rax rdi 0)))"),
+        ("encode-ret", "(машина-кодувати-допущену-команду (quote (ret)))"),
         ("reg-code-rdi", "(x86-reg-code (quote rdi))"),
         ("reg-code-rax", "(x86-reg-code (quote rax))"),
         ("reg-low3-rdi", "(x86-low3 (x86-reg-code (quote rdi)))"),
@@ -524,7 +524,7 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
         ("plus-disp8-zero", "(00001100 0 256)"),
         ("mod-disp8-zero", "(00010011 (00001100 0 256) 256)"),
         ("store-direct", "(x86-encode-mov-mem-disp8-r64 (quote rdi) 0 (quote rax))"),
-        ("lowered-car-encoding", "(x86-encode-admitted-program (знизити-складену-пару-до-машинних-форм 2 3))"),
+        ("lowered-car-encoding", "(машина-кодувати-допущену-програму (знизити-складену-пару-до-машинних-форм 2 3))"),
     ] {
         let result = eval_program(source, &mut session)
             .map(|value| format!("{:?}", value.value))
@@ -551,12 +551,12 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     }
 
     let native_car = eval_program(
-        "(native-call-u64-raw (x86-encode-admitted-program (знизити-складену-пару-до-машинних-форм 2 3)) x86-pair-cell-bytes)",
+        "(native-call-u64-raw (машина-кодувати-допущену-програму (знизити-складену-пару-до-машинних-форм 2 3)) x86-pair-cell-bytes)",
         &mut session,
     )
     .expect("Lisp-owned CONS+CAR forms must materialize through admission before raw host execution");
     let native_cdr = eval_program(
-        "(native-call-u64-raw (x86-encode-admitted-program (машина-знизити-решту-пари-64 2 3)) x86-pair-cell-bytes)",
+        "(native-call-u64-raw (машина-кодувати-допущену-програму (машина-знизити-решту-пари-64 2 3)) x86-pair-cell-bytes)",
         &mut session,
     )
     .expect("Lisp-owned CONS+CDR forms must materialize through admission before raw host execution");
@@ -585,7 +585,7 @@ fn lisp_owned_add_bytes_execute_natively_through_semantics_blind_host() {
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
     let result = eval_program(
-        "(native-call-u64-raw (x86-encode-admitted-program (машина-знизити-додавання-беззнакових-64-до-форм 2 3)))",
+        "(native-call-u64-raw (машина-кодувати-допущену-програму (машина-знизити-додавання-беззнакових-64-до-форм 2 3)))",
         &mut session,
     )
     .expect("host must execute bytes admitted from Lisp-owned structured forms");

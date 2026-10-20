@@ -76,9 +76,11 @@ def evidence_rows(text: str) -> list[tuple[str,str]]:
     return rows
 
 def admission_heads(text: str) -> list[str]:
-    start=text.find("(00001001 x86-admitted-instruction-patterns")
-    if start < 0: raise ValueError("x86-admitted-instruction-patterns missing")
-    block=balanced_blocks(text[start:],"00001001")[0]
+    # The live source is a Ukrainian SENS DEFINE. Machine mnemonics inside
+    # its quoted/data structure remain protocol values, not executable heads.
+    start=text.find("(визначити машина-допущені-шаблони-команд")
+    if start < 0: raise ValueError("машина-допущені-шаблони-команд missing")
+    block=balanced_blocks(text[start:],"визначити")[0]
     heads=[]
     for line in block.splitlines():
         m=(re.match(r"^\s{4}\(\(([A-Za-z0-9?+*/<>=!._:-]+)",line)
@@ -105,7 +107,7 @@ def derive(evidence: list[tuple[str,str]], heads: list[str]):
             raise ValueError(f"mapped admission {head} -> {pair} absent from pinned evidence")
         pairs.setdefault(pair,[]).append(head)
     if orphans:
-        raise ValueError("unmapped admission heads: "+", ".join(orphans))
+        raise ValueError("не зіставлені заголовки допуску: "+", ".join(orphans))
     return pairs
 
 def render_index(evidence):
