@@ -149,8 +149,8 @@
   (функція (кандидат)
     (за-умовою ((атом? кандидат) (як-є needs-research)) ((атом? (як-є ())) (як-є not-yet-assessed)))))
 
-; Per-identity status from the staging profile: чинна -> stable,
-; кандидат-сумісності -> compatibility-only, any other candidate -> candidate.
+; Статус на ідентичність з профілю підготовки: чинна -> stable,
+; кандидат-сумісності -> compatibility-only, будь-який інший кандидат -> candidate.
 (визначити первинний-статус-профілю
   (функція (кандидат)
     (за-умовою
