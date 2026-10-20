@@ -1,11 +1,10 @@
-; #1826 — exact-Q comparison predicate witnesses.
-;
-; `expected` is presentation only: PredicateBit YES/NO currently renders as
-; "1"/"0". The semantic result domain is PredicateBit, never Number.
-;
-; Exact-Q is the admissibility rule for these predicates, not a numeric truth
-; algebra. Outside-domain behavior is tracked separately as named domain/type
-; failure and is intentionally not encoded as structural () here.
+; Свідчення #1826: порівняння в області точних чисел Q.
+; Поле `expected` містить тільки людське подання бітової відповіді:
+; "1" означає ТАК, "0" — НІ. Семантичний домен результату
+; належить однобітному предикату, а не домену числових величин.
+; Правило Q визначає допустимість аргументів, не алгебру істинності.
+; Вихід за область допустимості має окрему іменовану помилку
+; домену або типу, а не підміняється структурним порожнім списком.
 
 ((expr . "(= 1/3 2/6)")
  (expected . "1")
@@ -32,9 +31,9 @@
  (expected-domain . "predicate-bit")
  (case . rational-nonincreasing-yes))
 
-; #295 — strict comparison laws preserved after retiring the legacy Rust
-; truth-sentinel test. The mathematical answer stays in the existing exact-Q
-; result domain; no new host-side semantic oracle is introduced.
+; Закон #295: строгі ланцюгові порівняння зберігають семантику Q
+; після вилучення історичних перевірок істинності з Rust.
+; Результат установлює мова, а не новий зовнішній оракул.
 ((expr . "(< 1 2 3)")
  (expected . "1")
  (expected-domain . "predicate-bit")
@@ -51,9 +50,9 @@
  (case . strict-single-argument-vacuous-yes))
 
 
-; Numeric canonicalization remains a Number-domain law, separate from
-; PredicateBit. These rows prove only that 0/1 and 1/1 are ordinary exact
-; rational spellings that compact to numeric 0 and 1.
+; Канонізація числових дробів належить числовому домену окремо
+; від однобітних відповідей предикатів. Ці рядки доводять лише
+; рівноцінність записів 0/1 і 1/1 відповідно числам 0 і 1.
 ((expr . "(= 0 0/1)")
  (expected . "1")
  (expected-domain . "predicate-bit")
@@ -68,14 +67,14 @@
  (expected . "(0 0 1 1)")
  (case . denominator-one-source-spellings-write-canonically))
 
-; Preserved from historical #216 work: equality on an exact integer is an
-; exact-Q YES and remains a canonical one-bit PredicateBit, not a host bool.
+; Історичний закон #216: рівність точного цілого дає відповідь ТАК
+; у домені Q, представлену одним бітом СЕНС, а не логічним типом хоста.
 ((expr . "(= 3 3)")
  (expected . "1")
  (expected-domain . "predicate-bit")
  (case . integer-equality-yes))
 
-; Comparison remains chained across every adjacent pair in the exact-Q domain.
+; Порівняння всіх сусідніх пар залишається ланцюговим законом області Q.
 ((expr . "(< 1 2 3 4)")
  (expected . "1")
  (expected-domain . "predicate-bit")
