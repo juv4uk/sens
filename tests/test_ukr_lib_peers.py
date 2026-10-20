@@ -168,6 +168,55 @@ class LibUkrPeerTests(unittest.TestCase):
                 hit = [k for k, (_uk, u, _e) in ROWS.items() if u == ukr]
                 self.assertTrue(hit, f"{rel}: {ukr} не є ratified укр-назвою драбини")
 
+    def test_legacy_clips_alias_block_is_retired(self):
+        """Старі англомовні DEFINE не повертаються як паралельні входи."""
+        src = (ROOT / "lib/clips-import.lisp").read_text(encoding="utf-8")
+        names = definitions(src)
+        old_aliases = {
+            "clips-all-asserts?",
+            "clips-assert-conclusions",
+            "clips-assert-form?",
+            "clips-clauses-for-conclusions",
+            "clips-convert-template",
+            "clips-convert-template-list",
+            "clips-convert-vars",
+            "clips-deffacts->clauses",
+            "clips-defrule->clauses",
+            "clips-deftemplate-form?",
+            "clips-deftemplate-name",
+            "clips-deftemplate-slots",
+            "clips-drop-printouts",
+            "clips-fact-clause",
+            "clips-facts->clauses",
+            "clips-form->clauses",
+            "clips-import",
+            "clips-import-forms",
+            "clips-lookup-slot-value",
+            "clips-positional-args",
+            "clips-printout-form?",
+            "clips-rule-preamble-form?",
+            "clips-slot-name",
+            "clips-slot-names",
+            "clips-split-at-arrow",
+            "clips-strip-module-prefix",
+            "clips-strip-rule-preamble",
+            "clips-template-slot-order",
+            "clips-templates-from-forms",
+            "clips-var-term",
+            "clips-var?",
+        }
+        self.assertTrue(old_aliases, "негативний список мусить бути непорожнім")
+        self.assertFalse(old_aliases & names,
+                         f"повернулися старі аліаси: {sorted(old_aliases & names)}")
+        self.assertNotIn(MARKER, src)
+        for live in ("кліпс-імпорт", "кліпс-імпорт-форми",
+                     "кліпс-визначити-правило-клаузи",
+                     "усі-твердження-кліпс?", "кліпс-шаблони-з-форми"):
+            self.assertIn("(визначити " + live, src)
+        # Сторонні ключові слова КЛІПС -- лише цитовані дані.
+        self.assertIn("(як-є deftemplate)", src)
+        self.assertIn("(як-є deffacts)", src)
+
     def test_native_clips_calls_use_full_ukrainian_surface(self):
         """Код випробувань використовує первинні голови, а не clips-* псевдоніми.
 
