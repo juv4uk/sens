@@ -235,4 +235,62 @@ sens_words_sub_exact:
     ret
 .size sens_words_sub_exact,.-sens_words_sub_exact
 
+
+/* Unsigned complete schoolbook product (2*N limbs), no lost carries.
+ * System V ABI: RDI=left, RSI=right, RDX=output, RCX=N.
+ * Requires N>0, non-overlapping source/output buffers, 2*N output limbs.
+ * The caller controls signedness, domain admission and promotion. */
+.p2align 4
+.globl sens_words_mul_exact
+.type sens_words_mul_exact,@function
+sens_words_mul_exact:
+    push %rbp
+    push %rbx
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+    mov %rdi,%r12
+    mov %rsi,%r13
+    mov %rdx,%r14
+    mov %rcx,%r15
+    xor %r8d,%r8d
+    mov %r15,%r9
+    add %r15,%r9
+.Lmul_clear:
+    movq $0,(%r14,%r8,8)
+    inc %r8
+    cmp %r9,%r8
+    jb .Lmul_clear
+    xor %ebx,%ebx
+.Lmul_outer:
+    xor %ebp,%ebp
+    xor %r10d,%r10d
+.Lmul_inner:
+    mov (%r12,%rbx,8),%rax
+    mulq (%r13,%r10,8)
+    lea (%rbx,%r10),%r11
+    add (%r14,%r11,8),%rax
+    adc $0,%rdx
+    add %rbp,%rax
+    adc $0,%rdx
+    mov %rax,(%r14,%r11,8)
+    mov %rdx,%rbp
+    inc %r10
+    cmp %r15,%r10
+    jb .Lmul_inner
+    lea (%rbx,%r15),%r11
+    mov %rbp,(%r14,%r11,8)
+    inc %rbx
+    cmp %r15,%rbx
+    jb .Lmul_outer
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
+    pop %rbx
+    pop %rbp
+    ret
+.size sens_words_mul_exact,.-sens_words_mul_exact
+
 .section .note.GNU-stack,"",@progbits

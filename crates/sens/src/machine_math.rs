@@ -38,6 +38,7 @@ unsafe extern "C" {
     // Багатослівна арифметика: на відміну від двослівних D96, довільна довжина.
     fn sens_words_add_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
     fn sens_words_sub_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
+    fn sens_words_mul_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
 }
 
 /// Цілочисельний механізм для рівно двох НАЯВНИХ знакових слів D24.
@@ -208,6 +209,38 @@ pub(crate) fn exact_words_add_sub(operator: &str, left: &[u64], right: &[u64]) -
         }
     }
     Some(out)
+}
+
+
+/* Unsigned full-width product, 64*N × 64*N -> 128*N.
+ * SENS alone admits exact Dn operands and selects Dn/D(2n).
+ * Caller supplies equal nonempty little-endian limb arrays.
+ * No rounding, truncation or float conversion. */
+pub(crate) fn exact_words_mul_unsigned(left: &[u64], right: &[u64]) -> Option<Vec<u64>> {
+    if left.is_empty() || left.len() != right.len() { return None; }
+    let out_len = left.len().checked_mul(2)?;
+    let mut output = vec![0_u64; out_len];
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    unsafe {
+        // SAFETY: output is 2*n elements and never aliases inputs.
+        // ASM preserves callee-saved registers under x86-64 System V ABI.
+        sens_words_mul_exact(left.as_ptr(), right.as_ptr(), output.as_mut_ptr(), left.len());
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    {
+        for (i, &a) in left.iter().enumerate() {
+            let mut carry = 0_u128;
+            for (j, &b) in right.iter().enumerate() {
+                let k = i + j;
+                let part = u128::from(a) * u128::from(b)
+                    + u128::from(output[k]) + carry;
+                output[k] = part as u64;
+                carry = part >> 64;
+            }
+            output[i + left.len()] = carry as u64;
+        }
+    }
+    Some(output)
 }
 
 /// Вибір механізму за ISA процесора, а не ратифікація мовної функції.
@@ -452,6 +485,54 @@ mod tests {
             let expect_sub = a.wrapping_sub(b);
             assert_eq!(sum, [expect_sum as u64, (expect_sum >> 64) as u64]);
             assert_eq!(sub, [expect_sub as u64, (expect_sub >> 64) as u64]);
+        }
+    }
+
+    #[test]
+    fn multiword_asm_multiplication_preserves_full_width() {
+        for n in [1, 2, 3, 4, 6, 12] {
+            let max = vec![u64::MAX; n];
+            let zero = vec![0_u64; n];
+            let one = [vec![1_u64], vec![0; n.saturating_sub(1)]].concat();
+            assert_eq!(exact_words_mul_unsigned(&max, &zero), Some(vec![0; 2 * n]));
+            assert_eq!(exact_words_mul_unsigned(&max, &one),
+                       Some([max.clone(), vec![0; n]].concat()));
+            assert_eq!(exact_words_mul_unsigned(&max, &max).unwrap()[0], 1);
+            assert_eq!(exact_words_mul_unsigned(&max, &max).unwrap()[2 * n - 1],
+                       u64::MAX);
+        }
+        assert_eq!(exact_words_mul_unsigned(&[], &[]), None);
+        assert_eq!(exact_words_mul_unsigned(&[1], &[1, 2]), None);
+    }
+
+    #[test]
+    fn multiword_asm_matches_independent_schoolbook_oracle() {
+        let mut seed = 0x9e37_79b9_82a1_c365_u64;
+        for n in [1, 2, 3, 4, 6, 12] {
+            for repeat in 0..4096 {
+                let mut left = vec![0_u64; n];
+                let mut right = vec![0_u64; n];
+                for i in 0..n {
+                    seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+                    left[i] = if repeat % 11 == 0 { u64::MAX } else { seed };
+                    seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+                    right[i] = if repeat % 13 == 0 { u64::MAX } else { seed };
+                }
+                let mut oracle = vec![0_u64; 2 * n];
+                for i in 0..n {
+                    let mut carry = 0_u128;
+                    for j in 0..n {
+                        let k = i + j;
+                        let value = u128::from(left[i]) * u128::from(right[j])
+                            + u128::from(oracle[k]) + carry;
+                        oracle[k] = value as u64;
+                        carry = value >> 64;
+                    }
+                    oracle[i + n] = carry as u64;
+                }
+                assert_eq!(exact_words_mul_unsigned(&left, &right), Some(oracle),
+                           "words={n} repetition={repeat}");
+            }
         }
     }
 }
