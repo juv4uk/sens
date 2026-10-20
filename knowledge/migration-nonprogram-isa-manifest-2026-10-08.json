@@ -1,110 +1,110 @@
 {
   "schema": "sens-migration-nonprogram-manifest/1",
-  "generated_from_main": "cd6ad0099f7bedca47a9be38bec86c6bfce9cca8",
+  "generated_from_main": "5f61a3437886b98d373cbaea967a616f70bae82a",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
-  "reason": "top-level isa-catalogue/1 declarative machine evidence, not executable SENS program",
+  "reason": "Exact 25 reviewed top-level isa-catalogue/1 declarative machine records. Every current source was inspected as an ISA catalogue without Lisp define/lambda execution. SHA pins carry data identity, not SENS-executable admission.",
   "automatic_sens_companion": false,
   "entries": [
     {
       "path": "lib/machine/isa/adx.lisp",
-      "git_blob_sha1": "fd17a7e2c4d0d173ff02b929de7d1ecaa44dbe4e"
+      "git_blob_sha1": "ff06ff5c7eacf0dac5deee2b23537fcd5f52bc9b"
     },
     {
       "path": "lib/machine/isa/aes-ni.lisp",
-      "git_blob_sha1": "388928a9ee78f38bab13e61e961af0d184c6697c"
+      "git_blob_sha1": "fe95ec53aa6e465ac754ad6412729ab47ec5ffa8"
     },
     {
       "path": "lib/machine/isa/avx.lisp",
-      "git_blob_sha1": "eb908afc48744a4352a7ef2adf6c87447a21c35e"
+      "git_blob_sha1": "82674242fe5fa360834d76f9734924c5deb3bfd3"
     },
     {
       "path": "lib/machine/isa/avx2.lisp",
-      "git_blob_sha1": "ebef5179e1a09498b935fa8ad6822e910fda057e"
+      "git_blob_sha1": "95cb5ef9de8bd5c264aa4afe43c7346705f7424d"
     },
     {
       "path": "lib/machine/isa/bmi1.lisp",
-      "git_blob_sha1": "b2c615fabddfab9b527df3d62f7984b05d7bf22d"
+      "git_blob_sha1": "f1d51c8248e689c00e76ee900e8e78697a4634d4"
     },
     {
       "path": "lib/machine/isa/bmi2.lisp",
-      "git_blob_sha1": "f94ea0eb10509b04123dbce6b4301306e2191173"
+      "git_blob_sha1": "f2d985d1d143b3ab34fdf540a9666a0a43c33d8e"
     },
     {
       "path": "lib/machine/isa/clflushopt.lisp",
-      "git_blob_sha1": "c62e93d322ce647c44c248bac8a70cbff7363110"
+      "git_blob_sha1": "e789bcf15e3e939b00ba7cc91079e208b04fc5e6"
     },
     {
       "path": "lib/machine/isa/f16c.lisp",
-      "git_blob_sha1": "16f8130244905d595819697eab452736f4c0c876"
+      "git_blob_sha1": "1ac1ee0c296edfa95eaa58efc21e57482b3646cc"
     },
     {
       "path": "lib/machine/isa/fma3.lisp",
-      "git_blob_sha1": "86795e9751d26b0cfe8cec74b9f4fa4d796a7aac"
+      "git_blob_sha1": "dcce9b5b2a57f954e5848d5b2200bd2e2d62ba89"
     },
     {
       "path": "lib/machine/isa/mmx.lisp",
-      "git_blob_sha1": "0e7ba6406d4447db1e8c5b7aa6db321d1c1bf08d"
+      "git_blob_sha1": "1c1c894f92086a73e5f465e638f6dcde6d872b85"
     },
     {
       "path": "lib/machine/isa/mpx.lisp",
-      "git_blob_sha1": "f5c1f1b4f2e702a8def85672ef61953c164e1b91"
+      "git_blob_sha1": "a074a04fcf56412fec91e498d586a5f0a42a7d0e"
     },
     {
       "path": "lib/machine/isa/pclmulqdq.lisp",
-      "git_blob_sha1": "dc7698d3aeeae9b591f3ea6bbe380c3d7461bf10"
+      "git_blob_sha1": "b5f5b1636768400c84a767a33bbb845deb7a341b"
     },
     {
       "path": "lib/machine/isa/rdrand.lisp",
-      "git_blob_sha1": "ea74c5ebfd94a2f3e2b3af6a87eeb33f99ea70a6"
+      "git_blob_sha1": "34f3a967d3d463dae4a3b159ffc8e685e25d9d0b"
     },
     {
       "path": "lib/machine/isa/rdseed.lisp",
-      "git_blob_sha1": "9bb853a43b8ed89188f72e8fb53471c046ede9fa"
+      "git_blob_sha1": "528bc48b4590b48f7978ff64ed7fb856aaf900ed"
     },
     {
       "path": "lib/machine/isa/sgx.lisp",
-      "git_blob_sha1": "5e70b986c33b570f5dd4d6b8843672cd9ecc46ea"
+      "git_blob_sha1": "c5ab1c4eac905b159c992c1e5fa9c6ab975ec499"
     },
     {
       "path": "lib/machine/isa/sse.lisp",
-      "git_blob_sha1": "1d656ae7df051bee2b7f95f1458879f99f43e6d1"
+      "git_blob_sha1": "1ffd66a92b618ad6de9a2e29ff51d9c43435cfa9"
     },
     {
       "path": "lib/machine/isa/sse2.lisp",
-      "git_blob_sha1": "6b96ee4aecbff026c2bbbc65fe0b4d4e620abb85"
+      "git_blob_sha1": "ef2d9100a88f09385b338c52249d3f0cf33c6a24"
     },
     {
       "path": "lib/machine/isa/sse3.lisp",
-      "git_blob_sha1": "3c62b41439f07fedc66e9f12b0e5f6301e6b5f74"
+      "git_blob_sha1": "74a9e1e093afa18f1e9c2fced2ce32e2988ba988"
     },
     {
       "path": "lib/machine/isa/sse4.1.lisp",
-      "git_blob_sha1": "2f5b3395f4a1ea722a2be3149f23e52695dcca16"
+      "git_blob_sha1": "2b874f51b6ecd5a4939638c7923327a6f68b4130"
     },
     {
       "path": "lib/machine/isa/sse4.2.lisp",
-      "git_blob_sha1": "1e6c86d53f84c948afce2ab50fde2c0b0675c54b"
+      "git_blob_sha1": "8e409bdb659ca6a8409cea15782fd2c43ba2af9b"
     },
     {
       "path": "lib/machine/isa/ssse3.lisp",
-      "git_blob_sha1": "e40e72fcf54724e5f4783b88512aff30c57fb08a"
+      "git_blob_sha1": "675a6a1cc75f5443d62351a7133777163dc2bfb9"
     },
     {
       "path": "lib/machine/isa/x86-64.lisp",
-      "git_blob_sha1": "e4b02dfde853e5773432550f15d17d2912d81577"
+      "git_blob_sha1": "c7a831b9f746d3b1ff6de3681f3dd5973c467511"
     },
     {
       "path": "lib/machine/isa/x86-base.lisp",
-      "git_blob_sha1": "4b753fa1ffdd2ca936a262abb691c74ad222711f"
+      "git_blob_sha1": "6308315addaf01393cdb31295572602c24084cfe"
     },
     {
       "path": "lib/machine/isa/x87.lisp",
-      "git_blob_sha1": "ca3e639e7548b2e46f8fcde5c351d915e1292dcd"
+      "git_blob_sha1": "c4db94f72072e06135809186657fa763e59d6cd2"
     },
     {
       "path": "lib/machine/isa/xsave.lisp",
-      "git_blob_sha1": "bffda21d28c5fbb86879605851969567b859dedf"
+      "git_blob_sha1": "7c879e8f3fbe2922cfe02d14449fa7dce233359b"
     }
   ]
 }
