@@ -132,8 +132,8 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertNotIn("(як-є no)", code)
         self.assertRegex(
             code,
-            r"\\(реєстр-містить-ідентичність\\?\\s+"
-            r"ідентичність\\s+рядки-реєстру-механізму\\)\\s+ні\\)",
+            r"\(реєстр-містить-ідентичність\?\s+"
+            r"ідентичність\s+рядки-реєстру-механізму\)\s+ні\)",
         )
 
     def test_only_balanced_source_parentheses_outside_strings_and_comments(self):
