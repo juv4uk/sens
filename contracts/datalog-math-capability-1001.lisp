@@ -1,9 +1,9 @@
-; #1001 — Datalog integer execution capability under exact SID8 identity.
+; #1001 — здатність цілочисельного виконання Datalog під точною ідентичністю SID8.
 ;
-; Canon/function-table owns every SID, meaning, domain and law.
-; Datalog owns only bounded integer execution machinery.
-; Semantic operation identity comes only from the shared 8-bit SID.
-; Payload bytes carry arguments only; operator text is forbidden as identity.
+; Canon/function-table володіє кожним SID, значенням, доменом і законом.
+; Datalog володіє лише обмеженою машинерією цілочисельного виконання.
+; Семантична тотожність операції походить лише зі спільного 8-бітового SID.
+; Байти корисного навантаження несуть лише аргументи; текст оператора заборонений як ідентичність.
 
 (datalog-math-capability/2
   ((kernel . wsm-datalog-kernel)
