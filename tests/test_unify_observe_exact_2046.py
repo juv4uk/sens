@@ -12,11 +12,6 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/unify-observe.lisp"
 TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
 HELPER = "уніфікація-спостереження-стан"
-OLD_HEADS = ("0011", "0010", "001000", "101010000", "110",
-             "010", "110", "101", "001", "1110", "001", "0100",
-             "101", "001", "1110", "001", "0100", "010",
-             "1110", "001", "0100", "010", "1110", "001")
-
 
 def read(source):
     items = [m.group() for m in TOKEN.finditer(source)
@@ -71,42 +66,44 @@ def normalize_operator_heads(ast):
 
 
 def validate(forms):
+    """Статична звірка українських форм, а не виконання семантики хостом."""
     forms = normalize_operator_heads(forms)
     if len(forms) != 2:
         raise AssertionError("рівно два D4 визначення")
-    if not all(isinstance(f, list) and len(f) == 3 and f[0] == "0011"
+    if not all(isinstance(f, list) and len(f) == 3 and f[0] == "визначити"
                for f in forms):
-        raise AssertionError("точна D4 DEFINE")
+        raise AssertionError("повна українська D4 DEFINE-проєкція")
     names = {f[1]: f for f in forms}
-    if set(names) != {HELPER, "unify-observe"}:
-        raise AssertionError("очікувані лише приватний helper та public wrapper")
+    public_name = "спостерігати-уніфікацію"
+    if set(names) != {HELPER, public_name}:
+        raise AssertionError("очікувані лише дві українські функції без англомовного псевдоніма")
     helper = names[HELPER][2]
-    public = names["unify-observe"][2]
-    if not (helper[:2] == ["0010", ["raw", "left", "right", "substitution"]]
-            and public[:2] == ["0010", ["left", "right", "substitution"]]):
+    public = names[public_name][2]
+    params = ["ліве", "праве", "підстановка"]
+    if not (helper[:2] == ["функція", ["сирий-результат", *params]]
+            and public[:2] == ["функція", params]):
         raise AssertionError("D4 LAMBDA параметри / арність")
-    if public[2] != [HELPER, ["unify", "left", "right", "substitution"],
-                      "left", "right", "substitution"]:
-        raise AssertionError("Lisp-owned unify повинен обчислитися рівно раз")
+    if public[2] != [HELPER, ["уніфікувати", *params], *params]:
+        raise AssertionError("Українська уніфікація мусить обчислитися рівно раз")
     if helper[2] != [
         "110",
-        [["010", "raw"], [
+        [["010", "сирий-результат"], [
             "110",
-            [["101", "raw", ["001", "fail"]],
-             ["1110", ["001", "unification-failure"],
-              "left", "right", "substitution"]],
-            [["010", []], ["1110", ["001", "unified"], "raw"]],
+            [["101", "сирий-результат", ["001", "fail"]],
+             ["1110", ["001", "unification-failure"], *params]],
+            [["010", ["001", []]],
+             ["1110", ["001", "unified"], "сирий-результат"]],
         ]],
-        [["010", []], ["1110", ["001", "unified"], "raw"]],
+        [["010", ["001", []]],
+         ["1110", ["001", "unified"], "сирий-результат"]],
     ]:
         raise AssertionError("порушено 3 класи результатів уніфікації")
     for form in forms:
-        if any(head in {"001000", "101010000"} for node in visit(form)
-               if isinstance(node, list) and node
-               for head in [node[0]] if isinstance(head, str)):
-            raise AssertionError("неприпустимий виконавчий D6/D9 head")
+        if any(node[0] in {"001000", "101010000"}
+               for node in visit(form) if isinstance(node, list)
+               and node and isinstance(node[0], str)):
+            raise AssertionError("неприпустима стара виклична голова")
     return names
-
 
 def all_2046():
     records = []
@@ -148,17 +145,16 @@ class UnifyObserveExact(unittest.TestCase):
     def test_three_outcome_classes_keep_empty_success(self):
         validate(self.forms)
 
-    def test_source_opcode_heads_bit_budget(self):
+    def test_source_has_only_current_ukrainian_d3_d4_call_heads(self):
         text = SOURCE.read_text(encoding="utf-8")
-        code = text[text.index("(0011 "):]
-        opheads = tuple(re.findall(r"\(([01]{3,10})(?=[\s(])", code))
-        self.assertEqual(sum(map(len, OLD_HEADS)), 90)  # незмінна стара механічна база
-        self.assertEqual(opheads, ("0011", "0010", "0011", "0010"))
-        self.assertEqual(sum(map(len, opheads)), 16)
-        # Це лічба джерельних binary heads, а не фізична T5M-метрика.
+        code = text[text.index("(визначити "):]
+        self.assertEqual(tuple(re.findall(r"\\(([01]{3,10})(?=[\\s(])", code)), ())
+        self.assertEqual(code.count("(визначити "), 2)
+        self.assertEqual(code.count("(функція "), 2)
         self.assertIn("(за-умовою", code)
         self.assertIn("(тотожне?", code)
         self.assertIn("(список", code)
+        self.assertNotIn("(визначити unify-observe", code)
 
     def test_exhaustive_2046_domains_and_six_surfaces(self):
         ids = exact_catalog(all_2046())
