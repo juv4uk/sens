@@ -438,8 +438,8 @@
                       (рядок-додати
                         (число-рядок кількість-символічних)
                         "\n"))))
-               (г (показати "numeric-only authority: CONFIRMED\n"))
-               (д (показати "meaning-first shape: CONFIRMED\n")))
+               (г (показати "Повноваження лише за точними числовими тотожностями: CONFIRMED\n"))
+               (д (показати "Перевага визначеного значення над представленням: CONFIRMED\n")))
           (як-є semantic-registry-ok)))))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
