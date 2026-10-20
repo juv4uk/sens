@@ -1,8 +1,8 @@
 ; Guard reference bureau / Довідкове бюро Guard
 ;
-; One topic points to authoritative sources, the canonical workflow, and the
-; evidence that proves completion. This is navigation knowledge, not a copy of
-; those contracts. Paths are repository-relative unless prefixed with ../.
+; Одна тема вказує на владні джерела, канонічний робочий процес і
+; свідчення, що доводить завершення. Це навігаційне знання, а не копія
+; тих контрактів. Шляхи відносні до репозиторію, якщо не починаються з ../.
 ;
 ; Одна тема вказує на авторитетні джерела, штатний workflow і докази
 ; завершення. Це навігаційне знання, а не копія контрактів. Шляхи відносні до
@@ -817,8 +817,8 @@
         (provenance "git commits 85640bd6 516b5954 0bcefcf9 c3dad2c0 35497fb1 71d5aa96 c4b2e96d 53df58b7..7d91dad9 15abbc4b ec8e4659; issue #1292 PR #1293, 2026-09-24, owner-directed archeology investigation")
         (unknown-route ask-owner)))))
 
-; Curated frequently-used tools. A record is navigation, not permission to run
-; the command. `risk` and `verify` tell an agent what must be checked afterward.
+; Дібрані часто вживані інструменти. Запис — це навігація, не дозвіл виконувати
+; команду. `risk` і `verify` кажуть агенту, що треба перевірити після.
 ; Добірка часто вживаних інструментів. Запис є навігацією, а не дозволом на
 ; запуск. Поля `risk` і `verify` пояснюють потрібний доказ після команди.
 (визначити *довідник-сценаріїв-гвардії*
@@ -992,16 +992,16 @@
         (захист-еталон-поле (як-є name) (перше інструменти))
         (гвардія-сценарії (решта інструменти)))))))
 
-; A topic may have more than one (reference ...) entry. Adding a stronger
-; answer never deletes or rejects the older one -- it stays in the
-; directory, still readable, just outranked. Strength is not an arbitrary
-; number an author picks -- it is the same evidence-status vocabulary
-; guard-evidence-status? already uses everywhere else in this system:
-; confirmed > partial > unresolved > broken. A reference with no stated
-; evidence-status defaults to unresolved, never to confirmed -- absence of
+; Тема може мати більше ніж один запис (reference ...). Додавання сильнішої
+; відповіді ніколи не видаляє й не відкидає старішу -- вона лишається в
+; каталозі, досі читабельна, лише нижча за рангом. Сила — не довільне
+; число, яке обирає автор -- це той самий словник статусів свідчень,
+; який guard-evidence-status? уже вживає всюди в цій системі:
+; confirmed > partial > unresolved > broken. Посилання без зазначеного
+; статусу свідчення типово unresolved, ніколи не confirmed -- відсутність
 ; a claim is not evidence for it. Own words: "якщо реальність каже що нова
 ; сильніша то ок" -- reality decides which entry wins the lookup; neither
-; entry is deleted.
+; запису видалено.
 (визначити гвардія-довідка-стан-доказу
   (функція (посилання)
     (нехай ((стан (захист-еталон-поле (як-є evidence-status) посилання)))
@@ -1091,11 +1091,11 @@
       (так (сполучити (захист-еталон-поле (як-є topic) (перше посилання))
         (гвардія-теми (решта посилання)))))))
 
-; One canonical entry point for a cold agent: "ask Guard" without needing
-; to know whether the answer lives in the tool directory or the reference
-; directory. Never silently prefers one over the other -- a name present
-; in both comes back tagged `ambiguous` with both full entries, so the
-; caller decides, instead of Guard guessing for them.
+; Одна канонічна точка входу для «холодного» агента: «запитати Guard», не
+; знаючи, чи відповідь живе в каталозі інструментів, чи в каталозі
+; посилань. Ніколи тихо не віддає перевагу одному над іншим -- ім'я, присутнє
+; в обох, повертається з тегом `ambiguous` і обома повними записами, тож
+; викликник вирішує, а не Guard вгадує за нього.
 ; Єдина канонічна точка входу для холодного агента: "спитати Guard", не
 ; знаючи наперед, чи відповідь лежить у директорії інструментів, чи в
 ; довідковій директорії. Ніколи мовчки не надає перевагу одному з них --
