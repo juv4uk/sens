@@ -234,25 +234,12 @@
                         (світ-журнал світ))
                 (світ-метадані світ))))
 
-;; Once `lib/world.lisp` is loaded, the legacy `defmodule` surface becomes a
-;; thin compatibility wrapper over the explicit World transition. It rebuilds
-;; only the legacy journal binding from the returned world, so existing
-;; `reason-in`/`forward-in` callers keep exactly their old contract while the
-;; write semantics now have one implementation: `world-tell-all`. The wrapper
-;; can disappear after the remaining global writers migrate.
-;;
-;; Після завантаження `lib/world.lisp` старий `defmodule` стає тонкою сумісною
-;; обгорткою над явним переходом World. Із поверненого світу він перевизначає
-;; лише старий journal-binding: чинні `reason-in`/`forward-in` не змінюють
-;; контракт, а семантика запису вже має одну реалізацію — `world-tell-all`.
-;; Обгортку можна буде прибрати після міграції решти глобальних writer-ів.
-;;
-;; Sobald `lib/world.lisp` geladen ist, wird die alte `defmodule`-Oberfläche zu
-;; einer dünnen Kompatibilitätshülle um den expliziten World-Übergang. Aus der
-;; gelieferten Welt bindet sie nur das alte Journal neu; bestehende
-;; `reason-in`/`forward-in`-Aufrufer behalten ihren Vertrag, während
-;; `world-tell-all` die einzige Schreibsemantik liefert. Nach der Migration der
-;; übrigen globalen Writer kann diese Hülle entfallen.
+;; Після завантаження бібліотеки світу історичний `defmodule` є лише
+;; сумісною обгорткою над явним переходом незмінного світу.
+;; Вона оновлює тільки прив'язку історичного журналу за отриманим
+;; світом. Виклики міркування й прямого виведення зберігають контракт;
+;; семантика запису визначається одним механізмом «світ-повідомити-всі».
+;; Після міграції решти записувальних механізмів обгортка не потрібна.
 (визначити визначити-модуль
   (макрос
     (функція (назва правила)
@@ -263,16 +250,11 @@
                     (список (як-є як-є) назва)
                     правила))))))
 
-;; The other two legacy journal macros follow the same bridge. `tell-knowledge`
-;; deliberately keeps its established pre-write conflict check and delegates
-;; only the accepted transition; `retract-knowledge` remains unconditional
-;; because removing knowledge cannot introduce a contradiction. Both rebuild
-;; the compatibility journal from a returned immutable World.
-;;
-;; Інші два legacy journal-макроси переходять тим самим мостом.
-;; `tell-knowledge` зберігає чинну перевірку конфлікту перед записом і делегує
-;; лише прийнятий перехід; `retract-knowledge` лишається безумовним, бо
-;; вилучення знання не створює суперечності. Обидва відновлюють compatibility-
+;; Історичні макроси повідомлення й відкликання знань використовують
+;; такий самий перехід. Повідомлення перевіряє суперечність до запису
+;; й допускає лише підтверджений перехід. Відкликання не потребує
+;; попередньої перевірки: вилучення твердження не породжує суперечності.
+;; Обидва відновлюють сумісний журнал з поверненого незмінного світу.
 ;; журнал із поверненого незмінного World.
 ;;
 ;; Die beiden anderen alten Journal-Makros nutzen dieselbe Brücke.
@@ -312,16 +294,12 @@
          (список рішення (світ-повідомити-всі світ назва-модуля клаузи)))
         (так (список рішення світ))))))
 
-;; A guarded compatibility transition must be evaluated exactly once. `let`
-;; cannot hold it because `def` would then update a disposable lambda frame, so
-;; this expansion uses one explicit top-level scratch binding. The argument and
-;; pure World transition run once; only accepted results rebind the journal.
-;; Guarded compatibility-перехід обчислюється рівно раз. `let` не підходить, бо
-;; `def` оновив би тимчасовий lambda-frame, тому expansion має одне явне
-;; top-level scratch binding. Аргумент і World-перехід виконуються один раз.
-;; Ein geschützter Kompatibilitätsübergang wird genau einmal ausgewertet. `let`
-;; eignet sich nicht, da `def` sonst einen temporären Lambda-Frame ändert; diese
-;; Expansion nutzt daher eine ausdrückliche Top-Level-Zwischenbindung.
+;; Умовний сумісний перехід потрібно обчислювати рівно один раз.
+;; Звичайне локальне зв'язування тут непридатне: визначення оновило б
+;; тимчасове лексичне оточення. Тому розгортання використовує одну
+;; явну допоміжну прив'язку верхнього рівня. Аргумент і чистий
+;; перехід світу виконуються по одному разу; журнал оновлюється
+;; тільки після допущеного результату.
 ; Чинне похідне SENS-правило: теги рішення порівнюються тільки
 ; точним D3:101 EQ після D4:1000 CAAR. Макрос генерує виклик за назвою,
 ; а не цитує двійкові коди як десяткові числа і не змінює граматику.
@@ -379,16 +357,11 @@
           (список (як-є як-є) назва-модуля)
           клаузи)))))
 
-;; World interchange reuses the established, versioned `my-lisp-knowledge`
-;; envelope. Export reads one explicit snapshot. Import validates the envelope
-;; as data and then delegates the only possible transition to
-;; `advise-all-world`; received data is never evaluated as code.
-;; World-обмін перевикористовує чинну версіоновану оболонку
-;; `my-lisp-knowledge`. Експорт читає явний snapshot, імпорт передає єдиний
-;; можливий перехід в `advise-all-world`; отримані дані ніколи не eval-код.
-;; Der World-Austausch nutzt die bestehende versionierte Hülle
-;; `my-lisp-knowledge`. Export liest einen expliziten Schnappschuss, Import
-;; delegiert den einzigen Übergang an `advise-all-world`; Daten werden nie evaluiert.
+;; Обмін світами використовує наявну версіоновану оболонку
+;; `my-lisp-knowledge`. Експорт читає один явно вибраний стан.
+;; Імпорт перевіряє оболонку як дані й передає допустимий перехід
+;; функції «порадити-всі-світ». Отримані дані ніколи не обчислюються
+;; як виконуваний код.
 (визначити створити-світ-знання-пакет
   (функція (світ назва-модуля)
     (за-умовою
@@ -403,8 +376,9 @@
            ((атом? клаузи)  (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) клаузи)))
            (так (створити-пакет-структурованих-знань назва-модуля клаузи))))))))
 
-; The knowledge package version is structured data (0 1), not an
-; atom. Compare recursively with exact D1 results, never W8 EQUAL on pairs.
+; Версія пакета знань — структуроване значення (0 1), а не атом.
+; Порівнюємо її рекурсивно з точними відповідями D1. Стару
+; восьмибітну перевірку EQUAL до пар не застосовуємо.
 (визначити внутрішня-рівність-версій
   (функція (ліве праве)
     (за-умовою
