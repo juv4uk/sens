@@ -33,6 +33,10 @@ PRIMARY = (
 # цей файл лише зберігає на нього повну укр-проєкцію.
 EXTERNAL_PEER = ("0010010110", "result-proper-list?", "результат-є-правильним-списком?")
 HISTORIC = tuple(en for _width, _bits, en, _ukr in PRIMARY)
+ВИЛУЧЕНІ_ПСЕВДОНІМИ = {
+    "provenance-goal", "provenance-source",
+    "provenance-rule", "provenance-derived-from",
+}
 
 
 def read_forms(source: str):
@@ -113,8 +117,12 @@ class NarrateUkrPeerTests(unittest.TestCase):
                 self.assertIn(f"(укр {ukrainian})", rows[0])
                 self.assertIsInstance(self.defs.get(ukrainian), list,
                                       f"{ukrainian}: full name must own the SENS body")
-                self.assertEqual(self.defs.get(english), ukrainian,
-                                 f"{english}: English must point to the full укр closure")
+                if english in ВИЛУЧЕНІ_ПСЕВДОНІМИ:
+                    self.assertNotIn(english, self.defs,
+                                     f"{english}: застарілий дубль не має повертатися")
+                else:
+                    self.assertEqual(self.defs.get(english), ukrainian,
+                                     f"{english}: сумісний вхід має вести до української функції")
                 self.assertNotRegex(
                     self.src,
                     rf"(?m)^\s*\({bits}(?:\s|\))",
@@ -138,11 +146,13 @@ class NarrateUkrPeerTests(unittest.TestCase):
         self.assertIn(ukrainian, call_heads(self.defs["пояснити-підсумок"]))
         self.assertNotIn(english, call_heads(self.defs["пояснити-підсумок"]))
 
-    def test_all_historical_entrypoints_survive_as_aliases(self):
+    def test_only_needed_english_entrypoints_remain(self):
         for _width, _bits, english, ukrainian in PRIMARY:
             with self.subTest(entrypoint=english):
-                self.assertIn(english, self.defs)
-                self.assertEqual(self.defs[english], ukrainian)
+                if english in ВИЛУЧЕНІ_ПСЕВДОНІМИ:
+                    self.assertNotIn(english, self.defs)
+                else:
+                    self.assertEqual(self.defs.get(english), ukrainian)
 
     def test_outcome_body_uses_full_ukr_heads(self):
         heads = call_heads(self.defs["пояснити-підсумок"])
