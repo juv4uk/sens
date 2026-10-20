@@ -1,4 +1,6 @@
-; SSE2 instruction-family catalogue. Physical ISA facts only.
+; Каталог родини машинних команд SSE2.
+; Містить тільки факти фізичного набору команд, не семантику SENS.
+; Поля та мнемоніки збережено як машинно-читані дані ISA.
 
 (isa-catalogue/1
   (extension SSE2)
