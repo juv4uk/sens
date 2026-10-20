@@ -120,20 +120,20 @@
            доречні))))
 
 ; ---------------------------------------------------------------------
-; The walker: collect every symbol used in executed head position,
-; excluding locally-bound names, tagging %uses-lambda / %uses-let-family
-; as it goes past lambda/let/let*/defmacro.
+; Обхідник: збирає кожен символ, ужитий у виконуваній позиції голови,
+; виключаючи локально зв'язані імена, позначаючи %uses-lambda / %uses-let-family
+; проходячи повз lambda/let/let*/defmacro.
 ; ---------------------------------------------------------------------
 
-; the constitutional fixture set deliberately includes malformed special
-; forms (a lambda missing its body, a defmacro missing its parameter
-; list, a let-binding missing its value expression) to test the real
-; evaluator's own Arity errors -- crates/my-lisp/tests exercises the
-; same class at conformance.lisp:113/134 (lambda/defmacro arity fixtures).
-; The real evaluator rejects these at eval time; this classifier only
-; needs to not crash while walking them, so every destructuring step
-; below that assumes a minimum shape uses these instead of raw car/cdr,
-; degrading a missing piece to () rather than erroring.
+; конституційний набір фікстур навмисно містить хибні спеціальні
+; форми (lambda без тіла, defmacro без списку параметрів,
+; let-зв'язування без виразу значення), щоб перевірити власні
+; помилки арності справжнього оцінювача -- crates/my-lisp/tests вправляє
+; той самий клас на conformance.lisp:113/134 (фікстури арності lambda/defmacro).
+; Справжній оцінювач відкидає їх під час обчислення; цей класифікатор лише
+; мусить не впасти, обходячи їх, тож кожен крок деструктуризації
+; нижче, що припускає мінімальну форму, використовує ці замість сирих car/cdr,
+; деградуючи відсутній елемент до () замість помилки.
 (визначити безпечне-перше
   (функція (елементи) (за-умовою ((атом? елементи) (як-є ())) ((атом? (як-є ())) (перше елементи)))))
 (визначити безпечна-решта
@@ -206,13 +206,13 @@
              ((та (символ? голова) (тотожне? голова (як-є def)))
               (нехай-послідовно ((назва (безпечне-перше (безпечна-решта форма)))
                      (форма-значення (безпечне-перше (безпечна-решта (безпечна-решта форма))))
-                     ; def's own name is visible inside its own value-expr:
-                     ; the evaluator shares one lexical frame between a def
-                     ; and the closure it defines, so a self-referential
-                     ; (def f (lambda (x) ... (f ...))) genuinely resolves
-                     ; at call time even though f isn't bound yet when the
-                     ; closure is created (crates/my-lisp/src/eval/special_forms/core.rs
-                     ; evaluate_definition's own comment documents this).
+                     ; власне ім'я def видиме всередині його власного value-expr:
+                     ; оцінювач поділяє один лексичний кадр між def
+                     ; і замиканням, яке він визначає, тож самопосилальний
+                     ; (def f (lambda (x) ... (f ...))) справді розв'язується
+                     ; під час виклику, хоча f ще не зв'язаний, коли
+                     ; створюється замикання (crates/my-lisp/src/eval/special_forms/core.rs
+                     ; власний коментар evaluate_definition це документує).
                      (нові-звязані (сполучити назва звязані)))
                 (зібрати-голови форма-значення нові-звязані)))
              ((та (символ? голова) (тотожне? голова (як-є defmacro)))
@@ -238,12 +238,12 @@
       ((символ? форма) (за-умовою ((значення-у-списку? форма звязані) (як-є ())) ((атом? (як-є ())) (список форма))))
       ((атом? (як-є ())) (зібрати-голови форма звязані)))))
 
-; a fixture's expr text can hold MORE than one top-level form (e.g.
-; "(def count-down (lambda ...)) (count-down 100000)" -- a def followed
-; by a call, exactly like a real script). read-all captures every form;
-; a top-level def/defmacro extends the bound-set for the forms that
-; follow it in the SAME fixture, matching how they'd actually be
-; evaluated in one shared environment.
+; текст expr фікстури може містити БІЛЬШЕ ніж одну форму верхнього рівня (напр.
+; "(def count-down (lambda ...)) (count-down 100000)" -- def, за яким
+; іде виклик, точнісінько як у справжньому скрипті). read-all захоплює кожну форму;
+; def/defmacro верхнього рівня розширює множину зв'язаних для форм, що
+; ідуть за ним у ТІЙ САМІЙ фікстурі, відповідаючи тому, як їх справді
+; обчислювали б в одному спільному середовищі.
 (визначити зібрати-залежності-верх-послід
   (функція (форми звязані)
     (за-умовою ((атом? форми) (як-є ())) ((атом? (як-є ())) (нехай-послідовно ((форма (перше форми))
@@ -263,8 +263,8 @@
     (зібрати-залежності-верх-послід форми (як-є ()))))
 
 ; ---------------------------------------------------------------------
-; Classification of one fixture's collected raw head-symbol list against
-; the known tables.
+; Класифікація зібраного сирого списку символів-голів однієї фікстури проти
+; відомих таблиць.
 ; ---------------------------------------------------------------------
 
 (визначити маркер?
@@ -289,7 +289,7 @@
       ((значення-у-списку? симв (решта (перше таблиці))) (перше (перше таблиці)))
       ((атом? (як-є ())) (бібліотека-власник симв (решта таблиці))))))
 
-; classify one real (non-marker) symbol; returns (bucket-tag . library-or-())
+; класифікувати один справжній (не-маркер) символ; повертає (bucket-tag . library-or-())
 (визначити класифікувати-символ
   (функція (симв інші-таблиці)
     (за-умовою
@@ -370,7 +370,7 @@
             (сполучити (як-є axiom-tagged-s1) (значення-у-списку? (як-є S1) список-аксіом))))))
 
 ; ---------------------------------------------------------------------
-; Fixture pairing (same technique as scripts/oracle-batch.lisp)
+; Зіставлення фікстур (та сама техніка, що в scripts/oracle-batch.lisp)
 ; ---------------------------------------------------------------------
 
 (визначити лише-фікстури
