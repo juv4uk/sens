@@ -201,21 +201,20 @@
      (pclmulqdq-xmm-mem-disp8-imm8
        xmm-register register disp8 uimm8))))
 
-; A disp8 slot only admits an exact integer in [-128,127].
-; Number identity uses the exact D8 word 11110100 WRITE-TO-STRING (not an SID alias)
-; producing canonical #q2:<num>/<den> wire; D9 NUMBER->STRING callability
-; is not inferred from its ratified nine-bit coordinate.
-; never from human decimal presentation.  A reduced exact number is an
-; integer exactly when its canonical denominator is 1.  Non-number values
-; have no #q2: prefix and therefore fail closed before numeric comparisons.
-; Use ratified D9 string identities here. The old W8 compatibility
-; string predicates produce pair-shaped (0)/(1) answers, which strict D3 COND
-; must never consume as PredicateBit controls.
+; Поле disp8 приймає точне ціле лише в межах [-128,127].
+; Тотожність числа задає слово D8:11110100 WRITE-TO-STRING, не псевдонім SID.
+; Канонічне подання має форму #q2:<чисельник>/<знаменник>.
+; Викличність D9 NUMBER->STRING не випливає з самої ратифікованої координати.
+; Людський десятковий запис не замінює перевірку точного числа.
+; Число є цілим лише за канонічного знаменника 1.
+; Нечислові значення без #q2: відхиляються до порівнянь.
+; Рядкові операції D9 не плутаємо зі старими W8-предикатами:
+; їхні парні результати (0)/(1) не є скалярним бітом керування D1.
 (визначити машина-допуск-знаменник-одиниця?
   (функція (текст)
-    ; The admitted W8 string predicates return the current scalar D1 answer
-    ; on valid strings. Keep these calls within the machine-source compatibility
-    ; boundary; do not lift them to D9 without expanding the reader's scope.
+    ; Допущені рядкові предикати W8 для коректного рядка повертають
+    ; скалярний результат D1. Залишаємо ці виклики в межі сумісності
+    ; машинного джерела, доки не розширено область дії читача.
     (за-умовою
       ((рядок-порожній? текст) (атом? (як-є (000))))
       ((тотожне? (рядок-перший текст) "/")
@@ -240,9 +239,9 @@
       (значення-у-текст значення))))
 (визначити машина-допуск-ціле-у-включних-межах?
   (функція (значення нижня-межа верхня-межа)
-    ; Contract 11.8: compose admitted D5 strict comparisons with exact D4 NOT.
-    ; GEQ/LEQ are D6 residents without generic callability; do not invoke them.
-    ; Both guards consume/return exact D1 PredicateBit, never Number 1 or host truth.
+    ; Договір 11.8: строгі порівняння D5 поєднуємо з точним D4 NOT.
+    ; GEQ/LEQ є резидентами D6 без загальної викличності, їх не викликаємо.
+    ; Обидві умови приймають і повертають тільки точний біт D1.
     (за-умовою
       ((хибне? (менше? значення нижня-межа))
        (за-умовою
@@ -253,11 +252,10 @@
       ((атом? (як-є ()))
        (атом? (як-є (000)))))))
 
-; disp8 is a finite x86 machine field, so admission reuses the
-; Lisp-owned exhaustive encoder table instead of treating this bound check
-; as numeric magnitude arithmetic. Exact-integer admission remains separate:
-; NUMBER->STRING supplies canonical #q2 wire and denominator must be 1.
-; EQ distinguishes the table's fail-closed NIL sentinel from the valid byte 0.
+; disp8 — скінченне поле x86. Допуск використовує повну таблицю
+; кодувальника Lisp, а не порівняння числової величини.
+; Для точного цілого окремо перевіряємо знаменник 1 у поданні #q2.
+; EQ відрізняє маркер відмови NIL від допустимого байта 0.
 (визначити машина-допуск-зсув-8?
   (функція (значення)
     (за-умовою
@@ -286,13 +284,11 @@
        (машина-допуск-ціле-у-включних-межах? значення -2147483648 2147483647))
       ((атом? ()) (атом? (як-є (000)))))))
 
-; `immediate`, `register`, and `disp8` are operand-slot wildcards, not
-; opcode wildcards. `register` only admits the 16 GPR names x86-reg-code
-; knows about -- any other atom (a number, a made-up symbol) fails the
-; match, the same way an out-of-range immediate would fail the encoder
-; later. The selected Lisp encoder still validates whether the operand can
-; be represented before the raw host capability is reachable.
-; Current D3 call heads: EQ=101, CAR=100, CDR=011. Do not reintroduce legacy head aliases.
+; `immediate`, `register`, `disp8` — шаблони місць операндів, не кодів операцій.
+; `register` приймає лише 16 назв регістрів GPR, відомих x86-reg-code.
+; Інші атоми, числові та вигадані символи не відповідають шаблону.
+; Кодувальник Lisp перевіряє представність до звернення до хоста.
+; Викличні голови D3: EQ=101, CAR=100, CDR=011; історичні псевдоніми не відновлюємо.
 (визначити машина-допуск-збіг-шаблону?
   (функція (шаблон форма)
     (за-умовою
@@ -811,12 +807,12 @@
          форма)
        (машина-кодувати-множення-без-перенесення-память
          (друге форма) (третє форма) (перше (решта (решта (решта форма)))) (п'ятий форма)))
-      ; Unreachable after admission. Keep fail-closed data instead of inventing
-      ; a fallback encoder.
+      ; Після допуску ця гілка недосяжна: повертаємо дані відмови,
+      ; не вигадуючи запасного механізму кодування.
       ((атом? ()) (як-є ())))))
 
-; Keep instruction mapping inside the current D3 value algebra. The shared
-; Core4 map-onto body still uses compatibility predicates as COND control.
+; Зіставлення команд залишається в алгебрі значень D3.
+; Спільне тіло Core4 map-onto ще використовує сумісні предикати як умови COND.
 (визначити машина-кодувати-список-команд
   (функція (форми)
     (за-умовою
@@ -830,9 +826,9 @@
   (функція (форми)
     (машина-кодувати-програму-інструкцій (машина-кодувати-список-команд форми))))
 
-; #177 safe composition seam. Unlike x86-encode-admitted-program, this entry
-; point is safe for callers holding arbitrary structured machine data: it must
-; prove admission before any byte materialization can happen.
+; #177 — безпечна межа композиції. На відміну від
+; x86-encode-admitted-program, цей вхід мусить довести допуск
+; довільних структурованих машинних даних до створення байтів.
 (визначити машина-кодувати-допущену-програму-або-відхилити
   (функція (форми)
     (за-умовою
