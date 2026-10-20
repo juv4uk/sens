@@ -1,62 +1,80 @@
-; #803 — admitted Prolog substitution -> Datalog fact projection.
+; Перетворення підстановок Прологу на факти Даталогу.
+; Мовне значення належить СЕНС, а зовнішній виконавець
+; може лише передати початкове спостереження.
 ;
-; Semantic authority lives in Lisp data/code here. The host may preserve and
-; transport native Prolog observations, but this function alone decides which
-; fields are admitted into ordinary Datalog fact data.
-;
-; Input:
-;   (prolog-substitution-observation
-;     (source-ref REF)
-;     (variable ROLE)
-;     (values VALUE ...))
-;
-; Output:
-;   (projection-result
-;     (projection prolog-substitutions-to-datalog-facts)
-;     (source-ref REF)
-;     (facts ((ROLE VALUE) ...)))
-;
-; Failure is named data, never ()/false.
+; Десятий домен уже має точні українські назви цих функцій.
+; Історичні назви збережено для чинних зовнішніх споживачів.
+; Позначки результатів і полів є даними протоколу.
+; Порожня множина фактів є допустимим результатом.
+; Помилки повертаються іменованими даними, а не логічною хибою.
 
-(визначити prolog-values-to-datalog-facts
-  (функція (role values)
+(визначити перетворити-значення-пролог-на-факти-даталог
+  (функція (роль значення)
     (за-умовою
-      
-      ((хибне? (атом? values))
-       (сполучити (список role (перше values))
-             (перетворити-значення-пролог-на-факти-даталог role (решта values)))))))
+      ((хибне? (атом? значення))
+       (сполучити
+         (список роль (перше значення))
+         (перетворити-значення-пролог-на-факти-даталог
+           роль
+           (решта значення))))
+      (так (як-є ())))))
 
+; Сумісна зовнішня назва — те саме значення, не нова функція.
+(визначити prolog-values-to-datalog-facts
+  перетворити-значення-пролог-на-факти-даталог)
+
+(визначити перетворити-підстановки-пролог-на-факти-даталог
+  (функція (спостереження)
+    ((функція (рядок-джерела рядок-змінної рядок-значень)
+       (за-умовою
+         ((атом? рядок-джерела)
+          (за-умовою
+            ((тотожне? рядок-джерела (як-є ()))
+             (список
+               (як-є projection-failure)
+               (як-є missing-source-ref)))
+            (так
+             (список
+               (як-є projection-failure)
+               (як-є malformed-source-ref)))))
+         ((атом? рядок-змінної)
+          (за-умовою
+            ((тотожне? рядок-змінної (як-є ()))
+             (список
+               (як-є projection-failure)
+               (як-є missing-variable-role)))
+            (так
+             (список
+               (як-є projection-failure)
+               (як-є malformed-variable-role)))))
+         ((атом? рядок-значень)
+          (за-умовою
+            ((тотожне? рядок-значень (як-є ()))
+             (список
+               (як-є projection-failure)
+               (як-є missing-values)))
+            (так
+             (список
+               (як-є projection-failure)
+               (як-є malformed-values)))))
+         (так
+          (список
+            (як-є projection-result)
+            (список
+              (як-є projection)
+              (як-є prolog-substitutions-to-datalog-facts))
+            (список
+              (як-є source-ref)
+              (перше (решта рядок-джерела)))
+            (список
+              (як-є facts)
+              (перетворити-значення-пролог-на-факти-даталог
+                (перше (решта рядок-змінної))
+                (решта рядок-значень)))))))
+     (знайти-за-ключем (як-є source-ref) (решта спостереження))
+     (знайти-за-ключем (як-є variable) (решта спостереження))
+     (знайти-за-ключем (як-є values) (решта спостереження)))))
+
+; Сумісна зовнішня назва — те саме значення, не нова функція.
 (визначити prolog-substitutions-to-datalog-facts
-  (функція (observation)
-    ((функція (source-ref-row variable-row values-row)
-      (за-умовою
-        ((хибне? (атом? source-ref-row))
-         (список (як-є projection-failure) (як-є missing-source-ref)))
-        ((атом? source-ref-row) 
-         (список (як-є projection-failure) (як-є malformed-source-ref)))
-        ((хибне? (атом? source-ref-row))
-         (за-умовою
-           ((хибне? (атом? variable-row))
-            (список (як-є projection-failure) (як-є missing-variable-role)))
-           ((атом? variable-row) 
-            (список (як-є projection-failure) (як-є malformed-variable-role)))
-           ((хибне? (атом? variable-row))
-            (за-умовою
-              ((хибне? (атом? values-row))
-               (список (як-є projection-failure) (як-є missing-values)))
-              ((атом? values-row) 
-               (список (як-є projection-failure) (як-є malformed-values)))
-              ((хибне? (атом? values-row))
-               (список
-                 (як-є projection-result)
-                 (список (як-є projection)
-                       (як-є prolog-substitutions-to-datalog-facts))
-                 (список (як-є source-ref)
-                       (перше (решта source-ref-row)))
-                 (список (як-є facts)
-                       (перетворити-значення-пролог-на-факти-даталог
-                         (перше (решта variable-row))
-                         (решта values-row)))))))))))
-     (знайти-за-ключем (як-є source-ref) (решта observation))
-     (знайти-за-ключем (як-є variable) (решта observation))
-     (знайти-за-ключем (як-є values) (решта observation)))))
+  перетворити-підстановки-пролог-на-факти-даталог)
