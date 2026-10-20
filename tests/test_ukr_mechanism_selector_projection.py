@@ -114,7 +114,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
     def test_registry_and_symbolic_sid_values_still_present(self):
         self.assertIn('"lib/surface/semantic-registry.lisp"', self.source)
         self.assertIn('"lib/function-table-mechanisms.lisp"', self.source)
-        for token in ("(як-є rows)", "(як-є no)", "(як-є yes)",
+        for token in ("(як-є rows)",
                       "(як-є mechanism-selected)", "(як-є sid-not-in-function-table)"):
             self.assertIn(token, self.source)
         for legacy, current in LOCAL_RENAMES:
@@ -123,6 +123,18 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         for legacy in ("mechanism-selector-registry", "mechanism-selector-metadata",
                        "mechanism-selector-registry-rows", "mechanism-selector-routes"):
             self.assertNotIn(f"(визначити {legacy} ", self.source)
+
+    def test_exact_d1_registry_predicate_not_old_textual_boolean(self):
+        code = uncommented(self.source)
+        self.assertIn("((атом? рядки) ні)", code)
+        self.assertIn("((тотожне? ідентичність (перше (перше рядки))) так)", code)
+        self.assertNotIn("(як-є yes)", code)
+        self.assertNotIn("(як-є no)", code)
+        self.assertRegex(
+            code,
+            r"\\(реєстр-містить-ідентичність\\?\\s+"
+            r"ідентичність\\s+рядки-реєстру-механізму\\)\\s+ні\\)",
+        )
 
     def test_only_balanced_source_parentheses_outside_strings_and_comments(self):
         code = uncommented(self.source)
