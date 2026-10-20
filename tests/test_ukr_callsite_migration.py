@@ -2241,6 +2241,8 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         "110111001": "число-рядок", "110111100": "записати-файл",
     }
     INVERSE = {surface: bits for bits, surface in PROJECTIONS.items()}
+    # Точні зворотні SHA оновлено після українізації повідомлень;
+    # ратифіковані коди та кількість виконуваних голів не змінено.
     SPECS = {
         "scripts/build-constitution.lisp": {
             "blob": "bd1a3c14b22b4f6259c4ff60e8cc41b7aa4194d6",
@@ -2250,7 +2252,7 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         },
         "scripts/generate-rust-evaluator-dispatch.lisp": {
             # Зворотний зріз після українізації локальних імен і параметрів.
-            "blob": "99dad735cf6dcd2e9d1abc92c3e7be3ea02e4719",
+            "blob": "60168952a756fa8cfd7393c46ca43cba992b42aa",
             # Контрольну точку оновлено після виправлення fallback-гілок COND:
             # точні head-лічильники та inverse blob відповідають нинішньому main.
             "counts": {
@@ -2277,7 +2279,7 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                        },
         },
         "scripts/generate-rust-function-signatures.lisp": {
-            "blob": "8e203e5ad3cbb1ca8d73d632b9d64563a5f9e8e7",
+            "blob": "6ac69484413d738ab7142f6c72d7be710138eece",
             "counts": {
                        "100": 10,
                        "101": 4,
