@@ -1,6 +1,6 @@
-//! #291 observer for Lisp-owned exact quantity product/quotient preservation.
-//! Rust loads the quantity libraries and witness, then observes only the named
-//! pass envelope. Expected quantity shapes and semantic relations stay in Lisp.
+//! Спостерігач #291 точної арифметики величин, що належить Lisp.
+//! Rust завантажує мовні бібліотеки й викликає українську назву свідка.
+//! Формат відповіді зберігається; математичне значення визначає Lisp.
 
 use my_lisp::{eval_program, Session};
 
@@ -16,7 +16,7 @@ fn exact_quantity_product_quotient_round_trip_is_lisp_owned() {
         eval_program(library, &mut session).expect("exact quantity witness dependency must load");
     }
 
-    let verdict = eval_program("(exact-quantity-round-trip-witness)", &mut session)
+    let verdict = eval_program("(свідок-кругового-обчислення-точних-величин)", &mut session)
         .expect("exact quantity round-trip witness must execute")
         .value
         .to_string();
