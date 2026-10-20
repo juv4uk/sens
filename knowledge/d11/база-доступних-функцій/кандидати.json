@@ -22,9 +22,9 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 153,
+    "total": 149,
     "historical": 15,
-    "library": 138,
+    "library": 134,
     "distinct_families": 19
   },
   "excluded": {
@@ -156,23 +156,6 @@
       "callable": false
     },
     {
-      "surface_name": "FOURTH",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
       "surface_name": "ISQRT-STEP",
       "source_family": "derived-core",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
@@ -191,23 +174,6 @@
     },
     {
       "surface_name": "LARGEST-CHUNK",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MEMBER?",
       "source_family": "derived-core",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
@@ -275,41 +241,7 @@
       "callable": false
     },
     {
-      "surface_name": "SECOND",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
       "surface_name": "SQRT-ITER",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "THIRD",
       "source_family": "derived-core",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
