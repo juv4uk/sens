@@ -82,21 +82,26 @@
 
 ; Retract the first structurally equal clause; both atoms and nested
 ; pairs are compared with the locally-derived exact D1 equality law.
-(визначити world-remove-first
+(визначити внутрішній-світ-прибрати-перше
   (функція (value values)
     (за-умовою
       ((порожній? values) (як-є ()))
       ((атом? values) (як-є ()))
       ((внутрішня-рівність-версій value (перше values)) (решта values))
-      (так (сполучити (перше values) (world-remove-first value (решта values)))))))
+      (так (сполучити (перше values) (внутрішній-світ-прибрати-перше value (решта values)))))))
 
-(визначити world-apply-event
+; Сумісна назва лишається лише на межі старого API.
+(визначити world-remove-first внутрішній-світ-прибрати-перше)
+
+(визначити внутрішній-світ-застосувати-подію
   (функція (clauses event)
     (за-умовою
       ((тотожне? (перше event) (як-є tell)) (сполучити (третє event) clauses))
       ((тотожне? (перше event) (як-є retract))
-       (world-remove-first (третє event) clauses))
+       (внутрішній-світ-прибрати-перше (третє event) clauses))
       (так clauses))))
+
+(визначити world-apply-event внутрішній-світ-застосувати-подію)
 
 ; D4 NOT of the D3 ATOM predicate: a module is known only when its
 ; event stream is a nonempty pair. D3 CONS cannot be a one-argument NOT.
@@ -104,9 +109,11 @@
   (функція (world module-name)
     (хибне? (атом? (світ-модуль-події world module-name)))))
 
-(визначити world-module-missing?
+(визначити внутрішній-світ-модуль-відсутній?
   (функція (world module-name)
     (атом? (світ-модуль-події world module-name))))
+
+(визначити world-module-missing? внутрішній-світ-модуль-відсутній?)
 
 ; D5 REVERSE and D6 REDUCE are ratified names but cannot be presumed
 ; callable; derive the chronological event fold from D3 list structure.
@@ -124,7 +131,7 @@
       ((атом? events) clauses)
       (так (внутрішнє-згортання-подій
                   (решта events)
-                  (world-apply-event clauses (перше events)))))))
+                  (внутрішній-світ-застосувати-подію clauses (перше events)))))))
 
 (визначити world-clauses
   (функція (world module-name)
@@ -143,7 +150,7 @@
     (за-умовою
       ((світ-модуль-відомий? world module-name)
        (міркувати goal (світ-клаузи world module-name)))
-      ((world-module-missing? world module-name)
+      ((внутрішній-світ-модуль-відсутній? world module-name)
        (як-є Module-not-found)))))
 
 (визначити forward-in-world
@@ -151,7 +158,7 @@
     (за-умовою
       ((світ-модуль-відомий? world module-name)
        (виконати-багатоваріантне-виведення (світ-клаузи world module-name) (як-є ())))
-      ((world-module-missing? world module-name)
+      ((внутрішній-світ-модуль-відсутній? world module-name)
        (як-є Module-not-found)))))
 
 ; Derived D1 symbol predicate for world module names. This is a Lisp
@@ -343,7 +350,7 @@
   (функція (transition)
     (перше transition)))
 
-(визначити legacy-world-transition-expansion
+(визначити внутрішній-світ-розгорнути-історичний-перехід
   (функція (transition)
     (список (як-є second)
           (список (як-є list)
@@ -365,10 +372,12 @@
                       (список (як-є так)
                             (список (як-є внутрішнє-рішення-переходу) (як-є *legacy-knowledge-transition*))))))))
 
+(визначити legacy-world-transition-expansion внутрішній-світ-розгорнути-історичний-перехід)
+
 (визначити advise
   (макрос
     (функція (module-name clause)
-  (legacy-world-transition-expansion
+  (внутрішній-світ-розгорнути-історичний-перехід
     (список (як-є advise-world)
           (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
           (список (як-є quote) module-name)
@@ -377,7 +386,7 @@
 (визначити advise-all
   (макрос
     (функція (module-name clauses)
-  (legacy-world-transition-expansion
+  (внутрішній-світ-розгорнути-історичний-перехід
     (список (як-є порадити-всі-світ)
           (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
           (список (як-є quote) module-name)
@@ -398,7 +407,7 @@
     (за-умовою
       ((хибне? (внутрішній-символ? module-name))
        (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) module-name)))
-      ((world-module-missing? world module-name)
+      ((внутрішній-світ-модуль-відсутній? world module-name)
        (список (як-є rejected) (список (як-є reason) (як-є Module-not-found)) (список (як-є input) module-name)))
       ((світ-модуль-відомий? world module-name)
        (нехай-похідне ((clauses (світ-клаузи world module-name)))
@@ -472,7 +481,7 @@
 (визначити import-knowledge-package
   (макрос
     (функція (package)
-  (legacy-world-transition-expansion
+  (внутрішній-світ-розгорнути-історичний-перехід
     (список (як-є import-knowledge-package-world)
           (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
           package)))))
