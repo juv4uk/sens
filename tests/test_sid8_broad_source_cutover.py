@@ -97,8 +97,8 @@ class TestBroaderSid8LispCutover(unittest.TestCase):
         for path in COHORT:
             with self.subTest(path=path):
                 source = (ROOT / path).read_text(encoding="utf-8")
-                self.assertNotRegex(source, r"\\(\\s*(?:101000|00110111)(?=\\s|\\))")
-                matches = list(re.finditer(r"\\(\\s*відобразити(?=\\s|\\))", source))
+                self.assertNotRegex(source, r"\(\s*(?:101000|00110111)(?=\s|\))")
+                matches = list(re.finditer(r"\(\s*відобразити(?=\s|\))", source))
                 for call in matches:
                     self.assertEqual(count_top_level_arguments(source, call.start()), 2)
                 total += len(matches)
@@ -108,7 +108,7 @@ class TestBroaderSid8LispCutover(unittest.TestCase):
         for path in COHORT:
             with self.subTest(path=path):
                 source = (ROOT / path).read_text(encoding="utf-8")
-                self.assertNotRegex(source, r"\\(\\s*00001001(?=\\s|\\))")
+                self.assertNotRegex(source, r"\(\s*00001001(?=\s|\))")
 
 if __name__ == "__main__":
     unittest.main()
