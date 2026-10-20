@@ -14,5 +14,4 @@
   ((тотожне? (кліпс-визначити-шаблон-форма? (як-є (deftemplate reading (slot sensor)))) ні) так)
   (так (ні)))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити кліпс-визначити-шаблон-форма? clips-deftemplate-form?)
+; Первинне українське визначення вже завантажено з lib/clips-import.lisp.
