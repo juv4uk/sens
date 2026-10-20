@@ -1,8 +1,8 @@
-//! Run the SENS-written whole-program compiler from canonical SW1 or physical T5.
+//! Виконання SENS-компілятора зі SW1 або фізичного T5M через Zig.
 //!
 //! Host work is deliberately limited to:
 //! - validating and round-tripping the selected wire/codec representation;
-//! - comparing same-stem source, physical T5 and visible-view projections;
+//! - порівняння Lisp, фізичного T5M і похідного бітового перегляду;
 //! - attaching SENS revision and canonical program-wire digest provenance;
 //! - encoding the SENS-produced artifact into canonical evidence bytes.
 //!
@@ -11,11 +11,12 @@
 
 use sens::{
     compiler_evidence_canonical_bytes, compiler_evidence_from_canonical_bytes,
-    compiler_program_artifact_from_sens, encode_binary_projection_ternary, lower_program,
-    lowered_program_to_exact_data, open_ternary_program, parse_canonical_binary,
+    compiler_program_artifact_from_sens, lower_program,
+    lowered_program_to_exact_data, parse_canonical_binary,
     parse_mixed_exact_domain, sha256_source, verify_compiler_program_artifact_from_sens,
     wire_decode_program, wire_encode_program, Value,
 };
+use sens_cli::zig_transport::{decode_t5_exact_words, encode_t5_exact_words};
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -24,7 +25,7 @@ use std::process::Command;
 const MAX_INPUT_BYTES: u64 = 64 * 1024 * 1024;
 
 // The recursive compiler is written and executed in SENS. Give its host
-// entrypoints a bounded dedicated stack without copying the SW1/T5 input.
+// entrypoints a bounded dedicated stack without copying the SW1/T5M input.
 // Only the canonical artifact bytes and acceptance bit cross the thread
 // boundary; SENS Value (Rc-backed) never becomes Send or an authority table.
 const SENS_COMPILER_STACK_BYTES: usize = 64 * 1024 * 1024;
@@ -95,7 +96,7 @@ fn artifact_schema(value: &Value) -> Result<&str, String> {
 }
 
 /// Keep artifact construction and canonical evidence verification shared by
-/// the explicit SW1 bootstrap route and the physical-T5 triplet route.
+/// the explicit SW1 bootstrap route and the physical-T5M triplet route.
 fn compile_program_data(
     program: Value,
     program_wire_sha256: &str,
@@ -158,7 +159,7 @@ fn compile_t5_triplet_on_worker(
 ) -> Result<(Vec<u8>, bool), String> {
     for (name, bytes) in [
         ("Lisp source", lisp_source),
-        ("physical T5", physical_t5),
+        ("physical T5M", physical_t5),
         ("visible word view", visible_view),
     ] {
         if bytes.is_empty() {
@@ -169,19 +170,25 @@ fn compile_t5_triplet_on_worker(
         }
     }
 
-    let visible = open_ternary_program(physical_t5)
-        .map_err(|error| format!("canonical physical T5 open failed: {error:?}"))?;
-    // The Rust renderer returns the spaced words without a newline, while the
-    // on-disk view contract requires exactly one final LF.
+    // Фізичний T5M декодує лише Zig; Rust відображає вже відновлені
+    // точні слова для незалежного SENS-парсера й не вводить власний кодек.
+    let exact = decode_t5_exact_words(physical_t5)
+        .map_err(|error| format!("Zig T5M відхилив фізичний носій: {error}"))?;
+    let visible = exact.iter()
+        .map(|word| word.bits.iter()
+             .map(|bit| char::from(b'0' + *bit))
+             .collect::<String>())
+        .collect::<Vec<_>>()
+        .join(" ");
     let mut canonical_view = visible.as_bytes().to_vec();
-    canonical_view.push(b'\n');
+    canonical_view.push(b'\\n');
     if visible_view != canonical_view.as_slice() {
-        return Err("triplet view does not byte-match the canonical T5 decoder output plus one LF".into());
+        return Err("T5M: похідний бітовий перегляд не збігається зі словами Zig".into());
     }
-    let reencoded_t5 = encode_binary_projection_ternary(&visible)
-        .map_err(|error| format!("canonical T5 re-encode failed: {error:?}"))?;
-    if reencoded_t5.as_slice() != physical_t5 {
-        return Err("physical T5 is not byte-canonical after decode/encode".into());
+    let reencoded_t5m = encode_t5_exact_words(&exact)
+        .map_err(|error| format!("Zig T5M не відновив фізичний носій: {error}"))?;
+    if reencoded_t5m.as_slice() != physical_t5 {
+        return Err("T5M: порушено побайтову канонічність кодека".into());
     }
 
     let source = std::str::from_utf8(lisp_source)
@@ -207,19 +214,19 @@ fn compile_t5_triplet_on_worker(
                     .position(|(left, right)| left != right)
                     .unwrap_or(source_form.len().min(binary_form.len()));
                 return Err(format!(
-                    "SENS source and physical-T5 view disagree after exact-domain lowering at top-level form {index}; first per-form wire difference={first_wire_difference}; source form={:?}; physical-T5 form={:?}",
+                    "SENS source and physical-T5M view disagree after exact-domain lowering at top-level form {index}; first per-form wire difference={first_wire_difference}; source form={:?}; physical-T5M form={:?}",
                     source_lowered[index], binary_lowered[index]
                 ));
             }
         }
         if source_lowered.len() != binary_lowered.len() {
             return Err(format!(
-                "SENS source and physical-T5 view have different top-level form counts: source={}, physical-T5={}",
+                "SENS source and physical-T5M view have different top-level form counts: source={}, physical-T5M={}",
                 source_lowered.len(), binary_lowered.len()
             ));
         }
         return Err(format!(
-            "SENS source and physical-T5 view differ in whole-program wire (source_bytes={}, physical_T5_bytes={}) although individual top-level forms appear equal",
+            "SENS source and physical-T5M view differ in whole-program wire (source_bytes={}, physical_T5_bytes={}) although individual top-level forms appear equal",
             source_identity_wire.len(), binary_identity_wire.len()
         ));
     }
@@ -227,7 +234,7 @@ fn compile_t5_triplet_on_worker(
     let program = lowered_program_to_exact_data(&binary_lowered)
         .map_err(|error| format!("T5 program-data conversion failed closed: {error}"))?;
     // The artifact contract names this field program_wire_sha256. Derive it
-    // from the canonical SW1 encoding of the typed program; physical T5 bytes
+    // from the canonical SW1 encoding of the typed program; physical T5M bytes
     // already passed their own byte-roundtrip gate above.
     let canonical_program_wire = wire_encode_program(&binary_lowered);
     let program_wire_digest = sha256_hex(&canonical_program_wire);
@@ -333,7 +340,7 @@ fn read_triplet_member(path: &Path, role: &str) -> Result<Vec<u8>, String> {
         .map_err(|error| format!("cannot read {role} {}: {error}", absolute.display()))
 }
 
-/// Run the physical T5 route from an explicit .sens path, requiring same-stem
+/// Run the physical T5M route from an explicit .sens path, requiring same-stem
 /// .lisp and extensionless-view siblings. No format sniffing or fallback occurs.
 pub fn run_triplet(
     repo_root: &str,
@@ -346,7 +353,7 @@ pub fn run_triplet(
     let lisp_path = sens_path.with_extension("lisp");
     let view_path = sens_path.with_extension("");
     let lisp = read_triplet_member(&lisp_path, "triplet Lisp source")?;
-    let physical = read_triplet_member(sens_path, "triplet physical T5")?;
+    let physical = read_triplet_member(sens_path, "triplet physical T5M")?;
     let view = read_triplet_member(&view_path, "triplet visible view")?;
     let revision = current_revision(repo_root)?;
     let (artifact, accepted) = compile_t5_triplet_bytes(&lisp, &physical, &view, &revision)?;
@@ -385,7 +392,7 @@ pub fn run(repo_root: &str, options: RunOptions) -> Result<bool, String> {
 mod tests {
     use super::*;
     use sens::{
-        encode_binary_projection_ternary, parse_mixed_exact_domain, lower_program,
+        parse_mixed_exact_domain, lower_program,
         CoreD8, Bit8, DomainIdentity, Expr, ExprKind, Span, CompilerLoweringRole,
     };
     use std::rc::Rc;
@@ -510,12 +517,16 @@ mod tests {
     }
 
     #[test]
-    fn canonical_t5_triplet_compiles_only_when_all_three_projections_match() {
+    fn canonical_t5m_triplet_compiles_only_when_all_three_projections_match() {
         let source = "(як-є ())\n".as_bytes();
         let view = b"10 001 00 000 01\n";
-        let physical = encode_binary_projection_ternary(
-            std::str::from_utf8(view).expect("ASCII canonical view"),
-        ).expect("existing SENS T5 codec");
+        let exact = std::str::from_utf8(view).expect("точний двійковий перегляд")
+            .trim_end_matches('\\n').split(' ')
+            .map(|word| sens_cli::zig_transport::ExactT5Word::new(
+                word.len(), word.bytes().map(|bit| bit - b'0').collect(),
+            ).expect("точне бітове слово"))
+            .collect::<Vec<_>>();
+        let physical = encode_t5_exact_words(&exact).expect("Zig T5M");
 
         let revision = "0123456789abcdef0123456789abcdef01234567";
         let (bytes, accepted) = compile_t5_triplet_bytes(
