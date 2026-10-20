@@ -610,7 +610,7 @@ fn life_orchestration_parity_stays_fail_closed_without_real_graal_evidence() {
     transport_life_substrate_parity_document(&mut session);
     load_life_substrate_parity_witness(&mut session);
 
-    let verdict = eval_program("(life-substrate-parity-witness)", &mut session)
+    let verdict = eval_program("(свідок-паритету-основи-життя)", &mut session)
         .expect("Lisp-owned #809 witness must execute")
         .value
         .to_string();
