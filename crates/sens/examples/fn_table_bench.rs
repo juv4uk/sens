@@ -22,7 +22,7 @@ const KNOWN_SENS_PANIC: &[&str] = &["/"];
 
 /// Результат залежить від часу/лічильника — звіряється лише факт виклику.
 const NONDETERMINISTIC: &[&str] = &[
-    "mono-ns", "unix-time-now", "utc-now", "mono-ms", "elapsed-ns", "gensym", "env",
+    "mono-ns", "unix-time-now", "utc-now", "mono-ms", "elapsed-ns", "створити-символ", "env",
     "deadline-reached?", "deadline-reached-at?", "deadline-from", "deadline-after-ns",
     "timezone-detect", "timezone-name", "timezone-offset-seconds",
 ];
