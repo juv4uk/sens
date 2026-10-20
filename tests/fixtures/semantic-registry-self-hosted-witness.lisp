@@ -1,44 +1,37 @@
 ; Executable Lisp-owned witness for the canonical semantic registry.
-; Registry occupancy and the full 8-bit Binary value domain are deliberately
-; separate: 11111111 must round-trip as Binary even though it is not currently
-; an admitted semantic-registry row.
+; Ukrainian projection only. Registry occupancy and full binary domain remain separate.
 
-(0011 semantic-registry-self-hosted-witness
-  (0010 (source)
-    (001001 ((registry (semantic-registry-read-source source))
+(визначити semantic-registry-self-hosted-witness
+  (функція (source)
+    (нехай ((registry (semantic-registry-read-source source))
            (rows (semantic-registry-rows registry))
-           (quote-row (semantic-registry-row-in registry 00000001))
-           (quote-id (semantic-registry-id-in registry 'quote))
-           (invoke-id (semantic-registry-id-in registry 'invoke))
-           (leading-zero-row (semantic-registry-row-in registry 00000101))
-           (max-roundtrip (semantic-registry-round-trip 11111111))
-           (invoke-roundtrip (semantic-registry-round-trip 10101000)))
-      (1110
-        (000000 rows)
-        (11110100 (semantic-registry-row-id quote-row))
-        (semantic-registry-surface-name 'en quote-row)
-        (11110100 quote-id)
-        (11110100 invoke-id)
-        (11110100 (semantic-registry-row-id leading-zero-row))
-        (11110100 max-roundtrip)
-        (semantic-registry-row-in registry 11111111)
-        (11110100 invoke-roundtrip)
-        (11110111 invoke-roundtrip (semantic-registry-row-id (semantic-registry-row-in registry 10101000)))))))
+           (quote-row (semantic-registry-row-in registry 1))
+           (quote-id (semantic-registry-id-in registry (як-є quote)))
+           (invoke-id (semantic-registry-id-in registry (як-є invoke)))
+           (leading-zero-row (semantic-registry-row-in registry 5))
+           (max-roundtrip (semantic-registry-round-trip 255))
+           (invoke-roundtrip (semantic-registry-round-trip 168)))
+      (список
+        (довжина rows)
+        (binary-print (semantic-registry-row-id quote-row))
+        (semantic-registry-surface-name (як-є en) quote-row)
+        (binary-print quote-id)
+        (binary-print invoke-id)
+        (binary-print (semantic-registry-row-id leading-zero-row))
+        (binary-print max-roundtrip)
+        (semantic-registry-row-in registry 255)
+        (binary-print invoke-roundtrip)
+        (однакові? invoke-roundtrip (semantic-registry-row-id (semantic-registry-row-in registry 168)))))))
 
-; Machine-readable handoff for downstream consumers.
-; Git commit pinning is provenance and stays outside language semantics.
-; The digest is content identity of the exact canonical source bytes. The full
-; parsed canonical rows are handed off directly, so Binary SID values are
-; preserved without building a second identity projection or recursive shadow table.
-(0011 semantic-registry-handoff-witness
-  (0010 (source)
-    (001001 ((registry (semantic-registry-read-source source))
+(визначити semantic-registry-handoff-witness
+  (функція (source)
+    (нехай ((registry (semantic-registry-read-source source))
            (rows (semantic-registry-rows registry)))
-      (1110
-        (001 semantic-registry-handoff/1)
-        (1110 (001 authority) semantic-registry-source-path)
-        (1110 (001 revision-policy) (001 pin-git-commit-containing-authority))
-        (1110 (001 source-digest) (110011000 source))
-        (1110 (001 binary-width) 8)
-        (1110 (001 row-count) (000000 rows))
-        (111 (001 canonical-rows) rows)))))
+      (список
+        (як-є semantic-registry-handoff/1)
+        (список (як-є authority) semantic-registry-source-path)
+        (список (як-є revision-policy) (як-є pin-git-commit-containing-authority))
+        (список (як-є source-digest) (source-digest source))
+        (список (як-є binary-width) 8)
+        (список (як-є row-count) (довжина rows))
+        (сполучити (як-є canonical-rows) rows)))))

@@ -1,91 +1,88 @@
-; function-table-mechanisms-sid8-witness — semantic witness in binary SENS.
+; function-table-mechanisms-witness — semantic witness, Ukrainian projection.
 ;
 ; Axiom: width = address = identity. Semantics owned by SENS, not Python.
+; Domain coordinates use decimal values matching exact bit patterns.
 ;
 ; Witnesses:
 ;   1. D1 PredicateBit carriers exact.
-;   2. Core evaluator SIDs are exact 8-bit coordinates (00000001..00001011).
-;   3. SID 00001100 has four island routes without inventing a fifth SID.
-;   4. Profile route 10101000 is 8-bit (Core3 registered-host).
-;   5. Authority path is semantic-registry — this file mints no meaning.
-;
-; Run under my-lisp / SENS fixture loader.
+;   2. Core evaluator coordinates match known identities.
+;   3. Plus has four island routes without inventing a fifth.
+;   4. Authority path is semantic-registry — this file mints no meaning.
 
 (load "lib/core.lisp")
 
-(0011 d1-true  (010 (001 ())))
-(0011 d1-false (101 (001 (0)) (001 (1))))
+(визначити d1-true (атом? (як-є ())))
+(визначити d1-false (тотожне? (як-є (0)) (як-є (1))))
 
-; Exact 8-bit SID coordinates (bit pattern = identity)
-(0011 sid-quote     00000001)
-(0011 sid-atom      00000010)
-(0011 sid-eq        00000011)
-(0011 sid-cons      00000100)
-(0011 sid-car       00000101)
-(0011 sid-cdr       00000110)
-(0011 sid-cond      00000111)
-(0011 sid-lambda    00001000)
-(0011 sid-define    00001001)
-(0011 sid-plus      00001100)
-(0011 sid-core3-reg 10101000)
+; Exact coordinates (bit pattern = identity), decimal presentation
+(визначити sid-quote 1)
+(визначити sid-atom 2)
+(визначити sid-eq 3)
+(визначити sid-cons 4)
+(визначити sid-car 5)
+(визначити sid-cdr 6)
+(визначити sid-cond 7)
+(визначити sid-lambda 8)
+(визначити sid-define 9)
+(визначити sid-plus 12)
+(визначити sid-core3-reg 168)
 
-(0011 sid8-eq?
-  (0010 (a b)
-    (110
-      ((101 a b) d1-true)
-      ((010 (001 ())) d1-false))))
+(визначити sid-eq?
+  (функція (a b)
+    (за-умовою
+      ((тотожне? a b) d1-true)
+      ((атом? (як-є ())) d1-false))))
 
-; Four islands share one SID — identity is the coordinate, not the executor name.
-(0011 plus-four-islands
-  (001
-    ((00001100 common-lisp)
-     (00001100 prolog)
-     (00001100 clips)
-     (00001100 datalog))))
+(визначити plus-four-islands
+  (як-є
+    ((12 common-lisp)
+     (12 prolog)
+     (12 clips)
+     (12 datalog))))
 
-(0011 plus-sid-uniform?
-  (0010 (rows)
-    (110
-      ((010 rows) d1-true)
-      ((010 (001 ()))
-       (110
-         ((101 (100 (100 rows)) sid-plus)
-          (plus-sid-uniform? (011 rows)))
-         ((010 (001 ())) d1-false))))))
+(визначити plus-sid-uniform?
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) d1-true)
+      (так
+       (за-умовою
+         ((тотожне? (перше (перше rows)) sid-plus)
+          (plus-sid-uniform? (решта rows)))
+         ((атом? (як-є ())) d1-false))))))
 
-(0011 function-table-mechanisms-sid8-witness
-  (0010 ()
-    (110
-      ((101 (sid8-eq? sid-quote 00000001) d1-true)
-       (110
-         ((101 (sid8-eq? sid-cond 00000111) d1-true)
-          (110
-            ((101 (sid8-eq? sid-plus 00001100) d1-true)
-             (110
-               ((101 (plus-sid-uniform? plus-four-islands) d1-true)
-                (110
-                  ((101 (sid8-eq? sid-core3-reg 10101000) d1-true)
-                   (001 (function-table-mechanisms-sid8
+(визначити function-table-mechanisms-sid8-witness
+  (функція ()
+    (за-умовою
+      ((тотожне? (sid-eq? sid-quote 1) d1-true)
+       (за-умовою
+         ((тотожне? (sid-eq? sid-cond 7) d1-true)
+          (за-умовою
+            ((тотожне? (sid-eq? sid-plus 12) d1-true)
+             (за-умовою
+               ((тотожне? (plus-sid-uniform? plus-four-islands) d1-true)
+                (за-умовою
+                  ((тотожне? (sid-eq? sid-core3-reg 168) d1-true)
+                   (як-є (function-table-mechanisms-sid8
                           (status pass)
                           (sid-width 8)
                           (plus-islands 4)
-                          (plus-sid 00001100)
+                          (plus-sid 12)
                           (authority semantic-registry)
                           (axiom width-equals-address))))
-                  ((010 (001 ()))
-                   (001 (function-table-mechanisms-sid8
+                  ((атом? (як-є ()))
+                   (як-є (function-table-mechanisms-sid8
                           (status fail) (core3-reg mismatch))))))
-               ((010 (001 ()))
-                (001 (function-table-mechanisms-sid8
+               ((атом? (як-є ()))
+                (як-є (function-table-mechanisms-sid8
                        (status fail) (plus-islands non-uniform))))))
-            ((010 (001 ()))
-             (001 (function-table-mechanisms-sid8
+            ((атом? (як-є ()))
+             (як-є (function-table-mechanisms-sid8
                     (status fail) (plus-sid mismatch))))))
-         ((010 (001 ()))
-          (001 (function-table-mechanisms-sid8
+         ((атом? (як-є ()))
+          (як-є (function-table-mechanisms-sid8
                  (status fail) (cond-sid mismatch))))))
-      ((010 (001 ()))
-       (001 (function-table-mechanisms-sid8
+      ((атом? (як-є ()))
+       (як-є (function-table-mechanisms-sid8
               (status fail) (quote-sid mismatch)))))))
 
 (function-table-mechanisms-sid8-witness)
