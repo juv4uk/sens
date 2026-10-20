@@ -1,13 +1,15 @@
-; #1391 — separation law between Core4 15-state answers and SENS functions.
+; #1391 — закон розмежування п'ятнадцяти станів відповіді Core4
+; та функцій мови СЕНС.
 ;
-; Logic answers:
+; Логічні відповіді:
 ;   0^n | 1^n | (), n=1..7
 ;
-; SENS functions:
+; Функції СЕНС:
 ;   00000000..11111111
 ;
-; These spaces are orthogonal. The grading path never turns a short answer
-; into an 8-bit function and never turns an 8-bit function into ().
+; Ці простори незалежні. Перетворення ступеня логічної відповіді
+; не створює восьмибітної функції СЕНС. Так само восьмибітний
+; код функції не може неявно перетворитися на порожню структуру.
 
 (core4-predicate-answer-boundary/4
 
