@@ -83,8 +83,8 @@ def check(root: Path) -> list[str]:
     if not cap_seen:
         problems.append("N4: no transport caps the width at D10 (D11 could leak into T5)")
 
-    # N5 -- the SID8-era is physically impossible: the sterile corridor modules
-    # carry no SID8/Sens8/Function8/W8 marker (legacy is provenance, not the ladder).
+    # N5 -- the сід8-era is physically impossible: the sterile corridor modules
+    # carry no сід8/сенс8/Function8/W8 marker (legacy is provenance, not the ladder).
     legacy_re = re.compile(r"SID8|Sens8|Function8|\bW8\b|pre-rebuild")
     for rel in ("research/zig-codecs/t5/t5.zig", "research/zig-codecs/transport_abi.zig",
                 "research/zig-codecs/f3c/f3c.zig", "research/zig-codecs/transport.zig"):
