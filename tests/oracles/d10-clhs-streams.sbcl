@@ -1,70 +1,80 @@
-;;;; Незалежний донорський оракул ANSI Common Lisp / SBCL.
-;;;; Не є програмою SENS, не створює D10 коди та не ратифікує значення.
+;;;; Незалежний дослідний оракул потоків ANSI Common Lisp / SBCL.
+;;;; Це не програма СЕНС, не джерело кодів Д10 і не ратифікація семантики.
+;;;; Власні функції, змінні й діагностика — українською.
+;;;; Стандартні форми Common Lisp, контрольні значення й протокольні маркери збережено.
 (in-package :cl-user)
-(defvar *d10-oracle-input* nil)
 
-(defun ensure-equal (actual expected label)
-  (unless (equal actual expected)
-    (error "D10 STREAMS ORACLE BLOCK ~A: observed=~S expected=~S" label actual expected)))
+(defvar *д10-вхідний-потік* nil)
 
-(defun witness-synonym-stream ()
-  (let* ((*d10-oracle-input* (make-string-input-stream "a"))
-         (alias (make-synonym-stream '*d10-oracle-input*)))
+(defun перевірити-рівність (фактичне очікуване назва)
+  (unless (equal фактичне очікуване)
+    (error "D10 STREAMS ORACLE BLOCK ~A: отримано=~S очікувано=~S"
+           назва фактичне очікуване)))
+
+(defun засвідчити-потік-псевдонім ()
+  (let* ((*д10-вхідний-потік* (make-string-input-stream "a"))
+         (псевдонім (make-synonym-stream '*д10-вхідний-потік*)))
     (unwind-protect
          (progn
-           (ensure-equal (read-char alias nil :eof) #\a "synonym first binding")
-           (let ((*d10-oracle-input* (make-string-input-stream "b")))
+           (перевірити-рівність (read-char псевдонім nil :eof) #\a
+                               "перше динамічне зв'язування")
+           (let ((*д10-вхідний-потік* (make-string-input-stream "b")))
              (unwind-protect
-                  (ensure-equal (read-char alias nil :eof) #\b
-                                "synonym rebound binding")
-               (close *d10-oracle-input*)))
-           (ensure-equal (read-char alias nil :eof) :eof
-                         "synonym original stream consumed"))
-      (close alias)
-      (close *d10-oracle-input*)))
+                  (перевірити-рівність (read-char псевдонім nil :eof) #\b
+                                      "переприв'язування потоку")
+               (close *д10-вхідний-потік*)))
+           (перевірити-рівність (read-char псевдонім nil :eof) :eof
+                               "початковий потік уже вичерпано"))
+      (close псевдонім)
+      (close *д10-вхідний-потік*)))
   (format t "PASS DYNAMIC-SYNONYM-STREAM-TARGET~%"))
 
-(defun witness-output-drain ()
-  (let ((buffer (make-string-output-stream)))
+(defun засвідчити-спорожнення-виводу ()
+  (let ((буфер (make-string-output-stream)))
     (unwind-protect
          (progn
-           (write-string "ab" buffer)
-           (ensure-equal (get-output-stream-string buffer) "ab" "first drain")
-           (ensure-equal (get-output-stream-string buffer) "" "second drain")
-           (write-string "c" buffer)
-           (ensure-equal (get-output-stream-string buffer) "c" "drain after write")
+           (write-string "ab" буфер)
+           (перевірити-рівність (get-output-stream-string буфер) "ab"
+                               "перше спорожнення")
+           (перевірити-рівність (get-output-stream-string буфер) ""
+                               "друге спорожнення")
+           (write-string "c" буфер)
+           (перевірити-рівність (get-output-stream-string буфер) "c"
+                               "спорожнення після запису")
            (format t "PASS DRAIN-STRING-OUTPUT-STREAM~%"))
-      (close buffer))))
+      (close буфер))))
 
-(defun witness-concatenation ()
-  (let ((a (make-string-input-stream "ab"))
-        (b (make-string-input-stream "cd")))
-    (let ((stream (make-concatenated-stream a b)))
+(defun засвідчити-об'єднаний-потік ()
+  (let ((перший (make-string-input-stream "ab"))
+        (другий (make-string-input-stream "cd")))
+    (let ((потік (make-concatenated-stream перший другий)))
       (unwind-protect
            (progn
-             (ensure-equal (loop repeat 4 collect (read-char stream nil :eof))
-                           (list #\a #\b #\c #\d)
-                           "ordered four reads")
-             (ensure-equal (read-char stream nil :eof) :eof
-                           "only final EOF"))
-        (close stream)
-        (close a)
-        (close b))))
-  (let ((a (make-string-input-stream ""))
-        (b (make-string-input-stream "x")))
-    (let ((stream (make-concatenated-stream a b)))
+             (перевірити-рівність
+               (loop repeat 4 collect (read-char потік nil :eof))
+               (list #\a #\b #\c #\d)
+               "чотири послідовні читання")
+             (перевірити-рівність (read-char потік nil :eof) :eof
+                                 "кінець після обох потоків"))
+        (close потік)
+        (close перший)
+        (close другий))))
+  (let ((перший (make-string-input-stream ""))
+        (другий (make-string-input-stream "x")))
+    (let ((потік (make-concatenated-stream перший другий)))
       (unwind-protect
            (progn
-             (ensure-equal (read-char stream nil :eof) #\x
-                           "empty first child skips EOF")
-             (ensure-equal (read-char stream nil :eof) :eof "true EOF"))
-        (close stream)
-        (close a)
-        (close b))))
+             (перевірити-рівність (read-char потік nil :eof) #\x
+                                 "порожній перший потік пропускаємо")
+             (перевірити-рівність (read-char потік nil :eof) :eof
+                                 "справжній кінець потоку"))
+        (close потік)
+        (close перший)
+        (close другий))))
   (format t "PASS ORDERED-CONCATENATED-INPUT~%"))
 
 (format t "SBCL-ORACLE: ~A~%" (lisp-implementation-version))
-(witness-synonym-stream)
-(witness-output-drain)
-(witness-concatenation)
+(засвідчити-потік-псевдонім)
+(засвідчити-спорожнення-виводу)
+(засвідчити-об'єднаний-потік)
 (format t "D10-CLHS-STREAMS-DONOR: PASS 3/3~%")
