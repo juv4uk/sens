@@ -38,13 +38,21 @@ jobs:
           assert r["status"] == "COMPLETE_MECHANICAL_INVENTORY_ONLY"
           assert s["tracked_lisp_sources"] == s["tracked_physical_sens_pairs"] + s["unpaired_source_rows"]
           assert s["independently_oracle_certified_from_these_inputs"] == 0
+          coverage = r["executable_roundtrip_coverage"]
+          assert not r["all_executable_lisp_roundtrip_verified"]
+          assert coverage["independent_runtime_oracle_verified"] == 0
+          assert coverage["blocked_or_unverified"] == coverage["executable_or_unclassified_sources"]
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as out:
               out.write("## T5 migration progress (mechanical evidence only)\n\n")
               out.write(f"- Original tracked Lisp files: **{s['tracked_lisp_sources']}**\n")
               out.write(f"- Physical T5 pairs: **{s['tracked_physical_sens_pairs']}**\n")
               out.write(f"- Unpaired originals: **{s['unpaired_source_rows']}**\n")
               out.write(f"- Physically canonical T5: **{s['mechanically_canonical_physical_pairs']}**\n")
-              out.write("- Semantic/executable admission: **NOT measured by this audit**; require independent D2/oracle evidence\n")
+              out.write(f"- Executable/unknown Lisp needing independent proof: **{coverage['executable_or_unclassified_sources']}**\n")
+              out.write(f"- Native SENS/oracle verified: **{coverage['independent_runtime_oracle_verified']}**\n")
+              out.write(f"- Executable roundtrip blocked/unverified: **{coverage['blocked_or_unverified']}**\n")
+              out.write("- Full executable Lisp ↔ SENS: **NO-GO / NOT VERIFIED**\n")
+              out.write("- Non-program data are excluded from executable target\n")
               out.write("- Non-program data are not executable backlog\n")
           print("MECHANICAL_COVERAGE",s)
           PY
