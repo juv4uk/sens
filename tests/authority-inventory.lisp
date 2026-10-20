@@ -1,7 +1,7 @@
-; #114/#115 authority inventory projection.
-; Lisp reads this as data; CI/host code may transport paths but must not own
-; the allow/deny rule. Keep tests/authority-inventory.tsv as the tabular audit
-; projection for reviewers.
+; #114/#115 — проєкція інвентарю семантичних повноважень.
+; Lisp читає записи як дані. CI та механізми хоста можуть передавати
+; шляхи, але не визначають право дозволяти чи забороняти дії.
+; tests/authority-inventory.tsv — похідна таблиця аудиту для перевірки.
 
 (authority "crates/my-lisp/tests/witness_authority.rs" observer)
 (authority "crates/my-lisp/tests/probabilistic_decision_jev_like.rs" observer)
