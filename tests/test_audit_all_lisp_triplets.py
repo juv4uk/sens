@@ -66,6 +66,42 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(result["semantic_runtime_proven"])
         self.assertFalse(result["release_ready"])
 
+    def test_nested_block_comments_are_not_machine_programs(self):
+        # Лексичні #| ... |# не створюють виконуваних слів D2/T5M.
+        # Дужки та символи старих мов усередині коментаря інертні.
+        self.put("lib/опис.lisp",
+                 "#| зовнішній (define fake 1)\\n"
+                 "  #| внутрішній ; () |#\\n"
+                 "  завершення |#\\n; ще опис\\n".replace("\\n", "\n"))
+        self.put("lib/програма.lisp", "(визначити проба так)\\n".replace("\\n", "\n"))
+        report = scan(self.root)
+        self.assertEqual(report["total_lisp_files"], 2)
+        self.assertEqual(report["comment_only_nonprogram_lisp"], 1)
+        self.assertEqual(report["potential_program_files"], 1)
+        self.assertEqual(report["potential_program_missing_sens"], 1)
+        self.assertEqual(report["comment_only_style_warnings"], 1)
+        self.assertEqual(report["blocked_count"], 1)
+        self.assertEqual(report["blocked_sample"][0]["path"], "lib/програма.lisp")
+        self.assertFalse(report["release_ready"])
+
+    def test_unclosed_block_comment_is_not_exempted(self):
+        self.put("lib/помилка.lisp", "#| незакритий коментар (визначити проба так)\\n".replace("\\n", "\n"))
+        report = scan(self.root)
+        self.assertEqual(report["comment_only_nonprogram_lisp"], 0)
+        self.assertEqual(report["potential_program_files"], 1)
+        self.assertEqual(report["potential_program_missing_sens"], 1)
+        self.assertIn("lib/помилка.lisp", str(report["blocked_sample"]))
+        self.assertFalse(report["all_bounded_reverse_verified"])
+
+    def test_executable_code_after_block_comment_still_needs_sens(self):
+        self.put("lib/програма.lisp",
+                 "#| інертний опис |#\\n(визначити проба так)\\n".replace("\\n", "\n"))
+        report = scan(self.root)
+        self.assertEqual(report["comment_only_nonprogram_lisp"], 0)
+        self.assertEqual(report["potential_program_missing_sens"], 1)
+        self.assertIn("немає звичайного однойменного .sens",
+                      str(report["blocked_sample"]))
+
     def test_noncommented_lisp_is_never_auto_exempted_from_program_census(self):
         self.put("lib/опис.lisp", '; опис\n(визначити функцію так)\n')
         report = scan(self.root)
