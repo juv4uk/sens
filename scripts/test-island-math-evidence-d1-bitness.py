@@ -48,7 +48,7 @@ def check_ime() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"island-math-evidence: host truthiness {m.group()!r}")
-    # Перевіряємо тільки чинний ратифікований D5; історія SID8 лишається в Git.
+    # Перевіряємо тільки чинний ратифікований D5; історія сід8 лишається в Git.
     d5 = ROOT / "lib" / "domains" / "d5.lisp"
     if not d5.is_file() or not re.search(
         r"^\s*\(01010\s+\(ук [^)]*\)\s+\(укр додати\)",
