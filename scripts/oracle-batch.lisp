@@ -1,88 +1,81 @@
-; scripts/oracle-batch.lisp — run every constitutional fixture through the
-; canonical TCP Oracle (:9999) and emit one machine-readable result per
-; fixture, keyed by its stable inventory ID.
+; Пакетний запит до канонічного TCP-оракула для кожного конституційного прикладу.
+; Результат містить незмінний ідентифікатор із реєстру прикладів.
 ;
-; tests/fixtures/inventory.lisp carries the stable F-<hash> IDs but not the
-; expression text; tests/fixtures/conformance.lisp carries the expression
-; text but no stable ID. Both are a straight positional walk over the same
-; underlying fixture list (build-inventory.lisp's emit-all processes
-; conformance.lisp's fixtures in file order, one inventory record per
-; fixture, no filtering/reordering) -- so the Nth (fixture ...) record in
-; inventory.lisp and the Nth raw record in conformance.lisp are the same
-; fixture, and are read here in parallel to pair `id` with `expr`.
+; tests/fixtures/inventory.lisp зберігає ідентифікатори, але не тексти виразів;
+; tests/fixtures/conformance.lisp — самі вирази в тому самому порядку.
+; Обидва файли обходимо синхронно. Протокольні назви полів, адреса,
+; формат запиту та вихідні позначки не перекладаються.
 ;
-; Run: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp
+; Запуск: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp
+;
+; Початковий текст виразу передаємо без повторного синтаксичного читання:
+; приклади переповнення чисел можуть не пройти локальний читач.
+; Для пакета перетворюємо лише готовий рядок на рядковий літерал протоколу.
 
-; expr-str is the fixture's own original source text (already a string,
-; straight from conformance.lisp). It is sent as-is, WITHOUT a local
-; read/write-to-string round trip: some fixtures (e.g. the S3
-; 1e100001/1e-100001 NumericOverflow cases) are only meaningful because
-; their source text does not survive local parsing at all -- re-reading
-; them here would abort the whole batch on the local reader's own
-; resource bound before the oracle ever saw the request. The only local
-; step needed is quoting expr-str as a WSM string literal for embedding
-; in the request text.
-(визначити make-request
-  (функція (expr-str)
-    (нехай ((quoted-source (значення-у-текст expr-str)))
+(визначити скласти-запит-оракула
+  (функція (текст-виразу)
+    (нехай ((цитоване-джерело (значення-у-текст текст-виразу)))
       (рядок-додати
         (рядок-додати
-          (рядок-додати "(request (op oracle-eval) (id \"batch\") (source " quoted-source)
+          (рядок-додати "(request (op oracle-eval) (id \"batch\") (source " цитоване-джерело)
           ") (contract-version (3 0)))")
         "\n"))))
 
-(визначити oracle-eval
-  (функція (expr-str)
-    (нехай ((request (make-request expr-str)))
-      (нехай ((socket (tcp-connect "100.113.68.50" 9999)))
-        (нехай ((sent (протокол-передавання-записати socket request)))
-          (нехай ((response (протокол-передавання-читати socket)))
-            (нехай ((closed (tcp-close socket)))
-              (прочитати response))))))))
+(визначити обчислити-через-оракул
+  (функція (текст-виразу)
+    (нехай ((запит (скласти-запит-оракула текст-виразу)))
+      (нехай ((з'єднання (tcp-connect "100.113.68.50" 9999)))
+        (нехай ((надіслано (протокол-передавання-записати з'єднання запит)))
+          (нехай ((відповідь (протокол-передавання-читати з'єднання)))
+            (нехай ((закрито (tcp-close з'єднання)))
+              (прочитати відповідь))))))))
 
-(визначити emit-result
-  (функція (id result)
+(визначити надрукувати-результат-оракула
+  (функція (ідентифікатор результат)
     (друкувати (список (як-є oracle-result)
-                 (сполучити (як-є id) id)
-                 (сполучити (як-є result) result)))))
+                 (сполучити (як-є id) ідентифікатор)
+                 (сполучити (як-є result) результат)))))
 
-(визначити fixtures-only
-  (функція (entries)
+(визначити вибрати-лише-приклади
+  (функція (записи)
     (за-умовою
-      ((атом? entries) (як-є ()))
-      ; inventory.lisp's own last top-level form is a bare () -- the CLI's
-      ; auto-printed final script return value, captured by the shell
-      ; redirect that originally generated the file, not a real record.
-      ; (car (car entries)) on that entry would car an atom and error, so
-      ; skip any non-Pair top-level form defensively instead of assuming
-      ; every entry is shaped like a tagged record.
-      ((атом? (перше entries)) (fixtures-only (решта entries)))
-      ((атом? (як-є ())) (за-умовою
-           ((тотожне? (перше (перше entries)) (як-є fixture))
-            (сполучити (перше entries) (fixtures-only (решта entries))))
-           ((атом? (як-є ())) (fixtures-only (решта entries))))))))
-
-; Walk inventory.lisp's (fixture ...) records and conformance.lisp's raw
-; ((expr . ...) ...) records in lockstep -- same position, same fixture.
-(визначити process-pair
-  (функція (inventory-remaining conformance-remaining)
-    (за-умовою
-      ((атом? inventory-remaining) (як-є ()))
-      ((атом? conformance-remaining) (як-є ()))
+      ((атом? записи) (як-є ()))
+      ; Останній елемент реєстру може бути просто порожнім значенням,
+      ; надрукованим командним інтерфейсом, а не записом прикладу.
+      ; Атом не можна розбирати як пару: пропускаємо його безпечно.
+      ((атом? (перше записи)) (вибрати-лише-приклади (решта записи)))
       ((атом? (як-є ()))
-       (нехай-послідовно ((inventory-fixture (перше inventory-remaining))
-              (id (решта (знайти-за-ключем (як-є id) (решта inventory-fixture))))
-              (conformance-fixture (перше conformance-remaining))
-              (expr-str (решта (знайти-за-ключем (як-є expr) conformance-fixture)))
-              (result (oracle-eval expr-str))
-              (emitted (emit-result id result)))
-         (process-pair (решта inventory-remaining) (решта conformance-remaining)))))))
+       (за-умовою
+         ((тотожне? (перше (перше записи)) (як-є fixture))
+          (сполучити (перше записи) (вибрати-лише-приклади (решта записи))))
+         ((атом? (як-є ())) (вибрати-лише-приклади (решта записи))))))))
 
-(друкувати (сполучити (як-є about) "oracle-results.lisp — oracle-eval results for every tests/fixtures/inventory.lisp fixture, via the canonical TCP Oracle :9999, keyed by stable F-ID."))
-(друкувати (сполучити (як-є generated) "Run: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
+; Один запис інвентарю відповідає одному запису корпусу за позицією.
+(визначити обробити-пару-прикладів
+  (функція (залишок-інвентарю залишок-корпусу)
+    (за-умовою
+      ((атом? залишок-інвентарю) (як-є ()))
+      ((атом? залишок-корпусу) (як-є ()))
+      ((атом? (як-є ()))
+       (нехай-послідовно
+         ((приклад-інвентарю (перше залишок-інвентарю))
+          (ідентифікатор (решта (знайти-за-ключем (як-є id) (решта приклад-інвентарю))))
+          (приклад-корпусу (перше залишок-корпусу))
+          (текст-виразу (решта (знайти-за-ключем (як-є expr) приклад-корпусу)))
+          (результат (обчислити-через-оракул текст-виразу))
+          (надруковано (надрукувати-результат-оракула ідентифікатор результат)))
+         (обробити-пару-прикладів
+           (решта залишок-інвентарю) (решта залишок-корпусу)))))))
 
-(process-pair
-  (fixtures-only (читати-всі (читати-файл "tests/fixtures/inventory.lisp")))
+(друкувати
+  (сполучити (як-є about)
+    "oracle-results.lisp — oracle-eval results for every tests/fixtures/inventory.lisp fixture, via the canonical TCP Oracle :9999, keyed by stable F-ID."))
+(друкувати
+  (сполучити (як-є generated)
+    "Run: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
+
+(обробити-пару-прикладів
+  (вибрати-лише-приклади (читати-всі (читати-файл "tests/fixtures/inventory.lisp")))
   (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
 
 (як-є ())
