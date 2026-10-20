@@ -4882,6 +4882,9 @@
   (функція (предикат елементи)
     (розділити-за-умовою-до предикат елементи (як-є ()) (як-є ()))))
 
+; Повна ратифікована назва Д10 використовує вже визначене замикання.
+(визначити розділити-елементи-за-предикатом розділити-за-умовою)
+
 ; D8 admitted mechanism projections; names are Ukrainian surfaces, not new authority.
 ; Exact width D8:11100000 -> D24 CHAR-CODE, D8:11101101/11101110 -> names.
 ; Mechanisms already exist in SENS evaluator, never re-route via historical SID8.
