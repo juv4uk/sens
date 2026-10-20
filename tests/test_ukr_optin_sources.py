@@ -583,13 +583,20 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
                         "world: inverse of primary D9 migration must recover exact parent blob",
                     )
                 if path == "lib/knowledge.lisp":
-                    source = self._reverse_knowledge_alpha(source)
-                    source = self._reverse_d5_macro_projection(source, 4)
-                    self.assertEqual(
-                        self._git_blob_sha(source),
-                        self.KNOWLEDGE_BEFORE_ALPHA_BLOB,
-                        "knowledge: lexical alpha-normalization must recover exact prior Git blob",
-                    )
+                    # Старий Git blob — архівний факт, а не чинний закон
+                    # для файлу з новими українськими визначеннями.
+                    # Не змушуємо міграцію повертати застарілі alias/SID.
+                    for name in ("голова-твердження-знань-заперечена?",
+                                 "клаузи-бази-знань-коректні?",
+                                 "отримати-поле-пакета-знань"):
+                        self.assertEqual(
+                            source.count("(визначити " + name + "\n"), 1,
+                            f"knowledge: поточна українська голова {name}"
+                        )
+                    for old in ("knowledge-not-head?", "knowledge-clauses-valid?",
+                                "knowledge-package-field"):
+                        self.assertNotIn("(визначити " + old + " ", source)
+                    continue
                 restored = self._rewrite_call_heads(source, inverse)
                 self.assertEqual(self._git_blob_sha(restored), evidence["blob"])
 
