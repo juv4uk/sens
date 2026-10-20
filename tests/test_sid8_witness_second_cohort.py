@@ -58,12 +58,12 @@ class SecondWitnessCohort(unittest.TestCase):
     def test_native_parity_witness_is_current_ukrainian_source(self):
         path = ROOT / "tests/fixtures/native-first-parity-witness.lisp"
         source = path.read_text(encoding="utf-8")
-        active = "\\n".join(line.split(";", 1)[0] for line in source.splitlines())
+        active = "\n".join(line.split(";", 1)[0] for line in source.splitlines())
         self.assertIn("(визначити нативний-паритет-корпус", active)
         self.assertIn("(визначити нативний-паритет-вердикти", active)
         self.assertIn("(визначити нативний-паритет-свідок", active)
         self.assertIn("(нативний-паритет-перевірити-корпус нативний-паритет-корпус)", active)
-        self.assertNotRegex(active, r"(?m)^\\s*\\([01]{3,10}\\s")
+        self.assertNotRegex(active, r"(?m)^\s*\([01]{3,10}\s")
         for legacy in ("native-first-parity-run", "native-first-parity-all-pass?",
                        "native-first-parity-corpus", "native-first-parity-witness"):
             self.assertNotIn(legacy, active)
