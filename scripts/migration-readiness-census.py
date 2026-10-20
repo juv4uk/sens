@@ -236,9 +236,11 @@ def build_report() -> dict:
                     and summary["files_blocked"] == sum(
                         row["status"]["auto"] == "blocked" for row in queue_rows
                     )
-                    # Progress is NOT an inventory error. New executable
-                    # candidates stay in the queue, without oracle admission.
-                    # Release remains NO-GO separately until actual proofs.
+                    # A newly eligible NON-ARCHIVE mechanical candidate is
+                    # NOT progress: it must block the census gate, never claim
+                    # success. Archived benchmark candidates stay visible
+                    # without blocking. Release remains NO-GO separately.
+                    and len(nonarchive_auto) == 0
                     and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                 ),
                 "rule": "read-only AUTO census PASS means only complete bookkeeping; it emits no .sens, grants no executable credit and cannot authorize release",
