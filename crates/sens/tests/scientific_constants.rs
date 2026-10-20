@@ -47,14 +47,14 @@ fn eval_science_knowledge(source: &str) -> String {
 fn speed_of_light_record_keeps_value_unit_status_kind_system_and_source() {
     let source = r#"
         (list
-          (scientific-constant-name si:defining-speed-of-light)
-          (scientific-constant-value si:defining-speed-of-light)
+          (scientific-constant-name сі:визначальна-швидкість-світла)
+          (scientific-constant-value сі:визначальна-швидкість-світла)
           (unit-dimensions
-            (scientific-constant-unit si:defining-speed-of-light))
-          (scientific-constant-status si:defining-speed-of-light)
-          (scientific-constant-kind si:defining-speed-of-light)
-          (scientific-constant-system si:defining-speed-of-light)
-          (scientific-constant-source si:defining-speed-of-light))
+            (scientific-constant-unit сі:визначальна-швидкість-світла))
+          (scientific-constant-status сі:визначальна-швидкість-світла)
+          (scientific-constant-kind сі:визначальна-швидкість-світла)
+          (scientific-constant-system сі:визначальна-швидкість-світла)
+          (scientific-constant-source сі:визначальна-швидкість-світла))
     "#;
     assert_eq!(
         eval_science(source),
@@ -65,23 +65,23 @@ fn speed_of_light_record_keeps_value_unit_status_kind_system_and_source() {
 #[test]
 fn exact_rational_values_remain_unchanged_after_structuring() {
     assert_eq!(
-        eval_science("si:planck-constant"),
+        eval_science("сі:стала-планка"),
         "132521403/200000000000000000000000000000000000000000"
     );
     assert_eq!(
-        eval_science("si:elementary-charge"),
+        eval_science("сі:елементарний-заряд"),
         "801088317/5000000000000000000000000000"
     );
     assert_eq!(
-        eval_science("si:boltzmann-constant"),
+        eval_science("сі:стала-больцмана"),
         "1380649/100000000000000000000000000000"
     );
     assert_eq!(
-        eval_science("si:avogadro-constant"),
+        eval_science("сі:стала-авогадро"),
         "602214076000000000000000"
     );
     assert_eq!(
-        eval_science("(сі:значення-константи si:defining-speed-of-light)"),
+        eval_science("(сі:значення-константи сі:визначальна-швидкість-світла)"),
         "299792458"
     );
 }
@@ -96,7 +96,7 @@ fn advice_taker_can_reason_about_an_admitted_scientific_constant() {
               (dimension/1 second -1))))
         (def admission
           (advise-all science
-            (scientific-constant->clauses si:defining-speed-of-light)))
+            (scientific-constant->clauses сі:визначальна-швидкість-світла)))
         (list
           (car admission)
           (result-status
@@ -138,10 +138,10 @@ fn si_source_does_not_reintroduce_a_second_literal_authority_for_numeric_views()
     let si = include_str!("../../../lib/si.lisp");
 
     for forbidden in [
-        "si:cesium-frequency 9192631770)",
-        "si:speed-of-light 299792458)",
-        "si:avogadro-constant 602214076000000000000000)",
-        "si:luminous-efficacy 683)",
+        "сі:частота-цезію 9192631770)",
+        "сі:швидкість-світла 299792458)",
+        "сі:стала-авогадро 602214076000000000000000)",
+        "сі:світлова-ефективність 683)",
     ] {
         assert!(
             !si_defines(si, forbidden),
@@ -150,13 +150,13 @@ fn si_source_does_not_reintroduce_a_second_literal_authority_for_numeric_views()
     }
 
     for derived in [
-        "si:cesium-frequency (сі:значення-константи si:defining-cesium-frequency))",
-        "si:speed-of-light (сі:значення-константи si:defining-speed-of-light))",
-        "si:planck-constant (сі:значення-константи si:defining-planck-constant))",
-        "si:elementary-charge (сі:значення-константи si:defining-elementary-charge))",
-        "si:boltzmann-constant (сі:значення-константи si:defining-boltzmann-constant))",
-        "si:avogadro-constant (сі:значення-константи si:defining-avogadro-constant))",
-        "si:luminous-efficacy (сі:значення-константи si:defining-luminous-efficacy))",
+        "(визначити сі:частота-цезію (сі:значення-константи сі:визначальна-частота-цезію))",
+        "(визначити сі:швидкість-світла (сі:значення-константи сі:визначальна-швидкість-світла))",
+        "(визначити сі:стала-планка (сі:значення-константи сі:визначальна-стала-планка))",
+        "(визначити сі:елементарний-заряд (сі:значення-константи сі:визначальний-елементарний-заряд))",
+        "(визначити сі:стала-больцмана (сі:значення-константи сі:визначальна-стала-больцмана))",
+        "(визначити сі:стала-авогадро (сі:значення-константи сі:визначальна-стала-авогадро))",
+        "(визначити сі:світлова-ефективність (сі:значення-константи сі:визначальна-світлова-ефективність))",
     ] {
         assert!(si_defines(si, derived), "missing derived SI numeric view: {derived}");
     }

@@ -76,7 +76,7 @@
 
 ### si.lisp (29)
 
-`si:defining-cesium-frequency`, `si:defining-speed-of-light`, `si:defining-planck-constant`, `si:defining-elementary-charge`, `si:defining-boltzmann-constant`, `si:defining-avogadro-constant`, `si:defining-luminous-efficacy`, `сі:значення-константи`, `si:cesium-frequency`, `si:speed-of-light`, `si:planck-constant`, `si:elementary-charge`, `si:boltzmann-constant`, `si:avogadro-constant`, `si:luminous-efficacy`, `delta-nu-cs`, `c`, `h`, `e`, `k`, `n-a`, `k-cd`, `si:delta-nu-cs`, `si:c`, `si:h`, `si:e`, `si:k`, `si:n-a`, `si:k-cd`
+`сі:визначальна-частота-цезію`, `сі:визначальна-швидкість-світла`, `сі:визначальна-стала-планка`, `сі:визначальний-елементарний-заряд`, `сі:визначальна-стала-больцмана`, `сі:визначальна-стала-авогадро`, `сі:визначальна-світлова-ефективність`, `сі:значення-константи`, `сі:частота-цезію`, `сі:швидкість-світла`, `сі:стала-планка`, `сі:елементарний-заряд`, `сі:стала-больцмана`, `сі:стала-авогадро`, `сі:світлова-ефективність`, `delta-nu-cs`, `c`, `h`, `e`, `k`, `n-a`, `k-cd`, `si:delta-nu-cs`, `si:c`, `si:h`, `si:e`, `si:k`, `si:n-a`, `si:k-cd`
 
 ### translation.lisp (31)
 

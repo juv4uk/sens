@@ -11,10 +11,10 @@ fn eval_with_si(source: &str) -> String {
 }
 
 #[test]
-fn descriptive_si_names_are_the_canonical_surface() {
-    assert_eq!(eval_with_si("si:cesium-frequency"), "9192631770");
-    assert_eq!(eval_with_si("si:speed-of-light"), "299792458");
-    assert_eq!(eval_with_si("si:luminous-efficacy"), "683");
+fn full_ukrainian_si_names_are_the_primary_surface() {
+    assert_eq!(eval_with_si("сі:частота-цезію"), "9192631770");
+    assert_eq!(eval_with_si("сі:швидкість-світла"), "299792458");
+    assert_eq!(eval_with_si("сі:світлова-ефективність"), "683");
 }
 
 #[test]

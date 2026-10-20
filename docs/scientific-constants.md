@@ -75,7 +75,7 @@ experiments; their presence is not evidence that those cases are complete.
 ## The seven SI defining constants
 
 `lib/si.lisp` stores one authoritative finite-data record for each defining
-constant under a regular `si:defining-*` surface:
+constant through its full Ukrainian `сі:визначальна-*` surface:
 
 ```text
 si:defining-cesium-frequency
