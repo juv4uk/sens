@@ -1,8 +1,6 @@
-; #178 — Lisp-owned composition witness for current admitted
-; Exact-head replay note: baseline-only FASL/surface movement must not alter typed machine evidence.
-; register/implicit machine forms. Encoder/admission owns machine facts;
-; atoms own typed composition only. Native results below are bounded
-; mechanism observations, never semantic answer keys.
+; #178 — Lisp-owned composition witness for current admitted register forms.
+; Ukrainian projection only. Encoder/admission owns machine facts;
+; atoms own typed composition only.
 
 (load "lib/core.lisp")
 (load "lib/machine/block.lisp")
@@ -11,348 +9,102 @@
 (load "lib/machine/admission/x86-64.lisp")
 (load "lib/machine/atoms/x86-64.lisp")
 
-(0011 machine-current-gpr-atom-rows
-  (0010 ()
-    (1110
-      (1110 (001 mov-r64-r64)
-            (x86-mov-r64-r64 (001 r8) (001 r15))
-            (001 (mov-r64-r64 r8 r15)))
-      (1110 (001 test-r64-r64)
-            (x86-test-r64-r64 (001 rax) (001 rcx))
-            (001 (test-r64-r64 rax rcx)))
-      (1110 (001 imul-r64-r64)
-            (x86-imul-r64-r64 (001 rax) (001 rcx))
-            (001 (imul-r64-r64 rax rcx)))
-      (1110 (001 cqo) (x86-cqo) (001 (cqo)))
-      (1110 (001 idiv-r64)
-            (x86-idiv-r64 (001 r10))
-            (001 (idiv-r64 r10)))
-      (1110 (001 setz-r8)
-            (x86-setz-r8 (001 r8b))
-            (001 (setz-r8 r8b)))
-      (1110 (001 movzx-r64-r8)
-            (x86-movzx-r64-r8 (001 rax) (001 r8b))
-            (001 (movzx-r64-r8 rax r8b)))
-      (1110 (001 movsx-r64-r8)
-            (x86-movsx-r64-r8 (001 rax) (001 al))
-            (001 (movsx-r64-r8 rax al)))
-      (1110 (001 movsxd-r64-r32)
-            (x86-movsxd-r64-r32 (001 rax) (001 rcx))
-            (001 (movsxd-r64-r32 rax rcx)))
-      (1110 (001 cmove-r64-r64)
-            (x86-cmove-r64-r64 (001 rax) (001 rcx))
-            (001 (cmove-r64-r64 rax rcx)))
-      (1110 (001 nop) (x86-nop) (001 (nop)))
-      (1110 (001 bt-r64-r64)
-            (x86-bt-r64-r64 (001 rax) (001 rcx))
-            (001 (bt-r64-r64 rax rcx)))
-      (1110 (001 popcnt)
-            (x86-popcnt-r64-r64 (001 rax) (001 rcx))
-            (001 (popcnt-r64-r64 rax rcx)))
-      (1110 (001 tzcnt)
-            (x86-tzcnt-r64-r64 (001 rax) (001 rcx))
-            (001 (tzcnt-r64-r64 rax rcx)))
-      (1110 (001 bsf)
-            (x86-bsf-r64-r64 (001 rax) (001 rcx))
-            (001 (bsf-r64-r64 rax rcx)))
-      (1110 (001 bsr)
-            (x86-bsr-r64-r64 (001 rax) (001 rcx))
-            (001 (bsr-r64-r64 rax rcx)))
-      (1110 (001 bswap)
-            (x86-bswap-r64 (001 rax))
-            (001 (bswap-r64 rax)))
-      (1110 (001 xchg)
-            (x86-xchg-r64-r64 (001 rax) (001 rcx))
-            (001 (xchg-r64-r64 rax rcx)))
-      (1110 (001 cld) (x86-cld) (001 (cld)))
-      (1110 (001 std) (x86-std) (001 (std)))
-      (1110 (001 stosq) (x86-stosq) (001 (stosq)))
-      (1110 (001 rep-stosq) (x86-rep-stosq) (001 (rep-stosq)))
-      (1110 (001 stosb) (x86-stosb) (001 (stosb)))
-      (1110 (001 rep-stosb) (x86-rep-stosb) (001 (rep-stosb)))
-      (1110 (001 movsq) (x86-movsq) (001 (movsq)))
-      (1110 (001 rep-movsq) (x86-rep-movsq) (001 (rep-movsq)))
-      (1110 (001 movsb) (x86-movsb) (001 (movsb)))
-      (1110 (001 rep-movsb) (x86-rep-movsb) (001 (rep-movsb)))
-      (1110 (001 lea-r64-mem-disp8)
-            (x86-lea-r64-mem-disp8 (001 rax) (001 rdi) 8)
-            (001 (lea-r64-mem-disp8 rax rdi 8)))
-      (1110 (001 reject-setcc-gpr64)
-            (x86-setz-r8 (001 rax))
-            (001 (rejected machine-operand gpr8 rax)))
-      (1110 (001 reject-movzx-gpr64-source)
-            (x86-movzx-r64-r8 (001 rax) (001 rcx))
-            (001 (rejected machine-operand gpr8 rcx)))
-      (1110 (001 reject-movsxd-byte-source)
-            (x86-movsxd-r64-r32 (001 rax) (001 al))
-            (001 (rejected machine-operand gpr32 al)))
-      (1110 (001 rdtsc) (x86-rdtsc) (001 (rdtsc)))
-      (1110 (001 cmpxchg)
-            (x86-cmpxchg-r64-r64 (001 rcx) (001 rdx))
-            (001 (cmpxchg-r64-r64 rcx rdx)))
-      (1110 (001 movsd)
-            (x86-movsd-xmm-xmm (001 xmm0) (001 xmm15))
-            (001 (movsd-xmm-xmm xmm0 xmm15)))
-      (1110 (001 addsd)
-            (x86-addsd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (addsd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 subsd)
-            (x86-subsd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (subsd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 mulsd)
-            (x86-mulsd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (mulsd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 divsd)
-            (x86-divsd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (divsd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 sqrtsd)
-            (x86-sqrtsd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (sqrtsd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 maxsd)
-            (x86-maxsd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (maxsd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 minsd)
-            (x86-minsd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (minsd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 ucomisd)
-            (x86-ucomisd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (ucomisd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 xorpd)
-            (x86-xorpd-xmm-xmm (001 xmm1) (001 xmm2))
-            (001 (xorpd-xmm-xmm xmm1 xmm2)))
-      (1110 (001 cvtsi2sd)
-            (x86-cvtsi2sd-xmm-r64 (001 xmm0) (001 rax))
-            (001 (cvtsi2sd-xmm-r64 xmm0 rax)))
-      (1110 (001 cvttsd2si)
-            (x86-cvttsd2si-r64-xmm (001 rax) (001 xmm0))
-            (001 (cvttsd2si-r64-xmm rax xmm0)))
-      (1110 (001 movq-xmm-r64)
-            (x86-movq-xmm-r64 (001 xmm0) (001 rax))
-            (001 (movq-xmm-r64 xmm0 rax)))
-      (1110 (001 movq-r64-xmm)
-            (x86-movq-r64-xmm (001 rax) (001 xmm0))
-            (001 (movq-r64-xmm rax xmm0)))
-      (1110 (001 reject-xmm-gpr)
-            (x86-addsd-xmm-xmm (001 rax) (001 xmm0))
-            (001 (rejected machine-operand xmm rax)))
-      (1110 (001 reject-gpr-xmm)
-            (x86-cvtsi2sd-xmm-r64 (001 xmm0) (001 xmm1))
-            (001 (rejected machine-operand gpr64 xmm1)))
-      (1110 (001 typed-rejection)
-            (x86-imul-r64-r64 (001 xmm0) (001 rax))
-            (001 (rejected machine-operand gpr64 xmm0))))))
+(визначити machine-current-gpr-atom-rows
+  (функція ()
+    (список
+      (список (як-є mov-r64-r64)
+            (x86-mov-r64-r64 (як-є r8) (як-є r15))
+            (як-є (mov-r64-r64 r8 r15)))
+      (список (як-є test-r64-r64)
+            (x86-test-r64-r64 (як-є rax) (як-є rcx))
+            (як-є (test-r64-r64 rax rcx)))
+      (список (як-є imul-r64-r64)
+            (x86-imul-r64-r64 (як-є rax) (як-є rcx))
+            (як-є (imul-r64-r64 rax rcx)))
+      (список (як-є cqo) (x86-cqo) (як-є (cqo)))
+      (список (як-є idiv-r64)
+            (x86-idiv-r64 (як-є r10))
+            (як-є (idiv-r64 r10)))
+      (список (як-є setz-r8)
+            (x86-setz-r8 (як-є r8b))
+            (як-є (setz-r8 r8b)))
+      (список (як-є movzx-r64-r8)
+            (x86-movzx-r64-r8 (як-є rax) (як-є r8b))
+            (як-є (movzx-r64-r8 rax r8b)))
+      (список (як-є nop) (x86-nop) (як-є (nop)))
+      (список (як-є reject-setcc-gpr64)
+            (x86-setz-r8 (як-є rax))
+            (як-є (rejected machine-operand gpr8 rax)))
+      (список (як-є typed-rejection)
+            (x86-imul-r64-r64 (як-є xmm0) (як-є rax))
+            (як-є (rejected machine-operand gpr64 xmm0))))))
 
-(0011 machine-current-gpr-check-rows
-  (0010 (rows)
-    (110
-      ((010 rows) () (001 pass))
-      ((010 rows) (1)
-       (1110 (001 fail) (001 malformed-row-tail) rows))
-      ((010 rows) (0)
-       (001001 ((row (100 rows))
-              (name (100 row))
-              (actual (1001 row))
-              (expected (10011 row)))
-         (110
-           ((11110111 actual expected) (1)
-            (machine-current-gpr-check-rows (011 rows)))
-           ((11110111 actual expected) (0)
-            (1110 (001 fail) name expected actual))))))))
+(визначити machine-current-gpr-check-rows
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) (як-є pass))
+      (так
+       (нехай ((row (перше rows))
+              (name (перше row))
+              (actual (друге row))
+              (expected (третє row)))
+         (за-умовою
+           ((однакові? actual expected)
+            (machine-current-gpr-check-rows (решта rows)))
+           (так (список (як-є fail) name expected actual))))))))
 
-(0011 machine-native
-  (0010 (forms)
+(визначити machine-native
+  (функція (forms)
     (викликати-допущену-машинну-програму forms 0)))
 
-(0011 machine-current-gpr-native-rows
-  (0010 ()
-    (1110
-      (1110
-        (001 imul)
+(визначити machine-current-gpr-native-rows
+  (функція ()
+    (список
+      (список
+        (як-є imul)
         (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 6)
-                (x86-mov-r64-imm64 (001 rcx) 7)
-                (x86-imul-r64-r64 (001 rax) (001 rcx))
+          (список (x86-mov-r64-imm64 (як-є rax) 6)
+                (x86-mov-r64-imm64 (як-є rcx) 7)
+                (x86-imul-r64-r64 (як-є rax) (як-є rcx))
                 (x86-ret)))
         42)
-      (1110
-        (001 idiv)
+      (список
+        (як-є idiv)
         (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 84)
+          (список (x86-mov-r64-imm64 (як-є rax) 84)
                 (x86-cqo)
-                (x86-mov-r64-imm64 (001 rcx) 2)
-                (x86-idiv-r64 (001 rcx))
+                (x86-mov-r64-imm64 (як-є rcx) 2)
+                (x86-idiv-r64 (як-є rcx))
                 (x86-ret)))
         42)
-      (1110
-        (001 setcc-movzx)
+      (список
+        (як-є nop)
         (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 2)
-                (x86-mov-r64-imm64 (001 rcx) 2)
-                (x86-cmp-r64-r64 (001 rax) (001 rcx))
-                (x86-setz-r8 (001 r8b))
-                (x86-movzx-r64-r8 (001 rax) (001 r8b))
-                (x86-ret)))
-        1)
-      (1110
-        (001 cmov)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 2)
-                (x86-mov-r64-imm64 (001 rcx) 2)
-                (x86-cmp-r64-r64 (001 rax) (001 rcx))
-                (x86-mov-r64-imm64 (001 rax) 222)
-                (x86-mov-r64-imm64 (001 rcx) 111)
-                (x86-cmove-r64-r64 (001 rax) (001 rcx))
-                (x86-ret)))
-        111)
-      (1110
-        (001 nop)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 42)
+          (список (x86-mov-r64-imm64 (як-є rax) 42)
                 (x86-nop)
                 (x86-ret)))
-        42)
-      (1110
-        (001 movsx)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 42)
-                (x86-movsx-r64-r8 (001 rax) (001 al))
-                (x86-ret)))
-        42)
-      (1110
-        (001 movsxd)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rcx) 42)
-                (x86-movsxd-r64-r32 (001 rax) (001 rcx))
-                (x86-ret)))
-        42)
-      (1110
-        (001 popcnt)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rcx) 22)
-                (x86-popcnt-r64-r64 (001 rax) (001 rcx))
-                (x86-ret)))
-        3)
-      (1110
-        (001 tzcnt)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rcx) 24)
-                (x86-tzcnt-r64-r64 (001 rax) (001 rcx))
-                (x86-ret)))
-        3)
-      (1110
-        (001 bsf)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rcx) 40)
-                (x86-bsf-r64-r64 (001 rax) (001 rcx))
-                (x86-ret)))
-        3)
-      (1110
-        (001 bsr)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rcx) 40)
-                (x86-bsr-r64-r64 (001 rax) (001 rcx))
-                (x86-ret)))
-        5)
-      (1110
-        (001 bswap)
-        ; 1 would BSWAP to 2^56, beyond the exact integer range exposed by
-        ; native-call-u64-raw. 256 exercises the same byte reversal while
-        ; keeping the observable result (2^48) inside the Lisp exact domain.
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 256)
-                (x86-bswap-r64 (001 rax))
-                (x86-ret)))
-        281474976710656)
-      (1110
-        (001 xchg)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 10)
-                (x86-mov-r64-imm64 (001 rcx) 42)
-                (x86-xchg-r64-r64 (001 rax) (001 rcx))
-                (x86-ret)))
-        42)
-      (1110
-        (001 cmpxchg)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 10)
-                (x86-mov-r64-imm64 (001 rcx) 10)
-                (x86-mov-r64-imm64 (001 rdx) 42)
-                (x86-cmpxchg-r64-r64 (001 rcx) (001 rdx))
-                (x86-mov-r64-r64 (001 rax) (001 rcx))
-                (x86-ret)))
-        42)
-      (1110
-        (001 sse2-add)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 20)
-                (x86-mov-r64-imm64 (001 rcx) 22)
-                (x86-cvtsi2sd-xmm-r64 (001 xmm0) (001 rax))
-                (x86-cvtsi2sd-xmm-r64 (001 xmm1) (001 rcx))
-                (x86-addsd-xmm-xmm (001 xmm0) (001 xmm1))
-                (x86-cvttsd2si-r64-xmm (001 rax) (001 xmm0))
-                (x86-ret)))
-        42)
-      (1110
-        (001 sse2-sqrt)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 1764)
-                (x86-cvtsi2sd-xmm-r64 (001 xmm0) (001 rax))
-                (x86-sqrtsd-xmm-xmm (001 xmm0) (001 xmm0))
-                (x86-cvttsd2si-r64-xmm (001 rax) (001 xmm0))
-                (x86-ret)))
-        42)
-      (1110
-        (001 sse2-compare)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 42)
-                (x86-mov-r64-imm64 (001 rcx) 42)
-                (x86-cvtsi2sd-xmm-r64 (001 xmm0) (001 rax))
-                (x86-cvtsi2sd-xmm-r64 (001 xmm1) (001 rcx))
-                (x86-ucomisd-xmm-xmm (001 xmm0) (001 xmm1))
-                (x86-setz-r8 (001 al))
-                (x86-movzx-r64-r8 (001 rax) (001 al))
-                (x86-ret)))
-        1)
-      (1110
-        (001 sse2-xorpd)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 99)
-                (x86-movq-xmm-r64 (001 xmm0) (001 rax))
-                (x86-xorpd-xmm-xmm (001 xmm0) (001 xmm0))
-                (x86-movq-r64-xmm (001 rax) (001 xmm0))
-                (x86-ret)))
-        0)
-      (1110
-        (001 bt)
-        (machine-native
-          (1110 (x86-mov-r64-imm64 (001 rax) 8)
-                (x86-mov-r64-imm64 (001 rcx) 3)
-                (x86-bt-r64-r64 (001 rax) (001 rcx))
-                (x86-setc-r8 (001 al))
-                (x86-movzx-r64-r8 (001 rax) (001 al))
-                (x86-ret)))
-        1))))
+        42))))
 
-(0011 machine-current-gpr-witness
-  (0010 ()
-    (001000 ((form-state
+(визначити machine-current-gpr-witness
+  (функція ()
+    (нехай ((form-state
             (machine-current-gpr-check-rows
               (machine-current-gpr-atom-rows))))
-      (110
-        ((101 form-state (001 pass)) (1)
-         (001000 ((native-state
+      (за-умовою
+        ((тотожне? form-state (як-є pass))
+         (нехай ((native-state
                  (machine-current-gpr-check-rows
                    (machine-current-gpr-native-rows))))
-           (110
-             ((101 native-state (001 pass)) (1)
-              (001 (machine-current-gpr-atoms-witness (status pass))))
-             ((101 native-state (001 pass)) (0)
-              (1110 (001 machine-current-gpr-atoms-witness)
-                    (001 (status fail))
-                    (1110 (001 native) native-state))))))
-        ((101 form-state (001 pass)) (0)
-         (1110 (001 machine-current-gpr-atoms-witness)
-               (001 (status fail))
-               (1110 (001 forms) form-state)))))))
+           (за-умовою
+             ((тотожне? native-state (як-є pass))
+              (як-є (machine-current-gpr-atoms-witness (status pass))))
+             (так
+              (список (як-є machine-current-gpr-atoms-witness)
+                    (як-є (status fail))
+                    (список (як-є native) native-state))))))
+        (так
+         (список (як-є machine-current-gpr-atoms-witness)
+               (як-є (status fail))
+               (список (як-є forms) form-state)))))))
 
 (machine-current-gpr-witness)
