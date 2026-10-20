@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regress the ORIGINAL unpaired readiness contract against real mainline D1-D9.
+"""Check current unpaired readiness using the owner-ratified D1–D11 ladder.
 
 These tests do NOT claim any unpaired Lisp has semantic/oracle admission.
 They verify that the census uses the exact same ratified foundation and
@@ -82,11 +82,12 @@ class ReadinessContractTests(unittest.TestCase):
         mock.start()
         self.addCleanup(mock.stop)
 
-    def test_uses_owner_ratified_d1_d9_not_stale_d1_d7(self):
-        assert (ROOT / "knowledge" / "d1-d9-foundation.json").is_file()
+    def test_uses_owner_ratified_d1_d11_not_stale_d1_d9(self):
+        assert (ROOT / "knowledge" / "d1-d11-foundation.json").is_file()
         self.assertIn("--foundation", census.ARTIFACT_ARGS)
         i = census.ARTIFACT_ARGS.index("--foundation")
-        self.assertEqual(census.ARTIFACT_ARGS[i+1], "knowledge/d1-d9-foundation.json")
+        self.assertEqual(census.ARTIFACT_ARGS[i+1], "knowledge/d1-d11-foundation.json")
+        self.assertNotIn("knowledge/d1-d9-foundation.json", census.ARTIFACT_ARGS)
         self.assertNotIn("knowledge/d1-d7-foundation.json", census.ARTIFACT_ARGS)
 
     def test_census_invokes_era_auto_and_excludes_existing_pairs_without_writes(self):
@@ -95,12 +96,12 @@ class ReadinessContractTests(unittest.TestCase):
             report = census.build_report()
         self.assertNotIn("--source-era", observed)
         self.assertEqual(observed[observed.index("--foundation")+1],
-                         "knowledge/d1-d9-foundation.json")
+                         "knowledge/d1-d11-foundation.json")
         for opt in ("--unpaired-only", "--dry-run"):
             self.assertIn(opt, observed)
         self.assertTrue(report["gate"]["pass"])
         self.assertEqual(report["source_era"], "auto")
-        self.assertEqual(report["foundation_path"], "knowledge/d1-d9-foundation.json")
+        self.assertEqual(report["foundation_path"], "knowledge/d1-d11-foundation.json")
         self.assertEqual(report["ratified_foundation_sha256"], "mock-ratified-sha256")
         self.assertEqual(report["migrator_summary"]["files_blocked"], 2)
         self.assertEqual(report["physical_outputs_created"], [])
