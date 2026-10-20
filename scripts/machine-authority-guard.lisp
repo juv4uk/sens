@@ -104,8 +104,8 @@
          ((тотожне? (перше рядок) (як-є authority-edge)) (0)
           (як-є denied)))))))
 
-; Deliberately unbound diagnostic symbols make fail-closed violations visible
-; even when stdout is buffered. CI requires the exact diagnostic name.
+; Навмисно незв'язані діагностичні символи роблять відмову видимою,
+; навіть коли стандартний вивід буферизовано. CI потребує точного імені помилки.
 (визначити помилка-машинних-повноважень
   (функція (рядок)
     (machine-authority-boundary-violation рядок)))
