@@ -87,7 +87,7 @@ fn exact_q_binary_rows_are_judged_by_lisp_owned_witness() {
         let actual_kind = kind(&value);
         let actual_render = escape_lisp_string(&value.to_string());
         let program = format!(
-            "(binary-math-verdict (quote {}) (quote {}) \"{}\")",
+            "(висновок-двійкової-математики (quote {}) (quote {}) \"{}\")",
             row.source, actual_kind, actual_render
         );
         let verdict = eval_program(&program, &mut session)
