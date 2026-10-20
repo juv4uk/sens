@@ -1,6 +1,7 @@
-;; Live builtin inventory (contract 2.1): every binding whose value prints
-;; as #<builtin ...>. Run: ./target/release/my-lisp scripts/gen-functions.lisp
-;; Output: one builtin name per line.
+; Перелік вбудованих функцій за контрактом мови 2.1.
+; Відбираємо зв'язування зі значенням, що друкується як #<builtin.
+; Запуск: ./target/release/my-lisp scripts/gen-functions.lisp
+; Результат: одна назва вбудованої функції на рядок.
 (визначити вбудовані
   (відсіяти
     (функція (пара) (рядок-префікс? "#<builtin" (значення-у-текст (решта пара))))
