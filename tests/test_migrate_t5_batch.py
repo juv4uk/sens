@@ -61,6 +61,8 @@ class CurrentBatchTransportTests(unittest.TestCase):
         # Ratification does not grant runtime callability or release admission.
         self.assertNotEqual(batch.INPUTS["foundation"],
                             REPO / "knowledge/d1-d9-foundation.json")
+        self.assertNotIn("historical_map", batch.INPUTS)
+        self.assertNotIn("legacy_coverage", batch.INPUTS)
 
     def test_real_fixture_has_independent_exact_physical_t5m_roundtrip(self):
         # Mechanism-only codec proof, NEVER an evaluator or semantic proof.

@@ -35,8 +35,6 @@ INPUTS = {
     "semantic_generated": ROOT / "crates/sens/src/semantic_registry_generated.rs",
     "semantic_registry": ROOT / "crates/sens/src/semantic_registry.rs",
     "necessary_forms": ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
-    "historical_map": ROOT / "contracts/core1-historical-sid-map.lisp",
-    "legacy_coverage": ROOT / "knowledge/sens8-current-coverage-v1.json",
     "text7": ROOT / "knowledge/d7-keyboard-v2-ratified.json",
 }
 EXCLUDE = set(mig.SKIP_DIRS)
@@ -157,13 +155,12 @@ def run(args: argparse.Namespace) -> dict:
     # switch cannot revive identity re-interpretation; current D8 is exact.
     if source_era == "legacy":
         raise ValueError("RETIRED_SID8_SOURCE_ERA: use current ratified domain identities")
-    admitted_d8 = data["domains"].get("D8", {}).get("residents", {})
     d9_residents = set(data["domains"].get("D9", {}).get("residents", {}))
     if source_era == "current" and "D8" not in data.get("current_domains", ()):
         raise ValueError("current D8 source requires owner-ratified D8 foundation")
-    # The third map is historical сід8 research, never live batch authority.
-    # Keep current source-era fail-closed; do not import the bridge into Resolver.
-    my, upper, _retired_sid8_bridge = mig.build_three_pass_maps(
+    # Резолвер отримує лише чинні таблиці кодів і поверхонь.
+    # Третій результат — не виконавчий інтерфейс і не використовується.
+    my, upper, _ = mig.build_three_pass_maps(
         data, INPUTS["domain_surfaces"], INPUTS["semantic_generated"],
         INPUTS["semantic_registry"], INPUTS["necessary_forms"]
     )
