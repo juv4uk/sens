@@ -47,10 +47,9 @@
       ((тотожне? вид (як-є query)) так)
       (так (як-є ())))))
 
-; Envelope validation owns only the protocol shell. Payload meaning is checked
-; separately so a well-shaped translator message containing malformed semantic
-; data can be named `invalid-candidate` instead of collapsing into a generic
-; transport/envelope failure.
+; Обгортка перевіряє тільки протокольну форму повідомлення.
+; Зміст перевіряють окремо, щоб некоректний кандидат не губився
+; під загальною помилкою транспорту.
 (визначити структура-обгортки-перекладу-коректна?
   (функція (пропозиція)
     (за-умовою
@@ -94,8 +93,8 @@
          (так (альтернативні-варіанти-перекладу-коректні? вид (решта альтернативи)))))
       (так (як-є ())))))
 
-; Ambiguity is evidence only when the translator exposes at least two valid
-; alternatives. One alternative is just a candidate; zero is not ambiguity.
+; Неоднозначність потребує щонайменше двох правильних альтернатив.
+; Одна альтернатива є кандидатом, а жодна — не неоднозначністю.
 (визначити опис-неоднозначності-перекладу-коректний?
   (функція (вид вміст)
     (за-умовою
@@ -188,9 +187,8 @@
      (переклад-вид пропозиція)
      (переклад-вміст пропозиція))))
 
-; `translation-review` is pure with respect to knowledge state. Even a review
-; classified as accepted has NOT written anything. Admission remains an
-; explicit later call to `advise` or `advise-all` by the Lisp/embedding layer.
+; Перевірка перекладу не змінює стану знань.
+; Навіть прийнятий огляд не записує фактів: потрібен окремий допуск.
 (визначити переклад-перевірка
   (функція (назва-модуля пропозиція)
     (за-умовою
@@ -227,9 +225,9 @@
        (створити-переклад-перевірка
          (як-є rejected) (як-є invalid-translation) пропозиція пропозиція)))))
 
-; Only accepted knowledge candidates expose an admission payload. Queries are
-; accepted questions, not knowledge writes. Rejected/ambiguous reviews cannot
-; accidentally be fed to advise through this helper.
+; Лише прийняті кандидати знань відкривають вміст для допуску.
+; Запитання не записує нове знання.
+; Відхилений або неоднозначний огляд не переходить до функції порад.
 (визначити переклад-допустимий?
   (функція (огляд)
     (за-умовою
@@ -254,7 +252,7 @@
        (переклад-вміст (переклад-перевірка-пропозиція огляд)))
       (так (як-є ())))))
 
-; Rejected and ambiguous translations are observations, not knowledge.
+; Відхилені й неоднозначні переклади є спостереженнями, а не знанням.
 (визначити переклад-доказ-вартий?
   (функція (огляд)
     (за-умовою
