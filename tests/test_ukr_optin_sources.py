@@ -563,7 +563,7 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
     # Новий SHA замість старого не підставляти: це приховало б регресію.
     KNOWLEDGE_BEFORE_ALPHA_BLOB = "aee397f6b0e25a0a5d2b941249f91ca85ba25504"
     KNOWLEDGE_ALPHA = {
-        "module-journal-events-onto": (
+        "додати-події-журналу-модуля": (
             ("назва-модуля", "module-name", 4),
             ("журнал", "journal", 7),
             ("накопичувач", "acc", 5),
@@ -581,7 +581,7 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
             ("клаузи", "clauses", 4),
             ("подія", "event", 5),
         ),
-        "knowledge-symbol?": (("значення", "value", 2),),
+        "знання-символ?": (("значення", "value", 2),),
     }
 
     @classmethod
@@ -643,6 +643,18 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
                 form,
             )
             source = source[:start] + original_form + source[end:]
+        # Функціональні імена вручну переписано після alpha-проходу.
+        # Інверсія нижче відновлює ці імена лише для точного Git-свідка;
+        # виконуваний файл не має жодної англійської сумісної прив'язки.
+        inverse_names = {
+            "додати-події-журналу-модуля": "module-journal-events-onto",
+            "знання-символ?": "knowledge-symbol?",
+        }
+        source = TOKEN.sub(
+            lambda match: inverse_names.get(match.group(), match.group())
+            if not match.group().startswith((";", '"')) else match.group(),
+            source,
+        )
         return source
 
     def test_negative_knowledge_alpha_binder_change_cannot_restore_original_blob(self):
