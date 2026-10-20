@@ -14,371 +14,371 @@
   (як-є (uk en sa)))
 
 (визначити тримовна-помилка
-  (функція (kind detail)
-    (нехай ((shown
+  (функція (вид деталі)
+    (нехай ((надруковане
             (друкувати
               (список
                 (як-є trilingual-surface-error)
-                kind
-                detail))))
+                вид
+                деталі))))
       ; Навмисно невизначений виклик: командний виконавець повертає ненульовий код.
-      (trilingual-surface-check-failed kind detail))))
+      (trilingual-surface-check-failed вид деталі))))
 
 (визначити тримовний-стан-належності
-  (функція (value values)
+  (функція (значення значення-списку)
     (за-умовою
-      ((атом? values) (structural-kind empty-list) (як-є absent))
-      ((атом? values) (structural-kind atom) (як-є malformed))
-      ((атом? values) (structural-kind pair)
+      ((атом? значення-списку) (structural-kind empty-list) (як-є absent))
+      ((атом? значення-списку) (structural-kind atom) (як-є malformed))
+      ((атом? значення-списку) (structural-kind pair)
        (за-умовою
-         ((однакові? value (перше values)) (structural-relation same)
+         ((однакові? значення (перше значення-списку)) (structural-relation same)
           (як-є present))
-         ((однакові? value (перше values)) (structural-relation distinct)
-          (тримовний-стан-належності value (решта values))))))))
+         ((однакові? значення (перше значення-списку)) (structural-relation distinct)
+          (тримовний-стан-належності значення (решта значення-списку))))))))
 
 (визначити тримовний-стан-трійки
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((атом? value) (structural-kind empty-list) (як-є no))
-      ((атом? value) (structural-kind atom) (як-є no))
-      ((атом? value) (structural-kind pair)
-       (нехай ((rest1 (решта value)))
+      ((атом? значення) (structural-kind empty-list) (як-є no))
+      ((атом? значення) (structural-kind atom) (як-є no))
+      ((атом? значення) (structural-kind pair)
+       (нехай ((залишок-перший (решта значення)))
          (за-умовою
-           ((атом? rest1) (structural-kind pair)
-            (нехай ((rest2 (решта rest1)))
+           ((атом? залишок-перший) (structural-kind pair)
+            (нехай ((залишок-другий (решта залишок-перший)))
               (за-умовою
-                ((атом? rest2) (structural-kind pair)
-                 (нехай ((rest3 (решта rest2)))
+                ((атом? залишок-другий) (structural-kind pair)
+                 (нехай ((залишок-третій (решта залишок-другий)))
                    (за-умовою
-                     ((атом? rest3) (structural-kind empty-list) (як-є yes))
-                     ((атом? rest3) (structural-kind atom) (як-є no))
-                     ((атом? rest3) (structural-kind pair) (як-є no)))))
-                ((атом? rest2) (structural-kind empty-list) (як-є no))
-                ((атом? rest2) (structural-kind atom) (як-є no)))))
-           ((атом? rest1) (structural-kind empty-list) (як-є no))
-           ((атом? rest1) (structural-kind atom) (як-є no))))))))
+                     ((атом? залишок-третій) (structural-kind empty-list) (як-є yes))
+                     ((атом? залишок-третій) (structural-kind atom) (як-є no))
+                     ((атом? залишок-третій) (structural-kind pair) (як-є no)))))
+                ((атом? залишок-другий) (structural-kind empty-list) (як-є no))
+                ((атом? залишок-другий) (structural-kind atom) (як-є no)))))
+           ((атом? залишок-перший) (structural-kind empty-list) (як-є no))
+           ((атом? залишок-перший) (structural-kind atom) (як-є no))))))))
 
 (визначити тримовний-стан-цитованого-символу
-  (функція (field)
+  (функція (поле)
     (за-умовою
       ((однакові?
-         field
+         поле
          (список (як-є sym) (список (як-є quote) (як-є stable))))
        (structural-relation same)
        (як-є yes))
       ((однакові?
-         field
+         поле
          (список (як-є sym) (список (як-є quote) (як-є stable))))
        (structural-relation distinct)
        (як-є no)))))
 
 (визначити тримовна-мова-поля
-  (функція (field)
-    (нехай ((спеціальна-змінна (тримовний-стан-цитованого-символу field)))
+  (функція (поле)
+    (нехай ((спеціальна-змінна (тримовний-стан-цитованого-символу поле)))
       (за-умовою
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same) (як-є sym))
-        ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (перше field))))))
+        ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (перше поле))))))
 
 (визначити тримовний-стан-поля
-  (функція (field)
-    (нехай ((спеціальна-змінна (тримовний-стан-цитованого-символу field)))
+  (функція (поле)
+    (нехай ((спеціальна-змінна (тримовний-стан-цитованого-символу поле)))
       (за-умовою
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same) (як-є stable))
-        ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (third field))))))
+        ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (third поле))))))
 
 (визначити тримовне-перевірити-звичайне-поле
-  (функція (field)
-    (нехай ((shape (тримовний-стан-трійки field)))
+  (функція (поле)
+    (нехай ((форма (тримовний-стан-трійки поле)))
       (за-умовою
-        ((тотожне? shape (як-є yes)) (identity-relation distinct)
-         (тримовна-помилка (як-є malformed-surface) field))
-        ((тотожне? shape (як-є yes)) (identity-relation same)
-         (нехай-послідовно ((language (перше field))
-                (name (second field))
-                (status (third field)))
+        ((тотожне? форма (як-є yes)) (identity-relation distinct)
+         (тримовна-помилка (як-є malformed-surface) поле))
+        ((тотожне? форма (як-є yes)) (identity-relation same)
+         (нехай-послідовно ((мова (перше поле))
+                (назва (second поле))
+                (стан (third поле)))
            (за-умовою
-             ((атом? language) (structural-kind atom)
+             ((атом? мова) (structural-kind atom)
               (за-умовою
-                ((атом? name) (structural-kind atom)
+                ((атом? назва) (structural-kind atom)
                  (за-умовою
-                   ((атом? status) (structural-kind atom)
-                    (нехай ((state (тримовний-стан-належності status тримовні-стани)))
+                   ((атом? стан) (structural-kind atom)
+                    (нехай ((поточний-стан (тримовний-стан-належності стан тримовні-стани)))
                       (за-умовою
-                        ((тотожне? state (як-є present)) (identity-relation same)
+                        ((тотожне? поточний-стан (як-є present)) (identity-relation same)
                          (як-є valid))
-                        ((тотожне? state (як-є present)) (identity-relation distinct)
-                         (тримовна-помилка (як-є unknown-status) field))))
-                   ((атом? status) (structural-kind empty-list)
-                    (тримовна-помилка (як-є malformed-status) field))
-                   ((атом? status) (structural-kind pair)
-                    (тримовна-помилка (як-є malformed-status) field))))
-                ((атом? name) (structural-kind empty-list)
-                 (тримовна-помилка (як-є malformed-name) field))
-                ((атом? name) (structural-kind pair)
-                 (тримовна-помилка (як-є malformed-name) field))))
-             ((атом? language) (structural-kind empty-list)
-              (тримовна-помилка (як-є malformed-surface-name) field))
-             ((атом? language) (structural-kind pair)
-              (тримовна-помилка (як-є malformed-surface-name) field))))))))))
+                        ((тотожне? поточний-стан (як-є present)) (identity-relation distinct)
+                         (тримовна-помилка (як-є unknown-status) поле))))
+                   ((атом? стан) (structural-kind empty-list)
+                    (тримовна-помилка (як-є malformed-status) поле))
+                   ((атом? стан) (structural-kind pair)
+                    (тримовна-помилка (як-є malformed-status) поле))))
+                ((атом? назва) (structural-kind empty-list)
+                 (тримовна-помилка (як-є malformed-name) поле))
+                ((атом? назва) (structural-kind pair)
+                 (тримовна-помилка (як-є malformed-name) поле))))
+             ((атом? мова) (structural-kind empty-list)
+              (тримовна-помилка (як-є malformed-surface-name) поле))
+             ((атом? мова) (structural-kind pair)
+              (тримовна-помилка (як-є malformed-surface-name) поле))))))))))
 
 (визначити тримовне-вимагати-людські-проєкції
-  (функція (seen)
-    (нехай ((uk-state (тримовний-стан-належності (як-є uk) seen)))
+  (функція (побачені)
+    (нехай ((стан-ук (тримовний-стан-належності (як-є uk) побачені)))
       (за-умовою
-        ((тотожне? uk-state (як-є present)) (identity-relation distinct)
+        ((тотожне? стан-ук (як-є present)) (identity-relation distinct)
          (тримовна-помилка (як-є missing-human-surface) (як-є uk)))
-        ((тотожне? uk-state (як-є present)) (identity-relation same)
-         (нехай ((en-state (тримовний-стан-належності (як-є en) seen)))
+        ((тотожне? стан-ук (як-є present)) (identity-relation same)
+         (нехай ((стан-англ (тримовний-стан-належності (як-є en) побачені)))
            (за-умовою
-             ((тотожне? en-state (як-є present)) (identity-relation distinct)
+             ((тотожне? стан-англ (як-є present)) (identity-relation distinct)
               (тримовна-помилка (як-є missing-human-surface) (як-є en)))
-             ((тотожне? en-state (як-є present)) (identity-relation same)
-              (нехай ((sa-state (тримовний-стан-належності (як-є sa) seen)))
+             ((тотожне? стан-англ (як-є present)) (identity-relation same)
+              (нехай ((стан-санскрит (тримовний-стан-належності (як-є sa) побачені)))
                 (за-умовою
-                  ((тотожне? sa-state (як-є present)) (identity-relation distinct)
+                  ((тотожне? стан-санскрит (як-є present)) (identity-relation distinct)
                    (тримовна-помилка (як-є missing-human-surface) (як-є sa)))
-                  ((тотожне? sa-state (як-є present)) (identity-relation same)
+                  ((тотожне? стан-санскрит (як-є present)) (identity-relation same)
                    (як-є valid))))))))))))
 
 (визначити тримовне-перевірити-поля
-  (функція (fields seen)
+  (функція (поля побачені)
     (за-умовою
-      ((атом? fields) (structural-kind empty-list)
-       (тримовне-вимагати-людські-проєкції seen))
-      ((атом? fields) (structural-kind atom)
-       (тримовна-помилка (як-є malformed-field-tail) fields))
-      ((атом? fields) (structural-kind pair)
-       (нехай-послідовно ((field (перше fields))
-              (спеціальна-змінна (тримовний-стан-цитованого-символу field)))
+      ((атом? поля) (structural-kind empty-list)
+       (тримовне-вимагати-людські-проєкції побачені))
+      ((атом? поля) (structural-kind atom)
+       (тримовна-помилка (як-є malformed-field-tail) поля))
+      ((атом? поля) (structural-kind pair)
+       (нехай-послідовно ((поле (перше поля))
+              (спеціальна-змінна (тримовний-стан-цитованого-символу поле)))
          (за-умовою
            ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same)
-            (нехай ((dup (тримовний-стан-належності (як-є sym) seen)))
+            (нехай ((дублікат (тримовний-стан-належності (як-є sym) побачені)))
               (за-умовою
-                ((тотожне? dup (як-є present)) (identity-relation same)
+                ((тотожне? дублікат (як-є present)) (identity-relation same)
                  (тримовна-помилка (як-є duplicate-surface) (як-є sym)))
-                ((тотожне? dup (як-є present)) (identity-relation distinct)
+                ((тотожне? дублікат (як-є present)) (identity-relation distinct)
                  (тримовне-перевірити-поля
-                   (решта fields)
-                   (сполучити (як-є sym) seen))))))
+                   (решта поля)
+                   (сполучити (як-є sym) побачені))))))
            ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct)
-            (нехай ((valid (тримовне-перевірити-звичайне-поле field)))
-              (нехай-послідовно ((language (тримовна-мова-поля field))
-                     (dup (тримовний-стан-належності language seen)))
+            (нехай ((valid (тримовне-перевірити-звичайне-поле поле)))
+              (нехай-послідовно ((мова (тримовна-мова-поля поле))
+                     (дублікат (тримовний-стан-належності мова побачені)))
                 (за-умовою
-                  ((тотожне? dup (як-є present)) (identity-relation same)
-                   (тримовна-помилка (як-є duplicate-surface) language))
-                  ((тотожне? dup (як-є present)) (identity-relation distinct)
+                  ((тотожне? дублікат (як-є present)) (identity-relation same)
+                   (тримовна-помилка (як-є duplicate-surface) мова))
+                  ((тотожне? дублікат (як-є present)) (identity-relation distinct)
                    (тримовне-перевірити-поля
-                     (решта fields)
-                     (сполучити language seen)))))))))))))
+                     (решта поля)
+                     (сполучити мова побачені)))))))))))))
 
 (визначити тримовне-перевірити-рядок
-  (функція (row)
+  (функція (рядок)
     (за-умовою
-      ((атом? row) (structural-kind empty-list)
-       (тримовна-помилка (як-є malformed-entry) row))
-      ((атом? row) (structural-kind atom)
-       (тримовна-помилка (як-є malformed-entry) row))
-      ((атом? row) (structural-kind pair)
-       (нехай ((identity (перше row)))
+      ((атом? рядок) (structural-kind empty-list)
+       (тримовна-помилка (як-є malformed-entry) рядок))
+      ((атом? рядок) (structural-kind atom)
+       (тримовна-помилка (як-є malformed-entry) рядок))
+      ((атом? рядок) (structural-kind pair)
+       (нехай ((тотожність (перше рядок)))
          (за-умовою
-           ((атом? identity) (structural-kind atom)
-            (нехай ((valid (тримовне-перевірити-поля (решта row) (як-є ()))))
-              identity))
-           ((атом? identity) (structural-kind empty-list)
-            (тримовна-помилка (як-є malformed-identity) row))
-           ((атом? identity) (structural-kind pair)
-            (тримовна-помилка (як-є malformed-identity) row))))))))
+           ((атом? тотожність) (structural-kind atom)
+            (нехай ((valid (тримовне-перевірити-поля (решта рядок) (як-є ()))))
+              тотожність))
+           ((атом? тотожність) (structural-kind empty-list)
+            (тримовна-помилка (як-є malformed-identity) рядок))
+           ((атом? тотожність) (structural-kind pair)
+            (тримовна-помилка (як-є malformed-identity) рядок))))))))
 
 (визначити тримовне-перевірити-рядки
-  (функція (rows seen-identities)
+  (функція (рядки побачені-тотожності)
     (за-умовою
-      ((атом? rows) (structural-kind empty-list)
+      ((атом? рядки) (structural-kind empty-list)
        (за-умовою
-         ((атом? seen-identities) (structural-kind empty-list)
+         ((атом? побачені-тотожності) (structural-kind empty-list)
           (тримовна-помилка (як-є empty-registry) (як-є ())))
-         ((атом? seen-identities) (structural-kind pair)
+         ((атом? побачені-тотожності) (structural-kind pair)
           (як-є valid))
-         ((атом? seen-identities) (structural-kind atom)
-          (тримовна-помилка (як-є malformed-seen-identities) seen-identities))))
-      ((атом? rows) (structural-kind atom)
-       (тримовна-помилка (як-є malformed-entry-tail) rows))
-      ((атом? rows) (structural-kind pair)
-       (нехай-послідовно ((identity (тримовне-перевірити-рядок (перше rows)))
-              (dup (тримовний-стан-належності identity seen-identities)))
+         ((атом? побачені-тотожності) (structural-kind atom)
+          (тримовна-помилка (як-є malformed-seen-identities) побачені-тотожності))))
+      ((атом? рядки) (structural-kind atom)
+       (тримовна-помилка (як-є malformed-entry-tail) рядки))
+      ((атом? рядки) (structural-kind pair)
+       (нехай-послідовно ((тотожність (тримовне-перевірити-рядок (перше рядки)))
+              (дублікат (тримовний-стан-належності тотожність побачені-тотожності)))
          (за-умовою
-           ((тотожне? dup (як-є present)) (identity-relation same)
-            (тримовна-помилка (як-є duplicate-semantic-id) identity))
-           ((тотожне? dup (як-є present)) (identity-relation distinct)
+           ((тотожне? дублікат (як-є present)) (identity-relation same)
+            (тримовна-помилка (як-є duplicate-semantic-id) тотожність))
+           ((тотожне? дублікат (як-є present)) (identity-relation distinct)
             (тримовне-перевірити-рядки
-              (решта rows)
-              (сполучити identity seen-identities)))))))))
+              (решта рядки)
+              (сполучити тотожність побачені-тотожності)))))))))
 
 (визначити тримовний-стан-проєкції
-  (функція (fields wanted)
+  (функція (поля очікуване)
     (за-умовою
-      ((атом? fields) (structural-kind empty-list) (як-є ()))
-      ((атом? fields) (structural-kind atom) (як-є ()))
-      ((атом? fields) (structural-kind pair)
-       (нехай-послідовно ((field (перше fields))
-              (language (тримовна-мова-поля field)))
+      ((атом? поля) (structural-kind empty-list) (як-є ()))
+      ((атом? поля) (structural-kind atom) (як-є ()))
+      ((атом? поля) (structural-kind pair)
+       (нехай-послідовно ((поле (перше поля))
+              (мова (тримовна-мова-поля поле)))
          (за-умовою
-           ((тотожне? language wanted) (identity-relation same)
-            (тримовний-стан-поля field))
-           ((тотожне? language wanted) (identity-relation distinct)
-            (тримовний-стан-проєкції (решта fields) wanted))))))))
+           ((тотожне? мова очікуване) (identity-relation same)
+            (тримовний-стан-поля поле))
+           ((тотожне? мова очікуване) (identity-relation distinct)
+            (тримовний-стан-проєкції (решта поля) очікуване))))))))
 
 (визначити тримовний-стан-усіх-статусів
-  (функція (fields languages wanted)
+  (функція (поля мови очікуване)
     (за-умовою
-      ((атом? languages) (structural-kind empty-list) (як-є all))
-      ((атом? languages) (structural-kind atom) (як-є not-all))
-      ((атом? languages) (structural-kind pair)
-       (нехай ((current
-               (тримовний-стан-проєкції fields (перше languages))))
+      ((атом? мови) (structural-kind empty-list) (як-є all))
+      ((атом? мови) (structural-kind atom) (як-є not-all))
+      ((атом? мови) (structural-kind pair)
+       (нехай ((поточне
+               (тримовний-стан-проєкції поля (перше мови))))
          (за-умовою
-           ((тотожне? current wanted) (identity-relation same)
+           ((тотожне? поточне очікуване) (identity-relation same)
             (тримовний-стан-усіх-статусів
-              fields
-              (решта languages)
-              wanted))
-           ((тотожне? current wanted) (identity-relation distinct)
+              поля
+              (решта мови)
+              очікуване))
+           ((тотожне? поточне очікуване) (identity-relation distinct)
             (як-є not-all))))))))
 
 (визначити тримовний-публічний-вид
-  (функція (row)
-    (нехай ((state
+  (функція (рядок)
+    (нехай ((поточний-стан
             (тримовний-стан-усіх-статусів
-              (решта row)
+              (решта рядок)
               тримовні-людські-проєкції
               (як-є compatibility-only))))
       (за-умовою
-        ((тотожне? state (як-є all)) (identity-relation same)
+        ((тотожне? поточний-стан (як-є all)) (identity-relation same)
          (як-є compatibility-only))
-        ((тотожне? state (як-є all)) (identity-relation distinct)
+        ((тотожне? поточний-стан (як-є all)) (identity-relation distinct)
          (як-є public))))))
 
 (визначити тримовний-стабільний-вид
-  (функція (row)
-    (нехай ((state
+  (функція (рядок)
+    (нехай ((поточний-стан
             (тримовний-стан-усіх-статусів
-              (решта row)
+              (решта рядок)
               тримовні-людські-проєкції
               (як-є stable))))
       (за-умовою
-        ((тотожне? state (як-є all)) (identity-relation same)
+        ((тотожне? поточний-стан (як-є all)) (identity-relation same)
          (як-є all-stable))
-        ((тотожне? state (як-є all)) (identity-relation distinct)
+        ((тотожне? поточний-стан (як-є all)) (identity-relation distinct)
          (як-є not-all-stable))))))
 
 (визначити тримовна-наявність-проєкції
-  (функція (fields wanted)
-    (нехай ((value (тримовний-стан-проєкції fields wanted)))
+  (функція (поля очікуване)
+    (нехай ((значення (тримовний-стан-проєкції поля очікуване)))
       (за-умовою
-        ((атом? value) (structural-kind empty-list) (як-є absent))
-        ((атом? value) (structural-kind atom) (як-є present))
-        ((атом? value) (structural-kind pair) (як-є present))))))
+        ((атом? значення) (structural-kind empty-list) (як-є absent))
+        ((атом? значення) (structural-kind atom) (як-є present))
+        ((атом? значення) (structural-kind pair) (як-є present))))))
 
 (визначити тримовне-порахувати-статуси
-  (функція (rows language wanted acc)
+  (функція (рядки мова очікуване накопичувач)
     (за-умовою
-      ((атом? rows) (structural-kind empty-list) acc)
-      ((атом? rows) (structural-kind atom) acc)
-      ((атом? rows) (structural-kind pair)
-       (нехай ((status
-               (тримовний-стан-проєкції (решта (перше rows)) language)))
+      ((атом? рядки) (structural-kind empty-list) накопичувач)
+      ((атом? рядки) (structural-kind atom) накопичувач)
+      ((атом? рядки) (structural-kind pair)
+       (нехай ((стан
+               (тримовний-стан-проєкції (решта (перше рядки)) мова)))
          (за-умовою
-           ((тотожне? status wanted) (identity-relation same)
-            (тримовне-порахувати-статуси (решта rows) language wanted (додати acc 1)))
-           ((тотожне? status wanted) (identity-relation distinct)
-            (тримовне-порахувати-статуси (решта rows) language wanted acc))))))))
+           ((тотожне? стан очікуване) (identity-relation same)
+            (тримовне-порахувати-статуси (решта рядки) мова очікуване (додати накопичувач 1)))
+           ((тотожне? стан очікуване) (identity-relation distinct)
+            (тримовне-порахувати-статуси (решта рядки) мова очікуване накопичувач))))))))
 
 (визначити тримовне-порахувати-публічні
-  (функція (rows acc)
+  (функція (рядки накопичувач)
     (за-умовою
-      ((атом? rows) (structural-kind empty-list) acc)
-      ((атом? rows) (structural-kind atom) acc)
-      ((атом? rows) (structural-kind pair)
-       (нехай ((kind (тримовний-публічний-вид (перше rows))))
+      ((атом? рядки) (structural-kind empty-list) накопичувач)
+      ((атом? рядки) (structural-kind atom) накопичувач)
+      ((атом? рядки) (structural-kind pair)
+       (нехай ((вид (тримовний-публічний-вид (перше рядки))))
          (за-умовою
-           ((тотожне? kind (як-є public)) (identity-relation same)
-            (тримовне-порахувати-публічні (решта rows) (додати acc 1)))
-           ((тотожне? kind (як-є public)) (identity-relation distinct)
-            (тримовне-порахувати-публічні (решта rows) acc))))))))
+           ((тотожне? вид (як-є public)) (identity-relation same)
+            (тримовне-порахувати-публічні (решта рядки) (додати накопичувач 1)))
+           ((тотожне? вид (як-є public)) (identity-relation distinct)
+            (тримовне-порахувати-публічні (решта рядки) накопичувач))))))))
 
 (визначити тримовне-порахувати-символьні
-  (функція (rows acc)
+  (функція (рядки накопичувач)
     (за-умовою
-      ((атом? rows) (structural-kind empty-list) acc)
-      ((атом? rows) (structural-kind atom) acc)
-      ((атом? rows) (structural-kind pair)
-       (нехай ((state
+      ((атом? рядки) (structural-kind empty-list) накопичувач)
+      ((атом? рядки) (structural-kind atom) накопичувач)
+      ((атом? рядки) (structural-kind pair)
+       (нехай ((поточний-стан
                (тримовна-наявність-проєкції
-                 (решта (перше rows))
+                 (решта (перше рядки))
                  (як-є sym))))
          (за-умовою
-           ((тотожне? state (як-є present)) (identity-relation same)
-            (тримовне-порахувати-символьні (решта rows) (додати acc 1)))
-           ((тотожне? state (як-є present)) (identity-relation distinct)
-            (тримовне-порахувати-символьні (решта rows) acc))))))))
+           ((тотожне? поточний-стан (як-є present)) (identity-relation same)
+            (тримовне-порахувати-символьні (решта рядки) (додати накопичувач 1)))
+           ((тотожне? поточний-стан (як-є present)) (identity-relation distinct)
+            (тримовне-порахувати-символьні (решта рядки) накопичувач))))))))
 
 (визначити тримовне-порахувати-спільні-стабільні
-  (функція (rows acc)
+  (функція (рядки накопичувач)
     (за-умовою
-      ((атом? rows) (structural-kind empty-list) acc)
-      ((атом? rows) (structural-kind atom) acc)
-      ((атом? rows) (structural-kind pair)
-       (нехай ((public (тримовний-публічний-вид (перше rows))))
+      ((атом? рядки) (structural-kind empty-list) накопичувач)
+      ((атом? рядки) (structural-kind atom) накопичувач)
+      ((атом? рядки) (structural-kind pair)
+       (нехай ((публічний (тримовний-публічний-вид (перше рядки))))
          (за-умовою
-           ((тотожне? public (як-є public)) (identity-relation distinct)
-            (тримовне-порахувати-спільні-стабільні (решта rows) acc))
-           ((тотожне? public (як-є public)) (identity-relation same)
-            (нехай ((stable (тримовний-стабільний-вид (перше rows))))
+           ((тотожне? публічний (як-є public)) (identity-relation distinct)
+            (тримовне-порахувати-спільні-стабільні (решта рядки) накопичувач))
+           ((тотожне? публічний (як-є public)) (identity-relation same)
+            (нехай ((stable (тримовний-стабільний-вид (перше рядки))))
               (за-умовою
                 ((тотожне? stable (як-є all-stable)) (identity-relation same)
-                 (тримовне-порахувати-спільні-стабільні (решта rows) (додати acc 1)))
+                 (тримовне-порахувати-спільні-стабільні (решта рядки) (додати накопичувач 1)))
                 ((тотожне? stable (як-є all-stable)) (identity-relation distinct)
-                 (тримовне-порахувати-спільні-стабільні (решта rows) acc)))))))))))
+                 (тримовне-порахувати-спільні-стабільні (решта рядки) накопичувач)))))))))))
 
 (визначити тримовний-стан-випуску
-  (функція (rows)
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) (structural-kind empty-list) (як-є confirmed))
-      ((атом? rows) (structural-kind atom) (як-є open))
-      ((атом? rows) (structural-kind pair)
-       (нехай ((public (тримовний-публічний-вид (перше rows))))
+      ((атом? рядки) (structural-kind empty-list) (як-є confirmed))
+      ((атом? рядки) (structural-kind atom) (як-є open))
+      ((атом? рядки) (structural-kind pair)
+       (нехай ((публічний (тримовний-публічний-вид (перше рядки))))
          (за-умовою
-           ((тотожне? public (як-є public)) (identity-relation distinct)
-            (тримовний-стан-випуску (решта rows)))
-           ((тотожне? public (як-є public)) (identity-relation same)
-            (нехай ((stable (тримовний-стабільний-вид (перше rows))))
+           ((тотожне? публічний (як-є public)) (identity-relation distinct)
+            (тримовний-стан-випуску (решта рядки)))
+           ((тотожне? публічний (як-є public)) (identity-relation same)
+            (нехай ((stable (тримовний-стабільний-вид (перше рядки))))
               (за-умовою
                 ((тотожне? stable (як-є all-stable)) (identity-relation same)
-                 (тримовний-стан-випуску (решта rows)))
+                 (тримовний-стан-випуску (решта рядки)))
                 ((тотожне? stable (як-є all-stable)) (identity-relation distinct)
                  (як-є open)))))))))))
 
 (визначити тримовний-режим
-  (функція (argv)
+  (функція (аргументи)
     (за-умовою
-      ((атом? argv) (structural-kind empty-list) (як-є report))
-      ((атом? argv) (structural-kind atom)
-       (тримовна-помилка (як-є malformed-argv) argv))
-      ((атом? argv) (structural-kind pair)
-       (нехай ((rest (решта argv)))
+      ((атом? аргументи) (structural-kind empty-list) (як-є report))
+      ((атом? аргументи) (structural-kind atom)
+       (тримовна-помилка (як-є malformed-argv) аргументи))
+      ((атом? аргументи) (structural-kind pair)
+       (нехай ((залишок (решта аргументи)))
          (за-умовою
-           ((атом? rest) (structural-kind empty-list)
+           ((атом? залишок) (structural-kind empty-list)
             (за-умовою
-              ((однакові? (перше argv) "--require-complete")
+              ((однакові? (перше аргументи) "--require-complete")
                (structural-relation same)
                (як-є require-complete))
-              ((однакові? (перше argv) "--require-complete")
+              ((однакові? (перше аргументи) "--require-complete")
                (structural-relation distinct)
-               (тримовна-помилка (як-є unknown-argument) (перше argv)))))
-           ((атом? rest) (structural-kind atom)
-            (тримовна-помилка (як-є malformed-argv) argv))
-           ((атом? rest) (structural-kind pair)
-            (тримовна-помилка (як-є too-many-arguments) argv))))))))
+               (тримовна-помилка (як-є unknown-argument) (перше аргументи)))))
+           ((атом? залишок) (structural-kind atom)
+            (тримовна-помилка (як-є malformed-argv) аргументи))
+           ((атом? залишок) (structural-kind pair)
+            (тримовна-помилка (як-є too-many-arguments) аргументи))))))))
 
 (визначити тримовна-форма-реєстру
   (перше
