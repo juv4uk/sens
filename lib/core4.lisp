@@ -2575,7 +2575,7 @@
 ; Integer quotient recurses in SENS; D5 QUOTIENT is exact rational division.
 ; Consume the (chunk . multiplier) pair as data directly, not through a
 ; historical LET macro that can turn a numeric result into a callable head.
-(визначити quotient-from-chunk
+(визначити цілочисельна-частка-з-блоку
   (функція (перший-аргумент другий-аргумент частина-і-множник)
     (додати (решта частина-і-множник)
             (частка (відняти перший-аргумент (перше частина-і-множник)) другий-аргумент))))
@@ -2585,7 +2585,7 @@
       ((нуль? другий-аргумент) (частка перший-аргумент другий-аргумент))
       ((менше? перший-аргумент другий-аргумент) 0)
       (так
-       (quotient-from-chunk перший-аргумент другий-аргумент
+       (цілочисельна-частка-з-блоку перший-аргумент другий-аргумент
          (знайти-найбільший-блок-частки перший-аргумент другий-аргумент другий-аргумент 1))))))
 
 ; Integer remainder uses the Lisp-owned floor quotient: a - b * floor(a / b).
