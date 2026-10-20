@@ -327,21 +327,29 @@ fn signed_wide_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value>
 }
 
 /// Точна цілочисельна частка двох вже допущених знакових D96+.
-/// Машинний дільник має вміщатися в u64. Для ненульової остачі
+/// Машинний дільник може займати довільну кількість слів. Для ненульової остачі
 /// виконується попередній канонічний закон RATIO — без округлення.
 fn signed_wide_div_exact_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
     let width = lhs.numeric_domain_width()?;
     if width < 96 || rhs.numeric_domain_width() != Some(width) { return None; }
     let (a_negative, a) = lhs.signed_magnitude()?;
     let (b_negative, b) = rhs.signed_magnitude()?;
-    if b.is_zero() || b.width() > 64 { return None; }
-    let divisor = b.as_bits().iter()
-        .fold(0_u64, |value, bit| (value << 1) | u64::from(*bit));
-    let limbs = a.as_bits().rchunks(64)
-        .map(|block| block.iter().fold(0_u64, |value, bit| (value << 1) | u64::from(*bit)))
-        .collect::<Vec<_>>();
-    let (quotient, remainder) = crate::machine_math::exact_words_div_rem_u64(&limbs, divisor)?;
-    if remainder != 0 { return None; }
+    if b.is_zero() { return None; }
+    // Довільна ширина дільника: маленький використовує DIVQ, широкий SBB.
+    // Ідентичність числового домену вже перевірена, жодного f64.
+    let unpack = |n: &BinaryNumber| -> Vec<u64> {
+        n.as_bits().rchunks(64)
+            .map(|part| part.iter().fold(0_u64, |bits, bit| (bits << 1) | u64::from(*bit)))
+            .collect()
+    };
+    let mut limbs = unpack(&a);
+    let mut divisor = unpack(&b);
+    let n = limbs.len().max(divisor.len());
+    limbs.resize(n, 0);
+    divisor.resize(n, 0);
+    let (quotient, remainder) =
+        crate::machine_math::exact_words_div_rem_unsigned(&limbs, &divisor)?;
+    if remainder.iter().any(|&word| word != 0) { return None; }
     let bits = quotient.iter().rev()
         .flat_map(|limb| (0..64).rev().map(move |shift| ((limb >> shift) & 1) as u8))
         .collect::<Vec<_>>();
