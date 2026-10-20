@@ -57,6 +57,24 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertEqual(summary["bounded_verified_legacy_t5"], 0)
         self.assertFalse(summary["all_bounded_reverse_verified"])
 
+    def test_binary_d2_under_lisp_is_not_a_verified_ukrainian_program(self):
+        # Keyboard characters are not evidence of a human Lisp program.
+        words = "10 110 00 1 01" + chr(10)
+        self.put("lib/не-лісп.lisp", words)
+        self.put("lib/не-лісп.sens", b"unverified-physical")
+        self.put("lib/не-лісп", words)
+        self.put("lib/належний.bits", words)
+        def must_not_call(*_args):
+            self.fail("двійковий D2 під .lisp не можна зараховувати до укр-свідків")
+        report = scan(self.root, verify_bounded=True, validator=must_not_call)
+        self.assertEqual(report["total_lisp_files"], 1)
+        self.assertEqual(report["ukrainian_keyboard"], 1)
+        self.assertEqual(report["misnamed_binary_lisp"], 1)
+        self.assertEqual(report["complete_triplets"], 1)
+        self.assertEqual(report["bounded_verified"], 0)
+        self.assertFalse(report["all_bounded_reverse_verified"])
+        self.assertIn("потрібен .bits", str(report["blocked_sample"]))
+
     def test_validator_rejection_is_not_silently_skipped(self):
         self.put("lib/проба.lisp", "(визначити проба так)\n")
         self.put("lib/проба.sens", b"invalid")

@@ -21,6 +21,14 @@ ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "sens-all-lisp-reversibility-census/v1"
 
 
+def misnamed_binary_d2(path: Path) -> bool:
+    """Двійкові слова D2 повинні мати .bits, а не .lisp."""
+    words = path.read_bytes().split()
+    return (len(words) >= 3
+            and all(word and not word.strip(b"01") for word in words)
+            and b"10" in words and (b"00" in words or b"01" in words))
+
+
 def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int = 20) -> dict:
     if not root.is_dir():
         raise NotADirectoryError(root)
@@ -77,6 +85,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
     # Не прирівнюємо історичний T5 до сучасного фізичного T5M.
     counts = dict(ukrainian_keyboard=0, with_sens=0, with_view=0,
                   complete_triplets=0, bounded_verified=0,
+                  misnamed_binary_lisp=0,
                   bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
     blocked: list[dict[str, str]] = []
 
@@ -94,6 +103,10 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             counts["ukrainian_keyboard"] += 1
         else:
             reject(relative, "не повністю українська розкладка: " + keyboard_problem)
+        binary_disguised = misnamed_binary_d2(source)
+        if binary_disguised:
+            counts["misnamed_binary_lisp"] += 1
+            reject(relative, "двійкові слова D2 під розширенням .lisp; потрібен .bits")
         physical = source.with_suffix(".sens")
         view = source.with_suffix("")
         has_sens = physical.is_file() and not physical.is_symlink()
@@ -107,7 +120,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             reject(relative, "немає звичайного двійкового перегляду")
             continue
         counts["complete_triplets"] += 1
-        if verify_bounded:
+        if verify_bounded and not binary_disguised:
             try:
                 witness = validator(source, physical, view)
                 codec = require_bounded_receipt(witness, source, physical, view)
@@ -121,6 +134,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
     all_verified = bool(sources) and (
         counts["bounded_verified"] == len(sources)
         and counts["ukrainian_keyboard"] == len(sources)
+        and counts["misnamed_binary_lisp"] == 0
         and verify_bounded
     )
     return {
