@@ -5,81 +5,81 @@
 ; Після push тегу workflow Release повторює focused test/clippy gates.
 ; Потрібні git, gh, timeout і cargo. Лише довірена CLI-сесія.
 
-(визначити release-preflight-failed
+(визначити невдала-передвипускова-перевірка
   (функція ()
     (перше (як-є ()))))
 
-(визначити release-require
-  (функція (label actual expected)
+(визначити вимагати-для-випуску
+  (функція (позначка одержано очікувано)
     (за-умовою
-      ((тотожне? actual expected) actual)
+      ((тотожне? одержано очікувано) одержано)
       ((атом? (як-є ()))
        ((функція ()
-          (друкувати label)
-          (друкувати actual)
-          (release-preflight-failed)))))))
+          (друкувати позначка)
+          (друкувати одержано)
+          (невдала-передвипускова-перевірка)))))))
 
-(визначити release-run
-  (функція (program arguments)
-    (нехай ((result (процес-запустити program arguments)))
+(визначити виконати-для-випуску
+  (функція (програма аргументи)
+    (нехай ((результат (процес-запустити програма аргументи)))
       ((функція ()
-         (release-require program (перше result) 0)
-         (друге result))))))
+         (вимагати-для-випуску програма (перше результат) 0)
+         (друге результат))))))
 
-(release-require "Потрібна одна версія: 0.42.0" (хибне? (відповідь-не (атом? *argv*)))
+(вимагати-для-випуску "Потрібна одна версія: 0.42.0" (хибне? (відповідь-не (атом? *argv*)))
                  (як-є (0)))
-(release-require "Потрібен рівно один аргумент" (хибне? (відповідь-не (атом? (решта *argv*))))
+(вимагати-для-випуску "Потрібен рівно один аргумент" (хибне? (відповідь-не (атом? (решта *argv*))))
                  (як-є ()))
-(визначити release-version (перше *argv*))
-(визначити release-tag (рядок-додати "l" release-version))
-(визначити release-tag-ref (рядок-додати "refs/tags/" release-tag))
+(визначити версія-випуску (перше *argv*))
+(визначити тег-випуску (рядок-додати "l" версія-випуску))
+(визначити посилання-на-тег-випуску (рядок-додати "refs/tags/" тег-випуску))
 
-(release-run "git" (список "check-ref-format" release-tag-ref))
-(release-require "Checkout має бути чистим"
-  (release-run "git" (як-є ("status" "--porcelain" "--untracked-files=normal"))) "")
-(release-require "Release запускається тільки з main"
-  (release-run "git" (як-є ("branch" "--show-current"))) "main\n")
-(release-run "timeout" (як-є ("60" "git" "fetch" "origin" "main")))
-(release-require "HEAD має дорівнювати свіжому origin/main"
-  (release-run "git" (як-є ("log" "-1" "--pretty=format:%H" "HEAD")))
-  (release-run "git" (як-є ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
-(release-run "cargo"
+(виконати-для-випуску "git" (список "check-ref-format" посилання-на-тег-випуску))
+(вимагати-для-випуску "Checkout має бути чистим"
+  (виконати-для-випуску "git" (як-є ("status" "--porcelain" "--untracked-files=normal"))) "")
+(вимагати-для-випуску "Release запускається тільки з main"
+  (виконати-для-випуску "git" (як-є ("branch" "--show-current"))) "main\n")
+(виконати-для-випуску "timeout" (як-є ("60" "git" "fetch" "origin" "main")))
+(вимагати-для-випуску "HEAD має дорівнювати свіжому origin/main"
+  (виконати-для-випуску "git" (як-є ("log" "-1" "--pretty=format:%H" "HEAD")))
+  (виконати-для-випуску "git" (як-є ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
+(виконати-для-випуску "cargo"
   (як-є ("run" "--release" "--locked" "-p" "sens-cli" "--bin" "gen-fasl"
           "--" "lib/core4.lisp" "lib/core4.lisp.fasl")))
-(визначити release-fasl-diff-status
+(визначити стан-різниці-фасл
   (перше (процес-запустити "git" (як-є ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
 (за-умовою
-  ((тотожне? release-fasl-diff-status 0) (як-є ()))
-  ((тотожне? release-fasl-diff-status 1)
+  ((тотожне? стан-різниці-фасл 0) (як-є ()))
+  ((тотожне? стан-різниці-фасл 1)
    ((функція ()
       ; Never create an implicit commit while preparing an exact-SHA release.
       ; The snapshot must be reviewed and committed by the single main writer
       ; in a separate change, then all exact-SHA gates must be replayed.
       (друкувати "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
-      (release-preflight-failed))))
+      (невдала-передвипускова-перевірка))))
   ((атом? (як-є ()))
    ((функція ()
       (друкувати "Не вдалося визначити стан regenerated FASL")
-      (друкувати release-fasl-diff-status)
-      (release-preflight-failed)))))
-(release-run "timeout" (як-є ("60" "git" "fetch" "origin" "main")))
-(визначити release-head (release-run "git" (як-є ("log" "-1" "--pretty=format:%H" "HEAD"))))
-(release-require "HEAD має дорівнювати свіжому origin/main"
-  release-head (release-run "git" (як-є ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
+      (друкувати стан-різниці-фасл)
+      (невдала-передвипускова-перевірка)))))
+(виконати-для-випуску "timeout" (як-є ("60" "git" "fetch" "origin" "main")))
+(визначити коміт-випуску (виконати-для-випуску "git" (як-є ("log" "-1" "--pretty=format:%H" "HEAD"))))
+(вимагати-для-випуску "HEAD має дорівнювати свіжому origin/main"
+  коміт-випуску (виконати-для-випуску "git" (як-є ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
 
-(визначити release-check-manifests
-  (функція (paths)
+(визначити перевірити-маніфести-випуску
+  (функція (шляхи)
     (за-умовою
-      ((атом? paths) (як-є ()))
+      ((атом? шляхи) (як-є ()))
       ((атом? (як-є ()))
        ((функція ()
-          (release-require (перше paths)
+          (вимагати-для-випуску (перше шляхи)
             (рядок-містить?
-              (рядок-додати "version = \"" (рядок-додати release-version "\""))
-              (читати-файл (перше paths))) t)
-          (release-check-manifests (решта paths))))))))
+              (рядок-додати "version = \"" (рядок-додати версія-випуску "\""))
+              (читати-файл (перше шляхи))) t)
+          (перевірити-маніфести-випуску (решта шляхи))))))))
 
-(release-check-manifests
+(перевірити-маніфести-випуску
   (як-є ("crates/sens/Cargo.toml" "crates/sens-cli/Cargo.toml"
           "crates/sens-literate/Cargo.toml" "crates/sens-wasm/Cargo.toml"
           "crates/sens-lsp/Cargo.toml" "crates/sens-host/Cargo.toml"
@@ -88,36 +88,36 @@
 ; Active pre-tag gates must both complete green on this exact SHA.
 ; Release Preflight includes cargo test/clippy --workspace; Hosted CI provides
 ; separate strict Core/runtime witnesses. Do not rely on any older green run.
-(release-require "Hosted CI не зелений на точному SHA"
-  (release-run "timeout"
-    (список "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
+(вимагати-для-випуску "Hosted CI не зелений на точному SHA"
+  (виконати-для-випуску "timeout"
+    (список "60" "gh" "run" "list" "--branch" "main" "--commit" коміт-випуску
           "--workflow" "ci-hosted.yml" "--limit" "1" "--json" "conclusion,status"
           "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
   "true\n")
-(release-require "Release Preflight не зелений на точному SHA"
-  (release-run "timeout"
-    (список "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
+(вимагати-для-випуску "Release Preflight не зелений на точному SHA"
+  (виконати-для-випуску "timeout"
+    (список "60" "gh" "run" "list" "--branch" "main" "--commit" коміт-випуску
           "--workflow" "release-preflight.yml" "--limit" "1" "--json" "conclusion,status"
           "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
   "true\n")
 ; The owner must authorize the exact SHA and tag before this script creates a tag.
-(release-require "Немає явного дозволу власника для поточного SHA"
-  (release-run "gh" (як-є ("variable" "get" "SENS_RELEASE_GO_SHA" "--repo" "juv4uk/sens")))
-  (рядок-додати release-head "\n"))
-(release-require "Немає явного дозволу власника для поточного тегу"
-  (release-run "gh" (як-є ("variable" "get" "SENS_RELEASE_GO_TAG" "--repo" "juv4uk/sens")))
-  (рядок-додати release-tag "\n"))
+(вимагати-для-випуску "Немає явного дозволу власника для поточного SHA"
+  (виконати-для-випуску "gh" (як-є ("variable" "get" "SENS_RELEASE_GO_SHA" "--repo" "juv4uk/sens")))
+  (рядок-додати коміт-випуску "\n"))
+(вимагати-для-випуску "Немає явного дозволу власника для поточного тегу"
+  (виконати-для-випуску "gh" (як-є ("variable" "get" "SENS_RELEASE_GO_TAG" "--repo" "juv4uk/sens")))
+  (рядок-додати тег-випуску "\n"))
 ; main міг змінитися під час попередніх перевірок.
-(release-run "timeout" (як-є ("60" "git" "fetch" "origin" "main")))
-(release-require "origin/main змінився; підготуй новий snapshot"
-  release-head (release-run "git" (як-є ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
-(release-require "Релізний тег уже існує"
-  (release-run "timeout" (список "60" "git" "ls-remote" "--tags" "origin" release-tag-ref)) "")
-(release-require "Checkout змінився під час перевірок"
-  (release-run "git" (як-є ("status" "--porcelain" "--untracked-files=normal"))) "")
-(release-run "git" (список "tag" release-tag release-head))
-(release-run "timeout" (список "60" "git" "push" "origin" release-tag-ref))
-(друкувати (рядок-додати "Тег опубліковано; очікуй завершення workflow Release: " release-tag))
+(виконати-для-випуску "timeout" (як-є ("60" "git" "fetch" "origin" "main")))
+(вимагати-для-випуску "origin/main змінився; підготуй новий snapshot"
+  коміт-випуску (виконати-для-випуску "git" (як-є ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
+(вимагати-для-випуску "Релізний тег уже існує"
+  (виконати-для-випуску "timeout" (список "60" "git" "ls-remote" "--tags" "origin" посилання-на-тег-випуску)) "")
+(вимагати-для-випуску "Checkout змінився під час перевірок"
+  (виконати-для-випуску "git" (як-є ("status" "--porcelain" "--untracked-files=normal"))) "")
+(виконати-для-випуску "git" (список "tag" тег-випуску коміт-випуску))
+(виконати-для-випуску "timeout" (список "60" "git" "push" "origin" посилання-на-тег-випуску))
+(друкувати (рядок-додати "Тег опубліковано; очікуй завершення workflow Release: " тег-випуску))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити відповідь-не ANSWER-NOT)
