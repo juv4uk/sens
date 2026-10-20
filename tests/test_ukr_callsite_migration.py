@@ -377,7 +377,7 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         first = (root / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
         mutual = (root / "lib/meta-eval-mutual.lisp").read_text(encoding="utf-8")
         self.assertIn("(сполучити (як-є атом?) (першокласний-примітив (як-є атом?)))", first)
-        self.assertIn("(тотожне? (перше форма) (як-є def))", mutual)
+        self.assertIn("(тотожне? (перше форма) (як-є визначити))", mutual)
         # Джерело зберігає історичний #d1:1 у коментарі; заборона діє
         # лише для виконуваного SENS-коду, а не для provenance.
         active_first = "\n".join(
@@ -392,11 +392,11 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         self.assertIn("(0 (ук ні) (укр ні)", d1)
         self.assertIn("(1 (ук так) (укр так)", d1)
         self.assertIn("((атом? значення) ні)", mutual)
-        self.assertIn("(так (тотожне? (перше значення) (як-є recursive-group-closure)))", mutual)
+        self.assertIn("(так (тотожне? (перше значення) назва-замикання-рекурсивної-групи))", mutual)
         self.assertNotIn("#d1:0", mutual)
         self.assertIn("(визначити першокласне-знайти-в-середовищі", first)
         self.assertNotIn("(0011 першокласне-знайти-в-середовищі", first)
-        self.assertIn("(визначити my-group-eval", mutual)
+        self.assertIn("(визначити обчислити-вираз-групи", mutual)
         # Negative witness: numeric operator behind QUOTE remains data, not callable.
         sample = "(як-є (100 quoted)) (сполучити (як-є datum) (перше xs))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
