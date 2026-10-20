@@ -1,88 +1,86 @@
-; #1145 executable witness for the yantraOS bridge contract.
-; Ukrainian projection only.
-;
-; The witness proves the intended composition without network access:
-; SENS constructs a typed action envelope, yantraOS is represented as
-; the execution owner, and the returned execution observation remains data.
+; Свідок #1145: семантичний міст до yantraOS визначається в СЕНС.
+; Українські виконувані назви й локальні зв'язування.
+; Зовнішні теги полів і значення протоколу yantraOS незмінні.
+; Мережевих викликів у свідку немає.
 
-(визначити yo-proper-list?
-  (функція (value)
+(визначити правильний-список-янтра?
+  (функція (значення)
     (за-умовою
-      ((атом? value)
+      ((атом? значення)
        (за-умовою
-         ((однакові? value (як-є ()))
+         ((однакові? значення (як-є ()))
           (як-є yes))
          (так (як-є invalid))))
-      (так (yo-proper-list? (решта value))))))
+      (так (правильний-список-янтра? (решта значення))))))
 
-(визначити yo-field
-  (функція (name record)
-    (нехай ((found (знайти-за-ключем name record)))
+(визначити поле-янтра
+  (функція (назва запис)
+    (нехай ((знайдене (знайти-за-ключем назва запис)))
       (за-умовою
-        ((однакові? found (як-є ()))
+        ((однакові? знайдене (як-є ()))
          (як-є ()))
-        (так (решта found))))))
+        (так (решта знайдене))))))
 
-(визначити yo-has-field?
-  (функція (name record)
-    (нехай ((found (знайти-за-ключем name record)))
+(визначити має-поле-янтра?
+  (функція (назва запис)
+    (нехай ((знайдене (знайти-за-ключем назва запис)))
       (за-умовою
-        ((однакові? found (як-є ()))
+        ((однакові? знайдене (як-є ()))
          (як-є no))
         (так (як-є yes))))))
 
-(визначити yo-no-raw-shell?
-  (функція (envelope)
-    (нехай ((action (yo-field (як-є action) envelope))
-          (parameters (yo-field (як-є parameters) envelope)))
+(визначити немає-прямої-оболонки-янтра?
+  (функція (оболонка)
+    (нехай ((дія (поле-янтра (як-є action) оболонка))
+          (параметри (поле-янтра (як-є parameters) оболонка)))
       (за-умовою
         ((однакові?
-           (yo-field (як-є capability) action)
+           (поле-янтра (як-є capability) дія)
            (як-є shell))
          (як-є no))
-        ((тотожне? (yo-has-field? (як-є command) parameters) (як-є yes))
+        ((тотожне? (має-поле-янтра? (як-є command) параметри) (як-є yes))
          (як-є no))
         (так (як-є yes))))))
 
-(визначити yo-action-envelope
-  (функція (goal capability operation target parameters verification provenance approval)
+(визначити оболонка-дії-янтра
+  (функція (ціль можливість операція цільовий-об'єкт параметри перевірка походження схвалення)
     (список
       (сполучити (як-є protocol) (як-є (yantraos-bridge 1)))
       (сполучити (як-є intent)
             (список
-              (сполучити (як-є goal) goal)
+              (сполучити (як-є goal) ціль)
               (сполучити (як-є requires) (як-є ()))
               (сполучити (як-є stop-on) (як-є (verified)))
               (сполучити (як-є produces) (як-є (execution-observation)))))
       (сполучити (як-є action)
             (список
-              (сполучити (як-є capability) capability)
-              (сполучити (як-є operation) operation)
-              (сполучити (як-є target) target)))
-      (сполучити (як-є parameters) parameters)
-      (сполучити (як-є verification) verification)
-      (сполучити (як-є provenance) provenance)
-      (сполучити (як-є approval) approval))))
+              (сполучити (як-є capability) можливість)
+              (сполучити (як-є operation) операція)
+              (сполучити (як-є target) цільовий-об'єкт)))
+      (сполучити (як-є parameters) параметри)
+      (сполучити (як-є verification) перевірка)
+      (сполучити (як-є provenance) походження)
+      (сполучити (як-є approval) схвалення))))
 
-(визначити yo-action-envelope?
-  (функція (value)
+(визначити оболонка-дії-янтра?
+  (функція (значення)
     (за-умовою
-      ((тотожне? (yo-proper-list? value) (як-є yes))
+      ((тотожне? (правильний-список-янтра? значення) (як-є yes))
        (за-умовою
-         ((тотожне? (yo-has-field? (як-є protocol) value) (як-є yes))
+         ((тотожне? (має-поле-янтра? (як-є protocol) значення) (як-є yes))
           (за-умовою
-            ((тотожне? (yo-has-field? (як-є intent) value) (як-є yes))
+            ((тотожне? (має-поле-янтра? (як-є intent) значення) (як-є yes))
              (за-умовою
-               ((тотожне? (yo-has-field? (як-є action) value) (як-є yes))
+               ((тотожне? (має-поле-янтра? (як-є action) значення) (як-є yes))
                 (за-умовою
-                  ((тотожне? (yo-has-field? (як-є parameters) value) (як-є yes))
+                  ((тотожне? (має-поле-янтра? (як-є parameters) значення) (як-є yes))
                    (за-умовою
-                     ((тотожне? (yo-has-field? (як-є verification) value) (як-є yes))
+                     ((тотожне? (має-поле-янтра? (як-є verification) значення) (як-є yes))
                       (за-умовою
-                        ((тотожне? (yo-has-field? (як-є provenance) value) (як-є yes))
+                        ((тотожне? (має-поле-янтра? (як-є provenance) значення) (як-є yes))
                          (за-умовою
-                           ((тотожне? (yo-has-field? (як-є approval) value) (як-є yes))
-                            (yo-no-raw-shell? value))
+                           ((тотожне? (має-поле-янтра? (як-є approval) значення) (як-є yes))
+                            (немає-прямої-оболонки-янтра? значення))
                            (так (як-є no))))
                         (так (як-є no))))
                      (так (як-є no))))
@@ -92,34 +90,44 @@
          (так (як-є no))))
       (так (як-є no)))))
 
-(визначити yo-execution-observation
-  (функція (result route evidence audit-ref provenance)
+(визначити спостереження-виконання-янтра
+  (функція (результат маршрут докази посилання-аудиту походження)
     (список
       (сполучити (як-є protocol) (як-є (yantraos-bridge 1)))
-      (сполучити (як-є result) result)
-      (сполучити (як-є route) route)
-      (сполучити (як-є evidence) evidence)
-      (сполучити (як-є audit-ref) audit-ref)
-      (сполучити (як-є provenance) provenance))))
+      (сполучити (як-є result) результат)
+      (сполучити (як-є route) маршрут)
+      (сполучити (як-є evidence) докази)
+      (сполучити (як-є audit-ref) посилання-аудиту)
+      (сполучити (як-є provenance) походження))))
 
-(визначити yo-execution-observation?
-  (функція (value)
+(визначити спостереження-виконання-янтра?
+  (функція (значення)
     (за-умовою
-      ((тотожне? (yo-proper-list? value) (як-є yes))
+      ((тотожне? (правильний-список-янтра? значення) (як-є yes))
        (за-умовою
-         ((тотожне? (yo-has-field? (як-є protocol) value) (як-є yes))
+         ((тотожне? (має-поле-янтра? (як-є protocol) значення) (як-є yes))
           (за-умовою
-            ((тотожне? (yo-has-field? (як-є result) value) (як-є yes))
+            ((тотожне? (має-поле-янтра? (як-є result) значення) (як-є yes))
              (за-умовою
-               ((тотожне? (yo-has-field? (як-є route) value) (як-є yes))
+               ((тотожне? (має-поле-янтра? (як-є route) значення) (як-є yes))
                 (за-умовою
-                  ((тотожне? (yo-has-field? (як-є evidence) value) (як-є yes))
+                  ((тотожне? (має-поле-янтра? (як-є evidence) значення) (як-є yes))
                    (за-умовою
-                     ((тотожне? (yo-has-field? (як-є audit-ref) value) (як-є yes))
-                      (yo-has-field? (як-є provenance) value))
+                     ((тотожне? (має-поле-янтра? (як-є audit-ref) значення) (як-є yes))
+                      (має-поле-янтра? (як-є provenance) значення))
                      (так (як-є no))))
                   (так (як-є no))))
                (так (як-є no))))
             (так (як-є no))))
          (так (як-є no))))
       (так (як-є no)))))
+
+; Зовнішні попередні імена — лише сумісні зв'язування.
+(визначити yo-proper-list? правильний-список-янтра?)
+(визначити yo-field поле-янтра)
+(визначити yo-has-field? має-поле-янтра?)
+(визначити yo-no-raw-shell? немає-прямої-оболонки-янтра?)
+(визначити yo-action-envelope оболонка-дії-янтра)
+(визначити yo-action-envelope? оболонка-дії-янтра?)
+(визначити yo-execution-observation спостереження-виконання-янтра)
+(визначити yo-execution-observation? спостереження-виконання-янтра?)
