@@ -71,7 +71,7 @@ fn disputed_outcome_keeps_both_evidence_sides_visible() {
 fn invalid_outcome_names_validation_failure_and_payload() {
     assert_eq!(
         eval_outcome_narration(
-            r#"(narrate-outcome (make-invalid (quote invalid-goal) 42))"#
+            r#"(narrate-outcome (створити-некоректний (quote invalid-goal) 42))"#
         ),
         "(invalid because invalid-goal payload 42)"
     );
@@ -81,13 +81,13 @@ fn invalid_outcome_names_validation_failure_and_payload() {
 fn partial_and_blocked_do_not_collapse_into_unknown() {
     assert_eq!(
         eval_outcome_narration(
-            r#"(narrate-outcome (make-partial (quote ()) (quote (depth . 12))))"#
+            r#"(narrate-outcome (створити-частковий (quote ()) (quote (depth . 12))))"#
         ),
         "(partial value () bound (depth . 12))"
     );
     assert_eq!(
         eval_outcome_narration(
-            r#"(narrate-outcome (make-blocked (quote (depends-on corpus))))"#
+            r#"(narrate-outcome (створити-заблокований (quote (depends-on corpus))))"#
         ),
         "(blocked because (depends-on corpus))"
     );
