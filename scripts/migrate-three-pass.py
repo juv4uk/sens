@@ -397,7 +397,7 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
     # сумісності наявних викликів інструмента; їхній вміст не читається.
     sem_rows=parse_semantic_rows(semantic_generated)
 
-    # A proposal-only historical SID8 crosswalk is provenance, never
+    # A proposal-only historical сід8 crosswalk is provenance, never
     # executable authority. Do not import research bridge rows into either
     # current name resolution or call-head lowering.
     _bridge_by_sid = {}
@@ -458,7 +458,7 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                 residents[name] = ident
             else:
                 # The exact current domain row resolves stale/ambiguous
-                # historical surface aliases without importing SID8 evidence.
+                # historical surface aliases without importing сід8 evidence.
                 my[name] = ident
 
     # Core4-defined D10 names are callable through their actual language
@@ -664,7 +664,7 @@ class Resolver:
 
     def head(self,tok: Tok,text7=None):
         t=tok.text
-        # Domain identity is (exact width, exact bits), never a flat SID8
+        # Domain identity is (exact width, exact bits), never a flat сід8
         # number. A *resident* D7 or D10 coordinate is not automatically
         # an executable function. Do not emit it as a call-head passthrough:
         # a binary-only output could then look valid yet lack a mechanism.
@@ -711,7 +711,7 @@ class Resolver:
             return [t],"already-exact"
         if len(t)==8 and set(t)<=set("01"):
             # Owner-ratified D8 first existed on 2026-10-06 (#3960).
-            # A raw eight-bit executable head could be older SID8/Sens8 or an
+            # A raw eight-bit executable head could be older сід8/сенс8 or an
             # unqualified later spelling; its bytes are never a D8 role proof.
             raise MigrationError(
                 f"ambiguous eight-bit SID8/Sens8-or-D8 head {t}: "
@@ -1575,7 +1575,7 @@ def main():
 
     data = load_foundation(args.foundation)
     # Current D8 is ratified, but occupancy never grants executable callability.
-    # An unproven eight-bit call head is rejected rather than inferred from SID8.
+    # An unproven eight-bit call head is rejected rather than inferred from сід8.
     d9_residents = set(data["domains"].get("D9",{}).get("residents",{}).keys())
     my, upper, bridge_by_sid = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
