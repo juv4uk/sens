@@ -1,5 +1,5 @@
-; Minimal fixture evidence file (#176 test only): admits ICLASSes that the
-; curated partially-implemented set (RET_NEAR, MOV, ADD) does not include.
+; Мінімальний файл-свідчення фікстури (лише тест #176): допускає ICLASS, яких
+; курований частково реалізований набір (RET_NEAR, MOV, ADD) не містить.
 (xed-machine-evidence/1
   (pinned-commit "0000000000000000000000000000000000000000")
   (source-digest "sha256:0")
