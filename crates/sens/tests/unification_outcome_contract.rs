@@ -83,8 +83,12 @@ fn reasoning_consumers_do_not_branch_on_private_fail_sentinel() {
             "#219 {name} must consume explicit unification outcomes, not branch on failed-subst?"
         );
         assert!(
-            source.contains("(unify-observe"),
-            "#219 {name} must consume the Lisp-owned unify-observe boundary"
+            source.contains("(уніфікувати"),
+            "#219 {name} має викликати чинну українську функцію уніфікації"
+        );
+        assert!(
+            !source.contains("(unify-observe"),
+            "#219 {name} не повинен повертати стару англійську викличну голову"
         );
     }
 }
