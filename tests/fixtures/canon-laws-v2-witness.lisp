@@ -1,5 +1,7 @@
-; #229 — current executable Canon laws under layered answer semantics.
-; Expected values are Lisp-owned data. No row uses t/() as pass/fail truth.
+; #229 — чинні закони Канону за пошаровою семантикою результатів.
+; Очікувані значення визначені даними Lisp, а не зовнішнім виконавцем.
+; Жоден рядок не ототожнює історичні t/() з відповідями «так» і «ні».
+; Протокольні поля expr, expected, active та історичні значення незмінні.
 
 ((expr . "канон-порожній-список")
  (expected . "()")
