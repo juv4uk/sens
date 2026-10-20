@@ -10,32 +10,32 @@
 ; and adds stable content-addressed IDs plus mechanically observed forms.
 ; Never hand-edit the generated file.
 
-(0011 fixtures (110101001 (110110111 "tests/fixtures/conformance.lisp")))
+(визначити fixtures (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
 
 ;; ---- Helpers ----
 
-(визначити assoc
-  (функція (key alist)
-    (за-умовою ((атом? alist) ()) ((атом? (як-є ())) (за-умовою
-           ((тотожне? (перше-першого alist) key) (перше alist))
-           ((атом? (як-є ())) (знайти-за-ключем key (решта alist))))))))
+(визначити знайти-пару
+  (функція (ключ список-пар)
+    (за-умовою ((атом? список-пар) ()) ((атом? (як-є ())) (за-умовою
+           ((тотожне? (перше-першого список-пар) ключ) (перше список-пар))
+           ((атом? (як-є ())) (знайти-за-ключем ключ (решта список-пар))))))))
 
-(визначити assoc-str
-  (функція (key alist)
-    (за-умовою ((атом? alist) ()) ((атом? (як-є ())) (за-умовою
-           ((тотожне? (перше-першого alist) key) (решта (перше alist)))
-           ((атом? (як-є ())) (assoc-str key (решта alist))))))))
+(визначити знайти-рядок-пари
+  (функція (ключ список-пар)
+    (за-умовою ((атом? список-пар) ()) ((атом? (як-є ())) (за-умовою
+           ((тотожне? (перше-першого список-пар) ключ) (решта (перше список-пар)))
+           ((атом? (як-є ())) (знайти-рядок-пари ключ (решта список-пар))))))))
 
-(визначити alist-keys
-  (функція (alist)
-    (за-умовою ((атом? alist) ()) ((атом? (як-є ())) (сполучити (перше-першого alist) (alist-keys (решта alist)))))))
+(визначити ключі-списку-пар
+  (функція (список-пар)
+    (за-умовою ((атом? список-пар) ()) ((атом? (як-є ())) (сполучити (перше-першого список-пар) (ключі-списку-пар (решта список-пар)))))))
 
 ;; Unique list (preserve order of first appearance)
-(визначити uniq
-  (функція (lst)
-    (за-умовою ((атом? lst) ()) ((атом? (як-є ())) (за-умовою
-           ((11101 (100 lst) (011 lst)) (uniq (011 lst)))
-           ((атом? (як-є ())) (сполучити (перше lst) (uniq (решта lst)))))))))
+(визначити унікальні
+  (функція (список-хвіст)
+    (за-умовою ((атом? список-хвіст) ()) ((атом? (як-є ())) (за-умовою
+           ((значення-у-списку? (перше список-хвіст) (решта список-хвіст)) (унікальні (решта список-хвіст)))
+           ((атом? (як-є ())) (сполучити (перше список-хвіст) (унікальні (решта список-хвіст)))))))))
 
 ;; Structural walk to collect observed-forms
 ;; Rules:
@@ -47,50 +47,50 @@
 ;; - any other list (incl. if, and, or, builtins, user calls) -> record 'application, recurse into all elements
 ;; - atoms (symbols, numbers, strings) -> ignored (not structural forms)
 
-(визначити walk-observed
-  (функція (v)
-    (110 ((010 v) ()) ((010 (001 ())) (001000 ((head (100 v)))
-         (за-умовою ((атом? head) (за-умовою
-              ((тотожне? head (як-є quote))
+(визначити обійти-спостережені
+  (функція (значення)
+    (за-умовою ((атом? значення) ()) ((атом? (як-є ())) (нехай ((голова (перше значення)))
+         (за-умовою ((атом? голова) (за-умовою
+              ((тотожне? голова (як-є quote))
                (список (як-є quote)))
-              ((тотожне? head (як-є lambda))
+              ((тотожне? голова (як-є lambda))
                (сполучити (як-є lambda)
-                     (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
-              ((тотожне? head (як-є def))
+                     (за-умовою ((атом? (решта-решти значення)) ()) ((атом? (як-є ())) (обійти-спостережені (перше (решта-решти значення)))))))
+              ((тотожне? голова (як-є def))
                (сполучити (як-є def)
-                     (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
-              ((тотожне? head (як-є defmacro))
+                     (за-умовою ((атом? (решта-решти значення)) ()) ((атом? (як-є ())) (обійти-спостережені (перше (решта-решти значення)))))))
+              ((тотожне? голова (як-є defmacro))
                (сполучити (як-є defmacro)
-                     (110 ((010 (0111 v)) ())
-                           ((атом? (решта (решта-решти v))) ())
-                           ((атом? (як-є ())) (walk-observed (перше (решта (решта-решти v))))))))
-              ((тотожне? head (як-є cond))
-               (сполучити (як-є cond) (walk-cond-clauses (решта v))))
+                     (за-умовою ((атом? (решта-решти значення)) ())
+                           ((атом? (решта (решта-решти значення))) ())
+                           ((атом? (як-є ())) (обійти-спостережені (перше (решта (решта-решти значення))))))))
+              ((тотожне? голова (як-є cond))
+               (сполучити (як-є cond) (обійти-клаузи-умови (решта значення))))
               ((атом? (як-є ()))
-               (сполучити (як-є application) (walk-list v))))) ((атом? (як-є ())) (сполучити (як-є application) (walk-list v)))))))))
+               (сполучити (як-є application) (обійти-список значення))))) ((атом? (як-є ())) (сполучити (як-є application) (обійти-список значення)))))))))
 
-(визначити walk-cond-clauses
-  (функція (clauses)
-    (за-умовою ((атом? clauses) ()) ((атом? (як-є ())) (приєднати (walk-observed (перше-першого clauses))
-                 (приєднати (за-умовою ((атом? (решта (перше clauses))) ()) ((атом? (як-є ())) (walk-observed (друге (перше clauses)))))
-                         (walk-cond-clauses (решта clauses))))))))
+(визначити обійти-клаузи-умови
+  (функція (клаузи)
+    (за-умовою ((атом? клаузи) ()) ((атом? (як-є ())) (приєднати (обійти-спостережені (перше-першого клаузи))
+                 (приєднати (за-умовою ((атом? (решта (перше клаузи))) ()) ((атом? (як-є ())) (обійти-спостережені (друге (перше клаузи)))))
+                         (обійти-клаузи-умови (решта клаузи))))))))
 
-(визначити walk-list
-  (функція (lst)
-    (за-умовою ((атом? lst) ()) ((атом? (як-є ())) (приєднати (walk-observed (перше lst))
-                 (walk-list (решта lst)))))))
+(визначити обійти-список
+  (функція (список-хвіст)
+    (за-умовою ((атом? список-хвіст) ()) ((атом? (як-є ())) (приєднати (обійти-спостережені (перше список-хвіст))
+                 (обійти-список (решта список-хвіст)))))))
 
 ;; Parse expr using read-all (canonical), then walk for observed-forms.
 ;; For NumericOverflow fixtures, the parser rejects the literal, so we skip
 ;; reading and return empty observed-forms (honest: no structural forms observed).
-(визначити get-observed-forms
-  (функція (expr-str error-kind)
+(визначити отримати-спостережені-форми
+  (функція (рядок-виразу вид-помилки)
     (за-умовою
-      ((тотожне? error-kind "NumericOverflow")
+      ((тотожне? вид-помилки "NumericOverflow")
        ())
       ((атом? (як-є ()))
-       (001000 ((forms (110101001 expr-str)))
-         (за-умовою ((атом? forms) ()) ((атом? (як-є ())) (uniq (walk-observed (перше forms))))))))))
+       (нехай ((форми (читати-всі рядок-виразу)))
+         (за-умовою ((атом? форми) ()) ((атом? (як-є ())) (унікальні (обійти-спостережені (перше форми))))))))))
 
 ;; Build identity record and compute ID
 ;; Identity includes axioms, not just expr+outcome: two fixtures can share the
@@ -99,53 +99,53 @@
 ;; under G1's general equality and again under S1's numeric exactness) —
 ;; collapsing those into one ID would silently erase which axiom a fixture
 ;; is actually evidence for.
-(визначити compute-id
-  (функція (expr axioms outcome-kind outcome-value)
-    (001001 ((identity-record (1110 (111 (001 expr) expr)
-                          (сполучити (як-є axioms) axioms)
-                          (сполучити outcome-kind outcome-value)))
-          (encoded (11110100 identity-record))
-          (hash (110011000 encoded)))
-      (110011110 "F-" (110100011 hash 0 16)))))
+(визначити обчислити-ід
+  (функція (вираз аксіоми вид-наслідку значення-наслідку)
+    (нехай-послідовно ((запис-тотожності (список (сполучити (як-є вираз) вираз)
+                          (сполучити (як-є axioms) аксіоми)
+                          (сполучити вид-наслідку значення-наслідку)))
+          (закодоване (значення-у-текст запис-тотожності))
+          (хеш (геш-256-шістнадцятковий закодоване)))
+      (рядок-додати "F-" (рядок-зріз хеш 0 16)))))
 
 ;; Process one fixture -> emit inventory record
-(визначити emit-fixture
-  (функція (fixture)
-    (001001 ((expr (assoc-str (001 expr) fixture))
-          (expected (assoc-str (як-є expected) fixture))
-          (error-kind (assoc-str (як-є error) fixture))
-          (tier (assoc-str (як-є tier) fixture))
-          (axioms (assoc-str (як-є axioms) fixture))
-          (requires (assoc-str (як-є requires) fixture))
-          (role (assoc-str (як-є role) fixture))
-          (note (assoc-str (як-є note) fixture))
-          (outcome-kind (за-умовою (expected (як-є expected)) ((атом? (як-є ())) (як-є error))))
-          (outcome-value (за-умовою (expected expected) ((атом? (як-є ())) error-kind)))
-          (id (compute-id expr axioms outcome-kind outcome-value))
-          (observed-forms (get-observed-forms expr error-kind)))
-      (11011011 (1110 (001 fixture)
-                   (сполучити (як-є id) id)
-                   (сполучити (як-є tier) tier)
-                   (сполучити (як-є axioms) axioms)
-                   (сполучити (як-є declared-requires) (за-умовою (requires requires) ((атом? (як-є ())) ())))
-                   (сполучити (як-є observed-forms) observed-forms)
-                   (сполучити (як-є outcome-kind) outcome-kind)
-                   (сполучити (як-є outcome-value) outcome-value)
-                   (сполучити (як-є role) (за-умовою (role role) ((атом? (як-є ())) ())))
-                   (сполучити (як-є note) (за-умовою (note note) ((атом? (як-є ())) ()))))))))
+(визначити вивести-приклад
+  (функція (приклад)
+    (нехай-послідовно ((вираз (знайти-рядок-пари (як-є вираз) приклад))
+          (очікуване (знайти-рядок-пари (як-є expected) приклад))
+          (вид-помилки (знайти-рядок-пари (як-є error) приклад))
+          (ярус (знайти-рядок-пари (як-є tier) приклад))
+          (аксіоми (знайти-рядок-пари (як-є axioms) приклад))
+          (вимоги (знайти-рядок-пари (як-є requires) приклад))
+          (роль (знайти-рядок-пари (як-є role) приклад))
+          (нотатка (знайти-рядок-пари (як-є note) приклад))
+          (вид-наслідку (за-умовою (очікуване (як-є expected)) ((атом? (як-є ())) (як-є error))))
+          (значення-наслідку (за-умовою (очікуване очікуване) ((атом? (як-є ())) вид-помилки)))
+          (ід (обчислити-ід вираз аксіоми вид-наслідку значення-наслідку))
+          (спостережені-форми (отримати-спостережені-форми вираз вид-помилки)))
+      (друкувати (список (як-є приклад)
+                   (сполучити (як-є id) ід)
+                   (сполучити (як-є tier) ярус)
+                   (сполучити (як-є axioms) аксіоми)
+                   (сполучити (як-є declared-requires) (за-умовою (вимоги вимоги) ((атом? (як-є ())) ())))
+                   (сполучити (як-є observed-forms) спостережені-форми)
+                   (сполучити (як-є outcome-kind) вид-наслідку)
+                   (сполучити (як-є outcome-value) значення-наслідку)
+                   (сполучити (як-є role) (за-умовою (роль роль) ((атом? (як-є ())) ())))
+                   (сполучити (як-є note) (за-умовою (нотатка нотатка) ((атом? (як-є ())) ()))))))))
 
 ;; Emit all fixtures
-(визначити emit-all
-  (функція (remaining)
-    (110 ((010 remaining) (001 ())) ((010 (001 ())) (001000 ((printed (emit-fixture (100 remaining))))
-         (emit-all (решта remaining)))))))
+(визначити вивести-всі
+  (функція (залишок)
+    (за-умовою ((атом? залишок) (як-є ())) ((атом? (як-є ())) (нехай ((надруковане (вивести-приклад (перше залишок))))
+         (вивести-всі (решта залишок)))))))
 
 ;; Header
-(11011011 (111 (001 about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
-(11011011 (111 (001 generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
-(11011011 (111 (001 source) "tests/fixtures/conformance.lisp"))
+(друкувати (сполучити (як-є about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
+(друкувати (сполучити (як-є generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
+(друкувати (сполучити (як-є source) "tests/fixtures/conformance.lisp"))
 
-(emit-all fixtures)
+(вивести-всі fixtures)
 
 (як-є ())
 
