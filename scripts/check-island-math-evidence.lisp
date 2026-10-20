@@ -1,7 +1,8 @@
-; #990 — fail-closed validation for mechanism evidence.
-; Evidence may only attach to an existing Canon/function-table SID and to an
-; executor route already admitted by #1046 mechanism metadata. This checker does
-; not define operation names, meaning, law, domain, or semantic equivalence.
+; #990 — перевірка fail-closed для свідчень механізмів.
+; Свідчення можуть прикріплюватися лише до наявного SID із Canon/таблиці
+; функцій і до маршруту виконавця, вже допущеного метаданими механізмів #1046.
+; Ця перевірка не визначає назв операцій, значення, закону, домену чи
+; семантичної рівнозначності.
 
 (визначити реєстр
   (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
