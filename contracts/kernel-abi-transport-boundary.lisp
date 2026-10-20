@@ -1,8 +1,8 @@
-; #1117 / #2817 — canonical domain identity vs legacy kernel ABI coordinate.
+; #1117 / #2817 — канонічна доменна ідентичність проти координати застарілого ABI ядра.
 ;
-; The language owns exact domain-qualified identity. External kernels may
-; preserve one historical transport byte as an observation/ABI coordinate,
-; but that wrapper is explicitly legacy and may not become reverse authority.
+; Мова володіє точною доменно-кваліфікованою ідентичністю. Зовнішні ядра можуть
+; зберегти один історичний транспортний байт як координату спостереження/ABI,
+; але ця обгортка явно застаріла і не може стати зворотною владою.
 
 (kernel-abi-transport-boundary/1
   (owner sens)
