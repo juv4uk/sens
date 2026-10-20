@@ -6,11 +6,11 @@
 ; but are normalized through the typed operand layer before a machine form is
 ; constructed. Operand typing does not grant instruction admission.
 
-(визначити x86-ret
+(визначити машинна-команда-повернення
   (функція ()
     (як-є (ret))))
 
-(визначити x86-mov-r64-imm64
+(визначити машинна-команда-завантажити-64-розрядне-число
   (функція (register immediate)
     ((функція (typed-register) (за-умовою
         ((x86-machine-rejected? typed-register) typed-register)
@@ -22,7 +22,7 @@
                     (x86-gpr64-value typed-register)
                     (x86-u64-imm-value typed-immediate))))) (x86-as-u64-imm immediate))))) (x86-as-gpr64 register))))
 
-(визначити x86-add-r64-r64
+(визначити машинна-команда-додати-64-розрядні-регістри
   (функція (destination source)
     ((функція (typed-destination) (за-умовою
         ((x86-machine-rejected? typed-destination) typed-destination)
@@ -34,7 +34,7 @@
                     (x86-gpr64-value typed-destination)
                     (x86-gpr64-value typed-source))))) (x86-as-gpr64 source))))) (x86-as-gpr64 destination))))
 
-(визначити x86-binary-gpr64-form
+(визначити машинна-форма-двох-64-розрядних-регістрів
   (функція (mnemonic destination source)
     ((функція (typed-destination) (за-умовою
         ((x86-machine-rejected? typed-destination) typed-destination)
@@ -48,28 +48,28 @@
 
 (визначити x86-or-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є or-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є or-r64-r64) destination source)))
 
 (визначити x86-and-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є and-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є and-r64-r64) destination source)))
 
 (визначити x86-sub-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є sub-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є sub-r64-r64) destination source)))
 
 (визначити x86-xor-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є xor-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є xor-r64-r64) destination source)))
 
 (визначити x86-cmp-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmp-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmp-r64-r64) destination source)))
 
 ; #196 bounded conditional-growth slice. The Jcc encoding/admission fact is
 ; already owned by #202. This atom owns only typed composition of the one
 ; conditional-transfer family demanded by the bounded EQ+COND witness.
-(визначити x86-jnz-rel8
+(визначити машинна-команда-перехід-якщо-не-нуль
   (функція (displacement)
     ((функція (typed-displacement) (за-умовою
         ((x86-machine-rejected? typed-displacement) typed-displacement)
@@ -78,7 +78,7 @@
            (як-є jnz-rel8)
            (x86-disp8-value typed-displacement))))) (x86-as-disp8 displacement))))
 
-(визначити x86-unary-gpr64-form
+(визначити машинна-форма-одного-64-розрядного-регістра
   (функція (mnemonic register)
     ((функція (typed-register) (за-умовою
         ((x86-machine-rejected? typed-register) typed-register)
@@ -87,19 +87,19 @@
 
 (визначити x86-push-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є push-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є push-r64) register)))
 
 (визначити x86-pop-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є pop-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є pop-r64) register)))
 
 (визначити x86-inc-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є inc-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є inc-r64) register)))
 
 (визначити x86-dec-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є dec-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є dec-r64) register)))
 
 (визначити x86-mov-mem64-r64
   (функція (memory source)
@@ -149,35 +149,35 @@
 
 (визначити x86-mov-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є mov-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є mov-r64-r64) destination source)))
 
 (визначити x86-test-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є test-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є test-r64-r64) destination source)))
 
 (визначити x86-imul-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є imul-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є imul-r64-r64) destination source)))
 
 (визначити x86-not-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є not-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є not-r64) register)))
 
 (визначити x86-neg-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є neg-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є neg-r64) register)))
 
 (визначити x86-idiv-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є idiv-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є idiv-r64) register)))
 
 (визначити x86-call-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є call-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є call-r64) register)))
 
 (визначити x86-jmp-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є jmp-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є jmp-r64) register)))
 
 (визначити x86-cqo
   (функція ()
@@ -344,119 +344,119 @@
 
 (визначити x86-cmovo-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovo-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovo-r64-r64) destination source)))
 
 (визначити x86-cmovno-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovno-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovno-r64-r64) destination source)))
 
 (визначити x86-cmovb-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovb-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovb-r64-r64) destination source)))
 
 (визначити x86-cmovc-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovc-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovc-r64-r64) destination source)))
 
 (визначити x86-cmovnb-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovnb-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovnb-r64-r64) destination source)))
 
 (визначити x86-cmovnc-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovnc-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovnc-r64-r64) destination source)))
 
 (визначити x86-cmovae-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovae-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovae-r64-r64) destination source)))
 
 (визначити x86-cmovz-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovz-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovz-r64-r64) destination source)))
 
 (визначити x86-cmove-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmove-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmove-r64-r64) destination source)))
 
 (визначити x86-cmovnz-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovnz-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovnz-r64-r64) destination source)))
 
 (визначити x86-cmovne-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovne-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovne-r64-r64) destination source)))
 
 (визначити x86-cmovbe-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovbe-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovbe-r64-r64) destination source)))
 
 (визначити x86-cmovna-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovna-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovna-r64-r64) destination source)))
 
 (визначити x86-cmovnbe-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovnbe-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovnbe-r64-r64) destination source)))
 
 (визначити x86-cmova-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmova-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmova-r64-r64) destination source)))
 
 (визначити x86-cmovs-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovs-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovs-r64-r64) destination source)))
 
 (визначити x86-cmovns-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovns-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovns-r64-r64) destination source)))
 
 (визначити x86-cmovp-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovp-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovp-r64-r64) destination source)))
 
 (визначити x86-cmovpe-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovpe-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovpe-r64-r64) destination source)))
 
 (визначити x86-cmovnp-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovnp-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovnp-r64-r64) destination source)))
 
 (визначити x86-cmovpo-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovpo-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovpo-r64-r64) destination source)))
 
 (визначити x86-cmovl-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovl-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovl-r64-r64) destination source)))
 
 (визначити x86-cmovnge-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovnge-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovnge-r64-r64) destination source)))
 
 (визначити x86-cmovnl-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovnl-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovnl-r64-r64) destination source)))
 
 (визначити x86-cmovge-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovge-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovge-r64-r64) destination source)))
 
 (визначити x86-cmovle-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovle-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovle-r64-r64) destination source)))
 
 (визначити x86-cmovng-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovng-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovng-r64-r64) destination source)))
 
 (визначити x86-cmovnle-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovnle-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovnle-r64-r64) destination source)))
 
 (визначити x86-cmovg-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є cmovg-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є cmovg-r64-r64) destination source)))
 
 (визначити x86-nop
   (функція ()
@@ -464,31 +464,31 @@
 
 (визначити x86-bt-r64-r64
   (функція (base index)
-    (x86-binary-gpr64-form (як-є bt-r64-r64) base index)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є bt-r64-r64) base index)))
 
 (визначити x86-popcnt-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є popcnt-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є popcnt-r64-r64) destination source)))
 
 (визначити x86-tzcnt-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є tzcnt-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є tzcnt-r64-r64) destination source)))
 
 (визначити x86-bsf-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є bsf-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є bsf-r64-r64) destination source)))
 
 (визначити x86-bsr-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form (як-є bsr-r64-r64) destination source)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є bsr-r64-r64) destination source)))
 
 (визначити x86-bswap-r64
   (функція (register)
-    (x86-unary-gpr64-form (як-є bswap-r64) register)))
+    (машинна-форма-одного-64-розрядного-регістра (як-є bswap-r64) register)))
 
 (визначити x86-xchg-r64-r64
   (функція (left right)
-    (x86-binary-gpr64-form (як-є xchg-r64-r64) left right)))
+    (машинна-форма-двох-64-розрядних-регістрів (як-є xchg-r64-r64) left right)))
 
 (визначити x86-cld (функція () (як-є (cld))))
 (визначити x86-std (функція () (як-є (std))))
@@ -563,7 +563,7 @@
 
 (визначити x86-cmpxchg-r64-r64
   (функція (destination source)
-    (x86-binary-gpr64-form
+    (машинна-форма-двох-64-розрядних-регістрів
       (як-є cmpxchg-r64-r64)
       destination
       source)))
@@ -627,3 +627,11 @@
 (визначити x86-encode-machine-block
   (функція (block)
     (x86-encode-admitted-program-or-reject (форми-машинного-блоку block))))
+
+; Зовнішні машинні інтерфейси лишаються псевдонімами українських замикань.
+(визначити x86-ret машинна-команда-повернення)
+(визначити x86-mov-r64-imm64 машинна-команда-завантажити-64-розрядне-число)
+(визначити x86-add-r64-r64 машинна-команда-додати-64-розрядні-регістри)
+(визначити x86-binary-gpr64-form машинна-форма-двох-64-розрядних-регістрів)
+(визначити x86-jnz-rel8 машинна-команда-перехід-якщо-не-нуль)
+(визначити x86-unary-gpr64-form машинна-форма-одного-64-розрядного-регістра)
