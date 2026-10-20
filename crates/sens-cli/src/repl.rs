@@ -430,6 +430,13 @@ fn eval_t5m_repl_line(
     let mut result = program
         .execute(session)
         .map_err(|error| format!("SENS binary evaluator: {}", error.render(line)))?;
+    // A defined closure is retained in the persistent SENS environment, but
+    // it is not itself an exact-domain data word to send back through T5M.
+    // Keep the evaluator's opaque runtime result for REPL presentation; all
+    // subsequent invocations still cross Zig T5M as exact source words.
+    if matches!(&result.value, Value::Closure(_)) {
+        return Ok(result);
+    }
     result.value = roundtrip_repl_result(result.value)?;
     Ok(result)
 }
@@ -1039,7 +1046,7 @@ mod tests {
     use super::*;
 
     fn core_state() -> ReplState {
-        let mut session = Session::default();
+        let mut session = Session::bare();
         sens::load_core_library(&mut session).expect("core bootstrap");
         ReplState::new(session, ReplSurface::Core, false).expect("REPL state")
     }
@@ -1188,13 +1195,6 @@ mod tests {
             error.starts_with("T5M_RESULT_UNSUPPORTED value=String"),
             "{error}"
         );
-    }
-
-    fn value(state: &mut ReplState, source: &str) -> String {
-        eval_program(source, &mut state.session)
-            .unwrap_or_else(|error| panic!("{source}: {}", error.render(source)))
-            .value
-            .to_string()
     }
 
     #[test]
@@ -1400,12 +1400,12 @@ mod tests {
             "UK surface exact byte identity"
         );
         assert!(
-            source.starts_with("; Ukrainian surface"),
-            "not canonical source asset"
+            source.starts_with("; Компактна українська проєкція"),
+            "not the current compact Ukrainian projection notice"
         );
         assert!(
-            source.contains("одна семантична реалізація"),
-            "truncated or swapped source"
+            source.contains("не дублює реєстр"),
+            "source must not duplicate domain identities"
         );
         println!(
             "ZIG_UK_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
@@ -1487,41 +1487,79 @@ mod tests {
     }
 
     #[test]
-    fn ukrainian_surface_adds_derived_vocabulary_but_not_canon_bindings() {
+    fn ukrainian_surface_uses_domain_registry_without_alias_bindings() {
         let mut state = core_state();
-        assert!(state.session.environment.get("атом?").is_none());
+        assert!(state.session.environment.get("додати").is_none());
 
         state.switch_surface(ReplSurface::Ukrainian).expect("uk");
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
-        // Contract 6.0: canonical spelling is resolver-owned, never a mutable
-        // surface-frame alias. Derived Ukrainian vocabulary remains a binding.
-        assert!(state.session.environment.get("атом?").is_none());
-        // `додати` is now a table surface (plus, 00001100) resolved through
-        // its code; `вектор-додати` is derived vocabulary bound by uk.lisp.
+        assert_eq!(
+            eval_repl_step_t5m(&mut state, "(додати 1 2)")
+                .expect("registered Ukrainian head crosses T5M")
+                .value
+                .to_string(),
+            "3"
+        );
+        // Canonical spelling is resolver-owned, never a mutable surface-frame
+        // alias; domain tables supply both Ukrainian projections.
         assert!(state.session.environment.get("додати").is_none());
-        assert!(state.session.environment.get("вектор-додати").is_some());
 
         state.switch_surface(ReplSurface::Core).expect("core");
-        assert!(state.session.environment.get("атом?").is_none());
-        assert_eq!(value(&mut state, "(atom? 'мама)"), "(1)");
+        assert_eq!(
+            eval_repl_step_t5m(&mut state, "(додати 1 2)")
+                .expect("registered canonical head crosses T5M")
+                .value
+                .to_string(),
+            "3"
+        );
         // Canon is not a UI layer: registered spellings still denote Canon
         // even when no human surface frame is loaded.
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
+        assert_eq!(
+            eval_repl_step_t5m(&mut state, "(додати 1 2)")
+                .expect("canonical domain resolution is surface-independent")
+                .value
+                .to_string(),
+            "3"
+        );
     }
 
     #[test]
     fn switching_surface_preserves_user_frame_and_closure_view() {
         let mut state = core_state();
-        value(&mut state, "(define крок 1)");
-        value(&mut state, "(define додай-крок (lambda (x) (+ x крок)))");
-        assert_eq!(value(&mut state, "(додай-крок 5)"), "6");
+        state.switch_surface(ReplSurface::Ukrainian).expect("uk");
+        eval_repl_step_t5m(&mut state, "(визначити крок 1)").expect("bind in Ukrainian");
+        eval_repl_step_t5m(
+            &mut state,
+            "(визначити додай-крок (функція (х) (додати х крок)))",
+        )
+        .expect("closure definition crosses T5M");
+        assert_eq!(
+            eval_repl_step_t5m(&mut state, "(додай-крок 5)")
+                .expect("local closure call crosses T5M")
+                .value
+                .to_string(),
+            "6"
+        );
+
+        state
+            .switch_surface(ReplSurface::UkrainianFull)
+            .expect("ukr");
+        eval_repl_step_t5m(&mut state, "(визначити крок 2)").expect("shadow in Ukrainian");
+        assert_eq!(
+            eval_repl_step_t5m(&mut state, "(додай-крок 5)")
+                .expect("closure keeps current frame view")
+                .value
+                .to_string(),
+            "7"
+        );
 
         state.switch_surface(ReplSurface::Ukrainian).expect("uk");
-        value(&mut state, "(define крок 2)");
-        assert_eq!(value(&mut state, "(додай-крок 5)"), "7");
-
-        state.switch_surface(ReplSurface::English).expect("en");
-        assert_eq!(value(&mut state, "(додай-крок 5)"), "7");
+        assert_eq!(
+            eval_repl_step_t5m(&mut state, "(додай-крок 5)")
+                .expect("closure survives projection switch")
+                .value
+                .to_string(),
+            "7"
+        );
     }
 
     #[test]
@@ -1578,8 +1616,13 @@ mod tests {
         let snapshot = state.session.environment.snapshot();
         // Since #1477 no function name is bound in the raw environment: the
         // call resolves through the SENS code, in any surface.
-        assert!(!snapshot.iter().any(|(name, _)| name.as_ref() == "atom?"));
-        assert!(!snapshot.iter().any(|(name, _)| name.as_ref() == "атом?"));
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
+        assert!(!snapshot.iter().any(|(name, _)| name.as_ref() == "додати"));
+        assert_eq!(
+            eval_repl_step_t5m(&mut state, "(додати 1 2)")
+                .expect("registered D5 head resolves without lexical alias")
+                .value
+                .to_string(),
+            "3"
+        );
     }
 }

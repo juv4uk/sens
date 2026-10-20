@@ -796,8 +796,8 @@ mod core_profile_bootstrap_tests {
         assert!(!forms.is_empty());
 
         let physical = zig_transport::encode_t5_direct(&words)
-            .expect("only Zig may create physical T5");
-        assert_eq!(physical, [0x63, 0x89, 0x06, 0xa1]);
+            .expect("only Zig may create physical T5M");
+        assert_eq!(physical, [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91]);
         // The exact-byte checked Zig adapter is used by sens-trit in
         // production. Exercise that same adapter in this sens test binary:
         // it must accept the unchanged carrier and reject one flipped bit.
@@ -824,9 +824,9 @@ mod core_profile_bootstrap_tests {
     #[cfg(feature = "zig-transport")]
     #[test]
     fn physical_main_binary_passes_through_zig_abi_v2_before_sens_admission() {
-        // This ordinary T5 carrier holds five exact D2/D3 words.
+        // This canonical T5M carrier holds five exact D2/D3 words.
         // Zig transports [width, MSB, LSB]; SENS alone judges D2 and eval.
-        let physical = [0x63, 0x89, 0x06, 0xa1];
+        let physical = [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91];
         let words = decode_physical_t5_words(&physical).expect("Zig ABI v2 ingress");
         let widths: Vec<_> = words.iter().copied().map(sens::BinarySourceWord::width).collect();
         let bits: Vec<_> = words.iter().copied().map(sens::BinarySourceWord::packed_bits).collect();
@@ -842,7 +842,7 @@ mod core_profile_bootstrap_tests {
     #[cfg(not(feature = "zig-transport"))]
     #[test]
     fn physical_main_refuses_to_bypass_unavailable_zig_transport() {
-        let physical = [0x63, 0x89, 0x06, 0xa1];
+        let physical = [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91];
         let error = decode_physical_t5_words(&physical).expect_err("no Zig means no .sens ingress");
         assert!(error.contains("no Rust fallback"));
     }
@@ -855,7 +855,10 @@ mod core_profile_bootstrap_tests {
             .expect("repeat exact Zig ABI byte copy");
         assert!(!src.is_empty());
         assert_eq!(src.as_bytes(), raw.as_slice(), "Zig ABI must preserve every source byte");
-        assert!(src.contains("(0011 lint-form-head"), "real linter source, not a stub");
+        assert!(
+            src.contains("(визначити аналіз-форма-голова"),
+            "current Ukrainian linter source, not a stub"
+        );
         // Parsing and execution are distinct SENS-owned admission tests.
         // Do not turn this transport witness red for an unrelated legacy
         // mixed-source parser rejection, nor falsely claim semantic PASS.
