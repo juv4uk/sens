@@ -393,7 +393,7 @@ fi
 # Lisp-owned expected evidence AND the reference evaluator, while proving the
 # observed execution route is really native rather than a hidden fallback.
 native_first_parity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-parity-witness.lisp)"
-if [[ "$native_first_parity_status" != "(native-first-parity-witness (status pass) (cases 4))" ]]; then
+if [[ "$native_first_parity_status" != "(нативний-паритет-свідок (status pass) (cases 4))" ]]; then
   printf 'native/evaluator differential parity witness failed: %s\n' "$native_first_parity_status" >&2
   exit 1
 fi
