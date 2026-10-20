@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-"""Mechanical source/width audit; semantic verdict belongs only to binary SENS.
+"""Статична перевірка джерела уніфікації й точної ширини доменів.
 
-Axiom: the binary key width IS the domain address.
-Checks:
-  1. lib/unify-observe.lisp has no bare host truthiness (t / T / NIL)
-  2. Historical D6/D9 executable heads are absent (no implicit callability)
-  3. Existing one-call unify compatibility boundary remains in the source
-  4. Key human outcome surfaces are present, without host truth tables
-  5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
+Семантичний висновок належить виключно СЕНС, а не цьому скрипту.
+Адресу об'єкта визначають домен і точне двійкове слово.
 
-Run:
-    python3 scripts/test-unify-observe-d1-bitness.py
+Перевіряємо: відсутність істинності хоста, старих викличних голів
+і старого англомовного псевдоніма; наявність української межі
+спостереження та повноту таблиць Д1–Д10.
 """
+
 from __future__ import annotations
 
 import re
@@ -23,11 +20,11 @@ UO = ROOT / "lib" / "unify-observe.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
 REQUIRED = (
-    "unify-observe",
-    "unification-failure",
-    "unified",
-    "уніфікація-спостереження-стан",
-    "unify",
+    "(визначити спостерігати-уніфікацію",
+    "(визначити уніфікація-спостереження-стан",
+    "(уніфікувати ",
+    "(як-є unification-failure)",
+    "(як-є unified)",
 )
 
 
@@ -45,6 +42,8 @@ def check_uo() -> list[str]:
     executable = text[text.find("(0011 "):]
     if re.search(r"\((?:001000|101010000)(?=\s|\()", executable):
         errs.append("unify-observe: historical D6/D9 executable head present")
+    if "(визначити unify-observe " in text:
+        errs.append("unify-observe: повернувся застарілий англійський псевдонім")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"unify-observe: required surface missing: {fn}")
