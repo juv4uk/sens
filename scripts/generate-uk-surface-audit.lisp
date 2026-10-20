@@ -216,11 +216,11 @@
 
 (визначити заголовок
   (список
-    "; GENERATED — DO NOT EDIT BY HAND"
-    "; Semantic authority: lib/surface/semantic-registry.lisp via lib/generated/function-table.lisp"
+    "; ЗГЕНЕРОВАНО — НЕ РЕДАГУВАТИ ВРУЧНУ"
+    "; Семантична влада: lib/surface/semantic-registry.lisp через lib/generated/function-table.lisp"
     "; Candidate evidence only: lib/surface/український-профіль-джерела.lisp"
-    "; Generator: scripts/generate-uk-surface-audit.lisp (my-lisp#85)"
-    "; candidate-full-uk is NOT automatically promoted into authoritative full-uk"
+    "; Генератор: scripts/generate-uk-surface-audit.lisp (my-lisp#85)"
+    "; candidate-full-uk НЕ підноситься автоматично до владного full-uk"
     ""
     "(uk-surface-audit/2"
     (рядок+ "  (summary (total " (число-рядок усього) ")"
@@ -236,4 +236,4 @@
 (визначити вихід (рядок+ тіло "\n  )\n)\n"))
 
 (записати-файл "lib/generated/uk-surface-audit.lisp" вихід)
-(друкувати (рядок+ "uk-surface-audit: " (число-рядок усього) " identities written"))
+(друкувати (рядок+ "uk-surface-audit: " (число-рядок усього) " тотожностей записано"))
