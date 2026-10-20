@@ -171,7 +171,7 @@ fn bounded_sub_effect_projects_with_form_byte_and_independent_decode_parity() {
         assert_eq!(effect, format!("(bounded-u64-sub {left} {right})"));
 
         let projected = eval_value(
-            &format!("(x86-project-machine-effect (quote {effect}))"),
+            &format!("(проєктувати-машинний-ефект-на-х86 (quote {effect}))"),
             &mut session,
         );
         let donor = eval_value(
@@ -181,7 +181,7 @@ fn bounded_sub_effect_projects_with_form_byte_and_independent_decode_parity() {
         assert_eq!(projected, donor, "SUB projection must preserve donor forms");
 
         let projected_bytes = eval_value(
-            &format!("(x86-encode-machine-effect (quote {effect}))"),
+            &format!("(закодувати-машинний-ефект-на-х86 (quote {effect}))"),
             &mut session,
         );
         let donor_bytes = eval_value(
@@ -217,7 +217,7 @@ fn bounded_mul_effect_projects_with_form_and_byte_parity() {
         assert_eq!(effect, format!("(bounded-u64-mul {left} {right})"));
 
         let projected = eval_value(
-            &format!("(x86-project-machine-effect (quote {effect}))"),
+            &format!("(проєктувати-машинний-ефект-на-х86 (quote {effect}))"),
             &mut session,
         );
         let donor = eval_value(
@@ -227,7 +227,7 @@ fn bounded_mul_effect_projects_with_form_and_byte_parity() {
         assert_eq!(projected, donor, "IMUL projection must preserve donor forms");
 
         let projected_bytes = eval_value(
-            &format!("(x86-encode-machine-effect (quote {effect}))"),
+            &format!("(закодувати-машинний-ефект-на-х86 (quote {effect}))"),
             &mut session,
         );
         let donor_bytes = eval_value(
