@@ -2688,15 +2688,12 @@
 
 (визначити число-рядок
   (функція (число-аргумент)
-    ; Canonical serialization for every number (FIX-NUMBER-TO-STRING-
-    ; RATIONAL, docs/BUG-number-to-string-rational.md): integers render
-    ; as themselves, non-integer rationals render REDUCED exactly —
-    ; "1/3", never a decimal approximation, per the same G6 law that
-    ; makes 10/20 serialize as "1/2". The previous quotient/mod descent
-    ; crashed on fractional digit indices ((nth 1/3 <digit-table>)) and
-    ; its misleading error surfaced as an apparent memory corruption.
-    ; Delegation, not re-implementation: write-to-string is already the
-    ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
+    ; Канонічне перетворення числа на текст зберігає точне значення.
+    ; Цілі числа мають запис без знаменника, дроби — скорочений:
+    ; 10/20 дає 1/2, а не приблизне десяткове число.
+    ; Попередній розбір дробових індексів цифр спричиняв помилку.
+    ; Використовуємо перевірений законом G6 механізм write-to-string,
+    ; а не повторну незалежну реалізацію.
     (значення-у-текст число-аргумент)))
 (визначити number->string число-рядок)
 
@@ -2974,9 +2971,9 @@
                  (відсутні-відповідники
                    джерело-форми (решта відповідники) привязки)))))))))))
 
-; Build one expression whose nested DEFINE forms all execute in the caller's
-; environment. This is why materialization is a macro rather than a function:
-; an ordinary function would define peers only in its temporary child frame.
+; Будуємо вираз із вкладеними визначеннями в оточенні викликача.
+; Матеріалізація тому є макросом: звичайна функція створювала б
+; імена в тимчасовому кадрі, недоступному зовнішньому виклику.
 (визначити побудувати-визначення-відповідників
   (функція (джерело-форми відповідники)
     (за-умовою
@@ -3115,8 +3112,9 @@
 (визначити maplist відобразити-залишки)
 
 ; D8:00110000 MAPL — exact ratified D8 historical capability.
-; Run the callback over successive nonempty tails for effects; return original list.
-; A Lisp-owned D6:000101 MAPLIST derivation; no direct D8 binary admission.
+; Послідовно виконуємо дію над непорожніми залишками списку
+; і повертаємо початковий список. Це похідний закон MAPLIST СЕНС,
+; а не прямий допуск коду D8.
 (визначити застосувати-до-залишків
   (функція (елементи дія)
     ((функція (непотрібні-результати) елементи)
@@ -3369,7 +3367,8 @@
 (визначити sublis підставити-пари)
 
 ; D8:00100010 SIGNUM: exact D24+ sign, result negative-one / zero / one.
-; Only D5 LESSP, D6 NEG, and exact D1 COND; no D7 digit promotion.
+; Використовуємо лише D5 LESSP, D6 NEG і точний D1 COND;
+; текстові цифри D7 не беруть участі в арифметиці.
 (визначити знак-числа
   (функція (число)
     (за-умовою
@@ -3421,7 +3420,8 @@
 
 ; D8:10100001 CHAR< / D8:00100111 CHAR> — Unicode codepoint order.
 ; D8:11100000 CHAR-CODE supplies an exact D24 value, D5:11010 LESSP owns order.
-; No direct D8 predicate admission: these are SENS language closures.
+; Предикати реалізовані мовними замиканнями СЕНС
+; без нового прямого допуску викликів D8.
 (визначити символ-менший?
   (функція (ліве праве)
     (менше? (код-символу ліве) (код-символу праве))))
@@ -3644,9 +3644,9 @@
 
 ; D9 canonical reasoning outcomes — ratified exact coordinates, from
 ; lib/result-status.lisp (historical research source; only SENS owns meaning).
-; Each result is ordinary D3/D4 list data, never a new host Value variant.
-; Canonical tags are quoted data, not executable English identifiers.
-; D9:000111101 MAKE-PROVED / D9:000110101 MAKE-UNKNOWN.
+; Результати — звичайні спискові дані D3/D4,
+; а не новий тип значення зовнішнього виконавця.
+; Канонічні мітки лишаються цитованими даними, не викличними головами.
 (визначити створити-доведений
   (функція (твердження докази)
     (список (як-є proved) твердження докази)))
@@ -3867,10 +3867,10 @@
     (решта (решта (решта (решта (решта (решта (решта значення)))))))))
 
 ; D9 four translation-envelope projections, harvested from lib/translation.lisp.
-; Canonical envelope is (translation/1 STATUS KIND SOURCE PAYLOAD), ordinary
-; SENS list data. The external translator grants no semantic admission.
-; Direct D3 CAR/CDR projection; no host registry, no decimal intermediary.
-; D9:000000101 TRANSLATION-STATUS, D9:000101100 TRANSLATION-KIND.
+; Оболонка (translation/1 STATUS KIND SOURCE PAYLOAD) — звичайні
+; дані СЕНС. Зовнішній перекладач не ратифікує семантику.
+; Поля читаються через D3 CAR/CDR, без реєстру хоста
+; й десяткового посередника.
 (визначити переклад-стан
   (функція (пропозиція)
     (перше (решта пропозиція))))
@@ -3908,8 +3908,9 @@
 
 ; D9 guard decision/status algebra from lib/guard.lisp.
 ; Ratified D9:000010001 GUARD-DECISION? and D9:000000000 GUARD-EVIDENCE-STATUS?
-; Every result is a strict D1 one-bit predicate. Non-atomic decision/status
-; data is rejected by D1:NO rather than sent to D3 EQ on a pair.
+; Кожна відповідь — точний біт предиката D1.
+; Неатомарне рішення чи стан відхиляється значенням «ні»,
+; а не передається як пара в атомарне D3 EQ.
 (визначити захист-рішення?
   (функція (рішення)
     (за-умовою
@@ -4262,10 +4263,9 @@
 
 ; D9 content-store algebra — derived SENS representation from lib/content-store.lisp.
 ; Immutable address/value alist: ((address . value) ...), D3:101 atom key identity.
-; The lookup returns a singleton (value) on presence, () on absence;
-; a stored () therefore remains distinguishable from an absent address.
-; These language closures do not grant D9 direct value-call mechanisms.
-; D9:000100001 EMPTY-CONTENT-STORE
+; Пошук повертає (значення), якщо адресу знайдено,
+; або (), якщо її немає. Збережене () не плутається з відсутністю.
+; Мовні замикання не створюють прямого механізму виклику D9.
 (визначити порожній-вміст-сховище
   (функція () (як-є ())))
 
@@ -5373,10 +5373,10 @@
 ; PAIP SORT*: a deliberately list-only derived SENS helper.
 ; Donor: juv4uk/paip-lisp@2db2ba99465cadef904e574b20b6981b32ad81df,
 ; lisp/auxfns.lisp. The donor's full sequence/key API is broader.
-; These helpers accept a proper list and a strict "comes before" predicate
-; that must return an exact D1 PredicateBit. Processing input left-to-right
-; and placing a new item after equal keys keeps ties stable.
-; This is NOT direct admission of D10:0011001011 SORT*; that row remains research.
+; Упорядкування приймає правильний список і точний предикат
+; D1 «передує». Елементи обробляємо зліва направо, нові
+; ставимо після рівних ключів, зберігаючи сталий порядок.
+; Це не прямий допуск дослідної D10:0011001011 SORT*.
 
 (визначити вставити-впорядковано-за
   (функція (перед? елемент упорядкований)
