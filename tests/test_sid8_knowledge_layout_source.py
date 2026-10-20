@@ -73,7 +73,7 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
     def test_four_live_fixture_source_heads(self):
         expected = {
             "lisp-fs-conformance.lisp": ("(001000 ((empty", "(001 (hello world))"),
-            "rivnopravnist-uk.lisp": ("(0011 подвоїти", "(01010 число число)", "(110"),
+            "rivnopravnist-uk.lisp": ("(визначити подвоїти", "(додати число число)", "(за-умовою"),
             "semantic-registry-self-hosted-witness.lisp": ("(0011 semantic-registry-self-hosted-witness", "(0010 (source)"),
             "semantic-coordinate-matrix-845.lisp": ("(0011 semantic-coordinate-matrix-845", "(001\n"),
         }
@@ -83,6 +83,13 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
                 for snippet in needles:
                     self.assertIn(snippet, source)
                 self.assertNotRegex(source, r"\(00001001(?=\s|\))")
+        ukrainian_example = (ROOT / "tests/fixtures/rivnopravnist-uk.lisp").read_text()
+        self.assertIn("(визначити подвоїти", ukrainian_example)
+        self.assertIn("(за-умовою", ukrainian_example)
+        self.assertIn("(тотожне? (подвоїти 21) 42)", ukrainian_example)
+        for bits in ("0011", "0010", "01010", "110", "101", "001"):
+            self.assertNotRegex(ukrainian_example, r"\(\s*" + bits + r"(?=\s|\))")
+
         # Binary-id data is still historical data, NOT an executable call head.
         registry = (ROOT / "tests/fixtures/semantic-registry-self-hosted-witness.lisp").read_text()
         self.assertIn("(semantic-registry-row-in registry 00000001)", registry)
