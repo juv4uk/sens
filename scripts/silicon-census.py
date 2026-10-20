@@ -217,7 +217,7 @@ def build_census(
 
 def self_test() -> None:
     # The generated evidence index uses the ratified Ukrainian `укр` call-head.
-    # Reject the retired encoded SID8 head rather than silently losing 1176 rows.
+    # Reject the retired encoded сід8 head rather than silently losing 1176 rows.
     canonical_pair = PAIR_RE.match('  (пара X86-BASE "AAA")')
     assert canonical_pair is not None
     assert canonical_pair.groups() == ("X86-BASE", "AAA")
