@@ -1,7 +1,7 @@
 ; contracts/d1-d7-foundation-ratification.lisp
-; OWNER-RATIFIED 2026-10-05 — issue #3572.
-; Single current semantic foundation chain through D7.
-; Exact resident maps are delegated to per-domain current authorities.
+; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-05 — issue #3572.
+; Єдиний чинний ланцюг семантичної основи до D7.
+; Точні карти резидентів делеговано поточним владам відповідних доменів.
 
 (
   (schema . d1-d7-foundation-ratification/1)
