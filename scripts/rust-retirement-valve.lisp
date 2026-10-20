@@ -1,15 +1,16 @@
-; #300 — Lisp owns the Rust retirement verdict.
-; CI transports only Rust diff facts into tests/rust-retirement-changes.lisp.
+; #300 — рішення про скорочення Rust ухвалює програма Lisp СЕНС.
+; CI передає лише факти різниці Rust до tests/rust-retirement-changes.lisp.
 ;
-; Change rows:
+; Форма вхідного рядка (поля незмінного зовнішнього протоколу):
 ;   (rust-change "path" additions deletions status)
-; status is one of: existing | new | deleted
+; Можливі стани: existing, new, deleted.
 ;
-; Verdicts:
+; Іменовані результати:
 ;   (rust-retirement-ok)
 ;   (rust-retirement-violation "path" additions status "diagnostic")
 ;
-; Active #299 rule: Lisp may grow; Rust may only shrink.
+; Чинне правило #299: Lisp може зростати, Rust має тільки скорочуватися.
+; Вхідні ключі, діагностичні рядки та маркери результатів не перейменовуємо.
 
 (визначити друге (функція (х) (перше (решта х))))
 (визначити третє (функція (х) (перше (решта (решта х)))))
