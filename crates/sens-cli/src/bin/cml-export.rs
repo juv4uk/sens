@@ -13,22 +13,12 @@ use sens::semantic_registry_export::{
 use sens::{fasl_encode, parse, sha256_source};
 use std::{fs, process};
 
-/// Slice 1 (2026-09-10, unchanged): exactly the semantic IDs
-/// `tests/fixtures/conformance.lisp`'s fixture #69 (named def + recursion,
-/// `count-down`) exercises.
-///
-/// Slice 2 (2026-09-11, per cml's own real need, not speculative --
-/// cml#9 found `semantic.rs`'s `is_reserved_canon_surface` hand-transcribing
-/// the full Canon 0+7 surface list instead of reading it from this export,
-/// because slice 1 never covered atom/cons/car/cdr/defmacro in the first
-/// place): adds the remaining Canon 0 identities (atom/cons/car/cdr) and
-/// defmacro (SID 00001010), so a consumer's own "which surfaces are Canon-reserved"
-/// table can be derived entirely from this file instead of staying a
-/// second hand-typed list that silently drifts if the registry changes.
-/// Обсяг експорту — які коди потрібні cml (slice 1 + slice 2). Роль і
-/// викликність більше не вписуються тут вручну: їх дає таблиця функцій
-/// (`function_role`, lib/surface/function-signatures.lisp).
-const EXPORTED_CODES: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13];
+/// Exact single identities that CML export v1 can represent.
+/// `defmacro` is deliberately absent: it is a derived surface over the
+/// current D5 MACRO and D4 DEFINE identities, not one standalone identity
+/// that this legacy single-slot format can truthfully encode.
+/// Ролі й викликність беремо з таблиці функцій, а не визначаємо тут.
+const EXPORTED_CODES: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 13];
 
 /// FNV-1a (64-bit) — not cryptographic, a drift-detection digest between
 /// trusted collaborators. See the design doc for why this is deliberate,
@@ -136,9 +126,17 @@ mod tests {
     }
 
     #[test]
+    fn derived_defmacro_surface_is_not_exported_as_a_standalone_identity() {
+        let export = render_export();
+        assert!(
+            !export.contains("00001010") && !export.contains("defmacro"),
+            "CML v1 must not invent a standalone legacy identity for the derived D5+D4 surface"
+        );
+    }
+
+    #[test]
     fn program_fasl_mode_exports_exact_sens_numeric_buffer_map() {
-        const SOURCE: &[u8] =
-            b"(01011001 (00001000 (x) (00001100 x 1)) #i32(1 2 3))";
+        const SOURCE: &[u8] = b"(01011001 (00001000 (x) (00001100 x 1)) #i32(1 2 3))";
         let encoded = program_fasl(SOURCE).expect("program FASL export");
         let (decoded, hash) =
             sens::fasl_decode_program(&encoded).expect("program FASL must decode");
@@ -163,9 +161,10 @@ mod tests {
     /// not hand-editing.
     #[test]
     fn committed_artifact_matches_producer_output() {
-        let committed = std::fs::read_to_string(
-            concat!(env!("CARGO_MANIFEST_DIR"), "/../../mylisp-cml-export.lisp"),
-        )
+        let committed = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../mylisp-cml-export.lisp"
+        ))
         .expect("mylisp-cml-export.wsm must exist at the repo root");
         assert_eq!(committed, render_export());
     }

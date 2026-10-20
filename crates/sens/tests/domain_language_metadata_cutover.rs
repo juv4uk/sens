@@ -1,9 +1,11 @@
-//! Справжній зовнішній свідок інструментального каталогу:
-//! метадані історичного W8 не присвоюють доменну тотожність.
+//! Зовнішній свідок каталогу: похідна назва макроса не стає доменною identity.
 use sens::{language_items, Arity, LanguageItem, LanguageItemKind};
 
 fn unique<'a>(all: &'a [LanguageItem], name: &str) -> &'a LanguageItem {
-    let found = all.iter().filter(|row| row.name == name).collect::<Vec<_>>();
+    let found = all
+        .iter()
+        .filter(|row| row.name == name)
+        .collect::<Vec<_>>();
     assert_eq!(found.len(), 1, "ім'я має один metadata-рядок: {name}");
     found[0]
 }
@@ -34,26 +36,33 @@ fn ukrainian_d4_lambda_and_define_keep_distinct_four_bit_identities() {
 }
 
 #[test]
-fn historical_defmacro_does_not_inherit_d5_macro_identity() {
+fn current_macro_and_define_identities_back_the_derived_defmacro_surface() {
     let all = language_items();
-    // W8 compatibility metadata can repeat the same spelling in ук/укр,
-    // but it cannot acquire a canonical D5 identity in either projection.
-    let records = all.iter().filter(|row| row.name == "визначити-макрос")
-        .collect::<Vec<_>>();
-    assert!(!records.is_empty(), "історичний макрос присутній в інвентарі");
-    for record in records {
-        assert_eq!(record.kind, LanguageItemKind::Macro);
-        assert!(record.domain_identity.is_none(),
-            "історичний DEFMACRO ≠ ратифікований D5 MACRO");
-    }
+    let macro_identity = sens::semantic_registry_export::admitted_core_domain_for_surface("макрос")
+        .expect("ратифікований D5 MACRO");
+    assert_eq!(macro_identity.width(), 5);
+    assert_eq!(macro_identity.packed_bits(), 0b00011);
+
+    let define = unique(&all, "визначити");
+    let define_identity = define.domain_identity.expect("ратифікований D4 DEFINE");
+    assert_eq!(define_identity.width(), 4);
+    assert_eq!(define_identity.packed_bits(), 0b0011);
+
+    assert!(
+        !all.iter().any(|row| row.name == "визначити-макрос"),
+        "з'єднана поверхнева назва не є окремим доменним записом"
+    );
 }
 
 #[test]
 fn current_domain_catalogue_does_not_use_unknown_or_legacy_names_as_authority() {
     let all = language_items();
-    let ratified = all.iter().filter(|row| row.domain_identity.is_some()).collect::<Vec<_>>();
+    let ratified = all
+        .iter()
+        .filter(|row| row.domain_identity.is_some())
+        .collect::<Vec<_>>();
     assert!(!ratified.is_empty());
     assert!(ratified.iter().any(|row| row.name == "перше"));
     assert!(ratified.iter().all(|row| row.domain_identity.is_some()));
-    assert!(!ratified.iter().any(|row| row.name == "визначити-макрос"));
+    assert!(ratified.iter().all(|row| row.name != "визначити-макрос"));
 }

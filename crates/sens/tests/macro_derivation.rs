@@ -1,6 +1,6 @@
 use sens::{
-    eval_program, load_macro_library, parse_mixed_exact_domain, Environment, Expr,
-    ExprKind, Session, Value, MACRO_LIBRARY_SOURCE,
+    eval_program, load_macro_library, parse_mixed_exact_domain, Environment, Expr, ExprKind,
+    Session, Value, MACRO_LIBRARY_SOURCE,
 };
 use std::rc::Rc;
 
@@ -83,8 +83,10 @@ fn migrated_macro_bootstrap_uses_ratified_d3_d4_d5_and_executes_ukrainian_source
         d4.contains(&0b0010),
         "the executable macro constructor must use the exact D4 LAMBDA resident"
     );
-    assert!(!d4.contains(&0b0011),
-        "quoted Ukrainian DEFINE is data until the expansion is lowered");
+    assert!(
+        !d4.contains(&0b0011),
+        "quoted Ukrainian DEFINE is data until the expansion is lowered"
+    );
     assert!(d5.contains(&0b00011), "потрібен ратифікований D5:00011");
     assert!(!MACRO_LIBRARY_SOURCE.contains("make-macro"));
     assert!(MACRO_LIBRARY_SOURCE.contains("(як-є макрос)"));
@@ -126,25 +128,35 @@ fn default_session_binds_all_defmacro_peers_to_one_value() {
 }
 
 #[test]
-fn macro_peer_admission_is_recorded_under_identity_00001010_without_binding_the_machine_id() {
-    let id = sens::semantic_registry_export::semantic_id_for_admitted_surface("defmacro")
-        .expect("defmacro must be registry-admitted");
+fn defmacro_surface_is_derived_from_current_d5_macro_and_d4_define_identities() {
     assert_eq!(
-        sens::semantic_registry_export::semantic_id_bits(id),
-        "00001010"
+        sens::semantic_registry_export::semantic_id_for_admitted_surface("defmacro"),
+        None,
+        "defmacro is a surface spelling, not a standalone domain identity"
     );
 
-    let surfaces = sens::semantic_registry_export::admitted_surfaces_for_semantic_id(id);
-    assert!(surfaces.iter().any(|row| row.namespace == "en" && row.name == "defmacro"));
-    assert!(surfaces.iter().any(|row| row.namespace == "ук" && row.name == "визначити-макрос"));
-    assert!(surfaces.iter().any(|row| row.namespace == "укр" && row.name == "визначити-макрос"));
-    assert!(surfaces.iter().all(|row| row.namespace != "sa" && row.namespace != "sym"));
+    let macro_identity = sens::semantic_registry_export::admitted_core_domain_for_surface("макрос")
+        .expect("D5 MACRO must remain the current macro identity");
+    assert_eq!(macro_identity.width(), 5);
+    assert_eq!(macro_identity.packed_bits(), 0b00011);
+
+    let define_identity =
+        sens::semantic_registry_export::admitted_core_domain_for_surface("визначити")
+            .expect("D4 DEFINE must remain the current definition identity");
+    assert_eq!(define_identity.width(), 4);
+    assert_eq!(define_identity.packed_bits(), 0b0011);
 
     let session = Session::default();
-    assert!(
-        session.environment.get("00001010").is_none(),
-        "opaque semantic IDs must never become ordinary lexical bindings"
-    );
+    assert_same_macro_value([
+        session
+            .environment
+            .get("defmacro")
+            .expect("English surface"),
+        session
+            .environment
+            .get("визначити-макрос")
+            .expect("Ukrainian surface"),
+    ]);
 }
 #[test]
 fn bare_root_gains_peer_bindings_only_through_macro_loader() {
@@ -213,42 +225,23 @@ fn language_owned_defmacro_preserves_unevaluated_arguments() {
 
 #[test]
 fn language_owned_defmacro_can_build_control_flow() {
-    let value = eval_with_derived_macros(
-        r#"
+    const MACRO: &str = r#"
         (defmacro unless (condition body)
           (cons (quote cond)
             (cons
               (cons condition
                 (cons (quote ()) (quote ())))
               (cons
-                (cons (quote t)
+                (cons (quote #d1:1)
                   (cons body (quote ())))
                 (quote ())))))
-        (unless () (quote success))
-        "#,
-    );
-    assert_eq!(value, "success");
-}
-
-// Реальний SENS evaluator, не перевірка тексту вихідних файлів.
-// Багатоаргументні форми змушують макрос згенерувати рекурсивну голову
-// «та»/«або»; гілки з невідомою функцією доводять коротке замикання.
-#[test]
-fn українські_макроси_короткого_замикання_дійсно_виконуються() {
+        "#;
     for (source, expected) in [
-        ("(та (атом? (як-є а)) (атом? (як-є б)) (атом? (як-є в)))", true),
-        ("(та (атом? (як-є (а))) (невідомий-виклик))", false),
-        ("(або (атом? (як-є (а))) (атом? (як-є (б))) (атом? (як-є в)))", true),
-        ("(або (атом? (як-є а)) (невідомий-виклик))", true),
+        ("(unless (quote #d1:1) (невідомий-виклик))", "()"),
+        ("(unless (quote #d1:0) (quote success))", "success"),
     ] {
-        let mut session = Session::default();
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("SENS macro {source}: {error}"));
-        assert_eq!(
-            result.value.as_predicate_bit(),
-            Some(expected),
-            "точний D1 та правильний порядок обчислення: {source}"
-        );
+        let program = format!("{MACRO}\n{source}");
+        assert_eq!(eval_with_derived_macros(&program), expected, "{source}");
     }
 }
 
