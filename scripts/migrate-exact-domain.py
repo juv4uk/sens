@@ -41,7 +41,7 @@ class Edit:
 
 def load_authority(root: Path = ROOT):
     foundation = json.loads(
-        (root / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
+        (root / "knowledge/d1-d11-foundation.json").read_text(encoding="utf-8")
     )
     if foundation.get("status") != "owner-ratified":
         raise ValueError("missing exact-domain owner authority")
@@ -178,7 +178,7 @@ def reject_shadowed_surfaces(source, surfaces):
         if identity.domain == "D4" and identity.label.upper() == "DEFINE"
     }
     foundation = json.loads(
-        (ROOT / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
+        (ROOT / "knowledge/d1-d11-foundation.json").read_text(encoding="utf-8")
     )
     if foundation.get("status") != "owner-ratified":
         raise ValueError("SOURCE_FORM_ERROR: основа доменів не ратифікована")
