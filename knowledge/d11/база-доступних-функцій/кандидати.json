@@ -1627,7 +1627,11 @@
       "exact_bit_width_if_admitted": 11,
       "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "ukr_surface_name": "число-в-рядок-до",
+      "current_ukr_source": "lib/core4.lisp",
+      "source_only_derived_function": true,
+      "behavioral_note": "Назву внутрішньої похідної функції перенесено на укр; тіло не змінювали. Реальне виконання та коректність для ненульових значень потребують окремого SENS-свідка. Канонічна D9 функція число-рядок має окремий закон."
     },
     {
       "surface_name": "OCCURS-CHECK",
