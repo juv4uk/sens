@@ -125,9 +125,10 @@
              (кліпс-шаблони-з-форми (решта форми))))
       (так (кліпс-шаблони-з-форми (решта форми))))))
 
-; A template registry is a list of (atomic-name . slot-order) pairs.
-; This derived lookup needs no D5 ASSOC / D8 EQUAL callable admission.
-; Empty or malformed entries fail closed as data (), not D1:NO.
+; Реєстр шаблонів є списком пар (атомарна-назва . порядок-слотів).
+; Пошук визначено структурно, без неявного допуску D5 ASSOC або
+; D8 EQUAL як викличних операцій. Порожні й некоректні записи
+; повертають порожні дані (), а не предикатну хибу D1.
 (визначити кліпс-шаблон-слот-порядок
   (функція (назва шаблони)
     (за-умовою
@@ -140,32 +141,13 @@
       ((тотожне? назва (перше (перше шаблони))) (решта (перше шаблони)))
       (так (кліпс-шаблон-слот-порядок назва (решта шаблони))))))
 
-; A CLIPS condition can name a multislot with no value at all, e.g.
-; `(precursors)` in wine-external.clp's `ask-a-question` rule — CLIPS reads
-; that as "match regardless of what's in this slot, including empty". A
-; well-formed slot form otherwise always has a value part (`(slotname
-; value)`), so `(cdr slot-form)` being empty is exactly this valueless
-; case; degrading to '() (no constraint) here follows the same "skip,
-; don't crash" policy as clips-lookup-slot-value's own atom guard below,
-; instead of letting `second` fail on a list with no cdr.
-; CLIPS-умова може називати мультислот зовсім без значення, напр.
-; `(precursors)` у правилі `ask-a-question` з wine-external.clp — CLIPS
-; читає це як "збігається незалежно від вмісту цього слота, навіть
-; порожнього". Добре сформована форма слота завжди має частину значення
-; (`(slotname value)`), тож порожній `(cdr slot-form)` — це саме цей
-; безвартісний випадок; деградація до '() (без обмеження) тут іде тим
-; самим шляхом "пропустити, не впасти", що й власна atom-перевірка
-; clips-lookup-slot-value нижче, замість падіння `second` на списку без
-; cdr.
-; Eine CLIPS-Bedingung kann einen Multislot ganz ohne Wert benennen, z.B.
-; `(precursors)` in der Regel `ask-a-question` aus wine-external.clp —
-; CLIPS liest das als "passt unabhängig vom Inhalt dieses Slots, auch
-; leer". Eine wohlgeformte Slot-Form hat sonst immer einen Wertteil
-; (`(slotname value)`), also ist ein leeres `(cdr slot-form)` genau dieser
-; wertlose Fall; die Degradierung zu '() (keine Einschränkung) folgt hier
-; derselben "überspringen statt abstürzen"-Politik wie die eigene
-; atom-Prüfung von clips-lookup-slot-value weiter unten, statt `second`
-; auf einer Liste ohne cdr abstürzen zu lassen.
+; Умова CLIPS може вказувати мультислот без значення.
+; Зокрема (precursors) у правилі ask-a-question означає,
+; що вміст слота довільний, навіть порожній.
+; Якщо форма слота не містить другого елемента,
+; повертаємо порожні дані — тобто відсутність обмеження.
+; Не викликаємо селектор другого елемента над неповною формою.
+; Імена CLIPS у цих прикладах належать зовнішньому протоколу.
 (визначити кліпс-значення-слота
   (функція (форма-слота)
     (за-умовою
@@ -197,40 +179,15 @@
       (так (сполучити (знайти-значення-слота-кліпс (перше порядок-слотів) форми-слотів)
                 (позиційні-аргументи-кліпс (решта порядок-слотів) форми-слотів))))))
 
-; Step 13 (fold-in fix, verified before writing — same discipline as
-; lib/forward.lisp's Steps 10-12): originally recursed through a `not`
-; wrapper only. A template fact nested inside `or`/`and` — e.g. `(or (cat
-; (name ?x)) (dog (name ?x)))` — silently never had its named slots
-; converted to positional form at all, since neither `or` nor `and` was
-; special-cased; the whole condition passed through unchanged (`(cat
-; (name ?x))` never became `(cat ?x)`), so it could never unify against a
-; positional `(cat tom)` fact — a rule that quietly derived nothing. Same
-; underlying lesson `lib/forward.lisp`'s Steps 10-12 kept re-learning:
-; `not`, `or`, and `and` all need explicit recursion, not just `not`.
-;
-; Крок 13 (виправлення вбудовано, перевірено перед написанням — та сама
-; дисципліна, що й Кроки 10-12 `lib/forward.lisp`): раніше рекурсував лише
-; крізь обгортку `not`. Факт-шаблон, вкладений в `or`/`and` — напр. `(or
-; (cat (name ?x)) (dog (name ?x)))` — мовчки взагалі не мав своїх
-; іменованих слотів конвертованих у позиційну форму, бо ні `or`, ні `and`
-; не були окремо оброблені; уся умова проходила незмінною (`(cat (name
-; ?x))` ніколи не ставала `(cat ?x)`), тож ніколи не могла унікуватись з
-; позиційним фактом `(cat tom)` — правило, що мовчки нічого не виводило.
-; Той самий урок, який Кроки 10-12 `lib/forward.lisp` повторювали: `not`,
-; `or` і `and` усі потребують явної рекурсії, не лише `not`.
-;
-; Schritt 13 (eingearbeiteter Fix, vor dem Schreiben verifiziert —
-; dieselbe Disziplin wie Schritte 10-12 in `lib/forward.lisp`): rekursierte
-; ursprünglich nur durch einen `not`-Wrapper. Ein Template-Fakt,
-; verschachtelt in `or`/`and` — z. B. `(or (cat (name ?x)) (dog (name
-; ?x)))` — hatte seine benannten Slots stillschweigend nie in positionale
-; Form umgewandelt, da weder `or` noch `and` gesondert behandelt wurden;
-; die ganze Bedingung blieb unverändert (`(cat (name ?x))` wurde nie zu
-; `(cat ?x)`), sodass sie nie gegen einen positionalen Fakt `(cat tom)`
-; unifizieren konnte — eine Regel, die still nichts ableitete. Dieselbe
-; Lehre, die Schritte 10-12 in `lib/forward.lisp` wiederholt lernten: `not`,
-; `or` und `and` brauchen alle explizite Rekursion, nicht nur `not`.
-; CLIPS `not` wird zur Sprachnegation `not?` (Prädikat mit `?`, #1444).
+; Крок 13: рекурсивне перетворення іменованих слотів охоплює
+; не тільки заперечення not, а й вкладені умови or, and,
+; а також квантори exists і forall.
+; Раніше приклад (or (cat (name ?x)) (dog (name ?x)))
+; не змінювався, тому не міг зіставитися з позиційним
+; фактом (cat tom) і правило помилково не давало висновків.
+; Тепер кожну вкладену умову обходимо за тим самим законом.
+; Зовнішнє not перетворюємо на протокольний терм not?,
+; а не виконуємо як виклик СЕНС у цьому імпортері.
 (визначити кліпс-перетворити-шаблон
   (функція (терм шаблони)
     (за-умовою
@@ -307,61 +264,19 @@
   (функція (форма шаблони)
     (кліпс-факти-клаузи (решта-решти форма) шаблони)))
 
-; --- Step 2: defrule, with CLIPS's `?x` variable syntax ------------------
-; CLIPS variables are ordinary symbols to my-lisp's reader (`?x` parses as
-; one atomic symbol, not reader-macro syntax) — but my-lisp has no way to
-; inspect a symbol's characters on its own. `symbol->string`/`string->symbol`/
-; `string-first`/`string-rest` (crates/my-lisp/src/eval/special_forms.rs)
-; were added specifically for this: peeling the `?` off `?x` to build the
-; logic-variable term `(var x)` `lib/unify.lisp` expects. Added deliberately,
-; not casually — per this project's own "don't grow the Rust surface"
-; principle (CLAUDE.md), only once a real wall was hit doing this purely in
-; my-lisp.
+; Крок 2: у CLIPS змінна має вигляд ?x, але читач Lisp
+; розглядає її як звичайний атомарний символ.
+; Для побудови логічного терма (var x) відкидаємо лише
+; початковий знак питання, зберігаючи вихідне ім'я.
+; Однакові ?x у межах правила повинні посилатися
+; на ту саму логічну змінну.
+; Застосовуємо перетворення символу на текст і назад,
+; не додаючи прихованих механізмів виконавця.
 ;
-; A CLIPS variable's own name becomes the `(var name)` term's name (`?x` ->
-; `(var x)`, dropping only the `?`) — not renamed or namespaced, so the
-; same `?x` used twice in one rule still refers to the same logic variable
-; after conversion, exactly as CLIPS (and `lib/unify.lisp`) both expect.
-;
-; Крок 2: defrule, з CLIPS-синтаксисом змінних `?x` — CLIPS-змінні для
-; reader'а my-lisp — звичайні символи (`?x` парситься як один атомарний
-; символ, не reader-macro синтаксис), але my-lisp не мала способу
-; перевірити символи символу сама. `symbol->string`/`string->symbol`/
-; `string-first`/`string-rest` додані саме для цього: відрізати `?` від
-; `?x`, щоб побудувати терм логічної змінної `(var x)`, якого чекає
-; `lib/unify.lisp`. Додано свідомо, не за звичкою — за власним принципом
-; проєкту "не розширювати поверхню Rust" (CLAUDE.md), лише коли впёрлись у
-; реальну стіну, роблячи це чистою my-lisp.
-;
-; Власне ім'я CLIPS-змінної стає ім'ям терму `(var name)` (`?x` -> `(var
-; x)`, відрізається лише `?`) — не перейменовується й не намespace-иться,
-; тож той самий `?x`, використаний двічі в одному правилі, після конвертації
-; й далі посилається на ту саму логічну змінну, точно як і CLIPS (і
-; `lib/unify.lisp`) обидва очікують.
-;
-; Schritt 2: defrule, mit CLIPS' `?x`-Variablensyntax — CLIPS-Variablen
-; sind für den my-lisp-Reader gewöhnliche Symbole (`?x` parst als ein
-; atomares Symbol, keine Reader-Makro-Syntax), aber my-lisp konnte die
-; Zeichen eines Symbols nicht selbst inspizieren.
-; `symbol->string`/`string->symbol`/`string-first`/`string-rest` wurden
-; genau dafür hinzugefügt: das `?` von `?x` abzuschälen, um den
-; Logikvariablen-Term `(var x)` zu bauen, den `lib/unify.lisp` erwartet.
-; Bewusst hinzugefügt, nicht beiläufig — nach dem eigenen Prinzip des
-; Projekts, die Rust-Oberfläche nicht wachsen zu lassen (CLAUDE.md), erst
-; als eine echte Grenze beim rein-my-lisp-Ansatz erreicht wurde.
-;
-; Der eigene Name einer CLIPS-Variable wird zum Namen des `(var
-; name)`-Terms (`?x` -> `(var x)`, nur das `?` wird entfernt) — nicht
-; umbenannt oder mit Namensraum versehen, sodass dasselbe `?x`, zweimal in
-; einer Regel verwendet, nach der Konvertierung weiterhin dieselbe
-; Logikvariable bezeichnet, genau wie CLIPS (und `lib/unify.lisp`) es beide
-; erwarten.
-; Guards on `symbol?` first: `term` may be any atom (a CLIPS fact's
-; argument can just as easily be a number, e.g. `(temperature 98)`), and
-; `symbol->string` (called by `кліпс-символ-починається-з-питальника?`) errors on
-; anything that isn't actually a symbol.
-; Only atoms may be variable symbols. D1:NO is explicit
-; for pairs and non-symbol atoms; no historical truthy NIL/UNKNOWN.
+; Аргумент факту може бути числом, наприклад (temperature 98).
+; Тому перед текстовою операцією обов'язково перевіряємо,
+; що терм справді є символом. Для пар та інших атомів
+; повертаємо точну хибу D1, без істинності хоста.
 (визначити кліпс-змінна?
   (функція (терм)
     (за-умовою
