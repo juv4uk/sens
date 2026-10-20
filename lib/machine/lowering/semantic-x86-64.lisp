@@ -125,15 +125,15 @@
         (машина-знизити-обмежений-вибір-першого-пари-64
           перше-якщо-ні решта-якщо-ні (як-є r10) (як-є r11))))))
 
-; Bounded structural witness for semantic identities 00000100/00000101/00000110.
-; The host contributes only a raw writable arena pointer in RDI. Lisp owns
-; the fact that one admitted pair cell has head at x86-пара-перше-зсув and
-; tail at x86-пара-решта-зсув. These routines produce structured STORE/LOAD
-; forms; admission and the encoder produce physical bytes only afterwards.
+; Обмежене структурне свідчення для історичних ідентичностей 00000100/00000101/00000110.
+; Хост надає лише адресу пам'яті в RDI для запису. Мова визначає
+; розташування голови та решти пари через x86-пара-перше-зсув
+; і x86-пара-решта-зсув. Тут створюються структуровані форми STORE/LOAD;
+; допуск і кодувальник перетворюють їх на байти лише після перевірки.
 ;
-; This is deliberately not a claim that arbitrary first-class pair values may
-; already escape native code: pair-x86-64.lisp fixes lifetime=native-call and
-; escape=forbidden for this proof slice.
+; Це не дозволяє довільним парам залишати машинний виклик:
+; pair-x86-64.lisp обмежує lifetime=native-call та escape=forbidden.
+
 (визначити машина-знизити-запис-пари-64
   (функція (лівий-операнд правий-операнд)
     (список
@@ -150,27 +150,30 @@
         x86-пара-решта-зсув
         (як-є rax)))))
 
-; Historical internal name retained as an explicit forwarding closure.
-; Do not place the bare function designator in value position: the strict
-; source path must make callability explicit and preserve structured forms.
+; Історичне внутрішнє ім'я збережено як явне замикання-переадресатор.
+; Не підставляти голе позначення функції на місце значення:
+; джерело повинно явно викликати функцію й зберігати структуру форм.
+
 (визначити машина-знизити-інструкції-запису-пари-64
   (функція (лівий-операнд правий-операнд)
     (машина-знизити-запис-пари-64 лівий-операнд правий-операнд)))
 
-; Append only the finite structured machine-form lists using current D3
-; primitives. Do not route this boundary through Core4's deferred legacy
-; reverse-onto/COND implementation: tests and authority remain language-owned.
+; Скінченні списки машинних форм поєднуються чинними примітивами D3.
+; Не спрямовувати цю межу через відкладені історичні reverse-onto/COND
+; четвертого ядра: перевірки й семантичні повноваження залишаються в мові.
+
 (визначити машина-приєднати-форми
   (функція (форми хвіст)
     (за-умовою
       ((атом? форми) хвіст)
       (так (сполучити (перше форми) (машина-приєднати-форми (решта форми) хвіст))))))
 
-; The bounded native pair witness has a fixed six-instruction shape. Build it
-; directly rather than routing through generic append/reverse: those Core4 list
-; traversals currently consume graded relation answers as COND control and must
-; keep failing closed until their predicate adapter is migrated. This narrow
-; witness should not depend on an unfinished generic traversal path.
+; Обмежене машинне свідчення пари має рівно шість інструкцій.
+; Його будуємо безпосередньо, не через загальні append/reverse:
+; обходи Core4 ще можуть використовувати градуйовані відповіді як COND.
+; До перенесення адаптера предикатів вони повинні відмовляти безпечно.
+; Це свідчення не залежить від незавершених загальних обходів.
+
 (визначити знизити-складену-пару-до-машинних-форм
   (функція (лівий-операнд правий-операнд)
     (список
@@ -217,12 +220,13 @@
         x86-пара-решта-зсув)
       (список (як-є ret)))))
 
-; Bounded semantic entry for the Vertical Day CAR witness.
-; Canonical CAR/CDR own pair validity and therefore fail with the language's
-; existing Type outcome before any machine request exists. Only after that
-; language-owned gate succeeds do the extracted u64 fields become structured
-; machine forms, pass closed admission, and enter the semantics-blind host.
-; No pair predicate or tag rule is duplicated in this machine layer.
+; Обмежений семантичний вхід для свідчення CAR із Vertical Day.
+; Канонічні CAR/CDR перевіряють пару і дають мовну помилку Type
+; ще до створення машинного запиту. Лише після успішної перевірки
+; поля u64 стають машинними формами, проходять допуск
+; і надходять у хост, який не визначає семантику.
+; Правила позначення й предикати пари тут не дублюються.
+
 (визначити машина-викликати-семантичне-перше-64
   (функція (значення-пари)
     (викликати-допущену-машинну-програму
@@ -232,14 +236,14 @@
       x86-пара-байти-комірки)))
 
 
-; #3989/#4001 current exact-domain D5 arithmetic entry.
-; Exact D5 semantic identity chooses the operation. The machine fast path then
-; applies a deliberately conservative numeric guard that cannot change exact
-; language meaning:
-;   PLUS/TIMES: both exact-integer inputs in u32 => result is guaranteed u64;
-;   DIFFERENCE: both exact-integer inputs in u64 and left >= right.
-; Anything outside those proved rectangles fails closed to the exact Lisp/Q
-; fallback. Historical SID8 values and human spellings never participate.
+; #3989/#4001: арифметика за точною семантичною адресою D5.
+; Операцію визначає D5. Швидкий машинний шлях лише перевіряє
+; доведені числові межі й не змінює мовного значення:
+;   PLUS/TIMES: два точні цілі операнди в межах u32 — результат у межах u64;
+;   DIFFERENCE: два точні цілі в межах u64, лівий операнд >= правого.
+; За межами доведеного застосовується точний шлях Lisp/Q.
+; Історичні SID8 та людські написання не вибирають операцію.
+
 (визначити машина-поточний-д5-допустимі-входи-32?
   (функція (лівий-операнд правий-операнд)
     (за-умовою
@@ -277,9 +281,10 @@
          (так (як-є ()))))
       (так (як-є ())))))
 
-; #4068 width-safe machine key helper. Width and packed bits are separate
-; mechanism scalars derived from Rust DomainIdentity; source leading zeros are never
-; consulted.
+; #4068: перевірка машинного ключа з явною шириною.
+; Ширина та упаковані біти — окремі параметри механізму,
+; отримані з Rust DomainIdentity; початкові нулі джерела не враховуються.
+
 (визначити машинний-ключ-поточного-домену?
   (функція (ширина-домену біти-домену очікувана-ширина очікувані-біти)
     (за-умовою
@@ -321,10 +326,11 @@
       (машина-знизити-поточну-двомісну-дію-64
                     ширина-домену біти-домену лівий-операнд правий-операнд))))
 
-; #4063 exact D6 ADD1/SUB1 bounded fast paths.
-; Language meaning is already admitted as LOWER_DOMAIN_COMPOSITION over exact
-; D5 PLUS/DIFFERENCE with exact integer 1. This machine slice reuses the same
-; admitted ADD/SUB forms and adds no arithmetic meaning of its own.
+; #4063: обмежені швидкі шляхи точних D6 ADD1/SUB1.
+; Значення вже допущене як LOWER_DOMAIN_COMPOSITION над точними
+; D5 PLUS/DIFFERENCE та цілим числом 1. Машинний шлях використовує
+; допущені форми ADD/SUB і не створює власного арифметичного закону.
+
 (визначити машина-поточний-д6-безпечний-наступник-64?
   (функція (значення)
     (за-умовою
