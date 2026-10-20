@@ -1,12 +1,12 @@
-; #834 — mathematical-law coordinate axis.
+; #834 — координатна вісь математичних законів.
 ;
-; Composition-only view over existing Lisp-owned semantic identities.
-; This file does NOT mint SIDs and does not define runtime meaning.
-; Canonical identity source: lib/surface/semantic-registry.lisp (sr/2).
-; Existing law/result authorities remain:
-;   #216 exact-Q binary domain,
-;   #218 structural observation / identity relations,
-;   #217 explicit-result control dispatch.
+; Лише-композиційний вид над наявними семантичними ідентичностями, що належать Lisp.
+; Цей файл НЕ карбує SID і не визначає значення часу виконання.
+; Канонічне джерело ідентичності: lib/surface/semantic-registry.lisp (sr/2).
+; Наявні влади законів/результатів лишаються:
+;   #216 бінарний домен exact-Q,
+;   #218 структурне спостереження / відношення тотожності,
+;   #217 диспетчеризація контролю за явним результатом.
 ;
 (semantic-mathematical-coordinate/1
   (authority-source . "lib/surface/semantic-registry.lisp")
