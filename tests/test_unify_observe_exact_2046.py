@@ -50,7 +50,7 @@ def visit(ast):
 
 
 # Українські call heads не змінюють ратифікованої координати.
-# Таблиця є джерелом значень, а не історичний SID8 або текстова ширина.
+# Таблиця є джерелом значень, а не історичний сід8 або текстова ширина.
 def normalize_operator_heads(ast):
     if not isinstance(ast, list):
         return ast
