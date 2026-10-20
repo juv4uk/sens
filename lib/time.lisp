@@ -1,11 +1,9 @@
-; Explicit timezone data for WSM. This is configuration, not an OS mutation.
-; Явні дані часового поясу для WSM. Це конфігурація, а не мутація ОС.
+; Явні налаштування часового поясу є даними, а не зміною системи.
 
-; Convert whole UTC days since 1970-01-01 to a proleptic Gregorian date.
-; This deliberately mirrors the current host-side utc-now calendar transform,
-; but lives in Lisp so we can prove that calendar semantics do not belong to
-; the host. Scope is non-negative Unix days; utc-now already rejects times
-; before the Unix epoch.
+; Кількість цілих діб від початку 1970 року перетворюємо на дату
+; пролептичного григоріанського календаря.
+; Ця формула належить мові, а не зовнішньому обчислювачу.
+; Область визначення — невід'ємні дні від початку епохи.
 (визначити грегоріанська-дата-з-числа-днів
   (функція (дні-від-епохи)
     ((функція (зміщені-дні)
@@ -44,9 +42,9 @@
 
 ; Канонічна D10:1010111110 проєкція укр того самого Lisp-замикання.
 
-; Pure language-level conversion from an exact Unix timestamp into UTC calendar
-; data. The host owns clock observation; this function owns deterministic
-; calendar semantics.
+; Точна часова позначка перетворюється на календарні дані.
+; Зовнішній механізм спостерігає час, а його календарне значення
+; детерміновано визначає СЕНС.
 (визначити узгоджений-час-з-юнікс
   (функція (секунди-юнікс наносекунди)
     ((функція (дні)
@@ -71,9 +69,8 @@
   ))
 
 
-; Minimal wall-clock host capability contract:
-;   (unix-time-now) -> (unix-time seconds nanosecond)
-; The host observes only the Unix clock. Calendar meaning stays here in Lisp.
+; Мінімальний зовнішній контракт надає секунди й наносекунди епохи.
+; Календарне значення цього спостереження залишається у СЕНС.
 (визначити юнікс-час-спостереження-узгоджений-час
   (функція (спостереження)
     (за-умовою
@@ -83,26 +80,24 @@
        (сполучити (як-є rejected) (сполучити (як-є invalid-unix-time-observation) (як-є ()))))))
 )
 
-; Public UTC clock meaning is language-owned. The only host fact needed here is
-; the raw Unix observation above.
+; Публічне значення календарного часу визначає мова.
+; Для цього достатньо сирого зовнішнього спостереження.
 (визначити узгоджений-час-зараз
   (функція ()
     (юнікс-час-спостереження-узгоджений-час (юнікс-час-зараз))))
 
 
-; Interpret protocol fields from one complete NTP response. Packet I/O and
-; extracting fixed-width fields are host mechanisms; deciding whether those
-; fields are acceptable, mapping the NTP epoch to Unix, and converting the
-; 32-bit fractional second into nanoseconds are language semantics.
+; Повна відповідь мережевого протоколу часу містить поля сталої ширини.
+; Пакетні операції та вилучення полів — тільки зовнішня механіка.
+; Перевірка допустимості, перетворення епохи та дробової частини
+; секунди на наносекунди належать мовній семантиці.
 ;
-; Expected host-side field contract for a complete response:
-;   host, mode, stratum, ntp-seconds, fraction
-; Successful interpretation preserves the existing public observation shape:
-;   (accepted host unix-seconds nanosecond)
-; Current control law: numeric comparisons produce exact D1 PredicateBit;
-; AND/OR consume only that typed answer. All COND clauses are two-field
-; (test expression). Predicate constants are direct one-bit values, not
-; Number 0/1, T/NIL, structural () or rich classifiers used as truth.
+; Повна відповідь містить вузол, режим, рівень, секунди та дробову частину.
+; Прийняте спостереження зберігає чинну форму результату.
+; Числові порівняння повертають точні відповіді першого домену.
+; Логічні операції використовують лише ці відповіді.
+; Умовний вибір має рівно два поля в кожній гілці.
+; Порожня структура й числові значення не замінюють істину.
 (визначити інтернет-час-режим-припустимий?
   (функція (режим)
     (за-умовою
@@ -138,10 +133,9 @@
        (сполучити (як-є rejected) (сполучити (як-є invalid-response) (як-є ())))))))
 
 
-; Adapter for the raw host boundary. The host returns either:
-;   (ntp-fields host mode stratum ntp-seconds fraction)
-; or a transport-level rejection such as (rejected receive-failed).
-; Lisp owns every protocol interpretation after that raw observation boundary.
+; Мовна межа приймає п'ять полів зовнішнього спостереження
+; або транспортну відмову з її причиною.
+; Після цієї межі всі рішення про значення ухвалює СЕНС.
 (визначити перетворити-сирі-дані-часу-на-спостереження
   (функція (сирі-дані)
     (за-умовою
@@ -155,15 +149,15 @@
       (так сирі-дані)))
 )
 
-; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
-; query mechanism under the deliberately mechanical name `ntp-query-raw`.
+; Значення мережевого часу належить СЕНС.
+; Зовнішній виконавець надає лише сирий механізм запиту.
 (визначити інтернет-час-синхронізувати
   (функція (вузол час-очікування-мс)
     (перетворити-сирі-дані-часу-на-спостереження
       (мережевий-протокол-часу-запит-сирий вузол час-очікування-мс))))
 
 
-; Turning an accepted timestamp into calendar meaning is also language policy.
+; Перетворення прийнятої часової позначки на календар визначає СЕНС.
 (визначити дати-календарне-значення-схваленому-часу
   (функція (спостереження)
     (за-умовою
@@ -178,10 +172,10 @@
 
 
 
-; Nanoseconds are the one monotonic host observation. Milliseconds are only a
-; coarser language-level view, so derive them instead of requiring a second
-; host clock primitive. For the non-negative monotonic counter, quotient gives
-; whole elapsed milliseconds (floor toward zero == floor here).
+; Наносекунди — єдиний монотонний зовнішній лічильник.
+; Мілісекунди обчислюємо як похідне мовне значення.
+; Для невід'ємного лічильника частка дає кількість повних
+; мілісекунд без залучення другого годинника.
 (визначити мілісекунди-з-наносекунди
   (функція (наносекунди)
     (частка наносекунди 1000000)))
@@ -191,9 +185,9 @@
     (мілісекунди-з-наносекунди (монотонний-наносекунди))))
 
 
-; Monotonic counters are host observations; deadline arithmetic is language
-; semantics. Keep a pure pair of helpers so scheduler logic can be tested
-; without sleeping, then expose convenience wrappers over the host counter.
+; Монотонне спостереження надає зовнішній механізм.
+; Строки і межі часу обчислює мова, окремо від очікування.
+; Такі обчислення перевіряються без затримки.
 (визначити крайній-час-з
   (функція (поточні-нс тривалість-нс)
     (додати поточні-нс тривалість-нс)))
@@ -221,18 +215,17 @@
     (відняти (монотонний-наносекунди) початкові-нс)))
 
 
-; Interpret raw host timezone declarations without performing host I/O here.
-; The host contract is:
-;   (timezone-declarations tz-value etc-timezone-value)
-; where each value is either a non-empty string or (). Lisp owns source
-; precedence and the public detected/unknown result shape.
+; Перевірка декларацій часового поясу не вимагає зовнішніх дій.
+; Два джерела містять непорожній рядок або порожню структуру.
+; Пріоритет джерел та форму висновку визначає мова.
 (визначити обрати-достовірне-джерело-часового-поясу
   (функція (значення-часового-поясу значення-поясу-з-файлу)
-    ; D3 COND is exactly two clauses. First distinguish absent TZ; for a
-    ; present TZ, distinguish empty from non-empty in a nested two-clause COND.
+    ; Умовний вибір третього домену використовує точні пари.
+    ; Спочатку перевіряємо наявність основного джерела,
+    ; потім окремо розрізняємо порожній та непорожній рядок.
     (за-умовою
       ((тотожне? значення-часового-поясу (як-є ()))
-       ; TZ is absent: ETC is the only fallback source.
+       ; За відсутності основного джерела перевіряємо запасне.
        (за-умовою
          ((тотожне? значення-поясу-з-файлу (як-є ()))
           (сполучити (як-є unknown) (сполучити (як-є host-declaration-unavailable) (як-є ())))
@@ -250,7 +243,7 @@
        )
       )
       ((хибне? (тотожне? значення-часового-поясу (як-є ())))
-       ; TZ is present: empty string still permits the ETC fallback.
+       ; Порожній рядок також дозволяє перевірити запасне джерело.
        (за-умовою
          ((тотожне? значення-часового-поясу "")
           (за-умовою
@@ -318,16 +311,16 @@
     (третє конфігурація)))
 
 ; Реєстр містить стабільні поверхні всіх наведених часових функцій.
-; Після визначення Lisp-замикань load_time_library застосовує чинну механічну
-; проєкцію stable peers із цього реєстру до наявних значень. Повторні
-; my-postcore-виклики тут застаріли: їхній шлях зупиняв завантаження,
-; хоча не створював жодного нового мовного закону. Часова семантика вище
-; залишається власністю SENS.
+; Після визначення замикань завантажувач застосовує
+; чинну проєкцію ратифікованих імен до наявних значень.
+; Старий шлях повторного завантаження переривав роботу,
+; тому його не застосовуємо. Семантика часу належить СЕНС.
 
-; Монотонний D10-механізм задає bootstrap; тут лишаються окремі raw host wrappers.
+; Монотонну основу визначає десятий домен.
+; Тут лишаються оболонки сирих зовнішніх операцій.
 
-; Окремі D10-обгортки raw host операцій; іншим резидентам ці механізми
-; не передаються лише через сусідство в таблиці домену.
+; Ці зовнішні оболонки десятого домену не передаються
+; іншим резидентам лише через їхнє сусідство в таблиці.
 (визначити мережевий-протокол-часу-запит-сирий
   (функція (вузол час-очікування-мс)
     (мережевий-протокол-часу-запит-сирий вузол час-очікування-мс)))
