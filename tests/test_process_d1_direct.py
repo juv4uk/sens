@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Single-file D1 W1 migration, full historical blob, exhaustive width/polarity audit."""
+"""Аудит прямої української Д1-логіки та структури результатів процесів."""
 from pathlib import Path
 import re
 import unittest
@@ -52,8 +52,8 @@ def domain_count():
 def audit(source: str):
     if source.count(NEW) != 5 or OLD in source or "#d1:1" in source:
         raise ValueError("five D1 W1 direct constants required")
-    # No full-file SHA oracle: a separate ratified D4 migration may legitimately
-    # change production bytes. Provenance belongs to Git history and review.
+    # SHA усього файла не фіксуємо: чинна українська реалізація може оновлюватися.
+    # Походження змін контролює Git, структуру умов — цей аудит.
     # Here we guard only exact D1 source and D3 two-branch structure.
     parsed = ast(source)
     if len(parsed) != 8 or sum(1 for form in parsed if isinstance(form,list) and form and form[0] == "визначити") != 7:
@@ -71,15 +71,15 @@ def audit(source: str):
         visit(row)
     # Точні чинні D9 call-heads і цитовані дані: не історичний blob-пін.
     definitions = {row[1]: row for row in parsed if isinstance(row, list) and len(row) >= 3 and row[0] == "визначити"}
-    expected_raw_exit = ["визначити", "process-raw-exit-code",
+    expected_raw_exit = ["визначити", "отримати-сирий-код-виходу-процесу",
                          ["функція", ["сирий-результат"], ["друге", "сирий-результат"]]]
-    if definitions.get("process-raw-exit-code") != expected_raw_exit:
+    if definitions.get("отримати-сирий-код-виходу-процесу") != expected_raw_exit:
         raise ValueError("порушено точний селектор вихідного коду")
     for name in ("процес-результат-текст", "процес-запустити-текст",
                  "процес-публічний-вихід-код", "процес-запустити"):
         if name not in definitions:
             raise ValueError(f"бракує визначеного D9 виклику {name}")
-    for datum in ("(як-є process-result)", "(як-є decoded)",
+    for datum in ("(як-є process-result)", "(як-є rejected)",
                   "(як-є decoded-process)"):
         if datum not in source:
             raise ValueError(f"цитовані дані змінено: {datum}")
@@ -153,8 +153,8 @@ class ProcessDirectD1(unittest.TestCase):
     def test_numeric_exit_code_and_structural_nil_unchanged(self):
         data = self.source
         self.assertRegex(data, r"\(\(тотожне\? код \(як-є \(\)\)\)\s+-1\)")
-        self.assertIn("(process-raw-exit-code сирий-результат)", data)
-        self.assertIn("(кодування-юнікод-8-декодувати-рядок (process-raw-stderr-bytes сирий-результат))", data)
+        self.assertIn("(отримати-сирий-код-виходу-процесу сирий-результат)", data)
+        self.assertIn("(отримати-сирі-байти-помилок-процесу сирий-результат)", data)
         self.assertIn("(як-є (postcore-materialization-debug skipped))", data)
 
 
