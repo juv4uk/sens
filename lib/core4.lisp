@@ -2965,13 +2965,9 @@
 ; evaluator's own lambda-binding check -- matching the removed Rust
 ; builtin's explicit "min/max expects at least one argument" error --
 ; without this Lisp definition needing to raise a custom error itself.
-(визначити min
-  (функція (перший-елемент . залишок-аргументів)
-    (найменше-у-списку (сполучити перший-елемент залишок-аргументів))))
 
-(визначити max
-  (функція (перший-елемент . залишок-аргументів)
-    (найбільше-у-списку (сполучити перший-елемент залишок-аргументів))))
+
+
 
 ; Two real bugs found live via oracle testing before this landed, not
 ; assumed from reading the removed Rust source:
@@ -4608,9 +4604,13 @@
 (визначити найменше
   (функція (перше-значення . решта-значень)
     (найменше-у-списку (сполучити перше-значення решта-значень))))
+; Історичний зовнішній запис збережено як сумісне посилання.
+(визначити min найменше)
 (визначити найбільше
   (функція (перше-значення . решта-значень)
     (найбільше-у-списку (сполучити перше-значення решта-значень))))
+; Історичний зовнішній запис збережено як сумісне посилання.
+(визначити max найбільше)
 
 
 ; D9:111111010 WORLD? — exactly (world parent journal metadata),
