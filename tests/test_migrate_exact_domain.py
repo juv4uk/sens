@@ -29,6 +29,30 @@ class ExactDomainMigrationTests(unittest.TestCase):
         edits = mod.plan(source, self.surfaces)
         return mod.apply_edits(source, edits)
 
+    def test_only_current_d1_d11_foundation_is_used_for_isolated_migration(self):
+        # Негативна фікстура не повинна випадково взяти застарілу D1–D9
+        # основу із робочого репозиторію.
+        with tempfile.TemporaryDirectory(prefix="sens-current-domains-") as td:
+            isolated = Path(td)
+            (isolated / "knowledge").mkdir()
+            domain_dir = isolated / "lib/domains"
+            domain_dir.mkdir(parents=True)
+            (isolated / "knowledge/d1-d11-foundation.json").write_bytes(
+                (ROOT / "knowledge/d1-d11-foundation.json").read_bytes()
+            )
+            for domain in ("d3", "d4"):
+                (domain_dir / f"{domain}.lisp").write_bytes(
+                    (ROOT / "lib/domains" / f"{domain}.lisp").read_bytes()
+                )
+            surfaces = mod.load_authority(isolated)
+            self.assertEqual((surfaces["перше"].domain,
+                              surfaces["перше"].bits), ("D3", "100"))
+            (isolated / "knowledge/d1-d11-foundation.json").write_text(
+                "{}", encoding="utf-8"
+            )
+            with self.assertRaisesRegex(ValueError, "owner authority"):
+                mod.load_authority(isolated)
+
     def test_current_d3_ratified_ukrainian_projection(self):
         for source in ("(car x)", "(CAR x)", "(перше x)"):
             self.assertEqual(self.rewrite(source), "(перше x)", source)
