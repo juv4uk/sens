@@ -5,14 +5,14 @@
 ; Викличні голови звірено з ратифікованими українськими назвами
 ; доменів Д9 і Д10. Протокольні маркери залишено незмінними.
 
-(load "lib/core.lisp")
-(load "lib/unify.lisp")
-(load "lib/reason.lisp")
-(load "lib/forward.lisp")
-(load "lib/knowledge.lisp")
-(load "lib/result-status.lisp")
-(load "lib/quantity.lisp")
-(load "lib/si.lisp")
+(завантажити-файл "lib/core.lisp")
+(завантажити-файл "lib/unify.lisp")
+(завантажити-файл "lib/reason.lisp")
+(завантажити-файл "lib/forward.lisp")
+(завантажити-файл "lib/knowledge.lisp")
+(завантажити-файл "lib/result-status.lisp")
+(завантажити-файл "lib/quantity.lisp")
+(завантажити-файл "lib/si.lisp")
 
 (визначити спостерегти-проєкцію-наукової-константи
   (функція ()
