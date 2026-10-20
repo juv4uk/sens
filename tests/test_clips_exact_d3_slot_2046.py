@@ -80,7 +80,7 @@ class ClipsSlotD3Exact2046(unittest.TestCase):
         self.assertNotIn(BAD_GUARD, body)
 
     def test_current_ukrainian_d3_guard_without_fake_bit_budget(self):
-        verify_source(self.source)
+        body = verify_source(self.source)
         self.assertIn("(атом? (перше форми-слотів))", body)
         self.assertIn("(тотожне? назва-слота", body)
         self.assertNotIn("11110111", body)
