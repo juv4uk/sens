@@ -1,11 +1,12 @@
-; #176 — x86-64 instruction harvest witness (LEA, JMP rel32, Jcc rel32).
-; Ukrainian projection only.
+; #176 — свідок команд x86-64: LEA, JMP та умовні переходи.
+; Первинні функції та змінні українською.
+; Назви машинних інструкцій, реєстри й поля результату незмінні.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
 (load "lib/machine/admission/x86-64.lisp")
 
-(визначити x86-instruction-witness-tests
+(визначити перевірки-команд-x86-64
   (як-є
     (((encode lea-basic)
       (x86-encode-lea-r64-mem-disp8 (як-є rax) (як-є rbx) 10)
@@ -59,29 +60,34 @@
       (x86-admitted-instruction? (як-є (nop)))
       так))))
 
-(визначити x86-instruction-check-rows
-  (функція (rows)
+(визначити перевірити-рядки-команд-x86-64
+  (функція (рядки)
     (за-умовою
-      ((атом? rows)
+      ((атом? рядки)
        (як-є (x86-64-instruction-set-witness (status pass))))
       (так
-       (нехай ((row (перше rows))
-              (name (перше row))
-              (actual (друге row))
-              (expected (третє row)))
+       (нехай ((рядок (перше рядки))
+              (назва (перше рядок))
+              (отримане (друге рядок))
+              (очікуване (третє рядок)))
          (за-умовою
-           ((однакові? actual expected)
-            (x86-instruction-check-rows (решта rows)))
+           ((однакові? отримане очікуване)
+            (перевірити-рядки-команд-x86-64 (решта рядки)))
            (так
             (список
               (як-є x86-64-instruction-set-witness)
               (як-є (status fail))
-              (список (як-є case) name)
-              (список (як-є actual) actual)
-              (список (як-є expected) expected)))))))))
+              (список (як-є case) назва)
+              (список (як-є actual) отримане)
+              (список (як-є expected) очікуване)))))))))
 
-(визначити x86-64-instruction-set-witness
+(визначити свідок-команд-x86-64
   (функція ()
-    (x86-instruction-check-rows x86-instruction-witness-tests)))
+    (перевірити-рядки-команд-x86-64 перевірки-команд-x86-64)))
 
-(x86-64-instruction-set-witness)
+; Сумісні імена залишено як посилання на українські замикання.
+(визначити x86-instruction-witness-tests перевірки-команд-x86-64)
+(визначити x86-instruction-check-rows перевірити-рядки-команд-x86-64)
+(визначити x86-64-instruction-set-witness свідок-команд-x86-64)
+
+(свідок-команд-x86-64)
