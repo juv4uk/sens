@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Summarize full-repository T5 migration readiness without writing .sens files.
+"""Облік кандидатів Lisp → SENS за чинними точними D1–D10 та каталогом D11.
 
-This is a coordination/evidence gate, not a semantic authority. A source may
-become migratable only after its exact-domain, host-effect, and oracle evidence
-are independently admitted.
+Один AUTO dry-run не створює фізичних .sens і не є семантичним допуском.
+D11 не робить кандидатів виконуваними, а Zig/T5M пакування й нативне
+виконання SENS тут не перевіряються. Облік і рішення про реліз — різні речі.
 """
 from __future__ import annotations
 
@@ -61,10 +61,11 @@ def _checked_rows(state: dict, era: str) -> dict[str, dict]:
 
 
 def _candidate_class(statuses: dict[str, str]) -> str:
-    # A mechanical candidate is NOT an admitted program. Only D2 + semantic
-    # oracle proof may promote a candidate to a committed physical .sens pair.
-    # NEW REALITY (owner 2026-10-15): the сід8/сенс8 source-era is retired --
-    # there is one scan, not three.
+    # Механічний кандидат — прогрес обліку, але ще не виконуваний .sens.
+    # Окремо потрібні нативні SENS reader/eval, негативні свідки,
+    # Zig/T5M та hosted exact-head CI; тут їх НЕ запускаємо.
+    # Сід8/сенс8 вилучено; актуальний прохід AUTO лише один.
+    # Старий текстовий статус зберігаємо для наявних споживачів.
     if statuses["auto"] == "would-write":
         return "mechanical-candidate-needs-oracle"
     return "blocked-needs-semantic-or-nonprogram-triage"
@@ -192,7 +193,7 @@ def build_report() -> dict:
         )
         result = {
             "schema": "sens-t5-migration-readiness/v2",
-            "authority": "research-only; ratified exact D1–D10 and catalog-only D11; no candidate is oracle-certified",
+            "authority": "research-only; exact D1–D10 and D11 catalog-only; Zig/T5M transport and native SENS reader/eval NOT_VERIFIED by this dry-run",
             "foundation_path": "knowledge/d1-d11-foundation.json",
             "source_era": "auto",
             "ratified_foundation_sha256": auto.get("authority", {}).get("foundation_sha256"),
