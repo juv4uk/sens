@@ -1,6 +1,6 @@
-; #509 — native/evaluator differential parity gate for every currently
-; admitted native-first island. Independent expected values prevent the native
-; route and the evaluator from serving as each other's only oracle.
+; #509 — диференційний свідок рівності нативного виконання й обчислювача СЕНС.
+; Незалежні очікувані значення у корпусі не дозволяють виконавцю
+; й обчислювачу взаємно підміняти еталон закону.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
@@ -13,7 +13,7 @@
 (load "lib/machine/dispatch/native-first-parity.lisp")
 
 (визначити нативний-паритет-корпус
-  '
+  (як-є
     ((car-cons-u64-zero
        (перше (сполучити 0 1))
        0
@@ -33,7 +33,7 @@
        (перше (сполучити 9007199254740991 7))
        9007199254740991
        pure
-       not-applicable)))
+       not-applicable))))
 
 (визначити нативний-паритет-вердикти
   (нативний-паритет-перевірити-корпус нативний-паритет-корпус))
