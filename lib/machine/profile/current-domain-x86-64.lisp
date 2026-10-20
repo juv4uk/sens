@@ -1,10 +1,12 @@
-; #3989/#4068 — current exact-domain x86-64 machine projection.
+; #3989/#4068 — чинна машинна проєкція x86-64 для точних доменів.
 ;
-; Current semantic->machine rows for already-witnessed Contract 11.8 residents.
-; Live keys are (domain-width, packed-bits), not source binary lexemes.
+; Рядки зіставлення семантики та машинних форм для мешканців
+; Контракту 11.8, уже підтверджених незалежними свідками.
+; Ключ — (ширина домену, упаковані біти), а не вихідне текстове слово.
 ;
-; D5:01010 and D4:1010 both have packed_bits=10, so width MUST be present.
-; These rows never infer meaning from a historical SID8 byte or a spelling.
+; У D5:01010 і D4:1010 упаковані біти однакові (10), тому
+; ширина є обов'язковою частиною тотожності. Семантика не
+; виводиться з історичного байта SID8 або людської назви.
 
 (machine-domain-profile/2
   (target x86-64)
