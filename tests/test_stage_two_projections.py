@@ -83,7 +83,7 @@ class StageTwoProjectionsTests(unittest.TestCase):
             root = Path(td) / "input"
             root.mkdir()
             source = root / "branch.lisp"
-            original = ("; Це коментар, а не SENS-команда\\n"
+            original = ("; Це коментар, а не SENS-команда\n"
                         + (ROOT / self.BRANCH).read_text(encoding="utf-8"))
             source.write_text(original, encoding="utf-8")
             mirror = Path(td) / "mirror"
