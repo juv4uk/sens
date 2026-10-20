@@ -671,6 +671,8 @@ pub fn install() {
     register_evaluated_capability("читати-сирий-текст-файла", 1, evaluate_read_file_utf8_raw);
     register_capability("записати-байти-файла", evaluate_write_file_bytes);
     register_capability("process-run-raw", process_raw::evaluate_process_run_raw);
+    // Та сама сира можливість процесу для українського виконуваного Lisp.
+    register_capability("процес-запустити-сирий", process_raw::evaluate_process_run_raw);
     register_evaluated_capability("load", 1, evaluate_load);
     register_capability("tcp-connect", evaluate_tcp_connect);
     register_capability("tcp-listen-raw", evaluate_tcp_listen_raw);
@@ -742,6 +744,7 @@ mod install_tests {
             "читати-сирий-текст-файла",
             "записати-байти-файла",
             "process-run-raw",
+            "процес-запустити-сирий",
             "load",
             "tcp-connect",
             "tcp-listen-raw",
@@ -768,6 +771,20 @@ mod install_tests {
             let mut session = sens::Session::default();
             let error = sens::eval_program(form, &mut session)
                 .expect_err("передані замало аргументів мають відхилятися до роботи з сокетом");
+            assert_eq!(error.kind, ErrorKind::Arity, "{form}");
+        }
+    }
+
+    #[test]
+    fn ukrainian_process_raw_name_preserves_fail_closed_arity() {
+        super::install();
+        for form in [
+            "(process-run-raw)",
+            "(процес-запустити-сирий)",
+        ] {
+            let mut session = sens::Session::default();
+            let error = sens::eval_program(form, &mut session)
+                .expect_err("недостатня кількість аргументів не має запускати зовнішній процес");
             assert_eq!(error.kind, ErrorKind::Arity, "{form}");
         }
     }
