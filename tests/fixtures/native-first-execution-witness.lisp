@@ -3,14 +3,14 @@
 ; читання українського джерела та збереження відмов.
 ; Мітки результатів і машинного плану — дані чинного протоколу.
 
-(load "lib/core.lisp")
-(load "lib/machine/encoding/x86-64.lisp")
-(load "lib/machine/layout/pair-x86-64.lisp")
-(load "lib/machine/operands/x86-64.lisp")
-(load "lib/machine/admission/x86-64.lisp")
-(load "lib/machine/lowering/semantic-x86-64.lisp")
-(load "lib/machine/dispatch/native-first.lisp")
-(load "lib/machine/dispatch/native-first-execute.lisp")
+(завантажити-файл "lib/core.lisp")
+(завантажити-файл "lib/machine/encoding/x86-64.lisp")
+(завантажити-файл "lib/machine/layout/pair-x86-64.lisp")
+(завантажити-файл "lib/machine/operands/x86-64.lisp")
+(завантажити-файл "lib/machine/admission/x86-64.lisp")
+(завантажити-файл "lib/machine/lowering/semantic-x86-64.lisp")
+(завантажити-файл "lib/machine/dispatch/native-first.lisp")
+(завантажити-файл "lib/machine/dispatch/native-first-execute.lisp")
 
 (визначити перевірити-свідок-нативного-виконання
   (функція (отримане очікуване)
