@@ -3,12 +3,12 @@
 ; Цитовані вирази та мітки транспортного результату не перекладаємо.
 ; Виконувані локальні зв'язування використовують українську проєкцію.
 
-(load "lib/core.lisp")
-(load "lib/machine/encoding/x86-64.lisp")
-(load "lib/machine/layout/pair-x86-64.lisp")
-(load "lib/machine/operands/x86-64.lisp")
-(load "lib/machine/lowering/semantic-x86-64.lisp")
-(load "lib/machine/dispatch/native-first.lisp")
+(завантажити-файл "lib/core.lisp")
+(завантажити-файл "lib/machine/encoding/x86-64.lisp")
+(завантажити-файл "lib/machine/layout/pair-x86-64.lisp")
+(завантажити-файл "lib/machine/operands/x86-64.lisp")
+(завантажити-файл "lib/machine/lowering/semantic-x86-64.lisp")
+(завантажити-файл "lib/machine/dispatch/native-first.lisp")
 
 (визначити перевірити-повноту-рідного-виконання
   (функція (вираз)
