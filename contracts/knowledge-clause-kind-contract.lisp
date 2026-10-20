@@ -1,7 +1,7 @@
-; #218 — Lisp-owned clause classification contract.
-; A knowledge clause answers with its domain kind, not with historical t/().
-; Structural shape is observed below this boundary; clause-kind is the public
-; knowledge-domain answer consumed by knowledge readers.
+; #218 — контракт класифікації клауз знань, визначений мовою Lisp.
+; Клауза відповідає своїм доменним видом, а не історичним t/().
+; Структурну форму спостерігають на нижчому рівні; публічну
+; відповідь домену знань читають споживачі знань.
 
 (knowledge-clause-kind-contract/1
   ((query . is-fact?)

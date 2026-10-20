@@ -1,15 +1,16 @@
-; #1810 — minimal shared COND control law.
+; #1810 — мінімальний спільний закон керування COND.
 ;
-; COND does not understand arbitrary answer algebras.
-; It consumes exactly the contextual one-bit predicate result:
+; COND не тлумачить довільні алгебри відповідей.
+; Він споживає лише контекстне однобітне значення предиката:
 ;
-;   1 -> select/evaluate expression
-;   0 -> continue
+;   1 -> вибрати та обчислити вираз
+;   0 -> перейти до наступного варіанта
 ;
-; A clause is exactly:
+; Умовна гілка має рівно два поля:
 ;   (test expression)
 ;
-; Exhaustion returns structural (), which is data and never predicate FALSE.
+; Якщо варіанти вичерпано, результатом є структурне ().
+; Це дані, а не логічна хиба предиката.
 
 (control-dispatch-contract/2
   ((identity . 00000111)

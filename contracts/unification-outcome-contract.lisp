@@ -1,7 +1,8 @@
-; #219 — Lisp-owned unification outcome contract.
-; `unify` remains the historical mechanism. `unify-observe` makes the
-; algorithm's established result explicit without confusing empty substitution
-; with Canon-0 no-answer and without inventing a cause for failure.
+; #219 — контракт результату уніфікації, визначений мовою Lisp.
+; `unify` залишається історичним механізмом. `unify-observe`
+; явно подає його встановлений результат: порожня підстановка
+; не плутається з відсутністю відповіді Канону 0, а причина
+; невдачі не вигадується.
 
 (unification-outcome-contract/1
   ((query . unify-observe)

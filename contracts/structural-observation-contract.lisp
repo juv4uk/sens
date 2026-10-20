@@ -1,8 +1,11 @@
-; structural-observation-contract.lisp — remaining non-core structural result algebras.
+; Контракт структурних спостережень — залишкові неядерні
+; різновиди структурованих результатів.
 ;
-; ATOM (00000010) and EQ (00000011) no longer live here: their current exact
-; one-bit predicate laws are owned by the shared Lisp semantic witnesses under #1709.
-; This document remains only for still-unmigrated structural/text observations.
+; ATOM (00000010) та EQ (00000011) більше не визначаються тут:
+; їхні чинні точні однобітні предикатні закони належать спільним
+; семантичним свідченням Lisp у #1709.
+; Цей документ збережено лише для структурних і текстових
+; спостережень, які ще не перенесено.
 
 (structural-observation-contract/1
   ((identity . "1023")

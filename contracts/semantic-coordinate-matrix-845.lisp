@@ -1,10 +1,12 @@
-; #845 — read-only semantic coordinate matrix v2.
+; #845 — матриця семантичних координат, версія 2; лише читання.
 ;
-; Composition view only: this file owns no semantic meaning, allocates no SID,
-; and copies no math/kernel/machine axis payload.
+; Це тільки зведене представлення: файл не визначає семантичного
+; значення, не призначає SID і не копіює дані математичної,
+; ядерної чи машинної осі.
 ;
-; The observer derives coordinates from the listed live sources. Missing axis
-; evidence is legal and must remain explicit rather than being guessed.
+; Спостерігач виводить координати із зазначених чинних джерел.
+; Відсутність свідчень для осі дозволена; її потрібно вказувати
+; явно, а не заповнювати здогадом.
 
 (semantic-coordinate-matrix/2
   (identity-source . "lib/surface/semantic-registry.lisp")

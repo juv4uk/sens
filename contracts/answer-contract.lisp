@@ -1,26 +1,28 @@
-; #1804 / #3161 — minimal shared answer/control foundation.
+; #1804 / #3161 — мінімальний спільний закон відповіді та керування.
 ;
-; Pure Lisp data authority. Domain-specific mathematics/reasoning live in
-; their own contracts and do not redefine the shared predicate/control law.
+; Це чисті дані Lisp, які визначають авторитет спільного контракту.
+; Предметна математика й міркування мають окремі контракти
+; і не перевизначають спільного закону предикатів та керування.
 ;
-; Shared law:
-;   D1:1      = YES
-;   D1:0      = NO
-;   D3:000 () = structural EMPTY / NO-WITNESS, never predicate FALSE
-;   COND      = exactly (test expression)
-;               D1:1 -> select
-;               D1:0 -> continue as explicit NO
-;               D3:000 -> continue as EMPTY/no-witness
-;               exhaustion -> D3:000
+; Спільний закон:
+;   D1:1      = ТАК
+;   D1:0      = НІ
+;   D3:000 () = структурна порожнеча / немає свідка, а не хиба предиката
+;   COND      = рівно (test expression)
+;               D1:1 -> вибрати
+;               D1:0 -> перейти далі з явною відповіддю НІ
+;               D3:000 -> перейти далі без свідка
+;               вичерпання варіантів -> D3:000
 ;
-; Critical distinction:
-;   control(D1:0)   = continue
-;   control(D3:000) = continue
-;   but D1:0 != D3:000
+; Важлива відмінність:
+;   control(D1:0)   = продовжити
+;   control(D3:000) = продовжити
+;   але D1:0 != D3:000
 ;
-; Human spellings remain surface projections. Canonical identity is exact
-; domain + exact bits + admitted law. No rich classifier record is a predicate
-; answer and no T/NIL truthiness is active authority.
+; Людські написання залишаються мовними проєкціями.
+; Канонічну тотожність задають точний домен, точні біти й допущений закон.
+; Розгорнутий запис класифікатора не є відповіддю предиката.
+; Історичне трактування T/NIL як істини не має нормативної сили.
 
 (answer-contract/3
 

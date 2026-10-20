@@ -1,9 +1,10 @@
-; #1115 — Lisp-owned early SID lowering boundary.
+; #1115 — історичний контракт раннього зниження SID засобами Lisp.
 ;
-; Surface spelling is resolved before the backend boundary. The backend receives
-; identity + arguments + a portable contract, never a human surface spelling.
+; Людське написання розв'язується до межі зовнішнього виконавця.
+; Виконавець отримує тотожність, аргументи та переносимий контракт,
+; але не людську назву мовної проєкції.
 ;
-; This is a contract artifact, not a new semantic identity.
+; Це запис контракту, а не нова семантична тотожність.
 
 (early-sid-lowering-contract/1
   ((resolution
