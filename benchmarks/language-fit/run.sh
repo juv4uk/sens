@@ -44,6 +44,17 @@ build_variant() {
 # Адресні тести машинного ядра, без важкого Cargo workspace.
 rustc --edition=2021 --test -C opt-level=2 crates/sens/src/machine_math.rs -o "$scratch/machine-math-tests"
 "$scratch/machine-math-tests"
+
+# ОКРЕМИЙ дослід: чи випереджає ASM компілятор Rust для точних
+# D24/D48/D96 цілочисельних ядер? Обов'язковий контроль кожного входу.
+# Відсутність числової відповідності — помилка, швидкісний програш — ні.
+rustc --edition=2021 -C opt-level=3 -C target-cpu=skylake \
+  benchmarks/language-fit/exact-integer.rs -o "$scratch/exact-integer"
+"$scratch/exact-integer" | tee "$scratch/exact-integer.md"
+if [[ -v GITHUB_STEP_SUMMARY && -n "$GITHUB_STEP_SUMMARY" ]]; then
+  cat "$scratch/exact-integer.md" >> "$GITHUB_STEP_SUMMARY"
+fi
+
 build_variant fortran gfortran -O3 -march=skylake -std=f2008 -Wall benchmarks/language-fit/dot.f90 -o "$scratch/dot-fortran"
 build_variant c gcc -O3 -march=skylake -std=c11 -Wall -Wextra benchmarks/language-fit/dot.c -o "$scratch/dot-c"
 build_variant rust rustc -C opt-level=3 -C target-cpu=skylake -C debuginfo=0 benchmarks/language-fit/dot.rs -o "$scratch/dot-rust"
