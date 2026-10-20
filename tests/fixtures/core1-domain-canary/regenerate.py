@@ -25,7 +25,7 @@ PROJECTION = HERE / "second.lisp"
 PHYSICAL = HERE / "second.sens"
 
 # An already implemented Core1 helper; preserve its source and semantics.
-# Its historic SID8 words are evidence, NOT modern D8 identity.
+# Its historic сід8 words are evidence, NOT modern D8 identity.
 C1_SECOND = re.compile(
     r"\(00001001\s+C1-SECOND\s+"
     r"\(00001000\s+\(X\)\s+"
