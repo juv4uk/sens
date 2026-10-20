@@ -1,20 +1,20 @@
-; #150/#211/#4057 — executable one-way machine authority + anti-hybrid guard.
-; Admitted authority direction remains semantic-to-machine; reverse authority is RED.
-; Current semantic authority is Contract 11.8 + ratified exact-domain laws.
-; Every bounded machine capability must name an independent exact-domain
-; semantic witness. Native/host results may realize meaning but may never
-; become their own answer key.
+; #150/#211/#4057 — мовна перевірка машинних повноважень і захист від гібридів.
+; Допущений напрям лише від семантичного закону до машини, не навпаки.
+; Джерело повноважень — контракт 11.8 та ратифіковані доменні закони.
+; Для кожної обмеженої машинної можливості потрібен незалежний точний
+; доменний свідок. Результат хоста може виконувати закон, але не визначає його.
+; Історичні поля та точні назви діагностичних помилок не перейменовуються.
 
-(визначити second (функція (x) (перше (решта x))))
-(визначити third (функція (x) (перше (решта (решта x)))))
+(визначити машина-друге (функція (значення) (перше (решта значення))))
+(визначити машина-третє (функція (значення) (перше (решта (решта значення)))))
 
-(визначити authority-edges
+(визначити ребра-повноважень
   (читати-всі (читати-файл "tests/machine-authority-edges.lisp")))
 
-(визначити machine-capability-provenance
+(визначити походження-машинних-можливостей
   (читати-всі (читати-файл "lib/machine/capability-provenance.lisp")))
 
-(визначити machine-provenance-required-fields
+(визначити обов'язкові-поля-походження
   (як-є
     (name
      semantic-authority
@@ -24,184 +24,184 @@
      reverse-edge
      independent-semantic-witness)))
 
-(визначити machine-provenance-field-from
-  (функція (name fields)
+(визначити поле-походження-з
+  (функція (назва поля)
     (за-умовою
-      ((атом? fields) () (як-є missing))
-      ((атом? fields) (1) (як-є missing))
-      ((атом? fields) (0)
-       (нехай ((field (перше fields)))
+      ((атом? поля) () (як-є missing))
+      ((атом? поля) (1) (як-є missing))
+      ((атом? поля) (0)
+       (нехай ((поле (перше поля)))
          (за-умовою
-           ((атом? field) ()
-            (machine-provenance-field-from name (решта fields)))
-           ((атом? field) (1)
-            (machine-provenance-field-from name (решта fields)))
-           ((атом? field) (0)
+           ((атом? поле) ()
+            (поле-походження-з назва (решта поля)))
+           ((атом? поле) (1)
+            (поле-походження-з назва (решта поля)))
+           ((атом? поле) (0)
             (за-умовою
-              ((тотожне? (перше field) name) (1)
-               (second field))
-              ((тотожне? (перше field) name) (0)
-               (machine-provenance-field-from name (решта fields)))))))))))
+              ((тотожне? (перше поле) назва) (1)
+               (машина-друге поле))
+              ((тотожне? (перше поле) назва) (0)
+               (поле-походження-з назва (решта поля)))))))))))
 
-(визначити machine-provenance-field
-  (функція (name row)
+(визначити поле-походження
+  (функція (назва рядок)
     (за-умовою
-      ((атом? row) () (як-є missing))
-      ((атом? row) (1) (як-є missing))
-      ((атом? row) (0)
-       (machine-provenance-field-from name (решта row))))))
+      ((атом? рядок) () (як-є missing))
+      ((атом? рядок) (1) (як-є missing))
+      ((атом? рядок) (0)
+       (поле-походження-з назва (решта рядок))))))
 
-(визначити machine-required-fields-state
-  (функція (required row)
+(визначити стан-обов'язкових-полів
+  (функція (обов'язкові рядок)
     (за-умовою
-      ((атом? required) () (як-є complete))
-      ((атом? required) (1) (як-є malformed))
-      ((атом? required) (0)
-       (нехай ((value (machine-provenance-field (перше required) row)))
+      ((атом? обов'язкові) () (як-є complete))
+      ((атом? обов'язкові) (1) (як-є malformed))
+      ((атом? обов'язкові) (0)
+       (нехай ((значення (поле-походження (перше обов'язкові) рядок)))
          (за-умовою
-           ((однакові? value (як-є missing)) (так)
+           ((однакові? значення (як-є missing)) (так)
             (як-є missing))
-           ((однакові? value (як-є missing)) (ні)
-            (machine-required-fields-state (решта required) row))))))))
+           ((однакові? значення (як-є missing)) (ні)
+            (стан-обов'язкових-полів (решта обов'язкові) рядок))))))))
 
-(визначити exact-domain-independent-witness-state
-  (функція (witness)
+(визначити стан-незалежного-свідка-домену
+  (функція (свідок)
     (за-умовою
-      ((атом? witness) () (як-є rejected))
-      ((атом? witness) (1) (як-є rejected))
-      ((атом? witness) (0)
+      ((атом? свідок) () (як-є rejected))
+      ((атом? свідок) (1) (як-є rejected))
+      ((атом? свідок) (0)
        (за-умовою
-         ((тотожне? (перше witness) (як-є exact-domain-expression))
+         ((тотожне? (перше свідок) (як-є exact-domain-expression))
           (1)
           (як-є admitted))
-         ((тотожне? (перше witness) (як-є exact-domain-expression))
+         ((тотожне? (перше свідок) (як-є exact-domain-expression))
           (0)
           (за-умовою
-            ((тотожне? (перше witness) (як-є exact-domain-corpus))
+            ((тотожне? (перше свідок) (як-є exact-domain-corpus))
              (1)
              (як-є admitted))
-            ((тотожне? (перше witness) (як-є exact-domain-corpus))
+            ((тотожне? (перше свідок) (як-є exact-domain-corpus))
              (0)
              (як-є rejected)))))))))
 
-(визначити allowed-machine-edge-state
-  (функція (row)
+(визначити стан-допущеного-ребра
+  (функція (рядок)
     (за-умовою
-      ((атом? row) () (як-є denied))
-      ((атом? row) (1) (як-є denied))
-      ((атом? row) (0)
+      ((атом? рядок) () (як-є denied))
+      ((атом? рядок) (1) (як-є denied))
+      ((атом? рядок) (0)
        (за-умовою
-         ((тотожне? (перше row) (як-є authority-edge)) (1)
+         ((тотожне? (перше рядок) (як-є authority-edge)) (1)
           (за-умовою
-            ((тотожне? (second row) (як-є semantic)) (1)
+            ((тотожне? (машина-друге рядок) (як-є semantic)) (1)
              (за-умовою
-               ((тотожне? (third row) (як-є machine)) (1)
+               ((тотожне? (машина-третє рядок) (як-є machine)) (1)
                 (як-є allowed))
-               ((тотожне? (third row) (як-є machine)) (0)
+               ((тотожне? (машина-третє рядок) (як-є machine)) (0)
                 (як-є denied))))
-            ((тотожне? (second row) (як-є semantic)) (0)
+            ((тотожне? (машина-друге рядок) (як-є semantic)) (0)
              (як-є denied))))
-         ((тотожне? (перше row) (як-є authority-edge)) (0)
+         ((тотожне? (перше рядок) (як-є authority-edge)) (0)
           (як-є denied)))))))
 
 ; Deliberately unbound diagnostic symbols make fail-closed violations visible
 ; even when stdout is buffered. CI requires the exact diagnostic name.
-(визначити fail-machine-authority
-  (функція (row)
-    (machine-authority-boundary-violation row)))
+(визначити помилка-машинних-повноважень
+  (функція (рядок)
+    (machine-authority-boundary-violation рядок)))
 
-(визначити fail-machine-hybrid
-  (функція (row)
-    (machine-semantic-hybrid-violation row)))
+(визначити помилка-гібридної-семантики
+  (функція (рядок)
+    (machine-semantic-hybrid-violation рядок)))
 
-(визначити check-machine-edges
-  (функція (rows)
+(визначити перевірити-машинні-ребра
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) () (як-є machine-authority-ok))
-      ((атом? rows) (1) (fail-machine-authority rows))
-      ((атом? rows) (0)
-       (нехай ((state (allowed-machine-edge-state (перше rows))))
+      ((атом? рядки) () (як-є machine-authority-ok))
+      ((атом? рядки) (1) (помилка-машинних-повноважень рядки))
+      ((атом? рядки) (0)
+       (нехай ((стан (стан-допущеного-ребра (перше рядки))))
          (за-умовою
-           ((тотожне? state (як-є allowed)) (1)
-            (check-machine-edges (решта rows)))
-           ((тотожне? state (як-є allowed)) (0)
-            (fail-machine-authority (перше rows)))))))))
+           ((тотожне? стан (як-є allowed)) (1)
+            (перевірити-машинні-ребра (решта рядки)))
+           ((тотожне? стан (як-є allowed)) (0)
+            (помилка-машинних-повноважень (перше рядки)))))))))
 
-(визначити machine-provenance-row-safe-state
-  (функція (row)
+(визначити стан-безпечного-рядка-походження
+  (функція (рядок)
     (за-умовою
-      ((атом? row) () (як-є rejected))
-      ((атом? row) (1) (як-є rejected))
-      ((атом? row) (0)
+      ((атом? рядок) () (як-є rejected))
+      ((атом? рядок) (1) (як-є rejected))
+      ((атом? рядок) (0)
        (за-умовою
-         ((тотожне? (перше row) (як-є capability-provenance)) (1)
-          (нехай ((required-state
-                  (machine-required-fields-state
-                    machine-provenance-required-fields
-                    row)))
+         ((тотожне? (перше рядок) (як-є capability-provenance)) (1)
+          (нехай ((стан-обов'язкових
+                  (стан-обов'язкових-полів
+                    обов'язкові-поля-походження
+                    рядок)))
             (за-умовою
-              ((тотожне? required-state (як-є complete)) (1)
-               (нехай-послідовно ((semantic-authority
-                        (machine-provenance-field
+              ((тотожне? стан-обов'язкових (як-є complete)) (1)
+               (нехай-послідовно ((семантичні-повноваження
+                        (поле-походження
                           (як-є semantic-authority)
-                          row))
-                      (reverse-edge
-                        (machine-provenance-field
+                          рядок))
+                      (зворотне-ребро
+                        (поле-походження
                           (як-є reverse-edge)
-                          row))
-                      (machine-witness
-                        (machine-provenance-field
+                          рядок))
+                      (машинний-свідок
+                        (поле-походження
                           (як-є machine-witness)
-                          row))
-                      (independent-witness
-                        (machine-provenance-field
+                          рядок))
+                      (незалежний-свідок
+                        (поле-походження
                           (як-є independent-semantic-witness)
-                          row))
-                      (independent-state
-                        (exact-domain-independent-witness-state
-                          independent-witness)))
+                          рядок))
+                      (стан-незалежного
+                        (стан-незалежного-свідка-домену
+                          незалежний-свідок)))
                  (за-умовою
-                   ((тотожне? semantic-authority (як-є language-contract.lisp+ratified-domain-laws))
+                   ((тотожне? семантичні-повноваження (як-є language-contract.lisp+ratified-domain-laws))
                     (1)
                     (за-умовою
-                      ((тотожне? reverse-edge (як-є forbidden))
+                      ((тотожне? зворотне-ребро (як-є forbidden))
                        (1)
                        (за-умовою
-                         ((тотожне? independent-state (як-є admitted))
+                         ((тотожне? стан-незалежного (як-є admitted))
                           (1)
                           (за-умовою
-                            ((однакові? independent-witness machine-witness)
+                            ((однакові? незалежний-свідок машинний-свідок)
                              (1)
                              (як-є rejected))
-                            ((однакові? independent-witness machine-witness)
+                            ((однакові? незалежний-свідок машинний-свідок)
                              (0)
                              (як-є admitted))))
-                         ((тотожне? independent-state (як-є admitted))
+                         ((тотожне? стан-незалежного (як-є admitted))
                           (0)
                           (як-є rejected))))
-                      ((тотожне? reverse-edge (як-є forbidden))
+                      ((тотожне? зворотне-ребро (як-є forbidden))
                        (0)
                        (як-є rejected))))
-                   ((тотожне? semantic-authority (як-є language-contract.lisp+ratified-domain-laws))
+                   ((тотожне? семантичні-повноваження (як-є language-contract.lisp+ratified-domain-laws))
                     (0)
                     (як-є rejected)))))
-              ((тотожне? required-state (як-є complete)) (0)
+              ((тотожне? стан-обов'язкових (як-є complete)) (0)
                (як-є rejected)))))
-         ((тотожне? (перше row) (як-є capability-provenance)) (0)
+         ((тотожне? (перше рядок) (як-є capability-provenance)) (0)
           (як-є rejected)))))))
 
-(визначити check-machine-capability-provenance
-  (функція (rows)
+(визначити перевірити-походження-машинної-можливості
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) () (як-є machine-anti-hybrid-ok))
-      ((атом? rows) (1) (fail-machine-hybrid rows))
-      ((атом? rows) (0)
-       (нехай ((state (machine-provenance-row-safe-state (перше rows))))
+      ((атом? рядки) () (як-є machine-anti-hybrid-ok))
+      ((атом? рядки) (1) (помилка-гібридної-семантики рядки))
+      ((атом? рядки) (0)
+       (нехай ((стан (стан-безпечного-рядка-походження (перше рядки))))
          (за-умовою
-           ((тотожне? state (як-є admitted)) (1)
-            (check-machine-capability-provenance (решта rows)))
-           ((тотожне? state (як-є admitted)) (0)
-            (fail-machine-hybrid (перше rows)))))))))
+           ((тотожне? стан (як-є admitted)) (1)
+            (перевірити-походження-машинної-можливості (решта рядки)))
+           ((тотожне? стан (як-є admitted)) (0)
+            (помилка-гібридної-семантики (перше рядки)))))))))
 
-(check-machine-edges authority-edges)
-(check-machine-capability-provenance machine-capability-provenance)
+(перевірити-машинні-ребра ребра-повноважень)
+(перевірити-походження-машинної-можливості походження-машинних-можливостей)
