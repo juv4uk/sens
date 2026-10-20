@@ -22,10 +22,10 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 150,
+    "total": 153,
     "historical": 15,
-    "library": 135,
-    "distinct_families": 20
+    "library": 138,
+    "distinct_families": 22
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -34,294 +34,6 @@
   },
   "rows": [
     {
-      "surface_name": "COMPUTE-APPLICABLE-METHODS",
-      "source_family": "clos-mop",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": null
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "DIRECT-SLOT-DEFINITION-CLASS",
-      "source_family": "clos-mop",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": null
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "EFFECTIVE-SLOT-DEFINITION-CLASS",
-      "source_family": "clos-mop",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": null
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "ENSURE-CLASS",
-      "source_family": "clos-mop",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": null
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "FINALIZE-INHERITANCE",
-      "source_family": "clos-mop",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": null
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "SHARED-INITIALIZE",
-      "source_family": "clos-mop",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": null
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "SLOT-VALUE-USING-CLASS",
-      "source_family": "clos-mop",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": null
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "DIGIT->STRING",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "ISQRT-STEP",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "LARGEST-CHUNK",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "NONDECREASING-FROM?",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "NONINCREASING-FROM?",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "NUMBER->STRING-ONTO",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "SQRT-ITER",
-      "source_family": "derived-core",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/core.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "NCONC",
-      "source_family": "early-lisp",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/2344-post-d4-historical-ledger.uk.md",
-        "primary_url": "https://softwarepreservation.computerhistory.org/LISP/lisp15_family.html"
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "NREVERSE",
-      "source_family": "early-lisp",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/2344-post-d4-historical-ledger.uk.md",
-        "primary_url": "https://softwarepreservation.computerhistory.org/LISP/lisp15_family.html"
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "EPISTEMIC--ALL-REQUIRED-PRESENT?",
-      "source_family": "epistemic",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/epistemic.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "EPISTEMIC--CLAIM-REF?",
-      "source_family": "epistemic",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/epistemic.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
       "surface_name": "ACCEPT-KNOWLEDGE-EXCHANGE",
       "source_family": "knowledge",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
@@ -329,6 +41,23 @@
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
         "original_file": "lib/knowledge.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "ADD-USAGE",
+      "source_family": "proof",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/reason.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -373,6 +102,516 @@
       "callable": false
     },
     {
+      "surface_name": "AGENT-LOOP",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "ALIST-REF",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "APPEND-TOOL-RESULTS",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "APPLY-SUBST-WALKED",
+      "source_family": "logic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/unify.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "BALANCE",
+      "source_family": "persistent-structures",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/persistent-map.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "BALANCE-FACTOR",
+      "source_family": "persistent-structures",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/persistent-map.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "BASH-TOOL-SCHEMA",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLAIM-MARKERS",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLIPS-CONS-EACH-ONTO",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/clips-import.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLIPS-FACTS->CLAUSES-ONTO",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/clips-import.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLIPS-IMPORT-FORMS-ONTO",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/clips-import.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLIPS-SLOT-VALUE-OF",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/clips-import.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLIPS-STRING-AFTER-LAST-DOUBLE-COLON",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/clips-import.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLIPS-STRING-EMPTY?",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/clips-import.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLIPS-STRING-STARTS-WITH-DOUBLE-COLON?",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/clips-import.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CLIPS-SYMBOL-STARTS-WITH-?",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/clips-import.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "COLLECT-TRAILING-TOOLS",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "COMPUTE-APPLICABLE-METHODS",
+      "source_family": "clos-mop",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": null
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CORE3-ADD-ROUTES",
+      "ukr": "ядро3-додати-маршрути",
+      "source_family": "core3",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/core3.lisp",
+        "verified_live_main": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "signature": {
+        "input": "точна-ідентичність",
+        "output": "список спостережень маршрутизації"
+      },
+      "normative_law_candidate": "Повертає маршрути для чотирьох історичних виконавців у визначеному порядку без нового семантичного коду.",
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "CORE3-ROUTE",
+      "ukr": "ядро3-маршрут",
+      "source_family": "core3",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/core3.lisp",
+        "verified_live_main": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "signature": {
+        "input": "точна-ідентичність, виконавець",
+        "output": "результат наявного вибору механізму"
+      },
+      "normative_law_candidate": "Результат дорівнює виклику раніше визначеного вибрати-механізм з тими самими аргументами.",
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "COUNT-USAGE-LIST",
+      "source_family": "proof",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/reason.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "COUNT-WITH-ROLE",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "DIGIT->STRING",
+      "source_family": "derived-core",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/core.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "DIRECT-SLOT-DEFINITION-CLASS",
+      "source_family": "clos-mop",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": null
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "DISPATCH-TOOL",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EFFECTFUL-PRIMITIVES",
+      "source_family": "lint",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/linter.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EFFECTIVE-SLOT-DEFINITION-CLASS",
+      "source_family": "clos-mop",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": null
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "ENSURE-CLASS",
+      "source_family": "clos-mop",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": null
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EPISTEMIC--ALL-REQUIRED-PRESENT?",
+      "source_family": "epistemic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/epistemic.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EPISTEMIC--CLAIM-REF?",
+      "source_family": "epistemic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/epistemic.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
       "surface_name": "EXCHANGE-KNOWLEDGE-PACKAGE",
       "source_family": "knowledge",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
@@ -380,6 +619,242 @@
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
         "original_file": "lib/knowledge.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EXECUTE-BASH",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EXECUTE-TOOL-CALL",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EXPLAIN-PROOF-LIST",
+      "source_family": "proof",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/reason.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EXPLAIN-PROOF-NODE",
+      "source_family": "proof",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/reason.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "EXTEND-SUBST",
+      "source_family": "logic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/unify.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "FINALIZE-INHERITANCE",
+      "source_family": "clos-mop",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": null
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "FIND-ENTRY",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/forward.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "GET-THRESHOLD",
+      "source_family": "lint",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/linter.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "HEIGHT-OF",
+      "source_family": "persistent-structures",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/persistent-map.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "HTTP-POST-JSON",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "HTTP-TRANSPORT-BODY",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "HTTP-TRANSPORT-EXIT",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "HTTP-TRANSPORT-STDERR",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "ID-IN-LIST?",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -424,13 +899,13 @@
       "callable": false
     },
     {
-      "surface_name": "LOAD-KNOWLEDGE",
-      "source_family": "knowledge",
+      "surface_name": "INVALID-COMPLETION-NUDGE",
+      "source_family": "tooling",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -441,13 +916,13 @@
       "callable": false
     },
     {
-      "surface_name": "RECEIVE-KNOWLEDGE-PACKAGE",
-      "source_family": "knowledge",
+      "surface_name": "ISQRT-STEP",
+      "source_family": "derived-core",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/core.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -458,13 +933,13 @@
       "callable": false
     },
     {
-      "surface_name": "RECORD-USAGE!",
-      "source_family": "knowledge",
+      "surface_name": "JSON->MESSAGE",
+      "source_family": "tooling",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -475,13 +950,13 @@
       "callable": false
     },
     {
-      "surface_name": "SEND-KNOWLEDGE-PACKAGE",
-      "source_family": "knowledge",
+      "surface_name": "JSON->TOOL-CALL",
+      "source_family": "tooling",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -492,13 +967,13 @@
       "callable": false
     },
     {
-      "surface_name": "STRING-THROUGH-LINE",
-      "source_family": "knowledge",
+      "surface_name": "JSON-ENCODE",
+      "source_family": "tooling",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -509,13 +984,13 @@
       "callable": false
     },
     {
-      "surface_name": "TCP-READ-FRAME",
-      "source_family": "knowledge",
+      "surface_name": "JSON-ENCODE-ARRAY-ITEMS",
+      "source_family": "tooling",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -526,13 +1001,13 @@
       "callable": false
     },
     {
-      "surface_name": "TCP-READ-TO-EOF",
-      "source_family": "knowledge",
+      "surface_name": "JSON-ENCODE-KEY",
+      "source_family": "tooling",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -543,13 +1018,13 @@
       "callable": false
     },
     {
-      "surface_name": "USAGE-OF",
-      "source_family": "knowledge",
+      "surface_name": "JSON-ENCODE-OBJECT-ENTRIES",
+      "source_family": "tooling",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -560,13 +1035,13 @@
       "callable": false
     },
     {
-      "surface_name": "WRITE-KNOWLEDGE-PACKAGE",
-      "source_family": "knowledge",
+      "surface_name": "JSON-ESCAPE-ONTO",
+      "source_family": "tooling",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/knowledge.lisp",
+        "original_file": "lib/yantra.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -577,13 +1052,13 @@
       "callable": false
     },
     {
-      "surface_name": "EFFECTFUL-PRIMITIVES",
-      "source_family": "lint",
+      "surface_name": "LARGEST-CHUNK",
+      "source_family": "derived-core",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/linter.lisp",
+        "original_file": "lib/core.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -594,13 +1069,13 @@
       "callable": false
     },
     {
-      "surface_name": "GET-THRESHOLD",
-      "source_family": "lint",
+      "surface_name": "LEGACY-WORLD-TRANSITION-EXPANSION",
+      "source_family": "world",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/linter.lisp",
+        "original_file": "lib/world.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -628,13 +1103,13 @@
       "callable": false
     },
     {
-      "surface_name": "APPLY-SUBST-WALKED",
-      "source_family": "logic",
+      "surface_name": "LOAD-KNOWLEDGE",
+      "source_family": "knowledge",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/unify.lisp",
+        "original_file": "lib/knowledge.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -645,13 +1120,13 @@
       "callable": false
     },
     {
-      "surface_name": "EXTEND-SUBST",
-      "source_family": "logic",
+      "surface_name": "MAKE-BALANCED-NODE",
+      "source_family": "persistent-structures",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/unify.lisp",
+        "original_file": "lib/persistent-map.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -662,13 +1137,13 @@
       "callable": false
     },
     {
-      "surface_name": "OCCURS-CHECK",
-      "source_family": "logic",
+      "surface_name": "MAP-APPLY-HEAD",
+      "source_family": "rules",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/unify.lisp",
+        "original_file": "lib/forward.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -679,12 +1154,14 @@
       "callable": false
     },
     {
-      "surface_name": "SSTATUS",
-      "source_family": "maclisp",
-      "source_kind": "HISTORICAL_LISP",
+      "surface_name": "MAP-APPLY-HEAD-JTMS",
+      "source_family": "rules",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
-        "repo_file": "docs/research/d10-historical-maclisp-v2.uk.md",
-        "primary_url": "https://softwarepreservation.computerhistory.org/LISP/"
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/forward.lisp",
+        "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
@@ -694,12 +1171,171 @@
       "callable": false
     },
     {
-      "surface_name": "STATUS",
-      "source_family": "maclisp",
-      "source_kind": "HISTORICAL_LISP",
+      "surface_name": "MAP-PROOFS",
+      "source_family": "proof",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
-        "repo_file": "docs/research/d10-historical-maclisp-v2.uk.md",
-        "primary_url": "https://softwarepreservation.computerhistory.org/LISP/"
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/reason.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MARKERS-CONTAINED?",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MAX-TURNS",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MAX2",
+      "source_family": "persistent-structures",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/persistent-map.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MECHANISM-SELECT",
+      "ukr": "вибрати-механізм",
+      "source_family": "mechanism-selection",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/mechanism-selector.lisp",
+        "verified_live_main": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "signature": {
+        "input": "точна-ідентичність, виконавець",
+        "output": "запис вибору механізму або обґрунтованої відмови"
+      },
+      "normative_law_candidate": "Якщо ідентичність відсутня в реєстрі, повернути помилку відсутньої тотожності; якщо маршрут відсутній — недоступність механізму; інакше вибраний маршрут із наявних даних.",
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MSG-CALL-IDS",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MSG-CONTENT",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MSG-ROLE",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MSG-TOOL-CALL-ID",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "MSG-TOOL-CALLS",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
@@ -828,82 +1464,12 @@
       "callable": false
     },
     {
-      "surface_name": "BALANCE",
-      "source_family": "persistent-structures",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "surface_name": "NCONC",
+      "source_family": "early-lisp",
+      "source_kind": "HISTORICAL_LISP",
       "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/persistent-map.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "BALANCE-FACTOR",
-      "source_family": "persistent-structures",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/persistent-map.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "HEIGHT-OF",
-      "source_family": "persistent-structures",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/persistent-map.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MAKE-BALANCED-NODE",
-      "source_family": "persistent-structures",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/persistent-map.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MAX2",
-      "source_family": "persistent-structures",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/persistent-map.lisp",
-        "snapshot_not_live_proof": true
+        "repo_file": "docs/research/2344-post-d4-historical-ledger.uk.md",
+        "primary_url": "https://softwarepreservation.computerhistory.org/LISP/lisp15_family.html"
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
@@ -998,6 +1564,321 @@
       "callable": false
     },
     {
+      "surface_name": "NONDECREASING-FROM?",
+      "source_family": "derived-core",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/core.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "NONINCREASING-FROM?",
+      "source_family": "derived-core",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/core.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "NREVERSE",
+      "source_family": "early-lisp",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/2344-post-d4-historical-ledger.uk.md",
+        "primary_url": "https://softwarepreservation.computerhistory.org/LISP/lisp15_family.html"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "NUMBER->STRING-ONTO",
+      "source_family": "derived-core",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/core.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "OCCURS-CHECK",
+      "source_family": "logic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/unify.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "OLLAMA-COMPLETE",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "OLLAMA-MODEL",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "OLLAMA-URL",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "PRINT-INDENT",
+      "source_family": "proof",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/reason.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "PROVENANCE-LIST",
+      "source_family": "proof",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/reason.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RECEIVE-KNOWLEDGE-PACKAGE",
+      "source_family": "knowledge",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/knowledge.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RECORD-CONSTRUCTOR",
+      "source_family": "r6rs-records",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RECORD-CONSTRUCTOR-DESCRIPTOR",
+      "source_family": "r6rs-records",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RECORD-TYPE-DESCRIPTOR",
+      "source_family": "r6rs-records",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RECORD-USAGE!",
+      "source_family": "knowledge",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/knowledge.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RESULT-ANSWER",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RESULT-EPISTEMIC-STATUS",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RESULT-MESSAGES",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RESULT-TURN",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
       "surface_name": "ROTATE-LEFT",
       "source_family": "persistent-structures",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
@@ -1022,6 +1903,338 @@
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
         "original_file": "lib/persistent-map.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "RUN-AGENT",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "SCIENCE-PROPER-LIST?",
+      "source_family": "quantity",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/quantity.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "SCIENCE-SEVENTH",
+      "source_family": "quantity",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/quantity.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "SCIENCE-SIXTH",
+      "source_family": "quantity",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/quantity.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "SEND-KNOWLEDGE-PACKAGE",
+      "source_family": "knowledge",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/knowledge.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "SHARED-INITIALIZE",
+      "source_family": "clos-mop",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": null
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "SLOT-VALUE-USING-CLASS",
+      "source_family": "clos-mop",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
+        "primary_url": null
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "SQRT-ITER",
+      "source_family": "derived-core",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/core.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "SSTATUS",
+      "source_family": "maclisp",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-maclisp-v2.uk.md",
+        "primary_url": "https://softwarepreservation.computerhistory.org/LISP/"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "STATUS",
+      "source_family": "maclisp",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "docs/research/d10-historical-maclisp-v2.uk.md",
+        "primary_url": "https://softwarepreservation.computerhistory.org/LISP/"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "STRCAT",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "STRCAT-ONTO",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "STRING-THROUGH-LINE",
+      "source_family": "knowledge",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/knowledge.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "STRIP-ARTICLE",
+      "source_family": "understand",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/understand.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "TC-ARGUMENTS",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "TC-ID",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "TC-NAME",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/yantra.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "TCP-READ-FRAME",
+      "source_family": "knowledge",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/knowledge.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "TCP-READ-TO-EOF",
+      "source_family": "knowledge",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/knowledge.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "USAGE-OF",
+      "source_family": "knowledge",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/knowledge.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
@@ -1321,1179 +2534,12 @@
       "callable": false
     },
     {
-      "surface_name": "ADD-USAGE",
-      "source_family": "proof",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/reason.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "COUNT-USAGE-LIST",
-      "source_family": "proof",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/reason.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "EXPLAIN-PROOF-LIST",
-      "source_family": "proof",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/reason.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "EXPLAIN-PROOF-NODE",
-      "source_family": "proof",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/reason.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MAP-PROOFS",
-      "source_family": "proof",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/reason.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "PRINT-INDENT",
-      "source_family": "proof",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/reason.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "PROVENANCE-LIST",
-      "source_family": "proof",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/reason.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "SCIENCE-PROPER-LIST?",
-      "source_family": "quantity",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/quantity.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "SCIENCE-SEVENTH",
-      "source_family": "quantity",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/quantity.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "SCIENCE-SIXTH",
-      "source_family": "quantity",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/quantity.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "RECORD-CONSTRUCTOR",
-      "source_family": "r6rs-records",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html"
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "RECORD-CONSTRUCTOR-DESCRIPTOR",
-      "source_family": "r6rs-records",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html"
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "RECORD-TYPE-DESCRIPTOR",
-      "source_family": "r6rs-records",
-      "source_kind": "HISTORICAL_LISP",
-      "provenance": {
-        "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
-        "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html"
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLIPS-CONS-EACH-ONTO",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/clips-import.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLIPS-FACTS->CLAUSES-ONTO",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/clips-import.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLIPS-IMPORT-FORMS-ONTO",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/clips-import.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLIPS-SLOT-VALUE-OF",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/clips-import.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLIPS-STRING-AFTER-LAST-DOUBLE-COLON",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/clips-import.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLIPS-STRING-EMPTY?",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/clips-import.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLIPS-STRING-STARTS-WITH-DOUBLE-COLON?",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/clips-import.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLIPS-SYMBOL-STARTS-WITH-?",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/clips-import.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "FIND-ENTRY",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/forward.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MAP-APPLY-HEAD",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/forward.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MAP-APPLY-HEAD-JTMS",
-      "source_family": "rules",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/forward.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
       "surface_name": "WITH-SYNTAX",
       "source_family": "scheme-macros",
       "source_kind": "HISTORICAL_LISP",
       "provenance": {
         "repo_file": "docs/research/d10-historical-gap-audit-20261009.uk.md",
         "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html"
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "AGENT-LOOP",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "ALIST-REF",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "APPEND-TOOL-RESULTS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "BASH-TOOL-SCHEMA",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "CLAIM-MARKERS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "COLLECT-TRAILING-TOOLS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "COUNT-WITH-ROLE",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "DISPATCH-TOOL",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "EXECUTE-BASH",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "EXECUTE-TOOL-CALL",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "HTTP-POST-JSON",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "HTTP-TRANSPORT-BODY",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "HTTP-TRANSPORT-EXIT",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "HTTP-TRANSPORT-STDERR",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "ID-IN-LIST?",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "INVALID-COMPLETION-NUDGE",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "JSON->MESSAGE",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "JSON->TOOL-CALL",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "JSON-ENCODE",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "JSON-ENCODE-ARRAY-ITEMS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "JSON-ENCODE-KEY",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "JSON-ENCODE-OBJECT-ENTRIES",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "JSON-ESCAPE-ONTO",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MARKERS-CONTAINED?",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MAX-TURNS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MSG-CALL-IDS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MSG-CONTENT",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MSG-ROLE",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MSG-TOOL-CALL-ID",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "MSG-TOOL-CALLS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "OLLAMA-COMPLETE",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "OLLAMA-MODEL",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "OLLAMA-URL",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "RESULT-ANSWER",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "RESULT-EPISTEMIC-STATUS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "RESULT-MESSAGES",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "RESULT-TURN",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "RUN-AGENT",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "STRCAT",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "STRCAT-ONTO",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "TC-ARGUMENTS",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "TC-ID",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "TC-NAME",
-      "source_family": "tooling",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/yantra.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "STRIP-ARTICLE",
-      "source_family": "understand",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/understand.lisp",
-        "snapshot_not_live_proof": true
-      },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
-      "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-      "ratified": false,
-      "callable": false
-    },
-    {
-      "surface_name": "LEGACY-WORLD-TRANSITION-EXPANSION",
-      "source_family": "world",
-      "source_kind": "SENS_LIBRARY_SNAPSHOT",
-      "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
-        "original_file": "lib/world.lisp",
-        "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
@@ -2527,6 +2573,23 @@
         "repo_file": "docs/FUNCTIONS.md",
         "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
         "original_file": "lib/world.lisp",
+        "snapshot_not_live_proof": true
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "WRITE-KNOWLEDGE-PACKAGE",
+      "source_family": "knowledge",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "docs/FUNCTIONS.md",
+        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "original_file": "lib/knowledge.lisp",
         "snapshot_not_live_proof": true
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
