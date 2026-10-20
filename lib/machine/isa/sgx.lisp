@@ -1,5 +1,6 @@
-; Intel SGX instruction-family catalogue. Physical ISA facts only.
-; Availability on this SKU is platform-gated by CPUID, firmware/ME, and OS support.
+; Каталог машинних команд Intel SGX; лише факти фізичної архітектури.
+; Доступність залежить від CPUID, прошивки й керівного середовища ME,
+; а також від підтримки операційною системою.
 
 (isa-catalogue/1
   (extension SGX)
