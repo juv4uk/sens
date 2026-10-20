@@ -53,6 +53,8 @@ class AllLispTripletCensusTests(unittest.TestCase):
         summary = scan(self.root)
         self.assertEqual(summary["complete_triplets"], 1)
         self.assertEqual(summary["bounded_verified"], 0)
+        self.assertEqual(summary["bounded_verified_t5m"], 0)
+        self.assertEqual(summary["bounded_verified_legacy_t5"], 0)
         self.assertFalse(summary["all_bounded_reverse_verified"])
 
     def test_validator_rejection_is_not_silently_skipped(self):
@@ -76,6 +78,9 @@ class AllLispTripletCensusTests(unittest.TestCase):
         summary = scan(self.root, verify_bounded=True)
         self.assertEqual(summary["complete_triplets"], 1)
         self.assertEqual(summary["bounded_verified"], 1, summary["blocked_sample"])
+        self.assertEqual(
+            summary["bounded_verified_t5m"] + summary["bounded_verified_legacy_t5"], 1
+        )
         self.assertTrue(summary["all_bounded_reverse_verified"])
         self.assertFalse(summary["semantic_runtime_proven"])
         self.assertFalse(summary["release_ready"])
@@ -92,6 +97,8 @@ class AllLispTripletCensusTests(unittest.TestCase):
         evidence = scan(self.root, verify_bounded=True)
         self.assertEqual(evidence["complete_triplets"], 1)
         self.assertEqual(evidence["bounded_verified"], 1, evidence["blocked_sample"])
+        self.assertEqual(evidence["bounded_verified_t5m"], 1)
+        self.assertEqual(evidence["bounded_verified_legacy_t5"], 0)
         self.assertTrue(evidence["all_bounded_reverse_verified"])
         self.assertFalse(evidence["semantic_runtime_proven"])
         self.assertFalse(evidence["release_ready"])
@@ -112,6 +119,8 @@ class AllLispTripletCensusTests(unittest.TestCase):
         genuine["physical_T5_roundtrip"] = True
         evidence = scan(self.root, verify_bounded=True, validator=lambda *_: genuine)
         self.assertEqual(evidence["bounded_verified"], 0)
+        self.assertEqual(evidence["bounded_verified_t5m"], 0)
+        self.assertEqual(evidence["bounded_verified_legacy_t5"], 0)
         self.assertIn("T5/T5M", str(evidence["blocked_sample"]))
         self.assertFalse(evidence["release_ready"])
 
