@@ -68,6 +68,41 @@ class T5ProgressLedgerTests(unittest.TestCase):
         ])
         self.assertTrue(all(not x["semantic_admitted"] for x in report["files"]))
 
+    def test_complete_source_inventory_is_not_full_sens_roundtrip(self):
+        pairs, ready, sources = fixtures()
+        report = mod.combine(pairs, ready, sources)
+        self.assertEqual(report["status"], "COMPLETE_MECHANICAL_INVENTORY_ONLY")
+        self.assertIs(report["all_executable_lisp_roundtrip_verified"], False)
+        self.assertEqual(report["executable_roundtrip_coverage"], {
+            "executable_or_unclassified_sources": 2,
+            "independent_runtime_oracle_verified": 0,
+            "blocked_or_unverified": 2,
+            "nonprogram_excluded_from_executable_target": 1,
+        })
+
+    def test_strict_cli_blocks_missing_native_oracle_even_when_inventory_complete(self):
+        import json
+        import tempfile
+        from unittest.mock import patch
+        pairs, ready, sources = fixtures()
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            paired = root / "pairs.json"
+            unpaired = root / "unpaired.json"
+            output = root / "audit.json"
+            paired.write_text(json.dumps(pairs), encoding="utf-8")
+            unpaired.write_text(json.dumps(ready), encoding="utf-8")
+            with patch.object(mod, "tracked_lisp_paths", return_value=sources):
+                verdict = mod.main([
+                    "--pairs", str(paired), "--readiness", str(unpaired),
+                    "--root", str(root), "--out", str(output),
+                    "--require-executable-roundtrip",
+                ])
+            self.assertEqual(verdict, 2)
+            written = json.loads(output.read_text(encoding="utf-8"))
+            self.assertTrue(written["source_complete"])
+            self.assertFalse(written["all_executable_lisp_roundtrip_verified"])
+
     def test_one_auto_pass_rejects_retired_three_era_evidence(self):
         pairs, ready, sources = fixtures()
         ready["candidate_rows"][0]["status"]["legacy"] = "blocked"
