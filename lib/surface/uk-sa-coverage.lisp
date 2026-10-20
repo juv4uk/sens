@@ -37,7 +37,7 @@
   (entry (canon cdr решта śeṣa stable stable "NS 1.1.5 śeṣavat"))
   (entry (canon cond за-умовою krama stable stable "Mīmāṃsā"))
 
-  ;; ── Necessary forms ────────────────────────────────────────
+  ;; ── Необхідні форми ─────────────────────────────────────────
   (entry (necessary lambda функція — stable missing "Макрос, що розгортається у форму lambda"))
   (entry (necessary define визначити — stable missing "Макрос, що розгортається у форму define"))
   (entry (language-macro defmacro визначити-макрос — stable missing "Те саме першокласне значення макроса; окремого механізму макросів немає"))
@@ -145,7 +145,7 @@
   (entry (time ntp-query-raw — — compatibility-only compatibility-only "Низькорівневий запит NTP"))
   (entry (time timezone-declarations-raw — — compatibility-only compatibility-only "Низькорівневий механізм"))
 
-  ;; ── Time library (Batch 2) ─────────────────────────────────
+  ;; ── Бібліотека часу (друга партія) ───────────────────────────
   (entry (time utc-now поточний-всч kāla-adya stable candidate "ВСЧ = всесвітній скоординований час"))
   (entry (time utc-from-unix всч-із-юнікс — stable missing "Перетворення позначки часу Unix на ВСЧ"))
   (entry (time unix-time-observation->utc юнікс-спостереження-у-всч — stable missing "Перетворення спостереження часу на ВСЧ"))
@@ -161,14 +161,14 @@
   (entry (time deadline-after-ns дедлайн-через-нс avadhi-anantara-ns stable candidate "avadhi-anantara — час після терміну"))
   (entry (time internet-time-sync запитати-інтернет-час — stable missing "Синхронізація часу через інтернет"))
 
-  ;; ── Persistent map (Batch 2) ───────────────────────────────
+  ;; ── Незмінна мапа (друга партія) ─────────────────────────────
   (entry (persistent-map map-empty порожня-карта kośa-śūnya stable candidate "kośa — сховище або мапа; śūnya — порожній"))
   (entry (persistent-map map-get отримати-з-карти kośa-grahaṇa stable candidate "grahaṇa — взяття чи отримання"))
   (entry (persistent-map map-insert вставити-в-карту kośa-niveśana stable candidate "niveśana — розміщення"))
   (entry (persistent-map map-contains? ключ-у-карті? kośa-sambaddha? stable candidate "sambaddha — вміщений"))
   (entry (persistent-map map->list карта-у-список kośa-śreṇī stable candidate "śreṇī — послідовність або список"))
 
-  ;; ── Persistent vector (Batch 2) ─────────────────────────────
+  ;; ── Незмінний вектор (друга партія) ───────────────────────────
   (entry (persistent-vector vec-empty порожній-вектор samūha-śūnya stable candidate "samūha — сукупність; śūnya — порожній"))
   (entry (persistent-vector vec-conj додати-до-вектора samūha-yukti stable candidate "yukti — сполучення"))
   (entry (persistent-vector vec-count розмір-вектора samūha-gaṇana stable candidate "gaṇana — лічба"))
@@ -217,7 +217,7 @@
 
   ;; ── Other ─────────────────────────────────────────────────
   (entry (other identity без-змін svabhāva stable candidate "Повертає аргумент без зміни"))
-  (entry (other gensym генерувати-символ nāman-nirmāṇa stable candidate "nāman-nirmāṇa = name generation"))
+  (entry (other gensym генерувати-символ nāman-nirmāṇa stable candidate "nāman-nirmāṇa — створення нового імені"))
   (entry (other and та — stable missing "Логічна кон'юнкція"))
   (entry (other or або — stable missing "Логічна диз'юнкція"))
   (entry (other let нехай — stable missing "Форма локального зв'язування"))
@@ -227,7 +227,7 @@
   (entry (other json-parse — — compatibility-only compatibility-only "Назва зовнішнього формату"))
   (entry (other sha256-hex — — compatibility-only compatibility-only "Назва алгоритму"))
 
-  ;; ── Summary statistics ─────────────────────────────────────
+  ;; ── Підсумкова статистика ────────────────────────────────────
   (summary
     (total-eligible 161)
     (stable-uk 140)
@@ -240,5 +240,5 @@
     (compatibility-sa 21)
     (usc-uk-percent "100.0%")
     (usc-sa-percent "77.0%")
-    (notes "Selected Ukrainian surface complete: 140 stable of 140 translation-eligible names; 21 compatibility-only names are explicitly outside the translation denominator. SA: 124 surface names (36 stable + 88 candidate). Remaining SA gaps: defmacro, lambda, define, min-list, max-list, numeric-buffer?, vector-set!, utc-from-unix, unix-time-observation->utc, internet-time-sync, module-known?, module-clauses-now, and, or, let, let*.")))
+    (notes "Історична вибірка української поверхні: 140 усталених назв із 140 придатних для перекладу; ще 21 назва лише для сумісності не входить до цього підрахунку. Санскритська поверхня: 124 назви (36 усталених і 88 кандидатів). У цьому зрізі ще немає відповідників для: defmacro, lambda, define, min-list, max-list, numeric-buffer?, vector-set!, utc-from-unix, unix-time-observation->utc, internet-time-sync, module-known?, module-clauses-now, and, or, let, let*. Чинну повноту й семантику звіряти з ратифікованими доменами D1–D10.")))
 
