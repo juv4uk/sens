@@ -1,19 +1,19 @@
 ; #1060 CANON-AUTHORITY-INVENTORY-1
-; #1347 policy note (2026-09-24): this 2026-09-20 inventory is historical audit data.
-; Any row classifying Rust/host local semantics as forbidden duplicate authority
-; does NOT impose a current prohibition. Rust/backend local semantics may grow
-; freely. Only a reverse edge that makes host implementation semantics the
-; source of Lisp language authority is forbidden by the asymmetric firewall.
+; Політична нотатка #1347 (2026-09-24): цей інвентар від 2026-09-20 — історичні дані аудиту.
+; Будь-який рядок, що класифікує локальну семантику Rust/хоста як заборонену дубльовану владу,
+; НЕ накладає поточної заборони. Локальна семантика Rust/бекенда може зростати
+; вільно. Заборонене асиметричним файрволом лише зворотне ребро, що робить семантику
+; реалізації хоста джерелом влади мови Lisp.
 ;
-; Data-only audit. This file is NOT a semantic contract and cannot mint a SID,
-; define a Lisp law, or admit an execution mechanism.
+; Аудит лише даних. Цей файл НЕ є семантичним контрактом і не може карбувати SID,
+; визначати закон Lisp чи допускати механізм виконання.
 ;
-; One row records one place that can currently assign, project, transport,
-; document, or realize SID-related meaning/mechanism information.
-; The only row allowed to claim canon-function-table-authority is the existing
-; Lisp-owned semantic registry. Everything else must be either a projection,
-; executor-local mechanism detail, historical/compatibility evidence, or an
-; explicitly tracked duplicate authority with a retirement path.
+; Один рядок фіксує одне місце, яке наразі може призначати, проєктувати, транспортувати,
+; документувати чи реалізовувати інформацію про значення/механізм, пов'язану з SID.
+; Єдиний рядок, якому дозволено заявляти canon-function-table-authority, — це наявний
+; семантичний реєстр, що належить Lisp. Усе інше мусить бути або проєкцією,
+; локальною для виконавця деталлю механізму, історичним/сумісним свідченням, або
+; явно відстежуваною дубльованою владою зі шляхом виведення.
 
 (schema canon-authority-inventory/1)
 (as-of "2026-09-20")
@@ -58,14 +58,14 @@
 (authority (path "contracts/semantic-ownership-audit-733.lisp") (mapping "component->semantic authority category") (class compatibility-historical-fixture) (provenance "earlier ownership audit") (consumers "audit/research tooling") (retirement 1062) (note "Labels lib/surface/function-signatures.lisp (formerly evaluator-dispatch.lisp) as the language-owned evaluator operation classification; preserve as evidence, never as live dispatch source."))
 (authority (path "CURRENT.md") (mapping "authority-order->claimed semantic owner") (class forbidden-duplicate-semantic-authority) (provenance "active human guidance") (consumers "agents/contributors") (retirement 1062) (note "Still names canon.rs/necessary_forms.rs in authority order; active guidance contradicts #997 and can recreate split authority even without code changes."))
 
-; Audit conclusion (2026-09-20):
-; - one identity root exists: lib/surface/semantic-registry.lisp;
-; - the most important active duplicate-meaning table is canon.rs (cml-export.rs roles
-;   derived from the function table since 2026-09-26)
-;   (evaluator-dispatch and language_items.rs retired 2026-09-26 into
-;   lib/surface/function-signatures.lisp; unused compiler IR ir.rs deleted);
-; - machine lowering is a legitimate mechanism layer but must gain verifiable
-;   provenance/admission from the same Canon row (#1047/#1061);
-; - the four kernel adapters are presently mechanical transports/executors;
-; - active/stale policy artifacts are explicitly listed so they cannot silently
-;   re-legitimize a second authority.
+; Висновок аудиту (2026-09-20):
+; - існує один корінь ідентичності: lib/surface/semantic-registry.lisp;
+; - найважливіша активна таблиця дубльованих значень — canon.rs (ролі cml-export.rs
+;   виведені з таблиці функцій від 2026-09-26)
+;   (evaluator-dispatch і language_items.rs виведено 2026-09-26 у
+;   lib/surface/function-signatures.lisp; невикористаний IR компілятора ir.rs видалено);
+; - машинне пониження — легітимний шар механізму, але мусить отримати верифіковне
+;   походження/допуск із того самого рядка Canon (#1047/#1061);
+; - чотири адаптери ядер наразі є механічними транспортами/виконавцями;
+; - активні/застарілі артефакти політики перелічено явно, щоб вони не могли тихо
+;   знову легітимізувати другу владу.
