@@ -26,7 +26,7 @@ from verify_uk_t5_triplet import (  # noqa: E402
     ProjectionBlocked, canonical_uk_from_words, project_current_uk, three_pass,
 )
 
-BITS = re.compile(r"[01]{1,9}\Z")
+BITS = re.compile(r"[01]{1,11}\Z")
 
 
 def digest(data: bytes) -> str:
@@ -50,15 +50,13 @@ def source_path(root: Path, supplied: str) -> tuple[Path, Path]:
 
 
 def migration_maps():
-    data = three_pass.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
-    legacy, my, upper = three_pass.build_three_pass_maps(
+    data = three_pass.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
+    my, upper, _retired_provenance = three_pass.build_three_pass_maps(
         data,
         ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry.rs",
         ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
-        ROOT / "contracts/core1-historical-sid-map.lisp",
-        ROOT / "knowledge/sens8-current-coverage-v1.json",
     )
     # Ratified D7 keyboard/v2 (width 7, occupancy 128/128) is the current Text7
     # authority. The retired crates/sens/src/text7_projection_generated.rs donor
@@ -66,19 +64,23 @@ def migration_maps():
     text7 = three_pass.build_text7(
         data, ROOT / "knowledge/d7-keyboard-v2-ratified.json"
     )
-    return data, legacy, my, upper, text7
+    return data, my, upper, text7
 
 
 def prepare(root: Path, supplied: str, source_era: str, maps: tuple) -> dict:
     rel, path = source_path(root, supplied)
     original = path.read_bytes()
-    data, legacy, my, upper, text7 = maps
+    data, my, upper, text7 = maps
+    if source_era == "legacy":
+        raise ProjectionBlocked("HISTORICAL_SOURCE_ERA_DISABLED: no SID8 execution path")
     resolver = three_pass.Resolver(
-        legacy, my, upper, source_era,
-        data["domains"].get("D8", {}).get("residents", {}),
+        my, upper,
+        d9_residents=set(data["domains"].get("D9", {}).get("residents", {})),
     )
     try:
-        projection = three_pass.migrate_file(original.decode("utf-8"), resolver, text7)
+        projection = three_pass.migrate_file(
+            original.decode("utf-8"), resolver, text7, source_surface="укр"
+        )
         words = projection.split()
         if not words or any(BITS.fullmatch(word) is None for word in words):
             raise ProjectionBlocked("not a complete exact-width binary-word projection")
