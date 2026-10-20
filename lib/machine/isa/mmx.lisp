@@ -1,5 +1,7 @@
-; MMX instruction-family catalogue. Physical ISA facts only.
-; MMX is retained on the i5-6400 for architectural compatibility.
+; Каталог родини машинних команд MMX.
+; Файл містить лише факти фізичного набору команд, не закони SENS.
+; MMX зберігається для сумісності з архітектурою процесора i5-6400.
+; Імена інструкцій та ключі записів — точні дані ISA, не виклики Lisp.
 
 (isa-catalogue/1
   (extension MMX)
