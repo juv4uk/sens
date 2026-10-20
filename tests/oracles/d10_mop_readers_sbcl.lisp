@@ -2,8 +2,8 @@
 ;;;; (role research-only)
 ;;;; (semantic-authority-change none)
 ;;;; Джерело: AMOP, розділ 6 / SB-MOP; без кодів D10 чи ратифікації.
-;;;; Власні функція спостереження й лічильник тепер мають українські імена.
-;;;; Класи, слоти, тестові мітки та форми стандартного Common Lisp не змінено.
+;;;; Власні назви функцій, класів, слотів і параметрів — українською.
+;;;; Стандартні форми Common Lisp та машинні мітки перевірок незмінні.
 (in-package :cl-user)
 
 (defvar *д10-моп-лічильник* 0)
@@ -13,11 +13,11 @@
   (incf *д10-моп-лічильник*)
   (format t "OBS~C~A~CPASS~%" #\Tab назва #\Tab))
 
-(defclass д10-моп-батьківський-клас () ((inherited :initform 5)))
-(defclass д10-моп-дочірній-клас (д10-моп-батьківський-клас) ((direct :initform 7)))
-(defgeneric д10-моп-узагальнена-функція (x))
-(defmethod д10-моп-узагальнена-функція ((x integer)) :integer)
-(defmethod д10-моп-узагальнена-функція ((x string)) :string)
+(defclass д10-моп-батьківський-клас () ((успадкований :initform 5)))
+(defclass д10-моп-дочірній-клас (д10-моп-батьківський-клас) ((безпосередній :initform 7)))
+(defgeneric д10-моп-узагальнена-функція (значення))
+(defmethod д10-моп-узагальнена-функція ((значення integer)) :integer)
+(defmethod д10-моп-узагальнена-функція ((значення string)) :string)
 
 (unless (find-package :sb-mop)
   (error "Відсутній необхідний дослідний пакет SB-MOP"))
@@ -37,10 +37,10 @@
     (д10-моп-спостерігати "PRECEDENCE_PARENT_PRESENT" (member батьківський порядок :test #'eq))
     (д10-моп-спостерігати "PRECEDENCE_NO_DUPLICATES"
       (= (length порядок) (length (remove-duplicates порядок :test #'eq))))
-    (д10-моп-спостерігати "DIRECT_DECLARED_PRESENT" (member 'direct власні-назви))
-    (д10-моп-спостерігати "DIRECT_EXCLUDES_INHERITED" (not (member 'inherited власні-назви)))
-    (д10-моп-спостерігати "EFFECTIVE_INCLUDES_INHERITED" (member 'inherited усі-назви))
-    (д10-моп-спостерігати "EFFECTIVE_INCLUDES_DIRECT" (member 'direct усі-назви)))
+    (д10-моп-спостерігати "DIRECT_DECLARED_PRESENT" (member 'безпосередній власні-назви))
+    (д10-моп-спостерігати "DIRECT_EXCLUDES_INHERITED" (not (member 'успадкований власні-назви)))
+    (д10-моп-спостерігати "EFFECTIVE_INCLUDES_INHERITED" (member 'успадкований усі-назви))
+    (д10-моп-спостерігати "EFFECTIVE_INCLUDES_DIRECT" (member 'безпосередній усі-назви)))
   (let* ((методи (sb-mop:generic-function-methods узагальнена-функція))
          (метод-цілих (find-method узагальнена-функція nil (list (find-class 'integer))))
          (метод-рядків (find-method узагальнена-функція nil (list (find-class 'string)))))
@@ -48,7 +48,7 @@
     (д10-моп-спостерігати "METHODS_EXACT_INTEGER_MEMBER" (member метод-цілих методи :test #'eq))
     (д10-моп-спостерігати "METHODS_EXACT_STRING_MEMBER" (member метод-рядків методи :test #'eq))
     (д10-моп-спостерігати "ARGUMENT_ORDER_SINGLE_X"
-      (equal (sb-mop:generic-function-argument-precedence-order узагальнена-функція) '(x)))
+      (equal (sb-mop:generic-function-argument-precedence-order узагальнена-функція) '(значення)))
     (remove-method узагальнена-функція метод-цілих)
     (let ((залишок (sb-mop:generic-function-methods узагальнена-функція)))
       (д10-моп-спостерігати "REMOVAL_DROPS_ONLY_INTEGER"
