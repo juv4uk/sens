@@ -62,7 +62,15 @@ class HistoricalScriptSourceDelta(unittest.TestCase):
                 )
                 self.assertFalse(problems)
                 self.assertEqual(candidate_count, number_replaced + sum(holds.values()))
-                self.assertEqual(projection, current)
+                # Генератор отримав наступний окремий ручний прохід
+                # тільки по локальних іменах. Історичне бітове свідчення
+                # зберігаємо на точному Git blob до цього проходу; зв'язок
+                # із чинним source доводить окремий тест проєкції імен.
+                before_name_pass = (
+                    old_blob("d73eb60620842d226f33a4f8b5b0feb418be1723")
+                    if path == "scripts/generate-functions-md.lisp" else current
+                )
+                self.assertEqual(projection, before_name_pass)
                 self.assertNotEqual(original, current)
                 for word in holds:
                     self.assertIn(word, current)
