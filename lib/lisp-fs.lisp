@@ -27,7 +27,7 @@
 
 (визначити fs-empty
   (функція ()
-    (список (порожній-вміст-сховище) map-empty 0)))
+    (список (порожній-вміст-сховище) мапа-порожній 0)))
 
 (визначити fs-root-address
   (функція (fs)
@@ -260,7 +260,7 @@
                   (список
                     (друге objects-decision)
                     (нехай-похідне ((bindings (фс-пакет-поле (як-є bindings) root-package)))
-                      (фс-зв'язки-з-список bindings map-empty))
+                      (фс-зв'язки-з-список bindings мапа-порожній))
                     (фс-пакет-поле (як-є revision) root-package)))))))))))
 
 (визначити fs-bindings-from-list
@@ -411,7 +411,7 @@
   (функція (fs name)
     (список
       (фс-об'єкти fs)
-      (fs-bindings-without (внутрішня-мапа-список (фс-зв'язки fs)) name map-empty)
+      (fs-bindings-without (внутрішня-мапа-список (фс-зв'язки fs)) name мапа-порожній)
       (додати-1 (фс-ревізія fs)))))
 
 ; Root-commit equivalence over immutable trees, derived from D3
