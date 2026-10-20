@@ -1,7 +1,7 @@
-"""Точковий CLIPS guard: D3 атоми, D8 рядки, 2046 точних D1–D10 адрес.
+"""Статичні інваріанти українського CLIPS-читача й точних адрес D1–D10.
 
-Source-level certificate complements actual Rust CLIPS importer execution.
-No claim that 2046 catalog entries are executable mechanisms.
+Це не виконавець SENS: поведінку засвідчують SENS/Rust integration tests.
+Історичні W8-опкоди та латинські псевдоніми не є чинним джерелом істини.
 """
 from pathlib import Path
 import re
@@ -9,36 +9,31 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/clips-import.lisp"
-BAD_GUARD = "((0100 (010 (100 slot-forms))) (clips-lookup-slot-value slot-name (011 slot-forms)))"
-GOOD_GUARD = "((0100 (010 (100 (100 slot-forms)))) (clips-lookup-slot-value slot-name (011 slot-forms)))"
-SKIP_ATOM = "((010 (100 slot-forms))  (clips-lookup-slot-value slot-name (011 slot-forms)))"
-OLD_EQUAL = "((11110111 slot-name (100 (100 slot-forms))) (кліпс-значення-слота (100 slot-forms)))"
-NEW_EQ = "((101 slot-name (100 (100 slot-forms))) (кліпс-значення-слота (100 slot-forms)))"
-STRING_EQUAL = '(11110111 (110101011 (11101110 symbol)) (110101011 "?_"))'
+SKIP_ATOM = "((атом? (перше форми-слотів))"
+CHECK_ATOMIC_NAME = "((хибне? (атом? (перше (перше форми-слотів))))"
+EQ_ATOMS = "((тотожне? назва-слота (перше (перше форми-слотів)))"
+BAD_GUARD = "((хибне? (атом? (перше форми-слотів)))"
+BAD_EQUAL = "((рівне? назва-слота (перше (перше форми-слотів)))"
 
 
 def lookup_body(source):
-    start = source.index("(0011 clips-lookup-slot-value")
-    end = source.index("(0011 clips-positional-args", start)
+    start = source.index("(визначити знайти-значення-слота-кліпс")
+    end = source.index("(визначити позиційні-аргументи-кліпс", start)
     return source[start:end]
 
 
 def verify_source(source):
     body = lookup_body(source)
     if BAD_GUARD in body:
-        raise AssertionError("небезпечний guard відсікає усі списки слотів")
-    if GOOD_GUARD not in body or SKIP_ATOM not in body:
-        raise AssertionError("не доведено пропуск пошкоджених записів")
-    if body.index(SKIP_ATOM) > body.index(GOOD_GUARD):
-        raise AssertionError("атом треба пропустити до виклику вкладеного CAR")
-    if OLD_EQUAL in body:
-        raise AssertionError("атомарну назву зіставлено через старий D8 EQUAL")
-    if NEW_EQ not in body:
-        raise AssertionError("точний D3 EQ на символах відсутній")
-    if STRING_EQUAL not in source:
-        raise AssertionError("рядковий D8 EQUAL змінили без доказу")
-    if source.count("(11110111 ") != 1:
-        raise AssertionError("кількість рядкових D8 EQUAL має лишитися один")
+        raise AssertionError("старий guard відсікає коректні списки слотів")
+    if SKIP_ATOM not in body or CHECK_ATOMIC_NAME not in body:
+        raise AssertionError("пропуск пошкодженого слота не доведено")
+    if EQ_ATOMS not in body or BAD_EQUAL in body:
+        raise AssertionError("тотожність атомарних назв має використовувати D3 EQ")
+    if not (body.index(SKIP_ATOM) < body.index(CHECK_ATOMIC_NAME) < body.index(EQ_ATOMS)):
+        raise AssertionError("небезпечний порядок перевірок вкладених пар")
+    if "(визначити clips-" in source:
+        raise AssertionError("латинську викличну поверхню CLIPS повернуто")
     return body
 
 
@@ -72,17 +67,16 @@ class ClipsSlotD3Exact2046(unittest.TestCase):
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
 
-    def test_reachable_lookup_and_atomic_eq_exact_d3(self):
+    def test_ukrainian_lookup_safe_structure(self):
         body = verify_source(self.source)
-        self.assertEqual(body.count(NEW_EQ), 1)
-        self.assertNotIn(BAD_GUARD, body)
+        self.assertEqual(body.count(EQ_ATOMS), 1)
+        self.assertEqual(body.count(SKIP_ATOM), 1)
+        self.assertNotIn("((11110111 ", body)
 
-    def test_ophead_budget_only_not_fake_physical_compression(self):
-        verify_source(self.source)
-        self.assertEqual(len("100"), 3)      # Added CAR (D3)
-        self.assertEqual(len("11110111"), 8) # Removed one D8 EQUAL
-        self.assertEqual(len("101"), 3)      # Added D3 EQ
-        self.assertEqual(3 + 3 - 8, -2)       # Net call-head bits
+    def test_no_english_define_aliases(self):
+        self.assertNotRegex(self.source, r"(?m)^\(визначити clips[-а-я]")
+        self.assertIn("(визначити кліпс-імпорт", self.source)
+        self.assertIn("(визначити кліпс-імпорт-файл", self.source)
 
     def test_exhaustive_2046_exact_width_domain_addresses(self):
         cells = validate_all_cells(domain_keys())
@@ -129,37 +123,30 @@ class ClipsSlotD3Exact2046(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "D10"):
             validate_all_cells(modified)
 
-    def test_negative_exhaustive_old_guard_and_w8_return(self):
+    def test_negative_old_guard_does_not_return(self):
         verify_source(self.source)
-        broken = self.source.replace(GOOD_GUARD, BAD_GUARD, 1)
-        with self.assertRaisesRegex(AssertionError, "небезпечний guard"):
-            verify_source(broken)
-        broken = self.source.replace(NEW_EQ, OLD_EQUAL, 1)
-        with self.assertRaisesRegex(AssertionError, "старий D8"):
+        broken = self.source.replace(SKIP_ATOM, BAD_GUARD, 1)
+        with self.assertRaisesRegex(AssertionError, "старий guard"):
             verify_source(broken)
 
-    def test_negative_do_not_alias_string_equal_to_atomic_eq(self):
+    def test_negative_name_compared_by_non_d3_equality(self):
         verify_source(self.source)
-        broken = self.source.replace(STRING_EQUAL, STRING_EQUAL.replace(
-            "11110111", "101", 1), 1)
-        with self.assertRaisesRegex(AssertionError, "рядковий D8"):
+        broken = self.source.replace(EQ_ATOMS, BAD_EQUAL, 1)
+        with self.assertRaisesRegex(AssertionError, "D3 EQ"):
             verify_source(broken)
 
-    def test_negative_malformed_slot_guard_order(self):
+    def test_negative_missing_malformed_name_guard(self):
         verify_source(self.source)
-        broken = self.source.replace(
-            SKIP_ATOM + "\n      " + GOOD_GUARD,
-            GOOD_GUARD + "\n      " + SKIP_ATOM,
-            1,
-        )
-        self.assertNotEqual(broken, self.source)
-        with self.assertRaisesRegex(AssertionError, "вкладеного CAR"):
+        broken = self.source.replace(CHECK_ATOMIC_NAME, "", 1)
+        with self.assertRaisesRegex(AssertionError, "пошкодженого слота"):
             verify_source(broken)
 
-    def test_negative_loss_of_malformed_atom_guard(self):
+    def test_negative_reordered_malformed_guards(self):
         verify_source(self.source)
-        broken = self.source.replace(SKIP_ATOM, "", 1)
-        with self.assertRaisesRegex(AssertionError, "пошкоджених"):
+        body = lookup_body(self.source)
+        mutated = body.replace(SKIP_ATOM, "@SWAP@", 1).replace(CHECK_ATOMIC_NAME, SKIP_ATOM, 1).replace("@SWAP@", CHECK_ATOMIC_NAME, 1)
+        broken = self.source.replace(body, mutated, 1)
+        with self.assertRaisesRegex(AssertionError, "порядок"):
             verify_source(broken)
 
 
