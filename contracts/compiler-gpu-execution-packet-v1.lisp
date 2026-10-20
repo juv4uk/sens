@@ -1,8 +1,8 @@
 ; compiler-gpu-execution-packet-v1.lisp
 ;
-; Binary execution transport for already-admitted SENS GPU operations.
-; This contract defines transport shape only. Semantic meaning and operation
-; admission remain owned by SENS compiler/law machinery.
+; Двійковий транспорт виконання вже допущених GPU-операцій СЕНС.
+; Контракт описує лише форму транспорту. Значення операцій і
+; дозвіл на їх виконання визначають компілятор та закони СЕНС.
 
 ((schema . compiler-gpu-execution-packet/1)
  (magic . "SGP\\x01")
@@ -31,6 +31,6 @@
       (semantic-authority . sens)
       (target-mechanism-owner . downstream))))
 
-; Width and payload are transport fields, not a semantic u8 identity.
-; Exact width remains attached to the payload; numeric equality alone never
-; collapses domain identities.
+; Ширина та вміст є полями транспорту, а не семантичною тотожністю u8.
+; Точна ширина невіддільна від вмісту: сама числова рівність
+; не ототожнює різні домени.

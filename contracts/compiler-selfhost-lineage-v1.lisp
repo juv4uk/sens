@@ -1,9 +1,10 @@
 ; contracts/compiler-selfhost-lineage-v1.lisp
-; sens#3822 / sens#3760 — machine-readable evidence contract for the
-; current-domain compiler fixed point.
+; sens#3822 / sens#3760 — машинно-читаний контракт доказів
+; нерухомої точки компілятора чинних доменів.
 ;
-; This file defines evidence shape and acceptance ordering only.
-; It does NOT define compiler semantics, backend mechanism, or a self-host PASS.
+; Файл установлює лише форму свідчень та порядок приймання.
+; Він НЕ визначає семантику компілятора, механізм цільового
+; виконавця або підтвердження самокомпіляції.
 
 (
   (schema . compiler-selfhost-lineage/1)

@@ -1,9 +1,9 @@
 ; contracts/compiler-bootstrap-boundary-v1.lisp
-; sens#3805 — machine-readable compiler-in-language bootstrap firewall.
+; sens#3805 — машинно-читаний контракт межі початкового компілятора мовою СЕНС.
 ;
-; This contract does not define SENS meaning. It classifies current helpers by
-; ownership so the compiler nucleus can move into SENS without silently moving
-; semantic decisions back into host code.
+; Контракт не визначає значення СЕНС. Він класифікує наявні допоміжні
+; механізми за власником, щоб ядро компілятора можна було перенести
+; в СЕНС без прихованого повернення семантичних рішень у код хоста.
 
 (
   (schema . compiler-bootstrap-boundary/1)
