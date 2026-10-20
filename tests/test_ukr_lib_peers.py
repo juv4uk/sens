@@ -1,4 +1,4 @@
-"""Свідок opt-in міграції lib-модулів на повну SENS укр-поверхню.
+"""Статична перевірка чинної української проєкції SENS.
 
 Покриття: narrate, time, reason, utf8, meta-eval-mutual, knowledge, forward,
 clips-import, meta-eval, world, lisp-fs, linter, unify, yantra, repl-core,
@@ -7,10 +7,11 @@ check-semantic-registry, check-trilingual-surface, profile-read-file-stages,
 profile-proven-byte-readfile-candidate, release, rust-retirement-valve,
 rust-retirement-valve-enforce, symbol-table}.
 
-Дані-driven: для кожного мігрованого модуля перевіряємо, що кожна повна
-укр-назва з таблиці драбини визначена як exact-value DEFINE-аліас на своє
-історичне (en) ім'я, і що історичне ім'я лишається визначеним. Форму
-S-expressions — не Python-семантику SENS.
+Залишкові міжмовні прив'язки перевіряються за точною таблицею
+доменних проєкцій; їхня кількість не є критерієм якості.
+Окремо захищаємо виконувані файли від повернення непотрібних
+історичних латинських зв'язувань. Перевіряємо структуру вихідного
+тексту, не відтворюємо семантику SENS засобами Python.
 """
 from __future__ import annotations
 
@@ -99,13 +100,11 @@ def optin_pairs(src: str):
 
 
 class LibUkrPeerTests(unittest.TestCase):
-    def test_every_migrated_full_ukr_name_is_an_exact_value_alias(self):
-        checked = 0
+    def test_remaining_peer_bindings_are_well_formed_and_unique(self):
         for rel in MIGRATED:
             src = (ROOT / rel).read_text(encoding="utf-8")
             defs = definitions(src)
             for ukr, en in optin_pairs(src):
-                checked += 1
                 # ціль мусить бути коректним іменем; повна укр-назва мусить бути
                 # ратифікованою поверхнею драбини (перевіряє наступний тест).
                 self.assertTrue(en and not re.search(r"[\s()]", en),
@@ -115,7 +114,45 @@ class LibUkrPeerTests(unittest.TestCase):
             # жодного дубля
             names = [x.group(1) for x in DEF.finditer(src)]
             self.assertEqual(len(names), len(set(names)), f"{rel}: дубль визначення")
-        self.assertGreater(checked, 20, "мало перевірених peer-аліасів")
+
+    def test_retired_legacy_tail_bindings_do_not_return(self):
+        # Файли з українськими виконуваними іменами не повинні
+        # повторно прив'язувати їх до історичної латинської поверхні.
+        # Дані протоколу в лапках і таблицях залишаються незмінними.
+        retired = {
+            "scripts/symbol-table.lisp": (
+                "(визначити список LIST)",
+                "(визначити значення-у-списку? MEMBER)",
+                "(визначити читати-всі READ-ALL)",
+                "(визначити текст-передує? STRING<)",
+                "(визначити символ-у-текст SYMBOL->STRING)",
+                "(визначити символ? SYMBOL?)",
+                "(визначити зворот-до reverse-onto)",
+            ),
+            "scripts/release.lisp": (
+                "(визначити відповідь-не ANSWER-NOT)",
+                "(визначити список LIST)",
+                "(визначити процес-запустити PROCESS-RUN)",
+                "(визначити рядок-додати STRING-APPEND)",
+            ),
+            "lib/surface/uk-inventory.lisp": (
+                "(визначити модуль abs)",
+                "(визначити атом? atom?)",
+                "(визначити довжина-до length-onto)",
+            ),
+            "lib/surface/uk-docs.lisp": (
+                "(визначити порахувати-елементи count)",
+            ),
+            "lib/surface/uk-sa-coverage.lisp": (
+                "(визначити список list)",
+                "(визначити вектор vector)",
+            ),
+        }
+        for rel, stale_forms in retired.items():
+            src = (ROOT / rel).read_text(encoding="utf-8")
+            for form in stale_forms:
+                with self.subTest(file=rel, old_binding=form):
+                    self.assertNotIn(form, src)
 
     def test_migrated_names_are_ratified_identities(self):
         for rel in MIGRATED:
