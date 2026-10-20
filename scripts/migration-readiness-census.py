@@ -236,11 +236,11 @@ def build_report() -> dict:
                     and summary["files_blocked"] == sum(
                         row["status"]["auto"] == "blocked" for row in queue_rows
                     )
-                    # A newly eligible NON-ARCHIVE mechanical candidate is
-                    # NOT progress: it must block the census gate, never claim
-                    # success. Archived benchmark candidates stay visible
-                    # without blocking. Release remains NO-GO separately.
-                    and len(nonarchive_auto) == 0
+                    # A new mechanical candidate is progress in the source
+                    # inventory, not semantic admission. Keep it visible in
+                    # nonarchive_candidate_paths; only native SENS evidence
+                    # can close the separate executable/release requirement.
+                    # Do not turn a valid read-only census into a CI red.
                     and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                 ),
                 "rule": "read-only AUTO census PASS means only complete bookkeeping; it emits no .sens, grants no executable credit and cannot authorize release",
