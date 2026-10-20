@@ -257,52 +257,6 @@ PINNED = {
       ]
     ]
   },
-  "lib/machine/lowering/semantic-effects.lisp": {
-    "sha": "a1ecf30cd1860558874bdc8489fa333ab6df35b0",
-    "changed": 10,
-    "edits": [
-      [
-        494,
-        "0011"
-      ],
-      [
-        537,
-        "0010"
-      ],
-      [
-        589,
-        "110"
-      ],
-      [
-        677,
-        "#d1:1"
-      ],
-      [
-        690,
-        "#d1:0"
-      ],
-      [
-        874,
-        "0011"
-      ],
-      [
-        918,
-        "0010"
-      ],
-      [
-        952,
-        "110"
-      ],
-      [
-        1299,
-        "#d1:1"
-      ],
-      [
-        1313,
-        "001"
-      ]
-    ]
-  }
 }
 ROW = re.compile(r'^\s*\(([01]+)\s+\(ук\s+[^()]*\)\s+\(укр\s+([^\s()]+)\)')
 HEAD = re.compile(r'\(\s*[01]+(?=\s|\)|$)')
@@ -415,11 +369,18 @@ class ExactDomainMigrationTests(unittest.TestCase):
         self.assertIn('(решта сирі-форми)', src)
         self.assertNotIn('побудувати-макровизначення', src)
 
+    def test_machine_effect_uses_only_ukrainian_function_names(self):
+        src = (ROOT / 'lib/machine/lowering/semantic-effects.lisp').read_text(encoding='utf-8')
+        for name in ('machine-effect-current-domain-key?', 'machine-lower-current-binary-effect'):
+            self.assertNotIn('(визначити ' + name, src)
+        for name in ('машинний-ефект-збігається-поточний-домен?', 'машинний-ефект-знизити-поточне-двійкове'):
+            self.assertIn('(визначити ' + name, src)
+
     def test_public_names_and_unknown_d5_preserved(self):
         checks = {
             'lib/unify-observe.lisp': ('спостерігати-уніфікацію', 'уніфікація-спостереження-стан'),
             'lib/machine/lowering/semantic-effects.lisp': (
-                'machine-effect-current-domain-key?', 'machine-lower-current-binary-effect'),
+                'машинний-ефект-збігається-поточний-домен?', 'машинний-ефект-знизити-поточне-двійкове'),
         }
         for path, names in checks.items():
             src = (ROOT / path).read_text(encoding='utf-8')

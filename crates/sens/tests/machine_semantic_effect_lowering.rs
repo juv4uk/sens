@@ -86,7 +86,7 @@ fn current_foundation_runtime_identity_and_effect_router_agree() {
         assert_eq!(args.len(), 2);
 
         let guarded_coordinate = format!(
-            "(machine-effect-current-domain-key? width bits {} {})",
+            "(машинний-ефект-збігається-поточний-домен? ширина біти {} {})",
             expected.0, expected.1
         );
         assert!(
@@ -109,7 +109,7 @@ fn exact_d5_arithmetic_selects_only_admitted_target_neutral_effects() {
         let (width, bits) = current_d5_coordinate(resident);
         assert_eq!(
             eval_value(
-                &format!("(machine-lower-current-binary-effect {width} {bits} {left} {right})"),
+                &format!("(машинний-ефект-знизити-поточне-двійкове {width} {bits} {left} {right})"),
                 &mut session,
             ),
             expected_effect,
@@ -121,7 +121,7 @@ fn exact_d5_arithmetic_selects_only_admitted_target_neutral_effects() {
     assert_eq!(
         eval_value(
             &format!(
-                "(machine-lower-current-binary-effect {plus_width} {plus_bits} 4294967296 3)"
+                "(машинний-ефект-знизити-поточне-двійкове {plus_width} {plus_bits} 4294967296 3)"
             ),
             &mut session,
         ),
@@ -133,7 +133,7 @@ fn exact_d5_arithmetic_selects_only_admitted_target_neutral_effects() {
     assert_eq!(
         eval_value(
             &format!(
-                "(machine-lower-current-binary-effect {difference_width} {difference_bits} 2 3)"
+                "(машинний-ефект-знизити-поточне-двійкове {difference_width} {difference_bits} 2 3)"
             ),
             &mut session,
         ),
@@ -145,7 +145,7 @@ fn exact_d5_arithmetic_selects_only_admitted_target_neutral_effects() {
     assert_eq!(
         eval_value(
             &format!(
-                "(machine-lower-current-binary-effect {times_width} {times_bits} 4294967296 1)"
+                "(машинний-ефект-знизити-поточне-двійкове {times_width} {times_bits} 4294967296 1)"
             ),
             &mut session,
         ),
@@ -160,9 +160,9 @@ fn wrong_domain_and_unmapped_current_identity_fail_closed() {
     let mut session = lowering_session();
 
     for source in [
-        format!("(machine-lower-current-binary-effect 4 {plus_bits} 2 3)"),
-        format!("(machine-lower-current-binary-effect 6 {plus_bits} 2 3)"),
-        "(machine-lower-current-binary-effect 5 23 4 2)".to_string(),
+        format!("(машинний-ефект-знизити-поточне-двійкове 4 {plus_bits} 2 3)"),
+        format!("(машинний-ефект-знизити-поточне-двійкове 6 {plus_bits} 2 3)"),
+        "(машинний-ефект-знизити-поточне-двійкове 5 23 4 2)".to_string(),
     ] {
         assert_eq!(
             eval_value(&source, &mut session),
@@ -199,8 +199,8 @@ fn semantic_to_effect_layer_contains_no_target_or_surface_authority() {
     }
 
     assert!(
-        !effects.contains("machine-lower-current-binary-effect")
-            && !effects.contains("machine-effect-current-domain-key?"),
+        !effects.contains("машинний-ефект-знизити-поточне-двійкове")
+            && !effects.contains("машинний-ефект-збігається-поточний-домен?"),
         "generic effect-definition module must not own semantic coordinate routing"
     );
 }
@@ -212,9 +212,9 @@ fn current_machine_effect_key_has_exact_d1_predicate_results() {
     load_core_library(&mut session).expect("ядро");
     load_lisp_file("lib/machine/lowering/semantic-effects.lisp", &mut session);
     for (source, expected) in [
-        ("(machine-effect-current-domain-key? 5 10 5 10)", true),
-        ("(machine-effect-current-domain-key? 4 10 5 10)", false),
-        ("(machine-effect-current-domain-key? 5 11 5 10)", false),
+        ("(машинний-ефект-збігається-поточний-домен? 5 10 5 10)", true),
+        ("(машинний-ефект-збігається-поточний-домен? 4 10 5 10)", false),
+        ("(машинний-ефект-збігається-поточний-домен? 5 11 5 10)", false),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))

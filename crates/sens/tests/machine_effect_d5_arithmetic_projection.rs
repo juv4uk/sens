@@ -120,8 +120,8 @@ fn exact_d5_identity_selects_target_neutral_add_sub_mul_effects() {
         "imul-r64",
         "modrm",
         "vex",
-        "machine-effect-current-domain-key?",
-        "machine-lower-current-binary-effect",
+        "машинний-ефект-збігається-поточний-домен?",
+        "машинний-ефект-знизити-поточне-двійкове",
     ] {
         assert!(
             !effect_source.contains(forbidden),
@@ -137,7 +137,7 @@ fn exact_d5_identity_selects_target_neutral_add_sub_mul_effects() {
 
         let selected = eval_value(
             &format!(
-                "(machine-lower-current-binary-effect {} {} {left} {right})",
+                "(машинний-ефект-знизити-поточне-двійкове {} {} {left} {right})",
                 identity.0, identity.1
             ),
             &mut session,
@@ -149,7 +149,7 @@ fn exact_d5_identity_selects_target_neutral_add_sub_mul_effects() {
     assert_eq!(
         eval_value(
             &format!(
-                "(machine-lower-current-binary-effect {} {} 4 2)",
+                "(машинний-ефект-знизити-поточне-двійкове {} {} 4 2)",
                 quotient.0, quotient.1
             ),
             &mut session,
@@ -262,7 +262,7 @@ fn sub_mul_effect_bounds_fail_closed_before_target_projection() {
     assert_eq!(
         eval_value(
             &format!(
-                "(machine-lower-current-binary-effect {} {} 2 3)",
+                "(машинний-ефект-знизити-поточне-двійкове {} {} 2 3)",
                 difference.0, difference.1
             ),
             &mut session,
