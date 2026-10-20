@@ -24,17 +24,17 @@ ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
 FLOAT = re.compile(r"\d+\.\d+")
 REQUIRED = (
-    "si:faraday-constant",
-    "si:molar-gas-constant",
-    "si:josephson-constant",
-    "si:von-klitzing-constant",
-    "si:magnetic-flux-quantum",
-    "si:conductance-quantum",
-    "si:molar-planck-constant",
-    "si:avogadro-constant",
-    "si:elementary-charge",
-    "si:boltzmann-constant",
-    "si:planck-constant",
+    "сі:стала-фарадея",
+    "сі:молярна-газова-стала",
+    "сі:стала-джозефсона",
+    "сі:стала-фон-клітцинга",
+    "сі:квант-магнітного-потоку",
+    "сі:квант-електричної-провідності",
+    "сі:молярна-стала-планка",
+    "сі:стала-авогадро",
+    "сі:елементарний-заряд",
+    "сі:стала-больцмана",
+    "сі:стала-планка",
 )
 
 

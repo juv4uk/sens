@@ -607,10 +607,10 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
         )
 
         for name in (
-            "si:faraday-constant", "si:molar-gas-constant",
-            "si:josephson-constant", "si:von-klitzing-constant",
-            "si:magnetic-flux-quantum", "si:conductance-quantum",
-            "si:molar-planck-constant",
+            "сі:стала-фарадея", "сі:молярна-газова-стала",
+            "сі:стала-джозефсона", "сі:стала-фон-клітцинга",
+            "сі:квант-магнітного-потоку", "сі:квант-електричної-провідності",
+            "сі:молярна-стала-планка",
         ):
             self.assertIn(f"(визначити {name}", source)
         restored = self.restore_heads(source)
@@ -627,8 +627,8 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
     def test_wrong_ukr_peer_fails_the_inverse_witness(self):
         source = self.SOURCE.read_text(encoding="utf-8")
         mutant = source.replace(
-            "(помножити si:avogadro-constant",
-            "(множити-нечинне si:avogadro-constant",
+            "(помножити сі:стала-авогадро",
+            "(множити-нечинне сі:стала-авогадро",
             1,
         )
         self.assertNotEqual(mutant, source)

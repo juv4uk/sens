@@ -114,3 +114,10 @@
 (визначити si:boltzmann-constant (сі:значення-константи si:defining-boltzmann-constant))
 (визначити si:avogadro-constant (сі:значення-константи si:defining-avogadro-constant))
 (визначити si:luminous-efficacy (сі:значення-константи si:defining-luminous-efficacy))
+
+; Українські назви визначальних величин для похідних точних сталих.
+; Історичні назви базових величин збережені для зовнішніх споживачів.
+(визначити сі:стала-авогадро si:avogadro-constant)
+(визначити сі:елементарний-заряд si:elementary-charge)
+(визначити сі:стала-больцмана si:boltzmann-constant)
+(визначити сі:стала-планка si:planck-constant)
