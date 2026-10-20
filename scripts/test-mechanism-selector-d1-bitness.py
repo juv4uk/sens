@@ -1,17 +1,8 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness for mechanism-selector + domain bitness.
+"""Легка перевірка українського добору механізмів та адрес доменів Д1–Д10.
 
-Axiom: binary key width IS the domain address.
-Checks:
-  1. lib/mechanism-selector.lisp has no duplicate consecutive EQ arms
-     of the form ((101 X Y) ...) ((101 X Y) ...)
-  2. No bare host truthiness tokens t / NIL as predicate carriers
-  3. Fallback uses exact D1:1 form (010 (001 ()))
-  4. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
-
-This does not prove runtime callability. Run:
-
-    python3 scripts/test-mechanism-selector-d1-bitness.py
+Перевіряються лише визначення Lisp і точні координати таблиць.
+Цей скрипт не обчислює семантику СЕНС, не запускає важких ранерів.
 """
 from __future__ import annotations
 
@@ -27,7 +18,7 @@ DUP_EQ = re.compile(
     re.MULTILINE,
 )
 HOST_T = re.compile(r"\b(t|NIL)\b")
-D1_TRUE = "(010 (001 ()))"
+UKRAINIAN_SELECTOR = "(визначити вибрати-механізм"
 
 
 def check_selector() -> list[str]:
@@ -39,12 +30,14 @@ def check_selector() -> list[str]:
         errs.append("mechanism-selector: consecutive duplicate EQ arms still present")
     if HOST_T.search(text):
         errs.append("mechanism-selector: host truthiness token (t/NIL) found")
-    if D1_TRUE not in text:
-        errs.append("mechanism-selector: exact D1:1 form (010 (001 ())) missing")
-    # count binary call-heads roughly
-    heads = re.findall(r"\(([01]{1,10})\b", text)
-    if not heads:
-        errs.append("mechanism-selector: no binary call-heads found")
+    if UKRAINIAN_SELECTOR not in text:
+        errs.append("немає українського визначення вибрати-механізм")
+    if "(третє маршрут)" not in text:
+        errs.append("відсутній точний селектор Д5 третього поля")
+    if re.search(r"(?m)^\(визначити\s+mechanism-", text):
+        errs.append("виявлено застарілі англомовні визначення")
+    if re.search(r"\(([01]{3,10})(?=[\s(])", text):
+        errs.append("викличні голови не мають української проєкції")
     return errs
 
 
@@ -77,7 +70,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("SELECTOR: PASS — no duplicate EQ, exact D1 forms")
+    print("ДОБІР: українська поверхня підтверджена статично; виконання СЕНС не перевірено")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
