@@ -17,6 +17,21 @@ SPEC.loader.exec_module(pair)
 class StageTwoProjectionsTests(unittest.TestCase):
     BRANCH = "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
 
+    def test_current_d1_d11_maps_do_not_restore_sid8(self):
+        data, my, upper, text7 = pair.migration_maps()
+        self.assertEqual(len(data["domains"]["D10"]["residents"]), 1024)
+        self.assertEqual(len((data, my, upper, text7)), 4)
+        self.assertIn("keyboard-v2", text7)
+        self.assertTrue(pair.BITS.fullmatch("0101010101"))
+
+    def test_legacy_source_era_cannot_reanimate_retired_bridge(self):
+        with tempfile.TemporaryDirectory(prefix="sens-two-legacy-") as td:
+            mirror = Path(td) / "mirror"
+            with self.assertRaisesRegex(pair.ProjectionBlocked,
+                                        "HISTORICAL_SOURCE_ERA_DISABLED"):
+                pair.stage(ROOT, mirror, [self.BRANCH], "legacy", True)
+            self.assertFalse(mirror.exists())
+
     def test_existing_uk_fixture_roundtrips_without_packing(self):
         with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
             mirror = Path(td) / "mirror"
