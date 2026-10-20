@@ -43,6 +43,17 @@ def read_source(path: str) -> str:
 
 
 class TranslationUkrPrimaryProjectionTests(unittest.TestCase):
+    def test_no_legacy_english_define_bindings_remain(self):
+        source = read_source(SOURCE_PATH)
+        self.assertNotRegex(
+            source,
+            r"(?m)^\(визначити\s+[^\s()]*[A-Za-z][^\s()]*",
+            "Активний Lisp не повинен повертати історичні англомовні DEFINE",
+        )
+        # Цитовані поля зовнішнього протоколу — дані, а не викличні імена.
+        self.assertIn("(як-є translation/1)", source)
+        self.assertIn("(як-є candidate)", source)
+
     def test_translation_names_match_ratified_d9_d10_projection_and_keep_width(self):
         source = read_source(SOURCE_PATH)
 
