@@ -1,19 +1,19 @@
-; #549 / #76 — Lisp-owned replacement for scripts/check_trilingual_surface.py.
-; Governance checker only. Semantic authority remains:
-;   lib/surface/semantic-registry.lisp
+; #549 / #76 — мовна заміна scripts/check_trilingual_surface.py.
+; Це перевірка правил супроводу, не джерело семантичних законів.
+; Авторитетом залишається lib/surface/semantic-registry.lisp.
 ;
-; The checker reads the canonical registry structurally, validates the
-; UK/EN/SA status matrix, emits a machine-readable report, and fails closed
-; for malformed/duplicate/missing human surfaces. --require-complete keeps
-; the historical release gate behavior.
+; Перевіряємо канонічний реєстр як структуру даних: стани української,
+; англійської та санскритської проєкцій, повноту й унікальність полів.
+; За неправильної форми або відсутньої проєкції повертаємо відмову.
+; Параметр --require-complete зберігає історичне правило допуску випуску.
 
-(визначити tri-statuses
+(визначити тримовні-стани
   (як-є (stable candidate missing compatibility-only)))
 
-(визначити tri-human-surfaces
+(визначити тримовні-людські-проєкції
   (як-є (uk en sa)))
 
-(визначити tri-fail
+(визначити тримовна-помилка
   (функція (kind detail)
     (нехай ((shown
             (друкувати
@@ -21,10 +21,10 @@
                 (як-є trilingual-surface-error)
                 kind
                 detail))))
-      ; Intentional unbound diagnostic: file-mode CLI returns non-zero.
+      ; Навмисно невизначений виклик: командний виконавець повертає ненульовий код.
       (trilingual-surface-check-failed kind detail))))
 
-(визначити tri-member-state
+(визначити тримовний-стан-належності
   (функція (value values)
     (за-умовою
       ((атом? values) (structural-kind empty-list) (як-є absent))
@@ -34,9 +34,9 @@
          ((однакові? value (перше values)) (structural-relation same)
           (як-є present))
          ((однакові? value (перше values)) (structural-relation distinct)
-          (tri-member-state value (решта values))))))))
+          (тримовний-стан-належності value (решта values))))))))
 
-(визначити tri-triple-state
+(визначити тримовний-стан-трійки
   (функція (value)
     (за-умовою
       ((атом? value) (structural-kind empty-list) (як-є no))
@@ -58,7 +58,7 @@
            ((атом? rest1) (structural-kind empty-list) (як-є no))
            ((атом? rest1) (structural-kind atom) (як-є no))))))))
 
-(визначити tri-special-quote-sym-state
+(визначити тримовний-стан-цитованого-символу
   (функція (field)
     (за-умовою
       ((однакові?
@@ -72,26 +72,26 @@
        (structural-relation distinct)
        (як-є no)))))
 
-(визначити tri-field-language
+(визначити тримовна-мова-поля
   (функція (field)
-    (нехай ((спеціальна-змінна (tri-special-quote-sym-state field)))
+    (нехай ((спеціальна-змінна (тримовний-стан-цитованого-символу field)))
       (за-умовою
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same) (як-є sym))
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (перше field))))))
 
-(визначити tri-field-status
+(визначити тримовний-стан-поля
   (функція (field)
-    (нехай ((спеціальна-змінна (tri-special-quote-sym-state field)))
+    (нехай ((спеціальна-змінна (тримовний-стан-цитованого-символу field)))
       (за-умовою
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same) (як-є stable))
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (third field))))))
 
-(визначити tri-valid-ordinary-field
+(визначити тримовне-перевірити-звичайне-поле
   (функція (field)
-    (нехай ((shape (tri-triple-state field)))
+    (нехай ((shape (тримовний-стан-трійки field)))
       (за-умовою
         ((тотожне? shape (як-є yes)) (identity-relation distinct)
-         (tri-fail (як-є malformed-surface) field))
+         (тримовна-помилка (як-є malformed-surface) field))
         ((тотожне? shape (як-є yes)) (identity-relation same)
          (нехай-послідовно ((language (перше field))
                 (name (second field))
@@ -102,155 +102,155 @@
                 ((атом? name) (structural-kind atom)
                  (за-умовою
                    ((атом? status) (structural-kind atom)
-                    (нехай ((state (tri-member-state status tri-statuses)))
+                    (нехай ((state (тримовний-стан-належності status тримовні-стани)))
                       (за-умовою
                         ((тотожне? state (як-є present)) (identity-relation same)
                          (як-є valid))
                         ((тотожне? state (як-є present)) (identity-relation distinct)
-                         (tri-fail (як-є unknown-status) field))))
+                         (тримовна-помилка (як-є unknown-status) field))))
                    ((атом? status) (structural-kind empty-list)
-                    (tri-fail (як-є malformed-status) field))
+                    (тримовна-помилка (як-є malformed-status) field))
                    ((атом? status) (structural-kind pair)
-                    (tri-fail (як-є malformed-status) field))))
+                    (тримовна-помилка (як-є malformed-status) field))))
                 ((атом? name) (structural-kind empty-list)
-                 (tri-fail (як-є malformed-name) field))
+                 (тримовна-помилка (як-є malformed-name) field))
                 ((атом? name) (structural-kind pair)
-                 (tri-fail (як-є malformed-name) field))))
+                 (тримовна-помилка (як-є malformed-name) field))))
              ((атом? language) (structural-kind empty-list)
-              (tri-fail (як-є malformed-surface-name) field))
+              (тримовна-помилка (як-є malformed-surface-name) field))
              ((атом? language) (structural-kind pair)
-              (tri-fail (як-є malformed-surface-name) field))))))))))
+              (тримовна-помилка (як-є malformed-surface-name) field))))))))))
 
-(визначити tri-require-human-surfaces
+(визначити тримовне-вимагати-людські-проєкції
   (функція (seen)
-    (нехай ((uk-state (tri-member-state (як-є uk) seen)))
+    (нехай ((uk-state (тримовний-стан-належності (як-є uk) seen)))
       (за-умовою
         ((тотожне? uk-state (як-є present)) (identity-relation distinct)
-         (tri-fail (як-є missing-human-surface) (як-є uk)))
+         (тримовна-помилка (як-є missing-human-surface) (як-є uk)))
         ((тотожне? uk-state (як-є present)) (identity-relation same)
-         (нехай ((en-state (tri-member-state (як-є en) seen)))
+         (нехай ((en-state (тримовний-стан-належності (як-є en) seen)))
            (за-умовою
              ((тотожне? en-state (як-є present)) (identity-relation distinct)
-              (tri-fail (як-є missing-human-surface) (як-є en)))
+              (тримовна-помилка (як-є missing-human-surface) (як-є en)))
              ((тотожне? en-state (як-є present)) (identity-relation same)
-              (нехай ((sa-state (tri-member-state (як-є sa) seen)))
+              (нехай ((sa-state (тримовний-стан-належності (як-є sa) seen)))
                 (за-умовою
                   ((тотожне? sa-state (як-є present)) (identity-relation distinct)
-                   (tri-fail (як-є missing-human-surface) (як-є sa)))
+                   (тримовна-помилка (як-є missing-human-surface) (як-є sa)))
                   ((тотожне? sa-state (як-є present)) (identity-relation same)
                    (як-є valid))))))))))))
 
-(визначити tri-validate-fields
+(визначити тримовне-перевірити-поля
   (функція (fields seen)
     (за-умовою
       ((атом? fields) (structural-kind empty-list)
-       (tri-require-human-surfaces seen))
+       (тримовне-вимагати-людські-проєкції seen))
       ((атом? fields) (structural-kind atom)
-       (tri-fail (як-є malformed-field-tail) fields))
+       (тримовна-помилка (як-є malformed-field-tail) fields))
       ((атом? fields) (structural-kind pair)
        (нехай-послідовно ((field (перше fields))
-              (спеціальна-змінна (tri-special-quote-sym-state field)))
+              (спеціальна-змінна (тримовний-стан-цитованого-символу field)))
          (за-умовою
            ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same)
-            (нехай ((dup (tri-member-state (як-є sym) seen)))
+            (нехай ((dup (тримовний-стан-належності (як-є sym) seen)))
               (за-умовою
                 ((тотожне? dup (як-є present)) (identity-relation same)
-                 (tri-fail (як-є duplicate-surface) (як-є sym)))
+                 (тримовна-помилка (як-є duplicate-surface) (як-є sym)))
                 ((тотожне? dup (як-є present)) (identity-relation distinct)
-                 (tri-validate-fields
+                 (тримовне-перевірити-поля
                    (решта fields)
                    (сполучити (як-є sym) seen))))))
            ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct)
-            (нехай ((valid (tri-valid-ordinary-field field)))
-              (нехай-послідовно ((language (tri-field-language field))
-                     (dup (tri-member-state language seen)))
+            (нехай ((valid (тримовне-перевірити-звичайне-поле field)))
+              (нехай-послідовно ((language (тримовна-мова-поля field))
+                     (dup (тримовний-стан-належності language seen)))
                 (за-умовою
                   ((тотожне? dup (як-є present)) (identity-relation same)
-                   (tri-fail (як-є duplicate-surface) language))
+                   (тримовна-помилка (як-є duplicate-surface) language))
                   ((тотожне? dup (як-є present)) (identity-relation distinct)
-                   (tri-validate-fields
+                   (тримовне-перевірити-поля
                      (решта fields)
                      (сполучити language seen)))))))))))))
 
-(визначити tri-validate-row
+(визначити тримовне-перевірити-рядок
   (функція (row)
     (за-умовою
       ((атом? row) (structural-kind empty-list)
-       (tri-fail (як-є malformed-entry) row))
+       (тримовна-помилка (як-є malformed-entry) row))
       ((атом? row) (structural-kind atom)
-       (tri-fail (як-є malformed-entry) row))
+       (тримовна-помилка (як-є malformed-entry) row))
       ((атом? row) (structural-kind pair)
        (нехай ((identity (перше row)))
          (за-умовою
            ((атом? identity) (structural-kind atom)
-            (нехай ((valid (tri-validate-fields (решта row) (як-є ()))))
+            (нехай ((valid (тримовне-перевірити-поля (решта row) (як-є ()))))
               identity))
            ((атом? identity) (structural-kind empty-list)
-            (tri-fail (як-є malformed-identity) row))
+            (тримовна-помилка (як-є malformed-identity) row))
            ((атом? identity) (structural-kind pair)
-            (tri-fail (як-є malformed-identity) row))))))))
+            (тримовна-помилка (як-є malformed-identity) row))))))))
 
-(визначити tri-validate-rows
+(визначити тримовне-перевірити-рядки
   (функція (rows seen-identities)
     (за-умовою
       ((атом? rows) (structural-kind empty-list)
        (за-умовою
          ((атом? seen-identities) (structural-kind empty-list)
-          (tri-fail (як-є empty-registry) (як-є ())))
+          (тримовна-помилка (як-є empty-registry) (як-є ())))
          ((атом? seen-identities) (structural-kind pair)
           (як-є valid))
          ((атом? seen-identities) (structural-kind atom)
-          (tri-fail (як-є malformed-seen-identities) seen-identities))))
+          (тримовна-помилка (як-є malformed-seen-identities) seen-identities))))
       ((атом? rows) (structural-kind atom)
-       (tri-fail (як-є malformed-entry-tail) rows))
+       (тримовна-помилка (як-є malformed-entry-tail) rows))
       ((атом? rows) (structural-kind pair)
-       (нехай-послідовно ((identity (tri-validate-row (перше rows)))
-              (dup (tri-member-state identity seen-identities)))
+       (нехай-послідовно ((identity (тримовне-перевірити-рядок (перше rows)))
+              (dup (тримовний-стан-належності identity seen-identities)))
          (за-умовою
            ((тотожне? dup (як-є present)) (identity-relation same)
-            (tri-fail (як-є duplicate-semantic-id) identity))
+            (тримовна-помилка (як-є duplicate-semantic-id) identity))
            ((тотожне? dup (як-є present)) (identity-relation distinct)
-            (tri-validate-rows
+            (тримовне-перевірити-рядки
               (решта rows)
               (сполучити identity seen-identities)))))))))
 
-(визначити tri-surface-status
+(визначити тримовний-стан-проєкції
   (функція (fields wanted)
     (за-умовою
       ((атом? fields) (structural-kind empty-list) (як-є ()))
       ((атом? fields) (structural-kind atom) (як-є ()))
       ((атом? fields) (structural-kind pair)
        (нехай-послідовно ((field (перше fields))
-              (language (tri-field-language field)))
+              (language (тримовна-мова-поля field)))
          (за-умовою
            ((тотожне? language wanted) (identity-relation same)
-            (tri-field-status field))
+            (тримовний-стан-поля field))
            ((тотожне? language wanted) (identity-relation distinct)
-            (tri-surface-status (решта fields) wanted))))))))
+            (тримовний-стан-проєкції (решта fields) wanted))))))))
 
-(визначити tri-all-status-state
+(визначити тримовний-стан-усіх-статусів
   (функція (fields languages wanted)
     (за-умовою
       ((атом? languages) (structural-kind empty-list) (як-є all))
       ((атом? languages) (structural-kind atom) (як-є not-all))
       ((атом? languages) (structural-kind pair)
        (нехай ((current
-               (tri-surface-status fields (перше languages))))
+               (тримовний-стан-проєкції fields (перше languages))))
          (за-умовою
            ((тотожне? current wanted) (identity-relation same)
-            (tri-all-status-state
+            (тримовний-стан-усіх-статусів
               fields
               (решта languages)
               wanted))
            ((тотожне? current wanted) (identity-relation distinct)
             (як-є not-all))))))))
 
-(визначити tri-public-kind
+(визначити тримовний-публічний-вид
   (функція (row)
     (нехай ((state
-            (tri-all-status-state
+            (тримовний-стан-усіх-статусів
               (решта row)
-              tri-human-surfaces
+              тримовні-людські-проєкції
               (як-є compatibility-only))))
       (за-умовою
         ((тотожне? state (як-є all)) (identity-relation same)
@@ -258,12 +258,12 @@
         ((тотожне? state (як-є all)) (identity-relation distinct)
          (як-є public))))))
 
-(визначити tri-stable-kind
+(визначити тримовний-стабільний-вид
   (функція (row)
     (нехай ((state
-            (tri-all-status-state
+            (тримовний-стан-усіх-статусів
               (решта row)
-              tri-human-surfaces
+              тримовні-людські-проєкції
               (як-є stable))))
       (за-умовою
         ((тотожне? state (як-є all)) (identity-relation same)
@@ -271,99 +271,99 @@
         ((тотожне? state (як-є all)) (identity-relation distinct)
          (як-є not-all-stable))))))
 
-(визначити tri-surface-presence
+(визначити тримовна-наявність-проєкції
   (функція (fields wanted)
-    (нехай ((value (tri-surface-status fields wanted)))
+    (нехай ((value (тримовний-стан-проєкції fields wanted)))
       (за-умовою
         ((атом? value) (structural-kind empty-list) (як-є absent))
         ((атом? value) (structural-kind atom) (як-є present))
         ((атом? value) (structural-kind pair) (як-є present))))))
 
-(визначити tri-count-status
+(визначити тримовне-порахувати-статуси
   (функція (rows language wanted acc)
     (за-умовою
       ((атом? rows) (structural-kind empty-list) acc)
       ((атом? rows) (structural-kind atom) acc)
       ((атом? rows) (structural-kind pair)
        (нехай ((status
-               (tri-surface-status (решта (перше rows)) language)))
+               (тримовний-стан-проєкції (решта (перше rows)) language)))
          (за-умовою
            ((тотожне? status wanted) (identity-relation same)
-            (tri-count-status (решта rows) language wanted (додати acc 1)))
+            (тримовне-порахувати-статуси (решта rows) language wanted (додати acc 1)))
            ((тотожне? status wanted) (identity-relation distinct)
-            (tri-count-status (решта rows) language wanted acc))))))))
+            (тримовне-порахувати-статуси (решта rows) language wanted acc))))))))
 
-(визначити tri-count-public
+(визначити тримовне-порахувати-публічні
   (функція (rows acc)
     (за-умовою
       ((атом? rows) (structural-kind empty-list) acc)
       ((атом? rows) (structural-kind atom) acc)
       ((атом? rows) (structural-kind pair)
-       (нехай ((kind (tri-public-kind (перше rows))))
+       (нехай ((kind (тримовний-публічний-вид (перше rows))))
          (за-умовою
            ((тотожне? kind (як-є public)) (identity-relation same)
-            (tri-count-public (решта rows) (додати acc 1)))
+            (тримовне-порахувати-публічні (решта rows) (додати acc 1)))
            ((тотожне? kind (як-є public)) (identity-relation distinct)
-            (tri-count-public (решта rows) acc))))))))
+            (тримовне-порахувати-публічні (решта rows) acc))))))))
 
-(визначити tri-count-symbolic
+(визначити тримовне-порахувати-символьні
   (функція (rows acc)
     (за-умовою
       ((атом? rows) (structural-kind empty-list) acc)
       ((атом? rows) (structural-kind atom) acc)
       ((атом? rows) (structural-kind pair)
        (нехай ((state
-               (tri-surface-presence
+               (тримовна-наявність-проєкції
                  (решта (перше rows))
                  (як-є sym))))
          (за-умовою
            ((тотожне? state (як-є present)) (identity-relation same)
-            (tri-count-symbolic (решта rows) (додати acc 1)))
+            (тримовне-порахувати-символьні (решта rows) (додати acc 1)))
            ((тотожне? state (як-є present)) (identity-relation distinct)
-            (tri-count-symbolic (решта rows) acc))))))))
+            (тримовне-порахувати-символьні (решта rows) acc))))))))
 
-(визначити tri-count-common-stable
+(визначити тримовне-порахувати-спільні-стабільні
   (функція (rows acc)
     (за-умовою
       ((атом? rows) (structural-kind empty-list) acc)
       ((атом? rows) (structural-kind atom) acc)
       ((атом? rows) (structural-kind pair)
-       (нехай ((public (tri-public-kind (перше rows))))
+       (нехай ((public (тримовний-публічний-вид (перше rows))))
          (за-умовою
            ((тотожне? public (як-є public)) (identity-relation distinct)
-            (tri-count-common-stable (решта rows) acc))
+            (тримовне-порахувати-спільні-стабільні (решта rows) acc))
            ((тотожне? public (як-є public)) (identity-relation same)
-            (нехай ((stable (tri-stable-kind (перше rows))))
+            (нехай ((stable (тримовний-стабільний-вид (перше rows))))
               (за-умовою
                 ((тотожне? stable (як-є all-stable)) (identity-relation same)
-                 (tri-count-common-stable (решта rows) (додати acc 1)))
+                 (тримовне-порахувати-спільні-стабільні (решта rows) (додати acc 1)))
                 ((тотожне? stable (як-є all-stable)) (identity-relation distinct)
-                 (tri-count-common-stable (решта rows) acc)))))))))))
+                 (тримовне-порахувати-спільні-стабільні (решта rows) acc)))))))))))
 
-(визначити tri-release-state
+(визначити тримовний-стан-випуску
   (функція (rows)
     (за-умовою
       ((атом? rows) (structural-kind empty-list) (як-є confirmed))
       ((атом? rows) (structural-kind atom) (як-є open))
       ((атом? rows) (structural-kind pair)
-       (нехай ((public (tri-public-kind (перше rows))))
+       (нехай ((public (тримовний-публічний-вид (перше rows))))
          (за-умовою
            ((тотожне? public (як-є public)) (identity-relation distinct)
-            (tri-release-state (решта rows)))
+            (тримовний-стан-випуску (решта rows)))
            ((тотожне? public (як-є public)) (identity-relation same)
-            (нехай ((stable (tri-stable-kind (перше rows))))
+            (нехай ((stable (тримовний-стабільний-вид (перше rows))))
               (за-умовою
                 ((тотожне? stable (як-є all-stable)) (identity-relation same)
-                 (tri-release-state (решта rows)))
+                 (тримовний-стан-випуску (решта rows)))
                 ((тотожне? stable (як-є all-stable)) (identity-relation distinct)
                  (як-є open)))))))))))
 
-(визначити tri-mode
+(визначити тримовний-режим
   (функція (argv)
     (за-умовою
       ((атом? argv) (structural-kind empty-list) (як-є report))
       ((атом? argv) (structural-kind atom)
-       (tri-fail (як-є malformed-argv) argv))
+       (тримовна-помилка (як-є malformed-argv) argv))
       ((атом? argv) (structural-kind pair)
        (нехай ((rest (решта argv)))
          (за-умовою
@@ -374,122 +374,122 @@
                (як-є require-complete))
               ((однакові? (перше argv) "--require-complete")
                (structural-relation distinct)
-               (tri-fail (як-є unknown-argument) (перше argv)))))
+               (тримовна-помилка (як-є unknown-argument) (перше argv)))))
            ((атом? rest) (structural-kind atom)
-            (tri-fail (як-є malformed-argv) argv))
+            (тримовна-помилка (як-є malformed-argv) argv))
            ((атом? rest) (structural-kind pair)
-            (tri-fail (як-є too-many-arguments) argv))))))))
+            (тримовна-помилка (як-є too-many-arguments) argv))))))))
 
-(визначити tri-registry-form
+(визначити тримовна-форма-реєстру
   (перше
     (читати-всі
       (читати-файл "lib/surface/semantic-registry.lisp"))))
 
-(визначити tri-rows
+(визначити тримовні-рядки
   (за-умовою
-    ((атом? tri-registry-form) (structural-kind empty-list)
-     (tri-fail (як-є malformed-registry-root) tri-registry-form))
-    ((атом? tri-registry-form) (structural-kind atom)
-     (tri-fail (як-є malformed-registry-root) tri-registry-form))
-    ((атом? tri-registry-form) (structural-kind pair)
+    ((атом? тримовна-форма-реєстру) (structural-kind empty-list)
+     (тримовна-помилка (як-є malformed-registry-root) тримовна-форма-реєстру))
+    ((атом? тримовна-форма-реєстру) (structural-kind atom)
+     (тримовна-помилка (як-є malformed-registry-root) тримовна-форма-реєстру))
+    ((атом? тримовна-форма-реєстру) (structural-kind pair)
      (за-умовою
-       ((тотожне? (перше tri-registry-form) (як-є sr/1))
+       ((тотожне? (перше тримовна-форма-реєстру) (як-є sr/1))
         (identity-relation same)
-        (решта tri-registry-form))
-       ((тотожне? (перше tri-registry-form) (як-є sr/1))
+        (решта тримовна-форма-реєстру))
+       ((тотожне? (перше тримовна-форма-реєстру) (як-є sr/1))
         (identity-relation distinct)
-        (tri-fail
+        (тримовна-помилка
           (як-є malformed-registry-root)
-          (перше tri-registry-form)))))))
+          (перше тримовна-форма-реєстру)))))))
 
-(визначити tri-validation
-  (tri-validate-rows tri-rows (як-є ())))
+(визначити тримовний-підсумок-перевірки
+  (тримовне-перевірити-рядки тримовні-рядки (як-є ())))
 
-(визначити tri-public-count
-  (tri-count-public tri-rows 0))
+(визначити тримовна-кількість-публічних
+  (тримовне-порахувати-публічні тримовні-рядки 0))
 
-(визначити tri-symbolic-count
-  (tri-count-symbolic tri-rows 0))
+(визначити тримовна-кількість-символьних
+  (тримовне-порахувати-символьні тримовні-рядки 0))
 
-(визначити tri-common-stable-count
-  (tri-count-common-stable tri-rows 0))
+(визначити тримовна-кількість-спільних-стабільних
+  (тримовне-порахувати-спільні-стабільні тримовні-рядки 0))
 
-(визначити tri-release
-  (tri-release-state tri-rows))
+(визначити тримовний-випуск
+  (тримовний-стан-випуску тримовні-рядки))
 
-(визначити tri-report
+(визначити тримовний-звіт
   (список
     (як-є trilingual-surface-report)
-    (список (як-є entries) (довжина tri-rows))
-    (список (як-є public-semantic-identities) tri-public-count)
-    (список (як-є shared-symbolic-identities) tri-symbolic-count)
+    (список (як-є entries) (довжина тримовні-рядки))
+    (список (як-є public-semantic-identities) тримовна-кількість-публічних)
+    (список (як-є shared-symbolic-identities) тримовна-кількість-символьних)
     (список
       (як-є uk)
       (список (як-є stable)
-            (tri-count-status tri-rows (як-є uk) (як-є stable) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є uk) (як-є stable) 0))
       (список (як-є candidate)
-            (tri-count-status tri-rows (як-є uk) (як-є candidate) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є uk) (як-є candidate) 0))
       (список (як-є missing)
-            (tri-count-status tri-rows (як-є uk) (як-є missing) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є uk) (як-є missing) 0))
       (список (як-є compatibility-only)
-            (tri-count-status
-              tri-rows
+            (тримовне-порахувати-статуси
+              тримовні-рядки
               (як-є uk)
               (як-є compatibility-only)
               0)))
     (список
       (як-є en)
       (список (як-є stable)
-            (tri-count-status tri-rows (як-є en) (як-є stable) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є en) (як-є stable) 0))
       (список (як-є candidate)
-            (tri-count-status tri-rows (як-є en) (як-є candidate) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є en) (як-є candidate) 0))
       (список (як-є missing)
-            (tri-count-status tri-rows (як-є en) (як-є missing) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є en) (як-є missing) 0))
       (список (як-є compatibility-only)
-            (tri-count-status
-              tri-rows
+            (тримовне-порахувати-статуси
+              тримовні-рядки
               (як-є en)
               (як-є compatibility-only)
               0)))
     (список
       (як-є sa)
       (список (як-є stable)
-            (tri-count-status tri-rows (як-є sa) (як-є stable) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є sa) (як-є stable) 0))
       (список (як-є candidate)
-            (tri-count-status tri-rows (як-є sa) (як-є candidate) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є sa) (як-є candidate) 0))
       (список (як-є missing)
-            (tri-count-status tri-rows (як-є sa) (як-є missing) 0))
+            (тримовне-порахувати-статуси тримовні-рядки (як-є sa) (як-є missing) 0))
       (список (як-є compatibility-only)
-            (tri-count-status
-              tri-rows
+            (тримовне-порахувати-статуси
+              тримовні-рядки
               (як-є sa)
               (як-є compatibility-only)
               0)))
     (список
       (як-є trilingual-stable-identities)
-      tri-common-stable-count
-      tri-public-count)
-    (список (як-є release-parity) tri-release)))
+      тримовна-кількість-спільних-стабільних
+      тримовна-кількість-публічних)
+    (список (як-є release-parity) тримовний-випуск)))
 
-(визначити tri-shown
-  (друкувати tri-report))
+(визначити тримовний-надрукований-звіт
+  (друкувати тримовний-звіт))
 
-(визначити tri-selected-mode
-  (tri-mode *argv*))
+(визначити тримовний-вибраний-режим
+  (тримовний-режим *argv*))
 
 (за-умовою
-  ((тотожне? tri-selected-mode (як-є require-complete))
+  ((тотожне? тримовний-вибраний-режим (як-є require-complete))
    (identity-relation same)
    (за-умовою
-     ((тотожне? tri-release (як-є confirmed))
+     ((тотожне? тримовний-випуск (як-є confirmed))
       (identity-relation same)
-      tri-report)
-     ((тотожне? tri-release (як-є confirmed))
+      тримовний-звіт)
+     ((тотожне? тримовний-випуск (як-є confirmed))
       (identity-relation distinct)
-      (tri-fail (як-є release-parity-open) tri-report))))
-  ((тотожне? tri-selected-mode (як-є require-complete))
+      (тримовна-помилка (як-є release-parity-open) тримовний-звіт))))
+  ((тотожне? тримовний-вибраний-режим (як-є require-complete))
    (identity-relation distinct)
-   tri-report))
+   тримовний-звіт))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити читати-всі read-all)
