@@ -565,7 +565,7 @@ mod tests {
     }
 
     #[test]
-    fn nullary_host_mechanism_returns_canonical_truth_to_SENS() {
+    fn nullary_host_mechanism_returns_canonical_truth_to_sens() {
         NULLARY_CALLS.store(0, Ordering::SeqCst);
         let session = sens_embed_session_new();
         assert_eq!(
@@ -639,7 +639,7 @@ mod tests {
     }
 
     #[test]
-    fn typed_unary_host_mechanism_rejects_wrong_kind_handle_as_SENS_error() {
+    fn typed_unary_host_mechanism_rejects_wrong_kind_handle_as_sens_error() {
         let session = sens_embed_session_new();
         unsafe {
             sens_embed_bind_host_handle(
@@ -688,7 +688,7 @@ mod tests {
     }
 
     #[test]
-    fn host_handle_binding_is_opaque_to_SENS_source() {
+    fn host_handle_binding_is_opaque_to_sens_source() {
         let session = sens_embed_session_new();
         assert_eq!(
             unsafe {
