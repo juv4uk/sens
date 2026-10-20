@@ -1,99 +1,99 @@
-; #225 — Lisp-owned verifier for the mathematical-result taxonomy.
-; Ukrainian projection only.
-; The host transports contracts/mathematical-result-taxonomy.lisp into
-; mathematical-result-taxonomy-document; every semantic expectation is here.
+; #225 — перевірка класифікації математичних результатів у СЕНС.
+; Джерело документа: contracts/mathematical-result-taxonomy.lisp.
+; Імена функцій і локальних зв'язувань — українські.
+; Цитовані назви полів, значення та протокольні маркери залишаються незмінними.
 
-(визначити mrt-field
-  (функція (entry field)
-    (нехай ((found (знайти-за-ключем field entry)))
+(визначити поле-математичної-класифікації
+  (функція (запис поле)
+    (нехай ((знайдене (знайти-за-ключем поле запис)))
       (за-умовою
-        ((атом? found) (як-є ()))
-        (так (решта found))))))
+        ((атом? знайдене) (як-є ()))
+        (так (решта знайдене))))))
 
-(визначити mrt-find
-  (функція (identity entries)
+(визначити знайти-запис-математичної-класифікації
+  (функція (тотожність записи)
     (за-умовою
-      ((атом? entries) (як-є ()))
-      ((однакові? (mrt-field (перше entries) (як-є identity)) identity)
-       (перше entries))
-      (так (mrt-find identity (решта entries))))))
+      ((атом? записи) (як-є ()))
+      ((однакові? (поле-математичної-класифікації (перше записи) (як-є identity)) тотожність)
+       (перше записи))
+      (так (знайти-запис-математичної-класифікації тотожність (решта записи))))))
 
-(визначити mrt-entry
-  (функція (identity)
-    (mrt-find identity (решта mathematical-result-taxonomy-document))))
+(визначити запис-математичної-класифікації
+  (функція (тотожність)
+    (знайти-запис-математичної-класифікації тотожність (решта mathematical-result-taxonomy-document))))
 
-(визначити mrt-expect
-  (функція (identity field expected)
-    (нехай ((entry (mrt-entry identity)))
+(визначити перевірити-очікування-математичної-класифікації
+  (функція (тотожність поле очікуване)
+    (нехай ((запис (запис-математичної-класифікації тотожність)))
       (за-умовою
-        ((атом? entry) (список (як-є missing-entry) identity))
-        ((однакові? (mrt-field entry field) expected) (як-є ()))
+        ((атом? запис) (список (як-є missing-entry) тотожність))
+        ((однакові? (поле-математичної-класифікації запис поле) очікуване) (як-є ()))
         (так
          (список
            (як-є mismatch)
-           identity
-           field
-           expected
-           (mrt-field entry field)))))))
+           тотожність
+           поле
+           очікуване
+           (поле-математичної-класифікації запис поле)))))))
 
-(визначити mrt-first-failure
-  (функція (checks)
+(визначити перша-помилка-математичної-класифікації
+  (функція (перевірки)
     (за-умовою
-      ((атом? checks) (як-є ()))
-      ((атом? (перше checks)) (mrt-first-failure (решта checks)))
-      (так (перше checks)))))
+      ((атом? перевірки) (як-є ()))
+      ((атом? (перше перевірки)) (перша-помилка-математичної-класифікації (решта перевірки)))
+      (так (перше перевірки)))))
 
-(визначити mathematical-result-taxonomy-witness
+(визначити свідок-класифікації-математичного-результату
   (функція ()
-    (нехай ((failure
-            (mrt-first-failure
+    (нехай ((помилка
+            (перша-помилка-математичної-класифікації
               (список
-                (mrt-expect (як-є laws)
+                (перевірити-очікування-математичної-класифікації (як-є laws)
                             (як-є domain-owner)
                             (як-є mathematical-result))
-                (mrt-expect (як-є laws)
+                (перевірити-очікування-математичної-класифікації (як-є laws)
                             (як-є object-approximation-identity)
                             (як-є distinct))
-                (mrt-expect (як-є laws)
+                (перевірити-очікування-математичної-класифікації (як-є laws)
                             (як-є generic-truth-coercion)
                             (як-є forbidden))
-                (mrt-expect (як-є laws)
+                (перевірити-очікування-математичної-класифікації (як-є laws)
                             (як-є many-valued-collapse)
                             (як-є forbidden))
-                (mrt-expect (як-є pi-example)
+                (перевірити-очікування-математичної-класифікації (як-є pi-example)
                             (як-є number-system)
                             (як-є real))
-                (mrt-expect (як-є pi-example)
+                (перевірити-очікування-математичної-класифікації (як-є pi-example)
                             (як-є rationality)
                             (як-є transcendental))
-                (mrt-expect (як-є pi-example)
+                (перевірити-очікування-математичної-класифікації (як-є pi-example)
                             (як-є algebraic-status)
                             (як-є transcendental))
-                (mrt-expect (як-є pi-example)
+                (перевірити-очікування-математичної-класифікації (як-є pi-example)
                             (як-є result-role)
                             (як-є exact-object))
-                (mrt-expect (як-є sqrt2-example)
+                (перевірити-очікування-математичної-класифікації (як-є sqrt2-example)
                             (як-є number-system)
                             (як-є real))
-                (mrt-expect (як-є sqrt2-example)
+                (перевірити-очікування-математичної-класифікації (як-є sqrt2-example)
                             (як-є rationality)
                             (як-є irrational))
-                (mrt-expect (як-є sqrt2-example)
+                (перевірити-очікування-математичної-класифікації (як-є sqrt2-example)
                             (як-є algebraic-status)
                             (як-є algebraic))
-                (mrt-expect (як-є sqrt2-example)
+                (перевірити-очікування-математичної-класифікації (як-є sqrt2-example)
                             (як-є result-role)
                             (як-є exact-object))
-                (mrt-expect (як-є approximation-role)
+                (перевірити-очікування-математичної-класифікації (як-є approximation-role)
                             (як-є required-metadata)
                             (як-є (target approximant precision-or-error-guarantee)))
-                (mrt-expect (як-є approximation-role)
+                (перевірити-очікування-математичної-класифікації (як-є approximation-role)
                             (як-є approximant-remains-own-mathematical-object)
                             (як-є так))
-                (mrt-expect (як-є interval-enclosure-role)
+                (перевірити-очікування-математичної-класифікації (як-є interval-enclosure-role)
                             (як-є required-metadata)
                             (як-є (target lower-bound upper-bound enclosure-guarantee)))
-                (mrt-expect (як-є symbolic-expression-role)
+                (перевірити-очікування-математичної-класифікації (як-є symbolic-expression-role)
                             (як-є many-valued-status)
                             (як-є forbidden))))))
       (за-умовою
@@ -102,11 +102,19 @@
          (список (як-є mathematical-result-taxonomy-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail) (як-є schema))))
-        ((атом? failure)
+        ((атом? помилка)
          (список (як-є mathematical-result-taxonomy-witness)
                (список (як-є status) (як-є pass))
                (список (як-є detail) (як-є standard-math-classification))))
         (так
          (список (як-є mathematical-result-taxonomy-witness)
                (список (як-є status) (як-є fail))
-               (список (як-є detail) failure)))))))
+               (список (як-є detail) помилка)))))))
+
+; Історичні зовнішні імена свідка — посилання на українські визначення.
+(визначити mrt-field поле-математичної-класифікації)
+(визначити mrt-find знайти-запис-математичної-класифікації)
+(визначити mrt-entry запис-математичної-класифікації)
+(визначити mrt-expect перевірити-очікування-математичної-класифікації)
+(визначити mrt-first-failure перша-помилка-математичної-класифікації)
+(визначити mathematical-result-taxonomy-witness свідок-класифікації-математичного-результату)
