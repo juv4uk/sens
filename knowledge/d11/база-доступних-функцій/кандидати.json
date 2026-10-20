@@ -22,10 +22,10 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 155,
+    "total": 157,
     "historical": 15,
-    "library": 140,
-    "distinct_families": 23
+    "library": 142,
+    "distinct_families": 24
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -2652,6 +2652,46 @@
       "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false
+    },
+    {
+      "surface_name": "ядро3-маршрут",
+      "source_family": "experimental-kernel",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/core3.lisp",
+        "blob_sha": "04ad3bbb1d8dc192882b604ff6d433b8faff225a",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false,
+      "existing_lisp_definition": true,
+      "signature_candidate": "(ідентичність, виконавець) → результат чинного вибрати-механізм",
+      "law_candidate": "Виклик передає обидва аргументи в раніше визначений вибрати-механізм без зміни результату та без створення нового маршруту.",
+      "admission_note": "Це виконуване похідне визначення бібліотеки, а не новий примітив. Не створювати D11-координату, поки не встановлено незалежний закон і відсутність семантичного дублювання."
+    },
+    {
+      "surface_name": "ядро3-додати-маршрути",
+      "source_family": "experimental-kernel",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/core3.lisp",
+        "blob_sha": "04ad3bbb1d8dc192882b604ff6d433b8faff225a",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false,
+      "existing_lisp_definition": true,
+      "signature_candidate": "(ідентичність) → список чотирьох вибраних маршрутів",
+      "law_candidate": "У визначеному порядку повертає чотири результати ядро3-маршрут для чинних протокольних виконавців; порядок і значення виконавців не перекодовуються.",
+      "admission_note": "Це виконуване похідне визначення бібліотеки, а не новий примітив. Не створювати D11-координату, поки не встановлено незалежний закон і відсутність семантичного дублювання."
     }
   ]
 }
