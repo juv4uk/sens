@@ -51,6 +51,20 @@ def assert_live_ukrainian_script(test, root, path, source):
     # Єдиний явно очікуваний негативний шлях для відсутнього параметра CLI.
     if path == "scripts/fixtures-for-tier.lisp":
         allowed.add("бракує-аргументу-рівня")
+    if path == "scripts/check-domain-bitness-laws.lisp":
+        # Навмисно не визначені імена: негативні свідки повинні завершуватися помилкою.
+        named_failures = {
+            "помилка-ширини-домену",
+            "помилка-д3-повтор-у-каноні",
+            "помилка-д3-пропущений-дубль",
+            "помилка-д3-крайній-ключ",
+            "помилка-д3-початковий-ключ",
+            "помилка-д3-ємність-мутанта",
+            "помилка-ширини-домену-негативна",
+        }
+        test.assertFalse(named_failures & definitions,
+                         "Негативні свідки не можна підміняти визначеними функціями")
+        allowed.update(named_failures)
     heads = list(mod.candidate_heads(forms))
     test.assertTrue(heads, f"{path}: немає виконуваних голів")
     unknown = [(tok.text, tok.line) for tok in heads if tok.text not in allowed]
