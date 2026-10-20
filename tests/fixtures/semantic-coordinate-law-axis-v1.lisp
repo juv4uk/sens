@@ -3,12 +3,10 @@
 ; This is evidence/projection data, not a second semantic registry.
 ; SID identity remains owned by lib/surface/semantic-registry.lisp.
 ; Mathematical result domains remain owned by #225 and their existing fixtures.
-;
-; A row may say that no mathematical law is claimed for an identity. That is
-; an important negative witness: semantic meaning is broader than mathematics.
+; Ukrainian projection only.
 
-(00001001 semantic-coordinate-law-axis-v1
-  (00000001
+(визначити semantic-coordinate-law-axis-v1
+  (як-є
     ((00001100
        (axis mathematical)
        (domain exact-rational-arithmetic)
@@ -30,14 +28,13 @@
        (witness no-mathematical-law-claimed)
        (evidence contracts/control-dispatch-contract.lisp)))))
 
-(00001001 semantic-coordinate-law-row
-  (00001000 (sid rows)
-    (00000111
-      ((00000010 rows) () ())
-      ((00000010 rows) (1) ())
-      ((00100010 sid (00000101 (00000101 rows))) (00000101 rows))
-      (t (semantic-coordinate-law-row sid (00000110 rows))))))
+(визначити semantic-coordinate-law-row
+  (функція (sid rows)
+    (за-умовою
+      ((атом? rows) (як-є ()))
+      ((тотожне? sid (перше (перше rows))) (перше rows))
+      (так (semantic-coordinate-law-row sid (решта rows))))))
 
-(00001001 semantic-coordinate-law-for-sid
-  (00001000 (sid)
+(визначити semantic-coordinate-law-for-sid
+  (функція (sid)
     (semantic-coordinate-law-row sid semantic-coordinate-law-axis-v1)))
