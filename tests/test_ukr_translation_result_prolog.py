@@ -91,7 +91,8 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
         bridge = (ROOT / "lib/bridge/prolog-to-datalog.lisp").read_text(encoding="utf-8")
         self.assertIn("(як-є candidate)", translation)
         self.assertIn("(як-є projection-result)", bridge)
-        self.assertIn("(визначити translation-status переклад-стан)", translation)
+        self.assertNotIn("(визначити translation-status переклад-стан)", translation)
+        self.assertIn("(визначити переклад-стан", translation)
         self.assertIn("(як-є prolog-substitutions-to-datalog-facts)", bridge)
         sample = '(як-є (translation-status дані)) (як-є (translation-payload дані))'
         heads = [t.text for t in audit.candidate_heads(audit.parse(sample))]
