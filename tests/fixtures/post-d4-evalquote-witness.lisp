@@ -1,24 +1,25 @@
-; #2279 — ordinary-function EVALQUOTE derivation witness.
-;
-; Test-only adapter: no SENS identity is assigned here.
-; Ordinary EVALQUOTE is reconstructed from existing EVAL + APPLY semantics.
-; Ukrainian projection only.
+; Свідчення #2279: похідне обчислення цитованої функції через Д4.
+; Це тестовий адаптер, не нова функціональна тотожність СЕНС.
+; Звичайний EVALQUOTE виводиться з чинних законів «обчислити»
+; та «застосувати», із повністю українськими локальними іменами.
+; Цитовані вхідні аргументи свідка зберігаються без змін.
 
-(визначити c1-evalquote-derived
-  (функція (fn args)
+(визначити обчислити-цитовану-функцію
+  (функція (форма-функції аргументи)
     (застосувати
-      (обчислити fn (як-є ()) (як-є ()))
-      args
+      (обчислити форма-функції (як-є ()) (як-є ()))
+      аргументи
       (як-є ()))))
 
-; One deterministic semantic observation after the helper definition:
-; 1. primitive CONS over a value-list;
-; 2. nested list data preserved through CAR;
-; 3. raw LAMBDA resolved by EVAL then applied as a closure;
-; 4. APPLY arity failure propagated unchanged.
+; Історичне ім'я адаптера — прив'язка до тієї самої функції.
+(визначити c1-evalquote-derived обчислити-цитовану-функцію)
+
+; Одне детерміноване спостереження після визначення:
+; з'єднання пари, вкладений список, лексичне замикання,
+; а також точна відмова за невірної кількості аргументів.
 (список
-  (c1-evalquote-derived (як-є сполучити) (як-є (A B)))
-  (c1-evalquote-derived (як-є перше) (як-є ((A B))))
-  (c1-evalquote-derived
-    (як-є (функція (X Y) (сполучити X Y)))
+  (обчислити-цитовану-функцію (як-є сполучити) (як-є (A B)))
+  (обчислити-цитовану-функцію (як-є перше) (як-є ((A B))))
+  (обчислити-цитовану-функцію
+    (як-є (функція (лівий правий) (сполучити лівий правий)))
     (як-є (A B))))
