@@ -6,14 +6,15 @@
 ; Зниження повертає структуровані машинні форми. Фізичні байти створює
 ; окремий закритий шар допуску; прямого обхідного інтерфейсу тут немає.
 
-; First executable semantic-lowering witness.
-; Semantic identity 00001100 already exists before this file is loaded. This
-; routine does not define addition; it chooses one bounded u64 realization.
-; It returns structured machine forms only. Admission owns the path from those
-; forms to executable bytes.
+; Перший виконуваний доказ зниження семантики до машинних команд.
+; Семантична тотожність 00001100 існує до завантаження цього файлу.
+; Ця функція не визначає додавання, а обирає обмежену реалізацію u64.
+; Вона повертає лише структуровані машинні форми.
+; Перетворення цих форм на виконувані байти належить шару допуску.
 ;
-; RAX carries the result per SysV x86-64. RCX is caller-saved, so the proof
-; routine does not violate the host ABI by clobbering a callee-saved register.
+; За угодою SysV x86-64 результат повертається через RAX.
+; Регістр RCX зберігає викликач, тому функція не порушує ABI
+; перезаписом регістра, який мав би зберегти викликаний код.
 (визначити машина-знизити-додавання-беззнакових-64-до-форм
   (функція (лівий-операнд-машини правий-операнд-машини)
     (список
@@ -22,9 +23,10 @@
       (список (як-є add-r64-r64) (як-є rax) (як-є rcx))
       (список (як-є ret)))))
 
-; #4001 bounded exact-D5 DIFFERENCE/TIMES witnesses. These routines only
-; describe machine forms. Selection is guarded below by exact D5 evaluation,
-; so SUB/IMUL are used only when inputs and the exact result all fit u64.
+; #4001 — обмежені докази точних операцій D5 DIFFERENCE і TIMES.
+; Ці функції лише описують машинні форми. Вибір нижче спирається
+; на точне обчислення D5: SUB та IMUL застосовуються тільки тоді,
+; коли обидва операнди й точний результат поміщаються в u64.
 (визначити машина-знизити-віднімання-беззнакових-64-до-форм
   (функція (лівий-операнд-машини правий-операнд-машини)
     (список
@@ -41,10 +43,10 @@
       (список (як-є imul-r64-r64) (як-є rax) (як-є rcx))
       (список (як-є ret)))))
 
-; #4017 first exact-D5 QUOTIENT machine witness.
-; This intentionally proves only x/x = 1 for positive signed-i64 operands.
-; The narrow relation guarantees exact divisibility without borrowing a
-; spelling, historical SID8 remainder helper, or truncating rational semantics.
+; #4017 — перший машинний доказ точного часткового D5 QUOTIENT.
+; Доведено лише x/x = 1 для додатних операндів зі знаком i64.
+; Вузька умова гарантує точну подільність, не покладаючись
+; на текстову назву, історичний SID8 чи усічення раціональної семантики.
 (визначити машина-знизити-частку-знакових-64-до-форм
   (функція (лівий-операнд-машини правий-операнд-машини)
     (список
@@ -54,15 +56,15 @@
       (список (як-є idiv-r64) (як-є rcx))
       (список (як-є ret)))))
 
-; #196 bounded conditional-growth witness for existing EQ + COND semantics.
-; This routine does not define equality or conditional evaluation. It chooses
-; one fixed-width u64 realization whose only purpose is to establish the
-; machine-effect lower bound demanded by a two-arm runtime decision.
+; #196 — обмежений доказ умовного вибору для наявної семантики EQ і COND.
+; Функція не визначає рівність і не змінює умовне обчислення.
+; Вона обирає реалізацію фіксованої ширини u64, щоб установити
+; необхідний мінімум машинних ефектів для вибору з двох гілок.
 ;
-; JNZ +11 skips exactly one MOV r64,imm64 (10 bytes) plus one RET (1 byte),
-; landing at the ELSE arm. This is deliberately not a general label resolver,
-; branch assembler, or compiler policy. It returns structured forms only;
-; closed admission remains the sole path to bytes.
+; JNZ +11 пропускає рівно один MOV r64,imm64 (10 байтів) та RET (1 байт)
+; і переходить до гілки ELSE. Це не загальний розв'язувач міток,
+; збирач переходів чи правило компілятора. Повертаються лише
+; структуровані форми; байти створюються тільки після закритого допуску.
 (визначити машина-знизити-рівність-та-умову-64
   (функція (лівий-операнд правий-операнд значення-якщо-так значення-якщо-ні)
     (список
@@ -75,11 +77,12 @@
       (список (як-є mov-r64-imm64) (як-є rax) значення-якщо-ні)
       (список (як-є ret)))))
 
-; #196 conditional+structural composition helper. Each branch constructs one
-; bounded pair in the same native-call arena and returns its CAR. The caller
-; selects distinct caller-saved extended GPRs so #207's widened MOV imm64
-; admission is exercised by semantic composition rather than by an ISA-only
-; witness. RAX remains the guest ABI result register.
+; #196 — поєднання умовного вибору та структури пари.
+; Кожна гілка створює обмежену пару в одній області native-call
+; і повертає її CAR. Викликач обирає окремі розширені регістри
+; загального призначення, за збереження яких відповідає викликач.
+; Тому розширений допуск MOV imm64 із #207 перевіряється складенням
+; семантики, а не окремим доказом ISA. Результат ABI лишається в RAX.
 (визначити машина-знизити-обмежений-вибір-першого-пари-64
   (функція (лівий-операнд правий-операнд лівий-регістр правий-регістр)
     (список
@@ -102,11 +105,12 @@
         x86-пара-перше-зсув)
       (список (як-є ret)))))
 
-; Third bounded #196 slice: compose runtime COND/EQ choice with structural
-; CAR(CONS ...) branch bodies. This remains deliberately finite: JNZ +33 skips
-; exactly one six-form CAR(CONS) arm (10+4+10+4+4+1 bytes with base RDI), and
-; each arm returns directly. No label resolver, register allocator, GC, or
-; general recursive expression lowering is claimed here.
+; Третій обмежений приклад #196: вибір COND/EQ зі структурними
+; гілками CAR(CONS ...). Обсяг навмисно скінченний: JNZ +33 пропускає
+; одну гілку CAR(CONS) із шести форм (10+4+10+4+4+1 байтів, база RDI).
+; Кожна гілка повертає результат безпосередньо. Тут не заявлено
+; розв'язування міток, розподілу регістрів, збирання сміття
+; або загального рекурсивного зниження виразів.
 (визначити машина-знизити-рівність-умову-та-пару-64
   (функція (лівий-операнд правий-операнд перше-якщо-так решта-якщо-так перше-якщо-ні решта-якщо-ні)
     (приєднати
