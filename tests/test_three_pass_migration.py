@@ -903,7 +903,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         for _, name, count in mod.NONPROGRAM_MANIFESTS:
             content = (ROOT / name).read_bytes()
             sha = mod.hashlib.sha1(
-                b"blob " + str(len(content)).encode("ascii") + b"\\0" + content
+                b"blob " + str(len(content)).encode("ascii") + b"\0" + content
             ).hexdigest()
             self.assertEqual(mod.NONPROGRAM_MANIFEST_BLOB_SHA[name], sha, name)
             record = json.loads(content)
