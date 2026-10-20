@@ -13,7 +13,7 @@ fn decimal_comma_semantics_are_owned_by_lisp_witness() {
     )
     .expect("decimal-comma authority witness must load");
 
-    let verdict = eval_program("(decimal-comma-authority-witness)", &mut session)
+    let verdict = eval_program("(свідок-закону-десяткової-коми)", &mut session)
         .expect("decimal-comma authority witness must execute")
         .value
         .to_string();
