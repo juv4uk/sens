@@ -1,11 +1,11 @@
-; GENERATED — DO NOT EDIT BY HAND
-; HISTORICAL MIGRATION PROJECTION — NOT SEMANTIC AUTHORITY
-; Donor: lib/surface/semantic-registry.lisp
-; Generator: scripts/generate-function-table.lisp
+; ЗГЕНЕРОВАНО — НЕ РЕДАГУВАТИ ВРУЧНУ
+; ІСТОРИЧНА МІГРАЦІЙНА ПРОЄКЦІЯ — НЕ СЕМАНТИЧНА ВЛАДА
+; Донор: lib/surface/semantic-registry.lisp
+; Генератор: scripts/generate-function-table.lisp
 ; Schema ft/2: (legacy-bitstring formal ук укр en sa sym projection)
 ; ук = current Ukrainian; укр = full Ukrainian peer surface
 ; Display order for humans: ук → укр → English → Sanskrit
-; projection = historical/migration review only
+; проєкція = лише історичний/міграційний огляд
 
 (ft/2
   (00000000 identity:00000000 (ук ()) (укр ()) (en ()) (sa ()) (sym ()) my-lisp)
