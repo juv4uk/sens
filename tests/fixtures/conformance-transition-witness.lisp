@@ -4,20 +4,22 @@
 ; Записи нижче не встановлюють нових семантичних законів: поле
 ; `supersedes-expr` указує на старий вираз, а поля `expr` та `expected`
 ; визначають його чинну виконувану заміну й очікуваний результат.
+; У нових умовах обидві гілки мають рівно два поля та точні Д1 «ні»/«так».
+; Старі трипольові конструкції лишаються тільки як текст походження.
 ;
 ; Rust має право лише переносити ці відповідності, але не вигадувати
 ; вилучену форму чи її наступника. Після архівування старого корпусу
 ; двочастинних умовних конструкцій цей перехідний файл можна вилучити.
 
 ((supersedes-expr . "(cond (0 (quote truthy)) (t (quote falsy)))")
- (expr . "(cond (0 1 (quote wrong)) (0 0 (quote zero-data)))")
+ (expr . "(за-умовою (ні (як-є wrong)) (так (як-є zero-data)))")
  (expected . "zero-data")
  (meta-eval . t)
  (reason . universal-zero-truthiness-retired)
  (owner . "217/220/231"))
 
 ((supersedes-expr . "(cond (0 (quote zero-is-truthy)) (t (quote wrong)))")
- (expr . "(cond (0 1 (quote wrong)) (1 1 (quote explicit-fallback)))")
+ (expr . "(за-умовою (ні (як-є wrong)) (так (як-є explicit-fallback)))")
  (expected . "explicit-fallback")
  (meta-eval . t)
  (reason . universal-zero-truthiness-retired)
