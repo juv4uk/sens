@@ -144,7 +144,9 @@ class NarrateUkrPeerTests(unittest.TestCase):
         # Предикат належить result-status; narrate лише викликає його укр-ім'ям.
         self.assertNotIn(ukrainian, self.defs)
         self.assertIsInstance(self.result_status_defs.get(ukrainian), list)
-        self.assertEqual(self.result_status_defs.get(english), ukrainian)
+        # Усі споживачі вже мають повну назву: англійський дубль не відновлюємо.
+        self.assertNotIn(english, self.result_status_defs,
+                         "Застарілий псевдонім result-proper-list? не повинен повертатися")
         self.assertIn(ukrainian, call_heads(self.defs["пояснити-підсумок"]))
         self.assertNotIn(english, call_heads(self.defs["пояснити-підсумок"]))
 
