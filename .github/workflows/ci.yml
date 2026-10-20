@@ -333,6 +333,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests/test_ukr_projection_progress_report.py -v
+          python3 -m unittest tests/test_migrate_english_predicates_question_mark.py -v
           python3 -m unittest tests/test_ukr_result_status_projection.py -v
           # Повні D9/D10 українські джерела без англомовних DEFINE-дублів.
           python3 -m unittest tests/test_translation_ukr_primary_projection.py -v
