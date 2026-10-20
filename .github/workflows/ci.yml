@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       compare_math_languages:
-        description: 'Лише ручний дослід: Fortran, C і Rust для одного математичного ядра'
+        description: 'Ручний дослід: Fortran, C, Rust, Zig, ASM SSE2/AVX2'
         type: boolean
         required: false
         default: false
@@ -384,7 +384,7 @@ jobs:
           echo "SENS CI passed: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT"
 
   language-fit-math:
-    name: Математика під Skylake — асемблер SSE2/AVX2 проти Fortran, C та Rust
+    name: Математика під Skylake — Zig, Fortran, C, Rust і ASM
     if: github.event_name == 'workflow_dispatch' && inputs.compare_math_languages == true && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -392,6 +392,7 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
           persist-credentials: false
-      - name: Перевірити п'ять математичних реалізацій і виміряти їх однією методикою
+      - uses: ./.github/actions/install-zig
+      - name: Порівняти шість математичних реалізацій з одним контролем
         shell: bash
         run: bash benchmarks/language-fit/run.sh
