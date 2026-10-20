@@ -1,12 +1,13 @@
-; memory-layout-contract.lisp — historical/mechanism NaN-box layout design
-; Історичний/механічний дизайн layout; НЕ семантична онтологія SENS.
-; Historischer/mechanischer Layout-Entwurf; KEINE SENS-Semantik.
+; Історичний опис механізму розміщення значень у пам'яті.
+; Цей файл є свідченням конструкції, а НЕ семантичною онтологією СЕНС.
 ;
-; This records a proposed 64-bit IEEE 754 NaN-boxing representation.
-; Tag widths and ordinals are implementation evidence only: they do not define
-; SENS value identity, payload domains, or canonical language semantics.
-; The lower 32-bit shape was designed to align with the fpga-lisp VALUE WORD;
-; independent runtimes may represent the same language values differently.
+; Записано пропозицію 64-бітного подання IEEE 754 з маркуванням NaN.
+; Ширини та порядкові номери тегів — лише відомості реалізації:
+; вони не визначають ідентичність значень СЕНС, домени вмісту або
+; канонічні закони мови.
+; Молодші 32 біти проєктувалися відповідно до структури VALUE WORD
+; у fpga-lisp. Незалежні виконавці можуть по-різному представляти
+; однакові мовні значення.
 
 ((kind . memory-layout-design)
  (version . (1 0))
@@ -34,10 +35,10 @@
           (nil . 3)
           (true . 4)
           (primitive . 5)
-          (string . 6)    ; New: extended-payload + payload = 48-bit pointer to heap
-          (rational . 7)  ; New: extended-payload + payload = 48-bit pointer to heap
-          (closure . 8)   ; New: extended-payload + payload = 48-bit pointer to heap
-          (tcp-conn . 9))) ; New: host resource handle
+          (string . 6)    ; Нове: extended-payload + payload = 48-бітний вказівник на купу
+          (rational . 7)  ; Нове: extended-payload + payload = 48-бітний вказівник на купу
+          (closure . 8)   ; Нове: extended-payload + payload = 48-бітний вказівник на купу
+          (tcp-conn . 9))) ; Нове: дескриптор ресурсу зовнішнього середовища
 
  (heap-representation .
   ((string . "null-terminated UTF-8 byte array")
