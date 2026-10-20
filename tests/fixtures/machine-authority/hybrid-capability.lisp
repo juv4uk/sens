@@ -1,5 +1,5 @@
-; #211 deliberate negative witness.
-; A native result attempts to become both semantic authority and its own answer key.
+; #211 навмисний негативний свідок.
+; Рідний результат намагається стати і семантичною владою, і власним ключем відповіді.
 (capability-provenance
   (name synthetic-native-answer-key)
   (semantic-authority machine)
