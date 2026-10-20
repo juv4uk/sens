@@ -256,6 +256,13 @@ jobs:
           python3 scripts/check_d11_selector_seed.py
           python3 scripts/audit_ukrainian_domain_projections.py
 
+      - name: Повний облік Lisp → SENS → перегляд без хибного допуску релізу
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests/test_audit_all_lisp_triplets.py -v
+          python3 scripts/audit_all_lisp_triplets.py --limit 8
+
       - name: SENS-визначення — баланс дужок і дублікати
         if: ${{ always() }}
         run: python3 scripts/check-sens-definitions.py
