@@ -99,9 +99,13 @@ class ResultStatusProjectionTests(unittest.TestCase):
                          "result-status", "result-payload",
                          "result-proper-list?"):
             self.assertNotIn("(визначити " + obsolete + " ", code)
-        # Два історичні входи спостереження мають окремих споживачів.
-        for compat in ("reason-observe", "reason-in-observe"):
-            self.assertIn("(визначити " + compat + " ", code)
+        # Латинські аліаси спостереження вилучені після переходу
+        # на повні українські викличні назви. Цитовані протокольні
+        # значення в інших формах не перейменовуються.
+        for obsolete in ("reason-observe", "reason-in-observe"):
+            self.assertNotIn("(визначити " + obsolete + " ", code)
+        for current in ("міркувати-спостерігати", "міркувати-у-спостерігати"):
+            self.assertRegex(code, r"\\(визначити\\s+" + re.escape(current) + r"\\s+\\(функція")
         for obsolete in ("result-goal?", "result-negated-goal?",
                          "result-opposite-goal"):
             self.assertNotIn("(визначити " + obsolete + " ", code)
