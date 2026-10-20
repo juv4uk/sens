@@ -3,5 +3,5 @@
   (authority "lib/surface/semantic-registry.lisp")
   (role mechanism-evidence-only)
   (rows
-    (00001100 common-lisp execution-witness "synthetic-duplicate-a")
-    (00001100 common-lisp execution-witness "synthetic-duplicate-b")))
+    (12 common-lisp execution-witness "synthetic-duplicate-a")
+    (12 common-lisp execution-witness "synthetic-duplicate-b")))
