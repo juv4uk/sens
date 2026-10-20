@@ -4,8 +4,8 @@
 ; Історичні назви відповідей усередині рядків — дані свідка.
 ; Пара завантажуваних бібліотек — залежності, не джерело законів.
 
-(load "lib/generated/meta-semantic-registry.lisp")
-(load "lib/meta-eval.lisp")
+(завантажити-файл "lib/generated/meta-semantic-registry.lisp")
+(завантажити-файл "lib/meta-eval.lisp")
 
 (визначити реєстр-пряме-значення
   (функція (джерело)
