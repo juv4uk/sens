@@ -1669,7 +1669,7 @@ class QuantityUkrLocalHelpersTests(unittest.TestCase):
     )
     @classmethod
     def restore_original(cls, source):
-        if re.search(r"(?m)^\\(визначити\\s+(?:science-|make-|dimension)", source):
+        if re.search(r"(?m)^\(визначити\s+(?:science-|make-|dimension)", source):
             raise AssertionError("у чинному Lisp залишено історичні аліаси")
         body = source
         for english, ukrainian, calls in cls.PAIRS:

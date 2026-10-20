@@ -218,7 +218,7 @@ PUBLIC_PROJECTIONS = (
 def restore_local_helper_layer(source: str) -> str:
     """Точний обернений прохід проєкцій; читача чи обчислювача не запускає."""
     # Архівний шар відтворюємо лише в перевірці походження, не в живій бібліотеці.
-    if re.search(r"(?m)^\\(визначити\\s+[A-Za-z*]", source):
+    if re.search(r"(?m)^\(визначити\s+[A-Za-z*]", source):
         raise AssertionError("у чинному Lisp залишено латинське визначення")
     body = source + SCHEMA_ARCHIVE_BLOCK
     # Local binders belong to the Ukrainian primary definitions; undo them
