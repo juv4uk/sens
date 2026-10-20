@@ -1,8 +1,8 @@
-; #996 — machine-readable authority handoff policy.
+; #996 — машинно-читана політика передачі повноважень.
 ;
-; This contract does not duplicate semantic rows. It states how downstream
-; consumers such as cml and wsm-my-lisp must pin and verify the canonical
-; Lisp-owned registry before lowering or observing it.
+; Цей контракт не дублює семантичних рядків. Він зазначає, як нижчі
+; споживачі (як-от cml і wsm-my-lisp) мусять закріпити й перевірити канонічний
+; реєстр, що належить Lisp, перш ніж понижувати чи спостерігати його.
 
 (semantic-registry-handoff-contract/1
   (authority "lib/surface/semantic-registry.lisp")
