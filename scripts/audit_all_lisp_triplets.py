@@ -171,6 +171,13 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         and counts["undecidable_lisp_files"] == 0
         and verify_bounded
     )
+    # Окремий точний показник для поточного T5M. Історичний T5
+    # залишається фізично оберненим, але не доводить завершення міграції.
+    all_current_t5m_verified = (
+        all_verified
+        and counts["bounded_verified_t5m"] == counts["potential_program_files"]
+        and counts["bounded_verified_legacy_t5"] == 0
+    )
     return {
         "schema": SCHEMA,
         "total_lisp_files": len(sources),
@@ -182,6 +189,10 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         "unverified_triplets": counts["complete_triplets"] - counts["bounded_verified"],
         "verification_requested": verify_bounded,
         "all_bounded_reverse_verified": all_verified,
+        "all_current_t5m_bounded_reverse_verified": all_current_t5m_verified,
+        "current_t5m_without_bounded_proof": (
+            counts["potential_program_files"] - counts["bounded_verified_t5m"]
+        ),
         "semantic_runtime_proven": False,
         "release_ready": False,
         "release_decision": "NO-GO: потрібні докази виконання SENS та повної семантики",
@@ -206,7 +217,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", type=Path)
     parser.add_argument("--verify-bounded", action="store_true")
     parser.add_argument("--require-reversible", action="store_true",
-                        help="відмова, якщо хоч один Lisp-файл не має підтвердженої обмеженої зворотності")
+                        help="вимагати обмеженої зворотності виконуваних Lisp саме в чинному T5M")
     args = parser.parse_args(argv)
     try:
         result = scan(args.root, verify_bounded=args.verify_bounded, limit=args.limit)
@@ -217,8 +228,9 @@ def main(argv: list[str] | None = None) -> int:
     print(text, end="")
     if args.json:
         args.json.write_text(text, encoding="utf-8")
-    if args.require_reversible and not result["all_bounded_reverse_verified"]:
-        print("REVERSE_BLOCKED: неповне або недоведене покриття", file=sys.stderr)
+    if args.require_reversible and not result["all_current_t5m_bounded_reverse_verified"]:
+        print("REVERSE_BLOCKED: неповне покриття чинного T5M або недоведена зворотність",
+              file=sys.stderr)
         return 2
     return 0
 
