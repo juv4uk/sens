@@ -1,19 +1,20 @@
-; #749 — Lisp-owned language-facing island compatibility contract.
+; #749 — Мовний контракт сумісності СЕНС із незалежними виконавчими островами.
 ;
-; This document defines what SENS promises at the border with autonomous
-; execution islands. It does NOT define Common Lisp, Prolog, CLIPS or Datalog
-; semantics and does not invent a universal result ontology.
+; Цей контракт визначає зобов'язання СЕНС на межі з автономними
+; виконавчими островами. Він НЕ встановлює семантику Common Lisp, Prolog,
+; CLIPS чи Datalog і не вигадує спільної для всіх онтології результатів.
 ;
-; Mechanical C/Rust boundaries may transport these identities and observations.
-; They do not own the meaning of the fields below.
+; Механічна межа C/Rust може передавати ці тотожності та спостереження,
+; але не визначає значення полів, наведених нижче.
 ;
-; Outer form:
+; Зовнішня форма:
 ;   (island-compat-contract/1 ENTRY ...)
 ;
-; Key distinction:
-;   literal () is Canon 0 in the language.
-;   protocol zero-results is an observation about one completed island call.
-;   The protocol must not silently make those two things identical.
+; Принципова відмінність:
+;   літерал () — це Канон 0 у самій мові;
+;   протокольний zero-results — спостереження одного завершеного
+;   виклику острова, що повернув нуль результатів.
+;   Протокол не має права неявно ототожнювати ці дві сутності.
 
 (island-compat-contract/1
   ((identity . semantic-id)
