@@ -29,6 +29,14 @@ class AllLispTripletCensusTests(unittest.TestCase):
             path.write_text(content, encoding="utf-8")
         return path
 
+    @staticmethod
+    def make_current_t5m(target: Path) -> None:
+        """Перекодувати лише тимчасову копію, не історичне джерело."""
+        from sens_t5_codec import encode_t5m_projection
+        target.with_suffix(".sens").write_bytes(encode_t5m_projection(
+            target.read_text(encoding="ascii")
+        ))
+
     def test_comment_only_lisp_has_no_machine_program_to_reverse(self):
         self.put("lib/опис.lisp", "; Український опис\n; Без програми\n")
         self.put("lib/порожній.lisp", "  \n\t\n")
@@ -55,6 +63,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
         for suffix in (".lisp", ".sens", ""):
             shutil.copyfile(fixture / ("branch" + suffix),
                             source.with_suffix(suffix))
+        self.make_current_t5m(source.with_suffix(""))
         self.put("lib/пояснення.lisp", "; Це лише документація\n")
         result = scan(self.root, verify_bounded=True)
         self.assertEqual(result["total_lisp_files"], 2)
@@ -195,12 +204,12 @@ class AllLispTripletCensusTests(unittest.TestCase):
             target = self.root / "lib" / ("branch" + suffix)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(fixture / ("branch" + suffix), target)
+        self.make_current_t5m(self.root / "lib/branch")
         summary = scan(self.root, verify_bounded=True)
         self.assertEqual(summary["complete_triplets"], 1)
         self.assertEqual(summary["bounded_verified"], 1, summary["blocked_sample"])
-        self.assertEqual(
-            summary["bounded_verified_t5m"] + summary["bounded_verified_legacy_t5"], 1
-        )
+        self.assertEqual(summary["bounded_verified_t5m"], 1)
+        self.assertEqual(summary["bounded_verified_legacy_t5"], 0)
         self.assertTrue(summary["all_bounded_reverse_verified"])
         self.assertFalse(summary["semantic_runtime_proven"])
         self.assertFalse(summary["release_ready"])
@@ -211,6 +220,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
             shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        self.make_current_t5m(target)
         source = target.with_suffix(".lisp")
         source.write_text("; inert historical comment ٢\n" +
                           source.read_text(encoding="utf-8"), encoding="utf-8")
@@ -262,6 +272,25 @@ class AllLispTripletCensusTests(unittest.TestCase):
             self.assertEqual(main([
                 "--root", str(self.root), "--verify-bounded", "--require-reversible"
             ]), 2)
+
+    def test_legacy_t5_cannot_certify_the_current_corpus(self):
+        # Старі фізичні T5-байти не означають сучасний T5M-доказ.
+        from verify_uk_t5_triplet import verify
+        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        target = self.root / "lib/branch"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for suffix in (".lisp", ".sens", ""):
+            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        historical = scan(self.root, verify_bounded=True,
+                          validator=lambda source, physical, view: verify(
+                              source, physical, view, codec="t5"))
+        self.assertEqual(historical["bounded_verified"], 1, historical["blocked_sample"])
+        self.assertEqual(historical["bounded_verified_legacy_t5"], 1)
+        self.assertEqual(historical["bounded_verified_t5m"], 0)
+        self.assertFalse(historical["all_bounded_reverse_verified"])
+        current = scan(self.root, verify_bounded=True)
+        self.assertEqual(current["bounded_verified_t5m"], 0)
+        self.assertFalse(current["all_bounded_reverse_verified"])
 
     def test_t5m_receipt_cannot_claim_legacy_t5_roundtrip_as_well(self):
         from sens_t5_codec import encode_t5m_projection
@@ -329,6 +358,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
             shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        self.make_current_t5m(target)
         (self.root / "lib" / "посилання.lisp").symlink_to("branch.lisp")
         summary = scan(self.root, verify_bounded=True)
         self.assertEqual(summary["total_lisp_files"], 2)

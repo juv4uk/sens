@@ -311,8 +311,8 @@ def main() -> int:
     parser.add_argument("--lisp", type=Path, required=True)
     parser.add_argument("--sens", type=Path, required=True)
     parser.add_argument("--view", type=Path, required=True)
-    parser.add_argument("--codec", choices=("auto", "t5m", "t5"), default="auto",
-                        help="T5M is current, T5 is explicit legacy, auto uses exact view")
+    parser.add_argument("--codec", choices=("auto", "t5m", "t5"), default="t5m",
+                        help="T5M за замовчуванням; t5 і auto — явний історичний аудит")
     args = parser.parse_args()
     try:
         result = verify(args.lisp, args.sens, args.view, codec=args.codec)

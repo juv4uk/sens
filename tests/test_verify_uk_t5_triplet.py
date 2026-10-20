@@ -325,9 +325,16 @@ class BoundedUkTripletTests(unittest.TestCase):
     def test_cli_read_only_current_canary(self):
         cmd = [sys.executable, str(SOURCE), "--lisp", str(self.lisp),
                "--sens", str(self.sens), "--view", str(self.view)]
+        old_default = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=90)
+        self.assertEqual(old_default.returncode, 2)
+        legacy = subprocess.run([*cmd, "--codec", "t5"], cwd=ROOT, text=True,
+                                capture_output=True, timeout=90)
+        self.assertEqual(legacy.returncode, 0, legacy.stderr)
+        self.sens.write_bytes(encode_t5m_projection(WORDS))
         ok = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=90)
         self.assertEqual(ok.returncode, 0, ok.stderr)
         self.assertIn("BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION", ok.stdout)
+        self.assertIn('"physical_codec": "t5m"', ok.stdout)
         self.view.write_bytes(b"0\n")
         bad = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=90)
         self.assertEqual(bad.returncode, 2)

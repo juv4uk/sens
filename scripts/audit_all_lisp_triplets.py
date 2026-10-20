@@ -41,7 +41,10 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
     )
     if verify_bounded and validator is None:
         from verify_uk_t5_triplet import verify
-        validator = verify
+        # Поточний фізичний носій T5M, старий T5 — лише явний аудит.
+        validator = lambda source, physical, view: verify(
+            source, physical, view, codec="t5m"
+        )
 
     def require_bounded_receipt(witness: object, source: Path, physical: Path, view: Path) -> str:
         """Read-only integrity of the real bounded oracle receipt, never runtime GO."""
@@ -162,6 +165,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
 
     all_verified = counts["potential_program_files"] > 0 and (
         counts["bounded_verified"] == counts["potential_program_files"]
+        and counts["bounded_verified_t5m"] == counts["potential_program_files"]
         # Keyboard style is a separate source-quality metric. Comments,
         # whitespace and quoted external protocol data are not executable
         # program identity; do not let them veto proved roundtrips.
