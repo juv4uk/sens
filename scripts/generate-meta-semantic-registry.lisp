@@ -1,5 +1,6 @@
 ; generate-meta-semantic-registry — українська проєкція шаблонів виводу
-; Генерує реєстр поверхонь без старих викличних кодів.
+; Джерело влади: lib/surface/semantic-registry.lisp.
+; Це неповний шаблон, а не підтверджений згенерований реєстр.
 ; Зовнішні назви my-semantic-* зберігаємо, бо вони мають споживачів;
 ; локальні зв'язування відтепер мають українські імена.
 
@@ -16,4 +17,4 @@
 
 (визначити generate-meta-semantic-registry-ready
   (функція ()
-    (як-є (generate-meta-semantic-registry (status pass) (projection ukr)))))
+    (як-є (generate-meta-semantic-registry (status not-verified) (projection ukr)))))
