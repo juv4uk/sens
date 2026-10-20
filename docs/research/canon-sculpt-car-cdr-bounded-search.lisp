@@ -1,17 +1,18 @@
-; #432 bounded structural-basis search
-; Research-only data. NOT semantic authority. NOT a proof of global irreducibility.
-; Base: main@23cfdc141ef1e7ab4275d27c536a99d1018f3292
+; #432 обмежений пошук структурної основи
+; Лише дослідницькі дані. НЕ семантична влада. НЕ доказ глобальної незвідності.
+; База: main@23cfdc141ef1e7ab4275d27c536a99d1018f3292
 ;
-; Purpose:
-;   Falsify one concrete family of CAR/CDR reductions without touching Canon/runtime.
-;   This first bounded search intentionally uses only eager value operations
-;   ATOM/EQ/CONS. Control forms are a separate follow-up experiment rather than
-;   silently strengthening the grammar after numbers have been observed.
+; Мета:
+;   Сфальсифікувати одну конкретну сім'ю CAR/CDR-редукцій, не чіпаючи Canon/runtime.
+;   Цей перший обмежений пошук навмисно використовує лише енергійні операції
+;   значень ATOM/EQ/CONS. Керівні форми — окремий наступний експеримент, а не
+;   тихе посилення граматики після того, як числа вже спостережено.
 ;
-; Important distinction:
-;   the search mechanism may inspect generated terms as research data;
-;   generated object-language candidates themselves may not contain CAR/CDR,
-;   peer surfaces, semantic-ID round trips, host pair destructuring, or backend loads.
+; Важлива відмінність:
+;   механізм пошуку може оглядати згенеровані терми як дослідницькі дані;
+;   самі згенеровані кандидати об'єктної мови не можуть містити CAR/CDR,
+;   peer-поверхні, round-trip семантичних ID, деструктуризацію пар хоста
+;   чи завантаження бекенда.
 
 (canon-sculpt-bounded-search
   (schema-version 2)
