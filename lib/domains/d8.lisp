@@ -1,10 +1,12 @@
-; Canonical human-readable D8 domain table.
-; Authority: knowledge/d8-ratified.json (#3960), Contract 11.7.
-; D8 only: exact-width 8-bit keys, 256/256 residents.
-; Columns: ук → укр → san → en → LISP → sym
-; Predicate marker rule: ук/укр/en use ? when a selected human predicate surface exists; Sanskrit does not.
-; Empty/missing human surface: ()
-; Historical Sens8 coordinates are donor/provenance only and never placement authority.
+; Канонічна людиночитана таблиця восьмого домену.
+; Ратифіковане джерело: knowledge/d8-ratified.json (#3960), контракт 11.7.
+; Лише Д8: ключі точної восьмибітної ширини, 256 із 256 резидентів.
+; Колонки: ук → укр → san → en → LISP → sym.
+; У проєкціях ук/укр/en предикат має ?, якщо вибрано відповідну людську назву;
+; санскритська проєкція не має цього закінчення.
+; Відсутню людську проєкцію позначено ().
+; Історичні координати Sens8 свідчать лише про походження:
+; вони не уповноважують розміщення у чинному Д8.
 
 (domain-table/1
   (00000000 (ук символ-за-кодом) (укр символ-за-кодом) (san koda-varṇa) (en code-char) (LISP CODE-CHAR) (sym ()))

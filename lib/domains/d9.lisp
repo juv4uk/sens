@@ -1,11 +1,11 @@
-; Canonical human-readable D9 domain table.
-; Authority: knowledge/d9-ratified.json (#4008), Contract 11.8.
-; D9 only: exact-width 9-bit keys, 512/512 residents.
-; Columns: ук → укр → san → en → LISP → sym
-; Predicate marker: ? in ук/укр/en; Sanskrit is marker-free.
-; Destructive marker: ! in ук/укр/en; Sanskrit encodes destructive distinction lexically.
-; Human surfaces do not imply Core ownership or runtime callability (#4033).
-; Rust W9 runtime carrier is separate and tracked by #4038.
+; Канонічна людиночитана таблиця дев'ятого домену.
+; Ратифіковане джерело: knowledge/d9-ratified.json (#4008), контракт 11.8.
+; Лише Д9: ключі точної дев'ятибітної ширини, 512 із 512 резидентів.
+; Колонки: ук → укр → san → en → LISP → sym.
+; Ознака предиката — ? в ук/укр/en; санскритська проєкція без цього знака.
+; Ознака руйнівної зміни — ! в ук/укр/en; санскрит передає її словами.
+; Людська назва не означає належності до ядра чи допуску виклику (#4033).
+; Дев'ятибітний носій Rust для виконання — окрема справа #4038.
 
 (domain-table/1
   (000000000 (ук захист-доказ-стан?) (укр захист-доказ-стан?) (san rakṣā-pramāṇa-avasthā) (en guard-evidence-status?) (LISP GUARD-EVIDENCE-STATUS?) (sym ()))

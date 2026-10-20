@@ -1,11 +1,12 @@
-; D10 human-readable surface; 1024 exact ten-bit words.
-; Authority: knowledge/d10-owner-whole-domain-ratification-20261012.json
-; Canonical mapping: knowledge/d10-v18-semantic-inventory.json
-; Pinned input Git blob: 7e6acb2531308ae5f63600d4e0042111cc3ec59c
-; Columns: ук -> укр -> san -> en -> LISP -> sym.
-; D10 is owner-ratified as a complete codebook; runtime admission is separate.
-; First-pass compositional translation, with technical Sanskrit surface draft.
-; International technical terms and rare words can be reviewed without moving codes.
+; Людиночитана проєкція десятого домену: 1024 точні десятибітні слова.
+; Ратифікація власника: knowledge/d10-owner-whole-domain-ratification-20261012.json.
+; Канонічна відповідність: knowledge/d10-v18-semantic-inventory.json.
+; Закріплений вихідний об'єкт Git: 7e6acb2531308ae5f63600d4e0042111cc3ec59c.
+; Колонки: ук → укр → san → en → LISP → sym.
+; Увесь словник Д10 ратифікований власником; допуск до виконання окремий.
+; Початкова складальна проєкція містить технічну санскритську чернетку.
+; Міжнародні технічні терміни та рідкісні слова можна уточнювати,
+; не пересуваючи жодної кодової координати.
 (domain-table/1
   (0000000000 (ук немає-можливості) (укр відсутня-можливість-виконання) (san abhāva-sāmarthya) (en missing-capability) (LISP MISSING-CAPABILITY) (sym ()))
   (0000000001 (ук кількість-результатів) (укр кількість-результатів-спостереження) (san phala-saṃkhyā) (en result-count) (LISP RESULT-COUNT) (sym ()))
