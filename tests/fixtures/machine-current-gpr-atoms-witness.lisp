@@ -1,6 +1,6 @@
-; #178 — Lisp-owned composition witness for current admitted register forms.
-; Ukrainian projection only. Encoder/admission owns machine facts;
-; atoms own typed composition only.
+; #178 — свідок композиції речових форм, що належить Lisp, для чинних допущених регістрових форм.
+; Лише українська проєкція. Кодер/допуск володіє машинними фактами;
+; атоми володіють лише типізованою композицією.
 
 (завантажити-файл "lib/core.lisp")
 (завантажити-файл "lib/machine/block.lisp")
