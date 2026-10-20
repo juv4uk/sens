@@ -1,11 +1,14 @@
-;; knowledge/physics.lisp
-(defmodule physics (001 (
-  ;; Rule: Anything with mass is attracted by gravity
+; Фізичні знання у вигляді фактів і правил.
+; Предикати та ідентифікатори у клаузах залишено незмінними:
+; це дані предметної області, а не англійські викличні голови Lisp.
+
+(визначити-модуль physics (як-є (
+  ; Тіло, яке має масу, піддається гравітаційному притяганню.
   ((attracted-by-gravity (var x)) (has-mass (var x)))
-  
-  ;; Rule: If something is a planet, it has mass
+
+  ; Кожна планета має масу.
   ((has-mass (var x)) (planet (var x)))
 
-  ;; Facts
+  ; Факт про масу яблука.
   ((has-mass apple))
 )))
