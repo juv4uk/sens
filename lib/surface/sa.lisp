@@ -87,8 +87,8 @@
 (визначити sambaddha? member?)
 ; saṃbandha = relation/connection
 (визначити saṃbandha assoc)
-; dvandva = pair (Pāṇini 2.2.29-34)
-(визначити dvandva pair)
+; «dvandva» лишається назвою проєкції у реєстрі поверхонь.
+; Тут не створюємо викличний alias: доменна identity сама не дає допуску.
 ; ordinals — safe: return element, not sublist
 (визначити dvitīya second)
 (визначити tṛtīya third)

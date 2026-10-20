@@ -1,8 +1,8 @@
 use sens::syntax::Expr;
 use sens::{parse, ExprKind};
 
-const HUMAN_SURFACES: [&str; 3] = ["ук", "en", "sa"];
-const FIXED_SURFACES: [&str; 5] = ["en", "ук", "укр", "sa", "sym"];
+const HUMAN_SURFACES: [&str; 4] = ["ук", "укр", "en", "san"];
+const FIXED_SURFACES: [&str; 6] = ["ук", "укр", "san", "en", "LISP", "sym"];
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct SurfaceName {
@@ -42,43 +42,105 @@ impl Counts {
 }
 
 fn normalize_surface(surface: &str) -> &str {
-    surface
+    match surface {
+        "sa" => "san",
+        _ => surface,
+    }
 }
 
+// The REPL is the human-projection exception: Rust reads these Lisp tables
+// only to render/resolve UI names; they do not enter the binary backend.
 fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     let mut entries = Vec::new();
-
-    for semantic_id in sens::semantic_registry_export::admitted_semantic_ids() {
-        if semantic_id == 0 {
-            continue;
+    for width in 1u8..=11 {
+        let source = domain_table_source(width)
+            .ok_or_else(|| format!("D{width}: відсутня таблиця проєкцій"))?;
+        let forms = parse(&source).map_err(|error| {
+            format!(
+                "не вдалося розібрати таблицю D{width}: {}",
+                error.render(&source)
+            )
+        })?;
+        let root = forms
+            .first()
+            .and_then(expr_list)
+            .ok_or_else(|| format!("D{width}: очікувався корінь domain-table/1"))?;
+        if root.first().and_then(expr_symbol) != Some("domain-table/1") {
+            return Err(format!("D{width}: невідомий формат таблиці"));
         }
-
-        let admitted =
-            sens::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id);
-        let names = FIXED_SURFACES
-            .iter()
-            .map(|namespace| {
-                let name = admitted
-                    .iter()
-                    .find(|surface| surface.namespace == *namespace)
-                    .map(|surface| surface.name.to_string());
-                SurfaceName {
-                    surface: (*namespace).to_string(),
-                    name,
+        for row in root.iter().skip(1) {
+            let row_fields = expr_list(row)
+                .ok_or_else(|| format!("D{width}: рядок таблиці має бути списком"))?;
+            let key = row_fields
+                .first()
+                .ok_or_else(|| format!("D{width}: порожній рядок"))?;
+            let bits = source
+                .get(key.span.start..key.span.end)
+                .ok_or_else(|| format!("D{width}: некоректний діапазон ключа"))?;
+            if bits.len() != usize::from(width)
+                || !bits.bytes().all(|bit| matches!(bit, b'0' | b'1'))
+            {
+                return Err(format!(
+                    "D{width}: ключ {bits:?} не має точної ширини домену"
+                ));
+            }
+            let mut names = FIXED_SURFACES
+                .iter()
+                .map(|surface| SurfaceName {
+                    surface: (*surface).to_string(),
+                    name: None,
+                })
+                .collect::<Vec<_>>();
+            for field in row_fields.iter().skip(1) {
+                let parts = expr_list(field)
+                    .ok_or_else(|| format!("D{width}:{bits}: проєкція має бути списком"))?;
+                if parts.len() != 2 {
+                    return Err(format!("D{width}:{bits}: очікував пару назва/значення"));
                 }
-            })
-            .collect();
-
-        entries.push(SurfaceEntry {
-            identity: sens::semantic_registry_export::semantic_id_bits(semantic_id),
-            names,
-        });
+                let surface = expr_symbol(&parts[0])
+                    .ok_or_else(|| format!("D{width}:{bits}: назва проєкції має бути символом"))?;
+                let slot = names
+                    .iter_mut()
+                    .find(|slot| slot.surface == surface)
+                    .ok_or_else(|| format!("D{width}:{bits}: невідома проєкція {surface}"))?;
+                slot.name = projection_value(&parts[1]).map(str::to_string);
+            }
+            entries.push(SurfaceEntry {
+                identity: format!("D{width}:{bits}"),
+                names,
+            });
+        }
     }
 
     if entries.is_empty() {
-        return Err("byte-SID semantic registry contains no surface entries".to_string());
+        return Err("D1–D11 таблиці не містять жодної координати".to_string());
     }
     Ok(entries)
+}
+
+fn domain_table_source(width: u8) -> Option<&'static str> {
+    match width {
+        1 => Some(include_str!("../../../../lib/domains/d1.lisp")),
+        2 => Some(include_str!("../../../../lib/domains/d2.lisp")),
+        3 => Some(include_str!("../../../../lib/domains/d3.lisp")),
+        4 => Some(include_str!("../../../../lib/domains/d4.lisp")),
+        5 => Some(include_str!("../../../../lib/domains/d5.lisp")),
+        6 => Some(include_str!("../../../../lib/domains/d6.lisp")),
+        7 => Some(include_str!("../../../../lib/domains/d7.lisp")),
+        8 => Some(include_str!("../../../../lib/domains/d8.lisp")),
+        9 => Some(include_str!("../../../../lib/domains/d9.lisp")),
+        10 => Some(include_str!("../../../../lib/domains/d10.lisp")),
+        11 => Some(include_str!("../../../../lib/domains/d11.lisp")),
+        _ => None,
+    }
+}
+
+fn projection_value(expr: &Expr) -> Option<&str> {
+    match &expr.kind {
+        ExprKind::Symbol(value) | ExprKind::String(value) => Some(value.as_ref()),
+        ExprKind::List(items) if items.is_empty() => None,
+        _ => None,
+    }
 }
 
 fn surface_name<'a>(entry: &'a SurfaceEntry, surface: &str) -> Option<&'a SurfaceName> {
@@ -101,14 +163,17 @@ fn public_denominator(entries: &[SurfaceEntry]) -> usize {
     entries.len()
 }
 
-fn find_entry<'a>(entries: &'a [SurfaceEntry], requested: &str) -> Option<&'a SurfaceEntry> {
-    entries.iter().find(|entry| {
-        entry.identity == requested
-            || entry
-                .names
-                .iter()
-                .any(|surface| surface.name.as_deref() == Some(requested))
-    })
+fn find_entries<'a>(entries: &'a [SurfaceEntry], requested: &str) -> Vec<&'a SurfaceEntry> {
+    entries
+        .iter()
+        .filter(|entry| {
+            entry.identity == requested
+                || entry
+                    .names
+                    .iter()
+                    .any(|surface| surface.name.as_deref() == Some(requested))
+        })
+        .collect()
 }
 
 fn rendered_name(surface: Option<&SurfaceName>) -> String {
@@ -156,8 +221,7 @@ fn uk_docs_source_zig_only() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
         let bytes = crate::zig_transport::uk_docs_source_bytes()?;
-        String::from_utf8(bytes)
-            .map_err(|err| format!("ZIG_UK_DOCS_CARRIER invalid UTF-8: {err}"))
+        String::from_utf8(bytes).map_err(|err| format!("ZIG_UK_DOCS_CARRIER invalid UTF-8: {err}"))
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -167,8 +231,12 @@ fn uk_docs_source_zig_only() -> Result<String, String> {
 
 fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
     let source = uk_docs_source_zig_only()?;
-    let program = parse(&source)
-        .map_err(|error| format!("не вдалося прочитати uk-docs.wsm: {}", error.render(&source)))?;
+    let program = parse(&source).map_err(|error| {
+        format!(
+            "не вдалося прочитати uk-docs.wsm: {}",
+            error.render(&source)
+        )
+    })?;
     let root = program
         .first()
         .and_then(expr_list)
@@ -195,8 +263,9 @@ fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
                 category: expr_symbol(&fields[1])
                     .ok_or_else(|| "uk-docs.wsm: category має бути символом".to_string())?
                     .to_string(),
-                identity: expr_documentation_key(&fields[2])
-                    .ok_or_else(|| "uk-docs.wsm: історичний документальний ключ повинен мати 8 біт".to_string())?,
+                identity: expr_documentation_key(&fields[2]).ok_or_else(|| {
+                    "uk-docs.wsm: історичний документальний ключ повинен мати 8 біт".to_string()
+                })?,
                 kind: expr_symbol(&fields[3])
                     .ok_or_else(|| "uk-docs.wsm: kind має бути символом".to_string())?
                     .to_string(),
@@ -216,12 +285,17 @@ pub(crate) fn render_status() -> Result<String, String> {
     let denominator = public_denominator(&entries);
     let uk = counts_for(&entries, "ук");
     let en = counts_for(&entries, "en");
-    let sa = counts_for(&entries, "sa");
+    let ukr = counts_for(&entries, "укр");
+    let san = counts_for(&entries, "san");
     let symbolic = entries
         .iter()
-        .filter(|entry| surface_name(entry, "sym").and_then(|item| item.name.as_deref()).is_some())
+        .filter(|entry| {
+            surface_name(entry, "sym")
+                .and_then(|item| item.name.as_deref())
+                .is_some()
+        })
         .count();
-    let trilingual_present = entries
+    let four_projection_rows = entries
         .iter()
         .filter(|entry| {
             HUMAN_SURFACES.iter().all(|surface| {
@@ -233,24 +307,14 @@ pub(crate) fn render_status() -> Result<String, String> {
         .count();
 
     Ok(format!(
-        "Рівноправні людські поверхні · byte identities: {denominator}\n\
+        "Проєкції таблиць D1–D11 · доменні координати: {denominator}\n\
          UK  present {:>3} · empty {:>3}\n\
+         UKR present {:>3} · empty {:>3}\n\
          EN  present {:>3} · empty {:>3}\n\
-         SA  present {:>3} · empty {:>3}\n\
+         SAN present {:>3} · empty {:>3}\n\
          shared sym identities: {symbolic}\n\
-         trilingual present: {trilingual_present}/{denominator}\n\
-         release parity: {}",
-        uk.present,
-        uk.empty,
-        en.present,
-        en.empty,
-        sa.present,
-        sa.empty,
-        if trilingual_present == denominator {
-            "CONFIRMED"
-        } else {
-            "OPEN"
-        }
+         rows with all four human projections: {four_projection_rows}/{denominator}",
+        uk.present, uk.empty, ukr.present, ukr.empty, en.present, en.empty, san.present, san.empty,
     ))
 }
 
@@ -258,7 +322,7 @@ pub(crate) fn render_names(surface: &str) -> Result<String, String> {
     let entries = registry_entries()?;
     if surface == "core" {
         let mut output = format!(
-            "core: byte semantic identities · {}\n",
+            "core: exact domain identities D1–D11 · {}\n",
             public_denominator(&entries)
         );
         for (index, entry) in entries.iter().enumerate() {
@@ -267,7 +331,8 @@ pub(crate) fn render_names(surface: &str) -> Result<String, String> {
             }
             output.push_str(&entry.identity);
         }
-        output.push_str("\n\ncore показує machine handles; людські назви дивіться через :ім'я <ID>.");
+        output
+            .push_str("\n\ncore показує machine handles; людські назви дивіться через :ім'я <ID>.");
         return Ok(output);
     }
 
@@ -302,41 +367,38 @@ pub(crate) fn render_names(surface: &str) -> Result<String, String> {
 
 pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, String> {
     let entries = registry_entries()?;
-    let Some(entry) = find_entry(&entries, requested) else {
+    let matches = find_entries(&entries, requested);
+    if matches.is_empty() {
         return Ok(format!(
-            "«{requested}» не знайдено у byte-SID semantic registry; сире середовище перевіряється через (env)/(середовище)."
+        "«{requested}» не знайдено серед координат таблиць D1–D11; викличність з цього каталогу не випливає."
         ));
     };
 
+    if matches.len() > 1 {
+        let identities = matches
+            .iter()
+            .map(|entry| entry.identity.as_str())
+            .collect::<Vec<_>>()
+            .join(", ");
+        return Ok(format!(
+            "«{requested}» неоднозначне; уточніть домен: {identities}"
+        ));
+    }
+    let entry = matches[0];
+
     let mut output = format!(
-        "identity: {}\n  UK: {}\n  EN: {}\n  SA: {}",
+        "identity: {}\n  UK: {}\n  UKR: {}\n  EN: {}\n  SAN: {}\n  LISP: {}\n  SYM: {}",
         entry.identity,
         rendered_name(surface_name(entry, "ук")),
+        rendered_name(surface_name(entry, "укр")),
         rendered_name(surface_name(entry, "en")),
-        rendered_name(surface_name(entry, "sa")),
+        rendered_name(surface_name(entry, "san")),
+        rendered_name(surface_name(entry, "LISP")),
+        rendered_name(surface_name(entry, "sym")),
     );
-    if surface_name(entry, "sym").is_some() {
-        output.push_str("\n  SYM: ");
-        output.push_str(&rendered_name(surface_name(entry, "sym")));
-    }
     output.push_str("\n  current: ");
     output.push_str(surface);
 
-    if normalize_surface(surface) == "ук" {
-        if let Some(doc) = ukrainian_docs()?
-            .into_iter()
-            .find(|doc| doc.identity == entry.identity)
-        {
-            output.push_str("\n  категорія: ");
-            output.push_str(&doc.category);
-            output.push_str("\n  тип: ");
-            output.push_str(&doc.kind);
-            output.push_str("\n  виклик: ");
-            output.push_str(&doc.call);
-            output.push_str("\n  ");
-            output.push_str(&doc.description);
-        }
-    }
     Ok(output)
 }
 
@@ -345,40 +407,52 @@ mod tests {
     use super::*;
 
     #[test]
-    fn byte_sid_is_the_only_machine_key() {
+    fn domain_and_exact_bits_are_the_identity() {
         let entries = registry_entries().expect("byte registry");
-        for requested in ["00110111", "map", "відобразити", "āvartana"] {
-            assert_eq!(
-                find_entry(&entries, requested).map(|entry| entry.identity.as_str()),
-                Some("00110111")
+        for width in 1..=11 {
+            assert!(
+                entries
+                    .iter()
+                    .any(|entry| entry.identity.starts_with(&format!("D{width}:"))),
+                "missing D{width} rows"
             );
         }
+        assert_eq!(
+            entries
+                .iter()
+                .filter(|entry| entry.identity.starts_with("D11:"))
+                .count(),
+            43,
+            "D11 remains the ratified sparse 43-row test vocabulary"
+        );
+        assert_eq!(find_entries(&entries, "D3:010")[0].identity, "D3:010");
+        assert!(
+            find_entries(&entries, "010").is_empty(),
+            "bits alone are not global identity"
+        );
     }
 
     #[test]
-    fn plus_is_one_code_with_english_word_and_shared_symbol() {
-        // Власник, 2026-09-26: математичні функції мають англійські назви
-        // (Lisp 1.5 PLUS); символ `+` лишається спільним — це той самий код.
+    fn all_projection_columns_come_from_domain_tables() {
         let entries = registry_entries().expect("numeric registry");
-        let entry = find_entry(&entries, "+").expect("+ identity");
-        assert_eq!(entry.identity, "00001100");
-        assert_eq!(find_entry(&entries, "plus").map(|e| e.identity.as_str()), Some("00001100"));
-        assert_eq!(surface_name(entry, "en").and_then(|item| item.name.as_deref()), Some("plus"));
-        assert_eq!(surface_name(entry, "ук").and_then(|item| item.name.as_deref()), Some("додати"));
-        assert_eq!(surface_name(entry, "sa").and_then(|item| item.name.as_deref()), Some("yoga"));
-        assert_eq!(surface_name(entry, "sym").and_then(|item| item.name.as_deref()), Some("+"));
+        let entry = find_entries(&entries, "D3:010")[0];
+        assert_eq!(
+            surface_name(entry, "ук").and_then(|item| item.name.as_deref()),
+            Some("атом?")
+        );
+        assert_eq!(
+            surface_name(entry, "LISP").and_then(|item| item.name.as_deref()),
+            Some("ATOM")
+        );
+        assert_eq!(normalize_surface("sa"), "san");
     }
 
     #[test]
     fn repl_never_reports_a_human_spelling_as_identity() {
-        let output = render_name("ук", "map").expect("render map");
-        assert!(output.starts_with("identity: 00110111\n"));
-        assert!(!output.contains("identity: map"));
-
-        let plus = render_name("ук", "+").expect("render +");
-        assert!(plus.starts_with("identity: 00001100\n"));
-        assert!(plus.contains("EN: plus"));
-        assert!(plus.contains("SYM: +"));
+        let output = render_name("ук", "D3:010").expect("render D3 identity");
+        assert!(output.starts_with("identity: D3:010\n"));
+        assert!(output.contains("UK: атом?"));
+        assert!(output.contains("LISP: ATOM"));
     }
 
     // Included in the existing automatic CI "zig_linter_carrier" test filter:
@@ -388,18 +462,24 @@ mod tests {
     fn zig_linter_carrier_uk_docs_exact_bytes_and_sens_owned_parse() {
         let bytes = crate::zig_transport::uk_docs_source_bytes()
             .expect("Zig root ABI must return UK docs bytes");
-        let source = uk_docs_source_zig_only()
-            .expect("Rust must obtain UK docs only through Zig");
+        let source = uk_docs_source_zig_only().expect("Rust must obtain UK docs only through Zig");
         assert!(!bytes.is_empty(), "Zig must not return an empty asset");
-        assert_eq!(source.as_bytes(), bytes.as_slice(), "every byte must survive Zig ABI");
+        assert_eq!(
+            source.as_bytes(),
+            bytes.as_slice(),
+            "every byte must survive Zig ABI"
+        );
         // SENS owns the parser/identities; this is not semantic admission by Zig.
         let docs = ukrainian_docs().expect("SENS parses Zig-delivered documentation");
-        assert!(docs.iter().any(|doc| doc.identity == "00000001"),
-                "expected exact eight-bit documentation identity");
+        assert!(
+            docs.iter().any(|doc| doc.identity == "00000001"),
+            "expected exact eight-bit documentation identity"
+        );
         println!(
             "ZIG_UK_DOCS_CARRIER_PASS test_id=zig-uk-docs-exact-carry \
              layer=transport bytes={} semantic_authority=SENS \
-             semantic_admission=NOT_TESTED", bytes.len()
+             semantic_admission=NOT_TESTED",
+            bytes.len()
         );
     }
 
@@ -408,8 +488,10 @@ mod tests {
     fn zig_linter_carrier_uk_docs_refuses_without_zig() {
         let error = uk_docs_source_zig_only()
             .expect_err("Rust must not embed/read the SENS UK docs source");
-        assert!(error.contains("RUST_ZIG_ONLY: uk-docs requires Zig; no Rust source fallback"),
-                "unexpected denial: {error}");
+        assert!(
+            error.contains("RUST_ZIG_ONLY: uk-docs requires Zig; no Rust source fallback"),
+            "unexpected denial: {error}"
+        );
         println!(
             "ZIG_UK_DOCS_NO_FALLBACK_PASS test_id=zig-uk-docs-deny-no-zig \
              layer=transport semantic_authority=SENS"
@@ -417,16 +499,30 @@ mod tests {
     }
 
     #[test]
-    fn core_catalog_is_byte_sid() {
+    fn core_catalog_lists_domain_qualified_identities() {
         let output = render_names("core").expect("core catalog");
-        assert!(output.contains("00110111"));
-        assert!(output.contains("00001100"));
-        assert!(!output.contains(" · map"));
+        assert!(output.contains("D1:0"));
+        assert!(output.contains("D11:00000000000"));
+        assert!(!output.contains("byte semantic"));
     }
 
     #[test]
-    fn ratified_sanskrit_cond_spelling_is_visible() {
-        let output = render_name("sa", "anukrama").expect("cond");
-        assert!(output.starts_with("identity: 00000111\n"));
+    fn projection_spelling_resolves_only_when_unique() {
+        let entries = registry_entries().expect("domain registry");
+        let candidates = find_entries(&entries, "так");
+        let output = render_name("ук", "так").expect("ambiguity is user-visible");
+        assert_eq!(candidates.len(), 1);
+        assert!(output.starts_with("identity: D1:1\n"));
+    }
+
+    #[test]
+    fn repl_surface_catalog_projects_the_ratified_d11_table_row() {
+        let output = render_name("укр", "прочитати-вміст-файла").expect("D11 projection");
+        assert!(
+            output.starts_with("identity: D11:00000000000\n"),
+            "{output}"
+        );
+        assert!(output.contains("UKR: прочитати-вміст-файла"), "{output}");
+        assert!(output.contains("EN: read-file"), "{output}");
     }
 }

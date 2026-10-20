@@ -44,16 +44,6 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/persistent-vector.lisp");
     println!("cargo:rerun-if-changed=../../lib/time.lisp");
     println!("cargo:rerun-if-changed=../../lib/epistemic.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d1.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d2.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d3.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d4.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d5.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d6.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d7.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d8.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d9.lisp");
-    println!("cargo:rerun-if-changed=../../lib/domains/d10.lisp");
     println!("cargo:rerun-if-changed=../../lib/meta-eval.lisp");
     println!("cargo:rerun-if-changed=../../lib/repl-core.lisp");
     println!("cargo:rerun-if-changed=../../language-contract.lisp");

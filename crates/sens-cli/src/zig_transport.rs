@@ -167,37 +167,6 @@ pub fn repl_core_source_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(asset_ffi::sens_zig_repl_core_bytes_copy, "ZIG_SENS_REPL")
 }
 
-/// Copy ONE original ratified domain table through Zig by its physical width.
-/// The width selects an opaque file only; callability and surfaces belong to SENS.
-pub fn domain_table_source_bytes(width: u8) -> Result<Vec<u8>, String> {
-    version()?;
-    let required = unsafe {
-        asset_ffi::sens_zig_domain_table_bytes_copy(
-            width,
-            std::ptr::NonNull::<u8>::dangling().as_ptr(),
-            0,
-        )
-    };
-    if required <= 0 {
-        return Err(format!("ZIG_SENS_DOMAIN_SOURCE: width={width} rejected ({required})"));
-    }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_SENS_DOMAIN_SOURCE: source size overflow".to_string())?;
-    if len > 8 * 1024 * 1024 {
-        return Err("ZIG_SENS_DOMAIN_SOURCE: source exceeds host byte bound".into());
-    }
-    let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_domain_table_bytes_copy(width, bytes.as_mut_ptr(), len)
-    };
-    if copied != required {
-        return Err(format!(
-            "ZIG_SENS_DOMAIN_SOURCE: width={width} expected={required} actual={copied}"
-        ));
-    }
-    Ok(bytes)
-}
-
 /// Механічний інваріант SENS ↔ Zig: кількість, ширина, біти.
 /// Не визначає значення функцій і не замінює SENS-семантичний оракул.
 /// Retrieves opaque source bytes through the sterile Zig C ABI.
@@ -841,33 +810,6 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
     output.truncate(len as usize);
     let words = decode_legacy_t5_words(&output)?;
     encode_t5_direct(&words)
-}
-
-#[cfg(test)]
-mod zig_repl_asset_bridge_tests {
-    use super::{domain_table_source_bytes, repl_core_source_bytes};
-
-    #[test]
-    fn zig_hands_sens_repl_and_all_ten_domain_tables_to_host_as_opaque_bytes() {
-        let repl = repl_core_source_bytes().expect("Zig must provide SENS REPL bytes");
-        assert!(!repl.is_empty());
-        assert_eq!(repl, repl_core_source_bytes().expect("stable SENS REPL source"));
-
-        for width in 1u8..=10u8 {
-            let source = domain_table_source_bytes(width)
-                .unwrap_or_else(|err| panic!("physical D{width} source missing: {err}"));
-            assert!(!source.is_empty(), "empty physical D{width} source");
-            assert_eq!(
-                source,
-                domain_table_source_bytes(width).expect("repeat same Zig table bytes"),
-                "Zig table transport changed bytes for D{width}",
-            );
-        }
-
-        // Refuse out-of-contract widths instead of manufacturing a host table.
-        assert!(domain_table_source_bytes(0).is_err());
-        assert!(domain_table_source_bytes(11).is_err());
-    }
 }
 
 #[cfg(test)]

@@ -808,7 +808,7 @@ mod tests {
         let source = forward_surface_source().expect("forward source via Zig C ABI");
         let bytes = crate::zig_transport::forward_source_bytes().expect("second Zig C byte copy");
         assert_eq!(source.as_bytes(), bytes.as_slice(), "ZIG_FORWARD_CARRIER exact byte parity");
-        assert!(source.starts_with("; LEGACY_MIGRATION_DEBT"), "wrong SENS source asset");
+        assert!(source.starts_with("; Чинний рушій прямого виведення СЕНС:"), "wrong SENS source asset");
         println!("ZIG_FORWARD_CARRIER_PASS test_id=zig-forward-exact-carry layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
     }
 
@@ -826,7 +826,7 @@ mod tests {
         let source = unify_surface_source().expect("Zig exact lib/unify.lisp bytes");
         let copied = crate::zig_transport::unify_source_bytes().expect("Zig copied original source");
         assert_eq!(source.as_bytes(), copied.as_slice(), "ZIG_UNIFY_CARRIER byte parity");
-        assert!(source.starts_with("; A small symbolic-AI primitive"), "wrong unify asset");
+        assert!(source.starts_with("; Уніфікація зіставляє структури"), "wrong unify asset");
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -862,8 +862,8 @@ mod tests {
         let source = ukr_surface_source().expect("real Zig full Ukrainian bytes");
         let bytes = crate::zig_transport::ukr_surface_bytes().expect("second Zig ABI copy");
         assert_eq!(source.as_bytes(), bytes.as_slice(), "UKR original byte parity");
-        assert!(source.starts_with("; Повна українська peer-поверхня"), "wrong source");
-        assert!(source.contains("canonical peer namespace"), "truncated source");
+        assert!(source.starts_with("; Повна українська проєкція"), "wrong source");
+        assert!(source.contains("рівноправною мовною поверхнею"), "truncated source");
         println!("ZIG_UKR_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
     }
 
@@ -941,9 +941,9 @@ mod tests {
         assert_eq!(ReplSurface::parse("ukr"), Some(ReplSurface::UkrainianFull));
         assert_ne!(ReplSurface::Ukrainian.code(), ReplSurface::UkrainianFull.code());
         assert!(
-            surface_catalog::render_name("укр", "порожній-текст?")
+            surface_catalog::render_name("укр", "D6:101000")
                 .expect("UKR registry lookup")
-                .starts_with("identity: 00111100")
+                .starts_with("identity: D6:101000")
         );
     }
 
@@ -956,26 +956,27 @@ mod tests {
         assert!(en.contains("surface en:"));
         assert!(uk.contains("surface ук:"));
         assert!(ukr.contains("surface укр:"));
-        assert!(sa.contains("surface sa:"));
+        assert!(sa.contains("surface san:"));
     }
 
     #[test]
     fn one_name_help_resolves_across_en_uk_sa() {
-        for requested in ["map", "відобразити", "āvartana"] {
-            let help = render_surface_name(ReplSurface::Ukrainian, requested).expect("name help");
-            // One SENS code, every surface; ft/2 carries no per-surface status.
-            assert!(help.contains("identity: 00110111"));
-            assert!(help.contains("EN: map"));
-            assert!(help.contains("UK: відобразити"));
-            assert!(help.contains("SA: āvartana"));
-        }
+        let help = render_surface_name(ReplSurface::Ukrainian, "D6:101000").expect("name help");
+        assert!(help.contains("identity: D6:101000"));
+        assert!(help.contains("EN: map"));
+        assert!(help.contains("UK: відобразити"));
+        assert!(help.contains("SAN: āvartana"));
+        assert!(render_surface_name(ReplSurface::Ukrainian, "map")
+            .expect("ambiguous map is described")
+            .contains("неоднозначне"));
     }
 
     #[test]
-    fn trilingual_status_is_measured_not_claimed() {
+    fn projection_status_reports_measured_table_coverage() {
         let status = render_surface_status().expect("surface status");
-        assert!(status.contains("trilingual present: 124/255"));
-        assert!(status.contains("release parity: OPEN"));
+        assert!(status.contains("Проєкції таблиць D1–D11"));
+        assert!(status.contains("доменні координати:"));
+        assert!(status.contains("rows with all four human projections:"));
     }
 
     #[test]
