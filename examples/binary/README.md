@@ -1,6 +1,6 @@
 # Pure-binary runnable SENS specimens — D1/D2/D3/D4/D7
 
-The files in this directory are **not human Lisp syntax**. `d7-first-program.lisp`, `d3-cond-program.bits`, `d3-primitives-program.bits` and `d5-label-recursion.bits`, `d5-label-copy.bits` and `d5-label-map.bits` contain only exact-width bit words separated by whitespace. Every payload
+The files in this directory are **not human Lisp syntax**. `d7-first-program.bits`, `d3-cond-program.bits`, `d3-primitives-program.bits` and `d5-label-recursion.bits`, `d5-label-copy.bits` and `d5-label-map.bits` contain only exact-width bit words separated by whitespace. Every payload
 word in that source consists of only `0` and `1`, with ASCII whitespace
 separating **exact-width** domain words. It contains a D4 definition,
 a D2-framed D7 Text7 binding, a D4 lambda, an exact D1 return value, and a

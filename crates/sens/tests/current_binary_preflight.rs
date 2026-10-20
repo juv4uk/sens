@@ -115,7 +115,7 @@ fn human_names_and_nonbinary_tokens_never_enter_canonical_source() {
 
 #[test]
 fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
-    let source = include_str!("../../../examples/binary-language/current-cond-reference.lisp");
+    let source = include_str!("../../../examples/binary-language/current-cond-reference.bits");
     let words = source.split_whitespace().collect::<Vec<_>>();
     assert!(!words.is_empty());
     assert!(

@@ -8,7 +8,7 @@ use sens::{
 };
 
 const BINARY_PROGRAM: &str =
-    include_str!("../../../examples/binary/d7-first-program.lisp");
+    include_str!("../../../examples/binary/d7-first-program.bits");
 const D3_COND_PROGRAM: &str =
     include_str!("../../../examples/binary/d3-cond-program.bits");
 const D3_PRIMITIVES_PROGRAM: &str =
