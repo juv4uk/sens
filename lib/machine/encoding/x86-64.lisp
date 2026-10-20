@@ -3335,42 +3335,42 @@
            (01010 144 код-умови)
            (x86-encode-modrm 3 0 (x86-low3 код))))))))
 
-(визначити x86-encode-seto-r8 (0010 (register) (x86-encode-setcc-r8 0 register)))
-(визначити x86-encode-setno-r8 (0010 (register) (x86-encode-setcc-r8 1 register)))
-(визначити x86-encode-setb-r8 (0010 (register) (x86-encode-setcc-r8 2 register)))
-(визначити x86-encode-setc-r8 (0010 (register) (x86-encode-setcc-r8 2 register)))
-(визначити x86-encode-setnb-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
-(визначити x86-encode-setnc-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
-(визначити x86-encode-setae-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
-(визначити x86-encode-setz-r8 (0010 (register) (x86-encode-setcc-r8 4 register)))
-(визначити x86-encode-sete-r8 (0010 (register) (x86-encode-setcc-r8 4 register)))
-(визначити x86-encode-setnz-r8 (0010 (register) (x86-encode-setcc-r8 5 register)))
-(визначити x86-encode-setne-r8 (0010 (register) (x86-encode-setcc-r8 5 register)))
-(визначити x86-encode-setbe-r8 (0010 (register) (x86-encode-setcc-r8 6 register)))
-(визначити x86-encode-setna-r8 (0010 (register) (x86-encode-setcc-r8 6 register)))
-(визначити x86-encode-setnbe-r8 (0010 (register) (x86-encode-setcc-r8 7 register)))
-(визначити x86-encode-seta-r8 (0010 (register) (x86-encode-setcc-r8 7 register)))
-(визначити x86-encode-sets-r8 (0010 (register) (x86-encode-setcc-r8 8 register)))
-(визначити x86-encode-setns-r8 (0010 (register) (x86-encode-setcc-r8 9 register)))
-(визначити x86-encode-setp-r8 (0010 (register) (x86-encode-setcc-r8 #d10 register)))
-(визначити x86-encode-setpe-r8 (0010 (register) (x86-encode-setcc-r8 #d10 register)))
-(визначити x86-encode-setnp-r8 (0010 (register) (x86-encode-setcc-r8 #d11 register)))
-(визначити x86-encode-setpo-r8 (0010 (register) (x86-encode-setcc-r8 #d11 register)))
-(визначити x86-encode-setl-r8 (0010 (register) (x86-encode-setcc-r8 12 register)))
-(визначити x86-encode-setnge-r8 (0010 (register) (x86-encode-setcc-r8 12 register)))
-(визначити x86-encode-setnl-r8 (0010 (register) (x86-encode-setcc-r8 13 register)))
-(визначити x86-encode-setge-r8 (0010 (register) (x86-encode-setcc-r8 13 register)))
-(визначити x86-encode-setle-r8 (0010 (register) (x86-encode-setcc-r8 14 register)))
-(визначити x86-encode-setng-r8 (0010 (register) (x86-encode-setcc-r8 14 register)))
-(визначити x86-encode-setnle-r8 (0010 (register) (x86-encode-setcc-r8 15 register)))
-(визначити x86-encode-setg-r8 (0010 (register) (x86-encode-setcc-r8 15 register)))
+(визначити x86-encode-seto-r8 (0010 (регістр) (x86-encode-setcc-r8 0 регістр)))
+(визначити x86-encode-setno-r8 (0010 (регістр) (x86-encode-setcc-r8 1 регістр)))
+(визначити x86-encode-setb-r8 (0010 (регістр) (x86-encode-setcc-r8 2 регістр)))
+(визначити x86-encode-setc-r8 (0010 (регістр) (x86-encode-setcc-r8 2 регістр)))
+(визначити x86-encode-setnb-r8 (0010 (регістр) (x86-encode-setcc-r8 3 регістр)))
+(визначити x86-encode-setnc-r8 (0010 (регістр) (x86-encode-setcc-r8 3 регістр)))
+(визначити x86-encode-setae-r8 (0010 (регістр) (x86-encode-setcc-r8 3 регістр)))
+(визначити x86-encode-setz-r8 (0010 (регістр) (x86-encode-setcc-r8 4 регістр)))
+(визначити x86-encode-sete-r8 (0010 (регістр) (x86-encode-setcc-r8 4 регістр)))
+(визначити x86-encode-setnz-r8 (0010 (регістр) (x86-encode-setcc-r8 5 регістр)))
+(визначити x86-encode-setne-r8 (0010 (регістр) (x86-encode-setcc-r8 5 регістр)))
+(визначити x86-encode-setbe-r8 (0010 (регістр) (x86-encode-setcc-r8 6 регістр)))
+(визначити x86-encode-setna-r8 (0010 (регістр) (x86-encode-setcc-r8 6 регістр)))
+(визначити x86-encode-setnbe-r8 (0010 (регістр) (x86-encode-setcc-r8 7 регістр)))
+(визначити x86-encode-seta-r8 (0010 (регістр) (x86-encode-setcc-r8 7 регістр)))
+(визначити x86-encode-sets-r8 (0010 (регістр) (x86-encode-setcc-r8 8 регістр)))
+(визначити x86-encode-setns-r8 (0010 (регістр) (x86-encode-setcc-r8 9 регістр)))
+(визначити x86-encode-setp-r8 (0010 (регістр) (x86-encode-setcc-r8 #d10 регістр)))
+(визначити x86-encode-setpe-r8 (0010 (регістр) (x86-encode-setcc-r8 #d10 регістр)))
+(визначити x86-encode-setnp-r8 (0010 (регістр) (x86-encode-setcc-r8 #d11 регістр)))
+(визначити x86-encode-setpo-r8 (0010 (регістр) (x86-encode-setcc-r8 #d11 регістр)))
+(визначити x86-encode-setl-r8 (0010 (регістр) (x86-encode-setcc-r8 12 регістр)))
+(визначити x86-encode-setnge-r8 (0010 (регістр) (x86-encode-setcc-r8 12 регістр)))
+(визначити x86-encode-setnl-r8 (0010 (регістр) (x86-encode-setcc-r8 13 регістр)))
+(визначити x86-encode-setge-r8 (0010 (регістр) (x86-encode-setcc-r8 13 регістр)))
+(визначити x86-encode-setle-r8 (0010 (регістр) (x86-encode-setcc-r8 14 регістр)))
+(визначити x86-encode-setng-r8 (0010 (регістр) (x86-encode-setcc-r8 14 регістр)))
+(визначити x86-encode-setnle-r8 (0010 (регістр) (x86-encode-setcc-r8 15 регістр)))
+(визначити x86-encode-setg-r8 (0010 (регістр) (x86-encode-setcc-r8 15 регістр)))
 
 ; MOVZX r64, r8: opcode 0x0F 0xB6, ModRM mod=3, reg=dest, rm=src.
 ; REX.W=1 extends the 8-bit source into the full 64-bit destination register.
 (визначити x86-encode-movzx-r64-r8
-  (функція (destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
         15
@@ -3380,9 +3380,9 @@
 ; IMUL r64, r64: two-operand signed multiply, opcode 0x0F 0xAF.
 ; Destination receives the low 64 bits of the signed product.
 (визначити x86-encode-imul-r64-r64
-  (функція (destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
         15
@@ -3399,53 +3399,53 @@
 ; Group 3 opcode 0xF7 /7, ModRM mod=3, reg=7, rm=src.
 ; Quotient is stored in RAX, remainder in RDX.
 (визначити x86-encode-idiv-r64
-  (функція (source)
+  (функція (джерело)
     ((0010 (src-code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 src-code))
         247
-        (x86-encode-modrm 3 7 (x86-low3 src-code)))) (x86-reg-code source))))
+        (x86-encode-modrm 3 7 (x86-low3 src-code)))) (x86-reg-code джерело))))
 
 ; CMOVcc r64, r64: conditional move, opcode 0x0F 0x40+cc.
 ; Moves source to destination if condition code is satisfied.
 (визначити x86-encode-cmovcc-r64-r64
-  (функція (condition-code destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (код-умови призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
         15
-        (01010 64 condition-code)
+        (01010 64 код-умови)
         (x86-encode-modrm 3 (x86-low3 dest-code) (x86-low3 src-code))))))
 
-(визначити x86-encode-cmovo-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 0 dest src)))
-(визначити x86-encode-cmovno-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 1 dest src)))
-(визначити x86-encode-cmovb-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 2 dest src)))
-(визначити x86-encode-cmovc-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 2 dest src)))
-(визначити x86-encode-cmovnb-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
-(визначити x86-encode-cmovnc-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
-(визначити x86-encode-cmovae-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
-(визначити x86-encode-cmovz-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 4 dest src)))
-(визначити x86-encode-cmove-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 4 dest src)))
-(визначити x86-encode-cmovnz-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 5 dest src)))
-(визначити x86-encode-cmovne-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 5 dest src)))
-(визначити x86-encode-cmovbe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 6 dest src)))
-(визначити x86-encode-cmovna-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 6 dest src)))
-(визначити x86-encode-cmovnbe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 7 dest src)))
-(визначити x86-encode-cmova-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 7 dest src)))
-(визначити x86-encode-cmovs-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 8 dest src)))
-(визначити x86-encode-cmovns-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 9 dest src)))
-(визначити x86-encode-cmovp-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d10 dest src)))
-(визначити x86-encode-cmovpe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d10 dest src)))
-(визначити x86-encode-cmovnp-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d11 dest src)))
-(визначити x86-encode-cmovpo-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d11 dest src)))
-(визначити x86-encode-cmovl-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 12 dest src)))
-(визначити x86-encode-cmovnge-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 12 dest src)))
-(визначити x86-encode-cmovnl-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 13 dest src)))
-(визначити x86-encode-cmovge-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 13 dest src)))
-(визначити x86-encode-cmovle-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 14 dest src)))
-(визначити x86-encode-cmovng-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 14 dest src)))
-(визначити x86-encode-cmovnle-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 15 dest src)))
-(визначити x86-encode-cmovg-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 15 dest src)))
+(визначити x86-encode-cmovo-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 0 dest джерело)))
+(визначити x86-encode-cmovno-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 1 dest джерело)))
+(визначити x86-encode-cmovb-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 2 dest джерело)))
+(визначити x86-encode-cmovc-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 2 dest джерело)))
+(визначити x86-encode-cmovnb-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 3 dest джерело)))
+(визначити x86-encode-cmovnc-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 3 dest джерело)))
+(визначити x86-encode-cmovae-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 3 dest джерело)))
+(визначити x86-encode-cmovz-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 4 dest джерело)))
+(визначити x86-encode-cmove-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 4 dest джерело)))
+(визначити x86-encode-cmovnz-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 5 dest джерело)))
+(визначити x86-encode-cmovne-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 5 dest джерело)))
+(визначити x86-encode-cmovbe-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 6 dest джерело)))
+(визначити x86-encode-cmovna-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 6 dest джерело)))
+(визначити x86-encode-cmovnbe-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 7 dest джерело)))
+(визначити x86-encode-cmova-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 7 dest джерело)))
+(визначити x86-encode-cmovs-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 8 dest джерело)))
+(визначити x86-encode-cmovns-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 9 dest джерело)))
+(визначити x86-encode-cmovp-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 #d10 dest джерело)))
+(визначити x86-encode-cmovpe-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 #d10 dest джерело)))
+(визначити x86-encode-cmovnp-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 #d11 dest джерело)))
+(визначити x86-encode-cmovpo-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 #d11 dest джерело)))
+(визначити x86-encode-cmovl-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 12 dest джерело)))
+(визначити x86-encode-cmovnge-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 12 dest джерело)))
+(визначити x86-encode-cmovnl-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 13 dest джерело)))
+(визначити x86-encode-cmovge-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 13 dest джерело)))
+(визначити x86-encode-cmovle-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 14 dest джерело)))
+(визначити x86-encode-cmovng-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 14 dest джерело)))
+(визначити x86-encode-cmovnle-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 15 dest джерело)))
+(визначити x86-encode-cmovg-r64-r64 (0010 (dest джерело) (x86-encode-cmovcc-r64-r64 15 dest джерело)))
 
 ; NOP: opcode 0x90.
 (визначити x86-encode-nop
@@ -3454,20 +3454,20 @@
 
 ; TEST r/m64, imm32: Group 3 opcode 0xF7 /0 id, ModRM mod=3, reg=0, rm=dest.
 (визначити x86-encode-test-r64-imm32
-  (функція (destination immediate)
+  (функція (призначення безпосереднє-значення)
     ((0010 (code) (1111
         (1110
           (x86-encode-rex 1 0 0 (x86-high1 code))
           247
           (x86-encode-modrm 3 0 (x86-low3 code)))
-        (x86-imm32-bytes immediate))) (x86-reg-code destination))))
+        (x86-imm32-bytes безпосереднє-значення))) (x86-reg-code призначення))))
 
 ; BT r/m64, r64: opcode 0x0F 0xA3 /r. ModRM reg=index, rm=base.
 ; Sets Carry Flag (CF) to the value of the bit at the given index.
 (визначити x86-encode-bt-r64-r64
-  (функція (base index)
-    (нехай ((base-code (x86-reg-code base))
-          (index-code (x86-reg-code index)))
+  (функція (база індекс)
+    (нехай ((base-code (x86-reg-code база))
+          (index-code (x86-reg-code індекс)))
       (1110
         (x86-encode-rex 1 (x86-high1 index-code) 0 (x86-high1 base-code))
         15
@@ -3476,35 +3476,35 @@
 
 ; Group 8 bit operations with imm8: opcode 0x0F 0xBA /reg ib.
 (визначити x86-encode-group8-r64-imm8
-  (функція (opcode-extension register bit-index)
+  (функція (розширення-коду-операції регістр номер-біта)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         15
         186
-        (x86-encode-modrm 3 opcode-extension (x86-low3 code))
-        bit-index)) (x86-reg-code register))))
+        (x86-encode-modrm 3 розширення-коду-операції (x86-low3 code))
+        номер-біта)) (x86-reg-code регістр))))
 
 (визначити x86-encode-bt-r64-imm8
-  (функція (register bit-index)
-    (x86-encode-group8-r64-imm8 4 register bit-index)))
+  (функція (регістр номер-біта)
+    (x86-encode-group8-r64-imm8 4 регістр номер-біта)))
 
 (визначити x86-encode-bts-r64-imm8
-  (функція (register bit-index)
-    (x86-encode-group8-r64-imm8 5 register bit-index)))
+  (функція (регістр номер-біта)
+    (x86-encode-group8-r64-imm8 5 регістр номер-біта)))
 
 (визначити x86-encode-btr-r64-imm8
-  (функція (register bit-index)
-    (x86-encode-group8-r64-imm8 6 register bit-index)))
+  (функція (регістр номер-біта)
+    (x86-encode-group8-r64-imm8 6 регістр номер-біта)))
 
 (визначити x86-encode-btc-r64-imm8
-  (функція (register bit-index)
-    (x86-encode-group8-r64-imm8 7 register bit-index)))
+  (функція (регістр номер-біта)
+    (x86-encode-group8-r64-imm8 7 регістр номер-біта)))
 
 ; MOVSX r64, r/m8: opcode 0x0F 0xBE /r. Sign-extend 8-bit to 64-bit.
 (визначити x86-encode-movsx-r64-r8
-  (функція (destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
         15
@@ -3513,9 +3513,9 @@
 
 ; MOVSXD r64, r/m32: opcode 0x63 /r. Sign-extend 32-bit to 64-bit.
 (визначити x86-encode-movsxd-r64-r32
-  (функція (destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
         99
@@ -3523,9 +3523,9 @@
 
 ; POPCNT r64, r/m64: opcode 0xF3 0x0F 0xB8 /r. Count set bits (population count).
 (визначити x86-encode-popcnt-r64-r64
-  (функція (destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         243
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3535,9 +3535,9 @@
 
 ; TZCNT r64, r/m64: opcode 0xF3 0x0F 0xBC /r. Count trailing zeros.
 (визначити x86-encode-tzcnt-r64-r64
-  (функція (destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         243
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3547,9 +3547,9 @@
 
 ; BSF r64, r/m64: opcode 0x0F 0xBC /r. Bit Scan Forward (first set bit).
 (визначити x86-encode-bsf-r64-r64
-  (функція (destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
         15
@@ -3558,9 +3558,9 @@
 
 ; BSR r64, r/m64: opcode 0x0F 0xBD /r. Bit Scan Reverse (last set bit).
 (визначити x86-encode-bsr-r64-r64
-  (функція (destination source)
-    (нехай ((dest-code (x86-reg-code destination))
-          (src-code (x86-reg-code source)))
+  (функція (призначення джерело)
+    (нехай ((dest-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
         15
@@ -3569,26 +3569,26 @@
 
 ; BSWAP r64: opcode 0x0F (0xC8 + rd). Byte Swap (reverse byte order).
 (визначити x86-encode-bswap-r64
-  (функція (register)
+  (функція (регістр)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         15
-        (01010 200 (x86-low3 code)))) (x86-reg-code register))))
+        (01010 200 (x86-low3 code)))) (x86-reg-code регістр))))
 
 ; ROL / ROR r64, imm8: group-2 opcode 0xC1, /0 for ROL, /1 for ROR.
 (визначити x86-encode-rol-r64-imm8
-  (функція (register count)
-    (x86-encode-shift-r64-imm8 0 register count)))
+  (функція (регістр кількість)
+    (x86-encode-shift-r64-imm8 0 регістр кількість)))
 
 (визначити x86-encode-ror-r64-imm8
-  (функція (register count)
-    (x86-encode-shift-r64-imm8 1 register count)))
+  (функція (регістр кількість)
+    (x86-encode-shift-r64-imm8 1 регістр кількість)))
 
 ; XCHG r64, r64: opcode 0x87 /r. Exchange register values.
 (визначити x86-encode-xchg-r64-r64
-  (функція (dst src)
-    (нехай ((dst-code (x86-reg-code dst))
-          (src-code (x86-reg-code src)))
+  (функція (призначення джерело)
+    (нехай ((dst-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110
         (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
         135
@@ -3913,12 +3913,12 @@
         (x86-encode-modrm 3 mechanism-extension (x86-low3 code))))))
 
 (визначити x86-encode-rdrand-r64
-  (функція (register)
-    (x86-encode-0f-c7-group-r64 #b110 register)))
+  (функція (регістр)
+    (x86-encode-0f-c7-group-r64 #b110 регістр)))
 
 (визначити x86-encode-rdseed-r64
-  (функція (register)
-    (x86-encode-0f-c7-group-r64 #b111 register)))
+  (функція (регістр)
+    (x86-encode-0f-c7-group-r64 #b111 регістр)))
 
 ; RDTSC: opcode 0x0F 0x31
 (визначити x86-encode-rdtsc
@@ -3927,9 +3927,9 @@
 
 ; CMPXCHG r64, r64: opcode REX.W 0x0F 0xB1 /r
 (визначити x86-encode-cmpxchg-r64-r64
-  (функція (dst src)
-    (нехай ((dst-code (x86-reg-code dst))
-          (src-code (x86-reg-code src)))
+  (функція (призначення джерело)
+    (нехай ((dst-code (x86-reg-code призначення))
+          (src-code (x86-reg-code джерело)))
       (1110 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
             15 177 (x86-encode-modrm 3 (x86-low3 src-code) (x86-low3 dst-code))))))
 
