@@ -247,6 +247,38 @@ class AuditT5PairsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "canonical T5M"):
             require_changed_views(report, ["lib/legacy.sens"])
 
+    def test_source_census_exposes_lisp_without_sens_and_release_gate_blocks(self):
+        self.pair("lib/paired", "10 01\n", ["10", "01"])
+        (self.root / "lib/unpaired.lisp").write_text(
+            "(визначити відсутній так)\n", encoding="utf-8"
+        )
+        inventory = self.audit(strict=True)
+        self.assertEqual(inventory["status"], "EXACT_BINARY_PAIRS")
+        self.assertEqual(inventory["summary"]["lisp_files"], 2)
+        self.assertEqual(inventory["summary"]["lisp_with_sens"], 1)
+        self.assertEqual(inventory["summary"]["lisp_without_sens"], 1)
+        self.assertEqual(inventory["lisp_without_sens"], ["lib/unpaired.lisp"])
+        gated = inspect(self.root, include_untracked=True,
+                        strict_semantic=True, require_complete_sources=True)
+        self.assertEqual(gated["status"], "BLOCKED")
+        self.assertEqual(main([str(self.root), "--include-untracked",
+                               "--require-complete-sources"]), 2)
+        self.assertEqual(main([str(self.root), "--include-untracked",
+                               "--require-complete-sources", "--inventory-only"]), 0)
+
+    def test_no_sens_files_does_not_hide_unpaired_lisp(self):
+        (self.root / "only.lisp").write_text(
+            "(визначити річ так)\n", encoding="utf-8"
+        )
+        inventory = self.audit()
+        self.assertEqual(inventory["status"], "NO_FILES")
+        self.assertEqual(inventory["summary"]["lisp_without_sens"], 1)
+        self.assertEqual(inventory["lisp_without_sens"], ["only.lisp"])
+        strict = inspect(self.root, include_untracked=True,
+                         require_complete_sources=True)
+        self.assertEqual(strict["status"], "BLOCKED")
+        self.assertTrue(strict["empty_is_not_certification"])
+
     def test_cli_generates_read_only_report_without_overwrite(self):
         self.pair("p", "10 01\n", ["10", "01"])
         report = self.root / "report.json"
