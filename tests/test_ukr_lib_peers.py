@@ -223,6 +223,39 @@ class LibUkrPeerTests(unittest.TestCase):
         self.assertIn("(як-є deftemplate)", src)
         self.assertIn("(як-є deffacts)", src)
 
+    def test_retired_mixed_clips_d9_bindings_remain_canonical_ukrainian(self):
+        """Не відновлювати 19 латинських обгорток D9 без потреби."""
+        src = (ROOT / "lib/clips-import.lisp").read_text(encoding="utf-8")
+        ladder = (ROOT / "lib/domains/d9.lisp").read_text(encoding="utf-8")
+        defs = definitions(src)
+        retired = (
+            ("clips-deftemplate-форма?", "кліпс-визначити-шаблон-форма?"),
+            ("clips-слот-імена", "кліпс-слот-імена"),
+            ("clips-deftemplate-слоти", "кліпс-визначити-шаблон-слоти"),
+            ("clips-шаблони-з-форми", "кліпс-шаблони-з-форми"),
+            ("clips-шаблон-слот-порядок", "кліпс-шаблон-слот-порядок"),
+            ("clips-перетворити-шаблон", "кліпс-перетворити-шаблон"),
+            ("clips-перетворити-шаблон-список", "кліпс-перетворити-шаблон-список"),
+            ("clips-факт-клауза", "кліпс-факт-клауза"),
+            ("clips-факти-клаузи", "кліпс-факти-клаузи"),
+            ("clips-deffacts-клаузи", "кліпс-визначити-факти-клаузи"),
+            ("clips-змінна?", "кліпс-змінна?"),
+            ("clips-перетворити-змінні", "кліпс-перетворити-змінні"),
+            ("clips-deftemplate-ім'я", "кліпс-визначити-шаблон-ім'я"),
+            ("clips-змінна-терм", "кліпс-змінна-терм"),
+            ("clips-defrule-клаузи", "кліпс-визначити-правило-клаузи"),
+            ("clips-форма-клаузи", "кліпс-форма-клаузи"),
+            ("clips-імпорт-форми", "кліпс-імпорт-форми"),
+            ("clips-імпорт", "кліпс-імпорт"),
+            ("clips-імпорт-файл", "кліпс-імпорт-файл"),
+        )
+        self.assertEqual(len(retired), 19)
+        for obsolete, canonical in retired:
+            with self.subTest(obsolete=obsolete):
+                self.assertNotIn(obsolete, defs)
+                self.assertIn("(визначити " + canonical, src)
+                self.assertIn("(ук " + canonical + ")", ladder)
+
     def test_native_clips_calls_use_full_ukrainian_surface(self):
         """Код випробувань використовує первинні голови, а не clips-* псевдоніми.
 
