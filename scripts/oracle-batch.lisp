@@ -6,7 +6,7 @@
 ; Обидва файли обходимо синхронно. Протокольні назви полів, адреса,
 ; формат запиту та вихідні позначки не перекладаються.
 ;
-; Запуск: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp
+; Запуск: sens scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp
 ;
 ; Початковий текст виразу передаємо без повторного синтаксичного читання:
 ; приклади переповнення чисел можуть не пройти локальний читач.
@@ -72,7 +72,7 @@
     "oracle-results.lisp — результати oracle-eval для кожного прикладу tests/fixtures/inventory.lisp через канонічний TCP-оракул :9999; зв'язок забезпечує сталий F-ID."))
 (друкувати
   (сполучити (як-є generated)
-    "Запуск: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
+    "Запуск: sens scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
 
 (обробити-пару-прикладів
   (вибрати-лише-приклади (читати-всі (читати-файл "tests/fixtures/inventory.lisp")))

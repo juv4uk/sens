@@ -1,7 +1,7 @@
-;; A1 pilot FINAL — per-program symbol extractor (single-line forms).
-;; Usage (з кореня fpga-lisp):
-;;   my-lisp scripts/program-symbol-table.lisp bootstrap_add_demo.asm fpga/asm/constants.inc
-;; Вивід: count, потім "<id> <name>" на рядок.
+;; A1 pilot FINAL — пер-програмний витягувач символів (однорядкові форми).
+;; Запуск із кореня fpga-lisp:
+;;   sens scripts/program-symbol-table.lisp bootstrap_add_demo.asm fpga/asm/constants.inc
+;; Вивід: кількість, потім "<id> <name>" на рядок.
 
 (визначити ознака-порожнього (як-є ()))
 
