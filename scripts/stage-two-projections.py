@@ -26,7 +26,10 @@ from verify_uk_t5_triplet import (  # noqa: E402
     ProjectionBlocked, canonical_uk_from_words, project_current_uk, three_pass,
 )
 
-BITS = re.compile(r"[01]{1,11}\Z")
+# Розпізнаємо лише дозволені ширини слів: D1–D10 та математичні D24+.
+# D11 є каталогом пропозицій, не виконавчою тотожністю.
+# Це лексична межа, не доказ домену, механізму чи семантики.
+BITS = re.compile(r"(?:[01]{1,10}|[01]{24,})\Z")
 
 
 def digest(data: bytes) -> str:
