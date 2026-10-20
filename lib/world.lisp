@@ -431,9 +431,9 @@
 ;; Імпорт пакетів завершує міграцію засобів запису: перевірку та облік версій,
 ;; розбір конфліктів і атомарний перехід передано імпортеру Світу, що оперує лише даними; журнал
 ;; перевизначається лише для пакетів зі станом accepted.
-;; Der Paketimport schließt die Writer-Migration ab: Prüfung, Versionierung,
-;; Konflikte und atomarer Übergang liegen beim datenreinen World-Importer; nur
-;; ein akzeptiertes Ergebnis bindet das Journal neu.
+;; Імпорт пакета завершує міграцію письменника: перевірка, версіювання,
+;; конфлікти й атомарний перехід лежать на чисто-даних імпортері світу; лише
+;; прийнятий результат переприв'язує журнал.
 (визначити імпортувати-пакет-знань
   (макрос
     (функція (пакет)
@@ -524,10 +524,10 @@
 ;; структурно рівні історії — той самий семантичний світ. `world-branch-diff`
 ;; показує спільну базу та обидві хронологічні дельти.
 ;;
-;; Der Zweigvergleich endet vor einer Merge-Policy. Beide Geschichten werden
-;; auf gleiche Tiefe gebracht und gemeinsam bis zum gleichen Vorfahren verfolgt.
-;; Bei unveränderlichen Werten sind strukturell gleiche Geschichten dieselbe
-;; semantische Welt. `world-branch-diff` zeigt Basis und beide Zeitdeltas.
+;; Порівняння гілок завершується перед політикою злиття. Обидві історії
+;; зводяться до однакової глибини й спільно простежуються до спільного предка.
+;; При незмінних значеннях структурно однакові історії — це той самий
+;; семантичний світ. `world-branch-diff` показує базу й обидві часові дельти.
 (визначити піднятись-ланцюгом-світу-до-заданої-глибини
   (функція (світ поточна-глибина цільова-глибина)
     (за-умовою
@@ -602,12 +602,12 @@
 ;; охоплює весь журнал подій і metadata; parent не дублюється рекурсивно.
 ;; Це точний ключ, не криптографічний digest; майбутній SHA лише стисне ключ.
 ;;
-;; Inhaltsidentität beginnt mit einer kanonischen Adresse statt einem
-;; voreiligen Hash-Primitiv. `write-to-string` ist deterministisch und
-;; rücklesbar, daher hat gleiches Wissen in jeder konformen Implementierung
-;; dieselbe Adresse. Die Weltadresse umfasst Journal und Metadaten; der
-;; Vorgänger wird nicht rekursiv dupliziert. Dies ist ein exakter Schlüssel,
-;; kein kryptographischer Digest; ein späteres SHA kann diesen Schlüssel kürzen.
+;; Тотожність вмісту починається з канонічної адреси, а не з
+;; поспішного хеш-примітива. `write-to-string` детермінований і
+;; зворотно читається, тож однакове знання в кожній конформній реалізації
+;; має ту саму адресу. Адреса світу охоплює журнал і метадані;
+;; попередник не дублюється рекурсивно. Це точний ключ,
+;; не криптографічний дайджест; пізніший SHA може цей ключ укоротити.
 (визначити знання-вміст-адреса
   (функція (знання)
     (значення-у-текст знання)))
