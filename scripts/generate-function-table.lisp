@@ -90,10 +90,10 @@
     (нехай ((рядок (знайти-історичний-рядок історичний-код історичні-рядки)))
       (110 ((010 рядок) "()") ((010 (001 ())) (поєднати-рядки (11110100 (100111 рядок)) " (" (11110100 (110110101 рядок)) ")"))))))
 
-; A surface word is usually a symbol (write-to-string strips the
-; Lisp-level Symbol wrapping down to bare text); the reconstructed
-; apostrophe case above is already a plain string. For prose contexts
-; (the human .md table) the bare apostrophe is fine either way.
+; Назва проєкції зазвичай є символом: канонічний друкар
+; перетворює його на текстове представлення без обгортки.
+; Відновлений апостроф вище вже є рядком.
+; Для людиночитної таблиці Markdown апостроф подається без змін.
 (визначити текст-слова-проєкції
   (функція (слово)
     (за-умовою
@@ -103,14 +103,12 @@
       ((тотожне? (класифікувати-рядкове-значення слово) (class-membership string nonmember))
        (значення-у-текст слово)))))
 
-; For the machine-readable .lisp output specifically, a bare apostrophe
-; word must NOT be re-embedded unquoted: a future reader of this
-; generated file would hit the exact same "'" quote-shorthand collision
-; this script itself just worked around on the way in. write-to-string
-; already does exactly the right thing per Value type -- a String gets
-; quoted/escaped (read-back-safe), a Symbol stays bare -- so this is
-; just write-to-string directly, named for what it's used for here.
-(визначити текст-слова-проєкції-сенс write-to-string)
+; Для машинно-читного виходу .lisp не можна вставляти апостроф
+; без цитування: читач сприйме його як синтаксис цитати.
+; Канонічний друкар зберігає рядок екранованим і придатним для
+; повторного читання, тоді як символ лишається без обгортки.
+; Тут використовується та сама ратифікована функція значення-у-текст.
+(визначити текст-слова-проєкції-сенс значення-у-текст)
 
 ; --- string-append is exactly binary; this repo's scripts routinely need
 ; more pieces joined than that, so a small variadic wrapper over reduce.
