@@ -456,7 +456,7 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
             "native-first-parity-verdict-pass?", "native-first-parity-all-pass?",
         ):
             self.assertNotIn("(визначити " + name, parity)
-        self.assertNotRegex(parity, r"(?m)^\\s*\\([01]{3,9}\\s")
+        self.assertNotRegex(parity, r"(?m)^\s*\([01]{3,9}\s")
         self.assertIn("(однакові? результат-обчислювача очікуване)", parity)
         self.assertIn("(однакові? результат-машини очікуваний-результат-машини)", parity)
 
