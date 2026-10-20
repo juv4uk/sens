@@ -180,6 +180,7 @@ def stage(root: Path, mirror: Path, sources: list[str],
     if write:
         # A cohort is all-or-none. The source is pinned again before EACH write.
         created = []
+        created_dirs = []
         try:
             for entry in planned:
                 if entry["path"].read_bytes() != entry["original"]:
@@ -187,11 +188,27 @@ def stage(root: Path, mirror: Path, sources: list[str],
             for path, data in outputs:
                 if any(p.is_symlink() for p in (path.parent, *path.parent.parents)):
                     raise ProjectionBlocked("destination symlink ancestor changed")
+                # Каталоги є частиною транзакції: зберігаємо лише
+                # власні створення, щоб не зачепити попередні дані.
+                missing_dirs = []
+                ancestor = path.parent
+                while not ancestor.exists() and not ancestor.is_symlink():
+                    missing_dirs.append(ancestor)
+                    ancestor = ancestor.parent
+                for directory in reversed(missing_dirs):
+                    directory.mkdir()
+                    created_dirs.append(directory)
                 publish_new(path, data)
                 created.append(path)
         except Exception:
             for path in reversed(created):
                 path.unlink(missing_ok=True)
+            for directory in reversed(created_dirs):
+                try:
+                    directory.rmdir()
+                except OSError:
+                    # Не видаляти каталоги, які заповнив інший процес.
+                    pass
             raise
         for entry in planned:
             entry["record"]["status"] = "TWO_STAGED_PHYSICAL_AND_ORACLE_PENDING"
