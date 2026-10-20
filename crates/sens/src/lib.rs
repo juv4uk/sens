@@ -1042,7 +1042,7 @@ mod core4_bootstrap_cache_tests {
         assert!(nanoseconds >= 0);
 
         let first = eval_program("(створити-символ \"probe-\")", &mut session)
-            .expect("Core4 gensym calls the D10 clock and D8 text projection");
+            .expect("створити-символ викликає D10-годинник і D8-проєкцію тексту");
         let second = eval_program("(створити-символ \"probe-\")", &mut session)
             .expect("Core4 gensym returns another fresh symbol");
         assert!(matches!(first.value, Value::Symbol(_)));
