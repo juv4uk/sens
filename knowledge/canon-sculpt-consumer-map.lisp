@@ -1,4 +1,4 @@
-; #419 consumer/dependency map. Audit navigation only.
+; #419 — Карта споживачів і залежностей Канону. Лише навігація для аудиту.
 
 (canon-sculpt-consumer-map
   (schema-version 1)
@@ -7,26 +7,26 @@
   (candidate
     (identity PRIM_ATOM)
     (known-semantic-surface structural-kind)
-    (migration-hazard "do not infer old t/() predicate behavior; current structural observation is richer"))
+    (migration-hazard "Не виводити стару поведінку предикатів t/(); чинне спостереження структури має багатшу семантику"))
   (candidate
     (identity PRIM_EQ)
     (known-semantic-surface identity-relation)
-    (migration-hazard "do not infer generic truthiness or host pointer identity"))
+    (migration-hazard "Не припускати загальної істинності або тотожності вказівників зовнішнього виконавця"))
   (candidate
     (identity PRIM_COND)
-    (consumer-hazard "control semantics include evaluation selection/order, so textual replacement is not a derivation proof"))
+    (consumer-hazard "Семантика керування визначає вибір і порядок обчислення; текстова заміна не доводить вивідності"))
   (candidate
     (identity PRIM_QUOTE)
-    (consumer-hazard "ordinary function consumers cannot reproduce suppression of argument evaluation without another control mechanism"))
+    (consumer-hazard "Звичайні виклики функцій не здатні припинити обчислення аргументів без додаткового механізму керування"))
   (candidate
     (identity PRIM_CONS)
-    (consumer-hazard "construction consumers must be distinguished from pair representation/backend allocation"))
+    (consumer-hazard "Споживачів конструктора слід відрізняти від представлення пари й виділення пам’яті виконавцем"))
   (candidate
     (identity PRIM_CAR)
-    (consumer-hazard "observation consumers must be distinguished from machine load/addressing mechanism"))
+    (consumer-hazard "Споживачів операції спостереження слід відрізняти від машинного механізму читання пам’яті та адресації"))
   (candidate
     (identity PRIM_CDR)
-    (consumer-hazard "observation consumers must be distinguished from machine load/addressing mechanism"))
+    (consumer-hazard "Споживачів операції спостереження слід відрізняти від машинного механізму читання пам’яті та адресації"))
 
   (coordination-exclusion
     (active-work
@@ -38,4 +38,4 @@
       409 413
       317))
   (next
-    "replace each hazard-only row with mechanically discovered live consumers after current overlapping migrations settle; unknown stays unknown until then"))
+    "Замінити кожний рядок лише з ризиком на виявлених у чинному коді споживачів після завершення паралельних перенесень; доти невідоме залишається невідомим"))
