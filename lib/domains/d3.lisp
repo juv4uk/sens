@@ -1,9 +1,10 @@
-; Canonical human-readable domain table.
-; D3: exact-width 3-bit keys only.
-; The binary key width is the domain address.
-; Columns: ук → укр → san → en → LISP → sym
-; Predicate marker rule: ук/укр/en end in ?, Sanskrit does not.
-; Empty/missing: ()
+; Канонічна таблиця людських проєкцій домену Д3.
+; Д3: лише ключі точної ширини 3 біт.
+; Ширина двійкового слова є частиною доменної адреси.
+; Стовпці: ук → укр → san → en → LISP → sym.
+; Позначку питання мають предикати в українській та англійській колонках;
+; санскритський запис не має такого закінчення.
+; Порожнє або відсутнє значення: ().
 
 (domain-table/1
   (000 (ук ()) (укр ()) (san ()) (en ()) (LISP ()) (sym ()))
