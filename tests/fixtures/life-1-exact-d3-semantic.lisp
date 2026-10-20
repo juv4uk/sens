@@ -1,127 +1,119 @@
-; Єдине джерело семантики перевірки LIFE-1: двійковий SENS.
+; Єдине джерело семантики перевірки LIFE-1: SENS.
 ; Rust/CI можуть тільки завантажити цей файл і спостерігати підсумковий D1-біт.
-; Первинні функції: D3:001 010 011 100 101 110 111, D4:0010 0011 1110.
-; Назви нижче — лише локальні зв'язування та цитовані дані, не нові коди.
-; D1:1 = (010 (001 ())); D1:0 = (010 (111 (001 ()) (001 ()))).
+; Українська проєкція. D1:1 = (атом? (як-є ())); D1:0 = (атом? (сполучити (як-є ()) (як-є ()))).
 ;
 ; Якщо хоча б один SENS-свідок поверне D1:0, результат усього файла D1:0.
 
-(0011 життя--ні?
-  (0010 (біт)
-    (110
-      (біт (010 (111 (001 ()) (001 ()))))
-      ((010 (001 ())) (010 (001 ()))))))
+(визначити життя--ні?
+  (функція (біт)
+    (за-умовою
+      (біт (атом? (сполучити (як-є ()) (як-є ()))))
+      ((атом? (як-є ())) (атом? (як-є ()))))))
 
-(0011 життя--всі?
-  (0010 (біти)
-    (110
-      ((010 біти) (010 (001 ())))
-      ((100 біти) (життя--всі? (011 біти)))
-      ((010 (001 ())) (010 (111 (001 ()) (001 ())))))))
+(визначити життя--всі?
+  (функція (біти)
+    (за-умовою
+      ((атом? біти) (атом? (як-є ())))
+      ((перше біти) (життя--всі? (решта біти)))
+      ((атом? (як-є ())) (атом? (сполучити (як-є ()) (як-є ())))))))
 
-(0011 життя--свідок-біти
-  (0010 ()
-    (1110
-        ; Атом / порожнє / вкладений список: тільки структурний D3-закон.
-        (життя--рівні? (001 ()) (001 ()))
-        (життя--рівні? (001 а) (001 а))
-        (життя--ні? (життя--рівні? (001 а) (001 б)))
-        (життя--ні? (життя--рівні? (001 а) (001 (а))))
-        (життя--ні? (життя--рівні? (001 (а)) (001 а)))
-        (життя--рівні? (001 (а (б в))) (001 (а (б в))))
-        (життя--ні? (життя--рівні? (001 (а (б в))) (001 (а (б г)))))
-        (життя--ні? (життя--рівні? (001 (а)) (001 (а б))))
-        (життя--рівні? (001 (готово (джерело радіо)))
-                        (001 (готово (джерело радіо))))
+(визначити життя--свідок-біти
+  (функція ()
+    (список
+        (життя--рівні? (як-є ()) (як-є ()))
+        (життя--рівні? (як-є а) (як-є а))
+        (життя--ні? (життя--рівні? (як-є а) (як-є б)))
+        (життя--ні? (життя--рівні? (як-є а) (як-є (а))))
+        (життя--ні? (життя--рівні? (як-є (а)) (як-є а)))
+        (життя--рівні? (як-є (а (б в))) (як-є (а (б в))))
+        (життя--ні? (життя--рівні? (як-є (а (б в))) (як-є (а (б г)))))
+        (життя--ні? (життя--рівні? (як-є (а)) (як-є (а б))))
+        (життя--рівні? (як-є (готово (джерело радіо)))
+                        (як-є (готово (джерело радіо))))
         (життя--ні?
           (життя--рівні?
-            (001 (готово (джерело радіо)))
-            (001 (готово (джерело інше)))))
-        ; Порівняння планувальника залишається даними, не host EQUAL.
+            (як-є (готово (джерело радіо)))
+            (як-є (готово (джерело інше)))))
         (життя--рівні?
           (життя-поле-запису
-            (001 (pending-invocation
+            (як-є (pending-invocation
                    (producer datalog)
                    (trigger (projection-ready prolog-to-datalog))
                    (provenance-ref observation-42)
                    (priority ordinary)
-                   (semantic-id 00001100)))
-            (001 trigger))
-          (001 (projection-ready prolog-to-datalog)))
-        (101
-          (життя-проєкція-готова?
-            (001 (pending-invocation
+                   (semantic-id 12)))
+            (як-є trigger))
+          (як-є (projection-ready prolog-to-datalog)))
+        (тотожне? (життя-проєкція-готова?
+            (як-є (pending-invocation
                    (producer datalog)
                    (trigger (projection-ready prolog-to-datalog))
                    (provenance-ref observation-42)
                    (priority ordinary)
-                   (semantic-id 00001100)))
-            (001 ((projection-ready prolog-to-datalog observation-42))))
-          (001 present))
-        (101
-          (життя-проєкція-готова?
-            (001 (pending-invocation
+                   (semantic-id 12)))
+            (як-є ((projection-ready prolog-to-datalog observation-42))))
+          (як-є present))
+        (тотожне? (життя-проєкція-готова?
+            (як-є (pending-invocation
                    (producer datalog)
                    (trigger (projection-ready prolog-to-datalog))
                    (provenance-ref observation-42)
                    (priority ordinary)
-                   (semantic-id 00001100)))
-            (001 ((projection-ready prolog-to-datalog observation-99))))
-          (001 absent))
-        (101
-          (життя-проєкція-готова?
-            (001 (pending-invocation
+                   (semantic-id 12)))
+            (як-є ((projection-ready prolog-to-datalog observation-99))))
+          (як-є absent))
+        (тотожне? (життя-проєкція-готова?
+            (як-є (pending-invocation
                    (producer datalog)
                    (trigger (projection-ready prolog-to-datalog))
                    (provenance-ref observation-42)
                    (priority ordinary)
-                   (semantic-id 00001100)))
-            (001 ((projection-ready another-contract observation-42))))
-          (001 absent))
+                   (semantic-id 12)))
+            (як-є ((projection-ready another-contract observation-42))))
+          (як-є absent))
         (життя--рівні?
           (життя-очікування
-            (1110
-              (001 (pending-invocation
+            (список
+              (як-є (pending-invocation
                      (producer datalog)
                      (trigger (projection-ready prolog-to-datalog))
                      (provenance-ref observation-42)
                      (priority ordinary)
-                     (semantic-id 00001100)))
-              (001 (pending-invocation
+                     (semantic-id 12)))
+              (як-є (pending-invocation
                      (producer datalog)
                      (trigger (projection-ready prolog-to-datalog))
                      (provenance-ref observation-42)
                      (priority ordinary)
-                     (semantic-id 00001100)))))
-          (001
+                     (semantic-id 12)))))
+          (як-є
             ((pending-invocation
               (producer datalog)
               (trigger (projection-ready prolog-to-datalog))
               (provenance-ref observation-42)
               (priority ordinary)
-              (semantic-id 00001100)))))
+              (semantic-id 12)))))
         (життя--рівні?
           (життя-спокій
-            (001 ()) (001 ()) (001 no-transition-required))
-          (001 (quiescence-state quiescent)))
-        ; LIFE-1 select-ready: порожня черга, готовий виклик, пропуск неготового.
+            (як-є ()) (як-є ()) (як-є no-transition-required))
+          (як-є (quiescence-state quiescent)))
         (життя--рівні?
-          (життя-обрати-готове (001 ()) (001 ()))
-          (001 (scheduler-selection none)))
-        (життя--рівні?
-          (життя-обрати-готове
-            (001 ((pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100))))
-            (001 ((projection-ready prolog-to-datalog observation-42))))
-          (001 (scheduler-selection ready (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100)) ())))
+          (життя-обрати-готове (як-є ()) (як-є ()))
+          (як-є (scheduler-selection none)))
         (життя--рівні?
           (життя-обрати-готове
-            (001 ((pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-99) (priority ordinary) (semantic-id 00001100)) (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100))))
-            (001 ((projection-ready prolog-to-datalog observation-42))))
-          (001 (scheduler-selection ready (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100)) ())))
+            (як-є ((pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 12))))
+            (як-є ((projection-ready prolog-to-datalog observation-42))))
+          (як-є (scheduler-selection ready (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 12)) ())))
+        (життя--рівні?
+          (життя-обрати-готове
+            (як-є ((pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-99) (priority ordinary) (semantic-id 12)) (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 12))))
+            (як-є ((projection-ready prolog-to-datalog observation-42))))
+          (як-є (scheduler-selection ready (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 12)) ())))
       )))
 
-(0011 життя--свідок
-  (0010 ()
+(визначити життя--свідок
+  (функція ()
     (життя--всі? (життя--свідок-біти))))
 
 (життя--свідок)
