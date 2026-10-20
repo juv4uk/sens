@@ -61,6 +61,21 @@ class TripletInventoryTests(unittest.TestCase):
         self.assertEqual(required["failed_required"], ["case.sens"])
         self.assertEqual(self.scan(strict=True)["status"], "BLOCKED")
 
+    def test_unpaired_lisp_is_visible_even_when_existing_view_passes(self):
+        self.view.write_bytes(self.expected)
+        additional = self.root / "ще-програма.lisp"
+        additional.write_text("(визначити відповідь так)\n", encoding="utf-8")
+        original = additional.read_bytes()
+        report = self.scan(required=())
+        self.assertEqual(report["status"], "INCOMPLETE_SOURCE_PAIRS")
+        self.assertEqual(report["summary"]["lisp_sources_seen"], 2)
+        self.assertEqual(report["summary"]["lisp_with_physical"], 1)
+        self.assertEqual(report["summary"]["lisp_without_physical"], 1)
+        self.assertEqual(report["unpaired_lisp_sources"], ["ще-програма.lisp"])
+        self.assertEqual(report["summary"]["view_present_valid"], 1)
+        self.assertEqual(self.scan(strict=True)["status"], "BLOCKED")
+        self.assertEqual(additional.read_bytes(), original)
+
     def test_noncanonical_ascii_views_are_rejected_byte_for_byte(self):
         variants = (
             b"",
@@ -132,6 +147,9 @@ class TripletInventoryTests(unittest.TestCase):
         self.sens.unlink()
         result = self.scan(required=())
         self.assertEqual(result["status"], "NO_FILES")
+        self.assertEqual(result["summary"]["lisp_sources_seen"], 1)
+        self.assertEqual(result["summary"]["lisp_without_physical"], 1)
+        self.assertEqual(result["unpaired_lisp_sources"], ["case.lisp"])
         self.assertEqual(result["summary"]["release_admitted"], 0)
 
     def test_cli_receipt_is_read_only_and_not_an_extensionless_program(self):
