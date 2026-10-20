@@ -1192,7 +1192,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         if path == "scripts/check-domain-table-readable.lisp":
             return DomainTableReadableUkrMigrationTests._undo_exact_heads(source)
         if path == "scripts/fixtures-for-tier.lisp":
-            # Separate D3/D5/D8/D9 executable heads, never infer old SID8
+            # Separate D3/D5/D8/D9 executable heads, never infer old сід8
             # from byte equality. These three witnessed lines are reversible.
             exact_lines = (
                 ("    (решта (знайти-за-ключем (як-є tier) приклад))))",
