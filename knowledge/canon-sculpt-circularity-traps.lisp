@@ -1,34 +1,34 @@
-; #419 negative criteria for claims that a semantic primitive is derivable.
-; Audit data only; not language authority.
+; #419 Негативні критерії тверджень про вивідність семантичного примітива.
+; Лише дані аудиту, а не джерело мовних законів.
 
 (canon-sculpt-circularity-traps
   (schema-version 1)
 
   (trap
     (name direct-self-call)
-    (reject "candidate definition directly invokes the identity being claimed derivable"))
+    (reject "Визначення кандидата прямо викликає тотожність, вивідність якої стверджується"))
   (trap
     (name surface-alias-self-call)
-    (reject "candidate invokes another EN/UK/SA or compatibility surface resolving to the same semantic identity"))
+    (reject "Кандидат викликає іншу англійську, українську, санскритську чи сумісну проєкцію тієї самої семантичної тотожності"))
   (trap
     (name registry-roundtrip-self-call)
-    (reject "candidate resolves the same semantic identity through semantic registry/function-table lookup and invokes it indirectly"))
+    (reject "Кандидат знаходить ту саму семантичну тотожність через реєстр або таблицю функцій і викликає її опосередковано"))
   (trap
     (name host-representation-oracle)
-    (reject "candidate asks Rust/host runtime tags, pointer identity, enum variants, or equivalent representation facts to supply the semantic answer"))
+    (reject "Кандидат отримує семантичну відповідь із міток Rust чи середовища виконання, тотожності вказівників, варіантів перелічень або інших подробиць подання"))
   (trap
     (name stronger-hidden-primitive)
-    (reject "candidate replaces the named primitive with an undeclared stronger primitive that already contains the operation being derived"))
+    (reject "Кандидат замінює названий примітив неоголошеним потужнішим примітивом, який уже містить потрібну операцію"))
   (trap
     (name backend-only-proof)
-    (reject "candidate is called derived only because one backend can lower it efficiently; lowering is mechanism, not semantic derivation"))
+    (reject "Кандидата називають виведеним лише тому, що один виконавець уміє ефективно його знизити; зниження є механізмом, а не семантичним виведенням"))
 
   (acceptance-law
     (name lower-concept-closure)
-    (statement "Every operation used by a derivation must be explicitly listed as lower, independently available, and unable to resolve back to the candidate identity."))
+    (statement "Кожну операцію виведення потрібно явно назвати простішою, незалежно доступною і такою, що не повертається до тотожності кандидата."))
   (acceptance-law
     (name observable-parity)
-    (statement "A derivation must preserve ordinary, edge, first-class/surface, meta-eval, and backend-relevant observations where those observations exist."))
+    (statement "Виведення мусить зберігати звичайні, граничні, функціональні, проєкційні, метаобчислювальні та залежні від виконавця спостереження там, де вони існують."))
   (acceptance-law
     (name uncertainty-wins)
-    (statement "If circularity cannot be mechanically excluded, classify insufficient-evidence rather than derivable.")))
+    (statement "Якщо циклічність не можна механічно виключити, класифікувати як недостатність доказів, а не як вивідність.")))

@@ -1,13 +1,13 @@
-; #419 backend evidence ledger. Evidence/navigation only.
+; #419 Журнал свідчень виконавців. Лише свідчення й навігація.
 
 (canon-sculpt-backend-evidence
   (schema-version 1)
   (law
     (name lowering-is-not-derivation)
-    (statement "A native/CML/x86 lowering proves an implementation path, not that a semantic concept is derivable from lower Lisp concepts."))
+    (statement "Зниження до рідного виконавця, CML чи x86 підтверджує шлях реалізації, а не вивідність семантичного поняття з простіших понять Lisp."))
   (law
     (name shared-truth-not-copied-truth)
-    (statement "Backends may consume one Lisp-owned expected corpus; backend manifests must not become a second semantic oracle."))
+    (statement "Виконавці можуть користуватися одним еталонним корпусом Lisp; маніфести виконавців не повинні ставати другим семантичним оракулом."))
 
   (path
     (name native)
@@ -32,13 +32,13 @@
 
   (candidate
     (identity PRIM_COND)
-    (backend-note "bounded native lowering evidence exists, but it cannot decide whether cond is fundamental syntax or macro-derivable from a smaller control form"))
+    (backend-note "Є свідчення обмеженого рідного зниження, але вони не визначають, чи cond є основним синтаксисом, чи макросом із простішої керувальної форми"))
   (candidate
     (identity PRIM_CONS)
-    (backend-note "machine construction/access lowering can support performance/portability evidence but cannot establish semantic irreducibility"))
+    (backend-note "Машинне зниження побудови й доступу може підтверджувати швидкодію та переносимість, але не семантичну незвідність"))
   (candidate
     (identity PRIM_ATOM)
-    (backend-note "structural classification must not be justified by a host/runtime representation tag"))
+    (backend-note "Структурну класифікацію не можна обґрунтовувати міткою подання середовища виконання"))
   (candidate
     (identity PRIM_EQ)
-    (backend-note "identity semantics must not collapse to pointer equality merely because a backend can implement one case that way")))
+    (backend-note "Семантика тотожності не зводиться до рівності вказівників лише тому, що виконавець так реалізує один випадок")))

@@ -1,4 +1,4 @@
-; #419 witness inventory. Navigation/provenance only: expected semantic truth stays in the referenced Lisp corpora.
+; #419 Інвентар свідків. Лише навігація й походження: очікувана семантика залишається у зазначених корпусах Lisp.
 
 (canon-sculpt-witness-inventory
   (schema-version 1)
@@ -56,4 +56,4 @@
   (gap
     (candidate PRIM_QUOTE)
     (status insufficient-inventory-evidence)
-    (next "locate an active Lisp-owned quote/evaluation-control witness before making a reducibility claim")))
+    (next "Знайти чинного свідка Lisp для цитування й керування обчисленням, перш ніж стверджувати вивідність")))

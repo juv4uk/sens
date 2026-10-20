@@ -1,12 +1,12 @@
-; #419 RED ledger. Research evidence only.
+; #419 Журнал червоних результатів. Лише дослідні свідчення.
 
 (canon-sculpt-red-ledger
   (schema-version 1)
   (experiment
     (candidate PRIM_QUOTE)
-    (hypothesis "quote is derivable as an ordinary eager Lisp function")
+    (hypothesis "Цитування можна вивести як звичайну функцію Lisp з негайним обчисленням аргументів")
     (fixture tests/fixtures/canon-sculpt-quote-ordinary-function-red.lisp)
-    (required-observation "an unbound symbol supplied as source data must reach the function body without ordinary argument evaluation")
-    (predicted-current-result "RED: eager argument evaluation attempts to resolve the symbol before the ordinary function body")
+    (required-observation "Незв'язаний символ, переданий як вихідні дані, має потрапити до тіла функції без звичайного обчислення аргументів")
+    (predicted-current-result "ЧЕРВОНИЙ: негайне обчислення аргументів намагається знайти символ ще до виконання тіла звичайної функції")
     (interpretation
-      "If observed, this falsifies only ordinary-function derivation. It does not prove quote irreducible: quote may still be derivable from a smaller explicitly declared evaluation-control mechanism.")))
+      "Якщо це спостерігається, спростовано лише виведення через звичайну функцію. Це не доводить незвідності цитування: його ще можна вивести з простішого явно оголошеного механізму керування обчисленням.")))
