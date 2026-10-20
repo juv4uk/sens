@@ -33,7 +33,7 @@ EXPECTED = {
     "scripts/enforce-function-table-mechanisms.lisp": {"0011": 2, "001": 4, "010": 1, "100": 2, "101": 0, "110": 1, "11110111": 1},
 }
 # Поточні D9 resident-и з lib/domains/d9.lisp. Ідентичність не виводимо
-# із історичного SID8 або ширини W8: reader peers мають власний D9 код.
+# із історичного сід8 або ширини W8: reader peers мають власний D9 код.
 D9_READERS = {"110101001": "читати-всі", "110110111": "читати-файл"}
 D9_INVERSE = {value: key for key, value in D9_READERS.items()}
 # Git blob-и безпосередньо перед ЦІЄЮ D9 партією, вже після D3/D4 cutover.
