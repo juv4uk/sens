@@ -1,13 +1,13 @@
-; #470 ATOM lower-basis falsification
-; Research-only. NOT semantic authority. NO production change.
+; #470 фальсифікація нижчої основи ATOM
+; Лише дослідження. НЕ семантична влада. БЕЗ змін у production.
 ;
-; Current authority stays in:
+; Чинна влада лишається в:
 ; - contracts/structural-observation-contract.lisp
 ; - contracts/answer-contract.lisp
 ; - tests/fixtures/structural-observation-v1.lisp
 ;
-; This record exists only to make one derivation route falsifiable and to
-; preserve the exact observed result after execution.
+; Цей запис існує лише щоб зробити один шлях виведення фальсифіковним і
+; зберегти точний спостережений результат після виконання.
 
 (atom-basis-obstruction/2
   (issue 470)
