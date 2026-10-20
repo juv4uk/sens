@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#4430 — conservative Ukrainian <-> typed words <-> physical legacy-T5 triplet proof.
+"""#4430 — conservative Ukrainian <-> typed words <-> physical T5M/legacy-T5 triplet proof.
 
 Deliberately bounded: ratified D1 predicates, exact D3 call-head syntax
 QUOTE/ATOM/CDR/CAR/EQ/COND/CONS and literal D3 EMPTY, plus D2 grammar.
@@ -23,7 +23,8 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 from domain_tables import read_domain_table
-from sens_t5_codec import SensT5Error, decode_bytes, encode_words, typed_sha256
+from sens_t5_codec import (SensT5Error, decode_bytes, encode_words,
+                           decode_t5m_bytes, encode_t5m_projection, typed_sha256)
 
 CONVERTER = SCRIPTS / "migrate-three-pass.py"
 SPEC = importlib.util.spec_from_file_location("uk_t5_canonical_three_pass", CONVERTER)
@@ -221,7 +222,7 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def verify(lisp: Path, sens: Path, view: Path) -> dict:
+def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "auto") -> dict:
     """Pure read-only 3-way proof, never creates an executable or a mirror."""
     if lisp.suffix != ".lisp" or sens != lisp.with_suffix(".sens") or view != lisp.with_suffix(""):
         raise ProjectionBlocked("all three inputs must be exact same-stem paths")
@@ -230,22 +231,46 @@ def verify(lisp: Path, sens: Path, view: Path) -> dict:
     readable = checked_file(view)
     try:
         source = src.decode("utf-8")
-        words = decode_bytes(binary)
-    except (UnicodeError, SensT5Error) as exc:
-        raise ProjectionBlocked("invalid source UTF-8 or physical T5") from exc
+    except UnicodeError as exc:
+        raise ProjectionBlocked("invalid source UTF-8") from exc
+    if codec not in ("auto", "t5m", "t5"):
+        raise ProjectionBlocked("unknown physical codec: " + codec)
+    # Use byte-exact physical roundtrip and same-stem view. Never guess old
+    # T5 word boundaries from a T5M prefix (or silently accept stale views).
+    candidates = []
+    for name, decoder, encoder in (
+        ("t5m", decode_t5m_bytes, lambda ws: encode_t5m_projection(" ".join(ws))),
+        ("t5", decode_bytes, encode_words),
+    ):
+        if codec not in ("auto", name):
+            continue
+        try:
+            decoded = decoder(binary)
+            encoded = encoder(decoded)
+        except SensT5Error:
+            continue
+        if encoded == binary and (" ".join(decoded) + "\n").encode("ascii") == readable:
+            candidates.append((name, decoded))
+    if not candidates:
+        raise ProjectionBlocked("physical T5M/T5 bytes or canonical view mismatch")
+    if len({tuple(candidate_words) for _, candidate_words in candidates}) != 1:
+        raise ProjectionBlocked("ambiguous T5M/T5 words: explicit codec required")
+    physical_codec, words = candidates[0]
     canonical_source = canonical_uk_from_words(words).encode("utf-8")
     if src != canonical_source:
         raise ProjectionBlocked("noncanonical українська ук source or wrong T5 semantics")
     canonical_view = (" ".join(words) + "\n").encode("ascii")
     if readable != canonical_view:
         raise ProjectionBlocked("missing, stale or noncanonical ASCII 0/1 view")
-    if encode_words(words) != binary:
-        raise ProjectionBlocked("physical T5 not byte-canonical")
+    encode_current = (lambda ws: encode_t5m_projection(" ".join(ws))
+                      if physical_codec == "t5m" else encode_words)
+    if encode_current(words) != binary:
+        raise ProjectionBlocked("physical carrier not byte-canonical")
     try:
         projected = project_current_uk(source)
     except (three_pass.MigrationError, SensT5Error, OSError, ValueError) as exc:
         raise ProjectionBlocked("Ukrainian source could not be encoded to exact words") from exc
-    if projected != words or encode_words(projected) != binary:
+    if projected != words or encode_current(projected) != binary:
         raise ProjectionBlocked("Ukrainian source and physical T5 do not agree")
     return {
         "schema": SCHEMA,
@@ -260,7 +285,9 @@ def verify(lisp: Path, sens: Path, view: Path) -> dict:
         "typed_word_sha256": typed_sha256(words),
         "typed_word_count": len(words),
         "physical_bytes": len(binary),
-        "physical_T5_roundtrip": True,
+        "physical_codec": physical_codec,
+        "physical_T5_roundtrip": physical_codec == "t5",
+        "physical_T5M_roundtrip": physical_codec == "t5m",
         "canonical_uk_roundtrip": True,
         "canonical_view_roundtrip": True,
         "runtime_oracle_admitted_by_this_audit": False,
@@ -273,9 +300,11 @@ def main() -> int:
     parser.add_argument("--lisp", type=Path, required=True)
     parser.add_argument("--sens", type=Path, required=True)
     parser.add_argument("--view", type=Path, required=True)
+    parser.add_argument("--codec", choices=("auto", "t5m", "t5"), default="auto",
+                        help="T5M is current, T5 is explicit legacy, auto uses exact view")
     args = parser.parse_args()
     try:
-        result = verify(args.lisp, args.sens, args.view)
+        result = verify(args.lisp, args.sens, args.view, codec=args.codec)
     except (ProjectionBlocked, OSError, ValueError) as exc:
         print("BLOCKED: " + str(exc), file=sys.stderr)
         return 2
