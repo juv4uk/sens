@@ -1,8 +1,8 @@
-; #471 EQ vs canonical three-part COND
+; #471 EQ проти канонічної трисекційної COND
 ; Research-only. NOT semantic authority. NO production change.
 ;
-; Question: can COND's explicit-result equality replace EQ's dynamic
-; two-runtime-operand atomic identity relation?
+; Питання: чи може рівність явного результату COND замінити динамічне
+; двооперандне атомарне відношення тотожності EQ часу виконання?
 
 (eq-cond-static-boundary/2
   (issue 471)
