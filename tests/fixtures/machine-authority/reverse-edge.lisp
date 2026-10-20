@@ -1,2 +1,2 @@
-; #150 deliberate negative witness: machine data attempts to mint semantic identity.
+; #150 навмисний негативний свідок: машинні дані намагаються викарбувати семантичну ідентичність.
 (authority-edge machine semantic mint-semantic-id)
