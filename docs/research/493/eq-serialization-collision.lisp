@@ -1,5 +1,5 @@
-; #493 EQ serialization collision
-; Research-only. NOT semantic authority. NO production change.
+; #493 колізія серіалізації EQ
+; Лише дослідження. НЕ семантична влада. БЕЗ змін у production.
 
 (eq-serialization-collision/2
   (issue 493)
