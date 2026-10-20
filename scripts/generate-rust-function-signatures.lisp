@@ -15,10 +15,11 @@
   (функція аргументи
     (згорнути (функція (накопичувач фрагмент) (рядок-додати накопичувач фрагмент)) "" аргументи)))
 
-; Rust arity fields are machine projection, not human number presentation.
-; number->string deliberately returns the canonical #q2:<bits>/1 wire.
-; Arity metadata is non-negative integer data, so consume its binary numerator
-; and emit an equivalent Rust binary integer literal.
+; Поля кількості аргументів у Rust — машинна проєкція,
+; а не людське числове представлення. Перетворення числа
+; в рядок навмисно дає канонічний транспорт #q2:<біти>/1.
+; Кількість аргументів є невід'ємним цілим: беремо її
+; двійковий чисельник і формуємо рівнозначний літерал Rust.
 (визначити дописати-біти-точного-цілого
   (функція (залишок накопичувач)
     (за-умовою
