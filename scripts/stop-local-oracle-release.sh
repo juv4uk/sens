@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-state_root=${XDG_STATE_HOME:-$HOME/.local/state}/my-lisp
+state_root=${XDG_STATE_HOME:-$HOME/.local/state}/sens
 pid_file=$state_root/oracle-local.pid
 oracle_port=${ORACLE_LOCAL_PORT:-9999}
 
@@ -28,7 +28,7 @@ if [ -n "$candidate" ] && [ -r "/proc/$candidate/cmdline" ]; then
   exe=$(readlink -f "/proc/$candidate/exe" 2>/dev/null || true)
   cmdline=$(tr '\0' ' ' < "/proc/$candidate/cmdline" 2>/dev/null || true)
   case "$exe:$cmdline" in
-    */my-lisp:*" --tcp=$oracle_port"*)
+    */sens:*" --tcp=$oracle_port"*)
       kill "$candidate"
       echo "stopped orphaned local Oracle pid=$candidate port=$oracle_port"
       exit 0

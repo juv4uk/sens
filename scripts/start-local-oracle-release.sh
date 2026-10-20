@@ -2,12 +2,12 @@
 set -euo pipefail
 
 project_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-cache_root=${CARGO_TARGET_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/my-lisp-target}
+cache_root=${CARGO_TARGET_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/sens-target}
 oracle_port=${ORACLE_LOCAL_PORT:-9999}
-state_root=${XDG_STATE_HOME:-$HOME/.local/state}/my-lisp
+state_root=${XDG_STATE_HOME:-$HOME/.local/state}/sens
 pid_file=$state_root/oracle-local.pid
 log_file=$state_root/oracle-local.log
-binary=$cache_root/release/my-lisp
+binary=$cache_root/release/sens
 cargo_bin=${CARGO_BIN:-cargo}
 
 mkdir -p "$state_root"
@@ -32,7 +32,7 @@ if ! command -v "$cargo_bin" >/dev/null 2>&1; then
 fi
 
 echo "Building release Oracle into $cache_root ..."
-CARGO_TARGET_DIR="$cache_root" "$cargo_bin" build --release -p my-lisp-cli --manifest-path "$project_root/Cargo.toml"
+CARGO_TARGET_DIR="$cache_root" "$cargo_bin" build --release -p sens-cli --manifest-path "$project_root/Cargo.toml"
 test -x "$binary" || {
   echo "ERROR: release binary missing: $binary" >&2
   exit 1
