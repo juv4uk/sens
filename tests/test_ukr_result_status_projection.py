@@ -105,7 +105,7 @@ class ResultStatusProjectionTests(unittest.TestCase):
         for obsolete in ("reason-observe", "reason-in-observe"):
             self.assertNotIn("(визначити " + obsolete + " ", code)
         for current in ("міркувати-спостерігати", "міркувати-у-спостерігати"):
-            self.assertRegex(code, r"\\(визначити\\s+" + re.escape(current) + r"\\s+\\(функція")
+            self.assertIn("(визначити " + current + "\n  (функція", code)
         for obsolete in ("result-goal?", "result-negated-goal?",
                          "result-opposite-goal"):
             self.assertNotIn("(визначити " + obsolete + " ", code)
