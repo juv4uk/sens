@@ -1916,7 +1916,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
     ]
   },
   "scripts/fixtures-for-tier.lisp": {
-    "sha": "59f75d93e00419575070162e4c83b7c49c2dfc34",
+            "sha": "14d3e568364e153ad6a447c1bc7c7050896b177c",
     "edits": [
       [
         1179,
@@ -2243,7 +2243,7 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
     INVERSE = {surface: bits for bits, surface in PROJECTIONS.items()}
     SPECS = {
         "scripts/build-constitution.lisp": {
-            "blob": "9254674d0669c46a24ccd2630a419315efc2c3c5",
+            "blob": "bd1a3c14b22b4f6259c4ff60e8cc41b7aa4194d6",
             "counts": {"110": 1, "111": 8, "1110": 19, "11011011": 27, "110101001": 1,
                        "110110111": 1, "0011": 3, "001": 52, "0010": 3, "010": 2,
                        "100": 1, "011": 1},
