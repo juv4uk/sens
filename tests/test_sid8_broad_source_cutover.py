@@ -3,12 +3,21 @@
 
 Це лише перевірка поверхні джерел, не доказ виконання SENS чи T5M.
 """
+import importlib.util
 import json
 from pathlib import Path
-import re
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location(
+    "ukr_callsite_audit_for_sid8_witness",
+    ROOT / "scripts/check_ukr_callsite_migration.py",
+)
+assert SPEC and SPEC.loader
+parser = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = parser
+SPEC.loader.exec_module(parser)
 COHORT = (
     "scripts/build-dependency-classification.lisp",
     "scripts/check-core4-predicate-answer-scale.lisp",
@@ -20,57 +29,30 @@ COHORT = (
 )
 
 
-def count_top_level_arguments(source: str, index: int) -> int:
-    """Підрахувати аргументи українського виклику з урахуванням вкладеності."""
-    match = re.match(r"\(\s*відобразити(?=\s|\))", source[index:])
-    if not match:
-        raise ValueError("очікується українська голова відобразити (D6 MAP)")
-    i = index + match.end()
-    count = 0
-    while i < len(source):
-        while i < len(source) and source[i].isspace():
-            i += 1
-        if source[i] == ")":
-            return count
-        if source[i] == "(":
-            depth = 0
-            quoted = False
-            while i < len(source):
-                char = source[i]
-                if char == '"':
-                    backslashes = 0
-                    j = i - 1
-                    while j >= 0 and source[j] == "\\":
-                        backslashes += 1
-                        j -= 1
-                    if backslashes % 2 == 0:
-                        quoted = not quoted
-                if not quoted:
-                    if char == "(":
-                        depth += 1
-                    elif char == ")":
-                        depth -= 1
-                        if depth == 0:
-                            i += 1
-                            break
-                i += 1
-            if depth != 0:
-                raise ValueError("незакритий аргумент відобразити")
-        elif source[i] == '"':
-            i += 1
-            while i < len(source):
-                if source[i] == "\\":
-                    i += 2
-                elif source[i] == '"':
-                    i += 1
-                    break
-                else:
-                    i += 1
-        else:
-            while i < len(source) and not source[i].isspace() and source[i] != ")":
-                i += 1
-        count += 1
-    raise ValueError("незакритий виклик відобразити")
+def executable_sites(source: str):
+    """Відокремити викличні голови від коментарів, рядків та цитованих даних."""
+    forms = parser.parse(source)
+
+    def walk(node):
+        if isinstance(node, parser.Prefix):
+            # Цитата, квазіцитата і відкинута форма — не виконувані виклики.
+            if node.marker in ("'", "#;", "`"):
+                return
+            if node.marker in (",", ",@"):
+                yield from walk(node.datum)
+            return
+        if not isinstance(node, parser.Form) or not node.values:
+            return
+        head = parser.atom(node.values[0])
+        if head in ("як-є", "quote", "001"):
+            return
+        if head in ("відобразити", "101000", "00110111", "00001001"):
+            yield head, len(node.values) - 1, node.pos.line
+        for child in node.values:
+            yield from walk(child)
+
+    for form in forms:
+        yield from walk(form)
 
 
 class TestBroaderSid8LispCutover(unittest.TestCase):
@@ -92,23 +74,35 @@ class TestBroaderSid8LispCutover(unittest.TestCase):
         )
 
     def test_current_ukr_map_heads_keep_two_arguments(self):
-        # Не заморожуємо історичні кількості викликів: перевіряємо чинну форму.
         total = 0
         for path in COHORT:
             with self.subTest(path=path):
                 source = (ROOT / path).read_text(encoding="utf-8")
-                self.assertNotRegex(source, r"\(\s*(?:101000|00110111)(?=\s|\))")
-                matches = list(re.finditer(r"\(\s*відобразити(?=\s|\))", source))
-                for call in matches:
-                    self.assertEqual(count_top_level_arguments(source, call.start()), 2)
-                total += len(matches)
+                sites = list(executable_sites(source))
+                old = [site for site in sites if site[0] != "відобразити"]
+                self.assertFalse(old, f"{path}: старі виконувані голови: {old}")
+                maps = [site for site in sites if site[0] == "відобразити"]
+                for head, arguments, line in maps:
+                    self.assertEqual(arguments, 2, f"{path}:{line}: {head}")
+                total += len(maps)
         self.assertGreater(total, 0)
+
+    def test_quoted_old_heads_are_data_not_migration_regressions(self):
+        source = """
+        ; (101000 a b) — коментар, не виклик
+        (як-є ((101000 a b) (00001001 дані)))
+        '(00110111 a b)
+        #| вкладений #| (101000 a b) |# коментар |#
+        (відобразити функція послідовність)
+        """
+        self.assertEqual([(head, argc) for head, argc, _ in executable_sites(source)], [("відобразити", 2)])
 
     def test_no_old_definition_call_heads_in_executable_cohort(self):
         for path in COHORT:
             with self.subTest(path=path):
                 source = (ROOT / path).read_text(encoding="utf-8")
-                self.assertNotRegex(source, r"\(\s*00001001(?=\s|\))")
+                old = [site for site in executable_sites(source) if site[0] == "00001001"]
+                self.assertFalse(old, f"{path}: застаріле виконуване визначення: {old}")
 
 if __name__ == "__main__":
     unittest.main()
