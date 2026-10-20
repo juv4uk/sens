@@ -326,7 +326,9 @@ class BoundedUkTripletTests(unittest.TestCase):
         cmd = [sys.executable, str(SOURCE), "--lisp", str(self.lisp),
                "--sens", str(self.sens), "--view", str(self.view)]
         old_default = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=90)
-        self.assertEqual(old_default.returncode, 2)
+        # Одні байти можуть одночасно бути канонічним T5M.
+        self.assertEqual(old_default.returncode, 0, old_default.stderr)
+        self.assertIn('"physical_codec": "t5m"', old_default.stdout)
         legacy = subprocess.run([*cmd, "--codec", "t5"], cwd=ROOT, text=True,
                                 capture_output=True, timeout=90)
         self.assertEqual(legacy.returncode, 0, legacy.stderr)
