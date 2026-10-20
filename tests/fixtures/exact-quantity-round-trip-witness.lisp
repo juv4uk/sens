@@ -1,29 +1,28 @@
-; #291 — exact quantity product/quotient preservation belongs to Lisp.
-; This preserves the useful law retired from the legacy Rust truth-sentinel test:
-; c * 1 second gives an exact distance, and dividing by the same second
-; recovers the original exact speed-of-light quantity.
-;
-; Expected semantic relations live here as Lisp data. Rust may only observe
-; the named pass/fail envelope.
+; Закон точної оборотної арифметики величин #291 належить Lisp СЕНС.
+; Добуток швидкості світла на одну секунду дає точну відстань.
+; Ділення результату на ту саму секунду відновлює вихідну величину.
+; Власні функції та зв'язування українською, повні назви Д9 ратифіковані.
+; Цитовані очікування, точні числові літерали та протокольні поля незмінні.
+; Раст може спостерігати результат, але не встановлює його семантику.
 
-(визначити exact-quantity-round-trip-rows
+(визначити рядки-кругової-перевірки-точних-величин
   (функція ()
-    (нехай-послідовно ((one-second
-             (make-quantity
+    (нехай-послідовно ((одна-секунда
+             (створити-величина
                1
-               (make-unit
-                 (список (make-dimension (як-є second) 1)))))
-           (speed
-             (scientific-constant-quantity si:defining-speed-of-light))
-           (distance
-             (quantity-product speed one-second))
-           (recovered
-             (quantity-quotient distance one-second)))
+               (створити-одиниця
+                 (список (створити-розмірність (як-є second) 1)))))
+           (швидкість
+             (науковий-константа-величина сі:визначальна-швидкість-світла))
+           (відстань
+             (величина-добуток швидкість одна-секунда))
+           (відновлена-швидкість
+             (величина-частка відстань одна-секунда)))
       (список
         (список
           (як-є distance-shape)
           (однакові?
-            distance
+            відстань
             (як-є
               (quantity/1
                 299792458
@@ -32,7 +31,7 @@
         (список
           (як-є recovered-speed-shape)
           (однакові?
-            recovered
+            відновлена-швидкість
             (як-є
               (quantity/1
                 299792458
@@ -42,33 +41,38 @@
           (як-є (structural-relation same)))
         (список
           (як-є quotient-inverse)
-          (однакові? recovered speed)
+          (однакові? відновлена-швидкість швидкість)
           (як-є (structural-relation same)))))))
 
-(визначити exact-quantity-round-trip-check
-  (функція (rows)
+(визначити перевірити-кругове-обчислення-точних-величин
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) (structural-kind empty-list)
+      ((атом? рядки) (structural-kind empty-list)
        (як-є (exact-quantity-round-trip-witness (status pass))))
-      ((атом? rows) (structural-kind atom)
+      ((атом? рядки) (structural-kind atom)
        (список
          (як-є exact-quantity-round-trip-witness)
          (список (як-є status) (як-є fail))
          (список (як-є case) (як-є malformed-row-tail))
-         (список (як-є actual) rows)))
-      ((атом? rows) (structural-kind pair)
-       (нехай ((row (перше rows)))
+         (список (як-є actual) рядки)))
+      ((атом? рядки) (structural-kind pair)
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((однакові? (друге row) (третє row)) (structural-relation same)
-            (exact-quantity-round-trip-check (решта rows)))
-           ((однакові? (друге row) (третє row)) (structural-relation distinct)
+           ((однакові? (друге рядок) (третє рядок)) (structural-relation same)
+            (перевірити-кругове-обчислення-точних-величин (решта рядки)))
+           ((однакові? (друге рядок) (третє рядок)) (structural-relation distinct)
             (список
               (як-є exact-quantity-round-trip-witness)
               (список (як-є status) (як-є fail))
-              (список (як-є case) (перше row))
-              (список (як-є actual) (друге row))
-              (список (як-є expected) (третє row))))))))))
+              (список (як-є case) (перше рядок))
+              (список (як-є actual) (друге рядок))
+              (список (як-є expected) (третє рядок))))))))))
 
-(визначити exact-quantity-round-trip-witness
+(визначити свідок-кругового-обчислення-точних-величин
   (функція ()
-    (exact-quantity-round-trip-check (exact-quantity-round-trip-rows))))
+    (перевірити-кругове-обчислення-точних-величин (рядки-кругової-перевірки-точних-величин))))
+
+; Історичні зовнішні назви — сумісні прив'язки до українських визначень.
+(визначити exact-quantity-round-trip-rows рядки-кругової-перевірки-точних-величин)
+(визначити exact-quantity-round-trip-check перевірити-кругове-обчислення-точних-величин)
+(визначити exact-quantity-round-trip-witness свідок-кругового-обчислення-точних-величин)
