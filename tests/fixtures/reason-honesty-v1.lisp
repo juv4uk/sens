@@ -1,12 +1,12 @@
-; #219 — first reasoning-honesty witness.
-; Absence of a proof for P is not evidence for (not P).
-;
-; Historical negation-as-failure proves (safe ocean) from the rule below merely
-; because no (danger ocean) proof exists. Under Canon 0 accumulator semantics,
-; that missing proof remains unspecialized as (), so the outer goal must not be
-; fabricated as proved.
+; #219 — свідок чесності логічного міркування.
+; Відсутність доказу твердження не доводить його заперечення.
+; Історичне заперечення через невдачу могло виводити (safe ocean)
+; лише тому, що не вдалося довести (danger ocean). За семантикою
+; накопичувача Канону 0 недоведене лишається порожнім значенням.
+; Не можна видавати відсутній доказ за доведений висновок.
+; Викличні голови Д9 і Д3 українські, історичні факти незмінні.
 
-((expr . "(reason (quote (safe ocean)) (quote (((safe (var x)) (not (danger (var x)))))))")
+((expr . "(міркувати (як-є (safe ocean)) (як-є (((safe (var x)) (not (danger (var x)))))))")
  (expected . "()")
  (active . t)
  (law . no-proof-is-not-negation))
