@@ -17,6 +17,7 @@ jobs:
       RUST_TEST_THREADS: "1"
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - name: Default SENS core has no runtime dependencies
         run: |
           tree="$(cargo tree -p sens --no-default-features -e normal --prefix none)"
@@ -69,10 +70,10 @@ jobs:
       - name: Three-projection publisher transaction and fail-closed guards
         run: python3 -m unittest discover -s tests -p 'test_publish_verified_uk_triplets.py'
 
-      - name: Physical T5 triplet through the public compiler CLI
+      - name: Physical T5M triplet through the public compiler CLI
         run: cargo test -p xtask --test compiler_triplet_cli -- --nocapture
 
-      - name: Canonical SW1 and physical T5 triplet -> SENS compiler -> artifact
+      - name: Canonical SW1 and physical T5M triplet -> SENS compiler -> artifact
         run: cargo test -p xtask compiler_compile::tests -- --nocapture
       - name: Whole-nucleus lowering coverage when present
         run: |
