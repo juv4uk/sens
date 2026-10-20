@@ -1,8 +1,10 @@
-; #74 real workload harvested from #76 Python -> my-lisp migration.
-; Measure the exact heavy phase profiled in PR #317, but split it into the
-; public Lisp-owned read-file path and read-all parser phase. Do not call
-; core.lisp's recursive string-length here: on a registry-sized String that is
-; a separate non-tail recursion benchmark and can overflow the host stack.
+; #74 — реальне навантаження зі старої міграції Python → SENS.
+; Вимірюємо важку фазу, досліджену у PR #317, окремо для мовного
+; читання файлу й синтаксичного розбору всіх форм.
+; Не викликаємо рекурсивне вимірювання довжини рядка з core.lisp:
+; для реєстру такий обхід може переповнити стек хоста. Це інша задача,
+; а не частина вимірювання звичайного читання.
+; Позначки eco-lisp-script-perf і назви полів — дані звіту.
 
 (визначити початок (монотонний-наносекунди))
 (визначити текст-реєстру (читати-файл "lib/surface/semantic-registry.lisp"))
