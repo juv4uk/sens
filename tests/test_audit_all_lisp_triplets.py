@@ -46,6 +46,26 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(report["all_bounded_reverse_verified"])
         self.assertFalse(report["release_ready"])
 
+    def test_proven_program_not_blocked_by_separate_comment_only_profile(self):
+        # Істина про програму не залежить від відсутності .sens у файлі
+        # без виконуваних форм; звичайний текст не потребує машинного коду.
+        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        source = self.root / "lib/branch.lisp"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        for suffix in (".lisp", ".sens", ""):
+            shutil.copyfile(fixture / ("branch" + suffix),
+                            source.with_suffix(suffix))
+        self.put("lib/пояснення.lisp", "; Це лише документація\n")
+        result = scan(self.root, verify_bounded=True)
+        self.assertEqual(result["total_lisp_files"], 2)
+        self.assertEqual(result["comment_only_nonprogram_lisp"], 1)
+        self.assertEqual(result["potential_program_files"], 1)
+        self.assertEqual(result["potential_program_missing_sens"], 0)
+        self.assertEqual(result["bounded_verified"], 1)
+        self.assertTrue(result["all_bounded_reverse_verified"])
+        self.assertFalse(result["semantic_runtime_proven"])
+        self.assertFalse(result["release_ready"])
+
     def test_noncommented_lisp_is_never_auto_exempted_from_program_census(self):
         self.put("lib/опис.lisp", '; опис\n(визначити функцію так)\n')
         report = scan(self.root)
