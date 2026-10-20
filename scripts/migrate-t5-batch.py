@@ -149,7 +149,7 @@ def run(args: argparse.Namespace) -> dict:
 
     data = mig.load_foundation(INPUTS["foundation"])
     source_era = args.source_era
-    # Historical SID8 and its optional registry are retired. A source-era
+    # Historical сід8 and its optional registry are retired. A source-era
     # switch cannot revive identity re-interpretation; current D8 is exact.
     if source_era == "legacy":
         raise ValueError("RETIRED_SID8_SOURCE_ERA: use current ratified domain identities")
@@ -157,7 +157,7 @@ def run(args: argparse.Namespace) -> dict:
     d9_residents = set(data["domains"].get("D9", {}).get("residents", {}))
     if source_era == "current" and "D8" not in data.get("current_domains", ()):
         raise ValueError("current D8 source requires owner-ratified D8 foundation")
-    # The third map is historical SID8 research, never live batch authority.
+    # The third map is historical сід8 research, never live batch authority.
     # Keep current source-era fail-closed; do not import the bridge into Resolver.
     my, upper, _retired_sid8_bridge = mig.build_three_pass_maps(
         data, INPUTS["domain_surfaces"], INPUTS["semantic_generated"],
