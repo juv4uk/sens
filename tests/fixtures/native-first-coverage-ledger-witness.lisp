@@ -20,7 +20,7 @@
     (нехай ((вердикти (як-є (pass pass pass))))
       (за-умовою
         ((усі-перевірки-нативного-покриття-пройдено? вердикти)
-         (як-є (свідок-журналу-нативного-покриття (status pass))))
+         (як-є (native-first-coverage-ledger-witness (status pass))))
         (так
          (список
            (як-є native-first-coverage-ledger-witness)
