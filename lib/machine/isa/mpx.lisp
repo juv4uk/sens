@@ -1,5 +1,6 @@
-; Intel Memory Protection Extensions catalogue. Physical ISA facts only.
-; Availability is platform/OS gated even when the processor advertises MPX.
+; Каталог машинних команд Intel MPX (розширення захисту пам'яті).
+; Доступність залежить від платформи та ОС, навіть якщо процесор
+; повідомляє про підтримку MPX.
 
 (isa-catalogue/1
   (extension MPX)
