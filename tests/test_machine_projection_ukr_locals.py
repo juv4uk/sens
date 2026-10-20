@@ -23,6 +23,28 @@ SOURCE = {
 }
 
 
+# Лише історична доказова реконструкція до попереднього Git-знімка.
+# Жоден із цих латинських псевдонімів не належить чинному виконуваному Lisp.
+CURRENT_TAIL = """; Чинний виконавчий інтерфейс використовує тільки українські функції.
+; Старі англомовні дублікати прибрано без зміни машинних законів і даних.
+"""
+HISTORICAL_TAIL = """; Історичні імена зовнішнього інтерфейсу лише посилаються на ті самі функції.
+(визначити x86-project-machine-effect проєктувати-машинний-ефект-на-х86)
+(визначити x86-encode-machine-effect закодувати-машинний-ефект-на-х86)
+"""
+
+
+def historical_projection_source(source: str) -> str:
+    """Точно відновити лише вилучений історичний хвіст для Git-blob доказу."""
+    if not source.endswith(CURRENT_TAIL):
+        raise AssertionError("Чинна українська поверхня машинної проєкції змінилася")
+    if "(визначити x86-project-machine-effect" in source:
+        raise AssertionError("Виконуваний англійський псевдонім повернувся")
+    if "(визначити x86-encode-machine-effect" in source:
+        raise AssertionError("Виконуваний англійський псевдонім повернувся")
+    return source[:-len(CURRENT_TAIL)] + HISTORICAL_TAIL
+
+
 def rewrite_bound_atoms(text: str, words: dict[str, str]) -> tuple[str, int]:
     """Не змінювати коментарів, рядків або даних усередині (як-є ...)."""
     frames: list[dict[str, bool]] = []
@@ -100,9 +122,17 @@ class MachineUkrainianLocalBindingTests(unittest.TestCase):
             with self.subTest(path=path):
                 text = (ROOT / path).read_text(encoding="utf-8")
                 inverse = {dst: src for src, dst in projected.items()}
-                restored, count = rewrite_bound_atoms(text, inverse)
+                restored, count = rewrite_bound_atoms(historical_projection_source(text), inverse)
                 self.assertGreater(count, 0)
                 self.assertEqual(git_blob_sha1(restored), original)
+
+    def test_current_machine_projection_has_no_latin_aliases(self):
+        source = (ROOT / "lib/machine/projection/x86-64.lisp").read_text(encoding="utf-8")
+        self.assertEqual(source.count("(визначити проєктувати-машинний-ефект-на-х86"), 1)
+        self.assertEqual(source.count("(визначити закодувати-машинний-ефект-на-х86"), 1)
+        self.assertNotIn("(визначити x86-project-machine-effect", source)
+        self.assertNotIn("(визначити x86-encode-machine-effect", source)
+        self.assertTrue(historical_projection_source(source).endswith(HISTORICAL_TAIL))
 
     def test_projection_is_idempotent(self):
         for path, (_original, projected) in SOURCE.items():
@@ -128,7 +158,7 @@ class MachineUkrainianLocalBindingTests(unittest.TestCase):
         wrong = text.replace("(функція (ефект)", "(функція (лівий)", 1)
         self.assertNotEqual(wrong, text)
         inverse = {dst: src for src, dst in SOURCE[path][1].items()}
-        restored, _ = rewrite_bound_atoms(wrong, inverse)
+        restored, _ = rewrite_bound_atoms(historical_projection_source(wrong), inverse)
         self.assertNotEqual(git_blob_sha1(restored), SOURCE[path][0])
 
 
