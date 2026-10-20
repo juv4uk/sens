@@ -142,9 +142,9 @@ class MetaFirstClassUkrRemaining(unittest.TestCase):
 
     def test_current_source_is_full_ukrainian_and_has_no_sid8_heads(self):
         self.assertTrue(self.current.startswith(CURRENT_REWRITE_HEADER))
-        active = "\\n".join(line.split(";", 1)[0] for line in self.current.splitlines())
+        active = "\n".join(line.split(";", 1)[0] for line in self.current.splitlines())
         self.assertNotIn("#d1:", active)
-        self.assertNotRegex(active, r"(?m)^\\s*\\([01]{3,9}\\s")
+        self.assertNotRegex(active, r"(?m)^\s*\([01]{3,9}\s")
         for old_name in ("my-fc-eval", "my-fc-apply", "my-eval-first-class", "SID8", "Sens8"):
             self.assertNotIn(old_name, active)
         for name in REWRITTEN_HELPERS.values():
@@ -167,8 +167,8 @@ class MetaFirstClassUkrRemaining(unittest.TestCase):
         mutant = self.current.replace("(як-є менше?)", "(як-є 11010)", 1)
         self.assertNotEqual(mutant, self.current)
         self.assertNotIn("(як-є 11010)", self.current)
-        active_mutant = "\\n".join(line.split(";", 1)[0] for line in mutant.splitlines())
-        self.assertRegex(active_mutant, r"\\(як-є 11010\\)")
+        active_mutant = "\n".join(line.split(";", 1)[0] for line in mutant.splitlines())
+        self.assertIn("(як-є 11010)", active_mutant)
 
 
 if __name__ == "__main__":
