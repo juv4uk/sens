@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/translation.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:YES textual projection #d1:1 is present
+  2. D1:YES is the ratified exact 1-bit українська projection «так»
   3. Reuses knowledge validators (knowledge-proper-list?, knowledge-clause-valid?)
   4. Key translation surface present
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -23,17 +23,17 @@ ROOT = Path(__file__).resolve().parents[1]
 TRANS = ROOT / "lib" / "translation.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "#d1:1"
+D1_TRUE = "(1 (ук так) (укр так)"
 REQUIRED = (
-    "translation-status-valid?",
-    "translation-kind-valid?",
-    "translation-envelope-valid?",
-    "translation-review",
-    "translation-admittable?",
-    "knowledge-proper-list?",
-    "knowledge-clause-valid?",
-    "knowledge-goal-valid?",
-    "advice-decision",
+    "статус-запису-перекладу-коректний?",
+    "вид-кандидата-перекладу-коректний?",
+    "структура-обгортки-перекладу-коректна?",
+    "переклад-перевірка",
+    "переклад-допустимий?",
+    "правильно-структурований-список-знань?",
+    "клауза-бази-знань-коректна?",
+    "ціль-бази-знань-коректна?",
+    "рішення-на-основі-огляду-перекладу-й-поради",
 )
 
 
@@ -48,8 +48,11 @@ def check_translation() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"translation: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("translation: exact D1:YES textual projection #d1:1 missing")
+    d1_source = (ROOT / "lib" / "domains" / "d1.lisp").read_text(encoding="utf-8")
+    if D1_TRUE not in d1_source or "так" not in text:
+        errs.append("translation: D1:YES exact 1-bit Ukrainian projection missing")
+    if "#d1:" in text:
+        errs.append("translation: forbidden historical textual D1 literal")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"translation: required surface missing: {fn}")

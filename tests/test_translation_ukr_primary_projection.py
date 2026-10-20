@@ -80,10 +80,10 @@ class TranslationUkrPrimaryProjectionTests(unittest.TestCase):
                     old_primary.search(source),
                     f"{english}: старе англійське первинне визначення ще лишилося",
                 )
-                self.assertIn(
-                    f"(визначити {english} {ukrainian})",
+                self.assertNotRegex(
                     source,
-                    f"{english}: немає сумісного псевдоніма до того самого замикання",
+                    rf"(?m)^\(визначити\s+{re.escape(english)}(?=\s|\))",
+                    f"{english}: історична англійська DEFINE-голова не повинна існувати",
                 )
                 self.assertNotRegex(
                     source,
