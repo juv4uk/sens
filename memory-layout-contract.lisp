@@ -18,12 +18,12 @@
  (nan-marker . ((bits . 12) (position . (63 52)) (value . #xfff)))
 
  (fpga-lisp-compatibility .
-  "The lower 32-bit layout mirrors the fpga-lisp VALUE WORD shape only.
-   bits (31 28) = tag
-   bits (27 0) = payload
-   This does not make tag ordinals or FPGA instruction opcodes language semantics.")
+  "Молодші 32 біти лише повторюють форму VALUE WORD із fpga-lisp.
+   біти (31 28) = тег
+   біти (27 0) = корисне навантаження
+   Це не робить номери тегів чи машинні коди FPGA семантикою мови.")
 
- (layout . ((float . "IEEE-754 64-bit double (when exponent is not all 1s)")
+ (layout . ((float . "64-бітне число подвійної точності IEEE-754 (коли біти показника не всі одиниці)")
             (tagged . ((nan-marker . (63 52))
                        (extended-payload . (51 32))
                        (tag . (31 28))
@@ -41,8 +41,8 @@
           (tcp-conn . 9))) ; Нове: дескриптор ресурсу зовнішнього середовища
 
  (heap-representation .
-  ((string . "null-terminated UTF-8 byte array")
-   (rational . "two consecutive 64-bit pointers (numerator, denominator) to BigInt blocks")
-   (closure . "two consecutive 64-bit pointers (environment, compiled-code-pointer)")))
+  ((string . "Масив байтів UTF-8 із кінцевим нульовим байтом")
+   (rational . "Два послідовні 64-бітні вказівники на блоки BigInt (чисельник і знаменник)")
+   (closure . "Два послідовні 64-бітні вказівники (оточення та скомпільований код)")))
 
- (notes . "Mechanism/history evidence only. Current SENS semantics must not inherit these tag ordinals; any backend using this layout must prove conformance independently."))
+ (notes . "Лише історичне свідчення про механізм. Чинна семантика СЕНС не успадковує порядкових номерів цих тегів; кожний виконавець, що застосовує цей формат, повинен незалежно довести відповідність."))
