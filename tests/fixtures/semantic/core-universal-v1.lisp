@@ -1,15 +1,14 @@
 ; tests/fixtures/semantic/core-universal-v1.lisp — #1709.
-; Спільний корпус: ці очікування мають бути однаковими під кожним профілем
-; (native evaluator, Core1, Core2, Core3, Core4). Якщо ядро дає іншу
-; відповідь, ніж нативний рантайм, це розбіжність, а не особливість профілю.
-; Rust не має права «підлаштовувати» очікування під профіль: воно переносить
-; фактичний результат, а вердикт виносить Lisp.
+; Універсальний корпус семантичних очікувань для всіх профілів СЕНС:
+; нативного обчислювача, Core1, Core2, Core3 та Core4.
+; Якщо різні профілі повертають різні результати для одного закону,
+; це семантична розбіжність, а не допустима властивість профілю.
+; Rust переносить фактичний результат, але не встановлює очікувань
+; і не має права змінювати їх залежно від профілю.
+; Мовний вердикт залишається відповідальністю Lisp СЕНС.
 ;
-; Shared corpus: these expectations must be identical under every profile
-; (native evaluator, Core1, Core2, Core3, Core4). If a core answers
-; differently from the native runtime, that is a divergence, not a profile
-; feature. Rust may not adapt expectations per profile: it transports the
-; actual result, Lisp delivers the verdict.
+; Старі координати, цитовані вирази й поля результатів нижче збережені
+; для порівняння з історичними свідченнями без перепризначення кодів.
 
 ((expect . expect-value)
  (expr . "(00100010 1 1)")
