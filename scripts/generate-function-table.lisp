@@ -1,16 +1,14 @@
-; scripts/generate-function-table.lisp — regenerate the ECO-CANON-1 function
-; table (my-lisp#75) from its real source of truth, written in my-lisp
-; itself (2026-09-12), replacing the retired scripts/generate-function-table.py
-; per issue #76 (ECO-LISP-SCRIPTS-1): repo-owned tooling must not add new
-; Python scripting surface, and tooling should be written directly in
-; my-lisp/wsm rather than migrated later.
+; Відтворення таблиці функцій ECO-CANON-1 (my-lisp#75) із першоджерела.
+; Генератор написано самою мовою СЕНС (2026-09-12). Він замінив
+; вилучений scripts/generate-function-table.py за завданням #76.
+; Інструменти репозиторію створюємо мовою СЕНС, а не шляхом
+; додавання нових сценаріїв Python для подальшого перенесення.
 ;
-; This script renders the historical flat registry only as a migration/review
-; projection. Canonical language authority is exact domain identity + admitted
-; law. Row count and legacy eight-bit position are not language invariants.
-; Reads the historical surface registry as ordinary my-lisp data
-; (read-file/read-all), not text/regex — the registry is already valid
-; my-lisp source, so no foreign parser is needed.
+; Історичний плаский реєстр відтворюємо лише для перевірки й міграції.
+; Канонічна тотожність — точний домен, слово та допущений закон.
+; Кількість рядків і давня восьмибітна позиція не є інваріантами мови.
+; Історичний реєстр читаємо як дані Lisp, а не текстовим пошуком:
+; сторонній розбирач для читання коректного джерела СЕНС не потрібен.
 ;
 ; The human projection may also join processor-specific realization metadata.
 ; That metadata is deliberately NOT semantic authority: the Intel Core i5-6400
@@ -34,69 +32,69 @@
 ; Registry surfaces are fixed two-element rows: (namespace spelling-or-()).
 ; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
-(визначити registry-form (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
-(визначити registry-rows registry-form)
+(визначити форма-реєстру (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
+(визначити рядки-реєстру форма-реєстру)
 ; Historical rows are retained only for migration/provenance consumers.
 ; Their eight-bit coordinates do not create canonical language identity.
-(визначити entries registry-rows)
+(визначити записи-реєстру рядки-реєстру)
 
 ; Processor realization projection. Its rows never create an identity: they
 ; may only annotate IDs that already exist in `entries` above.
-(визначити machine-profile-form
+(визначити форма-машинного-профілю
   (перше (читати-всі (читати-файл "lib/machine/intel-core-i5-6400.lisp"))))
 
-(визначити find-section
+(визначити знайти-розділ
   (функція (name sections)
     (за-умовою
       ((атом? sections) (як-є ()))
       
       ((тотожне? (перше (перше sections)) name) (перше sections))
-      ((атом? (як-є ())) (find-section name (решта sections))))))
+      ((атом? (як-є ())) (знайти-розділ name (решта sections))))))
 
-(визначити machine-rows
-  (решта (find-section (як-є rows) (решта machine-profile-form))))
+(визначити машинні-рядки
+  (решта (знайти-розділ (як-є rows) (решта форма-машинного-профілю))))
 
-(визначити find-machine-row
+(визначити знайти-машинний-рядок
   (функція (sid rows)
     (за-умовою
       ((атом? rows) (як-є ()))
       
       ((однакові? (перше (перше rows)) sid) (перше rows))
-      ((атом? (як-є ())) (find-machine-row sid (решта rows))))))
+      ((атом? (як-є ())) (знайти-машинний-рядок sid (решта rows))))))
 
-(визначити machine-path
+(визначити машинний-шлях
   (функція (sid)
-    (нехай ((row (find-machine-row sid machine-rows)))
+    (нехай ((row (знайти-машинний-рядок sid машинні-рядки)))
       (за-умовою ((атом? row) "()") ((атом? (як-є ())) (третє row))))))
 
 ; Historical (McCarthy 1960 / Lisp 1.5) realization projection. Its rows
 ; never create an identity: they may only annotate IDs that already exist
 ; in `entries` above. Reverse-authority is forbidden by the contract file
 ; itself -- a historical name never mints a new my-lisp SID.
-(визначити historical-profile-form
+(визначити форма-історичного-профілю
   (перше (читати-всі (читати-файл "contracts/core1-historical-sid-map.lisp"))))
 
-(визначити historical-rows
-  (решта (find-section (як-є rows) (решта historical-profile-form))))
+(визначити історичні-рядки
+  (решта (знайти-розділ (як-є rows) (решта форма-історичного-профілю))))
 
-(визначити find-historical-row
+(визначити знайти-історичний-рядок
   (функція (sid rows)
     (за-умовою
       ((атом? rows) (як-є ()))
       
       ((однакові? (друге (перше rows)) sid) (перше rows))
-      ((атом? (як-є ())) (find-historical-row sid (решта rows))))))
+      ((атом? (як-є ())) (знайти-історичний-рядок sid (решта rows))))))
 
-(визначити mccarthy-label
+(визначити позначка-маккарті
   (функція (sid)
-    (нехай ((row (find-historical-row sid historical-rows)))
-      (110 ((010 row) "()") ((010 (001 ())) (str+ (11110100 (100111 row)) " (" (11110100 (110110101 row)) ")"))))))
+    (нехай ((row (знайти-історичний-рядок sid історичні-рядки)))
+      (110 ((010 row) "()") ((010 (001 ())) (поєднати-рядки (11110100 (100111 row)) " (" (11110100 (110110101 row)) ")"))))))
 
 ; A surface word is usually a symbol (write-to-string strips the
 ; Lisp-level Symbol wrapping down to bare text); the reconstructed
 ; apostrophe case above is already a plain string. For prose contexts
 ; (the human .md table) the bare apostrophe is fine either way.
-(визначити surface-word-text
+(визначити текст-слова-проєкції
   (функція (word)
     (за-умовою
       ((однакові? word (як-є ())) "()")
@@ -112,34 +110,34 @@
 ; already does exactly the right thing per Value type -- a String gets
 ; quoted/escaped (read-back-safe), a Symbol stays bare -- so this is
 ; just write-to-string directly, named for what it's used for here.
-(визначити surface-word-wsm-text write-to-string)
+(визначити текст-слова-проєкції-сенс write-to-string)
 
 ; --- string-append is exactly binary; this repo's scripts routinely need
 ; more pieces joined than that, so a small variadic wrapper over reduce.
-(визначити str+
+(визначити поєднати-рядки
   (функція args (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
 ; SID already arrives from the registry as an exact 8-bit string. This generator
 ; must preserve it verbatim; formatting identity is owned by the registry.
 
 ; --- surfaces are fixed (lang word) slots; word is spelling or () ---
-(визначити find-surface
+(визначити знайти-проєкцію
   (функція (lang surfaces)
     (за-умовою
       ((атом? surfaces) (як-є ()))
       
       ((тотожне? (перше (перше surfaces)) lang) (перше surfaces))
-      ((атом? (як-є ())) (find-surface lang (решта surfaces))))))
+      ((атом? (як-є ())) (знайти-проєкцію lang (решта surfaces))))))
 
-(визначити surface-word
+(визначити слово-проєкції
   (функція (surface-entry)
     (за-умовою ((атом? surface-entry) (як-є ())) ((атом? (як-є ())) (перше (решта surface-entry))))))
 
-(визначити get-surface
+(визначити отримати-проєкцію
   (функція (lang surfaces)
-    (surface-word (find-surface lang surfaces))))
+    (слово-проєкції (знайти-проєкцію lang surfaces))))
 
-(визначити surface-usable?
+(визначити проєкція-придатна?
   (функція (word)
     (хибне? (однакові? word (як-є ())))))
 
@@ -147,23 +145,23 @@
 ; SID is already a first-class exact eight-bit identity. Its canonical printer
 ; preserves the exact spelling including leading zeroes; do not reinterpret it
 ; as arithmetic data merely to reconstruct the same source identity.
-(визначити sid-bits
+(визначити історичні-біти-ідентифікатора
   (функція (sid)
     (значення-у-текст sid)))
 
-(визначити formal-stub
+(визначити формальна-заготовка
   (функція (sid surfaces)
-    (нехай-послідовно ((en (get-surface (як-є en) surfaces))
-           (ук (get-surface (як-є ук) surfaces))
-           (sa (get-surface (як-є sa) surfaces)))
+    (нехай-послідовно ((en (отримати-проєкцію (як-є en) surfaces))
+           (ук (отримати-проєкцію (як-є ук) surfaces))
+           (sa (отримати-проєкцію (як-є sa) surfaces)))
       (за-умовою
-        ((surface-usable? en)
-         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text en)))
-        ((surface-usable? ук)
-         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text ук)))
-        ((surface-usable? sa)
-         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text sa)))
-        ((атом? (як-є ())) (рядок-додати "identity:" (sid-bits sid)))))))
+        ((проєкція-придатна? en)
+         (поєднати-рядки "identity:" (історичні-біти-ідентифікатора sid) "/surface:" (текст-слова-проєкції en)))
+        ((проєкція-придатна? ук)
+         (поєднати-рядки "identity:" (історичні-біти-ідентифікатора sid) "/surface:" (текст-слова-проєкції ук)))
+        ((проєкція-придатна? sa)
+         (поєднати-рядки "identity:" (історичні-біти-ідентифікатора sid) "/surface:" (текст-слова-проєкції sa)))
+        ((атом? (як-є ())) (рядок-додати "identity:" (історичні-біти-ідентифікатора sid)))))))
 
 ; Historical projection intentionally has no 256-row completeness law.
 ; Exact domains grow under their own widths, occupancy maps, and admitted laws.
@@ -174,55 +172,55 @@
 ; is not tail-recursive (the recursive call sits inside str+'s argument
 ; list, not in tail position) and overflows the host stack well before
 ; this registry's complete row set.
-(визначити join-newline-onto
+(визначити поєднати-рядки-з-новим-рядком-до
   (функція (strings acc)
     (за-умовою
       ((атом? strings) acc)
       
-      ((тотожне? acc "") (join-newline-onto (решта strings) (перше strings)))
-      ((атом? (як-є ())) (join-newline-onto (решта strings) (str+ acc "
+      ((тотожне? acc "") (поєднати-рядки-з-новим-рядком-до (решта strings) (перше strings)))
+      ((атом? (як-є ())) (поєднати-рядки-з-новим-рядком-до (решта strings) (поєднати-рядки acc "
 " (перше strings)))))))
 
-(визначити join-newline (функція (strings) (join-newline-onto strings "")))
+(визначити поєднати-рядки-з-новим-рядком (функція (strings) (поєднати-рядки-з-новим-рядком-до strings "")))
 
-(визначити render-wsm-row
+(визначити подати-рядок-сенс
   (функція (entry)
     (нехай-послідовно ((sid (перше entry))
            (surfaces (решта entry))
-           (ук (get-surface (як-є ук) surfaces))
-           (укр (get-surface (як-є укр) surfaces))
-           (en (get-surface (як-є en) surfaces))
-           (sa (get-surface (як-є sa) surfaces))
-           (sym (get-surface (як-є sym) surfaces))
-           (formal (formal-stub sid surfaces)))
-      (str+
-        "  (" (sid-bits sid) " " formal
-        " (ук " (surface-word-wsm-text ук) ")"
-        " (укр " (surface-word-wsm-text укр) ")"
-        " (en " (surface-word-wsm-text en) ")"
-        " (sa " (surface-word-wsm-text sa) ")"
-        " (sym " (surface-word-wsm-text sym) ")"
+           (ук (отримати-проєкцію (як-є ук) surfaces))
+           (укр (отримати-проєкцію (як-є укр) surfaces))
+           (en (отримати-проєкцію (як-є en) surfaces))
+           (sa (отримати-проєкцію (як-є sa) surfaces))
+           (sym (отримати-проєкцію (як-є sym) surfaces))
+           (formal (формальна-заготовка sid surfaces)))
+      (поєднати-рядки
+        "  (" (історичні-біти-ідентифікатора sid) " " formal
+        " (ук " (текст-слова-проєкції-сенс ук) ")"
+        " (укр " (текст-слова-проєкції-сенс укр) ")"
+        " (en " (текст-слова-проєкції-сенс en) ")"
+        " (sa " (текст-слова-проєкції-сенс sa) ")"
+        " (sym " (текст-слова-проєкції-сенс sym) ")"
         " my-lisp)"))))
 
-(визначити render-md-row
+(визначити подати-рядок-довідника
   (функція (entry)
     (нехай-послідовно ((sid (перше entry))
            (surfaces (решта entry))
-           (ук (get-surface (як-є ук) surfaces))
-           (укр (get-surface (як-є укр) surfaces))
-           (en (get-surface (як-є en) surfaces))
-           (sa (get-surface (як-є sa) surfaces))
-           (sym (get-surface (як-є sym) surfaces)))
-      (str+
-        "| `" (sid-bits sid) "` | " (surface-word-text ук)
-        " | " (surface-word-text укр)
-        " | " (surface-word-text en)
-        " | " (surface-word-text sa)
-        " | " (surface-word-text sym)
-        " | " (machine-path sid)
-        " | " (mccarthy-label sid) " |"))))
+           (ук (отримати-проєкцію (як-є ук) surfaces))
+           (укр (отримати-проєкцію (як-є укр) surfaces))
+           (en (отримати-проєкцію (як-є en) surfaces))
+           (sa (отримати-проєкцію (як-є sa) surfaces))
+           (sym (отримати-проєкцію (як-є sym) surfaces)))
+      (поєднати-рядки
+        "| `" (історичні-біти-ідентифікатора sid) "` | " (текст-слова-проєкції ук)
+        " | " (текст-слова-проєкції укр)
+        " | " (текст-слова-проєкції en)
+        " | " (текст-слова-проєкції sa)
+        " | " (текст-слова-проєкції sym)
+        " | " (машинний-шлях sid)
+        " | " (позначка-маккарті sid) " |"))))
 
-(визначити wsm-header
+(визначити заголовок-сенс
   (список
     "; GENERATED — DO NOT EDIT BY HAND"
     "; HISTORICAL MIGRATION PROJECTION — NOT SEMANTIC AUTHORITY"
@@ -235,12 +233,12 @@
     ""
     "(ft/2"))
 
-(визначити wsm-body (join-newline (приєднати wsm-header (відобразити render-wsm-row entries))))
-(визначити wsm-output (рядок-додати wsm-body "
+(визначити тіло-сенс (поєднати-рядки-з-новим-рядком (приєднати заголовок-сенс (відобразити подати-рядок-сенс записи-реєстру))))
+(визначити вивід-сенс (рядок-додати тіло-сенс "
 )
 "))
 
-(визначити md-header
+(визначити заголовок-довідника
   (список
     "# Function table (generated projection)"
     ""
@@ -255,40 +253,40 @@
     "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake | McCarthy 1960 / Lisp 1.5 (Core1) |"
     "|----|----|-----|---------|----------|--------|------------------------------|-----------------------------------|"))
 
-(визначити md-body (join-newline (приєднати md-header (відобразити render-md-row entries))))
-(визначити md-output (рядок-додати md-body "
+(визначити тіло-довідника (поєднати-рядки-з-новим-рядком (приєднати заголовок-довідника (відобразити подати-рядок-довідника записи-реєстру))))
+(визначити вивід-довідника (рядок-додати тіло-довідника "
 "))
 
-(визначити wsm-output-path "lib/generated/function-table.lisp")
-(визначити md-output-path "docs/generated/function-table.md")
+(визначити шлях-виводу-сенс "lib/generated/function-table.lisp")
+(визначити шлях-виводу-довідника "docs/generated/function-table.md")
 
-(визначити write-projections
+(визначити записати-проєкції
   (функція ()
     (друге
       (список
-        (записати-файл wsm-output-path wsm-output)
-        (записати-файл md-output-path md-output)
+        (записати-файл шлях-виводу-сенс вивід-сенс)
+        (записати-файл шлях-виводу-довідника вивід-довідника)
         (11011011
-          (str+
+          (поєднати-рядки
             "function-table: "
-            (число-рядок (довжина entries))
+            (число-рядок (довжина записи-реєстру))
             " historical projection rows written"))))))
 
 ; The projection payloads and argv selector below are strings, hence atoms.
 ; Use exact D3:101 EQ (3 bits), not the wider D8:11110111 structural EQUAL.
 ; This is a source-identity narrowing only; no physical T5 size claim follows.
-(визначити check-projections
+(визначити перевірити-проєкції
   (функція ()
-    (нехай ((current-wsm (читати-файл wsm-output-path))
-          (current-md (читати-файл md-output-path)))
+    (нехай ((current-wsm (читати-файл шлях-виводу-сенс))
+          (current-md (читати-файл шлях-виводу-довідника)))
       (за-умовою
-        ((тотожне? current-wsm wsm-output)
+        ((тотожне? current-wsm вивід-сенс)
          (за-умовою
-           ((тотожне? current-md md-output)
+           ((тотожне? current-md вивід-довідника)
             (11011011
-              (str+
+              (поєднати-рядки
                 "function-table: "
-                (число-рядок (довжина entries))
+                (число-рядок (довжина записи-реєстру))
                 " historical projection rows current")))
            ((атом? (як-є ()))
             (друге
@@ -303,8 +301,8 @@
 
 (за-умовою
   ((атом? *argv*)
-   (write-projections))
+   (записати-проєкції))
   ((тотожне? (перше *argv*) "--check")
-   (check-projections))
+   (перевірити-проєкції))
   ((атом? (як-є ()))
-   (write-projections)))
+   (записати-проєкції)))
