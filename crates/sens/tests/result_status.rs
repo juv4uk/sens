@@ -65,7 +65,7 @@ fn eval_reason_observation(source: &str) -> String {
 fn make_proved_preserves_statement_and_all_results() {
     assert_eq!(
         eval_result_status(
-            r#"(make-proved (quote (parent alice bob)) (quote ((subst-a proof-a) (subst-b proof-b))))"#
+            r#"(створити-доведений (quote (parent alice bob)) (quote ((subst-a proof-a) (subst-b proof-b))))"#
         ),
         "(proved (parent alice bob) ((subst-a proof-a) (subst-b proof-b)))"
     );
@@ -74,7 +74,7 @@ fn make_proved_preserves_statement_and_all_results() {
 #[test]
 fn make_unknown_tags_a_subject() {
     assert_eq!(
-        eval_result_status(r#"(make-unknown (quote no-rules-for-predicate))"#),
+        eval_result_status(r#"(створити-невідоме (quote no-rules-for-predicate))"#),
         "(unknown no-rules-for-predicate)"
     );
 }
@@ -82,7 +82,7 @@ fn make_unknown_tags_a_subject() {
 #[test]
 fn make_partial_tags_a_value_and_a_bound() {
     assert_eq!(
-        eval_result_status(r#"(make-partial (quote ()) (quote (depth . 12)))"#),
+        eval_result_status(r#"(створити-частковий (quote ()) (quote (depth . 12)))"#),
         "(partial () (depth . 12))"
     );
 }
@@ -91,7 +91,7 @@ fn make_partial_tags_a_value_and_a_bound() {
 fn make_blocked_tags_a_reason() {
     assert_eq!(
         eval_result_status(
-            r#"(make-blocked (quote (depends-on PANINI-BRIDGE-MY-LISP-SYNTAX-CONVERSION)))"#
+            r#"(створити-заблокований (quote (depends-on PANINI-BRIDGE-MY-LISP-SYNTAX-CONVERSION)))"#
         ),
         "(blocked (depends-on PANINI-BRIDGE-MY-LISP-SYNTAX-CONVERSION))"
     );
@@ -100,7 +100,7 @@ fn make_blocked_tags_a_reason() {
 #[test]
 fn make_disputed_tags_evidence() {
     assert_eq!(
-        eval_result_status(r#"(make-disputed (list (quote proof-a) (quote proof-b)))"#),
+        eval_result_status(r#"(створити-спірний (list (quote proof-a) (quote proof-b)))"#),
         "(disputed (proof-a proof-b))"
     );
 }
@@ -108,7 +108,7 @@ fn make_disputed_tags_evidence() {
 #[test]
 fn make_invalid_keeps_reason_and_payload() {
     assert_eq!(
-        eval_result_status(r#"(make-invalid (quote malformed-goal) 42)"#),
+        eval_result_status(r#"(створити-некоректний (quote malformed-goal) 42)"#),
         "(invalid malformed-goal 42)"
     );
 }
@@ -116,12 +116,12 @@ fn make_invalid_keeps_reason_and_payload() {
 #[test]
 fn result_status_extracts_every_canonical_tag() {
     for (source, expected) in [
-        ("(result-status (make-proved (quote x) (quote ())))", "proved"),
-        ("(result-status (make-unknown (quote x)))", "unknown"),
-        ("(result-status (make-partial 1 2))", "partial"),
-        ("(result-status (make-blocked (quote x)))", "blocked"),
-        ("(result-status (make-disputed (quote ())))", "disputed"),
-        ("(result-status (make-invalid (quote x) 1))", "invalid"),
+        ("(результат-стан (створити-доведений (quote x) (quote ())))", "proved"),
+        ("(результат-стан (створити-невідоме (quote x)))", "unknown"),
+        ("(результат-стан (створити-частковий 1 2))", "partial"),
+        ("(результат-стан (створити-заблокований (quote x)))", "blocked"),
+        ("(результат-стан (створити-спірний (quote ())))", "disputed"),
+        ("(результат-стан (створити-некоректний (quote x) 1))", "invalid"),
     ] {
         assert_eq!(eval_result_status(source), expected);
     }
@@ -130,7 +130,7 @@ fn result_status_extracts_every_canonical_tag() {
 #[test]
 fn result_payload_extracts_everything_after_the_tag() {
     assert_eq!(
-        eval_result_status(r#"(result-payload (make-partial 1 2))"#),
+        eval_result_status(r#"(результат-вміст (створити-частковий 1 2))"#),
         "(1 2)"
     );
 }
@@ -163,10 +163,10 @@ fn ukrainian_status_predicate_rejects_composite_head_as_d1_no() {
 #[test]
 fn result_status_predicates_are_exact_d1_bits() {
     for (source, expected) in [
-        ("(результат-позначений? (make-unknown (quote x)))", true),
+        ("(результат-позначений? (створити-невідоме (quote x)))", true),
         ("(результат-позначений? 42)", false),
-        ("(result-proper-list? (quote (a b)))", true),
-        ("(result-proper-list? (quote (a . b)))", false),
+        ("(результат-є-правильним-списком? (quote (a b)))", true),
+        ("(результат-є-правильним-списком? (quote (a . b)))", false),
         ("(результат-не-є-головою-правила? (quote not?))", true),
         ("(результат-не-є-головою-правила? (quote other))", false),
     ] {
@@ -181,7 +181,7 @@ fn result_status_predicates_are_exact_d1_bits() {
 
 #[test]
 fn result_status_of_an_untagged_value_is_nil() {
-    assert_eq!(eval_result_status(r#"(result-status 42)"#), "()");
+    assert_eq!(eval_result_status(r#"(результат-стан 42)"#), "()");
 }
 
 #[test]
@@ -216,7 +216,7 @@ fn reason_observe_reports_dispute_when_both_sides_are_provable() {
                  ((not? (mortal socrates)))
                ))))
           (let ((outcome (reason-observe (quote (mortal socrates)) rules)))
-            (list (result-status outcome) (length (second outcome)))))
+            (list (результат-стан outcome) (length (second outcome)))))
     "#;
     assert_eq!(eval_reason_observation(source), "(disputed 2)");
 }
