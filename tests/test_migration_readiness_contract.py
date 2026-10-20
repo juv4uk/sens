@@ -82,6 +82,32 @@ class ReadinessContractTests(unittest.TestCase):
         mock.start()
         self.addCleanup(mock.stop)
 
+
+    def test_original_source_symlinks_are_rejected_before_resolution(self):
+        # Джерело перевіряється до розіменування. Ніяких SENS-fake тестів.
+        import tempfile
+        with tempfile.TemporaryDirectory(prefix="sens-source-path-") as td:
+            root = Path(td) / "source"
+            root.mkdir()
+            source = root / "програма.lisp"
+            source.write_text("(так)\n", encoding="utf-8")
+            self.assertEqual(census.checked_original_source(root, "програма.lisp"), source)
+            (root / "підміна.lisp").symlink_to(source)
+            outside = Path(td) / "outside"
+            outside.mkdir()
+            (outside / "зовнішня.lisp").write_text("(так)\n", encoding="utf-8")
+            (root / "каталог").symlink_to(outside, target_is_directory=True)
+            for name in ("підміна.lisp", "каталог/зовнішня.lisp"):
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(RuntimeError, "symlink source"):
+                        census.checked_original_source(root, name)
+            for name in ("../outside/зовнішня.lisp", "немає.lisp",
+                         "./програма.lisp", "програма.lisp/../програма.lisp"):
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(RuntimeError, "unsafe/missing source"):
+                        census.checked_original_source(root, name)
+            self.assertFalse(list(root.rglob("*.sens")))
+
     def test_uses_owner_ratified_d1_d11_not_stale_d1_d9(self):
         assert (ROOT / "knowledge" / "d1-d11-foundation.json").is_file()
         self.assertIn("--foundation", census.ARTIFACT_ARGS)
