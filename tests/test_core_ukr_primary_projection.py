@@ -137,7 +137,7 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             start = racket_core.index("(визначити число-рядок")
             end = racket_core.index("; -> / ->> (thread-first / thread-last macros)", start)
             renderer = racket_core[start:end]
-            self.assertNotRegex(renderer, r"\\([01]{3,9}(?=\\s|\\))")
+            self.assertNotRegex(renderer, r"\([01]{3,9}(?=\s|\))")
 
         dependency_classifier = source("scripts/build-dependency-classification.lisp")
         with self.subTest(file="scripts/build-dependency-classification.lisp", migration="canonical decimal rendering"):
