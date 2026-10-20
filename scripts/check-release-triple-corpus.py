@@ -86,6 +86,32 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
+    # This schema is only a mechanical T5M/view inventory, never an
+    # independently admitted Ukrainian semantic oracle or release certificate.
+    # Even self-consistent forged positive counters must fail closed.
+    if (
+        r.get("status") not in (
+            "NO_FILES", "BLOCKED", "INCOMPLETE_VIEWS",
+            "PHYSICAL_VIEW_ONLY_UK_PENDING",
+        )
+        or r.get("strict") is not True
+        or s.get("original_executable_migrations_certified") != 0
+        or s["uk_oracle_verified"] != 0
+        or s["release_admitted"] != 0
+        or any(
+            row.get("uk_oracle") != "NOT_VERIFIED"
+            or row.get("release_admitted") is not False
+            or row.get("original_executable_migration_credit") != 0
+            for row in rows
+        )
+    ):
+        print(
+            "RELEASE_BLOCKED: a physical inventory cannot certify "
+            "Ukrainian semantics or release admission; independent "
+            "exact-SHA evidence is required",
+            file=sys.stderr,
+        )
+        return 1
     print("RELEASE_TRIPLE_DEBT", json.dumps(s, sort_keys=True))
     # Inventory cannot claim independent Ukrainian oracle for all canaries.
     # A ratified proof ledger must be consumed; never promote one D1 witness.
