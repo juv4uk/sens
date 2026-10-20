@@ -137,9 +137,9 @@ fn result_payload_extracts_everything_after_the_tag() {
 
 #[test]
 fn an_ordinary_value_is_not_a_tagged_result() {
-    assert_eq!(eval_result_status(r#"(result-tagged? 42)"#), "0");
+    assert_eq!(eval_result_status(r#"(результат-позначений? 42)"#), "0");
     assert_eq!(
-        eval_result_status(r#"(result-tagged? (quote (a b c)))"#),
+        eval_result_status(r#"(результат-позначений? (quote (a b c)))"#),
         "0"
     );
 }
@@ -163,12 +163,12 @@ fn ukrainian_status_predicate_rejects_composite_head_as_d1_no() {
 #[test]
 fn result_status_predicates_are_exact_d1_bits() {
     for (source, expected) in [
-        ("(result-tagged? (make-unknown (quote x)))", true),
-        ("(result-tagged? 42)", false),
+        ("(результат-позначений? (make-unknown (quote x)))", true),
+        ("(результат-позначений? 42)", false),
         ("(result-proper-list? (quote (a b)))", true),
         ("(result-proper-list? (quote (a . b)))", false),
-        ("(result-not-head? (quote not?))", true),
-        ("(result-not-head? (quote other))", false),
+        ("(результат-не-є-головою-правила? (quote not?))", true),
+        ("(результат-не-є-головою-правила? (quote other))", false),
     ] {
         let value = eval_result_status_value(source);
         assert_eq!(
