@@ -2,61 +2,53 @@
 ; Lisp's existing addition is the answer key. The machine layer realizes the
 ; same inputs twice: once through the canonical bounded lowerer (RCX scratch),
 ; once through an alternate admitted register choice (R8 scratch).
-; The shell observes only the named pass/fail envelope.
+; Ukrainian projection only.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
 (load "lib/machine/admission/x86-64.lisp")
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 
-(00001001 machine-representation-semantic-reference (00001100 2 3))
+(визначити machine-representation-semantic-reference (додати 2 3))
 
-(00001001 machine-representation-primary
+(визначити machine-representation-primary
   (викликати-допущену-машинну-програму
     (x86-lower-add-u64-forms 2 3)
     0))
 
-(00001001 machine-representation-alternate
+(визначити machine-representation-alternate
   (викликати-допущену-машинну-програму
-    (00000001
+    (як-є
       ((mov-r64-imm64 rax 2)
        (mov-r64-imm64 r8 3)
        (add-r64-r64 rax r8)
        (ret)))
     0))
 
-(00001001 machine-representation-witness
-  (00001000 ()
-    (00000111
-      ((00100010
+(визначити machine-representation-witness
+  (функція ()
+    (за-умовою
+      ((тотожне?
          machine-representation-primary
          machine-representation-semantic-reference)
-       (1)
-       (00000111
-         ((00100010
+       (за-умовою
+         ((тотожне?
             machine-representation-alternate
             machine-representation-semantic-reference)
-          (1)
-          (00000001 (machine-representation-independence-witness (status pass))))
-         ((00100010
-            machine-representation-alternate
-            machine-representation-semantic-reference)
-          (0)
-          (00100111
-            (00000001 machine-representation-independence-witness)
-            (00000001 (status fail))
-            (00100111 (00000001 case) (00000001 alternate-register))
-            (00100111 (00000001 semantic) machine-representation-semantic-reference)
-            (00100111 (00000001 actual) machine-representation-alternate)))))
-      ((00100010
-         machine-representation-primary
-         machine-representation-semantic-reference)
-       (0)
-       (00100111
-         (00000001 machine-representation-independence-witness)
-         (00000001 (status fail))
-         (00100111 (00000001 case) (00000001 canonical-register))
-         (00100111 (00000001 semantic) machine-representation-semantic-reference)
-         (00100111 (00000001 actual) machine-representation-primary))))))
+          (як-є (machine-representation-independence-witness (status pass))))
+         (так
+          (список
+            (як-є machine-representation-independence-witness)
+            (як-є (status fail))
+            (список (як-є case) (як-є alternate-register))
+            (список (як-є semantic) machine-representation-semantic-reference)
+            (список (як-є actual) machine-representation-alternate)))))
+      (так
+       (список
+         (як-є machine-representation-independence-witness)
+         (як-є (status fail))
+         (список (як-є case) (як-є canonical-register))
+         (список (як-є semantic) machine-representation-semantic-reference)
+         (список (як-є actual) machine-representation-primary))))))
 
 (machine-representation-witness)
