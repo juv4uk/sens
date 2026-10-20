@@ -2,6 +2,8 @@
 
 > **DRAFT · NO-GO (2026-10-12).** Не є release certificate. Цей файл навмисно відокремлює **підтверджену мовну ратифікацію** від **ще не перевіреної готовності конкретного релізного SHA**. Невідоме = BLOCK, не PASS.
 
+**Уточнення 21.10.2026 до чинного контракту 11.9:** для нових фізичних файлів `.sens` типовим є **Zig/T5M**, не історичний T5. Легкі статичні аудити та побайтовий roundtrip не підтверджують еквівалентності виконання; перевіряти програму на незалежному SENS reader/eval. Відсутність релізного свідка зупиняє тільки непідтверджений тег/публікацію, не незалежні виправлення в `main`. Червоне виправляти за фактичною причиною, без нових загальних HOLD/FREEZE чи приховування тестів.
+
 ## 2026-10-14 · Точковий meta-eval non-atom proof
 
 - [d92fde6](https://github.com/juv4uk/sens/commit/d92fde6d7fe3c1f13aeeb15bb01801c810597d86): захист D3:101 EQ від неатомарного імені без нового мовного дозволу.
@@ -33,7 +35,8 @@
 | D1–D9 | Ратифікований фундамент Contract 11.9 | **NOT YET CERTIFIED ON CANDIDATE SHA** |
 | D10 | Whole-domain 1024/1024 ратифіковано 2026-10-12 | F1/F2/F3/runtime/T5: **PENDING**, не називати 1024 callable |
 | D24+ | Окрема ратифікована числова драбина | Повне загальне physical T5 admission: **NOT CLAIMED** |
-| T5 (`.sens`) | General/default physical carrier | Whole release executable corpus parity: **PENDING** |
+| T5M (`.sens`) | Чинний типовий фізичний носій; Zig пакує точні слова, але не встановлює семантику | Оберненість усього виконуваного корпусу та незалежний SENS runtime parity: **PENDING** |
+| Історичний T5 | Лише явний сумісний маршрут; самі фізичні байти деяких коротких слів можуть бути T5M-сумісними | Не є окремим дозволом на виконання чи свідком релізу |
 | F3C (`.senc`) | Explicit tiny compact route | Ще потрібен exact-candidate stage/replay/digest |
 | F3M (`.f3m`) | Bounded enumerative research | НЕ general-production release promise |
 
