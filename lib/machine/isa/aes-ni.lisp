@@ -1,5 +1,7 @@
-; Intel AES New Instructions catalogue. Physical ISA facts only.
-; Runtime selection is gated by the CPUID AES feature bit.
+; Каталог апаратних інструкцій шифрування Intel AES-NI.
+; Це лише фізичні властивості ISA, а не мовні закони СЕНС.
+; Виконання допускається тільки за підтвердженою ознакою AES у CPUID.
+; Назви команд і поля залишаються незмінними даними каталогу.
 
 (isa-catalogue/1
   (extension AES-NI)
