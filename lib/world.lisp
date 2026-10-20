@@ -1,20 +1,10 @@
-;; An immutable world is ordinary my-lisp data:
-;;   (world parent newest-first-knowledge-journal metadata)
-;; Every transition returns a new value. The previous world remains its parent,
-;; and the new journal shares the complete old journal as its cons tail. No
-;; mutable host object or Rust primitive is needed.
-;;
-;; Незмінний світ — це звичайні дані my-lisp:
-;;   (world батько журнал-знань-від-нових-до-старих метадані)
-;; Кожен перехід повертає нове значення. Попередній світ лишається батьком,
-;; а новий журнал структурно ділить увесь старий журнал як хвіст cons. Жодного
-;; мутабельного об'єкта хоста чи нового Rust-примітива не потрібно.
-;;
-;; Eine unveränderliche Welt besteht aus gewöhnlichen my-lisp-Daten:
-;;   (world vorgänger wissenjournal-neueste-zuerst metadaten)
-;; Jeder Übergang liefert einen neuen Wert. Die vorige Welt bleibt ihr
-;; Vorgänger, und das neue Journal teilt das vollständige alte Journal als
-;; Cons-Ende. Kein veränderliches Hostobjekt und kein Rust-Primitiv ist nötig.
+;; Незмінний світ — звичайні дані СЕНС:
+;;   (world батько журнал-знань метадані)
+;; Кожен перехід повертає нове значення, залишаючи попередній
+;; світ батьком. Журнал нової версії спільно використовує хвіст
+;; старого списку. Змінюваний об'єкт хоста й новий примітив Rust
+;; для таких переходів не потрібні.
+;; Назва world у формі є незмінним протокольним маркером даних.
 
 (визначити створити-світ
   (функція (батько журнал метадані)
@@ -46,10 +36,10 @@
 ; same fourth-field projection as exact D5:10011 CADDR after D3:011 CDR.
 (визначити світ-метадані (функція (світ) (третє (решта світ))))
 
-;; Events intentionally have the same data shape as `lib/knowledge.lisp`'s
-;; journal, so a later migration can reuse packages and projections unchanged.
-;; Події навмисно мають ту саму форму, що й журнал `lib/knowledge.lisp`.
-;; Ereignisse haben absichtlich dieselbe Form wie in `lib/knowledge.lisp`.
+;; Події мають ту саму форму даних, що й журнал у
+;; lib/knowledge.lisp. Це зберігає сумісність пакетів та
+;; проєкцій між бібліотеками без прихованого перетворення.
+
 (визначити світ-запис
   (функція (світ подія)
     (створити-світ світ
@@ -139,12 +129,10 @@
       (внутрішній-зворот-подій (світ-модуль-події світ назва-модуля) (як-є ()))
       (як-є ()))))
 
-;; Pure reasoning adapters: the answer depends only on the explicit world,
-;; module, and goal. They deliberately do not inspect `*knowledge-journal*`.
-;; Чисті reasoning-адаптери: відповідь залежить лише від явно переданих світу,
-;; модуля й цілі; глобальний `*knowledge-journal*` вони не читають.
-;; Reine Schlussfolgerungsadapter: Die Antwort hängt nur von der expliziten
-;; Welt, dem Modul und dem Ziel ab; `*knowledge-journal*` wird nicht gelesen.
+;; Чисті адаптери логічного виведення залежать тільки
+;; від явно переданих світу, модуля та цілі.
+;; Глобальний *knowledge-journal* тут не читаємо.
+
 (визначити міркувати-у-світ
   (функція (світ назва-модуля мета)
     (за-умовою
@@ -204,13 +192,12 @@
          (список рішення (світ-повідомити світ назва-модуля клауза)))
         (так (список рішення світ))))))
 
-;; The batch form creates exactly one child world after the whole proposed
-;; knowledge set validates and proves conflict-free. Proposed rules can support
-;; or contradict one another during the check; no prefix can leak on failure.
-;; Пакетна форма створює рівно один дочірній світ лише після validation усього
-;; набору й перевірки конфліктів; жоден префікс не просочується при помилці.
-;; Die Stapelform erzeugt genau eine Kindwelt erst nach vollständiger Prüfung;
-;; bei einem Fehler kann kein Präfix des Pakets durchsickern.
+;; Пакетне додавання створює рівно один дочірній світ,
+;; тільки якщо весь набір тверджень коректний і не суперечить
+;; уже наявним знанням. Нові правила під час перевірки можуть
+;; підтримувати або заперечувати одне одного.
+;; У разі відхилення жоден частковий запис не стає видимим.
+
 (визначити порада-всі-рішення-у-світ
   (функція (світ назва-модуля клаузи)
     (за-умовою
@@ -486,20 +473,14 @@
           (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
           пакет)))))
 
-;; History navigation is derived from parent links, not timestamps. Depth is
-;; absolute from the root (`empty-world` = 0). `world-diff from to` returns the
-;; chronological event list only when `from` is an ancestor of `to`; divergent
-;; branches return `World-not-ancestor` until an explicit merge law exists.
-;;
-;; Навігація історією спирається на батьківські зв'язки, не timestamps. Глибина
-;; абсолютна від кореня (`empty-world` = 0). `world-diff from to` повертає
-;; хронологічні події лише для предка; різні гілки дають `World-not-ancestor`,
-;; доки не визначено чесний закон merge.
-;;
-;; Geschichtsnavigation folgt Vorgängerlinks statt Zeitstempeln. Die Tiefe ist
-;; absolut ab der Wurzel (`empty-world` = 0). `world-diff from to` liefert
-;; chronologische Ereignisse nur für einen Vorfahren; getrennte Zweige ergeben
-;; `World-not-ancestor`, bis ein ausdrückliches Merge-Gesetz definiert ist.
+;; Навігація історією використовує незмінні батьківські зв'язки,
+;; а не вигадані позначки часу. Глибину відлічуємо від кореня:
+;; порожній світ має глибину нуль.
+;; Різниця двох світів повертає хронологічний список подій,
+;; тільки якщо перший світ є предком другого.
+;; Для незалежних гілок зберігаємо протокольне
+;; World-not-ancestor до появи доведеного закону об'єднання.
+
 (визначити світ-глибина
   (функція (світ)
     (за-умовою
