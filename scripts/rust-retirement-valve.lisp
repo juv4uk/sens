@@ -1,54 +1,60 @@
-; #300 — Lisp owns the Rust retirement verdict.
-; CI transports only Rust diff facts into tests/rust-retirement-changes.lisp.
+; #300 — SENS визначає висновок щодо згортання застарілого коду Rust.
+; CI передає лише факти зміни файлів у tests/rust-retirement-changes.lisp.
 ;
-; Change rows:
-;   (rust-change "path" additions deletions status)
-; status is one of: existing | new | deleted
-;
-; Verdicts:
+; Структура запису:
+;   (rust-change "шлях" додано видалено стан)
+; Значення стану: existing | new | deleted.
+; Форми результату, як і їхні незмінні поля, належать зовнішньому протоколу:
 ;   (rust-retirement-ok)
-;   (rust-retirement-violation "path" additions status "diagnostic")
+;   (rust-retirement-violation "шлях" додано стан "пояснення")
 ;
-; Active #299 rule: Lisp may grow; Rust may only shrink.
+; Правило #299: код SENS може зростати, а код Rust — лише скорочуватися.
+; Допоміжні вибірки мають власні українські імена й не перевизначають
+; ратифіковані селектори на спільній поверхні мови.
 
-(визначити second (функція (x) (перше (решта x))))
-(визначити third (функція (x) (перше (решта (решта x)))))
-(визначити fourth (функція (x) (перше (решта (решта (решта x))))))
-(визначити fifth (функція (x) (перше (решта (решта (решта (решта x)))))))
+(визначити друге-поле-запису
+  (функція (значення) (перше (решта значення))))
+(визначити третє-поле-запису
+  (функція (значення) (перше (решта (решта значення)))))
+(визначити четверте-поле-запису
+  (функція (значення) (перше (решта (решта (решта значення))))))
+(визначити п'яте-поле-запису
+  (функція (значення) (перше (решта (решта (решта (решта значення)))))))
 
-(визначити rust-changes (читати-всі (читати-файл "tests/rust-retirement-changes.lisp")))
+(визначити зміни-руста
+  (читати-всі (читати-файл "tests/rust-retirement-changes.lisp")))
 
-(визначити rust-retirement-verdict-for
-  (функція (changes)
+(визначити висновок-згортання-руста-для
+  (функція (зміни)
     (за-умовою
-      ((атом? changes) (structural-kind empty-list)
+      ((атом? зміни) (structural-kind empty-list)
        (як-є (rust-retirement-ok)))
-      ((атом? changes) (structural-kind pair)
-       (нехай ((change (перше changes)))
-         (нехай ((path (second change)))
-           (нехай ((additions (third change)))
-             (нехай ((status (fifth change)))
+      ((атом? зміни) (structural-kind pair)
+       (нехай ((зміна (перше зміни)))
+         (нехай ((шлях (друге-поле-запису зміна)))
+           (нехай ((додано-рядків (третє-поле-запису зміна)))
+             (нехай ((стан (п'яте-поле-запису зміна)))
                (за-умовою
-                 ((тотожне? status (як-є new)) (identity-relation same)
+                 ((тотожне? стан (як-є new)) (identity-relation same)
                   (список
                     (як-є rust-retirement-violation)
-                    path
-                    additions
-                    status
+                    шлях
+                    додано-рядків
+                    стан
                     "New Rust paths are forbidden during retirement. See #299."))
-                 ((тотожне? status (як-є new)) (identity-relation distinct)
+                 ((тотожне? стан (як-є new)) (identity-relation distinct)
                   (за-умовою
-                    ((= additions 0) 1
-                     (rust-retirement-verdict-for (решта changes)))
-                    ((= additions 0) 0
+                    ((= додано-рядків 0) 1
+                     (висновок-згортання-руста-для (решта зміни)))
+                    ((= додано-рядків 0) 0
                      (список
                        (як-є rust-retirement-violation)
-                       path
-                       additions
-                       status
+                       шлях
+                       додано-рядків
+                       стан
                        "Rust may only shrink; added Rust lines are forbidden. See #299.")))))))))))))
 
-(rust-retirement-verdict-for rust-changes)
+(висновок-згортання-руста-для зміни-руста)
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+; Перехідна прив'язка читання, не новий мовний закон.
 (визначити читати-всі read-all)
