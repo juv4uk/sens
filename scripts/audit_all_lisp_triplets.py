@@ -50,7 +50,8 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if (witness.get("schema") != "sens-uk-t5-view-bounded-proof/v1"
                 or witness.get("status") != "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION"):
             raise ValueError("непідтверджена схема або статус обмеженого свідка")
-        for key in ("canonical_uk_roundtrip", "canonical_view_roundtrip"):
+        for key in ("canonical_uk_roundtrip", "program_identity_roundtrip",
+                    "canonical_view_roundtrip"):
             if witness.get(key) is not True:
                 raise ValueError("не доведено " + key)
         codec = witness.get("physical_codec")
@@ -133,7 +134,9 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
 
     all_verified = bool(sources) and (
         counts["bounded_verified"] == len(sources)
-        and counts["ukrainian_keyboard"] == len(sources)
+        # Keyboard style is a separate source-quality metric. Comments,
+        # whitespace and quoted external protocol data are not executable
+        # program identity; do not let them veto proved roundtrips.
         and counts["misnamed_binary_lisp"] == 0
         and verify_bounded
     )
