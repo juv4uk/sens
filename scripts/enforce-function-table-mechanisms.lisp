@@ -11,5 +11,5 @@
 (за-умовою
   ((однакові? висновок-механізмів (як-є (function-table-mechanisms-ok)))
    (як-є function-table-mechanisms-ok))
-  ((атом? (як-є ()))
+  (так
    (перше (як-є ()))))

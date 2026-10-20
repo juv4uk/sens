@@ -57,8 +57,3 @@
     (атом? eq? < = > numeric-buffer? string<? string? not? equal? member?
      string-empty? string-prefix? string-contains? symbol? null? <= >=)))
 
-; Українська проєкція: точну тотожність задають lib/domains/d*.lisp;
-; сумісні зв'язування не створюють нової диспетчеризації.
-(визначити модуль abs)
-(визначити атом? atom?)
-(визначити довжина-до length-onto)
