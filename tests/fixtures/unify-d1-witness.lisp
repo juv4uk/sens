@@ -1,35 +1,33 @@
-; unify-d1-witness — semantic/logic in binary SENS only.
+; unify-d1-witness — semantic/logic, Ukrainian projection only.
 ; Axiom: width = address = identity. No Python. No Rust as meaning.
 ;
-; 1. D1:1 is (010 (001 ()))
+; 1. D1:1 is (атом? (як-є ()))
 ; 2. COND else uses that carrier
-; 3. fail is data atom, not host boolean
-;
-; Run under SENS / my-lisp fixture loader.
+; 3. unify surfaces present
 
 (load "lib/core.lisp")
 (load "lib/unify.lisp")
 
-(0011 d1-true  (010 (001 ())))
-(0011 d1-false (101 (001 (0)) (001 (1))))
+(визначити d1-true (атом? (як-є ())))
+(визначити d1-false (тотожне? (як-є (0)) (як-є (1))))
 
-(0011 else-is-d1?
-  (0010 ()
-    (110
-      ((101 (001 no) (001 yes)) d1-false)
-      ((010 (001 ())) d1-true))))
+(визначити else-is-d1?
+  (функція ()
+    (за-умовою
+      ((тотожне? (як-є no) (як-є yes)) d1-false)
+      ((атом? (як-є ())) d1-true))))
 
-(0011 unify-d1-witness
-  (0010 ()
-    (110
-      ((101 (else-is-d1?) d1-true)
-       (001 (unify-d1
+(визначити unify-d1-witness
+  (функція ()
+    (за-умовою
+      ((тотожне? (else-is-d1?) d1-true)
+       (як-є (unify-d1
               (status pass)
-              (d1-true (010 (001 ())))
+              (d1-true (атом? (як-є ())))
               (cond-else exact-d1)
               (surfaces var? lookup-subst unify occurs-check)
               (axiom width-equals-address))))
-      ((010 (001 ()))
-       (001 (unify-d1 (status fail) (cond-else not-d1)))))))
+      ((атом? (як-є ()))
+       (як-є (unify-d1 (status fail) (cond-else not-d1)))))))
 
 (unify-d1-witness)

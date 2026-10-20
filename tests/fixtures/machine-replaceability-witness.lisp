@@ -1,28 +1,28 @@
 ; #211 — replaceability witness.
 ; CI runs this after physically moving lib/machine out of the checkout.
-; The witness uses only exact Function8 language forms and explicit binary
-; Number source. No machine/backend definition participates in the answer key.
+; Ukrainian projection only: no SID8 binary call heads, no #b machine width tags.
+; Exact decimal arithmetic and D3 surfaces.
 
-(0011 machine-replaceability-add
-  (01010 #b10 #b11))
+(визначити machine-replaceability-add
+  (додати 2 3))
 
-(0011 machine-replaceability-eq-cond
-  (110
-    ((101 #b10 #b10)
-     #b1101111)))
+(визначити machine-replaceability-eq-cond
+  (за-умовою
+    ((тотожне? 2 2)
+     111)))
 
-(0011 machine-replaceability-car-cons
-  (100 (111 #b10 #b11)))
+(визначити machine-replaceability-car-cons
+  (перше (сполучити 2 3)))
 
-; Every assertion is a strict one-clause PredicateBit COND. If any assertion
-; is NO, COND yields (), so the shell's exact pass-envelope check fails closed.
-(0011 machine-replaceability-verdict
-  (110
-    ((101 machine-replaceability-add #b101)
-     (110
-       ((101 machine-replaceability-eq-cond #b1101111)
-        (110
-          ((101 machine-replaceability-car-cons #b10)
-           (001 (machine-replaceability-witness (status pass))))))))))
+; Every assertion is a strict one-clause COND. If any assertion is NO, COND
+; yields (), so the shell's exact pass-envelope check fails closed.
+(визначити machine-replaceability-verdict
+  (за-умовою
+    ((тотожне? machine-replaceability-add 5)
+     (за-умовою
+       ((тотожне? machine-replaceability-eq-cond 111)
+        (за-умовою
+          ((тотожне? machine-replaceability-car-cons 2)
+           (як-є (machine-replaceability-witness (status pass))))))))))
 
 machine-replaceability-verdict

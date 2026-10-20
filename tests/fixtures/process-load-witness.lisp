@@ -3,14 +3,12 @@
 ; current core, this fixture is never reached; the identity check then proves
 ; the stable Ukrainian peer was materialized from the same semantic ID.
 
-(0011 process-load-witness
-  (0010 ()
-    (110
-      ((101 process-run запустити-процес)
-       (1)
-       (001 (process-load-witness (status pass))))
-      ((101 process-run запустити-процес)
-       (0)
-       (001 (process-load-witness (status fail)))))))
+(визначити process-load-witness
+  (функція ()
+    (за-умовою
+      ((тотожне? process-run запустити-процес)
+       (як-є (process-load-witness (status pass))))
+      (так
+       (як-є (process-load-witness (status fail)))))))
 
 (process-load-witness)
