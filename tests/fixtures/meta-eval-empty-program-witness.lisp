@@ -1,29 +1,30 @@
-; #305 / TASK-001 — the empty metacircular program is a Lisp-owned law.
-; An empty form list must preserve the supplied environment exactly and return
-; empty as the program result. Ukrainian projection only.
+; Свідчення #305: порожня програма метаобчислювача має мовний закон.
+; Порожній список форм повертає порожній результат і зберігає
+; передане оточення без змін. Рішення належить СЕНС.
+; Історичні мітки свідчення не перейменовуємо: це дані протоколу.
 
 (load "lib/meta-eval.lisp")
 
-(визначити meta-eval-empty-program-check
+(визначити перевірити-порожню-програму-метаобчислювача
   (функція ()
-    (нехай ((env-ref (список (сполучити (як-є sentinel) 42))))
-      (нехай ((loaded (обчислити-послідовність-форм (як-є ()) env-ref)))
+    (нехай ((початкове-оточення (список (сполучити (як-є sentinel) 42))))
+      (нехай ((обчислене (обчислити-послідовність-форм (як-є ()) початкове-оточення)))
         (за-умовою
-          ((тотожне? (перше loaded) env-ref)
+          ((тотожне? (перше обчислене) початкове-оточення)
            (за-умовою
-             ((тотожне? (решта loaded) (як-є ()))
+             ((тотожне? (решта обчислене) (як-є ()))
               (як-є (meta-eval-empty-program-witness (status pass))))
              (так
               (список
                 (як-є meta-eval-empty-program-witness)
                 (як-є (status fail))
                 (як-є (law empty-result))
-                (список (як-є actual) (решта loaded))))))
+                (список (як-є actual) (решта обчислене))))))
           (так
            (список
              (як-є meta-eval-empty-program-witness)
              (як-є (status fail))
              (як-є (law environment-preserved))
-             (список (як-є actual) (перше loaded)))))))))
+             (список (як-є actual) (перше обчислене)))))))))
 
-(meta-eval-empty-program-check)
+(перевірити-порожню-програму-метаобчислювача)
