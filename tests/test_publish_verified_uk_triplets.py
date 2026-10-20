@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Triplet writer guarantees: admitted canonical uk, T5 bytes, 0/1 view, no overwrite."""
+"""Перевірка атомарного експорту української програми у фізичний T5M."""
 from __future__ import annotations
 
 import json
@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from publish_verified_uk_triplets import (
     ProjectionBlocked, attest_source, export, no_symlink_destination,
 )
-from sens_t5_codec import decode_bytes
+from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
 
 
 class SafeTripletPublisher(unittest.TestCase):
@@ -27,7 +27,8 @@ class SafeTripletPublisher(unittest.TestCase):
             with self.subTest(rel=rel):
                 src = (ROOT / rel).read_bytes()
                 words, packed, view = attest_source(src)
-                self.assertEqual(decode_bytes(packed), words)
+                self.assertEqual(decode_t5m_bytes(packed), words)
+                self.assertEqual(packed, encode_t5m_projection(" ".join(words)))
                 self.assertEqual(view, (" ".join(words) + "\n").encode("ascii"))
                 self.assertNotIn(b"2", view)
                 self.assertGreater(len(packed), 0)
@@ -40,19 +41,42 @@ class SafeTripletPublisher(unittest.TestCase):
             original2 = (ROOT / self.REL2).read_bytes()
             res = export(ROOT, target, report, [self.REL1, self.REL2], write=True)
             self.assertEqual(res["summary"]["triplets_written"], 2)
+            self.assertTrue(all(row["physical_codec"] == "t5m" for row in res["files"]))
             self.assertEqual(res["summary"]["original_executables_oracle_certified"], 0)
             self.assertEqual((target / self.REL1).read_bytes(), original1)
             self.assertEqual((target / self.REL2).read_bytes(), original2)
             for rel in (self.REL1, self.REL2):
                 out = target / Path(rel)
                 packed = out.with_suffix(".sens").read_bytes()
-                words = decode_bytes(packed)
+                words = decode_t5m_bytes(packed)
                 self.assertEqual(out.with_suffix("").read_bytes(),
                                  (" ".join(words) + "\n").encode("ascii"))
             self.assertEqual(json.loads(report.read_text())["summary"]["triplets_written"], 2)
             # All generated files must be in the EXTERNAL mirror, not the source.
             self.assertEqual((ROOT / self.REL1).read_bytes(), original1)
             self.assertEqual((ROOT / self.REL2).read_bytes(), original2)
+
+    def test_comments_and_layout_do_not_change_exported_program(self):
+        # Порівнюємо доменні слова та програму, не відтворення коментарів.
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            root = base / "source"
+            root.mkdir()
+            original = (ROOT / self.REL1).read_text(encoding="utf-8")
+            decorated = "; Інформаційний коментар — не частина програми\n" + original.replace(" ", "  ", 1)
+            (root / "program.lisp").write_text(decorated, encoding="utf-8")
+            mirror = base / "mirror"
+            report = base / "report.json"
+            result = export(root, mirror, report, ["program.lisp"], write=True)
+            self.assertEqual(result["summary"]["triplets_written"], 1)
+            lisp = mirror / "program.lisp"
+            sens = mirror / "program.sens"
+            view = mirror / "program"
+            self.assertEqual(lisp.read_text(encoding="utf-8"), decorated)
+            words = decode_t5m_bytes(sens.read_bytes())
+            self.assertEqual(view.read_text(encoding="ascii"), " ".join(words) + "\n")
+            self.assertEqual(result["files"][0]["physical_codec"], "t5m")
+            self.assertEqual(result["summary"]["original_executables_oracle_certified"], 0)
 
     def test_preview_only_does_not_write_or_fake_semantics(self):
         with tempfile.TemporaryDirectory() as td:
@@ -127,7 +151,7 @@ class SafeTripletPublisher(unittest.TestCase):
                     self.assertFalse(path.is_symlink(), str(path))
                 self.assertEqual((ROOT / rel).read_bytes(), original[rel])
             self.assertFalse(report.exists())
-            self.assertEqual(list(mirror.rglob(".t5-stage-*")), [])
+            self.assertEqual(list(mirror.rglob(".t5m-stage-*")), [])
             # Тільки новостворені посилання видаляються, не оригінали.
             self.assertEqual({rel: (ROOT / rel).read_bytes()
                               for rel in (self.REL1, self.REL2)}, original)
@@ -158,7 +182,7 @@ class SafeTripletPublisher(unittest.TestCase):
                 self.assertFalse(stem.with_suffix("").exists())
                 self.assertEqual((ROOT / rel).read_bytes(), original[rel])
             self.assertFalse(report.exists())
-            self.assertEqual(list(mirror.rglob(".t5-stage-*")), [])
+            self.assertEqual(list(mirror.rglob(".t5m-stage-*")), [])
 
     def test_report_write_failure_rolls_back_all_new_triplets(self):
         with tempfile.TemporaryDirectory() as td:
