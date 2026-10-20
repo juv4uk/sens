@@ -650,13 +650,12 @@
 (визначити зіставити-тестову-умову
   (функція (поточний-вираз поточні-зв'язування)
     (нехай-похідне ((результат (обчислити (застосувати-підстановка поточний-вираз поточні-зв'язування))))
-      ; E1 (#216): under exact-Q a false comparison answers 0, and 0 is
-      ; truthy -- the pre-exact-Q two-part `(cond (результат (list subst)) (t ()))`
-      ; treated a falsy test as a success. A test condition is falsy when its
-      ; evaluation returns () or the exact-Q 0 answer; equal?-driven clauses
-      ; keep this faithful for structural truth values too (t, (structural-
-      ; relation same/distinct)) without feeding comparison results to cond
-      ; as numeric clauses.
+      ; E1 (#216): у старій exact-Q-моделі невдале порівняння повертало 0,
+      ; який тоді тлумачився як істина. Стара двочастинна форма COND
+      ; помилково визнавала хибну перевірку успішною.
+      ; Умову відхиляємо для порожнього результату () або точної
+      ; відповіді exact-Q 0. Структурні відповіді порівняння також
+      ; перевіряємо явно, не передаючи числа в COND як умови.
       (за-умовою
         ((однакові? результат (як-є ())) 
          (як-є ()))
@@ -823,7 +822,7 @@
 
 ; D9-аліаси нижче потребують уже визначених локальних українських замикань.
 ; Ніколи не пов'язувати ім'я з невизначеним символом до його DEFINE.
-; D9 Ukrainian projections of existing TMS/JTMS language-owned functions.
+; Д9: українські проєкції наявних мовних функцій TMS/JTMS.
 ; Джерела: lib/forward.lisp і knowledge/d9-final-semantic-fill-v1.json.
 ; Координати залишаються ратифікованими, нового машинного коду D9 немає.
 (визначити відкликати-факт-tms відкликати-факт-система-істини)
