@@ -140,26 +140,26 @@ fn compile_program_data(
 /// Compile one three-file source projection: same-stem SENS source, physical
 /// T5 and extensionless exact-width binary view. The T5 reader owns word
 /// decoding and D2 syntax; all projections must agree after SENS lowering.
-fn compile_t5_triplet_bytes(
+fn compile_t5m_triplet_bytes(
     lisp_source: &[u8],
-    physical_t5: &[u8],
+    physical_t5m: &[u8],
     visible_view: &[u8],
     sens_revision: &str,
 ) -> Result<(Vec<u8>, bool), String> {
-    on_compiler_stack(|| compile_t5_triplet_on_worker(
-        lisp_source, physical_t5, visible_view, sens_revision,
+    on_compiler_stack(|| compile_t5m_triplet_on_worker(
+        lisp_source, physical_t5m, visible_view, sens_revision,
     ))?
 }
 
-fn compile_t5_triplet_on_worker(
+fn compile_t5m_triplet_on_worker(
     lisp_source: &[u8],
-    physical_t5: &[u8],
+    physical_t5m: &[u8],
     visible_view: &[u8],
     sens_revision: &str,
 ) -> Result<(Vec<u8>, bool), String> {
     for (name, bytes) in [
         ("Lisp source", lisp_source),
-        ("physical T5M", physical_t5),
+        ("physical T5M", physical_t5m),
         ("visible word view", visible_view),
     ] {
         if bytes.is_empty() {
@@ -172,7 +172,7 @@ fn compile_t5_triplet_on_worker(
 
     // Фізичний T5M декодує лише Zig; Rust відображає вже відновлені
     // точні слова для незалежного SENS-парсера й не вводить власний кодек.
-    let exact = decode_t5_exact_words(physical_t5)
+    let exact = decode_t5_exact_words(physical_t5m)
         .map_err(|error| format!("Zig T5M відхилив фізичний носій: {error}"))?;
     let visible = exact.iter()
         .map(|word| word.bits.iter()
@@ -187,7 +187,7 @@ fn compile_t5_triplet_on_worker(
     }
     let reencoded_t5m = encode_t5_exact_words(&exact)
         .map_err(|error| format!("Zig T5M не відновив фізичний носій: {error}"))?;
-    if reencoded_t5m.as_slice() != physical_t5 {
+    if reencoded_t5m.as_slice() != physical_t5m {
         return Err("T5M: порушено побайтову канонічність кодека".into());
     }
 
@@ -232,7 +232,7 @@ fn compile_t5_triplet_on_worker(
     }
 
     let program = lowered_program_to_exact_data(&binary_lowered)
-        .map_err(|error| format!("T5 program-data conversion failed closed: {error}"))?;
+        .map_err(|error| format!("T5M program-data conversion failed closed: {error}"))?;
     // The artifact contract names this field program_wire_sha256. Derive it
     // from the canonical SW1 encoding of the typed program; physical T5M bytes
     // already passed their own byte-roundtrip gate above.
@@ -356,7 +356,7 @@ pub fn run_triplet(
     let physical = read_triplet_member(sens_path, "triplet physical T5M")?;
     let view = read_triplet_member(&view_path, "triplet visible view")?;
     let revision = current_revision(repo_root)?;
-    let (artifact, accepted) = compile_t5_triplet_bytes(&lisp, &physical, &view, &revision)?;
+    let (artifact, accepted) = compile_t5m_triplet_bytes(&lisp, &physical, &view, &revision)?;
     write_output(output, &artifact)?;
     if !accepted {
         eprintln!("SENS compiler rejected the triplet program; canonical compiler-compilation-error/1 artifact emitted");
@@ -529,7 +529,7 @@ mod tests {
         let physical = encode_t5_exact_words(&exact).expect("Zig T5M");
 
         let revision = "0123456789abcdef0123456789abcdef01234567";
-        let (bytes, accepted) = compile_t5_triplet_bytes(
+        let (bytes, accepted) = compile_t5m_triplet_bytes(
             source, &physical, view, revision,
         ).expect("three matching projections compile through SENS");
         assert!(accepted);
@@ -547,13 +547,13 @@ mod tests {
             revision,
         ).expect("artifact provenance is pinned to canonical program wire, not mislabeled T5 bytes");
 
-        assert!(compile_t5_triplet_bytes(
+        assert!(compile_t5m_triplet_bytes(
             source, &physical, b"10 100 00 000 01\n", revision,
         ).is_err(), "a mismatched extensionless view must block");
-        assert!(compile_t5_triplet_bytes(
+        assert!(compile_t5m_triplet_bytes(
             source, &physical, b"10 001 00 000 01", revision,
         ).is_err(), "the canonical extensionless view requires exactly one trailing LF");
-        assert!(compile_t5_triplet_bytes(
+        assert!(compile_t5m_triplet_bytes(
             "(інакше ())\n".as_bytes(), &physical, view, revision,
         ).is_err(), "a source that lowers to a different exact program must block");
     }
