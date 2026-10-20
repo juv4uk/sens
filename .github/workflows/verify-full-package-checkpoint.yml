@@ -12,5 +12,5 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Full my-lisp package
-        run: cargo test -p my-lisp
+      - name: Full SENS package
+        run: cargo test -p sens

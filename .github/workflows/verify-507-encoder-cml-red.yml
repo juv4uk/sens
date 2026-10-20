@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - name: Checkout my-lisp
+      - name: Checkout SENS
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
@@ -22,7 +22,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Move pinned CML outside my-lisp Cargo workspace
+      - name: Move pinned CML outside SENS Cargo workspace
         shell: bash
         run: |
           rm -rf /tmp/cml-pinned
@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          output="$(cd /tmp/cml-pinned && cargo run --quiet --bin cml -- x86-elf "$GITHUB_WORKSPACE/lib/machine/encoding/x86-64.lisp" /tmp/my-lisp-encoder 2>&1)"
+          output="$(cd /tmp/cml-pinned && cargo run --quiet --bin cml -- x86-elf "$GITHUB_WORKSPACE/lib/machine/encoding/x86-64.lisp" /tmp/sens-encoder 2>&1)"
           status=$?
           set -e
           printf '%s\n' "$output"

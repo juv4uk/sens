@@ -12,5 +12,5 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: verify-425-full-package
-      - name: Run complete my-lisp package
-        run: cargo test -p my-lisp
+      - name: Run complete SENS package
+        run: cargo test -p sens
