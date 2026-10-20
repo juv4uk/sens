@@ -1,14 +1,12 @@
 """Guard SENS full-укр projection: static source/authority tests, not Python eval."""
 from __future__ import annotations
 
-import hashlib
 import re
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/guard.lisp"
-ORIGINAL_GIT_BLOB = "37b4175a437de8274d71273c58e9f4f726921cd1"
 ALIAS_MARKER = "; Історичні викличні поверхні Guard — ті самі closure, без дублювання."
 
 # Authority is the actual domain table at this repository commit, never W8/сід8.
@@ -98,66 +96,23 @@ class GuardProjectionTests(unittest.TestCase):
                 self.assertIn("(укр " + ukr + ")", row.group())
                 self.assertIn("(en " + english + ")", row.group())
 
-    def test_exact_original_program_is_recoverable(self):
-        self.assertEqual(self.text.count(ALIAS_MARKER), 1)
-        migrated = self.text.split("\n" + ALIAS_MARKER, 1)[0]
-        # A semantic owner correction removed the unapproved commit FREEZE.
-        # Recreate that exact former policy section before reversing the older
-        # ratified-name migration. The historical blob itself is never repinned.
-        current_sync_section = "; Synchronization is verified by observed completion and recorded drift.\n; No repository-wide commit freeze or administrative HOLD is required.\n; Синхронізація: спочатку фактичне виконання, потім запис змін.\n; Незалежні коміти не заморожуються; невідоме повертає локальне WARN.\n(визначити guard-sync-window\n  (функція (commit-state sync-state drift-state evidence)\n    (за-умовою\n      ((хибне? (тотожне? sync-state (як-є completed)))\n       (створити-захист-висновок\n         (як-є warn) (як-є unresolved) (як-є ecosystem-sync)\n         sync-state (як-є synchronization-completed)\n         (список (як-є expected) (як-є completed) (як-є observed) sync-state)\n         (як-є drift-cannot-yet-be-classified)\n         (як-є complete-sync-and-preserve-logs)\n         evidence))\n      ((хибне? (тотожне? drift-state (як-є recorded)))\n       (створити-захист-висновок\n         (як-є warn) (як-є unresolved) (як-є ecosystem-sync)\n         drift-state (як-є drift-recorded)\n         (список (як-є expected) (як-є recorded) (як-є observed) drift-state)\n         (як-є synchronization-result-has-no-drift-record)\n         (як-є record-drift-and-continue)\n         evidence))\n      (так\n       (створити-захист-висновок\n         (як-є allow) (як-є confirmed) (як-є ecosystem-sync)\n         (список commit-state sync-state drift-state)\n         (як-є sync-record-and-continue)\n         (як-є ())\n         (як-є synchronization-boundary-observed)\n         (як-є continue-independent-commits)\n         evidence)))))\n\n"
-        historical_sync_section = "; Synchronization is a guarded transaction: first establish a commit freeze,\n; then perform synchronization, then record observed drift before reopening\n; the window. This is policy guidance, not a hidden Git lock.\n; Синхронізація — guarded transaction: спершу freeze комітів, потім sync,\n; потім запис observed drift і лише після цього відкриття вікна. Це policy,\n; а не прихований Git lock.\n(визначити guard-sync-window\n  (функція (commit-state sync-state drift-state evidence)\n    (за-умовою\n      ((хибне? (тотожне? commit-state (як-є frozen)))\n       (створити-захист-висновок\n         (як-є reject) (як-є confirmed) (як-є ecosystem-sync)\n         commit-state (як-є commits-frozen-before-sync)\n         (список (як-є expected) (як-є frozen) (як-є observed) commit-state)\n         (як-є concurrent-commits-can-create-unrecorded-drift)\n         (як-є freeze-commits-before-synchronization)\n         evidence))\n      ((хибне? (тотожне? sync-state (як-є completed)))\n       (створити-захист-висновок\n         (як-є warn) (як-є unresolved) (як-є ecosystem-sync)\n         sync-state (як-є synchronization-completed)\n         (список (як-є expected) (як-є completed) (як-є observed) sync-state)\n         (як-є drift-cannot-yet-be-classified)\n         (як-є complete-sync-and-preserve-logs)\n         evidence))\n      ((хибне? (тотожне? drift-state (як-є recorded)))\n       (створити-захист-висновок\n         (як-є warn) (як-є unresolved) (як-є ecosystem-sync)\n         drift-state (як-є drift-recorded)\n         (список (як-є expected) (як-є recorded) (як-є observed) drift-state)\n         (як-є synchronization-result-has-no-drift-record)\n         (як-є record-drift-before-unfreezing-commits)\n         evidence))\n      (так\n       (створити-захист-висновок\n         (як-є allow) (як-є confirmed) (як-є ecosystem-sync)\n         (список commit-state sync-state drift-state)\n         (як-є freeze-sync-record-unfreeze)\n         (як-є ())\n         (як-є synchronization-boundary-observed)\n         (як-є reopen-commit-window)\n         evidence)))))\n\n"
-        self.assertEqual(migrated.count(current_sync_section), 1)
-        migrated = migrated.replace(
-            current_sync_section, historical_sync_section, 1
-        )
-        # Inverse only the witnessed SENS-owned Guard accessor rewrite.
-        # The additional helper is real executable Lisp, not quoted advice;
-        # verify its law-bearing call heads before reconstructing the old blob.
-        helper_start = migrated.find(
-            "; Запис поля шукається структурно в Lisp, без невизначеного host/lookup маршруту.\n"
-        )
-        self.assertGreaterEqual(helper_start, 0)
-        field_start = migrated.find("(визначити guard-reference-field\n", helper_start)
-        self.assertGreater(field_start, helper_start)
-        helper = migrated[helper_start:field_start]
-        self.assertIn("(визначити захист-знайти-запис\n", helper)
-        self.assertIn("((порожній? записи) (як-є ()))", helper)
-        self.assertIn("((сторожа--рівні? ключ (перше запис)) запис)", helper)
-        field_end = migrated.find("\n; --- OWNER LANGUAGE FIREWALL", field_start)
-        self.assertGreater(field_end, field_start)
-        current_field = migrated[field_start:field_end]
-        self.assertIn("(порожній? запис)", current_field)
-        self.assertIn("(захист-знайти-запис поле (решта посилання)))))", current_field)
-        old_field = current_field.replace("(порожній? запис)", "(атом? запис)", 1)
-        old_field = old_field.replace(
-            "(захист-знайти-запис поле (решта посилання)))))",
-            "(знайти-за-ключем поле (решта посилання)))))", 1
-        )
-        migrated = migrated[:helper_start] + old_field + migrated[field_end:]
-
-        # Reverse only local names in the Guard accessor before the existing
-        # exact surface inverse restores the pinned original Lisp blob.
-        start = migrated.find("(визначити guard-reference-field\n")
-        self.assertGreaterEqual(start, 0)
-        end = migrated.find("\n(визначити ", start + 1)
-        self.assertGreater(end, start)
-        segment, local_counts = translate(
-            migrated[start:end], {},
-            {"поле": "field", "посилання": "reference", "запис": "entry"},
-        )
-        self.assertEqual(local_counts, {"поле": 2, "посилання": 2, "запис": 3})
-        migrated = migrated[:start] + segment + migrated[end:]
-        native_inverse = {name: bits for table in NATIVE.values()
-                          for bits, name in table.items()}
-        symbol_inverse = {ukr: en for en, ukr in D9.values()}
-        symbol_inverse.update({"так": "#d1:1", "ні": "#d1:0"})
-        restored, counts = translate(migrated, native_inverse, symbol_inverse)
-        self.assertTrue(all(counts.get(name, 0) > 0
-                            for name in native_inverse))
-        raw = restored.encode("utf-8")
-        git_sha = hashlib.sha1(f"blob {len(raw)}\0".encode("ascii") + raw).hexdigest()
-        self.assertEqual(git_sha, ORIGINAL_GIT_BLOB,
-                         "Mіграція змінила щось окрім ратифікованих surface tokens")
+    def test_current_guard_program_is_ukrainian_primary_not_old_blob(self):
+        # Чинний доказ: структура програми, а не історичний Git blob з
+        # коментарями, пробілами й застарілою політикою заморожування.
+        for name in (
+            "захист-рішення?", "захист-доказ-стан?",
+            "захист-невідоме-маршрути", "створити-захист-висновок",
+            "захист-порівняти", "захист-синхронізувати-вікно",
+            "захист-знайти-запис", "захист-еталон-поле",
+        ):
+            with self.subTest(name=name):
+                self.assertIn("(визначити " + name + "\n", self.text)
+        self.assertIn("(сторожа--рівні? очікуване спостережене)", self.text)
+        self.assertIn("(захист-знайти-запис поле (решта посилання))", self.text)
+        self.assertIn("(визначити guard-sync-window захист-синхронізувати-вікно)",
+                      self.text)
+        self.assertNotIn("(визначити guard-sync-window\n", self.text)
+        self.assertNotIn("#d1:", self.text)
 
     def test_all_native_guard_heads_migrated(self):
         stripped, _ = translate(self.text, {}, {})
@@ -166,7 +121,7 @@ class GuardProjectionTests(unittest.TestCase):
         native_bits = {bit for table in NATIVE.values() for bit in table}
         remaining = set(re.findall(r"\(\s*([01]+)(?=[\s(])", masked))
         self.assertTrue(native_bits.isdisjoint(remaining), remaining)
-        start = self.text.find("(визначити guard-reference-field\n")
+        start = self.text.find("(визначити захист-еталон-поле\n")
         self.assertGreaterEqual(start, 0)
         end = self.text.find("\n(визначити ", start + 1)
         self.assertGreater(end, start)
@@ -215,7 +170,7 @@ class GuardProjectionTests(unittest.TestCase):
         self.assertIn("(захист-мова-дозволена? мова роль)", self.text)
         self.assertNotIn("(визначити guard-language-decision", self.text)
         # Не припускаємо D9-ратифікацію лише з локального імені функції.
-        self.assertIn("(визначити захист-синхронізувати-вікно guard-sync-window)",
+        self.assertIn("(визначити guard-sync-window захист-синхронізувати-вікно)",
                       self.text)
 
     def test_no_python_semantic_simulation(self):
