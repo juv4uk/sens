@@ -374,6 +374,8 @@ jobs:
           python3 -m unittest tests/test_verify_uk_t5_triplet.py -v
           python3 -m unittest tests/test_migrated_two_projections.py -v
           python3 -m unittest tests/test_stage_two_projections.py -v
+          # Текстовий .bits — не фізичний T5M .sens; D10/D11 мають власні ширини.
+          python3 -m unittest tests/test_sens_domain_spaces.py -v
           python3 -m unittest tests/test_binary_examples_source_boundary.py -v
           python3 -m unittest tests/test_audit_t5_file_pairs.py -v
           python3 -m unittest tests/test_check_release_triple_corpus.py -v
