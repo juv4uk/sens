@@ -1,5 +1,5 @@
-; FMA3 instruction-family catalogue. Physical ISA facts only.
-; Execution requires AVX register state plus the CPUID FMA feature bit.
+; Каталог машинних команд FMA3; лише фізичні факти ISA.
+; Для виконання потрібні стан регістрів AVX та ознака FMA в CPUID.
 
 (isa-catalogue/1
   (extension FMA3)
