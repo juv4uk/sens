@@ -13,7 +13,7 @@
 ; Метод: справжній читач розбирає текст кожного прикладу.
 ; Самописний розпізнавач не застосовується — помилку цього класу
 ; раніше встановлено й виправлено в R1. Обхід дерева форм
-; збирає символи в позиціях викличних голів лише тих підформ,
+; збирає символи в позиціях викликних голів лише тих підформ,
 ; що виконуються та не цитуються. Потім зіставляє їх із
 ; таблицями відомих імен. Локально зв'язані параметри lambda,
 ; let, let* або defmacro відкидаються: це змінні користувача,
@@ -80,7 +80,7 @@
   (як-є (write-to-string read read-all string-append string<? string?
           symbol->string string->symbol string-first string-rest
           string-slice string-contains? string-empty? string-length
-          string-prefix? number->string)))
+          string-prefix? взяти-десятковий-символ number->string number->string-onto)))
 
 ; ---------------------------------------------------------------------
 ; Похідні таблиці: читаємо справжні бібліотечні файли, не копіюємо вручну.
@@ -120,20 +120,21 @@
            доречні))))
 
 ; ---------------------------------------------------------------------
-; The walker: collect every symbol used in executed head position,
-; excluding locally-bound names, tagging %uses-lambda / %uses-let-family
-; as it goes past lambda/let/let*/defmacro.
+; Обхідник: збирає кожен символ, ужитий у виконаній головній позиції,
+; виключаючи локально зв'язані імена, позначаючи %uses-lambda /
+; %uses-let-family при проходженні повз lambda/let/let*/defmacro.
 ; ---------------------------------------------------------------------
 
-; the constitutional fixture set deliberately includes malformed special
-; forms (a lambda missing its body, a defmacro missing its parameter
-; list, a let-binding missing its value expression) to test the real
-; evaluator's own Arity errors -- crates/my-lisp/tests exercises the
-; same class at conformance.lisp:113/134 (lambda/defmacro arity fixtures).
-; The real evaluator rejects these at eval time; this classifier only
-; needs to not crash while walking them, so every destructuring step
-; below that assumes a minimum shape uses these instead of raw car/cdr,
-; degrading a missing piece to () rather than erroring.
+; Конституційний набір фікстур навмисно містить хибні особливі
+; форми (lambda без тіла, defmacro без списку параметрів,
+; прив'язку let без виразу-значення), щоб випробувати власні
+; помилки Arity справжнього оцінювача -- crates/my-lisp/tests
+; вправляє той самий клас у conformance.lisp:113/134 (фікстури
+; арності lambda/defmacro). Справжній оцінювач відкидає їх під час
+; обчислення; цьому класифікатору лише треба не впасти під час
+; обходу, тож кожен крок деструктуризації нижче, що припускає
+; мінімальну форму, вживає ці замість голих car/cdr, зводячи
+; відсутній елемент до () замість помилки.
 (визначити безпечне-перше
   (функція (елементи) (за-умовою ((атом? елементи) (як-є ())) ((атом? (як-є ())) (перше елементи)))))
 (визначити безпечна-решта
@@ -206,13 +207,13 @@
              ((та (символ? голова) (тотожне? голова (як-є def)))
               (нехай-послідовно ((назва (безпечне-перше (безпечна-решта форма)))
                      (форма-значення (безпечне-перше (безпечна-решта (безпечна-решта форма))))
-                     ; def's own name is visible inside its own value-expr:
-                     ; the evaluator shares one lexical frame between a def
-                     ; and the closure it defines, so a self-referential
-                     ; (def f (lambda (x) ... (f ...))) genuinely resolves
-                     ; at call time even though f isn't bound yet when the
-                     ; closure is created (crates/my-lisp/src/eval/special_forms/core.rs
-                     ; evaluate_definition's own comment documents this).
+                     ; Власне ім'я def видиме всередині його ж value-expr:
+                     ; оцінювач поділяє один лексичний кадр між def
+                     ; і замиканням, яке він визначає, тож самопосилальне
+                     ; (def f (lambda (x) ... (f ...))) справді розв'язується
+                     ; під час виклику, хоча f ще не зв'язане, коли
+                     ; замикання створюється (crates/my-lisp/src/eval/special_forms/core.rs,
+                     ; коментар evaluate_definition це документує).
                      (нові-звязані (сполучити назва звязані)))
                 (зібрати-голови форма-значення нові-звязані)))
              ((та (символ? голова) (тотожне? голова (як-є defmacro)))
@@ -238,12 +239,13 @@
       ((символ? форма) (за-умовою ((значення-у-списку? форма звязані) (як-є ())) ((атом? (як-є ())) (список форма))))
       ((атом? (як-є ())) (зібрати-голови форма звязані)))))
 
-; a fixture's expr text can hold MORE than one top-level form (e.g.
-; "(def count-down (lambda ...)) (count-down 100000)" -- a def followed
-; by a call, exactly like a real script). read-all captures every form;
-; a top-level def/defmacro extends the bound-set for the forms that
-; follow it in the SAME fixture, matching how they'd actually be
-; evaluated in one shared environment.
+; Текст expr фікстури може містити БІЛЬШЕ ніж одну верхньорівневу
+; форму (напр., "(def count-down (lambda ...)) (count-down 100000)" --
+; def, а потім виклик, точнісінько як справжній скрипт). read-all
+; захоплює кожну форму; верхньорівневий def/defmacro розширює
+; зв'язаний набір для форм, що йдуть за ним у ТІЙ САМІЙ фікстурі,
+; відповідно до того, як вони насправді обчислювалися б в одному
+; спільному оточенні.
 (визначити зібрати-залежності-верх-послід
   (функція (форми звязані)
     (за-умовою ((атом? форми) (як-є ())) ((атом? (як-є ())) (нехай-послідовно ((форма (перше форми))
@@ -263,8 +265,8 @@
     (зібрати-залежності-верх-послід форми (як-є ()))))
 
 ; ---------------------------------------------------------------------
-; Classification of one fixture's collected raw head-symbol list against
-; the known tables.
+; Класифікація зібраного сирого списку символів-голів однієї
+; фікстури за відомими таблицями.
 ; ---------------------------------------------------------------------
 
 (визначити маркер?
@@ -289,7 +291,7 @@
       ((значення-у-списку? симв (решта (перше таблиці))) (перше (перше таблиці)))
       ((атом? (як-є ())) (бібліотека-власник симв (решта таблиці))))))
 
-; classify one real (non-marker) symbol; returns (bucket-tag . library-or-())
+; класифікувати один справжній (не маркерний) символ; повертає (bucket-tag . library-or-())
 (визначити класифікувати-символ
   (функція (симв інші-таблиці)
     (за-умовою
@@ -302,22 +304,24 @@
              ((однакові? бібліотека (як-є ())) (сполучити (як-є unknown) (як-є ())))
              ((атом? (як-є ())) (сполучити (як-є reasoning-world-or-host) бібліотека))))))))
 
-; my-lisp has no try/catch: a fixture whose own point is that its source
-; text exceeds the reader's decimal-literal exponent resource bound
-; (crates/my-lisp/src/value.rs's MAX_DECIMAL_LITERAL_EXPONENT_MAGNITUDE,
-; 10000 as of commit 3a90df3) makes read-all itself throw a hard parse
-; error, aborting the whole batch -- exactly the same shape of problem
-; scripts/oracle-batch.lisp hit and fixed by not locally re-parsing at
-; all. This classifier DOES need a local parse to walk the AST, so it
-; cannot avoid reading altogether; instead it special-cases the exact,
-; currently-known set of such fixtures (verified via
-; `grep -n 'e100001\|e-100001' tests/fixtures/conformance.lisp`: exactly
-; three, all S3 axiom-tagged, all with error . "NumericOverflow" already
-; recorded) rather than guessing at a general-purpose exponent scanner --
-; the R1 lesson earlier in this investigation was specifically about the
-; risk of hand-rolling number classification outside the real reader. If
-; a future fixture adds a different oversized-exponent literal, this
-; check needs re-verification against the live corpus, not silent trust.
+; my-lisp не має try/catch: фікстура, чий сенс у тому, що її текст
+; джерела перевищує ресурсну межу показника десяткового літерала
+; читача (MAX_DECIMAL_LITERAL_EXPONENT_MAGNITUDE у
+; crates/my-lisp/src/value.rs, 10000 станом на коміт 3a90df3),
+; змушує сам read-all кинути жорстку помилку розбору, перериваючи
+; весь пакет -- та сама форма проблеми, яку scripts/oracle-batch.lisp
+; спіткав і виправив, взагалі не розбираючи локально. Цей
+; класифікатор СПРАВДІ потребує локального розбору для обходу AST,
+; тож не може уникнути читання зовсім; натомість він особливо
+; обробляє точний, наразі відомий набір таких фікстур (перевірено
+; через `grep -n 'e100001\|e-100001' tests/fixtures/conformance.lisp`:
+; рівно три, усі з позначкою аксіоми S3, усі вже із записом
+; error . "NumericOverflow") замість вгадування універсального
+; сканера показників -- урок R1 раніше в цьому дослідженні був
+; саме про ризик саморобної класифікації чисел поза справжнім читачем.
+; Якщо майбутня фікстура додасть інший завеликий літерал показника,
+; цю перевірку треба переперевірити на живому корпусі, а не довіряти
+; мовчки.
 (визначити відомо-нечитний-завеликий-показник?
   (функція (рядок-виразу)
     (або (рядок-містить? "e100001" рядок-виразу)
@@ -370,7 +374,7 @@
             (сполучити (як-є axiom-tagged-s1) (значення-у-списку? (як-є S1) список-аксіом))))))
 
 ; ---------------------------------------------------------------------
-; Fixture pairing (same technique as scripts/oracle-batch.lisp)
+; Парування фікстур (та сама техніка, що й scripts/oracle-batch.lisp)
 ; ---------------------------------------------------------------------
 
 (визначити лише-фікстури
