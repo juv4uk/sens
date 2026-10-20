@@ -223,6 +223,30 @@ fn reason_observe_preserves_every_successful_alternative() {
 }
 
 #[test]
+fn ukrainian_negated_goal_must_have_exactly_one_nested_goal() {
+    for (source, expected) in [
+        ("(результат-ціль? (як-є (not? (planet earth))))", true),
+        ("(результат-ціль? (як-є (not?)))", false),
+        ("(результат-ціль? (як-є (not? (planet earth) extra)))", false),
+        ("(результат-ціль? (як-є (not? (not? (planet earth)))))", true),
+        ("(результат-заперечений-ціль? (як-є (not? (planet earth))))", true),
+        ("(результат-заперечений-ціль? (як-є (not?)))", false),
+    ] {
+        let actual = eval_result_status_value(source);
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "{source}: очікувано {expected}, отримано {actual}"
+        );
+    }
+
+    assert_eq!(
+        eval_result_status("(результат-протилежний-ціль (як-є (not? (planet earth))))"),
+        "(planet earth)"
+    );
+}
+
+#[test]
 fn reason_observe_rejects_malformed_goal_as_data() {
     assert_eq!(
         eval_reason_observation(r#"(reason-observe 42 (quote ()))"#),
