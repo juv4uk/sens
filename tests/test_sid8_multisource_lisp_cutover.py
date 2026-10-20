@@ -144,7 +144,7 @@ class MultisourceDomainCutover(unittest.TestCase):
                 )
                 # D4:0011 та його ратифікована повна укр-назва є
                 # рівноправними spelling одного виклику. Восьмибітні
-                # історичні SID8-голови і далі заборонені.
+                # історичні сід8-голови і далі заборонені.
                 define_heads = {"0011", "визначити"}
                 self.assertTrue(
                     define_heads.intersection(heads),
