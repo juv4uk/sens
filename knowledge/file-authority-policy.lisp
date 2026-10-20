@@ -1,8 +1,8 @@
 ; Постанова власника SENS: файлова влада, 2026-10-10.
 ; Це політика допуску НОВИХ шляхів, не ратифікація значення за розширенням.
 ; Старі формати тримаються як явно названий борг до окремої міграції.
-(0011 *file-authority-policy*
-  (001
+(визначити *file-authority-policy*
+  (як-є
     ((schema . file-authority-policy/1)
      (status . owner-directed)
      (activation-git-commit . "9c94727eb1c45378f3debccf633aad2366e13599")
