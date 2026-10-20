@@ -1,23 +1,24 @@
-; #219 — явні результати уніфікації.
+; #219 — сучасні українські запити до явних результатів уніфікації.
+; Ключі звіту й англійські мітки результатів є незмінними даними протоколу.
 ; Завершений запит уніфікації мусить зберігати розрізнення між порожньою
 ; успішною підстановкою і позитивно встановленою алгоритмічною відмовою.
 
-((expr . "(unify-observe (quote radio) (quote radio) (quote ()))")
+((expr . "(спостерігати-уніфікацію (як-є radio) (як-є radio) (як-є ()))")
  (expected . "(unified ())")
  (active . t)
  (law . empty-substitution-is-success-data))
 
-((expr . "(unify-observe (logic-var (quote x)) (quote alice) (quote ()))")
+((expr . "(спостерігати-уніфікацію (логічна-змінна (як-є x)) (як-є alice) (як-є ()))")
  (expected . "(unified ((x . alice)))")
  (active . t)
  (law . substitution-success-is-explicit))
 
-((expr . "(unify-observe (quote radio) (quote antenna) (quote ()))")
+((expr . "(спостерігати-уніфікацію (як-є radio) (як-є antenna) (як-є ()))")
  (expected . "(unification-failure radio antenna ())")
  (active . t)
  (law . established-failure-is-explicit))
 
-((expr . "(unify-observe (logic-var (quote x)) (quote (f (var x))) (quote ()))")
+((expr . "(спостерігати-уніфікацію (логічна-змінна (як-є x)) (як-є (f (var x))) (як-є ()))")
  (expected . "(unification-failure (var x) (f (var x)) ())")
  (active . t)
  (law . occurs-check-failure-is-explicit))
