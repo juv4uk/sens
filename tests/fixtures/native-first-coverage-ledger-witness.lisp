@@ -1,29 +1,35 @@
-; Native-first coverage ledger witness. Ukrainian projection only.
+; Свідок журналу покриття нативного виконання СЕНС.
+; Виконувані виклики — українські, маркери результату — дані протоколу.
 
 (load "lib/core.lisp")
 
-(визначити native-first-coverage-check
-  (функція (left right)
-    (однакові? left right)))
+(визначити перевірити-покриття-нативного-виконання
+  (функція (ліве праве)
+    (однакові? ліве праве)))
 
-(визначити native-first-coverage-all-pass-state
-  (функція (verdicts)
+(визначити усі-перевірки-нативного-покриття-пройдено?
+  (функція (вердикти)
     (за-умовою
-      ((атом? verdicts) так)
-      ((native-first-coverage-check (перше verdicts) (як-є pass))
-       (native-first-coverage-all-pass-state (решта verdicts)))
+      ((атом? вердикти) так)
+      ((перевірити-покриття-нативного-виконання (перше вердикти) (як-є pass))
+       (усі-перевірки-нативного-покриття-пройдено? (решта вердикти)))
       (так ні))))
 
-(визначити native-first-coverage-ledger-witness
+(визначити свідок-журналу-нативного-покриття
   (функція ()
-    (нехай ((verdicts (як-є (pass pass pass))))
+    (нехай ((вердикти (як-є (pass pass pass))))
       (за-умовою
-        ((native-first-coverage-all-pass-state verdicts)
-         (як-є (native-first-coverage-ledger-witness (status pass))))
+        ((усі-перевірки-нативного-покриття-пройдено? вердикти)
+         (як-є (свідок-журналу-нативного-покриття (status pass))))
         (так
          (список
            (як-є native-first-coverage-ledger-witness)
            (як-є (status fail))
-           (список (як-є verdicts) verdicts)))))))
+           (список (як-є verdicts) вердикти)))))))
 
-(native-first-coverage-ledger-witness)
+; Історичні зовнішні імена лишаються посиланнями, не дублями законів.
+(визначити native-first-coverage-check перевірити-покриття-нативного-виконання)
+(визначити native-first-coverage-all-pass-state усі-перевірки-нативного-покриття-пройдено?)
+(визначити native-first-coverage-ledger-witness свідок-журналу-нативного-покриття)
+
+(свідок-журналу-нативного-покриття)
