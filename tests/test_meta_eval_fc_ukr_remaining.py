@@ -38,7 +38,7 @@ ALPHA_TO_HISTORY = {
 # Відновлення не є шляхом виконання і не повертає стару мову до SENS.
 PRE_REWRITE_BLOB = "72218257be75805125a7e0b21d39bb4e519408b3"
 PRE_REWRITE_HEADER = "; Experimental metacircular evaluator layer for contract 2.1 first-class builtins.\n; This is deliberately additive: lib/meta-eval.lisp remains the current witness/oracle pair.\n; The purpose here is to prove the next architectural step before merging it into my-eval:\n; primitive names live in the metacircular environment as values, so ordinary lexical\n; shadowing works for the evaluator written in Lisp too.\n;\n; Міграція: історичне ATOM(QUOTE EMPTY) як D1=YES → пряма точна проєкція #d1:1.\n; Two-field COND. Reuses existing project primitives as first-class values.\n; Width is identity; every bit of the domain address is valued.\n\n"
-CURRENT_REWRITE_HEADER = "; Першокласні функції: експериментальний метаобчислювач мовою SENS.\n; Точні викличні голови ядра — повна проєкція «укр» D1–D10.\n; Примітиви зберігаються у явному лексичному середовищі як значення.\n; Тому локальне зв'язування затінює початковий примітив без host-втручання.\n; Замикання зберігає параметри, тіло та середовище визначення.\n; Синтаксичні форми «як-є», «за-умовою», «функція» не є значеннями.\n; Невідомий примітив і невикличне значення повертають окрему помилкову форму.\n; Вихідні математичні операнди записуються людськими десятковими числами.\n; Жодних SID8/Sens8, закодованих викличних голів або шарів сумісності.\n\n"
+CURRENT_REWRITE_HEADER = "; Першокласні функції: експериментальний метаобчислювач мовою СЕНС.\n; Викличні голови ядра відповідають повній українській проєкції доменів від 1 до 10.\n; Примітиви зберігаються у явному лексичному середовищі як значення.\n; Локальне зв'язування затінює примітив без втручання зовнішнього виконавця.\n; Замикання зберігає параметри, тіло та середовище визначення.\n; Синтаксичні форми як-є, за-умовою і функція не є звичайними значеннями.\n; Невідомий примітив і невикличне значення повертають окрему помилкову форму.\n; Вихідні математичні операнди записуються людськими десятковими числами.\n; Історичні восьмибітні коди та шари сумісності не застосовуються.\n\n"
 REWRITTEN_HELPERS = {
     "my-fc-apply-primitive": "першокласне-застосувати-примітив",
     "my-fc-compare-chain": "першокласне-порівняти-послідовність",
@@ -75,6 +75,16 @@ REWRITTEN_QUOTED_DATA = {
     "unknown-primitive": "невідомий-примітив",
     "not-callable": "не-викликається",
 }
+REWRITTEN_COMMENTS = {
+    "; Exact D1 chain: single remaining arg is true; pairwise op then recurse.": "; Порівняння сусідніх аргументів триває рекурсивно, доки не лишиться один аргумент.",
+    "         ; Syntax-only forms remain syntax. They are intentionally not values.": "         ; Синтаксичні форми залишаються синтаксисом, а не звичайними значеннями.",
+    "         ; Every ordinary head is resolved through the environment first.": "         ; Кожна звичайна виклична голова спочатку шукається в лексичному середовищі.",
+    "         ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow": "         ; Локальне ім'я може затінювати однойменну примітивну операцію.",
+    "         ; the root primitive binding without the evaluator special-casing its name.": "         ; Обчислювач не надає таким іменам особливого пріоритету.",
+    "; Public experimental entry point. The root primitive environment is explicit": "; Відкритий експериментальний вхід отримує явне середовище примітивів.",
+    "; Lisp data, so a future host/runtime only has to preserve the primitive mechanism": "; Лексичне розв'язування залишається всередині мови, а зовнішня машина",
+    "; identities; lexical resolution itself is owned here.": "; відповідає тільки за збереження тотожності допущених механізмів.",
+}
 
 
 def undo_full_rewrite(text: str) -> str:
@@ -85,6 +95,8 @@ def undo_full_rewrite(text: str) -> str:
     for historical, current in REWRITTEN_QUOTED_DATA.items():
         text = text.replace("(як-є " + current + ")", "(як-є " + historical + ")")
     for historical, current in sorted(REWRITTEN_HELPERS.items(), key=lambda item: -len(item[1])):
+        text = text.replace(current, historical)
+    for historical, current in sorted(REWRITTEN_COMMENTS.items(), key=lambda item: -len(item[1])):
         text = text.replace(current, historical)
     if git_blob_sha(text) != PRE_REWRITE_BLOB:
         raise AssertionError("неправильна/зсунута повна українська поверхня: історичний blob")
