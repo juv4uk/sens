@@ -115,8 +115,11 @@ fn current_d3_machine_capabilities_are_keyed_by_exact_domain_identity() {
 fn current_machine_axis_and_profile_do_not_claim_sid8_as_authority() {
     let axis = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis");
-    assert!(axis.contains("вісь-спроможностей-машини-v3"));
+    assert!(axis.contains("вісь-спроможностей-машини-версія-3"));
     assert!(axis.contains("спроможності-для-домену"));
+    assert!(axis.contains("вісь-спроможностей-машини-версія-3"));
+    assert!(axis.contains("свідки-цілей-спроможності-машини-версія-2"));
+    assert!(axis.contains("статуси-свідків-цілей-машини-версія-1"));
     assert!(!axis.contains("machine-capability-legacy-sid-axis"));
     assert!(!axis.contains("machine-capabilities-for-sid"));
     assert!(!axis.contains("00001100"));

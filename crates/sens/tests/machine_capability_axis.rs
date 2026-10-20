@@ -160,8 +160,11 @@ fn active_machine_capability_axis_has_no_sid8_lookup() {
     let source = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis source");
 
-    assert!(source.contains("вісь-спроможностей-машини-v3"));
+    assert!(source.contains("вісь-спроможностей-машини-версія-3"));
     assert!(source.contains("спроможності-для-домену"));
+    assert!(source.contains("вісь-спроможностей-машини-версія-3"));
+    assert!(source.contains("свідки-цілей-спроможності-машини-версія-2"));
+    assert!(source.contains("статуси-свідків-цілей-машини-версія-1"));
     assert!(!source.contains("machine-capability-legacy-sid-axis"));
     assert!(!source.contains("machine-capabilities-for-sid"));
     assert!(!source.contains("00001100"));
