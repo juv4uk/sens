@@ -96,6 +96,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("root", nargs="?", default=str(Path(__file__).resolve().parents[1]))
     parser.add_argument("--json", default="")
+    parser.add_argument(
+        "--structural-only", action="store_true",
+        help="check corridor/axioms only; never imply release publication GO",
+    )
     ns = parser.parse_args()
     root = Path(ns.root).resolve()
 
@@ -133,6 +137,9 @@ def main() -> int:
         print("\nRELEASE_GATE_PARTIAL (some structural gates UNVERIFIED; release NO-GO)")
         return 1
     print("\nRELEASE_STRUCTURAL_GATES_GO 10/10 (NOT release admission)")
+    if ns.structural_only:
+        print("RELEASE_STRUCTURAL_ONLY_PASS: physical/semantic release admission NOT_VERIFIED")
+        return 0
     print("RELEASE_GATE_NO_GO: exact candidate SHA, full T5 triplets, native SENS "
           "semantic oracles, independent CI and owner authorization are "
           "outside this structural-only checker; never infer publication GO")
