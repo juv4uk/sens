@@ -160,21 +160,21 @@ fn partially_implemented_iclasses() -> BTreeMap<&'static str, &'static str> {
 fn not_yet_implemented_reason(admitted_extension: &str) -> &'static str {
     match admitted_extension {
         "AVX" | "AVX2" | "FMA3" | "BMI1" | "BMI2" | "F16C" => {
-            "VEX-prefix encoding not yet implemented"
+            "Кодування з префіксом VEX ще не реалізовано"
         }
-        "X87" => "x87 stack-register encoding not yet implemented",
-        "MMX" => "MMX opcode-map encoding not yet implemented",
+        "X87" => "Кодування стекових регістрів x87 ще не реалізовано",
+        "MMX" => "Кодування таблиці кодів операцій MMX ще не реалізовано",
         "SSE" | "SSE2" | "SSE3" | "SSSE3" | "SSE4.1+SSE4.2" => {
-            "legacy SSE mandatory-prefix/ModRM encoding not yet implemented"
+            "Кодування обов'язкового префікса й ModRM для SSE ще не реалізовано"
         }
-        "AES-NI" | "PCLMULQDQ" => "SSE-prefixed crypto encoding not yet implemented",
-        "XSAVE" => "XSAVE control-state encoding not yet implemented",
-        "MPX" => "BND-register encoding not yet implemented",
-        "SGX" => "ENCLS/ENCLU leaf-function encoding not yet implemented",
-        "RDRAND" | "RDSEED" => "0F C7 opcode-map encoding not yet implemented",
-        "CLFLUSHOPT" => "cache-management opcode encoding not yet implemented",
-        "X86-64" => "long-mode-specific BASE forms pending family-by-family rollout",
-        _ => "remaining BASE forms pending family-by-family rollout",
+        "AES-NI" | "PCLMULQDQ" => "Кодування криптографічних команд із префіксом SSE ще не реалізовано",
+        "XSAVE" => "Кодування стану керування XSAVE ще не реалізовано",
+        "MPX" => "Кодування регістрів BND ще не реалізовано",
+        "SGX" => "Кодування підфункцій ENCLS/ENCLU ще не реалізовано",
+        "RDRAND" | "RDSEED" => "Кодування таблиці команд 0F C7 ще не реалізовано",
+        "CLFLUSHOPT" => "Кодування команд керування кешем ще не реалізовано",
+        "X86-64" => "Форми BASE для 64-бітного режиму очікують поетапної реалізації",
+        _ => "Решта форм BASE очікує поетапної реалізації",
     }
 }
 
