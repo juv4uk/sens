@@ -224,6 +224,7 @@ def publish_batch(staged: list[tuple[Path, bytes]], output_root: Path) -> None:
     Відновлюються точні слова програми, але не коментарі Lisp.
     """
     created: list[Path] = []
+    created_dirs: list[Path] = []
     try:
         # Validate every output path before creating a directory or byte.
         # A symlink in an intermediate directory must not redirect a
@@ -249,7 +250,16 @@ def publish_batch(staged: list[tuple[Path, bytes]], output_root: Path) -> None:
         for rel, payload in staged:
             target = output_root / rel
             view = target.with_suffix("")
-            target.parent.mkdir(parents=True, exist_ok=True)
+            # Фіксуємо також нові каталоги: збій пакета не залишає
+            # навіть порожнього сліду від незавершеної публікації.
+            missing_dirs: list[Path] = []
+            ancestor = target.parent
+            while not ancestor.exists() and not ancestor.is_symlink():
+                missing_dirs.append(ancestor)
+                ancestor = ancestor.parent
+            for directory in reversed(missing_dirs):
+                directory.mkdir()
+                created_dirs.append(directory)
             for prefix_length in range(len(rel.parts)):
                 directory = output_root.joinpath(*rel.parts[:prefix_length])
                 if directory.is_symlink():
@@ -280,6 +290,13 @@ def publish_batch(staged: list[tuple[Path, bytes]], output_root: Path) -> None:
     except Exception:
         for output in reversed(created):
             output.unlink(missing_ok=True)
+        # Видаляємо лише каталоги, створені цією транзакцією.
+        # Чужі або вже непорожні каталоги не чіпаємо.
+        for directory in reversed(created_dirs):
+            try:
+                directory.rmdir()
+            except OSError:
+                pass
         raise
 
 

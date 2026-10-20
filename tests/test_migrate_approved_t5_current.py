@@ -157,6 +157,20 @@ class CurrentManifestMigrationTests(unittest.TestCase):
             self.assertFalse((out / "b.sens").exists())
             self.assertEqual((out / "b").read_bytes(), b"existing-user-data")
 
+    def test_failed_nested_batch_removes_new_directories(self):
+        # Другий фізичний носій пошкоджено: нуль файлів І каталогів.
+        _, physical, _ = approved.migrate_one(
+            SOURCE, ROOT, self.maps, source_era="current",
+        )
+        with tempfile.TemporaryDirectory(prefix="sens-nested-rollback-") as temp:
+            out = Path(temp) / "mirror"
+            with self.assertRaises(approved.engine.SensT5Error):
+                approved.publish_batch([
+                    (Path("first/nested/program.sens"), physical),
+                    (Path("second/broken.sens"), b"\\xff"),
+                ], out)
+            self.assertFalse(out.exists())
+
     def test_legacy_sid8_is_not_an_executable_era(self):
         with self.assertRaisesRegex(approved.engine.MigrationError,
                                     "HISTORICAL_SOURCE_ERA_DISABLED"):
