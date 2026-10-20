@@ -1,6 +1,6 @@
 ; ecosystem-status — стан екосистеми (українська проєкція)
 
-(визначити ecosystem-status
+(визначити стан-екосистеми
   (функція ()
     (як-є (ecosystem
             (projection ukr)
@@ -9,4 +9,4 @@
             (boot racket/boot/core ukr)
             (fixtures cohorts canaries semantic ukr)))))
 
-(ecosystem-status)
+(стан-екосистеми)
