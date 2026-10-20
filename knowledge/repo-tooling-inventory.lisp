@@ -1,7 +1,7 @@
-; #382 — Lisp-owned machine-readable inventory of immediate scripts/* tooling.
+; #382 — машинно-читаний інвентар безпосередніх інструментів scripts/*, власність Lisp.
 ; Це governance metadata, а не semantic authority.
-; Scope: immediate entries under scripts/, except the tests/ directory.
-; Unknown facts stay explicit as unknown; do not infer callers or authority.
+; Обсяг: безпосередні записи під scripts/, крім каталогу tests/.
+; Невідомі факти лишаються явно невідомими; не виводьте викликників чи владу.
 
 (about
   (schema repo-tooling-inventory/1)
