@@ -96,7 +96,8 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
     # Не прирівнюємо історичний T5 до сучасного фізичного T5M.
     counts = dict(ukrainian_keyboard=0, with_sens=0, with_view=0,
                   complete_triplets=0, bounded_verified=0,
-                  misnamed_binary_lisp=0, comment_only_nonprogram_lisp=0,
+                  misnamed_binary_lisp=0, undecidable_lisp_files=0,
+                  comment_only_nonprogram_lisp=0,
                   potential_program_files=0, potential_program_missing_sens=0,
                   comment_only_style_warnings=0,
                   bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
@@ -109,6 +110,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         relative = source.relative_to(root).as_posix()
         # Never follow a symlink, even when its target looks valid.
         if source.is_symlink() or not source.is_file():
+            counts["undecidable_lisp_files"] += 1
             reject(relative, "не звичайний файл Lisp")
             continue
         comment_only = only_line_comments(source)
@@ -164,6 +166,9 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         # whitespace and quoted external protocol data are not executable
         # program identity; do not let them veto proved roundtrips.
         and counts["misnamed_binary_lisp"] == 0
+        # Відхилений .lisp (зокрема симлінк) не може зникнути
+        # зі знаменника й дати хибний загальний PASS.
+        and counts["undecidable_lisp_files"] == 0
         and verify_bounded
     )
     return {

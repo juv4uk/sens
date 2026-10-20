@@ -287,6 +287,24 @@ class AllLispTripletCensusTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(main(["--root", str(self.root), "--require-reversible"]), 2)
 
+    def test_symlinked_lisp_does_not_get_invisible_release_credit(self):
+        # Навіть одна справжня перевірена трійка не доводить облік
+        # другого .lisp, якщо той є символічним посиланням.
+        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        target = self.root / "lib" / "branch"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for suffix in (".lisp", ".sens", ""):
+            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        (self.root / "lib" / "посилання.lisp").symlink_to("branch.lisp")
+        summary = scan(self.root, verify_bounded=True)
+        self.assertEqual(summary["total_lisp_files"], 2)
+        self.assertEqual(summary["potential_program_files"], 1)
+        self.assertEqual(summary["bounded_verified"], 1, summary["blocked_sample"])
+        self.assertEqual(summary["undecidable_lisp_files"], 1)
+        self.assertFalse(summary["all_bounded_reverse_verified"])
+        self.assertFalse(summary["release_ready"])
+        self.assertIn("не звичайний файл", str(summary["blocked_sample"]))
+
     def test_empty_repository_is_not_vacuously_proven(self):
         summary = scan(self.root, verify_bounded=True, validator=lambda *_: {})
         self.assertEqual(summary["total_lisp_files"], 0)
