@@ -221,14 +221,14 @@
 
 (визначити заголовок-машинної-проєкції
   (список
-    "; GENERATED — DO NOT EDIT BY HAND"
-    "; HISTORICAL MIGRATION PROJECTION — NOT SEMANTIC AUTHORITY"
-    "; Donor: lib/surface/semantic-registry.lisp"
-    "; Generator: scripts/generate-function-table.lisp"
-    "; Schema ft/2: (legacy-bitstring formal ук укр en sa sym projection)"
-    "; ук = current Ukrainian; укр = full Ukrainian peer surface"
-    "; Display order for humans: ук → укр → English → Sanskrit"
-    "; projection = historical/migration review only"
+    "; ЗГЕНЕРОВАНО — НЕ РЕДАГУВАТИ ВРУЧНУ"
+    "; ІСТОРИЧНА МІГРАЦІЙНА ПРОЄКЦІЯ — НЕ СЕМАНТИЧНА ВЛАДА"
+    "; Донор: lib/surface/semantic-registry.lisp"
+    "; Генератор: scripts/generate-function-table.lisp"
+    "; Схема ft/2: (legacy-bitstring formal ук укр en sa sym projection)"
+    "; ук — чинна коротка українська проєкція; укр — повна українська проєкція"
+    "; Порядок читання: ук → укр → англійська → санскрит"
+    "; поле projection — лише історичний/міграційний огляд"
     ""
     "(ft/2"))
 
@@ -239,17 +239,17 @@
 
 (визначити заголовок-документної-проєкції
   (список
-    "# Function table (generated projection)"
+    "# Таблиця функцій (похідна проєкція)"
     ""
-    "**Status:** historical migration projection. Canonical identity comes from exact domains and admitted laws, not this flat table."
+    "**Статус:** історична міграційна проєкція. Канонічну тотожність задають точні домени та допущені закони, а не ця плоска таблиця."
     ""
-    "**Machine projection:** `lib/machine/intel-core-i5-6400.lisp` — physical execution paths only; it does not create language meaning."
+    "**Машинна проєкція:** `lib/machine/intel-core-i5-6400.lisp` описує лише фізичні шляхи виконання; семантики мови не створює."
     ""
-    "**Historical projection:** `contracts/core1-historical-sid-map.lisp` — one-way SID → McCarthy 1960 / Lisp 1.5 mechanism comparison, pinned against `juv4uk/mccarthy-eval`; it never mints a new identity and does not create language meaning."
+    "**Історична проєкція:** `contracts/core1-historical-sid-map.lisp` — одностороннє зіставлення SID з механізмами Маккарті 1960 / Lisp 1.5, звірене з `juv4uk/mccarthy-eval`. Воно не створює нових тотожностей і не визначає семантику."
     ""
-    "Regenerate: `cargo run -p sens-cli --bin sens -- scripts/generate-function-table.lisp`"
+    "Відтворити: `cargo run -p sens-cli --bin sens -- scripts/generate-function-table.lisp`"
     ""
-    "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake | McCarthy 1960 / Lisp 1.5 (Core1) |"
+    "| ІД | ук | укр | Англійська | Санскрит | Символ | Intel Core i5-6400 / Skylake | Маккарті 1960 / Lisp 1.5 (Core1) |"
     "|----|----|-----|---------|----------|--------|------------------------------|-----------------------------------|"))
 
 (визначити тіло-документної-проєкції (зєднати-новим-рядком (приєднати заголовок-документної-проєкції (відобразити сформувати-рядок-документної-проєкції записи))))
@@ -269,7 +269,7 @@
           (рядок+
             "function-table: "
             (число-рядок (довжина записи))
-            " historical projection rows written"))))))
+            " історичних рядків проєкції записано"))))))
 
 ; Значення проєкцій і перемикач аргументів — рядки, тобто атоми.
 ; Зіставляємо їх точним D3:101 EQ, а не ширшим D8:11110111 EQUAL.
@@ -286,16 +286,16 @@
               (рядок+
                 "function-table: "
                 (число-рядок (довжина записи))
-                " historical projection rows current")))
+                " історичних рядків проєкції актуально")))
            (так
             (друге
               (список
-                (друкувати "function-table markdown projection is stale")
+                (друкувати "таблиця функцій: застаріла документна проєкція")
                 (перше (як-є ())))))))
         (так
          (друге
            (список
-             (друкувати "function-table Lisp projection is stale")
+             (друкувати "таблиця функцій: застаріла Lisp-проєкція")
              (перше (як-є ())))))))))
 
 (за-умовою
