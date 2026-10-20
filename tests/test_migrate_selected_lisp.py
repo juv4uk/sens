@@ -156,14 +156,14 @@ class SelectedOriginalT5(unittest.TestCase):
         text7 = migration.build_text7(
             foundation, ROOT / "knowledge/d7-keyboard-v2-ratified.json")
         current = migration.Resolver(my, upper)
-        original = "(перше-першого (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\\n"
+        original = "(перше-першого (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n"
         projected = migration.migrate_file(
             original, current, text7, source_surface="укр", codec="t5")
         self.assertTrue(projected.startswith("10 1000 00 "), projected)
         ambiguous = migration.Resolver(my, upper)
         with self.assertRaisesRegex(migration.MigrationError, "ambiguous eight-bit"):
             migration.migrate_file(
-                "(01001000 000)\\n", ambiguous, text7, source_surface="укр", codec="t5")
+                "(01001000 000)\n", ambiguous, text7, source_surface="укр", codec="t5")
 
     def test_real_unpaired_original_files_are_audited_not_converted(self):
         # These are tracked old files, not fabricated canaries or newly authored
