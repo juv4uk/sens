@@ -1,2 +1,2 @@
-; D9 NUMERIC-EQUALITY must reject same-magnitude operands with different widths.
+; D9 NUMERIC-EQUALITY мусить відкидати операнди однакової величини різної ширини.
 (числовий-рівність #d24:000000000000000000000001 #d48:000000000000000000000000000000000000000000000001)
