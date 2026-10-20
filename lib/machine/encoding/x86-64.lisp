@@ -181,8 +181,8 @@
 
 ; ModR/M is a finite (mode:2, reg:3, rm:3) machine field.
 ; Each admitted tuple maps directly to its byte; unsupported values fail closed.
-(0011 x86-encode-modrm
-  (0010 (mode reg rm)
+(визначити x86-encode-modrm
+  (функція (mode reg rm)
     (110
       ((101 mode 0)
        (110
@@ -811,8 +811,8 @@
 ; legacy byte packer below still consumes mechanical Number fields, so project
 ; only the closed u3 domain 0..7 here.  This is intentionally not a general
 ; BinaryNumber -> legacy Number coercion.
-(0011 x86-project-bin3-to-mechanism-u3
-  (0010 (value)
+(визначити x86-project-bin3-to-mechanism-u3
+  (функція (value)
     (110
       ((11010 value #b1)    #d0)
       ((11010 value #b10)   #d1)
@@ -827,8 +827,8 @@
 
 ; SIB is a finite (scale:2, index:3, base:3) machine field.
 ; Explicit tuples preserve the exact byte without semantic-number arithmetic.
-(0011 x86-encode-sib
-  (0010 (scale index base)
+(визначити x86-encode-sib
+  (функція (scale index base)
     (110
       ((101 scale 0)
        (110
@@ -1500,8 +1500,8 @@
 
 ; Exact finite 8-bit decode. The source owns every transition and every byte;
 ; output projection never uses +, mod, division, or a host integer conversion.
-(0011 x86-byte-from-eight-bits
-  (0010 (b0 b1 b2 b3 b4 b5 b6 b7)
+(визначити x86-byte-from-eight-bits
+  (функція (b0 b1 b2 b3 b4 b5 b6 b7)
     (110
       ((101 b0 0) (110
       ((101 b1 0) (110
@@ -2269,18 +2269,18 @@
       ((010 ()) (001 ()))))
       ((010 ()) (001 ())))))
 
-(0011 x86-bit-or-zero
-  (0010 (bits)
+(визначити x86-bit-or-zero
+  (функція (bits)
     (110
       ((0101 bits) 0)
       ((010 ()) (100 bits)))))
 
-(0011 x86-drop-eight-bits
-  (0010 (bits)
+(визначити x86-drop-eight-bits
+  (функція (bits)
     (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))
 
-(0011 x86-byte-from-bits
-  (0010 (bits)
+(визначити x86-byte-from-bits
+  (функція (bits)
     (x86-byte-from-eight-bits
       (x86-bit-or-zero bits)
       (x86-bit-or-zero (011 bits))
@@ -2291,22 +2291,22 @@
       (x86-bit-or-zero (011 (011 (011 (011 (011 (011 bits)))))))
       (x86-bit-or-zero (011 (011 (011 (011 (011 (011 (011 bits)))))))))))
 
-(0011 x86-u64-bytes-from-bits
-  (0010 (bits)
+(визначити x86-u64-bytes-from-bits
+  (функція (bits)
     (110
       ((0101 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
        (111 (x86-byte-from-bits bits) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))))))))) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))))))))))))))))) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))))))))))))))))))))))))) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))))))))))))))))))))))))))))))))) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))))))))))))))))))))))))))))))))))))))))) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))))))))))))))))))))))))))))))))))))))))))))))))) (001 ()))))))))))
       ((010 ()) (001 ())))))
 
-(0011 x86-u32-bytes-from-bits
-  (0010 (bits)
+(визначити x86-u32-bytes-from-bits
+  (функція (bits)
     (110
       ((0101 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits)))))))))))))))))))))))))))))))))
        (111 (x86-byte-from-bits bits) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))))))))) (111 (x86-byte-from-bits (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 (011 bits))))))))))))))))))))))))) (001 ()))))))
       ((010 ()) (001 ())))))
 
-(0011 x86-u32-bytes
-  (0010 (value)
+(визначити x86-u32-bytes
+  (функція (value)
     ((0010 (bits)
        (110
          ((0101 bits) (001 ()))
@@ -2317,8 +2317,8 @@
 ; Механізм x86, не новий закон D5/D6: лише вже ратифіковані
 ; додавання, віднімання, порівняння і структурна пара D3.
 ; Кожна рекурсія подвоює масштаб; жодного лінійного віднімання 256.
-(0011 x86-ціла-частка-залишок
-  (0010 (значення масштаб кратність)
+(визначити x86-ціла-частка-залишок
+  (функція (значення масштаб кратність)
     (110
       ((менше? значення масштаб)
        (111 0 значення))
@@ -2337,8 +2337,8 @@
 
 ; Матеріалізація рівно восьми байтів little-endian.
 ; Довжина визначена механізмом x86; нічого не змінює в T5.
-(0011 x86-байти-без-знака
-  (0010 (значення кількість)
+(визначити x86-байти-без-знака
+  (функція (значення кількість)
     (110
       ((менше? кількість 1) (001 ()))
       ((010 ())
@@ -2350,24 +2350,24 @@
               (відняти кількість 1))))
         (x86-ціла-частка-залишок значення 256 1))))))
 
-(0011 x86-u64-bytes
-  (0010 (значення)
+(визначити x86-u64-bytes
+  (функція (значення)
     ((0010 (bits)
        (110
          ((0101 bits) (001 ()))
          ((010 ()) (x86-u64-bytes-from-bits bits))))
      (x86-wire-integer-bits значення))))
 
-(0011 x86-encode-ret
-  (0010 ()
+(визначити x86-encode-ret
+  (функція ()
     (1110 195)))
 
-(0011 x86-encode-mov-eax-imm32
-  (0010 (immediate)
+(визначити x86-encode-mov-eax-imm32
+  (функція (immediate)
     (111 184 (x86-u32-bytes immediate))))
 
-(0011 x86-encode-mov-r64-imm64
-  (0010 (register immediate)
+(визначити x86-encode-mov-r64-imm64
+  (функція (register immediate)
     ((0010 (code)
        (111
          (x86-encode-rex 1 0 0 (x86-high1 code))
@@ -2383,8 +2383,8 @@
 ; D3 CDR selects the remainder from the returned (quotient . remainder) pair.
 ; Signed disp8 is a finite machine field. Negative values map by the
 ; two's-complement byte projection, without invoking Core math or host coercion.
-(0011 x86-disp8-byte
-  (0010 (displacement)
+(визначити x86-disp8-byte
+  (функція (displacement)
     (110
       ((101 displacement -128)
        128)
@@ -2903,8 +2903,8 @@
 ; MOV r64, [base + disp8], opcode 8B /r.
 ; ModR/M mode 01 always carries one displacement byte. RSP/R12 bases use the
 ; required no-index SIB byte instead of silently emitting an invalid address.
-(0011 x86-encode-mov-r64-mem-disp8
-  (0010 (destination base displacement)
+(визначити x86-encode-mov-r64-mem-disp8
+  (функція (destination base displacement)
     ((0010 (dst) ((0010 (base-code) ((0010 (rex) ((0010 (modrm) (110
               ((101 (x86-low3 base-code) 4)
                 (1110
@@ -2917,8 +2917,8 @@
                 (1110 rex 139 modrm (x86-disp8-byte displacement))))) (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code)))) (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code)))) (x86-reg-code base))) (x86-reg-code destination))))
 
 ; MOV [base + disp8], r64, opcode 89 /r.
-(0011 x86-encode-mov-mem-disp8-r64
-  (0010 (base displacement source)
+(визначити x86-encode-mov-mem-disp8-r64
+  (функція (base displacement source)
     ((0010 (base-code) ((0010 (src) ((0010 (rex) ((0010 (modrm) (110
               ((101 (x86-low3 base-code) 4)
                 (1110
@@ -2940,8 +2940,8 @@
 ; any flags, needed once pointer/offset arithmetic (e.g. advancing a
 ; bump-pointer arena, or computing a struct field's address) must not
 ; disturb a CMP result still pending in a nearby branch.
-(0011 x86-encode-lea-r64-mem-disp8
-  (0010 (destination base displacement)
+(визначити x86-encode-lea-r64-mem-disp8
+  (функція (destination base displacement)
     ((0010 (dst) ((0010 (base-code) ((0010 (rex) ((0010 (modrm) (110
               ((101 (x86-low3 base-code) 4)
                 (1110
@@ -2958,8 +2958,8 @@
 ; against #175's pinned XED evidence: lib/machine/xed/vendor/base/xed-isa.txt
 ; PATTERN lines for each ICLASS's `MOD[0b11] MOD=3 REG[rrr] RM[nnn]` form).
 ; All six share one shape; only the opcode byte differs.
-(0011 x86-encode-alu-r64-r64
-  (0010 (opcode destination source)
+(визначити x86-encode-alu-r64-r64
+  (функція (opcode destination source)
     ((0010 (dst src)
        (1110
          (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 dst))
@@ -2968,28 +2968,28 @@
      (x86-reg-code destination)
      (x86-reg-code source))))
 
-(0011 x86-encode-add-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-add-r64-r64
+  (функція (destination source)
     (x86-encode-alu-r64-r64 1 destination source)))
 
-(0011 x86-encode-or-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-or-r64-r64
+  (функція (destination source)
     (x86-encode-alu-r64-r64 9 destination source)))
 
-(0011 x86-encode-and-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-and-r64-r64
+  (функція (destination source)
     (x86-encode-alu-r64-r64 33 destination source)))
 
-(0011 x86-encode-sub-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-sub-r64-r64
+  (функція (destination source)
     (x86-encode-alu-r64-r64 41 destination source)))
 
-(0011 x86-encode-xor-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-xor-r64-r64
+  (функція (destination source)
     (x86-encode-alu-r64-r64 49 destination source)))
 
-(0011 x86-encode-cmp-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-cmp-r64-r64
+  (функція (destination source)
     (x86-encode-alu-r64-r64 57 destination source)))
 
 ; MOV r/m64, r64 (opcode 0x89 /r, mod=3 register/register): copies source
@@ -3002,8 +3002,8 @@
 ; This is the most elementary data-movement form still missing until now:
 ; every other admitted form can only load an immediate or a memory operand
 ; into a register, never copy register-to-register.
-(0011 x86-encode-mov-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-mov-r64-r64
+  (функція (destination source)
     (x86-encode-alu-r64-r64 137 destination source)))
 
 ; Two's-complement little-endian bytes for a sign-extended imm32 value
@@ -3011,8 +3011,8 @@
 ; discipline #199 proved for disp8 (x86-disp8-byte) -- `mod` in this Lisp
 ; does not wrap negative operands, so adding 2^32 before reducing mod 2^32
 ; is exact for the whole imm32 domain.
-(0011 x86-imm32-bytes
-  (0010 (immediate)
+(визначити x86-imm32-bytes
+  (функція (immediate)
     (x86-u32-bytes
       (011
         (x86-ціла-частка-залишок
@@ -3028,8 +3028,8 @@
 ; RM[nnn] SIMMz()`). Lets a comparison/arithmetic-against-a-constant (the
 ; #196 COND base-case shape: compare a variable to a literal) skip loading
 ; the constant into a scratch register first.
-(0011 x86-encode-alu-r64-imm32
-  (0010 (opcode-extension destination immediate)
+(визначити x86-encode-alu-r64-imm32
+  (функція (opcode-extension destination immediate)
     ((0010 (dst) (111
         (x86-encode-rex 1 0 0 (x86-high1 dst))
         (111
@@ -3038,28 +3038,28 @@
             (x86-encode-modrm 3 opcode-extension (x86-low3 dst))
             (x86-imm32-bytes immediate))))) (x86-reg-code destination))))
 
-(0011 x86-encode-add-r64-imm32
-  (0010 (destination immediate)
+(визначити x86-encode-add-r64-imm32
+  (функція (destination immediate)
     (x86-encode-alu-r64-imm32 0 destination immediate)))
 
-(0011 x86-encode-or-r64-imm32
-  (0010 (destination immediate)
+(визначити x86-encode-or-r64-imm32
+  (функція (destination immediate)
     (x86-encode-alu-r64-imm32 1 destination immediate)))
 
-(0011 x86-encode-and-r64-imm32
-  (0010 (destination immediate)
+(визначити x86-encode-and-r64-imm32
+  (функція (destination immediate)
     (x86-encode-alu-r64-imm32 4 destination immediate)))
 
-(0011 x86-encode-sub-r64-imm32
-  (0010 (destination immediate)
+(визначити x86-encode-sub-r64-imm32
+  (функція (destination immediate)
     (x86-encode-alu-r64-imm32 5 destination immediate)))
 
-(0011 x86-encode-xor-r64-imm32
-  (0010 (destination immediate)
+(визначити x86-encode-xor-r64-imm32
+  (функція (destination immediate)
     (x86-encode-alu-r64-imm32 6 destination immediate)))
 
-(0011 x86-encode-cmp-r64-imm32
-  (0010 (destination immediate)
+(визначити x86-encode-cmp-r64-imm32
+  (функція (destination immediate)
     (x86-encode-alu-r64-imm32 7 destination immediate)))
 
 ; TEST r/m64, r64 (opcode 0x85 /r, mod=3 register/register): destination AND
@@ -3067,8 +3067,8 @@
 ; (`PATTERN : 0x85 MOD[0b11] MOD=3 REG[rrr] RM[nnn]`). Same REX.W+opcode+
 ; ModRM shape used by the group-1 ALU family, so it reuses x86-encode-alu-r64-r64
 ; directly rather than duplicating the REX/ModRM arithmetic.
-(0011 x86-encode-test-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-test-r64-r64
+  (функція (destination source)
     (x86-encode-alu-r64-r64 133 destination source)))
 
 ; PUSH r64 (opcode 0x50+rd, ICLASS PUSH: `0b0101_0 SRM[rrr] ... DF64()`) and
@@ -3076,16 +3076,16 @@
 ; #175's pinned XED evidence. Both default to 64-bit operand size in long
 ; mode (`DF64()`), so no REX.W is emitted; only REX.B is needed, and only
 ; for r8-r15.
-(0011 x86-encode-push-r64
-  (0010 (register)
+(визначити x86-encode-push-r64
+  (функція (register)
     ((0010 (code) (110
         ((101 (x86-high1 code) 1)
           (1110 (x86-encode-rex 0 0 0 1) (01010 80 (x86-low3 code))))
         ((010 ())
           (1110 (01010 80 (x86-low3 code)))))) (x86-reg-code register))))
 
-(0011 x86-encode-pop-r64
-  (0010 (register)
+(визначити x86-encode-pop-r64
+  (функція (register)
     ((0010 (code) (110
         ((101 (x86-high1 code) 1)
           (1110 (x86-encode-rex 0 0 0 1) (01010 88 (x86-low3 code))))
@@ -3100,15 +3100,15 @@
 ; evidence tagged `not64` -- those byte values became REX prefixes in
 ; 64-bit mode, so encoding INC/DEC in long mode always goes through this
 ; ModRM group-5 path, never the legacy one.
-(0011 x86-encode-inc-r64
-  (0010 (register)
+(визначити x86-encode-inc-r64
+  (функція (register)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         255
         (x86-encode-modrm 3 0 (x86-low3 code)))) (x86-reg-code register))))
 
-(0011 x86-encode-dec-r64
-  (0010 (register)
+(визначити x86-encode-dec-r64
+  (функція (register)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         255
@@ -3119,15 +3119,15 @@
 ; pinned XED evidence (`PATTERN : 0xF7 MOD[0b11] MOD=3 REG[0b010] RM[nnn]`
 ; / `REG[0b011]`). This matches INC/DEC's group-5 shape: always REX.W,
 ; REX.B only for r8-r15.
-(0011 x86-encode-not-r64
-  (0010 (register)
+(визначити x86-encode-not-r64
+  (функція (register)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         247
         (x86-encode-modrm 3 2 (x86-low3 code)))) (x86-reg-code register))))
 
-(0011 x86-encode-neg-r64
-  (0010 (register)
+(визначити x86-encode-neg-r64
+  (функція (register)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         247
@@ -3141,24 +3141,24 @@
 ; rel8/rel32/imm32, UIMM8 is an *unsigned* byte in [0,255], so no
 ; two's-complement wrap-before-split is needed -- the admitted count
 ; becomes the raw trailing byte directly.
-(0011 x86-encode-shift-r64-imm8
-  (0010 (opcode-extension register count)
+(визначити x86-encode-shift-r64-imm8
+  (функція (opcode-extension register count)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         193
         (x86-encode-modrm 3 opcode-extension (x86-low3 code))
         count)) (x86-reg-code register))))
 
-(0011 x86-encode-shl-r64-imm8
-  (0010 (register count)
+(визначити x86-encode-shl-r64-imm8
+  (функція (register count)
     (x86-encode-shift-r64-imm8 4 register count)))
 
-(0011 x86-encode-shr-r64-imm8
-  (0010 (register count)
+(визначити x86-encode-shr-r64-imm8
+  (функція (register count)
     (x86-encode-shift-r64-imm8 5 register count)))
 
-(0011 x86-encode-sar-r64-imm8
-  (0010 (register count)
+(визначити x86-encode-sar-r64-imm8
+  (функція (register count)
     (x86-encode-shift-r64-imm8 7 register count)))
 
 ; Jcc rel8: opcode 0x70+cc followed by a signed 8-bit relative displacement
@@ -3169,36 +3169,36 @@
 ; ICLASS in order: JO,JNO,JB,JNB,JZ,JNZ,JBE,JNBE,JS,JNS,JP,JNP,JL,JNL,JLE,
 ; JNLE). Reuses x86-disp8-byte for the same two's-complement byte
 ; conversion #199 already proved correct for MOV's disp8 slot.
-(0011 x86-encode-jcc-rel8
-  (0010 (condition-code displacement)
+(визначити x86-encode-jcc-rel8
+  (функція (condition-code displacement)
     (1110
       (01010 112 condition-code)
       (x86-disp8-byte displacement))))
 
-(0011 x86-encode-jo-rel8 (0010 (displacement) (x86-encode-jcc-rel8 0 displacement)))
-(0011 x86-encode-jno-rel8 (0010 (displacement) (x86-encode-jcc-rel8 1 displacement)))
-(0011 x86-encode-jb-rel8 (0010 (displacement) (x86-encode-jcc-rel8 2 displacement)))
-(0011 x86-encode-jnb-rel8 (0010 (displacement) (x86-encode-jcc-rel8 3 displacement)))
-(0011 x86-encode-jz-rel8 (0010 (displacement) (x86-encode-jcc-rel8 4 displacement)))
-(0011 x86-encode-jnz-rel8 (0010 (displacement) (x86-encode-jcc-rel8 5 displacement)))
-(0011 x86-encode-jbe-rel8 (0010 (displacement) (x86-encode-jcc-rel8 6 displacement)))
-(0011 x86-encode-jnbe-rel8 (0010 (displacement) (x86-encode-jcc-rel8 7 displacement)))
-(0011 x86-encode-js-rel8 (0010 (displacement) (x86-encode-jcc-rel8 8 displacement)))
-(0011 x86-encode-jns-rel8 (0010 (displacement) (x86-encode-jcc-rel8 9 displacement)))
-(0011 x86-encode-jp-rel8 (0010 (displacement) (x86-encode-jcc-rel8 #d10 displacement)))
-(0011 x86-encode-jnp-rel8 (0010 (displacement) (x86-encode-jcc-rel8 #d11 displacement)))
-(0011 x86-encode-jl-rel8 (0010 (displacement) (x86-encode-jcc-rel8 12 displacement)))
-(0011 x86-encode-jnl-rel8 (0010 (displacement) (x86-encode-jcc-rel8 13 displacement)))
-(0011 x86-encode-jle-rel8 (0010 (displacement) (x86-encode-jcc-rel8 14 displacement)))
-(0011 x86-encode-jnle-rel8 (0010 (displacement) (x86-encode-jcc-rel8 15 displacement)))
+(визначити x86-encode-jo-rel8 (0010 (displacement) (x86-encode-jcc-rel8 0 displacement)))
+(визначити x86-encode-jno-rel8 (0010 (displacement) (x86-encode-jcc-rel8 1 displacement)))
+(визначити x86-encode-jb-rel8 (0010 (displacement) (x86-encode-jcc-rel8 2 displacement)))
+(визначити x86-encode-jnb-rel8 (0010 (displacement) (x86-encode-jcc-rel8 3 displacement)))
+(визначити x86-encode-jz-rel8 (0010 (displacement) (x86-encode-jcc-rel8 4 displacement)))
+(визначити x86-encode-jnz-rel8 (0010 (displacement) (x86-encode-jcc-rel8 5 displacement)))
+(визначити x86-encode-jbe-rel8 (0010 (displacement) (x86-encode-jcc-rel8 6 displacement)))
+(визначити x86-encode-jnbe-rel8 (0010 (displacement) (x86-encode-jcc-rel8 7 displacement)))
+(визначити x86-encode-js-rel8 (0010 (displacement) (x86-encode-jcc-rel8 8 displacement)))
+(визначити x86-encode-jns-rel8 (0010 (displacement) (x86-encode-jcc-rel8 9 displacement)))
+(визначити x86-encode-jp-rel8 (0010 (displacement) (x86-encode-jcc-rel8 #d10 displacement)))
+(визначити x86-encode-jnp-rel8 (0010 (displacement) (x86-encode-jcc-rel8 #d11 displacement)))
+(визначити x86-encode-jl-rel8 (0010 (displacement) (x86-encode-jcc-rel8 12 displacement)))
+(визначити x86-encode-jnl-rel8 (0010 (displacement) (x86-encode-jcc-rel8 13 displacement)))
+(визначити x86-encode-jle-rel8 (0010 (displacement) (x86-encode-jcc-rel8 14 displacement)))
+(визначити x86-encode-jnle-rel8 (0010 (displacement) (x86-encode-jcc-rel8 15 displacement)))
 
 ; JMP rel8: opcode 0xEB followed by a signed 8-bit relative displacement,
 ; confirmed against #175's pinned XED evidence
 ; (`PATTERN : 0xEB mode64 norex2_prefix FORCE64() BRDISP8()`). Unlike Jcc,
 ; JMP is unconditional -- no condition-code byte, no ModRM, no REX -- but
 ; reuses the same x86-disp8-byte two's-complement conversion.
-(0011 x86-encode-jmp-rel8
-  (0010 (displacement)
+(визначити x86-encode-jmp-rel8
+  (функція (displacement)
     (1110
       235
       (x86-disp8-byte displacement))))
@@ -3209,8 +3209,8 @@
 ; mov-r64-imm64 (#220's truth-sentinel audit documented this being an
 ; existing, out-of-scope gap) -- `mod` in this Lisp does not wrap negative operands, so
 ; adding 2^32 before reducing mod 2^32 is exact for the whole rel32 domain.
-(0011 x86-rel32-bytes
-  (0010 (displacement)
+(визначити x86-rel32-bytes
+  (функція (displacement)
     (x86-u32-bytes
       (011
         (x86-ціла-частка-залишок
@@ -3228,8 +3228,8 @@
 ; pushes/pops for real; nothing in the arena model needs to know about it,
 ; the same "guest ABI is Lisp's, host mechanism is the CPU's" split #204
 ; already established for the Windows/Linux execution adapters.
-(0011 x86-encode-call-rel32
-  (0010 (displacement)
+(визначити x86-encode-call-rel32
+  (функція (displacement)
     (111 232 (x86-rel32-bytes displacement))))
 
 ; Jcc rel32: opcode 0x0F, then 0x80+cc, then a signed 32-bit relative
@@ -3243,38 +3243,38 @@
 ; already uses: JO,JNO,JB,JNB,JZ,JNZ,JBE,JNBE,JS,JNS,JP,JNP,JL,JNL,JLE,
 ; JNLE) -- reuses that same condition-code-to-opcode-offset mapping, just
 ; with a 2-byte opcode and a 4-byte displacement instead of 1+1.
-(0011 x86-encode-jcc-rel32
-  (0010 (condition-code displacement)
+(визначити x86-encode-jcc-rel32
+  (функція (condition-code displacement)
     (111
       15
       (111
         (01010 128 condition-code)
         (x86-rel32-bytes displacement)))))
 
-(0011 x86-encode-jo-rel32 (0010 (displacement) (x86-encode-jcc-rel32 0 displacement)))
-(0011 x86-encode-jno-rel32 (0010 (displacement) (x86-encode-jcc-rel32 1 displacement)))
-(0011 x86-encode-jb-rel32 (0010 (displacement) (x86-encode-jcc-rel32 2 displacement)))
-(0011 x86-encode-jnb-rel32 (0010 (displacement) (x86-encode-jcc-rel32 3 displacement)))
-(0011 x86-encode-jz-rel32 (0010 (displacement) (x86-encode-jcc-rel32 4 displacement)))
-(0011 x86-encode-jnz-rel32 (0010 (displacement) (x86-encode-jcc-rel32 5 displacement)))
-(0011 x86-encode-jbe-rel32 (0010 (displacement) (x86-encode-jcc-rel32 6 displacement)))
-(0011 x86-encode-jnbe-rel32 (0010 (displacement) (x86-encode-jcc-rel32 7 displacement)))
-(0011 x86-encode-js-rel32 (0010 (displacement) (x86-encode-jcc-rel32 8 displacement)))
-(0011 x86-encode-jns-rel32 (0010 (displacement) (x86-encode-jcc-rel32 9 displacement)))
-(0011 x86-encode-jp-rel32 (0010 (displacement) (x86-encode-jcc-rel32 #d10 displacement)))
-(0011 x86-encode-jnp-rel32 (0010 (displacement) (x86-encode-jcc-rel32 #d11 displacement)))
-(0011 x86-encode-jl-rel32 (0010 (displacement) (x86-encode-jcc-rel32 12 displacement)))
-(0011 x86-encode-jnl-rel32 (0010 (displacement) (x86-encode-jcc-rel32 13 displacement)))
-(0011 x86-encode-jle-rel32 (0010 (displacement) (x86-encode-jcc-rel32 14 displacement)))
-(0011 x86-encode-jnle-rel32 (0010 (displacement) (x86-encode-jcc-rel32 15 displacement)))
+(визначити x86-encode-jo-rel32 (0010 (displacement) (x86-encode-jcc-rel32 0 displacement)))
+(визначити x86-encode-jno-rel32 (0010 (displacement) (x86-encode-jcc-rel32 1 displacement)))
+(визначити x86-encode-jb-rel32 (0010 (displacement) (x86-encode-jcc-rel32 2 displacement)))
+(визначити x86-encode-jnb-rel32 (0010 (displacement) (x86-encode-jcc-rel32 3 displacement)))
+(визначити x86-encode-jz-rel32 (0010 (displacement) (x86-encode-jcc-rel32 4 displacement)))
+(визначити x86-encode-jnz-rel32 (0010 (displacement) (x86-encode-jcc-rel32 5 displacement)))
+(визначити x86-encode-jbe-rel32 (0010 (displacement) (x86-encode-jcc-rel32 6 displacement)))
+(визначити x86-encode-jnbe-rel32 (0010 (displacement) (x86-encode-jcc-rel32 7 displacement)))
+(визначити x86-encode-js-rel32 (0010 (displacement) (x86-encode-jcc-rel32 8 displacement)))
+(визначити x86-encode-jns-rel32 (0010 (displacement) (x86-encode-jcc-rel32 9 displacement)))
+(визначити x86-encode-jp-rel32 (0010 (displacement) (x86-encode-jcc-rel32 #d10 displacement)))
+(визначити x86-encode-jnp-rel32 (0010 (displacement) (x86-encode-jcc-rel32 #d11 displacement)))
+(визначити x86-encode-jl-rel32 (0010 (displacement) (x86-encode-jcc-rel32 12 displacement)))
+(визначити x86-encode-jnl-rel32 (0010 (displacement) (x86-encode-jcc-rel32 13 displacement)))
+(визначити x86-encode-jle-rel32 (0010 (displacement) (x86-encode-jcc-rel32 14 displacement)))
+(визначити x86-encode-jnle-rel32 (0010 (displacement) (x86-encode-jcc-rel32 15 displacement)))
 
 ; JMP rel32: opcode 0xE9 followed by a signed 32-bit relative displacement,
 ; confirmed against #175's pinned XED evidence (`PATTERN : 0xE9 mode64
 ; norex2_prefix FORCE64() BRDISP32()`). Matches JMP rel8's own
 ; unconditional, no-ModRM, no-REX shape -- only the opcode byte and
 ; displacement width differ.
-(0011 x86-encode-jmp-rel32
-  (0010 (displacement)
+(визначити x86-encode-jmp-rel32
+  (функція (displacement)
     (111 233 (x86-rel32-bytes displacement))))
 
 ; CALL r64 / JMP r64 (indirect through a register): group-5 opcode 0xFF,
@@ -3290,8 +3290,8 @@
 ; stack #204 already established. This is the first indirect (register-
 ; target) control transfer the encoder admits: the destination is
 ; genuinely a runtime value, not something knowable from the bytes alone.
-(0011 x86-encode-group5-indirect-r64
-  (0010 (opcode-extension register)
+(визначити x86-encode-group5-indirect-r64
+  (функція (opcode-extension register)
     ((0010 (code) (110
         ((101 (x86-high1 code) 1)
           (1110
@@ -3303,12 +3303,12 @@
             255
             (x86-encode-modrm 3 opcode-extension (x86-low3 code)))))) (x86-reg-code register))))
 
-(0011 x86-encode-call-r64
-  (0010 (register)
+(визначити x86-encode-call-r64
+  (функція (register)
     (x86-encode-group5-indirect-r64 2 register)))
 
-(0011 x86-encode-jmp-r64
-  (0010 (register)
+(визначити x86-encode-jmp-r64
+  (функція (register)
     (x86-encode-group5-indirect-r64 4 register)))
 
 ; SETcc r8: opcode 0x0F 0x90+cc, ModRM mod=3, reg=0, rm=low3(code).
@@ -3317,8 +3317,8 @@
 ; - codes 4..7 (spl, bpl, sil, dil) require REX prefix (0x40) to distinguish
 ;   them from legacy high bytes (ah, ch, dh, bh).
 ; - codes 8..15 (r8b..r15b) require REX.B=1 prefix (0x41).
-(0011 x86-encode-setcc-r8
-  (0010 (condition-code register)
+(визначити x86-encode-setcc-r8
+  (функція (condition-code register)
     (нехай ((code (x86-reg-code register)))
       ; Exact-D1 predicate selects REX; structural default is the
       ; explicit D1 true witness, never legacy (query expected result).
@@ -3335,40 +3335,40 @@
            (01010 144 condition-code)
            (x86-encode-modrm 3 0 (x86-low3 code))))))))
 
-(0011 x86-encode-seto-r8 (0010 (register) (x86-encode-setcc-r8 0 register)))
-(0011 x86-encode-setno-r8 (0010 (register) (x86-encode-setcc-r8 1 register)))
-(0011 x86-encode-setb-r8 (0010 (register) (x86-encode-setcc-r8 2 register)))
-(0011 x86-encode-setc-r8 (0010 (register) (x86-encode-setcc-r8 2 register)))
-(0011 x86-encode-setnb-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
-(0011 x86-encode-setnc-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
-(0011 x86-encode-setae-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
-(0011 x86-encode-setz-r8 (0010 (register) (x86-encode-setcc-r8 4 register)))
-(0011 x86-encode-sete-r8 (0010 (register) (x86-encode-setcc-r8 4 register)))
-(0011 x86-encode-setnz-r8 (0010 (register) (x86-encode-setcc-r8 5 register)))
-(0011 x86-encode-setne-r8 (0010 (register) (x86-encode-setcc-r8 5 register)))
-(0011 x86-encode-setbe-r8 (0010 (register) (x86-encode-setcc-r8 6 register)))
-(0011 x86-encode-setna-r8 (0010 (register) (x86-encode-setcc-r8 6 register)))
-(0011 x86-encode-setnbe-r8 (0010 (register) (x86-encode-setcc-r8 7 register)))
-(0011 x86-encode-seta-r8 (0010 (register) (x86-encode-setcc-r8 7 register)))
-(0011 x86-encode-sets-r8 (0010 (register) (x86-encode-setcc-r8 8 register)))
-(0011 x86-encode-setns-r8 (0010 (register) (x86-encode-setcc-r8 9 register)))
-(0011 x86-encode-setp-r8 (0010 (register) (x86-encode-setcc-r8 #d10 register)))
-(0011 x86-encode-setpe-r8 (0010 (register) (x86-encode-setcc-r8 #d10 register)))
-(0011 x86-encode-setnp-r8 (0010 (register) (x86-encode-setcc-r8 #d11 register)))
-(0011 x86-encode-setpo-r8 (0010 (register) (x86-encode-setcc-r8 #d11 register)))
-(0011 x86-encode-setl-r8 (0010 (register) (x86-encode-setcc-r8 12 register)))
-(0011 x86-encode-setnge-r8 (0010 (register) (x86-encode-setcc-r8 12 register)))
-(0011 x86-encode-setnl-r8 (0010 (register) (x86-encode-setcc-r8 13 register)))
-(0011 x86-encode-setge-r8 (0010 (register) (x86-encode-setcc-r8 13 register)))
-(0011 x86-encode-setle-r8 (0010 (register) (x86-encode-setcc-r8 14 register)))
-(0011 x86-encode-setng-r8 (0010 (register) (x86-encode-setcc-r8 14 register)))
-(0011 x86-encode-setnle-r8 (0010 (register) (x86-encode-setcc-r8 15 register)))
-(0011 x86-encode-setg-r8 (0010 (register) (x86-encode-setcc-r8 15 register)))
+(визначити x86-encode-seto-r8 (0010 (register) (x86-encode-setcc-r8 0 register)))
+(визначити x86-encode-setno-r8 (0010 (register) (x86-encode-setcc-r8 1 register)))
+(визначити x86-encode-setb-r8 (0010 (register) (x86-encode-setcc-r8 2 register)))
+(визначити x86-encode-setc-r8 (0010 (register) (x86-encode-setcc-r8 2 register)))
+(визначити x86-encode-setnb-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
+(визначити x86-encode-setnc-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
+(визначити x86-encode-setae-r8 (0010 (register) (x86-encode-setcc-r8 3 register)))
+(визначити x86-encode-setz-r8 (0010 (register) (x86-encode-setcc-r8 4 register)))
+(визначити x86-encode-sete-r8 (0010 (register) (x86-encode-setcc-r8 4 register)))
+(визначити x86-encode-setnz-r8 (0010 (register) (x86-encode-setcc-r8 5 register)))
+(визначити x86-encode-setne-r8 (0010 (register) (x86-encode-setcc-r8 5 register)))
+(визначити x86-encode-setbe-r8 (0010 (register) (x86-encode-setcc-r8 6 register)))
+(визначити x86-encode-setna-r8 (0010 (register) (x86-encode-setcc-r8 6 register)))
+(визначити x86-encode-setnbe-r8 (0010 (register) (x86-encode-setcc-r8 7 register)))
+(визначити x86-encode-seta-r8 (0010 (register) (x86-encode-setcc-r8 7 register)))
+(визначити x86-encode-sets-r8 (0010 (register) (x86-encode-setcc-r8 8 register)))
+(визначити x86-encode-setns-r8 (0010 (register) (x86-encode-setcc-r8 9 register)))
+(визначити x86-encode-setp-r8 (0010 (register) (x86-encode-setcc-r8 #d10 register)))
+(визначити x86-encode-setpe-r8 (0010 (register) (x86-encode-setcc-r8 #d10 register)))
+(визначити x86-encode-setnp-r8 (0010 (register) (x86-encode-setcc-r8 #d11 register)))
+(визначити x86-encode-setpo-r8 (0010 (register) (x86-encode-setcc-r8 #d11 register)))
+(визначити x86-encode-setl-r8 (0010 (register) (x86-encode-setcc-r8 12 register)))
+(визначити x86-encode-setnge-r8 (0010 (register) (x86-encode-setcc-r8 12 register)))
+(визначити x86-encode-setnl-r8 (0010 (register) (x86-encode-setcc-r8 13 register)))
+(визначити x86-encode-setge-r8 (0010 (register) (x86-encode-setcc-r8 13 register)))
+(визначити x86-encode-setle-r8 (0010 (register) (x86-encode-setcc-r8 14 register)))
+(визначити x86-encode-setng-r8 (0010 (register) (x86-encode-setcc-r8 14 register)))
+(визначити x86-encode-setnle-r8 (0010 (register) (x86-encode-setcc-r8 15 register)))
+(визначити x86-encode-setg-r8 (0010 (register) (x86-encode-setcc-r8 15 register)))
 
 ; MOVZX r64, r8: opcode 0x0F 0xB6, ModRM mod=3, reg=dest, rm=src.
 ; REX.W=1 extends the 8-bit source into the full 64-bit destination register.
-(0011 x86-encode-movzx-r64-r8
-  (0010 (destination source)
+(визначити x86-encode-movzx-r64-r8
+  (функція (destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3379,8 +3379,8 @@
 
 ; IMUL r64, r64: two-operand signed multiply, opcode 0x0F 0xAF.
 ; Destination receives the low 64 bits of the signed product.
-(0011 x86-encode-imul-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-imul-r64-r64
+  (функція (destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3391,15 +3391,15 @@
 
 ; CQO: Convert Quadword to Octword (sign-extend RAX into RDX:RAX).
 ; Opcode 0x48 0x99. Prepares dividend for 64-bit IDIV.
-(0011 x86-encode-cqo
-  (0010 ()
+(визначити x86-encode-cqo
+  (функція ()
     (1110 72 153)))
 
 ; IDIV r64: signed division of RDX:RAX by r64 operand.
 ; Group 3 opcode 0xF7 /7, ModRM mod=3, reg=7, rm=src.
 ; Quotient is stored in RAX, remainder in RDX.
-(0011 x86-encode-idiv-r64
-  (0010 (source)
+(визначити x86-encode-idiv-r64
+  (функція (source)
     ((0010 (src-code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 src-code))
         247
@@ -3407,8 +3407,8 @@
 
 ; CMOVcc r64, r64: conditional move, opcode 0x0F 0x40+cc.
 ; Moves source to destination if condition code is satisfied.
-(0011 x86-encode-cmovcc-r64-r64
-  (0010 (condition-code destination source)
+(визначити x86-encode-cmovcc-r64-r64
+  (функція (condition-code destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3417,44 +3417,44 @@
         (01010 64 condition-code)
         (x86-encode-modrm 3 (x86-low3 dest-code) (x86-low3 src-code))))))
 
-(0011 x86-encode-cmovo-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 0 dest src)))
-(0011 x86-encode-cmovno-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 1 dest src)))
-(0011 x86-encode-cmovb-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 2 dest src)))
-(0011 x86-encode-cmovc-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 2 dest src)))
-(0011 x86-encode-cmovnb-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
-(0011 x86-encode-cmovnc-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
-(0011 x86-encode-cmovae-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
-(0011 x86-encode-cmovz-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 4 dest src)))
-(0011 x86-encode-cmove-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 4 dest src)))
-(0011 x86-encode-cmovnz-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 5 dest src)))
-(0011 x86-encode-cmovne-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 5 dest src)))
-(0011 x86-encode-cmovbe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 6 dest src)))
-(0011 x86-encode-cmovna-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 6 dest src)))
-(0011 x86-encode-cmovnbe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 7 dest src)))
-(0011 x86-encode-cmova-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 7 dest src)))
-(0011 x86-encode-cmovs-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 8 dest src)))
-(0011 x86-encode-cmovns-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 9 dest src)))
-(0011 x86-encode-cmovp-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d10 dest src)))
-(0011 x86-encode-cmovpe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d10 dest src)))
-(0011 x86-encode-cmovnp-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d11 dest src)))
-(0011 x86-encode-cmovpo-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d11 dest src)))
-(0011 x86-encode-cmovl-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 12 dest src)))
-(0011 x86-encode-cmovnge-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 12 dest src)))
-(0011 x86-encode-cmovnl-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 13 dest src)))
-(0011 x86-encode-cmovge-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 13 dest src)))
-(0011 x86-encode-cmovle-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 14 dest src)))
-(0011 x86-encode-cmovng-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 14 dest src)))
-(0011 x86-encode-cmovnle-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 15 dest src)))
-(0011 x86-encode-cmovg-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 15 dest src)))
+(визначити x86-encode-cmovo-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 0 dest src)))
+(визначити x86-encode-cmovno-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 1 dest src)))
+(визначити x86-encode-cmovb-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 2 dest src)))
+(визначити x86-encode-cmovc-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 2 dest src)))
+(визначити x86-encode-cmovnb-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
+(визначити x86-encode-cmovnc-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
+(визначити x86-encode-cmovae-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 3 dest src)))
+(визначити x86-encode-cmovz-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 4 dest src)))
+(визначити x86-encode-cmove-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 4 dest src)))
+(визначити x86-encode-cmovnz-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 5 dest src)))
+(визначити x86-encode-cmovne-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 5 dest src)))
+(визначити x86-encode-cmovbe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 6 dest src)))
+(визначити x86-encode-cmovna-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 6 dest src)))
+(визначити x86-encode-cmovnbe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 7 dest src)))
+(визначити x86-encode-cmova-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 7 dest src)))
+(визначити x86-encode-cmovs-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 8 dest src)))
+(визначити x86-encode-cmovns-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 9 dest src)))
+(визначити x86-encode-cmovp-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d10 dest src)))
+(визначити x86-encode-cmovpe-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d10 dest src)))
+(визначити x86-encode-cmovnp-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d11 dest src)))
+(визначити x86-encode-cmovpo-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 #d11 dest src)))
+(визначити x86-encode-cmovl-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 12 dest src)))
+(визначити x86-encode-cmovnge-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 12 dest src)))
+(визначити x86-encode-cmovnl-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 13 dest src)))
+(визначити x86-encode-cmovge-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 13 dest src)))
+(визначити x86-encode-cmovle-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 14 dest src)))
+(визначити x86-encode-cmovng-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 14 dest src)))
+(визначити x86-encode-cmovnle-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 15 dest src)))
+(визначити x86-encode-cmovg-r64-r64 (0010 (dest src) (x86-encode-cmovcc-r64-r64 15 dest src)))
 
 ; NOP: opcode 0x90.
-(0011 x86-encode-nop
-  (0010 ()
+(визначити x86-encode-nop
+  (функція ()
     (1110 144)))
 
 ; TEST r/m64, imm32: Group 3 opcode 0xF7 /0 id, ModRM mod=3, reg=0, rm=dest.
-(0011 x86-encode-test-r64-imm32
-  (0010 (destination immediate)
+(визначити x86-encode-test-r64-imm32
+  (функція (destination immediate)
     ((0010 (code) (1111
         (1110
           (x86-encode-rex 1 0 0 (x86-high1 code))
@@ -3464,8 +3464,8 @@
 
 ; BT r/m64, r64: opcode 0x0F 0xA3 /r. ModRM reg=index, rm=base.
 ; Sets Carry Flag (CF) to the value of the bit at the given index.
-(0011 x86-encode-bt-r64-r64
-  (0010 (base index)
+(визначити x86-encode-bt-r64-r64
+  (функція (base index)
     (нехай ((base-code (x86-reg-code base))
           (index-code (x86-reg-code index)))
       (1110
@@ -3475,8 +3475,8 @@
         (x86-encode-modrm 3 (x86-low3 index-code) (x86-low3 base-code))))))
 
 ; Group 8 bit operations with imm8: opcode 0x0F 0xBA /reg ib.
-(0011 x86-encode-group8-r64-imm8
-  (0010 (opcode-extension register bit-index)
+(визначити x86-encode-group8-r64-imm8
+  (функція (opcode-extension register bit-index)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         15
@@ -3484,25 +3484,25 @@
         (x86-encode-modrm 3 opcode-extension (x86-low3 code))
         bit-index)) (x86-reg-code register))))
 
-(0011 x86-encode-bt-r64-imm8
-  (0010 (register bit-index)
+(визначити x86-encode-bt-r64-imm8
+  (функція (register bit-index)
     (x86-encode-group8-r64-imm8 4 register bit-index)))
 
-(0011 x86-encode-bts-r64-imm8
-  (0010 (register bit-index)
+(визначити x86-encode-bts-r64-imm8
+  (функція (register bit-index)
     (x86-encode-group8-r64-imm8 5 register bit-index)))
 
-(0011 x86-encode-btr-r64-imm8
-  (0010 (register bit-index)
+(визначити x86-encode-btr-r64-imm8
+  (функція (register bit-index)
     (x86-encode-group8-r64-imm8 6 register bit-index)))
 
-(0011 x86-encode-btc-r64-imm8
-  (0010 (register bit-index)
+(визначити x86-encode-btc-r64-imm8
+  (функція (register bit-index)
     (x86-encode-group8-r64-imm8 7 register bit-index)))
 
 ; MOVSX r64, r/m8: opcode 0x0F 0xBE /r. Sign-extend 8-bit to 64-bit.
-(0011 x86-encode-movsx-r64-r8
-  (0010 (destination source)
+(визначити x86-encode-movsx-r64-r8
+  (функція (destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3512,8 +3512,8 @@
         (x86-encode-modrm 3 (x86-low3 dest-code) (x86-low3 src-code))))))
 
 ; MOVSXD r64, r/m32: opcode 0x63 /r. Sign-extend 32-bit to 64-bit.
-(0011 x86-encode-movsxd-r64-r32
-  (0010 (destination source)
+(визначити x86-encode-movsxd-r64-r32
+  (функція (destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3522,8 +3522,8 @@
         (x86-encode-modrm 3 (x86-low3 dest-code) (x86-low3 src-code))))))
 
 ; POPCNT r64, r/m64: opcode 0xF3 0x0F 0xB8 /r. Count set bits (population count).
-(0011 x86-encode-popcnt-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-popcnt-r64-r64
+  (функція (destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3534,8 +3534,8 @@
         (x86-encode-modrm 3 (x86-low3 dest-code) (x86-low3 src-code))))))
 
 ; TZCNT r64, r/m64: opcode 0xF3 0x0F 0xBC /r. Count trailing zeros.
-(0011 x86-encode-tzcnt-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-tzcnt-r64-r64
+  (функція (destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3546,8 +3546,8 @@
         (x86-encode-modrm 3 (x86-low3 dest-code) (x86-low3 src-code))))))
 
 ; BSF r64, r/m64: opcode 0x0F 0xBC /r. Bit Scan Forward (first set bit).
-(0011 x86-encode-bsf-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-bsf-r64-r64
+  (функція (destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3557,8 +3557,8 @@
         (x86-encode-modrm 3 (x86-low3 dest-code) (x86-low3 src-code))))))
 
 ; BSR r64, r/m64: opcode 0x0F 0xBD /r. Bit Scan Reverse (last set bit).
-(0011 x86-encode-bsr-r64-r64
-  (0010 (destination source)
+(визначити x86-encode-bsr-r64-r64
+  (функція (destination source)
     (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
@@ -3568,25 +3568,25 @@
         (x86-encode-modrm 3 (x86-low3 dest-code) (x86-low3 src-code))))))
 
 ; BSWAP r64: opcode 0x0F (0xC8 + rd). Byte Swap (reverse byte order).
-(0011 x86-encode-bswap-r64
-  (0010 (register)
+(визначити x86-encode-bswap-r64
+  (функція (register)
     ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         15
         (01010 200 (x86-low3 code)))) (x86-reg-code register))))
 
 ; ROL / ROR r64, imm8: group-2 opcode 0xC1, /0 for ROL, /1 for ROR.
-(0011 x86-encode-rol-r64-imm8
-  (0010 (register count)
+(визначити x86-encode-rol-r64-imm8
+  (функція (register count)
     (x86-encode-shift-r64-imm8 0 register count)))
 
-(0011 x86-encode-ror-r64-imm8
-  (0010 (register count)
+(визначити x86-encode-ror-r64-imm8
+  (функція (register count)
     (x86-encode-shift-r64-imm8 1 register count)))
 
 ; XCHG r64, r64: opcode 0x87 /r. Exchange register values.
-(0011 x86-encode-xchg-r64-r64
-  (0010 (dst src)
+(визначити x86-encode-xchg-r64-r64
+  (функція (dst src)
     (нехай ((dst-code (x86-reg-code dst))
           (src-code (x86-reg-code src)))
       (1110
@@ -3595,57 +3595,57 @@
         (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
 
 ; CLD: opcode 0xFC (252). Clear direction flag (DF=0).
-(0011 x86-encode-cld
-  (0010 ()
+(визначити x86-encode-cld
+  (функція ()
     (1110 252)))
 
 ; STD: opcode 0xFD (253). Set direction flag (DF=1).
-(0011 x86-encode-std
-  (0010 ()
+(визначити x86-encode-std
+  (функція ()
     (1110 253)))
 
 ; STOSQ: opcode 0x48 0xAB (72 171). Store RAX to [RDI], increment RDI by 8.
-(0011 x86-encode-stosq
-  (0010 ()
+(визначити x86-encode-stosq
+  (функція ()
     (1110 (x86-encode-rex 1 0 0 0) 171)))
 
 ; REP STOSQ: opcode 0xF3 0x48 0xAB. Fill RCX qwords at [RDI] with RAX.
-(0011 x86-encode-rep-stosq
-  (0010 ()
+(визначити x86-encode-rep-stosq
+  (функція ()
     (1110 243 (x86-encode-rex 1 0 0 0) 171)))
 
 ; STOSB: opcode 0xAA (170). Store AL to [RDI], increment RDI by 1.
-(0011 x86-encode-stosb
-  (0010 ()
+(визначити x86-encode-stosb
+  (функція ()
     (1110 170)))
 
 ; REP STOSB: opcode 0xF3 0xAA. Fill RCX bytes at [RDI] with AL.
-(0011 x86-encode-rep-stosb
-  (0010 ()
+(визначити x86-encode-rep-stosb
+  (функція ()
     (1110 243 170)))
 
 ; MOVSQ: opcode 0x48 0xA5 (72 165). Move qword from [RSI] to [RDI].
-(0011 x86-encode-movsq
-  (0010 ()
+(визначити x86-encode-movsq
+  (функція ()
     (1110 (x86-encode-rex 1 0 0 0) 165)))
 
 ; REP MOVSQ: opcode 0xF3 0x48 0xA5. Copy RCX qwords from [RSI] to [RDI].
-(0011 x86-encode-rep-movsq
-  (0010 ()
+(визначити x86-encode-rep-movsq
+  (функція ()
     (1110 243 (x86-encode-rex 1 0 0 0) 165)))
 
 ; MOVSB: opcode 0xA4 (164). Move byte from [RSI] to [RDI].
-(0011 x86-encode-movsb
-  (0010 ()
+(визначити x86-encode-movsb
+  (функція ()
     (1110 164)))
 
 ; REP MOVSB: opcode 0xF3 0xA4. Copy RCX bytes from [RSI] to [RDI].
-(0011 x86-encode-rep-movsb
-  (0010 ()
+(визначити x86-encode-rep-movsb
+  (функція ()
     (1110 243 164)))
 
-(0011 x86-encode-sse2-f2-xmm-xmm
-  (0010 (opcode-byte dst src)
+(визначити x86-encode-sse2-f2-xmm-xmm
+  (функція (opcode-byte dst src)
     (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
@@ -3655,8 +3655,8 @@
          (1110 242 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
                15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))))
 
-(0011 x86-encode-sse2-66-xmm-xmm
-  (0010 (opcode-byte dst src)
+(визначити x86-encode-sse2-66-xmm-xmm
+  (функція (opcode-byte dst src)
     (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
@@ -3670,8 +3670,8 @@
 ; будову: mandatory 0x66, optional REX.R/REX.B для XMM8-XMM15, далі
 ; 0F 38 або 0F 3A, opcode і ModR/M з mode=3. Цей helper описує лише
 ; машинне кодування; значення AES-операцій тут не визначається.
-(0011 x86-encode-sse-66-map-xmm-xmm
-  (0010 (map-byte opcode-byte dst src)
+(визначити x86-encode-sse-66-map-xmm-xmm
+  (функція (map-byte opcode-byte dst src)
     (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
@@ -3692,34 +3692,34 @@
            (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))))
 
 ; AESENC xmm, xmm: 66 0F 38 DC /r.
-(0011 x86-encode-aesenc-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-aesenc-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse-66-map-xmm-xmm 56 220 dst src)))
 
 ; AESENCLAST xmm, xmm: 66 0F 38 DD /r.
-(0011 x86-encode-aesenclast-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-aesenclast-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse-66-map-xmm-xmm 56 221 dst src)))
 
 ; AESDEC xmm, xmm: 66 0F 38 DE /r.
-(0011 x86-encode-aesdec-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-aesdec-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse-66-map-xmm-xmm 56 222 dst src)))
 
 ; AESDECLAST xmm, xmm: 66 0F 38 DF /r.
-(0011 x86-encode-aesdeclast-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-aesdeclast-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse-66-map-xmm-xmm 56 223 dst src)))
 
 ; AESIMC xmm, xmm: 66 0F 38 DB /r.
-(0011 x86-encode-aesimc-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-aesimc-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse-66-map-xmm-xmm 56 219 dst src)))
 
 ; AESKEYGENASSIST xmm, xmm, imm8: 66 0F 3A DF /r ib.
 ; Межа imm8 перевіряється admission-шаром до матеріалізації байтів.
-(0011 x86-encode-aeskeygenassist-xmm-xmm-imm8
-  (0010 (dst src immediate)
+(визначити x86-encode-aeskeygenassist-xmm-xmm-imm8
+  (функція (dst src immediate)
     (1111
       (x86-encode-sse-66-map-xmm-xmm 58 223 dst src)
       (1110 immediate))))
@@ -3728,8 +3728,8 @@
 ; адресацію, що вже доведена для MOV/LEA: ModR/M mode=01, SIB для rsp/r12,
 ; REX.R для xmm8-xmm15 і REX.B для r8-r15. Ширину пам'яті визначає сама
 ; інструкція AES, тому цей helper не створює окремої семантики пам'яті.
-(0011 x86-encode-sse-66-map-xmm-mem-disp8
-  (0010 (map-byte opcode-byte dst base displacement)
+(визначити x86-encode-sse-66-map-xmm-mem-disp8
+  (функція (map-byte opcode-byte dst base displacement)
     (нехай ((dst-code (x86-xmm-reg-code dst))
           (base-code (x86-reg-code base)))
       (нехай ((modrm
@@ -3761,33 +3761,33 @@
                   ((010 ())
                    (1110 modrm disp-byte))))))))
 
-(0011 x86-encode-aesenc-xmm-mem-disp8
-  (0010 (dst base displacement)
+(визначити x86-encode-aesenc-xmm-mem-disp8
+  (функція (dst base displacement)
     (x86-encode-sse-66-map-xmm-mem-disp8
       56 220 dst base displacement)))
 
-(0011 x86-encode-aesenclast-xmm-mem-disp8
-  (0010 (dst base displacement)
+(визначити x86-encode-aesenclast-xmm-mem-disp8
+  (функція (dst base displacement)
     (x86-encode-sse-66-map-xmm-mem-disp8
       56 221 dst base displacement)))
 
-(0011 x86-encode-aesdec-xmm-mem-disp8
-  (0010 (dst base displacement)
+(визначити x86-encode-aesdec-xmm-mem-disp8
+  (функція (dst base displacement)
     (x86-encode-sse-66-map-xmm-mem-disp8
       56 222 dst base displacement)))
 
-(0011 x86-encode-aesdeclast-xmm-mem-disp8
-  (0010 (dst base displacement)
+(визначити x86-encode-aesdeclast-xmm-mem-disp8
+  (функція (dst base displacement)
     (x86-encode-sse-66-map-xmm-mem-disp8
       56 223 dst base displacement)))
 
-(0011 x86-encode-aesimc-xmm-mem-disp8
-  (0010 (dst base displacement)
+(визначити x86-encode-aesimc-xmm-mem-disp8
+  (функція (dst base displacement)
     (x86-encode-sse-66-map-xmm-mem-disp8
       56 219 dst base displacement)))
 
-(0011 x86-encode-aeskeygenassist-xmm-mem-disp8-imm8
-  (0010 (dst base displacement immediate)
+(визначити x86-encode-aeskeygenassist-xmm-mem-disp8-imm8
+  (функція (dst base displacement immediate)
     (1111
       (x86-encode-sse-66-map-xmm-mem-disp8
         58 223 dst base displacement)
@@ -3797,98 +3797,98 @@
 ; Pinned #175 XED evidence exposes exactly register-source and memory-source
 ; forms. The immediate selects the source 64-bit lanes; that ISA meaning is
 ; not redefined here -- this layer only materializes the admitted bytes.
-(0011 x86-encode-pclmulqdq-xmm-xmm-imm8
-  (0010 (dst src immediate)
+(визначити x86-encode-pclmulqdq-xmm-xmm-imm8
+  (функція (dst src immediate)
     (1111
       (x86-encode-sse-66-map-xmm-xmm #d58 #d68 dst src)
       (1110 immediate))))
 
 ; Bounded memory projection: base+disp8 reuses the already witnessed
 ; ModR/M/SIB/REX mechanism. This is not a claim of general x86 addressing.
-(0011 x86-encode-pclmulqdq-xmm-mem-disp8-imm8
-  (0010 (dst base displacement immediate)
+(визначити x86-encode-pclmulqdq-xmm-mem-disp8-imm8
+  (функція (dst base displacement immediate)
     (1111
       (x86-encode-sse-66-map-xmm-mem-disp8
         #d58 #d68 dst base displacement)
       (1110 immediate))))
 
 ; MOVSD xmm, xmm: opcode 0xF2 0x0F 0x10 /r
-(0011 x86-encode-movsd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-movsd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-f2-xmm-xmm 16 dst src)))
 
 ; SQRTSD xmm, xmm: opcode 0xF2 0x0F 0x51 /r
-(0011 x86-encode-sqrtsd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-sqrtsd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-f2-xmm-xmm 81 dst src)))
 
 ; ADDSD xmm, xmm: opcode 0xF2 0x0F 0x58 /r
-(0011 x86-encode-addsd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-addsd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-f2-xmm-xmm 88 dst src)))
 
 ; MULSD xmm, xmm: opcode 0xF2 0x0F 0x59 /r
-(0011 x86-encode-mulsd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-mulsd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-f2-xmm-xmm 89 dst src)))
 
 ; SUBSD xmm, xmm: opcode 0xF2 0x0F 0x5C /r
-(0011 x86-encode-subsd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-subsd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-f2-xmm-xmm 92 dst src)))
 
 ; MINSD xmm, xmm: opcode 0xF2 0x0F 0x5D /r
-(0011 x86-encode-minsd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-minsd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-f2-xmm-xmm 93 dst src)))
 
 ; DIVSD xmm, xmm: opcode 0xF2 0x0F 0x5E /r
-(0011 x86-encode-divsd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-divsd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-f2-xmm-xmm 94 dst src)))
 
 ; MAXSD xmm, xmm: opcode 0xF2 0x0F 0x5F /r
-(0011 x86-encode-maxsd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-maxsd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-f2-xmm-xmm 95 dst src)))
 
 ; UCOMISD xmm, xmm: opcode 0x66 0x0F 0x2E /r
-(0011 x86-encode-ucomisd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-ucomisd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-66-xmm-xmm 46 dst src)))
 
 ; XORPD xmm, xmm: opcode 0x66 0x0F 0x57 /r
-(0011 x86-encode-xorpd-xmm-xmm
-  (0010 (dst src)
+(визначити x86-encode-xorpd-xmm-xmm
+  (функція (dst src)
     (x86-encode-sse2-66-xmm-xmm 87 dst src)))
 
 ; CVTSI2SD xmm, r64: opcode 0xF2 REX.W 0x0F 0x2A /r
-(0011 x86-encode-cvtsi2sd-xmm-r64
-  (0010 (dst src)
+(визначити x86-encode-cvtsi2sd-xmm-r64
+  (функція (dst src)
     (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-reg-code src)))
       (1110 242 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 42 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
 
 ; CVTTSD2SI r64, xmm: opcode 0xF2 REX.W 0x0F 0x2C /r
-(0011 x86-encode-cvttsd2si-r64-xmm
-  (0010 (dst src)
+(визначити x86-encode-cvttsd2si-r64-xmm
+  (функція (dst src)
     (нехай ((dst-code (x86-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (1110 242 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 44 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
 
 ; MOVQ xmm, r64: opcode 0x66 REX.W 0x0F 0x6E /r
-(0011 x86-encode-movq-xmm-r64
-  (0010 (dst src)
+(визначити x86-encode-movq-xmm-r64
+  (функція (dst src)
     (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-reg-code src)))
       (1110 102 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 #d110 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
 
 ; MOVQ r64, xmm: opcode 0x66 REX.W 0x0F 0x7E /r
-(0011 x86-encode-movq-r64-xmm
-  (0010 (dst src)
+(визначити x86-encode-movq-r64-xmm
+  (функція (dst src)
     (нехай ((dst-code (x86-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (1110 102 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
@@ -3897,8 +3897,8 @@
 ; RDRAND/RDSEED r64 — positive control for #2372 generator-first machine grammar.
 ; Both descend from one XED-proven shape: REX.W + 0F C7 /digit, MOD=3, RM=GPRv.
 ; The shared helper is the encoding law; mnemonic wrappers are derived projections.
-(0011 x86-encode-0f-c7-group-r64
-  (0010 (opcode-extension register)
+(визначити x86-encode-0f-c7-group-r64
+  (функція (opcode-extension register)
     (нехай ((code (x86-reg-code register))
           (mechanism-extension
             (x86-project-bin3-to-mechanism-u3 opcode-extension)))
@@ -3912,22 +3912,22 @@
         #d199
         (x86-encode-modrm 3 mechanism-extension (x86-low3 code))))))
 
-(0011 x86-encode-rdrand-r64
-  (0010 (register)
+(визначити x86-encode-rdrand-r64
+  (функція (register)
     (x86-encode-0f-c7-group-r64 #b110 register)))
 
-(0011 x86-encode-rdseed-r64
-  (0010 (register)
+(визначити x86-encode-rdseed-r64
+  (функція (register)
     (x86-encode-0f-c7-group-r64 #b111 register)))
 
 ; RDTSC: opcode 0x0F 0x31
-(0011 x86-encode-rdtsc
-  (0010 ()
+(визначити x86-encode-rdtsc
+  (функція ()
     (1110 15 49)))
 
 ; CMPXCHG r64, r64: opcode REX.W 0x0F 0xB1 /r
-(0011 x86-encode-cmpxchg-r64-r64
-  (0010 (dst src)
+(визначити x86-encode-cmpxchg-r64-r64
+  (функція (dst src)
     (нехай ((dst-code (x86-reg-code dst))
           (src-code (x86-reg-code src)))
       (1110 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
@@ -3942,8 +3942,8 @@
 ; operations. ATOM distinguishes empty-list from pair; D4 NOT complements that
 ; bit for the recursive branch. Avoid D3 EQ here: compatibility EQ answers are
 ; graded lists and are intentionally invalid as D3 COND controls.
-(0011 x86-сполучити-байти
-  (0010 (ліво право)
+(визначити x86-сполучити-байти
+  (функція (ліво право)
     (110
       ((010 ліво) право)
       ((0100 (010 ліво))
@@ -3951,8 +3951,8 @@
          (100 ліво)
          (x86-сполучити-байти (011 ліво) право))))))
 
-(0011 x86-encode-program
-  (0010 (instructions)
+(визначити x86-encode-program
+  (функція (instructions)
     (110
       ((0101 instructions) (001 ()))
       ((0100 (010 instructions))
@@ -3966,8 +3966,8 @@
 ; byte1 = C4; byte2 = ~R ~X ~B m-mmmm; byte3 = W ~vvvv L pp.
 ; These are machine bytes in the exact Number carrier already used by the
 ; x86 encoder, so the instruction-set witness compares identity, not print.
-(0011 x86-vex3-byte2
-  (0010 (mmmmm r x b)
+(визначити x86-vex3-byte2
+  (функція (mmmmm r x b)
     (01010
       (10110 (01011 1 r) 128)
       (01010
@@ -3976,8 +3976,8 @@
           (10110 (01011 1 b) 32)
           mmmmm)))))
 
-(0011 x86-vex3-byte3
-  (0010 (w vvvv l pp)
+(визначити x86-vex3-byte3
+  (функція (w vvvv l pp)
     (01010
       (10110 w 128)
       (01010
@@ -3986,8 +3986,8 @@
           (10110 l 4)
           pp)))))
 
-(0011 x86-encode-vex3-xmm-xmm-xmm
-  (0010 (mmmmm w l pp opcode dst src1 src2)
+(визначити x86-encode-vex3-xmm-xmm-xmm
+  (функція (mmmmm w l pp opcode dst src1 src2)
     (001000
       ((dst-code (x86-xmm-reg-code dst))
        (src1-code (x86-xmm-reg-code src1))
@@ -4007,26 +4007,26 @@
           (x86-low3 src2-code))))))
 
 ; VANDNPS xmm,xmm,xmm: VEX.128.0F.WIG 55 /r.
-(0011 x86-encode-vandnps-xmm-xmm-xmm
-  (0010 (dst src1 src2)
+(визначити x86-encode-vandnps-xmm-xmm-xmm
+  (функція (dst src1 src2)
     (x86-encode-vex3-xmm-xmm-xmm
       1 0 0 0 85 dst src1 src2)))
 
 ; VANDNPD xmm,xmm,xmm: VEX.128.66.0F.WIG 55 /r.
-(0011 x86-encode-vandnpd-xmm-xmm-xmm
-  (0010 (dst src1 src2)
+(визначити x86-encode-vandnpd-xmm-xmm-xmm
+  (функція (dst src1 src2)
     (x86-encode-vex3-xmm-xmm-xmm
       1 0 0 1 85 dst src1 src2)))
 
 ; VADDPD xmm,xmm,xmm: VEX.128.66.0F.WIG 58 /r.
-(0011 x86-encode-vaddpd-xmm-xmm-xmm
-  (0010 (dst src1 src2)
+(визначити x86-encode-vaddpd-xmm-xmm-xmm
+  (функція (dst src1 src2)
     (x86-encode-vex3-xmm-xmm-xmm
       1 0 0 1 88 dst src1 src2)))
 
 ; VADDPS xmm,xmm,xmm: VEX.128.0F.WIG 58 /r.
-(0011 x86-encode-vaddps-xmm-xmm-xmm
-  (0010 (dst src1 src2)
+(визначити x86-encode-vaddps-xmm-xmm-xmm
+  (функція (dst src1 src2)
     (x86-encode-vex3-xmm-xmm-xmm
       1 0 0 0 88 dst src1 src2)))
 
