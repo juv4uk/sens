@@ -271,8 +271,11 @@ def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "auto") -> dict:
     canonical_view = (" ".join(words) + "\n").encode("ascii")
     if readable != canonical_view:
         raise ProjectionBlocked("missing, stale or noncanonical ASCII 0/1 view")
+    # Обидві гілки повертають саме байти, а не посилання на функцію.
+    # Для explicit legacy t5 виклик encode_words(ws) є необхідним:
+    # інакше реальний перевірений T5 помилково стає червоним.
     encode_current = (lambda ws: encode_t5m_projection(" ".join(ws))
-                      if physical_codec == "t5m" else encode_words)
+                      if physical_codec == "t5m" else encode_words(ws))
     if encode_current(words) != binary:
         raise ProjectionBlocked("physical carrier not byte-canonical")
     try:
