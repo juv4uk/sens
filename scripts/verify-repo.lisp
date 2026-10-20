@@ -99,7 +99,7 @@
          (нехай ((текст (читати-файл маніфест)))
            (за-умовою
              ((містить-зразок? текст "[package]\nname = \"my-lisp") так
-              (повідомити-про-помилку-репозиторію (поєднати-рядки "cargo package prefix regression: " маніфест " uses my-lisp*")))
+              (повідомити-про-помилку-репозиторію (поєднати-рядки "порушено префікс назви пакета Cargo: " маніфест " використовує застарілий префікс my-lisp*")))
              (так так (перевірити-маніфести (решта записи))))))))))
 
 (перевірити-маніфести (read-dir "crates"))
@@ -116,10 +116,10 @@
 ; «executable conformance» / «Executable conformance».
 (за-умовою
   ((містить-будь-який-зразок? (читати-файл "docs/semantic-authority-map.md") (як-є ("Ratified ADR" "ratified ADR"))) так так)
-  (так так (повідомити-про-помилку-репозиторію "docs/semantic-authority-map.md must mention ratified ADRs")))
+  (так так (повідомити-про-помилку-репозиторію "docs/semantic-authority-map.md має містити ратифіковані ADR")))
 (за-умовою
   ((містить-будь-який-зразок? (читати-файл "docs/semantic-authority-map.md") (як-є ("Executable conformance" "executable conformance"))) так так)
-  (так так (повідомити-про-помилку-репозиторію "docs/semantic-authority-map.md must mention executable conformance")))
+  (так так (повідомити-про-помилку-репозиторію "docs/semantic-authority-map.md має містити опис виконуваної відповідності законам")))
 (повідомити-успішну-перевірку "public-docs-point-to-semantic-authority")
 
 ; --- host-semantic-surface-documentation-tracks-time-ownership ---
@@ -357,7 +357,7 @@
             (перевірити-сумісні-імена (решта перейменування)))
            (так так
             (повідомити-про-помилку-репозиторію
-              (поєднати-рядки "missing exact-SENS compatibility alias (00001001 "
+              (поєднати-рядки "відсутній сумісний псевдонім точної тотожності СЕНС (00001001 "
                     (символ-у-текст старе-ім'я) " " (значення-у-текст код-сенс) ")")))))))))
 (перевірити-сумісні-імена перейменування-аудиту)
 (повідомити-успішну-перевірку "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
@@ -380,7 +380,7 @@
       ((атом? пари) (0)
        (за-умовою
          ((набирається? (решта (перше пари))) так (перевірити-набирання (решта пари)))
-         (так так (повідомити-про-помилку-репозиторію (поєднати-рядки "Ukrainian name needs another keyboard layout: " (решта (перше пари))))))))))
+         (так так (повідомити-про-помилку-репозиторію (поєднати-рядки "Українська назва вимагає іншої клавіатурної розкладки: " (решта (перше пари))))))))))
 (перевірити-набирання сталі-українські-назви)
 (повідомити-успішну-перевірку "every-stable-ukrainian-name-is-typeable-on-the-ukrainian-layout")
 
@@ -443,7 +443,7 @@
 (перевірити-дію-контракту ".github/workflows/sync-language-contract.yml")
 (перевірити-дію-контракту ".github/workflows/verify-language-contract.yml")
 
-(друкувати "verify-repo: all checks passed")
+(друкувати "verify-repo: усі перевірки пройдено")
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити згорнути reduce)
