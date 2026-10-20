@@ -48,7 +48,9 @@ def digest(data: bytes) -> str:
 
 
 def forbidden_components(path: Path) -> bool:
-    return path.is_absolute() or not path.parts or ".." in path.parts or any(
+    # «.» означає корінь репозиторію і є безпечним явним запитом.
+    # Батьківські переходи та виключені каталоги залишаються забороненими.
+    return path.is_absolute() or ".." in path.parts or any(
         p in EXCLUDE for p in path.parts
     )
 
@@ -90,7 +92,7 @@ def discover(repo: Path, requested: list[str]) -> tuple[list[Path], list[dict]]:
     failures: list[dict] = []
     for item in requested:
         relative = Path(item)
-        if forbidden_components(relative):
+        if not item or forbidden_components(relative):
             failures.append({"path": item, "status": "blocked",
                              "reason": "unsafe/excluded input path"})
             continue
@@ -129,9 +131,11 @@ def run(args: argparse.Namespace) -> dict:
     report = resolve_without_links(args.report, "report")
     if not repo.is_dir():
         raise ValueError("source repository must exist")
-    # No source edits, including accidental reports or files under the source tree.
-    if out == repo or out.is_relative_to(repo) or report.is_relative_to(repo):
-        raise ValueError("output mirror and report must be OUTSIDE source root")
+    # Власник дозволив створювати точні .sens безпосередньо поруч із .lisp.
+    # Захист від перезапису й Zig-перевірка діють також для out == repo.
+    # Незмінний JSON-звіт завжди поза репозиторієм джерел.
+    if report.is_relative_to(repo):
+        raise ValueError("report must be OUTSIDE source root")
     # The JSON receipt must NOT be anywhere in the binary output mirror.
     # Otherwise the later atomic stage.replace(report) can overwrite a .sens
     # just published by Zig, destroying physical exact-width bytes after

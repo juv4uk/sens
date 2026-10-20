@@ -110,16 +110,34 @@ class CurrentBatchTransportTests(unittest.TestCase):
         self.assertEqual(state["files"][0]["status"], "blocked")
         self.assertFalse((self.out / "lib/unknown.sens").exists())
 
-    def test_unsafe_paths_and_output_within_input_are_rejected(self):
+    def test_unsafe_paths_fail_but_in_repo_output_is_not_a_blocker(self):
         forbidden = self.root / "lib/link.lisp"
         forbidden.symlink_to(self.source)
-        for path in ("../escape.lisp", "lib/link.lisp", "missing.lisp"):
+        for path in ("../escape.lisp", "lib/link.lisp", "missing.lisp", ""):
             with self.subTest(path=path):
                 p = self.call(path)
                 self.assertNotEqual(p.returncode, 0, p.stdout + p.stderr)
-        nested = self.call(out=self.root / "published")
-        self.assertEqual(nested.returncode, 3, nested.stdout + nested.stderr)
+
+        original = self.source.read_bytes()
+        for mirror in (self.root, self.root / "published"):
+            with self.subTest(mirror=str(mirror)):
+                result = self.call(out=mirror)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                report = json.loads(self.report.read_text(encoding="utf-8"))
+                self.assertEqual(report["summary"]["files_would_write"], 1)
+                self.assertEqual(report["summary"]["files_written"], 0)
+                self.assertFalse((mirror / "lib/branch.sens").exists())
         self.assertFalse((self.root / "published").exists())
+        self.assertEqual(self.source.read_bytes(), original)
+
+    def test_root_dot_is_an_explicit_safe_batch_selection(self):
+        result = self.call(".", out=self.root)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        report = json.loads(self.report.read_text(encoding="utf-8"))
+        self.assertEqual(report["summary"]["files_seen"], 1)
+        self.assertEqual(report["summary"]["files_would_write"], 1)
+        self.assertEqual(report["files"][0]["path"], "lib/branch.lisp")
+        self.assertFalse(self.source.with_suffix(".sens").exists())
 
 
 if __name__ == "__main__":
