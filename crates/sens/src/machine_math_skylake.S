@@ -95,4 +95,18 @@ sens_i24_mul_exact:
     ret
 .size sens_i24_mul_exact,.-sens_i24_mul_exact
 
+/* D48 signed multiplication, exact RDX:RAX (128 bits).
+ * SysV RDI=left, RSI=right, RDX=high_out pointer, RAX=low.
+ * The caller selects D48/D96 using ratified domain law. */
+.p2align 4
+.globl sens_i48_mul_exact
+.type sens_i48_mul_exact,@function
+sens_i48_mul_exact:
+    mov %rdx,%rcx
+    mov %rdi,%rax
+    imul %rsi
+    mov %rdx,(%rcx)
+    ret
+.size sens_i48_mul_exact,.-sens_i48_mul_exact
+
 .section .note.GNU-stack,"",@progbits

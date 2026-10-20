@@ -142,30 +142,28 @@ pub fn is_domain_value(v: &Value) -> bool {
     numeric_value_domain_width(v).is_some()
 }
 
-/// Точний швидкий механізм: лише два вже ратифіковані знакові D24.
-/// Асемблер виконує тільки арифметику; саме числовий домен перевіряє
-/// тотожності, обирає D24 чи D48 та збирає повні біти без усічення.
-/// Для композицій NEG/RATIO та інших ширин залишається старий закон.
-fn signed_d24_integer_fast(operator: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
-    if lhs.numeric_domain_width() != Some(24) || rhs.numeric_domain_width() != Some(24) {
-        return None;
-    }
+/// Машинне обчислення двох доменно-допущених цілих D24/D48.
+/// Точне зростання D24->D48 і D48->D96, без f64 і змішаних доменів.
+fn signed_small_integer_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
+    let width = lhs.numeric_domain_width()?;
+    if !matches!(width, 24 | 48) || rhs.numeric_domain_width() != Some(width) { return None; }
     let decode = |number: &BinaryNumber| -> Option<i64> {
-        let word = number.exact_numeric_domain_bits()?;
-        if word.len() != 24 { return None; }
-        let raw = word.into_iter().fold(0_u32, |bits, bit| (bits << 1) | u32::from(bit));
-        // Розширення знака двійково-доповняльного D24 без десяткових
-        // посередників або перетворення в f64.
-        Some((((raw as i32) << 8) >> 8) as i64)
+        let bits = number.exact_numeric_domain_bits()?;
+        if bits.len() != width { return None; }
+        let raw = bits.into_iter().fold(0_u64, |v, b| (v << 1) | u64::from(b));
+        let shift = 64 - width;
+        Some(((raw as i64) << shift) >> shift)
     };
-    let mathematical = crate::machine_math::exact_i24_integer_op(operator, decode(lhs)?, decode(rhs)?)?;
-    // Результат ніколи не виходить за межі D48; жодної циклічної
-    // арифметики із втратою перенесення.
-    let out_width = if (-(1_i64 << 23)..=(1_i64 << 23) - 1).contains(&mathematical) { 24 } else { 48 };
-    let bits: Vec<u8> = (0..out_width)
-        .rev()
-        .map(|shift| ((mathematical >> shift) & 1) as u8)
-        .collect();
+    let (left, right) = (decode(lhs)?, decode(rhs)?);
+    let math: i128 = match width {
+        24 => i128::from(crate::machine_math::exact_i24_integer_op(op, left, right)?),
+        48 => crate::machine_math::exact_i48_integer_op(op, left, right)?,
+        _ => return None,
+    };
+    let limit = 1_i128 << (width - 1);
+    let out_width = if (-limit..=limit - 1).contains(&math) { width } else { 2 * width };
+    let bits = (0..out_width).rev()
+        .map(|shift| ((math >> shift) & 1) as u8).collect::<Vec<_>>();
     Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
 }
 
@@ -175,10 +173,10 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
     // Reject D24/D48 (or non-Dn) BEFORE cloning potentially wide rational
     // constituents into the private calculation.
     let width = shared_numeric_domain_width(lhs, rhs)?;
-    // Перевірена арифметична реалізація D24, без неявного приведення D48.
-    if width == 24 && matches!(operator, "+" | "-" | "*") {
+    // Машинний шлях лише для цілих одного D24 або D48.
+    if matches!(width, 24 | 48) && matches!(operator, "+" | "-" | "*") {
         if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
-            return signed_d24_integer_fast(operator, left, right);
+            return signed_small_integer_fast(operator, left, right);
         }
     }
     let (_, x_neg, x_num, x_den) = ingredients(lhs)?;
@@ -278,6 +276,35 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    #[test]
+    fn d48_asm_preserves_d96_widening_no_mixed_domains_or_float() {
+        const MIN: i64 = -(1_i64 << 47);
+        const MAX: i64 = (1_i64 << 47) - 1;
+        let make = |w: usize, v: i128| -> Value {
+            let bits = (0..w).rev().map(|i| ((v >> i) & 1) as u8).collect::<Vec<_>>();
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(w, &bits).unwrap())
+        };
+        for a in [MIN, MIN + 1, -1, 0, 1, MAX] {
+            for b in [MIN, -1, 0, 1, MAX] {
+                for (op, oracle) in [("+", i128::from(a) + i128::from(b)),
+                                    ("-", i128::from(a) - i128::from(b)),
+                                    ("*", i128::from(a) * i128::from(b))] {
+                    let output = compute(op, &make(48, i128::from(a)), &make(48, i128::from(b))).unwrap();
+                    assert_eq!(output.to_string(), oracle.to_string());
+                    let Value::BinaryNumber(word) = output else { panic!("D48/D96 word"); };
+                    let limit = 1_i128 << 47;
+                    let w = if (-limit..=limit - 1).contains(&oracle) { 48 } else { 96 };
+                    assert_eq!(word.numeric_domain_width(), Some(w));
+                    assert_eq!(word.exact_numeric_domain_bits().unwrap().len(), w);
+                }
+            }
+        }
+        assert!(compute("+", &make(24, 1), &make(48, 1)).is_none());
+        assert!(compute("*", &make(48, 1), &make(96, 1)).is_none());
+        assert_eq!(compute("/", &make(48, 1), &make(48, 2)).unwrap().to_string(), "1/2");
+        assert_eq!(compute("+", &make(96, 1), &make(96, 2)).unwrap().to_string(), "3");
     }
 
     #[test]

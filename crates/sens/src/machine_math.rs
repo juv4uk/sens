@@ -30,6 +30,7 @@ unsafe extern "C" {
     fn sens_i24_add_exact(left: i64, right: i64) -> i64;
     fn sens_i24_sub_exact(left: i64, right: i64) -> i64;
     fn sens_i24_mul_exact(left: i64, right: i64) -> i64;
+    fn sens_i48_mul_exact(left: i64, right: i64, high: *mut i64) -> i64;
 }
 
 /// Цілочисельний механізм для рівно двох НАЯВНИХ знакових слів D24.
@@ -62,6 +63,40 @@ pub(crate) fn exact_i24_integer_op(operator: &str, left: i64, right: i64) -> Opt
         "+" => left.checked_add(right),
         "-" => left.checked_sub(right),
         "*" => left.checked_mul(right),
+        _ => None,
+    }
+}
+
+
+/// Точний D48 механізм. Доменний допуск/ріст D48->D96 виконує SENS.
+/// 64-бітні ADD/SUB існуючого x86-ядра не усікають D48-суми;
+/// IMUL використовує RDX:RAX та повертає 128 бітів через ABI-адаптер.
+pub(crate) fn exact_i48_integer_op(op: &str, left: i64, right: i64) -> Option<i128> {
+    const MIN: i64 = -(1_i64 << 47);
+    const MAX: i64 = (1_i64 << 47) - 1;
+    if !(MIN..=MAX).contains(&left) || !(MIN..=MAX).contains(&right) { return None; }
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    {
+        // SAFETY: D48 аргументи знакові, ABI System V, &mut high
+        // зберігає старші 64 біти множення без втрати перенесення.
+        return Some(unsafe {
+            match op {
+                "+" => i128::from(sens_i24_add_exact(left, right)),
+                "-" => i128::from(sens_i24_sub_exact(left, right)),
+                "*" => {
+                    let mut high = 0_i64;
+                    let low = sens_i48_mul_exact(left, right, &mut high);
+                    (i128::from(high) << 64) | i128::from(low as u64)
+                }
+                _ => return None,
+            }
+        });
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    match op {
+        "+" => Some(i128::from(left) + i128::from(right)),
+        "-" => Some(i128::from(left) - i128::from(right)),
+        "*" => Some(i128::from(left) * i128::from(right)),
         _ => None,
     }
 }
@@ -179,4 +214,36 @@ mod tests {
         }
     }
 
+    #[test]
+    fn d48_asm_exact_signed_boundaries_and_wide_product() {
+        const MIN: i64 = -(1_i64 << 47);
+        const MAX: i64 = (1_i64 << 47) - 1;
+        for a in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
+            for b in [MIN, -1, 0, 1, MAX] {
+                assert_eq!(exact_i48_integer_op("+", a, b), Some(i128::from(a) + i128::from(b)));
+                assert_eq!(exact_i48_integer_op("-", a, b), Some(i128::from(a) - i128::from(b)));
+                assert_eq!(exact_i48_integer_op("*", a, b), Some(i128::from(a) * i128::from(b)));
+            }
+        }
+        assert_eq!(exact_i48_integer_op("*", MIN, MIN), Some(1_i128 << 94));
+        assert_eq!(exact_i48_integer_op("+", MAX + 1, 0), None);
+        assert_eq!(exact_i48_integer_op("*", MIN - 1, 1), None);
+        assert_eq!(exact_i48_integer_op("/", 2, 1), None);
+    }
+
+    #[test]
+    fn d48_asm_matches_i128_oracle_in_4096_cases() {
+        let mut seed = 0x9e37_79b9_82a1_c365_u64;
+        for _ in 0..4096 {
+            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            let a = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
+            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            let b = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
+            for (op, value) in [("+", i128::from(a) + i128::from(b)),
+                                ("-", i128::from(a) - i128::from(b)),
+                                ("*", i128::from(a) * i128::from(b))] {
+                assert_eq!(exact_i48_integer_op(op, a, b), Some(value));
+            }
+        }
+    }
 }
