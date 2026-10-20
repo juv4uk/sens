@@ -20,7 +20,7 @@
 ; a bare '() for exactly that reason, so the echoed extra line is a
 ; harmless "()" a reader can skip, not a duplicated fixture.
 
-(визначити fixtures (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
+(визначити фікстури (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
 
 (друкувати (сполучити (як-є about) "my-lisp-constitution.lisp — the executable proof of docs/language-core-axioms.md's project principles and axioms (G1-G8 generative, S1-S3 safety). Each fixture is one of the observable claims from tests/fixtures/conformance.lisp, tagged with the tier (1 CORE SEMANTICS, 2 LANGUAGE CONTRACT, 3 ECOSYSTEM CONFORMANCE) and, where one applies, the axiom(s) it is evidence for. Symbolic-reasoning fixtures (tier 3, unify/reason) carry no axiom tag on purpose — they are evidence for project principle 3, not the G/S axiom list."))
 
@@ -57,18 +57,18 @@
 (друкувати (список (як-є tier) 2 "LANGUAGE CONTRACT — every conforming implementation must have this"))
 (друкувати (список (як-є tier) 3 "ECOSYSTEM CONFORMANCE — an implementation can be sens without this loaded yet; tests a library, not the language itself"))
 
-(визначити print-fixture
-  (функція (fixture)
-    (друкувати (сполучити (як-є fixture) fixture))))
+(визначити надрукувати-приклад
+  (функція (приклад)
+    (друкувати (сполучити (як-є fixture) приклад))))
 
-(визначити print-fixtures
-  (функція (remaining)
+(визначити надрукувати-приклади
+  (функція (залишок)
     (за-умовою
-      ((атом? remaining) (як-є ()))
+      ((атом? залишок) (як-є ()))
       ((атом? (як-є ())) ((функція ()
-            (print-fixture (перше remaining))
-            (print-fixtures (решта remaining))))))))
+            (надрукувати-приклад (перше залишок))
+            (надрукувати-приклади (решта залишок))))))))
 
-(print-fixtures fixtures)
+(надрукувати-приклади фікстури)
 
 (як-є ())
