@@ -1,6 +1,6 @@
-; #432 research-only runtime witness.
-; Fresh payloads are minted at runtime so candidate literals cannot hard-code them.
-; This file observes current lower-basis behavior only; it does not define CAR/CDR.
+; #432 свідок часу виконання, лише дослідження.
+; Свіжі payload-и карбуються під час виконання, тож кандидатні літерали не можуть їх зашити.
+; Цей файл лише спостерігає поточну поведінку нижчої основи; він не визначає CAR/CDR.
 
 (def car-head-a (gensym "car-head-a-"))
 (def car-head-b (gensym "car-head-b-"))
