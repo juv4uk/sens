@@ -17,6 +17,21 @@ import sys
 ROOT=Path(os.environ.get('SENS_ROOT',Path(__file__).resolve().parents[1]))
 LEDGER=ROOT/'knowledge/d10-time-law-review-v2.json'
 
+# Чинні українські імена перевіряємо за живим SENS-джерелом.
+# Історичні semantic_name та surface_ukr у дослідницькому журналі
+# не є викличними головами і не призначають координат D10.
+LIVE_UKRAINIAN_DEFINITIONS = {
+    'CIVIL-FROM-DAYS': 'грегоріанська-дата-з-числа-днів',
+    'INTERNET-TIME-MODE-VALID?': 'інтернет-час-режим-припустимий?',
+    'INTERNET-TIME-STRATUM-VALID?': 'інтернет-час-рівень-припустимий?',
+    'INTERNET-TIME-FIELDS->OBSERVATION': 'тлумачити-поля-відповіді-часу',
+    'INTERNET-TIME-RAW->OBSERVATION': 'перетворити-сирі-дані-часу-на-спостереження',
+    'INTERNET-TIME-OBSERVATION->UTC': 'дати-календарне-значення-схваленому-часу',
+    'TIMEZONE-DECLARATIONS->OBSERVATION': 'обрати-достовірне-джерело-часового-поясу',
+    'TIMEZONE-RAW->OBSERVATION': 'часовий-пояс-сирий-до-спостереження',
+    'TIMEZONE-CONFIG': 'створити-перевірене-значення-поясу',
+}
+
 def verify(data, root, *, require_checkout=False, pinned_source=None):
     if not __debug__:
         raise RuntimeError("BLOCK: Python -O disables assertion-based research gates")
@@ -52,16 +67,23 @@ def verify(data, root, *, require_checkout=False, pinned_source=None):
     # the historical proof or silently ratify D10 candidates.
     source=root/'lib/time.lisp'
     if source.exists():
+        assert set(LIVE_UKRAINIAN_DEFINITIONS)=={row['semantic_name'] for row in rows}, (
+            'LIVE: дослідницький перелік і українські свідки розійшлися'
+        )
         current_lines=source.read_text(encoding='utf-8').splitlines()
         for row in rows:
-            prefix='(0011 '+row['semantic_name'].lower()
+            українське_імя=LIVE_UKRAINIAN_DEFINITIONS[row['semantic_name']]
+            prefix='(визначити '+українське_імя
             matches=[
                 line for line in current_lines
                 if line.startswith(prefix)
                 and line[len(prefix):][:1] in ('',' ',chr(9),')')
             ]
-            assert len(matches)==1, f"live D4 DEFINE missing/duplicated: {row['semantic_name']}"
-        print('LIVE: nine D4 definitions preserved, independent of historical source SHA')
+            assert len(matches)==1, (
+                f"LIVE: українське D4 DEFINE missing/duplicated: "
+                f"{row['semantic_name']} -> {українське_імя}"
+            )
+        print('LIVE: девʼять українських D4-визначень існують; архівний SHA незалежний')
     elif require_checkout:
         raise AssertionError('BLOCK: pinned lib/time.lisp missing; cannot validate live source')
     else:
