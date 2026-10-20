@@ -1,15 +1,17 @@
-; #790 BLACKBOARD-1 — research artifact.
-; Historical sources:
-; - H. Penny Nii, "The Blackboard Model of Problem Solving and the Evolution
-;   of Blackboard Architectures", AI Magazine 7(2), 1986.
+; #790 BLACKBOARD-1 — дослідження архітектури спільної дошки.
+;
+; Історичні джерела:
+; - H. Penny Nii, «The Blackboard Model of Problem Solving and the Evolution
+;   of Blackboard Architectures», AI Magazine 7(2), 1986.
 ;   DOI: 10.1609/aimag.v7i2.537
-; - Barbara Hayes-Roth, "A blackboard architecture for control",
-;   Artificial Intelligence 26(3), 1985, pp. 251-321.
+; - Barbara Hayes-Roth, «A blackboard architecture for control»,
+;   Artificial Intelligence 26(3), 1985, с. 251–321.
 ;   DOI: 10.1016/0004-3702(85)90063-3
 ;
-; my-lisp adaptation rule:
-; borrow coordination mechanics, reject shared semantic ontology.
-
+; Правило адаптації до СЕНС: запозичуємо механізми координації,
+; але не приймаємо спільну семантичну онтологію.
+; Протокольні атоми нижче — незмінні дані досліду, не виклики.
+;
 (blackboard-research-790
   (authority
     (semantic Canon-function-table)
