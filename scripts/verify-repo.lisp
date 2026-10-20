@@ -5,173 +5,173 @@
 ; Usage: sens scripts/verify-repo.lisp
 ; Друкує кожну перевірку; за першої ж проблеми — помилка й ненульовий вихід.
 
-(визначити str+
+(визначити поєднати-рядки
   (функція args
-    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
+    (згорнути (функція (накопичувач частина) (рядок-додати накопичувач частина)) "" args)))
 
 (визначити повідомити-про-помилку-репозиторію
-  (функція (message)
-    (друге (список (друкувати (str+ "FAIL: " message)) (перше (як-є ()))))))
+  (функція (повідомлення)
+    (друге (список (друкувати (поєднати-рядки "FAIL: " повідомлення)) (перше (як-є ()))))))
 
-(визначити pass
-  (функція (name)
-    (друкувати (str+ "ok: " name))))
+(визначити повідомити-успішну-перевірку
+  (функція (назва)
+    (друкувати (поєднати-рядки "ok: " назва))))
 
-(визначити contains? (функція (text needle) (рядок-містить? needle text)))
+(визначити містить-зразок? (функція (текст зразок) (рядок-містить? зразок текст)))
 
 ; Кожна голка з needles має бути в тексті; повертає перелік відсутніх.
-(визначити missing-needles
-  (функція (text needles)
+(визначити відсутні-зразки
+  (функція (текст зразки)
     (за-умовою
-      ((атом? needles) () (як-є ()))
-      ((атом? needles) (0)
+      ((атом? зразки) () (як-є ()))
+      ((атом? зразки) (0)
        (за-умовою
-         ((contains? text (перше needles)) t (missing-needles text (решта needles)))
-         (t t (сполучити (перше needles) (missing-needles text (решта needles)))))))))
+         ((містить-зразок? текст (перше зразки)) t (відсутні-зразки текст (решта зразки)))
+         (t t (сполучити (перше зразки) (відсутні-зразки текст (решта зразки)))))))))
 
-(визначити require-needles
-  (функція (name path needles)
-    (нехай ((missing (missing-needles (читати-файл path) needles)))
+(визначити вимагати-зразки
+  (функція (назва шлях зразки)
+    (нехай ((відсутні (відсутні-зразки (читати-файл шлях) зразки)))
       (за-умовою
-        ((атом? missing) () (pass name))
-        ((атом? missing) (ні) (повідомити-про-помилку-репозиторію (str+ name ": " path " missing " (значення-у-текст missing))))))))
+        ((атом? відсутні) () (повідомити-успішну-перевірку назва))
+        ((атом? відсутні) (ні) (повідомити-про-помилку-репозиторію (поєднати-рядки назва ": " шлях " missing " (значення-у-текст відсутні))))))))
 
-(визначити forbid-needle
-  (функція (name path needle)
+(визначити заборонити-зразок
+  (функція (назва шлях зразок)
     (за-умовою
-      ((contains? (читати-файл path) needle) t
-       (повідомити-про-помилку-репозиторію (str+ name ": " path " must not contain " (значення-у-текст needle))))
+      ((містить-зразок? (читати-файл шлях) зразок) t
+       (повідомити-про-помилку-репозиторію (поєднати-рядки назва ": " шлях " must not contain " (значення-у-текст зразок))))
       (t t t))))
 
-(визначити any-needle?
-  (функція (text needles)
+(визначити містить-будь-який-зразок?
+  (функція (текст зразки)
     (за-умовою
-      ((атом? needles) () (як-є ()))
-      ((атом? needles) (0)
+      ((атом? зразки) () (як-є ()))
+      ((атом? зразки) (0)
        (за-умовою
-         ((contains? text (перше needles)) t t)
-         (t t (any-needle? text (решта needles))))))))
+         ((містить-зразок? текст (перше зразки)) t t)
+         (t t (містить-будь-який-зразок? текст (решта зразки))))))))
 
 ; --- public-docs-share-current-project-identity-and-extension ---
-(визначити check-doc-identity
-  (функція (path)
-    (нехай ((doc (читати-файл path)))
+(визначити перевірити-тотожність-документів
+  (функція (шлях)
+    (нехай ((документ (читати-файл шлях)))
       (за-умовою
-        ((any-needle? doc (як-є ("reference implementation" "reference Rust implementation" "референсна реалізація" "референсна реалізація Rust")))
+        ((містить-будь-який-зразок? документ (як-є ("reference implementation" "reference Rust implementation" "референсна реалізація" "референсна реалізація Rust")))
          t
          (за-умовою
-           ((any-needle? doc (як-є ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
+           ((містить-будь-який-зразок? документ (як-є ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
             t
-            (повідомити-про-помилку-репозиторію (str+ path ": implementation wording must not imply that Rust itself owns semantics")))
+            (повідомити-про-помилку-репозиторію (поєднати-рядки шлях ": implementation wording must not imply that Rust itself owns semantics")))
            (t t
             (за-умовою
-              ((any-needle? doc (як-є ("канонічне розширення вихідного коду — **`.lisp`**"
+              ((містить-будь-який-зразок? документ (як-є ("канонічне розширення вихідного коду — **`.lisp`**"
                                         "Канонічне розширення вихідного коду — **`.lisp`**"
                                         "canonical source extension is **`.lisp`**"
                                         "current canonical source extension is **`.lisp`**")))
                t
                (за-умовою
-                 ((any-needle? doc (як-є ("legacy alias" "legacy aliases")))
+                 ((містить-будь-який-зразок? документ (як-є ("legacy alias" "legacy aliases")))
                   t
                   (за-умовою
-                    ((contains? doc "`.wsm`") t
+                    ((містить-зразок? документ "`.wsm`") t
                      (за-умовою
-                       ((contains? doc "`.my`") t t)
-                       (t t (повідомити-про-помилку-репозиторію (str+ path ": must name `.my` as a legacy alias")))))
-                    (t t (повідомити-про-помилку-репозиторію (str+ path ": must name `.wsm` as a legacy alias")))))
-                 (t t (повідомити-про-помилку-репозиторію (str+ path ": must call `.wsm`/`.my` legacy aliases")))))
-              (t t (повідомити-про-помилку-репозиторію (str+ path ": must state `.lisp` as the canonical extension")))))))
-        (t t (повідомити-про-помилку-репозиторію (str+ path ": must describe Rust as a reference implementation")))))))
+                       ((містить-зразок? документ "`.my`") t t)
+                       (t t (повідомити-про-помилку-репозиторію (поєднати-рядки шлях ": must name `.my` as a legacy alias")))))
+                    (t t (повідомити-про-помилку-репозиторію (поєднати-рядки шлях ": must name `.wsm` as a legacy alias")))))
+                 (t t (повідомити-про-помилку-репозиторію (поєднати-рядки шлях ": must call `.wsm`/`.my` legacy aliases")))))
+              (t t (повідомити-про-помилку-репозиторію (поєднати-рядки шлях ": must state `.lisp` as the canonical extension")))))))
+        (t t (повідомити-про-помилку-репозиторію (поєднати-рядки шлях ": must describe Rust as a reference implementation")))))))
 
-(check-doc-identity "README.md")
-(check-doc-identity "docs/language-core.md")
-(pass "public-docs-share-current-project-identity-and-extension")
+(перевірити-тотожність-документів "README.md")
+(перевірити-тотожність-документів "docs/language-core.md")
+(повідомити-успішну-перевірку "public-docs-share-current-project-identity-and-extension")
 
 ; --- cargo-workspace-has-no-my-lisp-package-prefix ---
 ; Назва пакета (рядок одразу після `[package]`) з префіксом my-lisp — регресія.
 ; Бінарники з назвою my-lisp (сумісні псевдоніми CLI) — не пакет, їх не чіпаємо.
-(визначити check-manifests
-  (функція (entries)
+(визначити перевірити-маніфести
+  (функція (записи)
     (за-умовою
-      ((атом? entries) () t)
-      ((атом? entries) (0)
-       (нехай ((manifest (str+ "crates/" (перше entries) "/Cargo.toml")))
-         (нехай ((text (читати-файл manifest)))
+      ((атом? записи) () t)
+      ((атом? записи) (0)
+       (нехай ((маніфест (поєднати-рядки "crates/" (перше записи) "/Cargo.toml")))
+         (нехай ((текст (читати-файл маніфест)))
            (за-умовою
-             ((contains? text "[package]\nname = \"my-lisp") t
-              (повідомити-про-помилку-репозиторію (str+ "cargo package prefix regression: " manifest " uses my-lisp*")))
-             (t t (check-manifests (решта entries))))))))))
+             ((містить-зразок? текст "[package]\nname = \"my-lisp") t
+              (повідомити-про-помилку-репозиторію (поєднати-рядки "cargo package prefix regression: " маніфест " uses my-lisp*")))
+             (t t (перевірити-маніфести (решта записи))))))))))
 
-(check-manifests (read-dir "crates"))
-(pass "cargo-workspace-has-no-my-lisp-package-prefix")
+(перевірити-маніфести (read-dir "crates"))
+(повідомити-успішну-перевірку "cargo-workspace-has-no-my-lisp-package-prefix")
 
 ; --- public-docs-point-to-semantic-authority ---
-(require-needles "public-docs-point-to-semantic-authority" "README.md"
+(вимагати-зразки "public-docs-point-to-semantic-authority" "README.md"
   (як-є ("docs/semantic-authority-map.md")))
-(require-needles "public-docs-point-to-semantic-authority" "docs/language-core.md"
+(вимагати-зразки "public-docs-point-to-semantic-authority" "docs/language-core.md"
   (як-є ("semantic-authority-map.md")))
-(require-needles "public-docs-point-to-semantic-authority" "docs/semantic-authority-map.md"
+(вимагати-зразки "public-docs-point-to-semantic-authority" "docs/semantic-authority-map.md"
   (як-є ("language-contract.lisp")))
 ; Rust шукав без урахування регістру; у документі — «Ratified ADRs» і
 ; «executable conformance» / «Executable conformance».
 (за-умовою
-  ((any-needle? (читати-файл "docs/semantic-authority-map.md") (як-є ("Ratified ADR" "ratified ADR"))) t t)
+  ((містить-будь-який-зразок? (читати-файл "docs/semantic-authority-map.md") (як-є ("Ratified ADR" "ratified ADR"))) t t)
   (t t (повідомити-про-помилку-репозиторію "docs/semantic-authority-map.md must mention ratified ADRs")))
 (за-умовою
-  ((any-needle? (читати-файл "docs/semantic-authority-map.md") (як-є ("Executable conformance" "executable conformance"))) t t)
+  ((містить-будь-який-зразок? (читати-файл "docs/semantic-authority-map.md") (як-є ("Executable conformance" "executable conformance"))) t t)
   (t t (повідомити-про-помилку-репозиторію "docs/semantic-authority-map.md must mention executable conformance")))
-(pass "public-docs-point-to-semantic-authority")
+(повідомити-успішну-перевірку "public-docs-point-to-semantic-authority")
 
 ; --- host-semantic-surface-documentation-tracks-time-ownership ---
 ; Раніше шукало текст "unix-time-now" у builtins.rs; після #1477 вбудовані —
 ; примітиви за кодом, тож джерело — таблиця функцій і її метадані.
-(require-needles "host-semantic-surface-documentation-tracks-time-ownership"
+(вимагати-зразки "host-semantic-surface-documentation-tracks-time-ownership"
   "docs/host-semantic-surface.md"
   (як-є ("mono-ns" "unix-time-now"
           "`utc-now` | `lib/time.lisp` | derived public clock meaning | HOST REMOVED")))
-(require-needles "host-semantic-surface-documentation-tracks-time-ownership"
+(вимагати-зразки "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/time.lisp"
   (як-є ("mono-ms" "utc-now")))
-(require-needles "host-semantic-surface-documentation-tracks-time-ownership"
+(вимагати-зразки "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/surface/function-signatures.lisp"
   (як-є ("(01011011 (kind builtin)")))
-(forbid-needle "host-semantic-surface-documentation-tracks-time-ownership"
+(заборонити-зразок "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/surface/function-signatures.lisp" "(utc-now)")
 
 ; --- agent-onboarding / current-agent-authority / human-migration-doc ---
-(require-needles "agent-onboarding-records-removed-coordination-surface" "AGENTS.md"
+(вимагати-зразки "agent-onboarding-records-removed-coordination-surface" "AGENTS.md"
   (як-є ("sens :9999" "swarm-node :910x"
           "Стара coordination surface на `:9999` фізично видалена"
           "мають повертати `unknown op`"
           "knowledge/swarm-legacy-deprecation.lisp"
           "Current coordination authority:" "`swarm-node`")))
-(forbid-needle "agent-onboarding-records-removed-coordination-surface" "AGENTS.md"
+(заборонити-зразок "agent-onboarding-records-removed-coordination-surface" "AGENTS.md"
   "This is a\n  first-class pattern, not a fallback")
-(require-needles "agent-onboarding-records-removed-coordination-surface"
+(вимагати-зразки "agent-onboarding-records-removed-coordination-surface"
   "knowledge/swarm-legacy-deprecation.lisp"
   (як-є ("(status . deprecated)" "(physical-status . removed)"
           "(runtime-rejection . confirmed)" "(coordination-authority . swarm-node)")))
-(require-needles "human-migration-doc-keeps-semantic-and-coordination-planes-separate"
+(вимагати-зразки "human-migration-doc-keeps-semantic-and-coordination-planes-separate"
   "docs/swarm-mesh-v2.md"
   (як-є ("sens :9999" "swarm-node :910x"
           "no longer the\ncoordination path going forward" "semantic oracle")))
 
 ; --- s2-explicitly-contracts-category-not-error-wording ---
-(require-needles "s2-explicitly-contracts-category-not-error-wording"
+(вимагати-зразки "s2-explicitly-contracts-category-not-error-wording"
   "docs/language-core-axioms.md"
   (як-є ("The wording may differ; the *category* is the contract.")))
-(require-needles "s2-explicitly-contracts-category-not-error-wording"
+(вимагати-зразки "s2-explicitly-contracts-category-not-error-wording"
   "crates/sens/src/error.rs"
   (як-є ("non-contractual: `kind` is what S2 ratifies")))
 
 ; --- Python-перевірки (поки викликаються; перенесення самих скриптів — окремо) ---
 (визначити run-python
-  (функція (name script args)
+  (функція (назва script args)
     (нехай ((result (процес-запустити "python3" (сполучити script args))))
       (за-умовою
-        ((11110111 (перше result) 0) (1) (pass name))
+        ((11110111 (перше result) 0) (1) (повідомити-успішну-перевірку назва))
         ((11110111 (перше result) 0) (0)
-         (повідомити-про-помилку-репозиторію (str+ name " failed\n" (друге result) (третє result))))))))
+         (повідомити-про-помилку-репозиторію (поєднати-рядки назва " failed\n" (друге result) (третє result))))))))
 
 (run-python "meta-eval-evidence-matrix" "scripts/check-meta-eval-evidence.py" (як-є ()))
 (run-python "meta-eval-human-evidence-projection" "scripts/generate-meta-eval-evidence.py" (як-є ("--check")))
@@ -221,7 +221,7 @@
     (нехай ((found (знайти-за-ключем id stable-uk)))
       (за-умовою
         ((атом? found) (0) (решта found))
-        (t t (повідомити-про-помилку-репозиторію (str+ "документаційний ID " id " не має stable UK projection у registry")))))))
+        (t t (повідомити-про-помилку-репозиторію (поєднати-рядки "документаційний ID " id " не має stable UK projection у registry")))))))
 
 (визначити all-bits?
   (функція (text)
@@ -244,8 +244,8 @@
        (нехай ((id (doc-id (перше docs))) (kind (doc-kind (перше docs))))
          (за-умовою
            ((11110111 (110100010 id) 8) (0)
-            (повідомити-про-помилку-репозиторію (str+ "документаційний join key має бути 8-бітним SID: " id)))
-           ((all-bits? id) () (повідомити-про-помилку-репозиторію (str+ "документаційний join key має бути 8-бітним SID: " id)))
+            (повідомити-про-помилку-репозиторію (поєднати-рядки "документаційний join key має бути 8-бітним SID: " id)))
+           ((all-bits? id) () (повідомити-про-помилку-репозиторію (поєднати-рядки "документаційний join key має бути 8-бітним SID: " id)))
            (t t
             (нехай ((uk (uk-name-for id)))
               (001000 ((question (11110111 (last-char uk) "?"))
@@ -254,22 +254,22 @@
                     (mutation (11110111 kind (як-є mutation))))
                 (за-умовою
                   ((11110111 question predicate) (0)
-                   (повідомити-про-помилку-репозиторію (str+ "українська назва " uk ": знак ? і predicate мусять збігатися")))
+                   (повідомити-про-помилку-репозиторію (поєднати-рядки "українська назва " uk ": знак ? і predicate мусять збігатися")))
                   ((11110111 bang mutation) (0)
-                   (повідомити-про-помилку-репозиторію (str+ uk ": ! зарезервований для мутації")))
+                   (повідомити-про-помилку-репозиторію (поєднати-рядки uk ": ! зарезервований для мутації")))
                   (mutation (1)
                    (за-умовою
                      ((11110111 uk "встановити-елемент-вектора!") (1)
                       (check-docs (решта docs) predicates (додати mutations 1)))
-                     (t t (повідомити-про-помилку-репозиторію (str+ "несподівана мутація: " uk)))))
+                     (t t (повідомити-про-помилку-репозиторію (поєднати-рядки "несподівана мутація: " uk)))))
                   (predicate (1)
                    (check-docs (решта docs) (додати predicates 1) mutations))
                   (t t (check-docs (решта docs) predicates mutations))))))))))))
 
 (check-docs uk-docs 0 0)
-(pass "dokumentatsiinyi-kliuch-ie-tilky-numeric")
-(pass "znak-pytannia-tochno-vidpovidaie-predykatam")
-(pass "znak-oklyku-tochno-vidpovidaie-mutatsii")
+(повідомити-успішну-перевірку "dokumentatsiinyi-kliuch-ie-tilky-numeric")
+(повідомити-успішну-перевірку "znak-pytannia-tochno-vidpovidaie-predykatam")
+(повідомити-успішну-перевірку "znak-oklyku-tochno-vidpovidaie-mutatsii")
 
 ; Усі ID документації є в таблиці; усі задокументовані назви — у Markdown.
 (визначити check-md-rows
@@ -281,13 +281,13 @@
          (за-умовою
            ((атом? (знайти-за-ключем id (відобразити (функція (doc) (сполучити (doc-id doc) t)) uk-docs))) ()
             (check-md-rows (решта pairs)))
-           ((рядок-містить? (str+ "| `" uk "` |") api-md) t (check-md-rows (решта pairs)))
-           (t t (повідомити-про-помилку-репозиторію (str+ "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
+           ((рядок-містить? (поєднати-рядки "| `" uk "` |") api-md) t (check-md-rows (решта pairs)))
+           (t t (повідомити-про-помилку-репозиторію (поєднати-рядки "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
 
 (за-умовою
   ((менше? 50 (count-items stable-uk)) 1 (check-md-rows stable-uk))
   (t t (повідомити-про-помилку-репозиторію "замало stable UK-назв у таблиці")))
-(pass "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku")
+(повідомити-успішну-перевірку "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku")
 
 ; Смисловий аудит назв: підсумок збігається з даними.
 (визначити audit (перше (читати-всі (читати-файл "lib/surface/uk-name-audit.lisp"))))
@@ -304,7 +304,7 @@
         (t t (повідомити-про-помилку-репозиторію "смисловий аудит мусить покривати рівно documented UK-покриття"))))
      (t t (повідомити-про-помилку-репозиторію "(renamed N) розійшовся з фактичною кількістю (rename ...)"))))
   (t t (повідомити-про-помилку-репозиторію "stable-reviewed мусить дорівнювати renamed+retained")))
-(pass "smyslovyi-audyt-summary-zbihaietsia-z-faktychnymy-danymy")
+(повідомити-успішну-перевірку "smyslovyi-audyt-summary-zbihaietsia-z-faktychnymy-danymy")
 
 (визначити uk-surface (читати-файл "lib/surface/uk.lisp"))
 (визначити semantic-registry
@@ -333,7 +333,7 @@
   ((11010 (pos-of uk-surface "(00001001 середовище env)" 0) 0) t
    (повідомити-про-помилку-репозиторію "uk.lisp: (00001001 середовище env) мусить бути лише в реєстрі, не в поверхні"))
   (t t t))
-(pass "seredovyshche-ne-maie-povtornoho-surface-binding")
+(повідомити-успішну-перевірку "seredovyshche-ne-maie-povtornoho-surface-binding")
 
 (визначити check-aliases
   (функція (renames)
@@ -348,19 +348,19 @@
          (за-умовою
            ((атом? sens) ()
             (повідомити-про-помилку-репозиторію
-              (str+ "audit EN surface missing from semantic registry: "
+              (поєднати-рядки "audit EN surface missing from semantic registry: "
                     (11101110 en-symbol))))
            ((110101000
-              (str+ "(00001001 " (11101110 old-symbol) " " (11110100 sens) ")")
+              (поєднати-рядки "(00001001 " (11101110 old-symbol) " " (11110100 sens) ")")
               uk-surface)
             t
             (check-aliases (решта renames)))
            (t t
             (повідомити-про-помилку-репозиторію
-              (str+ "missing exact-SENS compatibility alias (00001001 "
+              (поєднати-рядки "missing exact-SENS compatibility alias (00001001 "
                     (11101110 old-symbol) " " (11110100 sens) ")")))))))))
 (check-aliases audit-renames)
-(pass "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
+(повідомити-успішну-перевірку "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
 
 ; Розкладка: українські назви набираються без латиниці.
 (визначити uk-layout
@@ -380,9 +380,9 @@
       ((атом? pairs) (0)
        (за-умовою
          ((typeable? (решта (перше pairs))) t (check-typeable (решта pairs)))
-         (t t (повідомити-про-помилку-репозиторію (str+ "Ukrainian name needs another keyboard layout: " (решта (перше pairs))))))))))
+         (t t (повідомити-про-помилку-репозиторію (поєднати-рядки "Ukrainian name needs another keyboard layout: " (решта (перше pairs))))))))))
 (check-typeable stable-uk)
-(pass "every-stable-ukrainian-name-is-typeable-on-the-ukrainian-layout")
+(повідомити-успішну-перевірку "every-stable-ukrainian-name-is-typeable-on-the-ukrainian-layout")
 
 (визначити latin-letter?
   (функція (char)
@@ -418,8 +418,8 @@
   (функція (name path)
     (нехай ((found (latin-in-code (читати-файл path) () () "")))
       (за-умовою
-        ((110011100 found) (1) (pass name))
-        (t t (повідомити-про-помилку-репозиторію (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
+        ((110011100 found) (1) (повідомити-успішну-перевірку name))
+        (t t (повідомити-про-помилку-репозиторію (поєднати-рядки name ": латинські літери у виконуваному коді " path ": " found)))))))
 
 (require-no-latin "ukrainian-acceptance-program-code-never-requires-latin-layout"
   "lib/surface/uk-acceptance.lisp")
@@ -432,11 +432,11 @@
     (нехай ((text (читати-файл path)))
       (за-умовою
         ((рядок-містить? "language-contract.my" text) t
-         (повідомити-про-помилку-репозиторію (str+ path " still contains removed path language-contract.my")))
+         (повідомити-про-помилку-репозиторію (поєднати-рядки path " still contains removed path language-contract.my")))
         ((рядок-містить? "contracts/my-lisp/lock.my" text) t
-         (повідомити-про-помилку-репозиторію (str+ path " still contains removed path contracts/my-lisp/lock.my")))
+         (повідомити-про-помилку-репозиторію (поєднати-рядки path " still contains removed path contracts/my-lisp/lock.my")))
         (t t
-         (require-needles "contract-workflows-use-canonical-lisp-paths" path
+         (вимагати-зразки "contract-workflows-use-canonical-lisp-paths" path
            (як-є ("default: contracts/my-lisp/language-contract.lisp"
                    "default: contracts/my-lisp/lock.lisp"
                    "UPSTREAM_PATH: language-contract.lisp"))))))))
