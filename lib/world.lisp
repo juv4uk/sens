@@ -173,36 +173,36 @@
       (так (порожній? (як-є (ні)))))))
 
 (визначити advice-decision-in-world
-  (функція (world module-name clause)
+  (функція (світ назва-модуля клауза)
     (за-умовою
-      ((хибне? (внутрішній-символ? module-name))
-       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) clause)))
-      ((тотожне? (клауза-бази-знань-коректна? clause) (як-є ()))
-       (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) clause)))
+      ((хибне? (внутрішній-символ? назва-модуля))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) клауза)))
+      ((тотожне? (клауза-бази-знань-коректна? клауза) (як-є ()))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) клауза)))
       (так
-       (нехай-похідне ((opposite (отримати-протилежну-голову-твердження-знання (перше clause))))
-         (нехай-похідне ((proofs (за-умовою
-                         ((світ-модуль-відомий? world module-name)
-                          (міркувати-у-світ world module-name opposite))
+       (нехай-похідне ((протилежне (отримати-протилежну-голову-твердження-знання (перше клауза))))
+         (нехай-похідне ((докази (за-умовою
+                         ((світ-модуль-відомий? світ назва-модуля)
+                          (міркувати-у-світ світ назва-модуля протилежне))
                          )))
            (за-умовою
              
-             ((атом? proofs)  (список (як-є accepted)
-                    (список (як-є module) module-name)
-                    (список (як-є knowledge) clause)))
+             ((атом? докази)  (список (як-є accepted)
+                    (список (як-є module) назва-модуля)
+                    (список (як-є knowledge) клауза)))
              (так
               (список (як-є conflict)
-                    (список (як-є new) clause)
-                    (список (як-є existing) opposite)
-                    (список (як-є proof) (перше proofs)))))))))))
+                    (список (як-є new) клауза)
+                    (список (як-є existing) протилежне)
+                    (список (як-є proof) (перше докази)))))))))))
 
 (визначити advise-world
-  (функція (world module-name clause)
-    (нехай-похідне ((decision (порада-рішення-у-світ world module-name clause)))
+  (функція (світ назва-модуля клауза)
+    (нехай-похідне ((рішення (порада-рішення-у-світ світ назва-модуля клауза)))
       (за-умовою
-        ((тотожне? (перше decision) (як-є accepted))
-         (список decision (світ-повідомити world module-name clause)))
-        (так (список decision world))))))
+        ((тотожне? (перше рішення) (як-є accepted))
+         (список рішення (світ-повідомити світ назва-модуля клауза)))
+        (так (список рішення світ))))))
 
 ;; The batch form creates exactly one child world after the whole proposed
 ;; knowledge set validates and proves conflict-free. Proposed rules can support
@@ -212,40 +212,40 @@
 ;; Die Stapelform erzeugt genau eine Kindwelt erst nach vollständiger Prüfung;
 ;; bei einem Fehler kann kein Präfix des Pakets durchsickern.
 (визначити advice-all-decision-in-world
-  (функція (world module-name clauses)
+  (функція (світ назва-модуля клаузи)
     (за-умовою
-      ((хибне? (внутрішній-символ? module-name))
-       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) clauses)))
+      ((хибне? (внутрішній-символ? назва-модуля))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) клаузи)))
       
-      ((атом? clauses)  (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
-      ((тотожне? (правильно-структурований-список-знань? clauses) (як-є ()))
-       (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
-      ((тотожне? (клаузи-бази-знань-коректні? clauses) (як-є ()))
-       (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) clauses)))
+      ((атом? клаузи)  (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) клаузи)))
+      ((тотожне? (правильно-структурований-список-знань? клаузи) (як-є ()))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) клаузи)))
+      ((тотожне? (клаузи-бази-знань-коректні? клаузи) (як-є ()))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) клаузи)))
       (так
-       (нехай-похідне ((existing (за-умовою
-                         ((світ-модуль-відомий? world module-name)
-                          (світ-клаузи world module-name))
+       (нехай-похідне ((наявні (за-умовою
+                         ((світ-модуль-відомий? світ назва-модуля)
+                          (світ-клаузи світ назва-модуля))
                          )))
-         (нехай-похідне ((conflict (виявити-суперечність-у-групі-порад
-                           clauses clauses (приєднати clauses existing))))
+         (нехай-похідне ((суперечність (виявити-суперечність-у-групі-порад
+                           клаузи клаузи (приєднати клаузи наявні))))
            (за-умовою
              
-             ((атом? conflict)  (список (як-є accepted)
-                    (список (як-є module) module-name)
-                    (список (як-є knowledge) clauses)))
+             ((атом? суперечність)  (список (як-є accepted)
+                    (список (як-є module) назва-модуля)
+                    (список (як-є knowledge) клаузи)))
              (так
               (список (як-є conflict)
-                    (список (як-є new) (перше conflict))
-                    (список (як-є existing) (друге conflict))
-                    (список (як-є proof) (третє conflict)))))))))))
+                    (список (як-є new) (перше суперечність))
+                    (список (як-є existing) (друге суперечність))
+                    (список (як-є proof) (третє суперечність)))))))))))
 
 (визначити світ-повідомити-всі
-  (функція (world module-name clauses)
-    (створити-світ world
-                (приєднати (перетворити-клаузи-на-події-повідомлення module-name clauses)
-                        (світ-журнал world))
-                (світ-метадані world))))
+  (функція (світ назва-модуля клаузи)
+    (створити-світ світ
+                (приєднати (перетворити-клаузи-на-події-повідомлення назва-модуля клаузи)
+                        (світ-журнал світ))
+                (світ-метадані світ))))
 
 ;; Once `lib/world.lisp` is loaded, the legacy `defmodule` surface becomes a
 ;; thin compatibility wrapper over the explicit World transition. It rebuilds
@@ -268,13 +268,13 @@
 ;; übrigen globalen Writer kann diese Hülle entfallen.
 (визначити defmodule
   (макрос
-    (функція (name rules)
+    (функція (назва правила)
   (список (як-є def) (як-є *knowledge-journal*)
         (список (як-є світ-журнал)
               (список (як-є світ-повідомити-всі)
                     (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
-                    (список (як-є quote) name)
-                    rules))))))
+                    (список (як-є quote) назва)
+                    правила))))))
 
 ;; The other two legacy journal macros follow the same bridge. `tell-knowledge`
 ;; deliberately keeps its established pre-write conflict check and delegates
@@ -295,35 +295,35 @@
 ;; gewinnen das Kompatibilitätsjournal aus einer unveränderlichen World zurück.
 (визначити tell-knowledge
   (макрос
-    (функція (module-name rules)
+    (функція (назва-модуля правила)
   (список (як-є cond)
-        (список (список (як-є check-conflict) (список (як-є quote) module-name) rules)
+        (список (список (як-є check-conflict) (список (як-є quote) назва-модуля) правила)
               (список (як-є quote) (як-є Conflict-detected)))
         (список (як-є так)
               (список (як-є def) (як-є *knowledge-journal*)
                     (список (як-є світ-журнал)
                           (список (як-є світ-повідомити-всі)
                                 (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
-                                (список (як-є quote) module-name)
-                                rules))))))))
+                                (список (як-є quote) назва-модуля)
+                                правила))))))))
 
 (визначити retract-knowledge
   (макрос
-    (функція (module-name clause)
+    (функція (назва-модуля клауза)
   (список (як-є def) (як-є *knowledge-journal*)
         (список (як-є світ-журнал)
               (список (як-є world-retract)
                     (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
-                    (список (як-є quote) module-name)
-                    clause))))))
+                    (список (як-є quote) назва-модуля)
+                    клауза))))))
 
 (визначити порадити-всі-світ
-  (функція (world module-name clauses)
-    (нехай-похідне ((decision (порада-всі-рішення-у-світ world module-name clauses)))
+  (функція (світ назва-модуля клаузи)
+    (нехай-похідне ((рішення (порада-всі-рішення-у-світ світ назва-модуля клаузи)))
       (за-умовою
-        ((тотожне? (перше decision) (як-є accepted))
-         (список decision (світ-повідомити-всі world module-name clauses)))
-        (так (список decision world))))))
+        ((тотожне? (перше рішення) (як-є accepted))
+         (список рішення (світ-повідомити-всі світ назва-модуля клаузи)))
+        (так (список рішення світ))))))
 
 ;; A guarded compatibility transition must be evaluated exactly once. `let`
 ;; cannot hold it because `def` would then update a disposable lambda frame, so
@@ -341,20 +341,20 @@
 ; Guard у згенерованому AST має бути цитованою D1-тотожністю:
 ; голий #d1:1 тут передчасно обчислюється, а тоді стає числом 1 при reparse.
 (визначити внутрішній-прийнято-перехід?
-  (функція (transition)
-    (тотожне? (перше-першого transition) (як-є accepted))))
+  (функція (перехід)
+    (тотожне? (перше-першого перехід) (як-є accepted))))
 
 ; Тільки похідний SENS-селектор. D3:100 CAR витягає рішення
 ; з (decision world); числовий 00000101 не може бути викликом CAR.
 (визначити внутрішнє-рішення-переходу
-  (функція (transition)
-    (перше transition)))
+  (функція (перехід)
+    (перше перехід)))
 
 (визначити внутрішній-світ-розгорнути-історичний-перехід
-  (функція (transition)
+  (функція (перехід)
     (список (як-є second)
           (список (як-є list)
-                (список (як-є def) (як-є *legacy-knowledge-transition*) transition)
+                (список (як-є def) (як-є *legacy-knowledge-transition*) перехід)
                 (список (як-є cond)
                       (список
                         ; Generate a SENS-defined D1 predicate call. Its body
@@ -376,21 +376,21 @@
 
 (визначити advise
   (макрос
-    (функція (module-name clause)
+    (функція (назва-модуля клауза)
   (внутрішній-світ-розгорнути-історичний-перехід
     (список (як-є advise-world)
           (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
-          (список (як-є quote) module-name)
-          clause)))))
+          (список (як-є quote) назва-модуля)
+          клауза)))))
 
 (визначити advise-all
   (макрос
-    (функція (module-name clauses)
+    (функція (назва-модуля клаузи)
   (внутрішній-світ-розгорнути-історичний-перехід
     (список (як-є порадити-всі-світ)
           (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
-          (список (як-є quote) module-name)
-          clauses)))))
+          (список (як-є quote) назва-модуля)
+          клаузи)))))
 
 ;; World interchange reuses the established, versioned `my-lisp-knowledge`
 ;; envelope. Export reads one explicit snapshot. Import validates the envelope
@@ -403,71 +403,71 @@
 ;; `my-lisp-knowledge`. Export liest einen expliziten Schnappschuss, Import
 ;; delegiert den einzigen Übergang an `advise-all-world`; Daten werden nie evaluiert.
 (визначити make-world-knowledge-package
-  (функція (world module-name)
+  (функція (світ назва-модуля)
     (за-умовою
-      ((хибне? (внутрішній-символ? module-name))
-       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) module-name)))
-      ((внутрішній-світ-модуль-відсутній? world module-name)
-       (список (як-є rejected) (список (як-є reason) (як-є Module-not-found)) (список (як-є input) module-name)))
-      ((світ-модуль-відомий? world module-name)
-       (нехай-похідне ((clauses (світ-клаузи world module-name)))
+      ((хибне? (внутрішній-символ? назва-модуля))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) назва-модуля)))
+      ((внутрішній-світ-модуль-відсутній? світ назва-модуля)
+       (список (як-є rejected) (список (як-є reason) (як-є Module-not-found)) (список (як-є input) назва-модуля)))
+      ((світ-модуль-відомий? світ назва-модуля)
+       (нехай-похідне ((clauses (світ-клаузи світ назва-модуля)))
          (за-умовою
            
            ((атом? clauses)  (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
-           (так (створити-пакет-структурованих-знань module-name clauses))))))))
+           (так (створити-пакет-структурованих-знань назва-модуля clauses))))))))
 
 ; The knowledge package version is structured data (0 1), not an
 ; atom. Compare recursively with exact D1 results, never W8 EQUAL on pairs.
 (визначити внутрішня-рівність-версій
-  (функція (left right)
+  (функція (ліве праве)
     (за-умовою
-      ((порожній? left) (порожній? right))
-      ((порожній? right) (порожній? (як-є (ні))))
-      ((атом? left)
+      ((порожній? ліве) (порожній? праве))
+      ((порожній? праве) (порожній? (як-є (ні))))
+      ((атом? ліве)
        (за-умовою
-         ((атом? right) (тотожне? left right))
+         ((атом? праве) (тотожне? ліве праве))
          (так (порожній? (як-є (ні))))))
-      ((атом? right) (порожній? (як-є (ні))))
-      ((внутрішня-рівність-версій (перше left) (перше right))
-       (внутрішня-рівність-версій (решта left) (решта right)))
+      ((атом? праве) (порожній? (як-є (ні))))
+      ((внутрішня-рівність-версій (перше ліве) (перше праве))
+       (внутрішня-рівність-версій (решта ліве) (решта праве)))
       (так (порожній? (як-є (ні)))))))
 
 (визначити import-knowledge-package-world
-  (функція (world package)
+  (функція (світ пакет)
     (за-умовою
       
-      ((атом? package)  (список (список (як-є rejected)
+      ((атом? пакет)  (список (список (як-є rejected)
                    (список (як-є reason) (як-є invalid-package))
-                   (список (як-є input) package))
-             world))
-      ((хибне? (правильно-структурований-список-знань? package))
+                   (список (як-є input) пакет))
+             світ))
+      ((хибне? (правильно-структурований-список-знань? пакет))
        (список (список (як-є rejected)
                    (список (як-є reason) (як-є invalid-package))
-                   (список (як-є input) package))
-             world))
-      ((хибне? (записи-пакета-знань-коректні? package))
+                   (список (як-є input) пакет))
+             світ))
+      ((хибне? (записи-пакета-знань-коректні? пакет))
        (список (список (як-є rejected)
                    (список (як-є reason) (як-є invalid-package))
-                   (список (як-є input) package))
-             world))
-      ((тотожне? (отримати-поле-пакета-знань (як-є format) package) (як-є my-lisp-knowledge))
+                   (список (як-є input) пакет))
+             світ))
+      ((тотожне? (отримати-поле-пакета-знань (як-є format) пакет) (як-є my-lisp-knowledge))
        (за-умовою
-         ((внутрішня-рівність-версій (отримати-поле-пакета-знань (як-є version) package)
+         ((внутрішня-рівність-версій (отримати-поле-пакета-знань (як-є version) пакет)
                   *knowledge-package-version*)
-          (порадити-всі-світ world
-                            (отримати-поле-пакета-знань (як-є module) package)
-                            (отримати-поле-пакета-знань (як-є clauses) package)))
+          (порадити-всі-світ світ
+                            (отримати-поле-пакета-знань (як-є module) пакет)
+                            (отримати-поле-пакета-знань (як-є clauses) пакет)))
          (так
           (список (список (як-є rejected)
                       (список (як-є reason) (як-є unsupported-version))
                       (список (як-є version)
-                            (отримати-поле-пакета-знань (як-є version) package)))
-                world))))
+                            (отримати-поле-пакета-знань (як-є version) пакет)))
+                світ))))
       (так
        (список (список (як-є rejected)
                    (список (як-є reason) (як-є invalid-package))
-                   (список (як-є input) package))
-             world)))))
+                   (список (як-є input) пакет))
+             світ)))))
 
 ;; Package import completes the writer migration. The legacy macro delegates
 ;; validation, version handling, conflict detection, and the atomic transition
@@ -480,11 +480,11 @@
 ;; ein akzeptiertes Ergebnis bindet das Journal neu.
 (визначити import-knowledge-package
   (макрос
-    (функція (package)
+    (функція (пакет)
   (внутрішній-світ-розгорнути-історичний-перехід
     (список (як-є import-knowledge-package-world)
           (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
-          package)))))
+          пакет)))))
 
 ;; History navigation is derived from parent links, not timestamps. Depth is
 ;; absolute from the root (`empty-world` = 0). `world-diff from to` returns the
@@ -501,63 +501,63 @@
 ;; chronologische Ereignisse nur für einen Vorfahren; getrennte Zweige ergeben
 ;; `World-not-ancestor`, bis ein ausdrückliches Merge-Gesetz definiert ist.
 (визначити світ-глибина
-  (функція (world)
+  (функція (світ)
     (за-умовою
       
-      ((атом? (світ-батько world))  0)
-      (так (додати 1 (світ-глибина (світ-батько world)))))))
+      ((атом? (світ-батько світ))  0)
+      (так (додати 1 (світ-глибина (світ-батько світ)))))))
 
 (визначити отримати-світ-на-заданій-глибині-від-поточного
-  (функція (world current-depth target-depth)
+  (функція (світ поточна-глибина цільова-глибина)
     (за-умовою
-      ((тотожне? current-depth target-depth)  world)
+      ((тотожне? поточна-глибина цільова-глибина)  світ)
       (так (як-є World-not-found))
       
-      ((атом? (світ-батько world))  (як-є World-not-found))
-      (так (отримати-світ-на-заданій-глибині-від-поточного (світ-батько world)
-                              (відняти current-depth 1)
-                              target-depth)))))
+      ((атом? (світ-батько світ))  (як-є World-not-found))
+      (так (отримати-світ-на-заданій-глибині-від-поточного (світ-батько світ)
+                              (відняти поточна-глибина 1)
+                              цільова-глибина)))))
 
 (визначити world-at-depth
-  (функція (world target-depth)
+  (функція (світ цільова-глибина)
     (за-умовою
-      ((менше? target-depth 0)  (як-є World-not-found))
-      (так (отримати-світ-на-заданій-глибині-від-поточного world (світ-глибина world) target-depth)))))
+      ((менше? цільова-глибина 0)  (як-є World-not-found))
+      (так (отримати-світ-на-заданій-глибині-від-поточного світ (світ-глибина світ) цільова-глибина)))))
 
 (визначити world-journal-prefix
-  (функція (journal old-journal)
+  (функція (журнал старий-журнал)
     (за-умовою
-      ((внутрішня-рівність-версій journal old-journal) (як-є ()))
+      ((внутрішня-рівність-версій журнал старий-журнал) (як-є ()))
       
-      ((атом? journal)  (як-є World-not-ancestor))
+      ((атом? журнал)  (як-є World-not-ancestor))
       (так
-       (нехай-похідне ((rest (отримати-префікс-журналу-світу (решта journal) old-journal)))
+       (нехай-похідне ((rest (отримати-префікс-журналу-світу (решта журнал) старий-журнал)))
          (за-умовою
            ((цей-світ-не-є-предком-іншого? rest) rest)
-           (так (сполучити (перше journal) rest))))))))
+           (так (сполучити (перше журнал) rest))))))))
 
 (визначити цей-світ-не-є-предком-іншого?
-  (функція (value)
+  (функція (значення)
     (за-умовою
       
-      ((атом? value)  (тотожне? value (як-є World-not-ancestor)))
+      ((атом? значення)  (тотожне? значення (як-є World-not-ancestor)))
       )))
 
 (визначити світ-різниця
-  (функція (from to)
+  (функція (звідки куди)
     (за-умовою
-      ((внутрішня-рівність-версій from to) (як-є ()))
+      ((внутрішня-рівність-версій звідки куди) (як-є ()))
       
-      ((атом? (світ-батько to))  (як-є World-not-ancestor))
+      ((атом? (світ-батько куди))  (як-є World-not-ancestor))
       (так
-       (нехай-похідне ((earlier (світ-різниця from (світ-батько to))))
+       (нехай-похідне ((earlier (світ-різниця звідки (світ-батько куди))))
          (за-умовою
            ((цей-світ-не-є-предком-іншого? earlier) earlier)
            (так
             (нехай-похідне ((transition
                     (отримати-префікс-журналу-світу
-                      (світ-журнал to)
-                      (світ-журнал (світ-батько to)))))
+                      (світ-журнал куди)
+                      (світ-журнал (світ-батько куди)))))
               (за-умовою
                 ((цей-світ-не-є-предком-іншого? transition) transition)
                 (так (приєднати earlier transition)))))))))))
@@ -578,62 +578,62 @@
 ;; Bei unveränderlichen Werten sind strukturell gleiche Geschichten dieselbe
 ;; semantische Welt. `world-branch-diff` zeigt Basis und beide Zeitdeltas.
 (визначити піднятись-ланцюгом-світу-до-заданої-глибини
-  (функція (world current-depth target-depth)
+  (функція (світ поточна-глибина цільова-глибина)
     (за-умовою
-      ((тотожне? current-depth target-depth)  world)
-      (так (піднятись-ланцюгом-світу-до-заданої-глибини (світ-батько world)
-                               (відняти current-depth 1)
-                               target-depth)))))
+      ((тотожне? поточна-глибина цільова-глибина)  світ)
+      (так (піднятись-ланцюгом-світу-до-заданої-глибини (світ-батько світ)
+                               (відняти поточна-глибина 1)
+                               цільова-глибина)))))
 
 (визначити вирівняний-спільний-предок-двох-світів
-  (функція (left right)
+  (функція (ліве праве)
     (за-умовою
-      ((внутрішня-рівність-версій left right) left)
-      ((атом? left) (як-є World-no-common-ancestor))
-      ((атом? right) (як-є World-no-common-ancestor))
-      ((атом? (світ-батько left)) (як-є World-no-common-ancestor))
-      ((атом? (світ-батько right)) (як-є World-no-common-ancestor))
+      ((внутрішня-рівність-версій ліве праве) ліве)
+      ((атом? ліве) (як-є World-no-common-ancestor))
+      ((атом? праве) (як-є World-no-common-ancestor))
+      ((атом? (світ-батько ліве)) (як-є World-no-common-ancestor))
+      ((атом? (світ-батько праве)) (як-є World-no-common-ancestor))
       (так
-       (вирівняний-спільний-предок-двох-світів (світ-батько left)
-                                      (світ-батько right))))))
+       (вирівняний-спільний-предок-двох-світів (світ-батько ліве)
+                                      (світ-батько праве))))))
 
 ; An ancestor is found by walking immutable parents. Its SENS verdict
 ; is a D1 predicate, never a numeric depth or an historical W8 EQ value.
 (визначити внутрішній-предок-світу?
-  (функція (candidate world)
+  (функція (кандидат світ)
     (за-умовою
-      ((атом? world) ні)
-      ((внутрішня-рівність-версій candidate world) так)
-      ((атом? (світ-батько world)) ні)
+      ((атом? світ) ні)
+      ((внутрішня-рівність-версій кандидат світ) так)
+      ((атом? (світ-батько світ)) ні)
       (так
-       (внутрішній-предок-світу? candidate (світ-батько world))))))
+       (внутрішній-предок-світу? кандидат (світ-батько світ))))))
 
 ; The first ancestor of left occurring in right's ancestry is the deepest
 ; common world. This is pure SENS structure, independent of D24+ arithmetic.
 (визначити світ-спільний-предок
-  (функція (left right)
+  (функція (ліве праве)
     (за-умовою
-      ((атом? left) (як-є World-no-common-ancestor))
-      ((атом? right) (як-є World-no-common-ancestor))
-      ((внутрішній-предок-світу? left right) left)
-      ((атом? (світ-батько left)) (як-є World-no-common-ancestor))
-      (так (світ-спільний-предок (світ-батько left) right)))))
+      ((атом? ліве) (як-є World-no-common-ancestor))
+      ((атом? праве) (як-є World-no-common-ancestor))
+      ((внутрішній-предок-світу? ліве праве) ліве)
+      ((атом? (світ-батько ліве)) (як-є World-no-common-ancestor))
+      (так (світ-спільний-предок (світ-батько ліве) праве)))))
 
 (визначити світи-не-мають-спільного-предка?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((атом? value) (тотожне? value (як-є World-no-common-ancestor)))
+      ((атом? значення) (тотожне? значення (як-є World-no-common-ancestor)))
       (так ні))))
 
 (визначити world-branch-diff
-  (функція (left right)
-    (нехай-похідне ((base (світ-спільний-предок left right)))
+  (функція (ліве праве)
+    (нехай-похідне ((base (світ-спільний-предок ліве праве)))
       (за-умовою
         ((світи-не-мають-спільного-предка? base) base)
         (так
          (список (список (як-є base) base)
-               (список (як-є left) (світ-різниця base left))
-               (список (як-є right) (світ-різниця base right))))))))
+               (список (як-є left) (світ-різниця base ліве))
+               (список (як-є right) (світ-різниця base праве))))))))
 
 ;; Content identity starts with a canonical address, not a premature hash
 ;; primitive. `write-to-string` is deterministic and read-back-safe, so equal
@@ -657,18 +657,18 @@
 ;; Vorgänger wird nicht rekursiv dupliziert. Dies ist ein exakter Schlüssel,
 ;; kein kryptographischer Digest; ein späteres SHA kann diesen Schlüssel kürzen.
 (визначити знання-вміст-адреса
-  (функція (knowledge)
-    (значення-у-текст knowledge)))
+  (функція (знання)
+    (значення-у-текст знання)))
 
 (визначити світ-адреса-вміст
-  (функція (world)
+  (функція (світ)
     (список (як-є world-history)
-            (світ-журнал world)
-            (світ-метадані world))))
+            (світ-журнал світ)
+            (світ-метадані світ))))
 
 (визначити світ-вміст-адреса
-  (функція (world)
-    (знання-вміст-адреса (світ-адреса-вміст world))))
+  (функція (світ)
+    (знання-вміст-адреса (світ-адреса-вміст світ))))
 
 ; opt-in повна укр-поверхня: первинні D9-визначення в цьому блоці названі укр.
 (визначити advise-all-world порадити-всі-світ)
