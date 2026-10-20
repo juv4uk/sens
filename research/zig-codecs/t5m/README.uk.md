@@ -2,14 +2,15 @@
 
 **T5M — дефолтний фізичний носій SENS:** 5 трітів/байт (`3^5 = 243 < 256`),
 роздільник-трит 2. Це **окрема тека**, яка **не чіпає** чинний харнес
-`research/zig-codecs/t5/`: той самий драйвер і той самий кодек, плюс новий
-**асемблерний** бекенд. T5 і T5M тут — один і той самий кодек (5 трітів/байт).
+`research/zig-codecs/t5/`. Бенчмарк використовує **дефолтний T5M-кодек**
+`research/zig-codecs/t5m.zig` (5 трітів/байт); 3-байтовий варіант — окремий,
+`research/zig-codecs/t5m3.zig` (T5M3).
 
 ## Бекенди
 
 | бекенд | джерело | що міряє |
 |---|---|---|
-| `zig` | `research/zig-codecs/t5/bench.zig` (кодек `t5/t5.zig`) | word → byte (end-to-end) |
+| `zig` | `research/zig-codecs/t5m_bench.zig` (кодек `t5m.zig`, дефолтний T5M) | word → byte (end-to-end) |
 | `asm` | `research/zig-codecs/t5m/bench_asm.zig` + `research/asm-t5m/t5m_words.S` + `t5m_pack.S` | word → byte (end-to-end) |
 | `rust` | `crates/sens/examples/zig_t5_matched_bench.rs` | word → byte (end-to-end) |
 
@@ -32,14 +33,14 @@ cat /tmp/sens-zig-asm-rust-t5m/summary.md
 
 ## Результати (p50 нс/оп, `--impls zig,asm`)
 
-Див. анотацію `RESULTS-2026-10-20.uk.md`. Коротко:
+Див. анотацію `RESULTS-2026-10-20.uk.md`. Коротко (один прогін; числа коливаються):
 
 | Форми | Операція | zig | asm |
 |---:|---|---:|---:|
-| 1 | encode / decode | 52.5 / 203.8 | 35.6 / 35.5 |
-| 16 | encode / decode | 507.6 / 1559.7 | 588.1 / 570.5 |
-| 128 | encode / decode | 4005.7 / 10952.0 | 3060.9 / 4174.1 |
-| 1024 | encode / decode | 27806.2 / 72740.4 | 24181.6 / 38365.0 |
+| 1 | encode / decode | 49.9 / 155.9 | 31.1 / 30.4 |
+| 16 | encode / decode | 500.9 / 826.8 | 373.3 / 463.4 |
+| 128 | encode / decode | 3264.0 / 4699.8 | 2884.2 / 3762.2 |
+| 1024 | encode / decode | 28815.0 / 47154.4 | 20768.8 / 25931.0 |
 
 ## Що НЕ доведено
 
