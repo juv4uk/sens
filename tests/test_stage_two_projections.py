@@ -54,6 +54,29 @@ class StageTwoProjectionsTests(unittest.TestCase):
             self.assertTrue(view.read_bytes().endswith(b"\n"))
             self.assertNotIn(b"2", view.read_bytes())
 
+    def test_comment_changes_do_not_change_executable_two_projections(self):
+        # The inverse concerns the program, not the original Lisp bytes.
+        # Unicode numbers and non-Ukrainian text inside comments are inert.
+        with tempfile.TemporaryDirectory(prefix="sens-two-comment-") as td:
+            base = Path(td)
+            root = base / "source"
+            root.mkdir()
+            source = root / "програма.lisp"
+            program = (ROOT / self.BRANCH).read_text(encoding="utf-8")
+            original = "; English note ٢ -- not an executable atom\\n" + program
+            source.write_text(original, encoding="utf-8")
+            mirror = base / "mirror"
+            report = pair.stage(root, mirror, ["програма.lisp"], "auto", True)
+            self.assertFalse(report["release_admitted"])
+            self.assertEqual(report["semantic_oracle"], "NOT_VERIFIED")
+            self.assertEqual(source.read_text(encoding="utf-8"), original)
+            self.assertEqual((mirror / "програма.lisp").read_text(encoding="utf-8"), program)
+            self.assertEqual(
+                (mirror / "програма").read_bytes(),
+                (ROOT / self.BRANCH).with_suffix("").read_bytes(),
+            )
+            self.assertFalse((mirror / "програма.sens").exists())
+
     def test_preview_creates_nothing(self):
         with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
             mirror = Path(td) / "mirror"
