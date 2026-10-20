@@ -351,6 +351,7 @@ jobs:
           # Повні D9/D10 українські джерела без англомовних DEFINE-дублів.
           python3 -m unittest tests/test_translation_ukr_primary_projection.py -v
           python3 -m unittest tests/test_ukr_translation_result_prolog.py -v
+          python3 -m unittest tests/test_translation_d1_bitness_current.py -v
           # Звіт включає .lisp без .sens і не є релізним допуском.
           python3 scripts/audit_t5_file_pairs.py --inventory-only --output "$RUNNER_TEMP/t5-source-census.json"
           # Прогрес поступової міграції — інформативна метрика, не глобальний стоп.
