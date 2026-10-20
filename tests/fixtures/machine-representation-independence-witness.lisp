@@ -9,14 +9,14 @@
 (load "lib/machine/admission/x86-64.lisp")
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 
-(визначити machine-representation-semantic-reference (додати 2 3))
+(визначити еталон-машинного-подання (додати 2 3))
 
-(визначити machine-representation-primary
+(визначити машинне-подання-основне
   (викликати-допущену-машинну-програму
     (x86-lower-add-u64-forms 2 3)
     0))
 
-(визначити machine-representation-alternate
+(визначити машинне-подання-альтернативне
   (викликати-допущену-машинну-програму
     (як-є
       ((mov-r64-imm64 rax 2)
@@ -25,30 +25,30 @@
        (ret)))
     0))
 
-(визначити machine-representation-witness
+(визначити свідок-незалежності-машинного-подання
   (функція ()
     (за-умовою
       ((тотожне?
-         machine-representation-primary
-         machine-representation-semantic-reference)
+         машинне-подання-основне
+         еталон-машинного-подання)
        (за-умовою
          ((тотожне?
-            machine-representation-alternate
-            machine-representation-semantic-reference)
+            машинне-подання-альтернативне
+            еталон-машинного-подання)
           (як-є (machine-representation-independence-witness (status pass))))
          (так
           (список
             (як-є machine-representation-independence-witness)
             (як-є (status fail))
             (список (як-є case) (як-є alternate-register))
-            (список (як-є semantic) machine-representation-semantic-reference)
-            (список (як-є actual) machine-representation-alternate)))))
+            (список (як-є semantic) еталон-машинного-подання)
+            (список (як-є actual) машинне-подання-альтернативне)))))
       (так
        (список
          (як-є machine-representation-independence-witness)
          (як-є (status fail))
          (список (як-є case) (як-є canonical-register))
-         (список (як-є semantic) machine-representation-semantic-reference)
-         (список (як-є actual) machine-representation-primary))))))
+         (список (як-є semantic) еталон-машинного-подання)
+         (список (як-є actual) машинне-подання-основне))))))
 
-(machine-representation-witness)
+(свідок-незалежності-машинного-подання)

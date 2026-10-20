@@ -7,7 +7,7 @@
 (load "lib/result-status.lisp")
 (load "lib/narrate.lisp")
 
-(визначити narrate-outcome-authority-rows
+(визначити рядки-свідка-результату
   (функція ()
     (список
       (список
@@ -29,27 +29,27 @@
         (narrate-outcome (як-є (() payload)))
         (як-є (invalid outcome-tag ()))))))
 
-(визначити narrate-outcome-authority-check-rows
-  (функція (rows)
+(визначити перевірити-рядки-свідка-результату
+  (функція (рядки)
     (за-умовою
-      ((атом? rows)
+      ((атом? рядки)
        (як-є (narrate-outcome-authority-witness (status pass))))
       (так
-       (нехай ((row (перше rows)))
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((однакові? (друге row) (третє row))
-            (narrate-outcome-authority-check-rows (решта rows)))
+           ((однакові? (друге рядок) (третє рядок))
+            (перевірити-рядки-свідка-результату (решта рядки)))
            (так
             (список
               (як-є narrate-outcome-authority-witness)
               (як-є (status fail))
-              (список (як-є law) (перше row))
-              (список (як-є expected) (третє row))
-              (список (як-є actual) (друге row))))))))))
+              (список (як-є law) (перше рядок))
+              (список (як-є expected) (третє рядок))
+              (список (як-є actual) (друге рядок))))))))))
 
-(визначити narrate-outcome-authority-check
+(визначити перевірити-свідок-результату
   (функція ()
-    (narrate-outcome-authority-check-rows
-      (narrate-outcome-authority-rows))))
+    (перевірити-рядки-свідка-результату
+      (рядки-свідка-результату))))
 
-(narrate-outcome-authority-check)
+(перевірити-свідок-результату)

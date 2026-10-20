@@ -72,10 +72,16 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
 
     def test_four_live_fixture_source_heads(self):
         expected = {
-            "lisp-fs-conformance.lisp": ("(001000 ((empty", "(001 (hello world))"),
+            "lisp-fs-conformance.lisp": (
+                "(нехай-похідне ((хибне-рішення",
+                "(fs-journal-replay (список (список (як-є broken))))",
+            ),
             "rivnopravnist-uk.lisp": ("(визначити подвоїти", "(додати число число)", "(за-умовою"),
             "semantic-registry-self-hosted-witness.lisp": ("(0011 semantic-registry-self-hosted-witness", "(0010 (source)"),
-            "semantic-coordinate-matrix-845.lisp": ("(0011 semantic-coordinate-matrix-845", "(001\n"),
+            "semantic-coordinate-matrix-845.lisp": (
+                "(визначити semantic-coordinate-matrix-845",
+                "(semantic-coordinate-matrix-845)",
+            ),
         }
         for filename, needles in expected.items():
             with self.subTest(filename=filename):
