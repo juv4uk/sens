@@ -1,98 +1,71 @@
 ; #1115 executable witness.
 ; The canonical registry API performs the semantic lookup.
-; The witness receives the canonical registry source as data from the test
-; harness, parses it once in Lisp, and never re-enters host I/O.
-;
-; Backend boundary data is only: exact SID, arguments, portable contract.
+; Ukrainian projection only. Backend boundary: exact identity, arguments, portable contract.
 
-(00001001 early-sid-lowering-backend-request?
-  (00001000 (request)
-    (00000111
-      ((00000010 request)
-       ()
-       (00000001 no))
-      ((00000010 request)
-       (0)
-       (10011100 ((first-field (00000101 request)))
-         (00000111
-           ((00000010 first-field)
-            (0)
-            (00000111
-              ((00100010 (00000101 first-field) (00000001 sid))
-               (1)
-               (00000001 yes))
-              ((00100010 (00000101 first-field) (00000001 sid))
-               (0)
-               (00000001 no))))
-           ((00000010 first-field)
-            (1)
-            (00000001 no))
-           ((00000010 first-field)
-            ()
-            (00000001 no))))))))
+(визначити early-sid-lowering-backend-request?
+  (функція (request)
+    (за-умовою
+      ((атом? request) (як-є no))
+      (так
+       (нехай ((first-field (перше request)))
+         (за-умовою
+           ((атом? first-field) (як-є no))
+           (так
+            (за-умовою
+              ((тотожне? (перше first-field) (як-є sid))
+               (як-є yes))
+              (так (як-є no))))))))))
 
-(00001001 early-sid-lower
-  (00001000 (registry surface arguments contract)
-    (10011100 ((sid (semantic-registry-id-in registry surface)))
-      (00000111
-        ((00000010 sid)
-         ()
-         (00000001 rejected))
-        ((00000010 sid)
-         (1)
-         (00100111
-           (00000100 (00000001 sid) sid)
-           (00000100 (00000001 arguments) arguments)
-           (00000100 (00000001 contract) contract)))))))
+(визначити early-sid-lower
+  (функція (registry surface arguments contract)
+    (нехай ((sid (semantic-registry-id-in registry surface)))
+      (за-умовою
+        ((атом? sid) (як-є rejected))
+        (так
+         (список
+           (сполучити (як-є sid) sid)
+           (сполучити (як-є arguments) arguments)
+           (сполучити (як-є contract) contract)))))))
 
-(00001001 early-sid-lowering-peer-check
-  (00001000 (registry surface-a surface-b surface-c surface-d)
-    (10011100 ((a (semantic-registry-id-in registry surface-a))
+(визначити early-sid-lowering-peer-check
+  (функція (registry surface-a surface-b surface-c surface-d)
+    (нехай ((a (semantic-registry-id-in registry surface-a))
           (b (semantic-registry-id-in registry surface-b))
           (c (semantic-registry-id-in registry surface-c))
           (d (semantic-registry-id-in registry surface-d)))
-      (00000111
-        ((00100010 a b)
-         (1)
-         (00000111
-           ((00100010 b c)
-            (1)
-            (00000111
-              ((00100010 c d)
-               (1)
-               (00100111 (00000001 same) a))
-              ((00100010 c d)
-               (0)
-               (00000001 distinct))))
-           ((00100010 b c)
-            (0)
-            (00000001 distinct))))
-        ((00100010 a b)
-         (0)
-         (00000001 distinct))))))
+      (за-умовою
+        ((тотожне? a b)
+         (за-умовою
+           ((тотожне? b c)
+            (за-умовою
+              ((тотожне? c d)
+               (список (як-є same) a))
+              (так (як-є distinct))))
+           (так (як-є distinct))))
+        (так (як-є distinct))))))
 
-(00001001 early-sid-lowering-witness
-  (00001000 (registry-source)
-    (10011100 ((registry (semantic-registry-read-source registry-source)))
-      (10011100 ((atom-en (semantic-registry-id-in registry (00000001 atom?)))
-            (atom-uk (semantic-registry-id-in registry (00000001 атом?)))
-            (atom-ukr (semantic-registry-id-in registry (00000001 атом?)))
-            (atom-sa (semantic-registry-id-in registry (00000001 aṇu)))
-            (atom-sym (semantic-registry-id-in registry (00000001 .?))))
-        (00100111
+(визначити early-sid-lowering-witness
+  (функція (registry-source)
+    (нехай ((registry (semantic-registry-read-source registry-source)))
+      (нехай ((atom-en (semantic-registry-id-in registry (як-є atom?)))
+            (atom-uk (semantic-registry-id-in registry (як-є атом?)))
+            (atom-ukr (semantic-registry-id-in registry (як-є атом?)))
+            (atom-sa (semantic-registry-id-in registry (як-є aṇu)))
+            (atom-sym (semantic-registry-id-in registry (як-є .?))))
+        (список
           (early-sid-lowering-peer-check
             registry
-            (00000001 atom?) (00000001 атом?) (00000001 aṇu) (00000001 .?))
+            (як-є atom?) (як-є атом?) (як-є aṇu) (як-є .?))
           (early-sid-lowering-backend-request?
             (early-sid-lower
               registry
-              (00000001 atom?)
-              (00000001 (x))
-              (00000001 (portable-result-domain structural-relation))))
+              (як-є atom?)
+              (як-є (x))
+              (як-є (portable-result-domain structural-relation))))
           (early-sid-lowering-backend-request?
-            (00000001 (surface atom?)))
-          (00100010 atom-en atom-uk)
-          (00100010 atom-en atom-ukr)
-          (00100010 atom-en atom-sa)
-          (00100010 atom-en atom-sym)
-          (semantic-registry-id-in registry (00000001 not-admitted-by-language)))))))
+            (як-є (surface atom?)))
+          (тотожне? atom-en atom-uk)
+          (тотожне? atom-en atom-ukr)
+          (тотожне? atom-en atom-sa)
+          (тотожне? atom-en atom-sym)
+          (semantic-registry-id-in registry (як-є not-admitted-by-language)))))))
