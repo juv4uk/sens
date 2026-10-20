@@ -29,10 +29,15 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 from domain_tables import read_domain_table
 
-DEFINITIONS = {"00001001", "0011", "DEFINE", "define", "def"}
-LAMBDAS = {"00001000", "0010", "LAMBDA", "lambda"}
-QUOTES = {"00000001", "001", "QUOTE", "quote"}
-LETS = {"001000", "001001", "LET", "LET*", "let", "let*"}
+# Чинні українські голови — нормативні поверхні, а не нові закони.
+# Історичні написання тут потрібні тільки для безпечного аналізу *старого*
+# входу міграції, не для виконання та не для надання допуску.
+DEFINITIONS = {"00001001", "0011", "DEFINE", "define", "def",
+               "визначити", "визначити-макрос"}
+LAMBDAS = {"00001000", "0010", "LAMBDA", "lambda", "функція"}
+QUOTES = {"00000001", "001", "QUOTE", "quote", "як-є"}
+LETS = {"001000", "001001", "LET", "LET*", "let", "let*",
+        "нехай", "нехай-послідовно"}
 class Blocked(ValueError):
     pass
 
