@@ -1,8 +1,8 @@
-; GENERATED — DO NOT EDIT BY HAND
-; Semantic authority: lib/surface/semantic-registry.lisp via lib/generated/function-table.lisp
+; ЗГЕНЕРОВАНО — НЕ РЕДАГУВАТИ ВРУЧНУ
+; Семантична влада: lib/surface/semantic-registry.lisp через lib/generated/function-table.lisp
 ; Candidate evidence only: lib/surface/український-профіль-джерела.lisp
-; Generator: scripts/generate-uk-surface-audit.lisp (my-lisp#85)
-; candidate-full-uk is NOT automatically promoted into authoritative full-uk
+; Генератор: scripts/generate-uk-surface-audit.lisp (my-lisp#85)
+; candidate-full-uk НЕ підноситься автоматично до владного full-uk
 
 (uk-surface-audit/2
   (summary (total 182) (full 138) (already-compact 0) (ambiguous 0) (needs-research 23) (compatibility-only 21) (staging-evidence 182))
