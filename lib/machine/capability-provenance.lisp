@@ -5,7 +5,7 @@
 ; у scripts/machine-authority-guard.lisp.
 ;
 ; Поле independent-semantic-witness містить точні значення DomainIdentity.
-; Ширина входить до тотожності; історичні байти SID8 і текстові
+; Ширина входить до тотожності; історичні байти сід8 і текстові
 ; назви не використовуються як ключ для зіставлення.
 
 (capability-provenance
