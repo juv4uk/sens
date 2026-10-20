@@ -1,17 +1,18 @@
-; D7 v2 keyboard migration view (128/128 exact W7).
-; Authority: knowledge/d7-keyboard-v2-ratified.json (owner-ratified).
-; One coordinate, three projections: uk/ukr Ukrainian keyboard,
-; san IAST human notation, en ASCII. No SLP1 or X-SAMPA.
-; The original v2 Devanagari scalar map remains in owner JSON only for
-; historical reversible keyboard codec: do not infer IAST encoding from labels.
-; ◌ means a dependent sign; ◌∅ is virama, · is an editorial danda sign.
-; Human-table convention: letters without quotes, symbols WITH quotes.
-; Quoted text signs, digits, combining marks and punctuation are DATA,
-; not Lisp syntax, call-head names or additional machine bits.
-; Nonprintable control coordinates appear as () in this surface table;
-; exact control identities remain in normative JSON and Rust codec.
-; LISP is () for every D7 row; D7 never creates callable functions.
-; Historical v1 remains archived; never silently reinterpret as v2.
+; Д7, версія 2: клавіатурна проєкція, 128 із 128 точних семибітних слів.
+; Джерело чинності: knowledge/d7-keyboard-v2-ratified.json, рішення власника.
+; Одна координата має три людські проєкції: ук/укр з української
+; клавіатури, санскритська колонка san у записі IAST, колонка en — ASCII.
+; Старі системи SLP1 та X-SAMPA не використовуються.
+; Початкова таблиця знаків деванагарі зберігається в документі власника
+; лише для оборотності історичного кодека; напис не задає кодування IAST.
+; ◌ позначає залежний знак, ◌∅ — віраму, · — редакторський знак данди.
+; У людській таблиці літери записані без лапок, символи — в лапках.
+; Цитовані знаки, цифри, комбінувальні знаки та пунктуація є даними,
+; а не викличними головами Ліспу чи додатковими машинними бітами.
+; Недруковані керувальні координати показані як (); їх точна
+; тотожність міститься в нормативній таблиці та фізичному кодеку.
+; Колонка LISP для всіх рядків порожня: Д7 не визначає функцій.
+; Перша версія збережена в архіві й не підміняє чинну другу.
 ; Column order: ук, укр, san, en, LISP, sym.
 
 (domain-table/1
