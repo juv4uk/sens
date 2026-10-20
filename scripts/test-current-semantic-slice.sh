@@ -198,7 +198,7 @@ prefix = source[:-len(tail)].rstrip()
 root = Path(sys.argv[2])
 probes = {
     "speed-record-valid": "(scientific-constant? si:defining-speed-of-light)",
-    "speed-proper-list": "(science-proper-list? si:defining-speed-of-light)",
+    "speed-proper-list": "(науковий-список-правильний? si:defining-speed-of-light)",
     "speed-length-seven": "(00011100 (00101000 si:defining-speed-of-light) 7)",
     "speed-length-raw": "(00101000 si:defining-speed-of-light)",
     "numeric-seven-equalp": "(00011100 7 7)",
