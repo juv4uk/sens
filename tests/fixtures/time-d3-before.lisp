@@ -1,255 +1,42 @@
-; Explicit timezone data for WSM. This is configuration, not an OS mutation.
-; Явні дані часового поясу для WSM. Це конфігурація, а не мутація ОС.
+; Explicit timezone data for WSM. Ukrainian projection only.
+; Calendar semantics live in Lisp, not the host.
 
-; Convert whole UTC days since 1970-01-01 to a proleptic Gregorian date.
-; This deliberately mirrors the current host-side utc-now calendar transform,
-; but lives in Lisp so we can prove that calendar semantics do not belong to
-; the host. Scope is non-negative Unix days; utc-now already rejects times
-; before the Unix epoch.
-(00001001 civil-from-days
-  (00001000 (days)
-    (10011101 ((z (00001100 days 719468))
-           (era (00010100 z 146097))
-           (doe (00001101 z (00001110 era 146097)))
-           (yoe (00010100 (00001101 (00001100 doe (00010100 doe 36524))
-                              (00001100 (00010100 doe 1460) (00010100 doe 146096)))
+(визначити civil-from-days
+  (функція (days)
+    (нехай ((z (додати days 719468))
+           (era (поділити z 146097))
+           (doe (відняти z (помножити era 146097)))
+           (yoe (поділити (відняти (додати doe (поділити doe 36524))
+                              (додати (поділити doe 1460) (поділити doe 146096)))
                            365))
-           (y (00001100 yoe (00001110 era 400)))
-           (doy (00001101 doe (00001100 (00001110 365 yoe)
-                           (00001101 (00010100 yoe 4) (00010100 yoe #d100)))))
-           (mp (00010100 (00001100 (00001110 5 doy) 2) 153))
-           (day (00001100 (00001101 doy (00010100 (00001100 (00001110 153 mp) 2) 5)) 1))
-           (month (00001100 mp
-                    (00000111
-                      ((00011010 mp #d10) 3)
-                      ((00000010 (00000001 ())) -9))))
-           (year (00001100 y
-                   (00000111
-                     ((00011101 month 2) 1)
-                     ((00000010 (00000001 ())) 0)))))
-      (00100111 year month day))))
+           (y (додати yoe (помножити era 400)))
+           (doy (відняти doe (додати (помножити 365 yoe)
+                           (відняти (поділити yoe 4) (поділити yoe 100)))))
+           (mp (поділити (додати (помножити 5 doy) 2) 153))
+           (day (додати (відняти doy (поділити (додати (помножити 153 mp) 2) 5)) 1))
+           (month (додати mp
+                    (за-умовою
+                      ((менше? mp 10) 3)
+                      ((атом? (як-є ())) -9))))
+           (year (додати y
+                   (за-умовою
+                     ((більше? month 2) 1)
+                     ((атом? (як-є ())) 0)))))
+      (список year month day))))
 
-; Pure language-level conversion from an exact Unix timestamp into UTC calendar
-; data. The host owns clock observation; this function owns deterministic
-; calendar semantics.
-(00001001 utc-from-unix
-  (00001000 (seconds nanosecond)
-    (10011101 ((days (00010100 seconds 86400))
-           (day-seconds (00010011 seconds 86400))
+(визначити utc-from-unix
+  (функція (seconds nanosecond)
+    (нехай ((days (поділити seconds 86400))
+           (day-seconds (залишок seconds 86400))
            (civil (civil-from-days days))
-           (hour (00010100 day-seconds 3600))
-           (minute (00010100 (00010011 day-seconds 3600) 60))
-           (second-of-minute (00010011 day-seconds 60)))
-      (00100111 (00000001 utc)
-            (00000101 civil)
-            (00101111 civil)
-            (00110000 civil)
-            hour minute second-of-minute nanosecond))))
-
-; Minimal wall-clock host capability contract:
-;   (unix-time-now) -> (unix-time seconds nanosecond)
-; The host observes only the Unix clock. Calendar meaning stays here in Lisp.
-(00001001 unix-time-observation->utc
-  (00001000 (observation)
-    (00000111
-      ((00000011 (00000101 observation) (00000001 unix-time))
-       (00100111
-         (00000001 utc)
-         (00000101 observation)
-         (00101111 observation)
-         (00110000 observation)))
-      ((00000010 (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-unix-time-observation)))))
-)
-
-; Public UTC clock meaning is language-owned. The only host fact needed here is
-; the raw Unix observation above.
-(00001001 utc-now
-  (00001000 ()
-    (01100000 (01011011))))
-
-; Interpret protocol fields from one complete NTP response. Packet I/O and
-; extracting fixed-width fields are host mechanisms; deciding whether those
-; fields are acceptable, mapping the NTP epoch to Unix, and converting the
-; 32-bit fractional second into nanoseconds are language semantics.
-;
-; Expected host-side field contract for a complete response:
-;   host, mode, stratum, ntp-seconds, fraction
-; Successful interpretation preserves the existing public observation shape:
-;   (accepted host unix-seconds nanosecond)
-; Current control law: numeric comparisons produce exact D1 PredicateBit;
-; AND/OR consume only that typed answer. All COND clauses are two-field
-; (test expression). Explicit (ATOM ()) is the D1:1 fallback expression;
-; neither Number 1/0, T/NIL, structural () nor rich classifiers act as tests.
-(00001001 internet-time-mode-valid?
-  (00001000 (mode)
-    (or
-      (00011100 mode 4)
-      (00011100 mode 5)))
-)
-
-(00001001 internet-time-stratum-valid?
-  (00001000 (stratum)
-    (and
-      (00011011 stratum 0)
-      (00011010 stratum 16)))
-)
-
-(00001001 internet-time-fields->observation
-  (00001000 (host mode stratum ntp-seconds fraction)
-    (00000111
-      ((internet-time-mode-valid? mode)
-       (00000111
-         ((internet-time-stratum-valid? stratum)
-          (00000111
-            ((00011010 ntp-seconds 2208988800)
-             (00100111 (00000001 rejected) (00000001 invalid-epoch)))
-            ((00000010 (00000001 ()))
-             (00100111
-               (00000001 accepted)
-               host
-               (00001101 ntp-seconds 2208988800)
-               (00010100 (00001110 fraction #d1000000000) 4294967296)))))
-         ((00000010 (00000001 ()))
-          (00100111 (00000001 rejected) (00000001 invalid-response)))))
-      ((00000010 (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-response))))))
-
-
-; Adapter for the raw host boundary. The host returns either:
-;   (ntp-fields host mode stratum ntp-seconds fraction)
-; or a transport-level rejection such as (rejected receive-failed).
-; Lisp owns every protocol interpretation after that raw observation boundary.
-(00001001 internet-time-raw->observation
-  (00001000 (raw)
-    (00000111
-      ((00000011 (00000101 raw) (00000001 ntp-fields))
-       (internet-time-fields->observation
-         (00101111 raw)
-         (00110000 raw)
-         (00000101 (00000110 (00000110 (00000110 raw))))
-         (00000101 (00000110 (00000110 (00000110 (00000110 raw)))))
-         (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 raw))))))))
-      ((00000010 (00000001 ())) raw)))
-)
-
-; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
-; query mechanism under the deliberately mechanical name `ntp-query-raw`.
-(00001001 internet-time-sync
-  (00001000 (host timeout-ms)
-    (internet-time-raw->observation
-      (01011100 host timeout-ms))))
-
-; Turning an accepted timestamp into calendar meaning is also language policy.
-(00001001 internet-time-observation->utc
-  (00001000 (observation)
-    (00000111
-      ((00000011 (00000101 observation) (00000001 accepted))
-       (00100111
-         (00000001 accepted)
-         (00101111 observation)
-         (01011111
-           (00110000 observation)
-           (00000101 (00000110 (00000110 (00000110 observation)))))))
-      ((00000010 (00000001 ())) observation))))
-
-
-; Nanoseconds are the one monotonic host observation. Milliseconds are only a
-; coarser language-level view, so derive them instead of requiring a second
-; host clock primitive. For the non-negative monotonic counter, quotient gives
-; whole elapsed milliseconds (floor toward zero == floor here).
-(00001001 milliseconds-from-nanoseconds
-  (00001000 (nanoseconds)
-    (00010100 nanoseconds #d1000000)))
-
-(00001001 mono-ms
-  (00001000 ()
-    (01100001 (01011010))))
-
-; Monotonic counters are host observations; deadline arithmetic is language
-; semantics. Keep a pure pair of helpers so scheduler logic can be tested
-; without sleeping, then expose convenience wrappers over the host counter.
-(00001001 deadline-from
-  (00001000 (now-ns delta-ns)
-    (00001100 now-ns delta-ns)))
-
-(00001001 deadline-reached-at?
-  (00001000 (now-ns deadline-ns)
-    (00011110 now-ns deadline-ns)))
-
-(00001001 deadline-after-ns
-  (00001000 (delta-ns)
-    (01101001 (01011010) delta-ns)))
-
-(00001001 deadline-reached?
-  (00001000 (deadline-ns)
-    (01100111 (01011010) deadline-ns)))
-
-(00001001 elapsed-ns
-  (00001000 (started-ns)
-    (00001101 (01011010) started-ns)))
-
-; Interpret raw host timezone declarations without performing host I/O here.
-; The host contract is:
-;   (timezone-declarations tz-value etc-timezone-value)
-; where each value is either a non-empty string or (). Lisp owns source
-; precedence and the public detected/unknown result shape.
-(00001001 timezone-declarations->observation
-  (00001000 (tz-value etc-timezone-value)
-    (00000111
-      ((and (00100100 tz-value) (00011011 (00111011 tz-value) 0))
-       (00100111 (00000001 detected) tz-value (00000001 TZ)))
-      ((and (00100100 etc-timezone-value) (00011011 (00111011 etc-timezone-value) 0))
-       (00100111 (00000001 detected) etc-timezone-value (00000001 etc-timezone)))
-      ((00000010 (00000001 ()))
-       (00100111 (00000001 unknown) (00000001 host-declaration-unavailable)))))
-)
-
-; Adapt the mechanism-only host observation to public timezone meaning.
-(00001001 timezone-raw->observation
-  (00001000 (raw)
-    (00000111
-      ((00000011 (00000101 raw) (00000001 timezone-declarations))
-       (timezone-declarations->observation
-         (00101111 raw)
-         (00110000 raw)))
-      ((00000010 (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-timezone-observation)))))
-)
-
-(00001001 timezone-detect
-  (00001000 ()
-    (timezone-raw->observation
-      (01011101))))
-
-(00001001 timezone-config
-  (00001000 (name offset-seconds)
-    (00000111
-      ((00100100 name)
-       (00000111
-         ((00011010 offset-seconds -86400)
-          (00100111 (00000001 rejected) (00000001 invalid-offset)))
-         ((00011011 offset-seconds 86400)
-          (00100111 (00000001 rejected) (00000001 invalid-offset)))
-         ((00000010 (00000001 ()))
-          (00100111
-            (00000001 accepted)
-            (00100111 (00000001 timezone) name offset-seconds)))))
-      ((00000010 (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-name))))))
-
-
-(00001001 timezone-name
-  (00001000 (config)
-    (00101111 config)))
-
-(00001001 timezone-offset-seconds
-  (00001000 (config)
-    (00110000 config)))
-
-; Реєстр містить стабільні поверхні всіх наведених часових функцій.
-; Після визначення Lisp-замикань load_time_library застосовує чинну механічну
-; проєкцію stable peers із цього реєстру до наявних значень. Повторні
-; my-postcore-виклики тут застаріли: їхній шлях зупиняв завантаження,
-; хоча не створював жодного нового мовного закону. Часова семантика вище
-; залишається власністю SENS.
+           (hour (поділити day-seconds 3600))
+           (minute (поділити (залишок day-seconds 3600) 60))
+           (second (залишок day-seconds 60)))
+      (список
+        (сполучити (як-є year) (перше civil))
+        (сполучити (як-є month) (друге civil))
+        (сполучити (як-є day) (третє civil))
+        (сполучити (як-є hour) hour)
+        (сполучити (як-є minute) minute)
+        (сполучити (як-є second) second)
+        (сполучити (як-є nanosecond) nanosecond)))))
