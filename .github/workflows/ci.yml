@@ -7,11 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Поточний main замінює застаріле виконання тієї самої гілки.
-# Старі SHA залишаються у Git, але не витрачають нові раннери.
+# Кожен запуск зберігається; новий push не скасовує попередні запуски гілки.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
