@@ -1,5 +1,7 @@
-; Extended processor-state save/restore instruction-family catalogue.
-; Physical ISA facts only; usable state components are runtime/OS gated.
+; Каталог машинних команд збереження та відновлення стану процесора.
+; Тут описані лише фізичні властивості ISA.
+; Доступність складових стану перевіряють операційна система
+; та виконавець; каталог не встановлює мовних законів СЕНС.
 
 (isa-catalogue/1
   (extension XSAVE)
