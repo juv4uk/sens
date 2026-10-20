@@ -1,26 +1,24 @@
-; #834 — executable bounded mathematical-law witness.
-; Expected semantic law evidence stays in Lisp.
-; The Rust observer checks only structure and the named pass envelope.
+; #834 — виконуваний свідок обмежених математичних законів СЕНС.
+; Семантика й очікувані значення належать мові, не зовнішньому виконавцю.
+; Д3: кожна гілка умовного вибору має рівно умову та наслідок.
+; Раціональні операнди записано людськими числами, без сирих голів SID.
+; Історичні координати й мітки результату — лише цитовані дані.
+
 (load "lib/core.lisp")
 
-(визначити semantic-coordinate-math-834
+(визначити свідок-математичних-законів-координат-834
   (функція ()
     (за-умовою
-      ((однакові? (+ 1/3 1/6) 1/2)
-       (як-є (structural-relation same))
+      ((однакові? (додати 1/3 1/6) 1/2)
        (за-умовою
          ((однакові? (тотожне? (як-є radio) (як-є radio))
-                  (як-є (identity-relation same)))
-          (як-є (structural-relation same))
+                     (як-є (identity-relation same)))
           (за-умовою
             ((однакові? (сполучити 41 42) (як-є (41 . 42)))
-             (як-є (structural-relation same))
              (за-умовою
                ((однакові? (перше (сполучити 41 42)) 41)
-                (як-є (structural-relation same))
                 (за-умовою
                   ((однакові? (решта (сполучити 41 42)) 42)
-                   (як-є (structural-relation same))
                    (як-є
                      (semantic-coordinate-math-834
                        (status pass)
@@ -29,15 +27,13 @@
                        (sid 00000100 cons-car-equation)
                        (sid 00000101 car-cons-equation)
                        (sid 00000111 no-mathematical-law-witness))))
-                  ((як-є fallback) (як-є migration-only))
-                  ((як-є fallback) (як-є migration-only))))
-               ((як-є fallback) (як-є migration-only))
-               ((як-є fallback) (як-є migration-only))))
-            ((як-є fallback) (як-є migration-only))
-            ((як-є fallback) (як-є migration-only))))
-         ((як-є fallback) (як-є migration-only))
-         ((як-є fallback) (як-є migration-only))))
-      ((як-є fallback) (як-є migration-only))
-      ((як-є fallback) (як-є migration-only)))))
+                  (так (як-є migration-only))))
+               (так (як-є migration-only))))
+            (так (як-є migration-only))))
+         (так (як-є migration-only))))
+      (так (як-є migration-only)))))
 
-(semantic-coordinate-math-834)
+; Зовнішня сумісна назва вказує на те саме українське замикання.
+(визначити semantic-coordinate-math-834 свідок-математичних-законів-координат-834)
+
+(свідок-математичних-законів-координат-834)
