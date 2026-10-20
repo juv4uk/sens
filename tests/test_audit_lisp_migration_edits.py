@@ -40,28 +40,49 @@ class MigrationLexicalSafety(unittest.TestCase):
 
     def test_quoted_ukrainian_function_names_remain_data(self):
         self.blocked("'(CAR x)", "'(перше x)", "quoted/data")
+        self.blocked("(як-є (перше x))", "(як-є (100 x))", "quoted/data")
+        self.blocked("(визначити зразок (як-є (перше x)))",
+                     "(визначити зразок (як-є (100 x)))", "quoted/data")
+
+    def test_ukrainian_definition_and_binder_names_are_protected(self):
+        for old, new in (
+            ("(визначити перше (функція (x) (перше x)))",
+             "(визначити перше (функція (x) (100 x)))"),
+            ("(функція (перше) (перше x))",
+             "(функція (перше) (100 x))"),
+            ("(нехай ((перше x)) (перше y))",
+             "(нехай ((перше x)) (100 y))"),
+            ("(нехай-послідовно ((перше x)) (перше y))",
+             "(нехай-послідовно ((перше x)) (100 y))"),
+        ):
+            with self.subTest(source=old):
+                self.blocked(old, new, "locally bound callable")
 
     def test_actual_machine_pair_schema_keys_are_data(self):
         old = (ROOT / "lib/machine/layout/pair-x86-64.lisp").read_text()
-        self.assertIn("(car (offset-bytes 0)", old)
-        changed = old.replace("(car (offset-bytes 0)", "(100 (offset-bytes 0)")
-        changed = changed.replace("(cdr (offset-bytes 8)", "(011 (offset-bytes 8)")
+        self.assertIn("((перше (offset-bytes 0)", old)
+        changed = old.replace("((перше (offset-bytes 0)", "((100 (offset-bytes 0)")
+        changed = changed.replace("((решта (offset-bytes 8)", "((011 (offset-bytes 8)")
         self.blocked(old, changed, "quoted/data atom")
 
     def test_actual_local_assoc_recursion_is_not_domain_d5_assoc(self):
         old = (ROOT / "scripts/build-inventory.lisp").read_text()
-        self.assertIn("(00001001 assoc", old)
-        self.assertIn("(t (assoc key (00000110 alist)))", old)
+        self.assertIn("(визначити знайти-за-ключем знайти-пару)", old)
+        self.assertIn("(знайти-за-ключем ключ (решта список-пар))", old)
         changed = old.replace(
-            "(t (assoc key (00000110 alist)))",
-            "(t (11100 key (00000110 alist)))", 1,
+            "(знайти-за-ключем ключ (решта список-пар))",
+            "(11100 ключ (решта список-пар))", 1,
         )
         self.blocked(old, changed, "locally bound callable")
 
     def test_actual_local_scan_is_not_domain_d6_scan(self):
         old = (ROOT / "scripts/semantic-authority-guard.lisp").read_text()
-        self.assertIn("(00001001 scan", old)
-        changed = old.replace("(scan (00000110 rows))", "(101111 (00000110 rows))")
+        self.assertIn("(визначити текст-містить-будь-який?", old)
+        self.assertIn("(текст-містить-будь-який? джерело (решта зразки))", old)
+        changed = old.replace(
+            "(текст-містить-будь-який? джерело (решта зразки))",
+            "(101111 джерело (решта зразки))", 1,
+        )
         self.blocked(old, changed, "locally bound callable")
 
     def test_lambda_parameter_shadows_builtin_name(self):
