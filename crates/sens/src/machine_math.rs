@@ -676,6 +676,64 @@ mod tests {
         }
     }
     #[test]
+    fn full_width_division_keeps_all_bits_and_rejects_bad_inputs() {
+        assert_eq!(exact_words_div_rem_unsigned(&[], &[]), None);
+        assert_eq!(exact_words_div_rem_unsigned(&[1], &[1, 0]), None);
+        assert_eq!(exact_words_div_rem_unsigned(&[1, 2], &[0, 0]), None);
+        for n in [2_usize, 3, 6, 12] {
+            let mut divisor = vec![0_u64; n];
+            divisor[n - 1] = 1;
+            divisor[0] = 3;
+            let mut one = vec![0_u64; n];
+            one[0] = 1;
+            let zero = vec![0_u64; n];
+            assert_eq!(exact_words_div_rem_unsigned(&divisor, &divisor),
+                       Some((one.clone(), zero.clone())));
+            assert_eq!(exact_words_div_rem_unsigned(&one, &divisor),
+                       Some((zero.clone(), one.clone())));
+            assert_eq!(exact_words_div_rem_unsigned(&zero, &divisor),
+                       Some((zero.clone(), zero)));
+            let dividend = vec![u64::MAX; n];
+            let (q, r) = exact_words_div_rem_unsigned(&dividend, &divisor).unwrap();
+            assert_eq!(r.iter().rev().cmp(divisor.iter().rev()),
+                       std::cmp::Ordering::Less);
+            // Алгебраїчна тотожність незалежно від конкретного алгоритму:
+            // dividend = quotient * divisor + remainder.
+            let product = exact_words_mul_unsigned(&q, &divisor).unwrap();
+            let mut rem = vec![0_u64; 2 * n];
+            rem[..n].copy_from_slice(&r);
+            let reconstructed = exact_words_add_sub("+", &product, &rem).unwrap();
+            assert_eq!(&reconstructed[..n], dividend.as_slice());
+            assert!(reconstructed[n..].iter().all(|&word| word == 0));
+        }
+    }
+
+    #[test]
+    fn full_width_division_matches_independent_u128_oracle() {
+        let mut seed = 0x4f79_1ab3_8052_dc6e_u64;
+        for case in 0..4096 {
+            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            let a0 = seed;
+            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            let a1 = seed;
+            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            let d0 = seed;
+            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            let d1 = seed | 1; // справжній широкий ненульовий дільник
+            let numerator = (u128::from(a1) << 64) | u128::from(a0);
+            let denominator = (u128::from(d1) << 64) | u128::from(d0);
+            let (q, r) = exact_words_div_rem_unsigned(&[a0, a1], &[d0, d1]).unwrap();
+            let expected_q = numerator / denominator;
+            let expected_r = numerator % denominator;
+            assert_eq!(q, vec![expected_q as u64, (expected_q >> 64) as u64], "case {case}");
+            assert_eq!(r, vec![expected_r as u64, (expected_r >> 64) as u64], "case {case}");
+        }
+        assert_eq!(exact_words_div_rem_unsigned(&[u64::MAX, 1], &[3, 0]),
+                   exact_words_div_rem_u64(&[u64::MAX, 1], 3)
+                       .map(|(q, r)| (q, vec![r, 0])));
+    }
+
+    #[test]
     fn wide_divrem_reconstructs_every_bit_and_rejects_zero_divisor() {
         assert_eq!(exact_words_div_rem_u64(&[], 1), None);
         assert_eq!(exact_words_div_rem_u64(&[42], 0), None);
