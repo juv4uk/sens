@@ -506,6 +506,26 @@ mod tests {
                 }
             }
         }
+        // Межа знакового двійкового доповнення: мінімальне Dn, помножене
+        // на -1, має вирости до D(2n), інакше найвищий біт загубиться.
+        for width in [24_usize, 48, 96, 192, 384, 768] {
+            let mut min_word = vec![0; width];
+            min_word[0] = 1;
+            let negative_min = Value::BinaryNumber(
+                BinaryNumber::from_numeric_domain_bits(width, &min_word).unwrap());
+            let minus_one = Value::BinaryNumber(
+                BinaryNumber::from_numeric_domain_bits(width, &vec![1; width]).unwrap());
+            let positive = compute("*", &negative_min, &minus_one).unwrap();
+            let Value::BinaryNumber(ref result) = positive else { panic!("цілий Dn"); };
+            assert_eq!(result.numeric_domain_width(), Some(width * 2));
+            let mut expected_bits = vec![0; width * 2];
+            expected_bits[width] = 1; // +2^(width-1)
+            assert_eq!(result.exact_numeric_domain_bits().unwrap(), expected_bits);
+            let more_negative = compute("+", &negative_min, &minus_one).unwrap();
+            let Value::BinaryNumber(ref widened) = more_negative else { panic!("знаковий Dn"); };
+            assert_eq!(widened.numeric_domain_width(), Some(width * 2));
+        }
+
         // Різні домени не стають однаковими через однакові величини.
         let one = |width| {
             let mut bits = vec![0; width];
