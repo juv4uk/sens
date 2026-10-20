@@ -15,7 +15,7 @@
 ;
 ; RAX carries the result per SysV x86-64. RCX is caller-saved, so the proof
 ; routine does not violate the host ABI by clobbering a callee-saved register.
-(визначити x86-lower-add-u64-forms
+(визначити машина-знизити-додавання-беззнакових-64-до-форм
   (функція (лівий-операнд-машини правий-операнд-машини)
     (список
       (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд-машини)
@@ -26,7 +26,7 @@
 ; #4001 bounded exact-D5 DIFFERENCE/TIMES witnesses. These routines only
 ; describe machine forms. Selection is guarded below by exact D5 evaluation,
 ; so SUB/IMUL are used only when inputs and the exact result all fit u64.
-(визначити x86-lower-difference-u64-forms
+(визначити машина-знизити-віднімання-беззнакових-64-до-форм
   (функція (лівий-операнд-машини правий-операнд-машини)
     (список
       (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд-машини)
@@ -34,7 +34,7 @@
       (список (як-є sub-r64-r64) (як-є rax) (як-є rcx))
       (список (як-є ret)))))
 
-(визначити x86-lower-times-u64-forms
+(визначити машина-знизити-множення-беззнакових-64-до-форм
   (функція (лівий-операнд-машини правий-операнд-машини)
     (список
       (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд-машини)
@@ -81,7 +81,7 @@
 ; selects distinct caller-saved extended GPRs so #207's widened MOV imm64
 ; admission is exercised by semantic composition rather than by an ISA-only
 ; witness. RAX remains the guest ABI result register.
-(визначити x86-lower-bounded-car-cons-u64-arm-forms
+(визначити машина-знизити-обмежений-вибір-першого-пари-64
   (функція (лівий-операнд правий-операнд лівий-регістр правий-регістр)
     (список
       (список (як-є mov-r64-imm64) лівий-регістр лівий-операнд)
@@ -117,9 +117,9 @@
         (список (як-є cmp-r64-r64) (як-є rax) (як-є rcx))
         (список (як-є jnz-rel8) 33))
       (приєднати
-        (x86-lower-bounded-car-cons-u64-arm-forms
+        (машина-знизити-обмежений-вибір-першого-пари-64
           перше-якщо-так решта-якщо-так (як-є r8) (як-є r9))
-        (x86-lower-bounded-car-cons-u64-arm-forms
+        (машина-знизити-обмежений-вибір-першого-пари-64
           перше-якщо-ні решта-якщо-ні (як-є r10) (як-є r11))))))
 
 ; Bounded structural witness for semantic identities 00000100/00000101/00000110.
@@ -157,11 +157,11 @@
 ; Append only the finite structured machine-form lists using current D3
 ; primitives. Do not route this boundary through Core4's deferred legacy
 ; reverse-onto/COND implementation: tests and authority remain language-owned.
-(визначити x86-machine-append-forms
+(визначити машина-приєднати-форми
   (функція (форми хвіст)
     (за-умовою
       ((атом? форми) хвіст)
-      (так (сполучити (перше форми) (x86-machine-append-forms (решта форми) хвіст))))))
+      (так (сполучити (перше форми) (машина-приєднати-форми (решта форми) хвіст))))))
 
 ; The bounded native pair witness has a fixed six-instruction shape. Build it
 ; directly rather than routing through generic append/reverse: those Core4 list
@@ -290,17 +290,17 @@
       ((машинний-ключ-поточного-домену? ширина-домену біти-домену 5 10)
        (за-умовою
          ((x86-current-d5-u32-inputs? лівий-операнд правий-операнд)
-          (x86-lower-add-u64-forms лівий-операнд правий-операнд))
+          (машина-знизити-додавання-беззнакових-64-до-форм лівий-операнд правий-операнд))
          (так (як-є exact-d5-fallback-required))))
       ((машинний-ключ-поточного-домену? ширина-домену біти-домену 5 11)
        (за-умовою
          ((x86-current-d5-difference-u64-safe? лівий-операнд правий-операнд)
-          (x86-lower-difference-u64-forms лівий-операнд правий-операнд))
+          (машина-знизити-віднімання-беззнакових-64-до-форм лівий-операнд правий-операнд))
          (так (як-є exact-d5-fallback-required))))
       ((машинний-ключ-поточного-домену? ширина-домену біти-домену 5 22)
        (за-умовою
          ((x86-current-d5-u32-inputs? лівий-операнд правий-операнд)
-          (x86-lower-times-u64-forms лівий-операнд правий-операнд))
+          (машина-знизити-множення-беззнакових-64-до-форм лівий-операнд правий-операнд))
          (так (як-є exact-d5-fallback-required))))
       (так
        (як-є unsupported-current-domain-binary-u64)))))
@@ -344,12 +344,12 @@
       ((машинний-ключ-поточного-домену? ширина-домену біти-домену 6 14)
        (за-умовою
          ((x86-current-d6-add1-u64-safe? значення)
-          (x86-lower-add-u64-forms значення 1))
+          (машина-знизити-додавання-беззнакових-64-до-форм значення 1))
          (так (як-є exact-d6-fallback-required))))
       ((машинний-ключ-поточного-домену? ширина-домену біти-домену 6 15)
        (за-умовою
          ((x86-current-d6-sub1-u64-safe? значення)
-          (x86-lower-difference-u64-forms значення 1))
+          (машина-знизити-віднімання-беззнакових-64-до-форм значення 1))
          (так (як-є exact-d6-fallback-required))))
       (так
        (як-є unsupported-current-domain-d6-unary-u64)))))
@@ -566,3 +566,11 @@
 ; Збережене ім'я механічного виконавця — лише сумісна прив'язка.
 ; Семантична тотожність функцій і ратифіковані координати незмінні.
 (визначити x86-current-domain-key? машинний-ключ-поточного-домену?)
+
+; Історичні машинні назви збережено тільки як сумісні посилання.
+; Основні визначення та їхні виклики написані українською.
+(визначити x86-lower-add-u64-forms машина-знизити-додавання-беззнакових-64-до-форм)
+(визначити x86-lower-difference-u64-forms машина-знизити-віднімання-беззнакових-64-до-форм)
+(визначити x86-lower-times-u64-forms машина-знизити-множення-беззнакових-64-до-форм)
+(визначити x86-lower-bounded-car-cons-u64-arm-forms машина-знизити-обмежений-вибір-першого-пари-64)
+(визначити x86-machine-append-forms машина-приєднати-форми)
