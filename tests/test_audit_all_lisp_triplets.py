@@ -41,6 +41,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertEqual(report["potential_program_missing_sens"], 1)
         self.assertEqual(report["missing_sens"], 3)  # повний фізичний перепис
         self.assertEqual(report["blocked_count"], 1)  # не 3 штучних блокери
+        self.assertEqual(report["comment_only_style_warnings"], 1)
         self.assertEqual(report["blocked_sample"][0]["path"], "lib/програма.lisp")
         self.assertFalse(report["all_bounded_reverse_verified"])
         self.assertFalse(report["release_ready"])

@@ -95,6 +95,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
                   complete_triplets=0, bounded_verified=0,
                   misnamed_binary_lisp=0, comment_only_nonprogram_lisp=0,
                   potential_program_files=0, potential_program_missing_sens=0,
+                  comment_only_style_warnings=0,
                   bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
     blocked: list[dict[str, str]] = []
 
@@ -107,9 +108,14 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if source.is_symlink() or not source.is_file():
             reject(relative, "не звичайний файл Lisp")
             continue
+        comment_only = only_line_comments(source)
         keyboard_problem = examine_file(source)
         if keyboard_problem is None:
             counts["ukrainian_keyboard"] += 1
+        elif comment_only:
+            # Стиль коментаря або порожнього профілю -- телеметрія,
+            # а НЕ семантичний блокер: виконуваного коду тут немає.
+            counts["comment_only_style_warnings"] += 1
         else:
             reject(relative, "не повністю українська розкладка: " + keyboard_problem)
         binary_disguised = misnamed_binary_d2(source)
@@ -118,7 +124,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             reject(relative, "двійкові слова D2 під розширенням .lisp; потрібен .bits")
         # Коментарі не мають машинної семантики, їх НЕ пакуємо до SENS.
         # Якщо їм уже видали .sens — не приховуємо цю аномалію.
-        if only_line_comments(source):
+        if comment_only:
             counts["comment_only_nonprogram_lisp"] += 1
             if source.with_suffix(".sens").exists():
                 reject(relative, "файл лише з коментарів має необґрунтований .sens")
