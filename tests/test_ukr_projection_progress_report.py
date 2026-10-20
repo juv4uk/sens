@@ -85,14 +85,15 @@ class WholeFileMetricTests(FileTree):
         })
         result = report.measure_source_projection(root)
         self.assertEqual(result.total_source_files, 4)
-        self.assertEqual(result.fully_projected_source_files, 2)
-        self.assertEqual(result.percent, 50.0)
+        self.assertEqual(result.fully_projected_source_files, 1)
+        self.assertEqual(result.percent, 25.0)
         reasons = {item.path: item.reason for item in result.pending}
         self.assertTrue(
             "англомовний локальний параметр" in reasons["lib/not-ok.lisp"]
             or "англомовна виклична голова" in reasons["lib/not-ok.lisp"]
         )
         self.assertIn("сира бінарна голова", reasons["lib/raw.lisp"])
+        self.assertIn("англомовна назва визначення", reasons["lib/alias.lisp"])
         self.assertEqual(result.excluded_nonprogram_files, 2)
 
     def test_primary_projection_report_is_separate_from_keyboard_completion(self):
@@ -104,7 +105,7 @@ class WholeFileMetricTests(FileTree):
         self.assertEqual(report.measure(root).fully_ukrainian_files, 1)
 
 
-    def test_localized_compatibility_alias_markers_and_both_percentages(self):
+    def test_compatibility_comments_never_hide_unmigrated_definitions(self):
         files = {
             "lib/quantity.lisp": (
                 "(визначити головна-назва "
@@ -130,8 +131,9 @@ class WholeFileMetricTests(FileTree):
         root = self.tree(files)
         projected = report.measure_source_projection(root)
         self.assertEqual(projected.total_source_files, 3)
-        self.assertEqual(projected.fully_projected_source_files, 3)
-        self.assertEqual(projected.percent, 100.0)
+        self.assertEqual(projected.fully_projected_source_files, 0)
+        self.assertEqual(projected.percent, 0.0)
+        self.assertEqual(len(projected.pending), 3)
 
         # Compatibility names stay English; the strict keyboard metric is different.
         keyboard = report.measure(root)
@@ -143,7 +145,7 @@ class WholeFileMetricTests(FileTree):
         self.assertIn("повністю українські файли .lisp — 0/3 (0.0%)", stdout)
         self.assertIn(
             "виконувані назви, голови та параметри в активних lib-файлах — "
-            "3/3 (100.0%)",
+            "0/3 (0.0%)",
             stdout,
         )
 
