@@ -228,23 +228,3 @@
       (список
         (як-є claim)
         (як-є bounded-conditional-structural-composition-lower-bound)))))
-
-; Для зовнішніх свідків залишені лише потрібні історичні назви;
-; допоміжні вибірки рядків і локальні предикати мають українські назви.
-(визначити x86-minimal-structural-car-dependencies мінімальна-машина-перше-пари-залежності)
-(визначити x86-minimal-structural-car-forms мінімальна-машина-перше-пари-форми)
-(визначити x86-minimal-structural-car-observed-families мінімальна-машина-перше-пари-спостережені-сімейства)
-(визначити x86-minimal-structural-car-dependency-families мінімальна-машина-перше-пари-сімейства-залежностей)
-(визначити x86-minimal-structural-car-dependency-classes мінімальна-машина-перше-пари-класи-залежностей)
-(визначити x86-minimal-structural-car-profile мінімальна-машина-перше-пари-профіль)
-(визначити x86-minimal-eq-cond-dependencies мінімальна-машина-рівність-умова-залежності)
-(визначити x86-minimal-eq-cond-forms мінімальна-машина-рівність-умова-форми)
-(визначити x86-minimal-eq-cond-observed-families мінімальна-машина-рівність-умова-спостережені-сімейства)
-(визначити x86-minimal-eq-cond-dependency-families мінімальна-машина-рівність-умова-сімейства-залежностей)
-(визначити x86-minimal-eq-cond-dependency-classes мінімальна-машина-рівність-умова-класи-залежностей)
-(визначити x86-minimal-eq-cond-profile мінімальна-машина-рівність-умова-профіль)
-(визначити x86-minimal-eq-cond-car-cons-dependencies мінімальна-машина-рівність-умова-пара-залежності)
-(визначити x86-minimal-eq-cond-car-cons-forms мінімальна-машина-рівність-умова-пара-форми)
-(визначити x86-minimal-eq-cond-car-cons-observed-families мінімальна-машина-рівність-умова-пара-спостережені-сімейства)
-(визначити x86-minimal-eq-cond-car-cons-dependency-families мінімальна-машина-рівність-умова-пара-сімейства-залежностей)
-(визначити x86-minimal-eq-cond-car-cons-profile мінімальна-машина-рівність-умова-пара-профіль)
