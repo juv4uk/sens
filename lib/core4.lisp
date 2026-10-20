@@ -422,8 +422,8 @@
          (так ні)))
       ((є-листок-дерева-що-задовольняє-предикат? предикат (перше дерево)) так)
       (так (є-листок-дерева-що-задовольняє-предикат? предикат (решта дерево))))))
-; D6:101000 MAP: native SENS recursion over a proper list.
-; D4:0101 NULL ends exactly the empty list; D3:111 CONS preserves order.
+; D6:101000 MAP: власна рекурсія СЕНС над правильним списком.
+; D4:0101 NULL завершує обхід лише на порожньому списку; D3:111 CONS зберігає порядок.
 (визначити відобразити
   (функція (дія значення)
     (за-умовою
@@ -995,7 +995,7 @@
 (визначити трітів-у-байті 5)
 (визначити трійкова-основа 3)
 
-; D1 bits stay predicates at the boundary; base-3 math uses D24 trits.
+; На межі D1-біти залишаються предикатами; трійкова математика використовує трити D24.
 (визначити т5м-д24-тріт
   (функція (значення)
     ; Вхід — точний біт предиката D1, керує вибором, а не є числом.
@@ -1606,14 +1606,14 @@
        (список (друге результат) (перше результат)))
      (розпарувати-пари пари))))
 
-; D8:11110001 = ANY(NOT p), ратифікований добутковий кут.
-; Лише SENS-похідна реалізація на D6:111100 ANY + D4:0100 NOT.
+; D8:11110001 — заперечити умову для кожної спроби ANY; ратифікована композиція.
+; Лише похідна реалізація СЕНС через D6:111100 ANY та D4:0100 NOT.
 (визначити є-що-не-задовольняє?
   (функція (параметр-п значення)
     (будь-яке? (функція (аргумент-х) (хибне? (параметр-п аргумент-х))) значення)))
 
 ; D8:11110011 = ALL(NOT p), включно з порожнім списком.
-; Лише SENS-похідна реалізація на D6:111101 ALL + D4:0100 NOT.
+; Лише похідна реалізація СЕНС через D6:111101 ALL та D4:0100 NOT.
 (визначити усі-не-задовольняють?
   (функція (параметр-п значення)
     (усі? (функція (аргумент-х) (хибне? (параметр-п аргумент-х))) значення)))
@@ -1653,7 +1653,7 @@
 ; D8:00010110 REVAPPEND = D5:10101 REVERSE-ONTO, same closure.
 (визначити розвернути-й-приєднати зворот-до)
 
-; D8:00001001 SUBSETP — D1-positive exact structural recursion.
+; D8:00001001 SUBSETP — точна структурна рекурсія з відповіддю D1.
 (визначити підмножина?
   (функція (ліві праві)
     (за-умовою
@@ -1662,7 +1662,7 @@
        (підмножина? (решта ліві) праві))
       (так ні))))
 
-; D8:00111010 SET-DIFFERENCE — recursion without legacy LAMBDA carrier.
+; D8:00111010 SET-DIFFERENCE — рекурсія без історичного носія LAMBDA.
 (визначити різниця-множин
   (функція (ліві праві)
     (за-умовою
@@ -1671,7 +1671,7 @@
        (різниця-множин (решта ліві) праві))
       (так (сполучити (перше ліві) (різниця-множин (решта ліві) праві))))))
 
-; D8:00110110 ADJOIN — add a missing element at the front.
+; D8:00110110 ADJOIN — додати відсутній елемент на початок списку.
 (визначити приєднати-якщо-нема
   (функція (елемент список)
     (за-умовою
@@ -2413,16 +2413,6 @@
        (канон-запис-закону
          (як-є cond-first-match-short-circuit) (як-є violated))))))
 
-; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
-; item 14, item 20's G5 audit test applied live) — none of these need a
-; new Rust primitive: string-first/string-rest already expose a string
-; one character at a time, and eq already compares Value::String by
-; value, so "" is a real, checkable base case — the same shape as any
-; other recursive list walk in this file, just walking a string instead
-; of a pair chain. string-append (genuinely un-expressible this way,
-; since nothing here can build a new combined string) stays in Rust —
-; see its own comment in special_forms.rs for why.
-;
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md,
 ; пункт 14, живо застосований тест G5 з пункту 20) — жодна з них не
 ; потребує нового Rust-примітива: string-first/string-rest уже дають
@@ -2655,16 +2645,6 @@
   (функція (перший-елемент . залишені-елементи)
     (перевірити-незростання-значень? перший-елемент залишені-елементи)))
 
-; number->string (G5 test: already expressible via existing means?) —
-; yes, now that quotient/mod exist. Surfaced from the fpga-lisp
-; session's assembler.lisp, which had its own version built on a fixed
-; DECIMAL-POWERS lookup table (limited to ~10 digits by construction —
-; the table itself has a fixed length). This one recurses via
-; quotient/mod instead, the same -onto accumulator shape as
-; length-onto/reverse-onto above, so it has no digit-count ceiling of
-; its own (bounded only by however large an exact integer this
-; implementation can represent at all). Scope: non-negative integers
-; only, same as quotient/mod themselves.
 ; number->string (G5-тест: уже виразне через наявне?) — так, тепер,
 ; коли є quotient/mod. Знахідка з сесії fpga-lisp, assembler.lisp, яка
 ; мала власну версію на фіксованій таблиці DECIMAL-POWERS (обмежена
@@ -2685,19 +2665,10 @@
     (значення-у-текст число-аргумент)))
 (визначити number->string число-рядок)
 
-; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
-; without deep nesting (PLAN.md item / clean-code policy).
-; `(-> x (f y) g)` expands to `(g (f x y))`.
-; `(->> x (f y) g)` expands to `(g (f y x))`.
-; Both take advantage of the variadic lambda parameter support (a bare symbol `forms`
-; binds the whole list of arguments) available since 2026-08-09.
-;
 ; -> / ->> (макроси прокидання) — виражають пайплайни перетворень без
 ; глибокої вкладеності (політика clean-code).
 ; `(-> x (f y) g)` розгортається в `(g (f x y))`.
 ;
-; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
-; Verschachtelung aus.
 (визначити ->
   (макрос
     (функція форми-аргументів
@@ -2786,29 +2757,16 @@
       ((атом? ())  (уточнити-корінь-ітерацією (поділити аргумент-х 2.0) аргумент-х 5)))))
 (визначити sqrt корінь)
 
-; abs/min/max/min-list/max-list — migrated from Rust builtins.rs to
-; lib/core.lisp (owner directive 2026-09-11: "Lisp owns meaning, Rust owns
-; only irreducible mechanism" — these five touch no OS/host capability,
-; just arithmetic comparison and cons-list traversal already expressible
-; in the language itself, so keeping them in Rust was Rust-authority
-; with no substrate reason, not a necessity). Real numeric semantic IDs
-; already existed for all five in lib/surface/semantic-registry.lisp
-; (abs=1004, min=1005, max=1006, min-list=1011, max-list=1012, some with
-; real Sanskrit spellings already ratified) — the Rust implementation
-; simply never consulted them (plain `define!`, not the registry-aware
-; `define_peer_builtin` path other builtins use), a second real gap this
-; migration closes alongside moving the implementation itself. First
-; nearly overwrote these real entries with a duplicate 1147-1151 block
-; before checking the registry directly — caught before committing, not
-; after.
-; Behavior verified identical to the removed Rust implementation via
-; crates/my-lisp/tests/builtin_to_lisp_migration.rs before deletion, not
-; assumed from reading the old Rust source.
-; abs/min/max/min-list/max-list — perenesheni z Rust builtins.rs u
-; lib/core.lisp (nastanova vlasnyka 2026-09-11: "Lisp volodiie sensom, Rust
-; volodiie lyshe nezvidnym mekhanizmom") — ni odyn iz piaty ne torkaietsia
-; OS/host-mozhlyvosti, lyshe aryfmetychne porivniannia ta obkhid cons-spysku,
-; vzhe vyrazhuvani samoiu movoiu.
+; Модуль, мінімум, максимум і спискові крайні значення перенесено
+; з Rust builtins.rs до бібліотеки Lisp за рішенням власника від 11.09.2026.
+; Значення операцій належить Ліспу; Rust забезпечує лише незвідні механізми.
+; Ці функції використовують арифметику, порівняння та обхід пар,
+; а не системні можливості. Їхні ратифіковані тотожності вже були
+; в lib/surface/semantic-registry.lisp — не створюємо повторних координат.
+; Історичну тотожність з реалізацією Rust раніше перевіряли в
+; crates/my-lisp/tests/builtin_to_lisp_migration.rs; поточні тести
+; після цієї редакторської зміни окремо не запускалися.
+; D6:010011 ABS / модуль — точна арифметика D24+ і умова D1.
 ; D6:010011 ABS / модуль — exact D24+ arithmetic, exact D1 condition.
 ; LESSP returns an exact numeric result; EQUAL? projects its 1/0 value to D1.
 (визначити модуль
@@ -2819,28 +2777,18 @@
       (так аргумент-х))))
 (визначити abs модуль)
 
-; Required first parameter (dotted lambda-list, same pattern as
-; `<=`/`>=` above) keeps zero arguments an Arity error via the
-; evaluator's own lambda-binding check -- matching the removed Rust
-; builtin's explicit "min/max expects at least one argument" error --
-; without this Lisp definition needing to raise a custom error itself.
-
-
-
-
-; Two real bugs found live via oracle testing before this landed, not
-; assumed from reading the removed Rust source:
-; 1. `eq`, not `equal?`, requires both operands to be atoms and errors
-;    on a non-empty list -- the first draft used `(eq items (quote ()))`
-;    and crashed on every non-base recursive call.
-; 2. `atom` is *not* a safe "is this the empty-list sentinel" check for
-;    the RECURSIVE RESULT specifically: numbers are atoms too, so
-;    `(atom rest-min)` was true both for the real empty-list case and
-;    for an ordinary numeric answer, collapsing them and always taking
-;    the base-case branch. `items` itself is safe to test with `atom`
-;    (it's always a list or (), never itself a bare number), but the
-;    accumulator tests exact structural EMPTY with D4:0101 NULL.
-; D6:000010 та D6:000011: власні SENS-композиції D3/D4/D5.
+; Обов'язковий перший параметр у крапковому списку аргументів,
+; як у <= та >=, забезпечує помилку арності для порожнього виклику.
+; Її виявляє зв'язування параметрів самого обчислювача,
+; а не новий механізм чи окрема помилка в бібліотечній функції.
+;
+; Під час попередньої перевірки оракулом виявлено дві помилки:
+; 1. EQ приймає атоми; перевірка непорожнього списку через EQ
+;    спричиняла помилку типу на рекурсивному кроці.
+; 2. ATOM не відрізняє порожній результат від числа: число теж атом.
+;    Тому базовий випадок для результату перевіряємо через D4:0101 NULL,
+;    а не через D3 ATOM. Для власне списку перевірка атомарності допустима.
+; D6:000010 та D6:000011: власні композиції СЕНС з D3/D4/D5.
 ; Числова область D24+, для порожнього списку повертаємо ().
 (визначити найменше-залишки
   (функція (залишки обране)
