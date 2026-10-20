@@ -1,6 +1,6 @@
 ; contracts/d4-bootstrap-ratification.lisp
-; OWNER-RATIFIED 2026-10-04 — issue #3272.
-; Current D4 semantic authority together with language-contract.lisp.
+; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-04 — issue #3272.
+; Чинна семантична влада D4 разом із language-contract.lisp.
 
 (
   (schema . d4-bootstrap-ratification/1)
