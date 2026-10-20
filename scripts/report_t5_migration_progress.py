@@ -165,6 +165,19 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
             })
 
     counts = Counter(row["status"] for row in ledger)
+    # Mechanical inventory is not proof that all executable Lisp reverses to SENS.
+    # Non-program DATA and archives are deliberately not executable targets.
+    nonprogram = {"NONPROGRAM_ARCHIVED_NO_EXECUTABLE_T5",
+                  "NONPROGRAM_REVIEWED_NO_EXECUTABLE_T5"}
+    executable_rows = [row for row in ledger if row["status"] not in nonprogram]
+    semantic_proved = sum(
+        row["semantic_admitted"] is True and row["oracle_witness"] is not None
+        for row in executable_rows
+    )
+    all_executable_roundtrip_verified = (
+        not missing and not unknown and not orphan_physical_sens
+        and bool(executable_rows) and semantic_proved == len(executable_rows)
+    )
     discrepancy = bool(missing or unknown or any(
         r["status"] == "PHYSICAL_T5_PAIR_BLOCKED" for r in ledger
     ))
@@ -173,6 +186,13 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
         "status": "BLOCKED_DISCREPANCY" if discrepancy else "COMPLETE_MECHANICAL_INVENTORY_ONLY",
         "source_complete": not missing and not unknown,
         "semantic_certification": "NOT_ATTESTED_BY_THESE_AUDITS",
+        "all_executable_lisp_roundtrip_verified": all_executable_roundtrip_verified,
+        "executable_roundtrip_coverage": {
+            "executable_or_unclassified_sources": len(executable_rows),
+            "independent_runtime_oracle_verified": semantic_proved,
+            "blocked_or_unverified": len(executable_rows) - semantic_proved,
+            "nonprogram_excluded_from_executable_target": len(ledger) - len(executable_rows),
+        },
         "summary": {
             "tracked_lisp_sources": len(tracked_sources),
             "tracked_physical_sens_pairs": len(pair_entries),
@@ -204,6 +224,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="existing migration-readiness-census.py --out JSON")
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--require-executable-roundtrip", action="store_true",
+                        help="block without independent runtime-oracle proof for all executable Lisp")
     args = parser.parse_args(argv)
     try:
         pair_data = json.loads(args.pairs.read_text(encoding="utf-8"))
@@ -214,6 +236,10 @@ def main(argv: list[str] | None = None) -> int:
                             + "\n", encoding="utf-8")
         print(json.dumps({"status": report["status"], **report["summary"]},
                          ensure_ascii=False, sort_keys=True))
+        if args.require_executable_roundtrip and not report["all_executable_lisp_roundtrip_verified"]:
+            print("LISP_TO_SENS_ROUNDTRIP_BLOCKED: native SENS/oracle parity unverified",
+                  file=sys.stderr)
+            return 2
         return 0 if report["status"] == "COMPLETE_MECHANICAL_INVENTORY_ONLY" else 2
     except (OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"MIGRATION PROGRESS LEDGER ERROR: {exc}", file=sys.stderr)
