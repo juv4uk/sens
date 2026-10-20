@@ -28,7 +28,7 @@ pub const COMPILER_ROLE_LAW_REF: &str =
 pub const COMPILER_D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp";
 pub const COMPILER_D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
 pub const COMPILER_AUTHORITY_PATH: &str = "language-contract.lisp";
-pub const COMPILER_CONTRACT_VERSION: &str = "11.8";
+pub const COMPILER_CONTRACT_VERSION: &str = "11.9";
 
 /// SENS-owned semantic input for one current compiler identity.
 ///
@@ -649,7 +649,7 @@ fn decode_language_lowering_role(
 pub fn compiler_lowering_role_from_sens(
     identity: CoreDomainIdentity,
 ) -> Result<Option<CompilerLoweringRole>, LanguageError> {
-    let mut session = Session::default();
+    let mut session = Session::bare();
     load_core_library(&mut session)?;
 
     session
@@ -712,7 +712,7 @@ fn install_compiler_program_bindings(
 /// Return shape is owned by `lib/compiler-nucleus.lisp`:
 /// `(D1-success-bit request...)`.
 pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, LanguageError> {
-    let mut session = Session::default();
+    let mut session = Session::bare();
     load_core_library(&mut session)?;
     install_compiler_program_bindings(&mut session, program)?;
     eval_compiler_nucleus(&mut session)?;
@@ -749,7 +749,7 @@ pub fn compiler_program_artifact_from_sens(
         ));
     }
 
-    let mut session = Session::default();
+    let mut session = Session::bare();
     load_core_library(&mut session)?;
     install_compiler_program_bindings(&mut session, program)?;
     session.environment.define(
@@ -934,7 +934,7 @@ pub fn verify_compiler_program_artifact_from_sens(
         ));
     }
 
-    let mut role_session = Session::default();
+    let mut role_session = Session::bare();
     load_core_library(&mut role_session)?;
     role_session
         .environment
@@ -1048,7 +1048,7 @@ mod tests {
     fn compiler_nucleus_loads_each_definition_without_an_opaque_binding_failure() {
         let expressions =
             parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
-        let mut session = Session::default();
+        let mut session = Session::bare();
         load_core_library(&mut session).expect("active core loads");
         for (index, expression) in expressions.iter().enumerate() {
             if let Err(error) =
@@ -1151,7 +1151,7 @@ mod tests {
         assert_eq!(d3_input.semantic_status, "current");
         assert_eq!(d3_input.authority_path, "language-contract.lisp");
         assert_eq!(d3_input.authority_sha256.len(), 64);
-        assert_eq!(d3_input.language_contract_version, "11.8");
+        assert_eq!(d3_input.language_contract_version, "11.9");
 
         let d4_input = compiler_semantic_input_from_sens(d4(0b0010))
             .expect("D4 semantic input")

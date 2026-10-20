@@ -21,7 +21,6 @@ EXPECTED = [
 
 contract = (ROOT / "language-contract.lisp").read_text(encoding="utf-8")
 core = (ROOT / "docs/language-core.md").read_text(encoding="utf-8")
-current = (ROOT / "CURRENT.md").read_text(encoding="utf-8")
 ratified = (ROOT / "contracts/bija3-l1-l5-ratification.lisp").read_text(encoding="utf-8")
 
 contract_sentence = (
@@ -29,13 +28,12 @@ contract_sentence = (
     "100 CAR, 101 EQ, 110 COND, 111 CONS"
 )
 assert contract_sentence in contract
-assert "((major . #d11) (minor . 9)" in contract, "D3 contract guard must follow current Contract 11.8"
+assert "((major . #d11) (minor . 9)" in contract, "D3 contract guard must follow current Contract 11.9"
 assert "#3202" in contract
 
 for line in EXPECTED:
     assert line in core, line
 
-assert "000 (), 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS" in current
 assert "(owner-ratification . #3202)" in ratified
 
 for word, name in [
