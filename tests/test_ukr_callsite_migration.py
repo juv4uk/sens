@@ -1335,6 +1335,12 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
         for obsolete in ("(load ", "(quote ", "(cond ", "(lambda ",
                          "(define ", "(0011 ", "(0010 "):
             self.assertNotIn(obsolete, code)
+        self.assertEqual(code.count("((атом? рядки) так)"), 2)
+        self.assertNotIn("((атом? рядки) (атом? (як-є ())))", code)
+        mutated = code.replace("((атом? рядки) так)",
+                               "((атом? рядки) (атом? (як-є ())))", 1)
+        self.assertNotEqual(mutated, code)
+        self.assertEqual(mutated.count("((атом? рядки) так)"), 1)
 
     def test_tier_selector_preserves_current_d3_d9_operators(self):
         source = (self.ROOT / "scripts/fixtures-for-tier.lisp").read_text(encoding="utf-8")
