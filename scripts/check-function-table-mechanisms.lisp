@@ -1,178 +1,181 @@
-; #1046 — fail-closed validation for transitional mechanism metadata.
-; #3022: #d0/#d1 below are explicit transitional legacy predicate scalars.\n; #b... is now the canonical BinaryNumber source path and must not be used as a tooling boolean.\n; Semantic identity authority is ONLY lib/surface/semantic-registry.lisp.
-; This checker proves mechanism metadata cannot invent a function beside that table.
-; #1332/#1403: empty-list-ground is not a function mechanism.
+; #1046 — перевірка перехідних метаданих механізмів із відмовою за помилки.
+; #3022: історичні #d0/#d1 у чинному джерелі є перехідними типізованими
+; позначками предикатів. Не підміняти їх десятковими числами без доказу закону.
+; #b — джерельне подання BinaryNumber, а не неявна істинність інструмента.
+; Єдине джерело семантичної тотожності — lib/surface/semantic-registry.lisp.
+; Ця перевірка не дозволяє метаданим вигадувати додаткові функції.
+; #1332/#1403: empty-list-ground не є механізмом функції.
 
-(визначити registry
+(визначити реєстр
   (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
-(визначити metadata
+(визначити метадані
   (перше (читати-всі (читати-файл "lib/function-table-mechanisms.lisp"))))
 
-(визначити registry-rows registry)
+(визначити рядки-реєстру реєстр)
 
-(визначити find-section
-  (функція (name sections)
+(визначити знайти-розділ
+  (функція (назва розділи)
     (за-умовою
-      ((атом? sections) () (як-є ()))
-      ((атом? sections) (#d0)
+      ((атом? розділи) () (як-є ()))
+      ((атом? розділи) (#d0)
        (за-умовою
-         ((тотожне? (перше (перше sections)) name) (#d1)
-          (перше sections))
-         ((тотожне? (перше (перше sections)) name) (#d0)
-          (find-section name (решта sections))))))))
+         ((тотожне? (перше (перше розділи)) назва) (#d1)
+          (перше розділи))
+         ((тотожне? (перше (перше розділи)) назва) (#d0)
+          (знайти-розділ назва (решта розділи))))))))
 
-(визначити metadata-rows
-  (решта (find-section (як-є rows) metadata)))
+(визначити рядки-механізмів
+  (решта (знайти-розділ (як-є рядки) метадані)))
 
-(визначити profile-rows
-  (решта (find-section (як-є profile-routes) metadata)))
+(визначити рядки-профілів
+  (решта (знайти-розділ (як-є profile-routes) метадані)))
 
-(визначити registry-has-sid?
-  (функція (sid rows)
+(визначити реєстр-містить-ідентичність?
+  (функція (ідентичність рядки)
     (за-умовою
-      ((атом? rows) () (як-є no))
-      ((атом? rows) (#d0)
+      ((атом? рядки) () (як-є no))
+      ((атом? рядки) (#d0)
        (за-умовою
-         ((тотожне? sid (перше (перше rows))) (#d1) (як-є yes))
-         ((тотожне? sid (перше (перше rows))) (#d0)
-          (registry-has-sid? sid (решта rows))))))))
+         ((тотожне? ідентичність (перше (перше рядки))) (#d1) (як-є yes))
+         ((тотожне? ідентичність (перше (перше рядки))) (#d0)
+          (реєстр-містить-ідентичність? ідентичність (решта рядки))))))))
 
-(визначити metadata-has-route?
-  (функція (sid executor rows)
+(визначити метадані-містять-маршрут?
+  (функція (ідентичність виконавець рядки)
     (за-умовою
-      ((атом? rows) () (як-є no))
-      ((атом? rows) (#d0)
-       (нехай ((row (перше rows)))
+      ((атом? рядки) () (як-є no))
+      ((атом? рядки) (#d0)
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((тотожне? sid (перше row)) (#d1)
+           ((тотожне? ідентичність (перше рядок)) (#d1)
             (за-умовою
-              ((тотожне? executor (друге row)) (#d1) (як-є yes))
-              ((тотожне? executor (друге row)) (#d0)
-               (metadata-has-route? sid executor (решта rows)))))
-           ((тотожне? sid (перше row)) (#d0)
-            (metadata-has-route? sid executor (решта rows)))))))))
+              ((тотожне? виконавець (друге рядок)) (#d1) (як-є yes))
+              ((тотожне? виконавець (друге рядок)) (#d0)
+               (метадані-містять-маршрут? ідентичність виконавець (решта рядки)))))
+           ((тотожне? ідентичність (перше рядок)) (#d0)
+            (метадані-містять-маршрут? ідентичність виконавець (решта рядки)))))))))
 
-(визначити admitted-executor?
-  (функція (executor)
+(визначити виконавець-допущений?
+  (функція (виконавець)
     (за-умовою
-      ((тотожне? executor (як-є evaluator)) (#d1) (як-є yes))
-      ((тотожне? executor (як-є common-lisp)) (#d1) (як-є yes))
-      ((тотожне? executor (як-є prolog)) (#d1) (як-є yes))
-      ((тотожне? executor (як-є clips)) (#d1) (як-є yes))
-      ((тотожне? executor (як-є datalog)) (#d1) (як-є yes))
+      ((тотожне? виконавець (як-є evaluator)) (#d1) (як-є yes))
+      ((тотожне? виконавець (як-є common-lisp)) (#d1) (як-є yes))
+      ((тотожне? виконавець (як-є prolog)) (#d1) (як-є yes))
+      ((тотожне? виконавець (як-є clips)) (#d1) (як-є yes))
+      ((тотожне? виконавець (як-є datalog)) (#d1) (як-є yes))
       (t (як-є no)))))
 
-(визначити admitted-mechanism?
-  (функція (mechanism)
+(визначити механізм-допущений?
+  (функція (механізм)
     (за-умовою
-      ((тотожне? mechanism (як-є quote-form)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є atom-primitive)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є eq-primitive)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є cons-primitive)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є car-primitive)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є cdr-primitive)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є cond-form)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є lambda-form)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є define-form)) (#d1) (як-є yes))
-      ((тотожне? mechanism (як-є bounded-exact-add)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є quote-form)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є atom-primitive)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є eq-primitive)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є cons-primitive)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є car-primitive)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є cdr-primitive)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є cond-form)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є lambda-form)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є define-form)) (#d1) (як-є yes))
+      ((тотожне? механізм (як-є bounded-exact-add)) (#d1) (як-є yes))
       (t (як-є no)))))
 
-(визначити admitted-profile?
-  (функція (profile)
+(визначити профіль-допущений?
+  (функція (профіль)
     (за-умовою
-      ((тотожне? profile (як-є core3)) (#d1) (як-є yes))
+      ((тотожне? профіль (як-є core3)) (#d1) (як-є yes))
       (t (як-є no)))))
 
-(визначити admitted-profile-mechanism?
-  (функція (mechanism)
+(визначити механізм-профілю-допущений?
+  (функція (механізм)
     (за-умовою
-      ((тотожне? mechanism (як-є registered-host-mechanism))
+      ((тотожне? механізм (як-є registered-host-mechanism))
        (#d1)
        (як-є yes))
       (t (як-є no)))))
 
-(визначити profile-has-route?
-  (функція (profile sid rows)
+(визначити профіль-містить-маршрут?
+  (функція (профіль ідентичність рядки)
     (за-умовою
-      ((атом? rows) () (як-є no))
-      ((атом? rows) (#d0)
-       (нехай ((row (перше rows)))
+      ((атом? рядки) () (як-є no))
+      ((атом? рядки) (#d0)
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((тотожне? profile (перше row)) (#d1)
+           ((тотожне? профіль (перше рядок)) (#d1)
             (за-умовою
-              ((тотожне? sid (друге row)) (#d1) (як-є yes))
-              ((тотожне? sid (друге row)) (#d0)
-               (profile-has-route? profile sid (решта rows)))))
-           ((тотожне? profile (перше row)) (#d0)
-            (profile-has-route? profile sid (решта rows)))))))))
+              ((тотожне? ідентичність (друге рядок)) (#d1) (як-є yes))
+              ((тотожне? ідентичність (друге рядок)) (#d0)
+               (профіль-містить-маршрут? профіль ідентичність (решта рядки)))))
+           ((тотожне? профіль (перше рядок)) (#d0)
+            (профіль-містить-маршрут? профіль ідентичність (решта рядки)))))))))
 
-(визначити validate-profile-rows
-  (функція (rows)
+(визначити перевірити-рядки-профілю
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) ()
+      ((атом? рядки) ()
        (як-є (function-table-mechanisms-ok)))
-      ((атом? rows) (#d0)
-       (нехай-послідовно ((row (перше rows))
-              (profile (перше row))
-              (sid (друге row))
-              (mechanism (третє row)))
+      ((атом? рядки) (#d0)
+       (нехай-послідовно ((рядок (перше рядки))
+              (профіль (перше рядок))
+              (ідентичність (друге рядок))
+              (механізм (третє рядок)))
          (за-умовою
-           ((тотожне? (admitted-profile? profile) (як-є no))
+           ((тотожне? (профіль-допущений? профіль) (як-є no))
             (#d1)
             (список (як-є function-table-mechanisms-violation)
-                  (як-є unsupported-profile) profile sid))
-           ((тотожне? (registry-has-sid? sid registry-rows) (як-є no))
+                  (як-є unsupported-profile) профіль ідентичність))
+           ((тотожне? (реєстр-містить-ідентичність? ідентичність рядки-реєстру) (як-є no))
             (#d1)
             (список (як-є function-table-mechanisms-violation)
-                  (як-є profile-function-not-in-canon-function-table) profile sid))
-           ((тотожне? (profile-has-route? profile sid (решта rows)) (як-є yes))
+                  (як-є profile-function-not-in-canon-function-table) профіль ідентичність))
+           ((тотожне? (профіль-містить-маршрут? профіль ідентичність (решта рядки)) (як-є yes))
             (#d1)
             (список (як-є function-table-mechanisms-violation)
-                  (як-є duplicate-profile-route) profile sid))
-           ((тотожне? (admitted-profile-mechanism? mechanism) (як-є no))
+                  (як-є duplicate-profile-route) профіль ідентичність))
+           ((тотожне? (механізм-профілю-допущений? механізм) (як-є no))
             (#d1)
             (список (як-є function-table-mechanisms-violation)
-                  (як-є unsupported-profile-mechanism) profile sid mechanism))
-           (t (validate-profile-rows (решта rows)))))))))
+                  (як-є unsupported-profile-mechanism) профіль ідентичність механізм))
+           (t (перевірити-рядки-профілю (решта рядки)))))))))
 
-(визначити validate-rows
-  (функція (rows)
+(визначити перевірити-рядки-механізмів
+  (функція (рядки)
     (за-умовою
-      ((атом? rows) ()
+      ((атом? рядки) ()
        (як-є (function-table-mechanisms-ok)))
-      ((атом? rows) (#d0)
-       (нехай-послідовно ((row (перше rows))
-              (sid (перше row))
-              (executor (друге row))
-              (mechanism (третє row)))
+      ((атом? рядки) (#d0)
+       (нехай-послідовно ((рядок (перше рядки))
+              (ідентичність (перше рядок))
+              (виконавець (друге рядок))
+              (механізм (третє рядок)))
          (за-умовою
-           ((тотожне? (admitted-executor? executor) (як-є no))
+           ((тотожне? (виконавець-допущений? виконавець) (як-є no))
             (#d1)
             (список (як-є function-table-mechanisms-violation)
-                  (як-є unsupported-executor) sid executor))
-           ((тотожне? (registry-has-sid? sid registry-rows) (як-є no))
+                  (як-є unsupported-executor) ідентичність виконавець))
+           ((тотожне? (реєстр-містить-ідентичність? ідентичність рядки-реєстру) (як-є no))
             (#d1)
             (список (як-є function-table-mechanisms-violation)
-                  (як-є sid-not-in-canon-function-table) sid))
-           ((тотожне? (metadata-has-route? sid executor (решта rows)) (як-є yes))
+                  (як-є sid-not-in-canon-function-table) ідентичність))
+           ((тотожне? (метадані-містять-маршрут? ідентичність виконавець (решта рядки)) (як-є yes))
             (#d1)
             (список (як-є function-table-mechanisms-violation)
-                  (як-є duplicate-executor-route) sid executor))
-           ((тотожне? (admitted-mechanism? mechanism) (як-є no))
+                  (як-є duplicate-executor-route) ідентичність виконавець))
+           ((тотожне? (механізм-допущений? механізм) (як-є no))
             (#d1)
             (список (як-є function-table-mechanisms-violation)
-                  (як-є unsupported-mechanism) sid mechanism))
-           (t (validate-rows (решта rows)))))))))
+                  (як-є unsupported-mechanism) ідентичність механізм))
+           (t (перевірити-рядки-механізмів (решта рядки)))))))))
 
-(визначити legacy-verdict (validate-rows metadata-rows))
-(визначити profile-verdict (validate-profile-rows profile-rows))
+(визначити висновок-старого-маршруту (перевірити-рядки-механізмів рядки-механізмів))
+(визначити висновок-профілю (перевірити-рядки-профілю рядки-профілів))
 
-(визначити verdict
+(визначити висновок
   (за-умовою
-    ((однакові? legacy-verdict (як-є (function-table-mechanisms-ok)))
+    ((однакові? висновок-старого-маршруту (як-є (function-table-mechanisms-ok)))
      (#d1)
-     profile-verdict)
-    (t legacy-verdict)))
+     висновок-профілю)
+    (t висновок-старого-маршруту)))
 
-(друкувати verdict)
+(друкувати висновок)
