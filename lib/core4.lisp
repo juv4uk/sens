@@ -2335,7 +2335,7 @@
 
 
 ; === Д9: функції з перевіреними координатами без допуску нового машинного коду ===
-; D9:110100101 NUMERIC-EQUALITY. Exact D24+ numeric order is from D5
+; Д9:110100101 NUMERIC-EQUALITY. Точний числовий порядок D24+ походить із Д5
 ; Порівняння LESSP/GREATERP належать D5: різна бітність або операнди без домену відхиляються.
 (визначити числовий-рівність
   (функція (лівий правий)
@@ -2344,7 +2344,7 @@
       ((більше? лівий правий) ні)
       (так так))))
 
-; D9:010000000 CDR-PROPER. Observational equality of the proper list tail.
+; Д9:010000111 CDR-PROPER. Спостережувана рівність хвоста правильного списку.
 ; Створення та розбір структури виконують лише ратифіковані CONS/CDR домену D3.
 (визначити канон-закон-решта-правильний
   (функція (голова хвіст)
@@ -2979,7 +2979,7 @@
 
 ; Партія D6 · похідні власні закони, точні коди без прямого D6 opcode.
 ; D6:000101 MAPLIST — дія над усіма непорожніми хвостами.
-; D6:000101 MAPLIST(list, function) — successive suffix observations.
+; Д6:000101 MAPLIST(список, функція) — послідовні спостереження суфіксів.
 ; Точний закон D6 засвідчено у knowledge/d6-v2-binary-law-families.json і #3744.
 (визначити відобразити-залишки
   (функція (хвости дія)
@@ -3057,7 +3057,7 @@
 ; D8:00001011 MAPLIST* — ratified historical capability, exact 8-bit identity.
 ; Law: knowledge/d8-ratified.json: map successive proper-list tails, including final ().
 ; D6:000101 MAPLIST omits final (); this is a derived SENS definition,
-; not a new direct D8 machine-call admission or a legacy W8 slot.
+; Це не допуск нового прямого машинного виклику Д8 і не застарілий слот W8.
 (визначити відобразити-залишки-з-порожнім
   (функція (елементи дія)
     (за-умовою
@@ -3371,7 +3371,7 @@
       ((символ-більший? ліве праве) ні)
       (так так))))
 
-; D8:00110111 STRING= — lexical equality from both ratified orders.
+; Д8:00110111 STRING= — лексична рівність із двох ратифікованих порядків.
 ; Порівняння рядків за власним законом відхиляє несумісні нерядкові операнди.
 (визначити текст-рівний?
   (функція (ліве праве)
@@ -3651,7 +3651,7 @@
   (функція (запис)
     (друге (знайти-за-ключем (як-є produces) (решта запис)))))
 
-; D9:000000100 RESULT-TAGGED? — strict one-bit D1 verdict, not host truthiness.
+; Д9:000000100 RESULT-TAGGED? — строгий однобітний висновок Д1, а не істинність хоста.
 ; Некоректний заголовок у вигляді пари не є допустимим атомом стану.
 (визначити результат-позначений?
   (функція (результат)
@@ -3820,7 +3820,7 @@
   (функція (пропозиція)
     (перше (решта (решта (решта (решта пропозиція)))))))
 
-; D8:01001100 TRUNCATE — integer quotient toward zero, exact D24+ only.
+; Д8:01001100 TRUNCATE — ціла частка з округленням до нуля, лише точні D24+.
 (визначити округлити-до-нуля
   (функція (ділене дільник)
     ((функція (частка-модуля)
@@ -3841,7 +3841,7 @@
 
 
 ; Д9: алгебра рішень і станів захисту взята з lib/guard.lisp.
-; Ratified D9:000010001 GUARD-DECISION? and D9:000000000 GUARD-EVIDENCE-STATUS?
+; Ратифіковано Д9:000010001 GUARD-DECISION? і Д9:000000000 GUARD-EVIDENCE-STATUS?.
 ; Кожна відповідь — точний біт предиката D1.
 ; Неатомарне рішення чи стан відхиляється значенням «ні»,
 ; а не передається як пара в атомарне D3 EQ.
@@ -3891,8 +3891,8 @@
        (біт-довжина-невідємного (відняти (модуль число) 1)))
       (так (біт-довжина-невідємного число)))))
 
-; D8:01001110 LOGBITP — D1 strict bit predicate over the qualified
-; mathematical D24 index. Negative integers: two's-complement NOT(|n|-1).
+; Д8:01001110 LOGBITP — строгий предикат біта Д1 над допустимим
+; математичним індексом Д24. Від'ємні цілі: доповнення до двох NOT(|n|-1).
 (визначити біт-невідємного?
   (функція (позиція число)
     (за-умовою
@@ -3910,7 +3910,7 @@
       (так (біт-невідємного? позиція число)))))
 ; Д9: алгебру канонічних записів відновлено з lib/canon.lisp. Усі шість тотожностей
 ; мають ратифіковані дев'ятибітні координати; прямого виклику D9 немає.
-; D9:001110101 CANON-LAW-RESULT reuses the existing SENS record constructor.
+; Д9:001110101 CANON-LAW-RESULT повторно використовує чинний конструктор записів СЕНС.
 (визначити канон-закон-результат канон-запис-закону)
 ; D9:101000100 / D9:001010111 explicit SATISFIED/VIOLATED records.
 (визначити канон-закон-виконаний
@@ -3942,7 +3942,7 @@
           (канон-відповідність-з (решта результати)))
          (так (канон-відповідність-результат (як-є violated))))))))
 
-; D9:001111000 CANON-LAW-SYMBOLIC-SURFACE from lib/canon.lisp.
+; Д9:001111000 CANON-LAW-SYMBOLIC-SURFACE із lib/canon.lisp.
 ; Точний закон D3 ATOM/CAR/CDR/EQ/CONS, як у вже допущеному записі Канону.
 ; Це мовне визначення D9, а не новий примітив хоста чи машинний код.
 (визначити канон-закон-символьний-поверхня
@@ -4226,8 +4226,8 @@
       (так (вміст-сховище-містить? (решта сховище) адреса)))))
 
 ; D8:10110111 FLOOR, exact integer quotient rounded down.
-; D8:01001100 TRUNCATE and D8:01000000 dividend-signed REM are the
-; lower-domain proofs. When signs differ and REM != 0, FLOOR = TRUNC - 1.
+; Д8:01001100 TRUNCATE і Д8:01000000 REM зі знаком діленого —
+; доведення нижчих доменів. Якщо знаки різні й REM != 0, тоді FLOOR = TRUNC - 1.
 (визначити округлити-вниз
   (функція (ділене дільник)
     (за-умовою
@@ -4244,7 +4244,7 @@
       (так (округлити-до-нуля ділене дільник)))))
 
 ; D8:10110010 LOGNOT, infinite two's-complement arithmetic identity:
-; for any admitted signed integer n, NOT(n) = -n - 1.
+; Для кожного допустимого цілого n зі знаком: NOT(n) = -n - 1.
 (визначити побітове-не
   (функція (число)
     (відняти (змінити-знак число) 1)))
@@ -4252,7 +4252,7 @@
 
 ; D9:000010011 GUARD-REFERENCE-FIELD — tagged reference contains (field value).
 ; Ключі звіряємо через чинний D5 ASSOC та структурну рівність, без прямого виклику D9.
-; D9:000010011 — SENS-owned direct traversal of the tagged record fields.
+; Д9:000010011 — власний прямий обхід полів маркованого запису засобами СЕНС.
 ; Avoid anonymous call-head lowering; shape (tag (field value) ...).
 (визначити внутрішнє-поле-у-парах
   (функція (поле пари)
@@ -4265,34 +4265,34 @@
     (внутрішнє-поле-у-парах поле (решта запис))))
 
 
-; D9:000001111 PROVENANCE-RULE from canonical (statement goal (source ...) (rule ...) ...).
+; Д9:000001111 PROVENANCE-RULE із канонічного (statement goal (source ...) (rule ...) ...).
 (визначити походження-правило
   (функція (запис)
     (захист-еталон-поле (як-є rule) (решта запис))))
 
 
-; D9:000010110 PROVENANCE-GOAL is second cell of the canonical record.
+; Д9:000010110 PROVENANCE-GOAL — друга комірка канонічного запису.
 (визначити походження-ціль
   (функція (запис)
     (п-р запис)))
 
 
-; D9:000011100 PROVENANCE-DERIVED-FROM: immutable proof children field.
+; Д9:000011100 PROVENANCE-DERIVED-FROM — незмінне поле дочірніх доказів.
 (визначити походження-похідний-з
   (функція (запис)
     (захист-еталон-поле (як-є derived-from) (решта запис))))
 
 
-; D9:000101001 PROVENANCE-SOURCE: record's explicit evidence source field.
-; D9:000101001 PROVENANCE-SOURCE: exact third field in the canonical
-; (statement goal (source value) (rule ...) (derived-from ...)) record.
-; `source` is a data-field label, not a callable/domain surface identity.
+; Д9:000101001 PROVENANCE-SOURCE — явне поле джерела свідчення в записі.
+; Д9:000101001 PROVENANCE-SOURCE — точне третє поле канонічного
+; запису (statement goal (source value) (rule ...) (derived-from ...)).
+; `source` — позначення поля даних, а не виклична чи доменна поверхня.
 (визначити походження-джерело
   (функція (запис)
     (п-р (перше (решта (решта запис))))))
 
 
-; D9:000001000 GUARD-UNKNOWN-ROUTES — exact canonical routing choices from lib/guard.lisp.
+; Д9:000001000 GUARD-UNKNOWN-ROUTES — точні канонічні маршрути з lib/guard.lisp.
 ; No runtime orchestration; routing remains an immutable SENS value.
 (визначити захист-невідоме-маршрути
   (функція ()
@@ -4311,7 +4311,7 @@
         (verify citations-and-access-date))))))
 
 
-; D9:000100100 MAKE-GUARD-FINDING — canonical record from lib/guard.lisp.
+; Д9:000100100 MAKE-GUARD-FINDING — канонічний запис із lib/guard.lisp.
 ; Explicit allowed decision/evidence status, immutable SENS list fields.
 (визначити створити-захист-висновок
   (функція (вхідне-рішення вхідний-доказ-стан предмет стан контракт різниця вплив порада докази)
@@ -4340,7 +4340,7 @@
              (так (як-є ())))))))))
 
 ; D9:000110110 GUARD-COMPARE — pure SENS projection of lib/guard.lisp.
-; Existing structural EQUAL decides, D9 MAKE-GUARD-FINDING builds the record.
+; Рівність визначає чинний структурний EQUAL; запис будує Д9 MAKE-GUARD-FINDING.
 (визначити захист-порівняти
   (функція (предмет очікуване спостережене докази)
     (за-умовою
@@ -4356,8 +4356,8 @@
          (як-є reconcile-observation-with-contract) докази)))))
 
 ; D9:000000110 GUARD-UNKNOWN — preserve explicit missing evidence,
-; and classify unknown as a routable epistemic state, not silent reject.
-; The record layout is ratified from lib/guard.lisp make-guard-finding.
+; Невідомий стан класифікується як маршрутизований епістемічний стан, а не мовчазна відмова.
+; Формат запису ратифіковано в lib/guard.lisp через make-guard-finding.
 (визначити захист-невідоме
   (функція (предмет відсутні-докази порада)
     (список
@@ -4375,8 +4375,8 @@
       (список (як-є unknown-routes) (захист-невідоме-маршрути)))))
 
 ; D9:010111110 CANON-CONFORMS? — executable exact eleven-law aggregate.
-; lib/canon.lisp is the semantic donor. Existing D1 property laws are
-; projected into the canonical explicit three-field status record in SENS.
+; lib/canon.lisp є семантичним джерелом. Чинні закони властивостей Д1
+; проєктуються у канонічний явний запис стану з трьома полями мовою СЕНС.
 (визначити канон-запис-д1-ознаки
   (функція (закон ознака)
     (за-умовою
@@ -4406,8 +4406,8 @@
         (канон-закон-цитування-пригнічує-обчислення)
         (канон-закон-умова-перший-збіг-короткий-ланцюг)
         (канон-закон-символьний-поверхня)))))
-; D6:110101 MIN and D6:110111 MAX — proper variadic SENS projections.
-; A required first argument guarantees the original D6 arity boundary.
+; Д6:110101 MIN і Д6:110111 MAX — правильні варіативні проєкції СЕНС.
+; Обов'язковий перший аргумент зберігає початкове обмеження арності Д6.
 ; Exactly qualified D24+ comparisons occur in existing D6 list reducers.
 (визначити найменше
   (функція (перше-значення . решта-значень)
@@ -4422,7 +4422,7 @@
 
 
 ; D9:111111010 WORLD? — exactly (world parent journal metadata),
-; recovered from lib/world.lisp. No mutable host object or host predicate.
+; Відновлено з lib/world.lisp. Жодного змінюваного об'єкта чи предиката хоста.
 (визначити світ?
   (функція (значення)
     (за-умовою
@@ -4437,7 +4437,7 @@
       (так ні))))
 
 ; D9 world donor: filter newest-first tell/retract events by module.
-; Events have the ratified (operation module clause) list form.
+; Події мають ратифіковану форму списку (operation module clause).
 (визначити внутрішні-події-модуля
   (функція (модуль події)
     (за-умовою
@@ -4453,27 +4453,27 @@
   (функція (світ модуль)
     (внутрішні-події-модуля модуль (світ-журнал світ))))
 
-; D9:111100000 WORLD-MODULE-KNOWN? — only a nonempty pair event stream
+; Д9:111100000 WORLD-MODULE-KNOWN? — лише непорожній парний потік подій
 ; establishes existence; D1:NO is never silently coerced from ().
 (визначити світ-модуль-відомий?
   (функція (світ модуль)
     (хибне? (атом? (світ-модуль-події світ модуль)))))
 
 
-; D9:111010101 WORLD-TELL — a new immutable world with a tell-event.
-; Event identity and order are inherited from lib/world.lisp.
+; Д9:111010101 WORLD-TELL — новий незмінний світ із подією tell.
+; Тотожність і порядок подій успадковано від lib/world.lisp.
 (визначити світ-повідомити
   (функція (світ модуль клауза)
     (світ-запис світ (список (як-є tell) модуль клауза))))
 
-; D9:111001010 WORLD-RETRACT — record retraction, do not mutate parent.
+; Д9:111001010 WORLD-RETRACT — фіксація відкликання без зміни батьківського стану.
 (визначити світ-відкликати
   (функція (світ модуль клауза)
     (світ-запис світ (список (як-є retract) модуль клауза))))
 
 
 ; D9 WORLD-CLAUSES donor (lib/world.lisp), pure chronological event fold.
-; The journal is newest-first; fold oldest to newest without mutating worlds.
+; Журнал має порядок від нових до старих подій; згортати від старих до нових без змінювання світів.
 (визначити внутрішній-зворот-подій
   (функція (події акумулятор)
     (за-умовою
@@ -4482,7 +4482,7 @@
       (так (внутрішній-зворот-подій
         (решта події) (сполучити (перше події) акумулятор))))))
 
-; Retract only the first structurally identical active clause.
+; Відкликати лише першу активну клаузу, структурно тотожну шуканій.
 (визначити внутрішній-вилучити-клаузу
   (функція (клауза клаузи)
     (за-умовою
@@ -4515,7 +4515,7 @@
           (внутрішньо-застосувати-подію клаузи (перше події)))))))
 
 ; D9:111010110 WORLD-CLAUSES. Project currently asserted clauses for one
-; module from immutable journal, respecting tell/retract event order.
+; Модуль отримуємо з незмінного журналу з урахуванням порядку подій tell/retract.
 (визначити світ-клаузи
   (функція (світ модуль)
     (внутрішнє-згортання-подій
@@ -4524,7 +4524,7 @@
       (як-є ()))))
 
 
-; D9/D10 batch — 17.10.2026, owned semantic bodies (no direct D9/D10 dispatch).
+; Партія Д9/Д10 — 17.10.2026: власні семантичні тіла, без прямої диспетчеризації Д9/Д10.
 ; D9:010011101 JUSTIFIED-MEMBER? — ратифікована проєкція членства.
 ; Джерело: research/d9-justified-member-remove-batch-2026-10-17.lisp.
 (визначити обґрунтований-член?
@@ -4549,7 +4549,7 @@
     (сполучити факт підтримки)))
 
 ; D9:001111011 AXIOM — native historical TMS axiom (fact . NIL).
-; Law from lib/forward.lisp; exact D3 empty is data, no D9 direct opcode.
+; Закон із lib/forward.lisp; точна порожнеча Д3 є даними, не прямим опкодом Д9.
 (визначити аксіома
   (функція (факт)
     (створити-обґрунтований факт (як-є ()))))
@@ -4634,9 +4634,9 @@
 
 
 ; D10:0011001000 FIND-ALL (PAIP auxfns.lisp@2db2ba9).
-; Keep every matching list element, preserving order and repetitions.
+; Зберігати всі елементи списку, що збігаються, із початковим порядком та повтореннями.
 ; Default D8 EQL identity; optional supplied binary D1 predicate is the
-; language projection of the donor's :test law (no host keyword registry).
+; Мовна проєкція закону :test джерела (без реєстру ключових слів хоста).
 (визначити знайти-усі
   (функція (зразок елементи . способи)
     (за-умовою
@@ -4651,9 +4651,9 @@
 
 
 ; D10:0011011000 UNIQUE-FIND-IF-ANYWHERE (PAIP auxfns.lisp@2db2ba9).
-; Only leaves are tested. Visit CDR before CAR, ADJOIN matching CAR at
-; the front, yielding first-occurrence order without duplicate leaves.
-; Optional third list is the donor's found-so-far accumulator.
+; Перевіряються лише листки. Спочатку відвідати CDR, потім CAR; додавати відповідний CAR
+; на початок, отримуючи порядок перших появ без повторних листків.
+; Необов'язковий третій список — накопичувач уже знайденого з джерела.
 (визначити єдиний-знайти-якщо-будь-де
   (функція (умова дерево . попередні)
     ((функція (знайдене)
@@ -4671,10 +4671,10 @@
        ((порожній? попередні) (як-є ()))
        (так (перше попередні))))))
 
-; D10:0011001111 PARTITION-IF, derived from pinned PAIP auxfns.lisp.
+; Д10:0011001111 PARTITION-IF — похідна від зафіксованого PAIP auxfns.lisp.
 ; PAIP returns two Common Lisp values; the SENS projection is an explicit list
-; (selected rejected). Every source item is tested once; both partitions retain order.
-; Research-derived library helper only; no direct D10 opcode or F1-F4 admission.
+; Результат: (відібрані відхилені). Кожен вхідний елемент перевіряється один раз; порядок зберігається.
+; Лише бібліотечна похідна функція; без прямого опкоду Д10 чи допуску F1–F4.
 (визначити розділити-за-умовою-до
   (функція (предикат елементи так ні)
     (за-умовою
@@ -4736,7 +4736,7 @@
          (решта нові) (сполучити (перше нові) записи))))))
 
 ; D10:0010001110 KNOWLEDGE-PROPER-LIST? — harvested from lib/knowledge.lisp.
-; The entire CDR spine must terminate in D3:000, not an arbitrary atom.
+; Увесь ланцюг CDR мусить закінчуватися Д3:000, а не довільним атомом.
 ; Exact D1 result, no implicit truthiness or D10 opcode admission.
 (визначити правильно-структурований-список-знань?
   (функція (значення)
@@ -4755,7 +4755,7 @@
 ; D10:0001001001 FORALL-EVERY-CANDIDATE-SATISFIES.
 ; Native SENS recursion over exact D1 predicate bits: empty=YES,
 ; first NO stops; later candidates are evaluated only after preceding YES.
-; The predicate is an evaluated callable value, not a macro/code head.
+; Предикат — обчислене викличне значення, а не макрос чи голова коду.
 (визначити кожен-кандидат-задовольняє-умову?
   (функція (перевірка кандидати)
     (за-умовою
@@ -4768,7 +4768,7 @@
 ; D9:110101000 STRING-CONTAINS? — substring search, SENS-owned recursion.
 ; D9:110101010 takes (prefix string); both empty and rest are exact D9.
 ; Empty needle is included, non-string carriers fail in admitted D9 mechanisms.
-; This is a derived SENS definition, not a new direct D9 value-call mechanism.
+; Це похідне визначення СЕНС, а не новий механізм прямого виклику значення Д9.
 (визначити рядок-містить?
   (функція (рядок голка)
     (за-умовою
@@ -4780,7 +4780,7 @@
 ; D9:000111011 TRANSLATION-EVIDENCE-WORTHY?.
 ; Donor: lib/translation.lisp (rejected|ambiguous valid reviews are
 ; evidence; accepted reviews never create a rejection/ambiguity journal).
-; This is pure D3/D4/D5 structure with exact D1 verdicts, not D9 opcode.
+; Це чиста структура Д3/Д4/Д5 із точними висновками Д1, а не опкод Д9.
 (визначити переклад-доказ-вартий?
   (функція (перевірка)
     (за-умовою
@@ -4804,7 +4804,7 @@
 
 
 ; D9:000001110 TRANSLATION-EVIDENCE-NEXT:
-; immutable journal cons only when the reviewed outcome is worthy.
+; Незмінний журнал доповнюється через CONS лише для результату, гідного збереження.
 (визначити переклад-доказ-наступний
   (функція (перевірка журнал)
     (за-умовою
@@ -4813,7 +4813,7 @@
       (так журнал))))
 ; D9:111011111 WORLD-AT-DEPTH, D9:111101010 WORLD-COMMON-ANCESTOR.
 ; Donor lib/world.lisp: history generations != generic tree-depth.
-; No direct D9 opcode or host-side semantics: exact D24 and D1 only.
+; Без прямого опкоду Д9 чи семантики хоста: лише точні Д24 і Д1.
 (визначити внутрішня-глибина-поколінь
   (функція (світ)
     (за-умовою
@@ -4858,7 +4858,7 @@
       (так (світ-спільний-предок (світ-батько лівий) правий)))))
 
 
-; Internal donor helper: finite D3 proper-list check, exact D1 only.
+; Внутрішня допоміжна функція джерела: перевірка скінченного правильного списку Д3, лише точні Д1.
 (визначити результат-правильний-список?
   (функція (значення)
     (за-умовою
@@ -4866,7 +4866,7 @@
       (так (результат-правильний-список? (решта значення))))))
 
 
-; Internal donor helper: the two quoted negation heads are data symbols.
+; Внутрішня допоміжна функція джерела: дві цитовані голови заперечення є символами даних.
 (визначити результат-голова-заперечення?
   (функція (голова)
     (за-умовою
@@ -4876,8 +4876,8 @@
 
 
 ; D9:000011101 RESULT-GOAL? · lib/result-status.lisp.
-; Ordinary goal: proper nonempty list with a symbol head.
-; Negation is unary (not? nested-goal), recursively validated.
+; Звичайна мета — правильний непорожній список із символьною головою.
+; Заперечення одномісне (not? nested-goal); перевіряється рекурсивно.
 (визначити результат-ціль?
   (функція (ціль)
     (за-умовою
@@ -4910,8 +4910,8 @@
 ; D9:111010010 SCIENTIFIC-CONSTANT-STATUS and D9:111110010 STATUS-VALID?.
 ; Exact language donor: lib/quantity.lisp — a seven-slot immutable record
 ; (scientific-constant/1 name quantity status kind system source).
-; Status admits exact-by-definition and measured; physical-derived is a KIND,
-; not a third status. All predicate results are strict D1 width-one words.
+; Статус допускає exact-by-definition і measured; physical-derived — це вид (KIND),
+; а не третій статус. Усі предикати повертають строгі однобітні слова Д1.
 (визначити науковий-константа-стан
   (функція (константа)
     (перше (решта (решта (решта константа))))))
@@ -4927,9 +4927,9 @@
 
 ; Local derived type check used by D9 RESULT-GOAL?, not an admitted
 ; D9:110101100 machine call; language-owned SYMBOL? already exists in Core4.
-; Local SENS-only SYMBOL? predicate, borrowed from lib/world.lisp.
+; Локальний предикат SYMBOL? лише для СЕНС, запозичений із lib/world.lisp.
 ; D8:11110100 serializes an atom; D8:11101101 restores its symbol name.
-; Do not call non-admitted D9:110101100 or missing English compatibility names.
+; Не викликати недопущене Д9:110101100 чи відсутні англійські сумісні назви.
 (визначити результат-символ?
   (функція (значення)
     (за-умовою
@@ -4988,28 +4988,28 @@
       (так (асоціація-тотожність ключ (решта асоціації) запасна-дія)))))
 
 ; D9:100000000 п-п-п-п-п-п-п — ratified seven-step selector,
-; composition of proven six-step D8 selector and exact D3 CAR:100.
+; композиція доведеного шестикрокового селектора Д8 та точного Д3 CAR:100.
 ; No new direct D9 machine-call mechanism.
 (визначити п-п-п-п-п-п-п
   (функція (значення)
     (перше-від-перше-від-перше-від-перше-від-перше-від-перше (перше значення))))
 
 ; D9:100000001 п-п-п-п-п-п-р — ratified seven-step selector,
-; composition of proven six-step D8 selector and exact D3 CDR:011.
+; композиція доведеного шестикрокового селектора Д8 та точного Д3 CDR:011.
 ; No new direct D9 machine-call mechanism.
 (визначити п-п-п-п-п-п-р
   (функція (значення)
     (перше-від-перше-від-перше-від-перше-від-перше-від-перше (решта значення))))
 
 ; D9:100000010 п-п-п-п-п-р-п — ratified seven-step selector,
-; composition of proven six-step D8 selector and exact D3 CAR:100.
+; композиція доведеного шестикрокового селектора Д8 та точного Д3 CAR:100.
 ; No new direct D9 machine-call mechanism.
 (визначити п-п-п-п-п-р-п
   (функція (значення)
     (перше-від-перше-від-перше-від-перше-від-перше-від-решта (перше значення))))
 
 ; D9:100000011 п-п-п-п-п-р-р — ratified seven-step selector,
-; composition of proven six-step D8 selector and exact D3 CDR:011.
+; композиція доведеного шестикрокового селектора Д8 та точного Д3 CDR:011.
 ; No new direct D9 machine-call mechanism.
 (визначити п-п-п-п-п-р-р
   (функція (значення)
