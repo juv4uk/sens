@@ -1,4 +1,5 @@
-; SSE instruction-family catalogue. Physical ISA facts only.
+; Каталог команд SSE. Тут зібрано тільки факти фізичного набору команд;
+; англомовні мнемоніки — точні дані ISA, а не викличні імена SENS.
 
 (isa-catalogue/1
   (extension SSE)
