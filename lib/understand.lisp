@@ -1,24 +1,20 @@
-; A controlled-natural-language bridge from a fixed sentence shape to a
-; knowledge clause `(head . body)`, in `lib/knowledge.lisp`'s / `lib/reason.lisp`'s
-; format — the "text -> structure" half of the Advice Taker vision from
-; private/lisp-to-knowledge.md §6, deliberately without a real NLP model.
+; Перетворення контрольованих речень на структуровані твердження знань.
+; Джерела законів структур знань: lib/knowledge.lisp та lib/reason.lisp.
+; Модуль реалізує перехід від послідовності слів до форми твердження,
+; без статистичної мовної моделі й без самостійної семантики.
 ;
-; Migrated: two-field COND only; unconditional branches use exact D1:1.
-; Pairs with migrated lib/narrate.lisp (structure -> text). Reuses project
-; selectors 100/011/1001/10011/100111. Width is identity; every bit valued.
+; Умовні форми мають дві складові. Безумовні гілки використовують
+; точну істину першого домену; складені селектори належать чинній драбині.
+; Назви і ширини функцій не виводяться зі збігу бітових суфіксів.
 ;
-; `understand` takes a *word list*, not a raw string — my-lisp has no string
-; primitives. Controlled natural language: three fixed sentence shapes,
-; matched structurally, not parsed statistically.
+; Вхід — список слів, а не текстовий рядок. Розпізнаються лише три
+; фіксовані структури: належність об'єкта до виду, тричленне
+; відношення та загальне правило. Граматика є структурною.
+; Англійські слова в цитуванні нижче — точні дані вхідного формату;
+; їх переклад без зміни граматики порушив би сумісність.
 ;
-; Shapes recognized:
-;   (X is a Y)   / (X is an Y) / (X is Y)  -> fact:  ((Y X))
-;   (X V Y)                                -> fact:  ((V X Y))
-;   (all X have Y)                         -> rule:  ((has (var w) Y) (X (var w)))
-;
-; Query shapes (via `understand-query`):
-;   (is X a Y)   / (is X an Y) / (is X Y)  -> goal:  (Y X)
-;   (does X V Y)                           -> goal:  (V X Y)
+; Запит також має фіксовану форму: належність об'єкта до виду
+; або тричленне відношення. Вихід — структура цілі для міркування.
 
 (визначити прибрати-артикль
   (функція (слова)
@@ -52,8 +48,8 @@
       (так
        (розібрати-відношення слова)))))
 
-; `understand-query` is the goal-shaped complement of `understand`.
-; Controlled, structural, deterministic: no morphology, no network, no LLM.
+; Розбір запиту повертає форму цілі, доповнюючи розбір тверджень.
+; Жодного морфологічного аналізу, мережевого звернення чи мовної моделі.
 (визначити побудувати-запит-є
   (функція (слова)
     (список (перше (прибрати-артикль (решта-решти слова))) (друге слова))))
@@ -73,9 +69,11 @@
       (так
        (як-є ())))))
 
-; D9 Ukrainian callable projections. Names/codes: lib/domains/d9.lisp;
-; source laws: knowledge/d9-semantic-layer-harvest-v1.json.
-; SENS DEFINE aliases existing Lisp closures; NO new native D9 dispatch.
+; Виконувані українські назви дев'ятого домену звірено з
+; lib/domains/d9.lisp; джерело законів — дослідницька таблиця
+; knowledge/d9-semantic-layer-harvest-v1.json.
+; Визначення прив'язують уже наявні мовні функції до ратифікованих назв.
+; Нова машинна диспетчеризація дев'ятого домену тут не створюється.
 ; D9:000001011
 (визначити розібрати-є побудувати-факт-є)
 ; D9:000001100
