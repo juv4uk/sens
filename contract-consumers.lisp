@@ -1,5 +1,6 @@
-; contract-consumers.lisp — direct consumers of sens (СЕНС) language semantics.
-; The source contract is authoritative; consumer snapshots are pinned observations.
+; Безпосередні споживачі мовної семантики СЕНС.
+; Авторитетом є вихідний контракт мови.
+; Зафіксовані знімки стану споживачів — лише спостереження, не нові закони.
 
 (contract-consumers
   (source
