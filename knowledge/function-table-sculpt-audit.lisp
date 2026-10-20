@@ -1,7 +1,7 @@
-; function-table-sculpt-audit.lisp — live SID implementation audit (#1118)
-; Audit data, NOT semantic authority. Identity authority remains lib/surface/semantic-registry.lisp.
-; Historical #734 is superseded where current executable implementation disagrees.
-; remove backend implementation != demote primitive status != reclaim/delete SID.
+; function-table-sculpt-audit.lisp — аудит живої реалізації SID (#1118)
+; Дані аудиту, НЕ семантична влада. Влада ідентичності лишається в lib/surface/semantic-registry.lisp.
+; Історичний #734 замінено там, де чинна виконувана реалізація розходиться.
+; вилучення бекенд-реалізації != пониження статусу примітива != повернення/видалення SID.
 
 (function-table-sculpt-audit/1
   (issue 1118)
