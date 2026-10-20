@@ -34,7 +34,7 @@ fn legacy_coordination_deprecation_records_retired_physical_surface() {
 
     let value = session
         .environment
-        .get("*swarm-legacy-coordination*")
+        .get("*застаріла-координація-рою*")
         .expect("deprecation marker should define machine-readable migration data")
         .to_string();
 
@@ -62,7 +62,7 @@ fn no_live_callers_audit_records_physical_removal() {
 
     let value = session
         .environment
-        .get("*swarm-no-live-callers-audit*")
+        .get("*аудит-відсутності-чинних-викликів-рою*")
         .expect("no-live-callers audit should be executable machine-readable data")
         .to_string();
 

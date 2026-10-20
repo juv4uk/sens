@@ -1,11 +1,11 @@
-; Ecosystem-scoped C5 audit після фізичного видалення legacy :9999 coordination.
-; Coordination authority — swarm-node :910x / swarm/1. my-lisp :9999 лишається
-; semantic oracle; semantic-oracle callers навмисно не входять у цей removal gate.
+; Аудит C5 для екосистеми після фізичного вилучення старої координації :9999.
+; За координацію відповідає swarm-node :910x / swarm/1. Служба my-lisp :9999
+; лишається семантичним оракулом, її споживачі не належать до цього аудиту.
 ;
-; status=removed описує фізичний стан API. Сильніший claim про повністю
-; підтверджений C5 робиться лише після зеленого C5 gate та full CI на цьому стані.
+; Стан status=removed описує фізичне вилучення API. Повну готовність C5
+; встановлюють лише успішні перевірки відповідної межі та всієї системи.
 
-(визначити *swarm-no-live-callers-audit*
+(визначити *аудит-відсутності-чинних-викликів-рою*
   (як-є
     ((schema . swarm-no-live-callers-audit/1)
      (as-of . "2026-09-07")

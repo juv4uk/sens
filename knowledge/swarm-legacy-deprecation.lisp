@@ -1,9 +1,9 @@
-; Машинно-читаний marker для retired coordination operations старого :9999 API.
-; Coordination authority належить swarm-node :910x / swarm/1.
-; Стару coordination surface на my-lisp :9999 фізично видалено; ці назви
-; лишаються тут як migration data та не мають dispatch path у semantic oracle.
+; Машинозчитуваний запис про виведені з ужитку операції координації API :9999.
+; Повноваження координації належать swarm-node :910x / swarm/1.
+; Колишню координаційну поверхню my-lisp :9999 фізично вилучено.
+; Операції нижче — лише історичні дані перенесення, без маршруту виклику.
 
-(визначити *swarm-legacy-coordination*
+(визначити *застаріла-координація-рою*
   (як-є
     ((schema . swarm-legacy-deprecation/1)
      (status . deprecated)

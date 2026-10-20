@@ -15,7 +15,7 @@
 ; програмні surface мови (зокрема Sanskrit surface), канонічні ідентичності,
 ; зовнішні API, точні назви символів, протоколів, файлів чи upstream-термінів.
 
-(визначити *language-policy*
+(визначити *мовна-політика*
   (як-є
     ((schema . language-policy/1)
      (status . ratified)
