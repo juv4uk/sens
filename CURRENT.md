@@ -53,6 +53,10 @@ exact binary word (0/1 digits)
 
 Current Core examples:
 
+Канонічні людські таблиці доменів: [D1](lib/domains/d1.lisp), [D9](lib/domains/d9.lisp), [D10](lib/domains/d10.lisp); окрема числова authority D24+ — [`contracts/numeric-domains-ratification.lisp`](contracts/numeric-domains-ratification.lisp).
+
+Написи проекцій — лише source/UI routing metadata: вони маршрутизують до доменно-кваліфікованого об'єкта, але не визначають його identity чи значення.
+
 ```text
 D1  PredicateBit — exact 1-bit keys (2/2)
 D2  racana2 structure — exact 2-bit keys (4/4)

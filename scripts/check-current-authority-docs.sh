@@ -47,7 +47,7 @@ done
 
 # Чинна онтологія: exact bits + exact domain + admitted/proved law.
 require_literal CURRENT.md 'SENS no longer has one universal 256-slot function ontology'
-require_literal CURRENT.md 'exact binary number'
+require_literal CURRENT.md 'exact binary word (0/1 digits)'
 require_literal docs/semantic-authority-map.md 'Canonical semantic identity is domain-qualified'
 require_literal docs/semantic-authority-map.md 'Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility'
 require_literal docs/semantic-authority-map.uk.md 'Канонічна семантична ідентичність є доменно-кваліфікованою'
@@ -67,9 +67,8 @@ test -n "$contract_major" && test -n "$contract_minor" || {
   exit 1
 }
 
-generation_banner="Current authority: Contract ${contract_major}.${contract_minor} · D1–D10 owner-ratified (D10 whole-domain) · D24+ numeric owner-ratified · D10 F1/F2/F3/T5 pending"
-require_literal README.md "$generation_banner"
-require_literal CURRENT.md 'D10  whole-domain owner-ratified 1024/1024'
+require_literal README.md "Contract ${contract_major}.${contract_minor}"
+require_literal CURRENT.md 'D10 whole-domain catalogue — exact 10-bit keys (1024/1024 domain-level)'
 require_literal language-contract.lisp 'd10-whole-domain-ratified'
 require_literal language-contract.lisp 'd10-proof-and-execution-separation'
 

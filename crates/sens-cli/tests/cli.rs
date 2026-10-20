@@ -102,7 +102,7 @@ fn explicit_core3_flag_selects_core3_before_file_evaluation() {
 
 #[test]
 fn oracle_check_file_is_agent_friendly_and_side_effect_free() {
-    let path = std::env::temp_dir().join("my-lisp-oracle-check-unclosed.lisp");
+    let path = std::env::temp_dir().join("sens-oracle-check-unclosed.lisp");
     std::fs::write(&path, "(def answer (+ 40 2)").expect("should write fixture");
 
     let output = sens()
@@ -233,15 +233,15 @@ fn oracle_help_reports_not_found_when_absent_from_both_directories() {
 #[test]
 fn running_a_source_file_prints_its_result() {
     let dir = std::env::temp_dir();
-    let path = dir.join("my-lisp-cli-test-ok.lisp");
-    std::fs::write(&path, "(+ 1 2)").expect("should write temp file");
+    let path = dir.join("sens-cli-test-ok.lisp");
+    std::fs::write(&path, "(як-є сенс)").expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert_eq!(stdout.trim(), "3");
+    assert_eq!(stdout.trim(), "сенс");
 }
 
 /// Historical human-source extensions remain compatibility inputs only.
@@ -249,10 +249,10 @@ fn running_a_source_file_prints_its_result() {
 #[test]
 fn textual_compatibility_extensions_do_not_claim_sens_binary_identity() {
     let dir = std::env::temp_dir();
-    let code = "(+ 1 2)";
+    let code = "(як-є сенс)";
 
     for ext in [".wsm", ".my", ".lisp", ".сенс"] {
-        let path = dir.join(format!("my-lisp-cli-test-ext{ext}"));
+        let path = dir.join(format!("sens-cli-test-ext{ext}"));
         std::fs::write(&path, code).expect("should write compatibility source");
 
         let output = sens().arg(&path).output().expect("binary should run");
@@ -263,7 +263,7 @@ fn textual_compatibility_extensions_do_not_claim_sens_binary_identity() {
             "{ext}: {}",
             String::from_utf8_lossy(&output.stderr)
         );
-        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "3", "{ext}");
+        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "сенс", "{ext}");
     }
 }
 
@@ -317,7 +317,7 @@ fn sens_binary_rejects_text_disguised_as_physical_t5() {
 #[test]
 fn running_a_file_with_an_evaluation_error_exits_nonzero() {
     let dir = std::env::temp_dir();
-    let path = dir.join("my-lisp-cli-test-eval-error.lisp");
+    let path = dir.join("sens-cli-test-eval-error.lisp");
     std::fs::write(&path, "(car (quote ()))").expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
@@ -331,7 +331,7 @@ fn running_a_file_with_an_evaluation_error_exits_nonzero() {
 #[test]
 fn running_a_file_with_a_parse_error_exits_nonzero() {
     let dir = std::env::temp_dir();
-    let path = dir.join("my-lisp-cli-test-parse-error.lisp");
+    let path = dir.join("sens-cli-test-parse-error.lisp");
     std::fs::write(&path, "(1 2").expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
@@ -345,7 +345,7 @@ fn running_a_file_with_a_parse_error_exits_nonzero() {
 #[test]
 fn running_a_missing_file_reports_a_read_error() {
     let output = sens()
-        .arg("this-file-does-not-exist-my-lisp-cli.lisp")
+        .arg("this-file-does-not-exist-sens-cli.lisp")
         .output()
         .expect("binary should run");
 
@@ -364,7 +364,7 @@ fn repl_history_persists_across_separate_sessions() {
     // Isoliert HOME/USERPROFILE pro Testlauf, damit weder das echte
     // ~/.sens-history des Nutzers gelesen/geschrieben wird noch parallele
     // Testläufe kollidieren.
-    let dir = std::env::temp_dir().join(format!("my-lisp-cli-test-history-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("sens-cli-test-history-{}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("should create temp home dir");
 
     let run = |input: &str| {
@@ -404,7 +404,7 @@ fn repl_echoes_a_lone_unknown_symbol_as_a_greeting_not_an_error() {
     use std::io::Write;
     use std::process::Stdio;
 
-    let dir = std::env::temp_dir().join(format!("my-lisp-cli-test-echo-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("sens-cli-test-echo-{}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("should create temp home dir");
 
     let mut child = sens()
@@ -445,7 +445,7 @@ fn repl_echoes_a_lone_unknown_symbol_as_a_greeting_not_an_error() {
 #[test]
 fn file_mode_still_errors_on_a_lone_unknown_symbol() {
     let dir = std::env::temp_dir();
-    let path = dir.join("my-lisp-cli-test-lone-symbol.lisp");
+    let path = dir.join("sens-cli-test-lone-symbol.lisp");
     std::fs::write(&path, "мама").expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
@@ -460,12 +460,12 @@ fn file_mode_still_errors_on_a_lone_unknown_symbol() {
 fn read_with_no_arguments_reads_one_line_from_real_stdin() {
     // Reliable in file mode, where the CLI's own stdin isn't also owned by
     // rustyline's line editor (see the caveat on read_stdin_line in
-    // crates/my-lisp/src/eval/special_forms.rs for the interactive-REPL case).
+    // crates/sens/src/eval/special_forms/io.rs for the interactive-REPL case).
     use std::io::Write;
     use std::process::Stdio;
 
     let dir = std::env::temp_dir();
-    let path = dir.join("my-lisp-cli-test-read-stdin.lisp");
+    let path = dir.join("sens-cli-test-read-stdin.lisp");
     std::fs::write(&path, "(eval (read))").expect("should write temp file");
 
     let mut child = sens()
@@ -498,7 +498,7 @@ fn core_lib_is_preloaded_before_running_a_file() {
     // lib/core.my definiert `identity`; würde die CLI core.my nicht mehr einspeisen,
     // schlüge dies mit einem "unknown symbol"-Fehler fehl statt 5 zurückzugeben.
     let dir = std::env::temp_dir();
-    let path = dir.join("my-lisp-cli-test-core-lib.lisp");
+    let path = dir.join("sens-cli-test-core-lib.lisp");
     std::fs::write(&path, "(identity 5)").expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
@@ -513,12 +513,12 @@ fn core_lib_is_preloaded_before_running_a_file() {
 fn argv_carries_everything_after_the_filename() {
     // *argv* (PLAN.md item 21's follow-up, for scripts/release.my taking a
     // version on the command line) is whatever follows the filename, as a
-    // my-lisp list of strings — not parsed as code, just passed through.
+    // SENS list of strings — not parsed as code, just passed through.
     // *argv* (prodovzhennia PLAN.md, punktu 21, dlia scripts/release.my, yaka
     // bere versiiu z komandnoho riadka) — use, shcho yde pislia imeni failu, yak
-    // my-lisp-spysok riadkiv — ne parsytsia yak kod, lyshe peredaietsia yak ye.
+    // SENS-spysok riadkiv — ne parsytsia yak kod, lyshe peredaietsia yak ye.
     let dir = std::env::temp_dir();
-    let path = dir.join("my-lisp-cli-test-argv.lisp");
+    let path = dir.join("sens-cli-test-argv.lisp");
     std::fs::write(&path, "*argv*").expect("should write temp file");
 
     let output = sens()
@@ -537,7 +537,7 @@ fn argv_carries_everything_after_the_filename() {
 #[test]
 fn argv_is_empty_when_nothing_follows_the_filename() {
     let dir = std::env::temp_dir();
-    let path = dir.join("my-lisp-cli-test-argv-empty.lisp");
+    let path = dir.join("sens-cli-test-argv-empty.lisp");
     std::fs::write(&path, "*argv*").expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
@@ -687,7 +687,7 @@ fn sexpr_protocol_parse_returns_canonical_structure_not_debug_format() {
 
     assert!(
         response.contains("(value (+ 1 2))"),
-        "expected canonical my-lisp syntax, not a Rust Debug string: {response}"
+        "expected canonical SENS syntax, not a Rust Debug string: {response}"
     );
 }
 
