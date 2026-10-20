@@ -2,7 +2,8 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(0011 identity (0010 (значення) значення))
+(0011 тотожність (0010 (значення) значення))
+(0011 identity тотожність)
 
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
@@ -27,7 +28,8 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(0011 list (0010 аргументи аргументи))
+(0011 список (0010 аргументи аргументи))
+(0011 list список)
 
 (0011 not
   (0010 (значення)
@@ -35,21 +37,25 @@
       (значення (001 ()))
       (t t))))
 
-(0011 pair
+(0011 пара
   (0010 (лівий правий)
     (111 лівий (111 правий (001 ())))))
+(0011 pair пара)
 
-(0011 second
+(0011 друге
   (0010 (значення)
     (100 (011 значення))))
+(0011 second друге)
 
-(0011 third
+(0011 третє
   (0010 (значення)
     (100 (011 (011 значення)))))
+(0011 third третє)
 
-(0011 fourth
+(0011 четверте
   (0010 (значення)
     (100 (011 (011 (011 значення))))))
+(0011 fourth четверте)
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -61,7 +67,7 @@
 ; не друге визначення), бо реальні виклики вже пишуть саме так
 ; (lib/reason.my мав власний локальний (def cadddr ...) до цього,
 ; посимвольно ідентичний тілу fourth).
-(0011 cadddr fourth)
+(0011 cadddr четверте)
 
 ; fifth — same single-parameter primitive-chain pattern as second/third/
 ; fourth, one step deeper. Found duplicated in two places at once:
@@ -73,9 +79,10 @@
 ; у двох місцях: власний локальний (def fifth ...) у lib/narrate.my,
 ; посимвольно ідентичний, і node-right у lib/persistent-map.my — та
 ; сама операція, виписана вручну замість названа.
-(0011 fifth
+(0011 п'ятий
   (0010 (значення)
     (100 (011 (011 (011 (011 значення)))))))
+(0011 fifth п'ятий)
 
 (0011 caar
   (0010 (значення)
