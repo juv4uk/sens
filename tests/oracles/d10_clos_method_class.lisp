@@ -1,28 +1,29 @@
-;;;; Historical CLOS donor oracle only; never SENS code or .sens source.
-;;;; The observations are pinned to ANSI Common Lisp / CLOS semantics.
+;;;; Історичний CLOS-оракул Д10: лише дослідницький еталон, не код СЕНС.
+;;;; Спостереження спираються на ANSI Common Lisp і закони CLOS.
+;;;; Викличні імена стандартної бібліотеки та контрольні мітки залишено без змін.
 (in-package :cl-user)
 
 (defvar *d10-method-class-observations* 0)
 
-(defun d10-method-class-observe (id truth)
-  (unless truth
-    (error "D10 CLOS method/class donor oracle failed: ~A" id))
+(defun d10-method-class-observe (назва умова)
+  (unless умова
+    (error "D10 CLOS method/class donor oracle failed: ~A" назва))
   (incf *d10-method-class-observations*)
-  (format t "OBS~C~A~CPASS~%" #\Tab id #\Tab))
+  (format t "OBS~C~A~CPASS~%" #\Tab назва #\Tab))
 
-(defun d10-method-class-signals-error-p (thunk)
+(defun d10-method-class-signals-error-p (дія)
   (handler-case
-      (progn (funcall thunk) nil)
+      (progn (funcall дія) nil)
     (error () t)))
 
-;;; Exact signature lookup is different from runtime applicability.
-(defgeneric d10-method-class-dispatch (x))
-(defmethod d10-method-class-dispatch ((x integer)) :integer)
-(defmethod d10-method-class-dispatch ((x number)) :number)
-(defmethod d10-method-class-dispatch :before ((x integer)) nil)
-(defmethod d10-method-class-dispatch ((x string)) :string)
+;;; Точне знаходження методу за сигнатурою не тотожне диспетчеризації виклику.
+(defgeneric d10-method-class-dispatch (значення))
+(defmethod d10-method-class-dispatch ((значення integer)) :integer)
+(defmethod d10-method-class-dispatch ((значення number)) :number)
+(defmethod d10-method-class-dispatch :before ((значення integer)) nil)
+(defmethod d10-method-class-dispatch ((значення string)) :string)
 
-;;; CHANGE-CLASS classes and hook must be global definitions.
+;;; Класи та метод оновлення для CHANGE-CLASS визначено на верхньому рівні.
 (defclass d10-method-class-before ()
   ((retained :initarg :retained)
    (common-unbound)
@@ -35,73 +36,74 @@
 (defvar *d10-change-class-target* nil)
 (defvar *d10-change-class-hook-observation* nil)
 (defmethod update-instance-for-different-class :before
-    ((previous d10-method-class-before)
-     (current d10-method-class-after)
-     &rest initargs)
-  (declare (ignore initargs))
+    ((попередній d10-method-class-before)
+     (поточний d10-method-class-after)
+     &rest параметри-ініціалізації)
+  (declare (ignore параметри-ініціалізації))
   (setf *d10-change-class-hook-observation*
-        (list (slot-value previous 'retained)
-              (eq current *d10-change-class-target*))))
+        (list (slot-value попередній 'retained)
+              (eq поточний *d10-change-class-target*))))
 
-(let* ((gf #'d10-method-class-dispatch)
-       (integer-specializer (find-class 'integer))
-       (number-specializer (find-class 'number))
-       (integer-method (find-method gf nil (list integer-specializer)))
-       (number-method (find-method gf nil (list number-specializer)))
-       (before-method (find-method gf '(:before) (list integer-specializer))))
+(let* ((узагальнена-функція #'d10-method-class-dispatch)
+       (спеціалізатор-цілих (find-class 'integer))
+       (спеціалізатор-чисел (find-class 'number))
+       (метод-цілих (find-method узагальнена-функція nil (list спеціалізатор-цілих)))
+       (метод-чисел (find-method узагальнена-функція nil (list спеціалізатор-чисел)))
+       (попередній-метод (find-method узагальнена-функція '(:before) (list спеціалізатор-цілих))))
   (d10-method-class-observe "FIND_METHOD_INTEGER_EXACT"
-    (eq integer-method (find-method gf nil (list integer-specializer))))
+    (eq метод-цілих (find-method узагальнена-функція nil (list спеціалізатор-цілих))))
   (d10-method-class-observe "FIND_METHOD_NUMBER_EXACT"
-    (eq number-method (find-method gf nil (list number-specializer))))
+    (eq метод-чисел (find-method узагальнена-функція nil (list спеціалізатор-чисел))))
   (d10-method-class-observe "FIND_METHOD_BEFORE_QUALIFIER_EXACT"
-    (eq before-method (find-method gf '(:before) (list integer-specializer))))
+    (eq попередній-метод (find-method узагальнена-функція '(:before) (list спеціалізатор-цілих))))
   (d10-method-class-observe "FIND_METHOD_QUALIFIER_DISTINCT"
-    (not (eq integer-method before-method)))
+    (not (eq метод-цілих попередній-метод)))
   (d10-method-class-observe "FIND_METHOD_MISSING_RETURNS_NIL"
-    (null (find-method gf '(:after) (list integer-specializer) nil)))
+    (null (find-method узагальнена-функція '(:after) (list спеціалізатор-цілих) nil)))
   (d10-method-class-observe "FIND_METHOD_MISSING_DEFAULT_ERRORS"
     (d10-method-class-signals-error-p
-      (lambda () (find-method gf '(:after) (list integer-specializer)))))
+      (lambda () (find-method узагальнена-функція '(:after) (list спеціалізатор-цілих)))))
   (d10-method-class-observe "FIND_METHOD_SPECIALIZER_ARITY_ERRORS"
     (d10-method-class-signals-error-p
-      (lambda () (find-method gf nil nil nil))))
+      (lambda () (find-method узагальнена-функція nil nil nil))))
   (d10-method-class-observe "FIND_METHOD_LOOKUP_NOT_DISPATCH_RESULT"
-    (and (eq number-method
-             (find-method gf nil (list number-specializer)))
-         (eq (funcall gf 42) :integer)
-         (not (eq number-method integer-method))))
+    (and (eq метод-чисел
+             (find-method узагальнена-функція nil (list спеціалізатор-чисел)))
+         (eq (funcall узагальнена-функція 42) :integer)
+         (not (eq метод-чисел метод-цілих))))
 
-  ;; Removing one method leaves the generic function, siblings and qualifiers.
+  ;; Видалення методу зберігає узагальнену функцію, інші методи й кваліфікатори.
   (d10-method-class-observe "REMOVE_METHOD_RETURNS_SAME_GF"
-    (eq gf (remove-method gf integer-method)))
+    (eq узагальнена-функція (remove-method узагальнена-функція метод-цілих)))
   (d10-method-class-observe "REMOVE_METHOD_INTEGER_METHOD_ABSENT"
-    (null (find-method gf nil (list integer-specializer) nil)))
+    (null (find-method узагальнена-функція nil (list спеціалізатор-цілих) nil)))
   (d10-method-class-observe "REMOVE_METHOD_ABSENT_NO_ERROR"
-    (eq gf (remove-method gf integer-method)))
+    (eq узагальнена-функція (remove-method узагальнена-функція метод-цілих)))
   (d10-method-class-observe "REMOVE_METHOD_ABSENT_RETURNS_SAME_GF"
-    (eq gf (remove-method gf integer-method)))
+    (eq узагальнена-функція (remove-method узагальнена-функція метод-цілих)))
   (d10-method-class-observe "REMOVE_METHOD_OTHER_METHOD_STILL_PRESENT"
-    (eq number-method (find-method gf nil (list number-specializer))))
+    (eq метод-чисел (find-method узагальнена-функція nil (list спеціалізатор-чисел))))
   (d10-method-class-observe "REMOVE_METHOD_FALLBACK_DISPATCH"
-    (eq (funcall gf 42) :number))
+    (eq (funcall узагальнена-функція 42) :number))
   (d10-method-class-observe "REMOVE_METHOD_BEFORE_STILL_PRESENT"
-    (eq before-method (find-method gf '(:before) (list integer-specializer))))
+    (eq попередній-метод (find-method узагальнена-функція '(:before) (list спеціалізатор-цілих))))
 
-  ;; CHANGE-CLASS preserves identity, common slot value and unbound state.
-  (let ((object (make-instance 'd10-method-class-before :retained 41)))
-    (setf *d10-change-class-target* object
+  ;; CHANGE-CLASS зберігає тотожність об'єкта, значення спільного слота
+  ;; та стан незв'язаного спільного слота.
+  (let ((об'єкт (make-instance 'd10-method-class-before :retained 41)))
+    (setf *d10-change-class-target* об'єкт
           *d10-change-class-hook-observation* nil)
     (d10-method-class-observe "CHANGE_CLASS_RETURNS_SAME_INSTANCE"
-      (eq object (change-class object 'd10-method-class-after)))
+      (eq об'єкт (change-class об'єкт 'd10-method-class-after)))
     (d10-method-class-observe "CHANGE_CLASS_INSTANCE_CLASS_CHANGED"
-      (eq (class-of object) (find-class 'd10-method-class-after)))
+      (eq (class-of об'єкт) (find-class 'd10-method-class-after)))
     (d10-method-class-observe "CHANGE_CLASS_RETAINS_COMMON_VALUE"
-      (= (slot-value object 'retained) 41))
+      (= (slot-value об'єкт 'retained) 41))
     (d10-method-class-observe "CHANGE_CLASS_PRESERVES_COMMON_UNBOUND"
-      (not (slot-boundp object 'common-unbound)))
+      (not (slot-boundp об'єкт 'common-unbound)))
     (d10-method-class-observe "CHANGE_CLASS_INITIALIZES_NEW_SLOT"
-      (and (slot-boundp object 'new-only)
-           (eq (slot-value object 'new-only) :new)))
+      (and (slot-boundp об'єкт 'new-only)
+           (eq (slot-value об'єкт 'new-only) :new)))
     (d10-method-class-observe "CHANGE_CLASS_UPDATE_HOOK_RUNS"
       (consp *d10-change-class-hook-observation*))
     (d10-method-class-observe "CHANGE_CLASS_HOOK_SEES_OLD_VALUE"
