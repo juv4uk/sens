@@ -2952,11 +2952,11 @@
               ((атом? ())
                 (список байт-рекс 141 байт-модрм (машина-байт-восьмибітного-зсуву зміщення))))) (машина-кодувати-модрм 1 (машина-молодші-три-біти код-призначення) (машина-молодші-три-біти код-бази)))) (машина-кодувати-поле-рекс 1 (машина-старший-біт код-призначення) 0 (машина-старший-біт код-бази)))) (машина-код-регістра база))) (машина-код-регістра призначення))))
 
-; Group-1 ALU r/m64, r64 (mod=3 register/register), opcode base+1: ADD 0x01,
-; OR 0x09, AND 0x21, SUB 0x29, XOR 0x31, CMP 0x39 (Intel SDM, confirmed
-; against #175's pinned XED evidence: lib/machine/xed/vendor/base/xed-isa.txt
-; PATTERN lines for each ICLASS's `MOD[0b11] MOD=3 REG[rrr] RM[nnn]` form).
-; All six share one shape; only the opcode byte differs.
+; Арифметична група 1: r/m64, r64 (режим 3, регістр/регістр).
+; Коди: ADD 0x01, OR 0x09, AND 0x21, SUB 0x29, XOR 0x31, CMP 0x39.
+; Доказ: Intel SDM та зафіксований XED #175 у lib/machine/xed/vendor/base/xed-isa.txt,
+; шаблон `MOD[0b11] MOD=3 REG[rrr] RM[nnn]` для відповідних ICLASS.
+; Шість команд мають ту саму структуру; змінюється тільки байт операції.
 (визначити машина-кодувати-арифметичну-дію-регістрів-64
   (функція (код-операції призначення джерело)
     ((функція (код-призначення код-джерела)
@@ -2991,25 +2991,24 @@
   (функція (призначення джерело)
     (машина-кодувати-арифметичну-дію-регістрів-64 57 призначення джерело)))
 
-; MOV r/m64, r64 (opcode 0x89 /r, mod=3 register/register): copies source
-; into destination with no flags touched -- per #175's pinned XED evidence
-; (`PATTERN : 0x89 MOD[0b11] MOD=3 REG[rrr] RM[nnn]`, `OPERANDS : REG0=
-; GPRv_B():w REG1=GPRv_R():r`, i.e. the reg field is the source being read
-; and the rm field is the destination being written, the identical
-; source/destination assignment the group-1 ALU family already uses). Same
-; REX.W+opcode+ModRM shape, so it reuses x86-encode-alu-r64-r64 directly.
-; This is the most elementary data-movement form still missing until now:
-; every other admitted form can only load an immediate or a memory operand
-; into a register, never copy register-to-register.
+; MOV r/m64, r64: операція 0x89 /r, режим 3 (регістр/регістр).
+; Копіює джерело до призначення без зміни прапорців, за доказом XED #175.
+; Шаблон: `PATTERN : 0x89 MOD[0b11] MOD=3 REG[rrr] RM[nnn]`.
+; Операнди: `REG0=GPRv_B():w REG1=GPRv_R():r`.
+; Поле reg читає джерело, поле rm задає призначення, як у групі ALU 1.
+; Структура REX.W + код операції + ModRM спільна з арифметичними командами,
+; тому використовуємо x86-encode-alu-r64-r64 без дублювання коду.
+; На відміну від завантаження числа або пам'яті, ця форма копіює
+; значення безпосередньо між двома регістрами.
 (визначити машина-кодувати-пересилання-регістрів-64
   (функція (призначення джерело)
     (машина-кодувати-арифметичну-дію-регістрів-64 137 призначення джерело)))
 
-; Two's-complement little-endian bytes for a sign-extended imm32 value
-; already known to be in [-2147483648,2147483647]. Same wrap-before-split
-; discipline #199 proved for disp8 (x86-disp8-byte) -- `mod` in this Lisp
-; does not wrap negative operands, so adding 2^32 before reducing mod 2^32
-; is exact for the whole imm32 domain.
+; Для знакового imm32 у межах [-2147483648,2147483647]
+; формуємо молодший-байт-першим подання у двійковому доповненні.
+; Перед поділом додаємо 2^32, як доведено для disp8 у #199.
+; `mod` цього Lisp не обгортає від'ємні числа, тому приведення
+; за модулем 2^32 після додавання дає точний результат для всього imm32.
 (визначити машина-байти-безпосереднього-числа-32
   (функція (безпосереднє-значення)
     (машина-байти-32
@@ -3019,14 +3018,12 @@
           4294967296
           1)))))
 
-; ALU r/m64, imm32 (mod=3, sign-extended to 64 bits): opcode 0x81, ModRM reg
-; field selects the operation (ADD=0, OR=1, AND=4, SUB=5, XOR=6, CMP=7,
-; matching the same fixed group-1 numbering the register/register family's
-; own opcodes already encode), rm field is the destination register -- per
-; #175's pinned XED evidence (`PATTERN : 0x81 MOD[0b11] MOD=3 REG[rrr]
-; RM[nnn] SIMMz()`). Lets a comparison/arithmetic-against-a-constant (the
-; #196 COND base-case shape: compare a variable to a literal) skip loading
-; the constant into a scratch register first.
+; Арифметична група 1: r/m64, imm32 (режим 3, знак розширюється до 64 біт).
+; Код 0x81; поле reg у ModRM обирає дію: ADD=0, OR=1, AND=4,
+; SUB=5, XOR=6, CMP=7. Поле rm містить регістр призначення.
+; Доказ XED #175: `PATTERN : 0x81 MOD[0b11] MOD=3 REG[rrr] RM[nnn] SIMMz()`.
+; Порівняння або арифметика з константою не потребує попереднього
+; завантаження цієї константи в допоміжний регістр (умова #196).
 (визначити машина-кодувати-арифметику-регістр-64-число-32
   (функція (розширення-коду-операції призначення безпосереднє-значення)
     ((функція (код-призначення) (сполучити
@@ -3061,20 +3058,19 @@
   (функція (призначення безпосереднє-значення)
     (машина-кодувати-арифметику-регістр-64-число-32 7 призначення безпосереднє-значення)))
 
-; TEST r/m64, r64 (opcode 0x85 /r, mod=3 register/register): destination AND
-; source, result discarded, flags set only -- per #175's pinned XED evidence
-; (`PATTERN : 0x85 MOD[0b11] MOD=3 REG[rrr] RM[nnn]`). Same REX.W+opcode+
-; ModRM shape used by the group-1 ALU family, so it reuses x86-encode-alu-r64-r64
-; directly rather than duplicating the REX/ModRM arithmetic.
+; TEST r/m64, r64: 0x85 /r, режим 3, логічне І над операндами.
+; Результат не зберігається, змінюються лише прапорці.
+; Доказ XED #175: `PATTERN : 0x85 MOD[0b11] MOD=3 REG[rrr] RM[nnn]`.
+; Форму REX.W + код операції + ModRM беремо зі спільного кодера
+; x86-encode-alu-r64-r64, без дублювання обчислень полів.
 (визначити машина-кодувати-перевірку-регістрів-64
   (функція (призначення джерело)
     (машина-кодувати-арифметичну-дію-регістрів-64 133 призначення джерело)))
 
-; PUSH r64 (opcode 0x50+rd, ICLASS PUSH: `0b0101_0 SRM[rrr] ... DF64()`) and
-; POP r64 (opcode 0x58+rd, ICLASS POP: `0b0101_1 SRM[rrr] ... DF64()`), per
-; #175's pinned XED evidence. Both default to 64-bit operand size in long
-; mode (`DF64()`), so no REX.W is emitted; only REX.B is needed, and only
-; for r8-r15.
+; PUSH r64: 0x50+rd, `0b0101_0 SRM[rrr] ... DF64()`.
+; POP r64: 0x58+rd, `0b0101_1 SRM[rrr] ... DF64()`, доказ XED #175.
+; У довгому режимі розрядність операнда за замовчуванням 64 біти,
+; тому REX.W не видаємо, а REX.B потрібний лише для r8–r15.
 (визначити машина-кодувати-покладання-регістра-64-у-стек
   (функція (регістр)
     ((функція (код) (за-умовою
@@ -3091,14 +3087,13 @@
         ((атом? ())
           (список (додати 88 (машина-молодші-три-біти код)))))) (машина-код-регістра регістр))))
 
-; INC r64 / DEC r64: group-5 opcode 0xFF, /reg extension (not a register
-; operand) selects the operation -- INC is /0, DEC is /1 -- per #175's
-; pinned XED evidence (`PATTERN : 0xFF MOD[0b11] MOD=3 REG[0b000] RM[nnn]`
-; / `REG[0b001]`). Unlike PUSH/POP, this form always needs REX.W: the
-; legacy single-byte 0x40+r/0x48+r INC/DEC opcodes exist in the same pinned
-; evidence tagged `not64` -- those byte values became REX prefixes in
-; 64-bit mode, so encoding INC/DEC in long mode always goes through this
-; ModRM group-5 path, never the legacy one.
+; INC/DEC r64 — група 5, код 0xFF; поле розширення /reg
+; обирає операцію: INC — /0, DEC — /1, доказ XED #175.
+; Шаблони: `REG[0b000]` та `REG[0b001]` із `MOD=3`.
+; На відміну від PUSH/POP, ця форма потребує REX.W.
+; Старі однобайтові 0x40+r/0x48+r мають у XED позначку `not64`:
+; у 64-бітному режимі ці байти є префіксами REX.
+; Тому INC/DEC кодуємо тільки через ModRM групи 5.
 (визначити машина-кодувати-збільшення-регістра-64
   (функція (регістр)
     ((функція (код) (список
@@ -3132,14 +3127,13 @@
         247
         (машина-кодувати-модрм 3 3 (машина-молодші-три-біти код)))) (машина-код-регістра регістр))))
 
-; SHL/SHR/SAR r64, imm8: group-2 opcode 0xC1, /reg extension selects the
-; operation -- SHL is /4, SHR is /5, SAR is /7 (/6 duplicates SHL under an
-; undocumented encoding and is intentionally not admitted) -- per #175's pinned XED
-; evidence (`PATTERN : 0xC1 MOD[0b11] MOD=3 REG[0b100] RM[nnn] UIMM8()`
-; for SHL, `REG[0b101]` for SHR, `REG[0b111]` for SAR). Unlike disp8/
-; rel8/rel32/imm32, UIMM8 is an *unsigned* byte in [0,255], so no
-; two's-complement wrap-before-split is needed -- the admitted count
-; becomes the raw trailing byte directly.
+; SHL/SHR/SAR r64, imm8: група 2, код 0xC1.
+; Поле /reg обирає SHL=/4, SHR=/5, SAR=/7; недокументоване /6
+; дублює SHL, тому навмисно не допускається.
+; Доказ XED #175: `PATTERN : 0xC1 MOD[0b11] MOD=3 REG[0b100] RM[nnn] UIMM8()`;
+; для SHR — `REG[0b101]`, для SAR — `REG[0b111]`.
+; UIMM8 є беззнаковим байтом [0,255], на відміну від disp8 і rel8,
+; тому зміна знака перед поділом не потрібна; лічильник іде в останній байт.
 (визначити машина-кодувати-зсув-регістра-64-на-число-8
   (функція (розширення-коду-операції регістр кількість)
     ((функція (код) (список
@@ -3160,14 +3154,13 @@
   (функція (регістр кількість)
     (машина-кодувати-зсув-регістра-64-на-число-8 7 регістр кількість)))
 
-; Jcc rel8: opcode 0x70+cc followed by a signed 8-bit relative displacement
-; (from the address of the *next* instruction). No REX prefix -- this is a
-; control-transfer, not a GPR operation. The 16 condition codes and their
-; opcode offsets are fixed by Intel's encoding and confirmed against #175's
-; pinned XED evidence (`PATTERN : 0x7<cc> mode64 ... BRDISP8()` for each
-; ICLASS in order: JO,JNO,JB,JNB,JZ,JNZ,JBE,JNBE,JS,JNS,JP,JNP,JL,JNL,JLE,
-; JNLE). Reuses x86-disp8-byte for the same two's-complement byte
-; conversion #199 already proved correct for MOV's disp8 slot.
+; Jcc rel8: код 0x70+cc, далі знаковий восьмибітний зсув
+; від адреси наступної інструкції. Префікса REX немає: це перехід.
+; Шістнадцять кодів умов визначені Intel й підтверджені XED #175:
+; `PATTERN : 0x7<cc> mode64 ... BRDISP8()`;
+; порядок ICLASS: JO,JNO,JB,JNB,JZ,JNZ,JBE,JNBE,JS,JNS,JP,JNP,JL,JNL,JLE,JNLE.
+; Для двійкового доповнення зсуву використовуємо x86-disp8-byte,
+; точність якого вже доведено у #199 для MOV.
 (визначити машина-кодувати-умовний-перехід-зі-зсувом-8
   (функція (код-умови зміщення)
     (список
