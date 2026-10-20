@@ -104,7 +104,7 @@
            (outcome
              (нативне-виконати-вираз expression))
            (parity
-             (native-first-parity-case
+             (нативний-паритет-перевірити-випадок
                (1110
                  class
                  expression
