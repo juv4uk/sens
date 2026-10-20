@@ -1,26 +1,26 @@
-; lib/compiler-nucleus.lisp
-; sens#3759 / #3803 — first executable compiler nucleus slice owned by SENS.
+; Мовне ядро компілятора СЕНС.
+; Задачі 3759 та 3803: перший виконуваний зріз ядра компілятора.
 ;
-; N0 is deliberately smaller than the final self-hosted compiler:
-; - exact DomainIdentity is already a first-class runtime value;
-; - authority rows are supplied as data by the bootstrap boundary;
-; - this program performs the authority lookup/normalization itself;
-; - it contains no D3 coordinate table, no Sid8/Sens8 identity, and no backend
-;   opcode/mechanism table.
+; Початковий зріз навмисно менший за повний самокомпілятор:
+; точна доменна тотожність уже є повноцінним значенням виконання;
+; рядки повноважень надходять як дані з початкової межі;
+; програма сама знаходить і нормалізує потрібні повноваження;
+; немає таблиці координат третього домену чи старих тотожностей,
+; немає таблиці машинних операцій та виконавців.
 ;
-; Authority row shape for this bounded slice:
+; Форма рядка повноважень цього обмеженого зрізу:
 ;
-;   (exact-domain-identity execution-role proof-ref provenance)
+; точна тотожність, роль виконання, посилання на доказ, походження.
 ;
-; The role/proof/provenance payload is opaque here.  #3806 moves construction
-; of that authority projection from the Rust/bootstrap oracle into executable
-; SENS-owned law.  Until then this file is a real compiler component, but only
-; a PARTIAL nucleus and not a self-host/fixed-point claim.
+; Роль, доказ і походження тут є непрозорими даними.
+; Наступний етап переносить побудову проєкції повноважень
+; із початкового зовнішнього механізму до закону самої мови.
+; Це реальний компонент, але ще не доказ повної самокомпіляції.
 ;
-; Ukrainian spellings below are source/UI projections only.  They are chosen
-; because the current registry routes Ukrainian D3/D4 surfaces directly to
-; exact-domain identities.  The focused guard lowers this file before execution
-; and rejects any historical Sid/Call node.
+; Нижче використовуються лише джерельні українські проєкції.
+; Чинний реєстр зіставляє українські поверхні третього
+; і четвертого доменів із точними тотожностями;
+; старі викличні вузли відхиляються до виконання.
 
 (визначити знайти-авторитет-компілятора
   (функція (ідентичність рядки-для-пошуку-авторитету)
@@ -34,30 +34,30 @@
     (знайти-авторитет-компілятора ідентичність джерело-авторитету)))
 
 
-; Representation-only bootstrap seam for #3808.
-; DECOMPOSE is an explicitly supplied first-class mechanism.  The language
-; chooses when to invoke it; the host function may reveal only exact width/bits
-; and has no identity->meaning authority.
+; Межа початкового механізму працює тільки з поданням.
+; Розкладання на частини надається окремим механізмом.
+; Воно показує лише точну ширину та біти слова
+; і не має права виводити семантику з представлення.
 (визначити форма-домену-компілятора
   (функція (розкласти ідентичність)
     (розкласти ідентичність)))
 
 
-; #3809 — bounded compiler-role derivation from generated, provenance-bound
-; D3 L1-L5 structural law data.  There is deliberately no D3 coordinate→role
-; table here.
+; Обмежене виведення ролей компілятора з породжених
+; ратифікованих структурних законів третього домену.
+; Окремої таблиці перетворення координати на роль немає.
 ;
-; LAW is transported from knowledge/bija3-l1-l5-structure-projection.json:
-;   (domain-width l1-empty-bits l4-xor-mask l5-spine)
+; Структурний закон передається з чинної проєкції знань:
+; ширина, біти порожнечі, маска двоїстості та впорядкований шлях.
 ;
-; The projection itself is mechanically generated from owner-ratified #3202.
-; It carries no compiler role names.  SENS assigns the bounded compiler roles
-; by executing the ratified structural relationships:
-;   head selector = third ordered L5 spine member
-;   tail selector = L4 dual(head selector)
-;   pair construct = L4 dual(L1 empty)
+; Саму проєкцію механічно отримано з ратифікації власника.
+; Вона не містить назв ролей компілятора.
+; Мова визначає ролі з виконання структурних відношень:
+; вибір голови є третім елементом впорядкованого шляху;
+; вибір хвоста є двоїстістю вибору голови;
+; побудова пари є двоїстістю порожнього значення.
 ;
-; DECOMPOSE is the representation-only mechanism from #3808.
+; Розкладання залишається механізмом подання, не семантики.
 
 (визначити істина-компілятора
   (функція (насіння-локального-компілятора)
@@ -67,18 +67,18 @@
   (функція (насіння-локального-компілятора)
     ні))
 
-; Exact proper-list end is NIL, not every atom. Derive the observation
-; from the admitted D3 ATOM + atom-only D3 EQ laws. N0's compiler ISA
-; does not claim a D4 NULL lowering role or invent a callable bridge.
+; Правильний список завершується порожнечею, а не кожним атомом.
+; Це встановлюється законами атомарності й рівності третього домену.
+; Нової викличної операції четвертого домену тут немає.
 (визначити кінець-списку-компілятора?
   (функція (значення)
     (за-умовою
       ((атом? значення) (тотожне? значення (як-є ())))
       (так (хиба-компілятора ())))))
 
-; A verified bit sequence is a proper list of D1 atoms. To test the
-; empty-list terminator, use the ratified ATOM predicate, not EQ over a
-; non-atomic pair: exact D3 EQ admits two ATOMS, not a list-versus-NIL.
+; Перевірена бітова послідовність є правильним списком атомів.
+; Термінатор перевіряється лише після встановлення атомарності.
+; Порівняння атомів не допускає порівняння пари з порожнечею.
 (визначити бітові-послідовності-однакові?
   (функція (насіння-локального-компілятора послідовність-бітів-зліва послідовність-бітів-справа)
     (за-умовою
@@ -110,9 +110,9 @@
          (виключне-або-одного-біту-компілятора насіння-локального-компілятора (перше послідовність-бітів-зліва) (перше послідовність-бітів-справа))
          (виключне-або-бітових-послідовностей-компілятора насіння-локального-компілятора (решта послідовність-бітів-зліва) (решта послідовність-бітів-справа)))))))
 
-; Exact selectors: D4:1001 CADR, D5:10011 CADDR.
-; D6 is ratified but these longer selectors lack executable admission;
-; compose admitted D5 and D3 instead. No D7 text/data aliases.
+; Точні вибірки другого й третього елементів уже ратифіковані.
+; Довші селектори шостого домену ще не мають доказу виконання;
+; тому використовуємо композиції нижчих допущених доменів.
 (визначити компілятор-ширина-форми
   (функція (форма)
     (перше форма)))
@@ -149,9 +149,9 @@
   (функція (закон-бітів-умови-л5-компілятора)
     (перше (решта (решта (решта (остов-закону-л5-компілятора закон-бітів-умови-л5-компілятора)))))))
 
-; Full D3 compiler closure is derived only from the ratified L1/L4/L5
-; structure.  The three spine roles are read by ordered position; their duals
-; are obtained with the one L4 XOR law.  No raw D3 coordinate is embedded here.
+; Повне замикання компілятора для третього домену походить
+; лише з ратифікованих структурних відношень.
+; Двоїсті ролі обчислюються законом, а не зашитими координатами.
 (визначити роль-компілятора-за-бітами-л1-л5
   (функція (початковий-код біти-координати закон-домену)
     (за-умовою
@@ -173,8 +173,8 @@
        (як-є pair-construct))
       ((істина-компілятора початковий-код) ()))))
 
-; Full D3 lowering closure for self-hosting.  It deliberately has a separate
-; name so the already-merged three-role execution API remains stable.
+; Повний набір перетворень третього домену потрібний для самокомпіляції.
+; Окремі назви зберігають чинний зовнішній інтерфейс трьох ролей.
 (визначити роль-пониження-компілятора-за-бітами-л1-л5
   (функція (початковий-код біти-координати закон-домену)
     (за-умовою
@@ -227,16 +227,16 @@
       ((істина-компілятора ідентичність) ()))))
 
 
-; #3824 — D4 bootstrap-role derivation from the ordered owner-ratified fibre.
-; D4-LAW is transported as:
-;   (domain-width parent-bits ordered-children)
-; where ordered-children is the exact two-child fibre generated from #3272.
-; The structure carries no role names.  SENS assigns the first/second
-; irreducible bootstrap child to LambdaForm/DefineForm respectively.
-; Bootstrap uses exact D3 CAR/CDR compositions for selector access;
-; canonical D4:1001 CADR and D5:10011 CADDR keep their separate identities.
-; The compiler's present lowering law does not yet admit D5 calls.
-; The domain width remains part of the callable identity; no D6/D7 alias.
+; Виведення початкових ролей четвертого домену з ратифікованого порядку.
+; Структурний закон четвертого домену передається як:
+; ширина, біти батьківського слова, впорядковані нащадки.
+; Нащадки утворюють точну двоелементну структуру ратифікації.
+; Самі дані не містять назв ролей компілятора.
+; Перший і другий незвідні нащадки відповідають функції та визначенню.
+; Початкове виконання користується композицією селекторів третього домену;
+; ратифіковані селектори вищих доменів зберігають окремі тотожності.
+; Поточний закон зниження ще не допускає прямих викликів п'ятого домену.
+; Ширина є частиною тотожності, а не підставою для псевдоніма.
 (визначити компілятор-ширина-закону-д4
   (функція (закон-домену)
     (перше закон-домену)))
@@ -274,9 +274,9 @@
          закон-домену))
       ((істина-компілятора ідентичність) ()))))
 
-; One production role query for the whole current compiler nucleus.  Domain
-; width selects which already-ratified structural law is applicable; neither
-; the host nor this function infers meaning from an equal packed payload.
+; Виклик ролі охоплює все чинне ядро компілятора.
+; Ширина обирає застосовний ратифікований структурний закон.
+; Рівність упакованих байтів не надає жодному механізму семантичної влади.
 (визначити роль-пониження-компілятора-за-л1-л5
   (функція (розкласти-ідентичність ідентичність закон-домену)
     (за-умовою
@@ -303,14 +303,14 @@
       ((істина-компілятора ідентичність) ()))))
 
 
-; #3810 — production request cutover.
-; Role meaning comes only from compiler-role-from-l1-l5 above.  The host may
-; transport LAW/proof/provenance values, but it does not select the role.
+; Перехід виробничих запитів на мовний механізм.
+; Ролі походять тільки із законів, виведених вище.
+; Зовнішня межа передає закон і докази, але ролі не обирає.
 
-; Empty role means the law did not admit this identity. Do not emit a
-; malformed request carrying (), especially for a wrong-width domain.
-; Empty role is NIL, which is itself an atom in this language. Test
-; exact equality with () before emitting a compiler request.
+; Порожня роль означає відсутність допуску цього значення.
+; Не можна створювати неповний запит із порожньою роллю.
+; Структурна порожнеча є окремим атомарним значенням;
+; точну рівність із порожнечею перевіряємо до запиту.
 (визначити запит-компілятора-за-роллю
   (функція (початковий-код ідентичність роль-виконання посилання-на-доказ походження)
     (за-умовою
@@ -334,17 +334,17 @@
       походження)))
 
 
-; #3839 — whole-program compiler traversal.
+; Обхід повної програми компілятором.
 ;
-; Program data is the source-shaped tree ratified by compiler-program-data/1:
-; exact DomainCall nodes are ordinary lists whose head is an exact
-; DomainIdentity.  SHAPE-OR-EMPTY is a representation-only host mechanism:
-; DomainIdentity -> (width bits), every other value -> ().
+; Дані програми — джерельне дерево з ратифікованого формату.
+; Точні доменні виклики подаються звичайними списками;
+; їхня голова є точною доменною тотожністю.
+; Механізм подання може повернути ширину й біти або порожнечу.
 ;
-; The traversal owns semantic request selection in SENS and returns:
-;   (D1-success-bit request...)
-; so an unsupported exact-domain node cannot be confused with an empty
-; subtree.  Backend lowering/installation remains outside this program.
+; Обхід сам обирає семантичний запит мовою СЕНС.
+; Результат містить біт успіху та список запитів.
+; Непідтриману точну форму не можна плутати з порожнім піддеревом.
+; Подальше машинне зниження лишається поза програмою.
 
 (визначити запит-компілятора-за-законами
   (функція (розкласти-ідентичність ідентичність закон-д3 закон-д4 доказ-д3 доказ-д4 походження)
@@ -411,11 +411,11 @@
   (функція (запит)
     (перше (решта запит))))
 
-; Validate source shape only after SENS has already derived the abstract role.
-; This is deliberately role -> arity/shape, never domain-bits -> shape.
-; Arguments are proper SENS compiler-program-data lists.  Exact cardinality
-; must be tested using the D3 ATOM predicate on the tail, not a D4
-; operator applied to an already-computed D1 predicate bit.
+; Джерельну форму перевіряємо лише після виведення ролі.
+; Порядок перевірки: від ролі до арності, не від бітів до змісту.
+; Аргументи є правильними списками даних програми.
+; Кількість перевіряємо через атомарність хвоста,
+; а не через операцію над уже обчисленою відповіддю.
 (визначити рівно-один-аргумент-компілятора
   (функція (аргументи)
     (за-умовою
@@ -431,9 +431,9 @@
       ((кінець-списку-компілятора? (решта (решта аргументи))) (істина-компілятора ()))
       ((істина-компілятора ()) (хиба-компілятора ())))))
 
-; Proper variadic tails: only the exact EMPTY terminates a list.
-; D3 ATOM detects a malformed nonempty atom; EQ sees EMPTY only after ATOM.
-; The already-admitted compiler-list-end? owns that distinction in SENS.
+; Варіативний хвіст завершується тільки точною порожнечею.
+; Атомарність відрізняє неправильний непорожній терм від порожнечі.
+; Цю межу встановлює вже допущена мовна перевірка.
 (визначити правильний-хвіст-компілятора?
   (функція (хвіст)
     (за-умовою
@@ -441,9 +441,9 @@
       ((атом? хвіст) (хиба-компілятора ()))
       (так (правильний-хвіст-компілятора? (решта хвіст))))))
 
-; D4 LAMBDA is parameters plus one-or-more body expressions.
-; Both mandatory argument cells must be pairs, and all remaining cells must
-; form a proper list; nested data elements may themselves be dotted pairs.
+; Функція має параметри й щонайменше одну форму тіла.
+; Обидві обов'язкові комірки аргументів повинні бути парами.
+; Решта має бути правильним списком, навіть якщо дані містять крапкові пари.
 (визначити щонайменше-два-аргументи-компілятора
   (функція (аргументи)
     (за-умовою
@@ -451,7 +451,7 @@
       ((атом? (решта аргументи)) (хиба-компілятора ()))
       (так (правильний-хвіст-компілятора? (решта (решта аргументи)))))))
 
-; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
+; Умовний вибір третього домену є непорожнім списком двопольових умов.
 (визначити клаузи-умов-компілятора-чинні?
   (функція (клаузи)
     (за-умовою
@@ -487,13 +487,13 @@
          ((істина-компілятора ()) (клаузи-умов-компілятора-чинні? аргументи-форми))))
       ((істина-компілятора ()) (хиба-компілятора ())))))
 
-; Program traversal policy is semantic and therefore SENS-owned.
-; QUOTE payload is data.  LAMBDA parameters and DEFINE name are data.
-; Other admitted forms recursively compile every argument position.
-; Exact D3 COND clauses are pairs of source expressions, not
-; calls whose head is the D1 predicate. Flatten each admitted pair into
-; predicate, result, then the remaining clauses. D3 handles the traversal;
-; no new domain coordinate or callable slot is created.
+; Правила обходу є семантикою, отже належать СЕНС.
+; Цитований вираз, параметри функції та назва визначення є даними.
+; Інші допущені форми рекурсивно обробляють кожний аргумент.
+; Умовні пари третього домену містять вираз умови та результат.
+; Вони не є викликами предиката першого домену.
+; Кожну пару розгортаємо в умову, результат і решту умов.
+; Це не створює нової координати чи викликуваного резидента.
 (визначити компілятор-вирази-гілок-умови
   (функція (гілки-умов)
     (за-умовою
@@ -534,9 +534,9 @@
          ((істина-компілятора ()) (компілятор-створити-невдалий-результат))))
       ((істина-компілятора ()) (компілятор-створити-невдалий-результат)))))
 
-; Tail-position list traversal keeps stack bounded by expression nesting,
-; not by the number of sibling forms. The accumulator stores requests reversed.
-; Request selection and failure remain entirely SENS-owned.
+; Обхід у хвостовій позиції обмежує стек вкладеністю виразів,
+; а не кількістю сусідніх форм; запити накопичуються у зворотному порядку.
+; Семантика вибору та відмови повністю належить мові СЕНС.
 (визначити компілятор-зворот-до
   (функція (елементи накопичувач)
     (за-умовою
@@ -666,17 +666,17 @@
       походження)))
 
 
-; #3839 whole-program artifact composition.
+; Побудова артефакту програми цілком.
 ;
-; The host supplies only mechanical provenance values:
-; - exact canonical SW\x01 program-byte digest,
-; - exact pinned SENS revision,
-; - exact compiler-nucleus source digest,
-; - and one representation-only digest mechanism.
+; Зовнішня межа передає тільки механічні свідчення походження:
+; точний відбиток байтів програми;
+; точну закріплену редакцію СЕНС;
+; точний відбиток джерела ядра компілятора;
+; та один механізм обчислення відбитка.
 ;
-; SENS itself chooses the ordered semantic-request value to hash and composes
-; the whole backend-neutral artifact. The digest mechanism owns no identity
-; meaning, role/proof routing or backend policy.
+; Сама мова вибирає послідовність семантичних запитів для відбитка
+; і створює незалежний від машинного виконавця артефакт.
+; Механізм відбитка не визначає тотожність, ролі чи політику виконання.
 (визначити поле-артефакту-компілятора
   (функція (назва-поля значення-поля)
     (сполучити назва-поля (сполучити значення-поля ()))))
