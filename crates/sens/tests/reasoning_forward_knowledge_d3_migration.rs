@@ -1,8 +1,6 @@
-//! D3/D9 migration witness for the Lisp-owned forward and knowledge engines.
-//!
-//! Frozen W8 files remain provenance only. They used the old NIL-as-false
-//! conditional convention, so executing them with the ratified exact-D1 COND
-//! would test a retired law rather than current behavior.
+//! Д3/Д9: перевірка справжнього виконання українських функцій виведення і знань.
+//! Джерельні свідки вже перейшли на українські викличні назви.
+//! Точні значення Д1 і доменні закони не підміняються історичним W8.
 use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session};
 
 const CORE: &str = include_str!("../../../lib/core.lisp");
@@ -39,24 +37,28 @@ fn observed(program: &str) -> String {
 }
 
 #[test]
-fn candidate_forward_and_knowledge_have_only_exact_d3_executable_heads() {
-    for (original, projection) in [
-        (FORWARD_OLD, FORWARD_D3),
-        (KNOWLEDGE_OLD, KNOWLEDGE_D3),
+fn ukrainian_forward_and_knowledge_keep_d3_laws_without_retired_w8() {
+    for (witness, current, expected_definition) in [
+        (FORWARD_OLD, FORWARD_D3, "(визначити застосувати-правило"),
+        (KNOWLEDGE_OLD, KNOWLEDGE_D3, "(визначити д3-створити-пакет"),
     ] {
-        assert!(original.contains("(00000111"));
-        assert!(!projection.contains("(00000111"));
-        assert!(projection.contains("(110"));
-        assert!(projection.contains("(010"));
-        assert!(projection.contains("(101"));
+        assert!(
+            witness.contains(expected_definition),
+            "у вихідному свідку втрачено українське визначення: {expected_definition}"
+        );
+        assert!(!witness.contains("(00000111"), "свідок не повинен повертати W8");
+        assert!(!current.contains("(00000111"), "чинна бібліотека не повинна повертати W8");
+        for head in ["(визначити ", "(як-є ", "(атом? ", "(за-умовою ", "(тотожне? "] {
+            assert!(current.contains(head), "відсутня чинна голова Д3/Д4: {head}");
+        }
     }
 }
 
 #[test]
 fn reasoning_d3_d9_projections_replay_frozen_bounded_behavior() {
     for (program, expected) in [
-        ("(module-journal-events (quote example) (quote ()))", "()"),
-        ("(module-journal-events (quote example) (quote ((tell example (fact a)))))", "((tell example (fact a)))"),
+        ("(отримати-події-журналу-окремого-модуля (як-є example) (як-є ()))", "()"),
+        ("(отримати-події-журналу-окремого-модуля (як-є example) (як-є ((tell example (fact a)))))", "((tell example (fact a)))"),
         ("(запустити-правило (як-є ((fact a) (derived a))) (як-є (fact a)))", "(derived a)"),
         ("(запустити-правило (як-є ((fact a) (derived a))) (як-є (fact b)))", "no-match"),
         ("(запустити-правило-на-факти (як-є ((fact a) (derived a))) (як-є ()))", "()"),
