@@ -1,158 +1,175 @@
-; Lisp-owned semantic-registry API.
-;
-; Authority is lib/surface/semantic-registry.lisp itself. This library does
-; not recreate the registry in another representation: it reads the canonical
-; Lisp table with the ordinary Lisp reader and queries that resulting value.
-;
-; Every element of the canonical table is a semantic row:
-;   (Binary identity (en ...) (ук ...) (укр ...) (sa ...) (sym ...))
-;
-; Runtime implementations may project the Binary identity to an internal byte,
-; but the meaning and lookup rules below belong to Lisp.
+; Мовний інтерфейс до семантичного реєстру СЕНС.
+; Єдине джерело визначень: lib/surface/semantic-registry.lisp.
+; Таблицю читає власний читач мови; друга таблиця тотожностей не створюється.
+; Семантичний рядок: (ідентичність (en ...) (ук ...) (укр ...) (sa ...) (sym ...)).
+; Теги просторів імен та шлях до файлу — незмінні протокольні дані.
+; Виконувані виклики й параметри українською, з чинної канонічної проєкції.
+; Колишні публічні імена лишаються тільки прив'язками для споживачів.
 
-(визначити semantic-registry-source-path
+(визначити шлях-джерела-семантичного-реєстру
   "lib/surface/semantic-registry.lisp")
 
-(визначити semantic-registry-read-source
-  (функція (source)
+(визначити прочитати-джерело-семантичного-реєстру
+  (функція (джерело)
     (перше
-      (читати-всі source))))
+      (читати-всі джерело))))
 
-(визначити semantic-registry-read
+(визначити прочитати-семантичний-реєстр
   (функція ()
-    (semantic-registry-read-source
-      (читати-файл semantic-registry-source-path))))
+    (прочитати-джерело-семантичного-реєстру
+      (читати-файл шлях-джерела-семантичного-реєстру))))
 
-(визначити semantic-registry-rows
-  (функція (registry)
-    registry))
+(визначити рядки-семантичного-реєстру
+  (функція (реєстр)
+    реєстр))
 
-(визначити semantic-registry-namespaces
+(визначити простори-імен-семантичного-реєстру
   (функція ()
     (як-є (en ук укр sa sym))))
 
-(визначити semantic-registry-row-namespaces
-  (функція (surfaces)
+(визначити простори-імен-рядка-реєстру
+  (функція (проєкції)
     (за-умовою
       
-      ((хибне? (атом? surfaces))
+      ((хибне? (атом? проєкції))
        (сполучити
-         (перше (перше surfaces))
-         (semantic-registry-row-namespaces
-           (решта surfaces)))))))
+         (перше (перше проєкції))
+         (простори-імен-рядка-реєстру
+           (решта проєкції)))))))
 
-(визначити semantic-registry-row-namespaces-from-row
-  (функція (row)
-    (semantic-registry-row-namespaces
-      (semantic-registry-row-surfaces row))))
+(визначити простори-імен-з-рядка-реєстру
+  (функція (рядок)
+    (простори-імен-рядка-реєстру
+      (проєкції-рядка-реєстру рядок))))
 
-(визначити semantic-registry-row-id
-  (функція (row)
-    (перше row)))
+(визначити ідентичність-рядка-реєстру
+  (функція (рядок)
+    (перше рядок)))
 
-(визначити semantic-registry-row-surfaces
-  (функція (row)
-    (решта row)))
+(визначити проєкції-рядка-реєстру
+  (функція (рядок)
+    (решта рядок)))
 
-(визначити semantic-registry-find-surface
-  (функція (namespace surfaces)
+(визначити знайти-проєкцію-реєстру
+  (функція (простір-імен проєкції)
     (за-умовою
       
-      ((хибне? (атом? surfaces))
+      ((хибне? (атом? проєкції))
        (за-умовою
-         ((тотожне? namespace (перше (перше surfaces))) 
-          (перше surfaces))
-         ((хибне? (тотожне? namespace (перше (перше surfaces))))
-          (semantic-registry-find-surface namespace (решта surfaces))))))))
+         ((тотожне? простір-імен (перше (перше проєкції))) 
+          (перше проєкції))
+         ((хибне? (тотожне? простір-імен (перше (перше проєкції))))
+          (знайти-проєкцію-реєстру простір-імен (решта проєкції))))))))
 
-(визначити semantic-registry-surface-name
-  (функція (namespace row)
-    (нехай ((entry
-            (semantic-registry-find-surface
-              namespace
-              (semantic-registry-row-surfaces row))))
+(визначити назва-проєкції-реєстру
+  (функція (простір-імен рядок)
+    (нехай ((запис
+            (знайти-проєкцію-реєстру
+              простір-імен
+              (проєкції-рядка-реєстру рядок))))
       (за-умовою
         
-        ((хибне? (атом? entry))
-         (друге entry))))))
+        ((хибне? (атом? запис))
+         (друге запис))))))
 
-(визначити semantic-registry-find-row
-  (функція (sens-ref rows)
+(визначити знайти-рядок-семантичного-реєстру
+  (функція (посилання-сенс рядки)
     (за-умовою
       
-      ((хибне? (атом? rows))
+      ((хибне? (атом? рядки))
        (за-умовою
-         ((однакові? sens-ref (semantic-registry-row-id (перше rows)))
+         ((однакові? посилання-сенс (ідентичність-рядка-реєстру (перше рядки)))
           
-          (перше rows))
+          (перше рядки))
          (так
-          (semantic-registry-find-row sens-ref (решта rows))))))))
+          (знайти-рядок-семантичного-реєстру посилання-сенс (решта рядки))))))))
 
-(визначити semantic-registry-find-id-in-namespaces
-  (функція (name row namespaces)
+(визначити знайти-ідентичність-у-просторах-імен
+  (функція (назва рядок простори-імен)
     (за-умовою
       
-      ((хибне? (атом? namespaces))
-       (нехай ((candidate
-               (semantic-registry-surface-name
-                 (перше namespaces)
-                 row)))
+      ((хибне? (атом? простори-імен))
+       (нехай ((кандидат
+               (назва-проєкції-реєстру
+                 (перше простори-імен)
+                 рядок)))
          (за-умовою
-           ((однакові? name candidate) 
-            (semantic-registry-row-id row))
-           ((хибне? (однакові? name candidate))
-            (semantic-registry-find-id-in-namespaces
-              name
-              row
-              (решта namespaces)))))))))
+           ((однакові? назва кандидат) 
+            (ідентичність-рядка-реєстру рядок))
+           ((хибне? (однакові? назва кандидат))
+            (знайти-ідентичність-у-просторах-імен
+              назва
+              рядок
+              (решта простори-імен)))))))))
 
-(визначити semantic-registry-id-for-surface
-  (функція (name rows)
+(визначити ідентичність-за-проєкцією
+  (функція (назва рядки)
     (за-умовою
       
-      ((хибне? (атом? rows))
-       (нехай ((sens-ref
-               (semantic-registry-find-id-in-namespaces
-                 name
-                 (перше rows)
+      ((хибне? (атом? рядки))
+       (нехай ((посилання-сенс
+               (знайти-ідентичність-у-просторах-імен
+                 назва
+                 (перше рядки)
                  (як-є (en ук укр sa sym)))))
          (за-умовою
-           ((хибне? (атом? sens-ref))
-            (semantic-registry-id-for-surface name (решта rows)))
-           ((атом? sens-ref) 
-            sens-ref)
-           ((хибне? (атом? sens-ref))
-            (semantic-registry-id-for-surface name (решта rows)))))))))
+           ((хибне? (атом? посилання-сенс))
+            (ідентичність-за-проєкцією назва (решта рядки)))
+           ((атом? посилання-сенс) 
+            посилання-сенс)
+           ((хибне? (атом? посилання-сенс))
+            (ідентичність-за-проєкцією назва (решта рядки)))))))))
 
-(визначити semantic-registry-round-trip
-  (функція (sens-ref)
-    (нехай-послідовно ((printed (write-to-string sens-ref))
-           (forms
-             (читати-всі printed)))
-      (перше forms))))
+(визначити перевірити-кругове-читання-реєстру
+  (функція (посилання-сенс)
+    (нехай-послідовно ((надруковане (значення-у-текст посилання-сенс))
+           (форми
+             (читати-всі надруковане)))
+      (перше форми))))
 
 ; Query already-read registry data without re-entering host I/O.
-(визначити semantic-registry-row-in
-  (функція (registry sens-ref)
-    (semantic-registry-find-row
-      sens-ref
-      (semantic-registry-rows registry))))
+(визначити рядок-у-семантичному-реєстрі
+  (функція (реєстр посилання-сенс)
+    (знайти-рядок-семантичного-реєстру
+      посилання-сенс
+      (рядки-семантичного-реєстру реєстр))))
 
-(визначити semantic-registry-id-in
-  (функція (registry surface)
-    (semantic-registry-id-for-surface
-      surface
-      (semantic-registry-rows registry))))
+(визначити ідентичність-у-семантичному-реєстрі
+  (функція (реєстр проєкція)
+    (ідентичність-за-проєкцією
+      проєкція
+      (рядки-семантичного-реєстру реєстр))))
 
 ; Convenience wrappers for ordinary runtime use.
-(визначити semantic-registry-row
-  (функція (sens-ref)
-    (semantic-registry-row-in
-      (semantic-registry-read)
-      sens-ref)))
+(визначити отримати-рядок-семантичного-реєстру
+  (функція (посилання-сенс)
+    (рядок-у-семантичному-реєстрі
+      (прочитати-семантичний-реєстр)
+      посилання-сенс)))
 
-(визначити semantic-registry-id
-  (функція (surface)
-    (semantic-registry-id-in
-      (semantic-registry-read)
-      surface)))
+(визначити отримати-ідентичність-семантичного-реєстру
+  (функція (проєкція)
+    (ідентичність-у-семантичному-реєстрі
+      (прочитати-семантичний-реєстр)
+      проєкція)))
+
+; Сумісні історичні прив'язки; не нові семантичні коди.
+(визначити semantic-registry-source-path шлях-джерела-семантичного-реєстру)
+(визначити semantic-registry-read-source прочитати-джерело-семантичного-реєстру)
+(визначити semantic-registry-read прочитати-семантичний-реєстр)
+(визначити semantic-registry-rows рядки-семантичного-реєстру)
+(визначити semantic-registry-namespaces простори-імен-семантичного-реєстру)
+(визначити semantic-registry-row-namespaces простори-імен-рядка-реєстру)
+(визначити semantic-registry-row-namespaces-from-row простори-імен-з-рядка-реєстру)
+(визначити semantic-registry-row-id ідентичність-рядка-реєстру)
+(визначити semantic-registry-row-surfaces проєкції-рядка-реєстру)
+(визначити semantic-registry-find-surface знайти-проєкцію-реєстру)
+(визначити semantic-registry-surface-name назва-проєкції-реєстру)
+(визначити semantic-registry-find-row знайти-рядок-семантичного-реєстру)
+(визначити semantic-registry-find-id-in-namespaces знайти-ідентичність-у-просторах-імен)
+(визначити semantic-registry-id-for-surface ідентичність-за-проєкцією)
+(визначити semantic-registry-round-trip перевірити-кругове-читання-реєстру)
+(визначити semantic-registry-row-in рядок-у-семантичному-реєстрі)
+(визначити semantic-registry-id-in ідентичність-у-семантичному-реєстрі)
+(визначити semantic-registry-row отримати-рядок-семантичного-реєстру)
+(визначити semantic-registry-id отримати-ідентичність-семантичного-реєстру)
