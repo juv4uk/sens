@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent release guard for the owner-approved physical T5 .sens writer.
+"""Independent transport witness for the current physical Zig/T5M .sens writer.
 
 Keep this test separate from tests/test_sens_code_migration.py: migration PRs
 must not be able to make an accidental T5 removal green by deleting its test.
@@ -17,7 +17,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "migrate-to-sens-codes.py"
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_bytes, encode_projection
+from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
 TEXT7 = ROOT / "knowledge" / "d7-keyboard-v2-ratified.json"
@@ -56,8 +56,8 @@ class PhysicalT5MigratorContract(unittest.TestCase):
             result_file = destination / "hello.sens"
             self.assertTrue(result_file.is_file())
             physical = result_file.read_bytes()
-            self.assertEqual(physical, encode_projection("000"))
-            self.assertEqual(decode_bytes(physical), ["000"])
+            self.assertEqual(physical, encode_t5m_projection("000"))
+            self.assertEqual(decode_t5m_bytes(physical), ["000"])
             self.assertNotEqual(physical, b"000")
             self.assertFalse((destination / "hello").exists())
             self.assertFalse((destination / "hello.lisp").exists())
