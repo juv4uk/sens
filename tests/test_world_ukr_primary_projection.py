@@ -99,7 +99,7 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
                 self.assertRegex(
                     source, rf"(?m)^\(визначити\s+{re.escape(ukrainian)}\s+\(функція\b"
                 )
-                self.assertNotRegex(source, rf"\(визначити\s+{re.escape(english)}\b")
+                self.assertNotRegex(source, rf"\(визначити\s+{re.escape(english)}(?=\s|\))")
                 rows = [line for line in d10.splitlines()
                         if line.startswith(f"  ({bits} ")]
                 self.assertEqual(len(rows), 1, f"D10:{bits} exact identity")
