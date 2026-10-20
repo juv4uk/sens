@@ -5,10 +5,10 @@
 ; через інший допущений регістр R8. Виконувані функції українські;
 ; назви регістрів та машинні інструкції залишаються даними ISA.
 
-(load "lib/core.lisp")
-(load "lib/machine/encoding/x86-64.lisp")
-(load "lib/machine/admission/x86-64.lisp")
-(load "lib/machine/lowering/semantic-x86-64.lisp")
+(завантажити-файл "lib/core.lisp")
+(завантажити-файл "lib/machine/encoding/x86-64.lisp")
+(завантажити-файл "lib/machine/admission/x86-64.lisp")
+(завантажити-файл "lib/machine/lowering/semantic-x86-64.lisp")
 
 (визначити еталон-машинного-подання (додати 2 3))
 
