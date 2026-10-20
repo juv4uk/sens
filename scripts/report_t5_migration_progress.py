@@ -72,6 +72,8 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
             raise ValueError(f"not a same-stem physical .sens: {source} -> {row.get('sens')}")
         if row.get("physical_status") not in ("PASS", "BLOCKED"):
             raise ValueError(f"unrecognized T5 audit status: {source}")
+        if row["physical_status"] == "PASS" and row.get("physical_codec") not in ("t5m", "t5"):
+            raise ValueError(f"physical PASS without identified T5M/T5 codec: {source}")
         if row.get("source_status") not in (
             "EXACT_BINARY_SOURCE", "PENDING_ORACLE", "BLOCKED", "NOT_CHECKED",
         ):
@@ -127,20 +129,28 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
     for source in sorted(represented):
         if source in pair_entries:
             p = pair_entries[source]
+            # Legacy T5 can roundtrip physically but is NOT current T5M.
+            # Keep it visible as migration work, never promote it as a
+            # canonical current carrier or as native semantic proof.
             condition = ("PHYSICAL_T5_PAIR_BLOCKED" if p["physical_status"] != "PASS"
-                         else "PHYSICAL_T5_PAIR_PENDING_INDEPENDENT_ORACLE")
+                         else "PHYSICAL_LEGACY_T5_PAIR_REQUIRES_T5M"
+                         if p["physical_codec"] == "t5"
+                         else "PHYSICAL_T5M_PAIR_PENDING_INDEPENDENT_ORACLE")
             ledger.append({
                 "source": source, "sens": p["sens"],
                 "source_category": "paired",
                 "status": condition,
+                "physical_codec": p.get("physical_codec"),
                 "source_sha256": p.get("source_sha256"),
                 "physical_sha256": p.get("physical_sha256"),
                 "typed_word_sha256": p.get("typed_word_sha256"),
                 "source_view_status": p.get("source_status"),
                 "semantic_admitted": False,
                 "oracle_witness": None,
-                "first_empty": p.get("error") if condition.endswith("BLOCKED")
-                                    else "needs independent source/oracle witness",
+                "first_empty": (p.get("error") if condition == "PHYSICAL_T5_PAIR_BLOCKED"
+                                else "legacy T5 must be converted to current T5M"
+                                if p["physical_codec"] == "t5"
+                                else "needs independent source/oracle witness"),
             })
         else:
             u = queue[source]
@@ -198,6 +208,14 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
             "tracked_physical_sens_pairs": len(pair_entries),
             "unpaired_source_rows": len(queue),
             "mechanically_canonical_physical_pairs": pair_summary["physical_pass"],
+            "mechanically_canonical_current_t5m_pairs": sum(
+                r["physical_status"] == "PASS" and r.get("physical_codec") == "t5m"
+                for r in pair_entries.values()
+            ),
+            "legacy_t5_pairs_requiring_t5m": sum(
+                r["physical_status"] == "PASS" and r.get("physical_codec") == "t5"
+                for r in pair_entries.values()
+            ),
             "independently_oracle_certified_from_these_inputs": 0,
             "status_counts": dict(sorted(counts.items())),
             "missing_from_both_audits": len(missing),
@@ -209,7 +227,8 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
         "untracked_or_stale_source_paths": unknown,
         "files": ledger,
         "warning": (
-            "A physical T5 pair is not an executable-semantic admission. "
+            "A physical T5M pair is not an executable-semantic admission; "
+            "legacy T5 physical success does not establish current T5M. "
             "The original .lisp requires an independent canonical D2 parser "
             "and observer/oracle proof, never a filename-only or codec-only pass."
         ),
