@@ -1,12 +1,12 @@
-; #447 single pair-eliminator research model
-; Research-only data. NOT semantic authority. NO Canon/runtime change.
+; #447 дослідна модель єдиного елімінатора пар
+; Лише дослідницькі дані. НЕ семантична влада. БЕЗ змін Canon/runtime.
 ;
-; Question:
-;   Does replacing independent CAR/CDR primitives with one product eliminator
-;   remove semantic power, or only choose an equivalent basis?
+; Питання:
+;   Чи заміна незалежних примітивів CAR/CDR одним елімінатором добутку
+;   відбирає семантичну потужність, чи лише обирає еквівалентну основу?
 ;
-; The candidate is intentionally abstract and has no proposed public spelling,
-; semantic ID, ABI, implementation, or ratification status.
+; Кандидат навмисно абстрактний і не має запропонованого публічного написання,
+; семантичного ID, ABI, реалізації чи статусу ратифікації.
 
 (pair-elim-research
   (schema-version 2)
