@@ -82,7 +82,7 @@ fn current_d5_plus_builds_target_neutral_bounded_add_effect() {
 
     let mut session = machine_session();
     assert_eq!(
-        eval_value("(machine-effect-bounded-u64-add 2 3)", &mut session),
+        eval_value("(машинний-ефект-додавання-64 2 3)", &mut session),
         "(bounded-u64-add 2 3)"
     );
 }
@@ -93,7 +93,7 @@ fn bounded_add_effect_projects_to_same_forms_and_bytes_as_current_donor() {
 
     for (left, right) in [(2u64, 3u64), (0, u32::MAX as u64), (u32::MAX as u64, u32::MAX as u64)] {
         let effect = eval_value(
-            &format!("(machine-effect-bounded-u64-add {left} {right})"),
+            &format!("(машинний-ефект-додавання-64 {left} {right})"),
             &mut session,
         );
         assert_eq!(effect, format!("(bounded-u64-add {left} {right})"));
@@ -137,9 +137,9 @@ fn effect_and_projection_rejections_are_distinct_and_fail_closed() {
     let mut session = machine_session();
 
     for source in [
-        "(machine-effect-bounded-u64-add -1 3)",
-        "(machine-effect-bounded-u64-add 4294967296 3)",
-        "(machine-effect-bounded-u64-add 2 4294967296)",
+        "(машинний-ефект-додавання-64 -1 3)",
+        "(машинний-ефект-додавання-64 4294967296 3)",
+        "(машинний-ефект-додавання-64 2 4294967296)",
     ] {
         assert_eq!(eval_value(source, &mut session), "machine-effect-rejected");
     }
@@ -193,11 +193,6 @@ fn ukrainian_machine_effect_and_atom_aliases_keep_execution_parity() {
     let mut session = machine_session();
     // Порівнюємо фактичне обчислення, не лише наявність рядків у файлах.
     let pairs = [
-        ("machine-effect-bounded-u64-add 2 3", "машинний-ефект-додавання-64 2 3"),
-        ("machine-effect-bounded-u64-sub 5 3", "машинний-ефект-віднімання-64 5 3"),
-        ("machine-effect-bounded-u64-mul 2 3", "машинний-ефект-множення-64 2 3"),
-        ("machine-effect-bounded-u64-sub 2 3", "машинний-ефект-віднімання-64 2 3"),
-        ("machine-effect-u32-carrier? -1", "машинний-ефект-носій-беззнаковий-32? -1"),
         ("x86-ret", "машинна-команда-повернення"),
         ("x86-add-r64-r64 (як-є rax) (як-є rcx)", "машинна-команда-додати-64-розрядні-регістри (як-є rax) (як-є rcx)"),
         ("x86-jnz-rel8 11", "машинна-команда-перехід-якщо-не-нуль 11"),
