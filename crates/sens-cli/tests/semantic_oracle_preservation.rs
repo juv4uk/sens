@@ -89,19 +89,21 @@ fn semantic_oracle_surface_survives_coordination_removal() {
     assert!(contract.contains("(status ok)"), "{contract}");
     assert!(contract.contains("(contract-version"), "{contract}");
 
+    // Exercise a callable identity admitted by the current Core4 contract.
+    // The historical `(+)` spelling is not a callable resident here.
     let eval = request(
         port,
-        r#"(request (id 2) (op eval) (source "(+ 1 2)"))"#,
+        r#"(request (id 2) (op eval) (source "(тотожність 3)"))"#,
     );
     assert!(eval.contains("(status ok)"), "{eval}");
     assert!(eval.contains("(value 3)"), "{eval}");
 
     let parse = request(
         port,
-        r#"(request (id 3) (op parse) (source "(+ 1 2)"))"#,
+        r#"(request (id 3) (op parse) (source "(тотожність 3)"))"#,
     );
     assert!(parse.contains("(status ok)"), "{parse}");
-    assert!(parse.contains("(value (+ 1 2))"), "{parse}");
+    assert!(parse.contains("(value (тотожність 3))"), "{parse}");
 
     let diagnose = request(
         port,

@@ -389,23 +389,6 @@ fn main() {
     #[allow(unused_variables)]
     let core_lib = CORE_SRC;
 
-    // The sexpr/oracle server creates a fresh custom Environment per connection.
-    // Its handler now establishes the macro substrate explicitly before this
-    // remaining language-owned seed is evaluated, so macro.lisp need not be
-    // duplicated into the seed string.
-    static SEXPR_BOOTSTRAP: std::sync::OnceLock<String> = std::sync::OnceLock::new();
-    let sexpr_bootstrap_lib: &'static str = SEXPR_BOOTSTRAP
-        .get_or_init(|| {
-            format!(
-                "{}\n{}\n{}\n{}",
-                CORE_SRC,
-                sens::UTF8_LIBRARY_SOURCE,
-                sens::PROCESS_LIBRARY_SOURCE,
-                sens::FS_LIBRARY_SOURCE
-            )
-        })
-        .as_str();
-
     if args.len() > 1 {
         let arg = &args[1];
 
@@ -479,7 +462,6 @@ fn main() {
             if sexpr_protocol {
                 run_tcp_repl_sexpr(
                     port,
-                    sexpr_bootstrap_lib,
                     allowed_for_tcp,
                     contract_major,
                     contract_minor,

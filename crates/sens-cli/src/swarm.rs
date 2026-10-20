@@ -507,7 +507,6 @@ fn error_kind_symbol(kind: &ErrorKind) -> &'static str {
 /// threads), not just logical (separate `Environment`s in one thread).
 pub(crate) fn run_tcp_repl_sexpr(
     port: u16,
-    core_lib: &'static str,
     allowed: Vec<String>,
     contract_major: f64,
     contract_minor: f64,
@@ -541,7 +540,7 @@ pub(crate) fn run_tcp_repl_sexpr(
         thread::Builder::new()
             .stack_size(256 * 1024 * 1024)
             .spawn(move || {
-                handle_sexpr_connection(stream, core_lib, &allowed, contract_major, contract_minor);
+                handle_sexpr_connection(stream, &allowed, contract_major, contract_minor);
             })
             .expect("failed to spawn TCP connection thread");
     }
@@ -549,7 +548,6 @@ pub(crate) fn run_tcp_repl_sexpr(
 
 fn handle_sexpr_connection(
     mut stream: TcpStream,
-    core_lib: &str,
     allowed: &[String],
     contract_major: f64,
     contract_minor: f64,
@@ -571,16 +569,38 @@ fn handle_sexpr_connection(
     // unrestricted by default.
     let environment = Environment::root().with_process_allowlist(allowed.to_vec());
     let mut session = Session { environment };
-    if let Ok(core_ast) = parse(core_lib) {
-        if eval_parsed_expressions(&core_ast, &mut session).is_err() {
-            return;
-        }
-    } else {
+    // Keep the oracle bootstrap on the same exact-domain/FASL-aware loader path
+    // as the CLI. Environment::root() is deliberately bare: evaluating the
+    // concatenated source with the general reader skipped macro-library setup
+    // and silently closed every connection when Core4 reached a macro form.
+    if let Err(error) = sens::load_core_library(&mut session) {
+        eprintln!(
+            "TCP REPL: Core4 bootstrap failed: {}",
+            error.render(sens::CORE_LIBRARY_SOURCE)
+        );
         return;
     }
     // The time library uses an owner-pinned exact-D3 parser, not the ordinary
     // composite string reader (which would treat W3 heads as decimal tokens).
-    if sens::load_time_library(&mut session).is_err() {
+    if let Err(error) = sens::load_time_library(&mut session) {
+        eprintln!(
+            "TCP REPL: time library bootstrap failed: {}",
+            error.render(sens::TIME_LIBRARY_SOURCE)
+        );
+        return;
+    }
+    if let Err(error) = sens::load_process_library(&mut session) {
+        eprintln!(
+            "TCP REPL: process library bootstrap failed: {}",
+            error.render(sens::PROCESS_LIBRARY_SOURCE)
+        );
+        return;
+    }
+    if let Err(error) = sens::load_fs_library(&mut session) {
+        eprintln!(
+            "TCP REPL: filesystem library bootstrap failed: {}",
+            error.render(sens::FS_LIBRARY_SOURCE)
+        );
         return;
     }
 
