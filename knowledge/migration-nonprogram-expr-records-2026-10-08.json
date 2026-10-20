@@ -87,14 +87,14 @@
       "path": "tests/fixtures/conformance.lisp",
       "previous_git_blob_sha1": "154116b8a75206f6f75f758a1bb0b2f9b858b2d7",
       "current_git_blob_sha1": "c7fe4f17a0a3f34d9440bc83b9958d3eaa6ec2ea",
-      "reviewed_commit": "Поточний коміт маніфесту",
+      "reviewed_commit": "3905d8f69b7b13003ade764005f6573ba438fcd0",
       "reason": "Після українізації перевірено, що всі 38 верхньорівневі записи досі мають форму (expr . quoted-source), а не виконуваний Lisp. Оновлено лише SHA походження. Вкладені вирази залишаються separate-unproven; жодного SENS/T5M runtime чи release допуску."
     },
     {
       "path": "tests/fixtures/macro-conformance.lisp",
       "previous_git_blob_sha1": "2d9d756b65777e26f72510c71493e37e01f7b8bc",
       "current_git_blob_sha1": "51c0d38f29ba24bd4d1cf4c3de5f20866f9f204f",
-      "reviewed_commit": "Поточний коміт маніфесту",
+      "reviewed_commit": "3905d8f69b7b13003ade764005f6573ba438fcd0",
       "reason": "Після українізації перевірено, що всі 7 верхньорівневі записи досі мають форму (expr . quoted-source), а не виконуваний Lisp. Оновлено лише SHA походження. Вкладені вирази залишаються separate-unproven; жодного SENS/T5M runtime чи release допуску."
     }
   ]
