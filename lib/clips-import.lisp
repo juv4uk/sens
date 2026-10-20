@@ -36,15 +36,6 @@
       ((тотожне? (перше форма) (як-є deftemplate)) так)
       (так ні))))
 
-; Real CLIPS files namespace their deftemplate/deffacts names with a
-; `defmodule` prefix, e.g. `QUESTIONS::question`. `wine-external.clp`
-; (fetched from CLIPS's own examples) declares `(deftemplate QUESTIONS::question ...)`
-; but then asserts plain `(question ...)` facts inside `deffacts` — CLIPS
-; resolves the bare name against whichever module is current, but this
-; importer has no notion of modules at all. Stripping every name down to
-; whatever follows the last `::` (or the whole name, if there is none)
-; before it ever reaches the template alist lets bare and qualified names
-; match each other, without needing to model `defmodule` for real.
 ; Реальні CLIPS-файли простороюють імена deftemplate/deffacts префіксом
 ; `defmodule`, напр. `QUESTIONS::question`. `wine-external.clp` (зі
 ; справжніх прикладів CLIPS) оголошує `(deftemplate QUESTIONS::question ...)`,
@@ -54,21 +45,12 @@
 ; `::` (або всього імені, якщо `::` немає) ще до потрапляння в реєстр
 ; шаблонів дозволяє голим і кваліфікованим іменам збігатися одне з одним,
 ; без реальної підтримки `defmodule`.
-; Echte CLIPS-Dateien versehen deftemplate/deffacts-Namen mit einem
-; `defmodule`-Präfix, z.B. `QUESTIONS::question`. `wine-external.clp` (aus
-; den echten CLIPS-Beispielen) deklariert `(deftemplate QUESTIONS::question ...)`,
-; asserted dann aber schlichte `(question ...)`-Fakten in `deffacts` — CLIPS
-; löst den nackten Namen selbst gegen das aktuelle Modul auf, dieser
-; Importer kennt Module überhaupt nicht. Jeden Namen schon vor der
-; Aufnahme in die Vorlagen-Registry auf den Teil nach dem letzten `::`
-; zu kürzen (oder den ganzen Namen, falls kein `::` vorkommt) lässt nackte
-; und qualifizierte Namen einander finden, ohne `defmodule` wirklich
-; abzubilden.
 (визначити кліпс-рядок-порожній? (функція (рядок) (тотожне? рядок "")))
 
-; This is a D1 predicate, not a partial search returning NIL on failure.
-; D3 COND can inspect only the exact one-bit results; empty/short strings,
-; mismatched first character and mismatched second character are all D1:NO.
+; Це предикат D1, а не частковий пошук, що повертає NIL у разі невдачі.
+; D3 COND може перевіряти лише точні однобітні результати; порожній чи
+; закороткий рядок, а також невідповідність першого або другого символу
+; дають D1:НІ.
 (визначити кліпс-рядок-починається-з-подвійної-двокрапки?
   (функція (рядок)
     (за-умовою
@@ -228,24 +210,12 @@
 (визначити кліпс-факт-клауза
   (функція (факт) (список факт)))
 
-; `(cons ... (clips-facts->clauses ...))` is not a tail call — for a real
-; CLIPS file with a big `deffacts` block (`animal-external.clp`'s own
-; knowledge base is 128 facts in one block) the Rust call stack grew one
-; frame per fact and overflowed. `-onto` accumulator + `reverse`, the same
-; stack-safe shape `lib/core.lisp`'s own `map`/`filter` use, keeps every
-; recursive call here in tail position.
 ; `(cons ... (clips-facts->clauses ...))` — не хвостовий виклик: на
 ; справжньому CLIPS-файлі з великим блоком `deffacts` (`animal-external.clp`'s
 ; власна база знань — 128 фактів в одному блоці) стек Rust ріс на один
 ; фрейм на факт і переповнювався. Акумулятор `-onto` + `reverse`, та сама
 ; стек-безпечна форма, яку використовують власні `map`/`filter` з
 ; `lib/core.lisp`, тримає кожен рекурсивний виклик тут у хвостовій позиції.
-; `(cons ... (clips-facts->clauses ...))` ist kein Tail-Call — bei einer
-; echten CLIPS-Datei mit einem großen `deffacts`-Block (`animal-external.clp`s
-; eigene Wissensbasis hat 128 Fakten in einem Block) wuchs der Rust-Stack
-; um einen Frame pro Fakt und lief über. Akkumulator `-onto` + `reverse`,
-; dieselbe stack-sichere Form, die `lib/core.lisp`s eigene `map`/`filter`
-; verwenden, hält jeden rekursiven Aufruf hier in Tail-Position.
 (визначити кліпс-факти-у-клаузи-дописати
   (функція (факти шаблони накопичені)
     (за-умовою
@@ -258,8 +228,8 @@
   (функція (факти шаблони)
     (кліпс-факти-у-клаузи-дописати факти шаблони (як-є ()))))
 
-; `(cddr form)` drops `deffacts` and the deffacts block's own name,
-; leaving just the fact list.
+; `(cddr form)` прибирає `deffacts` і власне ім'я блока deffacts,
+; залишаючи лише список фактів.
 (визначити кліпс-визначити-факти-клаузи
   (функція (форма шаблони)
     (кліпс-факти-клаузи (решта-решти форма) шаблони)))
@@ -286,8 +256,8 @@
          (так ні)))
       (так ні))))
 
-; Both projections are atoms, so admitted D3 EQ suffices;
-; D8 EQUAL is neither needed nor implicitly admitted here.
+; Обидві проєкції — атоми, тож достатньо допущеного D3 EQ;
+; D8 EQUAL тут ані не потрібен, ані не допускається неявно.
 (визначити кліпс-символ-починається-з-питальника?
   (функція (символ)
     (тотожне? (рядок-перший (символ-у-текст символ)) (рядок-перший "?_"))))
@@ -296,8 +266,8 @@
   (функція (символ)
     (список (як-є var) (текст-у-символ (рядок-решта (символ-у-текст символ))))))
 
-; Walks an arbitrary CLIPS term, replacing every `?x`-shaped symbol with
-; `(var x)` and leaving everything else untouched.
+; Обходить довільний терм CLIPS: кожен символ вигляду `?x` замінює на
+; `(var x)`, а все інше залишає без змін.
 (визначити кліпс-перетворити-змінні
   (функція (терм)
     (за-умовою
@@ -306,10 +276,10 @@
       ((атом? терм)  терм)
       (так (сполучити (кліпс-перетворити-змінні (перше терм)) (кліпс-перетворити-змінні (решта терм)))))))
 
-; Splits a defrule's body at `=>` into (conditions . conclusion-forms).
-; Guards the `=>`-check with `(atom (car body))` first: a condition like
-; `(planet ?x)` is itself a compound list, and `eq` errors on non-atom
-; arguments instead of just correctly answering "not the `=>` marker".
+; Ділить тіло defrule за `=>` на (умови . форми-висновку).
+; Перед перевіркою `=>` спершу перевіряє `(atom (car body))`: умова на
+; кшталт `(planet ?x)` сама є складеним списком, а `eq` на неатомарних
+; аргументах видає помилку замість відповіді «це не маркер `=>`».
 (визначити розділити-правило-кліпс
   (функція (тіло)
     (за-умовою
@@ -392,15 +362,6 @@
       (так (сполучити (сполучити (кліпс-перетворити-змінні (перше висновки)) умови)
                 (правила-для-висновків-кліпс (решта висновки) умови))))))
 
-; Step 5 (superseded — history kept, not silently erased): originally
-; detected CLIPS's `(not (pattern))` conditions and skipped the whole rule,
-; because `lib/forward.lisp`'s `match-conditions` had no negation-as-failure
-; handling and a naively-converted `(not ...)` condition would silently
-; never fire. Step 6 (`lib/forward.lisp`'s `match-one-condition`/
-; `match-negated-condition`) closed that gap directly in the forward
-; engine, so `not` conditions now import and run correctly — the guard
-; that used to skip them has been removed rather than left as a dead,
-; misleadingly-named no-op.
 ;
 ; Крок 5 (замінено — історія збережена, не тихо стерта): раніше виявляв
 ; CLIPS-умови `(not (шаблон))` і пропускав усе правило, бо
@@ -411,40 +372,10 @@
 ; `not` тепер імпортуються й працюють коректно — guard, що їх пропускав,
 ; прибрано, а не залишено як мертвий, оманливо названий no-op.
 ;
-; Schritt 5 (ersetzt — Historie erhalten, nicht still gelöscht): erkannte
-; ursprünglich CLIPS' `(not (muster))`-Bedingungen und übersprang die ganze
-; Regel, weil `match-conditions` in `lib/forward.lisp` keine
-; Negation-als-Fehlschlag-Behandlung hatte und eine naiv konvertierte
-; `(not ...)`-Bedingung still nie gefeuert hätte. Schritt 6
-; (`match-one-condition`/`match-negated-condition` in `lib/forward.lisp`)
-; schloss diese Lücke direkt in der Forward-Engine, sodass `not`-Bedingungen
-; nun korrekt importiert werden und funktionieren — der Guard, der sie
-; übersprang, wurde entfernt statt als toter, irreführend benannter No-op
-; zurückzubleiben.
-; Template conversion runs *before* `?x`-variable conversion: slot lookup
-; matches on slot names and reorders values, and a value can just as
-; easily be `?x` as `earth` at this point — either way it's carried
-; through positionally unchanged, then `clips-convert-vars` turns any
-; `?x`-shaped value into `(var x)` afterward.
-; Step 16: strip a `defrule`'s optional preamble — a docstring (a bare
-; string literal) and/or a `(declare (salience N))` property, both of
-; which CLIPS allows directly after the rule name and before its
-; conditions. Verified against a second genuine external `.clp` file (not
-; guessed): CLIPS's own "Automotive Expert System" example
-; (tests/fixtures/auto-external.clp) gives every single one of its 21
-; rules an empty docstring `""`, and several a `(declare (salience N))` —
-; without stripping them, both landed in the condition list as if they
-; were patterns to match against facts. Neither a bare string nor a
-; `declare` form is ever a fact's head, so every affected rule silently
-; never fired — the entire file was dead on arrival, not just one rule.
-; `string?` (crates/my-lisp/src/eval/special_forms.rs) was added
-; specifically to tell a docstring apart from an ordinary condition term.
-;
-; Salience itself (CLIPS's rule-firing priority) has no equivalent here:
-; `run-multi`/`run-jtms-multi` materialize every derivable fact to a
-; fixpoint regardless of order, so which rule "goes first" never changes
-; the final result — dropping `declare` loses information CLIPS would use
-; to order *when* things fire, never *whether* they do.
+; Перетворення шаблонів відбувається ДО перетворення змінних `?x`: пошук
+; зіставляє назви слотів і переставляє значення. На цьому етапі значенням
+; може бути як `?x`, так і `earth`; його позиція зберігається, а згодом
+; `clips-convert-vars` перетворює кожне значення форми `?x` на `(var x)`.
 ;
 ; Крок 16: обрізає необов'язковий преамбул `defrule` — докстрінг (голий
 ; рядковий літерал) і/або властивість `(declare (salience N))`, обидва
@@ -466,30 +397,10 @@
 ; `declare` втрачає інформацію, яку CLIPS використав би, щоб впорядкувати
 ; *коли* щось спрацьовує, ніколи не *чи* спрацьовує.
 ;
-; Schritt 16: entfernt die optionale Präambel einer `defrule` — einen
-; Docstring (ein bloßes String-Literal) und/oder eine `(declare (salience
-; N))`-Eigenschaft, beide erlaubt CLIPS direkt nach dem Regelnamen, vor den
-; Bedingungen. Verifiziert gegen eine zweite echte externe `.clp`-Datei
-; (nicht geraten): CLIPS' eigenes Beispiel "Automotive Expert System"
-; (tests/fixtures/auto-external.clp) gibt jeder seiner 21 Regeln einen
-; leeren Docstring `""`, mehreren ein `(declare (salience N))` — ohne
-; Entfernung landeten beide in der Bedingungsliste, als wären sie Muster
-; zum Abgleich gegen Fakten. Weder ein bloßer String noch eine
-; `declare`-Form ist je der Kopf eines Fakts, also feuerte jede betroffene
-; Regel still nie — die ganze Datei war von Anfang an tot, nicht nur eine
-; Regel. `string?` wurde genau dafür hinzugefügt, einen Docstring von
-; einem gewöhnlichen Bedingungsterm zu unterscheiden.
-;
-; Salience selbst (CLIPS' Feuerpriorität für Regeln) hat hier kein
-; Äquivalent: `run-multi`/`run-jtms-multi` materialisieren jeden
-; ableitbaren Fakt bis zum Fixpunkt, unabhängig von der Reihenfolge, also
-; ändert es nie das Endergebnis, welche Regel "zuerst dran ist" — das
-; Verwerfen von `declare` verliert Information, die CLIPS nutzen würde, um
-; zu ordnen, *wann* etwas feuert, nie *ob*.
-; CLIPS grammar: at rule preamble, an atom other than => is the
-; optional documentation datum; valid conditions and (declare ...) are pairs.
-; This is a position-specific SENS structural law, NOT a general stringp.
-; Do not grant the unadmitted D9:110100110 STRINGP runtime authority.
+; Граматика CLIPS: у преамбулі правила атом, відмінний від `=>`, може бути
+; необов'язковим документаційним значенням; умови й `(declare ...)` — пари.
+; Це структурний закон SENS для конкретної позиції, а НЕ загальний stringp.
+; Не надавати недопущеному D9:110100110 STRINGP повноважень виконання.
 (визначити преамбула-правила-кліпс?
   (функція (форма)
     (за-умовою
@@ -538,11 +449,11 @@
       (розділити-правило-кліпс (прибрати-преамбулу-кліпс (решта-решти форма)))
       шаблони)))
 
-; Dispatches on one top-level CLIPS form's leading symbol. Unknown or
-; not-yet-supported forms produce no clauses rather than erroring — a
-; partial import of a mixed file still returns whatever it *could*
-; translate. `deftemplate` itself produces no clauses (it only feeds the
-; `templates` lookup `clips-import` builds once, up front).
+; Розпізнає верхньорівневу форму CLIPS за першим символом. Невідомі або ще
+; не підтримані форми не створюють клауз і не спричиняють помилки: частковий
+; імпорт змішаного файла повертає все, що вдалося перетворити. Сама
+; `deftemplate` клауз не утворює, а лише наповнює таблицю `templates`, яку
+; `clips-import` будує один раз на початку.
 (визначити кліпс-форма-клаузи
   (функція (форма шаблони)
     (за-умовою
@@ -552,16 +463,6 @@
       ((тотожне? (перше форма) (як-є defrule)) (кліпс-визначити-правило-клаузи форма шаблони))
       (так (як-є ())))))
 
-; Same non-tail-call problem as `clips-facts->clauses` above, one level up:
-; `(append (clips-form->clauses ...) (clips-import-forms ...))` nests one
-; Rust stack frame per top-level form. `animal-external.clp` (37 forms,
-; one deffacts block of 128 facts) is exactly the file that first grew
-; this deep enough to crash the process outright with a real stack
-; overflow rather than a graceful error — found the same "verify with a
-; throwaway debug test" way as every other importer bug this file
-; documents. `кліпс-сполучити-кожен-дописати` flattens one form's own clause list
-; onto the running accumulator tail-recursively, so neither loop — across
-; forms, or across one form's clauses — grows the native stack.
 ; Та сама проблема нехвостового виклику, що й у `clips-facts->clauses`
 ; вище, лише рівнем вище: `(append (clips-form->clauses ...)
 ; (clips-import-forms ...))` вкладає один Rust-стек-фрейм на кожну
@@ -573,17 +474,6 @@
 ; сплющує список clause однієї форми на робочий акумулятор хвостово-
 ; рекурсивно, тож жоден із циклів — ні по формах, ні по clause однієї
 ; форми — не росте нативний стек.
-; Dasselbe Nicht-Tail-Call-Problem wie bei `clips-facts->clauses` oben,
-; nur eine Ebene höher: `(append (clips-form->clauses ...)
-; (clips-import-forms ...))` verschachtelt einen Rust-Stack-Frame pro
-; Top-Level-Form. `animal-external.clp` (37 Formen, ein deffacts-Block
-; mit 128 Fakten) ist genau die Datei, die das erstmals tief genug wachsen
-; ließ, um mit einem echten Stack-Overflow abzustürzen statt einen
-; ordentlichen Fehler zu liefern — gefunden auf demselben Weg "erst ein
-; Wegwerf-Debug-Test" wie jeder andere Importer-Bug in dieser Datei.
-; `кліпс-сполучити-кожен-дописати` glättet die Clause-Liste einer Form tail-rekursiv
-; auf den laufenden Akkumulator, sodass weder die Schleife über die Formen
-; noch die über die Clauses einer Form den nativen Stack wachsen lässt.
 (визначити кліпс-сполучити-кожен-дописати
   (функція (елементи накопичені)
     (за-умовою
@@ -617,8 +507,9 @@
   (функція (шлях)
     (кліпс-імпорт (читати-всі (читати-файл шлях)))))
 
-; D9 exact-width Ukrainian projections of native CLIPS S-expression importer.
-; Source laws are the Lisp closures above; no new parser, Rust semantics or opcode.
+; Точні українські проєкції D9 для нативного імпортера S-виразів CLIPS.
+; Закони джерела — наведені вище Lisp-замикання; нового парсера,
+; семантики Rust чи opcode тут немає.
 ; D9:010110100
 (визначити clips-deftemplate-форма? кліпс-визначити-шаблон-форма?)
 ; D9:001110111
