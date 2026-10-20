@@ -46,7 +46,9 @@ jobs:
           python3 -m unittest tests.test_check_principle_force -v
           python3 scripts/check_numeric_domain_exclusive.py .
           python3 -m unittest tests.test_check_numeric_domain_exclusive -v
-          python3 scripts/release_go_gate.py . --json "$RUNNER_TEMP/release-go-gate.json"
+          # Structural success permits the remaining checks to run; it is NOT
+          # a release GO or authorization to publish.
+          python3 scripts/release_go_gate.py . --structural-only --json "$RUNNER_TEMP/release-go-gate.json"
           python3 -m unittest tests.test_rust_zig_sens_boundary -v
           python3 scripts/migration-zig-gate.py --require-zig
           # Zig 0.16 native test suite with release-like optimizations and safety.
