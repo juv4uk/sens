@@ -204,7 +204,7 @@ class WholeFileMetricTests(FileTree):
 
 
 class ReportCliTests(FileTree):
-    def test_default_output_contains_only_requested_metric(self):
+    def test_default_output_contains_both_progress_metrics(self):
         root = self.tree({
             "lib/так.lisp": "(визначити відповідь так)\n",
             "lib/ні.lisp": "(визначити answer так)\n",
@@ -214,7 +214,10 @@ class ReportCliTests(FileTree):
         self.assertEqual(code, 0)
         self.assertEqual(
             stdout.splitlines(),
-            ["УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 1/2 (50.0%)"],
+            [
+                "УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 1/2 (50.0%)",
+                "УКР-ПРОЄКЦІЯ: виконувані назви, голови та параметри в активних lib-файлах — 1/2 (50.0%)",
+            ],
         )
         self.assertNotIn("ук==укр", stdout)
         self.assertNotIn("викличні голови", stdout)
