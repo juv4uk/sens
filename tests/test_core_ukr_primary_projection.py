@@ -1,6 +1,6 @@
 """Точкова перевірка повної української проєкції основних Core-файлів.
 
-Перевіряє напрямок primary → сумісний alias та exact-width таблиці.
+Перевіряє актуальні українські визначення та точні ширини доменів.
 Назви з таблиць є проєкціями; цей тест не надає координатам викличності.
 """
 from __future__ import annotations
@@ -40,23 +40,14 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         surface = source("lib/surface/uk.lisp")
 
         with self.subTest(file="lib/core.lisp"):
-            self.assertIn(
-                "(визначити друге\n"
-                "  (функція (значення-функції)\n"
-                "    (перше (решта значення-функції))))\n"
-                "(визначити second друге)",
-                core,
-            )
-            self.assertIn("(визначити third третє)", core)
-            self.assertIn(
-                "(визначити четверте\n"
-                "  (функція (значення-функції)\n"
-                "    (третє (решта значення-функції))))\n"
-                "(визначити fourth четверте)",
-                core,
-            )
-            self.assertNotIn("(визначити друге second)", core)
-            self.assertNotIn("(визначити четверте fourth)", core)
+            # Поточний Core — українська виклична поверхня, без
+            # приписування старому ASCII псевдоніму машинного значення.
+            for head in ("тотожність", "друге", "третє", "четверте"):
+                self.assertIn(f"(визначити {head}", core)
+            self.assertIn("(перше (решта значення-функції))", core)
+            self.assertIn("(третє (решта значення-функції))", core)
+            for retired in ("second", "third", "fourth"):
+                self.assertNotRegex(core, rf"\(визначити\s+{retired}\b")
 
         with self.subTest(file="lib/core4.lisp"):
             # Допоміжний двоелементний список і D8 «пара» — різні закони.
@@ -82,14 +73,11 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertNotIn("(визначити четверте fourth)", core4)
 
         with self.subTest(file="lib/surface/uk.lisp"):
-            for alias in (
-                "(визначити pair пара)",
-                "(визначити second друге)",
-                "(визначити third третє)",
-                "(визначити fourth четверте)",
-            ):
-                with self.subTest(alias=alias):
-                    self.assertIn(alias, surface)
+            # Чинна компактна поверхня — проєкція, а не файл
+            # зі старими англомовними DEFINE-дублями.
+            self.assertIn("не створює псевдонімів", surface)
+            self.assertIn("T5M", surface)
+            self.assertNotIn("(визначити ", surface)
 
         # Internal helpers remain internal; their executable names are Ukrainian
         # in both bootstrap/core4 copies and every live caller. No alias or new
@@ -129,10 +117,10 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
                 self.assertIn("класифікувати-рядкове-значення", code)
                 self.assertNotIn("(string-membership-helper ", code)
         inventory = source("lib/surface/uk-inventory.lisp")
-        for ukrainian, legacy in helpers:
-            with self.subTest(inventory=legacy):
-                self.assertIn(ukrainian, inventory)
-                self.assertNotIn(legacy, inventory)
+        self.assertIn("(current-projection ukr)", inventory)
+        self.assertIn("(sid8-call-heads retired)", inventory)
+        self.assertIn("історичні-імена-лише-дані", inventory)
+        self.assertNotIn("(визначити ", inventory)
 
         # These three helpers deliberately have no D-domain resident names:
         # keep them internal, Ukrainian, and exactly reversible at the callsite.
@@ -142,30 +130,31 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         ):
             self.assertIn(f"(визначити {ukrainian}", core4)
             self.assertNotIn(f"({legacy} ", core4)
-        inventory = source("lib/surface/uk-inventory.lisp")
-        for ukrainian, legacy in helpers[-3:]:
-            with self.subTest(inventory=legacy):
-                self.assertIn(ukrainian, inventory)
-                self.assertNotIn(legacy, inventory)
+        # Інвентар не дублює внутрішні визначення й не створює
+        # жодної окремої машинної адреси для допоміжних функцій.
 
-        with self.subTest(file="racket/boot/core.lisp", migration="canonical decimal rendering"):
+        with self.subTest(file="racket/boot/core.lisp", migration="Ukrainian D1 bootstrap"):
             racket_core = source("racket/boot/core.lisp")
-            self.assertIn("(визначити число-рядок", racket_core)
-            self.assertIn("(значення-у-текст число-аргумент)", racket_core)
-            self.assertNotIn("взяти-десятковий-символ", racket_core)
+            # За поточним Contract 11.9 це українське джерело, не
+            # старий Racket-host alias реєстр і не доказ SENS runtime.
+            self.assertIn("(визначити тотожність", racket_core)
+            self.assertIn("(визначити друге", racket_core)
+            self.assertIn("(визначити третє", racket_core)
+            self.assertIn("(визначити четверте", racket_core)
+            self.assertIn("(визначити готовність-ядра-ракет", racket_core)
+            self.assertIn("(визначити двійковий-опис", racket_core)
+            self.assertIn("(значення ні)", racket_core)
+            self.assertIn("(так так)", racket_core)
+            self.assertNotRegex(racket_core, r"\(визначити\s+[A-Za-z]")
+            self.assertNotRegex(racket_core, r"\(t(?:\s|\))")
+            self.assertNotIn("(визначити cadddr", racket_core)
             self.assertNotIn("number->string-onto", racket_core)
-            self.assertIn("(визначити number->string число-рядок)", racket_core)
-            self.assertIn("; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень.", racket_core)
-            self.assertNotIn("(0011 number->string", racket_core)
-            start = racket_core.index("(визначити число-рядок")
-            end = racket_core.index("; -> / ->> (thread-first / thread-last macros)", start)
-            renderer = racket_core[start:end]
-            self.assertNotRegex(renderer, r"\([01]{3,9}(?=\s|\))")
 
         dependency_classifier = source("scripts/build-dependency-classification.lisp")
-        with self.subTest(file="scripts/build-dependency-classification.lisp", migration="canonical decimal rendering"):
-            self.assertIn("number->string", dependency_classifier)
-            self.assertNotIn("взяти-десятковий-символ", dependency_classifier)
+        with self.subTest(file="scripts/build-dependency-classification.lisp", migration="domain authority"):
+            self.assertIn("(projection ukr)", dependency_classifier)
+            self.assertIn("(sid8-call-heads retired)", dependency_classifier)
+            self.assertIn("(forms (визначити функція за-умовою як-є", dependency_classifier)
             self.assertNotIn("number->string-onto", dependency_classifier)
 
         # Numeric iteration workers remain ordinary Ukrainian library helpers.
