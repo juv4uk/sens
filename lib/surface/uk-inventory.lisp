@@ -1,6 +1,6 @@
-; Machine-readable inventory of the English-facing public surface.
-; Машинно-читаний інвентар англомовної публічної поверхні.
-; This file classifies names; it does not choose Ukrainian words.
+; Машинно-читаний інвентар історичної англомовної публічної поверхні.
+; Файл класифікує назви за їхньою роллю, але не визначає
+; українських назв і не створює нових семантичних тотожностей.
 
 (uk-surface-inventory
   (schema uk-surface-inventory/1)
@@ -24,11 +24,11 @@
         string-first string-rest string-slice string<? string? symbol->string
         timezone-declarations-raw unix-time-now vector vector-length vector-ref
         vector-set! write-to-string codepoint->string))
-     ; abs/max/max-list/min/min-list moved here 2026-09-11 (from
-     ; root-builtins): migrated from Rust builtins.rs to lib/core.lisp, see
-     ; docs/VERTICAL-SLICE-1-ABS-MIN-MAX-2026-09-11.md. This inventory
-     ; had gone stale relative to the actual implementation until
-     ; corrected.
+     ; Із 11.09.2026 abs/max/max-list/min/min-list належать бібліотеці,
+     ; а не кореневим примітивам: їхній механізм перенесено
+     ; з Rust builtins.rs до lib/core.lisp. Джерело доказу:
+     ; docs/VERTICAL-SLICE-1-ABS-MIN-MAX-2026-09-11.md.
+     ; Інвентар оновлено після виявлення історичної невідповідності.
      (core-library
        (модуль identity binary list not? and or gensym pair second third fourth cadddr fifth
         caar cadr cddr length reverse append map filter reduce let equal? max
@@ -36,8 +36,9 @@
         divmod <= >= number->string -> ->> isqrt sqrt
         null? subst sublis maplist apply
         answer-atom answer-eq answer-not answer-and answer-or answer-weaken))))
-  ; Ukrainian words carry the readable surface. Mathematical marks remain
-  ; optional compact notation over the same existing operations.
+  ; Українські слова є основною людиночитаною поверхнею.
+  ; Математичні знаки — лише необов'язковий скорочений запис
+  ; тих самих уже визначених операцій.
   (symbolic-sugar (+ - * / < = > <= >=))
   (internal
     ((bootstrap (макрос))
