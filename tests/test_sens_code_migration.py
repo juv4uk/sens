@@ -326,20 +326,20 @@ class SensCodeMigrationTests(unittest.TestCase):
             ]
             first = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
             self.assertEqual(first.returncode, 0, first.stderr)
-            from sens_t5_codec import decode_bytes, encode_projection
+            from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
             target = out / 'hello.sens'
             self.assertTrue(target.is_file())
             self.assertFalse((out / 'hello').exists())
             self.assertFalse((out / 'hello.lisp').exists())
-            self.assertEqual(target.read_bytes(), encode_projection('000'))
-            self.assertEqual(decode_bytes(target.read_bytes()), ['000'])
+            self.assertEqual(target.read_bytes(), encode_t5m_projection('000'))
+            self.assertEqual(decode_t5m_bytes(target.read_bytes()), ['000'])
             self.assertEqual((root / 'hello.lisp').read_text(), '()\n')
             state=json.loads(report.read_text())
             self.assertEqual(state['mode'], 'sens-mirror')
             self.assertEqual(state['files'][0]['status'], 'sens-written')
             second=subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
             self.assertEqual(second.returncode, 2, second.stderr)
-            self.assertEqual(target.read_bytes(), encode_projection('000'))
+            self.assertEqual(target.read_bytes(), encode_t5m_projection('000'))
 
 
     def test_binary_migration_blocks_whole_batch_if_one_source_is_unadmitted(self):
