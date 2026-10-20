@@ -235,7 +235,7 @@
        (додати-нові-обґрунтований (решта нові-записи) поточні-записи))
       (так (додати-нові-обґрунтований (решта нові-записи) (сполучити (перше нові-записи) поточні-записи))))))
 
-; The fixpoint loop over justified facts, mirroring `run` from Step 4.
+; Цикл до нерухомої точки над обґрунтованими фактами, як у кроці 4.
 (визначити запустити-система-істини
   (функція (поточні-правила поточні-записи)
     ((функція (нові-записи) ((функція (об'єднані-записи) (за-умовою
@@ -373,11 +373,9 @@
            (решта нові-записи)
            (додати-обґрунтування (факт-від (перше нові-записи)) (друге (перше нові-записи)) поточні-записи))))))
 
-; The fixpoint loop. Compares the merged result to the input with `equal?`
-; rather than a length/count check (Step 4's `run` compares lengths) —
-; `add-justification` can grow an *existing* entry's justification list
-; without changing the entry count, so counting entries alone would miss
-; real progress and stop too early.
+; Порівнюємо повний об'єднаний результат, а не кількість записів:
+; нове обґрунтування може з'явитися в уже відомого факту,
+; не змінюючи кількості фактів.
 (визначити запустити-система-обґрунтувань
   (функція (поточні-правила поточні-записи)
     ((функція (об'єднані-записи) (за-умовою
@@ -520,11 +518,9 @@
       ((атом? (обґрунтування-від (перше поточні-записи)))  (відкинути-непідтримані (решта поточні-записи)))
       (так (сполучити (перше поточні-записи) (відкинути-непідтримані (решта поточні-записи)))))))
 
-; Removes `fact`'s own entry outright, then prunes every justification-set
-; elsewhere that named it. Any entry left with zero justification-sets has
-; lost all support and cascade-retracts in turn — recursively, the same way
-; Step 5b's single-justification cascade works, just checking "any
-; justification left" instead of "any support left".
+; Спершу прибираємо сам запис факту, потім відкидаємо з інших записів
+; залежні від нього обґрунтування. Факт без підстав каскадно відкликається,
+; як у попередньому механізмі одного обґрунтування.
 (визначити відкликати-факт-система-обґрунтувань
   (функція (поточний-факт поточні-записи)
     ((функція (обрізані-докази) ((функція (нові-непідтримані решта-записів) (за-умовою
@@ -566,35 +562,14 @@
              ((підстановка-позначає-невдачу? поточний-стан-підстановки) (зіставити-умову-із-набором-фактів поточна-умова (решта поточні-факти) поточні-зв'язування))
              (так (сполучити поточний-стан-підстановки (зіставити-умову-із-набором-фактів поточна-умова (решта поточні-факти) поточні-зв'язування))))) (уніфікувати поточна-умова (перше поточні-факти) поточні-зв'язування))))))
 
-; Step 7: negation as failure — `(not (pattern))` conditions. This is the
-; capability `lib/clips-import.lisp`'s Step 5 flagged as missing and worked
-; around by *skipping* any CLIPS rule containing `not` rather than
-; importing a rule that would silently never fire. Same idea
-; `lib/reason.lisp`'s `prove-goal-state` already uses for backward-chaining:
-; a `not` succeeds exactly when its inner pattern *cannot* be matched
-; against the current facts (with the current substitution) — no new
-; bindings, `subst` passes through unchanged.
-;
-; Крок 7: negation as failure — умови `(not (шаблон))`. Це та можливість,
-; якої не вистачало Кроку 5 `lib/clips-import.lisp`, і яку обходили
-; *пропуском* будь-якого CLIPS-правила з `not`, замість імпорту правила,
-; що мовчки ніколи б не спрацювало. Та сама ідея, яку `prove-goal-state` у
-; `lib/reason.lisp` уже використовує для backward-chaining: `not` успішний
-; точно тоді, коли внутрішній шаблон *не вдається* зіставити з поточними
-; фактами (з поточною підстановкою) — жодних нових зв'язувань, `subst`
-; проходить незмінним.
-;
-; Schritt 7: Negation als Fehlschlag — `(not (muster))`-Bedingungen. Genau
-; die Fähigkeit, die Schritt 5 von `lib/clips-import.lisp` als fehlend
-; markierte und durch *Überspringen* jeder CLIPS-Regel mit `not` umging,
-; statt eine Regel zu importieren, die still nie feuern würde. Dieselbe
-; Idee, die `prove-goal-state` in `lib/reason.lisp` bereits für
-; Backward-Chaining nutzt: ein `not` gelingt genau dann, wenn sein inneres
-; Muster *nicht* gegen die aktuellen Fakten (mit der aktuellen
-; Substitution) abgeglichen werden kann — keine neuen Bindungen, `subst`
-; läuft unverändert durch.
-; A negated condition is an exact D1 predicate, never the list (1).
-; Both tags are atoms; a compound head is not a negation operator.
+; Крок 7. Заперечення за невдачею має форму (not (шаблон)).
+; Раніше імпортер CLIPS пропускав такі правила, бо рушій не розумів not.
+; Заперечення задовольняється, коли внутрішній шаблон не зіставляється
+; з жодним поточним фактом за наявної підстановки.
+; Нових зв'язувань при успіху не створюємо.
+; Керування використовує тільки точний біт предиката D1.
+; Лише атомарна голова може бути назвою оператора not.
+
 (визначити умова-має-форму-заперечення?
   (функція (поточна-умова)
     (за-умовою
@@ -604,8 +579,8 @@
       ((тотожне? (перше поточна-умова) (як-є not)) так)
       (так ні))))
 
-; Negation-as-failure: keep the original substitution only if no fact
-; matches the inner condition; a match must produce zero candidates.
+; За успішного заперечення зберігаємо вихідну підстановку;
+; внутрішній шаблон не повинен збігтися з жодним фактом.
 (визначити зіставити-заперечену-умову-правила
   (функція (внутрішній-зразок поточні-факти поточні-зв'язування)
     (за-умовою
@@ -613,39 +588,13 @@
        (список поточні-зв'язування))
       (так (як-є ())))))
 
-; Step 10: `(or (pattern1) (pattern2) ...)` conditions — verified missing
-; before fixing (not guessed), the same way Step 7's `not` gap was found:
-; a rule with `(or (cat ?x) (dog ?x))` derived nothing at all, because no
-; fact's head is ever the symbol `or`, so `match-condition-against-facts`
-; unified the whole `or`-condition literally and always failed — the same
-; silent-dead-rule shape `not` had. `or` succeeds with the *union* of
-; every alternative's own matches: try each alternative as its own
-; condition (recursing through `match-one-condition`, so an alternative
-; can itself be a `not` or nested `or`), collecting every substitution any
-; of them produce.
-;
-; Крок 10: умови `(or (шаблон1) (шаблон2) ...)` — перевірено як
-; відсутню можливість перед виправленням (не здогадано), так само, як
-; знайдено прогалину `not` у Кроці 7: правило з `(or (cat ?x) (dog ?x))`
-; не виводило нічого, бо жоден факт ніколи не має головою символ `or`,
-; тож `match-condition-against-facts` унікувала всю `or`-умову буквально
-; й завжди провалювалась — та сама форма мовчки мертвого правила, що й у
-; `not`. `or` успішний з *об'єднанням* збігів кожної альтернативи: кожна
-; альтернатива пробується як власна умова (рекурсія через
-; `match-one-condition`, тож альтернатива сама може бути `not` чи
-; вкладеним `or`), збираючи всі підстановки, які видає будь-яка з них.
-;
-; Schritt 10: `(or (muster1) (muster2) ...)`-Bedingungen — vor dem Fix
-; verifiziert (nicht geraten), genauso wie die `not`-Lücke in Schritt 7
-; gefunden wurde: eine Regel mit `(or (cat ?x) (dog ?x))` leitete
-; überhaupt nichts ab, weil kein Fakt je das Symbol `or` als Kopf hat,
-; sodass `match-condition-against-facts` die ganze `or`-Bedingung wörtlich
-; unifizierte und immer fehlschlug — dieselbe Form einer still toten Regel
-; wie bei `not`. `or` gelingt mit der *Vereinigung* der Treffer jeder
-; Alternative: jede Alternative wird als eigene Bedingung versucht
-; (Rekursion über `match-one-condition`, sodass eine Alternative selbst
-; ein `not` oder verschachteltes `or` sein kann), gesammelt werden alle
-; Substitutionen, die irgendeine davon liefert.
+; Крок 10. Умова (or (шаблон1) (шаблон2) ...) обирає
+; об'єднання всіх успішних підстановок альтернатив.
+; Без розпізнавання or зіставлення шукало б факт з такою головою.
+; Кожну альтернативу зіставляємо як незалежну умову;
+; вона може містити not або вкладену диз'юнкцію.
+; Прогалину перевірено на правилі (or (cat ?x) (dog ?x)).
+
 (визначити умова-має-форму-диз'юнкції?
   (функція (поточна-умова)
     (за-умовою
@@ -663,44 +612,13 @@
       (так (приєднати (зіставити-одну-умову-правила (перше альтернативи-умов) поточні-факти поточні-зв'язування)
                   (зіставити-умову-логічного-або (решта альтернативи-умов) поточні-факти поточні-зв'язування))))))
 
-; Step 11: `(and (pattern1) (pattern2) ...)` conditions — the same bug
-; class again, found the same way: `(or (and (cat ?x) (small ?x)) (dog
-; ?x))` never matched the `and`-branch at all, silently missing every
-; animal that was both a cat and small, because no fact's head is ever
-; the symbol `and` either. Nested explicitly because top-level conditions
-; are already an implicit conjunction (that's what `thread-conjunction`
-; already does one level up) — an inner `and` is exactly the same
-; operation, just written explicitly, most often to group a compound
-; condition inside an `or`. `match-and-condition` is `match-conditions`
-; itself, threading the sub-conditions the identical way; not
-; reimplemented, just reused under the name the condition-position
-; dispatch expects.
-;
-; Крок 11: умови `(and (шаблон1) (шаблон2) ...)` — той самий клас бага,
-; знайдений тим самим методом: `(or (and (cat ?x) (small ?x)) (dog ?x))`
-; узагалі не зіставляла гілку `and`, мовчки пропускаючи кожну тварину, що
-; одночасно кіт і маленька, бо жоден факт теж ніколи не має головою символ
-; `and`. Вкладено явно, бо умови верхнього рівня вже й так неявна
-; кон'юнкція (те саме, що `thread-conjunction` уже робить на рівень вище)
-; — внутрішній `and` — точно та сама операція, лише записана явно,
-; найчастіше щоб згрупувати складену умову всередині `or`.
-; `match-and-condition` — це сам `match-conditions`, що протягує
-; під-умови так само; не переписано заново, лише перевикористано під
-; іменем, якого чекає диспетчеризація за позицією умови.
-;
-; Schritt 11: `(and (muster1) (muster2) ...)`-Bedingungen — dieselbe
-; Bugklasse, gefunden auf demselben Weg: `(or (and (cat ?x) (small ?x))
-; (dog ?x))` glich den `and`-Zweig überhaupt nie ab und verwarf
-; stillschweigend jedes Tier, das zugleich Katze und klein war, weil auch
-; kein Fakt je das Symbol `and` als Kopf hat. Explizit verschachtelt, weil
-; Bedingungen der obersten Ebene bereits eine implizite Konjunktion sind
-; (genau das, was `thread-conjunction` eine Ebene höher schon tut) — ein
-; inneres `and` ist genau dieselbe Operation, nur explizit geschrieben,
-; meist um eine zusammengesetzte Bedingung innerhalb eines `or` zu
-; gruppieren. `match-and-condition` ist `match-conditions` selbst, das die
-; Unterbedingungen identisch fädelt; nicht neu implementiert, nur unter
-; dem Namen wiederverwendet, den die Dispatch nach Bedingungsposition
-; erwartet.
+; Крок 11. Явна кон'юнкція (and ...) усередині іншої умови
+; повинна задовольнити кожну підумову.
+; На верхньому рівні список умов уже є неявною кон'юнкцією,
+; тому використовуємо ту саму послідовність підстановок.
+; Це необхідно для (or (and (cat ?x) (small ?x)) (dog ?x)).
+; Без окремого закону and така гілка помилково не спрацьовувала.
+
 (визначити умова-має-форму-кон'юнкції?
   (функція (поточна-умова)
     (за-умовою
@@ -714,49 +632,12 @@
   (функція (вкладені-умови поточні-факти поточні-зв'язування)
     (зіставити-умови вкладені-умови поточні-факти поточні-зв'язування)))
 
-; Step 12: `(test <expression>)` conditions — the fourth time this same
-; bug class turned up (verified before fixing, same as `not`/`or`/`and`):
-; `(test (> ?x 5))` matched nothing at all, because — once again — no
-; fact's head is ever the symbol `test`. Unlike `not`/`or`/`and`, `test`
-; isn't a matching combinator at all: it doesn't compare a pattern against
-; facts, it evaluates an arbitrary expression (typically a comparison like
-; `>`, already a my-lisp primitive) after substituting in whatever the
-; preceding conditions already bound. `apply-subst` (lib/unify.lisp) resolves
-; every `(var name)` in the expression against the current `subst`; `eval`
-; (the same read/eval-closing primitive `(eval (read ...))` uses
-; throughout this project, see lib/reason.lisp's header for the pattern)
-; then runs the now-fully-resolved expression as ordinary my-lisp code. A
-; truthy result succeeds with `subst` unchanged (no new bindings, same as
-; `not`); anything else fails.
-;
-; Крок 12: умови `(test <вираз>)` — четвертий раз той самий клас бага
-; (перевірено перед виправленням, як і `not`/`or`/`and`): `(test (> ?x
-; 5))` не зіставляла нічого, бо — знову — жоден факт не має головою символ
-; `test`. На відміну від `not`/`or`/`and`, `test` — узагалі не комбінатор
-; зіставлення: він не порівнює шаблон з фактами, а обчислює довільний
-; вираз (зазвичай порівняння на кшталт `>`, уже наявний примітив my-lisp)
-; після підстановки того, що вже зв'язали попередні умови. `apply-subst`
-; (lib/unify.lisp) розв'язує кожен `(var name)` у виразі проти поточної
-; `subst`; `eval` (той самий примітив, що замикає read/eval цикл, який
-; `(eval (read ...))` використовує по всьому проєкту) тоді виконує вже
-; повністю розв'язаний вираз як звичайний код my-lisp. Правдивий результат
-; успішний з незмінною `subst` (без нових зв'язувань, як і `not`); усе
-; інше — провал.
-;
-; Schritt 12: `(test <ausdruck>)`-Bedingungen — das vierte Mal, dass diese
-; Bugklasse auftauchte (vor dem Fix verifiziert, wie bei `not`/`or`/`and`):
-; `(test (> ?x 5))` glich überhaupt nichts ab, weil — wieder einmal — kein
-; Fakt je das Symbol `test` als Kopf hat. Anders als `not`/`or`/`and` ist
-; `test` überhaupt kein Abgleichs-Kombinator: es vergleicht kein Muster
-; mit Fakten, sondern wertet einen beliebigen Ausdruck aus (typischerweise
-; einen Vergleich wie `>`, bereits ein my-lisp-Primitiv), nachdem
-; eingesetzt wurde, was vorherige Bedingungen bereits gebunden haben.
-; `apply-subst` (lib/unify.lisp) löst jedes `(var name)` im Ausdruck gegen
-; die aktuelle `subst` auf; `eval` (dasselbe Primitiv, das die
-; Read/Eval-Schleife schließt) führt dann den nun vollständig aufgelösten
-; Ausdruck als gewöhnlichen my-lisp-Code aus. Ein wahrer Wert gelingt mit
-; unveränderter `subst` (keine neuen Bindungen, wie bei `not`); alles
-; andere schlägt fehl.
+; Крок 12. Умова (test вираз) не зіставляє шаблон із фактом.
+; Спочатку підставляємо раніше зв'язані змінні у вираз,
+; потім обчислюємо отриману форму мовою СЕНС.
+; Успіх зберігає попередню підстановку без нових зв'язувань.
+; Джерело перевірки — (test (> ?x 5)).
+
 (визначити умова-має-тестову-форму?
   (функція (поточна-умова)
     (за-умовою
@@ -786,98 +667,17 @@
            ((хибне? (однакові? результат 0))
             (список поточні-зв'язування))))))))
 
-; Step 15: `(exists <CE>+)`/`(forall <first-CE> <CE>+)` — the same class of
-; bug as `not`/`or`/`and`/`test` (Steps 7/10-12), found by importing a
-; real external CLIPS file (`tests/fixtures/sudoku-external.clp`, CLIPS's
-; own Sudoku solver): `(exists (unsolved))` matched nothing, because no
-; fact's head is ever the symbol `exists` — the importer's Step 19 guard
-; skips any rule using `exists`/`forall` rather than import one that can
-; never fire, exactly the safety net Step 7's `not` guard was before this
-; step existed.
-;
-; `exists` succeeds if its conjunction of sub-conditions matches *at
-; least once* against the current facts — but, like `not`, it binds
-; nothing back into the outer `subst`: an existence check, not a source
-; of new variables. `match-conditions` (already built on
-; `thread-conjunction`) does exactly the matching; `match-exists-condition`
-; only asks whether that came back non-empty, discarding whichever
-; sub-substitution actually satisfied it and returning the *original*
-; `subst` unchanged on success.
-;
-; `forall` looked like it could reuse `exists`/`not`/`and` the same way —
-; "no counter-example exists" — but `match-negated-condition` only ever
-; matches its inner pattern directly against facts (`match-condition-
-; against-facts`), not through `match-one-condition`, so a `not` can't
-; actually wrap a compound `and` (verified by a failing debug test before
-; settling on this version, not assumed). `forall` is written directly
-; instead: gather every substitution `first-condition` produces
-; (`match-one-condition`, so it can itself be `not`/`or`/`and`/`exists`),
-; then require every one of them to also satisfy `rest-conditions`
-; (`match-conditions`, the same conjunction-threader everything else
-; here uses) — if even one candidate fails, the whole `forall` fails.
-;
-; Крок 15: `(exists <CE>+)`/`(forall <перша-CE> <CE>+)` — той самий клас
-; бага, що й `not`/`or`/`and`/`test` (Кроки 7/10-12), знайдений при
-; імпорті реального зовнішнього CLIPS-файлу (`tests/fixtures/sudoku-external.clp`,
-; власний Sudoku-solver CLIPS): `(exists (unsolved))` не збігалася ні з
-; чим, бо жоден факт ніколи не має головою символ `exists` — guard Кроку
-; 19 в імпортері пропускає будь-яке правило з `exists`/`forall`, замість
-; імпортувати те, що ніколи не спрацює — саме та сітка безпеки, якою був
-; guard `not` у Кроці 7 до появи цього кроку.
-;
-; `exists` успішний, якщо його кон'юнкція під-умов збігається
-; **хоча б раз** проти поточних фактів — але, як і `not`, не зв'язує
-; нічого назад у зовнішню `subst`: це перевірка існування, не джерело
-; нових змінних. `match-conditions` (уже побудована на
-; `thread-conjunction`) виконує саме це зіставлення; `match-exists-condition`
-; лише питає, чи результат непорожній, відкидаючи будь-яку конкретну
-; під-підстановку, що задовольнила умову, і повертаючи при успіху
-; **незмінну оригінальну** `subst`.
-;
-; Виглядало, що `forall` можна так само перевикористати через
-; `exists`/`not`/`and` — "не існує контрприкладу" — але
-; `match-negated-condition` завжди зіставляє свій внутрішній патерн
-; напряму з фактами (`match-condition-against-facts`), не через
-; `match-one-condition`, тож `not` насправді не може обгорнути складену
-; `and` (перевірено провальним debug-тестом перед тим, як зупинитись на
-; цій версії, не здогадано). `forall` натомість написана напряму: зібрати
-; кожну підстановку, яку дає `first-condition` (`match-one-condition`,
-; тож вона сама може бути `not`/`or`/`and`/`exists`), а тоді вимагати,
-; щоб кожна з них також задовольняла `rest-conditions` (`match-conditions`,
-; той самий кон'юнкт-протягувач, що й скрізь тут) — якщо хоч один
-; кандидат провалюється, весь `forall` провалюється.
-;
-; Schritt 15: `(exists <CE>+)`/`(forall <erste-CE> <CE>+)` — dieselbe
-; Bugklasse wie `not`/`or`/`and`/`test` (Schritte 7/10-12), gefunden beim
-; Import einer echten externen CLIPS-Datei (`tests/fixtures/sudoku-external.clp`,
-; CLIPS' eigener Sudoku-Löser): `(exists (unsolved))` glich nichts ab,
-; weil kein Fakt je das Symbol `exists` als Kopf hat — der Guard aus
-; Schritt 19 im Importer überspringt jede Regel mit `exists`/`forall`,
-; statt eine zu importieren, die nie feuern kann — genau das
-; Sicherheitsnetz, das der `not`-Guard vor Schritt 7 war.
-;
-; `exists` gelingt, wenn seine Konjunktion von Unterbedingungen
-; **mindestens einmal** gegen die aktuellen Fakten passt — bindet aber,
-; wie `not`, nichts zurück in die äußere `subst`: eine Existenzprüfung,
-; keine Quelle neuer Variablen. `match-conditions` (bereits auf
-; `thread-conjunction` aufgebaut) übernimmt genau dieses Matching;
-; `match-exists-condition` fragt nur, ob das Ergebnis nicht leer war,
-; verwirft jede konkrete Unter-Substitution, die es erfüllt hat, und
-; gibt bei Erfolg die **unveränderte ursprüngliche** `subst` zurück.
-;
-; Es sah so aus, als könnte `forall` genauso `exists`/`not`/`and`
-; wiederverwenden — "es existiert kein Gegenbeispiel" — aber
-; `match-negated-condition` gleicht sein inneres Muster immer direkt
-; gegen Fakten ab (`match-condition-against-facts`), nicht über
-; `match-one-condition`, sodass ein `not` ein zusammengesetztes `and`
-; tatsächlich nicht umschließen kann (durch einen fehlschlagenden
-; Debug-Test verifiziert, bevor diese Version feststand, nicht
-; angenommen). `forall` ist stattdessen direkt geschrieben: alle
-; Substitutionen sammeln, die `first-condition` liefert
-; (`match-one-condition`, kann also selbst `not`/`or`/`and`/`exists`
-; sein), dann verlangen, dass jede davon auch `rest-conditions` erfüllt
-; (`match-conditions`, derselbe Konjunktions-Fädler wie überall hier) —
-; scheitert auch nur ein Kandidat, scheitert das ganze `forall`.
+; Крок 15. Умови існування та загальності мають окремі закони.
+; Проблему виявлено на зовнішньому прикладі CLIPS Sudoku:
+; пошук факту з буквальною головою exists не працює.
+; Exists успішний, якщо хоча б одна підстановка задовольнила
+; всі його підумови, але не створює нових зовнішніх зв'язувань.
+; Forall перевіряє всі підстановки першої умови й вимагає,
+; щоб решта умов виконувалася для кожної.
+; Не замінюємо forall на not exists not: чинне заперечення
+; зіставляє лише внутрішній шаблон, а не складену кон'юнкцію.
+; Назви exists, forall і not залишаються даними протоколу.
+
 (визначити умова-має-квантор-існування?
   (функція (поточна-умова)
     (за-умовою
