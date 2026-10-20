@@ -77,9 +77,9 @@ fn content_store_membership_is_an_exact_d1_bit_not_structural_one() {
 fn world_fourth_field_uses_d3_projection_not_unadmitted_d6_cadddr() {
     let mut session = session();
     for (source, expected) in [
-        ("(world-metadata (empty-world))", "()"),
-        ("(world-metadata (make-world (quote ()) (quote ()) (quote (marker))))", "(marker)"),
-        ("(world-metadata (world-tell (make-world (quote ()) (quote ()) (quote (marker))) (quote zoo) (quote ((has-fur cat)))))", "(marker)"),
+        ("(світ-метадані (порожній-світ))", "()"),
+        ("(світ-метадані (створити-світ (quote ()) (quote ()) (quote (marker))))", "(marker)"),
+        ("(світ-метадані (світ-повідомити (створити-світ (quote ()) (quote ()) (quote (marker))) (quote zoo) (quote ((has-fur cat)))))", "(marker)"),
     ] {
         assert_eq!(observe(&mut session, source), expected,
             "World metadata is the fourth cons field, derived from D3");
@@ -89,7 +89,7 @@ fn world_fourth_field_uses_d3_projection_not_unadmitted_d6_cadddr() {
 #[test]
 fn world_dedup_source_can_export_its_own_knowledge_envelope() {
     let mut session = session();
-    let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (car (make-world-knowledge-package source (quote zoo))))";
+    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (car (make-world-knowledge-package source (quote zoo))))";
     assert_eq!(observe(&mut session, src), "(format . my-lisp-knowledge)");
 }
 
@@ -99,7 +99,7 @@ fn world_dedup_can_import_its_exported_knowledge_package() {
     // The import returns (receipt world); the receipt is itself a tagged
     // record (accepted (module ...) (knowledge ...)), not a bare symbol.
     // Probe only its D3 CAR tag, retaining the richer language-owned receipt.
-    let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (car (car (import-knowledge-package-world (empty-world) (make-world-knowledge-package source (quote zoo))))))";
+    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (car (car (import-knowledge-package-world (порожній-світ) (make-world-knowledge-package source (quote zoo))))))";
     assert_eq!(observe(&mut session, src), "accepted",
         "an exported immutable world package must be reimportable");
 }
@@ -107,7 +107,7 @@ fn world_dedup_can_import_its_exported_knowledge_package() {
 #[test]
 fn world_dedup_two_equal_world_contents_share_one_key() {
     let mut session = session();
-    let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (let ((copy (second (import-knowledge-package-world (empty-world) (make-world-knowledge-package source (quote zoo)))))) (content-store-size (content-store-put-world (content-store-put-world (empty-content-store) source) copy))))";
+    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (let ((copy (second (import-knowledge-package-world (порожній-світ) (make-world-knowledge-package source (quote zoo)))))) (content-store-size (content-store-put-world (content-store-put-world (empty-content-store) source) copy))))";
     assert_eq!(observe(&mut session, src), "1");
 }
 
