@@ -145,13 +145,6 @@ class LispForm:
 
 LATIN_IDENTIFIER = re.compile(r"[A-Za-z]")
 RAW_BINARY_HEAD = re.compile(r"[01]{3,11}\Z")
-UKR_ALIAS_MARKER = "; opt-in повна укр-поверхня"
-UKR_ALIAS_MARKERS = (
-    UKR_ALIAS_MARKER,
-    "; Сумісні історичні імена схем залишаються зовнішніми",
-    "; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень.",
-    "; Сумісні зовнішні назви вказують на ті самі значення, без другої реалізації.",
-)
 NONPROGRAM_LIB_PATHS = (
     "lib/domains/",
     "lib/surface/",
@@ -277,13 +270,7 @@ def _atom_value(node: object) -> str | None:
 
 
 def _projection_reasons(source: str) -> list[str]:
-    """Find executable English heads/binders and raw bit heads, not data words."""
-    marker = -1
-    for candidate in UKR_ALIAS_MARKERS:
-        position = source.find(candidate)
-        if position >= 0 and (marker < 0 or position < marker):
-            marker = position
-    alias_line = source.count("\n", 0, marker) + 1 if marker >= 0 else 0
+    """Find every English callable, binder or DEFINE alias; exclude quoted data."""
     forms = parse_lisp_tokens(tokenize_lisp(source))
     reasons: list[str] = []
 
@@ -316,16 +303,9 @@ def _projection_reasons(source: str) -> list[str]:
             target = node.items[1]
             target_value = _atom_value(target)
             if target_value and LATIN_IDENTIFIER.search(target_value):
-                rhs_value = _atom_value(node.items[2]) if len(node.items) == 3 else None
-                is_explicit_alias = (
-                    alias_line > 0
-                    and node.line > alias_line
-                    and len(node.items) == 3
-                    and rhs_value is not None
-                    and not LATIN_IDENTIFIER.search(rhs_value)
-                )
-                if not is_explicit_alias:
-                    add(target.token, "англомовна назва визначення", target_value)
+                # Історичний DEFINE-аліас теж є виконуваним зв'язуванням.
+                # Коментар/маркер сумісності не може робити міграцію зеленою.
+                add(target.token, "англомовна назва визначення", target_value)
 
         if head_value == "функція" and len(node.items) >= 2:
             formals = node.items[1]
