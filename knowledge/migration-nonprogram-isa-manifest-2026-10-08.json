@@ -3,7 +3,7 @@
   "generated_from_main": "5f61a3437886b98d373cbaea967a616f70bae82a",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
-  "reason": "Exact 25 reviewed top-level isa-catalogue/1 declarative machine records. Every current source was inspected as an ISA catalogue without Lisp define/lambda execution. SHA pins carry data identity, not SENS-executable admission.",
+  "reason": "Повторний огляд 21.10.2026: кожен із 25 точних чинних lib/machine/isa/*.lisp має декларативну головну форму isa-catalogue/1, без виклику DEFINE. Дані ISA — опис машинного механізму, не виконувана програма SENS; точні SHA знову суворо контролюються, executable-пари .sens не допускаються автоматично.",
   "automatic_sens_companion": false,
   "entries": [
     {
