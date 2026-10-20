@@ -43,11 +43,11 @@
          ;; must be added here too, or the build will fail cleanly (not
          ;; silently) since cargo-build-system vendors explicitly.
          #:cargo-inputs '()))
-  (home-page "https://github.com/juv4uk/my-lisp")
-  (synopsis "P2P coordination-plane node for the my-lisp ecosystem swarm")
+  (home-page "https://github.com/juv4uk/sens")
+  (synopsis "P2P coordination-plane node for the SENS ecosystem")
   (description
    "swarm-node is a dependency-free Rust binary implementing gossip-based
 peer discovery, anti-entropy event-log synchronization, and quorum-voted
-task claiming for agents coordinating across the my-lisp ecosystem's
-repositories.  See my-lisp/docs/swarm-mesh-v2.md for the protocol.")
+task claiming for agents coordinating across SENS ecosystem repositories.
+See docs/swarm-mesh-v2.md in the SENS repository for the protocol.")
   (license expat))

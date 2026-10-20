@@ -1,14 +1,14 @@
-# my-lisp core · Ядро my-lisp · my-lisp-Kern
+# SENS core · Ядро SENS · SENS-Kern
 
 > **A small language that grows itself. · Маленька мова, що вирощує себе. · Eine kleine Sprache, die sich selbst wachsen lässt.**
 
-An independent, capability-free Rust library for **my-lisp**, a small Lisp that originated alongside the my-idea IDE and now lives in its own repository. The first milestone implements McCarthy's seven primitives and keeps parser, runtime values, environments, diagnostics, and tests free of any host-application dependency.
+An independent, capability-free Rust library for **SENS**. It provides the Rust implementation of the language runtime without a host-application dependency.
 
-Незалежна Rust-бібліотека без доступу до системних можливостей для **my-lisp** — маленького Lisp, який зародився поруч з IDE my-idea, а тепер живе у власному репозиторії. Перший етап реалізує сім примітивів Маккарті та тримає парсер, значення виконання, середовища, діагностику й тести без залежності від будь-якого хост-застосунку.
+Незалежна Rust-бібліотека без доступу до системних можливостей для **SENS**. Вона надає реалізацію мовного середовища виконання без залежності від хост-застосунку.
 
-Eine unabhängige Rust-Bibliothek ohne Systemzugriffe für **my-lisp**, einen kleinen Lisp, der ursprünglich zusammen mit der my-idea-IDE entstand und nun in seinem eigenen Repository lebt. Der erste Meilenstein implementiert McCarthys sieben Primitive und hält Parser, Laufzeitwerte, Umgebungen, Diagnosen und Tests frei von jeder Host-Anwendungsabhängigkeit.
+Eine unabhängige Rust-Bibliothek ohne Host-Fähigkeiten für **SENS**. Sie stellt die Rust-Implementierung der Laufzeit ohne Abhängigkeit von einer Host-Anwendung bereit.
 
-Source files use `.my`; `.lisp` remains compatible. · Файли коду використовують `.my`; `.lisp` залишається сумісним. · Quellcodedateien verwenden `.my`; `.lisp` bleibt kompatibel.
+Human-readable language projections use `.lisp`; encoded SENS streams use `.sens`. · Людські мовні проекції мають розширення `.lisp`, закодовані потоки SENS — `.sens`. · Menschenlesbare Sprachprojektionen verwenden `.lisp`, kodierte SENS-Ströme `.sens`.
 
 ## Contract · Контракт · Vertrag
 
@@ -27,12 +27,12 @@ Rust enthält die minimale semantische Mechanik einschließlich lexikalischem `l
 
 ## Test · Тестування · Test
 
-```powershell
-cargo test --manifest-path crates/my-lisp/Cargo.toml
+```sh
+cargo test -p sens
 ```
 
-The crate starts at its own library version `0.1.0`; the containing IDE release is versioned independently.
+The crate is versioned with the SENS workspace. The language contract is maintained in [`language-contract.lisp`](../../language-contract.lisp).
 
-Крейт починає власну версію бібліотеки з `0.1.0`; реліз IDE, що його містить, версіонується незалежно.
+Версія крейта керується разом із робочим простором SENS. Контракт мови ведеться у [`language-contract.lisp`](../../language-contract.lisp).
 
-Das Crate beginnt mit der eigenen Bibliotheksversion `0.1.0`; das enthaltene IDE-Release wird unabhängig versioniert.
+Die Version des Crates wird gemeinsam mit dem SENS-Workspace verwaltet. Der Sprachvertrag liegt in [`language-contract.lisp`](../../language-contract.lisp).

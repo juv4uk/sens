@@ -1,4 +1,4 @@
-# my-lisp WASM
+# SENS WASM
 
 WASM-прив'язка тримає сталу `Session` між викликами `evaluate()` і надає browser/embedder-рівню перемикання програмних поверхонь без зміни семантичного контракту мови.
 
@@ -25,7 +25,5 @@ surface
   ↓
 user
 ```
-
-Автономний [`public/my-lisp-cli-web.html`](../../public/my-lisp-cli-web.html) стартує з `uk` і реалізує interaction-команди `:мова` / `:surface` поверх цього API.
 
 Повна користувацька документація: [`docs/repl-surfaces.md`](../../docs/repl-surfaces.md).
