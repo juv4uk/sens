@@ -1,6 +1,7 @@
-; #506 — native-first execution bridge witness.
-; Route choice, CPU execution, evaluator fallback, source parsing, non-masking.
-; Ukrainian projection: Sid8/Sens8 → D3/D4/D8.
+; #506 — свідок нативного виконання СЕНС.
+; Перевіряємо вибір маршруту, виконання, повернення до обчислювача,
+; читання українського джерела та збереження відмов.
+; Мітки результатів і машинного плану — дані чинного протоколу.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
@@ -11,18 +12,17 @@
 (load "lib/machine/dispatch/native-first.lisp")
 (load "lib/machine/dispatch/native-first-execute.lisp")
 
-(визначити native-first-execution-witness-check
-  (функція (actual expected)
+(визначити перевірити-свідок-нативного-виконання
+  (функція (отримане очікуване)
     (за-умовою
-      ((однакові? actual expected) (як-є pass))
-      ((однакові? actual expected) (як-є ні)
-       (список (як-є fail) actual expected)))))
+      ((однакові? отримане очікуване) (як-є pass))
+      (так (список (як-є fail) отримане очікуване)))))
 
-(визначити native-first-execution-witness
+(визначити свідок-нативного-виконання
   (функція ()
     (список
-      ; Supported bounded structural slice reaches the CPU.
-      (native-first-execution-witness-check
+      ; Допущений обмежений структурний випадок виконується на процесорі.
+      (перевірити-свідок-нативного-виконання
         (нативне-виконати-вираз
           (як-є (перше (сполучити 2 3))))
         (як-є
@@ -30,20 +30,20 @@
             (status completed)
             (value 2))))
 
-      ; Unsupported ordinary Lisp stays evaluator-owned.
-      (native-first-execution-witness-check
+      ; Недопущений випадок залишається в мовному обчислювачі.
+      (перевірити-свідок-нативного-виконання
         (нативне-виконати-вираз
-          (як-є (+ 2 3)))
+          (як-є (додати 2 3)))
         (як-є
           (execution-route evaluator
             (status completed)
             (value 5))))
 
-      ; Source text is parsed; each top-level form is routed separately.
-      (native-first-execution-witness-check
+      ; Текст програми читається, кожна верхня форма має свій маршрут.
+      (перевірити-свідок-нативного-виконання
         (нативне-виконати-джерело
-          "(+ 1 2)
-(car (cons 7 9))")
+          "(додати 1 2)
+(перше (сполучити 7 9))")
         (як-є
           (source-execution
             ((execution-route evaluator
@@ -53,8 +53,8 @@
                (status completed)
                (value 7))))))
 
-      ; Once a native plan exists, admission rejection stays visibly native.
-      (native-first-execution-witness-check
+      ; Відхилення сформованого машинного плану лишається нативною відмовою.
+      (перевірити-свідок-нативного-виконання
         (нативне-виконати-план
           (як-є
             (native-plan
@@ -68,8 +68,8 @@
                 unadmitted-machine-form
                 (definitely-not-an-admitted-machine-form))))))
 
-      ; Malformed native plans fail closed on the native route.
-      (native-first-execution-witness-check
+      ; Некоректний нативний план відхиляється без запасного виконання.
+      (перевірити-свідок-нативного-виконання
         (нативне-виконати-план
           (як-є (native-plan ((ret)))))
         (як-є
@@ -79,4 +79,8 @@
               (malformed-native-plan
                 (native-plan ((ret)))))))))))
 
-(native-first-execution-witness)
+; Історичні зовнішні імена посилаються на ті самі українські замикання.
+(визначити native-first-execution-witness-check перевірити-свідок-нативного-виконання)
+(визначити native-first-execution-witness свідок-нативного-виконання)
+
+(свідок-нативного-виконання)
