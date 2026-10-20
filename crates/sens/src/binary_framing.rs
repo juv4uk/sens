@@ -366,7 +366,7 @@ pub fn encode_binary_program(frames: &[BinaryFrame]) -> Result<Vec<u8>, BinaryFr
     let mut out = Vec::new();
     let mut depth = 0usize;
 
-    for frame in frames {
+    for (frame_index, frame) in frames.iter().enumerate() {
         match frame {
             BinaryFrame::Open => depth += 1,
             BinaryFrame::Close => {
@@ -377,7 +377,15 @@ pub fn encode_binary_program(frames: &[BinaryFrame]) -> Result<Vec<u8>, BinaryFr
             }
             _ => {}
         }
-        out.extend(encode_binary_frame(frame)?);
+        let encoded = encode_binary_frame(frame).map_err(|error| match error {
+            // This diagnostic is defined in frame coordinates by
+            // BinaryFrameError, not as a local bit offset within one record.
+            BinaryFrameError::LegacyFrameForbidden { .. } => {
+                BinaryFrameError::LegacyFrameForbidden { index: frame_index }
+            }
+            other => other,
+        })?;
+        out.extend(encoded);
     }
 
     if depth != 0 {
@@ -982,8 +990,8 @@ mod tests {
     fn control2_stream_keeps_real_space_and_nested_structure() {
         let frames = vec![
             BinaryFrame::Open,
-            BinaryFrame::Function(crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(
-                crate::Bit5::new(0b01010).expect("plus"),
+            BinaryFrame::Domain(crate::DomainIdentity::D5(crate::CoreD5::from_word(
+                crate::Bit5::new(0b01010).expect("доменне слово D5"),
             ))),
             BinaryFrame::Space,
             BinaryFrame::Number(number("10", "1")),
@@ -1027,7 +1035,8 @@ mod tests {
             Err(BinaryFrameError::UnexpectedEnd { .. })
         ));
         assert!(matches!(
-            decode_binary_frame(&[1, 1, 0, 0, 0, 0, 0, 0]),
+            // Escape + legacy rational type with its required sign omitted.
+            decode_binary_frame(&[1, 1, 0, 1]),
             Err(BinaryFrameError::UnexpectedEnd { .. })
         ));
         assert!(matches!(
@@ -1199,7 +1208,7 @@ mod tests {
     }
 
     #[test]
-    fn exact_program_rejects_legacy_frames_on_encode_and_decode_without_breaking_archive_reads() {
+    fn exact_program_rejects_legacy_frames_without_reenabling_legacy_function_writes() {
         let historical_frames = [
             BinaryFrame::Function(crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(
                 crate::Bit8::new(0b10101000).expect("legacy W8 payload"),
@@ -1215,8 +1224,17 @@ mod tests {
                 Err(BinaryFrameError::LegacyFrameForbidden { index: 1 })
             ));
 
-            let archive = encode_binary_program(&sequence)
-                .expect("the compatibility writer must keep reading/writing archived frames");
+            if matches!(historical, BinaryFrame::Function(_)) {
+                assert!(matches!(
+                    encode_binary_program(&sequence),
+                    Err(BinaryFrameError::LegacyFrameForbidden { index: 1 })
+                ));
+                continue;
+            }
+
+            // The old reader/writer remains for historical number framing;
+            // exact-domain APIs reject it after decoding without aliasing it.
+            let archive = encode_binary_program(&sequence).unwrap();
             assert_eq!(decode_binary_program(&archive).unwrap(), sequence);
             assert!(matches!(
                 BinaryFrame::decode_exact_domain_program(&archive),

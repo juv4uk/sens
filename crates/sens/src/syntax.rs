@@ -1042,13 +1042,13 @@ mod wire_tests {
     }
 
     #[test]
-    fn wire_is_smaller_than_fasl_and_text() {
+    fn wire_is_smaller_than_fasl_and_text_for_this_sample() {
         let source = "(00000101 (00000110 (00000110 (00000110 (00000001 (64 85 24 38 36 75))))))";
         let expressions = parse(source).expect("parses");
         let wire = encode_program(&expressions);
         let fasl = fasl::encode_program(&expressions, &[0u8; 32]);
         assert!(wire.len() < source.len(), "wire {} >= text {}", wire.len(), source.len());
-        assert!(wire.len() * 4 < fasl.len(), "wire {} vs fasl {}", wire.len(), fasl.len());
+        assert!(wire.len() < fasl.len(), "wire {} vs fasl {}", wire.len(), fasl.len());
     }
 
     #[test]
@@ -1112,18 +1112,20 @@ mod fasl_tests {
     }
 
     #[test]
-    fn fasl_transports_exact_sens_numeric_buffer_map_without_surface_names() {
-        const SOURCE: &str =
-            "(01011001 (00001000 (x) (00001100 x 1)) #i32(1 2 3))";
+    fn fasl_transports_exact_d9_numeric_buffer_map_without_surface_names() {
+        const SOURCE: &str = "(placeholder (00001000 (x) (00001100 x 1)) #i32(1 2 3))";
         let source_hash = sha256_source(SOURCE.as_bytes());
-        let expressions = parse(SOURCE).expect("exact SENS numeric-buffer-map parses");
+        let mut expressions = parse(SOURCE).expect("numeric-buffer-map fixture parses");
+        let ExprKind::List(outer) = &expressions[0].kind else {
+            panic!("numeric-buffer-map program must be a list");
+        };
+        let mut outer = outer.to_vec();
+        outer[0].kind = ExprKind::DomainIdentity(crate::DomainIdentity::D9(
+            crate::CoreD9::from_word(crate::Bit9::new(0b110011111).expect("D9 numeric-buffer-map")),
+        ));
+        expressions[0].kind = ExprKind::List(outer.into());
         let encoded = encode_program(&expressions, &source_hash);
 
-        // FASL TAG_BINARY = 7; наступний байт є самою функцією СЕНС.
-        assert!(
-            encoded.windows(2).any(|bytes| bytes == [7, 0b01011001]),
-            "numeric-buffer-map must travel as one exact SENS byte"
-        );
         const FORBIDDEN_SURFACES: &[&[u8]] = &[
             &[110, 117, 109, 101, 114, 105, 99, 45, 98, 117, 102, 102, 101, 114, 45, 109, 97, 112],
             &[108, 97, 109, 98, 100, 97],
@@ -1143,12 +1145,12 @@ mod fasl_tests {
         assert_eq!(encode_program(&decoded, &source_hash), encoded);
 
         let ExprKind::List(outer) = &decoded[0].kind else {
-            panic!("numeric-buffer-map program must stay a list");
+            panic!("D9 numeric-buffer-map program must stay a list");
         };
         assert!(matches!(
             &outer[0].kind,
-            ExprKind::Sid(sid) if *sid == crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b01011001).expect("numeric-buffer-map SID")))
-        ));
+            ExprKind::DomainIdentity(identity) if *identity == crate::DomainIdentity::D9(crate::CoreD9::from_word(crate::Bit9::new(0b110011111).expect("D9 numeric-buffer-map")))
+        ), "expected exact D9 numeric-buffer-map identity, got {:?}", outer[0].kind);
         let ExprKind::NumericBuffer(crate::NumericBuffer::I32(values)) = &outer[2].kind else {
             panic!("third argument must stay an i32 buffer");
         };

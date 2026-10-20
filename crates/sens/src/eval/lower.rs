@@ -345,56 +345,13 @@ mod domain_ladder_lowering_migration_tests {
     }
 
     #[test]
-    fn staged_historical_call_lowers_its_body_without_rewriting_quote_or_binders() {
-        // Mechanical AST projection only: language semantics are proved by
-        // the native binary SENS witnesses, not by this host-language test.
-        for source in [
-            "(00000001 (00000101 x))",
-            "(00000111 ((00000101 x) (00000001 (00000101 y))))",
-            "(00001000 (x) (00000001 (00000101 x)))",
-            "(00001011 x (00000101 y))",
-            "(00000110 (00000001 x) (00000101 y))",
-        ] {
-            let parsed = crate::parse(source).expect("valid historical source");
-            let ExprKind::List(items) = &parsed[0].kind else {
-                panic!("historical source must have a list head");
-            };
-            let ExprKind::Sid(sid) = &items[0].kind else {
-                panic!("historical list head must be an exact W8 token");
-            };
-            let staged = Expr {
-                kind: ExprKind::Call(*sid, items[1..].into()),
-                span: parsed[0].span,
-            };
-            let expected = lower_program(&parsed);
-            let actual = lower_program(&[staged]);
-            assert_eq!(actual, expected, "staged vs source lowering: {source}");
-            assert_eq!(lower_program(&actual), actual, "idempotence: {source}");
-        }
-    }
-
-    #[test]
-    fn historical_quote_does_not_evaluate_quoted_data() {
-        let lowered = lowered_one("(00000001 (00000101 x))");
-        let ExprKind::Call(_, args) = lowered.kind else { panic!("QUOTE має лишатися W8 для сумісного читача"); };
-        assert_eq!(args.len(), 1);
-        assert!(matches!(&args[0].kind, ExprKind::List(items) if matches!(&items[0].kind, ExprKind::Sid(_))));
-    }
-
-    #[test]
-    fn historical_cond_lowers_only_clause_expressions() {
-        let lowered = lowered_one("(00000111 ((00000101 x) (00000001 (00000101 y))))");
-        let ExprKind::Call(_, clauses) = lowered.kind else { panic!("COND має залишатися W8 для сумісності"); };
-        let ExprKind::List(parts) = &clauses[0].kind else { panic!("структурна клауза"); };
-        assert!(matches!(&parts[0].kind, ExprKind::Call(_, _)));
-        assert!(matches!(&parts[1].kind, ExprKind::Call(_, _)));
-    }
-
-    #[test]
-    fn unrelated_w8_cannot_infer_d3_law() {
-        for source in ["(00001000 x)", "(10101000 x)"] {
+    fn raw_eight_bit_tokens_do_not_gain_historical_callability() {
+        for source in ["(00000001 x)", "(00000111 x)", "(00001000 x)", "(10101000 x)"] {
             let lowered = lowered_one(source);
-            assert!(matches!(lowered.kind, ExprKind::Call(_, _)));
+            assert!(
+                !matches!(lowered.kind, ExprKind::Call(_, _)),
+                "raw token unexpectedly became a call head: {source}"
+            );
         }
     }
 }
@@ -414,7 +371,7 @@ mod exact_lowering_isolation_tests {
 
     #[test]
     fn exact_def_compatibility_surface_lowers_to_ratified_d4_binder() {
-        let current = lower_current("(def x (001 1))");
+        let current = lower_current("(визначити x (001 1))");
         let ExprKind::DomainCall(CoreDomainIdentity::D4(word), arguments) = current.kind else {
             panic!("Lisp-owned def compatibility surface must lower to D4 DEFINE");
         };

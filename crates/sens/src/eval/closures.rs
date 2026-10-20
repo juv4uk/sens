@@ -898,12 +898,13 @@ mod exact_d4_eval_head_migration_tests {
     }
 
     #[test]
-    fn historical_eval_uses_registry_slot_but_other_w8_is_not_eval() {
+    fn eval_surface_resolves_to_current_d4_and_d8_is_not_eval() {
         let env = Environment::root();
-        let historical = semantic_registry::admitted_semantic_id_for_surface("eval")
-            .expect("історична таблиця має окремий сумісний слот EVAL");
-        assert_eq!(historical.packed_bits(), 0b01001101);
-        assert!(matches!(sid_head(historical, &env), Head::Opaque));
+        let identity = semantic_registry::admitted_semantic_id_for_surface("обчислити")
+            .expect("українська проєкція має точну D4 identity");
+        assert_eq!(identity.width(), 4);
+        assert_eq!(identity.packed_bits(), 0b0001);
+        assert!(matches!(sid_head(identity, &env), Head::Opaque));
         assert!(!matches!(sid_head(crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload"))), &env), Head::Opaque));
     }
 

@@ -335,7 +335,7 @@ mod qualified_numeric_domain_value_tests {
         let max = in_domain(24, max_word);
         session.environment.define("a", max.clone());
         session.environment.define("b", max);
-        let result = crate::eval_program("(+ a b)", &mut session)
+        let result = crate::eval_program("(додати a b)", &mut session)
             .expect("Core addition over domain-qualified values").value;
         let Value::BinaryNumber(ref value) = result else {
             panic!("domain-qualified Value expected")
@@ -355,8 +355,8 @@ mod qualified_numeric_domain_value_tests {
         session.environment.define("a", make(6));
         session.environment.define("b", make(2));
         for (expr, expected) in [
-            ("(* a b)", 12),
-            ("(- a b)", 4),
+            ("(помножити a b)", 12),
+            ("(відняти a b)", 4),
         ] {
             let result = crate::eval_program(expr, &mut session)
                 .expect("same-D24 exact integer arithmetic").value;
@@ -366,15 +366,15 @@ mod qualified_numeric_domain_value_tests {
         }
         session.environment.define("a", make(1));
         session.environment.define("b", make(3));
-        let minus = crate::eval_program("(- a b)", &mut session).unwrap().value;
+        let minus = crate::eval_program("(відняти a b)", &mut session).unwrap().value;
         assert_eq!(minus.to_string(), "-2");
         let fraction = crate::domain_numeric::compute("/", &make(1), &make(3))
             .expect("exact rational division is available through the admitted numeric API");
         assert_eq!(fraction.to_string(), "1/3");
         session.environment.define("negative", minus);
         session.environment.define("fraction", fraction);
-        assert_eq!(crate::eval_program("(+ negative b)", &mut session).unwrap().value, make(1));
-        assert_eq!(crate::eval_program("(* fraction b)", &mut session).unwrap().value, make(1));
+        assert_eq!(crate::eval_program("(додати negative b)", &mut session).unwrap().value, make(1));
+        assert_eq!(crate::eval_program("(помножити fraction b)", &mut session).unwrap().value, make(1));
         assert!(crate::domain_numeric::compute("/", &make(1), &make(0)).is_none(),
             "division by zero must fail closed");
     }

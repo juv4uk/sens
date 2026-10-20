@@ -150,18 +150,13 @@ mod exact_d4_necessary_form_migration_tests {
     }
 
     #[test]
-    fn compatibility_w8_rows_are_explicitly_projected_to_d4() {
-        for (slot, bits, expected) in [
-            (0b00001000, 0b0010, NecessaryFormIdentity::Lambda),
-            (0b00001001, 0b0011, NecessaryFormIdentity::Define),
-            (0b00001011, 0b0011, NecessaryFormIdentity::Define),
-        ] {
-            let legacy = CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(slot).expect("8-bit source word"))).expect("exact domain word");
-            let identity = domain_identity_for_legacy_semantic_id(legacy)
-                .expect("the three admitted compatibility rows have an explicit D4 bridge");
-            assert_eq!(identity.width(), 4);
-            assert_eq!(identity.packed_bits(), bits);
-            assert_eq!(identity_for_semantic_id(legacy), Some(expected));
+    fn current_d8_residents_do_not_inherit_d4_necessary_forms() {
+        for slot in [0b00001000, 0b00001001, 0b00001011] {
+            let legacy = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                crate::Bit8::new(slot).expect("D8 resident payload"),
+            ));
+            assert_eq!(domain_identity_for_legacy_semantic_id(legacy), None);
+            assert_eq!(identity_for_semantic_id(legacy), None);
         }
     }
 
@@ -186,17 +181,14 @@ mod exact_d4_necessary_form_migration_tests {
     }
 
     #[test]
-    fn every_other_historical_w8_slot_fails_closed() {
+    fn every_current_d8_resident_fails_closed_as_a_necessary_form() {
         for slot in 0u8..=u8::MAX {
-            let expected = match slot {
-                0b00001000 => Some(NecessaryFormIdentity::Lambda),
-                0b00001001 | 0b00001011 => Some(NecessaryFormIdentity::Define),
-                _ => None,
-            };
             assert_eq!(
-                identity_for_semantic_id(CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(slot).expect("8-bit source word"))).expect("exact domain word")),
-                expected,
-                "unexpected necessary-form route for historical W8 {slot:08b}",
+                identity_for_semantic_id(CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                    crate::Bit8::new(slot).expect("D8 resident payload"),
+                ))),
+                None,
+                "D8 resident acquired a D4 necessary-form route: {slot:08b}",
             );
         }
     }

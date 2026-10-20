@@ -588,29 +588,37 @@ mod exact_d5_binding_projection_tests {
 #[cfg(test)]
 mod exact_d3_compatibility_migration_tests {
     use super::*;
-    use crate::BinarySourceWord;
 
     #[test]
-    fn only_ratified_surfaces_project_historical_quote_cond_car() {
-        for (legacy_byte, bits) in [
-            (0b00000001, 0b001u8),
-            (0b00000111, 0b110u8),
-            (0b00000101, 0b100u8),
-        ] {
-            let identity = compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(crate::Bit8::new(legacy_byte).expect("8-bit source word"))).expect("exact domain word")
-            ).expect("іменна історична проєкція на ратифікований D3");
+    fn exact_d3_identities_keep_their_domain_and_unrelated_d8_stays_unmapped() {
+        for bits in [0b001u8, 0b110u8, 0b100u8] {
+            let exact = CoreDomainIdentity::D3(crate::Bija3::from_word(
+                crate::Bit3::new(bits).expect("exact D3 payload"),
+            ));
+            let identity = compatibility_d3_route_from_ratified_domains(exact)
+                .expect("чинна D3 identity remains a D3 identity");
             assert_eq!(identity.width(), 3);
             assert_eq!(identity.packed_bits(), u16::from(bits));
+        }
+        for legacy_byte in [
+            0b00000001,
+            0b00000111,
+            0b00000101,
+        ] {
+            let historical_slot = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                crate::Bit8::new(legacy_byte).expect("D8 resident payload"),
+            ));
+            assert!(compatibility_d3_route_from_ratified_domains(historical_slot).is_none());
         }
     }
 
     #[test]
     fn unrelated_w8_never_becomes_d3() {
         for byte in [0b00000000, 0b00001000, 0b00001001, 0b10101000] {
-            assert!(compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(crate::Bit8::new(byte).expect("8-bit source word"))).expect("exact domain word")
-            ).is_none());
+            let historical_slot = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                crate::Bit8::new(byte).expect("historical slot payload"),
+            ));
+            assert!(compatibility_d3_route_from_ratified_domains(historical_slot).is_none());
         }
     }
 }
@@ -694,7 +702,10 @@ mod domain_source_projection_anti_collision_tests {
             }
         }
         assert_eq!(rows_checked, 119);
-        assert_eq!(surfaces_checked, 238);
+        // Every source-routable resident currently has both Ukrainian
+        // projections (uk and ukr) plus its Sanskrit projection. The old
+        // 238 count covered only two columns and silently missed ukr.
+        assert_eq!(surfaces_checked, 357);
     }
 
     #[test]

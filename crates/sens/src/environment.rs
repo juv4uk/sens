@@ -580,7 +580,12 @@ mod tests {
         use crate::{Bit8, CoreD8, CoreDomainIdentity};
 
         let environment = Environment::root();
-        let legacy = CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(0b1010_1000).expect("8-bit source word"))).expect("exact domain word");
+        // Construct the historical registry-slot key explicitly. Lifting a
+        // W8 source word uses current D8 identity and must not mint a legacy
+        // callable mechanism.
+        let legacy = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b1010_1000).expect("8-bit source word"),
+        ));
         let current = DomainIdentity::D8(CoreD8::from_word(
             Bit8::new(0b1010_1000).expect("точно вісім біт"),
         ));
@@ -669,7 +674,9 @@ mod tests {
         // Every historical W8 byte has a current D8 coordinate with the
         // same low eight payload bits, but MUST NOT alias the current slot.
         for bits in 0u16..256 {
-            let sid = CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(bits as u8).expect("8-bit source word"))).expect("exact domain word");
+            let sid = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                crate::Bit8::new(bits as u8).expect("historical registry-slot payload"),
+            ));
             let identity = DomainIdentity::from_source_word(
                 crate::BinarySourceWord::W8(crate::Bit8::new(bits as u8).unwrap()));
             let current = environment.domain_code_slot(identity);

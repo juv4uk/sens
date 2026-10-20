@@ -817,12 +817,12 @@ mod exact_domain_program_tests {
     }
 
     #[test]
-    fn exact_execution_rejects_historical_surface_before_any_side_effect() {
+    fn exact_execution_rejects_unadmitted_english_surface_before_any_side_effect() {
         let mut session = Session::bare();
         let error = eval_exact_domain_program("(def x (001 1))", &mut session)
-            .expect_err("legacy-only def is not ratified D4 DEFINE");
-        assert_eq!(error.kind, ErrorKind::InvalidForm);
-        assert!(error.message.contains("historical-only"), "{}", error.message);
+            .expect_err("unadmitted English `def` is not the Ukrainian D4 DEFINE surface");
+        assert_eq!(error.kind, ErrorKind::UnknownSymbol);
+        assert!(error.message.contains("unknown symbol"), "{}", error.message);
         assert_eq!(&"(def x (001 1))"[error.span.start..error.span.end], "def");
         assert!(session.environment.get("x").is_none());
     }
@@ -953,21 +953,21 @@ mod domain_eval_cutover_d3_compatibility {
     }
 
     #[test]
-    fn historical_quote_runs_identically_to_exact_d3_quote() {
-        let mut legacy = Session::bare();
+    fn ukrainian_quote_runs_identically_to_exact_d3_quote() {
+        let mut projected = Session::bare();
         let mut exact = Session::bare();
-        let old_value = eval_program("(00000001 (a b))", &mut legacy)
-            .expect("старе цитування має пройти засвідчений D3-маршрут");
+        let projected_value = eval_program("(як-є (a b))", &mut projected)
+            .expect("українська проєкція має пройти чинний D3-маршрут");
         let new_value = eval_exact_domain_program("(001 (a b))", &mut exact)
             .expect("чинне точнодоменне цитування");
-        assert_eq!(old_value.value, new_value.value);
+        assert_eq!(projected_value.value, new_value.value);
     }
 
     #[test]
     fn legacy_cond_rejects_three_part_clause_by_current_d3_contract() {
         let mut session = Session::bare();
-        let err = eval_program("(00000111 ((00000010 (00000001 ())) (00000001 yes) (00000001 no)))", &mut session)
-            .expect_err("двопольний D3 COND забороняє історичну тричастинну клаузу");
+        let err = eval_exact_domain_program("(110 ((010 (001 ())) (001 yes) (001 no)))", &mut session)
+            .expect_err("двопольний D3 COND забороняє тричастинну клаузу");
         assert_eq!(err.kind, ErrorKind::InvalidForm);
         assert!(err.message.contains("D3:110"), "{}", err.message);
     }
