@@ -67,10 +67,11 @@ class MigrationLexicalSafety(unittest.TestCase):
 
     def test_actual_local_assoc_recursion_is_not_domain_d5_assoc(self):
         old = (ROOT / "scripts/build-inventory.lisp").read_text()
-        self.assertIn("(визначити знайти-за-ключем знайти-пару)", old)
-        self.assertIn("(знайти-за-ключем ключ (решта список-пар))", old)
+        self.assertIn("(визначити знайти-пару", old)
+        self.assertIn("(знайти-пару ключ (решта список-пар))", old)
+        self.assertNotIn("(визначити знайти-за-ключем знайти-пару)", old)
         changed = old.replace(
-            "(знайти-за-ключем ключ (решта список-пар))",
+            "(знайти-пару ключ (решта список-пар))",
             "(11100 ключ (решта список-пар))", 1,
         )
         self.blocked(old, changed, "locally bound callable")
