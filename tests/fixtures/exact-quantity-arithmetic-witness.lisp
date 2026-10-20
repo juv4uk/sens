@@ -1,25 +1,27 @@
-; #291 — exact quantity arithmetic laws are owned by Lisp.
-; Ukrainian projection only.
-;
-; #369: valid SI constant projects exactly; string NAME does not project.
+; Свідок законів точної арифметики величин #291, власність Lisp СЕНС.
+; Виконувані назви — канонічна повна українська проєкція Д9.
+; Внутрішні функції, змінні й назви SI мають українські зв'язування.
+; Результати та початкові цитовані записи величин залишено незмінними.
+; Відмова від проєкції рядкового імені — частина свідка #369.
+; Зовнішнє завантаження двох бібліотек — механізм, не джерело законів.
 
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
-(визначити exact-quantity-arithmetic-rows
+(визначити рядки-точної-арифметики-величин
   (функція ()
-    ((функція (planck)
-  ((функція (cesium)
-    ((функція (energy)
-      ((функція (one-second)
-        ((функція (speed)
-          ((функція (distance)
-            ((функція (recovered)
+    ((функція (стала-планка)
+  ((функція (частота-цезію)
+    ((функція (енергія)
+      ((функція (одна-секунда)
+        ((функція (швидкість)
+          ((функція (відстань)
+            ((функція (відновлена-швидкість)
               (список
                       (список
                         (як-є planck-cesium-energy-shape)
                         (однакові?
-                          energy
+                          енергія
                           (як-є
                             (quantity/1
                               121822045942277331/20000000000000000000000000000000000000000
@@ -31,7 +33,7 @@
                       (список
                         (як-є speed-times-second-distance-shape)
                         (однакові?
-                          distance
+                          відстань
                           (як-є
                             (quantity/1
                               299792458
@@ -40,7 +42,7 @@
                       (список
                         (як-є recovered-speed-shape)
                         (однакові?
-                          recovered
+                          відновлена-швидкість
                           (як-є
                             (quantity/1
                               299792458
@@ -50,15 +52,15 @@
                         (як-є (1)))
                       (список
                         (як-є quotient-inverse)
-                        (однакові? recovered speed)
+                        (однакові? відновлена-швидкість швидкість)
                         (як-є (1)))
                       (список
                         (як-є si-constant-projects)
-                        (scientific-constant->clauses si:defining-speed-of-light)
+                        (науковий-константа-клаузи сі:визначальна-швидкість-світла)
                         (як-є (1)))
                       (список
                         (як-є string-name-does-not-project)
-                        (scientific-constant->clauses
+                        (науковий-константа-клаузи
                           (як-є
                             (scientific-constant/1 "not-a-symbol"
                               (quantity/1 299792458
@@ -68,57 +70,63 @@
                               exact-by-definition physical-defining si
                               (science-source/1 bipm-si-brochure-9 2019))))
                         (як-є ()))))
-              (quantity-quotient distance one-second)))
-            (quantity-product speed one-second)))
-          (scientific-constant-quantity si:defining-speed-of-light)))
-        (make-quantity
+              (величина-частка відстань одна-секунда)))
+            (величина-добуток швидкість одна-секунда)))
+          (науковий-константа-величина сі:визначальна-швидкість-світла)))
+        (створити-величина
                        1
-                       (make-unit
-                         (список (make-dimension (як-є second) 1))))))
-      (quantity-product planck cesium)))
-    (scientific-constant-quantity si:defining-cesium-frequency)))
-  (scientific-constant-quantity si:defining-planck-constant))))
+                       (створити-одиниця
+                         (список (створити-розмірність (як-є second) 1))))))
+      (величина-добуток стала-планка частота-цезію)))
+    (науковий-константа-величина сі:визначальна-частота-цезію)))
+  (науковий-константа-величина сі:визначальна-стала-планка))))
 
-(визначити exact-quantity-structural-equal?
-  (функція (left right)
+(визначити точні-величини-структурно-однакові?
+  (функція (ліве праве)
     (за-умовою
-      ((атом? left)
+      ((атом? ліве)
        (за-умовою
-         ((атом? right) (тотожне? left right))
+         ((атом? праве) (тотожне? ліве праве))
          ((атом? ()) (тотожне? 1 0))))
-      ((атом? right) (тотожне? 1 0))
-      ((exact-quantity-structural-equal? (перше left) (перше right))
-       (exact-quantity-structural-equal? (решта left) (решта right)))
+      ((атом? праве) (тотожне? 1 0))
+      ((точні-величини-структурно-однакові? (перше ліве) (перше праве))
+       (точні-величини-структурно-однакові? (решта ліве) (решта праве)))
       ((атом? ()) (тотожне? 1 0)))))
 
-(визначити exact-quantity-arithmetic-check
-  (функція (rows)
+(визначити перевірити-точну-арифметику-величин
+  (функція (рядки)
     (за-умовою
-      ((атом? rows)
+      ((атом? рядки)
        (за-умовою
-         ((тотожне? rows (як-є ()))
+         ((тотожне? рядки (як-є ()))
           (як-є (exact-quantity-arithmetic-witness (status pass))))
          ((атом? ())
           (список
             (як-є exact-quantity-arithmetic-witness)
             (список (як-є status) (як-є fail))
             (список (як-є case) (як-є malformed-row-tail))
-            (список (як-є actual) rows)))))
+            (список (як-є actual) рядки)))))
       ((атом? ())
-       (нехай ((row (перше rows)))
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((exact-quantity-structural-equal? (друге row) (третє row))
-            (exact-quantity-arithmetic-check (решта rows)))
+           ((точні-величини-структурно-однакові? (друге рядок) (третє рядок))
+            (перевірити-точну-арифметику-величин (решта рядки)))
            ((атом? ())
             (список
               (як-є exact-quantity-arithmetic-witness)
               (список (як-є status) (як-є fail))
-              (список (як-є case) (перше row))
-              (список (як-є actual) (друге row))
-              (список (як-є expected) (третє row))))))))))
+              (список (як-є case) (перше рядок))
+              (список (як-є actual) (друге рядок))
+              (список (як-є expected) (третє рядок))))))))))
 
-(визначити exact-quantity-arithmetic-witness
+(визначити свідок-точної-арифметики-величин
   (функція ()
-    (exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))))
+    (перевірити-точну-арифметику-величин (рядки-точної-арифметики-величин))))
 
-(exact-quantity-arithmetic-witness)
+; Сумісні зовнішні назви без повторних реалізацій.
+(визначити exact-quantity-arithmetic-rows рядки-точної-арифметики-величин)
+(визначити exact-quantity-structural-equal? точні-величини-структурно-однакові?)
+(визначити exact-quantity-arithmetic-check перевірити-точну-арифметику-величин)
+(визначити exact-quantity-arithmetic-witness свідок-точної-арифметики-величин)
+
+(свідок-точної-арифметики-величин)
