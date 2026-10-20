@@ -4,9 +4,10 @@ fn release_workflow_publishes_the_versioned_island_manifest() {
     let manifest = include_str!("../../../packaging/islands-manifest-v1.json");
 
     assert!(workflow.contains("packaging/islands-manifest-v1.json"));
-    assert!(workflow.contains("sha256sum"));
+    assert!(workflow.contains("hashlib.sha256"));
+    assert!(workflow.contains("scripts/generate_islands_manifest.py"));
     assert!(workflow.contains("islands-manifest-v1.json"));
-    assert!(manifest.contains("my-lisp-islands-manifest/1"));
+    assert!(manifest.contains("sens-islands-manifest/1"));
     assert!(manifest.contains("\"four-kernel\""));
     assert!(manifest.contains("\"common-lisp\""));
     assert!(manifest.contains("\"prolog\""));

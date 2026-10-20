@@ -1,5 +1,5 @@
 {
-  "protocol": "my-lisp-islands-manifest/1",
+  "protocol": "sens-islands-manifest/1",
   "profiles": [
     {
       "key": "four-kernel",

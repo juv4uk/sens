@@ -306,7 +306,7 @@ fn load_manifest_str(source: &str, origin: &str) -> Result<Manifest, String> {
     let manifest: Manifest = serde_json::from_str(source)
         .map_err(|error| format!("invalid manifest {origin}: {error}"))?;
 
-    if manifest.protocol != "my-lisp-islands-manifest/1" {
+    if manifest.protocol != "sens-islands-manifest/1" {
         return Err(format!("unsupported manifest protocol: {}", manifest.protocol));
     }
 
@@ -472,7 +472,7 @@ fn load_manifest(args: &[String]) -> Result<Manifest, String> {
     }
 
     let temporary = std::env::temp_dir().join(format!(
-        "my-lisp-islands-manifest-{}-{}.json",
+        "sens-islands-manifest-{}-{}.json",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -1479,7 +1479,7 @@ mod zig_islands_manifest_tests {
         let source = std::str::from_utf8(&bytes).expect("manifest must be UTF-8");
         let parsed = load_manifest_str(source, "zig-root-asset")
             .expect("only the host validates release manifest protocol");
-        assert_eq!(parsed.protocol, "my-lisp-islands-manifest/1");
+        assert_eq!(parsed.protocol, "sens-islands-manifest/1");
         let via_wrapper = embedded_manifest_via_zig().expect("same Zig source");
         assert_eq!(via_wrapper.protocol, parsed.protocol);
         assert_eq!(via_wrapper.islands.len(), parsed.islands.len());
