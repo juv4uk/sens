@@ -167,7 +167,7 @@ class CurrentManifestMigrationTests(unittest.TestCase):
             with self.assertRaises(approved.engine.SensT5Error):
                 approved.publish_batch([
                     (Path("first/nested/program.sens"), physical),
-                    (Path("second/broken.sens"), b"\\xff"),
+                    (Path("second/broken.sens"), b"\xff"),
                 ], out)
             self.assertFalse(out.exists())
 
