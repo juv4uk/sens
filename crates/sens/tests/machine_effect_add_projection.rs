@@ -159,3 +159,31 @@ fn effect_and_projection_rejections_are_distinct_and_fail_closed() {
         "x86-projection-rejected"
     );
 }
+
+#[test]
+fn ukr_machine_key_projection_preserves_width_and_legacy_calls() {
+    let mut session = machine_session();
+    // Порівнюємо ширину І бітове слово. Стара назва лишається тією самою функцією.
+    for (width, bits, expected_width, expected_bits, matches) in [
+        (5, 10, 5, 10, true),
+        (5, 10, 6, 10, false),
+        (5, 10, 5, 11, false),
+        (3, 5, 3, 5, true),
+    ] {
+        let ukr = eval_value(
+            &format!(
+                "(машинний-ключ-поточного-домену? {width} {bits} {expected_width} {expected_bits})"
+            ),
+            &mut session,
+        );
+        let historical = eval_value(
+            &format!(
+                "(x86-current-domain-key? {width} {bits} {expected_width} {expected_bits})"
+            ),
+            &mut session,
+        );
+        let expected = eval_value(if matches { "так" } else { "(як-є ())" }, &mut session);
+        assert_eq!(ukr, expected, "width={width}, bits={bits}");
+        assert_eq!(historical, ukr, "historical binding must preserve behavior");
+    }
+}
