@@ -853,6 +853,38 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(summary["summary"]["files_written"], 1)
 
 
+    def test_unpaired_only_already_paired_is_noop_without_zig(self):
+        # A second migration sweep must not build Zig or fail merely because
+        # no new source remains. It must not promote parity to semantic GO.
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            src = base / "src"
+            src.mkdir()
+            lisp = src / "готове.lisp"
+            sens = src / "готове.sens"
+            lisp.write_text("(як-є ())\\n".replace("\\n", "\n"), encoding="utf-8")
+            original = mod.encode_t5m_projection("10 001 00 000 01")
+            sens.write_bytes(original)
+            output = base / "mirror"
+            receipt = base / "report.json"
+            run = subprocess.run([
+                sys.executable, str(SCRIPT), str(src),
+                "--out", str(output), "--report", str(receipt),
+                "--unpaired-only", "--source-surface", "укр", "--codec", "t5m",
+            ], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            result = json.loads(receipt.read_text(encoding="utf-8"))
+            self.assertEqual(result["summary"]["files_seen"], 0)
+            self.assertEqual(result["summary"]["files_skipped_paired"], 1)
+            self.assertEqual(result["summary"]["files_written"], 0)
+            self.assertEqual(result["summary"]["files_blocked"], 0)
+            self.assertEqual(result["physical_producer"], "NOT_INVOKED_ALREADY_PAIRED")
+            self.assertFalse(result["semantic_admitted"])
+            self.assertEqual(result["skipped_paired_paths"], ["готове.lisp"])
+            self.assertEqual(sens.read_bytes(), original)
+            self.assertFalse(output.exists())
+
+
     def test_minimal_cli_defaults_to_current_ratified_foundation(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)

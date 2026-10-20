@@ -1617,7 +1617,8 @@ def main():
         paths = candidates
     # Publish mode always builds pinned Zig; missing Zig cannot silently fall
     # back to Python. Dry-run remains a read-only mechanical preview.
-    zig_temp = tempfile.TemporaryDirectory(prefix="sens-three-pass-zig-") if not args.dry_run else None
+    zig_temp = (tempfile.TemporaryDirectory(prefix="sens-three-pass-zig-")
+                if not args.dry_run and paths else None)
     zig_binary = None
     if zig_temp is not None:
         try:
@@ -1741,7 +1742,9 @@ def main():
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only-zig-minted",
         "semantic_admitted": False,
-        "physical_producer": ("PYTHON_REFERENCE_ONLY" if args.dry_run
+        "physical_producer": ("NOT_INVOKED_ALREADY_PAIRED"
+                              if not paths and skipped_paired else
+                              "PYTHON_REFERENCE_ONLY" if args.dry_run
                               else f"PINNED_ZIG_{args.codec.upper()}_CARRY"),
         "summary": {
             "files_seen": len(paths),
@@ -1756,7 +1759,10 @@ def main():
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
                            encoding="utf-8")
     print(json.dumps(report["summary"], ensure_ascii=False))
-    return 0 if written else 2
+    # Nothing new to publish when every selected source is already paired:
+    # this is a valid idempotent selection, not a codec/toolchain failure.
+    # An actually empty or wholly blocked input still returns a failure.
+    return 0 if written or (not paths and bool(skipped_paired)) else 2
 
 
 if __name__ == "__main__":
