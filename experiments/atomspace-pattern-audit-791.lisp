@@ -1,20 +1,21 @@
-; #791 ATOMSPACE-1 — identity/reference/provenance audit.
+; #791 ATOMSPACE-1 — дослідження тотожності, посилань і походження.
 ;
-; Research data only. OpenCog AtomSpace is treated as a graph/reference
-; precedent, not as a required central ontology for the archipelago.
+; Це дослідні дані, а не новий семантичний реєстр.
+; OpenCog AtomSpace розглядається як приклад графових посилань,
+; а не як обов'язкова спільна онтологія для всіх обчислювальних островів.
 ;
-; Evidence consulted:
-; - AtomSpace Nodes uniquely identified by (name,type)
-; - Links uniquely identified by (type,outgoing set)
-; - queries represented as graph structures
-; - lightweight per-Atom Values used for changing metadata
-; - TruthValue/AttentionValue are Atom-attached value domains
+; Досліджені властивості:
+; - вузол має стійку тотожність за назвою та типом;
+; - зв'язок визначається типом і набором вихідних посилань;
+; - запити подаються графовими структурами;
+; - додаткові значення атомів зберігають змінні метадані;
+; - TruthValue та AttentionValue є окремими видами значень атома.
 ;
-; Decisions:
-;   borrow-mechanism
-;   adapt-explicitly
-;   reject-ontology
-
+; Три рішення записано точними атомами чинної дослідної схеми:
+; borrow-mechanism — запозичити механізм;
+; adapt-explicitly — адаптувати явно;
+; reject-ontology — відхилити спільну онтологію.
+;
 (atomspace-pattern-audit/1
   ((pattern . stable-node-identity)
    (decision . borrow-mechanism)
