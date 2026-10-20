@@ -1,12 +1,12 @@
-; #215 — machine-readable Nil-use migration map.
-; This is classification data, not executable truth semantics.
-; Categories:
-;   structural            — empty list / proper-list terminator; keep.
-;   empty-result          — zero produced values/result placeholder; preserve but audit context.
-;   legacy-semantic       — historical NIL/FALSE conflation; must migrate.
-;   boundary-compatibility— host/protocol representation currently collapsed onto Nil; isolate/review.
+; #215 — машинно-читана карта міграції вжитку Nil.
+; Це дані класифікації, а не виконувана семантика істини.
+; Категорії:
+;   structural            — порожній список / термінатор правильного списку; лишити.
+;   empty-result          — нуль вироблених значень/заповнювач результату; зберегти, але перевірити контекст.
+;   legacy-semantic       — історичне змішання NIL/FALSE; мусить мігрувати.
+;   boundary-compatibility— подання хоста/протоколу, наразі зведене до Nil; ізолювати/переглянути.
 ;
-; `owner` names the issue that has authority over the replacement semantics.
+; `owner` називає issue, що має владу над семантикою заміни.
 
 (nil-use
   (path . "crates/my-lisp/src/value.rs")
