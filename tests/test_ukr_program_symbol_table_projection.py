@@ -449,6 +449,31 @@ def manually_renamed_code(source):
     flush()
     return "".join(out)
 
+# Зміни виконавчої логіки поверх уже доведеної лексичної проєкції.
+# Історичний Git blob і зворотне перетворення бітових голів незмінні.
+# Це точна перевірка вихідного тексту, а не Python-виконавець SENS.
+LIVE_REPAIRS = (
+    ("((менше? позиція (рядок-довжина рядок)) \"\")", "((хибне? (менше? позиція (рядок-довжина рядок))) \"\")", 2),
+    ("((містить-підрядок? \" \" (рядок-перший рядок)) \"\")", "((містить-підрядок? \" \" (рядок-перший (зріз-від рядок позиція))) \"\")", 1),
+    ("(рядок-додати (рядок-перший рядок) (слово-до-пробілу рядок (додати позиція 1)))", "(рядок-додати (рядок-перший (зріз-від рядок позиція)) (слово-до-пробілу рядок (додати позиція 1)))", 1),
+    ("((однакові? 0 0) (сполучити", "(так (сполучити", 1),
+    ("(так ознака-порожнього)", "(так ні)", 1),
+    ("(перше (перше база))) позначка-так)", "(перше (перше база))) так)", 1),
+)
+
+
+def apply_live_repairs(source: str) -> str:
+    for previous, current, expected_count in LIVE_REPAIRS:
+        actual_count = source.count(previous)
+        if actual_count != expected_count:
+            raise AssertionError(
+                f"Неочікувана кількість входжень {previous!r}: "
+                f"{actual_count} замість {expected_count}"
+            )
+        source = source.replace(previous, current)
+    return source
+
+
 ROW = re.compile(r"^\s*\(([01]+)\s+\(ук\s+[^()]*\)\s+\(укр\s+([^\s()]+)\)")
 NUMERIC_HEAD = re.compile(r"\(\s*[01]+(?=\s|\)|$)")
 ENCODED_LITERAL = re.compile(r"#(?:d\d+:[01]+|b[01]+)")
@@ -521,10 +546,21 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
         original = source_before_manual_names()
         self.assertEqual(git_blob(original), PRE_RENAME_BLOB)
         actual = SOURCE.read_text(encoding="utf-8")
-        self.assertEqual(manually_renamed_code(original), actual)
+        self.assertEqual(apply_live_repairs(manually_renamed_code(original)), actual)
         self.assertIn("(визначити ознака-порожнього (як-є ()))", actual)
         self.assertIn("(головна (перше *argv*)", actual)
         self.assertNotIn("(визначити nil-marker", actual)
+
+    def test_current_executable_symbol_scanner_guards(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        self.assertEqual(source.count(
+            "(хибне? (менше? позиція (рядок-довжина рядок)))"), 2)
+        self.assertIn("(рядок-перший (зріз-від рядок позиція))", source)
+        self.assertIn("((містить-підрядок? \" \" (рядок-перший (зріз-від рядок позиція))) \"\")", source)
+        self.assertIn("(так ні)", source)
+        self.assertIn("(перше (перше база))) так)", source)
+        self.assertNotIn("позначка-так", source)
+        self.assertNotIn("((однакові? 0 0)", source)
 
     def test_ratified_coordinates_and_exact_count(self):
         self.assertEqual(Counter(old for _, old in PINNED["edits"]), EXPECTED)
