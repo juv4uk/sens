@@ -1,6 +1,6 @@
 ; contracts/d5-ratification.lisp
-; OWNER-RATIFIED 2026-10-04 — issue #3305.
-; Current D5 semantic residency authority.
+; Затверджено власником 2026-10-04 — завдання #3305.
+; Чинне джерело ратифікації семантичних резидентів Д5.
 
 (
   (schema . d5-ratification/1)
@@ -53,11 +53,11 @@
        (coordinate-historical . 4)))
 
   (laws
-    . ((no-global-fifth-bit . "The fifth bit has local family meaning only; there is no universal D5 suffix semantics.")
-       (no-lower-duplicate . "A D5 resident must not duplicate an already-admitted lower-domain semantic identity merely to fill capacity.")
-       (selector-family . "The eight depth-3 selector residents follow the proved CAR/CDR composition law under D4 selector parents.")
+    . ((no-global-fifth-bit . "П'ятий біт має значення лише в межах власної родини; універсальної семантики суфіксів Д5 немає.")
+       (no-lower-duplicate . "Резидент Д5 не повинен дублювати вже допущену семантичну тотожність нижчого домену лише для заповнення місткості.")
+       (selector-family . "Вісім трирівневих селекторів-резидентів підпорядковуються доведеному закону композиції CAR/CDR через батьківські селектори Д4.")
        (reverse-onto . "REVERSE(x)=REVERSE-ONTO(x,()); REVERSE-ONTO(x,y)=APPEND(REVERSE(x),y); APPEND(x,y)=REVERSE-ONTO(REVERSE(x),y).")
-       (runtime-separation . "Ratified residency does not promise a callable mechanism. Missing resident mechanisms fail closed.")))
+       (runtime-separation . "Ратифікація резидента не гарантує наявності механізму виклику. За відсутності механізму виклик відхиляється без припущення про успіх.")))
 
   (supersedes . (#3278-D5-revocation OD-005-pre-reset #3297-research-shadow))
   (preserves . (#3278-D8-revocation))
