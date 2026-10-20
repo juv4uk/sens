@@ -1,24 +1,24 @@
-; semantic-ownership-audit-733.lisp — Lisp-owned semantic ownership audit (#733)
+; semantic-ownership-audit-733.lisp — аудит семантичної відповідальності, керованої Ліспом (#733)
 ;
-; Parent: #726
-; Related: #730, #746, #749, COMMON-LISP-KERNEL-1
+; Батьківське завдання: #726
+; Пов'язані завдання: #730, #746, #749, COMMON-LISP-KERNEL-1
 ;
-; CRITICAL DISTINCTION:
-;   Does this item define WHAT THE LANGUAGE MEANS,
-;   or only HOW AN IMPLEMENTATION EXECUTES IT?
+; КРИТИЧНО ВАЖЛИВЕ РОЗРІЗНЕННЯ:
+;   Чи визначає цей компонент ЗНАЧЕННЯ МОВИ,
+;   чи лише СПОСІБ ЙОГО ВИКОНАННЯ В РЕАЛІЗАЦІЇ?
 ;
-; CLASSIFICATION TAXONOMY:
-;   * semantic-authority      — Defines the inviolable meaning of the language (Canons, laws, SID registry).
-;   * semantic-witness        — Pure Lisp data or runner that witnesses and verifies language laws.
-;   * compatibility-reference — External standards or surface synonym references (ANSI Common Lisp, Ukrainian profiles).
-;   * execution-mechanism     — Concrete substrate implementation (Rust/C runtime, allocation, evaluators, memory layouts).
-;   * kernel-adapter          — Mechanical boundary / C-ABI bridge to the 4 autonomous islands (Prolog, Datalog, CLIPS, CL).
-;   * historical-experiment   — Complex monolithic subsystem or in-Lisp engine candidate for demotion or routing to islands.
-;   * unknown                 — Ambiguous item requiring focused experiment before moving or demoting.
+; КЛАСИФІКАЦІЯ:
+;   * semantic-authority      — визначає непорушну семантику мови (Канони, закони, історичний реєстр SID).
+;   * semantic-witness        — дані або виконавець на чистому Ліспі, що засвідчують і перевіряють закони мови.
+;   * compatibility-reference — зовнішні стандарти або довідники синонімів поверхонь (ANSI Common Lisp, українські профілі).
+;   * execution-mechanism     — конкретна реалізація механізму (Rust/C, розподіл пам'яті, обчислювачі, розміщення даних).
+;   * kernel-adapter          — механічна межа / міст C-ABI до чотирьох незалежних систем (Prolog, Datalog, CLIPS, CL).
+;   * historical-experiment   — історичний складний модуль або реалізація Ліспом для можливого винесення до окремої системи.
+;   * unknown                 — невизначений компонент, який потребує цільового досліду перед перенесенням чи зниженням статусу.
 
 (semantic-ownership-audit/1
   ; --------------------------------------------------------------------------
-  ; SECTION 1: SEMANTIC AUTHORITIES (Defines WHAT the language means)
+  ; РОЗДІЛ 1: ДЖЕРЕЛА СЕМАНТИЧНОЇ ВЛАДИ (визначають значення мови)
   ; --------------------------------------------------------------------------
 
   ((key . canon-laws)
@@ -28,7 +28,7 @@
    (semantic-role . constitutive-laws)
    (future-action . retain-in-core)
    (target-destination . "lib/canon.lisp")
-   (rationale . "Defines Canon 0 empty list () and McCarthy 7 constitutive axioms (quote, atom, eq, cons, car, cdr, cond) as executable semantic laws in my-lisp."))
+   (rationale . "Визначає порожній список Канону 0 та сім основних аксіом Маккарті (quote, atom, eq, cons, car, cdr, cond) як виконувані семантичні закони my-lisp."))
 
   ((key . semantic-registry-schema)
    (path . "lib/surface/semantic-registry.lisp")
@@ -37,7 +37,7 @@
    (semantic-role . semantic-identity-registry)
    (future-action . retain-in-core)
    (target-destination . "lib/surface/semantic-registry.lisp")
-   (rationale . "Single authoritative 8-bit SID schema (00000000..10101000) mapping bitstrings to semantic identities across Ukrainian, English, Sanskrit, and keyboard-symbol surfaces."))
+   (rationale . "На дату цього аудиту єдина восьмибітна схема SID (00000000..10101000) зіставляла бітові слова із семантичними тотожностями української, англійської, санскритської та символічної поверхонь."))
 
   ((key . answer-contract)
    (path . "contracts/answer-contract.lisp")
@@ -46,7 +46,7 @@
    (semantic-role . shared-predicate-control-boundary)
    (future-action . retain-minimal)
    (target-destination . "contracts/answer-contract.lisp")
-   (rationale . "Minimal shared law only: structural empty, one-bit predicates, and two-part COND. Domain-specific mathematics/reasoning live in separate contracts."))
+   (rationale . "Лише мінімальний спільний закон: структурна порожнеча, однобітні предикати й двопольова COND. Доменна математика та міркування описані окремими контрактами."))
 
   ((key . island-compatibility-contract)
    (path . "contracts/island-compat-contract.lisp")
@@ -55,7 +55,7 @@
    (semantic-role . kernel-interaction-contract)
    (future-action . retain-in-core)
    (target-destination . "contracts/island-compat-contract.lisp")
-   (rationale . "Defines language-facing kernel call/result protocol and cross-island data flow through pure S-expression data."))
+   (rationale . "Визначає мовний протокол викликів і результатів ядер та обмін даними між системами через чисті S-вирази."))
 
   ((key . core-bootstrap-library)
    (path . "lib/core.lisp")
@@ -64,7 +64,7 @@
    (semantic-role . derived-language-semantics)
    (future-action . retain-in-core)
    (target-destination . "lib/core.lisp")
-   (rationale . "Pure Lisp bootstrap definitions (list, not, and, or, let, map, filter, reduce) defining language semantics derived from primitives without host intrusion."))
+   (rationale . "Початкові визначення на чистому Ліспі (list, not, and, or, let, map, filter, reduce) задають похідні від примітивів закони мови без втручання хоста."))
 
   ((key . exact-q-binary-contract)
    (path . "contracts/exact-q-binary-contract.lisp")
@@ -73,7 +73,7 @@
    (semantic-role . exact-q-predicate-admissibility)
    (future-action . retain-minimal)
    (target-destination . "contracts/exact-q-binary-contract.lisp")
-   (rationale . "Defines which exact-rational comparison predicates may produce the ordinary one-bit SENS PredicateBit without approximation. Numeric 0/1 and 1/1 remain Number values, never predicate identity."))
+   (rationale . "Визначає, які предикати порівняння точних раціональних чисел можуть без наближень утворити однобітний SENS PredicateBit. Числові 0/1 і 1/1 залишаються значеннями Number, а не тотожностями предикатів."))
 
   ((key . structural-observation-contract)
    (path . "contracts/structural-observation-contract.lisp")
@@ -82,7 +82,7 @@
    (semantic-role . structural-query-laws)
    (future-action . retain-in-core)
    (target-destination . "contracts/structural-observation-contract.lisp")
-   (rationale . "Defines observation taxonomy for atom, pair, symbol, and string representations."))
+   (rationale . "Визначає класифікацію спостережень для подань атома, пари, символу та рядка."))
 
   ((key . core-macro-laws)
    (path . "lib/macro.lisp")
@@ -91,7 +91,7 @@
    (semantic-role . syntactic-transformation-laws)
    (future-action . retain-in-core)
    (target-destination . "lib/macro.lisp")
-   (rationale . "Defines macroexpansion rules and definition mechanics in pure Lisp on top of primitive make-macro substrate."))
+   (rationale . "Визначає закони розгортання й створення макросів на чистому Ліспі поверх примітива make-macro."))
 
   ((key . result-status-taxonomy)
    (path . "lib/result-status.lisp")
@@ -100,7 +100,7 @@
    (semantic-role . result-status-ontology)
    (future-action . retain-in-core)
    (target-destination . "lib/result-status.lisp")
-   (rationale . "Defines outcome vocabulary: ok, err, pass, fail, halt, pending."))
+   (rationale . "Визначає словник станів результату: ok, err, pass, fail, halt, pending."))
 
   ((key . evaluator-dispatch-contract)
    (path . "lib/surface/function-signatures.lisp")
@@ -109,7 +109,7 @@
    (semantic-role . evaluator-operation-classification)
    (future-action . retain-in-core)
    (target-destination . "lib/surface/function-signatures.lisp")
-   (rationale . "Owns the language-level mapping from semantic identities to evaluator operation classes; host runtimes may project this data to mechanisms but must not recreate the mapping."))
+   (rationale . "Володіє мовним зіставленням семантичних тотожностей із класами операцій обчислювача; виконавці хоста можуть використовувати цю проєкцію, але не створювати її заново."))
 
   ; --------------------------------------------------------------------------
   ; SECTION 2: SEMANTIC WITNESSES (Proves in Lisp data that laws hold)
