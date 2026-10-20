@@ -1,7 +1,10 @@
-; #1046 — fail-closed validation for transitional mechanism metadata.
-; #3022: #d0/#d1 below are explicit transitional legacy predicate scalars.\n; #b... is now the canonical BinaryNumber source path and must not be used as a tooling boolean.\n; Semantic identity authority is ONLY lib/surface/semantic-registry.lisp.
-; This checker proves mechanism metadata cannot invent a function beside that table.
-; #1332/#1403: empty-list-ground is not a function mechanism.
+; #1046 — перевірка перехідних метаданих механізмів із відмовою за замовчуванням.
+; #3022 — позначення #d0/#d1 нижче є перехідними історичними скалярами предикатів.
+; Канонічний шлях BinaryNumber починається з #b... і не слугує булевим
+; значенням інструментів супроводу.
+; Джерело семантичної тотожності — лише lib/surface/semantic-registry.lisp.
+; Перевірка доводить, що метадані механізмів не створюють нових функцій.
+; #1332/#1403 — empty-list-ground не є механізмом виконання функції.
 
 (визначити реєстр
   (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
