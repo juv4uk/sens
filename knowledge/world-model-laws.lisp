@@ -62,4 +62,4 @@
     (provenance))
 
   ; Арифметика розмірностей сама собою не надає фізичного значення.
-  (rule . "dimensionally valid arithmetic alone does not create physical meaning"))
+  (rule . "Сама лише розмірнісно коректна арифметика не створює фізичного змісту"))
