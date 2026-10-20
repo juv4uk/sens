@@ -1,4 +1,4 @@
-# FUNCTION REFERENCE — my-lisp
+# SENS — ДОВІДНИК ФУНКЦІЙ / Function Reference
 
 **Live builtin section refreshed:** 2026-09-11 · base `6c82490`
 **Library inventory base:** 2026-09-02 · `8b4529f`
