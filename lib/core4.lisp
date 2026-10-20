@@ -94,11 +94,11 @@
   (функція (лівий-аргумент правий-аргумент)
     (сполучити лівий-аргумент (сполучити правий-аргумент (як-є ())))))
 
-; D4:1000 CAAR | D4:1001 CADR | D4:0111 CDDR
-; D5:10011 CADDR is executable; D6 selector coordinates are ratified,
-; but not physically admitted as call heads. Never manufacture D6 dispatch.
-; fourth = D5 CADDR ∘ D3 CDR; fifth = D5 CADDR ∘ D4 CDDR.
-; D7 is text data, not an escape hatch for deeper selectors.
+; D4:1000 CAAR | D4:1001 CADR | D4:0111 CDDR.
+; D5:10011 CADDR уже має виконуване визначення. Селектори D6 ратифіковано,
+; але прямі виклики їхніх координат не допущено: не створювати диспетчер D6.
+; Четверте = D5 CADDR після D3 CDR; п'яте = D5 CADDR після D4 CDDR.
+; D7 містить текстові дані, а не запасні викличні коди глибших селекторів.
 
 ; D4:1001 друге / CADR — визначено через допущені примітиви перше/решта.
 (визначити друге
@@ -364,9 +364,9 @@
 
 
 
-; D5 PLUS/DIFFERENCE/TIMES/LESSP/GREATERP already have immutable
-; exact-domain value-call mechanisms. Their canonical surfaces come from
-; lib/domains/d5.lisp; do not rebind those immutable names in Core4.
+; D5 PLUS/DIFFERENCE/TIMES/LESSP/GREATERP уже мають незмінні механізми
+; виклику значень у точному домені. Канонічні назви задано в
+; lib/domains/d5.lisp; не перевизначати ці незмінні імена в Core4.
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
@@ -446,11 +446,11 @@
       (так так))))
 
 
-; D10 PAIP FIND-IF-ANYWHERE: derive a tree search from the pinned PAIP law.
-; PAIP checks ATOM first and applies the predicate to every atom, including ().
-; Traversal is left-to-right; a successful CAR search short-circuits the CDR.
-; The D10 codebook row does not create a primitive/opcode; the exact closure
-; route above applies only if this concrete definition is loaded.
+; D10 PAIP FIND-IF-ANYWHERE: обхід дерева виведено із зафіксованого закону PAIP.
+; Спочатку перевіряємо ATOM, предикат застосовуємо до всіх атомів, навіть ().
+; Обхід зліва направо; успіх у CAR не потребує подальшого обходу CDR.
+; Запис у таблиці D10 не створює примітива чи машинного коду; виклик
+; наявного замикання можливий лише після завантаження саме цього визначення.
 (визначити є-листок-дерева-що-задовольняє-предикат?
   (функція (предикат дерево)
     (за-умовою
