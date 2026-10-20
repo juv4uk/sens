@@ -1,18 +1,17 @@
-; #196 — machine-readable lower-bound profiles derived from bounded Lisp witnesses.
+; #196 — мінімальні машинні профілі для обмежених свідків Lisp.
 ;
-; This file is deliberately NOT a second ISA catalogue, opcode table, encoder,
-; or admission list. Observed machine families are derived from already-existing
-; semantic lowering. Hand-authored dependency rows explain only why each family
-; is necessary for its bounded witness.
+; Це не другий каталог ISA, таблиця кодів операцій, кодер або список допуску.
+; Спостережені сімейства машинних команд походять від наявного зниження
+; семантичних форм. Рядки залежностей лише пояснюють потребу кожного
+; сімейства для конкретного обмеженого свідка.
 ;
-; Current claim boundaries:
-;   structural-v0: (car (cons 2 3)) -> 2 using one 16-byte pair arena.
-;   conditional-growth-v0: (cond ((eq A B) THEN) (t ELSE)) for bounded u64.
-;   conditional-structural-v0: bounded COND with CAR(CONS ...) in both arms.
-; None is a full allocator, GC, label resolver, calling convention, compiler,
-; or self-hosting claim.
+; Межі свідків: перше(пара) у виділеній області пари,
+; умовний вибір за рівністю для беззнакових чисел і складення
+; умовного вибору з побудовою пари.
+; Це не універсальний розподільник пам'яті, збирання сміття,
+; розв'язування міток, угода викликів або повний компілятор.
 
-(визначити x86-minimal-structural-car-dependencies
+(визначити мінімальна-машина-перше-пари-залежності
   (як-є
     ((materialize-value
        mov-r64-imm64
@@ -31,7 +30,7 @@
        required-for-minimal-runtime
        "return the bounded result through the host ABI"))))
 
-(визначити x86-minimal-eq-cond-dependencies
+(визначити мінімальна-машина-рівність-умова-залежності
   (як-є
     ((materialize-value
        mov-r64-imm64
@@ -50,7 +49,7 @@
        required-for-minimal-runtime
        "return the selected bounded result through the guest ABI"))))
 
-(визначити x86-minimal-eq-cond-car-cons-dependencies
+(визначити мінімальна-машина-рівність-умова-пара-залежності
   (як-є
     ((materialize-values
        mov-r64-imm64
@@ -77,155 +76,181 @@
        required-for-minimal-runtime
        "return the selected structural result through the guest ABI"))))
 
-(визначити x86-minimal-family-member?
-  (функція (family families)
+(визначити мінімальна-машина-містить-сімейство?
+  (функція (сімейство сімейства)
     (за-умовою
       
-      ((атом? families)  ())
-      ((тотожне? family (перше families)) t)
-      ((атом? ()) (x86-minimal-family-member? family (решта families))))))
+      ((атом? сімейства)  ())
+      ((тотожне? сімейство (перше сімейства)) t)
+      ((атом? ()) (мінімальна-машина-містить-сімейство? сімейство (решта сімейства))))))
 
-(визначити x86-minimal-unique-form-families
-  (функція (forms seen)
+(визначити мінімальна-машина-унікальні-сімейства-форм
+  (функція (форми переглянуті)
     (за-умовою
       
-      ((атом? forms)  seen)
+      ((атом? форми)  переглянуті)
       ((атом? ())
-       (нехай ((family (перше (перше forms))))
+       (нехай ((сімейство (перше (перше форми))))
          (за-умовою
-           ((x86-minimal-family-member? family seen)
-            (x86-minimal-unique-form-families (решта forms) seen))
+           ((мінімальна-машина-містить-сімейство? сімейство переглянуті)
+            (мінімальна-машина-унікальні-сімейства-форм (решта форми) переглянуті))
            ((атом? ())
-            (x86-minimal-unique-form-families
-              (решта forms)
-              (приєднати seen (список family))))))))))
+            (мінімальна-машина-унікальні-сімейства-форм
+              (решта форми)
+              (приєднати переглянуті (список сімейство))))))))))
 
-(визначити x86-minimal-row-second
-  (функція (row)
-    (перше (решта row))))
+(визначити мінімальна-машина-друге-поле-рядка
+  (функція (рядок)
+    (перше (решта рядок))))
 
-(визначити x86-minimal-row-third
-  (функція (row)
-    (перше (решта (решта row)))))
+(визначити мінімальна-машина-третє-поле-рядка
+  (функція (рядок)
+    (перше (решта (решта рядок)))))
 
-(визначити x86-minimal-map-row-second
-  (функція (rows)
+(визначити мінімальна-машина-другі-поля-рядків
+  (функція (рядки)
     (за-умовою
       
-      ((атом? rows)  (як-є ()))
+      ((атом? рядки)  (як-є ()))
       ((атом? ())
        (сполучити
-         (x86-minimal-row-second (перше rows))
-         (x86-minimal-map-row-second (решта rows)))))))
+         (мінімальна-машина-друге-поле-рядка (перше рядки))
+         (мінімальна-машина-другі-поля-рядків (решта рядки)))))))
 
-(визначити x86-minimal-map-row-third
-  (функція (rows)
+(визначити мінімальна-машина-треті-поля-рядків
+  (функція (рядки)
     (за-умовою
       
-      ((атом? rows)  (як-є ()))
+      ((атом? рядки)  (як-є ()))
       ((атом? ())
        (сполучити
-         (x86-minimal-row-third (перше rows))
-         (x86-minimal-map-row-third (решта rows)))))))
+         (мінімальна-машина-третє-поле-рядка (перше рядки))
+         (мінімальна-машина-треті-поля-рядків (решта рядки)))))))
 
-(визначити x86-minimal-structural-car-forms
-  (функція (left right)
-    (x86-lower-cons-car-u64-forms left right)))
+(визначити мінімальна-машина-перше-пари-форми
+  (функція (ліве праве)
+    (x86-lower-cons-car-u64-forms ліве праве)))
 
-(визначити x86-minimal-structural-car-observed-families
-  (функція (left right)
-    (x86-minimal-unique-form-families
-      (x86-minimal-structural-car-forms left right)
+(визначити мінімальна-машина-перше-пари-спостережені-сімейства
+  (функція (ліве праве)
+    (мінімальна-машина-унікальні-сімейства-форм
+      (мінімальна-машина-перше-пари-форми ліве праве)
       (як-є ()))))
 
-(визначити x86-minimal-structural-car-dependency-families
+(визначити мінімальна-машина-перше-пари-сімейства-залежностей
   (функція ()
-    (x86-minimal-map-row-second x86-minimal-structural-car-dependencies)))
+    (мінімальна-машина-другі-поля-рядків мінімальна-машина-перше-пари-залежності)))
 
-(визначити x86-minimal-structural-car-dependency-classes
+(визначити мінімальна-машина-перше-пари-класи-залежностей
   (функція ()
-    (x86-minimal-map-row-third x86-minimal-structural-car-dependencies)))
+    (мінімальна-машина-треті-поля-рядків мінімальна-машина-перше-пари-залежності)))
 
-(визначити x86-minimal-structural-car-profile
-  (функція (left right)
+(визначити мінімальна-машина-перше-пари-профіль
+  (функція (ліве праве)
     (список
       (список (як-є witness) (як-є bounded-car-cons-u64))
-      (список (як-є forms) (x86-minimal-structural-car-forms left right))
+      (список (як-є forms) (мінімальна-машина-перше-пари-форми ліве праве))
       (список
         (як-є observed-families)
-        (x86-minimal-structural-car-observed-families left right))
-      (список (як-є dependencies) x86-minimal-structural-car-dependencies)
+        (мінімальна-машина-перше-пари-спостережені-сімейства ліве праве))
+      (список (як-є dependencies) мінімальна-машина-перше-пари-залежності)
       (список (як-є arena-lifetime) (як-є native-call))
       (список (як-є escape) (як-є forbidden))
       (список (як-є claim) (як-є bounded-structural-lower-bound)))))
 
-(визначити x86-minimal-eq-cond-forms
-  (функція (left right then-value else-value)
-    (x86-lower-eq-cond-u64-forms left right then-value else-value)))
+(визначити мінімальна-машина-рівність-умова-форми
+  (функція (ліве праве значення-так значення-ні)
+    (x86-lower-eq-cond-u64-forms ліве праве значення-так значення-ні)))
 
-(визначити x86-minimal-eq-cond-observed-families
-  (функція (left right then-value else-value)
-    (x86-minimal-unique-form-families
-      (x86-minimal-eq-cond-forms left right then-value else-value)
+(визначити мінімальна-машина-рівність-умова-спостережені-сімейства
+  (функція (ліве праве значення-так значення-ні)
+    (мінімальна-машина-унікальні-сімейства-форм
+      (мінімальна-машина-рівність-умова-форми ліве праве значення-так значення-ні)
       (як-є ()))))
 
-(визначити x86-minimal-eq-cond-dependency-families
+(визначити мінімальна-машина-рівність-умова-сімейства-залежностей
   (функція ()
-    (x86-minimal-map-row-second x86-minimal-eq-cond-dependencies)))
+    (мінімальна-машина-другі-поля-рядків мінімальна-машина-рівність-умова-залежності)))
 
-(визначити x86-minimal-eq-cond-dependency-classes
+(визначити мінімальна-машина-рівність-умова-класи-залежностей
   (функція ()
-    (x86-minimal-map-row-third x86-minimal-eq-cond-dependencies)))
+    (мінімальна-машина-треті-поля-рядків мінімальна-машина-рівність-умова-залежності)))
 
-(визначити x86-minimal-eq-cond-profile
-  (функція (left right then-value else-value)
+(визначити мінімальна-машина-рівність-умова-профіль
+  (функція (ліве праве значення-так значення-ні)
     (список
       (список (як-є witness) (як-є bounded-eq-cond-u64))
       (список
         (як-є forms)
-        (x86-minimal-eq-cond-forms left right then-value else-value))
+        (мінімальна-машина-рівність-умова-форми ліве праве значення-так значення-ні))
       (список
         (як-є observed-families)
-        (x86-minimal-eq-cond-observed-families
-          left right then-value else-value))
-      (список (як-є dependencies) x86-minimal-eq-cond-dependencies)
+        (мінімальна-машина-рівність-умова-спостережені-сімейства
+          ліве праве значення-так значення-ні))
+      (список (як-є dependencies) мінімальна-машина-рівність-умова-залежності)
       (список (як-є claim) (як-є bounded-conditional-growth-lower-bound)))))
 
-(визначити x86-minimal-eq-cond-car-cons-forms
-  (функція (left right then-car then-cdr else-car else-cdr)
+(визначити мінімальна-машина-рівність-умова-пара-форми
+  (функція (ліве праве перше-так решта-так перше-ні решта-ні)
     (x86-lower-eq-cond-car-cons-u64-forms
-      left right then-car then-cdr else-car else-cdr)))
+      ліве праве перше-так решта-так перше-ні решта-ні)))
 
-(визначити x86-minimal-eq-cond-car-cons-observed-families
-  (функція (left right then-car then-cdr else-car else-cdr)
-    (x86-minimal-unique-form-families
-      (x86-minimal-eq-cond-car-cons-forms
-        left right then-car then-cdr else-car else-cdr)
+(визначити мінімальна-машина-рівність-умова-пара-спостережені-сімейства
+  (функція (ліве праве перше-так решта-так перше-ні решта-ні)
+    (мінімальна-машина-унікальні-сімейства-форм
+      (мінімальна-машина-рівність-умова-пара-форми
+        ліве праве перше-так решта-так перше-ні решта-ні)
       (як-є ()))))
 
-(визначити x86-minimal-eq-cond-car-cons-dependency-families
+(визначити мінімальна-машина-рівність-умова-пара-сімейства-залежностей
   (функція ()
-    (x86-minimal-map-row-second x86-minimal-eq-cond-car-cons-dependencies)))
+    (мінімальна-машина-другі-поля-рядків мінімальна-машина-рівність-умова-пара-залежності)))
 
-(визначити x86-minimal-eq-cond-car-cons-dependency-classes
+(визначити мінімальна-машина-рівність-умова-пара-класи-залежностей
   (функція ()
-    (x86-minimal-map-row-third x86-minimal-eq-cond-car-cons-dependencies)))
+    (мінімальна-машина-треті-поля-рядків мінімальна-машина-рівність-умова-пара-залежності)))
 
-(визначити x86-minimal-eq-cond-car-cons-profile
-  (функція (left right then-car then-cdr else-car else-cdr)
+(визначити мінімальна-машина-рівність-умова-пара-профіль
+  (функція (ліве праве перше-так решта-так перше-ні решта-ні)
     (список
       (список (як-є witness) (як-є bounded-eq-cond-car-cons-u64))
       (список
         (як-є forms)
-        (x86-minimal-eq-cond-car-cons-forms
-          left right then-car then-cdr else-car else-cdr))
+        (мінімальна-машина-рівність-умова-пара-форми
+          ліве праве перше-так решта-так перше-ні решта-ні))
       (список
         (як-є observed-families)
-        (x86-minimal-eq-cond-car-cons-observed-families
-          left right then-car then-cdr else-car else-cdr))
-      (список (як-є dependencies) x86-minimal-eq-cond-car-cons-dependencies)
+        (мінімальна-машина-рівність-умова-пара-спостережені-сімейства
+          ліве праве перше-так решта-так перше-ні решта-ні))
+      (список (як-є dependencies) мінімальна-машина-рівність-умова-пара-залежності)
       (список (як-є arena-lifetime) (як-є native-call))
       (список (як-є escape) (як-є forbidden))
       (список
         (як-є claim)
         (як-є bounded-conditional-structural-composition-lower-bound)))))
+
+; Сумісні старі назви — посилання на ті самі українські визначення.
+(визначити x86-minimal-structural-car-dependencies мінімальна-машина-перше-пари-залежності)
+(визначити x86-minimal-structural-car-forms мінімальна-машина-перше-пари-форми)
+(визначити x86-minimal-structural-car-observed-families мінімальна-машина-перше-пари-спостережені-сімейства)
+(визначити x86-minimal-structural-car-dependency-families мінімальна-машина-перше-пари-сімейства-залежностей)
+(визначити x86-minimal-structural-car-dependency-classes мінімальна-машина-перше-пари-класи-залежностей)
+(визначити x86-minimal-structural-car-profile мінімальна-машина-перше-пари-профіль)
+(визначити x86-minimal-eq-cond-dependencies мінімальна-машина-рівність-умова-залежності)
+(визначити x86-minimal-eq-cond-forms мінімальна-машина-рівність-умова-форми)
+(визначити x86-minimal-eq-cond-observed-families мінімальна-машина-рівність-умова-спостережені-сімейства)
+(визначити x86-minimal-eq-cond-dependency-families мінімальна-машина-рівність-умова-сімейства-залежностей)
+(визначити x86-minimal-eq-cond-dependency-classes мінімальна-машина-рівність-умова-класи-залежностей)
+(визначити x86-minimal-eq-cond-profile мінімальна-машина-рівність-умова-профіль)
+(визначити x86-minimal-eq-cond-car-cons-dependencies мінімальна-машина-рівність-умова-пара-залежності)
+(визначити x86-minimal-eq-cond-car-cons-forms мінімальна-машина-рівність-умова-пара-форми)
+(визначити x86-minimal-eq-cond-car-cons-observed-families мінімальна-машина-рівність-умова-пара-спостережені-сімейства)
+(визначити x86-minimal-eq-cond-car-cons-dependency-families мінімальна-машина-рівність-умова-пара-сімейства-залежностей)
+(визначити x86-minimal-eq-cond-car-cons-dependency-classes мінімальна-машина-рівність-умова-пара-класи-залежностей)
+(визначити x86-minimal-eq-cond-car-cons-profile мінімальна-машина-рівність-умова-пара-профіль)
+(визначити x86-minimal-family-member? мінімальна-машина-містить-сімейство?)
+(визначити x86-minimal-unique-form-families мінімальна-машина-унікальні-сімейства-форм)
+(визначити x86-minimal-row-second мінімальна-машина-друге-поле-рядка)
+(визначити x86-minimal-row-third мінімальна-машина-третє-поле-рядка)
+(визначити x86-minimal-map-row-second мінімальна-машина-другі-поля-рядків)
+(визначити x86-minimal-map-row-third мінімальна-машина-треті-поля-рядків)
