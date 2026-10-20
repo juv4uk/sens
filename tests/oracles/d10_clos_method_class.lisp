@@ -7,7 +7,7 @@
 
 (defun д10-клос-спостерігати (назва умова)
   (unless умова
-    (error "D10 CLOS method/class donor oracle failed: ~A" назва))
+    (error "Д10 CLOS: незалежний дослідний оракул методів і класів не пройшов перевірку: ~A" назва))
   (incf *д10-клос-кількість-спостережень*)
   (format t "OBS~C~A~CPASS~%" #\Tab назва #\Tab))
 
