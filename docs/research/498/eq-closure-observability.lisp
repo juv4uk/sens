@@ -1,5 +1,5 @@
-; #498 bounded closure-identity observability without EQ
-; Research-only. NOT semantic authority. NO production change.
+; #498 обмежена спостережність тотожності замикань без EQ
+; Лише дослідження. НЕ семантична влада. БЕЗ змін у production.
 
 (eq-closure-observability/2
   (issue 498)
