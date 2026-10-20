@@ -1,14 +1,14 @@
-; #76 — Lisp-owned meta semantic registry projection from the canonical semantic registry.
+; #76 — проєкція мета-семантичного реєстру, якою володіє Lisp СЕНС, із канонічного семантичного реєстру.
 ;
-; Authority stays in lib/surface/semantic-registry.lisp.
-; This script owns projection mechanics only: it reads the registry as
-; ordinary my-lisp data and never re-parses source text with host regexes.
+; Авторитет лишається в lib/surface/semantic-registry.lisp.
+; Цей скрипт володіє лише механікою проєкції: читає реєстр як
+; звичайні дані my-lisp і ніколи не перерозбирає вихідний текст хостовим regex.
 ;
-; Registry rows are:
-;   ("SID" (namespace surface) ...)
-; Empty surfaces are omitted. The reader-only apostrophe is represented as
-; a string and is omitted because the reader consumes it as quote syntax.
-; Every other admitted symbol is projected in registry order.
+; Рядки реєстру:
+;   ("SID" (простір-імен поверхня) ...)
+; Порожні поверхні опускаються. Апостроф, який споживає лише читач,
+; представлено рядком і опущено, бо читач споживає його як синтаксис цитати.
+; Кожен інший допущений символ проєктується в порядку реєстру.
 
 (визначити слово-поверхні
   (функція (поверхня)
