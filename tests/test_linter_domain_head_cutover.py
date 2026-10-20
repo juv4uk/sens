@@ -103,6 +103,26 @@ class UkrainianLinterProjection(unittest.TestCase):
         self.assertIn(" лінтер-примітиви-з-ефектами)", self.active)
         self.assertNotIn("(визначити effectful-primitives", self.active)
 
+    def test_quoted_data_and_ukrainian_macro_have_explicit_source_witnesses(self):
+        # Це охорона джерела та випробувальних даних, НЕ Python-обчислення SENS.
+        for literal in (
+            "((тотожне? (перше дерево) (як-є як-є)) (як-є ()))",
+            "((тотожне? (перше дерево) (як-є quote)) (як-є ()))",
+            "(аналіз-форма-голова дерево) (як-є визначити-макрос)",
+        ):
+            with self.subTest(literal=literal):
+                self.assertIn(literal, self.active)
+        examples = (ROOT / "tests/fixtures/linter.lisp").read_text(encoding="utf-8")
+        for program in (
+            "(аналіз-ефекти (як-є (як-є (друкувати 1))))",
+            "(аналіз-ефекти (як-є (quote (процес-запустити 1))))",
+            "(аналіз-глобальні (як-є (визначити-макрос назва",
+            "(аналіз-глобальні (як-є (визначити нова (функція",
+        ):
+            with self.subTest(program=program):
+                self.assertIn(program, examples)
+        self.assertGreaterEqual(examples.count('(expected . "()")'), 2)
+
     def test_wrong_peer_and_reintroduced_binary_head_fail_source_contract(self):
         wrong_peer = self.active.replace(
             "(як-є визначити)) (як-є визначити))",
