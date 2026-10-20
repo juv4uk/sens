@@ -174,7 +174,7 @@ class SourceResolver:
             spelling: set(ids) for spelling, ids in domain_surfaces.items()
         }
 
-        # Жодні історичні SID8, мітки чи registry-аліаси не додають
+        # Жодні історичні сід8, мітки чи registry-аліаси не додають
         # поточних резидентів. Лише канонічні доменні проєкції є authority.
 
     @staticmethod
@@ -220,7 +220,7 @@ class SourceResolver:
                 )
 
         # D8 was owner-ratified only on 2026-10-06 (#3960).
-        # Earlier eight-bit executable heads belong to historical W8/SID8/Sens8,
+        # Earlier eight-bit executable heads belong to historical W8/сід8/сенс8,
         # NOT to D8 merely because the payload has eight bits. A modern raw W8
         # token is likewise ambiguous without an explicit source-era proof.
         if re.fullmatch(r"[01]{8}", token):
