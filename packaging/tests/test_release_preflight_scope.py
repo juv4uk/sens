@@ -112,6 +112,19 @@ def require_manual_preflight(source: str) -> None:
     if (not live_lines or live_lines[0] != "set -euo pipefail"
             or any(re.match(r"^set\s+\+", line) for line in live_lines[1:])):
         raise AssertionError("RELEASE_BLOCKED: Zig release shell must remain strict")
+    # A structural preflight must use the explicit corridor-only mode.
+    # Without it, a correct NO-GO on missing SENS/oracle evidence would
+    # prematurely abort later independent tests; it cannot grant release.
+    structural_command = (
+        'python3 scripts/release_go_gate.py . --structural-only '
+        '--json "$RUNNER_TEMP/release-go-gate.json"'
+    )
+    structural_line = "          " + structural_command + "\n"
+    if body.count(structural_line) != 1:
+        raise AssertionError("RELEASE_BLOCKED: structural-only gate missing or spoofed")
+    if re.search(r"(?m)^          python3 scripts/release_go_gate.py (?!.*--structural-only)", body):
+        raise AssertionError("RELEASE_BLOCKED: non-structural GO gate inside transport preflight")
+
     physical_match = re.search(
         r"(?m)^          " + re.escape(physical_command) + r"[ \t]*$", body
     )
@@ -215,6 +228,20 @@ class ReleasePreflightScopeTest(unittest.TestCase):
         )
         with self.assertRaisesRegex(AssertionError, "GO-gate artifact"):
             require_manual_preflight(spoof)
+
+    def test_structural_preflight_mode_cannot_be_removed_or_echoed(self):
+        live = ('          python3 scripts/release_go_gate.py . --structural-only '
+                '--json "$RUNNER_TEMP/release-go-gate.json"\n')
+        self.assertIn(live, self.workflow)
+        for forged in (
+            live.replace(" --structural-only", ""),
+            live.replace("python3 ", "echo python3 "),
+            live.replace("python3 ", "# python3 "),
+        ):
+            with self.subTest(forged=forged.strip()):
+                modified = self.workflow.replace(live, forged, 1)
+                with self.assertRaisesRegex(AssertionError, "structural-only gate"):
+                    require_manual_preflight(modified)
 
     def test_negative_guard_rejects_new_automatic_push_and_pr(self):
         for trigger in ("push", "pull_request", "schedule"):
