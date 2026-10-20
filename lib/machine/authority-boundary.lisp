@@ -1,12 +1,12 @@
-; #150/#211 — one-way authority boundary for machine/backend data.
+; Межа повноважень між семантикою СЕНС та машинним виконанням.
+; Машинне представлення походить від мовного значення, а не навпаки.
+; Відомості про процесор, набори інструкцій, регістри, кодування
+; та двійковий інтерфейс виклику описують лише способи виконання.
+; Вони не можуть призначати назви, координати чи закони функцій.
 ;
-; Lisp semantics may be projected into machine representation. Machine facts
-; may describe CPU capabilities, instruction forms, registers, encodings and
-; ABI details, but none of those facts may allocate/rename language meaning or
-; become their own semantic answer key.
-;
-; This file is Lisp-owned policy data. Host tooling may transport and enforce
-; it, but the authority direction and prohibitions are stated here.
+; Це декларативна політика, якою володіє мовний рівень СЕНС.
+; Зовнішні засоби можуть передавати та перевіряти її виконання,
+; але не мають права змінювати напрям семантичної влади.
 
 (machine-authority-boundary/1
   (semantic-authority language-contract.lisp+ratified-domain-laws)
@@ -21,8 +21,8 @@
   (semantic-id-from-cpu-profile forbidden)
   (peer-surface-from-machine forbidden)
 
-  ; #211 anti-hybrid hardening. A machine/native observation may verify a
-  ; realization but may not define the language result it is compared against.
+  ; Машинне спостереження підтверджує реалізацію, але не встановлює
+  ; очікуваного мовного результату для власного порівняння.
   (machine-semantic-answer-key forbidden)
   (native-only-semantic-witness forbidden)
   (independent-semantic-witness required)
