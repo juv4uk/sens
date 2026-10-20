@@ -318,7 +318,7 @@
 | `lib/forward.lisp` | function | `map-apply-head` | unreviewed |
 | `lib/forward.lisp` | function | `fire-rule-multi` | unreviewed |
 | `lib/forward.lisp` | function | `fire-rules-multi` | unreviewed |
-| `lib/forward.lisp` | function | `run-multi` | unreviewed |
+| `lib/forward.lisp` | function | `виконати-багатоваріантне-виведення` | unreviewed |
 | `lib/fs.lisp` | function | `read-file` | unreviewed |
 | `lib/fs.lisp` | function | `write-file` | unreviewed |
 | `lib/guard.lisp` | function | `guard-decision?` | unreviewed |
