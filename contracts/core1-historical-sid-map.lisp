@@ -1,32 +1,34 @@
-; Core1 SID -> historical Lisp mechanism comparison.
+; Порівняння історичних кодів SID першого ядра з механізмами Ліспу.
 ;
-; Semantic source: the first Lisps of McCarthy (1960) and Lisp 1.5 (1962).
-; Our only surface difference: English predicates carry `?` (owner, #1443).
-; Authority: the SENS code (Sens8) owns identity; a historical name never
-; overrides a code. New codes for historical functions are an owner decision.
+; Семантичні першоджерела: ранній Лісп Маккарті (1960) та Lisp 1.5 (1962).
+; Відмінність написання: англійські назви предикатів завершуються знаком `?`
+; за рішенням власника (#1443).
+; Історично тотожність визначав код SENS (Sens8), а не назва.
+; Нові коди для історичних функцій вимагають рішення власника.
+; Цей контракт фіксує історичне походження, а не чинну драбину Д1–Д10.
 ;
-; SID identifies the operation. The selected Core profile owns the law/result
-; domain. Core1 uses the historical T/NIL-oriented law where applicable.
-; Core4-only result records such as identity-relation/structural-kind are
-; outside this file's profile and are not projected here.
+; SID визначав операцію. Обраний профіль ядра встановлював закон
+; і домен результату. Перше ядро за потреби застосовує історичні T/NIL.
+; Записи результатів четвертого ядра, зокрема identity-relation і
+; structural-kind, тут не припускаються і не проєктуються.
 ;
-; A row is:
+; Формат рядка:
 ;   (row SID my-lisp-name historical-name source fit core1-status)
 ;
-; fit:
-;   direct                 historical mechanism is native to the Core1 profile
-;   value-adapter          representation/surface adaptation only; Core1 law is unchanged
-;   closure-adapter        historical FUNCTION/FUNARG supplies the Core1 closure mechanism
-;   surface-adapter        historical surface/calling convention differs
-;   profile-support        historical evaluator helper supports Core1 but is not a public identity
+; Значення поля fit:
+;   direct                 механізм безпосередньо належить першому ядру
+;   value-adapter          змінюється лише подання; закон не змінюється
+;   closure-adapter        замикання першого ядра надають FUNCTION/FUNARG
+;   surface-adapter        відрізняється написання або спосіб виклику
+;   profile-support        внутрішній допоміжний механізм, не публічна тотожність
 ;
-; core1-status:
-;   admitted               used by the current Core1 bootstrap
-;   support                internal mechanism used behind admitted Core1 behavior
-;   available-not-admitted historically present, but not required by the current bootstrap
+; Значення поля core1-status:
+;   admitted               застосовується під час чинного початкового завантаження
+;   support                внутрішній механізм для допущеної поведінки
+;   available-not-admitted наявний історично, але нині не потрібний
 ;
-; This file compares identities/mechanisms. It does NOT declare semantic equivalence
-; merely because two names look alike.
+; Таблиця лише зіставляє тотожності та механізми. Подібність написань
+; НЕ встановлює семантичної рівносильності.
 
 (core1-historical-sid-map/1
   (authority
@@ -53,7 +55,7 @@
     ; (раніше — механізм без SID). Ядро mccarthy-eval 6031f926 диспетчеризує
     ; LABEL за кодом 10101010; Core1 (lib/core1.lisp) записаний цим кодом.
     (row 10101010 label LABEL mccarthy-1960 direct admitted)
-    ; #1443: functions of McCarthy 1960 §3d, defined in lib/core.lisp.
+    ; #1443: функції з праці Маккарті (1960, §3d), визначені в lib/core.lisp.
     (row 10101011 null? NULL mccarthy-1960 direct available-not-admitted)
     (row 10101100 subst SUBST mccarthy-1960 direct available-not-admitted)
     (row 10101101 sublis SUBLIS mccarthy-1960 direct available-not-admitted)
@@ -76,7 +78,7 @@
     (row 00101000 length LENGTH lisp15-1962 direct available-not-admitted)
     (row 00101001 append APPEND mccarthy-1960 direct support)
     (row 00101010 reverse REVERSE lisp15-1962 direct available-not-admitted)
-    ; member? is also McCarthy 1960 `among` (not in the pinned evidence by that name).
+    ; member? відповідає також назві `among` у Маккарті (1960), але такої назви немає в закріпленому доказі.
     (row 00101100 member? MEMBER lisp15-1962 direct available-not-admitted)
     (row 00101101 assoc assoc mccarthy-1960 profile-support support)
     (row 00101110 pair PAIR mccarthy-1960 profile-support support)
