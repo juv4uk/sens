@@ -128,7 +128,7 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
                 "--report",
                 str(report),
                 # These four SHA-pinned fixtures are explicitly historical
-                # SID8; AUTO must otherwise block before the binder evidence.
+                # сід8; AUTO must otherwise block before the binder evidence.
                 "--source-era", "legacy",
             ]
             run = subprocess.run(
@@ -149,7 +149,7 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
 
             # The source SHA and its dynamic DEFINE/references are pinned in
             # test_four_dynamic_sources_are_real_sha_pinned_executable_bindings.
-            # When a predecessor (for example a legacy SID8 successor) becomes
+            # When a predecessor (for example a legacy сід8 successor) becomes
             # lawfully resolved, the *first* reported empty can change. Never
             # confuse that change with approved lexical/dynamic semantics.
             expected_paths = {Path(row["path"]).name for row in self.dynamic}
