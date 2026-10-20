@@ -185,6 +185,10 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
         "status": "ready",
         "physical_producer": "ZIG_ATTESTED" if zig_binary is not None else "REFERENCE_PREVIEW_ONLY",
         "physical_codec": "T5M",
+        "view": dest.with_suffix("").as_posix(),
+        "view_sha256": hashlib.sha256(
+            (" ".join(words) + "\n").encode("ascii")
+        ).hexdigest(),
         "semantic_oracle": "NOT_VERIFIED",
     }
 
@@ -215,32 +219,44 @@ def verify_rust_d2(payload: bytes, words: list[str], reader: Path) -> None:
 
 
 def publish_batch(staged: list[tuple[Path, bytes]], output_root: Path) -> None:
+    """Опублікувати .sens та точний бітовий перегляд одним відкотним пакетом.
+
+    Відновлюються точні слова програми, але не коментарі Lisp.
+    """
     created: list[Path] = []
     try:
         for rel, payload in staged:
+            if rel.suffix != ".sens":
+                raise engine.SensT5Error("expected physical .sens destination")
             target = output_root / rel
+            view = target.with_suffix("")
             target.parent.mkdir(parents=True, exist_ok=True)
-            if target.exists() or target.is_symlink():
+            if target.parent.is_symlink():
+                raise engine.SensT5Error("symlink output directory is forbidden")
+            if (target.exists() or target.is_symlink()
+                    or view.exists() or view.is_symlink()):
                 raise engine.SensT5Error(
-                    f"target already exists; refusing overwrite: {rel.as_posix()}"
+                    f"physical or view output exists; refusing overwrite: {rel.as_posix()}"
                 )
-
-            fd, tmp_name = tempfile.mkstemp(
-                prefix=".sens-t5m-", suffix=".tmp", dir=target.parent
-            )
-            tmp = Path(tmp_name)
-            try:
-                with os.fdopen(fd, "wb") as handle:
-                    handle.write(payload)
-                    handle.flush()
-                    os.fsync(handle.fileno())
-                os.link(tmp, target)
-                created.append(target)
-            finally:
-                tmp.unlink(missing_ok=True)
+            words = engine.decode_t5m_bytes(payload)
+            readable = (" ".join(words) + "\n").encode("ascii")
+            for destination, contents in ((target, payload), (view, readable)):
+                fd, tmp_name = tempfile.mkstemp(
+                    prefix=".sens-t5m-", suffix=".tmp", dir=target.parent
+                )
+                temporary = Path(tmp_name)
+                try:
+                    with os.fdopen(fd, "wb") as handle:
+                        handle.write(contents)
+                        handle.flush()
+                        os.fsync(handle.fileno())
+                    os.link(temporary, destination)
+                    created.append(destination)
+                finally:
+                    temporary.unlink(missing_ok=True)
     except Exception:
-        for target in reversed(created):
-            target.unlink(missing_ok=True)
+        for output in reversed(created):
+            output.unlink(missing_ok=True)
         raise
 
 
@@ -298,12 +314,14 @@ def main() -> int:
             destinations.add(dest)
 
             target = output / dest
-            if target.exists() or target.is_symlink():
+            view = target.with_suffix("")
+            if (target.exists() or target.is_symlink()
+                    or view.exists() or view.is_symlink()):
                 rows.append({
                     "path": rel.as_posix(),
                     "output": dest.as_posix(),
                     "status": "blocked",
-                    "reason": "target already exists; refusing overwrite",
+                    "reason": "target or view already exists; refusing overwrite",
                 })
                 continue
 
