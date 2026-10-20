@@ -1,7 +1,7 @@
-/* Спільний бенчмарк T5M-3: асемблер проти Zig, C і (опційно) Rust.
+/* Спільний бенчмарк T5M (дефолтний): асемблер проти Zig, C і (опційно) Rust.
    Збірка без Rust:  zig cc -O2 bench.c t5m_pack.o t5m_ref.o -o bench
-   Збірка з Rust:    zig cc -O2 -DHAVE_RUST bench.c t5m_pack.o t5m_ref.o librust_t5m_ref.a -o bench
-   Усі реалізації роблять те саме: 15 тритів → 3 байти LE, value = value*3 + trit. */
+   Збірка з Rust:    zig cc -O2 -DHAVE_RUST bench.c t5m_pack.o t5m_ref.o rust_t5m_ref.o -o bench
+   Усі реалізації роблять те саме: 5 трітів → 1 байт (3^5=243<256), value = value*3 + trit. */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,23 +19,20 @@ extern void rust_t5m_unpack(const uint8_t *bytes, size_t n_groups, uint8_t *trit
 
 static size_t c_pack(const uint8_t *trits, size_t n, uint8_t *out) {
     size_t o = 0;
-    for (size_t i = 0; i < n; i += 15) {
+    for (size_t i = 0; i < n; i += 5) {
         uint32_t v = 0;
-        for (size_t j = 0; j < 15; j++) v = v * 3 + trits[i + j];
+        for (size_t j = 0; j < 5; j++) v = v * 3 + trits[i + j];
         out[o] = (uint8_t)v;
-        out[o + 1] = (uint8_t)(v >> 8);
-        out[o + 2] = (uint8_t)(v >> 16);
-        o += 3;
+        o += 1;
     }
     return o;
 }
 
 static void c_unpack(const uint8_t *bytes, size_t n_groups, uint8_t *trits) {
     for (size_t g = 0; g < n_groups; g++) {
-        uint32_t v = (uint32_t)bytes[g * 3] | ((uint32_t)bytes[g * 3 + 1] << 8) |
-                     ((uint32_t)bytes[g * 3 + 2] << 16);
-        for (size_t j = 15; j-- > 0;) {
-            trits[g * 15 + j] = (uint8_t)(v % 3);
+        uint32_t v = (uint32_t)bytes[g];
+        for (size_t j = 5; j-- > 0;) {
+            trits[g * 5 + j] = (uint8_t)(v % 3);
             v /= 3;
         }
     }
@@ -48,12 +45,12 @@ static double now_s(void) {
 }
 
 int main(void) {
-    const size_t n = 15 * 200000; /* кратне 15 */
-    const size_t groups = n / 15;
-    uint8_t *trits = malloc(n), *pkbuf = malloc(groups * 3), *unp = malloc(n);
-    uint8_t *p1 = malloc(groups * 3), *p2 = malloc(groups * 3), *p3 = malloc(groups * 3);
+    const size_t n = 5 * 200000; /* кратне 5 */
+    const size_t groups = n / 5;
+    uint8_t *trits = malloc(n), *pkbuf = malloc(groups), *unp = malloc(n);
+    uint8_t *p1 = malloc(groups), *p2 = malloc(groups), *p3 = malloc(groups);
 #ifdef HAVE_RUST
-    uint8_t *p4 = malloc(groups * 3);
+    uint8_t *p4 = malloc(groups);
 #endif
     if (!trits || !pkbuf || !unp || !p1 || !p2 || !p3) return 2;
 
@@ -68,10 +65,10 @@ int main(void) {
     size_t cb = c_pack(trits, n, p3);
     printf("груп=%zu asm_байт=%llu zig_байт=%zu c_байт=%zu | pack збіг: asm/zig=%d asm/c=%d\n",
            groups, (unsigned long long)ab, zb, cb,
-           memcmp(p1, p2, groups * 3) == 0, memcmp(p1, p3, groups * 3) == 0);
+           memcmp(p1, p2, groups) == 0, memcmp(p1, p3, groups) == 0);
 #ifdef HAVE_RUST
     size_t rb = rust_t5m_pack(trits, n, p4);
-    printf("rust_байт=%zu | pack збіг: asm/rust=%d\n", rb, memcmp(p1, p4, groups * 3) == 0);
+    printf("rust_байт=%zu | pack збіг: asm/rust=%d\n", rb, memcmp(p1, p4, groups) == 0);
 #endif
 
     sens_t5m_unpack(p1, groups, unp);
