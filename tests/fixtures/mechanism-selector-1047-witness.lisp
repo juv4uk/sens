@@ -1,53 +1,50 @@
-; #1047 — Lisp-owned selector witness.
-; Expected routing lives here, not in shell/Rust.
-; Ukrainian projection only.
+; Свідчення #1047: добір механізму належить семантиці СЕНС.
+; Очікувані маршрути визначає сам файл, а не оболонка чи Rust.
+; Виконавчі назви перенесено на українські функції реєстру і добору.
+; Протокольні мітки та свідомо некоректні дані залишаються незмінними.
 
-(load "lib/core.lisp")
-(load "lib/surface/semantic-registry-api.lisp")
-(load "lib/mechanism-selector.lisp")
-
-(визначити mechanism-selector-1047-witness
+(визначити свідок-вибору-механізму-1047
   (функція ()
-    (нехай ((atom-sid (semantic-registry-id (як-є atom?)))
-           (plus-sid (semantic-registry-id (як-є +)))
-           (selected (mechanism-select atom-sid (як-є evaluator)))
-           (plus-prolog (mechanism-select plus-sid (як-є prolog)))
-           (missing (mechanism-select atom-sid (як-є prolog)))
-           (no-route (mechanism-select 255 (як-є evaluator)))
-           (quoted-shadow (mechanism-select "00001100" (як-є prolog))))
+    (нехай ((ідентичність-атома (отримати-ідентичність-семантичного-реєстру (як-є atom?)))
+           (ідентичність-додавання (отримати-ідентичність-семантичного-реєстру (як-є +)))
+           (обраний-механізм (вибрати-механізм ідентичність-атома (як-є evaluator)))
+           (додавання-у-пролозі (вибрати-механізм ідентичність-додавання (як-є prolog)))
+           (відсутній-механізм (вибрати-механізм ідентичність-атома (як-є prolog)))
+           (маршрут-відсутній (вибрати-механізм 255 (як-є evaluator)))
+           (текстовий-двійник (вибрати-механізм "00001100" (як-є prolog))))
       (за-умовою
         ((однакові?
-           selected
+           обраний-механізм
            (список
              (як-є mechanism-selected)
-             atom-sid
+             ідентичність-атома
              (як-є evaluator)
              (як-є atom-primitive)))
          (за-умовою
            ((однакові?
-              plus-prolog
+              додавання-у-пролозі
               (список
                 (як-є mechanism-selected)
-                plus-sid
+                ідентичність-додавання
                 (як-є prolog)
                 (як-є bounded-exact-add)))
             (за-умовою
               ((однакові?
-                 missing
+                 відсутній-механізм
                  (список
                    (як-є mechanism-unavailable)
-                   atom-sid
+                   ідентичність-атома
                    (як-є prolog)))
                (за-умовою
                  ((однакові?
-                    no-route
+                    маршрут-відсутній
                     (список
                       (як-є mechanism-unavailable)
                       255
                       (як-є evaluator)))
                   (за-умовою
                     ((однакові?
-                       quoted-shadow
+                       текстовий-двійник
                        (список
                          (як-є mechanism-selection-failure)
                          (як-є sid-not-in-function-table)
@@ -59,4 +56,4 @@
            (так (перше (як-є ())))))
         (так (перше (як-є ())))))))
 
-(mechanism-selector-1047-witness)
+(свідок-вибору-механізму-1047)
