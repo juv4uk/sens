@@ -18,18 +18,18 @@
 ; W8:00000101/00101111/00110000 — лише архівне походження;
 ; чинний закон: D3:100 CAR, D4:1001 CADR, D5:10011 CADDR.
 ; Функції є похідними SENS-LAMBDA, без історичного byte dispatch.
-(визначити fs-objects
+(визначити фс-об'єкти
   (функція (fs) (перше fs)))
-(визначити fs-bindings
+(визначити фс-зв'язки
   (функція (fs) (друге fs)))
-(визначити fs-revision
+(визначити фс-ревізія
   (функція (fs) (третє fs)))
 
-(визначити fs-empty
+(визначити фс-порожній
   (функція ()
     (список (порожній-вміст-сховище) мапа-порожній 0)))
 
-(визначити fs-root-address
+(визначити фс-корінь-адреса
   (функція (fs)
     (знання-вміст-адреса
       (список (як-є wsm-fs-root)
@@ -39,7 +39,7 @@
 ; retain the old root, enabling immutable branching and rollback.
 ; fs-write повертає (new-fs content-address); викликач сам вирішує, чи
 ; зберігати старий корінь, тому branching і rollback лишаються можливими.
-(визначити fs-write
+(визначити фс-записати
   (функція (fs name value)
     (нехай-похідне ((address (знання-вміст-адреса value)))
       (список
@@ -51,7 +51,7 @@
 
 ; fs-read returns (found value address) or (not-found name).
 ; fs-read повертає (found value address) або (not-found name).
-(визначити fs-read
+(визначити фс-читати
   (функція (fs name)
     (нехай-похідне ((binding (внутрішня-мапа-отримати name (фс-зв'язки fs))))
       (за-умовою
@@ -71,11 +71,11 @@
                       (перше (вміст-сховище-отримати (фс-об'єкти fs) address))
                       address)))))))))
 
-(визначити fs-list
+(визначити фс-список
   (функція (fs)
     (внутрішня-мапа-список (фс-зв'язки fs))))
 
-(визначити fs-contains?
+(визначити фс-містить?
   (функція (fs name)
     (хибне? (атом? (внутрішня-мапа-отримати name (фс-зв'язки fs))))))
 
@@ -84,7 +84,7 @@
 ; Версіоновані data-only оболонки є звичайними alist і ніколи не виконуються.
 (визначити *fs-format-version* (як-є (ні 1)))
 
-(визначити fs-object-package
+(визначити фс-об'єкт-пакет
   (функція (value)
     (список
       (сполучити (як-є format) (як-є wsm-fs-object))
@@ -92,7 +92,7 @@
       (сполучити (як-є address) (знання-вміст-адреса value))
       (сполучити (як-є value) value))))
 
-(визначити fs-root-package
+(визначити фс-корінь-пакет
   (функція (fs)
     (список
       (сполучити (як-є format) (як-є wsm-fs-root))
@@ -101,7 +101,7 @@
       (сполучити (як-є bindings) (внутрішня-мапа-список (фс-зв'язки fs)))
       (сполучити (як-є objects) (фс-об'єкт-адреси (внутрішня-мапа-список (фс-об'єкти fs)))))))
 
-(визначити fs-object-addresses
+(визначити фс-об'єкт-адреси
   (функція (entries)
     (за-умовою
       ((порожній? entries) (як-є ()))
@@ -527,23 +527,23 @@
 ; Ratified D9 exact-width FS surfaces; donor closures above own semantics.
 ; The file system here is immutable SENS data, not a host syscall or new opcode.
 ; D9:001010000
-(визначити фс-об'єкти fs-objects)
+(визначити fs-objects фс-об'єкти)
 ; D9:010000001
-(визначити фс-зв'язки fs-bindings)
+(визначити fs-bindings фс-зв'язки)
 ; D9:010010101
-(визначити фс-ревізія fs-revision)
+(визначити fs-revision фс-ревізія)
 ; D9:001011011
-(визначити фс-порожній fs-empty)
+(визначити fs-empty фс-порожній)
 ; D9:010001100
-(визначити фс-корінь-адреса fs-root-address)
+(визначити fs-root-address фс-корінь-адреса)
 ; D9:010010110
-(визначити фс-список fs-list)
+(визначити fs-list фс-список)
 ; D9:010100001
-(визначити фс-містить? fs-contains?)
+(визначити fs-contains? фс-містить?)
 ; D9:010100010
-(визначити фс-об'єкт-пакет fs-object-package)
+(визначити fs-object-package фс-об'єкт-пакет)
 ; D9:001011111
-(визначити фс-корінь-пакет fs-root-package)
+(визначити fs-root-package фс-корінь-пакет)
 ; D9:001101011
 (визначити фс-журнал-подія fs-journal-event)
 ; D9:001011001
@@ -554,11 +554,11 @@
 ; D9 canonical Ukrainian SENS aliases for persistent functional FS laws.
 ; No unqualified domain conversion, new machine mechanisms or host I/O path.
 ; D9:010000010
-(визначити фс-записати fs-write)
+(визначити fs-write фс-записати)
 ; D9:010110011
-(визначити фс-читати fs-read)
+(визначити fs-read фс-читати)
 ; D9:001010100
-(визначити фс-об'єкт-адреси fs-object-addresses)
+(визначити fs-object-addresses фс-об'єкт-адреси)
 ; D9:010101111
 (визначити фс-пакет-поле fs-package-field)
 ; D9:010010111
