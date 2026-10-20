@@ -67,11 +67,11 @@ fn structural_car_profile_is_projected_from_the_existing_semantic_witness() {
     let mut session = profile_session();
 
     let semantic_forms = eval_value("(знизити-складену-пару-до-машинних-форм 2 3)", &mut session);
-    let profile_forms = eval_value("(x86-minimal-structural-car-forms 2 3)", &mut session);
+    let profile_forms = eval_value("(мінімальна-машина-перше-пари-форми 2 3)", &mut session);
     assert_eq!(profile_forms, semantic_forms);
 
     let families = eval_value(
-        "(x86-minimal-structural-car-observed-families 2 3)",
+        "(мінімальна-машина-перше-пари-спостережені-сімейства 2 3)",
         &mut session,
     );
     assert_eq!(
@@ -80,13 +80,13 @@ fn structural_car_profile_is_projected_from_the_existing_semantic_witness() {
     );
 
     let dependency_families = eval_value(
-        "(x86-minimal-structural-car-dependency-families)",
+        "(мінімальна-машина-перше-пари-сімейства-залежностей)",
         &mut session,
     );
     assert_eq!(dependency_families, families);
 
     let classes = eval_value(
-        "(x86-minimal-structural-car-dependency-classes)",
+        "(мінімальна-машина-перше-пари-класи-залежностей)",
         &mut session,
     );
     assert_eq!(
@@ -121,9 +121,9 @@ fn structural_car_profile_has_typed_177_atom_projections_for_every_required_fami
 #[test]
 fn structural_car_profile_reaches_bytes_only_through_closed_admission() {
     let mut session = profile_session();
-    let forms = eval_value("(x86-minimal-structural-car-forms 2 3)", &mut session);
+    let forms = eval_value("(мінімальна-машина-перше-пари-форми 2 3)", &mut session);
     let encoded = eval_value(
-        "(x86-encode-admitted-program-or-reject (x86-minimal-structural-car-forms 2 3))",
+        "(x86-encode-admitted-program-or-reject (мінімальна-машина-перше-пари-форми 2 3))",
         &mut session,
     );
 
@@ -158,18 +158,18 @@ fn bounded_cond_profile_matches_lisp_owned_machine_lowering() {
     );
 
     let profile_forms = eval_value(
-        "(x86-minimal-eq-cond-forms 2 3 111 222)",
+        "(мінімальна-машина-рівність-умова-форми 2 3 111 222)",
         &mut session,
     );
     assert_eq!(profile_forms, semantic_forms);
 
     let families = eval_value(
-        "(x86-minimal-eq-cond-observed-families 2 3 111 222)",
+        "(мінімальна-машина-рівність-умова-спостережені-сімейства 2 3 111 222)",
         &mut session,
     );
     assert_eq!(families, "(mov-r64-imm64 cmp-r64-r64 jnz-rel8 ret)");
     assert_eq!(
-        eval_value("(x86-minimal-eq-cond-dependency-families)", &mut session),
+        eval_value("(мінімальна-машина-рівність-умова-сімейства-залежностей)", &mut session),
         families
     );
 }
@@ -189,11 +189,11 @@ fn bounded_cond_profile_has_typed_jnz_atom_and_fails_closed_outside_disp8() {
 fn bounded_cond_profile_reaches_bytes_only_through_closed_admission_and_round_trips() {
     let mut session = profile_session();
     let forms = eval_value(
-        "(x86-minimal-eq-cond-forms 2 3 111 222)",
+        "(мінімальна-машина-рівність-умова-форми 2 3 111 222)",
         &mut session,
     );
     let encoded = eval_value(
-        "(x86-encode-admitted-program-or-reject (x86-minimal-eq-cond-forms 2 3 111 222))",
+        "(x86-encode-admitted-program-or-reject (мінімальна-машина-рівність-умова-форми 2 3 111 222))",
         &mut session,
     );
 
