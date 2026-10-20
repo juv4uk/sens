@@ -1,6 +1,7 @@
-; #216 — Lisp-owned exact-Q binary decision witnesses.
-; Expected kind/magnitude and domain status live here; Rust only transports
-; the actual runtime kind/rendering to the Lisp verifier.
+; Свідчення #216: двійкові рішення в області точної арифметики Q.
+; Очікуваний вид результату, значення та стан домену визначає Lisp СЕНС.
+; Rust тільки переносить фактичний вид і текстове подання результату
+; до мовної перевірки, не створюючи нового семантичного вердикту.
 
 ((expr . "(= 1/3 2/6)")
  (expected-kind . rational)
@@ -32,7 +33,8 @@
  (decision . yes)
  (active . t))
 
-; Inexact values are outside the absolute exact-Q binary layer.
+; Неточні числа не належать області точних Q-операндів.
+; Очікувані форми відмови збережено як історичні тестові дані.
 ((expr . "(= 3.0 3.0)")
  (expected-kind . empty-list)
  (expected-render . "()")
