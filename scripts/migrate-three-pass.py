@@ -1206,6 +1206,14 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
                     if getattr(resolver, "source_surface", "default") in ("ук", "укр")
                     else r"[+-]?(?:\d+\.\d+|\.\d+)"
                 )
+                # W8-голова не є десятковим D24+ числом:
+                # старий SID8 не можна ототожнювати з чинним D8.
+                if re.fullmatch(r"[01]{8}", head_text):
+                    raise MigrationError(
+                        "ambiguous eight-bit SID8/D8 call head: "
+                        "use a ratified Ukrainian executable name",
+                        item.tok,
+                    )
                 if (re.fullmatch(r"[+-]?\d+", head_text)
                         or re.fullmatch(numeric_head_pattern, head_text)):
                     raise MigrationError(
