@@ -33,7 +33,7 @@ fn clips_import_file_imports_a_second_real_external_clp_file_correctly() {
     // rules imported with clean condition lists (no stray "" or declare)
     // is enough to prove the fix, without pinning all 21 verbatim.
     let source = r#"
-        (clips-import-file "../../tests/fixtures/auto-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/auto-external.clp")
     "#;
     let imported = eval_import(source);
     assert!(
@@ -54,7 +54,7 @@ fn clips_import_file_imports_a_real_external_clp_file_from_the_official_clips_ex
     // interoperability test: does our importer handle a file we didn't
     // write, not tailored to our importer's coverage?
     let source = r#"
-        (clips-import-file "../../tests/fixtures/wordgame-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/wordgame-external.clp")
     "#;
     // All twenty facts from startup's single multi-fact assert import
     // correctly, plus generate-combinations' single-fact rule; find-solution
@@ -73,7 +73,7 @@ fn clips_import_file_reads_and_imports_a_real_clp_file() {
     // caller-supplied quoted literal — the actual "connect to old
     // symbolic-AI systems" tool this whole file exists to build.
     let source = r#"
-        (def imported (clips-import-file "../../tests/fixtures/astronomy.clp"))
+        (def imported (кліпс-імпорт-файл "../../tests/fixtures/astronomy.clp"))
         (defmodule imported-astro imported)
         (forward-in (quote imported-astro))
     "#;
@@ -91,7 +91,7 @@ fn clips_import_file_imports_a_third_real_external_clp_file_with_module_qualifie
     // to use CLIPS's valueless-multislot condition shorthand — both bugs
     // above were found through this exact file.
     let source = r#"
-        (clips-import-file "../../tests/fixtures/wine-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/wine-external.clp")
     "#;
     let imported = eval_import(source);
     assert!(
@@ -114,7 +114,7 @@ fn clips_import_file_imports_a_fourth_real_external_clp_file_with_a_large_deffac
     // facts, enough non-tail recursion depth (compounded across all 37 of
     // the file's top-level forms) to blow the stack before the fix above.
     let source = r#"
-        (clips-import-file "../../tests/fixtures/animal-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/animal-external.clp")
     "#;
     let imported = eval_import(source);
     assert!(
@@ -144,7 +144,7 @@ fn clips_import_file_imports_a_fifth_real_external_clp_file_with_mostly_disquali
     // guest data separately) that exercises almost every disqualification
     // rule at once without crashing or importing anything incorrect.
     let source = r#"
-        (clips-import-file "../../tests/fixtures/manners-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/manners-external.clp")
     "#;
     assert_eq!(
         eval_import(source),
@@ -170,7 +170,7 @@ fn clips_import_file_imports_a_sixth_real_external_clp_file_with_duplicate_and_e
     // `MAIN::status`/`MAIN::opposites`, exercising the Step 17 prefix fix
     // again) survive.
     let source = r#"
-        (clips-import-file "../../tests/fixtures/dilemma1-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/dilemma1-external.clp")
     "#;
     assert_eq!(
         eval_import(source),
@@ -204,7 +204,7 @@ fn clips_import_file_imports_a_seventh_real_external_clp_file_at_scale() {
     // `print-solution` and `generate-combinations` both use `retract` and
     // correctly contribute no clauses.
     let source = r#"
-        (clips-import-file "../../tests/fixtures/zebra-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/zebra-external.clp")
     "#;
     let imported = eval_import(source);
     assert!(
@@ -239,7 +239,7 @@ fn clips_import_file_imports_an_eighth_real_external_clp_file_with_bare_tilde_co
     // correctly disqualifies, every pure-assert rule (all with an empty
     // `""` docstring, per Step 16) correctly survives.
     let source = r#"
-        (clips-import-file "../../tests/fixtures/mab-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/mab-external.clp")
     "#;
     let imported = eval_import(source);
     assert!(
@@ -272,7 +272,7 @@ fn clips_import_file_imports_a_ninth_real_external_clp_file_with_a_real_exists_c
     // (already-known limitations, not bugs) or surviving as genuine
     // working clauses, including the one with `exists` itself.
     let source = r#"
-        (clips-import-file "../../tests/fixtures/sudoku-external.clp")
+        (кліпс-імпорт-файл "../../tests/fixtures/sudoku-external.clp")
     "#;
     let imported = eval_import(source);
     assert!(
