@@ -1,5 +1,5 @@
-; Synthetic GREEN for #1347.
-; Rust may be mentioned as evidence/observation without becoming semantic authority.
+; Синтетичний GREEN для #1347.
+; Rust можна згадувати як свідчення/спостереження, не роблячи його семантичною владою.
 
 (evidence
   (path "crates/sens/src/eval/canon.rs")
