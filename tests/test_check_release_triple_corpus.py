@@ -22,6 +22,9 @@ def ledger() -> dict:
     return {
         "schema": "sens-t5-triplet-inventory/v1",
         "failed_required": [],
+        "strict": True,
+        "status": "PHYSICAL_VIEW_ONLY_UK_PENDING",
+        "unpaired_lisp_sources": [],
         "summary": {
             "physical_pairs_seen": 1,
             "physical_blocked": 0,
@@ -30,12 +33,18 @@ def ledger() -> dict:
             "view_invalid_or_unsafe": 0,
             "uk_oracle_verified": 0,
             "release_admitted": 0,
+            "original_executable_migrations_certified": 0,
+            "lisp_sources_seen": 1,
+            "lisp_with_physical": 1,
+            "lisp_without_physical": 0,
         },
         "files": [{
             "sens": "приклад.sens",
+            "source": "приклад.lisp",
             "view_status": "PHYSICAL_VIEW_PASS",
             "uk_oracle": "NOT_VERIFIED",
             "release_admitted": False,
+            "original_executable_migration_credit": 0,
         }],
     }
 
@@ -109,6 +118,46 @@ class ReleaseTripleCorpusTests(unittest.TestCase):
         report["failed_required"] = ["приклад.sens"]
         self.write(report)
         self.assertEqual(self.run_checker()[0], 1)
+
+    def test_missing_lisp_without_sens_is_real_release_debt(self) -> None:
+        report = ledger()
+        report["status"] = "BLOCKED"
+        report["summary"]["lisp_sources_seen"] = 2
+        report["summary"]["lisp_without_physical"] = 1
+        report["unpaired_lisp_sources"] = ["неперетворена-програма.lisp"]
+        self.write(report)
+        code, output = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("RELEASE_BLOCKED", output)
+
+    def test_source_inventory_cannot_hide_missing_lisp(self) -> None:
+        for broken in (
+            {"lisp_sources_seen": 2},
+            {"lisp_without_physical": 1},
+            {"lisp_with_physical": 2},
+        ):
+            with self.subTest(broken=broken):
+                report = ledger()
+                report["summary"].update(broken)
+                self.write(report)
+                code, output = self.run_checker()
+                self.assertEqual(code, 1)
+                self.assertIn("contradict per-file evidence", output)
+
+    def test_duplicate_or_escaping_source_path_rejected(self) -> None:
+        for files in (
+            ["a.lisp", "a.lisp"],
+            ["../outside.lisp"],
+            ["/outside.lisp"],
+            ["not-a-lisp-file"],
+        ):
+            with self.subTest(files=files):
+                report = ledger()
+                report["unpaired_lisp_sources"] = files
+                self.write(report)
+                code, output = self.run_checker()
+                self.assertEqual(code, 1)
+                self.assertIn("RELEASE_BLOCKED", output)
 
     def test_boolean_and_negative_counts_are_not_numbers_of_proofs(self) -> None:
         for count in (True, -1, "1"):
