@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
-"""Strict, transactional three-projection exporter for admitted Ukrainian subset.
+"""Атомарне створення української трійки .lisp / .sens (T5M) / бітовий перегляд.
 
-SOURCE/path/name.lisp (ratified canonical `ук`)
- -> MIRROR/path/name.lisp (byte-for-byte source copy)
- -> MIRROR/path/name.sens (physical five-trit legacy T5; not T5M default)
- -> MIRROR/path/name (one-space bit-word view, one final LF)
-
-No semantic oracle proof is fabricated. Uses existing, bounded Ukrainian
-triplet parser instead of competing with the canonical three-pass migrator.
-Never edits source or writes to master; never overwrites existing destinations.
+.lisp копіюється без змін, але тотожність програми звіряється за точними
+словами та структурою, а не за коментарями чи форматуванням тексту.
+Немає самовільного семантичного допуску, запису в master або перезапису.
 """
 from __future__ import annotations
 
@@ -22,12 +17,12 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import encode_words, decode_bytes, typed_sha256
+from sens_t5_codec import encode_t5m_projection, decode_t5m_bytes, typed_sha256
 from verify_uk_t5_triplet import (
     ProjectionBlocked, canonical_uk_from_words, project_current_uk, verify,
 )
 
-SCHEMA = "sens-uk-t5-three-projection-atomic-preview/v1"
+SCHEMA = "sens-uk-t5m-three-projection-atomic-preview/v2"
 MAX_FILES = 100
 
 
@@ -59,16 +54,16 @@ def attest_source(source: bytes) -> tuple[list[str], bytes, bytes]:
     try:
         text = source.decode("utf-8")
         words = project_current_uk(text)
-        rendered = canonical_uk_from_words(words).encode("utf-8")
-        if rendered != source:
-            raise ProjectionBlocked("source not exact canonical Ukrainian ук projection")
-        physical = encode_words(words)
-        if decode_bytes(physical) != words:
-            raise ProjectionBlocked("T5 exact typed-width roundtrip failed")
+        rendered = canonical_uk_from_words(words)
+        if project_current_uk(rendered) != words:
+            raise ProjectionBlocked("українська проєкція не зберегла програму")
+        physical = encode_t5m_projection(" ".join(words))
+        if decode_t5m_bytes(physical) != words:
+            raise ProjectionBlocked("T5M не зберіг точні слова програми")
     except (UnicodeError, ValueError, RecursionError) as exc:
         if isinstance(exc, ProjectionBlocked):
             raise
-        raise ProjectionBlocked("unproven source representation or invalid T5") from exc
+        raise ProjectionBlocked("недоведений вихідний код або некоректний T5M") from exc
     view = (" ".join(words) + "\n").encode("ascii")
     if not view or b"2" in view:
         raise ProjectionBlocked("invalid human binary view")
@@ -122,7 +117,7 @@ def publish_no_clobber(paths_data: list[tuple[Path, bytes]],
             target.parent.mkdir(parents=True, exist_ok=True)
             no_symlink_destination(mirror, target)
             with tempfile.NamedTemporaryFile(
-                mode="wb", dir=target.parent, prefix=".t5-stage-",
+                mode="wb", dir=target.parent, prefix=".t5m-stage-",
                 suffix=".tmp", delete=False,
             ) as pending:
                 temporary = Path(pending.name)
@@ -179,6 +174,7 @@ def export(root: Path, mirror: Path, report: Path,
                        target_sens=rel.with_suffix(".sens").as_posix(),
                        target_view=rel.with_suffix("").as_posix(),
                        word_count=len(words), physical_bytes=len(physical),
+                       physical_codec="t5m",
                        source_sha256=sha(original), physical_sha256=sha(physical),
                        view_sha256=sha(view), typed_word_sha256=typed_sha256(words))
         except (ProjectionBlocked, OSError, ValueError) as exc:
@@ -199,7 +195,7 @@ def export(root: Path, mirror: Path, report: Path,
                 # Independent existing bounded verifier controls exact 3-way
                 # canonical Ukrainian and byte/view roundtrip after publication.
                 lisp, sens, human = destination_paths(mirror, rel)
-                result = verify(lisp, sens, human)
+                result = verify(lisp, sens, human, codec="t5m")
                 if result["runtime_oracle_admitted_by_this_audit"] is not False:
                     raise ProjectionBlocked("invalid semantic oracle claim")
                 if source.read_bytes() != original:
