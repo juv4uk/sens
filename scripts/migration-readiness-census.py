@@ -63,7 +63,7 @@ def _checked_rows(state: dict, era: str) -> dict[str, dict]:
 def _candidate_class(statuses: dict[str, str]) -> str:
     # A mechanical candidate is NOT an admitted program. Only D2 + semantic
     # oracle proof may promote a candidate to a committed physical .sens pair.
-    # NEW REALITY (owner 2026-10-15): the SID8/Sens8 source-era is retired --
+    # NEW REALITY (owner 2026-10-15): the сід8/сенс8 source-era is retired --
     # there is one scan, not three.
     if statuses["auto"] == "would-write":
         return "mechanical-candidate-needs-oracle"
@@ -79,7 +79,7 @@ def build_report() -> dict:
     """
     with tempfile.TemporaryDirectory(prefix="sens-t5-readiness-") as td:
         work = Path(td)
-        # NEW REALITY (owner 2026-10-15): the SID8/Sens8 source-era is retired;
+        # NEW REALITY (owner 2026-10-15): the сід8/сенс8 source-era is retired;
         # there is one scan, not three. (A/B/C eras are gone.)
         output = work / "physical"
         report_path = work / "migration.json"
