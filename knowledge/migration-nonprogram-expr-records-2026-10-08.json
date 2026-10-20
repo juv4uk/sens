@@ -18,7 +18,7 @@
     },
     {
       "path": "tests/fixtures/conformance.lisp",
-      "git_blob_sha1": "154116b8a75206f6f75f758a1bb0b2f9b858b2d7"
+      "git_blob_sha1": "c7fe4f17a0a3f34d9440bc83b9958d3eaa6ec2ea"
     },
     {
       "path": "tests/fixtures/exact-q-binary-v1.lisp",
@@ -34,7 +34,7 @@
     },
     {
       "path": "tests/fixtures/macro-conformance.lisp",
-      "git_blob_sha1": "2d9d756b65777e26f72510c71493e37e01f7b8bc"
+      "git_blob_sha1": "51c0d38f29ba24bd4d1cf4c3de5f20866f9f204f"
     },
     {
       "path": "tests/fixtures/mathematical-result-v1.lisp",
@@ -82,6 +82,20 @@
       "current_git_blob_sha1": "2cbc35b399600d15cb24d3f4bea196a4a9cc2af1",
       "reviewed_commit": "41fe112b71b0e40f51907bf8467fcd163e10abce",
       "reason": "Owner-requested explicit migration of 19 embedded quoted ATOM/EQ expressions to current exact D3, including a positive/one-bit-mutant binary-SENS pair. Top-level fixture remains a non-executable record envelope, never eligible for automatic physical .sens. Runtime semantic oracle and exact-SHA release CI are still unverified; this is a reviewed source-provenance update, not execution admission."
+    },
+    {
+      "path": "tests/fixtures/conformance.lisp",
+      "previous_git_blob_sha1": "154116b8a75206f6f75f758a1bb0b2f9b858b2d7",
+      "current_git_blob_sha1": "c7fe4f17a0a3f34d9440bc83b9958d3eaa6ec2ea",
+      "reviewed_commit": "Поточний коміт маніфесту",
+      "reason": "Після українізації перевірено, що всі 38 верхньорівневі записи досі мають форму (expr . quoted-source), а не виконуваний Lisp. Оновлено лише SHA походження. Вкладені вирази залишаються separate-unproven; жодного SENS/T5M runtime чи release допуску."
+    },
+    {
+      "path": "tests/fixtures/macro-conformance.lisp",
+      "previous_git_blob_sha1": "2d9d756b65777e26f72510c71493e37e01f7b8bc",
+      "current_git_blob_sha1": "51c0d38f29ba24bd4d1cf4c3de5f20866f9f204f",
+      "reviewed_commit": "Поточний коміт маніфесту",
+      "reason": "Після українізації перевірено, що всі 7 верхньорівневі записи досі мають форму (expr . quoted-source), а не виконуваний Lisp. Оновлено лише SHA походження. Вкладені вирази залишаються separate-unproven; жодного SENS/T5M runtime чи release допуску."
     }
   ]
 }
