@@ -674,6 +674,8 @@ pub fn install() {
     // Та сама сира можливість процесу для українського виконуваного Lisp.
     register_capability("процес-запустити-сирий", process_raw::evaluate_process_run_raw);
     register_evaluated_capability("load", 1, evaluate_load);
+    // Українська виклична назва того самого механізму читання та обчислення файла.
+    register_evaluated_capability("завантажити-файл", 1, evaluate_load);
     register_capability("tcp-connect", evaluate_tcp_connect);
     register_capability("tcp-listen-raw", evaluate_tcp_listen_raw);
     register_capability("протокол-передавання-сире-слухання", evaluate_tcp_listen_raw);
@@ -746,6 +748,7 @@ mod install_tests {
             "process-run-raw",
             "процес-запустити-сирий",
             "load",
+            "завантажити-файл",
             "tcp-connect",
             "tcp-listen-raw",
             "протокол-передавання-сире-слухання",
