@@ -112,7 +112,7 @@
    (rationale . "Володіє мовним зіставленням семантичних тотожностей із класами операцій обчислювача; виконавці хоста можуть використовувати цю проєкцію, але не створювати її заново."))
 
   ; --------------------------------------------------------------------------
-  ; SECTION 2: SEMANTIC WITNESSES (Proves in Lisp data that laws hold)
+  ; РОЗДІЛ 2: СЕМАНТИЧНІ СВІДКИ (доводять у даних Lisp, що закони виконуються)
   ; --------------------------------------------------------------------------
 
   ((key . island-compat-witness)
@@ -163,7 +163,7 @@
    (rationale . "Witness verifying that Ukrainian, Sanskrit, and English surfaces evaluate to the exact same semantic identities."))
 
   ; --------------------------------------------------------------------------
-  ; SECTION 3: EXECUTION MECHANISMS (HOW an implementation executes the language)
+  ; РОЗДІЛ 3: МЕХАНІЗМИ ВИКОНАННЯ (ЯК реалізація виконує мову)
   ; --------------------------------------------------------------------------
 
   ((key . rust-canon-dispatch)
@@ -294,7 +294,7 @@
    (rationale . "Compatibility/reference snapshot only. Current native/WASM bootstrap and freshness authority use lib/core4.lisp -> lib/core4.lisp.fasl; this legacy artifact must not be selected as the current Core loader merely because it exists."))
 
   ; --------------------------------------------------------------------------
-  ; SECTION 4: KERNEL ADAPTERS (Bridges to the 4 autonomous islands)
+  ; РОЗДІЛ 4: АДАПТЕРИ ЯДЕР (мости до 4 автономних островів)
   ; --------------------------------------------------------------------------
 
   ((key . kernel-c-abi-contract)
@@ -343,7 +343,7 @@
    (rationale . "C-ABI wrapper adapter for autonomous ANSI Common Lisp execution island."))
 
   ; --------------------------------------------------------------------------
-  ; SECTION 5: COMPATIBILITY REFERENCES (Standards & surface synonyms)
+  ; РОЗДІЛ 5: ПОСИЛАННЯ СУМІСНОСТІ (стандарти й синоніми поверхні)
   ; --------------------------------------------------------------------------
 
   ((key . ansi-cl-compatibility)
@@ -374,7 +374,7 @@
    (rationale . "Sanskrit Paninian grammatical surface aliases."))
 
   ; --------------------------------------------------------------------------
-  ; SECTION 6: HISTORICAL EXPERIMENTS & DEMOTION CANDIDATES
+  ; РОЗДІЛ 6: ІСТОРИЧНІ ЕКСПЕРИМЕНТИ Й КАНДИДАТИ НА ПОНИЖЕННЯ
   ; --------------------------------------------------------------------------
 
   ((key . reason-backward-inference)
@@ -468,7 +468,7 @@
    (rationale . "Ternary semantic graph experiment (endpoint relation endpoint) for call-graph indexing. Demote to graph research package."))
 
   ; --------------------------------------------------------------------------
-  ; SECTION 7: AMBIGUOUS ITEMS REQUIRING EXPERIMENT (unknown)
+  ; РОЗДІЛ 7: НЕОДНОЗНАЧНІ ЕЛЕМЕНТИ, ЩО ПОТРЕБУЮТЬ ЕКСПЕРИМЕНТУ (невідомі)
   ; --------------------------------------------------------------------------
 
   ((key . physical-units-si)
