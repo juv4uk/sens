@@ -19,49 +19,46 @@ little-endian**: `3^15 = 14348907 < 2^24`, тож 15 тритів точно в�
 |---|---|
 | `t5m_pack.S` | асемблерний pack/unpack (x86-64 SysV, без libc) |
 | `t5m_ref.zig` | Zig-реалізація з C-ABI |
-| `t5m_ref.rs` | Rust-реалізація з C-ABI |
+| `t5m_ref.rs` | Rust-реалізація з C-ABI (`#![no_std]`) |
 | `bench.c` | спільний харнес: міряє asm, Zig, C (і Rust за `-DHAVE_RUST`) |
 | `check_asm.py` | локальна перевірка: mmap `.text`, звірка з `scripts/sens_t5_codec.py` |
 
 ## Збірка й запуск
 
 ```sh
-# асемблер
 as --64 -o t5m_pack.o t5m_pack.S
-
-# Zig
 zig build-obj t5m_ref.zig -O ReleaseFast -femit-bin=t5m_ref.o
-
-# Rust
-rustc -O --edition 2021 --crate-type staticlib t5m_ref.rs -o librust_t5m_ref.a
-
-# харнес
-zig cc -O2 bench.c t5m_pack.o t5m_ref.o -o bench            # asm + Zig + C
-zig cc -O2 -DHAVE_RUST bench.c t5m_pack.o t5m_ref.o librust_t5m_ref.a -o bench
+rustc -O --edition 2021 --crate-type lib --emit obj -C panic=abort -o rust_t5m_ref.o t5m_ref.rs
+zig cc -O2 -DHAVE_RUST bench.c t5m_pack.o t5m_ref.o rust_t5m_ref.o -o bench
 ./bench
 ```
 
-## Результати (локально, x86-64, 3 млн тритів, 200 повторів)
+## Результати
 
-Коректність: asm, Zig і C дають **байт-у-байт ідентичний** результат, і всі
-три unpack повертають вихідні трити.
+### CI (ubuntu-24.04, один процесор, 3 млн тритів, 200 повторів)
 
-| реалізація | M трит/с |
-|---|---|
-| pack asm | ~1410 |
-| pack zig | ~1500 |
-| pack c | ~2650 |
-| unpack asm | ~600 |
-| unpack zig | ~800 |
-| unpack c | ~750 |
+Коректність: asm, Zig, C і Rust дають **байт-у-байт ідентичний** результат, і всі
+unpack повертають вихідні трити.
 
-Спостереження: ручний асемблер **на рівні Zig** на pack, але C виграє (компілятор
-розгортає/векторизує). На unpack асемблер поступається: ділення на 3 замінено
-магічним множенням `(x*0xAAAAAAAB)>>33`, що пришвидшило unpack у 4.4 раза
-(133 → 600 M трит/с) проти найпростішого варіанта з `div`, але Zig-компілятор
-усе одно тримає перевагу. Rust-стовпець додається в CI (див. workflow).
+| реалізація | pack, M трит/с | unpack, M трит/с |
+|---|---|---|
+| асемблер | 4504 | 1312 |
+| Zig | 4972 | 1402 |
+| C | 4540 | 1370 |
+| Rust | 4533 | 1622 |
+
+Тобто ручний асемблер — у межах ~10% від найкращого на pack і ~19% на unpack,
+але не переможець: компілятори добре розгортають/векторизують цю арифметику.
+Rust-еталон зібрано як `#![no_std]`-об'єкт (інакше `std` тягне `_Unwind_*`, яких
+немає в лінкувальнику `zig cc`).
+
+### Локально в сендбоксі (інший процесор)
+
+pack: asm ~1410, zig ~1500, c ~2650. unpack: asm ~600, zig ~800, c ~750.
+Найпростіший варіант unpack із `div` давав лише ~133 M трит/с; заміна на магічне
+множення `(x*0xAAAAAAAB)>>33` пришвидшила його у 4.4 раза.
 
 ## CI
 
 `.github/workflows/t5m-asm-bench.yml` (ручний запуск) збирає все разом із Rust і
-друкує таблицю.
+друкує таблицю. Останній успішний прогін: run 39452980862.
