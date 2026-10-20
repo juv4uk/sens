@@ -262,6 +262,8 @@ jobs:
           set -euo pipefail
           python3 -m unittest tests/test_audit_all_lisp_triplets.py -v
           python3 -m unittest tests/test_report_nonprogram_pin_drift.py -v
+          # Легкі інтеграційні перевірки поточного D1–D11/T5M, без Zig build та SENS-eval.
+          python3 -m unittest tests/test_migrate_t5_batch.py -v
           # На кожному push: чинний D1–D11, точні слова та беззаписний dry-run.
           # Повна перевірка 2026-10-08 SHA-маніфестів зберігається суворою
           # у workflow_dispatch migration-readiness-census; застарілий пін
