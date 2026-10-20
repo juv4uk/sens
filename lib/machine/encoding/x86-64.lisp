@@ -1480,20 +1480,20 @@
 
 (визначити x86-wire-integer-bits
   (функція (значення)
-    ((функція (wire)
+    ((функція (текстове-подання)
        (за-умовою
-         ((рядок-префікс? "#q2:" wire)
-          ((функція (parts)
+         ((рядок-префікс? "#q2:" текстове-подання)
+          ((функція (частини)
              (за-умовою
-               ((хибне? (атом? parts))
+               ((хибне? (атом? частини))
                 (за-умовою
-                  ((порожній? (перше parts)) (як-є ()))
+                  ((порожній? (перше частини)) (як-є ()))
                   ((атом? ())
                    (за-умовою
-                     ((x86-wire-denominator-one? parts) (перше parts))
+                     ((x86-wire-denominator-one? частини) (перше частини))
                      ((атом? ()) (як-є ())))))))
            (x86-wire-split-integer
-             (рядок-решта (рядок-решта (рядок-решта (рядок-решта wire)))
+             (рядок-решта (рядок-решта (рядок-решта (рядок-решта текстове-подання)))
              (як-є ()))))
          ((атом? ()) (як-є ()))))
      (значення-у-текст значення))))))
@@ -2307,10 +2307,10 @@
 
 (визначити x86-u32-bytes
   (функція (значення)
-    ((0010 (bits)
+    ((0010 (біти)
        (110
-         ((0101 bits) (001 ()))
-         ((010 ()) (x86-u32-bytes-from-bits bits))))
+         ((0101 біти) (001 ()))
+         ((010 ()) (x86-u32-bytes-from-bits біти))))
      (x86-wire-integer-bits значення))))
 
 ; Точне двійкове ділення з цілою часткою і залишком.
@@ -2352,10 +2352,10 @@
 
 (визначити x86-u64-bytes
   (функція (значення)
-    ((0010 (bits)
+    ((0010 (біти)
        (110
-         ((0101 bits) (001 ()))
-         ((010 ()) (x86-u64-bytes-from-bits bits))))
+         ((0101 біти) (001 ()))
+         ((010 ()) (x86-u64-bytes-from-bits біти))))
      (x86-wire-integer-bits значення))))
 
 (визначити x86-encode-ret
@@ -2368,11 +2368,11 @@
 
 (визначити x86-encode-mov-r64-imm64
   (функція (регістр безпосереднє-значення)
-    ((0010 (code)
+    ((0010 (код)
        (111
-         (x86-encode-rex 1 0 0 (x86-high1 code))
+         (x86-encode-rex 1 0 0 (x86-high1 код))
          (111
-           (01010 184 (x86-low3 code))
+           (01010 184 (x86-low3 код))
            (x86-u64-bytes безпосереднє-значення))))
      (x86-reg-code регістр))))
 
@@ -2905,30 +2905,30 @@
 ; required no-index SIB byte instead of silently emitting an invalid address.
 (визначити x86-encode-mov-r64-mem-disp8
   (функція (призначення база зміщення)
-    ((0010 (dst) ((0010 (base-code) ((0010 (rex) ((0010 (modrm) (110
-              ((101 (x86-low3 base-code) 4)
+    ((0010 (код-призначення) ((0010 (код-бази) ((0010 (байт-рекс) ((0010 (байт-модрм) (110
+              ((101 (x86-low3 код-бази) 4)
                 (1110
-                  rex
+                  байт-рекс
                   139
-                  modrm
+                  байт-модрм
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte зміщення)))
               ((010 ())
-                (1110 rex 139 modrm (x86-disp8-byte зміщення))))) (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code)))) (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code)))) (x86-reg-code база))) (x86-reg-code призначення))))
+                (1110 байт-рекс 139 байт-модрм (x86-disp8-byte зміщення))))) (x86-encode-modrm 1 (x86-low3 код-призначення) (x86-low3 код-бази)))) (x86-encode-rex 1 (x86-high1 код-призначення) 0 (x86-high1 код-бази)))) (x86-reg-code база))) (x86-reg-code призначення))))
 
 ; MOV [base + disp8], r64, opcode 89 /r.
 (визначити x86-encode-mov-mem-disp8-r64
   (функція (база зміщення джерело)
-    ((0010 (base-code) ((0010 (src) ((0010 (rex) ((0010 (modrm) (110
-              ((101 (x86-low3 base-code) 4)
+    ((0010 (код-бази) ((0010 (код-джерела) ((0010 (байт-рекс) ((0010 (байт-модрм) (110
+              ((101 (x86-low3 код-бази) 4)
                 (1110
-                  rex
+                  байт-рекс
                   137
-                  modrm
+                  байт-модрм
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte зміщення)))
               ((010 ())
-                (1110 rex 137 modrm (x86-disp8-byte зміщення))))) (x86-encode-modrm 1 (x86-low3 src) (x86-low3 base-code)))) (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 base-code)))) (x86-reg-code джерело))) (x86-reg-code база))))
+                (1110 байт-рекс 137 байт-модрм (x86-disp8-byte зміщення))))) (x86-encode-modrm 1 (x86-low3 код-джерела) (x86-low3 код-бази)))) (x86-encode-rex 1 (x86-high1 код-джерела) 0 (x86-high1 код-бази)))) (x86-reg-code джерело))) (x86-reg-code база))))
 
 ; LEA r64, [base + disp8], opcode 0x8D /r -- per #175's pinned XED evidence
 ; (`PATTERN : 0x8D MOD[mm] MOD!=3 REG[rrr] RM[nnn] MODRM() REMOVE_SEGMENT()`,
@@ -2942,16 +2942,16 @@
 ; disturb a CMP result still pending in a nearby branch.
 (визначити x86-encode-lea-r64-mem-disp8
   (функція (призначення база зміщення)
-    ((0010 (dst) ((0010 (base-code) ((0010 (rex) ((0010 (modrm) (110
-              ((101 (x86-low3 base-code) 4)
+    ((0010 (код-призначення) ((0010 (код-бази) ((0010 (байт-рекс) ((0010 (байт-модрм) (110
+              ((101 (x86-low3 код-бази) 4)
                 (1110
-                  rex
+                  байт-рекс
                   141
-                  modrm
+                  байт-модрм
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte зміщення)))
               ((010 ())
-                (1110 rex 141 modrm (x86-disp8-byte зміщення))))) (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code)))) (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code)))) (x86-reg-code база))) (x86-reg-code призначення))))
+                (1110 байт-рекс 141 байт-модрм (x86-disp8-byte зміщення))))) (x86-encode-modrm 1 (x86-low3 код-призначення) (x86-low3 код-бази)))) (x86-encode-rex 1 (x86-high1 код-призначення) 0 (x86-high1 код-бази)))) (x86-reg-code база))) (x86-reg-code призначення))))
 
 ; Group-1 ALU r/m64, r64 (mod=3 register/register), opcode base+1: ADD 0x01,
 ; OR 0x09, AND 0x21, SUB 0x29, XOR 0x31, CMP 0x39 (Intel SDM, confirmed
@@ -2960,11 +2960,11 @@
 ; All six share one shape; only the opcode byte differs.
 (визначити x86-encode-alu-r64-r64
   (функція (код-операції призначення джерело)
-    ((0010 (dst src)
+    ((0010 (код-призначення код-джерела)
        (1110
-         (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 dst))
+         (x86-encode-rex 1 (x86-high1 код-джерела) 0 (x86-high1 код-призначення))
          код-операції
-         (x86-encode-modrm 3 (x86-low3 src) (x86-low3 dst))))
+         (x86-encode-modrm 3 (x86-low3 код-джерела) (x86-low3 код-призначення))))
      (x86-reg-code призначення)
      (x86-reg-code джерело))))
 
@@ -3030,12 +3030,12 @@
 ; the constant into a scratch register first.
 (визначити x86-encode-alu-r64-imm32
   (функція (розширення-коду-операції призначення безпосереднє-значення)
-    ((0010 (dst) (111
-        (x86-encode-rex 1 0 0 (x86-high1 dst))
+    ((0010 (код-призначення) (111
+        (x86-encode-rex 1 0 0 (x86-high1 код-призначення))
         (111
           129
           (111
-            (x86-encode-modrm 3 розширення-коду-операції (x86-low3 dst))
+            (x86-encode-modrm 3 розширення-коду-операції (x86-low3 код-призначення))
             (x86-imm32-bytes безпосереднє-значення))))) (x86-reg-code призначення))))
 
 (визначити x86-encode-add-r64-imm32
@@ -3078,19 +3078,19 @@
 ; for r8-r15.
 (визначити x86-encode-push-r64
   (функція (регістр)
-    ((0010 (code) (110
-        ((101 (x86-high1 code) 1)
-          (1110 (x86-encode-rex 0 0 0 1) (01010 80 (x86-low3 code))))
+    ((0010 (код) (110
+        ((101 (x86-high1 код) 1)
+          (1110 (x86-encode-rex 0 0 0 1) (01010 80 (x86-low3 код))))
         ((010 ())
-          (1110 (01010 80 (x86-low3 code)))))) (x86-reg-code регістр))))
+          (1110 (01010 80 (x86-low3 код)))))) (x86-reg-code регістр))))
 
 (визначити x86-encode-pop-r64
   (функція (регістр)
-    ((0010 (code) (110
-        ((101 (x86-high1 code) 1)
-          (1110 (x86-encode-rex 0 0 0 1) (01010 88 (x86-low3 code))))
+    ((0010 (код) (110
+        ((101 (x86-high1 код) 1)
+          (1110 (x86-encode-rex 0 0 0 1) (01010 88 (x86-low3 код))))
         ((010 ())
-          (1110 (01010 88 (x86-low3 code)))))) (x86-reg-code регістр))))
+          (1110 (01010 88 (x86-low3 код)))))) (x86-reg-code регістр))))
 
 ; INC r64 / DEC r64: group-5 opcode 0xFF, /reg extension (not a register
 ; operand) selects the operation -- INC is /0, DEC is /1 -- per #175's
@@ -3102,17 +3102,17 @@
 ; ModRM group-5 path, never the legacy one.
 (визначити x86-encode-inc-r64
   (функція (регістр)
-    ((0010 (code) (1110
-        (x86-encode-rex 1 0 0 (x86-high1 code))
+    ((0010 (код) (1110
+        (x86-encode-rex 1 0 0 (x86-high1 код))
         255
-        (x86-encode-modrm 3 0 (x86-low3 code)))) (x86-reg-code регістр))))
+        (x86-encode-modrm 3 0 (x86-low3 код)))) (x86-reg-code регістр))))
 
 (визначити x86-encode-dec-r64
   (функція (регістр)
-    ((0010 (code) (1110
-        (x86-encode-rex 1 0 0 (x86-high1 code))
+    ((0010 (код) (1110
+        (x86-encode-rex 1 0 0 (x86-high1 код))
         255
-        (x86-encode-modrm 3 1 (x86-low3 code)))) (x86-reg-code регістр))))
+        (x86-encode-modrm 3 1 (x86-low3 код)))) (x86-reg-code регістр))))
 
 ; NOT r64 / NEG r64: group-3 opcode 0xF7, /reg extension (not a register
 ; operand) selects the operation -- NOT is /2, NEG is /3 -- per #175's
@@ -3121,17 +3121,17 @@
 ; REX.B only for r8-r15.
 (визначити x86-encode-not-r64
   (функція (регістр)
-    ((0010 (code) (1110
-        (x86-encode-rex 1 0 0 (x86-high1 code))
+    ((0010 (код) (1110
+        (x86-encode-rex 1 0 0 (x86-high1 код))
         247
-        (x86-encode-modrm 3 2 (x86-low3 code)))) (x86-reg-code регістр))))
+        (x86-encode-modrm 3 2 (x86-low3 код)))) (x86-reg-code регістр))))
 
 (визначити x86-encode-neg-r64
   (функція (регістр)
-    ((0010 (code) (1110
-        (x86-encode-rex 1 0 0 (x86-high1 code))
+    ((0010 (код) (1110
+        (x86-encode-rex 1 0 0 (x86-high1 код))
         247
-        (x86-encode-modrm 3 3 (x86-low3 code)))) (x86-reg-code регістр))))
+        (x86-encode-modrm 3 3 (x86-low3 код)))) (x86-reg-code регістр))))
 
 ; SHL/SHR/SAR r64, imm8: group-2 opcode 0xC1, /reg extension selects the
 ; operation -- SHL is /4, SHR is /5, SAR is /7 (/6 duplicates SHL under an
@@ -3143,10 +3143,10 @@
 ; becomes the raw trailing byte directly.
 (визначити x86-encode-shift-r64-imm8
   (функція (розширення-коду-операції регістр кількість)
-    ((0010 (code) (1110
-        (x86-encode-rex 1 0 0 (x86-high1 code))
+    ((0010 (код) (1110
+        (x86-encode-rex 1 0 0 (x86-high1 код))
         193
-        (x86-encode-modrm 3 розширення-коду-операції (x86-low3 code))
+        (x86-encode-modrm 3 розширення-коду-операції (x86-low3 код))
         кількість)) (x86-reg-code регістр))))
 
 (визначити x86-encode-shl-r64-imm8
@@ -3292,16 +3292,16 @@
 ; genuinely a runtime value, not something knowable from the bytes alone.
 (визначити x86-encode-group5-indirect-r64
   (функція (розширення-коду-операції регістр)
-    ((0010 (code) (110
-        ((101 (x86-high1 code) 1)
+    ((0010 (код) (110
+        ((101 (x86-high1 код) 1)
           (1110
             (x86-encode-rex 0 0 0 1)
             255
-            (x86-encode-modrm 3 розширення-коду-операції (x86-low3 code))))
+            (x86-encode-modrm 3 розширення-коду-операції (x86-low3 код))))
         ((010 ())
           (1110
             255
-            (x86-encode-modrm 3 розширення-коду-операції (x86-low3 code)))))) (x86-reg-code регістр))))
+            (x86-encode-modrm 3 розширення-коду-операції (x86-low3 код)))))) (x86-reg-code регістр))))
 
 (визначити x86-encode-call-r64
   (функція (регістр)
@@ -3400,10 +3400,10 @@
 ; Quotient is stored in RAX, remainder in RDX.
 (визначити x86-encode-idiv-r64
   (функція (джерело)
-    ((0010 (src-code) (1110
-        (x86-encode-rex 1 0 0 (x86-high1 src-code))
+    ((0010 (код-джерела) (1110
+        (x86-encode-rex 1 0 0 (x86-high1 код-джерела))
         247
-        (x86-encode-modrm 3 7 (x86-low3 src-code)))) (x86-reg-code джерело))))
+        (x86-encode-modrm 3 7 (x86-low3 код-джерела)))) (x86-reg-code джерело))))
 
 ; CMOVcc r64, r64: conditional move, opcode 0x0F 0x40+cc.
 ; Moves source to destination if condition code is satisfied.
@@ -3455,11 +3455,11 @@
 ; TEST r/m64, imm32: Group 3 opcode 0xF7 /0 id, ModRM mod=3, reg=0, rm=dest.
 (визначити x86-encode-test-r64-imm32
   (функція (призначення безпосереднє-значення)
-    ((0010 (code) (1111
+    ((0010 (код) (1111
         (1110
-          (x86-encode-rex 1 0 0 (x86-high1 code))
+          (x86-encode-rex 1 0 0 (x86-high1 код))
           247
-          (x86-encode-modrm 3 0 (x86-low3 code)))
+          (x86-encode-modrm 3 0 (x86-low3 код)))
         (x86-imm32-bytes безпосереднє-значення))) (x86-reg-code призначення))))
 
 ; BT r/m64, r64: opcode 0x0F 0xA3 /r. ModRM reg=index, rm=base.
@@ -3477,11 +3477,11 @@
 ; Group 8 bit operations with imm8: opcode 0x0F 0xBA /reg ib.
 (визначити x86-encode-group8-r64-imm8
   (функція (розширення-коду-операції регістр номер-біта)
-    ((0010 (code) (1110
-        (x86-encode-rex 1 0 0 (x86-high1 code))
+    ((0010 (код) (1110
+        (x86-encode-rex 1 0 0 (x86-high1 код))
         15
         186
-        (x86-encode-modrm 3 розширення-коду-операції (x86-low3 code))
+        (x86-encode-modrm 3 розширення-коду-операції (x86-low3 код))
         номер-біта)) (x86-reg-code регістр))))
 
 (визначити x86-encode-bt-r64-imm8
@@ -3570,10 +3570,10 @@
 ; BSWAP r64: opcode 0x0F (0xC8 + rd). Byte Swap (reverse byte order).
 (визначити x86-encode-bswap-r64
   (функція (регістр)
-    ((0010 (code) (1110
-        (x86-encode-rex 1 0 0 (x86-high1 code))
+    ((0010 (код) (1110
+        (x86-encode-rex 1 0 0 (x86-high1 код))
         15
-        (01010 200 (x86-low3 code)))) (x86-reg-code регістр))))
+        (01010 200 (x86-low3 код)))) (x86-reg-code регістр))))
 
 ; ROL / ROR r64, imm8: group-2 opcode 0xC1, /0 for ROL, /1 for ROR.
 (визначити x86-encode-rol-r64-imm8
@@ -3730,36 +3730,36 @@
 ; інструкція AES, тому цей helper не створює окремої семантики пам'яті.
 (визначити x86-encode-sse-66-map-xmm-mem-disp8
   (функція (байт-карти байт-коду-операції призначення база зміщення)
-    (нехай ((dst-code (x86-xmm-reg-code призначення))
-          (base-code (x86-reg-code база)))
-      (нехай ((modrm
+    (нехай ((код-призначення (x86-xmm-reg-code призначення))
+          (код-бази (x86-reg-code база)))
+      (нехай ((байт-модрм
               (x86-encode-modrm
                 1
-                (x86-low3 dst-code)
-                (x86-low3 base-code)))
+                (x86-low3 код-призначення)
+                (x86-low3 код-бази)))
             (disp-byte (x86-disp8-byte зміщення)))
-        ((0010 (address-tail) (110
-            ((менше? (додати (x86-high1 dst-code) (x86-high1 base-code)) 1)
+        ((0010 (хвіст-адреси) (110
+            ((менше? (додати (x86-high1 код-призначення) (x86-high1 код-бази)) 1)
              (1111
                (1110 102 15 байт-карти байт-коду-операції)
-               address-tail))
+               хвіст-адреси))
             ((010 ())
              (1111
                (1110
                  102
                  (x86-encode-rex
                    0
-                   (x86-high1 dst-code)
+                   (x86-high1 код-призначення)
                    0
-                   (x86-high1 base-code))
+                   (x86-high1 код-бази))
                  15
                  байт-карти
                  байт-коду-операції)
-               address-tail)))) (110
-                  ((101 (x86-low3 base-code) 4)
-                   (1110 modrm (x86-encode-sib 0 4 4) disp-byte))
+               хвіст-адреси)))) (110
+                  ((101 (x86-low3 код-бази) 4)
+                   (1110 байт-модрм (x86-encode-sib 0 4 4) disp-byte))
                   ((010 ())
-                   (1110 modrm disp-byte))))))))
+                   (1110 байт-модрм disp-byte))))))))
 
 (визначити x86-encode-aesenc-xmm-mem-disp8
   (функція (призначення база зміщення)
