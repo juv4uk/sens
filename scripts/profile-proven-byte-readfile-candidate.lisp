@@ -1,12 +1,12 @@
-; Verification-only #333 microscope. Never production authority.
-; Measures the provenance-specialized read-file candidate on the same
-; semantic-registry workload as #379/#394:
-;   host-proven exact u8 list -> existing Lisp UTF-8 sequence decoder
-;   -> String -> read-all.
+; #333 — вимірювальний дослід, не джерело повноважень виконавця.
+; Порівнює окремий спосіб читання файлу на тому самому навантаженні
+; семантичного реєстру, що й #379/#394:
+;   точний список байтів u8, отриманий від хоста →
+;   декодер послідовностей UTF-8 мовою Lisp → рядок → читання форм.
 ;
-; `read-file-bytes` materializes std::fs::read Vec<u8> directly as exact Lisp
-; numbers 0..255, so this candidate deliberately skips only the redundant
-; generic byte-domain pass. UTF-8 sequence interpretation remains in Lisp.
+; `read-file-bytes` повертає байти std::fs::read Vec<u8> як точні
+; числа Lisp від 0 до 255. Тому в досліді пропущено лише зайву
+; загальну перевірку домену байтів. Тлумачення UTF-8 лишається у Lisp.
 
 (визначити шлях-профіль-доведених-байтів "lib/surface/semantic-registry.lisp")
 
