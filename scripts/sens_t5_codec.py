@@ -155,15 +155,15 @@ def parse_t5m_words(source: str) -> list[str]:
 
 
 def encode_t5m_projection(source: str) -> bytes:
-    """Reference T5M: rank groups of 15 trits into little-endian 24-bit words."""
+    """Reference default T5M: rank five trits in base 3 into one byte."""
     words = parse_t5m_words(source)
-    trits = "2".join(words)
-    trits += "2" * (-len(trits) % 15)
-    if len(trits) // 15 * 3 > MAX_FILE_BYTES:
+    trits = [int(trit) for trit in "2".join(words)]
+    trits.extend([2] * (-len(trits) % 5))
+    if len(trits) // 5 > MAX_FILE_BYTES:
         raise SensT5Error("physical T5M file exceeds size limit")
-    encoded = b"".join(
-        int(trits[i:i + 15], 3).to_bytes(3, "little")
-        for i in range(0, len(trits), 15)
+    encoded = bytes(
+        sum(trits[offset + i] * 3 ** (4 - i) for i in range(5))
+        for offset in range(0, len(trits), 5)
     )
     if decode_t5m_bytes(encoded) != words:
         raise SensT5Error("T5M encode/decode exact word identity failed")
@@ -176,42 +176,38 @@ def decode_t5m_bytes(data: bytes) -> list[str]:
         raise SensT5Error("empty physical T5M")
     if len(data) > MAX_FILE_BYTES:
         raise SensT5Error("physical T5M file exceeds size limit")
+    trits: list[int] = []
+    for byte in data:
+        if byte >= 243:
+            raise SensT5Error("invalid T5M byte outside 0..242")
+        group = [0] * 5
+        for index in range(4, -1, -1):
+            group[index] = byte % 3
+            byte //= 3
+        trits.extend(group)
+    padding = 0
+    while trits and trits[-1] == 2:
+        trits.pop()
+        padding += 1
+    if padding >= 5:
+        raise SensT5Error("more than four terminal T5M padding trits")
+    if not trits or trits[0] == 2 or trits[-1] == 2:
+        raise SensT5Error("empty/unsupported physical T5M")
     words: list[str] = []
     current: list[str] = []
-    padding = 0
-    if len(data) % 3:
-        raise SensT5Error("T5M physical length must be a multiple of three bytes")
-    for offset in range(0, len(data), 3):
-        value = int.from_bytes(data[offset:offset + 3], "little")
-        if value >= 3**15:
-            raise SensT5Error("invalid T5M group outside 0..3^15-1")
-        group = [0] * 15
-        for index in range(14, -1, -1):
-            group[index] = value % 3
-            value //= 3
-        for trit in group:
-            if trit == 2:
-                if current:
-                    words.append("".join(current))
-                    current.clear()
-                    padding = 1
-                else:
-                    padding += 1
-                if padding >= 15:
-                    raise SensT5Error("more than fourteen terminal T5M padding trits")
-            else:
-                if padding > 1:
-                    raise SensT5Error("noncanonical repeated T5M separator")
-                if padding and not words:
-                    raise SensT5Error("noncanonical leading T5M separator")
-                padding = 0
-                current.append("1" if trit else "0")
-                if len(current) > MAX_FILE_BYTES * 5:
-                    raise SensT5Error("T5M word exceeds physical size limit")
-    if current:
-        words.append("".join(current))
-    if not words:
-        raise SensT5Error("empty/unsupported physical T5M")
+    for trit in trits:
+        if trit == 2:
+            if not current:
+                raise SensT5Error("noncanonical repeated or leading T5M separator")
+            words.append("".join(current))
+            current.clear()
+        else:
+            current.append("1" if trit else "0")
+            if len(current) > MAX_FILE_BYTES * 5:
+                raise SensT5Error("T5M word exceeds physical size limit")
+    if not current:
+        raise SensT5Error("noncanonical trailing T5M separator")
+    words.append("".join(current))
     for index, word in enumerate(words, 1):
         if re.fullmatch(r"[01]+", word) is None:
             raise SensT5Error(f"word {index}: invalid exact-width T5M binary word")

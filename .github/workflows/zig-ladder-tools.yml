@@ -30,6 +30,8 @@ jobs:
         run: |
           set -euo pipefail
           zig test research/zig-codecs/t5/t5.zig
+          zig test research/zig-codecs/t5m.zig
+          zig test research/zig-codecs/t5m3.zig
           zig test research/zig-codecs/tests.zig
       - name: Зібрати ladder_tool (ReleaseFast)
         run: zig build-exe -O ReleaseFast -lc research/zig-codecs/ladder_tool.zig -femit-bin="$RUNNER_TEMP/ladder_tool"

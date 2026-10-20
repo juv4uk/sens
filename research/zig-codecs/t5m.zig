@@ -1,13 +1,12 @@
-//! T5M physical transport: 15 logical trits (0/1 bits, 2 word separators)
-//! are ranked in base 3 and stored as one little-endian 24-bit group.
+//! T5M physical transport: five logical trits (0/1 bits, 2 word separators)
+//! are ranked in base 3 and stored in one byte. T5M3 is the separate 15-trit/3-byte codec.
 //! This layer preserves exact word widths and bits; it assigns no semantics.
 const std = @import("std");
 const domain_ladder = @import("domain_ladder.zig");
 
 pub const MAX_PHYSICAL_BYTES: usize = 4 * 1024 * 1024;
-const TRITS_PER_GROUP: usize = 15;
-const BYTES_PER_GROUP: usize = 3;
-const MAX_GROUP_VALUE: u32 = 14_348_907; // 3^15
+const TRITS_PER_BYTE: usize = 5;
+const MAX_BYTE_VALUE: u8 = 243; // 3^5; valid physical byte values are 0..242.
 
 pub const Error = error{
     EmptyProgram,
@@ -48,16 +47,13 @@ fn supportsWidth(width: usize) bool {
     return width != 0;
 }
 
-fn appendDigit(out: []u8, group_index: *usize, current: *u32, used: *u8, digit: u8) void {
+fn appendDigit(out: []u8, byte_index: *usize, current: *u8, used: *u8, digit: u8) void {
     std.debug.assert(digit <= 2);
-    current.* = current.* * 3 + @as(u32, digit);
+    current.* = current.* * 3 + digit;
     used.* += 1;
-    if (used.* == TRITS_PER_GROUP) {
-        const offset = group_index.* * BYTES_PER_GROUP;
-        out[offset] = @truncate(current.*);
-        out[offset + 1] = @truncate(current.* >> 8);
-        out[offset + 2] = @truncate(current.* >> 16);
-        group_index.* += 1;
+    if (used.* == TRITS_PER_BYTE) {
+        out[byte_index.*] = current.*;
+        byte_index.* += 1;
         current.* = 0;
         used.* = 0;
     }
@@ -79,25 +75,23 @@ pub fn encode(allocator: std.mem.Allocator, words: []const Word) Error![]u8 {
         trit_count = std.math.add(usize, trit_count, word.width) catch
             return Error.TransportTooLarge;
     }
-    const trit_budget = (MAX_PHYSICAL_BYTES / BYTES_PER_GROUP) * TRITS_PER_GROUP;
+    const trit_budget = MAX_PHYSICAL_BYTES * TRITS_PER_BYTE;
     if (trit_count > trit_budget) return Error.TransportTooLarge;
-    const padded_trits = std.math.add(usize, trit_count, TRITS_PER_GROUP - 1) catch
+    const padded_trits = std.math.add(usize, trit_count, TRITS_PER_BYTE - 1) catch
         return Error.TransportTooLarge;
-    const group_count = padded_trits / TRITS_PER_GROUP;
-    const byte_len = std.math.mul(usize, group_count, BYTES_PER_GROUP) catch
-        return Error.TransportTooLarge;
+    const byte_len = padded_trits / TRITS_PER_BYTE;
     const out = allocator.alloc(u8, byte_len) catch return Error.OutOfMemory;
     errdefer allocator.free(out);
 
-    var group_index: usize = 0;
-    var current: u32 = 0;
+    var byte_index: usize = 0;
+    var current: u8 = 0;
     var used: u8 = 0;
     for (words, 0..) |word, word_index| {
-        if (word_index != 0) appendDigit(out, &group_index, &current, &used, 2);
-        for (word.bits) |bit| appendDigit(out, &group_index, &current, &used, bit - '0');
+        if (word_index != 0) appendDigit(out, &byte_index, &current, &used, 2);
+        for (word.bits) |bit| appendDigit(out, &byte_index, &current, &used, bit - '0');
     }
-    while (used != 0) appendDigit(out, &group_index, &current, &used, 2);
-    std.debug.assert(group_index == group_count);
+    while (used != 0) appendDigit(out, &byte_index, &current, &used, 2);
+    std.debug.assert(byte_index == byte_len);
     return out;
 }
 
@@ -109,29 +103,24 @@ fn validateWordWidth(width: usize) Error!void {
 pub fn decode(allocator: std.mem.Allocator, data: []const u8) Error!Decoded {
     if (data.len == 0) return Error.EmptyProgram;
     if (data.len > MAX_PHYSICAL_BYTES) return Error.TransportTooLarge;
-    if (data.len % BYTES_PER_GROUP != 0) return Error.InvalidPhysicalByte;
-    const group_count = data.len / BYTES_PER_GROUP;
-    const trit_count = std.math.mul(usize, group_count, TRITS_PER_GROUP) catch
+    const trit_count = std.math.mul(usize, data.len, TRITS_PER_BYTE) catch
         return Error.TransportTooLarge;
     const trits = allocator.alloc(u8, trit_count) catch return Error.OutOfMemory;
     defer allocator.free(trits);
-    for (0..group_count) |group_index| {
-        const offset = group_index * BYTES_PER_GROUP;
-        var value: u32 = @as(u32, data[offset]) |
-            (@as(u32, data[offset + 1]) << 8) |
-            (@as(u32, data[offset + 2]) << 16);
-        if (value >= MAX_GROUP_VALUE) return Error.InvalidPhysicalGroup;
-        var place: usize = TRITS_PER_GROUP;
+    for (data, 0..) |raw, byte_index| {
+        if (raw >= MAX_BYTE_VALUE) return Error.InvalidPhysicalByte;
+        var value = raw;
+        var place: usize = TRITS_PER_BYTE;
         while (place > 0) {
             place -= 1;
-            trits[group_index * TRITS_PER_GROUP + place] = @intCast(value % 3);
+            trits[byte_index * TRITS_PER_BYTE + place] = value % 3;
             value /= 3;
         }
     }
 
     var padding: usize = 0;
     while (padding < trits.len and trits[trits.len - padding - 1] == 2) : (padding += 1) {}
-    if (padding >= TRITS_PER_GROUP) return Error.InvalidTail;
+    if (padding >= TRITS_PER_BYTE) return Error.InvalidTail;
     const body_len = trits.len - padding;
     if (body_len == 0) return Error.EmptyDomainWord;
 
@@ -178,14 +167,12 @@ pub fn decode(allocator: std.mem.Allocator, data: []const u8) Error!Decoded {
     return .{ .words = words, .bit_storage = bit_storage };
 }
 
-test "D24 exact word uses two T5M groups without a numeric marker" {
+test "D24 exact word uses five T5M bytes without a numeric marker" {
     const d24_one = "000000000000000000000001";
     const words = [_]Word{.{ .width = 24, .bits = d24_one }};
-    const expected = [_]u8{ 0, 0, 0, 0xb1, 0x05, 0 };
-
     const encoded = try encode(std.testing.allocator, &words);
     defer std.testing.allocator.free(encoded);
-    try std.testing.expectEqualSlices(u8, &expected, encoded);
+    try std.testing.expectEqual(@as(usize, 5), encoded.len);
 
     var decoded = try decode(std.testing.allocator, encoded);
     defer decoded.deinit(std.testing.allocator);
@@ -195,20 +182,20 @@ test "D24 exact word uses two T5M groups without a numeric marker" {
     try std.testing.expect(domain_ladder.supportsPhysicalWidth(decoded.words[0].width));
 }
 
-test "T5M D1 bytes use one 15-trit group" {
+test "T5M D1 word occupies one byte (five trits)" {
     const words = [_]Word{.{ .width = 1, .bits = "1" }};
     const encoded = try encode(std.testing.allocator, &words);
     defer std.testing.allocator.free(encoded);
-    try std.testing.expectEqualSlices(u8, &.{ 241, 246, 145 }, encoded);
+    try std.testing.expectEqualSlices(u8, &.{0xa1}, encoded);
 }
 
-test "T5M packs one exact word as a 15-trit little-endian group" {
+test "T5M packs each five-trit group into one byte" {
     const words = [_]Word{.{ .width = 1, .bits = "1" }};
     const encoded = try encode(std.testing.allocator, &words);
     defer std.testing.allocator.free(encoded);
 
-    // 1 followed by fourteen padding trits 2, ranked in base 3 then stored LE.
-    try std.testing.expectEqualSlices(u8, &.{ 241, 246, 145 }, encoded);
+    // 1 followed by four padding trits 2: 1*3^4 + 2*3^3 + 2*3^2 + 2*3 + 2 = 161.
+    try std.testing.expectEqualSlices(u8, &.{0xa1}, encoded);
 }
 
 test "T5M preserves an exact D11 word without admitting its semantics" {
@@ -327,11 +314,10 @@ test "T5M transports D1 through D10 exact widths including D10 leading zeros" {
     // Transport preserves a 10-bit coordinate but does not admit an executable D10 resident.
 }
 
-test "decoder rejects invalid T5M groups, malformed lengths, and empty words" {
+test "decoder rejects invalid T5M bytes, tails, and empty words" {
     try std.testing.expectError(Error.InvalidPhysicalByte, decode(std.testing.allocator, &.{243}));
-    try std.testing.expectError(Error.InvalidPhysicalGroup, decode(std.testing.allocator, &.{ 255, 255, 255 }));
-    // Base-3 2 followed by fourteen zero trits: a separator before any word.
-    try std.testing.expectError(Error.EmptyDomainWord, decode(std.testing.allocator, &.{ 242, 246, 145 }));
-    // Fifteen trailing trits 2 are not canonical padding for a nonempty word.
-    try std.testing.expectError(Error.InvalidTail, decode(std.testing.allocator, &.{ 106, 242, 218 }));
+    // Base-3 20000: a separator before any word.
+    try std.testing.expectError(Error.EmptyDomainWord, decode(std.testing.allocator, &.{162}));
+    // Five trailing separator trits are not canonical padding for a nonempty word.
+    try std.testing.expectError(Error.InvalidTail, decode(std.testing.allocator, &.{242}));
 }

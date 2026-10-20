@@ -88,10 +88,10 @@ def candidates(words):
     except tb33.TailError:
         pass
     try:
-        raw = bytes((adaptive.МІТКА_Т5М,)) + adaptive.кодувати_т5м(words)
-        options["T5M"] = (
-            lambda: bytes((adaptive.МІТКА_Т5М,)) + adaptive.кодувати_т5м(words),
-            lambda b: adaptive.декодувати_т5м(b[1:]),
+        raw = bytes((adaptive.МІТКА_Т5М3,)) + adaptive.кодувати_т5м3(words)
+        options["T5M3"] = (
+            lambda: bytes((adaptive.МІТКА_Т5М3,)) + adaptive.кодувати_т5м3(words),
+            lambda b: adaptive.декодувати_т5м3(b[1:]),
             raw,
         )
     except adaptive.ПомилкаНосія:
@@ -209,7 +209,7 @@ def main():
             },
             "chosen": selection.профіль, "chosen_bytes": len(selection.дані),
         }
-        for key in ("F3", "Tb33", "T5M"):
+        for key in ("F3", "Tb33", "T5M3"):
             if key not in row["profiles"]:
                 row["profiles"][key] = {"status": "UNSUPPORTED"}
         if not args.check:

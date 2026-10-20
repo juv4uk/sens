@@ -11,7 +11,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from sens_t5_codec import (
     SensT5Error, decode_bytes, encode_projection, encode_words,
-    parse_words, typed_sha256, encode_typed_domain_words,
+    decode_t5m_bytes, encode_t5m_projection, parse_words, typed_sha256,
+    encode_typed_domain_words,
 )
 
 
@@ -23,6 +24,17 @@ class PhysicalT5CodecTests(unittest.TestCase):
         self.assertNotEqual(physical, b"10 001 00 000 01")
         self.assertNotIn(b" ", physical)
         self.assertEqual(encode_projection("10 01").hex(), "64")
+
+    def test_default_t5m_is_one_byte_per_five_trits(self):
+        self.assertEqual(encode_t5m_projection("1"), b"\xa1")
+        self.assertEqual(encode_t5m_projection("00000000001"), b"\x00\x00\xa1")
+        self.assertEqual(decode_t5m_bytes(b"\xa1"), ["1"])
+        self.assertEqual(decode_t5m_bytes(b"\x00\x00\xa1"), ["00000000001"])
+
+    def test_t5m_rejects_invalid_byte_and_noncanonical_padding(self):
+        for data in (b"", b"\xf3", b"\xf2"):
+            with self.subTest(data=data), self.assertRaises(SensT5Error):
+                decode_t5m_bytes(data)
 
     def test_trit2_never_appears_as_text_file_or_semantic_word(self):
         for bad in ["102", "10 2 01", "(CONS x y)", "10 01 ; foo",

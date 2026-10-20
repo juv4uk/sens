@@ -3,6 +3,7 @@
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
 const t5m = @import("t5m.zig");
+const t5m3 = @import("t5m3.zig");
 const physical_cycle = @import("physical_cycle.zig");
 const ladder = @import("domain_ladder.zig");
 const ladder_e1 = @import("domain_e1.zig");
@@ -24,6 +25,7 @@ test "import exact-width transport suites" {
     std.debug.assert(freestanding.F3C_SUFFIX_ROM_BYTES == 4000);
     _ = t5;
     _ = t5m;
+    _ = t5m3;
     _ = physical_cycle;
     _ = ladder;
     _ = ladder_e1;
@@ -38,7 +40,6 @@ test "import exact-width transport suites" {
     _ = ladder_stdin_tool;
     _ = transport_cli;
 }
-
 
 test "ladder D1 and D2 stay distinct through canonical T5 physical adapter" {
     const yes = (try ladder.D1.fromBinary("1")).coordinate().triplet();
@@ -55,8 +56,7 @@ test "ladder D1 and D2 stay distinct through canonical T5 physical adapter" {
 
     // D10 is a valid rung but not automatically a T5 executable word.
     const d10 = (try ladder.D10.fromBinary("0000000001")).coordinate().triplet();
-    try std.testing.expectError(error.UnsupportedDomainWidth,
-        t5.encodeTripletsInto(&left, &d10));
+    try std.testing.expectError(error.UnsupportedDomainWidth, t5.encodeTripletsInto(&left, &d10));
 }
 
 test "modern D8 and D9 share payload but not their T5 identity" {
@@ -65,10 +65,8 @@ test "modern D8 and D9 share payload but not their T5 identity" {
     const nine = (try ladder.D9.fromBinary("010101000")).coordinate();
     try std.testing.expectEqual(eight.bits, nine.bits);
     try std.testing.expect(!eight.same(nine));
-    try std.testing.expectError(error.WrongDomainWidth,
-        ladder.fromCarrier(8, .{ .width = nine.width, .bits = nine.bits }));
-    try std.testing.expectError(error.WrongDomainWidth,
-        ladder.fromCarrier(9, .{ .width = eight.width, .bits = eight.bits }));
+    try std.testing.expectError(error.WrongDomainWidth, ladder.fromCarrier(8, .{ .width = nine.width, .bits = nine.bits }));
+    try std.testing.expectError(error.WrongDomainWidth, ladder.fromCarrier(9, .{ .width = eight.width, .bits = eight.bits }));
 
     const e = eight.triplet();
     const n = nine.triplet();
@@ -95,10 +93,8 @@ test "D8 exhaustive current-ladder physical width stays distinct from D9" {
         try std.testing.expectEqual(eight.bits, nine.bits);
         try std.testing.expect(!eight.same(nine));
         try std.testing.expect(@TypeOf(d8) != @TypeOf(d9));
-        try std.testing.expectError(error.WrongDomainWidth,
-            ladder.fromCarrier(8, d9.toCarrier()));
-        try std.testing.expectError(error.WrongDomainWidth,
-            ladder.fromCarrier(9, d8.toCarrier()));
+        try std.testing.expectError(error.WrongDomainWidth, ladder.fromCarrier(8, d9.toCarrier()));
+        try std.testing.expectError(error.WrongDomainWidth, ladder.fromCarrier(9, d8.toCarrier()));
 
         const e = eight.triplet();
         const n = nine.triplet();
@@ -108,8 +104,7 @@ test "D8 exhaustive current-ladder physical width stays distinct from D9" {
         const nlen = try t5.encodeTripletsInto(&physical_nine, &n);
         try std.testing.expectEqual(@as(usize, 2), elen);
         try std.testing.expectEqual(@as(usize, 2), nlen);
-        try std.testing.expect(!std.mem.eql(u8, physical_eight[0..elen],
-            physical_nine[0..nlen]));
+        try std.testing.expect(!std.mem.eql(u8, physical_eight[0..elen], physical_nine[0..nlen]));
     }
 }
 
@@ -119,14 +114,11 @@ test "D1 zero and D3 three zero bits stay different T5 words" {
     const three = (try ladder.D3.fromBinary("000")).coordinate().triplet();
     var left: [1]u8 = undefined;
     var right: [1]u8 = undefined;
-    try std.testing.expectEqual(@as(usize, 1),
-        try t5.encodeTripletsInto(&left, &one));
-    try std.testing.expectEqual(@as(usize, 1),
-        try t5.encodeTripletsInto(&right, &three));
+    try std.testing.expectEqual(@as(usize, 1), try t5.encodeTripletsInto(&left, &one));
+    try std.testing.expectEqual(@as(usize, 1), try t5.encodeTripletsInto(&right, &three));
     try std.testing.expectEqual(@as(u8, 0x50), left[0]);
     try std.testing.expectEqual(@as(u8, 0x08), right[0]);
 }
-
 
 test "typed ladder via public Zig ABI v2, D10 fail closed" {
     const a = std.testing.allocator;
@@ -143,18 +135,15 @@ test "typed ladder via public Zig ABI v2, D10 fail closed" {
         try std.testing.expectEqualSlices(u8, typed_wire, wire[0..@intCast(n)]);
         const decoded = try ladder.decodeTypedWord(width, a, wire[0..@intCast(n)]);
         try std.testing.expectEqual(word.bits, decoded.bits);
-        try std.testing.expectEqual(@as(c_int, 0),
-            abi.sens_zig_t5_validate(&wire, @intCast(n)));
+        try std.testing.expectEqual(@as(c_int, 0), abi.sens_zig_t5_validate(&wire, @intCast(n)));
     }
     const d10 = ladder.D10.init(0b1000000000).coordinate().triplet();
     var failed: [3]u8 = [_]u8{0xa5} ** 3;
-    try std.testing.expectEqual(@as(isize, -1),
-        abi.sens_zig_t5_encode_be3(&d10, d10.len, &failed, failed.len));
+    try std.testing.expectEqual(@as(isize, -1), abi.sens_zig_t5_encode_be3(&d10, d10.len, &failed, failed.len));
     try std.testing.expectEqualSlices(u8, &.{ 0xa5, 0xa5, 0xa5 }, &failed);
 
     const d8 = ladder.D8.init(0b10101000).coordinate().triplet();
-    try std.testing.expectEqual(@as(isize, -2),
-        abi.sens_zig_t5_encode_be3(&d8, d8.len, &failed, 1));
+    try std.testing.expectEqual(@as(isize, -2), abi.sens_zig_t5_encode_be3(&d8, d8.len, &failed, 1));
     try std.testing.expectEqualSlices(u8, &.{ 0xa5, 0xa5, 0xa5 }, &failed);
 }
 
@@ -166,30 +155,23 @@ test "Zig ABI v2 F3C returns physical statuses without publishing error bytes" {
     const untouched = [_]u8{0x75} ** 32;
     var output: [32]u8 = untouched;
 
-    try std.testing.expectEqual(@as(isize, -2),
-        abi.sens_zig_f3c_pack(&quote_t5, quote_t5.len, &output, 2));
+    try std.testing.expectEqual(@as(isize, -2), abi.sens_zig_f3c_pack(&quote_t5, quote_t5.len, &output, 2));
     try std.testing.expectEqualSlices(u8, &untouched, &output);
-    try std.testing.expectEqual(@as(isize, -1),
-        abi.sens_zig_f3c_pack(&.{0xff}, 1, &output, output.len));
+    try std.testing.expectEqual(@as(isize, -1), abi.sens_zig_f3c_pack(&.{0xff}, 1, &output, output.len));
     try std.testing.expectEqualSlices(u8, &untouched, &output);
-    try std.testing.expectEqual(@as(isize, -3),
-        abi.sens_zig_f3c_pack(&.{0x64}, 1, &output, output.len));
+    try std.testing.expectEqual(@as(isize, -3), abi.sens_zig_f3c_pack(&.{0x64}, 1, &output, output.len));
     try std.testing.expectEqualSlices(u8, &untouched, &output);
 
-    try std.testing.expectEqual(@as(isize, quote_f3c.len),
-        abi.sens_zig_f3c_pack(&quote_t5, quote_t5.len, &output, output.len));
+    try std.testing.expectEqual(@as(isize, quote_f3c.len), abi.sens_zig_f3c_pack(&quote_t5, quote_t5.len, &output, output.len));
     try std.testing.expectEqualSlices(u8, &quote_f3c, output[0..quote_f3c.len]);
     try std.testing.expectEqual(@as(u8, 0x75), output[quote_f3c.len]);
 
     output = untouched;
-    try std.testing.expectEqual(@as(isize, -2),
-        abi.sens_zig_f3c_unpack(&quote_f3c, quote_f3c.len, &output, 3));
+    try std.testing.expectEqual(@as(isize, -2), abi.sens_zig_f3c_unpack(&quote_f3c, quote_f3c.len, &output, 3));
     try std.testing.expectEqualSlices(u8, &untouched, &output);
-    try std.testing.expectEqual(@as(isize, -1),
-        abi.sens_zig_f3c_unpack(&.{ 0xf4, 0x40, 0x60 }, 3, &output, output.len));
+    try std.testing.expectEqual(@as(isize, -1), abi.sens_zig_f3c_unpack(&.{ 0xf4, 0x40, 0x60 }, 3, &output, output.len));
     try std.testing.expectEqualSlices(u8, &untouched, &output);
-    try std.testing.expectEqual(@as(isize, quote_t5.len),
-        abi.sens_zig_f3c_unpack(&quote_f3c, quote_f3c.len, &output, output.len));
+    try std.testing.expectEqual(@as(isize, quote_t5.len), abi.sens_zig_f3c_unpack(&quote_f3c, quote_f3c.len, &output, output.len));
     try std.testing.expectEqualSlices(u8, &quote_t5, output[0..quote_t5.len]);
     try std.testing.expectEqual(@as(u8, 0x75), output[quote_t5.len]);
 
@@ -197,12 +179,8 @@ test "Zig ABI v2 F3C returns physical statuses without publishing error bytes" {
     // Zig stages the candidate separately and never outsources allocation.
     var shared: [32]u8 = untouched;
     @memcpy(shared[0..quote_t5.len], &quote_t5);
-    try std.testing.expectEqual(@as(isize, quote_f3c.len),
-        abi.sens_zig_f3c_pack(shared[0..].ptr, quote_t5.len,
-            shared[0..].ptr, shared.len));
+    try std.testing.expectEqual(@as(isize, quote_f3c.len), abi.sens_zig_f3c_pack(shared[0..].ptr, quote_t5.len, shared[0..].ptr, shared.len));
     try std.testing.expectEqualSlices(u8, &quote_f3c, shared[0..quote_f3c.len]);
-    try std.testing.expectEqual(@as(isize, quote_t5.len),
-        abi.sens_zig_f3c_unpack(shared[0..].ptr, quote_f3c.len,
-            shared[0..].ptr, shared.len));
+    try std.testing.expectEqual(@as(isize, quote_t5.len), abi.sens_zig_f3c_unpack(shared[0..].ptr, quote_f3c.len, shared[0..].ptr, shared.len));
     try std.testing.expectEqualSlices(u8, &quote_t5, shared[0..quote_t5.len]);
 }

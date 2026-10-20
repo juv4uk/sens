@@ -24,6 +24,8 @@ fn pinned_zig_compiler(pinned: &str) -> std::ffi::OsString {
 fn main() {
     println!("cargo:rerun-if-changed=../../.zig-version");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5/t5.zig");
+    println!("cargo:rerun-if-changed=../../research/zig-codecs/t5m.zig");
+    println!("cargo:rerun-if-changed=../../research/zig-codecs/t5m3.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/f3c/f3c.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/transport_abi.zig");
     // Cargo's directory dependency watch is recursive (Cargo Book).

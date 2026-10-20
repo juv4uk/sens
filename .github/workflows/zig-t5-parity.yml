@@ -24,8 +24,12 @@ jobs:
           tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
-      - name: Фундамент — одиничні тести T5
-        run: zig test research/zig-codecs/t5/t5.zig
+      - name: Фундамент — одиничні тести T5, T5M і T5M3
+        run: |
+          set -euo pipefail
+          zig test research/zig-codecs/t5/t5.zig
+          zig test research/zig-codecs/t5m.zig
+          zig test research/zig-codecs/t5m3.zig
       - name: Зібрати інструмент стану драбини (ReleaseFast)
         run: zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig -femit-bin="$RUNNER_TEMP/parity_t5"
       - name: Стан драбини T5 на реальному корпусі — кожна розбіжність = можливість-розв'язати-цікаву-задачу

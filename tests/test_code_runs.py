@@ -373,12 +373,13 @@ class CodecRunsTests(unittest.TestCase):
                 self.assertEqual(restored, data,
                                  f"{path.name}: decode→encode не відтворив байти")
 
-    def test_t5m_fixture_rejects_truncated_group(self):
+    def test_t5m_fixture_rejects_out_of_range_byte(self):
         path = ROOT / "tests" / "semantic" / "ukr-d24-existing-functions.sens"
         data = path.read_bytes()
-        self.assertEqual(len(data) % 3, 0)
-        with self.assertRaisesRegex(codec.SensT5Error, "multiple of three"):
-            codec.decode_t5m_bytes(data[:-1])
+        self.assertTrue(data)
+        corrupt = bytes([243]) + data[1:]
+        with self.assertRaisesRegex(codec.SensT5Error, "outside 0..242"):
+            codec.decode_t5m_bytes(corrupt)
 
     def test_extensionless_program_roundtrips(self):
         candidates = [

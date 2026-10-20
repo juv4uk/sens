@@ -797,7 +797,7 @@ mod core_profile_bootstrap_tests {
 
         let physical = zig_transport::encode_t5_direct(&words)
             .expect("only Zig may create physical T5M");
-        assert_eq!(physical, [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91]);
+        assert_eq!(physical, [0x63, 0x89, 0x06, 0xa1]);
         // The exact-byte checked Zig adapter is used by sens-trit in
         // production. Exercise that same adapter in this sens test binary:
         // it must accept the unchanged carrier and reject one flipped bit.
@@ -826,7 +826,7 @@ mod core_profile_bootstrap_tests {
     fn physical_main_binary_passes_through_zig_abi_v2_before_sens_admission() {
         // This canonical T5M carrier holds five exact D2/D3 words.
         // Zig transports [width, MSB, LSB]; SENS alone judges D2 and eval.
-        let physical = [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91];
+        let physical = [0x63, 0x89, 0x06, 0xa1];
         let words = decode_physical_t5_words(&physical).expect("Zig ABI v2 ingress");
         let widths: Vec<_> = words.iter().copied().map(sens::BinarySourceWord::width).collect();
         let bits: Vec<_> = words.iter().copied().map(sens::BinarySourceWord::packed_bits).collect();

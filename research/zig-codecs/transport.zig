@@ -369,11 +369,11 @@ test "Zig opaque trit carry preserves widths and rejects malformed boundaries" {
     try std.testing.expectError(t5.Error.UnsupportedDomainWidth, carryTrits(allocator, "00000000000"));
 }
 
-test "T5M CLI carry routes exact opaque words through 15-trit Zig transport" {
+test "default T5M CLI carry packs exact opaque words five trits per byte" {
     const allocator = std.testing.allocator;
     const encoded = try carryT5M(allocator, "00000000001");
     defer allocator.free(encoded);
-    try std.testing.expectEqualSlices(u8, &.{ 0xa1, 0x00, 0x00 }, encoded);
+    try std.testing.expectEqualSlices(u8, &.{ 0x00, 0x00, 0xa1 }, encoded);
     var decoded = try t5m.decode(allocator, encoded);
     defer decoded.deinit(allocator);
     try std.testing.expectEqual(@as(usize, 11), decoded.words[0].width);

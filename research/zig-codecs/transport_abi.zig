@@ -13,7 +13,7 @@ pub export fn sens_zig_codec_abi_version() u32 {
     return 2;
 }
 
-/// Default physical transport ABI: T5M groups of fifteen trits in 24 bits.
+/// Default physical transport ABI: T5M stores five trits in one byte.
 /// This narrow BE3 host adapter carries current W1..W9 source words only;
 /// the physical T5M codec itself preserves arbitrary exact widths.
 pub export fn sens_zig_t5m_validate(src: [*]const u8, len: usize) c_int {
@@ -363,7 +363,7 @@ test "T5M exact-word ABI fails closed for malformed records and short capacity" 
     try std.testing.expectEqualSlices(u8, &([_]u8{0xaa} ** 8), &output);
 
     const valid = [_]u8{ 0, 0, 0, 1, 1 };
-    try std.testing.expectEqual(@as(isize, -2), sens_zig_t5m_encode_words(&valid, valid.len, &output, 1));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_t5m_encode_words(&valid, valid.len, &output, 0));
     try std.testing.expectEqualSlices(u8, &([_]u8{0xaa} ** 8), &output);
 }
 
@@ -496,14 +496,14 @@ test "no-allocation-crossing Zig C ABI roundtrip and caller bounds" {
     try std.testing.expectEqual(@as(c_int, -1), sens_zig_t5_validate(&.{0xf3}, 1));
 }
 
-test "ABI v2 additive T5M BE3 exact W1 roundtrip uses a 15-trit group" {
+test "ABI v2 additive T5M BE3 exact W1 roundtrip uses one byte" {
     const input = [_]u8{ 1, 0, 1 };
-    var physical: [3]u8 = undefined;
+    var physical: [1]u8 = undefined;
     const written = sens_zig_t5m_encode_be3(&input, input.len, &physical, physical.len);
-    try std.testing.expectEqual(@as(isize, 3), written);
-    try std.testing.expectEqualSlices(u8, &.{ 241, 246, 145 }, &physical);
+    try std.testing.expectEqual(@as(isize, 1), written);
+    try std.testing.expectEqualSlices(u8, &.{0xa1}, &physical);
     var decoded: [3]u8 = undefined;
-    const restored = sens_zig_t5m_decode_be3(&physical, physical.len, &decoded, decoded.len);
+    const restored = sens_zig_t5m_decode_be3(&physical, 1, &decoded, decoded.len);
     try std.testing.expectEqual(@as(isize, 3), restored);
     try std.testing.expectEqualSlices(u8, &input, &decoded);
 }

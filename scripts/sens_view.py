@@ -3,7 +3,7 @@
 
 Three projections of one admitted program (owner directive 2026-10-09):
   path/name.lisp  — canonical Ukrainian human-readable projection (укр surface)
-  path/name.sens  — physical T5M machine file (exact words; 15 trits/3 bytes)
+  path/name.sens  — physical T5M machine file (exact words; 5 trits/byte)
   path/name       — generated read-only VIEW: exact bit-words [01]+ separated by
                     exactly one space, one trailing newline. No brackets, names,
                     trit '2', headers, comments, width tags or padding.

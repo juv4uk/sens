@@ -1563,7 +1563,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
     ap.add_argument("--codec", choices=("t5m", "t5"), default="t5m",
-                    help="T5M — основний 15-тритовий/24-бітний транспорт; T5 — явний legacy-формат")
+                    help="T5M — дефолтний 5-тритовий транспорт (1 байт); T5 — явний legacy-формат")
     ap.add_argument("--source-surface", choices=("default", "ук", "укр"),
                     default="default",
                     help="людська проєкція джерела; ук/укр дозволяють десяткову кому")
@@ -1712,7 +1712,7 @@ def main():
         "schema": "sens-three-pass-t5-migration/v3",
         "naming_law": "SOURCE/name.lisp -> OUT/name.sens; the extensionless 0/1 view (name, spaced bits + one LF) is now REQUIRED alongside each .sens (#4694)",
         "file_format": {
-            "suffix": ".sens", "physical": ("binary-T5M-base3-15-trits-per-little-endian-24-bit-group"
+            "suffix": ".sens", "physical": ("binary-T5M-base3-5-trits-per-byte"
                                                 if args.codec == "t5m" else "binary-T5-five-trits-per-byte"),
             "language": ("D1–24+ frame; T5M physical subset: D1–D10 plus exact D24+ numeric words" if args.codec == "t5m"
                          else "currently supported D1..D9 exact-width 0/1 words"),
@@ -1720,7 +1720,7 @@ def main():
             "callable_migration_subset": "D3-D6, admitted D8 mechanisms, and exact D9/D10 identities backed by Core4 callable definitions; D11 remains test-only",
             "transport_separator": "logical trit 2 strictly between words",
             "file_eof": "physical byte length; no terminal 22",
-            "padding": "T5M: zero through fourteen final trits 2; T5: zero through four final trits 2",
+            "padding": "T5M: zero through four final trits 2; T5: zero through four final trits 2",
             "ascii_text": False,
             "source_surface": args.source_surface,
             "numeric_projection": "human decimal numerals lower to exact D24+ words before physical encoding",
