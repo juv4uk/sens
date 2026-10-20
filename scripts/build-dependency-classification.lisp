@@ -1,46 +1,43 @@
-; scripts/build-dependency-classification.lisp — classify every constitutional
-; fixture (tests/fixtures/conformance.lisp, keyed via tests/fixtures/inventory.lisp,
-; same 1:1 positional pairing established in scripts/oracle-batch.lisp) by
-; which language layers it needs in order to execute at all: the bare
-; kernel (core special forms + Rust builtins), closure creation/application,
-; exact-number machinery, strings/reader operations, lib/core.lisp (the one
-; core library loaded in the standard bootstrap), or any OTHER lib/*.lisp
-; library / host capability (tcp-*, file I/O, load, process-run) — the
-; combined "reasoning/World or host capability" bucket named in
-; WSM-CONSTITUTION-DEPENDENCY-CLASSIFICATION's own description.
+; Класифікація залежностей кожного конституційного прикладу.
+; Приклади з tests/fixtures/conformance.lisp зіставляються з
+; tests/fixtures/inventory.lisp позиційно, один до одного, як у
+; scripts/oracle-batch.lisp. Для кожного визначаємо потрібні шари:
+; ядро (особливі форми та вбудовані засоби Rust),
+; створення й застосування замикань, точні числа, рядки й читач,
+; стандартну бібліотеку lib/core.lisp або інші бібліотеки lib/*.lisp
+; та можливості хоста (tcp-*, файлове введення-виведення,
+; load, process-run). Останні входять до категорії
+; «міркування/Світ або можливості хоста» за умовами
+; WSM-CONSTITUTION-DEPENDENCY-CLASSIFICATION.
 ;
-; Method: read each fixture's source text with the real reader (not a
-; hand-rolled tokenizer — that class of bug is exactly what R1 found and
-; fixed earlier in this same investigation), walk the parsed form
-; collecting every symbol that appears in HEAD (operator) position of an
-; unquoted, executed sub-form, and classify each such symbol against
-; tables of known names. A symbol bound locally by an enclosing lambda,
-; let, let*, or defmacro parameter list is excluded — it is a user
-; variable, not an external dependency. A symbol matching none of the
-; known tables is left explicit as UNKNOWN rather than guessed into a
-; bucket, per the task's own requirement.
+; Метод: справжній читач розбирає текст кожного прикладу.
+; Самописний розпізнавач не застосовується — помилку цього класу
+; раніше встановлено й виправлено в R1. Обхід дерева форм
+; збирає символи в позиціях викличних голів лише тих підформ,
+; що виконуються та не цитуються. Потім зіставляє їх із
+; таблицями відомих імен. Локально зв'язані параметри lambda,
+; let, let* або defmacro відкидаються: це змінні користувача,
+; а не зовнішні залежності. Невідомі назви лишаються в явній
+; категорії UNKNOWN, без вгадування.
 ;
-; The core-special-form / core-builtin / host-capability tables are
-; hardcoded because they live in Rust (crates/my-lisp/src/eval/mod.rs's
-; evaluate_list dispatch, crates/my-lisp/src/eval/builtins.rs,
-; crates/my-lisp-host/src/lib.rs's register_capability calls) — there is
-; no self-hosted source to read them from. The lib/core.lisp table and the
-; "every other lib/*.lisp file" table ARE generated at run time, by reading
-; those files with read-dir/read-file/read-all and collecting every
-; top-level (def NAME ...) / (defmacro NAME ...) name — so this stays
-; correct as those libraries grow, instead of silently rotting like a
-; hand-copied list would.
+; Таблиці особливих форм ядра, вбудованих функцій і можливостей
+; хоста наведено явно: наразі джерела визначені в Rust,
+; зокрема evaluate_list у crates/my-lisp/src/eval/mod.rs,
+; crates/my-lisp/src/eval/builtins.rs та register_capability
+; у crates/my-lisp-host/src/lib.rs.
+; Натомість таблиці для lib/core.lisp і решти lib/*.lisp
+; утворюються під час запуску: read-dir/read-file/read-all
+; читають файли й збирають верхньорівневі def/defmacro.
+; Це запобігає застаріванню вручну скопійованих переліків.
 ;
-; "exact numbers" is the one bucket without a runtime type predicate to
-; check against (my-lisp exposes no rational?/exact? primitive, and
-; hand-rolling a source-text scanner for rational-literal syntax would
-; repeat exactly the class of bug R1 found and fixed earlier in this
-; investigation: guessing at tokenizer classification from outside the
-; real reader). Instead this bucket is source-confirmed from ground
-; truth that already exists: each fixture's own conformance.lisp record
-; names its axioms, and S1 IS the constitution's "never silently
-; approximate exact->inexact" axiom — a fixture tagged S1 is, by the
-; constitution's own classification, exercising exact-number semantics.
+; Для категорії «точні числа» немає окремого предиката типу
+; під час виконання. Історичний my-lisp не має примітивів
+; rational?/exact?, а пошук раціональних літералів самописним
+; аналізатором повторив би помилку R1. Натомість беремо
+; підтверджені відомості із самих конституційних прикладів:
+; кожен запис conformance.lisp перелічує аксіоми; позначка S1
+; відповідає забороні непомітно наближати точне число
+; неточним. Отже, приклад S1 перевіряє семантику точних чисел.
 ; This is honestly a coarser signal than a real type check would be
 ; (reported as axiom-tagged-s1, not silently presented as equivalent to
 ; the other buckets' direct symbol-table matches) but it is not guessed.
