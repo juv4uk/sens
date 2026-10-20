@@ -1,13 +1,14 @@
-; #1096 — bare domain identities as first-class semantic values.
-; Semantic authority stays here in Lisp. Host observers may only execute this
-; witness and check its named pass/fail envelope.
-; Ukrainian projection: decimal arithmetic, no SID8 call heads.
+; Свідчення #1096: доменна тотожність є самостійним мовним значенням.
+; Семантичну перевірку виконує СЕНС; зовнішній спостерігач лише
+; запускає свідчення та отримує іменований результат.
+; Викличні голови українські, а математичні числа десяткові.
+; Позначки результату збережено як дані протоколу.
 
-(визначити bare-sid-sum (додати 2 3))
-(визначити surface-sum (додати 2 3))
+(визначити сума-за-чинним-законом (додати 2 3))
+(визначити сума-через-українську-проєкцію (додати 2 3))
 
 (за-умовою
-  ((тотожне? bare-sid-sum surface-sum)
+  ((тотожне? сума-за-чинним-законом сума-через-українську-проєкцію)
    (як-є (bare-sid-literal-witness (status pass))))
   (так
    (як-є (bare-sid-literal-witness
