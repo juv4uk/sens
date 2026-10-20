@@ -148,7 +148,7 @@ class UnifyObserveExact(unittest.TestCase):
     def test_source_has_only_current_ukrainian_d3_d4_call_heads(self):
         text = SOURCE.read_text(encoding="utf-8")
         code = text[text.index("(визначити "):]
-        self.assertEqual(tuple(re.findall(r"\\(([01]{3,10})(?=[\\s(])", code)), ())
+        self.assertEqual(tuple(re.findall(r"\(([01]{3,10})(?=[\s(])", code)), ())
         self.assertEqual(code.count("(визначити "), 2)
         self.assertEqual(code.count("(функція "), 2)
         self.assertIn("(за-умовою", code)
