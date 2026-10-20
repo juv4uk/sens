@@ -187,7 +187,7 @@
 ; --- OWNER LANGUAGE FIREWALL 2026-10-16 ---
 ; SENS Lisp owns semantics. Zig handles domain-ladder codes. Rust consumes them.
 ; Unknown language or wrong role is always rejected.
-(визначити guard-language-allowed?
+(визначити захист-мова-дозволена?
   (функція (мова роль)
     (за-умовою
       ((тотожне? мова (як-є sens))
@@ -202,7 +202,7 @@
 
 (визначити guard-language-decision
   (функція (мова роль)
-    (за-умовою ((guard-language-allowed? мова роль) (як-є allow))
+    (за-умовою ((захист-мова-дозволена? мова роль) (як-є allow))
          (так (як-є reject)))))
 
 ; D9:000110011 GUARD-SYNC-WINDOW — українська поверхня SENS.
