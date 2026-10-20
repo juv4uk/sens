@@ -1,98 +1,112 @@
-;;;; D10 independent source oracle: finite cyclic bit word minima.
+;;;; Д10: незалежний історичний оракул мінімальних циклічних зсувів бітових слів.
 ;;;; (role research-only)
 ;;;; (semantic-authority-change none)
-;;;; Source: SageMath FiniteWord.minimal_conjugate and Booth (1980).
-;;;; This is ordinary Common Lisp donor evidence, NOT SENS executable source.
+;;;; Джерела: SageMath FiniteWord.minimal_conjugate та Booth (1980).
+;;;; Це свідчення на Common Lisp, а не виконуваний вихідний код СЕНС.
 
 (defpackage :d10-cyclic-bit-oracle (:use :cl))
 (in-package :d10-cyclic-bit-oracle)
 
-(defvar *checks* 0)
-(defvar *orbit-cases* 0)
-(defun assert-equal (caption actual expected)
-  (unless (equal actual expected)
-    (error "~A: expected ~S, received ~S" caption expected actual))
-  (incf *checks*))
+(defvar *перевірок* 0)
+(defvar *перевірених-орбіт* 0)
 
-(defun bit-vector-source-p (xs)
-  (and (listp xs) xs
-       (every (lambda (x) (and (integerp x) (member x '(0 1) :test #'eql)))
-              xs)))
+(defun перевірити-рівність (назва фактичне очікуване)
+  (unless (equal фактичне очікуване)
+    (error "~A: очікувалося ~S, отримано ~S" назва очікуване фактичне))
+  (incf *перевірок*))
 
-(defun left-conjugate (bits shift)
-  (let ((i (mod shift (length bits))))
-    (append (subseq bits i) (subseq bits 0 i))))
+(defun правильне-бітове-слово? (біти)
+  (and (listp біти) біти
+       (every (lambda (біт)
+                (and (integerp біт)
+                     (member біт '(0 1) :test #'eql)))
+              біти)))
 
-(defun lexbit-before? (xs ys)
-  (loop for x in xs for y in ys
-        when (/= x y) do (return (< x y))
+(defun циклічний-зсув-ліворуч (біти зсув)
+  (let ((позиція (mod зсув (length біти))))
+    (append (subseq біти позиція)
+            (subseq біти 0 позиція))))
+
+(defun лексикографічно-менше? (ліве праве)
+  (loop for лівий-біт in ліве
+        for правий-біт in праве
+        when (/= лівий-біт правий-біт)
+          do (return (< лівий-біт правий-біт))
         finally (return nil)))
 
-(defun source-cyclic-canon (bits)
-  (unless (bit-vector-source-p bits)
-    (error "Nonempty source word with only exact bits required"))
-  (let ((best nil) (best-shift nil))
-    (loop for k from 0 below (length bits)
-          for rotated = (left-conjugate bits k)
-          do (when (or (null best) (lexbit-before? rotated best))
-               (setf best rotated best-shift k)))
-    (list best best-shift)))
+(defun канонічний-циклічний-зсув (біти)
+  (unless (правильне-бітове-слово? біти)
+    (error "Потрібне непорожнє слово лише з точних бітів"))
+  (let ((найкраще nil)
+        (найкращий-зсув nil))
+    (loop for зсув from 0 below (length біти)
+          for повернуте = (циклічний-зсув-ліворуч біти зсув)
+          do (when (or (null найкраще)
+                       (лексикографічно-менше? повернуте найкраще))
+               (setf найкраще повернуте
+                     найкращий-зсув зсув)))
+    (list найкраще найкращий-зсув)))
 
-(defun bits-of-integer (x width)
-  (loop for i downfrom (1- width) to 0
-        collect (ldb (byte 1 i) x)))
+(defun біти-цілого (число ширина)
+  (loop for позиція downfrom (1- ширина) to 0
+        collect (ldb (byte 1 позиція) число)))
 
-(defun reject? (source)
+(defun відхилено? (слово)
   (handler-case
-      (progn (source-cyclic-canon source) nil)
+      (progn (канонічний-циклічний-зсув слово) nil)
     (error () t)))
 
-(defun suite ()
-  (dolist (row '(((1 1 0 0)       ((0 0 1 1) 2))
-                 ((1 0 0 1)       ((0 0 1 1) 1))
-                 ((1 0 1 0)       ((0 1 0 1) 1))
-                 ((0 1 0 0 1 0)   ((0 0 1 0 0 1) 2))
-                 ((1 1 1 1)       ((1 1 1 1) 0))
-                 ((0 1 0 1 0)     ((0 0 1 0 1) 4))
-                 ((0 1 1 0)       ((0 0 1 1) 3))
-                 ((0)             ((0) 0))
-                 ((1)             ((1) 0))))
-    (assert-equal "source witness"
-                  (source-cyclic-canon (first row))
-                  (second row)))
-  (assert-equal "tie in all-ones" (source-cyclic-canon '(1 1 1 1 1 1))
-                '((1 1 1 1 1 1) 0))
-  (assert-equal "full-length is preserved"
-                (length (first (source-cyclic-canon '(0 1 0 1 0))))
-                5)
-  (assert-equal "empty rejected" (reject? nil) t)
-  (assert-equal "invalid out-of-alphabet bit rejected" (reject? '(1 2 0)) t)
-  (assert-equal "text char is not an exact bit" (reject? '(1 #\0)) t)
-  (assert-equal "float is not exact bit" (reject? '(0.0 1)) t)
-  ;; The independent donor enumerates the ORBIT itself, rather than
-  ;; implementing Booth+KMP (the Python source-under-test).
-  (loop for n from 1 to 9 do
-    (loop for value from 0 below (ash 1 n) do
-      (let* ((word (bits-of-integer value n))
-             (answer (source-cyclic-canon word))
-             (canonical (first answer))
-             (k (second answer)))
-        (unless (equal canonical (left-conjugate word k))
-          (error "source witness rotation is invalid"))
-        (loop for j from 0 below n
-              for alt = (left-conjugate word j)
-              do (when (lexbit-before? alt canonical)
-                   (error "nonminimal circular shift in source oracle"))
-              when (equal alt canonical)
-                do (when (< j k)
-                     (error "earliest tied original source shift violated")))
-        (incf *orbit-cases*))))
+(defun перевірити-набір ()
+  (dolist (рядок '(((1 1 0 0)       ((0 0 1 1) 2))
+                   ((1 0 0 1)       ((0 0 1 1) 1))
+                   ((1 0 1 0)       ((0 1 0 1) 1))
+                   ((0 1 0 0 1 0)   ((0 0 1 0 0 1) 2))
+                   ((1 1 1 1)       ((1 1 1 1) 0))
+                   ((0 1 0 1 0)     ((0 0 1 0 1) 4))
+                   ((0 1 1 0)       ((0 0 1 1) 3))
+                   ((0)             ((0) 0))
+                   ((1)             ((1) 0))))
+    (перевірити-рівність "джерельне свідчення"
+                        (канонічний-циклічний-зсув (first рядок))
+                        (second рядок)))
+  (перевірити-рівність "найперший рівноцінний зсув"
+                      (канонічний-циклічний-зсув '(1 1 1 1 1 1))
+                      '((1 1 1 1 1 1) 0))
+  (перевірити-рівність "довжина збережена"
+                      (length (first (канонічний-циклічний-зсув '(0 1 0 1 0))))
+                      5)
+  (перевірити-рівність "порожнє відхилено" (відхилено? nil) t)
+  (перевірити-рівність "недопустимий біт відхилено"
+                      (відхилено? '(1 2 0)) t)
+  (перевірити-рівність "текстовий знак не є точним бітом"
+                      (відхилено? '(1 #\0)) t)
+  (перевірити-рівність "дійсне число не є точним бітом"
+                      (відхилено? '(0.0 1)) t)
+  ;; Незалежний оракул перебирає всю орбіту, а не відтворює
+  ;; алгоритми Бута й Кнута—Морріса—Пратта із перевірюваної реалізації.
+  (loop for ширина from 1 to 9 do
+    (loop for число from 0 below (ash 1 ширина) do
+      (let* ((слово (біти-цілого число ширина))
+             (відповідь (канонічний-циклічний-зсув слово))
+             (канон (first відповідь))
+             (зсув (second відповідь)))
+        (unless (equal канон (циклічний-зсув-ліворуч слово зсув))
+          (error "Канон не збігається зі свідченням зсуву"))
+        (loop for інший-зсув from 0 below ширина
+              for альтернатива = (циклічний-зсув-ліворуч слово інший-зсув)
+              do (when (лексикографічно-менше? альтернатива канон)
+                   (error "Знайдено менший циклічний зсув"))
+              when (equal альтернатива канон)
+                do (when (< інший-зсув зсув)
+                     (error "Порушено правило найпершого рівноцінного зсуву")))
+        (incf *перевірених-орбіт*))))
+  ;; Рядок підсумку збережено для зовнішніх споживачів протоколу.
   (format t "D10 CYCLIC WORD real SBCL donor PASS ~D named controls + ~D exhaustive words~%"
-          *checks* *orbit-cases*)
+          *перевірок* *перевірених-орбіт*)
   (finish-output))
 
-(handler-case (suite)
-  (error (condition)
-    (format *error-output "D10 CYCLIC WORD real SBCL donor FAIL ~A~%"
-            condition)
+(handler-case (перевірити-набір)
+  (error (помилка)
+    (format *error-output* "D10 CYCLIC WORD real SBCL donor FAIL ~A~%"
+            помилка)
     (sb-ext:exit :code 1)))
