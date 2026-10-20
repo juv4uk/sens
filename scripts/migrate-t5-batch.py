@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Пакетне перетворення .lisp у поточний фізичний T5M .sens.
 
-This is a batch driver, not a competing language implementation: semantic
-conversion is delegated to migrate-three-pass.py. Zig emits published physical
-T5M bytes; Python packing is an independent dry-run/parity reference only.
-Nothing is published unless --write is explicitly requested.
+Це пакетний оркестратор, а не альтернативна реалізація семантики SENS.
+Перетворення джерела виконує migrate-three-pass.py; Zig записує фізичні
+байти T5M, а Python є лише незалежним еталоном транспортної оберненості.
+Нові файли не записуються без --write та --zig-codec. Вхідні .lisp
+залишаються незмінними; доказ виконання програми SENS потрібен окремо.
 """
 from __future__ import annotations
 
@@ -290,7 +291,11 @@ def run(args: argparse.Namespace) -> dict:
                       "codec": "physical-T5M-5-trits-per-byte",
                       "source_era": source_era,
                       "w8_policy": "SID8 retired; auto/current preserve only ratified D8; no historical remapping"},
+        "semantic_runtime_verified_by_this_tool": False,
+        "release_admitted_by_this_tool": False,
+        "mechanical_only": True,
         "summary": {"files_seen": len(ledger), "files_admitted": admitted,
+                    "mechanically_packable_files": admitted,
                     "files_written": written,
                     "files_would_write": candidates,
                     "files_blocked": blocked},
@@ -316,18 +321,18 @@ def run(args: argparse.Namespace) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="+",
-                        help="EXPLICIT repository-relative .lisp files or directories")
+                        help="явні шляхи .lisp або каталоги відносно кореня репозиторію")
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--out", type=Path, required=True,
-                        help="separate output mirror (never source root)")
+                        help="каталог для нових .sens: дозволено і корінь джерел; без перезапису; --report поза обома деревами")
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--source-era", choices=("auto", "legacy", "current"),
                         default="auto",
-                        help="auto/current use ratified current domains only; legacy is rejected as retired")
+                        help="auto/current — лише чинні ратифіковані домени; legacy скасовано")
     parser.add_argument("--zig-codec", action="store_true",
-                        help="require pinned Zig 0.16 physical T5M roundtrip for every candidate")
+                        help="вимагати фізичну перевірку T5M через закріплений Zig 0.16")
     parser.add_argument("--write", action="store_true",
-                        help="opt in to creating new physical .sens; never overwrite")
+                        help="створювати лише нові фізичні .sens без перезапису")
     args = parser.parse_args()
     # New reality (#5777/#5779): the Rust<->SENS link crosses ONLY the sterile Zig
     # corridor. Publishing physical .sens without the pinned-Zig cross-check is a
