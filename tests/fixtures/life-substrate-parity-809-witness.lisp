@@ -1,9 +1,9 @@
 ; Lisp-owned fail-closed witness for #809.
 
-(def life-substrate-parity-schema
+(визначити life-substrate-parity-schema
   (функція () (перше life-substrate-parity-document)))
 
-(def life-substrate-parity-witness
+(визначити life-substrate-parity-witness
   (функція ()
     (за-умовою
       ((тотожне? (life-substrate-parity-schema) (як-є life-substrate-parity/1))

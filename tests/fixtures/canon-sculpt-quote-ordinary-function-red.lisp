@@ -10,8 +10,8 @@
 ; through a surface alias, registry lookup, macro expander that itself requires quote-equivalent control, or host AST access
 ; does not count.
 
-(def quote-as-ordinary-function
-  (lambda (x) x))
+(визначити quote-as-ordinary-function
+  (функція (x) x))
 
 ; If ordinary eager function application were sufficient, this would yield canon-sculpt-unbound-symbol as data.
 ; Expected RED on the current evaluator: the argument is evaluated before the function body and the symbol is unbound.
