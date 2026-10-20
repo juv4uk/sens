@@ -299,7 +299,13 @@ def main(argv: list[str] | None = None) -> int:
                         help="BLOCK if any physical view OR Lisp source pair is missing")
     parser.add_argument("--report", type=Path,
                         help="write JSON audit receipt, never a program or view")
+    parser.add_argument("--informational", action="store_true",
+                        help="show existing migration debt without stopping unrelated CI; audit errors still fail")
     args = parser.parse_args(argv)
+    if args.informational and (args.strict or args.require_view):
+        print("TRIPLE INVENTORY BLOCKED: --informational cannot override --strict/--require-view",
+              file=sys.stderr)
+        return 2
     try:
         report = inspect(
             args.root, include_untracked=args.include_untracked,
@@ -310,6 +316,11 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"status": report["status"], **report["summary"],
                           "failed_required": report["failed_required"]},
                          ensure_ascii=False, sort_keys=True))
+        if args.informational and report["status"] == "BLOCKED":
+            # A successfully computed inventory is not a release gate. Do not
+            # swallow exceptions: they still take the error branch below.
+            print("::warning::T5_TRIPLET_INVENTORY_DEBT: physical/source debt remains; semantic parity NOT_VERIFIED")
+            return 0
         return 2 if report["status"] in ("BLOCKED", "NO_FILES") else 0
     except (OSError, ValueError, subprocess.SubprocessError) as exc:
         print("TRIPLE INVENTORY BLOCKED: " + str(exc), file=sys.stderr)

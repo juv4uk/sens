@@ -378,11 +378,10 @@ jobs:
           # Тільки незмінні Lisp-токени дозволяють переприв'язувати SHA після українізації коментарів.
           python3 -m unittest tests/test_refresh_nonprogram_comment_pins.py -v
           python3 -m unittest tests/test_report_t5_triplet_inventory.py -v
-          # Залишковий історичний борг видно в кожному запуску; не підміняти
-          # частковий прогрес загальним релізним NO-GO чи фальшивим GREEN.
-          if ! python3 scripts/report_t5_triplet_inventory.py .; then
-            echo "::warning::T5_TRIPLET_INVENTORY_BLOCKED: перевірити пофайловий борг; універсальну оборотність не доведено"
-          fi
+          # Інвентаризаційний борг — warning, а внутрішня помилка аудиту —
+          # справжній RED. Не приховувати винятки за універсальним if !.
+          # Навіть успішний інформативний звіт не є релізним допуском.
+          python3 scripts/report_t5_triplet_inventory.py . --informational
 
       - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
         if: ${{ always() }}

@@ -373,5 +373,27 @@ class TripletInventoryTests(unittest.TestCase):
         self.assertNotIn("Traceback", checked.stderr)
 
 
+    def test_informational_inventory_reports_debt_but_not_auditor_failure(self):
+        # Missing/malformed current pairs are visible debt, not an unrelated
+        # main-branch stop; an exception or strict release request must fail.
+        self.view.write_bytes(b"0\\n")
+        original = (self.source.read_bytes(), self.sens.read_bytes(), self.view.read_bytes())
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+            rc = main([str(self.root), "--include-untracked", "--informational"])
+        self.assertEqual(rc, 0, output.getvalue())
+        first = json.loads(output.getvalue().splitlines()[0])
+        self.assertEqual(first["status"], "BLOCKED")
+        self.assertEqual(first["release_admitted"], 0)
+        self.assertIn("T5_TRIPLET_INVENTORY_DEBT", output.getvalue())
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main([str(self.root), "--include-untracked", "--informational",
+                                   "--strict"]), 2)
+            self.assertEqual(main([str(self.root / "absent"), "--include-untracked",
+                                   "--informational"]), 2)
+        self.assertEqual(original, (self.source.read_bytes(), self.sens.read_bytes(),
+                                    self.view.read_bytes()))
+
+
 if __name__ == "__main__":
     unittest.main()
