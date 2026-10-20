@@ -238,7 +238,7 @@ class ExactDomainMigrationTests(unittest.TestCase):
 
     def test_legacy_W8_rewrite_preserves_quotes_and_exact_ukr(self):
         # Це тест механічного сканера, НЕ Python-evaluator SENS.
-        old = "00000101"  # історичний SID8: CAR, не D8:00000101
+        old = "00000101"  # історичний сід8: CAR, не D8:00000101
         proven = {old: mod.Identity("D3", "100", "CAR", "перше")}
         source = (
             "; (00000101 дані)\\n"
