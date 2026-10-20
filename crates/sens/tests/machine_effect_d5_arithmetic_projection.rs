@@ -165,7 +165,7 @@ fn bounded_sub_effect_projects_with_form_byte_and_independent_decode_parity() {
 
     for (left, right) in [(5u64, 3u64), (u64::MAX, 0), (u64::MAX, u64::MAX)] {
         let effect = eval_value(
-            &format!("(machine-effect-bounded-u64-sub {left} {right})"),
+            &format!("(машинний-ефект-віднімання-64 {left} {right})"),
             &mut session,
         );
         assert_eq!(effect, format!("(bounded-u64-sub {left} {right})"));
@@ -211,7 +211,7 @@ fn bounded_mul_effect_projects_with_form_and_byte_parity() {
         (u32::MAX as u64, u32::MAX as u64),
     ] {
         let effect = eval_value(
-            &format!("(machine-effect-bounded-u64-mul {left} {right})"),
+            &format!("(машинний-ефект-множення-64 {left} {right})"),
             &mut session,
         );
         assert_eq!(effect, format!("(bounded-u64-mul {left} {right})"));
@@ -245,11 +245,11 @@ fn sub_mul_effect_bounds_fail_closed_before_target_projection() {
     let mut session = machine_session();
 
     for source in [
-        "(machine-effect-bounded-u64-sub 2 3)",
-        "(machine-effect-bounded-u64-sub -1 0)",
-        "(machine-effect-bounded-u64-sub 18446744073709551616 0)",
-        "(machine-effect-bounded-u64-mul 4294967296 1)",
-        "(machine-effect-bounded-u64-mul 1 4294967296)",
+        "(машинний-ефект-віднімання-64 2 3)",
+        "(машинний-ефект-віднімання-64 -1 0)",
+        "(машинний-ефект-віднімання-64 18446744073709551616 0)",
+        "(машинний-ефект-множення-64 4294967296 1)",
+        "(машинний-ефект-множення-64 1 4294967296)",
     ] {
         assert_eq!(
             eval_value(source, &mut session),
@@ -307,9 +307,9 @@ fn bounded_effect_negative_form_predicates_return_exact_d1_no() {
     load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
 
     for source in [
-        "(machine-effect-bounded-u64-add-form? (00000001 ()))",
-        "(machine-effect-bounded-u64-sub-form? (00000001 ()))",
-        "(machine-effect-bounded-u64-mul-form? (00000001 ()))",
+        "(машинний-ефект-форма-додавання-64? (00000001 ()))",
+        "(машинний-ефект-форма-віднімання-64? (00000001 ()))",
+        "(машинний-ефект-форма-множення-64? (00000001 ()))",
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
@@ -329,9 +329,9 @@ fn bounded_effect_integer_range_answer_is_exact_d1() {
     load_core_library(&mut session).expect("ядро");
     load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
     for (source, expected) in [
-        ("(machine-effect-within-inclusive-integer-range? 5 0 10)", true),
-        ("(machine-effect-within-inclusive-integer-range? -1 0 10)", false),
-        ("(machine-effect-within-inclusive-integer-range? 11 0 10)", false),
+        ("(машинний-ефект-ціле-в-межах? 5 0 10)", true),
+        ("(машинний-ефект-ціле-в-межах? -1 0 10)", false),
+        ("(машинний-ефект-ціле-в-межах? 11 0 10)", false),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
@@ -351,9 +351,9 @@ fn bounded_effect_carriers_reject_out_of_range_with_exact_d1_no() {
     load_core_library(&mut session).expect("ядро");
     load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
     for source in [
-        "(machine-effect-u32-carrier? 4294967296)",
-        "(machine-effect-u64-carrier? -1)",
-        "(machine-effect-u64-carrier? 18446744073709551616)",
+        "(машинний-ефект-носій-беззнаковий-32? 4294967296)",
+        "(машинний-ефект-носій-беззнаковий-64? -1)",
+        "(машинний-ефект-носій-беззнаковий-64? 18446744073709551616)",
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
@@ -373,12 +373,12 @@ fn bounded_effect_structural_forms_return_exact_d1_for_matching_and_mismatched_k
     load_core_library(&mut session).expect("ядро");
     load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
     for (source, expected) in [
-        ("(machine-effect-bounded-u64-add-form? (quote (bounded-u64-add 2 3)))", true),
-        ("(machine-effect-bounded-u64-sub-form? (quote (bounded-u64-sub 5 3)))", true),
-        ("(machine-effect-bounded-u64-mul-form? (quote (bounded-u64-mul 2 3)))", true),
-        ("(machine-effect-bounded-u64-add-form? (quote (bounded-u64-sub 5 3)))", false),
-        ("(machine-effect-bounded-u64-sub-form? (quote (bounded-u64-mul 2 3)))", false),
-        ("(machine-effect-bounded-u64-mul-form? (quote (bounded-u64-add 2 3)))", false),
+        ("(машинний-ефект-форма-додавання-64? (quote (bounded-u64-add 2 3)))", true),
+        ("(машинний-ефект-форма-віднімання-64? (quote (bounded-u64-sub 5 3)))", true),
+        ("(машинний-ефект-форма-множення-64? (quote (bounded-u64-mul 2 3)))", true),
+        ("(машинний-ефект-форма-додавання-64? (quote (bounded-u64-sub 5 3)))", false),
+        ("(машинний-ефект-форма-віднімання-64? (quote (bounded-u64-mul 2 3)))", false),
+        ("(машинний-ефект-форма-множення-64? (quote (bounded-u64-add 2 3)))", false),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
