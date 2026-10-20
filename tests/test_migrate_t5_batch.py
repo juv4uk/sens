@@ -90,6 +90,25 @@ class CurrentBatchTransportTests(unittest.TestCase):
         self.assertFalse(self.out.exists())
         self.assertEqual(self.source.read_bytes(), original)
 
+    def test_batch_output_in_repo_is_documented_without_semantic_admission(self):
+        help_result = subprocess.run(
+            [sys.executable, str(DRIVER), "--help"],
+            cwd=REPO, capture_output=True, text=True, timeout=15,
+        )
+        self.assertEqual(help_result.returncode, 0, help_result.stderr)
+        self.assertIn("дозволено і корінь джерел", help_result.stdout)
+        self.assertNotIn("never source root", help_result.stdout)
+        result = self.call()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        report = json.loads(self.report.read_text(encoding="utf-8"))
+        self.assertTrue(report["mechanical_only"])
+        self.assertIs(report["semantic_runtime_verified_by_this_tool"], False)
+        self.assertIs(report["release_admitted_by_this_tool"], False)
+        self.assertEqual(
+            report["summary"]["mechanically_packable_files"],
+            report["summary"]["files_would_write"],
+        )
+
     def test_neither_legacy_source_era_nor_python_bytes_can_publish(self):
         old = self.call(era="legacy")
         self.assertEqual(old.returncode, 3, old.stdout + old.stderr)
