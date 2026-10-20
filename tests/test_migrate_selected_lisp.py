@@ -99,29 +99,29 @@ class SelectedOriginalT5(unittest.TestCase):
         self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
 
     def test_bad_blob_blocks_even_before_conversion(self):
-        code, state = self.call(blob="0" * 40)
+        code, state = self.call(blob="0" * 40, dry=True)
         self.assertEqual((code, state["status"]), (2, "BLOCKED"))
         self.assertIn("source changed", state["reason"])
         self.assertFalse(list(self.output.rglob("*.sens")))
 
     def test_unknown_original_dynamic_binding_blocks(self):
-        code, state = self.call(LEGACY_UNPROVEN)
+        code, state = self.call(LEGACY_UNPROVEN, inspect=True)
         self.assertEqual((code, state["status"]), (2, "BLOCKED"))
         self.assertTrue(state["reason"])
         self.assertFalse(list(self.output.rglob("*.sens")))
 
     def test_unverified_oracle_never_writes(self):
-        code, state = self.call(oracle=False)
+        code, state = self.call(oracle=False, dry=True)
         self.assertEqual((code, state["status"]), (2, "BLOCKED"))
         self.assertFalse(list(self.output.rglob("*.sens")))
 
     def test_unverified_rust_reader_never_writes(self):
-        code, state = self.call(reader=False)
+        code, state = self.call(reader=False, dry=True)
         self.assertEqual((code, state["status"]), (2, "BLOCKED"))
         self.assertFalse(list(self.output.rglob("*.sens")))
 
     def test_path_traversal_is_rejected(self):
-        code, state = self.call(source="../outside.lisp", blob="0" * 40)
+        code, state = self.call(source="../outside.lisp", blob="0" * 40, dry=True)
         self.assertEqual((code, state["status"]), (2, "BLOCKED"))
         self.assertIn("relative", state["reason"])
 
@@ -201,14 +201,14 @@ class SelectedOriginalT5(unittest.TestCase):
         if not self.reader.is_file():
             self.fail("build the real Rust sens-trit opener before running this test")
         fake_oracle(self.verifier, disagreement=True)
-        code, state = self.call()
+        code, state = self.call(dry=True)
         self.assertEqual((code, state["status"]), (2, "BLOCKED"))
         self.assertIn("observations differ", state["reason"])
         self.assertFalse(list(self.output.rglob("*.sens")))
 
-    def test_exact_physical_file_then_immutability_and_no_clobber(self):
+    def test_legacy_t5_inspection_never_publishes_even_with_oracle(self):
         if not self.reader.is_file():
-            self.fail("build the real Rust sens-trit opener before running this test")
+            self.fail("build the real Rust sens-trit opener before this test")
         code, state = self.call(dry=True)
         self.assertEqual(code, 0, state)
         self.assertEqual(state["status"], "VERIFIED_DRY_RUN")
@@ -216,18 +216,15 @@ class SelectedOriginalT5(unittest.TestCase):
         self.assertEqual(state["syntax"], "PASS_D2_SYNTAX_ONLY")
         self.assertEqual(state["oracle"], "PASS_HISTORICAL_CURRENT")
         self.assertFalse(list(self.output.rglob("*.sens")))
+
+        # Once the historical witness has passed, publishing it through the
+        # obsolete Python T5 adapter must still be impossible.
         code, state = self.call()
-        self.assertEqual(code, 0, state)
-        self.assertEqual(state["status"], "WRITTEN")
-        self.assertFalse(state["original_491_reduced"])
-        target = self.output / "tests/fixtures/migration-d4-selector-cohort/caar.sens"
-        self.assertEqual(target.read_bytes(), EXPECTED_PHYSICAL)
-        self.assertEqual(state["physical_sha256"], hashlib.sha256(EXPECTED_PHYSICAL).hexdigest())
+        self.assertEqual((code, state["status"]), (2, "BLOCKED"))
+        self.assertIn("LEGACY_T5_PUBLICATION_DISABLED", state["reason"])
+        self.assertIn("migrate-one-to-sens.py", state["reason"])
         self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
-        again_code, again = self.call()
-        self.assertEqual((again_code, again["status"]), (2, "BLOCKED"))
-        self.assertIn("already exists", again["reason"])
-        self.assertEqual(target.read_bytes(), EXPECTED_PHYSICAL)
+        self.assertFalse(list(self.output.rglob("*.sens")))
 
     def test_existing_symlink_is_rejected(self):
         fake = self.folder / "elsewhere"
@@ -235,7 +232,7 @@ class SelectedOriginalT5(unittest.TestCase):
         leaf = self.output / "tests/fixtures/migration-d4-selector-cohort"
         leaf.mkdir(parents=True)
         (leaf / "caar.sens").symlink_to(fake, target_is_directory=True)
-        code, state = self.call()
+        code, state = self.call(dry=True)
         self.assertEqual((code, state["status"]), (2, "BLOCKED"))
 
 if __name__ == "__main__":
