@@ -87,7 +87,7 @@ def detect_runtime_shape() -> dict[str, Any]:
     )
 
     # The ordinary executable parser currently admits semantic IDs only through
-    # the exact 8-bit Sens8 path. A future D5 admission may use a different AST
+    # the exact 8-bit сенс8 path. A future D5 admission may use a different AST
     # variant; this detector intentionally reports that as a shape change which
     # must update the audit rather than silently guessing.
     parser_exact_8_sid = (
