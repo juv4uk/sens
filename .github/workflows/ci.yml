@@ -347,6 +347,7 @@ jobs:
           python3 -m unittest tests/test_ukr_callsite_migration.py -v
           python3 -m unittest tests/test_ukr_narrate_peers.py -v
           python3 -m unittest tests/test_ukr_lib_peers.py -v
+          python3 -m unittest tests/test_clips_exact_d3_slot_2046.py -v
           python3 -m unittest tests/test_persistent_map_ukr_primary_projection.py -v
           python3 -m unittest tests/test_content_store_ukr_primary_projection.py -v
           python3 -m unittest tests/test_persistent_vector_ukr_primary_projection.py -v

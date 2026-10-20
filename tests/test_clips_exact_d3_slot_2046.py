@@ -9,17 +9,17 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/clips-import.lisp"
-BAD_GUARD = "((0100 (010 (100 slot-forms))) (clips-lookup-slot-value slot-name (011 slot-forms)))"
-GOOD_GUARD = "((0100 (010 (100 (100 slot-forms)))) (clips-lookup-slot-value slot-name (011 slot-forms)))"
-SKIP_ATOM = "((010 (100 slot-forms))  (clips-lookup-slot-value slot-name (011 slot-forms)))"
-OLD_EQUAL = "((11110111 slot-name (100 (100 slot-forms))) (кліпс-значення-слота (100 slot-forms)))"
-NEW_EQ = "((101 slot-name (100 (100 slot-forms))) (кліпс-значення-слота (100 slot-forms)))"
-STRING_EQUAL = '(11110111 (110101011 (11101110 symbol)) (110101011 "?_"))'
+BAD_GUARD = "((хибне? (атом? (перше форми-слотів))) (знайти-значення-слота-кліпс назва-слота (решта форми-слотів)))"
+GOOD_GUARD = "((хибне? (атом? (перше (перше форми-слотів)))) (знайти-значення-слота-кліпс назва-слота (решта форми-слотів)))"
+SKIP_ATOM = "((атом? (перше форми-слотів))  (знайти-значення-слота-кліпс назва-слота (решта форми-слотів)))"
+OLD_EQUAL = "((11110111 назва-слота (перше (перше форми-слотів))) (кліпс-значення-слота (перше форми-слотів)))"
+NEW_EQ = "((тотожне? назва-слота (перше (перше форми-слотів))) (кліпс-значення-слота (перше форми-слотів)))"
+STRING_EQUAL = '((тотожне? (рядок-перший рядок) ":") (тотожне? (рядок-перший (рядок-решта рядок)) ":"))'
 
 
 def lookup_body(source):
-    start = source.index("(0011 clips-lookup-slot-value")
-    end = source.index("(0011 clips-positional-args", start)
+    start = source.index("(визначити знайти-значення-слота-кліпс")
+    end = source.index("(визначити позиційні-аргументи-кліпс", start)
     return source[start:end]
 
 
@@ -36,9 +36,11 @@ def verify_source(source):
     if NEW_EQ not in body:
         raise AssertionError("точний D3 EQ на символах відсутній")
     if STRING_EQUAL not in source:
-        raise AssertionError("рядковий D8 EQUAL змінили без доказу")
-    if source.count("(11110111 ") != 1:
-        raise AssertionError("кількість рядкових D8 EQUAL має лишитися один")
+        raise AssertionError("канонічне порівняння двокрапок змінено без доказу")
+    if source.count(STRING_EQUAL) != 1:
+        raise AssertionError("канонічне порівняння двокрапок дубльоване або втрачено")
+    if "11110111" in body:
+        raise AssertionError("старий D8 EQUAL повернувся у викличну позицію")
     return body
 
 
@@ -77,12 +79,13 @@ class ClipsSlotD3Exact2046(unittest.TestCase):
         self.assertEqual(body.count(NEW_EQ), 1)
         self.assertNotIn(BAD_GUARD, body)
 
-    def test_ophead_budget_only_not_fake_physical_compression(self):
+    def test_current_ukrainian_d3_guard_without_fake_bit_budget(self):
         verify_source(self.source)
-        self.assertEqual(len("100"), 3)      # Added CAR (D3)
-        self.assertEqual(len("11110111"), 8) # Removed one D8 EQUAL
-        self.assertEqual(len("101"), 3)      # Added D3 EQ
-        self.assertEqual(3 + 3 - 8, -2)       # Net call-head bits
+        self.assertIn("(атом? (перше форми-слотів))", body)
+        self.assertIn("(тотожне? назва-слота", body)
+        self.assertNotIn("11110111", body)
+        # Довжина написання української проєкції не доводить
+        # жодного скорочення фізичного T5M або нового доменного закону.
 
     def test_exhaustive_2046_exact_width_domain_addresses(self):
         cells = validate_all_cells(domain_keys())
@@ -141,16 +144,18 @@ class ClipsSlotD3Exact2046(unittest.TestCase):
     def test_negative_do_not_alias_string_equal_to_atomic_eq(self):
         verify_source(self.source)
         broken = self.source.replace(STRING_EQUAL, STRING_EQUAL.replace(
-            "11110111", "101", 1), 1)
-        with self.assertRaisesRegex(AssertionError, "рядковий D8"):
+            '":"', '";"', 1), 1)
+        with self.assertRaisesRegex(AssertionError, "порівняння двокрапок"):
             verify_source(broken)
 
     def test_negative_malformed_slot_guard_order(self):
         verify_source(self.source)
+        start = self.source.index(SKIP_ATOM) + len(SKIP_ATOM)
+        end = self.source.index(GOOD_GUARD, start)
+        whitespace = self.source[start:end]
         broken = self.source.replace(
-            SKIP_ATOM + "\n      " + GOOD_GUARD,
-            GOOD_GUARD + "\n      " + SKIP_ATOM,
-            1,
+            SKIP_ATOM + whitespace + GOOD_GUARD,
+            GOOD_GUARD + whitespace + SKIP_ATOM, 1,
         )
         self.assertNotEqual(broken, self.source)
         with self.assertRaisesRegex(AssertionError, "вкладеного CAR"):
