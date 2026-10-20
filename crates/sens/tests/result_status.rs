@@ -188,7 +188,7 @@ fn result_status_of_an_untagged_value_is_nil() {
 fn reason_observe_reports_positive_proof_without_changing_reason() {
     let source = r#"
         (let ((rules (quote (((parent alice bob))))))
-          (reason-observe (quote (parent alice bob)) rules))
+          (міркувати-спостерігати (quote (parent alice bob)) rules))
     "#;
     assert_eq!(
         eval_reason_observation(source),
@@ -200,7 +200,7 @@ fn reason_observe_reports_positive_proof_without_changing_reason() {
 fn reason_observe_reports_an_explicit_negative_as_proved_opposite() {
     let source = r#"
         (let ((rules (quote (((not? (mortal socrates)))))))
-          (second (reason-observe (quote (mortal socrates)) rules)))
+          (second (міркувати-спостерігати (quote (mortal socrates)) rules)))
     "#;
     assert_eq!(
         eval_reason_observation(source),
@@ -215,7 +215,7 @@ fn reason_observe_reports_dispute_when_both_sides_are_provable() {
                  ((mortal socrates))
                  ((not? (mortal socrates)))
                ))))
-          (let ((outcome (reason-observe (quote (mortal socrates)) rules)))
+          (let ((outcome (міркувати-спостерігати (quote (mortal socrates)) rules)))
             (list (результат-стан outcome) (length (second outcome)))))
     "#;
     assert_eq!(eval_reason_observation(source), "(disputed 2)");
@@ -231,7 +231,7 @@ fn reason_observe_preserves_every_successful_alternative() {
                ))))
           (length
             (third
-              (reason-observe
+              (міркувати-спостерігати
                 (list (quote edge) (logic-var (quote x)) (quote z))
                 rules))))
     "#;
@@ -265,7 +265,7 @@ fn ukrainian_negated_goal_must_have_exactly_one_nested_goal() {
 #[test]
 fn reason_observe_rejects_malformed_goal_as_data() {
     assert_eq!(
-        eval_reason_observation(r#"(reason-observe 42 (quote ()))"#),
+        eval_reason_observation(r#"(міркувати-спостерігати 42 (quote ()))"#),
         "(invalid invalid-goal 42)"
     );
 }

@@ -99,9 +99,12 @@ class ResultStatusProjectionTests(unittest.TestCase):
                          "result-status", "result-payload",
                          "result-proper-list?"):
             self.assertNotIn("(визначити " + obsolete + " ", code)
-        # Два історичні входи спостереження мають окремих споживачів.
-        for compat in ("reason-observe", "reason-in-observe"):
-            self.assertIn("(визначити " + compat + " ", code)
+        # Споживачі спостереження перейшли на українську поверхню.
+        for retired in ("reason-observe", "reason-in-observe"):
+            self.assertNotIn("(визначити " + retired + " ", code)
+        for current in ("міркувати-спостерігати",
+                        "міркувати-у-спостерігати"):
+            self.assertIn("(визначити " + current + "\n", code)
         for obsolete in ("result-goal?", "result-negated-goal?",
                          "result-opposite-goal"):
             self.assertNotIn("(визначити " + obsolete + " ", code)

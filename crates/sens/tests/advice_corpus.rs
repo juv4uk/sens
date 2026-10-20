@@ -63,7 +63,7 @@ fn direct_controlled_fact_reaches_proved_narration() {
     let source = r#"
         (advise astronomy (understand (001 (earth is a planet))))
         (narrate-outcome
-          (reason-in-observe (001 astronomy) (001 (planet earth))))
+          (міркувати-у-спостерігати (001 astronomy) (001 (planet earth))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved earth is a planet)");
 }
@@ -78,7 +78,7 @@ fn multistep_rules_survive_admission_reasoning_and_presentation() {
             ((valuable (var x)) (has (var x) mass))
           )))
         (let* ((outcome
-                 (reason-in-observe (001 science) (001 (valuable earth))))
+                 (міркувати-у-спостерігати (001 science) (001 (valuable earth))))
                (words (narrate-outcome outcome)))
           (list (result-status outcome) (100 words)))
     "#;
@@ -98,7 +98,7 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
               (ancestor (var z) (var y)))
           )))
         (let* ((outcome
-                 (reason-in-observe
+                 (міркувати-у-спостерігати
                    (001 family)
                    (001 (ancestor alice charlie))))
                (words (narrate-outcome outcome)))
@@ -114,7 +114,7 @@ fn explicit_conflict_is_rejected_and_cannot_replace_the_existing_fact() {
         (let* ((decision
                  (advise ethics (001 ((not? (mortal socrates))))))
                (outcome
-                 (reason-in-observe (001 ethics) (001 (mortal socrates)))))
+                 (міркувати-у-спостерігати (001 ethics) (001 (mortal socrates)))))
           (list (100 decision) (result-status outcome)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(conflict proved)");
@@ -130,7 +130,7 @@ fn knowledge_package_round_trip_precedes_reasoning_without_eval_of_package_data(
         (def *knowledge-journal* (001 ()))
         (import-knowledge-package package)
         (narrate-outcome
-          (reason-in-observe (001 archive) (001 (planet mars))))
+          (міркувати-у-спостерігати (001 archive) (001 (planet mars))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved mars is a planet)");
 }

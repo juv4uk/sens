@@ -24,7 +24,7 @@ fn observe_in(source: &str) -> String {
 #[test]
 fn malformed_module_name_is_invalid_not_unknown() {
     assert_eq!(
-        observe_in(r#"(reason-in-observe 42 (quote (planet earth)))"#),
+        observe_in(r#"(міркувати-у-спостерігати 42 (quote (planet earth)))"#),
         "(invalid invalid-module 42)"
     );
 }
@@ -32,7 +32,7 @@ fn malformed_module_name_is_invalid_not_unknown() {
 #[test]
 fn malformed_goal_is_invalid_even_when_module_is_missing() {
     assert_eq!(
-        observe_in(r#"(reason-in-observe (quote missing) (quote (not?)))"#),
+        observe_in(r#"(міркувати-у-спостерігати (quote missing) (quote (not?)))"#),
         "(invalid invalid-goal (not?))"
     );
 }

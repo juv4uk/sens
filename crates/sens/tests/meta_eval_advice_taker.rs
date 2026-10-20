@@ -42,7 +42,7 @@ fn advice_program() -> String {
 (def meta-advice-observe
   (lambda ()
     (let* ((proved
-             (reason-observe
+             (міркувати-спостерігати
                (quote (grandparent alice carol))
                meta-advice-rules))
            (proof
@@ -52,13 +52,13 @@ fn advice_program() -> String {
         (list (quote proof-provenance) (provenance proof))
         (list
           (quote disputed-outcome)
-          (reason-observe (quote (safe sky)) meta-advice-rules))
+          (міркувати-спостерігати (quote (safe sky)) meta-advice-rules))
         (list
           (quote unknown-outcome)
-          (reason-observe (quote (safe ocean)) meta-advice-rules))
+          (міркувати-спостерігати (quote (safe ocean)) meta-advice-rules))
         (list
           (quote invalid-outcome)
-          (reason-observe (quote (not?)) meta-advice-rules))))))
+          (міркувати-спостерігати (quote (not?)) meta-advice-rules))))))
 
 (meta-advice-observe)
 "#,

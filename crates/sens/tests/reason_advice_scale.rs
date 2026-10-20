@@ -106,8 +106,8 @@ fn profile_size(distractors: usize) -> (u128, u128, u128, u128, u128, usize) {
 
     let indexed_direct = "(length (міркувати (quote (valuable target)) bench-rules))";
     let linear_direct = "(length (довести-ціль (quote (valuable target)) bench-rules (quote ()) (лінійний-індекс-міркування bench-rules) 0))";
-    let raw_reason = "(result-status (reason-observe (quote (valuable target)) bench-rules))";
-    let end_to_end = "(result-status (reason-in-observe (quote bench) (quote (valuable target))))";
+    let raw_reason = "(result-status (міркувати-спостерігати (quote (valuable target)) bench-rules))";
+    let end_to_end = "(result-status (міркувати-у-спостерігати (quote bench) (quote (valuable target))))";
 
     // Warm every measured reasoning path before the three-sample median. The
     // direct pair intentionally has the same projected corpus, goal and result
@@ -171,11 +171,11 @@ const REPEATED_GOALS: [&str; 6] = [
 ];
 
 fn public_observe_source(goal: &str) -> String {
-    format!("(reason-in-observe (quote bench) (quote {goal}))")
+    format!("(міркувати-у-спостерігати (quote bench) (quote {goal}))")
 }
 
 fn prepared_observe_source(goal: &str) -> String {
-    format!("(reason-observe (quote {goal}) bench-index)")
+    format!("(міркувати-спостерігати (quote {goal}) bench-index)")
 }
 
 fn timed_query_batch(session: &mut Session, prepared: bool) -> u128 {

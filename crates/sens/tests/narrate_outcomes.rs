@@ -40,7 +40,7 @@ fn proved_outcome_keeps_the_ground_answer_and_real_premise() {
         (let* ((rules (quote (((has (var x) mass) (planet (var x)))
                               ((planet earth)))))
                (goal (quote (has earth mass))))
-          (narrate-outcome (reason-observe goal rules)))
+          (narrate-outcome (міркувати-спостерігати goal rules)))
     "#;
     assert_eq!(
         eval_outcome_narration(source),
@@ -55,7 +55,7 @@ fn disputed_outcome_keeps_both_evidence_sides_visible() {
                               ((not? (mortal socrates))))))
                (narration
                  (narrate-outcome
-                   (reason-observe (quote (mortal socrates)) rules))))
+                   (міркувати-спостерігати (quote (mortal socrates)) rules))))
           (list (car narration)
                 (second narration)
                 (third narration)

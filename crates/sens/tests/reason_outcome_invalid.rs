@@ -18,7 +18,7 @@ fn observe(source: &str) -> String {
 #[test]
 fn not_without_nested_goal_is_invalid() {
     assert_eq!(
-        observe(r#"(reason-observe (quote (not?)) (quote ()))"#),
+        observe(r#"(міркувати-спостерігати (quote (not?)) (quote ()))"#),
         "(invalid invalid-goal (not?))"
     );
 }
@@ -26,7 +26,7 @@ fn not_without_nested_goal_is_invalid() {
 #[test]
 fn not_with_multiple_nested_forms_is_invalid() {
     assert_eq!(
-        observe(r#"(reason-observe (quote (not? (planet earth) extra)) (quote ()))"#),
+        observe(r#"(міркувати-спостерігати (quote (not? (planet earth) extra)) (quote ()))"#),
         "(invalid invalid-goal (not? (planet earth) extra))"
     );
 }
@@ -34,7 +34,7 @@ fn not_with_multiple_nested_forms_is_invalid() {
 #[test]
 fn non_symbol_predicate_head_is_invalid() {
     assert_eq!(
-        observe(r#"(reason-observe (quote (42 earth)) (quote ()))"#),
+        observe(r#"(міркувати-спостерігати (quote (42 earth)) (quote ()))"#),
         "(invalid invalid-goal (42 earth))"
     );
 }
