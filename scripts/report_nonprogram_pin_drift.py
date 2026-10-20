@@ -14,6 +14,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 from report_original_migration_candidates import NONPROGRAM_MANIFESTS, git_blob_sha
+from report_ukr_projection_progress import tokenize_lisp
 
 SCHEMA = "sens-nonprogram-source-pin-drift/v1"
 
@@ -71,12 +72,17 @@ def scan(root: Path, manifests=NONPROGRAM_MANIFESTS, *, limit: int = 10) -> dict
                 if source.with_suffix(".sens").exists() or source.with_suffix(".sens").is_symlink():
                     reason = "UNAPPROVED_PHYSICAL_PAIR"
                 if cohort == "comment-only-loader":
+                    # Чинний Lisp допускає ; та вкладені #| ... |#
+                    # як коментарі. Старий построковий евристичний
+                    # розбір створює штучний NO_LONGER_COMMENT_ONLY.
                     try:
-                        lines = source.read_text(encoding="utf-8").splitlines()
+                        tokens = tokenize_lisp(source.read_text(encoding="utf-8"))
                     except UnicodeError:
                         reason = "INVALID_UTF8_COMMENT_ONLY_SOURCE"
+                    except ValueError:
+                        reason = "INVALID_LISP_COMMENT_SYNTAX"
                     else:
-                        if any(line.strip() and not line.lstrip().startswith(";") for line in lines):
+                        if tokens:
                             reason = "NO_LONGER_COMMENT_ONLY"
             if reason:
                 discrepancies.append({
