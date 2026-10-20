@@ -4,8 +4,8 @@
 ; Кількості обчислюються наскрізно через BinaryNumber; перевірка не повинна
 ; відновлювати неявне перетворення між Number і BinaryNumber.
 
-(load "lib/core.lisp")
-(load "lib/machine/encoding/coverage-generator.lisp")
+(завантажити-файл "lib/core.lisp")
+(завантажити-файл "lib/machine/encoding/coverage-generator.lisp")
 
 (визначити форма-покриття-кодувальника
   (перше
