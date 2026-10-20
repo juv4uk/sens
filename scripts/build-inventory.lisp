@@ -141,8 +141,8 @@
          (вивести-всі (решта залишок)))))))
 
 ;; Заголовок породженого файла.
-(друкувати (сполучити (як-є about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p sens-cli --bin sens -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
-(друкувати (сполучити (як-є generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
+(друкувати (сполучити (як-є about) "tests/fixtures/inventory.lisp — детермінований покажчик з tests/fixtures/conformance.lisp. Кожен запис містить сталий ідентифікатор за вмістом (F-<16hex>), нормативний рівень, аксіоми та заявлені залежності, спостережені канонічним читачем форми й очікуваний результат. Файл породжено автоматично — не редагуйте вручну. Відтворення: cargo run -p sens-cli --bin sens -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
+(друкувати (сполучити (як-є generated) "Цей файл ПОРОДЖЕНО автоматично — не редагуйте вручну. Він є проєкцією tests/fixtures/conformance.lisp та канонічної логіки сценарію scripts/build-inventory.lisp."))
 (друкувати (сполучити (як-є source) "tests/fixtures/conformance.lisp"))
 
 (вивести-всі приклади)
