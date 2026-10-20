@@ -1,27 +1,24 @@
-;; Peer-identity acceptance program.
-;; Приймальна програма тотожності мовних поверхонь.
+;; Приймальна перевірка точної тотожності української й англійської поверхонь.
 ;;
-;; Proves that a Ukrainian peer spelling and its English counterpart
-;; share exact language-level identity under `eq`, not merely equal
-;; behavior through a re-implementation or translation shim -- the
-;; distinction docs/PLAN-FULL-LANGUAGE-PARITY.md's invariant 5 draws
-;; ("Жодного cross-language alias як реалізації"). The runtime
-;; representation used to realize that identity is deliberately not part
-;; of this language contract.
+;; Перевіряємо, що українська назва та її англійський відповідник мають
+;; одну мовну тотожність за «тотожне?», а не лише однакову поведінку
+;; через повторну реалізацію або проміжний перекладач.
+;; Це вимога № 5 з docs/PLAN-FULL-LANGUAGE-PARITY.md:
+;; «Жодного cross-language alias як реалізації».
+;; Фізичне подання значень не є частиною цього мовного контракту.
 ;;
-;; This is a different concern from tests/fixtures/conformance.lisp's
-;; single-session semantic facts: it inherently compares bindings across
-;; two loaded surface files, which conformance.lisp's uniform core.lisp-only
-;; execution model does not accommodate.
+;; Ця перевірка відрізняється від tests/fixtures/conformance.lisp:
+;; тут зіставляються прив'язки з двох завантажених мовних поверхонь.
+;; Вона не вкладається у модель одного завантаженого core.lisp.
 ;;
-;; Required: core.lisp, then uk.lisp loaded on top (same as the CLI's own
-;; --surface=uk prerequisite chain).
-;; Run: load core library + uk.lisp, then evaluate this file.
+;; Перед виконанням потрібно завантажити core.lisp, потім uk.lisp.
+;; Це відповідає послідовності залежностей командного режиму --surface=uk.
 ;;
-;; Added 2026-09-11 alongside the abs/min/max/min-list/max-list
-;; migration (docs/VERTICAL-SLICE-1-ABS-MIN-MAX-2026-09-11.md) as the
-;; first entries; extend this file, not conformance.lisp, for future
-;; peer-identity witnesses.
+;; Файл доповнено 11.09.2026 під час перенесення abs, min, max,
+;; min-list і max-list (docs/VERTICAL-SLICE-1-ABS-MIN-MAX-2026-09-11.md).
+;; Подальші свідчення міжмовної тотожності додаються сюди,
+;; а не до історичного корпусу conformance.lisp.
+
 
 (визначити перевірити-все
   (функція ()
@@ -33,5 +30,5 @@
       ((хибне? (тотожне? найбільше-у-списку max-list)) (як-є помилка-найбільше-у-списку-max-list))
       ((тотожне? 1 1) (як-є успіх)))))
 
-;; Run
+;; Виконати приймальну перевірку.
 (перевірити-все)
