@@ -298,8 +298,8 @@ if [[ "$meta_registry_status" != "(meta-semantic-registry-witness (status pass))
   exit 1
 fi
  
-# #771: current compact-SID post-core process declaration must load cleanly
-# and preserve one runtime identity across the English/Ukrainian stable peer.
+# #771: чинна українська функція процесного модуля має завантажитися
+# та зберегти точне правило коду виходу без старого англійського псевдоніма.
 process_load_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/process-load-witness.lisp)"
 if [[ "$process_load_status" != "(process-load-witness (status pass))" ]]; then
   printf 'process-load Lisp witness failed: %s\n' "$process_load_status" >&2
