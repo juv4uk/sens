@@ -1,2 +1,3 @@
-; #150 normal authority graph input: meaning may project downward to machine.
+; #150 — допустиме ребро графа повноважень: від семантики до машини.
+; Точний напрям і назви полів зберігаються як дані контракту.
 (authority-edge semantic machine projection)
