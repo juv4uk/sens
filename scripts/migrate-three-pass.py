@@ -1730,15 +1730,16 @@ def main():
             "padding": "T5M: zero through four final trits 2; T5: zero through four final trits 2",
             "ascii_text": False,
             "source_surface": args.source_surface,
-            "numeric_projection": "human decimal numerals lower to exact D24+ words before physical encoding",
+            "numeric_projection": "human decimal tokens require explicit successful D24+ lowering; unsupported values stay blocked",
         },
         "passes": {
-            "1": "historical 8-bit head -> admitted current successor",
+            "1": "retired historical SID8 bridge: no executable mapping",
             "2": "my-lisp / current admitted name -> exact current domain",
             "3": "Lisp-I/1.5 head -> proven callable identity (D3-D6, admitted D8, concrete Core4-bound D9/D10); D11 remains test-only",
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
-        "migration_complete": bool(paths) and blocked == 0,
+        "migration_complete": False,  # batch transport never certifies semantic migration
+        "physical_batch_complete": bool(paths) and blocked == 0 and not args.dry_run,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
         "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; under the D1–24+ frame, width alone grants neither identity nor callability; this migration requires a named current identity and an admitted call mechanism",
@@ -1765,7 +1766,10 @@ def main():
     # Nothing new to publish when every selected source is already paired:
     # this is a valid idempotent selection, not a codec/toolchain failure.
     # An actually empty or wholly blocked input still returns a failure.
-    return 0 if written or (not paths and bool(skipped_paired)) else 2
+    # Частковий пакет не є успіхом: лишаємо вдалі окремі результати,
+    # але звітуємо код 2, якщо хоча б одна програма не перетворилася.
+    # CI може зберегти артефакти та показати точні причини без глобального STOP.
+    return 0 if blocked == 0 and (written or (not paths and bool(skipped_paired))) else 2
 
 
 if __name__ == "__main__":
