@@ -1,8 +1,8 @@
 ; contracts/d8-ratification.lisp
-; OWNER-RATIFIED 2026-10-06 — issue #3960.
-; Normative D8 cut: 256/256 distinct residents.
-; Full exact map: knowledge/d8-ratified.json
-; Source candidate: #3959 / b60b60b6ba4fe990dac8d0b9487fbaf67a13f77f
+; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-06 — issue #3960.
+; Нормативний зріз D8: 256/256 різних резидентів.
+; Повна точна карта: knowledge/d8-ratified.json
+; Джерело-кандидат: #3959 / b60b60b6ba4fe990dac8d0b9487fbaf67a13f77f
 
 (
   (schema . d8-ratification/1)
