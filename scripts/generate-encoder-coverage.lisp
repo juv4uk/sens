@@ -1,4 +1,10 @@
-; #604 — regenerate encoder coverage from Lisp-owned derived machine coverage inputs.
+; #604 — відтворити покриття кодувальника з похідних машинних даних,
+; якими керує мова СЕНС.
+; Результат записує мовна функція, а не зовнішній генератор.
+; Точні мітки encoder-coverage-generate, status, forms і partial
+; належать формату звіту: це цитовані дані, не викличні імена.
+; Наявні виклики load лишаються механізмом завантаження хоста,
+; доки для них не підтверджено ратифікованого українського відповідника.
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
 
