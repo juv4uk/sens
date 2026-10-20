@@ -1,12 +1,14 @@
-; #491 — register-width discipline after x86-reg-code gained byte aliases.
-; The encoder may share one physical register-code mapping across widths, but
-; typed operands must not collapse gpr8 into gpr64.
+; Свідок розрядності регістрів x86-64 #491.
+; Один фізичний код регістра може відповідати різним розрядностям,
+; але типізовані операнди gpr8 та gpr64 не можна ототожнювати.
+; Власні функції, параметри й локальні назви українською.
+; Байтові еталони, регістрові позначки та зовнішні x86-механізми незмінні.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
 (load "lib/machine/operands/x86-64.lisp")
 
-(визначити machine-register-width-rows
+(визначити рядки-перевірки-розрядності-регістрів
   (функція ()
     (список
       (список (як-є gpr64-rax)
@@ -43,25 +45,29 @@
             (x86-encode-setz-r8 (x86-gpr8-value (x86-gpr8 (як-є r8b))))
             (як-є (65 15 148 192))))))
 
-(визначити machine-register-width-check
-  (функція (rows)
+(визначити перевірити-розрядність-регістрів
+  (функція (рядки)
     (за-умовою
-      ((атом? rows)
+      ((атом? рядки)
        (як-є (machine-register-width-witness (status pass))))
       (так
-       (нехай ((row (перше rows))
-              (name (перше row))
-              (actual (друге row))
-              (expected (третє row)))
+       (нехай ((рядок (перше рядки))
+              (назва (перше рядок))
+              (фактичне (друге рядок))
+              (очікуване (третє рядок)))
          (за-умовою
-           ((однакові? actual expected)
-            (machine-register-width-check (решта rows)))
+           ((однакові? фактичне очікуване)
+            (перевірити-розрядність-регістрів (решта рядки)))
            (так
             (список
               (як-є machine-register-width-witness)
               (як-є (status fail))
-              (список (як-є case) name)
-              (список (як-є expected) expected)
-              (список (як-є actual) actual)))))))))
+              (список (як-є case) назва)
+              (список (як-є expected) очікуване)
+              (список (як-є actual) фактичне)))))))))
 
-(machine-register-width-check (machine-register-width-rows))
+; Сумісні зовнішні назви.
+(визначити machine-register-width-rows рядки-перевірки-розрядності-регістрів)
+(визначити machine-register-width-check перевірити-розрядність-регістрів)
+
+(перевірити-розрядність-регістрів (рядки-перевірки-розрядності-регістрів))
