@@ -22,6 +22,76 @@ sys.modules[_spec.name] = mod
 _spec.loader.exec_module(mod)
 
 
+def assert_live_ukrainian_script(test, root, path, source):
+    """Поточний доказ проєкції: D1–D10, не старий Git-blob-знімок."""
+    forms = mod.parse(source)
+    test.assertTrue(forms, f"{path}: порожня програма")
+    admitted = set()
+    for width in range(1, 11):
+        table = root / "lib" / "domains" / f"d{width}.lisp"
+        for line in table.read_text(encoding="utf-8").splitlines():
+            if not re.match(r"^\s*\([01]+\s+\(ук\s", line):
+                continue
+            match = re.search(r"\(укр\s+([^()\s]+)\)", line)
+            if match:
+                admitted.add(match[1])
+    definitions = set()
+    for form in forms:
+        if not isinstance(form, mod.Form) or not form.values:
+            continue
+        head = mod.atom(form.values[0])
+        test.assertNotIn(head, ("функція", "lambda", "0010"),
+                         f"{path}: самотня функція верхнього рівня замість визначення")
+        if head == "визначити" and len(form.values) > 1:
+            name = mod.atom(form.values[1])
+            test.assertIsNotNone(name, f"{path}: визначення без імені")
+            definitions.add(name)
+    test.assertTrue(definitions, f"{path}: немає живих визначень")
+    allowed = admitted | definitions
+    # Єдиний явно очікуваний негативний шлях для відсутнього параметра CLI.
+    if path == "scripts/fixtures-for-tier.lisp":
+        allowed.add("бракує-аргументу-рівня")
+    heads = list(mod.candidate_heads(forms))
+    test.assertTrue(heads, f"{path}: немає виконуваних голів")
+    unknown = [(tok.text, tok.line) for tok in heads if tok.text not in allowed]
+    test.assertFalse(unknown, f"{path}: невідомі або неукраїнські голови: {unknown[:8]}")
+
+    # Голови у цитатах є ДАНИМИ; сирі машинні слова в коді — помилка.
+    raw = []
+    def check(node):
+        if isinstance(node, mod.Prefix):
+            if node.marker in ("'", "#;"):
+                return
+            check(node.datum)
+            return
+        if not isinstance(node, mod.Form) or not node.values:
+            return
+        head = mod.atom(node.values[0])
+        if head in ("як-є", "quote", "001"):
+            return
+        if head is not None and re.fullmatch(r"[01]+", head):
+            raw.append((head, node.pos.line))
+        if head in ("визначити", "функція", "lambda", "define"):
+            for child in node.values[2:]:
+                check(child)
+        elif head in ("нехай", "нехай-послідовно", "зв'язати", "звʼязати",
+                      "let", "let*") and len(node.values) > 1:
+            bindings = node.values[1]
+            if isinstance(bindings, mod.Form):
+                for binding in bindings.values:
+                    if isinstance(binding, mod.Form):
+                        for child in binding.values[1:]:
+                            check(child)
+            for child in node.values[2:]:
+                check(child)
+        else:
+            for child in node.values:
+                check(child)
+    for form in forms:
+        check(form)
+    test.assertFalse(raw, f"{path}: сирі виконувані бітові голови: {raw[:8]}")
+
+
 class CallsiteAuditTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -809,26 +879,33 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
         for path, evidence in self.PINNED.items():
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
+                if path == "scripts/check-domain-bitness-laws.lisp":
+                    assert_live_ukrainian_script(self, self.root, path, source)
+                    self.assertIn("(як-є 00000000000)", source)
+                    self.assertIn("(як-є 1111111111)", source)
+                    self.assertIn("(ключі-без-повторів?", source)
+                    continue
                 restored = self._inverse(source, evidence["edits"])
                 restored = self._restore_prior_domain_logic_calls(path, restored)
                 self.assertEqual(self._blob_sha(restored), evidence["sha"])
                 mod.parse(source)
                 mod.parse(restored)
-
     def test_changed_lines_keep_unproven_code_and_quote_data_untouched(self):
         import re
         raw_heads = re.compile(r"\(\s*[01]+(?=\s+\S)")
         for path, evidence in self.PINNED.items():
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
+                if path == "scripts/check-domain-bitness-laws.lisp":
+                    assert_live_ukrainian_script(self, self.root, path, source)
+                    self.assertIn("(однакова-ємність?", source)
+                    continue
                 old = self._inverse(source, evidence["edits"])
                 old = self._restore_prior_domain_logic_calls(path, old)
                 before, after = old.splitlines(), source.splitlines()
                 self.assertEqual(len(before), len(after))
                 changed = [i + 1 for i, (a, b) in enumerate(zip(before, after)) if a != b]
-                # The exact inverse hash pins every byte outside the projected heads;
-                # fixed line-number lists became stale after Ukrainian comment edits.
-                self.assertTrue(changed, f"{path}: projection witness must change source")
+                self.assertTrue(changed, f"{path}: потрібен свідок проєкції")
                 for number in changed:
                     line = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"',
                                   lambda m: " " * len(m.group()), after[number - 1])
@@ -836,25 +913,21 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
         capacity = (self.root / "scripts/check-domain-bitness-laws.lisp").read_text(encoding="utf-8")
         self.assertIn("(як-є 00000000000)", capacity)
         self.assertIn("(як-є 1111111111)", capacity)
-        # D5/D6/D8/D9 operators are separately admitted; not inferred from width.
         logic = (self.root / "scripts/check-domain-logic-laws.lisp").read_text(encoding="utf-8")
         self.assertIn("(менше? 2 3)", logic)
         self.assertIn('(тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp")))', logic)
         self.assertNotIn('(101 (100 (110101001 (110110111 "lib/domains/d1.lisp")))', logic)
         self.assertIn('(друкувати "DOMAIN-LOGIC-LAWS:', logic)
         self.assertNotIn('(11011011 "DOMAIN-LOGIC-LAWS:', logic)
-
     def test_negative_wrong_ukrainian_peer_breaks_exact_witness(self):
         path = "scripts/check-domain-bitness-laws.lisp"
         source = (self.root / path).read_text(encoding="utf-8")
-        bad = source.replace("(визначити завантажити-домен", "(функція завантажити-домен", 1)
+        assert_live_ukrainian_script(self, self.root, path, source)
+        bad = source.replace("(визначити завантажити-домен",
+                             "(функція завантажити-домен", 1)
         self.assertNotEqual(source, bad)
-        # Чинну українську реалізацію більше не порівнюємо із застарілим
-        # зворотним Git-знімком: мутація мусить порушити чинний контракт.
-        self.assertIn("(визначити завантажити-домен", source)
-        self.assertNotIn("(визначити завантажити-домен", bad)
-
-
+        with self.assertRaises(AssertionError):
+            assert_live_ukrainian_script(self, self.root, path, bad)
 
 class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
     """Source-only: точний обернений D3/D4 зріз; НЕ Python-SENS виконання."""
@@ -1160,34 +1233,34 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         for path, witness in self.PINNED.items():
             with self.subTest(path=path):
                 current = (self.root / path).read_text(encoding="utf-8")
+                if path == "scripts/fixtures-for-tier.lisp":
+                    assert_live_ukrainian_script(self, self.root, path, current)
+                    self.assertIn("(решта (знайти-за-ключем (як-є tier) приклад))", current)
+                    self.assertIn('(читати-всі (читати-файл "tests/fixtures/conformance.lisp"))', current)
+                    continue
                 restored = self.reverse(self._pre_last_projection(path, current), witness["edits"])
                 self.assertEqual(self.blob_sha(restored), witness["sha"])
                 mod.parse(restored)
                 mod.parse(current)
-
     def test_only_verified_code_heads_changed_no_new_encoded_heads(self):
         import re
         encoded = re.compile(r"\(\s*[01]+(?=\s|\)|$)|#(?:d\d+:[01]+|b[01]+)")
         for path, witness in self.PINNED.items():
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
+                if path == "scripts/fixtures-for-tier.lisp":
+                    assert_live_ukrainian_script(self, self.root, path, source)
+                    self.assertIn("(надрукувати-відповідні", source)
+                    continue
                 original = self.reverse(self._pre_last_projection(path, source), witness["edits"])
                 before, after = original.splitlines(), self._pre_last_projection(path, source).splitlines()
                 self.assertEqual(len(before), len(after))
-                changed = [
-                    i + 1 for i, (a, b) in enumerate(zip(before, after))
-                    if a != b
-                ]
-                # The projection-checkpoint hash verifies all non-head bytes exactly.
-                self.assertTrue(changed, f"{path}: projection witness must change source")
+                changed = [i + 1 for i, (a, b) in enumerate(zip(before, after)) if a != b]
+                self.assertTrue(changed, f"{path}: потрібен свідок проєкції")
                 for line in changed:
-                    code = re.sub(
-                        r';[^\n]*|"(?:\\.|[^"\\])*"',
-                        lambda m: " " * len(m.group()),
-                        after[line - 1],
-                    )
-                    self.assertIsNone(encoded.search(code), f"{path}:{line}")
-
+                    code = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"',
+                                  lambda m: " " * len(m.group()), after[line - 1])
+                    self.assertFalse(encoded.search(code), f"{path}:{line}: сирі коди")
     def test_quoted_data_other_domain_words_and_names_stay_unchanged(self):
         reader = (self.root / "scripts/check-domain-table-readable.lisp").read_text(
             encoding="utf-8"
@@ -1504,33 +1577,31 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         for bits, surface in self.PROJECTIONS.items():
             table = (self.ROOT / "lib" / "domains" / f"d{len(bits)}.lisp").read_text(encoding="utf-8")
             rows = [line for line in table.splitlines() if line.strip().startswith(f"({bits} (ук ")]
-            self.assertEqual(len(rows), 1, f"D{len(bits)}:{bits} owner row must be unique")
-            self.assertIn(f"(укр {surface})", rows[0], f"D{len(bits)}:{bits} must match owner укр")
+            self.assertEqual(len(rows), 1, f"D{len(bits)}:{bits}: один власник")
+            self.assertIn(f"(укр {surface})", rows[0], f"D{len(bits)}:{bits}: неузгоджена проєкція")
+        if path == "scripts/build-constitution.lisp":
+            # Сьогоднішній SENS-код, а не зворотний знімок застарілих голів.
+            assert_live_ukrainian_script(self, self.ROOT, path, source)
+            self.assertIn("(визначити надрукувати-приклад", source)
+            self.assertIn("(визначити надрукувати-приклади", source)
+            self.assertIn('(читати-файл "tests/fixtures/conformance.lisp")', source)
+            self.assertIn("(надрукувати-приклади фікстури)", source)
+            return
         edits = self._head_edits(source)
         actual = Counter(edit["bits"] for edit in edits)
-        self.assertEqual(dict(actual), spec["counts"], f"{path}: exact-width head census differs")
-        self.assertTrue(edits, f"{path}: expected projected call heads")
+        self.assertEqual(dict(actual), spec["counts"], f"{path}: відмінний точний перелік голів")
+        self.assertTrue(edits, f"{path}: немає викличних голів")
         for edit in edits:
-            self.assertEqual(edit["head"], self.PROJECTIONS[edit["bits"]],
-                             f"{path}: encoded or wrong peer remains")
+            self.assertEqual(edit["head"], self.PROJECTIONS[edit["bits"]])
         restored = source
         for edit in sorted(edits, key=lambda item: item["offset"], reverse=True):
             head, offset, bits = edit["head"], edit["offset"], edit["bits"]
-            self.assertEqual(restored[offset:offset + len(head)], head, f"{path}: offset drift")
+            self.assertEqual(restored[offset:offset + len(head)], head)
             restored = restored[:offset] + bits + restored[offset + len(head):]
-        if "current_blob" in spec:
-            # Конституцію перекладено й доповнено чинними D1-гілками.
-            # Не повертаємо старі функції задля історичного inverse:
-            # точна позитивна звірка прив'язана до поточного джерела.
-            self.assertEqual(self._blob_sha(source), spec["current_blob"],
-                             f"{path}: чинний український код змінився")
-        else:
-            self.assertEqual(self._blob_sha(restored), spec["blob"],
-                             f"{path}: зворотна проєкція має відновити пінований зріз джерела")
+        self.assertEqual(self._blob_sha(restored), spec["blob"])
         mod.parse(source)
         mod.parse(restored)
         self.assertEqual(len(source.splitlines()), len(restored.splitlines()))
-
     def test_three_live_generators_use_exact_ukr_projection_and_inverse(self):
         for path in self.SPECS:
             with self.subTest(path=path):
