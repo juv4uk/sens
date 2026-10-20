@@ -5432,11 +5432,11 @@
 ; D9:001100011 CLIPS-SLOT-NAME; D9:001110111 CLIPS-SLOT-NAMES;
 ; D9:001100110 CLIPS-DEFTEMPLATE-SLOTS; D9:010111000 CLIPS-FACT-CLAUSE.
 ; Only SENS D3/D4 structural laws; no host parser or direct D9 call admission.
-(визначити clips-slot-name
+(визначити кліпс-слот-ім'я
   (функція (поле)
     (друге поле)))
 
-(визначити clips-slot-names
+(визначити кліпс-слот-імена
   (функція (поля)
     (за-умовою
       ((порожній? поля) (як-є ()))
@@ -5444,11 +5444,11 @@
        (сполучити (кліпс-слот-ім'я (перше поля))
             (кліпс-слот-імена (решта поля)))))))
 
-(визначити clips-deftemplate-slots
+(визначити кліпс-визначити-шаблон-слоти
   (функція (форма)
     (кліпс-слот-імена (решта-решти форма))))
 
-(визначити clips-fact-clause
+(визначити кліпс-факт-клауза
   (функція (факт)
     (список факт)))
 
@@ -6314,10 +6314,10 @@
 ; D9:001100110 CLIPS-DEFTEMPLATE-SLOTS, 010111000 CLIPS-FACT-CLAUSE.
 ; Механізм залишається мовним SENS, без нового D8/D9 direct call-head admission.
 (визначити решта-від-позиції відкинути)
-(визначити кліпс-слот-ім'я clips-slot-name)
-(визначити кліпс-слот-імена clips-slot-names)
-(визначити кліпс-визначити-шаблон-слоти clips-deftemplate-slots)
-(визначити кліпс-факт-клауза clips-fact-clause)
+(визначити clips-slot-name кліпс-слот-ім'я)
+(визначити clips-slot-names кліпс-слот-імена)
+(визначити clips-deftemplate-slots кліпс-визначити-шаблон-слоти)
+(визначити clips-fact-clause кліпс-факт-клауза)
 
 ; Дослідження lib/clips-import.lisp, ратифіковані D9 CLIPS структурні закони.
 ; D9:010110100 CLIPS-DEFTEMPLATE-FORM?: тільки список із атомною головою deftemplate.
