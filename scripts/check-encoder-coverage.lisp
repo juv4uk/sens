@@ -1,15 +1,13 @@
-; #604 — структурна перевірка покриття кодувальника, визначеного мовою SENS.
-; Зіставляємо породжені входи, свідок міграції історичної підмножини
-; та збережений результат — по записах, без побудови великого рядка.
-; Підрахунки від початку до кінця залишаються у власному двійковому
-; числовому представленні. Не вводимо неявного змішування з числами хоста.
-; load нижче — наявна форма завантажувача, не новий доменний виклик;
-; назви й поля результату encoder-coverage-* — незмінний формат даних.
+; #604 — structural check for the Lisp-owned encoder coverage authority.
+; Validates generated inputs, legacy-subset migration witness, and committed
+; coverage row-by-row without rendering the full output string.
+; Cardinality checks are BinaryNumber-native end-to-end; this checker must
+; never reintroduce implicit ordinary-Number <-> BinaryNumber coercion.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
 
-(визначити збережена-форма-покриття-кодувальника
+(визначити форма-покриття-кодувальника
   (перше
     (читати-всі
       (читати-файл
@@ -19,7 +17,7 @@
   ((покриття-кодувальника-індекс-коректний?)
    (за-умовою
      ((покриття-кодувальника-проєкція-коректна?
-        збережена-форма-покриття-кодувальника)
+        форма-покриття-кодувальника)
       (як-є
         (encoder-coverage-check
           (status pass))))
