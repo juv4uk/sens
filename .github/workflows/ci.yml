@@ -6,12 +6,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      compare_math_languages:
-        description: 'Повторити автоматичний дослід вручну: Fortran, C, Rust, Zig, ASM'
-        type: boolean
-        required: false
-        default: false
 
 permissions:
   contents: read
@@ -21,7 +15,7 @@ jobs:
     name: Реальне виконання — частина ${{ matrix.shard }}
     # Дев'ятнадцять ресурсомістких частин — лише за ручним дозволом власника.
     # Звичайний push перевіряє мовну поверхню та реальний post-core свідок нижче.
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.compare_math_languages != true
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
@@ -125,7 +119,7 @@ jobs:
 
   lisp-guards:
     name: Українська проєкція та заборона сирих літералів
-    if: (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main') && inputs.compare_math_languages != true
+    if: (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
     # Усі push/PR/manual перевірки — лише GitHub-hosted Ubuntu.
     # Не маршрутизувати код на персональний self-hosted runner.
     runs-on: ubuntu-24.04
@@ -381,7 +375,7 @@ jobs:
 
   lisp-surface:
     name: Українська проєкція та заборона сирих літералів
-    if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main') && inputs.compare_math_languages != true
+    if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
     needs: [lisp-guards, runtime-shards]
     runs-on: ubuntu-24.04
     steps:
@@ -403,23 +397,3 @@ jobs:
             exit 1
           fi
           echo "SENS CI passed: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT"
-
-  language-fit-math:
-    name: Математика під Skylake — серійні й векторні мови проти ASM
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.compare_math_languages == true && github.ref == 'refs/heads/main')
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/install-zig
-      - name: Порівняти сім реалізацій, у тому числі C AVX2 проти ASM AVX2
-        id: language_fit
-        shell: bash
-        continue-on-error: true
-        run: bash benchmarks/language-fit/run.sh
-      - name: Сповістити про невдале вимірювання без зупинки семантичного CI
-        if: steps.language_fit.outcome == 'failure'
-        shell: bash
-        run: echo "::warning title=SENS — мовний бенчмарк::Дослід не завершився успішно; перевірте журнал. Семантичні закони СЕНС цим виміром не оцінюються."
