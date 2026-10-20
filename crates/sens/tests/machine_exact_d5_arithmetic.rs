@@ -112,7 +112,7 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     }
 
     let sub_forms = eval_program(
-        "(x86-lower-current-binary-u64-forms 5 11 9 4)",
+        "(машина-знизити-поточну-двомісну-дію-64 5 11 9 4)",
         &mut session,
     )
     .expect("D5 DIFFERENCE forms")
@@ -124,7 +124,7 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     );
 
     let sub_bytes = eval_program(
-        "(x86-encode-current-binary-u64 5 11 9 4)",
+        "(машина-кодувати-поточну-двомісну-дію-64 5 11 9 4)",
         &mut session,
     )
     .expect("D5 DIFFERENCE bytes")
@@ -139,7 +139,7 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     );
 
     let times_forms = eval_program(
-        "(x86-lower-current-binary-u64-forms 5 22 6 7)",
+        "(машина-знизити-поточну-двомісну-дію-64 5 22 6 7)",
         &mut session,
     )
     .expect("D5 TIMES forms")
@@ -151,7 +151,7 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     );
 
     let times_bytes = eval_program(
-        "(x86-encode-current-binary-u64 5 22 6 7)",
+        "(машина-кодувати-поточну-двомісну-дію-64 5 22 6 7)",
         &mut session,
     )
     .expect("D5 TIMES bytes")
@@ -171,10 +171,10 @@ fn exact_d5_fast_paths_fail_closed_when_u64_would_change_meaning() {
     let mut session = machine_session();
 
     for form in [
-        "(x86-encode-current-binary-u64 5 11 1 2)",
-        "(x86-encode-current-binary-u64 5 22 18446744073709551615 2)",
-        "(x86-encode-current-binary-u64 5 10 18446744073709551615 1)",
-        "(x86-encode-current-binary-u64 5 11 -1 1)",
+        "(машина-кодувати-поточну-двомісну-дію-64 5 11 1 2)",
+        "(машина-кодувати-поточну-двомісну-дію-64 5 22 18446744073709551615 2)",
+        "(машина-кодувати-поточну-двомісну-дію-64 5 10 18446744073709551615 1)",
+        "(машина-кодувати-поточну-двомісну-дію-64 5 11 -1 1)",
     ] {
         let actual = eval_program(form, &mut session)
             .unwrap_or_else(|error| panic!("guard expression failed: {form}: {error}"))

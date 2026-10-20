@@ -78,7 +78,7 @@ fn admitted_d6_domain_identity_drives_machine_key_without_source_width_recovery(
         );
 
         let form = format!(
-            "(x86-encode-current-d6-unary-u64 {} {} {})",
+            "(машина-кодувати-поточну-одномісну-дію-д6 {} {} {})",
             identity.width(),
             identity.packed_bits(),
             input
@@ -96,7 +96,7 @@ fn exact_d6_add1_sub1_reuse_admitted_add_sub_forms_and_bytes() {
     let mut session = machine_session();
 
     let add_forms = eval_program(
-        "(x86-lower-current-d6-unary-u64-forms 6 14 41)",
+        "(машина-знизити-поточну-одномісну-дію-д6 6 14 41)",
         &mut session,
     )
     .expect("D6 ADD1 forms")
@@ -108,7 +108,7 @@ fn exact_d6_add1_sub1_reuse_admitted_add_sub_forms_and_bytes() {
     );
 
     let add_bytes = eval_program(
-        "(x86-encode-current-d6-unary-u64 6 14 41)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 14 41)",
         &mut session,
     )
     .expect("D6 ADD1 bytes")
@@ -120,7 +120,7 @@ fn exact_d6_add1_sub1_reuse_admitted_add_sub_forms_and_bytes() {
     );
 
     let sub_forms = eval_program(
-        "(x86-lower-current-d6-unary-u64-forms 6 15 41)",
+        "(машина-знизити-поточну-одномісну-дію-д6 6 15 41)",
         &mut session,
     )
     .expect("D6 SUB1 forms")
@@ -132,7 +132,7 @@ fn exact_d6_add1_sub1_reuse_admitted_add_sub_forms_and_bytes() {
     );
 
     let sub_bytes = eval_program(
-        "(x86-encode-current-d6-unary-u64 6 15 41)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 15 41)",
         &mut session,
     )
     .expect("D6 SUB1 bytes")
@@ -149,13 +149,13 @@ fn exact_d6_unary_fast_paths_fail_closed_outside_exact_u64_rectangle() {
     let mut session = machine_session();
 
     for form in [
-        "(x86-encode-current-d6-unary-u64 6 14 -1)",
-        "(x86-encode-current-d6-unary-u64 6 14 1/2)",
-        "(x86-encode-current-d6-unary-u64 6 14 18446744073709551615)",
-        "(x86-encode-current-d6-unary-u64 6 15 0)",
-        "(x86-encode-current-d6-unary-u64 6 15 -1)",
-        "(x86-encode-current-d6-unary-u64 6 15 1/2)",
-        "(x86-encode-current-d6-unary-u64 6 15 18446744073709551616)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 14 -1)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 14 1/2)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 14 18446744073709551615)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 15 0)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 15 -1)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 15 1/2)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 6 15 18446744073709551616)",
     ] {
         assert_eq!(
             eval_program(form, &mut session)
@@ -168,8 +168,8 @@ fn exact_d6_unary_fast_paths_fail_closed_outside_exact_u64_rectangle() {
     }
 
     for form in [
-        "(x86-encode-current-d6-unary-u64 5 14 41)",
-        "(x86-encode-current-d6-unary-u64 5 15 41)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 5 14 41)",
+        "(машина-кодувати-поточну-одномісну-дію-д6 5 15 41)",
     ] {
         assert_eq!(
             eval_program(form, &mut session)

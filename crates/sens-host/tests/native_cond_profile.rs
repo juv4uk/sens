@@ -41,7 +41,7 @@ fn bounded_eq_cond_native_execution_follows_generated_cmp_jnz_branches() {
         (2_u64, 3_u64, 222_u64),
     ] {
         let native_source = format!(
-            "(викликати-допущену-машинну-програму (x86-lower-eq-cond-u64-forms {left} {right} 111 222) 0)"
+            "(викликати-допущену-машинну-програму (машина-знизити-рівність-та-умову-64 {left} {right} 111 222) 0)"
         );
         let native = eval_program(&native_source, &mut session)
             .expect("admitted bounded CMP+JNZ lowering must execute on the native CPU")

@@ -190,25 +190,25 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
         (
             "cmp-jnz-equal",
             "MOV + CMP + JNZ rel8 + RET",
-            "(викликати-допущену-машинну-програму (x86-lower-eq-cond-u64-forms 5 5 111 222) 0)",
+            "(викликати-допущену-машинну-програму (машина-знизити-рівність-та-умову-64 5 5 111 222) 0)",
             "111",
         ),
         (
             "cmp-jnz-distinct",
             "MOV + CMP + JNZ rel8 + RET",
-            "(викликати-допущену-машинну-програму (x86-lower-eq-cond-u64-forms 5 6 111 222) 0)",
+            "(викликати-допущену-машинну-програму (машина-знизити-рівність-та-умову-64 5 6 111 222) 0)",
             "222",
         ),
         (
             "pair-store-load-car",
             "bounded STORE pair + LOAD head + RET",
-            "(викликати-допущену-машинну-програму (x86-lower-cons-car-u64-forms 2 3) x86-pair-cell-bytes)",
+            "(викликати-допущену-машинну-програму (знизити-складену-пару-до-машинних-форм 2 3) x86-pair-cell-bytes)",
             "2",
         ),
         (
             "pair-store-load-cdr",
             "bounded STORE pair + LOAD tail + RET",
-            "(викликати-допущену-машинну-програму (x86-lower-cons-cdr-u64-forms 2 3) x86-pair-cell-bytes)",
+            "(викликати-допущену-машинну-програму (машина-знизити-решту-пари-64 2 3) x86-pair-cell-bytes)",
             "3",
         ),
         (

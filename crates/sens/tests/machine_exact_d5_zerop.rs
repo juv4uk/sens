@@ -113,7 +113,7 @@ fn bounded_exact_integer_zerop_reaches_admitted_internal_bit_bytes() {
     );
 
     let forms = eval_program(
-        "(x86-lower-current-zerop-u64-forms 5 8 0)",
+        "(машина-знизити-поточну-перевірку-нуля-64 5 8 0)",
         &mut session,
     )
     .expect("ZEROP forms")
@@ -126,7 +126,7 @@ fn bounded_exact_integer_zerop_reaches_admitted_internal_bit_bytes() {
 
     for value in ["0", "42"] {
         let rendered = eval_program(
-            &format!("(x86-encode-current-zerop-bit 5 8 {value})"),
+            &format!("(машина-кодувати-поточний-біт-нуля 5 8 {value})"),
             &mut session,
         )
         .expect("ZEROP admitted bytes")
@@ -151,11 +151,11 @@ fn zerop_native_slice_fails_closed_outside_exact_integer_rectangle() {
     // Machine input projection is bounded to exact nonnegative u64;
     // all out-of-rectangle inputs must leave this machine mechanism unselected.
     for form in [
-        "(x86-encode-current-zerop-bit 5 8 3/1000000)",
-        "(x86-encode-current-zerop-bit 5 8 -3/1000000)",
-        "(x86-encode-current-zerop-bit 5 8 31/10000000)",
-        "(x86-encode-current-zerop-bit 5 8 -1)",
-        "(x86-encode-current-zerop-bit 5 8 18446744073709551616)",
+        "(машина-кодувати-поточний-біт-нуля 5 8 3/1000000)",
+        "(машина-кодувати-поточний-біт-нуля 5 8 -3/1000000)",
+        "(машина-кодувати-поточний-біт-нуля 5 8 31/10000000)",
+        "(машина-кодувати-поточний-біт-нуля 5 8 -1)",
+        "(машина-кодувати-поточний-біт-нуля 5 8 18446744073709551616)",
     ] {
         assert_eq!(
             eval_program(form, &mut session)
@@ -168,7 +168,7 @@ fn zerop_native_slice_fails_closed_outside_exact_integer_rectangle() {
     }
 
     assert_eq!(
-        eval_program("(x86-encode-current-zerop-bit 3 5 0)", &mut session)
+        eval_program("(машина-кодувати-поточний-біт-нуля 3 5 0)", &mut session)
             .expect("wrong exact identity fails closed")
             .value
             .to_string(),
@@ -192,7 +192,7 @@ fn zerop_machine_proof_does_not_publish_numeric_boolean_language_semantics() {
         .unwrap_or(source.len());
     let block = &source[start..end];
 
-    assert!(block.contains("(00001001 x86-encode-current-zerop-bit"));
+    assert!(block.contains("(00001001 машина-кодувати-поточний-біт-нуля"));
     assert!(block.contains("exact-d5-fallback-required"));
     for forbidden in [
         "x86-call-current-zerop",

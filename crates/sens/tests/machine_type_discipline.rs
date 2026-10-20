@@ -45,10 +45,10 @@ fn semantic_car_entry_preserves_canonical_type_before_host() {
     register_capability("native-call-u64-raw", spy_executor);
 
     for (reference_source, machine_source) in [
-        ("(car 5)", "(x86-call-semantic-car-u64 5)"),
+        ("(car 5)", "(машина-викликати-семантичне-перше-64 5)"),
         (
             "(car (quote ()))",
-            "(x86-call-semantic-car-u64 (quote ()))",
+            "(машина-викликати-семантичне-перше-64 (quote ()))",
         ),
     ] {
         let reference_error = eval_program(reference_source, &mut session)
@@ -75,7 +75,7 @@ fn semantic_car_entry_preserves_canonical_type_before_host() {
 
     EXECUTOR_CALLS.store(0, Ordering::SeqCst);
     let valid = eval_program(
-        "(x86-call-semantic-car-u64 (cons 2 3))",
+        "(машина-викликати-семантичне-перше-64 (cons 2 3))",
         &mut session,
     )
     .expect("valid bounded pair must proceed through the admitted machine gateway");

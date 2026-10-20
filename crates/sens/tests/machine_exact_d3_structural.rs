@@ -98,13 +98,13 @@ fn exact_d3_structural_identities_select_existing_bounded_x86_forms() {
         ),
     ] {
         let forms = eval_value(
-            &format!("(x86-lower-current-structural-u64-forms 3 {packed_bits} 2 3)"),
+            &format!("(машина-знизити-поточну-структурну-дію-64 3 {packed_bits} 2 3)"),
             &mut session,
         );
         assert_eq!(forms, expected_forms, "D3 packed={packed_bits}");
 
         let encoded = eval_value(
-            &format!("(x86-encode-current-structural-u64 3 {packed_bits} 2 3)"),
+            &format!("(машина-кодувати-поточну-структурну-дію-64 3 {packed_bits} 2 3)"),
             &mut session,
         );
         assert!(
@@ -123,7 +123,7 @@ fn exact_d3_structural_identities_select_existing_bounded_x86_forms() {
 fn unsupported_exact_domain_identity_fails_closed() {
     let mut session = machine_session();
     let result = eval_value(
-        "(x86-encode-current-structural-u64 3 5 2 3)",
+        "(машина-кодувати-поточну-структурну-дію-64 3 5 2 3)",
         &mut session,
     );
     assert_eq!(result, "unsupported-current-domain-structural-u64");

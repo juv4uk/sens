@@ -62,7 +62,7 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     assert_eq!(capabilities, "((integer-add bounded-u32-inputs u64-result))");
 
     let bytes = eval_program(
-        &format!("(x86-encode-current-binary-u64 {width} {packed_bits} 2 3)"),
+        &format!("(машина-кодувати-поточну-двомісну-дію-64 {width} {packed_bits} 2 3)"),
         &mut session,
     )
     .expect("exact D5 PLUS must reach admitted x86 bytes")
@@ -75,7 +75,7 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     );
 
     let unsupported = eval_program(
-        "(x86-encode-current-binary-u64 3 5 2 3)",
+        "(машина-кодувати-поточну-двомісну-дію-64 3 5 2 3)",
         &mut session,
     )
     .expect("unsupported current identity fails closed as named data")
