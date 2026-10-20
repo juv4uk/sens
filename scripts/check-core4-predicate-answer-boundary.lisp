@@ -1,40 +1,40 @@
-; #1391 — executable witness for Core4 logic/SENS boundary.
+; #1391 — виконуваний свідок межі між логікою Core4 та SENS.
 
-(визначити pab-contract
+(визначити контракт-межі-відповідей
   (перше (читати-всі (читати-файл "contracts/core4-predicate-answer-boundary.lisp"))))
-(визначити pab-schema (перше pab-contract))
-(визначити pab-sections (решта pab-contract))
+(визначити схема-межі-відповідей (перше контракт-межі-відповідей))
+(визначити розділи-межі-відповідей (решта контракт-межі-відповідей))
 
-(визначити pab-field
-  (функція (section name)
-    (решта (знайти-за-ключем name section))))
+(визначити поле-межі-відповідей
+  (функція (розділ назва)
+    (решта (знайти-за-ключем назва розділ))))
 
-(визначити pab-meta (перше pab-sections))
-(визначити pab-no (друге pab-sections))
-(визначити pab-yes (третє pab-sections))
-(визначити pab-undirected (четверте pab-sections))
-(визначити pab-function-convergence (п'ятий pab-sections))
-(визначити pab-laws (елемент-списку-за-індексом 5 pab-sections))
+(визначити відомості-межі-відповідей (перше розділи-межі-відповідей))
+(визначити відповідь-ні (друге розділи-межі-відповідей))
+(визначити відповідь-так (третє розділи-межі-відповідей))
+(визначити відповідь-без-напряму (четверте розділи-межі-відповідей))
+(визначити збіжність-функцій-відповідей (п'ятий розділи-межі-відповідей))
+(визначити закони-межі-відповідей (елемент-списку-за-індексом 5 розділи-межі-відповідей))
 
-(визначити pab-observed
+(визначити спостережені-відповіді
   (список
-    pab-schema
-    (pab-field pab-meta (як-є answer-count))
-    (pab-field pab-meta (як-є sens-function-count))
-    (pab-field pab-meta (як-є spaces))
-    (довжина (pab-field pab-no (як-є no-path)))
-    (pab-field pab-no (як-є converges-to))
-    (довжина (pab-field pab-yes (як-є yes-path)))
-    (pab-field pab-yes (як-є converges-to))
-    (pab-field pab-undirected (як-є undirected-answer))
-    (pab-field pab-function-convergence (як-є function-convergence))
-    (pab-field pab-function-convergence (як-є function-identities))
-    (pab-field pab-function-convergence (як-є result-value))
-    (pab-field pab-laws (як-є short-answer-to-sens-function))
-    (pab-field pab-laws (як-є sens-function-to-answer))
-    (pab-field pab-laws (як-є eighth-bit-in-grading))))
+    схема-межі-відповідей
+    (поле-межі-відповідей відомості-межі-відповідей (як-є answer-count))
+    (поле-межі-відповідей відомості-межі-відповідей (як-є sens-function-count))
+    (поле-межі-відповідей відомості-межі-відповідей (як-є spaces))
+    (довжина (поле-межі-відповідей відповідь-ні (як-є no-path)))
+    (поле-межі-відповідей відповідь-ні (як-є converges-to))
+    (довжина (поле-межі-відповідей відповідь-так (як-є yes-path)))
+    (поле-межі-відповідей відповідь-так (як-є converges-to))
+    (поле-межі-відповідей відповідь-без-напряму (як-є undirected-answer))
+    (поле-межі-відповідей збіжність-функцій-відповідей (як-є function-convergence))
+    (поле-межі-відповідей збіжність-функцій-відповідей (як-є function-identities))
+    (поле-межі-відповідей збіжність-функцій-відповідей (як-є result-value))
+    (поле-межі-відповідей закони-межі-відповідей (як-є short-answer-to-sens-function))
+    (поле-межі-відповідей закони-межі-відповідей (як-є sens-function-to-answer))
+    (поле-межі-відповідей закони-межі-відповідей (як-є eighth-bit-in-grading))))
 
-(визначити pab-expected
+(визначити очікувані-відповіді
   (список
     (як-є core4-predicate-answer-boundary/4)
     15
@@ -53,9 +53,9 @@
     (як-є forbidden)))
 
 (за-умовою
-  ((однакові? pab-observed pab-expected)
+  ((однакові? спостережені-відповіді очікувані-відповіді)
    (як-є (core4-predicate-answer-boundary-ok)))
   ((атом? (як-є ()))
    (список (як-є core4-predicate-answer-boundary-mismatch)
-         pab-expected
-         pab-observed)))
+         очікувані-відповіді
+         спостережені-відповіді)))
