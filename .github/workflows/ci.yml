@@ -495,4 +495,12 @@ jobs:
             echo "::error::Manual full runtime check was skipped"
             exit 1
           fi
-          echo "SENS CI passed: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT"
+          # Зелені поверхневі перевірки не дорівнюють доказу виконання SENS.
+          # На звичайних push runtime-shards можуть законно пропускатися;
+          # це інформація про неперевірений шар, а не новий глобальний STOP.
+          if [[ "$SHARDS_RESULT" == "skipped" ]]; then
+            echo "SENS SURFACE PASS: guards=$GUARDS_RESULT; runtime=NOT_TESTED; release=NOT_CERTIFIED"
+            echo "::notice::SENS surface only: runtime was skipped; no release proof for this SHA"
+          else
+            echo "SENS CHECKS PASS: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT; release requires separate corpus admission"
+          fi
