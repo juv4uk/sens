@@ -1,5 +1,5 @@
-; AVX2 instruction-family catalogue. Physical ISA facts only.
-; Actual execution remains gated by CPUID + OS-enabled YMM state.
+; Каталог машинних команд AVX2; тільки факти фізичної архітектури.
+; Виконання залежить від CPUID та стану YMM, дозволеного системою.
 
 (isa-catalogue/1
   (extension AVX2)
