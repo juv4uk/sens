@@ -1,6 +1,6 @@
-; D9 scientific constant status: eight native D1 YES witnesses.
-; Valid exact-by-definition/measured, invalid derived/unknown/compound,
-; and fourth-field projection preserved even for unadmitted values.
+; D9 статус наукової константи: вісім рідних D1-свідків YES.
+; Чинні exact-by-definition/measured, недійсні derived/unknown/compound,
+; і проєкція четвертого поля збережена навіть для недопущених значень.
 (список
   (науковий-константа-стан-чинний? (як-є exact-by-definition))
   (науковий-константа-стан-чинний? (як-є measured))
