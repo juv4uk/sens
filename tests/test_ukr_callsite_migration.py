@@ -2250,7 +2250,7 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         },
         "scripts/generate-rust-evaluator-dispatch.lisp": {
             # Зворотний зріз після українізації локальних імен і параметрів.
-            "blob": "72f0ab9946f078a7060fbaf0412ad05a2d911c9f",
+            "blob": "326b2efc6d6d3550fe4ad362a248deef14e94119",
             # Нові сирі голови додають чотири виклики: два D1, один D3 і один D8.
             # Зворотна проєкція відновлює цей зріз після українізації локальних імен.
             "counts": {"100": 9, "110": 7, "111": 1, "1001": 4, "1110": 3, "11011011": 4,
@@ -2259,7 +2259,7 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                        "0011": 12, "0010": 7, "001": 15, "011": 5, "010": 12},
         },
         "scripts/generate-rust-function-signatures.lisp": {
-            "blob": "a64b16690225bcae6919c2f84fd6059551f2d62b",
+            "blob": "488c6630236ff0294f682b445c9a7f3e1b3ddda2",
             "counts": {"100": 10, "101": 4, "110": 10, "1001": 6, "1110": 3, "11011011": 4,
                        "11110100": 3, "11110111": 6, "110011101": 5, "110011110": 2,
                        "110101001": 1, "110101010": 1, "110101011": 2, "110110111": 3,
