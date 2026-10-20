@@ -1,18 +1,20 @@
-; Core4 predicate/record migration inventory — #1259 under Contract 9.
+; Інвентар ролей предикатів і записів Core4 — #1259, контракт 9.
 ;
-; The ONLY function identity in this file is the bare exact 8-bit value.
-; Human surface names do not appear as function identities.
+; Історичні точні восьмибітні значення в цьому інвентарі є
+; даними відповідного знімка, а не дозволом викликати їх через
+; нинішню доменну драбину. Назви людських проєкцій не визначають
+; тотожності функцій.
 ;
-; This inventory classifies result roles only. It does not change runtime
-; behavior and does not define predicate meaning.
+; Інвентар лише класифікує ролі результатів: він не змінює
+; виконання й не встановлює семантику предикатів.
+; Ролі чинного формату:
+;   predicate-question — запит із однобітною відповіддю;
+;   classifier-observer — розширене описове спостереження;
+;   control-consumer — споживач точного результату іншої операції.
 ;
-; Roles:
-;   predicate-question  — asks a directional question.
-;   classifier-observer — returns richer descriptive observation data.
-;   control-consumer    — consumes another operation's exact result domain.
+; Ядра Core1–Core3 не входять до меж цієї інвентаризації.
+; Протокольні ключі та бітові рядки збережено буквально.
 ;
-; Core1, Core2 and Core3 are out of scope.
-
 (core4-predicate-record-inventory/2
 
   ((profile . core4)
