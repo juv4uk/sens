@@ -1,131 +1,88 @@
 ; Executable Lisp-owned witness for LIFE-1 contract.
-; Host code may transport contracts/life-1-contract.lisp into
-; life-1-document, but every semantic expectation is checked here.
-;
-; This witness uses Canon 6 explicit-result COND clauses. Canon 0 is data and
-; list termination; it is never consumed as generic FALSE.
+; Ukrainian projection only.
 
-(0011 life-1-schema
-  (0010 () (100 life-1-document)))
+(визначити life-1-schema
+  (функція () (перше life-1-document)))
 
-(0011 life-1-entries
-  (0010 () (011 life-1-document)))
+(визначити life-1-entries
+  (функція () (решта life-1-document)))
 
-(0011 life-1-field
-  (0010 (entry field)
-    (001000 ((found (11100 field entry)))
-      (110
-        ((010 found) () (001 ()))
-        ((010 found) (0) (011 found))))))
+(визначити life-1-field
+  (функція (entry field)
+    (нехай ((found (знайти-за-ключем field entry)))
+      (за-умовою
+        ((атом? found) (як-є ()))
+        (так (решта found))))))
 
-(0011 life-1-find
-  (0010 (identity entries)
-    (110
-      ((010 entries) () (001 ()))
-      ((010 entries) (0)
-       (110
-         ((101 (life-1-field (100 entries) (001 identity)) identity)
-          (1)
-          (100 entries))
-         ((101 (life-1-field (100 entries) (001 identity)) identity)
-          (0)
-          (life-1-find identity (011 entries))))))))
+(визначити life-1-find
+  (функція (identity entries)
+    (за-умовою
+      ((атом? entries) (як-є ()))
+      (так
+       (за-умовою
+         ((тотожне? (life-1-field (перше entries) (як-є identity)) identity)
+          (перше entries))
+         (так (life-1-find identity (решта entries))))))))
 
-(0011 life-1-entry
-  (0010 (identity)
+(визначити life-1-entry
+  (функція (identity)
     (life-1-find identity (life-1-entries))))
 
-(0011 life-1-check
-  (0010 (identity field expected)
-    (001000 ((entry (life-1-entry identity)))
-      (110
-        ((010 entry) ()
-         (1110 (001 missing-entry) identity))
-        ((010 entry) (0)
-         (110
-           ((101 (life-1-field entry field) expected)
-            (1)
-            (001 ()))
-           ((101 (life-1-field entry field) expected)
-            (0)
-            (1110 (001 mismatch)
-                  identity
-                  field
-                  expected
+(визначити life-1-check
+  (функція (identity field expected)
+    (нехай ((entry (life-1-entry identity)))
+      (за-умовою
+        ((атом? entry)
+         (список (як-є missing-entry) identity))
+        (так
+         (за-умовою
+           ((тотожне? (life-1-field entry field) expected)
+            (як-є ()))
+           (так
+            (список (як-є mismatch) identity field expected
                   (life-1-field entry field)))))))))
 
-(0011 life-1-first-failure
-  (0010 (checks)
-    (110
-      ((010 checks) () (001 ()))
-      ((010 checks) (0)
-       (110
-         ((010 (100 checks)) ()
-          (life-1-first-failure (011 checks)))
-         ((010 (100 checks)) (0)
-          (100 checks)))))))
+(визначити life-1-first-failure
+  (функція (checks)
+    (за-умовою
+      ((атом? checks) (як-є ()))
+      (так
+       (за-умовою
+         ((атом? (перше checks))
+          (life-1-first-failure (решта checks)))
+         (так (перше checks)))))))
 
-(0011 life-1-contract-witness
-  (0010 ()
-    (001000 ((failure
+(визначити life-1-contract-witness
+  (функція ()
+    (нехай ((failure
             (life-1-first-failure
-              (1110
-                (life-1-check (001 life-trace)
-                              (001 owner)
-                              (001 sens))
-                (life-1-check (001 life-trace)
-                              (001 truth-value)
-                              (001 forbidden))
-                (life-1-check (001 source-observation)
-                              (001 native-domain-preserved)
-                              (001 yes))
-                (life-1-check (001 source-observation)
-                              (001 universal-result-normalization)
-                              (001 forbidden))
-                (life-1-check (001 projection)
-                              (001 explicit)
-                              (001 yes))
-                (life-1-check (001 projection)
-                              (001 partial)
-                              (001 yes))
-                (life-1-check (001 projection)
-                              (001 semantic-equivalence-assumed)
-                              (001 no))
-                (life-1-check (001 target-invocation)
-                              (001 kernel-reinterpretation)
-                              (001 forbidden))
-                (life-1-check (001 missing-source-kernel)
-                              (001 changes-semantic-id-meaning)
-                              (001 no))
-                (life-1-check (001 first-vertical-slice)
-                              (001 source)
-                              (001 prolog))
-                (life-1-check (001 first-vertical-slice)
-                              (001 target)
-                              (001 datalog))
-                (life-1-check (001 first-vertical-slice)
-                              (001 shared-result-type)
-                              (001 forbidden))
-                (life-1-check (001 liveness)
-                              (001 fresh-checkout)
-                              (001 required))))))
-      (110
-        ((101 (life-1-schema) (001 life-1-contract/1))
-         (1)
-         (110
-           ((010 failure) ()
-            (1110 (001 life-1-contract-witness)
-                  (1110 (001 status) (001 pass))
-                  (1110 (001 detail)
-                        (001 provenance-not-truth))))
-           ((010 failure) (0)
-            (1110 (001 life-1-contract-witness)
-                  (1110 (001 status) (001 fail))
-                  (1110 (001 detail) failure)))))
-        ((101 (life-1-schema) (001 life-1-contract/1))
-         (0)
-         (1110 (001 life-1-contract-witness)
-               (1110 (001 status) (001 fail))
-               (1110 (001 detail)
-                     (1110 (001 schema)
-                           (life-1-schema)))))))))
+              (список
+                (life-1-check (як-є life-trace) (як-є owner) (як-є sens))
+                (life-1-check (як-є life-trace) (як-є truth-value) (як-є forbidden))
+                (life-1-check (як-є source-observation) (як-є native-domain-preserved) (як-є yes))
+                (life-1-check (як-є source-observation) (як-є universal-result-normalization) (як-є forbidden))
+                (life-1-check (як-є projection) (як-є explicit) (як-є yes))
+                (life-1-check (як-є projection) (як-є partial) (як-є yes))
+                (life-1-check (як-є projection) (як-є semantic-equivalence-assumed) (як-є no))
+                (life-1-check (як-є target-invocation) (як-є kernel-reinterpretation) (як-є forbidden))
+                (life-1-check (як-є missing-source-kernel) (як-є changes-semantic-id-meaning) (як-є no))
+                (life-1-check (як-є first-vertical-slice) (як-є source) (як-є prolog))
+                (life-1-check (як-є first-vertical-slice) (як-є target) (як-є datalog))
+                (life-1-check (як-є first-vertical-slice) (як-є shared-result-type) (як-є forbidden))
+                (life-1-check (як-є liveness) (як-є fresh-checkout) (як-є required))))))
+      (за-умовою
+        ((тотожне? (life-1-schema) (як-є life-1-contract/1))
+         (за-умовою
+           ((атом? failure)
+            (список (як-є life-1-contract-witness)
+                  (список (як-є status) (як-є pass))
+                  (список (як-є detail) (як-є provenance-not-truth))))
+           (так
+            (список (як-є life-1-contract-witness)
+                  (список (як-є status) (як-є fail))
+                  (список (як-є detail) failure)))))
+        (так
+         (список (як-є life-1-contract-witness)
+               (список (як-є status) (як-є fail))
+               (список (як-є detail)
+                     (список (як-є schema) (life-1-schema)))))))))
