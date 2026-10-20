@@ -131,6 +131,8 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertTrue(report["gate"]["pass"])
         self.assertFalse(report["all_executable_lisp_roundtrip_verified"])
         self.assertEqual(report["release_status"], "NO-GO-NATIVE-SENS-ORACLE-UNVERIFIED")
+        self.assertIn("Zig/T5M transport", report["authority"])
+        self.assertIn("native SENS reader/eval NOT_VERIFIED", report["authority"])
         self.assertNotIn("nothing here blocks a publication", report["gate"]["rule"])
 
     def test_new_mechanical_candidate_is_reported_without_false_ci_red_or_release(self):
