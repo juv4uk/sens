@@ -1,4 +1,4 @@
-; SSE4.2 instruction-family catalogue. Physical ISA facts only.
+; Каталог родини інструкцій SSE4.2. Лише фізичні факти ISA.
 
 (isa-catalogue/1
   (extension SSE4.2)
