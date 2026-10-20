@@ -1,66 +1,62 @@
 ; #1047 — Lisp-owned selector witness.
 ; Expected routing lives here, not in shell/Rust.
+; Ukrainian projection only.
 
 (load "lib/core.lisp")
 (load "lib/surface/semantic-registry-api.lisp")
 (load "lib/mechanism-selector.lisp")
 
-(0011 mechanism-selector-1047-witness
-  (0010 ()
-    (001001 ((atom-sid (semantic-registry-id (001 atom?)))
-           (plus-sid (semantic-registry-id (001 +)))
-           (selected (mechanism-select atom-sid (001 evaluator)))
-           (plus-prolog (mechanism-select plus-sid (001 prolog)))
-           (missing (mechanism-select atom-sid (001 prolog)))
-           (no-route (mechanism-select 11111111 (001 evaluator)))
-           (quoted-shadow (mechanism-select "00001100" (001 prolog))))
-      (110
-        ((11110111
+(визначити mechanism-selector-1047-witness
+  (функція ()
+    (нехай ((atom-sid (semantic-registry-id (як-є atom?)))
+           (plus-sid (semantic-registry-id (як-є +)))
+           (selected (mechanism-select atom-sid (як-є evaluator)))
+           (plus-prolog (mechanism-select plus-sid (як-є prolog)))
+           (missing (mechanism-select atom-sid (як-є prolog)))
+           (no-route (mechanism-select 255 (як-є evaluator)))
+           (quoted-shadow (mechanism-select "00001100" (як-є prolog))))
+      (за-умовою
+        ((однакові?
            selected
-           (1110
-             (001 mechanism-selected)
+           (список
+             (як-є mechanism-selected)
              atom-sid
-             (001 evaluator)
-             (001 atom-primitive)))
-         (1)
-         (110
-           ((11110111
+             (як-є evaluator)
+             (як-є atom-primitive)))
+         (за-умовою
+           ((однакові?
               plus-prolog
-              (1110
-                (001 mechanism-selected)
+              (список
+                (як-є mechanism-selected)
                 plus-sid
-                (001 prolog)
-                (001 bounded-exact-add)))
-            (1)
-            (110
-              ((11110111
+                (як-є prolog)
+                (як-є bounded-exact-add)))
+            (за-умовою
+              ((однакові?
                  missing
-                 (1110
-                   (001 mechanism-unavailable)
+                 (список
+                   (як-є mechanism-unavailable)
                    atom-sid
-                   (001 prolog)))
-               (1)
-               (110
-                 ((11110111
+                   (як-є prolog)))
+               (за-умовою
+                 ((однакові?
                     no-route
-                    (1110
-                      (001 mechanism-unavailable)
-                      11111111
-                      (001 evaluator)))
-                  (1)
-                  (110
-                    ((11110111
+                    (список
+                      (як-є mechanism-unavailable)
+                      255
+                      (як-є evaluator)))
+                  (за-умовою
+                    ((однакові?
                        quoted-shadow
-                       (1110
-                         (001 mechanism-selection-failure)
-                         (001 sid-not-in-function-table)
+                       (список
+                         (як-є mechanism-selection-failure)
+                         (як-є sid-not-in-function-table)
                          "00001100"))
-                     (1)
-                     (001 (mechanism-selector-1047 (status pass))))
-                    (t (100 (001 ())))))
-                 (t (100 (001 ())))))
-              (t (100 (001 ())))))
-           (t (100 (001 ())))))
-        (t (100 (001 ())))))))
+                     (як-є (mechanism-selector-1047 (status pass))))
+                    (так (перше (як-є ())))))
+                 (так (перше (як-є ())))))
+              (так (перше (як-є ())))))
+           (так (перше (як-є ())))))
+        (так (перше (як-є ())))))))
 
 (mechanism-selector-1047-witness)

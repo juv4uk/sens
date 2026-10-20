@@ -1,51 +1,50 @@
-(00001001 PAIRLIS-HIST
-  (10101010 PAIRLIS-HIST
-    (00001000 (PARAMS ARGS ENV)
-      (00000111
-        ((00000011 PARAMS NIL) ENV)
-        (T
-         (00000100
-           (00000100 (00000101 PARAMS) (00000101 ARGS))
-           (PAIRLIS-HIST
-             (00000110 PARAMS)
-             (00000110 ARGS)
-             ENV)))))))
+; #2286 — pairlis/bind witness. Ukrainian projection.
+; Historical PAIRLIS recursive construction and C1-BIND/LOOKUP observations.
 
-(PAIRLIS-HIST
-  (QUOTE (X Y))
-  (QUOTE (1 2))
-  (QUOTE ((OLD . ENV))))
+(визначити pairlis-hist
+  (функція (params args env)
+    (за-умовою
+      ((тотожне? params (як-є ())) env)
+      (так
+       (сполучити
+         (сполучити (перше params) (перше args))
+         (pairlis-hist (решта params) (решта args) env))))))
 
-(C1-BIND
-  (QUOTE (X Y))
-  (QUOTE (1 2))
-  (QUOTE ((OLD . ENV))))
+(pairlis-hist
+  (як-є (X Y))
+  (як-є (1 2))
+  (як-є ((OLD . ENV))))
 
-(C1-LOOKUP-IN
-  (QUOTE X)
-  (PAIRLIS-HIST
-    (QUOTE (X X))
-    (QUOTE (FIRST SECOND))
-    NIL))
+(спарувати
+  (як-є (X Y))
+  (як-є (1 2))
+  (як-є ((OLD . ENV))))
 
-(C1-LOOKUP-IN
-  (QUOTE X)
-  (C1-BIND
-    (QUOTE (X X))
-    (QUOTE (FIRST SECOND))
-    NIL))
+(знайти-за-ключем
+  (як-є X)
+  (pairlis-hist
+    (як-є (X X))
+    (як-є (FIRST SECOND))
+    (як-є ())))
 
-(C1-BIND
-  (QUOTE ())
-  (QUOTE ())
-  (QUOTE ((OLD . ENV))))
+(знайти-за-ключем
+  (як-є X)
+  (спарувати
+    (як-є (X X))
+    (як-є (FIRST SECOND))
+    (як-є ())))
 
-(C1-BIND
-  (QUOTE (X))
-  (QUOTE (1 2))
-  NIL)
+(спарувати
+  (як-є ())
+  (як-є ())
+  (як-є ((OLD . ENV))))
 
-(C1-BIND
-  (QUOTE (X Y))
-  (QUOTE (1))
-  NIL)
+(спарувати
+  (як-є (X))
+  (як-є (1 2))
+  (як-є ()))
+
+(спарувати
+  (як-є (X Y))
+  (як-є (1))
+  (як-є ()))
