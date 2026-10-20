@@ -80,7 +80,7 @@
   (як-є (write-to-string read read-all string-append string<? string?
           symbol->string string->symbol string-first string-rest
           string-slice string-contains? string-empty? string-length
-          string-prefix? взяти-десятковий-символ number->string number->string-onto)))
+          string-prefix? number->string)))
 
 ; ---------------------------------------------------------------------
 ; Похідні таблиці: читаємо справжні бібліотечні файли, не копіюємо вручну.
