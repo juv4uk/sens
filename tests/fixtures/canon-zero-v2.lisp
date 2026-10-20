@@ -1,20 +1,20 @@
-; #215 EMPTY-LIST-STRUCTURE-1 — Lisp-owned Canon 0 transition witnesses.
-; Expected semantic outcomes live here. Rust may only transport actual outcomes
-; to tests/fixtures/witness-runner.lisp for comparison.
+; #215 EMPTY-LIST-STRUCTURE-1 — свідки переходу Canon 0, що належать Lisp.
+; Очікувані семантичні результати живуть тут. Rust може лише транспортувати фактичні результати
+; до tests/fixtures/witness-runner.lisp для порівняння.
 ;
-; ACTIVE rows prove the early structural half of #215 now:
-;   * () remains ordinary empty-list data and a proper-list terminator;
-;   * structural empty and numeric zero remain observably distinct values.
+; Рядки ACTIVE доводять ранню структурну половину #215 уже тепер:
+;   * () лишається звичайними даними порожнього списку й термінатором правильного списку;
+;   * структурний порожній і числовий нуль лишаються спостережувано різними значеннями.
 ;
-; BLOCKED rows preserve the already-proven RED target for the final half:
-;   * producing () must not be consumed as binary FALSE by control flow.
-; They are intentionally not active until #218 gives structural observations an
-; explicit result algebra and #217 gives control an explicit decision protocol.
-; We do not add a hidden bootstrap/legacy-cond mode because semantics must not
-; depend on loader context.
+; Рядки BLOCKED зберігають уже доведену RED-ціль для фінальної половини:
+;   * вироблення () не повинно споживатися потоком контролю як бінарний FALSE.
+; Вони навмисно не активні, доки #218 не дасть структурним спостереженням
+; явну алгебру результатів, а #217 не дасть контролю явний протокол рішень.
+; Ми не додаємо прихованого режиму bootstrap/legacy-cond, бо семантика не повинна
+; залежати від контексту завантажувача.
 ;
-; Rich-reasoning zero-answer coverage belongs to #219; #215 remains open until
-; the cross-domain witness is present and the blocked control rows can activate.
+; Покриття нуль-відповіді багатого міркування належить #219; #215 лишається відкритим, доки
+; не буде присутній міждоменний свідок і не зможуть активуватися заблоковані рядки контролю.
 
 ((expr . "(quote ())")
  (expected . "()")
