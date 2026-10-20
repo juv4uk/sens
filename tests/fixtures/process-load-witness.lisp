@@ -1,9 +1,9 @@
-; #771: focused Lisp-owned witness for post-core process loading and
-; registry-driven peer identity. If lib/process.lisp cannot load under the
-; current core, this fixture is never reached; the identity check then proves
-; the stable Ukrainian peer was materialized from the same semantic ID.
+; #771. Мовний свідок завантаження процесного модуля після ядра.
+; Якщо lib/process.lisp не завантажено, цей свідок не виконується.
+; Порівнюємо історичну зовнішню назву зі сталою українською проєкцією.
+; Цитовані позначки звіту залишаються даними чинного протоколу.
 
-(визначити process-load-witness
+(визначити свідок-завантаження-процесу
   (функція ()
     (за-умовою
       ((тотожне? process-run запустити-процес)
@@ -11,4 +11,4 @@
       (так
        (як-є (process-load-witness (status fail)))))))
 
-(process-load-witness)
+(свідок-завантаження-процесу)
