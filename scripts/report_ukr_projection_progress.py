@@ -442,25 +442,22 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--top має бути невід'ємним")
 
     progress = measure(args.root)
-    source_projection = measure_source_projection(args.root)
     keyboard_message = render(progress)
-    projection_message = render_source_projection(source_projection)
-    print(projection_message)
-    print("СТРОГИЙ КЛАВІАТУРНИЙ ЗРІЗ: " + keyboard_message)
+    print(keyboard_message)
     if not args.no_annotation and os.getenv("GITHUB_ACTIONS") == "true":
-        print(f"::notice::{projection_message}")
-        print(f"::notice::СТРОГИЙ КЛАВІАТУРНИЙ ЗРІЗ: {keyboard_message}")
+        print(f"::notice::{keyboard_message}")
 
     if args.list:
         pending = progress.pending
         shown = pending[:args.top] if args.top else pending
-        print("СТРОГИЙ КЛАВІАТУРНИЙ ЗРІЗ — незавершені файли:")
+        print("УКР-ПРОЄКЦІЯ — незавершені файли:")
         for item in shown:
             print(f"{item.path}: {item.reason}")
         if args.top and len(pending) > args.top:
             print(f"… ще {len(pending) - args.top}")
 
     if args.projection_list:
+        source_projection = measure_source_projection(args.root)
         pending = source_projection.pending
         shown = pending[:args.top] if args.top else pending
         print("УКР-ПРОЄКЦІЯ — невиконані активні lib-файли:")
@@ -471,7 +468,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.json is not None:
         payload = progress.to_dict()
-        payload["source_projection"] = source_projection.to_dict()
+        payload["source_projection"] = measure_source_projection(args.root).to_dict()
         args.json.write_text(
             json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
