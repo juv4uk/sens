@@ -48,7 +48,7 @@ fn ukrainian_forward_and_knowledge_keep_d3_laws_without_retired_w8() {
         );
         assert!(!witness.contains("(00000111"), "свідок не повинен повертати W8");
         assert!(!current.contains("(00000111"), "чинна бібліотека не повинна повертати W8");
-        for head in ["(визначити ", "(як-є ", "(атом? ", "(за-умовою ", "(тотожне? "] {
+        for head in ["(визначити ", "(як-є ", "(атом? ", "(за-умовою", "(тотожне? "] {
             assert!(current.contains(head), "відсутня чинна голова Д3/Д4: {head}");
         }
     }
