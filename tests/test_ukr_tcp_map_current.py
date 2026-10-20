@@ -1,127 +1,97 @@
-"""Позитивні/негативні свідки українських локальних TCP-зв'язувачів і map-closure."""
+"""Живі українські поверхні TCP і сталої мапи після повної міграції.
+
+Це перевірка вихідних викликів і точних координат, не Python-обчислювач
+семантики SENS. Справжня негативна перевірка арності TCP — у sens-host.
+"""
 from __future__ import annotations
 
-from collections import Counter
-import hashlib
-import importlib.util
 from pathlib import Path
 import re
-import sys
 import unittest
 
+from scripts.report_ukr_projection_progress import ALLOWED
+
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "check_ukr_callsite_migration.py"
-spec = importlib.util.spec_from_file_location("ukr_tcp_map_scanner", SCRIPT)
-assert spec and spec.loader
-scanner = importlib.util.module_from_spec(spec)
-sys.modules[spec.name] = scanner
-spec.loader.exec_module(scanner)
+TCP = ROOT / "lib/tcp.lisp"
+MAP = ROOT / "lib/persistent-map.lisp"
+HOST = ROOT / "crates/sens-host/src/lib.rs"
+D9 = ROOT / "lib/domains/d9.lisp"
 
-TCP_BEFORE = "28ae808fbfe0669cc1f9eb9530826304e01f3f29"
-MAP_BEFORE = "b6b84716702e7546cb2c0f031524210cb7d7b956"
-
-# Перейменування лише зв'язаних лексичних символів, без SID8/D8 трактування.
-TCP_ALPHA = {
-    "address": "вхідна-адреса",
-    "port": "мережевий-порт",
-    "bytes": "вхідні-байти",
-    "decoded": "декодований-вміст",
-    "connection": "мережеве-підключення",
-    "text": "вхідний-текст",
-    "written": "записано-байтів",
-}
-TCP_COUNTS = {
-    "address": 2, "port": 4, "bytes": 2, "decoded": 5,
-    "connection": 6, "text": 7, "written": 1,
-}
-TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
-MAP_INVERSE = {
-    "мапа-отримати": "map-get",
-    "внутрішня-мапа-вставити": "map-insert",
-}
+TCP_PROJECTIONS = (
+    ("001101001", "протокол-передавання-читати-байти-текст"),
+    ("010100110", "протокол-передавання-слухати-на"),
+    ("010110110", "протокол-передавання-записати-текст-байти"),
+    ("101000101", "протокол-передавання-записати-через-сирий"),
+    ("110110011", "протокол-передавання-записати"),
+    ("110111101", "протокол-передавання-слухати"),
+    ("110111110", "протокол-передавання-читати"),
+)
+RAW_CAPABILITIES = (
+    ("протокол-передавання-сире-слухання", "register_capability", "evaluate_tcp_listen_raw"),
+    ("протокол-передавання-сире-читання", "register_evaluated_capability", "evaluate_tcp_read_raw"),
+    ("протокол-передавання-сирий-запис", "register_capability", "evaluate_tcp_write_raw"),
+)
+MAP_PROJECTIONS = (
+    ("101100011", "мапа-порожній"),
+    ("101101110", "мапа-вставити"),
+    ("101100101", "мапа-отримати"),
+    ("101100010", "мапа-містить?"),
+    ("101001100", "мапа-список"),
+)
 
 
-def git_blob_sha(content: str) -> str:
-    data = content.encode("utf-8")
-    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\x00" + data).hexdigest()
-
-
-def restore_tcp(source: str):
-    reverse = {value: key for key, value in TCP_ALPHA.items()}
-    counted = Counter()
-
-    def change(match):
-        token = match.group()
-        old = reverse.get(token)
-        if old is None:
-            return token
-        counted[old] += 1
-        return old
-
-    return TOKEN.sub(change, source), counted
-
-
-def restore_map(source: str):
-    # Тільки голова виконуваного виклику, ніколи binding/value/QUOTE.
-    heads = list(scanner.candidate_heads(scanner.parse(source)))
-    count = Counter(token.text for token in heads if token.text in MAP_INVERSE)
-    offsets = [0]
-    offsets.extend(match.end() for match in re.finditer("\n", source))
-    edits = [(offsets[token.line - 1] + token.column - 1,
-              token.text, MAP_INVERSE[token.text])
-             for token in heads if token.text in MAP_INVERSE]
-    restored = source
-    for index, present, old in sorted(edits, reverse=True):
-        assert restored[index:index + len(present)] == present, (index, present)
-        restored = restored[:index] + old + restored[index + len(present):]
-    return restored, count
+def exact_row(table: str, bits: str, spelling: str) -> bool:
+    lines = [line.strip() for line in table.splitlines()
+             if line.lstrip().startswith(f"({bits} ")]
+    return len(lines) == 1 and f"(укр {spelling})" in lines[0]
 
 
 class UkrainianTcpMapCurrentTests(unittest.TestCase):
-    def test_tcp_alpha_inverse_and_lexical_negative(self):
-        source = (ROOT / "lib/tcp.lisp").read_text(encoding="utf-8")
-        restored, counts = restore_tcp(source)
-        self.assertEqual(dict(counts), TCP_COUNTS)
-        self.assertEqual(git_blob_sha(restored), TCP_BEFORE)
-        scanner.parse(source)
-        self.assertIn('"0.0.0.0"', source)  # IPv4 data is untouched
-        self.assertIn("(tcp-listen-raw вхідна-адреса мережевий-порт)", source)
-        self.assertIn("(tcp-read-raw мережеве-підключення)", source)
-        self.assertIn("(tcp-write-raw мережеве-підключення", source)
-        # Помилковий peer або незв'язаний латинський аргумент має зламати inverse.
-        mutant = source.replace("(tcp-listen-raw вхідна-адреса мережевий-порт)",
-                                "(tcp-listen-raw мережевий-порт мережевий-порт)", 1)
-        reconstructed, _ = restore_tcp(mutant)
-        self.assertNotEqual(git_blob_sha(reconstructed), TCP_BEFORE)
+    def test_tcp_complete_keyboard_projection_and_ratified_d9(self):
+        source = TCP.read_text(encoding="utf-8")
+        table = D9.read_text(encoding="utf-8")
+        self.assertTrue(source.strip())
+        self.assertEqual({c for c in source if c not in ALLOWED}, set())
+        for bits, name in TCP_PROJECTIONS:
+            with self.subTest(name=name):
+                self.assertTrue(exact_row(table, bits, name))
+                self.assertEqual(len(re.findall(
+                    rf"(?m)^\(визначити\s+{re.escape(name)}(?=\s|\))",
+                    source,
+                )), 1)
+        for old in ("tcp-listen-raw", "tcp-read-raw", "tcp-write-raw"):
+            self.assertNotIn(old, source)
+        for name, _, _ in RAW_CAPABILITIES:
+            self.assertEqual(source.count(f"({name} "), 1)
+        self.assertIn('"0.0.0.0"', source)
 
-    def test_map_local_binding_exact_inverse_and_wrong_peer(self):
-        source = (ROOT / "lib/persistent-map.lisp").read_text(encoding="utf-8")
-        restored, counted = restore_map(source)
-        self.assertEqual(dict(counted), {
-            "мапа-отримати": 2,
-            "внутрішня-мапа-вставити": 1,
-        })
-        self.assertEqual(git_blob_sha(restored), MAP_BEFORE)
-        self.assertIn("(визначити мапа-отримати внутрішня-мапа-отримати)", source)
-        self.assertIn("(визначити внутрішня-мапа-вставити map-insert)", source)
-        heads = [t.text for t in scanner.candidate_heads(scanner.parse(source))]
-        self.assertNotIn("map-get", heads)
-        self.assertNotIn("map-insert", heads)
-        wrong = source.replace("(мапа-отримати key entries)",
-                               "(мапа-містить? key entries)", 1)
-        inverse, _ = restore_map(wrong)
-        self.assertNotEqual(git_blob_sha(inverse), MAP_BEFORE)
+    def test_tcp_host_capability_aliases_keep_real_handlers_and_arity_witness(self):
+        source = HOST.read_text(encoding="utf-8")
+        for name, registration, handler in RAW_CAPABILITIES:
+            with self.subTest(name=name):
+                if registration == "register_evaluated_capability":
+                    expected = f'{registration}("{name}", 1, {handler});'
+                else:
+                    expected = f'{registration}("{name}", {handler});'
+                self.assertIn(expected, source)
+        self.assertIn("fn ukrainian_tcp_raw_names_preserve_fail_closed_arity()", source)
+        self.assertIn("assert_eq!(error.kind, ErrorKind::Arity", source)
 
-    def test_ratified_d9_identity_does_not_mint_missing_map_insert_callable(self):
-        table = (ROOT / "lib/domains/d9.lisp").read_text(encoding="utf-8")
-        self.assertRegex(table,
-            r"\(101100101 \(ук мапа-отримати\) \(укр мапа-отримати\)")
-        self.assertRegex(table,
-            r"\(101101110 \(ук мапа-вставити\) \(укр мапа-вставити\)")
-        source = (ROOT / "lib/persistent-map.lisp").read_text(encoding="utf-8")
-        self.assertNotIn("(визначити мапа-вставити ", source)
-        self.assertIn("(визначити внутрішня-мапа-вставити map-insert)", source)
+    def test_immutable_map_full_ukr_closures_match_d9(self):
+        source = MAP.read_text(encoding="utf-8")
+        table = D9.read_text(encoding="utf-8")
+        self.assertEqual({c for c in source if c not in ALLOWED}, set())
+        for bits, name in MAP_PROJECTIONS:
+            with self.subTest(name=name):
+                self.assertTrue(exact_row(table, bits, name))
+                self.assertEqual(len(re.findall(
+                    rf"(?m)^\(визначити\s+{re.escape(name)}(?=\s|\))",
+                    source,
+                )), 1)
+        self.assertIn("(визначити внутрішня-мапа-вставити мапа-вставити)", source)
+        self.assertIn("(внутрішня-мапа-вставити ключ значення (решта записи))", source)
+        self.assertNotRegex(source, r"\(map-(?:insert|get|empty)")
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
