@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Перевіряє canonical 8-bit binary-SID authority мовних поверхонь."""
+"""Перевіряє історичний SID8-crosswalk лише як дані міграції.
+
+Поточні семантичні ідентичності визначають точні слова з lib/domains/Dn,
+а не позиції в цьому 256-рядковому історичному словнику.
+"""
 
 from __future__ import annotations
 
@@ -133,7 +137,7 @@ def check(root) -> tuple[int, set[str], int]:
 
     if len(seen_ids) != 256:
         raise ValueError(
-            f"expected exactly 256 SENS functions (00000000..11111111), got {len(seen_ids)}"
+            f"historical SID8 crosswalk must contain 256 migration rows, got {len(seen_ids)}"
         )
 
     return len(seen_ids), all_surfaces, symbolic_count
@@ -149,12 +153,12 @@ def main() -> int:
         print(f"semantic registry error: {error}")
         return 1
 
-    print(f"semantic registry: {count} identities")
-    print("surfaces: " + " ".join(sorted(surfaces)))
-    print(f"shared symbolic identities: {symbolic_count}")
-    print("8-bit binary SID authority: CONFIRMED")
-    print("All 256 SENS function rows are present: CONFIRMED")
-    print("Bare binary tokens are canonical: CONFIRMED")
+    print(f"ІСТОРИЧНИЙ SID8-CROSSWALK: {count} рядків лише для міграції")
+    print("історичні поверхні: " + " ".join(sorted(surfaces)))
+    print(f"символьні відповідності історичного crosswalk: {symbolic_count}")
+    print("8-бітні SID: перевірено лише форму історичних ключів, НЕ поточну семантичну владу")
+    print("256 історичних рядків НЕ є 256 виконуваними функціями SENS")
+    print("Поточний канон: точні біти + домен D1–D10 + доведений закон; викличність тут НЕ перевіряється")
     return 0
 
 
