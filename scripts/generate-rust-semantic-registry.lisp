@@ -1,89 +1,87 @@
-; Lisp-owned Rust projection of the canonical semantic registry.
-;
-; Authority: lib/surface/semantic-registry.lisp
-;
-; This generator reads the registry as ordinary Lisp data. It emits only a
-; mechanical Rust runtime projection. Rust never parses the canonical Lisp
-; source text at runtime.
-;
-; Usage:
+; Проєкція канонічного семантичного реєстру у код Раст належить СЕНС.
+; Джерело законів: lib/surface/semantic-registry.lisp.
+; Генератор читає Lisp-таблицю як структуровані дані власним читачем.
+; Раст отримує тільки похідний механічний опис, не право визначати семантику.
+; Виконання з кореня репозиторію:
 ;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp
 ;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp --check
+; Рядки генерації та назви полів вихідного коду Раст збережені без перекладу.
+; Протокольні позначки перевірки типу та зовнішні аргументи теж не змінюємо.
 
-(визначити source-path "lib/surface/semantic-registry.lisp")
-(визначити output-path "crates/sens/src/semantic_registry_generated.rs")
+(визначити шлях-джерела "lib/surface/semantic-registry.lisp")
+(визначити шлях-результату "crates/sens/src/semantic_registry_generated.rs")
 
-(визначити str+
-  (функція args
-    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
+(визначити зчепити-всі-рядки
+  (функція аргументи
+    (згорнути (функція (накопичувач фрагмент) (рядок-додати накопичувач фрагмент)) "" аргументи)))
 
-(визначити registry-form
-  (перше (читати-всі (читати-файл source-path))))
+(визначити форма-семантичного-реєстру
+  (перше (читати-всі (читати-файл шлях-джерела))))
 
-(визначити rows registry-form)
+(визначити рядки-семантичного-реєстру форма-семантичного-реєстру)
 
-(визначити rust-string
-  (функція (value)
+(визначити подати-рядок-для-раст
+  (функція (значення)
     (за-умовою
-      ((класифікувати-рядкове-значення value)
+      ((класифікувати-рядкове-значення значення)
        (class-membership string member)
-       (значення-у-текст value))
-      ((класифікувати-рядкове-значення value)
+       (значення-у-текст значення))
+      ((класифікувати-рядкове-значення значення)
        (class-membership string nonmember)
-       (значення-у-текст (символ-у-текст value))))))
+       (значення-у-текст (символ-у-текст значення))))))
 
 
-(визначити render-surface
-  (функція (entry)
-    (нехай ((name (друге entry)))
+(визначити подати-проєкцію
+  (функція (запис)
+    (нехай ((назва (друге запис)))
       (за-умовою
-        ((однакові? name (як-є ()))
+        ((однакові? назва (як-є ()))
          (1)
          "")
-        ((однакові? name (як-є ()))
+        ((однакові? назва (як-є ()))
          (0)
-         (str+
+         (зчепити-всі-рядки
            "SemanticSurface { namespace: "
-           (rust-string (перше entry))
+           (подати-рядок-для-раст (перше запис))
            ", name: "
-           (rust-string name)
+           (подати-рядок-для-раст назва)
            " }, "))))))
 
-(визначити render-surfaces
-  (функція (surfaces)
+(визначити подати-проєкції
+  (функція (проєкції)
     (за-умовою
-      ((атом? surfaces)
+      ((атом? проєкції)
        ()
        "")
-      ((атом? surfaces)
+      ((атом? проєкції)
        (0)
-       (str+
-         (render-surface (перше surfaces))
-         (render-surfaces (решта surfaces)))))))
+       (зчепити-всі-рядки
+         (подати-проєкцію (перше проєкції))
+         (подати-проєкції (решта проєкції)))))))
 
-(визначити render-row
-  (функція (row)
-    (str+
+(визначити подати-рядок-реєстру
+  (функція (рядок)
+    (зчепити-всі-рядки
       "    SemanticRow { semantic_id: 0b"
-      (значення-у-текст (перше row))
+      (значення-у-текст (перше рядок))
       ", surfaces: &["
-      (render-surfaces (решта row))
+      (подати-проєкції (решта рядок))
       "] },\n")))
 
-(визначити render-rows
-  (функція (remaining)
+(визначити подати-рядки-реєстру
+  (функція (залишок)
     (за-умовою
-      ((атом? remaining)
+      ((атом? залишок)
        ()
        "")
-      ((атом? remaining)
+      ((атом? залишок)
        (0)
-       (str+
-         (render-row (перше remaining))
-         (render-rows (решта remaining)))))))
+       (зчепити-всі-рядки
+         (подати-рядок-реєстру (перше залишок))
+         (подати-рядки-реєстру (решта залишок)))))))
 
-(визначити header
-  (str+
+(визначити заголовок-згенерованого
+  (зчепити-всі-рядки
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/surface/semantic-registry.lisp\n"
     "// Generator: scripts/generate-rust-semantic-registry.lisp\n"
@@ -105,24 +103,24 @@
     "\n"
     "pub(super) const SEMANTIC_ROWS: &[SemanticRow] = &[\n"))
 
-(визначити generated
-  (str+ header (render-rows rows) "];\n"))
+(визначити згенерований-вміст
+  (зчепити-всі-рядки заголовок-згенерованого (подати-рядки-реєстру рядки-семантичного-реєстру) "];\n"))
 
 (за-умовою
   ((атом? *argv*)
    ()
    (друге
      (список
-       (записати-файл output-path generated)
+       (записати-файл шлях-результату згенерований-вміст)
        (друкувати "Rust semantic registry projection written"))))
   ((однакові? (перше *argv*) "--check")
    (1)
-   (нехай ((current (читати-файл output-path)))
+   (нехай ((чинний-вміст (читати-файл шлях-результату)))
      (за-умовою
-       ((однакові? current generated)
+       ((однакові? чинний-вміст згенерований-вміст)
         (1)
         (друкувати "Rust semantic registry projection is current"))
-       ((однакові? current generated)
+       ((однакові? чинний-вміст згенерований-вміст)
         (0)
         (друге
           (список
@@ -132,5 +130,5 @@
    write-projection
    (друге
      (список
-       (записати-файл output-path generated)
+       (записати-файл шлях-результату згенерований-вміст)
        (друкувати "Rust semantic registry projection written")))))
