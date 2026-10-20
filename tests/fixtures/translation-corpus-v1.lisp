@@ -1,13 +1,12 @@
-; Data-only external/NL translation corpus.
-; Shape:
+; Дослідний корпус перекладу із зовнішньої природної мови.
+; Його записи — дані свідчень, а не виконуваний код перекладача.
+; Структура зберігає протокольні назви полів:
 ;   (translation-corpus/1
 ;     (translation-case/1 ID MODULE INPUT PROPOSAL EXPECTED-REVIEW-STATUS
 ;                         DOWNSTREAM-QUERY EXPECTED-OUTCOME-STATUS)
 ;     ...)
-;
-; `not-run` means the case must not be admitted as knowledge and therefore has
-; no downstream Advice Taker query. This file is evidence data, not executable
-; translator code.
+; Стан not-run означає, що пропозицію не допущено як знання;
+; для неї не можна виконувати подальший запит Advice Taker.
 
 (translation-corpus/1
   (translation-case/1

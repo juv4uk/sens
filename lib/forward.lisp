@@ -181,8 +181,8 @@
       ((атом? записи-обґрунтувань)  (як-є ()))
       (так (сполучити (факт-від (перше записи-обґрунтувань)) (мапа-факт-від (решта записи-обґрунтувань)))))))
 
-; Same `fire-rule` as Step 1, but wraps a successful result with the
-; single supporting fact that produced it.
+; Правило діє як на першому кроці, але успішний результат
+; доповнюємо фактом, що його обґрунтував.
 (визначити запустити-правило-система-істини
   (функція (правило факт)
     ((функція (результат)
@@ -271,8 +271,8 @@
        (сполучити (факт-від (перше поточні-записи)) (залежні-від поточний-факт (решта поточні-записи))))
       (так (залежні-від поточний-факт (решта поточні-записи))))))
 
-; Retracts `fact`, then recursively retracts everything that named it in
-; their support set — the cascade truth maintenance is for.
+; Відкликаємо факт і рекурсивно всі похідні факти,
+; для яких він був необхідною підставою.
 (визначити відкликати-факт-система-істини
   (функція (поточний-факт поточні-записи)
     (відкликати-факти-система-істини (залежні-від поточний-факт поточні-записи) (видалити-обґрунтований поточний-факт поточні-записи))))
@@ -351,10 +351,10 @@
       ((однакові? поточний-факт (факт-від (перше поточні-записи))) (видалити-запис-система-обґрунтувань поточний-факт (решта поточні-записи)))
       (так (сполучити (перше поточні-записи) (видалити-запис-система-обґрунтувань поточний-факт (решта поточні-записи)))))))
 
-; Folds one new `(fact justification)` pair into `entries`: a brand-new
-; fact gets a fresh entry; a fact already present gets `justification`
-; added to its list only if not already there (so re-deriving the same way
-; twice is a no-op, needed for `run-jtms`'s fixpoint check to terminate).
+; Додаємо пару (факт обґрунтування) до записів.
+; Новий факт отримує запис, старий — лише нове обґрунтування.
+; Повторне виведення тим самим шляхом не змінює пам'ять,
+; що забезпечує завершення циклу до нерухомої точки.
 (визначити додати-обґрунтування
   (функція (поточний-факт обґрунтування-доказ поточні-записи)
     ((функція (існуючий-запис) (за-умовою
@@ -732,12 +732,10 @@
        (зіставити-умову-для-всіх-кандидатів (друге поточна-умова) (решта (решта поточна-умова)) поточні-факти поточні-зв'язування))
       (так (зіставити-умову-із-набором-фактів поточна-умова поточні-факти поточні-зв'язування)))))
 
-; Built directly on `thread-conjunction` (lib/unify.lisp) — the same
-; conjunction-walking kernel `lib/reason.lisp`'s `prove-goals` threads a
-; richer `(subst proofs)` state through. Here `try-one` is
-; `match-one-condition`: for one condition, either match it against every
-; fact in the explicit list, or (for `not`) check that its inner pattern
-; matches none of them — rather than recursively searching further rules.
+; Послідовний обхід умов використовує закон lib/unify.lisp,
+; спільний із доведенням цілей у lib/reason.lisp.
+; Кожну умову звіряємо з явним списком фактів, а заперечення
+; успішне лише за відсутності збігу внутрішнього шаблону.
 (визначити зіставити-умови
   (функція (поточні-умови поточні-факти поточні-зв'язування)
     (потік-виконання-кон'юнкція поточні-умови поточні-зв'язування
@@ -750,11 +748,9 @@
       ((атом? підстановки)  (як-є ()))
       (так (сполучити (застосувати-підстановка голова-правила (перше підстановки)) (застосувати-голову-правила-до-підстановок голова-правила (решта підстановки)))))))
 
-; Fires a `(head cond1 cond2 ...)` rule against a fact list: finds every
-; substitution satisfying the whole condition conjunction, and returns one
-; derived `head` per substitution found (possibly the same fact more than
-; once, if several substitutions produce it — downstream dedup via
-; `append-new`/`member?` already handles that, same as Steps 1-5).
+; Правило (head cond1 cond2 ...) породжує головний факт
+; для кожної підстановки, що задовольняє всі умови.
+; Повторені факти прибирає подальше об'єднання з перевіркою членства.
 (визначити застосувати-одне-правило-до-всіх-збігів
   (функція (поточне-правило поточні-факти)
     (за-умовою
@@ -828,9 +824,8 @@
 ; D9-аліаси нижче потребують уже визначених локальних українських замикань.
 ; Ніколи не пов'язувати ім'я з невизначеним символом до його DEFINE.
 ; D9 Ukrainian projections of existing TMS/JTMS language-owned functions.
-; Source: lib/forward.lisp and knowledge/d9-final-semantic-fill-v1.json.
-; Preserve exact ratified coordinates; no new D9 native opcode.
-; D9:010100111
+; Джерела: lib/forward.lisp і knowledge/d9-final-semantic-fill-v1.json.
+; Координати залишаються ратифікованими, нового машинного коду D9 немає.
 (визначити відкликати-факт-tms відкликати-факт-система-істини)
 ; D9:001101100
 (визначити відкликати-факти-tms відкликати-факти-система-істини)

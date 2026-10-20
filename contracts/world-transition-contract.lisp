@@ -1,15 +1,17 @@
-; contracts/world-transition-contract.lisp — Lisp-owned result contract for #1312.
+; Мовний контракт результатів переходів світу, задача #1312.
+; Історичні англомовні ключі записів є незмінними іменами протоколу.
 ;
-; Formalizes the result domains of world state transitions, history preservation,
-; and equality observations over immutable worlds:
+; Контракт описує результати переходів стану, збереження історії
+; та спостереження рівності незмінних світів:
 ;
-; 1. World snapshot parentage and historical reconstruction are verified via
-;    structural-relation (equal?), never universal truth sentinels.
-; 2. Content addresses are verified via identity-relation (eq). Distinct world
-;    histories with identical current clauses produce distinct content addresses.
-; 3. Transition receipts (accepted, rejected, conflict) embed structural-relation
-;    records, preserving transition shape without universal-T coercion.
-; 4. Universal-T coercion is forbidden across all world transitions.
+; 1. Батьківський зв'язок і відновлення знімків перевіряємо
+;    структурною рівністю, а не універсальним маркером істини.
+; 2. Адреси вмісту порівнюємо за тотожністю. Різні історії світів
+;    можуть мати однакові чинні клаузи, але різні адреси вмісту.
+; 3. Квитанції accepted, rejected, conflict зберігають власну
+;    структурну форму разом із результатом перевірки.
+; 4. Заборонено приводити всі відповіді переходів до універсальної істини.
+; Точна предикатна істина й хиба належать D1; форма даних від них відмінна.
 
 (world-transition-contract/1
   ((domain . world-system)

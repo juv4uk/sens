@@ -1,17 +1,15 @@
-; #219 MULTI-LOGIC-RESEARCH-1
-; Data-only research corpus. These forms are observations to compare across
-; candidate projections. They are NOT ratified truth values or language laws.
-;
-; Shape:
-;   (evidence-case ID
-;     (positive SOURCES...)
-;     (negative SOURCES...)
-;     (search STATE)
+; #219 — дослідний корпус для порівняння багатьох логік.
+; Ці форми є спостереженнями, а не ратифікованими значеннями істини
+; чи новими законами мови.
+; Структура кожного дослідного запису:
+;   (evidence-case ІДЕНТИФІКАТОР
+;     (positive ДЖЕРЕЛА...)
+;     (negative ДЖЕРЕЛА...)
+;     (search СТАН)
 ;     (note ...))
-;
-; Canon 0 / () is deliberately represented by the absence of an evidence-case
-; value at the language boundary. E0 below is a named laboratory specimen so
-; candidate projections can be compared without redefining () itself.
+; Канон 0 / () не підміняється вигаданим значенням evidence-case.
+; E0 — лише іменований дослідний зразок для порівняння проєкцій,
+; без перевизначення порожнього списку.
 
 (evidence-case E0
   (positive)
@@ -58,8 +56,8 @@
   (search completed-zero-answers)
   (note completed-zero-answer-search-is-a-search-fact-not-false))
 
-; Expected *research projections*. These describe what a candidate can express,
-; not what my-lisp must mean.
+; Очікування для дослідних проєкцій описують можливості моделей,
+; а не обов'язкову семантику мови СЕНС.
 (candidate-expectation classical
   (E0 outside)
   (E1 true)
