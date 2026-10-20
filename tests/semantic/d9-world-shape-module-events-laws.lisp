@@ -1,5 +1,5 @@
-; D9 WORLD?/WORLD-MODULE-EVENTS/WORLD-MODULE-KNOWN? — eight native D1 laws.
-; One canonical shape, three malformed shapes, filtered immutable journal.
+; D9 WORLD?/WORLD-MODULE-EVENTS/WORLD-MODULE-KNOWN? — вісім рідних D1-законів.
+; Одна канонічна форма, три хибні форми, відфільтрований незмінний журнал.
 (список
   (світ? (порожній-світ))
   (світ? (світ-запис (порожній-світ) (як-є (tell альфа факт-а))))
