@@ -69,10 +69,10 @@
 
 (друкувати
   (сполучити (як-є about)
-    "oracle-results.lisp — oracle-eval results for every tests/fixtures/inventory.lisp fixture, via the canonical TCP Oracle :9999, keyed by stable F-ID."))
+    "oracle-results.lisp — результати oracle-eval для кожного прикладу tests/fixtures/inventory.lisp через канонічний TCP-оракул :9999; зв'язок забезпечує сталий F-ID."))
 (друкувати
   (сполучити (як-є generated)
-    "Run: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
+    "Запуск: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
 
 (обробити-пару-прикладів
   (вибрати-лише-приклади (читати-всі (читати-файл "tests/fixtures/inventory.lisp")))
