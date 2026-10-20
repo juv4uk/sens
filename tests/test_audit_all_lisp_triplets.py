@@ -103,6 +103,22 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(summary["semantic_runtime_proven"])
         self.assertFalse(summary["release_ready"])
 
+    def test_comments_outside_keyboard_are_style_only_not_program_changes(self):
+        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        target = self.root / "lib" / "branch"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for suffix in (".lisp", ".sens", ""):
+            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        source = target.with_suffix(".lisp")
+        source.write_text("; inert historical comment ٢\n" +
+                          source.read_text(encoding="utf-8"), encoding="utf-8")
+        report = scan(self.root, verify_bounded=True)
+        self.assertEqual(report["ukrainian_keyboard"], 0)
+        self.assertEqual(report["bounded_verified"], 1, report["blocked_sample"])
+        self.assertTrue(report["all_bounded_reverse_verified"])
+        self.assertFalse(report["semantic_runtime_proven"])
+        self.assertFalse(report["release_ready"])
+
     def test_current_t5m_triplet_is_counted_only_after_real_reverse_proof(self):
         from sens_t5_codec import encode_t5m_projection
         fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
