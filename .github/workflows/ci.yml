@@ -144,7 +144,48 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/install-zig
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:')) }}
+
+      # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
+      - uses: dtolnay/rust-toolchain@1.99.0
+        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
+      - name: "BENCH-T5M — Zig, x86-64 ASM, Rust"
+        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/t5m-bench"
+          mkdir -p "$dir"
+          cd research/asm-t5m
+          as --64 -o "$dir/t5m_pack.o" t5m_pack.S
+          zig build-obj t5m_ref.zig -O ReleaseFast -femit-bin="$dir/t5m_ref.o"
+          rustc -O --edition 2021 --crate-type lib --emit obj -C panic=abort -o "$dir/rust_t5m_ref.o" t5m_ref.rs
+          zig cc -O2 -DHAVE_RUST bench.c "$dir/t5m_pack.o" "$dir/t5m_ref.o" "$dir/rust_t5m_ref.o" -o "$dir/bench"
+          "$dir/bench" | tee "$dir/results.txt"
+          # Старий bench друкує збіг, але сам не повертає FAIL.
+          grep -Fq "pack збіг: asm/zig=1 asm/c=1" "$dir/results.txt"
+          grep -Fq "pack збіг: asm/rust=1" "$dir/results.txt"
+          grep -Fq "unpack==трити: asm=1 zig=1 c=1 rust=1" "$dir/results.txt"
+          {
+            echo "## T5M: Zig, ASM, Rust (+ C контроль)"
+            echo "SHA: $GITHUB_SHA"
+            echo "CPU: $(grep -m1 model /proc/cpuinfo)"
+            echo "Zig: $(zig version); Rust: $(rustc --version)"
+            echo "1 000 000 тритів, 200 повторень; pack/unpack"
+            echo "Лише транспорт, не семантика SENS."
+            echo '~~~text'
+            cat "$dir/results.txt"
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: "BENCH-T5M — зберегти звіт"
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        with:
+          name: t5m-zig-asm-rust-${{ github.sha }}
+          path: ${{ runner.temp }}/t5m-bench/results.txt
+          if-no-files-found: warn
+          retention-days: 14
 
       # Одноразове виконання тільки на конкретному MIGRATE-SID8-UKR push.
       # Жодних комітів/пушів із раннера — лише звіт та patch artifact.
