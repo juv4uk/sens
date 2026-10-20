@@ -1,17 +1,18 @@
-; Pinned/versioned external-evidence provenance for #175 (MACHINE-ISA-2).
+; Закріплені й версіоновані джерела зовнішніх технічних доказів для #175 (MACHINE-ISA-2).
 ;
-; XED is imported here strictly as external technical evidence for
-; instruction-form facts (class, category, ISA-set grouping, operand
-; descriptors). It is never semantic authority: nothing here mints or
-; renames a public semantic ID, and no XED mnemonic reaches
-; lib/generated/meta-semantic-registry.lisp or lib/surface/*. See #150.
+; XED імпортується сюди виключно як зовнішнє джерело технічних
+; відомостей про форми інструкцій: класи, категорії, набори ISA
+; та описи операндів. Це не джерело семантичних повноважень:
+; тут не створюють і не перейменовують відкриті семантичні коди,
+; а мнемоніки XED не потрапляють до метареєстру чи мовних
+; проєкцій lib/surface/*. Див. #150.
 ;
-; The vendored files below are verbatim copies (including their own
-; Apache-2.0 license headers) of the named upstream files at the pinned
-; commit. Only files actually consumed by the import pipeline are
-; vendored; each vendored file keeps its full original content rather
-; than a hand-trimmed excerpt, so the import step -- not this commit --
-; is the place that decides which extensions/forms are admitted.
+; Наведені нижче файли постачальника є точними копіями
+; відповідних файлів джерела на закріпленому коміті, разом
+; із заголовками ліцензії Apache-2.0. Копіюються лише файли,
+; які справді читає процес імпорту. Кожен зберігає повний
+; вихідний вміст, без ручного обрізання фрагментів.
+; Лише етап імпорту визначає, які розширення й форми допускати.
 
 (xed-provenance/1
   (repository "https://github.com/intelxed/xed.git")
@@ -89,11 +90,11 @@
     (upstream-path "datafiles/ivbavx/fp16-isa.txt")
     (covers-extensions (F16C)))
 
-  ; XED-extension-tag -> my-lisp admitted-extension name (see
-  ; lib/machine/cpu/intel-core-i5-6400-inventory.lisp). This mapping is a
-  ; data-transport concern only: every target name already exists as an
-  ; admitted-extension there, so this table renames nothing new into
-  ; existence -- it only aligns two pre-existing vocabularies.
+  ; Тег розширення XED зіставляється з уже допущеним розширенням
+  ; у lib/machine/cpu/intel-core-i5-6400-inventory.lisp.
+  ; Це лише узгодження форматів даних: усі цільові назви
+  ; вже існують у профілі допуску. Таблиця не створює
+  ; нових семантичних сутностей, а поєднує два наявні словники.
   (extension-mapping (BASE X86-BASE))
   (extension-mapping (LONGMODE X86-64))
   (extension-mapping (X87 X87))
@@ -102,9 +103,9 @@
   (extension-mapping (SSE2 SSE2))
   (extension-mapping (SSE3 SSE3))
   (extension-mapping (SSSE3 SSSE3))
-  ; The pinned data's SSE4 tag predates the SSE4.1/SSE4.2 split and carries
-  ; no field that distinguishes them, so every SSE4-tagged form is admitted
-  ; under both existing admitted extensions rather than guessing which one.
+  ; У закріплених даних тег SSE4 передує розподілу на SSE4.1/SSE4.2
+  ; та не має поля для їх розрізнення. Тому кожна форма з тегом SSE4
+  ; віднесена до обох уже допущених розширень без довільного вибору.
   (extension-mapping (SSE4 SSE4.1+SSE4.2))
   (extension-mapping (AES AES-NI))
   (extension-mapping (PCLMULQDQ PCLMULQDQ))
@@ -121,9 +122,10 @@
   (extension-mapping (RDSEED RDSEED))
   (extension-mapping (F16C F16C))
 
-  ; ADX has no distinct EXTENSION-tagged source file in the pinned XED
-  ; checkout used here (its forms are folded into a chip-set file rather
-  ; than an isa-form file at this commit); it is intentionally not
-  ; imported in this pass. #174's admission of ADX stands on the CPU
-  ; capability profile alone until a suitable source is identified.
+  ; У закріпленому XED немає окремого вихідного файлу ADX
+  ; з тегом EXTENSION: його форми містяться у файлі набору
+  ; можливостей процесора, а не форм ISA. Тому в цьому проході
+  ; ADX свідомо не імпортовано. Допуск ADX за #174 наразі
+  ; спирається лише на профіль можливостей процесора,
+  ; доки не встановлено відповідне джерело.
   (not-yet-sourced ADX))
