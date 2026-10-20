@@ -74,13 +74,13 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
         expected = {
             "lisp-fs-conformance.lisp": (
                 "(нехай-похідне ((хибне-рішення",
-                "(fs-journal-replay (список (список (як-є broken))))",
+                "(фс-журнал-повторити (список (список (як-є broken))))",
             ),
             "rivnopravnist-uk.lisp": ("(визначити подвоїти", "(додати число число)", "(за-умовою"),
-            "semantic-registry-self-hosted-witness.lisp": ("(0011 semantic-registry-self-hosted-witness", "(0010 (source)"),
+            "semantic-registry-self-hosted-witness.lisp": ("(визначити свідок-самостійного-семантичного-реєстру", "(функція (джерело)"),
             "semantic-coordinate-matrix-845.lisp": (
-                "(визначити semantic-coordinate-matrix-845",
-                "(semantic-coordinate-matrix-845)",
+                "(визначити свідок-матриці-семантичних-координат",
+                "(свідок-матриці-семантичних-координат)",
             ),
         }
         for filename, needles in expected.items():
@@ -98,7 +98,8 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
 
         # Binary-id data is still historical data, NOT an executable call head.
         registry = (ROOT / "tests/fixtures/semantic-registry-self-hosted-witness.lisp").read_text()
-        self.assertIn("(semantic-registry-row-in registry 00000001)", registry)
+        self.assertIn("(як-є semantic-registry-handoff/1)", registry)
+        self.assertIn("(як-є source-digest)", registry)
 
 if __name__ == "__main__":
     unittest.main()
