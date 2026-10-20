@@ -201,6 +201,12 @@ fn ukrainian_machine_effect_and_atom_aliases_keep_execution_parity() {
         ("x86-ret", "машинна-команда-повернення"),
         ("x86-add-r64-r64 (як-є rax) (як-є rcx)", "машинна-команда-додати-64-розрядні-регістри (як-є rax) (як-є rcx)"),
         ("x86-jnz-rel8 11", "машинна-команда-перехід-якщо-не-нуль 11"),
+        ("x86-gpr64 (як-є rax)", "машинний-регістр-64 (як-є rax)"),
+        ("x86-as-gpr64 (як-є rax)", "типізувати-машинний-регістр-64 (як-є rax)"),
+        ("x86-gpr64-value (як-є (gpr64 rax))", "значення-машинного-регістра-64 (як-є (gpr64 rax))"),
+        ("x86-disp8 11", "машинний-зсув-8 11"),
+        ("x86-disp8 256", "машинний-зсув-8 256"),
+        ("x86-u64-imm 3", "машинне-безпосереднє-беззнакове-64 3"),
     ];
     for (historical, ukrainian) in pairs {
         let previous = eval_value(&format!("({historical})"), &mut session);
