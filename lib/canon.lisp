@@ -18,7 +18,7 @@
 
 ; Canon 0 has no lexical alias as part of Canon itself. This ordinary witness
 ; is intentionally outside the reserved set and is used only by the laws below.
-(визначити canon-empty-list (як-є ()))
+(визначити канон-порожній-список (як-є ()))
 
 ; QUOTE and COND are evaluation-control forms, not ordinary first-class values.
 ; Callable Canon primitives are first-class immutable operation handles.
@@ -31,25 +31,25 @@
 ; A law does not return universal TRUE/FALSE. It returns explicit Lisp data.
 ; Закон не повертає універсальні TRUE/FALSE, а явний Lisp-запис.
 
-(визначити canon-law-result
+(визначити канон-закон-результат
   (функція (law status)
     (сполучити
       (як-є canon-law-result)
       (сполучити law (сполучити status (як-є ()))))))
 
-(визначити canon-law-satisfied
+(визначити канон-закон-виконаний
   (функція (law)
     (канон-закон-результат law (як-є satisfied))))
 
-(визначити canon-law-violated
+(визначити канон-закон-порушений
   (функція (law)
     (канон-закон-результат law (як-є violated))))
 
-(визначити canon-law-status
+(визначити канон-закон-стан
   (функція (result)
     (перше (решта (решта result)))))
 
-(визначити canon-conformance-result
+(визначити канон-відповідність-результат
   (функція (status)
     (сполучити
       (як-є canon-conformance)
@@ -60,7 +60,7 @@
 ; через ратифіковані українські surface; керування лише точним D1 PredicateBit.
 ; Структурне () не є хибним предикатом.
 
-(визначити canon-law-empty-list
+(визначити канон-закон-порожній-список
   (функція ()
     (за-умовою
       ((тотожне? канон-порожній-список (як-є ()))
@@ -68,7 +68,7 @@
       (так
        (канон-закон-порушений (як-є empty-list))))))
 
-(визначити canon-law-atom-cons
+(визначити канон-закон-атом-пара
   (функція (x y)
     (за-умовою
       ((атом? (сполучити x y))
@@ -76,7 +76,7 @@
       (так
        (канон-закон-виконаний (як-є atom-cons))))))
 
-(визначити canon-law-car-cons
+(визначити канон-закон-перше-пара
   (функція (x y)
     (за-умовою
       ((тотожне? (перше (сполучити x y)) x)
@@ -84,7 +84,7 @@
       (так
        (канон-закон-порушений (як-є car-cons))))))
 
-(визначити canon-law-cdr-cons
+(визначити канон-закон-решта-пара
   (функція (x y)
     (за-умовою
       ((тотожне? (решта (сполучити x y)) y)
@@ -92,7 +92,7 @@
       (так
        (канон-закон-порушений (як-є cdr-cons))))))
 
-(визначити canon-law-eq-reflexive-atom
+(визначити канон-закон-рівність-рефлексивний-атом
   (функція (x)
     (за-умовою
       ((атом? x)
@@ -105,7 +105,7 @@
        (канон-закон-порушений (як-є eq-reflexive-atom))))))
 
 ; `решта` must be a pair projection, not a human-language "second element".
-(визначити canon-law-cdr-dotted
+(визначити канон-закон-решта-крапковий
   (функція ()
     (за-умовою
       ((тотожне?
@@ -117,7 +117,7 @@
 
 ; EQ перевіряє тотожність допустимих атомів, включно зі структурним ().
 ; Завершення правильного списку доводимо явним EQ з ().
-(визначити canon-law-cdr-proper
+(визначити канон-закон-решта-правильний
   (функція ()
     (за-умовою
       ((тотожне? (перше (решта (як-є (1 2 3)))) 2)
@@ -136,7 +136,7 @@
        (канон-закон-порушений (як-є cdr-proper))))))
 
 ; EQ is atom-only, so the improper tail is checked through atom projections.
-(визначити canon-law-cdr-improper
+(визначити канон-закон-решта-неправильний
   (функція ()
     (за-умовою
       ((тотожне? (перше (решта (як-є (1 2 . 3)))) 2)
@@ -151,7 +151,7 @@
 ; Evaluation-control laws: quoted/unselected unknown symbols must never be
 ; evaluated. If a host eagerly evaluates them, execution errors before a law
 ; record can be produced.
-(визначити canon-law-quote-suppresses-evaluation
+(визначити канон-закон-цитування-пригнічує-обчислення
   (функція ()
     (за-умовою
       ((тотожне? (як-є never-defined-canon-symbol)
@@ -160,7 +160,7 @@
       (так
        (канон-закон-порушений (як-є quote-suppresses-evaluation))))))
 
-(визначити canon-law-cond-first-match-short-circuit
+(визначити канон-закон-умова-перший-збіг-короткий-ланцюг
   (функція ()
     (за-умовою
       ((тотожне?
@@ -176,7 +176,7 @@
 ; Legacy witness name retained for compatibility; the law now executes
 ; exact D3 heads. Surface spelling parity belongs to projection checks.
 ; No historical T/NIL truthiness is admitted.
-(визначити canon-law-symbolic-surface
+(визначити канон-закон-символьний-поверхня
   (функція ()
     (за-умовою
       ((тотожне?
@@ -192,7 +192,7 @@
 
 ; Aggregate explicit law records recursively. The empty list terminates the
 ; result list structurally; it does not mean FALSE.
-(визначити canon-conformance-from
+(визначити канон-відповідність-з
   (функція (results)
     (за-умовою
       ((атом? results)
@@ -211,7 +211,7 @@
           (канон-відповідність-результат (як-є violated))))))))
 
 ; One language-level explicit conformance record used by runtime observers.
-(визначити canon-conforms?
+(визначити канон-відповідає?
   (функція ()
     (канон-відповідність-з
       (сполучити
@@ -237,3 +237,25 @@
                           (сполучити
                             (канон-закон-символьний-поверхня)
                             (як-є ())))))))))))))))
+
+; Історичні англомовні імена лишаються сумісними зв'язуваннями того самого значення.
+; Основні DEFINE вище — повні ратифіковані українські імена дев'ятого домену.
+(визначити canon-empty-list канон-порожній-список)
+(визначити canon-law-result канон-закон-результат)
+(визначити canon-law-satisfied канон-закон-виконаний)
+(визначити canon-law-violated канон-закон-порушений)
+(визначити canon-law-status канон-закон-стан)
+(визначити canon-conformance-result канон-відповідність-результат)
+(визначити canon-law-empty-list канон-закон-порожній-список)
+(визначити canon-law-atom-cons канон-закон-атом-пара)
+(визначити canon-law-car-cons канон-закон-перше-пара)
+(визначити canon-law-cdr-cons канон-закон-решта-пара)
+(визначити canon-law-eq-reflexive-atom канон-закон-рівність-рефлексивний-атом)
+(визначити canon-law-cdr-dotted канон-закон-решта-крапковий)
+(визначити canon-law-cdr-proper канон-закон-решта-правильний)
+(визначити canon-law-cdr-improper канон-закон-решта-неправильний)
+(визначити canon-law-quote-suppresses-evaluation канон-закон-цитування-пригнічує-обчислення)
+(визначити canon-law-cond-first-match-short-circuit канон-закон-умова-перший-збіг-короткий-ланцюг)
+(визначити canon-law-symbolic-surface канон-закон-символьний-поверхня)
+(визначити canon-conformance-from канон-відповідність-з)
+(визначити canon-conforms? канон-відповідає?)
