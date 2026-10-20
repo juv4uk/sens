@@ -1,25 +1,22 @@
-; #990 — four-island execution evidence subordinate to Canon()/function table.
+; Свідчення виконання математичних функцій чотирма автономними виконавцями.
+; Цей файл описує лише підтвердження механізмів, не закони мови СЕНС.
 ;
-; Історичний SID8:00001100 був PLUS, не D8:00001100 (зменшити-на-1).
-; Чинна ратифікована функція додавання: D5:01010, укр додати.
-; Це лише свідчення механізмів, не нова семантична identity.
+; Історична функція додавання SID8:00001100 не є сучасною
+; D8:00001100 (зменшити-на-один). Чинна ратифікована функція
+; додавання має координату D5:01010 та українську назву «додати».
+; Збіг машинних бітів між епохами не утворює семантичної тотожності.
 ;
-; Reuses (2000+ surface):
-;   lib/surface/semantic-registry.lisp (authority),
-;   lib/function-table-mechanisms.lisp (mechanism-source),
-;   mechanism-select / island-lowering consumers of these rows.
+; Відомості про чинні функції та маршрути зберігаються у
+; lib/surface/semantic-registry.lisp і lib/function-table-mechanisms.lisp.
+; Добір механізму та зниження для автономного виконавця лише споживають
+; ці відомості; вони не можуть привласнювати функції нову координату.
 ;
-; This is NOT a semantic contract and must not carry operation names, law or
-; domain. Semantic identity/meaning stays in lib/surface/semantic-registry.lisp
-; and #1046. Evidence donors: closed #1042 (executor observations), #1052
-; (Datalog replay). Current bounded slice: SID 00001100 only, because #1053
-; already admits all four executor routes for that existing SID. Final semantic
-; ratification remains blocked until law/domain are available from the one
-; Canon/function-table authority row.
-;
-; Чотири історичні executor-свідки SID8:00001100 тепер посилаються на
-; ратифіковану українську проєкцію D5:01010. D8:00001100 — інша функція.
-; Не ототожнювати однакові 8-бітні записи між епохами і доменами.
+; Початкові свідчення походять із задач #1042 і #1052.
+; Для історичного додавання #1053 підтвердив чотири маршрути.
+; Остаточна ратифікація семантики вимагає незалежного закону й домену
+; з єдиного авторитетного реєстру. Поточні поля протоколу не змінюємо.
+; Англійські позначки всередині структури нижче — зовнішні дані
+; виконання, а не викличні голови української мови.
 
 (
   (schema island-math-evidence/1)
