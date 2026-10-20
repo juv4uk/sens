@@ -50,12 +50,27 @@ class GoGateTests(unittest.TestCase):
             capture_output=True, text=True, check=False,
         )
 
-    def test_all_go(self) -> None:
+    def test_all_structural_checks_green_cannot_authorize_release(self) -> None:
         self._all_receipts()
-        proc = subprocess.run([sys.executable, str(CHECKER), str(self.root)],
-                              capture_output=True, text=True)
-        self.assertEqual(proc.returncode, 0)
-        self.assertIn("RELEASE_GATE_GO", proc.stdout)
+        proc = self._run_gate()
+        self.assertEqual(proc.returncode, 1)
+        self.assertIn("RELEASE_STRUCTURAL_GATES_GO 10/10", proc.stdout)
+        self.assertIn("RELEASE_GATE_NO_GO", proc.stdout)
+        self.assertNotIn("RELEASE_GATE_GO every", proc.stdout)
+
+    def test_all_structural_checks_green_json_still_reports_release_block(self) -> None:
+        import json
+        self._all_receipts()
+        receipt = self.root / "structural-only.json"
+        proc = subprocess.run(
+            [sys.executable, str(CHECKER), str(self.root), "--json", str(receipt)],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(proc.returncode, 1)
+        report = json.loads(receipt.read_text(encoding="utf-8"))
+        self.assertEqual(report["go"], report["total"])
+        self.assertIs(report["release_go"], False)
+        self.assertEqual(report["release_admission"], "NOT_VERIFIED")
 
     def test_one_red_is_no_go(self) -> None:
         self._all_receipts()
