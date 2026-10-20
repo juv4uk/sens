@@ -1,6 +1,6 @@
-; D9:111110000 WORLD-ADDRESS-CONTENT — eight D1 laws.
-; Exact structure, tag, journal, metadata, parent invariance, negative differences,
-; and one immutable record append. The D9 opcode is not directly admitted.
+; D9:111110000 WORLD-ADDRESS-CONTENT — вісім D1-законів.
+; Точна структура, тег, журнал, метадані, інваріантність батька, негативні різниці,
+; і один незмінний доданий запис. Опкод D9 не допущено безпосередньо.
 (список
   (однакові? (світ-адреса-вміст (порожній-світ)) (як-є (world-history () ())))
   (тотожне? (перше (світ-адреса-вміст (порожній-світ))) (як-є world-history))
