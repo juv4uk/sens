@@ -3,7 +3,7 @@
   "generated_from_main": "a4e5032466f1e4e31042639559592aeb2d296ced",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
-  "reason": "strict T5 preview classified these files by their top-level schema/data form; they are not executable SENS source",
+  "reason": "strict T5 preview classified these files by their top-level schema/data form; they are not executable SENS source\nПовторний огляд 21.10.2026: чотири schema island-math-evidence/*.lisp залишаються декларативними негативними свідками, не executable SENS; SHA поновлено тільки після перевірки повних форм.",
   "automatic_sens_companion": false,
   "entries": [
     {
@@ -77,19 +77,19 @@
     },
     {
       "path": "tests/fixtures/island-math-evidence/duplicate-route.lisp",
-      "git_blob_sha1": "577737093d61a0abe0e55b2862b4a625ccee61ce"
+      "git_blob_sha1": "01ffbf0fc6fa4b5ddab9111acd1c9c923db58d70"
     },
     {
       "path": "tests/fixtures/island-math-evidence/semantic-field-leak.lisp",
-      "git_blob_sha1": "d4bbcc448d7c466256f4b01a362b89e63ba8b14a"
+      "git_blob_sha1": "7df09cb9e44be62170c682494223df32c57820a8"
     },
     {
       "path": "tests/fixtures/island-math-evidence/unadmitted-route.lisp",
-      "git_blob_sha1": "b904bf8feca8b3106482e28325b11033fad4c751"
+      "git_blob_sha1": "807d392a7c4996a48798ec07e0978fe67c4653d7"
     },
     {
       "path": "tests/fixtures/island-math-evidence/unsupported-executor.lisp",
-      "git_blob_sha1": "f2f2b48b0cc835cb01e1645dd19bf82a4831fb66"
+      "git_blob_sha1": "ef3d61d0d9a6967398d7d97dcc15a8e7a2bd8113"
     }
   ]
 }
