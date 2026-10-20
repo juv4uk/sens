@@ -317,13 +317,15 @@ jobs:
         if: ${{ always() && github.event_name == 'workflow_dispatch' }}
         run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
 
-      - name: Оборотність Lisp ↔ точні слова ↔ T5 — позитивні й негативні перевірки
+      - name: Оборотність Lisp ↔ точні слова ↔ T5M — позитивні й негативні перевірки
         if: ${{ always() }}
         shell: bash
         run: |
           set -euo pipefail
           # Старий Python/T5-запис повністю заблоковано: він не є Zig/T5M.
           python3 -m unittest tests/test_retired_t5_publisher.py -v
+          # Легка перевірка транзакційного T5M без важкого Zig/Rust складання.
+          python3 -m unittest tests/test_guarded_sens_mirror.py -v
           # Це тести канонічної фізичної тотожності, НЕ незалежний SENS-eval.
           # Нові помилки у міграторі, інвентарі або свідках мають робити CI червоним.
           python3 -m unittest tests/test_verify_uk_t5_triplet.py -v
