@@ -454,10 +454,10 @@
 ; глибина рекурсії O(log(a/b)) як у `largest-chunk`, так і в самому
 ; `quotient`, перевірено на 13-розрядному діленому без проблем.
 (0011 largest-chunk
-  (0010 (a b chunk mult)
+  (0010 (ділене дільник частина кратність)
     (110
-      ((11010 a (01010 chunk chunk)) (111 chunk mult))
-      (t (largest-chunk a b (01010 chunk chunk) (01010 mult mult))))))
+      ((11010 ділене (01010 частина частина)) (111 частина кратність))
+      (t (largest-chunk ділене дільник (01010 частина частина) (01010 кратність кратність))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -477,16 +477,16 @@
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
 (0011 quotient
-  (0010 (a b)
+  (0010 (ділене дільник)
     (110
-      ((101 b 0) (11110110 a b))
-      ((11010 a b) 0)
-      (t (let ((chunk+mult (largest-chunk a b b 1)))
-           (01010 (011 chunk+mult) (quotient (01011 a (100 chunk+mult)) b)))))))
+      ((101 дільник 0) (11110110 ділене дільник))
+      ((11010 ділене дільник) 0)
+      (t (let ((частина-і-кратність (largest-chunk ділене дільник дільник 1)))
+           (01010 (011 частина-і-кратність) (quotient (01011 ділене (100 частина-і-кратність)) дільник)))))))
 
 (0011 mod
-  (0010 (a b)
-    (01011 a (10110 b (quotient a b)))))
+  (0010 (ділене дільник)
+    (01011 ділене (10110 дільник (quotient ділене дільник)))))
 
 ; `<=` and `>=` need no Rust dispatch: the strict comparisons plus equality
 ; already preserve exact/inexact numeric semantics, while ordinary recursion
@@ -499,32 +499,32 @@
 ; reichen, gewöhnliche Rekursion liefert die Verkettung. Der Pflichtparameter
 ; erhält den Arity-Fehler bei null Argumenten; ein Argument ist trivial geordnet.
 (0011 nondecreasing-from?
-  (0010 (current remaining)
+  (0010 (поточне решта-значень)
     (110
-      ((010 remaining) t)
-      ((11010 current (100 remaining))
-       (nondecreasing-from? (100 remaining) (011 remaining)))
-      ((11110111 current (100 remaining))
-       (nondecreasing-from? (100 remaining) (011 remaining)))
+      ((010 решта-значень) t)
+      ((11010 поточне (100 решта-значень))
+       (nondecreasing-from? (100 решта-значень) (011 решта-значень)))
+      ((11110111 поточне (100 решта-значень))
+       (nondecreasing-from? (100 решта-значень) (011 решта-значень)))
       (t (001 ())))))
 
 (0011 nonincreasing-from?
-  (0010 (current remaining)
+  (0010 (поточне решта-значень)
     (110
-      ((010 remaining) t)
-      ((11011 current (100 remaining))
-       (nonincreasing-from? (100 remaining) (011 remaining)))
-      ((11110111 current (100 remaining))
-       (nonincreasing-from? (100 remaining) (011 remaining)))
+      ((010 решта-значень) t)
+      ((11011 поточне (100 решта-значень))
+       (nonincreasing-from? (100 решта-значень) (011 решта-значень)))
+      ((11110111 поточне (100 решта-значень))
+       (nonincreasing-from? (100 решта-значень) (011 решта-значень)))
       (t (001 ())))))
 
 (0011 <=
-  (0010 (first . remaining)
-    (nondecreasing-from? first remaining)))
+  (0010 (перший . решта-значень)
+    (nondecreasing-from? перший решта-значень)))
 
 (0011 >=
-  (0010 (first . remaining)
-    (nonincreasing-from? first remaining)))
+  (0010 (перший . решта-значень)
+    (nonincreasing-from? перший решта-значень)))
 
 ; number->string (G5 test: already expressible via existing means?) —
 ; yes, now that quotient/mod exist. Surfaced from the fpga-lisp
