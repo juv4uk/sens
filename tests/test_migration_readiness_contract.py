@@ -133,12 +133,19 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertEqual(report["release_status"], "NO-GO-NATIVE-SENS-ORACLE-UNVERIFIED")
         self.assertNotIn("nothing here blocks a publication", report["gate"]["rule"])
 
-    def test_new_mechanical_candidate_blocks_release_not_claim_success(self):
+    def test_new_mechanical_candidate_is_reported_without_false_ci_red_or_release(self):
         _, fn = fake_migrator_call(newly_eligible=1)
         with patch.object(census.subprocess, "run", side_effect=fn):
             report = census.build_report()
-        self.assertFalse(report["gate"]["pass"])
+        self.assertTrue(report["gate"]["pass"])  # source inventory only
         self.assertEqual(report["migrator_summary"]["files_would_write"], 1)
+        self.assertEqual(report["source_scope"]["nonarchive_mechanical_unproved"], 1)
+        self.assertEqual(report["source_scope"]["nonarchive_candidate_paths"], [
+            "tests/fixtures/core1-third-domain-canary/third.lisp"
+        ])
+        self.assertEqual(report["release_status"], "NO-GO-NATIVE-SENS-ORACLE-UNVERIFIED")
+        self.assertFalse(report["all_executable_lisp_roundtrip_verified"])
+        self.assertFalse(report["candidate_rows"][1]["semantic_oracle_admitted"])
         self.assertEqual(report["physical_outputs_created"], [])
         self.assertEqual(report["migrator_summary"]["files_written"], 0)
 
