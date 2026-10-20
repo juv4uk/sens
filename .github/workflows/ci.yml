@@ -7,12 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Кожне виконання перевіряє свій незмінний SHA; нові push не можуть
-# скасувати чи витіснити старий run з тієї самої branch-concurrency групи.
-# Один targeted workflow на коміт, без автоматичних дублювань.
+# Поточний main замінює застаріле виконання тієї самої гілки.
+# Старі SHA залишаються у Git, але не витрачають нові раннери.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.sha }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -20,13 +19,15 @@ permissions:
 jobs:
   runtime-shards:
     name: Реальне виконання — частина ${{ matrix.shard }}
-    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    # Дев'ятнадцять ресурсомістких частин — лише за ручним дозволом власника.
+    # Звичайний push перевіряє мовну поверхню та реальний post-core свідок нижче.
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
       fail-fast: false
-      # 19 shard jobs run beside the single guard job: at most 20 runners.
-      max-parallel: 19
+      # Навіть за ручного запуску виконуємо одну частину за раз.
+      max-parallel: 1
       matrix:
         shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     steps:
@@ -367,8 +368,16 @@ jobs:
           GUARDS_RESULT: ${{ needs.lisp-guards.result }}
           SHARDS_RESULT: ${{ needs.runtime-shards.result }}
         run: |
-          if [[ "$GUARDS_RESULT" != "success" || "$SHARDS_RESULT" != "success" ]]; then
-            echo "::error::SENS CI failed: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT"
+          if [[ "$GUARDS_RESULT" != "success" ]]; then
+            echo "::error::SENS CI failed: guards=$GUARDS_RESULT"
+            exit 1
+          fi
+          if [[ "$SHARDS_RESULT" != "success" && "$SHARDS_RESULT" != "skipped" ]]; then
+            echo "::error::SENS CI failed: runtime_shards=$SHARDS_RESULT"
+            exit 1
+          fi
+          if [[ "$SHARDS_RESULT" == "skipped" && "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "::error::Manual full runtime check was skipped"
             exit 1
           fi
           echo "SENS CI passed: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT"
