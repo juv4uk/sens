@@ -123,6 +123,7 @@ class LibUkrPeerTests(unittest.TestCase):
             "lib/knowledge.lisp": (
                 "(визначити check-conflict перевірити-конфлікт?)",
                 "(визначити *knowledge-package-version* *версія-пакета-знань*)",
+                "(визначити module-journal-has-module? журнал-містить-записи-модуля?)",
             ),
             "scripts/symbol-table.lisp": (
                 "(визначити список LIST)",
