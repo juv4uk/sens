@@ -405,7 +405,7 @@ jobs:
           echo "SENS CI passed: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT"
 
   language-fit-math:
-    name: Математика під Skylake — Zig, Fortran, C, Rust і ASM
+    name: Математика під Skylake — серійні й векторні мови проти ASM
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.compare_math_languages == true && github.ref == 'refs/heads/main')
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -414,7 +414,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/install-zig
-      - name: Порівняти шість математичних реалізацій з одним контролем
+      - name: Порівняти сім реалізацій, у тому числі C AVX2 проти ASM AVX2
         id: language_fit
         shell: bash
         continue-on-error: true

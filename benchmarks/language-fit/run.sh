@@ -30,7 +30,8 @@ scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 : > "$scratch/build.tsv"
 : > "$scratch/samples.tsv"
-variants=(fortran c rust zig asm-scalar asm-avx2)
+# Серійне ядро C та те саме чотирьохланцюжкове AVX2/FMA як у ASM.
+variants=(fortran c c-avx2 rust zig asm-scalar asm-avx2)
 
 build_variant() {
   local lang="$1"
@@ -57,6 +58,8 @@ fi
 
 build_variant fortran gfortran -O3 -march=skylake -std=f2008 -Wall benchmarks/language-fit/dot.f90 -o "$scratch/dot-fortran"
 build_variant c gcc -O3 -march=skylake -std=c11 -Wall -Wextra benchmarks/language-fit/dot.c -o "$scratch/dot-c"
+# Рівний SIMD-конкурент: та сама ширина, FMA і 4 незалежні накопичувачі.
+build_variant c-avx2 gcc -O3 -march=skylake -std=c11 -Wall -Wextra -DSENS_C_AVX2 benchmarks/language-fit/dot.c benchmarks/language-fit/dot-c-avx2.c -o "$scratch/dot-c-avx2"
 build_variant rust rustc -C opt-level=3 -C target-cpu=skylake -C debuginfo=0 benchmarks/language-fit/dot.rs -o "$scratch/dot-rust"
 # Zig 0.16 компілюємо окремо у власний .o; gcc тільки лінкує його
 # зі спільним C-драйвером. Це не «zig cc» замість справжнього Zig.
@@ -101,10 +104,10 @@ for lang in "${variants[@]}"; do
   verify "$lang" "$value"
 done
 
-# П'ять чергувань шести реалізацій; порядок змінюється між повторами.
+# П'ять чергувань семи реалізацій; порядок змінюється між повторами.
 for round in 0 1 2 3 4; do
-  for position in 0 1 2 3 4 5; do
-    index="$(((round+position)%6))"
+  for position in 0 1 2 3 4 5 6; do
+    index="$(((round+position)%7))"
     lang="${variants[index]}"
     started="$(date +%s%N)"
     value="$("$scratch/dot-$lang" | tr -d '[:space:]')"
@@ -115,7 +118,7 @@ for round in 0 1 2 3 4; do
 done
 
 {
-  echo '## Intel Skylake: Fortran / C / Rust / Zig / x86 SSE2 / x86 AVX2-FMA'
+  echo '## Intel Skylake: Fortran / C / C AVX2/FMA / Rust / Zig / ASM SSE2 / ASM AVX2/FMA'
   echo
   echo "- Git SHA: $(git rev-parse HEAD 2>/dev/null || echo НЕВІДОМО)"
   echo "- CPU: $(awk -F: '/model name/ {sub(/^[[:space:]]+/, "", $2); print $2; exit}' /proc/cpuinfo)"
@@ -139,6 +142,7 @@ done
     case "$lang" in
       fortran) files=(benchmarks/language-fit/dot.f90) ;;
       c) files=(benchmarks/language-fit/dot.c) ;;
+      c-avx2) files=(benchmarks/language-fit/dot.c benchmarks/language-fit/dot-c-avx2.c) ;;
       rust) files=(benchmarks/language-fit/dot.rs) ;;
       zig) files=(benchmarks/language-fit/dot.zig benchmarks/language-fit/dot.c) ;;
       asm-*) files=(benchmarks/language-fit/dot.c crates/sens/src/machine_math_skylake.S) ;;
@@ -156,11 +160,12 @@ done
     cpu_brief="$(awk -F: '/model name/ {sub(/^[[:space:]]+/, "", $2); print $2; exit}' /proc/cpuinfo)"
     cpu_brief="${cpu_brief//%/%25}"
     printf -v compact '%s; ' "${brief_times[@]}"
-    printf '::notice title=SENS Skylake — 6 реалізацій::CPU=%s; %sточність=PASS; медіани 5 запусків цілого процесу; дослід\n' "$cpu_brief" "$compact" >&2
+    printf '::notice title=SENS Skylake — 7 реалізацій::CPU=%s; %sточність=PASS; медіани 5 запусків цілого процесу; дослід\n' "$cpu_brief" "$compact" >&2
   fi
   echo
   echo 'Це дослідницький вимір; результати GitHub-hosted CPU не є результатами i5-6400.'
   echo 'AVX2/FMA може змінювати порядок додавання f64; застосовано числовий допуск.'
+  echo 'Скалярні й векторні реалізації — різні класи; ASM AVX2 порівнюємо насамперед з C AVX2/FMA.'
 } | tee "$scratch/result.md"
 
 if [[ -v GITHUB_STEP_SUMMARY && -n "$GITHUB_STEP_SUMMARY" ]]; then
