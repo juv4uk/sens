@@ -297,5 +297,52 @@ class TripletInventoryTests(unittest.TestCase):
         self.assertEqual(self.check_release_gate(report, "invalid")[0], 1)
 
 
+    def release_verdict(self, report: dict, inventory_status: str = "0"):
+        receipt = self.root / "release-triple.json"
+        receipt.write_text(json.dumps(report), encoding="utf-8")
+        return subprocess.run(
+            [sys.executable, str(ROOT / "scripts/check-release-triple-corpus.py"),
+             str(receipt), inventory_status],
+            cwd=ROOT, capture_output=True, text=True, check=False,
+        )
+
+    def test_release_gate_does_not_promote_valid_physical_triple_to_semantic_go(self):
+        self.view.write_bytes(self.expected)
+        report = self.scan(strict=True)
+        self.assertEqual(report["status"], "PHYSICAL_VIEW_ONLY_UK_PENDING")
+        self.assertEqual(report["summary"]["view_present_valid"], 1)
+        checked = self.release_verdict(report)
+        self.assertEqual(checked.returncode, 1, checked.stdout + checked.stderr)
+        self.assertIn("RELEASE_BLOCKED", checked.stderr)
+        self.assertNotIn("RELEASE_TRIPLE_FULL_CORPUS_PASS", checked.stdout)
+
+    def test_release_gate_rejects_forged_oracle_even_with_consistent_counters(self):
+        self.view.write_bytes(self.expected)
+        report = self.scan(strict=True)
+        report["summary"]["uk_oracle_verified"] = 1
+        report["summary"]["release_admitted"] = 1
+        report["files"][0]["uk_oracle"] = "VERIFIED"
+        report["files"][0]["release_admitted"] = True
+        checked = self.release_verdict(report)
+        self.assertEqual(checked.returncode, 1, checked.stdout + checked.stderr)
+        self.assertIn("physical inventory cannot certify", checked.stderr)
+        self.assertNotIn("RELEASE_TRIPLE_FULL_CORPUS_PASS", checked.stdout)
+
+    def test_release_gate_rejects_informational_inventory_without_strict_proof(self):
+        self.view.write_bytes(self.expected)
+        report = self.scan(strict=False)
+        checked = self.release_verdict(report)
+        self.assertEqual(checked.returncode, 1, checked.stdout + checked.stderr)
+        self.assertIn("RELEASE_BLOCKED", checked.stderr)
+
+    def test_release_gate_rejects_invalid_status_without_python_traceback(self):
+        self.view.write_bytes(self.expected)
+        report = self.scan(strict=True)
+        checked = self.release_verdict(report, "not-a-status")
+        self.assertEqual(checked.returncode, 1, checked.stdout + checked.stderr)
+        self.assertIn("RELEASE_BLOCKED", checked.stderr)
+        self.assertNotIn("Traceback", checked.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
