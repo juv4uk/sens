@@ -89,10 +89,10 @@
 (визначити відрендерити-проєкцію
   (функція (рядки)
     (рядок+
-      "; GENERATED FILE — DO NOT EDIT.\n"
-      "; Source authority: lib/surface/semantic-registry.lisp\n"
-      "; Generator: scripts/generate-meta-semantic-registry.lisp\n"
-      "; Registry surfaces; empty and reader-only apostrophe surfaces omitted.\n\n"
+      "; ЗГЕНЕРОВАНИЙ ФАЙЛ — НЕ РЕДАГУВАТИ.\n"
+      "; Джерело влади: lib/surface/semantic-registry.lisp\n"
+      "; Генератор: scripts/generate-meta-semantic-registry.lisp\n"
+      "; Поверхні реєстру; порожні й лише-читальні апостроф-поверхні пропущено.\n\n"
       "(00001001 my-semantic-surface-registry\n"
       "  (00000001 (\n"
       (зєднати-рядки (зворот рядки))
