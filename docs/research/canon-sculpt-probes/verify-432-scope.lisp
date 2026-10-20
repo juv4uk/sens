@@ -1,6 +1,6 @@
-(verification-scope
-  (production-changes none)
-  (semantic-authority none)
-  (rust-additions 0)
-  (fixture-changes none)
-  (merge-policy never-merge))
+(межі-перевірки
+  (зміни-у-робочому-коді немає)
+  (повноваження-змінювати-семантику немає)
+  (доповнення-раст 0)
+  (зміни-дослідницьких-свідків немає)
+  (політика-злиття без-злиття))
