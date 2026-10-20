@@ -885,6 +885,18 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertFalse(output.exists())
 
 
+    def test_export_trigger_installs_pinned_zig_in_existing_ci(self):
+        # Explicit one-shot T5M must never reach the publisher without Zig.
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        guards = workflow.split("  lisp-guards:", 1)[1]
+        installer = guards.split("      - uses: ./.github/actions/install-zig", 1)[1]
+        condition = installer.splitlines()[1].strip()
+        self.assertIn("MIGRATE-LIB-TRIPLETS:", condition)
+        self.assertIn("BENCH-T5M:", condition)
+        self.assertIn("github.event_name == 'push'", condition)
+        self.assertIn("ONE-SHOT — фізичні T5M-пари", guards)
+
+
     def test_minimal_cli_defaults_to_current_ratified_foundation(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)

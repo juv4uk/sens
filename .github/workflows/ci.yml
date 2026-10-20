@@ -144,7 +144,7 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/install-zig
-        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:')) }}
+        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:'))) }}
 
       # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - uses: dtolnay/rust-toolchain@1.99.0
@@ -366,7 +366,7 @@ jobs:
           set -euo pipefail
           # Старий Python/T5-запис повністю заблоковано: він не є Zig/T5M.
           python3 -m unittest tests/test_retired_t5_publisher.py -v
-          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_unpaired_only_already_paired_is_noop_without_zig -v
+          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_unpaired_only_already_paired_is_noop_without_zig tests.test_three_pass_migration.ThreePassMigrationTests.test_export_trigger_installs_pinned_zig_in_existing_ci -v
           # Легка перевірка транзакційного T5M без важкого Zig/Rust складання.
           python3 -m unittest tests/test_guarded_sens_mirror.py -v
           # Це тести канонічної фізичної тотожності, НЕ незалежний SENS-eval.
