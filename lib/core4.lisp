@@ -1,40 +1,28 @@
 
-; my-lisp bootstrap library: derived behavior belongs in the language itself.
-; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
-; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
+; Завантажувальна бібліотека СЕНС: похідна поведінка належить самій мові.
 
 (визначити тотожність (функція (значення-аргументу) значення-аргументу))
 
-; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
-; The reader treats the following source forms as binary data until the next
-; top-level source is read; decimal integers remain ordinary decimal values.
+; Мовний описувач двійкової форми канонічної восьмибітної граматики.
+; Читач трактує наступні форми як двійкові дані до наступної
+; самостійної вихідної форми. Десяткові числа залишаються десятковими.
 (визначити бінарний
   (функція (ширина)
     (список (як-є binary) ширина)))
 
-; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
-; 2026-08-09 once variadic lambda parameters existed to express it: a bare
-; symbol as the parameter list binds every argument, evaluated left to
-; right, as one list. This is pure sugar over `cons`/`'()`, exactly the
-; kind of thing G4/G5 (docs/language-core-axioms.md) say belongs in the
-; language itself once the core can already express it, not bolted onto
-; the host. Kept first in this file (not wherever it happens to be used)
-; because `let`/`let*` below build their expansion with it.
-; `list` раніше був спеціальною формою Rust (`evaluate_list_func`) —
-; перенесено сюди 2026-08-09, щойно з'явились варіативні параметри lambda,
-; якими його можна виразити: голий символ як список параметрів зв'язує
-; кожен аргумент, обчислений зліва направо, в один список. Це чистий цукор
-; над `cons`/`'()` — саме те, що G4/G5 (docs/language-core-axioms.md)
-; кажуть має належати самій мові, щойно ядро вже може це виразити, не
-; хосту. Лишено першим у файлі (не там, де випадково використовується),
-; бо `let`/`let*` нижче будують свою розгортку через нього.
+; Список є похідною бібліотечною функцією, а не окремим механізмом хоста.
+; Від дев'ятого серпня 2026 року довільна кількість параметрів функції
+; дозволяє зв'язати всі обчислені аргументи в один список.
+; Закон виражено через сполучення та порожній список.
+; Визначення розміщено перед функціями, які будують через нього форми.
 (визначити список (функція аргументи-функції аргументи-функції))
 (визначити list список)
 
-; and/or are Lisp-owned short-circuit macros. A tested operand must return
-; an exact D1 PredicateBit; 0 is not () and neither result is host T/NIL.
-; Each COND clause below has exactly two fields: (test expression). The last
-; operand is still returned as a value without being reinterpreted as a test.
+; Логічні та й або — мовні макроси з коротким замиканням.
+; Перевірений аргумент має повертати точний однобітний результат.
+; Числовий нуль не є порожнім списком чи істинністю стороннього виконавця.
+; Кожна гілка умов має два поля: перевірка та результат.
+; Останній аргумент повертається як значення без додаткової перевірки.
 (визначити та
   (макрос
     (функція залишок-аргументів
@@ -3141,7 +3129,7 @@
 ; D9:110111111 DIVMOD. Операнди D24+; результат (частка, остача).
 ; Остача виводиться точно з D5:01011 DIFFERENCE, D5:10110 TIMES і
 ; D5:10111 QUOTIENT є точним раціональним діленням; ціла частка через SENS quotient. D8:00101100 MOD не викликаємо.
-; Д8:11110110 — поділити, ратифікована функція історичного DIVIDE.
+; Восьмий домен, слово 11110110 — поділити, ратифікована функція ділення.
 ; Для невід'ємних цілих аргументів її закон збігається з Д5:10111 ЧАСТКА.
 ; Від'ємні аргументи та ділення на нуль не отримують тут нового закону.
 ; Похідна функція не створює машинної координати одинадцятого домену.
