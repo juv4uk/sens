@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import contextlib
+import importlib.util
+import io
 import subprocess
 import sys
 import tempfile
@@ -14,6 +17,14 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from report_t5_triplet_inventory import GOLDEN, inspect, main
 from sens_t5_codec import encode_words
+
+# Під'єднання вже наявного релізного gate, без дублювання його законів.
+_GATE_PATH = ROOT / "scripts" / "check-release-triple-corpus.py"
+_GATE_SPEC = importlib.util.spec_from_file_location("sens_release_triple_gate", _GATE_PATH)
+assert _GATE_SPEC and _GATE_SPEC.loader
+release_gate = importlib.util.module_from_spec(_GATE_SPEC)
+_GATE_SPEC.loader.exec_module(release_gate)
+
 
 
 class TripletInventoryTests(unittest.TestCase):
@@ -237,6 +248,53 @@ class TripletInventoryTests(unittest.TestCase):
         self.assertEqual(record["view_status"], "PHYSICAL_VIEW_PASS")
         self.assertFalse(record["release_admitted"])
         self.assertEqual(result["summary"]["original_executable_migrations_certified"], 0)
+
+
+    def check_release_gate(self, report: dict, status: str = "0") -> tuple[int, str]:
+        with tempfile.TemporaryDirectory(prefix="sens-release-gate-test-") as temp:
+            path = Path(temp) / "mechanical-report.json"
+            path.write_text(json.dumps(report, ensure_ascii=False), encoding="utf-8")
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+                rc = release_gate.main([str(path), status])
+            return rc, output.getvalue()
+
+    def test_release_gate_blocks_complete_physical_triplet_without_native_oracle(self):
+        self.view.write_bytes(self.expected)
+        receipt = self.scan(strict=True)
+        self.assertEqual(receipt["status"], "PHYSICAL_VIEW_ONLY_UK_PENDING")
+        code, output = self.check_release_gate(receipt)
+        self.assertEqual(code, 1)
+        self.assertIn("RELEASE_BLOCKED", output)
+        self.assertNotIn("RELEASE_TRIPLE_FULL_CORPUS_PASS", output)
+
+    def test_release_gate_refuses_forged_semantics_even_if_counts_match_rows(self):
+        self.view.write_bytes(self.expected)
+        receipt = self.scan(strict=True)
+        altered = json.loads(json.dumps(receipt))
+        altered["summary"]["uk_oracle_verified"] = 1
+        altered["summary"]["release_admitted"] = 1
+        altered["files"][0]["uk_oracle"] = "VERIFIED"
+        altered["files"][0]["release_admitted"] = True
+        code, output = self.check_release_gate(altered)
+        self.assertEqual(code, 1)
+        self.assertIn("RELEASE_BLOCKED", output)
+        self.assertNotIn("RELEASE_TRIPLE_FULL_CORPUS_PASS", output)
+
+    def test_release_gate_rejects_bad_exit_or_malformed_inventory(self):
+        self.view.write_bytes(self.expected)
+        report = self.scan(strict=True)
+        for variation in (
+            {"schema": report["schema"], "summary": {}},
+            {**report, "files": []},
+            {**report, "schema": "unexpected-schema"},
+        ):
+            with self.subTest(variation=variation):
+                code, output = self.check_release_gate(variation)
+                self.assertEqual(code, 1)
+                self.assertIn("RELEASE_BLOCKED", output)
+        self.assertEqual(self.check_release_gate(report, "7")[0], 1)
+        self.assertEqual(self.check_release_gate(report, "invalid")[0], 1)
 
 
 if __name__ == "__main__":
