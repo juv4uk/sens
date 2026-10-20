@@ -24,9 +24,9 @@
         string-first string-rest string-slice string<? string? symbol->string
         timezone-declarations-raw unix-time-now vector vector-length vector-ref
         vector-set! write-to-string codepoint->string))
-     ; Із 11.09.2026 abs/max/max-list/min/min-list належать бібліотеці,
+     ; Від 11.09.2026 abs/max/max-list/min/min-list є бібліотечними функціями,
      ; а не кореневим примітивам: їхній механізм перенесено
-     ; з Rust builtins.rs до lib/core.lisp. Джерело доказу:
+     ; з Rust builtins.rs до lib/core.lisp. Підтвердження:
      ; docs/VERTICAL-SLICE-1-ABS-MIN-MAX-2026-09-11.md.
      ; Інвентар оновлено після виявлення історичної невідповідності.
      (core-library
@@ -52,12 +52,13 @@
         сталі-відповідники-за-адресами знайти-групу-відповідників-за-адресою
         стан-привязки-відповідника відсутні-відповідники
         побудувати-визначення-відповідників матеріалізувати-сталі-відповідники))))
-  ; Every future Ukrainian spelling for these public predicates ends in ?.
+  ; Кожна наступна українська назва цих публічних предикатів закінчується на ?.
   (public-predicates
     (атом? eq? < = > numeric-buffer? string<? string? not? equal? member?
      string-empty? string-prefix? string-contains? symbol? null? <= >=)))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+; Українська проєкція: точну тотожність задають lib/domains/d*.lisp;
+; сумісні зв'язування не створюють нової диспетчеризації.
 (визначити модуль abs)
 (визначити атом? atom?)
 (визначити довжина-до length-onto)
