@@ -25,31 +25,31 @@ fn eval_map(source: &str) -> String {
 
 #[test]
 fn empty_map_has_nothing() {
-    assert_eq!(eval_map(r#"(map-get "a" map-empty)"#), "()");
-    assert_eq!(eval_map(r#"(map-contains? "a" map-empty)"#), "()");
-    assert_eq!(eval_map("(map->list map-empty)"), "()");
+    assert_eq!(eval_map(r#"(мапа-отримати "a" мапа-порожній)"#), "()");
+    assert_eq!(eval_map(r#"(мапа-містить? "a" мапа-порожній)"#), "()");
+    assert_eq!(eval_map("(мапа-список мапа-порожній)"), "()");
 }
 
 #[test]
 fn insert_then_get_finds_the_value() {
     assert_eq!(
-        eval_map(r#"(map-get "a" (map-insert "a" 1 map-empty))"#),
+        eval_map(r#"(мапа-отримати "a" (мапа-вставити "a" 1 мапа-порожній))"#),
         "(1)"
     );
     assert_eq!(
-        eval_map(r#"(map-contains? "a" (map-insert "a" 1 map-empty))"#),
+        eval_map(r#"(мапа-містить? "a" (мапа-вставити "a" 1 мапа-порожній))"#),
         "(1)"
     );
 }
 
 #[test]
 fn absent_key_is_not_confused_with_a_stored_nil_value() {
-    // map-get's "maybe" shape (`()` for absent, `(value)` for present)
+    // мапа-отримати's "maybe" shape (`()` for absent, `(value)` for present)
     // exists specifically so a legitimately-stored `()` value is
     // distinguishable from "not found" — both print differently here.
     let source = r#"
-        (def m (map-insert "a" (quote ()) map-empty))
-        (list (map-get "a" m) (map-get "z" m) (map-contains? "a" m) (map-contains? "z" m))
+        (def m (мапа-вставити "a" (quote ()) мапа-порожній))
+        (list (мапа-отримати "a" m) (мапа-отримати "z" m) (мапа-містить? "a" m) (мапа-містить? "z" m))
     "#;
     assert_eq!(eval_map(source), "((()) () (1) ())");
 }
@@ -57,9 +57,9 @@ fn absent_key_is_not_confused_with_a_stored_nil_value() {
 #[test]
 fn insert_replaces_an_existing_key_rather_than_duplicating_it() {
     let source = r#"
-        (def m (map-insert "a" 1 map-empty))
-        (def m2 (map-insert "a" 100 m))
-        (list (map-get "a" m2) (map->list m2))
+        (def m (мапа-вставити "a" 1 мапа-порожній))
+        (def m2 (мапа-вставити "a" 100 m))
+        (list (мапа-отримати "a" m2) (мапа-список m2))
     "#;
     assert_eq!(eval_map(source), "((100) ((\"a\" . 100)))");
 }
@@ -67,9 +67,9 @@ fn insert_replaces_an_existing_key_rather_than_duplicating_it() {
 #[test]
 fn insert_is_persistent_the_original_tree_is_untouched() {
     let source = r#"
-        (def m (map-insert "a" 1 map-empty))
-        (def m2 (map-insert "b" 2 m))
-        (list (map->list m) (map->list m2))
+        (def m (мапа-вставити "a" 1 мапа-порожній))
+        (def m2 (мапа-вставити "b" 2 m))
+        (list (мапа-список m) (мапа-список m2))
     "#;
     assert_eq!(eval_map(source), r#"((("a" . 1)) (("a" . 1) ("b" . 2)))"#);
 }
@@ -77,8 +77,8 @@ fn insert_is_persistent_the_original_tree_is_untouched() {
 #[test]
 fn map_to_list_returns_keys_in_sorted_order() {
     let source = r#"
-        (def m (map-insert "c" 3 (map-insert "a" 1 (map-insert "b" 2 map-empty))))
-        (map->list m)
+        (def m (мапа-вставити "c" 3 (мапа-вставити "a" 1 (мапа-вставити "b" 2 мапа-порожній))))
+        (мапа-список m)
     "#;
     assert_eq!(eval_map(source), "((\"a\" . 1) (\"b\" . 2) (\"c\" . 3))");
 }
@@ -104,10 +104,10 @@ fn sorted_insertion_order_stays_balanced_instead_of_degenerating_into_a_list() {
             (cond
               ((atom? pairs) () tree)
               ((atom? pairs) (1) tree)
-              (t (insert-all (cdr pairs) (map-insert (car (car pairs)) (second (car pairs)) tree))))))
+              (t (insert-all (cdr pairs) (мапа-вставити (car (car pairs)) (second (car pairs)) tree))))))
         (def m (insert-all (list (list "a" 1) (list "b" 2) (list "c" 3) (list "d" 4)
                                   (list "e" 5) (list "f" 6) (list "g" 7))
-                            map-empty))
+                            мапа-порожній))
         (node-height m)
     "#;
     assert_eq!(eval_map(source), "3");
@@ -121,11 +121,11 @@ fn map_to_list_stays_sorted_after_many_out_of_order_inserts() {
             (cond
               ((atom? pairs) () tree)
               ((atom? pairs) (1) tree)
-              (t (insert-all (cdr pairs) (map-insert (car (car pairs)) (second (car pairs)) tree))))))
+              (t (insert-all (cdr pairs) (мапа-вставити (car (car pairs)) (second (car pairs)) tree))))))
         (def m (insert-all (list (list "g" 7) (list "c" 3) (list "e" 5) (list "a" 1)
                                   (list "f" 6) (list "b" 2) (list "d" 4))
-                            map-empty))
-        (map->list m)
+                            мапа-порожній))
+        (мапа-список m)
     "#;
     assert_eq!(
         eval_map(source),
