@@ -160,8 +160,9 @@
       (як-є invalid-form)
       (список (як-є canonical-name-immutable) імя-символу))))
 
-; Root primitive meanings are values containing the canonical Ukrainian
-; resident, never its decimalized bits. Canon remains syntax-first.
+; Кореневі примітиви містять канонічний український виконавчий об'єкт.
+; Десятковий запис його бітів не стає значенням.
+; Канон спочатку є синтаксисом.
 (визначити типове-зв'язування-імені
   (функція (імя-символу)
     (нехай ((посилання-тотожності (канонічна-ідентичність імя-символу)))
@@ -183,19 +184,19 @@
          (власний-примітив (як-є текст-у-символ)))
         (так імя-символу)))))
 
-; ADR-009 shared definition frame.
+; ADR-009: спільний кадр визначень.
 ;
-; The metacircular environment remains finite Lisp data. A binding whose key is
-; the non-symbol internal sentinel 0 stores the mutable-in-the-language-model
-; top-level frame as an ordinary alist:
+; Метациклічне оточення залишається скінченними даними Lisp. Прив'язка з
+; несимвольним внутрішнім ключем 0 містить оновлюваний верхній кадр
+; у звичайному асоціативному списку:
 ;
 ;   ((0 . ((latest . value) ...)) . lexical-outer-env)
 ;
-; User binders are symbols, so the sentinel cannot collide with a legal source
-; binding. Local lexical bindings are consed before this marker. At closure call
-; time only the marker payload is refreshed from the caller; local captured
-; bindings before it are preserved. This models shared frame identity without
-; dynamic scope and without a cyclic host object.
+; Імена користувацьких зв'язувань є символами, тому з маркером не збігаються.
+; Локальні лексичні прив'язки стоять перед цим маркером.
+; Під час виклику замикання оновлюється лише вміст спільного кадру:
+; захоплені локальні прив'язки зберігаються. Це не динамічна область
+; видимості й не циклічний об'єкт мови-господаря.
 (визначити зв'язування-спільного-кадру?
   (функція (привязка)
     (за-умовою
@@ -318,14 +319,13 @@
       ((атом? значення-виразу)  ні)
       (так (тотожне? (перше значення-виразу) (як-є primitive))))))
 
-; UnknownSymbol belongs to name resolution, not application. A symbol produced
-; as a value (for example by quote) is not an unresolved lookup and therefore
-; must later fail as not-callable/Type if placed in operator position.
+; UnknownSymbol належить розв'язанню імені, а не застосуванню.
+; Символ, одержаний як значення (зокрема через цитування), не є
+; нерозв'язаним іменем. У позиції виклику він має дати помилку типу.
 ;
-; `symbol?` itself is language-owned in core.lisp, derived without a Rust builtin,
-; so this distinction adds no primitive to the closed Canon.
-; This predicate crosses a D3:110 COND boundary: always yield the
-; exact one-bit D1 result. () is data, never an implicit false predicate.
+; Предикат symbol? реалізовано в самій мові (core.lisp) без примітива Rust.
+; Цей предикат перетинає межу COND домену Д3: повертаємо точне значення Д1.
+; Порожній список () є даними, а не прихованою хибністю.
 (визначити визначити-невирішене-ім'я-в-оточенні?
   (функція (імя-символу посилання-оточення)
     (за-умовою
@@ -357,11 +357,12 @@
       ((атом? значення-виразу) ні)
       (так (тотожне? (перше значення-виразу) (як-є closure))))))
 
-; A recursive closure is finite Lisp data. It does not require a cyclic host
-; Environment. At call time the evaluator reconstructs the one self-binding that
-; the function needs. Contract 6 guarantees that this name is never Canon.
+; Рекурсивне замикання є скінченними даними Lisp.
+; Циклічне оточення мови-господаря не потрібне: під час виклику
+; обчислювач відновлює необхідну прив'язку функції до самої себе.
+; Контракт 6 не допускає для такої прив'язки канонічного імені.
 ;
-; Shape:
+; Структура (імена полів є незмінними даними протоколу):
 ;   (recursive-closure name params body captured-env)
 (визначити це-рекурсивне-замикання?
   (функція (значення-виразу)
@@ -370,11 +371,12 @@
       ((атом? значення-виразу) ні)
       (так (тотожне? (перше значення-виразу) (як-є recursive-closure))))))
 
-; A mutually-recursive group is also finite Lisp data. Every member stores the
-; same raw group and captured outer environment; application reconstructs the
-; group's bindings at call time rather than relying on a cyclic host object.
+; Взаємно рекурсивна група також є скінченними даними Lisp.
+; Кожен учасник зберігає первинну групу та захоплене зовнішнє
+; оточення. Під час виклику обчислювач відновлює прив'язки групи,
+; не використовуючи циклічний об'єкт мови-господаря.
 ;
-; Shape:
+; Структура (назви полів протоколу залишено без змін):
 ;   (recursive-group-closure name params body group captured-env)
 (визначити це-замикання-рекурсивної-групи?
   (функція (значення-виразу)
