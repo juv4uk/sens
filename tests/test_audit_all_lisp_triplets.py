@@ -60,6 +60,8 @@ class AllLispTripletCensusTests(unittest.TestCase):
         report = scan(self.root)
         self.assertEqual(report["comment_only_nonprogram_lisp"], 1)
         self.assertEqual(report["potential_program_files"], 0)
+        self.assertEqual(report["with_sens"], 1)
+        self.assertEqual(report["missing_sens"], 0)
         self.assertIn("необґрунтований", str(report["blocked_sample"]))
         self.assertFalse(report["release_ready"])
 

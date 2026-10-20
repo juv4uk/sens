@@ -122,20 +122,20 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if binary_disguised:
             counts["misnamed_binary_lisp"] += 1
             reject(relative, "двійкові слова D2 під розширенням .lisp; потрібен .bits")
-        # Коментарі не мають машинної семантики, їх НЕ пакуємо до SENS.
-        # Якщо їм уже видали .sens — не приховуємо цю аномалію.
-        if comment_only:
-            counts["comment_only_nonprogram_lisp"] += 1
-            if source.with_suffix(".sens").exists():
-                reject(relative, "файл лише з коментарів має необґрунтований .sens")
-            continue
-        counts["potential_program_files"] += 1
         physical = source.with_suffix(".sens")
         view = source.with_suffix("")
         has_sens = physical.is_file() and not physical.is_symlink()
         has_view = view.is_file() and not view.is_symlink()
         counts["with_sens"] += int(has_sens)
         counts["with_view"] += int(has_view)
+        # Коментарний профіль без програмного змісту не вимагає T5M,
+        # але вже створений фізичний носій мусить залишитися помітним.
+        if comment_only:
+            counts["comment_only_nonprogram_lisp"] += 1
+            if physical.exists() or physical.is_symlink():
+                reject(relative, "файл лише з коментарів має необґрунтований .sens")
+            continue
+        counts["potential_program_files"] += 1
         if not has_sens:
             counts["potential_program_missing_sens"] += 1
             reject(relative, "немає звичайного однойменного .sens")
