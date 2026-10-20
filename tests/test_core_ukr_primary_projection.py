@@ -97,6 +97,9 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
                 self.assertNotIn(f"({legacy} ", core4)
         self.assertNotIn("взяти-десятковий-символ", core4)
         self.assertNotIn("number->string-onto", core4)
+        self.assertIn("(визначити число-рядок", core4)
+        self.assertIn("(визначити number->string число-рядок)", core4)
+        self.assertLess(core4.index("; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень."), core4.index("(визначити list список)"))
         live_callers = (
             "lib/yantra.lisp",
             "lib/translation.lisp",
@@ -134,6 +137,9 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertIn("(значення-у-текст число-аргумент)", racket_core)
             self.assertNotIn("взяти-десятковий-символ", racket_core)
             self.assertNotIn("number->string-onto", racket_core)
+            self.assertIn("(визначити number->string число-рядок)", racket_core)
+            self.assertIn("; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень.", racket_core)
+            self.assertNotIn("(0011 number->string", racket_core)
             start = racket_core.index("(визначити число-рядок")
             end = racket_core.index("; -> / ->> (thread-first / thread-last macros)", start)
             renderer = racket_core[start:end]

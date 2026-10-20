@@ -178,7 +178,7 @@
 | `lib/core4.lisp` | function | `<=` | unreviewed |
 | `lib/core4.lisp` | function | `>=` | unreviewed |
 | `lib/core4.lisp` | function | `взяти-десятковий-символ` | unreviewed |
-| `lib/core4.lisp` | function | `number->string-onto` | unreviewed |
+| `lib/core4.lisp` | function | `число-рядок` | unreviewed |
 | `lib/core4.lisp` | function | `number->string` | unreviewed |
 | `lib/core4.lisp` | macro | `->` | unreviewed |
 | `lib/core4.lisp` | macro | `->>` | unreviewed |

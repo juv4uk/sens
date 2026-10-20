@@ -568,29 +568,13 @@
   (0010 (перший . решта-значень)
     (перевірити-незростання-значень? перший решта-значень)))
 
-; number->string (G5 test: already expressible via existing means?) —
-; yes, now that quotient/mod exist. Surfaced from the fpga-lisp
-; session's assembler.my, which had its own version built on a fixed
-; DECIMAL-POWERS lookup table (limited to ~10 digits by construction —
-; the table itself has a fixed length). This one recurses via
-; quotient/mod instead, the same -onto accumulator shape as
-; length-onto/reverse-onto above, so it has no digit-count ceiling of
-; its own (bounded only by however large an exact integer this
-; implementation can represent at all). Scope: non-negative integers
-; only, same as quotient/mod themselves.
-; number->string (G5-тест: уже виразне через наявне?) — так, тепер,
-; коли є quotient/mod. Знахідка з сесії fpga-lisp, assembler.my, яка
-; мала власну версію на фіксованій таблиці DECIMAL-POWERS (обмежена
-; ~10 розрядами самою побудовою таблиці). Ця рекурсує через
-; quotient/mod, та сама -onto-форма акумулятора, що й length-onto/
-; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
-; лише невід'ємні цілі, як і самі quotient/mod.
-; Точний числовий текст належить ратифікованому D9 значення-у-текст.
-; Десяткові цифри не збираються окремим виконавцем, а старі бітові
-; D3/D4 голови не є вихідним синтаксисом SENS.
+; Числовий друк має один канонічний закон — ратифікований D9.
+; Точне подання цілих чисел і скорочених дробів визначає значення-у-текст.
+; Окремий рекурсивний акумулятор дублював цей закон і більше не потрібний.
 (визначити число-рядок
   (функція (число-аргумент)
     (значення-у-текст число-аргумент)))
+; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень.
 (визначити number->string число-рядок)
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines

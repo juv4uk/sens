@@ -1625,13 +1625,13 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "review_status": "SUPERSEDED_BY_RATIFIED_D9_DEDUP",
       "ratified": false,
       "callable": false,
       "ukr_surface_name": "число-в-рядок-до",
-      "current_ukr_source": "lib/core4.lisp",
+      "current_ukr_source": null,
       "source_only_derived_function": true,
-      "behavioral_note": "Назву внутрішньої похідної функції перенесено на укр; тіло не змінювали. Реальне виконання та коректність для ненульових значень потребують окремого SENS-свідка. Канонічна D9 функція число-рядок має окремий закон."
+      "behavioral_note": "Історичний допоміжний помічник більше не визначено в чинних Core-файлах. Його замінено канонічною D9 функцією число-рядок (110111001), яка делегує до значення-у-текст. Нова функція, координата D11 або викличність не додаються; картка збережена лише як історичний кандидат."
     },
     {
       "surface_name": "OCCURS-CHECK",

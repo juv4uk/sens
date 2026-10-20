@@ -26,7 +26,7 @@
 
 ### core.lisp (57)
 
-`->`, `->>`, `<=`, `>=`, `abs`, `and`, `append`, `assoc`, `caar`, `cadddr`, `cadr`, `cddr`, `взяти-десятковий-символ`, `equal?`, `fifth`, `filter`, `filter-onto`, `fourth`, `identity`, `isqrt`, `створити-символ`, `крок-цілого-кореня`, `знайти-найбільший-блок-частки`, `length`, `length-onto`, `let`, `let*`, `list`, `map`, `map-onto`, `max`, `max-list`, `member?`, `min`, `min-list`, `mod`, `перевірити-неспадання-значень?`, `перевірити-незростання-значень?`, `not`, `nth`, `number->string`, `number->string-onto`, `or`, `pair`, `quotient`, `reduce`, `reverse`, `reverse-onto`, `second`, `sqrt`, `уточнити-корінь-ітерацією`, `string-contains?`, `string-empty?`, `string-length`, `string-prefix?`, `symbol?`, `third`
+`->`, `->>`, `<=`, `>=`, `abs`, `and`, `append`, `assoc`, `caar`, `cadddr`, `cadr`, `cddr`, `взяти-десятковий-символ`, `equal?`, `fifth`, `filter`, `filter-onto`, `fourth`, `identity`, `isqrt`, `створити-символ`, `крок-цілого-кореня`, `знайти-найбільший-блок-частки`, `length`, `length-onto`, `let`, `let*`, `list`, `map`, `map-onto`, `max`, `max-list`, `member?`, `min`, `min-list`, `mod`, `перевірити-неспадання-значень?`, `перевірити-незростання-значень?`, `not`, `nth`, `number->string`, `число-рядок`, `or`, `pair`, `quotient`, `reduce`, `reverse`, `reverse-onto`, `second`, `sqrt`, `уточнити-корінь-ітерацією`, `string-contains?`, `string-empty?`, `string-length`, `string-prefix?`, `symbol?`, `third`
 
 ### epistemic.lisp (25)
 
