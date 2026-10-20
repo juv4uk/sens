@@ -1,7 +1,7 @@
 ; #1394 — виконувана схема дослідження базису СЕНС.
-; Research-only. НЕ semantic authority. НЕ production dispatch.
+; Лише дослідження. НЕ семантична влада. НЕ production dispatch.
 ;
-; Baseline: sens/main@33bfb53a51beb81812bd97c14c710a1095b125a9
+; База: sens/main@33bfb53a51beb81812bd97c14c710a1095b125a9
 ;
 ; Мета: описати граф гіпотез про взаємну вивідність exact 8-bit SENS functions
 ; без людських назв, без legacy ID/name round-trip і без host semantic oracle.
@@ -27,10 +27,10 @@
       classify blocked-by-reality-drift
       do-not-infer-semantic-law))
 
-  ; Current-main reality check found a concrete drift:
-  ; commit 170b2e7 already removed () from function 00000000 in runtime/IR,
-  ; while Contract 9.0 and transitional mechanism metadata still describe that
-  ; state as current debt / empty-list-ground. #1403 owns reconciliation.
+  ; Перевірка реальності current-main виявила конкретний дрейф:
+  ; коміт 170b2e7 вже вилучив () з функції 00000000 у runtime/IR,
+  ; тоді як Контракт 9.0 і метадані перехідного механізму досі описують той
+  ; стан як чинний борг / empty-list-ground. #1403 володіє звіркою.
   (observed-current-drift
     (empty-structure-runtime
       outside-function-space
