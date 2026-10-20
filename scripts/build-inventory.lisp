@@ -1,18 +1,19 @@
-; scripts/build-inventory.lisp — generate tests/fixtures/inventory.lisp from
-; tests/fixtures/conformance.lisp (2026-09-01). Written in my-lisp itself so
-; the canonical reader (read-all, write-to-string, sha256-hex) is the same
-; one every conforming implementation has. The inventory is a *projection*,
-; not a second source of truth — edit conformance.lisp, then rerun:
+; Побудова tests/fixtures/inventory.lisp з канонічного корпусу
+; tests/fixtures/conformance.lisp (2026-09-01) самою мовою СЕНС.
+; Читання, серіалізацію та SHA256 виконує той самий мовний механізм,
+; який доступний кожній сумісній реалізації.
+; Інвентар — похідна проєкція, а не окреме джерело істини.
+; Змінюйте conformance.lisp і повторно запускайте:
 ;
 ;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp
 ;
-; Each inventory entry preserves the authoritative fields from conformance.lisp
-; and adds stable content-addressed IDs plus mechanically observed forms.
-; Never hand-edit the generated file.
+; Кожен запис зберігає авторитетні поля випробування й додає
+; сталі ідентифікатори за вмістом та спостережені форми.
+; Не редагуйте породжений інвентар вручну.
 
 (визначити приклади (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
 
-;; ---- Helpers ----
+;; ---- Допоміжні функції ----
 
 (визначити знайти-пару
   (функція (ключ список-пар)
@@ -30,22 +31,22 @@
   (функція (список-пар)
     (за-умовою ((атом? список-пар) ()) ((атом? (як-є ())) (сполучити (перше-першого список-пар) (ключі-списку-пар (решта список-пар)))))))
 
-;; Unique list (preserve order of first appearance)
+;; Відбираємо неповторювані елементи в порядку першої появи.
 (визначити унікальні
   (функція (список-хвіст)
     (за-умовою ((атом? список-хвіст) ()) ((атом? (як-є ())) (за-умовою
            ((значення-у-списку? (перше список-хвіст) (решта список-хвіст)) (унікальні (решта список-хвіст)))
            ((атом? (як-є ())) (сполучити (перше список-хвіст) (унікальні (решта список-хвіст)))))))))
 
-;; Structural walk to collect observed-forms
-;; Rules:
-;; - quote        -> record 'quote, DO NOT recurse into argument (data, not code)
-;; - lambda       -> record 'lambda, recurse into body only (not params)
-;; - def          -> record 'def, recurse into value expression
-;; - defmacro     -> record 'defmacro, recurse into macro body
-;; - cond         -> record 'cond, recurse into each clause
-;; - any other list (incl. if, and, or, builtins, user calls) -> record 'application, recurse into all elements
-;; - atoms (symbols, numbers, strings) -> ignored (not structural forms)
+;; Структурний обхід збирає спостережені форми.
+;; Правила обходу:
+;; - quote: записати quote, не обходити аргумент — це дані
+;; - lambda: записати lambda, обходити лише тіло, не параметри
+;; - def: записати def, обходити вираз значення
+;; - defmacro: записати defmacro, обходити тіло макроса
+;; - cond: записати cond, обходити кожну гілку
+;; - інший список: записати application й обходити всі елементи
+;; - атоми (імена, числа, рядки): не враховувати як структурні форми
 
 (визначити обійти-спостережені
   (функція (значення)
@@ -80,9 +81,9 @@
     (за-умовою ((атом? список-хвіст) ()) ((атом? (як-є ())) (приєднати (обійти-спостережені (перше список-хвіст))
                  (обійти-список (решта список-хвіст)))))))
 
-;; Parse expr using read-all (canonical), then walk for observed-forms.
-;; For NumericOverflow fixtures, the parser rejects the literal, so we skip
-;; reading and return empty observed-forms (honest: no structural forms observed).
+;; Читаємо вираз канонічним читачем, тоді збираємо спостережені форми.
+;; Для NumericOverflow читач відхиляє літерал, тому не розбираємо його
+;; і повертаємо порожній перелік: жодної форми фактично не спостерігали.
 (визначити отримати-спостережені-форми
   (функція (рядок-виразу вид-помилки)
     (за-умовою
@@ -92,13 +93,12 @@
        (нехай ((форми (читати-всі рядок-виразу)))
          (за-умовою ((атом? форми) ()) ((атом? (як-є ())) (унікальні (обійти-спостережені (перше форми))))))))))
 
-;; Build identity record and compute ID
-;; Identity includes axioms, not just expr+outcome: two fixtures can share the
-;; exact same expr and expected outcome while being distinct constitutive
-;; claims justified by different axioms (e.g. "(eq 3 3)" is asserted once
-;; under G1's general equality and again under S1's numeric exactness) —
-;; collapsing those into one ID would silently erase which axiom a fixture
-;; is actually evidence for.
+;; Створюємо запис тотожності й обчислюємо ідентифікатор.
+;; До тотожності входять аксіоми, не лише вираз і результат.
+;; Два випробування можуть мати однаковий вираз та очікуваний результат,
+;; але свідчити про різні конститутивні твердження: наприклад,
+;; (eq 3 3) як закон рівності G1 і як закон числової точності S1.
+;; Об'єднання їх під одним кодом загубило б зв'язок з аксіомою.
 (визначити обчислити-ід
   (функція (вираз аксіоми вид-наслідку значення-наслідку)
     (нехай-послідовно ((запис-тотожності (список (сполучити (як-є вираз) вираз)
@@ -108,7 +108,7 @@
           (хеш (геш-256-шістнадцятковий закодоване)))
       (рядок-додати "F-" (рядок-зріз хеш 0 16)))))
 
-;; Process one fixture -> emit inventory record
+;; Один приклад перетворюємо на один запис інвентарю.
 (визначити вивести-приклад
   (функція (приклад)
     (нехай-послідовно ((вираз (знайти-рядок-пари (як-є вираз) приклад))
@@ -134,13 +134,13 @@
                    (сполучити (як-є role) (за-умовою (роль роль) ((атом? (як-є ())) ())))
                    (сполучити (як-є note) (за-умовою (нотатка нотатка) ((атом? (як-є ())) ()))))))))
 
-;; Emit all fixtures
+;; Виводимо всі приклади без зміни їхнього порядку.
 (визначити вивести-всі
   (функція (залишок)
     (за-умовою ((атом? залишок) (як-є ())) ((атом? (як-є ())) (нехай ((надруковане (вивести-приклад (перше залишок))))
          (вивести-всі (решта залишок)))))))
 
-;; Header
+;; Заголовок породженого файла.
 (друкувати (сполучити (як-є about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
 (друкувати (сполучити (як-є generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
 (друкувати (сполучити (як-є source) "tests/fixtures/conformance.lisp"))
