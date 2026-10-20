@@ -64,7 +64,7 @@ class ContentStoreUkrPrimaryProjectionTests(unittest.TestCase):
             with self.subTest(name=english):
                 self.assertNotRegex(
                     source,
-                    rf"(?m)^\\(визначити\\s+{re.escape(english)}(?=\\s|\\))",
+                    rf"(?m)^\(визначити\s+{re.escape(english)}(?=\s|\))",
                 )
 
     def test_no_raw_binary_call_heads_or_reinferred_width(self):
