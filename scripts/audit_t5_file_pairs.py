@@ -141,6 +141,14 @@ def require_changed_views(report: dict, changed_sens: list[str]) -> None:
                 f"new/modified T5 must have same-stem canonical spaced-bit view: {path}; "
                 f"physical={row.get('physical_status')} view={row.get('view_status')}"
             )
+        # Historical T5 pairs remain inspectable, but newly added or
+        # modified carriers must use the current T5M transport.
+        # An exact spaced-bit view cannot turn legacy T5 into T5M.
+        if row.get("physical_codec") != "t5m":
+            raise ValueError(
+                f"new/modified .sens must use canonical T5M, not legacy T5: {path}; "
+                f"codec={row.get('physical_codec')}"
+            )
 
 
 def inspect(root: Path, *, strict_semantic: bool = False,

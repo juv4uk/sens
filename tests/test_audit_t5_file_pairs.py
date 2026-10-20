@@ -208,7 +208,8 @@ class AuditT5PairsTests(unittest.TestCase):
         self.assertTrue((cohort / "branch").read_bytes().endswith(b"\n"))
 
     def test_changed_new_physical_requires_proven_extensionless_view(self):
-        self.pair("src/first", "10 01\n", ["10", "01"])
+        _, current = self.pair("src/first", "10 01\n", ["10", "01"])
+        current.write_bytes(encode_t5m_projection("10 01\n"))
         self.pair("src/second", "10 01\n", ["10", "01"])
         src = "src/first.sens"
         report = self.audit()
@@ -234,6 +235,17 @@ class AuditT5PairsTests(unittest.TestCase):
             require_changed_views(report, [src])
         with self.assertRaisesRegex(ValueError, "unknown T5 report"):
             require_changed_views({"schema": "unsupported"}, [src])
+
+    def test_changed_legacy_t5_with_valid_view_is_not_new_t5m(self):
+        self.pair("lib/legacy", "10 01\n", ["10", "01"])
+        (self.root / "lib/legacy").write_text("10 01\n", encoding="ascii")
+        report = self.audit()
+        self.assertEqual(report["files"][0]["physical_codec"], "t5")
+        self.assertEqual(report["files"][0]["view_status"], "PASS")
+        # Existing historical pairs remain readable; changed ones cannot pass.
+        self.assertEqual(report["status"], "EXACT_BINARY_PAIRS")
+        with self.assertRaisesRegex(ValueError, "canonical T5M"):
+            require_changed_views(report, ["lib/legacy.sens"])
 
     def test_cli_generates_read_only_report_without_overwrite(self):
         self.pair("p", "10 01\n", ["10", "01"])
