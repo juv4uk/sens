@@ -77,7 +77,7 @@ def count_top_level_arguments(source: str, index: int) -> int:
 class TestBroaderSid8LispCutover(unittest.TestCase):
     def test_current_map_residents_have_separate_ratifed_domain_authority(self):
         # D6 and D8 are separately ratified current domains. Historical
-        # SID8 MAP source cells cannot act as D8's earlier authority.
+        # сід8 MAP source cells cannot act as D8's earlier authority.
         foundation = json.loads((ROOT / "knowledge/d1-d9-foundation.json").read_text())
         current_d8 = json.loads((ROOT / "knowledge/d8-ratified.json").read_text())
         self.assertEqual(foundation["domains"]["D6"]["residents"]["101000"], "MAP")
