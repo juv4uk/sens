@@ -1,9 +1,10 @@
-; #801 — Lisp-owned scheduler witness.
-; Ukrainian projection only.
+; #801 — свідок планувальника LIFE-1, семантика належить СЕНС.
+; Виконувані назви взято з lib/life-1-scheduler.lisp.
+; Позначки повідомлень Прологу й Даталогу залишаються даними протоколу.
 
-(визначити life-1-scheduler-witness
+(визначити свідок-планувальника-життя-1
   (функція ()
-    (нехай ((first
+    (нехай ((перший-виклик
              (як-є
                (pending-invocation
                  (producer datalog)
@@ -11,7 +12,7 @@
                  (provenance-ref observation-42)
                  (priority ordinary)
                  (semantic-id 12))))
-           (first-duplicate
+           (дубль-першого-виклику
              (як-є
                (pending-invocation
                  (producer datalog)
@@ -19,7 +20,7 @@
                  (provenance-ref observation-42)
                  (priority ordinary)
                  (semantic-id 12))))
-           (second-ref
+           (виклик-з-іншим-джерелом
              (як-є
                (pending-invocation
                  (producer datalog)
@@ -27,10 +28,10 @@
                  (provenance-ref observation-99)
                  (priority ordinary)
                  (semantic-id 12))))
-           (pending
-             (life-scheduler-pending
-               (список first first-duplicate second-ref)))
-           (projections
+           (очікування
+             (життя-очікування
+               (список перший-виклик дубль-першого-виклику виклик-з-іншим-джерелом)))
+           (готові-проєкції
              (як-є
                ((projection-ready
                   prolog-substitutions-to-datalog-facts
@@ -38,46 +39,46 @@
                 (projection-ready
                   prolog-substitutions-to-datalog-facts
                   observation-99))))
-           (selection
-             (life-scheduler-select-ready pending projections))
-           (wrong-provenance
-             (life-scheduler-projection-ready?
-               first
+           (обраний-виклик
+             (життя-обрати-готове очікування готові-проєкції))
+           (помилкове-походження
+             (життя-проєкція-готова?
+               перший-виклик
                (як-є
                  ((projection-ready
                     prolog-substitutions-to-datalog-facts
                     observation-99)))))
-           (wrong-bridge
-             (life-scheduler-projection-ready?
-               first
+           (помилковий-міст
+             (життя-проєкція-готова?
+               перший-виклик
                (як-є
                  ((projection-ready
                     different-bridge-contract
                     observation-42))))))
       (за-умовою
-        ((атом? selection)
+        ((атом? обраний-виклик)
          (список
            (як-є life-1-scheduler-witness)
            (список (як-є status) (як-є fail))
            (список (як-є detail) (як-є missing-selection))))
         (так
-         (нехай ((ready (перше (решта selection)))
-                (remaining (перше (решта (решта (решта selection)))))
-                (dedup-ok (однакові? remaining (список second-ref)))
-                (quiescence-ok
+         (нехай ((готове (перше (решта обраний-виклик)))
+                (залишок (перше (решта (решта (решта обраний-виклик)))))
+                (без-повторів? (однакові? залишок (список виклик-з-іншим-джерелом)))
+                (стан-спокою-правильний?
                   (однакові?
-                    (life-scheduler-quiescence
+                    (життя-спокій
                       (як-є ())
                       (як-є ())
                       (як-є no-transition-required))
                     (як-є (quiescence-state quiescent))))
-                (adversarial-ok
+                (хибні-проєкції-відхилено?
                   (однакові?
-                    (список wrong-provenance wrong-bridge)
+                    (список помилкове-походження помилковий-міст)
                     (як-є (absent absent)))))
            (за-умовою
              ((однакові?
-                (список ready dedup-ok quiescence-ok adversarial-ok)
+                (список готове без-повторів? стан-спокою-правильний? хибні-проєкції-відхилено?)
                 (як-є (ready (1) (1) (1))))
               (список
                 (як-є life-1-scheduler-witness)
@@ -90,4 +91,7 @@
                 (список (як-є status) (як-є fail))
                 (список (як-є detail) (як-є scheduler-invariant-mismatch)))))))))))
 
-(life-1-scheduler-witness)
+; Історична зовнішня назва лишається посиланням на українську.
+(визначити life-1-scheduler-witness свідок-планувальника-життя-1)
+
+(свідок-планувальника-життя-1)
