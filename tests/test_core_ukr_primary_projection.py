@@ -120,7 +120,10 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertIn("(current-projection ukr)", inventory)
         self.assertIn("(sid8-call-heads retired)", inventory)
         self.assertIn("історичні-імена-лише-дані", inventory)
-        self.assertNotIn("(визначити ", inventory)
+        # У таблиці дозволено назву спеціальної форми як ДАНІ,
+        # але заборонено верхньорівневе виконавче DEFINE.
+        self.assertIn("(necessary-forms (визначити функція))", inventory)
+        self.assertNotRegex(inventory, r"(?m)^\s*\(визначити\s+")
 
         # These three helpers deliberately have no D-domain resident names:
         # keep them internal, Ukrainian, and exactly reversible at the callsite.
