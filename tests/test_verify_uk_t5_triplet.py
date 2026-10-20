@@ -191,12 +191,12 @@ class BoundedUkTripletTests(unittest.TestCase):
         # comment are inert, while those in an executable atom are not.
         variants = (
             "   " + UK,
-            UK.replace(" ", "\\t"),
-            UK.rstrip("\\n"),
-            UK.rstrip("\\n") + "\\n\\n",
-            UK.replace("\\n", "\\r\\n"),
-            "; Коментар із чужою цифрою ٢\\n" + UK,
-            "#| коментар #| вкладений ५ |# завершено |#\\n" + UK,
+            UK.replace(" ", "\t"),
+            UK.rstrip("\n"),
+            UK.rstrip("\n") + "\n\n",
+            UK.replace("\n", "\r\n"),
+            "; Коментар із чужою цифрою ٢\n" + UK,
+            "#| коментар #| вкладений ५ |# завершено |#\n" + UK,
             UK.replace(" (так так)", " #| інертний |# (так    так)") +
                 "; наприкінці",
         )
