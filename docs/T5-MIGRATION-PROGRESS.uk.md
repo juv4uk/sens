@@ -34,6 +34,40 @@
 
 Файл дає класи `PHYSICAL_T5_PAIR_PENDING_INDEPENDENT_ORACLE`, `PHYSICAL_T5_PAIR_BLOCKED`, `UNPAIRED_SOURCE_BLOCKED`, `MECHANICAL_CANDIDATE_NEEDS_ORACLE`, `NONPROGRAM_ARCHIVED_NO_EXECUTABLE_T5`. Це **класи обліку, не статуси дозволу на виконання**.
 
+## Сувора перевірка оберненості, 21.10.2026
+
+**NO-GO до незалежного SENS-доказу.** Успіх `report_t5_migration_progress.py`
+без суворого режиму означає виключно повноту **механічного обліку**.
+Він не означає, що кожний `.lisp` уже має `.sens`, що файл можна
+перетворити назад в українську проєкцію або що така програма правильно
+виконується. Архівні та доказово невиконувані DATA-файли не зобов'язані
+стати програмами SENS.
+
+У JSON є незалежні поля:
+
+- `source_complete`: кожний Git-tracked `.lisp` має рівно один рядок обліку;
+- `executable_roundtrip_coverage.executable_or_unclassified_sources`:
+  кількість чинних/невизначених джерел, які вимагають окремого доказу;
+- `executable_roundtrip_coverage.blocked_or_unverified`:
+  кількість ще не сертифікованих програм;
+- `all_executable_lisp_roundtrip_verified`: може бути `true` лише
+  за повної пофайлової відповідності й незалежної виконавчої перевірки.
+
+Для суворого fail-closed результату використовуйте вже створені
+`/tmp/t5-pairs.json` та `/tmp/t5-readiness.json`:
+
+```sh
+python3 scripts/report_t5_migration_progress.py \
+  --root . --pairs /tmp/t5-pairs.json --readiness /tmp/t5-readiness.json \
+  --out /tmp/t5-executable-roundtrip.json --require-executable-roundtrip
+```
+
+**Код виходу 2** означає, що повної оберненості/семантичного оракула
+немає; цей стан не можна зробити зеленим зменшенням обсягу корпусу,
+виключенням невідомих програм або підміною SENS-виконання Python.
+Загальний релізний дозвіл додатково вимагає одного SHA, всіх трійок,
+позитивних/негативних свідків та рішення власника.
+
 ## Відтворення
 
 ```sh
