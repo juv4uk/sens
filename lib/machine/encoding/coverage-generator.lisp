@@ -137,7 +137,7 @@
         (решта покриття-кодувальника-форма-проєкції-допусків)))))
 
 (визначити покриття-кодувальника-підстава-частковості
-  "derived from structured Lisp admission; at least one admitted form maps to this pinned ICLASS; full XED operand/addressing coverage is not claimed")
+  "За структурованим допуском Lisp щонайменше одна форма відповідає закріпленому ICLASS; повне покриття операндів і способів адресації XED не підтверджене")
 
 (визначити покриття-кодувальника-історична-форма
   (перше
