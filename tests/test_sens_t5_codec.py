@@ -97,7 +97,7 @@ class PhysicalT5CodecTests(unittest.TestCase):
             ten_bit_holds += 1
         self.assertEqual(len(admitted) + ten_bit_holds, 2046)
 
-        # Every historical SID8 spelling is source evidence only, not a D8
+        # Every historical сід8 spelling is source evidence only, not a D8
         # identity. An explicit SOURCE ERA must precede migration.
         for old in range(256):
             with self.subTest(legacy=old):
