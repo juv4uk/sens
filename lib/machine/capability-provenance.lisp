@@ -1,10 +1,12 @@
-; #4057 — machine-readable provenance for bounded machine capabilities.
-; These rows describe realization evidence only. They never define SENS meaning.
-; Current semantic authority is Contract 11.8 + ratified exact-domain laws.
-; CI validates every row fail-closed through scripts/machine-authority-guard.lisp.
+; #4057 — машинно-читане походження доказів обмежених машинних можливостей.
+; Рядки описують лише докази реалізації, не визначаючи значення СЕНС.
+; Джерело семантики — Контракт 11.8 і ратифіковані закони точних доменів.
+; Автоматична перевірка звіряє рядки з відмовою за замовчуванням
+; у scripts/machine-authority-guard.lisp.
 ;
-; independent-semantic-witness carries exact DomainIdentity literals. Width is
-; part of identity; no historical SID8 byte or human spelling is used as a join.
+; Поле independent-semantic-witness містить точні значення DomainIdentity.
+; Ширина входить до тотожності; історичні байти SID8 і текстові
+; назви не використовуються як ключ для зіставлення.
 
 (capability-provenance
   (name add-u64)
