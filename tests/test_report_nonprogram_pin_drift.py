@@ -59,6 +59,35 @@ class PinDriftTests(unittest.TestCase):
         self.assertEqual(state["sample"][0]["pinned_blob_sha"],
                          json.loads(self.manifest_path.read_text())["entries"][0]["git_blob_sha1"])
 
+    def test_nested_block_comments_are_valid_nonprogram_lisp(self):
+        self.source.write_text(
+            "#| зовнішній (define pretend 1)\n"
+            "   #| внутрішній (псевдовиклик) |#\n"
+            "   завершення |#\n; пояснення\n",
+            encoding="utf-8",
+        )
+        self.write_manifest(blob_sha(self.source.read_bytes()))
+        state = self.report()
+        self.assertEqual(state["discrepancies"], 0)
+        self.assertEqual(state["status"], "PINNED_SOURCE_BLOBS_MATCH")
+        self.assertFalse(state["automatic_repin"])
+
+    def test_executable_after_nested_comment_is_not_nonprogram(self):
+        self.source.write_text(
+            "#| коментар #| вкладений |# |#\n(визначити проба так)\n",
+            encoding="utf-8",
+        )
+        self.write_manifest(blob_sha(self.source.read_bytes()))
+        self.assertEqual(self.report()["sample"][0]["reason"],
+                         "NO_LONGER_COMMENT_ONLY")
+
+    def test_unterminated_block_comment_is_invalid_not_nonprogram(self):
+        self.source.write_text("#| незавершений #| вкладений |#\n",
+                               encoding="utf-8")
+        self.write_manifest(blob_sha(self.source.read_bytes()))
+        self.assertEqual(self.report()["sample"][0]["reason"],
+                         "INVALID_LISP_COMMENT_SYNTAX")
+
     def test_form_pretending_to_be_profile_is_rejected_even_if_repinning(self):
         self.source.write_text("(визначити нова-функція так)\n", encoding="utf-8")
         self.write_manifest(blob_sha(self.source.read_bytes()))
