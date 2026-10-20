@@ -1,9 +1,6 @@
-; Positive witness for the existing root host clock capability.
-; The legacy surface (mono-ns) returns a raw host observation.
-; It is NOT the exact D10:0011110110 identity and does NOT grant D10 callability.
-; The distinct exact ten-bit candidate is tested physically in
-; tests/semantic/t5m-bench-time.bits and must remain fail-closed until F1-F4 admission.
+; Позитивний свідок наявної можливості отримати час від хоста.
+; Історична поверхня повертала необроблене спостереження.
+; Цей приклад не надає права виклику іншій десятибітній функції.
+; Окрема перевірка точного доменного слова виконується фізично.
+; Без підтвердження допуску невідомий виклик має відхилятися.
 (монотонний-наносекунди)
-
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити монотонний-наносекунди mono-ns)
