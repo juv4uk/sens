@@ -1,6 +1,7 @@
-; #505 — native-first classification witness.
-; Lisp owns the routing decision. This fixture never executes raw machine code.
-; Ukrainian projection: Sid8/Sens8 heads → D3/D4/D8 surfaces.
+; #505 — свідок класифікації з пріоритетом нативного виконання.
+; Рішення про маршрут належить Lisp; свідок не запускає машинних байтів.
+; Виконувані голови — українські проєкції чинних бібліотек.
+; Цитовані теги маршрутів і планів — дані протоколу, не назви викликів.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
@@ -9,33 +10,36 @@
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 (load "lib/machine/dispatch/native-first.lisp")
 
-(визначити native-first-witness-check
-  (функція (actual expected)
+(визначити перевірити-свідок-нативного-маршруту
+  (функція (отримане очікуване)
     (за-умовою
-      ((однакові? actual expected) (як-є pass))
+      ((однакові? отримане очікуване) (як-є pass))
       ((як-є native-first-witness-fallback)
        native-first-witness-fallback
-       (список (як-є fail) actual expected)))))
+       (список (як-є fail) отримане очікуване)))))
 
 (список
-  (native-first-witness-check
+  (перевірити-свідок-нативного-маршруту
     (класифікувати-нативний-вираз (як-є (перше (сполучити 2 3))))
     (список
       (як-є native-plan)
-      (x86-lower-cons-car-u64-forms 2 3)
+      (знизити-складену-пару-до-машинних-форм 2 3)
       x86-pair-cell-bytes))
-  (native-first-witness-check
-    (класифікувати-нативний-вираз (як-є (+ 2 3)))
-    (як-є (evaluator-fallback (+ 2 3))))
-  (native-first-witness-check
-    (класифікувати-нативний-вираз (як-є (перше (сполучити (+ 1 1) 3))))
-    (як-є (evaluator-fallback (перше (сполучити (+ 1 1) 3)))))
-  (native-first-witness-check
+  (перевірити-свідок-нативного-маршруту
+    (класифікувати-нативний-вираз (як-є (додати 2 3)))
+    (як-є (evaluator-fallback (додати 2 3))))
+  (перевірити-свідок-нативного-маршруту
+    (класифікувати-нативний-вираз (як-є (перше (сполучити (додати 1 1) 3))))
+    (як-є (evaluator-fallback (перше (сполучити (додати 1 1) 3)))))
+  (перевірити-свідок-нативного-маршруту
     (класифікувати-нативний-вираз (як-є (перше (сполучити -1 3))))
     (як-є (evaluator-fallback (перше (сполучити -1 3)))))
-  (native-first-witness-check
+  (перевірити-свідок-нативного-маршруту
     (класифікувати-нативний-вираз (як-є radio))
     (як-є (evaluator-fallback radio)))
-  (native-first-witness-check
+  (перевірити-свідок-нативного-маршруту
     (класифікувати-нативний-вираз (як-є (перше . radio)))
     (як-є (evaluator-fallback (перше . radio)))))
+
+; Сумісне ім'я свідка не є окремою функцією або доменним кодом.
+(визначити native-first-witness-check перевірити-свідок-нативного-маршруту)
