@@ -40,6 +40,8 @@ unsafe extern "C" {
     fn sens_words_add_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
     fn sens_words_sub_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
     fn sens_words_mul_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
+    fn sens_words_divrem_u64(input: *const u64, output: *mut u64, words: usize,
+                             divisor: u64, remainder: *mut u64);
 }
 
 /// Цілочисельний механізм для рівно двох НАЯВНИХ знакових слів D24.
@@ -242,6 +244,35 @@ pub(crate) fn exact_words_mul_unsigned(left: &[u64], right: &[u64]) -> Option<Ve
         }
     }
     Some(output)
+}
+
+/// Точна механічна частка та остача багатослівного БЕЗЗНАКОВОГО числа.
+/// Молодше слово перше, довжина ненульова; рішення про Dn та RATIO — за SENS.
+pub(crate) fn exact_words_div_rem_u64(input: &[u64], divisor: u64) -> Option<(Vec<u64>, u64)> {
+    if input.is_empty() || divisor == 0 { return None; }
+    let mut output = vec![0_u64; input.len()];
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    {
+        let mut remainder = 0_u64;
+        // SAFETY: окремі буфери рівної довжини, дільник >0;
+        // старша половина перед DIVQ завжди строго менша за дільник.
+        unsafe {
+            sens_words_divrem_u64(input.as_ptr(), output.as_mut_ptr(),
+                                  input.len(), divisor, &mut remainder);
+        }
+        return Some((output, remainder));
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    {
+        let mut remainder = 0_u128;
+        let d = u128::from(divisor);
+        for i in (0..input.len()).rev() {
+            let numerator = (remainder << 64) | u128::from(input[i]);
+            output[i] = (numerator / d) as u64;
+            remainder = numerator % d;
+        }
+        Some((output, remainder as u64))
+    }
 }
 
 /// Точна цілочисельна частка двох явно допущених знакових D24/D48.
@@ -596,6 +627,59 @@ mod tests {
             let b = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
             let expected = if b == 0 || a % b != 0 { None } else { Some(a / b) };
             assert_eq!(exact_small_integer_quotient(48, a, b), expected);
+        }
+    }
+    #[test]
+    fn wide_divrem_reconstructs_every_bit_and_rejects_zero_divisor() {
+        assert_eq!(exact_words_div_rem_u64(&[], 1), None);
+        assert_eq!(exact_words_div_rem_u64(&[42], 0), None);
+        for n in [1, 2, 3, 6, 12] {
+            let max = vec![u64::MAX; n];
+            for divisor in [1_u64, 2, 3, 17, u32::MAX as u64, u64::MAX] {
+                let (quot, rem) = exact_words_div_rem_u64(&max, divisor).unwrap();
+                assert!(rem < divisor);
+                let mut carry = u128::from(rem);
+                for i in 0..n {
+                    let product = u128::from(quot[i]) * u128::from(divisor) + carry;
+                    assert_eq!(product as u64, max[i]);
+                    carry = product >> 64;
+                }
+                assert_eq!(carry, 0);
+            }
+        }
+    }
+
+    #[test]
+    fn wide_divrem_matches_u128_oracle_in_seeded_cases() {
+        let mut seed = 0x35cd_a871_4eb9_f206_u64;
+        for n in [1, 2, 3, 6, 12] {
+            for _ in 0..1024 {
+                let mut input = Vec::new();
+                for _ in 0..n {
+                    seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+                    input.push(seed);
+                }
+                seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+                let divisor = seed | 1;
+                let (quot, rem) = exact_words_div_rem_u64(&input, divisor).unwrap();
+                assert!(rem < divisor);
+                let mut carry = u128::from(rem);
+                for i in 0..n {
+                    let product = u128::from(quot[i]) * u128::from(divisor) + carry;
+                    assert_eq!(product as u64, input[i], "n={n}, limb={i}");
+                    carry = product >> 64;
+                }
+                assert_eq!(carry, 0);
+                if n <= 2 {
+                    let value = u128::from(input[0]) | if n == 2 {
+                        u128::from(input[1]) << 64
+                    } else { 0 };
+                    let expect = value / u128::from(divisor);
+                    assert_eq!(quot[0], expect as u64);
+                    if n == 2 { assert_eq!(quot[1], (expect >> 64) as u64); }
+                    assert_eq!(rem, (value % u128::from(divisor)) as u64);
+                }
+            }
         }
     }
 }

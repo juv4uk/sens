@@ -308,4 +308,26 @@ sens_i64_divrem_exact:
     ret
 .size sens_i64_divrem_exact,.-sens_i64_divrem_exact
 
+/* Long division 64*N / 64 -> quotient and remainder, least limb first.
+ * SysV: RDI=in, RSI=out, RDX=count, RCX=divisor, R8=rem.
+ * Before each DIVQ the high dividend half is the prior rem < divisor. */
+.p2align 4
+.globl sens_words_divrem_u64
+.type sens_words_divrem_u64,@function
+sens_words_divrem_u64:
+    mov %rdx,%r10
+    mov %rcx,%r9
+    mov %r8,%r11
+    xor %edx,%edx
+.Lword_div_loop:
+    dec %r10
+    mov (%rdi,%r10,8),%rax
+    divq %r9
+    mov %rax,(%rsi,%r10,8)
+    test %r10,%r10
+    jnz .Lword_div_loop
+    mov %rdx,(%r11)
+    ret
+.size sens_words_divrem_u64,.-sens_words_divrem_u64
+
 .section .note.GNU-stack,"",@progbits
