@@ -4,17 +4,17 @@
 (визначити схема-паритету-основи-життя
   (функція () (перше life-substrate-parity-document)))
 
+; Д3 має точні двопольові гілки: умова та результат.
+; Підписи структурних відношень не є виконуваними викличними головами.
 (визначити свідок-паритету-основи-життя
   (функція ()
     (за-умовою
       ((тотожне? (схема-паритету-основи-життя) (як-є life-substrate-parity/1))
-       (identity-relation same)
        (список
          (як-є life-substrate-parity-witness)
          (список (як-є status) (як-є pass))
          (список (як-є detail) (як-є awaiting-real-graal-evidence))))
-      ((тотожне? (схема-паритету-основи-життя) (як-є life-substrate-parity/1))
-       (identity-relation distinct)
+      (так
        (список
          (як-є life-substrate-parity-witness)
          (список (як-є status) (як-є fail))
