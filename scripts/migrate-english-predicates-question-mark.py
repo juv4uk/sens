@@ -1,159 +1,149 @@
 #!/usr/bin/env python3
-"""#1413: усі англійські предикати мають закінчуватися на `?`.
+"""Мігратор виконуваних голів предикатів на повну українську проєкцію.
 
-Предикат — функція СЕНС, у якої українське (ук/укр) чи санскритське ім'я
-закінчується на `?`. Англійські імена, яким `?` бракує, беруться з
-`lib/surface/semantic-registry.lisp` — не зі списку в цьому файлі.
-
-Переписує лише ВИКЛИКИ: токен одразу після `(`, поза рядками й
-коментарями, у файлах мови (.lisp/.sens/...) і в Rust-рядках, що містять
-код мови. Дані (`(quote eq)`, `structural-kind atom`) не чіпаються.
-Функція як значення в не-головній позиції (`(map atom xs)`) лише
-звітується — її треба розглянути вручну.
-
-  python3 scripts/migrate-english-predicates-question-mark.py          # звіт
-  python3 scripts/migrate-english-predicates-question-mark.py --apply  # записати
+Авторитет: ратифіковані D3/D4 таблиці, а НЕ SID8 / старий реєстр.
+Не змінює цитовані дані, коментарі, рядки, фізичні .sens або Rust.
+Типовий режим тільки повідомляє кандидатів; --apply вимагає окремий
+чистий Git-файл lib/*.lisp. Не є доказом SENS/T5M-виконання.
 """
-import re
-import sys
+from __future__ import annotations
+
+import argparse
+import os
 from pathlib import Path
+import subprocess
+import sys
+import tempfile
+
+from check_ukr_callsite_migration import candidate_heads, parse
+from domain_tables import read_domain_table
 
 ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
-LANG_EXT = {".lisp", ".sens", ".my", ".wsm", ".всм", ".мій", ".лісп"}
-SKIP_DIRS = {"vendor", ".git", "node_modules"}
-DELIM = set(" \t\r\n()\"';")
+NONPROGRAM = frozenset({"domains", "surface", "generated", "staged-out"})
 
 
-def predicates():
-    src = REGISTRY.read_text(encoding="utf-8")
-    pat = re.compile(r"\(([01]{8}) \(en ([^()\s]+|\(\))\) \(ук ([^()\s]+|\(\))\) "
-                     r"\(укр ([^()\s]+|\(\))\) \(sa ([^()\s]+|\(\))\)")
-    out = {}
-    for code, en, uk, ukr, sa in pat.findall(src):
-        if en != "()" and not en.endswith("?") and any(
-                s.endswith("?") for s in (uk, ukr, sa)):
-            out[en] = code
-    if not out:
-        return {
-            "atom": "00000010",
-            "eq": "00000011",
-            "not": "00100001",
-            "check-conflict": "01111101",
-            "occurs-check": "10001100",
-        }
-    return out
-
-
-def rewrite_lisp(text, names):
-    """Код мови: голови викликів поза рядками й коментарями."""
-    out, i, n, heads = [], 0, len(text), 0
-    in_str = in_comment = False
-    while i < n:
-        c = text[i]
-        if in_comment:
-            in_comment = c != "\n"
-        elif in_str:
-            if c == "\\":
-                out.append(text[i:i + 2])
-                i += 2
+def predicates(root: Path = ROOT) -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    for width in (3, 4):
+        for row in read_domain_table(root / "lib/domains" / f"d{width}.lisp"):
+            if not row.en or not row.en.endswith("?"):
                 continue
-            in_str = c != '"'
-        elif c == '"':
-            in_str = True
-        elif c == ";":
-            in_comment = True
-        elif c == "(":
-            j = i + 1
-            while j < n and text[j] in " \t":
-                j += 1
-            k = j
-            while k < n and text[k] not in DELIM:
-                k += 1
-            if text[j:k] in names:
-                out.append(text[i:k] + "?")
-                heads += 1
-                i = k
-                continue
-        out.append(c)
-        i += 1
-    return "".join(out), heads
+            if not row.ukr or not row.ukr.endswith("?"):
+                raise ValueError(f"{row.domain}:{row.bits}: нема ратифікованого укр-предиката")
+            aliases = {row.en, row.en[:-1]}
+            if row.lisp:
+                aliases.update({row.lisp, row.lisp.lower()})
+            for alias in aliases:
+                if not alias or alias == row.ukr:
+                    continue
+                previous = mapping.setdefault(alias, row.ukr)
+                if previous != row.ukr:
+                    raise ValueError(f"неоднозначна назва {alias!r}")
+    if not mapping:
+        raise ValueError("порожня ратифікована карта D3/D4")
+    return mapping
 
 
-RUST_STR = re.compile(r'r(#*)"(.*?)"\1|"((?:[^"\\]|\\.)*)"', re.S)
-
-
-def rewrite_rust(text, names):
-    """Rust: лише вміст рядкових літералів (там записано код мови)."""
-    total = 0
-
-    def fix(m):
-        nonlocal total
-        body = m.group(2) if m.group(2) is not None else m.group(3)
-        new_body, heads = rewrite_lisp_heads_only(body, names)
-        total += heads
-        return m.group(0).replace(body, new_body, 1) if heads else m.group(0)
-
-    return RUST_STR.sub(fix, text), total
-
-
-def rewrite_lisp_heads_only(body, names):
-    """Усередині Rust-рядка: лише `(ім'я` + роздільник, без аналізу рядків."""
-    heads = 0
-
-    def fix(m):
-        nonlocal heads
-        heads += 1
-        return m.group(1) + m.group(2) + "?"
-
-    pattern = r"(\(\s*)(" + "|".join(re.escape(n) for n in names) + r")(?=[\s()\\])"
-    return re.sub(pattern, fix, body), heads
-
-
-def non_head_mentions(text, names):
-    return sum(len(re.findall(r"(?<![(\w?-])" + re.escape(n) + r"(?![\w?-])", text))
-               for n in names)
-
-
-def files():
-    for path in ROOT.rglob("*"):
-        rel = path.relative_to(ROOT)
-        if any(p in SKIP_DIRS or p.startswith("target") for p in rel.parts):
+def rewrite_lisp(source: str, mapping: dict[str, str]) -> tuple[str, list[tuple[int, str, str]]]:
+    """Використати чинний лексичний сканер викликів, не виконувати SENS у Python."""
+    forms = parse(source)
+    lines = [0] + [i + 1 for i, char in enumerate(source) if char == "\n"]
+    edits: list[tuple[int, str, str]] = []
+    for token in candidate_heads(forms):
+        replacement = mapping.get(token.text)
+        if replacement is None:
             continue
-        # Історичні записи того, що реально виконувалось, не переписуються.
-        if rel.parts[:1] == ("archive",) or "results" in rel.parts:
-            continue
-        if path.is_file() and (path.suffix in LANG_EXT or path.suffix == ".rs"):
-            yield path
+        at = lines[token.line - 1] + token.column - 1
+        if source[at:at + len(token.text)] != token.text:
+            raise ValueError(f"неправильна позиція виклику {token.line}:{token.column}")
+        edits.append((at, token.text, replacement))
+    if len({at for at, _, _ in edits}) != len(edits):
+        raise ValueError("повторне редагування тієї ж позиції")
+    result = source
+    for at, old, new in sorted(edits, reverse=True):
+        result = result[:at] + new + result[at + len(old):]
+    if edits:
+        parse(result)
+    return result, edits
 
 
-def main():
-    apply = "--apply" in sys.argv
-    names = predicates()
-    print("предикати без ?:", ", ".join(f"{n}->{n}?" for n in names))
-    total_heads = total_files = 0
-    for path in sorted(files()):
-        if path == REGISTRY:
-            continue
-        text = path.read_text(encoding="utf-8", errors="strict")
-        if path.suffix == ".rs":
-            new, heads = rewrite_rust(text, names)
-        else:
-            new, heads = rewrite_lisp(text, names)
-        if heads:
-            total_heads += heads
-            total_files += 1
-            print(f"{path.relative_to(ROOT)}\tвикликів {heads}")
+def selected(names: list[str], *, apply: bool) -> list[Path]:
+    if apply and not names:
+        raise ValueError("--apply потребує явно вибраного файла lib/*.lisp")
+    result: set[Path] = set()
+    for name in names or ["lib"]:
+        rel = Path(name)
+        if (rel.is_absolute() or not rel.parts or rel.parts[0] != "lib"
+                or any(part in ("", ".", "..") for part in rel.parts)
+                or any(part in NONPROGRAM for part in rel.parts[1:])):
+            raise ValueError(f"поза активним lib/: {name}")
+        source = ROOT / rel
+        if source.is_symlink():
+            raise ValueError(f"символічне посилання: {name}")
+        if source.is_dir():
             if apply:
-                path.write_text(new, encoding="utf-8")
-    print(f"разом: викликів {total_heads} у {total_files} файлах")
-    if apply:
-        src = REGISTRY.read_text(encoding="utf-8")
-        for name in names:
-            src = src.replace(f"(en {name})", f"(en {name}?)")
-        REGISTRY.write_text(src, encoding="utf-8")
-        print("реєстр оновлено")
+                raise ValueError("--apply не приймає каталогу: виберіть окремий файл")
+            candidates = source.rglob("*.lisp")
+        elif source.is_file() and source.suffix == ".lisp":
+            candidates = [source]
+        else:
+            raise ValueError(f"немає виконуваного Lisp: {name}")
+        for path in candidates:
+            relative = path.relative_to(ROOT)
+            if (path.is_file() and not path.is_symlink()
+                    and not any(part in NONPROGRAM for part in relative.parts[1:])):
+                result.add(path)
+    return sorted(result)
+
+
+def write_checked(path: Path, original: bytes, changed: bytes) -> None:
+    rel = path.relative_to(ROOT).as_posix()
+    pinned = subprocess.run(["git", "-C", str(ROOT), "show", "HEAD:" + rel],
+                            capture_output=True, check=False)
+    if pinned.returncode or pinned.stdout != original or path.read_bytes() != original:
+        raise ValueError(f"{rel}: паралельні чи незакомічені зміни; перезапис заборонено")
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".ukr-pred-",
+                                         delete=False) as writer:
+            temporary = Path(writer.name)
+            writer.write(changed)
+            writer.flush()
+            os.fsync(writer.fileno())
+        os.chmod(temporary, path.stat().st_mode)
+        if path.read_bytes() != original:
+            raise ValueError(f"{rel}: виявлено зміну під час публікації")
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("files", nargs="*")
+    parser.add_argument("--apply", action="store_true")
+    args = parser.parse_args(argv)
+    try:
+        mapping = predicates()
+        files = selected(args.files, apply=args.apply)
+        modified = count = 0
+        for path in files:
+            original = path.read_bytes()
+            result, edits = rewrite_lisp(original.decode("utf-8", "strict"), mapping)
+            if edits:
+                modified += 1
+                count += len(edits)
+                print(f"{path.relative_to(ROOT)}: {len(edits)} точних укр-викликів")
+                if args.apply:
+                    write_checked(path, original, result.encode("utf-8"))
+        print(f"УКР_ПРЕДИКАТИ: файлів={len(files)} кандидатів={modified} викликів={count} "
+              f"запис={args.apply}; семантичний_оракул=НЕ_ПЕРЕВІРЕНО")
+        return 0
+    except (ValueError, OSError, UnicodeError, RuntimeError) as error:
+        print(f"ПОМИЛКА УКР_ПРЕДИКАТИ: {error}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
