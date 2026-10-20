@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Safe, explicit file-by-file .lisp -> physical T5 .sens migration.
+"""Пакетне перетворення .lisp у поточний фізичний T5M .sens.
 
 This is a batch driver, not a competing language implementation: semantic
 conversion is delegated to migrate-three-pass.py. Zig emits published physical
-T5 bytes; Python packing is an independent dry-run/parity reference only.
+T5M bytes; Python packing is an independent dry-run/parity reference only.
 Nothing is published unless --write is explicitly requested.
 """
 from __future__ import annotations
@@ -30,7 +30,7 @@ sys.modules[spec.name] = mig
 spec.loader.exec_module(mig)
 
 INPUTS = {
-    "foundation": ROOT / "knowledge/d1-d9-foundation.json",
+    "foundation": ROOT / "knowledge/d1-d11-foundation.json",
     "domain_surfaces": ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
     "semantic_generated": ROOT / "crates/sens/src/semantic_registry_generated.rs",
     "semantic_registry": ROOT / "crates/sens/src/semantic_registry.rs",
@@ -192,16 +192,16 @@ def run(args: argparse.Namespace) -> dict:
             original = source.read_bytes()
             row["source_sha256"] = digest(original)
             readable = original.decode("utf-8")
-            projection = mig.migrate_file(readable, resolver, text7, codec="t5")
+            projection = mig.migrate_file(readable, resolver, text7, codec="t5m")
             words = mig.parse_words(projection)
             # Python is an independent reference, NOT the published byte producer.
-            reference_bytes = mig.encode_projection(projection)
-            if mig.decode_bytes(reference_bytes) != words:
-                raise ValueError("exact typed T5 word roundtrip failed")
+            reference_bytes = mig.encode_t5m_projection(projection)
+            if mig.decode_t5m_bytes(reference_bytes) != words:
+                raise ValueError("exact typed T5M word roundtrip failed")
             if zig_binary is not None:
                 packed = zig_codec_bridge.carry_t5(
                     zig_binary, projection,
-                    codec="t5",
+                    codec="t5m",
                     trusted_source_sha256=digest(reference_bytes),
                 )
                 if packed != reference_bytes:
@@ -216,7 +216,7 @@ def run(args: argparse.Namespace) -> dict:
                     )
                 evidence = zig_codec_bridge.verify_t5(
                     zig_binary, packed,
-                    codec="t5",
+                    codec="t5m",
                     trusted_source_sha256=digest(reference_bytes),
                 )
                 row["zig_transport"] = evidence
@@ -265,8 +265,8 @@ def run(args: argparse.Namespace) -> dict:
                 # The binary and exact-bit text view form one publication unit.
                 # An existing view must not strand an orphan .sens; a failed view
                 # write rolls back only the bytes this candidate just created.
-                # T5 bytes have already passed the pinned Zig corridor above.
-                view_bytes = (" ".join(mig.decode_bytes(packed)) + "\n").encode("ascii")
+                # T5M bytes have already passed the pinned Zig corridor above.
+                view_bytes = (" ".join(mig.decode_t5m_bytes(packed)) + "\n").encode("ascii")
                 view_path = out / destination.with_suffix("")
                 migration_publish_pair.publish_pair(
                     mig.write_atomic_no_clobber,
@@ -286,7 +286,7 @@ def run(args: argparse.Namespace) -> dict:
         "schema": SCHEMA, "mode": "write-new-only" if args.write else "dry-run",
         "root": str(repo), "output_mirror": str(out),
         "authority": {"foundation_sha256": digest(INPUTS["foundation"].read_bytes()),
-                      "codec": "physical-T5-5-trits-per-byte",
+                      "codec": "physical-T5M-5-trits-per-byte",
                       "source_era": source_era,
                       "w8_policy": "SID8 retired; auto/current preserve only ratified D8; no historical remapping"},
         "summary": {"files_seen": len(ledger), "files_admitted": admitted,
@@ -324,7 +324,7 @@ def main() -> int:
                         default="auto",
                         help="auto/current use ratified current domains only; legacy is rejected as retired")
     parser.add_argument("--zig-codec", action="store_true",
-                        help="require pinned Zig 0.16 physical T5 roundtrip for every candidate")
+                        help="require pinned Zig 0.16 physical T5M roundtrip for every candidate")
     parser.add_argument("--write", action="store_true",
                         help="opt in to creating new physical .sens; never overwrite")
     args = parser.parse_args()
