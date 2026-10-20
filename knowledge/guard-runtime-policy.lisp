@@ -6,25 +6,25 @@
 ; Політика навмисно мала: Rust подає нормалізовані факти, а WSM визначає
 ; класифікацію й може змінювати її без перекомпіляції.
 
-(0011 guard-evaluate
-  (0010 (kind subject evidence)
-    (110
-      ((101 evidence (001 missing))
-       (guard-unknown subject (001 runtime-evidence) (001 ask-agent)))
-      ((101 kind (001 read))
+(визначити guard-evaluate
+  (функція (вид суб'єкт докази)
+    (за-умовою
+      ((тотожне? докази (як-є missing))
+       (guard-unknown суб'єкт (як-є runtime-evidence) (як-є ask-agent)))
+      ((тотожне? вид (як-є read))
        (make-guard-finding
-         (001 allow) (001 confirmed) subject kind (001 read-only)
-         (001 ()) (001 no-state-change) (001 continue) (1110 evidence)))
-      ((101 kind (001 write))
+         (як-є allow) (як-є confirmed) суб'єкт вид (як-є read-only)
+         (як-є ()) (як-є no-state-change) (як-є continue) (список докази)))
+      ((тотожне? вид (як-є write))
        (make-guard-finding
-         (001 warn) (001 partial) subject kind (001 review-write-scope)
-         (001 mutation-requested) (001 state-may-change)
-         (001 verify-authority-and-target) (1110 evidence)))
-      ((101 kind (001 destructive))
+         (як-є warn) (як-є partial) суб'єкт вид (як-є review-write-scope)
+         (як-є mutation-requested) (як-є state-may-change)
+         (як-є verify-authority-and-target) (список докази)))
+      ((тотожне? вид (як-є destructive))
        (make-guard-finding
-         (001 reject) (001 confirmed) subject kind
-         (001 explicit-owner-authority-required)
-         (001 authority-not-present) (001 irreversible-impact)
-         (001 ask-owner) (1110 evidence)))
-      (1 (guard-unknown subject (001 unclassified-event-kind)
-           (001 choose-unknown-route))))))
+         (як-є reject) (як-є confirmed) суб'єкт вид
+         (як-є explicit-owner-authority-required)
+         (як-є authority-not-present) (як-є irreversible-impact)
+         (як-є ask-owner) (список докази)))
+      (1 (guard-unknown суб'єкт (як-є unclassified-event-kind)
+           (як-є choose-unknown-route))))))
