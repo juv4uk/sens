@@ -94,8 +94,8 @@ class SelectedOriginalT5(unittest.TestCase):
         return code, payload
 
     def test_pinned_original_not_fake_new_file(self):
-        self.assertEqual(source_blob(SOURCE), "407685130e53a0129b8d1b86e8e20b36270965ba")
-        self.assertEqual(self.orig.decode(), "(п-п (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n")
+        self.assertEqual(source_blob(SOURCE), "44c4e8cad5442d74bcecef6f115fa1e14c68a5c0")
+        self.assertEqual(self.orig.decode(), "(перше-першого (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n")
         self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
 
     def test_bad_blob_blocks_even_before_conversion(self):
@@ -141,41 +141,29 @@ class SelectedOriginalT5(unittest.TestCase):
         self.assertFalse(list(self.output.rglob("*.sens")))
         self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
 
-    def test_one_file_resolver_uses_owner_audited_w8_and_explicit_era(self):
-        # No oracle is bypassed here: this inspects only canonical head mapping,
-        # never publishes an original executable SENS artifact.
+    def test_one_file_resolver_uses_current_ukr_and_rejects_ambiguous_w8(self):
+        # Historical SID8 bytes are not a source of ratified D8 callability.
         migration = app.load_migrator()
         foundation = migration.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
-        legacy, my, upper = migration.build_three_pass_maps(
+        my, upper, bridge = migration.build_three_pass_maps(
             foundation,
             ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
             ROOT / "crates/sens/src/semantic_registry_generated.rs",
             ROOT / "crates/sens/src/semantic_registry.rs",
             ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
-            ROOT / "contracts/core1-historical-sid-map.lisp",
-            ROOT / "knowledge/sens8-current-coverage-v1.json",
         )
-        self.assertEqual(legacy["01001000"][:2], ("11011011", "D8"))
-        self.assertNotIn("00001010", migration.parse_audited_legacy_successors(
-            ROOT / "knowledge/sens8-current-coverage-v1.json", foundation))
-        admitted_d8 = foundation["domains"]["D8"]["residents"]
+        self.assertFalse(bridge)
         text7 = migration.build_text7(
-            foundation, ROOT / "crates/sens/src/text7_projection_generated.rs")
-        original = "(01001000 000)\n"
-        old = migration.Resolver(
-            legacy, my, upper, source_era="legacy", admitted_d8=admitted_d8)
-        now = migration.Resolver(
-            legacy, my, upper, source_era="current", admitted_d8=admitted_d8)
-        self.assertTrue(migration.migrate_file(original, old, text7).startswith(
-            "10 11011011 00 "))
-        self.assertEqual(old.counts["pass1-sens8"], 1)
-        self.assertTrue(migration.migrate_file(original, now, text7).startswith(
-            "10 01001000 00 "))
-        self.assertEqual(now.counts["already-exact"], 1)
-        automatic = migration.Resolver(
-            legacy, my, upper, source_era="auto", admitted_d8=admitted_d8)
-        with self.assertRaisesRegex(migration.MigrationError, "ambiguous W8"):
-            migration.migrate_file(original, automatic, text7)
+            foundation, ROOT / "knowledge/d7-keyboard-v2-ratified.json")
+        current = migration.Resolver(my, upper)
+        original = "(перше-першого (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\\n"
+        projected = migration.migrate_file(
+            original, current, text7, source_surface="укр", codec="t5")
+        self.assertTrue(projected.startswith("10 1000 00 "), projected)
+        ambiguous = migration.Resolver(my, upper)
+        with self.assertRaisesRegex(migration.MigrationError, "ambiguous eight-bit"):
+            migration.migrate_file(
+                "(01001000 000)\\n", ambiguous, text7, source_surface="укр", codec="t5")
 
     def test_real_unpaired_original_files_are_audited_not_converted(self):
         # These are tracked old files, not fabricated canaries or newly authored
