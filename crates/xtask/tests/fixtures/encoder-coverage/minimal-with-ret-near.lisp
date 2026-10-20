@@ -1,7 +1,7 @@
-; Minimal fixture evidence file (#176 test only): admits every ICLASS the
-; curated partially-implemented set names (RET_NEAR, MOV, ADD, OR, AND, SUB, XOR, CMP, TEST, PUSH, POP, INC, DEC, NOT, NEG, JO, JNO, JB, JNB, JZ, JNZ, JBE, JNBE, JS, JNS, JP, JNP, JL, JNL, JLE, JNLE, JMP),
-; so the generator's own cross-check against that set is satisfied, plus
-; one ordinary not-yet-implemented ICLASS for contrast.
+; Мінімальний файл-свідчення фікстури (лише тест #176): допускає кожен ICLASS, який
+; називає курований частково реалізований набір (RET_NEAR, MOV, ADD, OR, AND, SUB, XOR, CMP, TEST, PUSH, POP, INC, DEC, NOT, NEG, JO, JNO, JB, JNB, JZ, JNZ, JBE, JNBE, JS, JNS, JP, JNP, JL, JNL, JLE, JNLE, JMP),
+; тож власна перехресна перевірка генератора проти того набору задоволена, плюс
+; один звичайний ще не реалізований ICLASS для контрасту.
 (xed-machine-evidence/1
   (pinned-commit "0000000000000000000000000000000000000000")
   (source-digest "sha256:0")
