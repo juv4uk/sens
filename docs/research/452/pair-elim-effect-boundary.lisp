@@ -1,11 +1,11 @@
-; #452 pair-elim effect/evaluation-order boundary
-; Research-only. NOT semantic authority. NO production change.
+; #452 межа ефекту/порядку обчислення pair-elim
+; Лише дослідження. НЕ семантична влада. БЕЗ змін у production.
 ;
-; Parent result #451 is intentionally preserved:
-; pure extensional selector model => basis-exchange-only.
+; Батьківський результат #451 навмисно збережено:
+; чиста екстенсіональна модель селектора => basis-exchange-only.
 ;
-; This slice asks whether effectful selector *expressions* distinguish an
-; ordinary callable eliminator from a stronger delayed-selector special form.
+; Цей зріз питає, чи ефектні *вирази* селектора відрізняють звичайний
+; викликний елімінатор від сильнішої особливої форми відкладеного селектора.
 
 (pair-elim-effect-boundary
   (schema-version 4)
