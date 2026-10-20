@@ -104,6 +104,18 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertEqual(report["ratified_foundation_sha256"], "mock-ratified-sha256")
         self.assertEqual(report["migrator_summary"]["files_blocked"], 2)
         self.assertEqual(report["physical_outputs_created"], [])
+        self.assertEqual(report["release_status"], "NO-GO-NATIVE-SENS-ORACLE-UNVERIFIED")
+        self.assertIs(report["all_executable_lisp_roundtrip_verified"], False)
+        self.assertIn("cannot authorize release", report["gate"]["rule"])
+
+    def test_mechanical_pass_does_not_claim_native_roundtrip(self):
+        _, fn = fake_migrator_call()
+        with patch.object(census.subprocess, "run", side_effect=fn):
+            report = census.build_report()
+        self.assertTrue(report["gate"]["pass"])
+        self.assertFalse(report["all_executable_lisp_roundtrip_verified"])
+        self.assertEqual(report["release_status"], "NO-GO-NATIVE-SENS-ORACLE-UNVERIFIED")
+        self.assertNotIn("nothing here blocks a publication", report["gate"]["rule"])
 
     def test_new_mechanical_candidate_blocks_release_not_claim_success(self):
         _, fn = fake_migrator_call(newly_eligible=1)
