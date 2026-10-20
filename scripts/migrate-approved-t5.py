@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Manifest-driven transactional .lisp -> physical T5 .sens migration.
+"""Manifest-driven transactional .lisp -> current physical T5M .sens migration.
 
 The three-pass migrator translates source words; native SENS alone owns semantics. This command is the
 operational boundary for a real approved cohort:
 
-  manifest -> source integrity -> semantic migration -> T5 roundtrip ->
+  manifest -> source integrity -> semantic migration -> T5M roundtrip ->
   collision check -> publish the complete batch atomically, or publish none.
 
 Manifest formats:
@@ -106,7 +106,7 @@ def source_sha256(source: Path) -> str:
 
 
 def load_engine_maps(root: Path):
-    data = engine.load_foundation(root / "knowledge/d1-d9-foundation.json")
+    data = engine.load_foundation(root / "knowledge/d1-d11-foundation.json")
     my, upper, _historical_bridge_provenance = engine.build_three_pass_maps(
         data,
         root / "crates/sens/src/domain_surface_registry_generated.rs",
@@ -128,10 +128,10 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
         raise engine.MigrationError(
             "HISTORICAL_SOURCE_ERA_DISABLED: no SID8-to-current-D8 projection"
         )
-    # D8 is a current width-qualified domain, never an implicit сід8 replay.
+    # Чинний D8 має точну ширину; сід8 не є альтернативним шляхом.
     # The migration adapter carries only current-domain D9 residency metadata;
     # this is not proof that a resident is callable by SENS.
-    foundation = engine.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
+    foundation = engine.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
     d9_residents = set(foundation["domains"].get("D9", {}).get("residents", {}))
     resolver = engine.Resolver(my, upper, d9_residents=d9_residents)
     if original is None:
@@ -141,22 +141,22 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
     signal.signal(signal.SIGALRM, engine._timeout_handler)
     signal.alarm(5)
     try:
-        projection = engine.migrate_file(source_text, resolver, text7, codec="t5")
+        projection = engine.migrate_file(source_text, resolver, text7, codec="t5m")
     finally:
         signal.alarm(0)
 
     words = engine.parse_words(projection)
     # Python encoding is an independent physical parity reference only.
     # A non-dry-run publisher MUST take its real carrier bytes from Zig.
-    reference = engine.encode_projection(projection)
-    if engine.decode_bytes(reference) != words:
-        raise engine.SensT5Error("T5 roundtrip changed typed source words")
+    reference = engine.encode_t5m_projection(projection)
+    if engine.decode_t5m_bytes(reference) != words:
+        raise engine.SensT5Error("T5M roundtrip changed typed source words")
     if zig_binary is None:
         payload = reference  # preview/reference only; cannot publish
     else:
         payload = bridge.carry_t5(
             zig_binary, projection,
-            codec="t5",
+            codec="t5m",
             trusted_source_sha256=hashlib.sha256(reference).hexdigest(),
         )
         if payload != reference:
@@ -218,7 +218,7 @@ def publish_batch(staged: list[tuple[Path, bytes]], output_root: Path) -> None:
                 )
 
             fd, tmp_name = tempfile.mkstemp(
-                prefix=".sens-t5-", suffix=".tmp", dir=target.parent
+                prefix=".sens-t5m-", suffix=".tmp", dir=target.parent
             )
             tmp = Path(tmp_name)
             try:
@@ -245,7 +245,7 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--reader", type=Path, help="real built Rust sens-trit; REQUIRED for publication")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
-                    help="auto resolves known historical SID8 with mapping evidence; legacy is explicit historical; current preserves exact ratified D8")
+                    help="auto/current use ratified exact-domain identities; legacy is rejected")
     args = ap.parse_args()
 
     root = args.root.resolve()
@@ -258,10 +258,10 @@ def main() -> int:
     if report_path.is_relative_to(root):
         ap.error("--report must be outside the source repository")
 
-    # A packed T5 byte stream need not be a valid D2 program. Without the
+    # A packed T5M byte stream need not be a valid D2 program. Without the
     # independent Rust reader only a dry-run is admissible.
     if not args.dry_run and (reader is None or not reader.is_file()):
-        ap.error("physical T5 publication requires --reader path/to/sens-trit")
+        ap.error("physical T5M publication requires --reader path/to/sens-trit")
     if reader is not None and not reader.is_file():
         ap.error("--reader must name an existing executable")
 
@@ -318,7 +318,7 @@ def main() -> int:
                 if dest_path != dest:
                     raise engine.SensT5Error("destination derivation changed")
                 if reader is not None:
-                    verify_rust_d2(payload, engine.decode_bytes(payload), reader)
+                    verify_rust_d2(payload, engine.decode_t5m_bytes(payload), reader)
                     row["d2_syntax"] = "PASS"
                 else:
                     row["d2_syntax"] = "NOT_VERIFIED"
