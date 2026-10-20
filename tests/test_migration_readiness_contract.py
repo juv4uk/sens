@@ -90,6 +90,21 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertNotIn("knowledge/d1-d9-foundation.json", census.ARTIFACT_ARGS)
         self.assertNotIn("knowledge/d1-d7-foundation.json", census.ARTIFACT_ARGS)
 
+    def test_original_unpaired_inventory_uses_current_ladder_and_sens_authority(self):
+        # The old original-candidate report must not silently reinstate the
+        # D1–D9 foundation, legacy Rust semantic oracle, or T5 publication.
+        import report_original_migration_candidates as original
+        self.assertIn("--foundation", original.ARGS)
+        i = original.ARGS.index("--foundation")
+        self.assertEqual(original.ARGS[i + 1], "knowledge/d1-d11-foundation.json")
+        self.assertNotIn("knowledge/d1-d9-foundation.json", original.ARGS)
+        self.assertIn("D1–D10", original.EMPTY_ACTIONS["unmapped-function"])
+        self.assertIn("D11", original.EMPTY_ACTIONS["unmapped-function"])
+        self.assertIn("native SENS reader/eval", original.EMPTY_ACTIONS["other-unproved"])
+        self.assertIn("Zig/T5M", original.EMPTY_ACTIONS["other-unproved"])
+        self.assertNotIn("Rust D2", " ".join(original.EMPTY_ACTIONS.values()))
+
+
     def test_census_invokes_era_auto_and_excludes_existing_pairs_without_writes(self):
         observed, fn = fake_migrator_call()
         with patch.object(census.subprocess, "run", side_effect=fn):
