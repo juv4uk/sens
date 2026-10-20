@@ -36,7 +36,7 @@
     },
     {
       "path": "tests/fixtures/semantic-authority-guard/allowed-lisp-host-evidence.lisp",
-      "git_blob_sha1": "075a4b7a50655f3f241348782bce57b1df5489f9"
+      "git_blob_sha1": "e1abc979d8a300bfeb6808607659823fc2571f30"
     }
   ]
 }
