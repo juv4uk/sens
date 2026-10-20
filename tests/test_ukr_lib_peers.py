@@ -167,6 +167,35 @@ class LibUkrPeerTests(unittest.TestCase):
                 hit = [k for k, (_uk, u, _e) in ROWS.items() if u == ukr]
                 self.assertTrue(hit, f"{rel}: {ukr} не є ratified укр-назвою драбини")
 
+    def test_native_clips_calls_use_full_ukrainian_surface(self):
+        """Код випробувань використовує первинні голови, а не clips-* псевдоніми.
+
+        Зовнішні цитовані форми CLIPS (defrule, deffacts, slot, assert)
+        лишаються даними. Python тут НЕ імітує виконання SENS.
+        """
+        source = (ROOT / "crates/sens/tests/clips_import.rs").read_text(
+            encoding="utf-8")
+        old_heads = (
+            "clips-import", "clips-split-at-arrow", "clips-all-asserts?",
+            "clips-assert-conclusions", "clips-strip-rule-preamble",
+            "clips-convert-vars", "clips-convert-template-list",
+            "clips-defrule->clauses", "clips-lookup-slot-value",
+            "quote", "def", "defmodule", "forward-in", "reason-in",
+        )
+        for old in old_heads:
+            with self.subTest(old=old):
+                self.assertNotRegex(
+                    source, r"\(" + re.escape(old) + r"(?=[\s)])"
+                )
+        for current in (
+            "як-є", "визначити", "визначити-модуль",
+            "вперед-у", "міркувати-у", "кліпс-імпорт",
+            "розділити-правило-кліпс", "кліпс-визначити-правило-клаузи",
+            "знайти-значення-слота-кліпс",
+        ):
+            with self.subTest(current=current):
+                self.assertIn("(" + current + " ", source)
+
     def test_numeric_heads_gone_from_the_alias_block(self):
         for rel in MIGRATED:
             src = (ROOT / rel).read_text(encoding="utf-8")
