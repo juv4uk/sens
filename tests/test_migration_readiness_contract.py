@@ -145,7 +145,11 @@ class ReadinessContractTests(unittest.TestCase):
         ])
         self.assertEqual(report["release_status"], "NO-GO-NATIVE-SENS-ORACLE-UNVERIFIED")
         self.assertFalse(report["all_executable_lisp_roundtrip_verified"])
-        self.assertFalse(report["candidate_rows"][1]["semantic_oracle_admitted"])
+        candidates = [row for row in report["candidate_rows"]
+                      if row["status"]["auto"] == "would-write"]
+        self.assertEqual(len(candidates), 1)
+        self.assertFalse(candidates[0]["semantic_oracle_admitted"])
+        self.assertFalse(candidates[0]["physical_published"])
         self.assertEqual(report["physical_outputs_created"], [])
         self.assertEqual(report["migrator_summary"]["files_written"], 0)
 
