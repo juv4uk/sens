@@ -2602,15 +2602,12 @@
 (визначити послідовність-повернути-друге повернути-друге)
 (визначити prog2 послідовність-повернути-друге)
 
-; `symbol?` moved out of Rust after `write-to-string` made the distinction
-; expressible without exceptions: among atoms, exactly a Symbol is identical
-; to the Symbol reconstructed from its canonical text. The atom guard keeps
-; primitive `eq` away from pairs. This works for arbitrary symbol names, not
-; only reader-friendly identifiers, because `string->symbol` takes raw text.
-; `symbol?` перенесено з Rust: серед атомів лише Symbol тотожний символу,
-; відновленому з його канонічного тексту. `atom` не допускає пари до `eq`.
-; `symbol?` wurde aus Rust verschoben: Unter Atomen ist nur ein Symbol mit dem
-; aus seinem kanonischen Text rekonstruierten Symbol identisch; `atom` schützt `eq`.
+; Мовний предикат символу не потребує окремого примітива Rust.
+; Для атомарного значення перевіряємо тотожність із символом,
+; відновленим з його канонічного тексту. Перевірка атомарності
+; не допускає застосування D3 EQ до пар.
+; Перетворення тексту на символ працює з довільним його ім'ям,
+; навіть коли воно не є звичним ідентифікатором читача.
 (визначити символ?
   (функція (значення-аргументу)
     (за-умовою
@@ -2622,64 +2619,25 @@
 (визначити symbol? символ?)
 
 
-; quotient/mod (G5 test: already expressible via existing means?) — yes.
-; Unlike bitwise operations (AND/OR/XOR/shift — no primitive exposes a
-; number's binary representation at all, so those would genuinely need a
-; new Rust primitive), integer division and remainder for non-negative
-; integers fall straight out of arithmetic and comparison primitives
-; already here — no new Rust code, same class of gap as string-length
-; before it. Surfaced from the fpga-lisp session's assembler.lisp
-; (2026-08-10), which flagged the *absence* of bitwise/mod but found it
-; non-load-bearing for its own current needs; added here anyway since
-; it's genuinely useful independent of that one caller and costs
-; nothing new in Rust. Scope: non-negative `a`, positive `b` only — no
-; attempt at negative-number semantics (floor vs. truncate division is
-; a real, unresolved design choice for negatives, deliberately left
-; open rather than guessed at).
+; Цілочисельна частка та остача для невід'ємних чисел
+; виражаються наявними арифметичними й порівняльними функціями
+; без нових машинних примітивів. Це не дає права довільно
+; припускати семантику ділення від'ємних чисел: округлення вниз
+; і відкидання дробової частини — різні контракти.
+; Історична потреба походить із дослідження fpga-lisp від 10.08.2026.
 ;
-; First version (same-day, since replaced) recursed via repeated
-; subtraction — recursion depth equal to the *quotient itself*, not
-; its digit count. Fine for small examples (17/5, 100/10) but a real
-; correctness bug: `(number->string 9999999999999)` (below) needs
-; `(quotient 9999999999999 10)` — a quotient near 10^12 — which blew
-; the Rust host's stack outright. `my-lisp` has arbitrary-precision
-; exact integers (`bignum.rs`); a division whose cost scales with the
-; *value* rather than its *size* was never actually general-purpose.
-; Fixed here via doubling (`знайти-найбільший-блок-частки`: find the largest `b * 2^k`
-; that still fits `a`, subtract it, repeat) — the standard
-; binary-long-division trick, recursion depth O(log(a/b)) in both
-; `знайти-найбільший-блок-частки` and `quotient` itself, tested against a 13-digit
-; dividend without incident.
-; quotient/mod (G5-тест: уже виразне через наявне?) — так. На відміну
-; від бітових операцій (AND/OR/XOR/зсув — жоден примітив узагалі не
-; відкриває бінарне представлення числа, тож ті справді потребували б
-; нового Rust-примітива), цілочисельне ділення й остача для
-; невід'ємних чисел випливають напряму з наявних арифметичних і
-; порівняльних примітивів — без нового Rust-коду, той самий клас
-; прогалини, що й string-length раніше. Знахідка з сесії fpga-lisp,
-; assembler.lisp (2026-08-10), яка позначила ВІДСУТНІСТЬ bitwise/mod, але
-; визнала це не критичним для власних поточних потреб; додано тут усе
-; одно, бо це реально корисне незалежно від того одного викликача й не
-; коштує нічого нового в Rust. Обсяг: лише невід'ємне `a`, додатне `b`
-; — без спроби вгадати семантику для від'ємних чисел.
+; Початкове повторюване віднімання потребувало стільки рекурсивних
+; викликів, яким було саме значення частки. Для діленого
+; 9999999999999 і дільника 10 це переповнювало стек.
+; Тому блок частки шукаємо подвоєнням: найбільший b * 2^k,
+; який ще вміщується в a, віднімаємо і повторюємо.
+; Глибина пошуку залежить від log(a/b), а не від значення частки.
 ;
-; Перша версія (того самого дня, відтоді замінена) рекурсувала через
-; повторюване віднімання — глибина рекурсії дорівнювала САМІЙ ЧАСТЦІ,
-; не кількості її розрядів. Прийнятно для малих прикладів (17/5,
-; 100/10), але справжній баг коректності: `(number->string
-; 9999999999999)` (нижче) вимагав `(quotient 9999999999999 10)` —
-; частку близько 10^12 — що переповнило Rust-стек хоста напряму.
-; `my-lisp` має цілі числа довільної точності (`bignum.rs`); ділення,
-; вартість якого масштабується зі ЗНАЧЕННЯМ, а не РОЗМІРОМ, ніколи не
-; було справді загальноцільовим. Виправлено через подвоєння
-; (`знайти-найбільший-блок-частки`: знайти найбільше `b * 2^k`, що вміщується в `a`,
-; відняти, повторити) — стандартний трюк бінарного довгого ділення,
-; глибина рекурсії O(log(a/b)) як у `знайти-найбільший-блок-частки`, так і в самому
-; `quotient`, перевірено на 13-розрядному діленому без проблем.
-; Інваріант 0 < chunk ≤ a (D24+). Перевірка a < 2*chunk
-; переповнювала D24 у D48 перед D5 LESSP (змішаний домен).
-; Рівносильна перевірка a - chunk < chunk лишається у вхідному Dn;
-; тільки після неї подвоюємо chunk, коли 2*chunk ≤ a.
+; Числовий інваріант: 0 < частина ≤ a. Перевірка
+; a < 2*частина могла переносити проміжне число з D24 до D48.
+; Рівносильне порівняння a-частина < частина не потребує
+; такого переповнення перед подвоєнням. Межі доменів
+; визначає математична семантика D24+, а не текстова назва.
 (визначити знайти-найбільший-блок-частки
   (функція (перший-аргумент другий-аргумент частина множник)
     (за-умовою
@@ -2689,26 +2647,16 @@
          (додати частина частина)
          (додати множник множник))))))
 
-; `b = 0` used to hang forever: `знайти-найбільший-блок-частки` starts doubling from
-; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
-; fit" check never flips — an infinite tail-recursive loop, not a
-; crash, silent unless you're specifically watching for it. Found the
-; same way as the earlier stack-overflow bug: tested an edge case the
-; first version never considered. `/` (the Rust primitive) already
-; fails named on division by zero (`ErrorKind::InvalidForm`) — routing
-; through it here reuses that real, already-tested error instead of
-; inventing a second, different one for the same condition.
-; `b = 0` раніше зависав назавжди: `знайти-найбільший-блок-частки` починає подвоювати
-; від `chunk = b`, а `0 + 0 = 0` ніколи не росте, тож перевірка "чи
-; chunk усе ще вміщується" ніколи не переверталась — нескінченний
-; хвостово-рекурсивний цикл, не крах, непомітний, якщо спеціально не
-; шукати. `/` (Rust-примітив) уже провалюється названо на діленні на
-; нуль (`ErrorKind::InvalidForm`) — маршрутизація через нього тут
-; перевикористовує цю реальну, вже перевірену помилку замість
-; вигадування другої, іншої для того самого стану.
-; Integer quotient recurses in SENS; D5 QUOTIENT is exact rational division.
-; Consume the (chunk . multiplier) pair as data directly, not through a
-; historical LET macro that can turn a numeric result into a callable head.
+; За нульового дільника алгоритм подвоєння не просувається:
+; 0+0=0, тому рекурсія могла бути нескінченною.
+; Гілка перевірки дільника має зберігати визначену помилку
+; ділення на нуль, а не потрапляти у цикл.
+;
+; Структурну пару (частина . множник) читаємо як дані.
+; Її не слід пропускати через історичний макрос LET,
+; який міг би сприйняти числовий результат за голову виклику.
+; Числова частка D5 і алгоритм цілочисельного ділення
+; потребують окремої перевірки контрактів, без підміни законів.
 (визначити цілочисельна-частка-з-блоку
   (функція (перший-аргумент другий-аргумент частина-і-множник)
     (додати (решта частина-і-множник)
@@ -2725,18 +2673,19 @@
 ; Стара зовнішня назва — те саме замикання, не новий закон.
 (визначити quotient частка)
 
-; Integer remainder uses the Lisp-owned floor quotient: a - b * floor(a / b).
+; Остачу виражено через результат ділення: a − b · q.
+; Значення q мусить відповідати явно встановленому
+; правилу округлення; не припускаємо його за назвою функції.
 (визначити модульна-остача
   (функція (перший-аргумент другий-аргумент)
     (відняти перший-аргумент (помножити другий-аргумент (частка перший-аргумент другий-аргумент)))))
 ; Історичне ім'я — лише сумісне зв'язування української функції.
 (визначити mod модульна-остача)
 
-; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
-; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
-; exact YES -> 1/1, exact NO -> 0/1, and any inexact operand -> Canon 0 `()`.
-; Canonical three-part `cond` distinguishes exact NO (0) from no-answer `()`
-; without routing either through generic truthiness.
+; Похідні порівняння мають зберігати точну алгебру відповідей:
+; істина — 1/1, хиба — 0/1, невизначена відповідь — ().
+; Канонічні двопольові гілки умови розрізняють точну хибу
+; і відсутність відповіді, не покладаючись на істинність хоста.
 (визначити перевірити-неспадання-значень?
   (функція (поточне-значення залишені-елементи)
     (за-умовою
