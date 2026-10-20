@@ -273,6 +273,23 @@ fn sub_mul_effect_bounds_fail_closed_before_target_projection() {
 }
 
 #[test]
+fn memory_operand_three_fields_are_checked_before_acceptance() {
+    // Виконання справжньої мови СЕНС, а не Python-імітація семантики.
+    let mut session = machine_session();
+    for (source, expected) in [
+        ("(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax) (disp8 4))))", true),
+        ("(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax))))", false),
+        ("(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax) (disp8 4) зайве)))", false),
+        ("(машинна-память-64-зсув-8? (як-є (unknown (gpr64 rax) (disp8 4))))", false),
+    ] {
+        let answer = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(answer.as_predicate_bit(), Some(expected), "{source}");
+    }
+}
+
+#[test]
 fn bounded_effect_source_keeps_exact_d1_controls() {
     // #5360: застаріла масова міграція не має повертати числове 1 чи історичне t у D3 COND.
     let text = read("lib/machine/effects/u64.lisp");
