@@ -1,8 +1,8 @@
 ; contracts/d9-ratification.lisp
-; OWNER-RATIFIED 2026-10-07 — issue #4008.
-; Normative D9 cut: 512/512 distinct residents.
-; Full exact map: knowledge/d9-ratified.json
-; Source candidate: #4007 / 99913a3645576ce0a2035832b549bed574a1591e
+; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-07 — issue #4008.
+; Нормативний зріз D9: 512/512 різних резидентів.
+; Повна точна карта: knowledge/d9-ratified.json
+; Джерело-кандидат: #4007 / 99913a3645576ce0a2035832b549bed574a1591e
 
 (
   (schema . d9-ratification/1)
