@@ -21,7 +21,7 @@ PEERS = {
     "список": (4, "1110"), "рядок-додати": (9, "110011110"),
     "четверте": (6, "100111"),
 }
-# Frozen pre-migration AST, NOT a SID8 byte/width authority.
+# Frozen pre-migration AST, NOT a сід8 byte/width authority.
 BASELINE = {
   "lib/tcp.lisp": {
     "fingerprint": "9566f4cd27d15f90",
