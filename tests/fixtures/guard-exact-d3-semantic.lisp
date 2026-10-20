@@ -1,6 +1,7 @@
-; Власник логічних законів Guard — виключно SENS.
-; Host лише завантажує цей файл і перевіряє фінальний D1-біт.
-; Українська проєкція: без SID8 call-heads і без #d1: тегів.
+; Власник логічних законів захисту — виключно СЕНС.
+; Зовнішній виконавець тільки завантажує свідок та читає точний біт Д1.
+; Виклики використовують визначення з lib/guard.lisp, не старі імена.
+; Цитовані значення, у тому числі історичні коди, збережено.
 
 (визначити сторожа--ні?
   (функція (біт)
@@ -53,78 +54,78 @@
         (сторожа--рівні? (як-є (D3 "001")) (як-є (D3 "001")))
         (сторожа--ні? (сторожа--рівні? (як-є (D3 "001")) (як-є (D4 "0001"))))
         (сторожа--ні? (сторожа--рівні? (як-є (D3 "001")) (як-є (D3 "000"))))
-        (guard-decision? (як-є allow))
-        (guard-decision? (як-є warn))
-        (guard-decision? (як-є reject))
-        (guard-decision? (як-є unknown))
-        (сторожа--ні? (guard-decision? (як-є unauthorized)))
-        (guard-evidence-status? (як-є confirmed))
-        (guard-evidence-status? (як-є partial))
-        (guard-evidence-status? (як-є unresolved))
-        (guard-evidence-status? (як-є broken))
-        (сторожа--ні? (guard-evidence-status? (як-є invented)))
+        (захист-рішення? (як-є allow))
+        (захист-рішення? (як-є warn))
+        (захист-рішення? (як-є reject))
+        (захист-рішення? (як-є unknown))
+        (сторожа--ні? (захист-рішення? (як-є unauthorized)))
+        (захист-доказ-стан? (як-є confirmed))
+        (захист-доказ-стан? (як-є partial))
+        (захист-доказ-стан? (як-є unresolved))
+        (захист-доказ-стан? (як-є broken))
+        (сторожа--ні? (захист-доказ-стан? (як-є invented)))
         (тотожне?
           (сторожа--рішення
-            (make-guard-finding
+            (створити-захист-висновок
               (як-є warn) (як-є confirmed) (як-є task)
               (як-є old) (як-є target) (як-є delta)
               (як-є impact) (як-є reconcile) (як-є evidence)))
           (як-є warn))
         (тотожне?
           (сторожа--статус
-            (make-guard-finding
+            (створити-захист-висновок
               (як-є warn) (як-є confirmed) (як-є task)
               (як-є old) (як-є target) (як-є delta)
               (як-є impact) (як-є reconcile) (як-є evidence)))
           (як-є confirmed))
         (тотожне?
           (сторожа--рішення
-            (guard-unknown (як-є source) (як-є missing) (як-є inspect)))
+            (захист-невідоме (як-є source) (як-є missing) (як-є inspect)))
           (як-є unknown))
         (тотожне?
           (сторожа--статус
-            (guard-unknown (як-є source) (як-є missing) (як-є inspect)))
+            (захист-невідоме (як-є source) (як-є missing) (як-є inspect)))
           (як-є unresolved))
         (тотожне?
           (сторожа--рішення
-            (guard-compare
+            (захист-порівняти
               (як-є logic) (як-є (one (zero)))
               (як-є (one (zero))) (як-є (proof))))
           (як-є allow))
         (тотожне?
           (сторожа--рішення
-            (guard-compare
+            (захист-порівняти
               (як-є logic) (як-є (one (zero)))
               (як-є (one (one))) (як-є (proof))))
           (як-є warn))
         (тотожне?
           (сторожа--рішення
-            (guard-compare
+            (захист-порівняти
               (як-є logic) (як-є (one (zero)))
               (як-є one) (як-є (proof))))
           (як-є warn))
         (тотожне?
           (сторожа--рішення
-            (guard-sync-window
+            (захист-синхронізувати-вікно
               (як-є open) (як-є completed) (як-є recorded) (як-є proof)))
           (як-є reject))
         (тотожне?
           (сторожа--рішення
-            (guard-sync-window
+            (захист-синхронізувати-вікно
               (як-є frozen) (як-є pending) (як-є recorded) (як-є proof)))
           (як-є warn))
         (тотожне?
           (сторожа--рішення
-            (guard-sync-window
+            (захист-синхронізувати-вікно
               (як-є frozen) (як-є completed) (як-є absent) (як-є proof)))
           (як-є warn))
         (тотожне?
           (сторожа--рішення
-            (guard-sync-window
+            (захист-синхронізувати-вікно
               (як-є frozen) (як-є completed) (як-є recorded) (як-є proof)))
           (як-є allow))
-        (сторожа--містить? (як-є ask-owner) (guard-unknown-routes))
-        (сторожа--містить? (як-є ask-agent) (guard-unknown-routes))
-        (сторожа--містить? (як-є research-web) (guard-unknown-routes))))))
+        (сторожа--містить? (як-є ask-owner) (захист-невідоме-маршрути))
+        (сторожа--містить? (як-є ask-agent) (захист-невідоме-маршрути))
+        (сторожа--містить? (як-є research-web) (захист-невідоме-маршрути))))))
 
 (сторожа--закон)
