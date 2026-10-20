@@ -63,7 +63,7 @@ class StageTwoProjectionsTests(unittest.TestCase):
             root.mkdir()
             source = root / "програма.lisp"
             program = (ROOT / self.BRANCH).read_text(encoding="utf-8")
-            original = "; English note ٢ -- not an executable atom\\n" + program
+            original = "; English note ٢ -- not an executable atom\n" + program
             source.write_text(original, encoding="utf-8")
             mirror = base / "mirror"
             report = pair.stage(root, mirror, ["програма.lisp"], "auto", True)
