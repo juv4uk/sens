@@ -1,5 +1,5 @@
-; #382 — Lisp-owned repository tooling inventory validator.
-; Policy and inventory data are Lisp-owned. This checker never defines language semantics.
+; #382 — валідатор інвентаря інструментів репозиторію, власність Lisp.
+; Політика й дані інвентаря належать Lisp. Цей перевіряч ніколи не визначає семантики мови.
 
 (визначити інструменти-репо-потрібні-поля
   (як-є (path kind language role lifecycle callers authority-source
