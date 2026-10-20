@@ -1,25 +1,29 @@
-;;;; Independent ANSI Common Lisp reference witness, not the SENS runtime.
-(defclass d10-change-class-a ()
-  ((shared :initarg :shared :accessor d10-change-class-shared)))
+;;;; Незалежний еталон ANSI Common Lisp для зміни класу Д10.
+;;;; Це виконуваний свідок CLOS, а не частина обчислювача СЕНС.
+;;;; Власні класи, поля, методи доступу та локальні назви українські.
+;;;; Стандартні оператори Common Lisp і текст результату залишаються чинними.
 
-(defclass d10-change-class-b ()
-  ((shared :initarg :shared :accessor d10-change-class-shared)
-   (new-slot :initarg :new-slot :initform :new-default
-             :accessor d10-change-class-new-slot)))
+(defclass клас-д10-до-зміни ()
+  ((спільне :initarg :shared :accessor отримати-спільне-поле-д10)))
 
-(let* ((object (make-instance 'd10-change-class-a :shared 7))
-       (identity-before object))
-  (change-class object 'd10-change-class-b)
-  (assert (eq object identity-before))
-  (assert (eq (class-of object) (find-class 'd10-change-class-b)))
-  (assert (= (d10-change-class-shared object) 7))
-  (assert (eq (d10-change-class-new-slot object) :new-default)))
+(defclass клас-д10-після-зміни ()
+  ((спільне :initarg :shared :accessor отримати-спільне-поле-д10)
+   (нове-поле :initarg :new-slot :initform :new-default
+               :accessor отримати-нове-поле-д10)))
 
-(let* ((object (make-instance 'd10-change-class-a))
-       (identity-before object))
-  (assert (not (slot-boundp object 'shared)))
-  (change-class object 'd10-change-class-b)
-  (assert (eq object identity-before))
-  (assert (not (slot-boundp object 'shared))))
+(let* ((екземпляр (make-instance 'клас-д10-до-зміни :shared 7))
+       (тотожність-до-зміни екземпляр))
+  (change-class екземпляр 'клас-д10-після-зміни)
+  (assert (eq екземпляр тотожність-до-зміни))
+  (assert (eq (class-of екземпляр) (find-class 'клас-д10-після-зміни)))
+  (assert (= (отримати-спільне-поле-д10 екземпляр) 7))
+  (assert (eq (отримати-нове-поле-д10 екземпляр) :new-default)))
+
+(let* ((екземпляр (make-instance 'клас-д10-до-зміни))
+       (тотожність-до-зміни екземпляр))
+  (assert (not (slot-boundp екземпляр 'спільне)))
+  (change-class екземпляр 'клас-д10-після-зміни)
+  (assert (eq екземпляр тотожність-до-зміни))
+  (assert (not (slot-boundp екземпляр 'спільне))))
 
 (format t "D10-CHANGE-CLASS-REAL-CLOS-ORACLE PASS~%")
