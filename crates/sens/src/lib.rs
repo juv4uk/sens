@@ -60,6 +60,7 @@ mod domain_words;
 mod domain_identity;
 pub mod domain_ladder;
 pub use domain_ladder::DomainD10;
+pub mod domain_projection_catalog;
 #[allow(dead_code)]
 mod domain_owner_generated;
 mod packed_bits;
