@@ -758,6 +758,21 @@ mod install_tests {
     }
 
     #[test]
+    fn ukrainian_tcp_raw_names_preserve_fail_closed_arity() {
+        super::install();
+        for form in [
+            "(протокол-передавання-сире-слухання \"0.0.0.0\")",
+            "(протокол-передавання-сире-читання)",
+            "(протокол-передавання-сирий-запис)",
+        ] {
+            let mut session = sens::Session::default();
+            let error = sens::eval_program(form, &mut session)
+                .expect_err("передані замало аргументів мають відхилятися до роботи з сокетом");
+            assert_eq!(error.kind, ErrorKind::Arity, "{form}");
+        }
+    }
+
+    #[test]
     fn write_file_bytes_rejects_bad_path_before_evaluating_bytes() {
         super::install();
         let mut session = sens::Session::default();
