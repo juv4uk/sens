@@ -104,6 +104,49 @@ class WholeFileMetricTests(FileTree):
         self.assertEqual(report.measure(root).fully_ukrainian_files, 1)
 
 
+    def test_localized_compatibility_alias_markers_and_both_percentages(self):
+        files = {
+            "lib/quantity.lisp": (
+                "(визначити головна-назва "
+                "(функція (значення) значення))\n"
+                "; Сумісні історичні імена схем залишаються зовнішніми\n"
+                "(визначити old-name головна-назва)\n"
+            ),
+            "lib/mechanism-selector.lisp": (
+                "(визначити головна-назва "
+                "(функція (значення) значення))\n"
+                "; Сумісні англомовні назви залишаються псевдонімами "
+                "тих самих Lisp-значень.\n"
+                "(визначити old-name головна-назва)\n"
+            ),
+            "lib/alias.lisp": (
+                "(визначити головна-назва "
+                "(функція (значення) значення))\n"
+                "; Сумісні зовнішні назви вказують на ті самі значення, "
+                "без другої реалізації.\n"
+                "(визначити old-name головна-назва)\n"
+            ),
+        }
+        root = self.tree(files)
+        projected = report.measure_source_projection(root)
+        self.assertEqual(projected.total_source_files, 3)
+        self.assertEqual(projected.fully_projected_source_files, 3)
+        self.assertEqual(projected.percent, 100.0)
+
+        # Compatibility names stay English; the strict keyboard metric is different.
+        keyboard = report.measure(root)
+        self.assertEqual(keyboard.total_lisp_files, 3)
+        self.assertEqual(keyboard.fully_ukrainian_files, 0)
+
+        code, stdout = self.cli("--root", str(root), "--no-annotation")
+        self.assertEqual(code, 0)
+        self.assertIn("повністю українські файли .lisp — 0/3 (0.0%)", stdout)
+        self.assertIn(
+            "виконувані назви, голови та параметри в активних lib-файлах — "
+            "3/3 (100.0%)",
+            stdout,
+        )
+
     def test_english_comment_removal_really_increments_the_numerator(self):
         root = self.tree({"lib/завдання.lisp": "(визначити річ 1)\n; TODO\n"})
         self.assertEqual(report.measure(root).fully_ukrainian_files, 0)
