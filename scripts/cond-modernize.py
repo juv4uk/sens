@@ -166,7 +166,7 @@ def parse(source: str) -> tuple[Form, ...]:
 
 
 QUOTE_HEADS = frozenset(("001", "00000001", "quote", "QUOTE"))
-CURRENT_COND = "110"      # exact D3 bīja3 identity, not 8-bit SID8
+CURRENT_COND = "110"      # exact D3 bīja3 identity, not 8-bit сід8
 LEGACY_COND = frozenset(("00000111", "cond", "COND"))
 EXACT_D1_PRODUCERS = frozenset(("010", "101"))  # D3 ATOM and EQ
 
