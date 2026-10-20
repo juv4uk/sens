@@ -1,16 +1,17 @@
-//! T5M asm-бекенд — механічний бенчмарк. x86-64 SysV асемблерний pack/unpack
-//! (research/asm-t5m/t5m_pack.S, 5 трітів/байт, 3^5=243<256).
-//! Міряє ядро asm (trit→byte / byte→trit) на заздалегідь побудованому потоці
-//! тритів; крос-бекенд паритет байтів звіряє драйвер ДО таймінгу.
-//! Це транспортна механіка, НЕ SENS-семантика. Формат виводу — як у bench.zig.
+//! T5M asm-бекенд — механічний бенчмарк. x86-64 SysV асемблерний кодек
+//! (research/asm-t5m/t5m_words.S + t5m_pack.S, 5 трітів/байт, 3^5=243<256).
+//! Міряє ТОЙ САМИЙ шлях слово→байт / байт→слово, що й bench.zig та Rust,
+//! тож рядки порівнювані. Це транспортна механіка, НЕ SENS-семантика.
+//! Формат виводу — як у bench.zig (fixture/physical/sample).
 const std = @import("std");
 
-/// Локальний мінімальний опис слова (width біт, значення bits) — як t5.Word,
-/// але без імпорту кодека: asm-бенч самодостатній, а паритет байтів звіряє драйвер.
+/// Локальний мінімальний опис слова (width біт, значення bits) — як t5.Word.
 const Word = struct { width: u8, bits: u16 };
 
-extern fn sens_t5m_pack(trits: [*]const u8, n: usize, out: [*]u8) u64;
-extern fn sens_t5m_unpack(bytes: [*]const u8, n: usize, trits: [*]u8) void;
+extern fn sens_t5m_encode(bits: [*]const u16, widths: [*]const u8, n: usize,
+    scratch: [*]u8, out: [*]u8) u64;
+extern fn sens_t5m_decode(bytes: [*]const u8, n_bytes: usize, scratch: [*]u8,
+    out_bits: [*]u16, out_widths: [*]u8) u64;
 
 const Timespec = extern struct { tv_sec: c_long, tv_nsec: c_long };
 extern "c" fn clock_gettime(clock_id: c_int, ts: *Timespec) c_int;
@@ -34,47 +35,29 @@ const Pattern = [_]Word{
     .{ .width = 2, .bits = 1 },
 };
 
-/// Слова → плоский потік тритів: роздільник 2 між словами, доповнення 2 до кратного 5.
-fn tritStream(allocator: std.mem.Allocator, words: []const Word) ![]u8 {
-    var total: usize = 0;
-    for (words) |w| total += w.width;
-    if (words.len > 0) total += words.len - 1;
-    while (total % 5 != 0) total += 1;
-    const trits = try allocator.alloc(u8, total);
-    var at: usize = 0;
-    for (words, 0..) |w, idx| {
-        if (idx != 0) {
-            trits[at] = 2;
-            at += 1;
-        }
-        var i: u8 = w.width;
-        while (i > 0) {
-            i -= 1;
-            trits[at] = @intCast((w.bits >> @intCast(i)) & 1);
-            at += 1;
-        }
-    }
-    while (at < total) : (at += 1) trits[at] = 2;
-    return trits;
-}
-
 fn trial(
     comptime operation: enum { encode, decode },
-    trits: []const u8,
+    n: usize,
+    n_bytes: usize,
+    bits: []const u16,
+    widths: []const u8,
     physical: []const u8,
     forms: usize,
     repetitions: usize,
+    scratch: []u8,
     out_bytes: []u8,
-    out_trits: []u8,
+    out_bits: []u16,
+    out_widths: []u8,
 ) void {
     const begin = nanoseconds();
     for (0..repetitions) |_| {
         if (operation == .encode) {
-            const written = sens_t5m_pack(trits.ptr, trits.len, out_bytes.ptr);
+            const written = sens_t5m_encode(bits.ptr, widths.ptr, n, scratch.ptr, out_bytes.ptr);
             std.mem.doNotOptimizeAway(written);
         } else {
-            sens_t5m_unpack(physical.ptr, physical.len, out_trits.ptr);
-            std.mem.doNotOptimizeAway(out_trits.ptr);
+            const words = sens_t5m_decode(physical.ptr, n_bytes, scratch.ptr,
+                out_bits.ptr, out_widths.ptr);
+            std.mem.doNotOptimizeAway(words);
         }
     }
     const elapsed = nanoseconds() - begin;
@@ -89,43 +72,51 @@ pub fn main() !void {
     const reps = [_]usize{ 12000, 3000, 600, 100 };
 
     for (cases, 0..) |forms, i| {
-        const words = try allocator.alloc(Word, forms * Pattern.len);
-        defer allocator.free(words);
+        const n = forms * Pattern.len;
+        const bits = try allocator.alloc(u16, n);
+        defer allocator.free(bits);
+        const widths = try allocator.alloc(u8, n);
+        defer allocator.free(widths);
         for (0..forms) |j| {
-            @memcpy(words[j * Pattern.len ..][0..Pattern.len], &Pattern);
+            for (Pattern, 0..) |w, k| {
+                bits[j * Pattern.len + k] = w.bits;
+                widths[j * Pattern.len + k] = w.width;
+            }
+        }
+        const scratch = try allocator.alloc(u8, 6 * n + 8);
+        defer allocator.free(scratch);
+        const physical = try allocator.alloc(u8, 2 * n + 8);
+        defer allocator.free(physical);
+        const out_bits = try allocator.alloc(u16, n);
+        defer allocator.free(out_bits);
+        const out_widths = try allocator.alloc(u8, n);
+        defer allocator.free(out_widths);
+
+        const written = sens_t5m_encode(bits.ptr, widths.ptr, n, scratch.ptr, physical.ptr);
+        const decoded = sens_t5m_decode(physical.ptr, written, scratch.ptr, out_bits.ptr, out_widths.ptr);
+        if (decoded != n) return error.MechanicalParityMismatch;
+        for (0..n) |k| {
+            if (out_bits[k] != bits[k] or out_widths[k] != widths[k])
+                return error.MechanicalParityMismatch;
         }
 
-        const trits = try tritStream(allocator, words);
-        defer allocator.free(trits);
-
-        const physical = try allocator.alloc(u8, trits.len / 5);
-        defer allocator.free(physical);
-        const written = sens_t5m_pack(trits.ptr, trits.len, physical.ptr);
-        if (written != physical.len) return error.MechanicalParityMismatch;
-
-        // Локальний round-trip asm→asm; крос-бекенд паритет звіряє драйвер.
-        const asm_trits = try allocator.alloc(u8, physical.len * 5);
-        defer allocator.free(asm_trits);
-        sens_t5m_unpack(physical.ptr, physical.len, asm_trits.ptr);
-        if (!std.mem.eql(u8, asm_trits, trits)) return error.MechanicalParityMismatch;
-
         std.debug.print("fixture impl=asm forms={d} words={d} bytes={d} fnv64={x}\n", .{
-            forms, words.len, physical.len, fnv64(physical),
+            forms, n, written, fnv64(physical[0..written]),
         });
         std.debug.print("physical impl=asm forms={d} hex=", .{forms});
         const alphabet = "0123456789abcdef";
-        for (physical) |byte| {
+        for (physical[0..written]) |byte| {
             std.debug.print("{c}{c}", .{ alphabet[byte >> 4], alphabet[byte & 15] });
         }
         std.debug.print("\n", .{});
 
         for (0..3) |_| {
-            _ = sens_t5m_pack(trits.ptr, trits.len, physical.ptr);
-            sens_t5m_unpack(physical.ptr, physical.len, asm_trits.ptr);
+            _ = sens_t5m_encode(bits.ptr, widths.ptr, n, scratch.ptr, physical.ptr);
+            _ = sens_t5m_decode(physical.ptr, written, scratch.ptr, out_bits.ptr, out_widths.ptr);
         }
         for (0..5) |_| {
-            trial(.encode, trits, physical, forms, reps[i], physical, asm_trits);
-            trial(.decode, trits, physical, forms, reps[i], physical, asm_trits);
+            trial(.encode, n, written, bits, widths, physical, forms, reps[i], scratch, physical, out_bits, out_widths);
+            trial(.decode, n, written, bits, widths, physical, forms, reps[i], scratch, physical, out_bits, out_widths);
         }
     }
 }
