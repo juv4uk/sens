@@ -518,7 +518,16 @@ fn load_core_library_with_fasl_mode(
     use_verified_cache: bool,
 ) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core4);
-    load_macro_library(session)?;
+    // `Session::default()` already installs the same language-owned macro
+    // layer. Its exact D5 mechanism slot is bind-once, so bootstrapping Core4
+    // must not install the identical layer a second time.
+    let macro_identity = semantic_registry::domain_identity_for_surface("макрос");
+    if macro_identity
+        .and_then(|identity| session.environment.domain_code_slot(identity))
+        .is_none()
+    {
+        load_macro_library(session)?;
+    }
 
     // Cache only the exact embedded FASL. Arbitrary caller-supplied FASL
     // (including invalid/stale fixtures) retains the original decode/fallback
