@@ -1,19 +1,19 @@
-; #803 — Lisp-owned witness for the admitted projection contract.
+; Prolog→Datalog bridge witness for the admitted projection contract.
 
 (load "lib/core.lisp")
 (load "lib/bridge/prolog-to-datalog.lisp")
 
-(0011 prolog-datalog-bridge-witness
-  (0010 ()
-    (110
-      ((11110111
+(визначити prolog-datalog-bridge-witness
+  (функція ()
+    (за-умовою
+      ((однакові?
          (prolog-substitutions-to-datalog-facts
-           (001
+           (як-є
              (prolog-substitution-observation
                (source-ref observation-42)
                (variable ancestor)
                (values bob dave carol))))
-         (001
+         (як-є
            (projection-result
              (projection prolog-substitutions-to-datalog-facts)
              (source-ref observation-42)
@@ -21,16 +21,14 @@
                ((ancestor bob)
                 (ancestor dave)
                 (ancestor carol))))))
-       (1)
-       (001 (prolog-datalog-bridge-witness (status pass))))
-      ((11110111
+       (як-є (prolog-datalog-bridge-witness (status pass))))
+      ((однакові?
          (prolog-substitutions-to-datalog-facts
-           (001
+           (як-є
              (prolog-substitution-observation
                (variable ancestor)
                (values bob))))
-         (001 (projection-failure missing-source-ref)))
-       (1)
-       (001 (prolog-datalog-bridge-witness (status pass)))))))
+         (як-є (projection-failure missing-source-ref)))
+       (як-є (prolog-datalog-bridge-witness (status pass)))))))
 
 (prolog-datalog-bridge-witness)
