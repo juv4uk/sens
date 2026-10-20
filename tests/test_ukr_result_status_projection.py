@@ -58,8 +58,8 @@ class ResultStatusProjectionTests(unittest.TestCase):
         for name in D9_PROVEN.values():
             with self.subTest(name=name):
                 if name == "міркувати-спостерігати":
-                    self.assertIn("(визначити міркувати-спостерігати reason-observe)",
-                                  SOURCE)
+                    self.assertRegex(SOURCE,
+                                     r"\(визначити\s+міркувати-спостерігати\s+\(функція")
                 else:
                     self.assertRegex(core, r"\((?:0011|визначити) "
                                      + re.escape(name) + r"[\s()]")
@@ -86,13 +86,19 @@ class ResultStatusProjectionTests(unittest.TestCase):
                 self.assertNotRegex(code, r"\(\s*" + bits + r"(?=[\s()])")
         self.assertNotIn("D7", SOURCE.splitlines()[0])
 
-    def test_legacy_public_definitions_and_data_tags_kept(self):
+    def test_only_needed_legacy_entrypoints_and_protocol_tags_remain(self):
         code = source_code(SOURCE)
         for name in ("make-proved", "make-unknown", "make-partial",
                      "make-blocked", "make-disputed", "make-invalid",
                      "result-status", "result-payload", "reason-observe",
                      "reason-in-observe"):
             self.assertIn("(визначити " + name + "\n", code)
+        for obsolete in ("result-goal?", "result-negated-goal?",
+                         "result-opposite-goal"):
+            self.assertNotIn("(визначити " + obsolete + " ", code)
+        for current in ("результат-ціль?", "результат-заперечений-ціль?",
+                        "результат-протилежний-ціль"):
+            self.assertIn("(визначити " + current + "\n", code)
         for tag in ("proved", "unknown", "partial", "blocked",
                     "disputed", "invalid", "not?", "invalid-goal"):
             self.assertIn("(як-є " + tag + ")", code)
