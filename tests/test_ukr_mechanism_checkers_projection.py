@@ -41,6 +41,22 @@ DOMAIN_ROW = re.compile(
 )
 
 
+# Д1: рівно десять виконуваних гілок «так» мають відновлюватися
+# до історичного Git-відбитка без переписування цитованих полів.
+DIRECT_D1_ISLAND_LINES = (22, 75, 81, 95, 105, 106, 132, 149, 161, 162)
+
+
+def _undo_direct_d1_island(path: str, source: str) -> str:
+    if path != "scripts/check-island-math-evidence.lisp":
+        return source
+    lines = source.splitlines(keepends=True)
+    for number in DIRECT_D1_ISLAND_LINES:
+        if len(lines) < number or lines[number - 1].count("(так ") != 1:
+            raise AssertionError(f"неприпустима зміна Д1 у {path}:{number}")
+        lines[number - 1] = lines[number - 1].replace("(так ", "(1 ", 1)
+    return "".join(lines)
+
+
 def _git_blob_sha(text: str) -> str:
     payload = text.encode("utf-8")
     return hashlib.sha1(
@@ -201,9 +217,10 @@ class UkrainianMechanismCheckerProjectionTests(unittest.TestCase):
         for path in EXPECTED_COUNTS:
             with self.subTest(path=path):
                 current = (ROOT / path).read_text(encoding="utf-8")
-                original, _ = _transform(current, inverse=True)
+                historical = _undo_direct_d1_island(path, current)
+                original, _ = _transform(historical, inverse=True)
                 projected, _ = _transform(original)
-                self.assertEqual(projected, current)
+                self.assertEqual(projected, historical)
                 if path in SOURCE_BLOBS:
                     self.assertEqual(_git_blob_sha(original), SOURCE_BLOBS[path])
                 self.assertEqual(len(original.splitlines()), len(current.splitlines()))
@@ -214,19 +231,39 @@ class UkrainianMechanismCheckerProjectionTests(unittest.TestCase):
         for path, expected_counts in EXPECTED_COUNTS.items():
             with self.subTest(path=path):
                 current = (ROOT / path).read_text(encoding="utf-8")
-                original, _ = _transform(current, inverse=True)
+                historical = _undo_direct_d1_island(path, current)
+                original, _ = _transform(historical, inverse=True)
                 projected, counts = _transform(original)
                 for bits, minimum in expected_counts.items():
                     self.assertGreaterEqual(counts.get(bits, 0), minimum, (path, bits))
-                self.assertEqual(projected, current)
-                heads = _active_surface_heads(current)
+                self.assertEqual(projected, historical)
+                heads = _active_surface_heads(historical)
                 self.assertTrue(heads)
                 token = sorted(heads,key=lambda t:int(t["start"]))[0]
                 start, end = int(token["start"]), int(token["end"])
-                mutant = current[:start] + reverse[str(token["value"])] + current[end:]
+                mutant = historical[:start] + reverse[str(token["value"])] + historical[end:]
                 repaired, _ = _transform(mutant)
-                self.assertEqual(repaired, current)
+                self.assertEqual(repaired, historical)
 
+
+    def test_island_only_d1_direct_and_negative_numeric_mutant(self):
+        path = "scripts/check-island-math-evidence.lisp"
+        current = (ROOT / path).read_text(encoding="utf-8")
+        d1 = (ROOT / "lib/domains/d1.lisp").read_text(encoding="utf-8")
+        self.assertIn("(1 (ук так) (укр так)", d1)
+        self.assertEqual(current.count("(так "), len(DIRECT_D1_ISLAND_LINES))
+        self.assertEqual(_undo_direct_d1_island(path, current).count("(1 "),
+                         len(DIRECT_D1_ISLAND_LINES))
+        heads = []
+        for node in _parse(current):
+            _walk_raw(node, heads)
+        self.assertFalse(heads, "у живому Lisp не повинно бути сирих числових голів")
+        mutant = current.replace("(так ", "(1 ", 1)
+        self.assertNotEqual(mutant, current)
+        broken = []
+        for node in _parse(mutant):
+            _walk_raw(node, broken)
+        self.assertTrue(broken, "числова мутація має бути виявлена")
 
     def test_d4_cadr_residual_batch_is_idempotent_and_byte_reversible(self):
         # D4:1001 CADR was formerly outside the test's permitted key set.
@@ -237,9 +274,10 @@ class UkrainianMechanismCheckerProjectionTests(unittest.TestCase):
         ):
             with self.subTest(path=path):
                 current = (ROOT / path).read_text(encoding="utf-8")
-                original, inverse_counts = _transform(current, inverse=True)
+                historical = _undo_direct_d1_island(path, current)
+                original, inverse_counts = _transform(historical, inverse=True)
                 projected, forward_counts = _transform(original)
-                self.assertEqual(projected, current)
+                self.assertEqual(projected, historical)
                 self.assertEqual(inverse_counts.get("друге"), expected)
                 self.assertEqual(forward_counts.get("1001"), expected)
                 self.assertEqual(_transform(current)[0], current)
