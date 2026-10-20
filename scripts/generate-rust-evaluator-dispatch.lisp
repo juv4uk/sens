@@ -1,75 +1,75 @@
-; Lisp-owned generator for the evaluator necessary-form dispatch projection.
+; Генератор механічної проєкції необхідних форм обчислювача мовою СЕНС.
+; Джерело законів: lib/surface/function-signatures.lisp, поле (form ...) рядка.
+; Раст отримує тільки похідні дані виконання, а не власне визначення законів.
+; Англомовні рядки вихідного Расту, шляхів і протоколів не перекладати.
 ;
-; Authority: lib/surface/function-signatures.lisp (поле (form ...) рядка таблиці)
-; Rust receives only a mechanical execution projection.
-;
-; Usage:
+; Запуск:
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp --check
 
-(визначити source-path "lib/surface/function-signatures.lisp")
-(визначити output-path "crates/sens/src/eval/necessary_forms_generated.rs")
+(визначити шлях-джерела "lib/surface/function-signatures.lisp")
+(визначити шлях-результату "crates/sens/src/eval/necessary_forms_generated.rs")
 
-(визначити str+
-  (функція args
-    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
+(визначити зчепити-рядки
+  (функція аргументи
+    (згорнути (функція (накопичувач частина) (рядок-додати накопичувач частина)) "" аргументи)))
 
 ;; Особливі форми — рядки таблиці з полем (form lambda|define).
-(визначити all-rows
-  (перше (читати-всі (читати-файл source-path))))
+(визначити усі-рядки
+  (перше (читати-всі (читати-файл шлях-джерела))))
 
-(визначити row-form
-  (функція (row)
-    (друге (знайти-за-ключем (як-є form) (решта row)))))
+(визначити форма-рядка
+  (функція (рядок)
+    (друге (знайти-за-ключем (як-є form) (решта рядок)))))
 
-(визначити form-rows
-  (функція (remaining)
+(визначити рядки-форм
+  (функція (залишок)
     (за-умовою
-      ((атом? remaining)
+      ((атом? залишок)
        (як-є ()))
       ((атом? (як-є ()))
        (за-умовою
-         ((атом? (знайти-за-ключем (як-є form) (решта (перше remaining))))
-          (form-rows (решта remaining)))
+         ((атом? (знайти-за-ключем (як-є form) (решта (перше залишок))))
+          (рядки-форм (решта залишок)))
          ((атом? (як-є ()))
-          (сполучити (перше remaining) (form-rows (решта remaining)))))))))
+          (сполучити (перше залишок) (рядки-форм (решта залишок)))))))))
 
-(визначити rows (form-rows all-rows))
+(визначити рядки (рядки-форм усі-рядки))
 
-(визначити rust-mechanism
-  (функція (name)
+(визначити механізм-раст
+  (функція (назва)
     (за-умовою
-      ((однакові? name (як-є lambda))
+      ((однакові? назва (як-є lambda))
        "NecessaryFormMechanism::Lambda")
-      ((однакові? name (як-є define))
+      ((однакові? назва (як-є define))
        "NecessaryFormMechanism::Define")
       ((атом? (як-є ())) (перше (як-є ()))))))
 
-(визначити render-row
-  (функція (row)
-    (нехай ((mechanism (rust-mechanism (row-form row))))
+(визначити подати-рядок
+  (функція (рядок)
+    (нехай ((механізм (механізм-раст (форма-рядка рядок))))
       (за-умовою
-        ((атом? mechanism)
+        ((атом? механізм)
          (перше (як-є ())))
         ((атом? (як-є ()))
-         (str+
+         (зчепити-рядки
            "    NecessaryFormDispatchRow { semantic_id: 0b"
-           (значення-у-текст (перше row))
+           (значення-у-текст (перше рядок))
            ", mechanism: "
-           mechanism
+           механізм
            " },\n"))))))
 
-(визначити render-rows
-  (функція (remaining)
+(визначити подати-рядки
+  (функція (залишок)
     (за-умовою
-      ((атом? remaining)
+      ((атом? залишок)
        "")
       ((атом? (як-є ()))
-       (str+ (render-row (перше remaining))
-             (render-rows (решта remaining)))))))
+       (зчепити-рядки (подати-рядок (перше залишок))
+             (подати-рядки (решта залишок)))))))
 
-(визначити header
-  (str+
+(визначити заголовок
+  (зчепити-рядки
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/surface/function-signatures.lisp\n"
     "// Generator: scripts/generate-rust-evaluator-dispatch.lisp\n\n"
@@ -85,19 +85,19 @@
     "}\n\n"
     "pub(super) const NECESSARY_FORM_DISPATCH: &[NecessaryFormDispatchRow] = &[\n"))
 
-(визначити generated
-  (str+ header (render-rows rows) "];\n"))
+(визначити згенерований-вміст
+  (зчепити-рядки заголовок (подати-рядки рядки) "];\n"))
 
 (за-умовою
   ((атом? *argv*)
    (друге
      (список
-       (записати-файл output-path generated)
+       (записати-файл шлях-результату згенерований-вміст)
        (друкувати "Rust evaluator dispatch projection written")))))
   ((11110111 (100 *argv*) "--check")
-   (нехай ((current (читати-файл output-path)))
+   (нехай ((поточний-вміст (читати-файл шлях-результату)))
      (за-умовою
-       ((однакові? current generated)
+       ((однакові? поточний-вміст згенерований-вміст)
         (друкувати "Rust evaluator dispatch projection is current"))
        ((атом? (як-є ()))
         (друге
@@ -107,5 +107,5 @@
   ((010 (001 ()))
    (друге
      (список
-       (записати-файл output-path generated)
+       (записати-файл шлях-результату згенерований-вміст)
        (друкувати "Rust evaluator dispatch projection written"))))
