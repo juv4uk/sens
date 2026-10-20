@@ -26,6 +26,18 @@ def invoke(source: Path, *args: str):
 
 
 class CanonicalOneFileMigration(unittest.TestCase):
+    def test_zastarilyi_t5_ne_publikuie_sens(self):
+        # Історичний T5 не карбує нових виконуваних файлів.
+        original = PROVEN.read_bytes()
+        with tempfile.TemporaryDirectory(prefix="sens-t5-retired-") as td:
+            target = Path(td) / "branch.sens"
+            attempt = invoke(PROVEN, "--output", str(target), "--codec", "t5")
+            self.assertNotEqual(attempt.returncode, 0)
+            self.assertIn("LEGACY_T5_PUBLICATION_DISABLED", attempt.stderr)
+            self.assertFalse(target.exists())
+            self.assertFalse(target.with_suffix("").exists())
+        self.assertEqual(PROVEN.read_bytes(), original)
+
     def test_existing_d1_d3_canary_dry_run_does_not_write(self):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
