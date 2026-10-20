@@ -20,9 +20,9 @@
       ((атом? значення) ні)
       ((тотожне? (перше значення) (як-є world))
        (за-умовою
-         ; Exact shape: (world parent journal metadata).
-         ; D3 ATOM/CDR tests required tails; D4 NULL rejects an extra field.
-         ; No D6 LENGTH, numeric arity literal, or host-side list checker.
+         ; Точна форма: (world батько журнал метадані).
+         ; D3 ATOM/CDR перевіряють необхідні хвости; D4 NULL відкидає зайве поле.
+         ; Без D6 LENGTH, числового літерала арності та перевірки списку хостом.
          ((атом? (решта значення)) ні)
          ((атом? (решта (решта значення))) ні)
          ((атом? (решта (решта (решта значення)))) ні)
@@ -32,8 +32,8 @@
 
 (визначити світ-батько (функція (світ) (друге світ)))
 (визначити світ-журнал (функція (світ) (третє світ)))
-; D6:100111 CADDDR has no admitted evaluator mechanism; derive the
-; same fourth-field projection as exact D5:10011 CADDR after D3:011 CDR.
+; D6:100111 CADDDR поки не має допущеного механізму обчислення.
+; Четверте поле виводимо через точні D3:011 CDR та D5:10011 CADDR.
 (визначити світ-метадані (функція (світ) (третє (решта світ))))
 
 ;; Події мають ту саму форму даних, що й журнал у
@@ -54,9 +54,9 @@
   (функція (світ назва-модуля клауза)
     (світ-запис світ (список (як-є retract) назва-модуля клауза))))
 
-; D6 FILTER (101001) has no admitted evaluator mechanism. Select a
-; module's event records directly by exact D3 atom/pair and D3 EQ on the
-; atomic module-name field, preserving the original event order.
+; D6 FILTER (101001) не має допущеного механізму обчислення.
+; Події модуля відбираємо через точну структуру атома/пари D3
+; і D3 EQ для атомарної назви модуля, зберігаючи порядок подій.
 (визначити внутрішні-події-модуля
   (функція (назва-модуля події)
     (за-умовою
@@ -70,8 +70,8 @@
   (функція (світ назва-модуля)
     (внутрішні-події-модуля назва-модуля (світ-журнал світ))))
 
-; Retract the first structurally equal clause; both atoms and nested
-; pairs are compared with the locally-derived exact D1 equality law.
+; Вилучаємо першу структурно рівну клаузу. Атоми й вкладені
+; пари порівнюємо за локально виведеним точним законом рівності D1.
 (визначити внутрішній-світ-прибрати-перше
   (функція (значення значення-списку)
     (за-умовою
@@ -93,8 +93,8 @@
 
 (визначити world-apply-event внутрішній-світ-застосувати-подію)
 
-; D4 NOT of the D3 ATOM predicate: a module is known only when its
-; event stream is a nonempty pair. D3 CONS cannot be a one-argument NOT.
+; D4 NOT заперечує предикат D3 ATOM: модуль відомий лише тоді,
+; коли його потік подій є непорожньою парою. D3 CONS не замінює NOT.
 (визначити світ-модуль-відомий?
   (функція (світ назва-модуля)
     (хибне? (атом? (світ-модуль-події світ назва-модуля)))))
@@ -105,8 +105,8 @@
 
 (визначити world-module-missing? внутрішній-світ-модуль-відсутній?)
 
-; D5 REVERSE and D6 REDUCE are ratified names but cannot be presumed
-; callable; derive the chronological event fold from D3 list structure.
+; D5 REVERSE і D6 REDUCE ратифіковані, але їхню викличність
+; не припускаємо: згортання подій у часовому порядку виводимо зі списків D3.
 (визначити внутрішній-зворот-подій
   (функція (події накопичувач)
     (за-умовою
@@ -149,9 +149,10 @@
       ((внутрішній-світ-модуль-відсутній? світ назва-модуля)
        (як-є Module-not-found)))))
 
-; Derived D1 symbol predicate for world module names. This is a Lisp
-; law over ATOM/NULL/EQ and exact D8 write+string-to-symbol mechanisms,
-; not a native admission of the unrelated D9:110101100 coordinate.
+; Виведений предикат D1 для назв модулів світу як символів.
+; Це закон Lisp над ATOM/NULL/EQ і точними механізмами D8
+; запису та перетворення рядка на символ, а не дозвіл
+; на виконання іншої координати D9:110101100.
 (визначити внутрішній-символ?
   (функція (значення)
     (за-умовою
@@ -315,9 +316,9 @@
                 (список (як-є визначити) (як-є *legacy-knowledge-transition*) перехід)
                 (список (як-є за-умовою)
                       (список
-                        ; Generate a SENS-defined D1 predicate call. Its body
-                        ; performs exact D3 EQ / D4 CAAR, not a legacy W8
-                        ; equality producing a structural list (1).
+                        ; Створюємо виклик предиката D1, визначеного в СЕНС.
+                        ; Його тіло виконує точні D3 EQ і D4 CAAR,
+                        ; а не стару W8-рівність зі структурним списком (1).
                         (список (як-є внутрішній-прийнято-перехід?)
                               (як-є *legacy-knowledge-transition*))
                         (список (як-є друге)
@@ -423,9 +424,10 @@
                    (список (як-є input) пакет))
              світ)))))
 
-;; Package import completes the writer migration. The legacy macro delegates
-;; validation, version handling, conflict detection, and the atomic transition
-;; to the data-only World importer; only an accepted result rebinds the journal.
+;; Імпорт пакета завершує міграцію записувача. Історичний макрос
+;; передає перевірку, оброблення версій, виявлення конфліктів
+;; та атомарний перехід імпортеру світу як даних.
+;; Тільки прийнятий результат повторно зв'язує журнал.
 ;; Імпорт пакетів завершує міграцію writer-ів: validation, version handling,
 ;; конфлікти й атомарний перехід делеговано data-only World-імпортеру; журнал
 ;; перевизначається лише для accepted.
@@ -510,11 +512,12 @@
                 ((цей-світ-не-є-предком-іншого? події-переходу) події-переходу)
                 (так (приєднати ранні-події події-переходу)))))))))))
 
-;; Branch comparison stops before merge policy. First align both histories to
-;; the same absolute depth, then walk parents together until their values are
-;; equal. Since worlds are immutable values, structurally equal histories are
-;; the same semantic world even if reconstructed independently from a package.
-;; `world-branch-diff` exposes the common base plus both chronological deltas.
+;; Порівняння гілок відокремлене від політики злиття. Спершу
+;; вирівнюємо обидві історії за абсолютною глибиною, далі разом
+;; ідемо до батьків аж до рівних значень. Незмінювані світи
+;; зі структурно рівними історіями семантично тотожні, навіть
+;; якщо відновлені незалежно з пакета.
+;; `world-branch-diff` повертає спільну основу і дві часові різниці.
 ;;
 ;; Порівняння гілок зупиняється до merge-policy. Історії вирівнюються за
 ;; абсолютною глибиною й разом ідуть до рівного предка. Для immutable-значень
@@ -545,8 +548,8 @@
        (вирівняний-спільний-предок-двох-світів (світ-батько ліве)
                                       (світ-батько праве))))))
 
-; An ancestor is found by walking immutable parents. Its SENS verdict
-; is a D1 predicate, never a numeric depth or an historical W8 EQ value.
+; Предка знаходимо переходом по незмінюваних батьківських світах.
+; Відповідь СЕНС — предикат D1, а не числова глибина чи стара рівність W8.
 (визначити внутрішній-предок-світу?
   (функція (кандидат світ)
     (за-умовою
@@ -556,8 +559,8 @@
       (так
        (внутрішній-предок-світу? кандидат (світ-батько світ))))))
 
-; The first ancestor of left occurring in right's ancestry is the deepest
-; common world. This is pure SENS structure, independent of D24+ arithmetic.
+; Перший предок лівого світу, наявний серед предків правого,
+; є найглибшим спільним світом. Це чиста структура СЕНС, незалежна від D24+.
 (визначити світ-спільний-предок
   (функція (ліве праве)
     (за-умовою
@@ -583,14 +586,15 @@
                (список (як-є left) (світ-різниця спільна-основа ліве))
                (список (як-є right) (світ-різниця спільна-основа праве))))))))
 
-;; Content identity starts with a canonical address, not a premature hash
-;; primitive. `write-to-string` is deterministic and read-back-safe, so equal
-;; knowledge has exactly the same address on every conforming implementation.
-;; A world's address covers its complete event journal plus metadata; parent is
-;; omitted because the journal already contains the whole history, avoiding a
-;; recursively duplicated serialization. This is an exact key, not a fixed-size
-;; cryptographic digest. A future SHA layer may hash this key without changing
-;; what identity means.
+;; Тотожність вмісту починається з канонічної адреси, а не
+;; з передчасного примітива хешування. `write-to-string` працює
+;; детерміновано і з можливістю точного зворотного читання:
+;; рівні знання мають однакову адресу на кожній відповідній реалізації.
+;; Адреса світу охоплює повний журнал подій і метадані,
+;; але не батька: журнал уже містить історію повністю, тому
+;; серіалізація не дублює її рекурсивно. Це точний ключ, не
+;; криптографічний відбиток сталої довжини. Майбутній шар SHA
+;; може хешувати ключ, не змінюючи визначення тотожності.
 ;;
 ;; Content-ідентичність починається з канонічної адреси, не передчасного hash-
 ;; примітива. `write-to-string` детермінований і read-back-safe, тому рівне
