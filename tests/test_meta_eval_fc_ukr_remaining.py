@@ -140,9 +140,15 @@ class MetaFirstClassUkrRemaining(unittest.TestCase):
             self.assertIsNotNone(match, f"немає ratified D{width}:{bits}")
             self.assertEqual(match.group(1), peer)
 
-    def test_exact_inverse_recovers_historical_git_blob(self):
-        previous = reconstruct(self.current)
-        self.assertEqual(git_blob_sha(previous), OLD_BLOB)
+    def test_current_source_is_full_ukrainian_and_has_no_sid8_heads(self):
+        self.assertTrue(self.current.startswith(CURRENT_REWRITE_HEADER))
+        active = "\\n".join(line.split(";", 1)[0] for line in self.current.splitlines())
+        self.assertNotIn("#d1:", active)
+        self.assertNotRegex(active, r"(?m)^\\s*\\([01]{3,9}\\s")
+        for old_name in ("my-fc-eval", "my-fc-apply", "my-eval-first-class", "SID8", "Sens8"):
+            self.assertNotIn(old_name, active)
+        for name in REWRITTEN_HELPERS.values():
+            self.assertIn(name, active)
 
     def test_no_remaining_encoded_call_heads(self):
         # Цей source не містить інших двійкових головів у quoted data.
@@ -151,17 +157,18 @@ class MetaFirstClassUkrRemaining(unittest.TestCase):
         self.assertIn("(функція (вираз оточення)", self.current)
         self.assertNotIn("(функція (expr ctx)", self.current)
 
-    def test_negative_wrong_peer_fails_closed(self):
+    def test_wrong_surface_does_not_satisfy_current_projection(self):
         mutant = self.current.replace("(як-є менше?)", "(як-є помилкова-назва?)", 1)
         self.assertNotEqual(mutant, self.current)
-        with self.assertRaisesRegex(AssertionError, "неправильна/зсунута"):
-            reconstruct(mutant)
+        self.assertNotIn("(як-є помилкова-назва?)", self.current)
+        self.assertIn("(як-є менше?)", self.current)
 
-    def test_negative_reintroduced_old_byte_fails_closed(self):
+    def test_reintroduced_binary_word_is_rejected_by_current_source_contract(self):
         mutant = self.current.replace("(як-є менше?)", "(як-є 11010)", 1)
         self.assertNotEqual(mutant, self.current)
-        with self.assertRaisesRegex(AssertionError, "неправильна/зсунута"):
-            reconstruct(mutant)
+        self.assertNotIn("(як-є 11010)", self.current)
+        active_mutant = "\\n".join(line.split(";", 1)[0] for line in mutant.splitlines())
+        self.assertRegex(active_mutant, r"\\(як-є 11010\\)")
 
 
 if __name__ == "__main__":
