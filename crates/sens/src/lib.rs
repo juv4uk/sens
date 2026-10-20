@@ -1041,9 +1041,9 @@ mod core4_bootstrap_cache_tests {
             .expect("monotonic clock result is an exact integer");
         assert!(nanoseconds >= 0);
 
-        let first = eval_program("(gensym \"probe-\")", &mut session)
+        let first = eval_program("(створити-символ \"probe-\")", &mut session)
             .expect("Core4 gensym calls the D10 clock and D8 text projection");
-        let second = eval_program("(gensym \"probe-\")", &mut session)
+        let second = eval_program("(створити-символ \"probe-\")", &mut session)
             .expect("Core4 gensym returns another fresh symbol");
         assert!(matches!(first.value, Value::Symbol(_)));
         assert!(matches!(second.value, Value::Symbol(_)));
