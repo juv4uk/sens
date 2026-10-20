@@ -1,13 +1,13 @@
-; #231/#220 — Lisp-owned transition overlay for historical conformance rows.
+; Перехідні свідчення #231/#220: чинні відповідники історичних випробувань.
 ;
-; `tests/fixtures/conformance.lisp` is preserved as historical evidence.  A row
-; listed here no longer owns current semantic authority; `supersedes-expr`
-; identifies the historical expression and the ordinary `expr`/`expected`
-; fields provide its current executable replacement.
+; Файл tests/fixtures/conformance.lisp залишається історичним доказом.
+; Записи нижче не встановлюють нових семантичних законів: поле
+; `supersedes-expr` указує на старий вираз, а поля `expr` та `expected`
+; визначають його чинну виконувану заміну й очікуваний результат.
 ;
-; Rust may transport this mapping, but it must not invent either the retired
-; expression or its replacement.  When the historical two-part-cond corpus is
-; eventually archived as a whole, this overlay can disappear with it.
+; Rust має право лише переносити ці відповідності, але не вигадувати
+; вилучену форму чи її наступника. Після архівування старого корпусу
+; двочастинних умовних конструкцій цей перехідний файл можна вилучити.
 
 ((supersedes-expr . "(cond (0 (quote truthy)) (t (quote falsy)))")
  (expr . "(cond (0 1 (quote wrong)) (0 0 (quote zero-data)))")
