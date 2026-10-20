@@ -12,9 +12,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORLD = ROOT / "lib" / "world.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
-HOST_T = "(1110 (001 t)"
-D1_TRUE = "(010 (001 ()))"
-REQUIRED = ("*knowledge-journal*", "module", "event")
+# Чинні виконавчі назви є українськими; протокольні дані недоторканні.
+REQUIRED_PRIMARY = (
+    "(визначити світ-модуль-відомий?",
+    "(визначити внутрішній-світ-модуль-відсутній?",
+    "(визначити світ-повідомити",
+    "(визначити світ-відкликати",
+)
+LEGACY_BINDING = "(визначити world-module-missing?"
 
 
 def check_world() -> list[str]:
@@ -24,11 +29,13 @@ def check_world() -> list[str]:
     text = WORLD.read_text(encoding="utf-8")
     if len(text) < 1000:
         errs.append(f"world: truncated ({len(text)} bytes)")
-    if HOST_T in text:
-        errs.append("world: host COND else still present — run migrate-world-d1.py")
-    if D1_TRUE not in text and HOST_T not in text:
-        # after migration D1 should appear
-        pass
+    for spelling in REQUIRED_PRIMARY:
+        if spelling not in text:
+            errs.append("world: втрачено українське визначення " + spelling)
+    if LEGACY_BINDING in text:
+        errs.append("world: лишився старий англомовний дубль")
+    if "(за-умовою" not in text or "(хибне?" not in text:
+        errs.append("world: немає чинних умов та D1 заперечення")
     return errs
 
 
@@ -44,6 +51,9 @@ def check_domain(n: int) -> list[str]:
     bad = [k for k in keys if len(k) != n]
     if bad:
         errs.append(f"D{n}: key width mismatch")
+    expected_keys = {format(number, f"0{n}b") for number in range(expect)}
+    if set(keys) != expected_keys:
+        errs.append(f"D{n}: неточна або повторена доменна адреса")
     return errs
 
 
@@ -57,7 +67,7 @@ def main() -> int:
         for e in errs:
             print(f"  {e}", file=sys.stderr)
         return 1
-    print("WORLD: PASS (or pending migrate-world-d1.py)")
+    print("WORLD: українську D1-поверхню підтверджено статично; виконання засвідчує SENS")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit")
     print("BITNESS: PASS")
