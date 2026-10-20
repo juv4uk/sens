@@ -1,17 +1,15 @@
-; #1826 — exact-ℚ admissibility for numeric comparison predicates.
+; #1826 — допуск точних раціональних чисел ℚ до предикатів порівняння.
 ;
-; Exactness answers only one question here: may this numeric predicate produce
-; an exact language answer without approximation?
+; Перевірка точності відповідає на одне питання: чи може числовий
+; предикат повернути точну відповідь мови без наближення?
+; Якщо операцію допущено, результат — однобітна відповідь СЕНС:
+;   0 = НІ
+;   1 = ТАК
 ;
-; If admitted, the result is the ordinary SENS PredicateBit:
-;   0 = NO
-;   1 = YES
-;
-; PredicateBit is not Number. Exact rational values 0/1 and 1/1 remain ordinary
-; Numbers and must not be used as predicate identity.
-;
-; Outside the admitted exact-ℚ domain the predicate must fail with a named
-; domain/type failure. Structural () is not a third predicate result.
+; Біт предиката не є числом. Раціональні 0/1 і 1/1 залишаються числами,
+; їх не можна підміняти тотожністю предиката.
+; За межами допущеного домену ℚ має виникнути іменована помилка
+; домену чи типу. Структурне () не є третьою відповіддю предиката.
 
 (exact-q-predicate-contract/2
   ((domain-owner . exact-q-comparison-predicate)

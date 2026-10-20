@@ -1,7 +1,7 @@
-; knowledge/world-model-laws.lisp
-; Explicit physical/model laws for world reasoning.
-; Authority: #3402. World-axiom ids come from knowledge/world-axioms.lisp.
-; Human formula spellings are projections; dependency identity is name-erased.
+; Явні фізичні закони й закони моделі для міркувань про світ.
+; Джерело: #3402. Ідентифікатори аксіом походять із knowledge/world-axioms.lisp.
+; Людський запис формул є проєкцією; тотожність залежностей не
+; визначається людськими назвами.
 
 (world-model-laws
   (schema . 2)
@@ -61,4 +61,5 @@
     (uncertainty-exactness)
     (provenance))
 
+  ; Арифметика розмірностей сама собою не надає фізичного значення.
   (rule . "dimensionally valid arithmetic alone does not create physical meaning"))

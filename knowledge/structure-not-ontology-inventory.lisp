@@ -1,8 +1,10 @@
-; #1698 — structure is not a fourth SENS payload domain.
-; Inventory only: no runtime type, tag, coercion, or new semantic identity.
+; #1698 — структура не є четвертим доменом вмісту в СЕНС.
+; Це лише інвентаризація: без нового типу виконання, мітки,
+; приведення чи окремої семантичної тотожності.
 ;
-; Canonical payload remains Function8 | Number | Text7.
-; Predicate1 is contextual output. Structure is Control2 composition.
+; Історична модель вмісту: Function8 | Number | Text7.
+; Predicate1 — контекстний результат; структура — поєднання Control2.
+; Протокольні атоми залишено незмінними як точні дані інвентарю.
 
 (structure-not-ontology/1
   ((representation . empty-structure)

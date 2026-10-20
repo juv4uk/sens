@@ -1,11 +1,10 @@
-; knowledge/world-axioms.lisp
-; Canonical name-erased primitive world-axiom authority.
-; Authorities: #3374 #3386 #3434. Boot consumer: #3502.
+; Канонічне джерело первинних аксіом фізичного світу, незалежне від назв.
+; Підстави: #3374, #3386, #3434. Початковий споживач: #3502.
 ;
-; Canonical identity lives in the axiom objects below. Human SI names,
-; compatibility aliases and descriptive dimension names are projections only.
-; The 3-bit axiom ids are opaque stable ids, NOT function numbers and NOT
-; arithmetic coordinates.
+; Тотожність міститься в самих об'єктах аксіом. Людські назви сталих SI,
+; сумісні псевдоніми та назви розмірностей є лише проєкціями.
+; Трибітні ідентифікатори аксіом — непрозорі сталі позначки,
+; а НЕ номери функцій чи арифметичні координати.
 
 (world-axioms
   (schema . 2)
@@ -17,8 +16,8 @@
   (id-semantics . opaque-stable-id-not-function-number)
   (dimension-basis-ids . (000 001 010 011 100 101 110))
 
-  ; dimension-vector7 order is the exact order in dimension-basis-ids.
-  ; Canonical objects contain no human constant names.
+  ; Порядок семи складників dimension-vector7 збігається з dimension-basis-ids.
+  ; Канонічні об'єкти не містять людських назв сталих.
   (axioms
     (000
       (value . 9192631770)
@@ -70,8 +69,8 @@
       (source-id . 000)
       (exactness . exact-by-definition)))
 
-  ; Everything below is a projection for humans/current library compatibility.
-  ; Removing this section must not change axiom identity or exact values.
+  ; Далі — лише людські та сумісні бібліотечні проєкції.
+  ; Цей розділ не змінює тотожності чи точні значення аксіом.
   (surface-projections
     (system
       (000 . SI))

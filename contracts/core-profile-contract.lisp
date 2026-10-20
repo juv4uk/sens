@@ -1,11 +1,9 @@
-; #1131 / #1703 — four Core roles under one SENS language.
+; #1131 / #1703 — чотири профілі ядра в одній мові СЕНС.
 ;
-; A Core profile selects an execution/research role and may select mechanisms.
-; It does not select a different meaning for the shared predicate/control
-; foundation.
-;
-; Historical profile semantics remain provenance in git history. They are not
-; active language authority.
+; Профіль обирає роль виконання або дослідження й може визначати механізми.
+; Він не змінює значення спільного закону предикатів та керування.
+; Історична семантика профілів зберігається в історії Git як свідчення
+; походження, а не як чинне джерело законів мови.
 
 (core-profile-contract/2
   ((identity . authority)

@@ -1,6 +1,6 @@
-; my-lisp knowledge package 0.1 — data only; read it, do not `load` it.
-; Пакет знань my-lisp 0.1 — лише дані; читати через `read`, не `load`.
-; my-lisp-Wissenspaket 0.1 — nur Daten; mit `read`, nicht mit `load` lesen.
+; Пакет знань СЕНС 0.1 — лише дані; читати через `read`, не виконувати через `load`.
+; SENS-Wissenspaket 0.1 — nur Daten; mit `read` lesen, nicht mit `load` ausführen.
+; SENS knowledge package 0.1 — data only; read with `read`, never `load`.
 ((format . my-lisp-knowledge)
  (version 0 1)
  (module . astronomy-exchange)
