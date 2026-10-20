@@ -1,18 +1,16 @@
-; RED research witness for #419.
-; Hypothesis under test: PRIM_QUOTE could be removed by defining quote as an ordinary eager Lisp function.
-; This fixture is intentionally not wired into steady-state CI and must not merge to main as semantic authority.
+; Негативний дослід #419: чи можна замінити спеціальну форму
+; цитування звичайною жадібною функцією Lisp.
+; Цей свідок не належить до звичайного CI і не встановлює семантичного закону.
 ;
-; Falsification criterion:
-; In an eager evaluator, an ordinary function receives evaluated arguments. Therefore a plain function cannot implement
-; (quote SYMBOL) when SYMBOL is unbound, because suppressing that evaluation is the behavior being explained.
+; У жадібному обчислювачі аргумент обчислюється раніше за тіло функції.
+; Тому не можна відтворити цитування незв'язаного символу звичайною функцією.
+; Успішне спростування потребувало б окремого нижчого механізму керування
+; обчисленням, а не псевдоніма чи доступу зовнішнього виконавця до дерева.
 ;
-; A future GREEN is valid only if it names an explicitly lower evaluation-control mechanism. Renaming quote, routing
-; through a surface alias, registry lookup, macro expander that itself requires quote-equivalent control, or host AST access
-; does not count.
+; Очікувана помилка — обчислення незв'язаного символу, а не успіх.
 
-(визначити quote-as-ordinary-function
-  (функція (x) x))
+(визначити цитування-як-звичайна-функція
+  (функція (значення) значення))
 
-; If ordinary eager function application were sufficient, this would yield canon-sculpt-unbound-symbol as data.
-; Expected RED on the current evaluator: the argument is evaluated before the function body and the symbol is unbound.
-(quote-as-ordinary-function canon-sculpt-unbound-symbol)
+; Ім'я незв'язаного символу є незмінною частиною негативного свідка.
+(цитування-як-звичайна-функція canon-sculpt-unbound-symbol)
