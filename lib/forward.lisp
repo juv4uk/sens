@@ -66,30 +66,19 @@
                результат
                (запустити-правило-на-факти правило (решта факти))))))
         (запустити-правило правило (перше факти)))))))
-; Convenience wrapper reading the current global working memory rather than
-; requiring the caller to pass it explicitly.
+; Зручний виклик бере факти з поточної робочої пам'яті.
+; Передавати цей список явним аргументом тут не потрібно.
+
 (визначити запустити-правило-на-робоча-пам'ять
   (функція (правило-для-робочої-памяті)
     (запустити-правило-на-факти правило-для-робочої-памяті *робоча-пам'ять*)))
 
-; Step 3: apply every rule in a rule set to a fact list (still a single
-; pass — no fixpoint loop yet, so a fact produced by one rule isn't itself
-; matched against other rules within this same call). `append`-based, the
-; same fan-out shape `prove-goal` in lib/reason.lisp uses to try every rule
-; against a goal.
-;
-; Крок 3: застосувати кожне правило з набору правил до списку фактів (досі
-; один прохід — без fixpoint-циклу, тож факт, породжений одним правилом, у
-; межах цього ж виклику не зіставляється з іншими правилами). Побудовано
-; через `append`, той самий розгалужувальний паттерн, що й `prove-goal` у
-; lib/reason.lisp для перебору всіх правил проти цілі.
-;
-; Schritt 3: jede Regel eines Regelwerks auf eine Faktenliste anwenden
-; (immer noch ein einzelner Durchlauf — noch keine Fixpunkt-Schleife, ein
-; von einer Regel erzeugter Fakt wird innerhalb desselben Aufrufs also nicht
-; selbst mit anderen Regeln abgeglichen). Auf `append` aufgebaut, dieselbe
-; Fan-out-Form, die `prove-goal` in lib/reason.lisp nutzt, um jede Regel gegen
-; ein Ziel zu versuchen.
+; Крок 3. Одним проходом застосовуємо всі правила набору до фактів.
+; Новий факт не зіставляється з іншими правилами під час того самого виклику:
+; циклу до нерухомої точки на цьому етапі ще немає.
+; Результати об'єднуємо, як під час перебору правил для цілі
+; у lib/reason.lisp. Це розгалуження виведено засобами СЕНС.
+
 (визначити запустити-правила-на-факти
   (функція (правила-для-фактів факти-для-правил)
     (за-умовою
@@ -102,49 +91,18 @@
   (функція (правила-робочої-пам'яті)
     (запустити-правила-на-факти правила-робочої-пам'яті *робоча-пам'ять*)))
 
-; Step 4: `run` — the fixpoint loop. Repeatedly fires the whole rule set
-; against the current fact list, folding newly produced facts (deduplicated
-; via `equal?`, since facts are compound terms) into that list, until a pass
-; adds nothing new.
+; Крок 4. Повторюємо застосування всіх правил до поточного списку фактів,
+; доки прохід не перестане додавати нові факти. Складені факти порівнюємо
+; структурно й не додаємо дублікати.
+; Рушій повертає підсумковий список як чиста функція.
+; Він сам не записує його у *робоча-пам'ять*: замикання не повинне
+; видавати локальне переприв'язування за зміну глобального стану.
+; Окреме явне ствердження фактів на верхньому рівні оновлює пам'ять.
 ;
-; `run` is a *pure function* returning the final fact list — it does not
-; itself assert into `*робоча-пам'ять*`. Same reason `count-usage` accumulates
-; instead of mutating in lib/reason.lisp: `run` is a `lambda`, and `def` (the
-; only mutation my-lisp has) only ever mutates the frame it runs in, so a
-; loop body cannot durably update a global one iteration at a time. To sync
-; the result back, call `assert-facts!` yourself at the top level:
-; `(assert-facts! (run rules *робоча-пам'ять*))`.
-;
-; Крок 4: `run` — fixpoint-цикл. Повторно застосовує весь набір правил до
-; поточного списку фактів, вкладаючи новоутворені факти (дедуплікація через
-; `equal?`, бо факти — складені терми) у цей список, поки прохід не додає
-; нічого нового.
-;
-; `run` — *чиста функція*, що повертає фінальний список фактів — сама вона
-; не записує в `*робоча-пам'ять*`. Та сама причина, що й акумуляція в
-; `count-usage` у lib/reason.lisp замість мутації: `run` — це `lambda`, а
-; `def` (єдина мутація в my-lisp) мутує лише той фрейм, у якому виконується,
-; тож тіло циклу не може стійко оновлювати глобальний стан по одній
-; ітерації. Щоб синхронізувати результат назад, виклич `assert-facts!` сам
-; на верхньому рівні: `(assert-facts! (run rules *робоча-пам'ять*))`.
-;
-; Schritt 4: `run` — die Fixpunkt-Schleife. Wendet wiederholt das ganze
-; Regelwerk auf die aktuelle Faktenliste an und faltet neu erzeugte Fakten
-; (dedupliziert über `equal?`, da Fakten zusammengesetzte Terme sind) in
-; diese Liste ein, bis ein Durchlauf nichts Neues mehr hinzufügt.
-;
-; `run` ist eine *reine Funktion*, die die endgültige Faktenliste
-; zurückgibt — sie schreibt selbst nicht in `*робоча-пам'ять*`. Derselbe
-; Grund wie die Akkumulation in `count-usage` in lib/reason.lisp statt
-; Mutation: `run` ist eine `lambda`, und `def` (die einzige Mutation in
-; my-lisp) mutiert nur den Frame, in dem es läuft, daher kann der
-; Schleifenkörper nicht Schritt für Schritt dauerhaft einen globalen Zustand
-; aktualisieren. Um das Ergebnis zurückzusynchronisieren, ruf `assert-facts!`
-; selbst auf oberster Ebene auf: `(assert-facts! (run rules *робоча-пам'ять*))`.
+; Перевірка членства — похідний закон СЕНС для структурних фактів.
+; На відміну від старого MEMBER, вона не звертається до першого складника
+; порожнього списку й не вимагає окремого допуску D8 EQUAL.
 
-; Structural membership is a derived SENS law over fact data.
-; Unlike historical D5 MEMBER, it must not call CAR on an empty list,
-; nor require an unadmitted D8 EQUAL mechanism for compound facts.
 (визначити факт-наявний?
   (функція (факт-для-пошуку память-для-пошуку)
     (за-умовою
@@ -176,36 +134,13 @@
     (функція (факти)
       (список (як-є визначити) (як-є *робоча-пам'ять*) (список (як-є додати-нові) факти (як-є *робоча-пам'ять*))))))
 
-; Step 5a: plain `retract-fact` — removes one matching fact (compared via
-; `equal?`, same as everywhere else facts are compared) from a fact list.
-; Deliberately *not* truth maintenance yet: if some other fact was derived
-; only from the one being retracted, that derived fact stays behind,
-; unsupported and undetected — `run` currently returns a flat fact list
-; with no memory of which facts justified which. A real TMS needs facts
-; paired with their support set (`(fact . supporting-facts)`), so retracting
-; a support can cascade; that's Step 5b, a separate agreed-on step, not
-; assumed here.
-;
-; Крок 5a: простий `retract-fact` — видаляє один відповідний факт
-; (порівняння через `equal?`, як і скрізь для фактів) зі списку фактів.
-; Свідомо *ще без* truth maintenance: якщо якийсь інший факт був виведений
-; лише з того, що зараз видаляється, цей похідний факт лишається — без
-; підтримки й непоміченим — `run` зараз повертає плаский список фактів без
-; пам'яті про те, які факти обґрунтовували які. Справжній TMS потребує
-; фактів у парі з їхнім набором підтримки (`(факт . факти-підтримки)`), щоб
-; видалення підтримки могло каскадно поширюватись; це Крок 5b, окремо
-; узгоджений крок, тут не мається на увазі.
-;
-; Schritt 5a: einfaches `retract-fact` — entfernt einen passenden Fakt
-; (Vergleich über `equal?`, wie überall sonst bei Fakten) aus einer
-; Faktenliste. Bewusst *noch keine* Truth Maintenance: Wurde ein anderer
-; Fakt nur aus dem gerade entfernten abgeleitet, bleibt dieser abgeleitete
-; Fakt unbemerkt und ohne Unterstützung zurück — `run` liefert derzeit eine
-; flache Faktenliste ohne Gedächtnis darüber, welche Fakten welche
-; begründet haben. Ein echtes TMS braucht Fakten gepaart mit ihrer
-; Unterstützungsmenge (`(fakt . unterstützende-fakten)`), damit das
-; Entfernen einer Unterstützung kaskadieren kann; das ist Schritt 5b, ein
-; separat abgestimmter Schritt, hier nicht unterstellt.
+; Крок 5а. Відкликання прибирає зі списку перший структурно рівний факт.
+; На цьому етапі ще немає підтримки обґрунтувань: похідний факт може
+; залишитися після відкликання єдиної підстави його виведення.
+; Простий список фактів не пам'ятає причин появи кожного елемента.
+; Для каскадного відкликання потрібні пари факту та його підстав;
+; цю окрему можливість визначено далі в кроці 5б.
+
 (визначити відкликати-факт
   (функція (факт-для-вилучення факти-перед-вилученням)
     (за-умовою
@@ -219,65 +154,18 @@
     (функція (поточний-факт)
       (список (як-є визначити) (як-є *робоча-пам'ять*) (список (як-є відкликати-факт) поточний-факт (як-є *робоча-пам'ять*))))))
 
-; Step 5b: a real (if minimal) truth maintenance system. A *justified fact*
-; is `(fact . supports)`: `supports` is the list of facts a rule consumed to
-; derive `fact`, or `()` for a fact asserted as an axiom (nothing backs it
-; but the assertion itself). Retracting a fact now cascades: everything
-; whose support set names the retracted fact loses its justification and
-; gets retracted too, recursively.
+; Крок 5б. Додаємо мінімальний механізм підтримки обґрунтувань.
+; Обґрунтований факт має форму (факт . підтримка): підтримка містить
+; факти, потрібні правилу, а порожня підтримка означає пряму аксіому.
+; Відкликання підстави каскадно відкликає факти, які від неї залежать.
 ;
-; Deliberately single-justification: each fact is tracked with the *one*
-; support set that first derived it, not every possible way it could be
-; derived. If a fact is independently derivable two different ways,
-; retracting the tracked support still retracts it, even though another
-; justification might have kept it alive in a full JTMS. Documented as a
-; known limitation, not hidden — extending to multiple justifications per
-; fact is a further step, not assumed here.
-;
-; Lives alongside the Step 1-5a plain-fact functions rather than replacing
-; them: `*обґрунтована-пам'ять*` is a separate global from `*робоча-пам'ять*`,
-; so existing callers of `run`/`assert-fact!`/`retract-fact!` are unaffected.
-;
-; Крок 5b: справжня (хоч і мінімальна) система підтримки істинності. *Факт з
-; обґрунтуванням* — це `(факт . підтримка)`: `підтримка` — список фактів,
-; які правило спожило, щоб вивести `факт`, або `()` для факту-аксіоми
-; (нічого, крім самого твердження). Видалення факту тепер каскадує: усе, у
-; чиєму наборі підтримки згадується видалений факт, втрачає обґрунтування й
-; теж видаляється, рекурсивно.
-;
-; Свідомо одне обґрунтування на факт: кожен факт відстежується з *одним*
-; набором підтримки, який вивів його першим, не з усіма можливими шляхами
-; виведення. Якщо факт можна незалежно вивести двома різними шляхами,
-; видалення відстеженої підтримки все одно видалить факт, навіть якщо інше
-; обґрунтування могло б зберегти його живим у повному JTMS. Задокументовано
-; як відоме обмеження, не приховано — розширення до кількох обґрунтувань на
-; факт — окремий подальший крок, тут не мається на увазі.
-;
-; Існує поряд із функціями Кроку 1-5a для простих фактів, не замінюючи їх:
-; `*обґрунтована-пам'ять*` — окрема глобальна змінна від `*робоча-пам'ять*`, тож
-; наявні виклики `run`/`assert-fact!`/`retract-fact!` не зачіпаються.
-;
-; Schritt 5b: ein echtes (wenn auch minimales) Truth-Maintenance-System. Ein
-; *begründeter Fakt* ist `(fakt . unterstützung)`: `unterstützung` ist die
-; Liste der Fakten, die eine Regel verbraucht hat, um `fakt` abzuleiten,
-; oder `()` für einen als Axiom behaupteten Fakt (nichts stützt ihn außer
-; der Behauptung selbst). Das Entfernen eines Fakts kaskadiert nun: alles,
-; dessen Unterstützungsmenge den entfernten Fakt nennt, verliert seine
-; Begründung und wird ebenfalls rekursiv entfernt.
-;
-; Bewusst nur eine Begründung pro Fakt: jeder Fakt wird mit der *einen*
-; Unterstützungsmenge verfolgt, die ihn zuerst abgeleitet hat, nicht mit
-; jedem möglichen Ableitungsweg. Lässt sich ein Fakt unabhängig auf zwei
-; verschiedenen Wegen ableiten, entfernt das Retract der verfolgten
-; Unterstützung ihn trotzdem, selbst wenn eine andere Begründung ihn in
-; einem vollständigen JTMS am Leben erhalten hätte. Als bekannte
-; Einschränkung dokumentiert, nicht versteckt — die Erweiterung auf mehrere
-; Begründungen pro Fakt ist ein weiterer, hier nicht unterstellter Schritt.
-;
-; Existiert neben den Funktionen für einfache Fakten aus Schritt 1-5a, ohne
-; sie zu ersetzen: `*обґрунтована-пам'ять*` ist eine von `*робоча-пам'ять*`
-; getrennte globale Variable, sodass bestehende Aufrufer von
-; `run`/`assert-fact!`/`retract-fact!` unberührt bleiben.
+; Ця версія пам'ятає лише перше обґрунтування кожного факту.
+; Якщо факт має інший незалежний доказ, його все одно можуть відкликати:
+; така межа можливостей явна, не прихована. Наступний крок розширює
+; запис до кількох незалежних обґрунтувань.
+; Окрема *обґрунтована-пам'ять* не підміняє *робоча-пам'ять*,
+; тому попередні функції списку фактів зберігають свою поведінку.
+
 (визначити створити-обґрунтований
   (функція (факт-із-підставами підстави-факту)
     (сполучити факт-із-підставами підстави-факту)))
