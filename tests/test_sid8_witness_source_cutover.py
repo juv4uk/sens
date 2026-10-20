@@ -25,7 +25,6 @@ COHORT = {
     "tests/fixtures/meta-semantic-registry-witness.lisp": ("9efc1b4e755b1e3abe109f3d0f4be21e42d6d21b", 113),
     "tests/fixtures/narrate-outcome-authority-witness.lisp": ("52dc37bc7a9511bf8681947e0b698e347da4be94", 56),
     "tests/fixtures/persistent-vector-balance-witness.lisp": ("d8deef1b93f52db2b4f8b7377df835bc11e7df05", 23),
-    "tests/fixtures/process-load-witness.lisp": ("730e7d073ef92266ddd9d73e1f283cc023f5df1f", 7),
     "tests/fixtures/prolog-datalog-bridge-witness.lisp": ("afd0019a1fcb981ce848e2b25ae381f776d374b5", 11),
     "tests/fixtures/reason-index-authority-witness.lisp": ("a83b8466f1afa19eecb314ccc9494c0ceb9c1451", 51),
     "tests/fixtures/scientific-constant-knowledge-projection-witness.lisp": ("da0b0d886182c04dd2ce7c8046d8667580fb4070", 21),
@@ -52,8 +51,19 @@ class WitnessSourceMigration(unittest.TestCase):
                 changes = sum(a != b for a, b in zip(prior, current))
                 self.assertEqual(changes, expected)
                 total += changes
-        self.assertEqual(len(COHORT), 11)
-        self.assertEqual(total, 557)
+        self.assertEqual(len(COHORT), 10)
+        self.assertEqual(total, 550)
+
+    def test_process_witness_executes_current_ukrainian_function(self):
+        # Старий точний Git-знімок зберігається в історії, а не в чинному API.
+        source = (ROOT / "tests/fixtures/process-load-witness.lisp").read_text(
+            encoding="utf-8")
+        self.assertEqual(source.count("(процес-публічний-вихід-код "), 2)
+        self.assertNotIn("(тотожне? process-run запустити-процес)", source)
+        self.assertNotIn("(визначити process-run ", source)
+        self.assertIn("(status pass)", source)
+        self.assertIn("(status fail)", source)
+        self.assertIn("(за-умовою", source)
 
     def test_old_binary_call_heads_not_reintroduced(self):
         for path in COHORT:
