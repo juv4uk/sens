@@ -1,7 +1,8 @@
-; #845 — executable check of the coordinate-view envelope.
-; The source axes remain authoritative; this fixture only emits the named
-; observer envelope after loading the matrix as data.
-(визначити semantic-coordinate-matrix-845
+; Виконуваний свідок оболонки матриці семантичних координат #845.
+; Джерельні осі залишаються повноважним першоджерелом.
+; Цей свідок лише повертає іменований результат спостереження.
+; Протокольна оболонка й кількість рядків залишаються незмінними.
+(визначити свідок-матриці-семантичних-координат
   (функція ()
     (як-є
       (semantic-coordinate-matrix-845
@@ -10,4 +11,7 @@
        (authority canonical-sid-registry)
        (rows 5)))))
 
-(semantic-coordinate-matrix-845)
+; Історична назва для зовнішніх споживачів.
+(визначити semantic-coordinate-matrix-845 свідок-матриці-семантичних-координат)
+
+(свідок-матриці-семантичних-координат)
