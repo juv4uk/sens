@@ -1,8 +1,8 @@
-; #604 — structural check for the Lisp-owned encoder coverage authority.
-; Validates generated inputs, legacy-subset migration witness, and committed
-; coverage row-by-row without rendering the full output string.
-; Cardinality checks are BinaryNumber-native end-to-end; this checker must
-; never reintroduce implicit ordinary-Number <-> BinaryNumber coercion.
+; #604 — структурна перевірка покриття машинного кодера, яким керує СЕНС.
+; Перевіряє згенеровані вхідні дані, свідок міграції попередньої підмножини
+; та кожен зафіксований рядок покриття без формування повного рядка звіту.
+; Кількості обчислюються наскрізно через BinaryNumber; перевірка не повинна
+; відновлювати неявне перетворення між Number і BinaryNumber.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
