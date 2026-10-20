@@ -6,9 +6,9 @@ CI_GLUE_NO_SEMANTICS: this Python file never establishes a SENS logical PASS.
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/meta-eval-mutual.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:1 token #d1:1 is present as fallback; derived spelling not mandatory
-  3. Key surface present (group-closure / group-eval / eval-program-with-groups)
-  4. Reuses existing meta-eval helpers (my-apply, bind-params, env-lookup)
+  2. A named Ukrainian D1:YES outcome is present; raw #d1: tokens are absent
+  3. Key surface present (recursive-group closure / group-eval / eval-program-with-groups)
+  4. Reuses existing MetaEval helpers under current Ukrainian names
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
 Does not prove runtime callability or T5 physical execution. Run:
@@ -25,17 +25,17 @@ ROOT = Path(__file__).resolve().parents[1]
 MUT = ROOT / "lib" / "meta-eval-mutual.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "#d1:1"
+D1_TRUE = "(так"
 REQUIRED = (
-    "my-group-closure?",
-    "my-group-eval",
-    "my-group-apply",
-    "my-eval-program-with-groups",
-    "my-build-group-env",
-    "my-take-lambda-def-group",
-    "my-apply",       # reuse from meta-eval
-    "bind-params",    # reuse
-    "env-lookup",     # reuse
+    "це-замикання-рекурсивної-групи?",
+    "обчислити-групу-мета",
+    "застосувати-групове-замикання",
+    "обчислити-програму-з-рекурсивними-групами",
+    "побудувати-лексичні-зв'язки-рекурсивної-групи",
+    "взяти-групу-лямбда-визначень",
+    "застосувати-функцію-мета",
+    "зв'язати-аргументи-з-лямбда-параметрами",
+    "знайти-значення-імені-в-лексичному-середовищі",
 )
 
 
@@ -50,8 +50,11 @@ def check_mutual() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"meta-eval-mutual: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("meta-eval-mutual: explicit exact D1:1 token missing (mechanical)")
+    active = "\n".join(line.split(";", 1)[0] for line in text.splitlines())
+    if D1_TRUE not in active:
+        errs.append("meta-eval-mutual: named D1:YES outcome missing (mechanical)")
+    if "#d1:" in active:
+        errs.append("meta-eval-mutual: raw/typed one-bit literal remains in executable source")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"meta-eval-mutual: required surface missing: {fn}")

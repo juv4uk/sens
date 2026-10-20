@@ -7,8 +7,8 @@
   "capacity": 2048,
   "counts": {
     "curated": 153,
-    "additional_function_shaped": 410,
-    "unique_names": 565,
+    "additional_function_shaped": 408,
+    "unique_names": 563,
     "detailed_law_dossiers": 155,
     "new_domain_codes": 0,
     "new_callable": 0,
@@ -24,7 +24,7 @@
     "foundation": "363ddf6895ea87fabc772ad19e448d63abb343a6"
   },
   "source_state_counts": {
-    "LIVE_SOURCE_DEFINITION_FOUND": 300,
+    "LIVE_SOURCE_DEFINITION_FOUND": 298,
     "HISTORICAL_DONOR_ONLY": 231,
     "SOURCE_BINDING_ABSENT_AT_ORIGIN": 24,
     "ARCHIVED_D10_RESEARCH_NOT_A_MODERN_CALLABLE": 2,
@@ -2913,7 +2913,8 @@
       "callable": false,
       "ratification": "PENDING",
       "native_runtime_witness": "NOT_RUN",
-      "archive_method_limitation": "Archived closure-based ANSI CL example is a derivability challenge, not a SENS or Xerox LOOPS oracle"
+      "archive_method_limitation": "Archived closure-based ANSI CL example is a derivability challenge, not a SENS or Xerox LOOPS oracle",
+      "origin_ids": []
     },
     {
       "name": "ACTIVE-VALUE-PUT",
@@ -2930,7 +2931,8 @@
       "callable": false,
       "ratification": "PENDING",
       "native_runtime_witness": "NOT_RUN",
-      "archive_method_limitation": "Archived closure-based ANSI CL example is a derivability challenge, not a SENS or Xerox LOOPS oracle"
+      "archive_method_limitation": "Archived closure-based ANSI CL example is a derivability challenge, not a SENS or Xerox LOOPS oracle",
+      "origin_ids": []
     },
     {
       "name": "ADD-EDGE",
@@ -6333,7 +6335,7 @@
       "callable": false
     },
     {
-      "name": "my-apply-primitive",
+      "name": "застосувати-примітив-мета",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6346,7 +6348,7 @@
       "callable": false
     },
     {
-      "name": "my-arity-error",
+      "name": "помилка-арності-мета",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6359,7 +6361,7 @@
       "callable": false
     },
     {
-      "name": "my-build-dependency-graph-with-names",
+      "name": "побудувати-граф-залежностей-за-іменами",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6385,7 +6387,7 @@
       "callable": false
     },
     {
-      "name": "my-canon-binding-error",
+      "name": "помилка-незмінності-канонічного-імені",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6398,7 +6400,7 @@
       "callable": false
     },
     {
-      "name": "my-canon-callable-identity?",
+      "name": "канонічна-виклична-тотожність?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6411,7 +6413,7 @@
       "callable": false
     },
     {
-      "name": "my-canon-cond-name?",
+      "name": "ім'я-форми-за-умовою?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6424,7 +6426,7 @@
       "callable": false
     },
     {
-      "name": "my-canon-identity",
+      "name": "канонічна-ідентичність",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6437,7 +6439,7 @@
       "callable": false
     },
     {
-      "name": "my-canon-name?",
+      "name": "канонічне-ім'я-форми?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6450,7 +6452,7 @@
       "callable": false
     },
     {
-      "name": "my-canon-quote-name?",
+      "name": "ім'я-форми-як-є?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6463,7 +6465,7 @@
       "callable": false
     },
     {
-      "name": "my-compare-two",
+      "name": "порівняти-два-значення-мета",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6476,7 +6478,7 @@
       "callable": false
     },
     {
-      "name": "my-cond-has-migration-clause?",
+      "name": "має-перехідну-гілку-за-умовою?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6502,7 +6504,7 @@
       "callable": false
     },
     {
-      "name": "my-default-binding",
+      "name": "типове-зв'язування-імені",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6515,7 +6517,7 @@
       "callable": false
     },
     {
-      "name": "my-define-name?",
+      "name": "ім'я-форми-визначити?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6541,7 +6543,7 @@
       "callable": false
     },
     {
-      "name": "my-defmacro-name?",
+      "name": "ім'я-форми-визначити-макрос?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6567,7 +6569,7 @@
       "callable": false
     },
     {
-      "name": "my-ensure-shared-frame",
+      "name": "забезпечити-спільний-кадр",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6580,7 +6582,7 @@
       "callable": false
     },
     {
-      "name": "my-env-has-shared-frame?",
+      "name": "оточення-має-спільний-кадр?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6604,7 +6606,7 @@
       "callable": false
     },
     {
-      "name": "my-eval-application-result",
+      "name": "результат-застосування-функції-мета",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6639,7 +6641,7 @@
       "callable": false
     },
     {
-      "name": "my-eval-cond-result",
+      "name": "результат-за-умовою",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6652,7 +6654,7 @@
       "callable": false
     },
     {
-      "name": "my-eval-cond-result-mode",
+      "name": "режим-результату-за-умовою",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6678,7 +6680,7 @@
       "callable": false
     },
     {
-      "name": "my-eval-lambda-components",
+      "name": "обчислити-компоненти-лямбди",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6884,20 +6886,7 @@
       "callable": false
     },
     {
-      "name": "my-fifth",
-      "origin": "LIVE_LIBRARY_EXPANSION",
-      "source": "lib/meta-eval.lisp:function",
-      "origin_ids": [
-        "api:MY-FIFTH"
-      ],
-      "provenance_records": 1,
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "meaning": "UNPROVEN",
-      "coordinate": null,
-      "callable": false
-    },
-    {
-      "name": "my-forms-reference-name?",
+      "name": "форма-посилається-на-ім'я?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6910,20 +6899,7 @@
       "callable": false
     },
     {
-      "name": "my-fourth",
-      "origin": "LIVE_LIBRARY_EXPANSION",
-      "source": "lib/meta-eval.lisp:function",
-      "origin_ids": [
-        "api:MY-FOURTH"
-      ],
-      "provenance_records": 1,
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "meaning": "UNPROVEN",
-      "coordinate": null,
-      "callable": false
-    },
-    {
-      "name": "my-graph-dependencies",
+      "name": "залежності-графа",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -6936,7 +6912,7 @@
       "callable": false
     },
     {
-      "name": "my-graph-dependencies-reach?",
+      "name": "досяжність-залежностей-графа?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7040,7 +7016,7 @@
       "callable": false
     },
     {
-      "name": "my-install-group-env-onto",
+      "name": "встановити-зв'язування-групи-в-оточення",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7053,7 +7029,7 @@
       "callable": false
     },
     {
-      "name": "my-lambda-def-group-error",
+      "name": "помилка-групи-визначень-лямбди",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7066,7 +7042,7 @@
       "callable": false
     },
     {
-      "name": "my-lambda-def-names",
+      "name": "імена-визначень-лямбди",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7079,7 +7055,7 @@
       "callable": false
     },
     {
-      "name": "my-lambda-invalid-form",
+      "name": "помилка-форми-лямбди",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7105,7 +7081,7 @@
       "callable": false
     },
     {
-      "name": "my-lambda-name?",
+      "name": "ім'я-форми-лямбда?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7118,7 +7094,7 @@
       "callable": false
     },
     {
-      "name": "my-last-lambda-def-name",
+      "name": "останнє-ім'я-визначення-лямбди",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7220,7 +7196,7 @@
       "callable": false
     },
     {
-      "name": "my-primitive",
+      "name": "власний-примітив",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7233,7 +7209,7 @@
       "callable": false
     },
     {
-      "name": "my-primitive?",
+      "name": "це-примітив?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7246,7 +7222,7 @@
       "callable": false
     },
     {
-      "name": "my-replace-shared-frame",
+      "name": "замінити-спільний-кадр",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7259,7 +7235,7 @@
       "callable": false
     },
     {
-      "name": "my-result-fail-token",
+      "name": "маркер-невдалого-результату",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7272,7 +7248,7 @@
       "callable": false
     },
     {
-      "name": "my-result-ok-token",
+      "name": "маркер-успішного-результату",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7285,20 +7261,7 @@
       "callable": false
     },
     {
-      "name": "my-result-value",
-      "origin": "LIVE_LIBRARY_EXPANSION",
-      "source": "lib/meta-eval.lisp:function",
-      "origin_ids": [
-        "api:MY-RESULT-VALUE"
-      ],
-      "provenance_records": 1,
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "meaning": "UNPROVEN",
-      "coordinate": null,
-      "callable": false
-    },
-    {
-      "name": "my-semantic-id?",
+      "name": "тотожність-відповідає-поверхні?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7311,7 +7274,7 @@
       "callable": false
     },
     {
-      "name": "my-shared-frame-binding?",
+      "name": "зв'язування-спільного-кадру?",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -7324,7 +7287,7 @@
       "callable": false
     },
     {
-      "name": "my-shared-frame-value",
+      "name": "значення-спільного-кадру",
       "origin": "LIVE_LIBRARY_EXPANSION",
       "source": "lib/meta-eval.lisp:function",
       "origin_ids": [
@@ -9995,6 +9958,19 @@
       ],
       "provenance_records": 1,
       "source_state": "HISTORICAL_DONOR_ONLY",
+      "meaning": "UNPROVEN",
+      "coordinate": null,
+      "callable": false
+    },
+    {
+      "name": "шосте-значення-групи",
+      "origin": "LIVE_LIBRARY_EXPANSION",
+      "source": "lib/meta-eval.lisp:function",
+      "origin_ids": [
+        "api:MY-SIXTH"
+      ],
+      "provenance_records": 1,
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "meaning": "UNPROVEN",
       "coordinate": null,
       "callable": false

@@ -102,9 +102,9 @@ test "ukrainian SENS REPL source crosses Zig byte-exact, short buffer is untouch
     try std.testing.expectEqualSlices(u8, repl_core_asset[0..repl_core_asset.len], &exact);
 }
 
-// SENS owns the metacircular evaluator (`my-eval-top-form`) and its generated
-// semantic registry. Zig is only the exact byte carrier; no name interpretation,
-// no semantics and no admission tables live here.
+// SENS owns the metacircular evaluator and its generated semantic registry.
+// Zig is only the exact byte carrier; no name interpretation, semantics or
+// admission tables live here.
 const meta_eval_asset = @embedFile("lib/meta-eval.lisp");
 
 pub export fn sens_zig_meta_eval_bytes_copy(dst: [*]u8, capacity: usize) isize {
