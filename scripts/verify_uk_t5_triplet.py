@@ -180,8 +180,16 @@ def canonical_uk_from_words(words: list[str]) -> str:
 
 
 def project_current_uk(source: str) -> list[str]:
-    data = three_pass.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
-    my, upper, bridge_by_sid = three_pass.build_three_pass_maps(
+    # Коментарі/пробіли не є програмними бітами, але виконувані
+    # англомовні T/NIL/CAR/COND — НЕ українські назви навіть коли
+    # legacy resolver міг би відобразити їх у той самий машинний код.
+    without_comments = three_pass.strip_comments(source)
+    tokens = three_pass.tokenize(without_comments, source_surface="укр")
+    for token in tokens:
+        if token.kind == "ATOM" and re.search(r"[A-Za-z]", token.text):
+            raise ProjectionBlocked("noncanonical Ukrainian source: Latin executable atom")
+    data = three_pass.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
+    my, upper, _retired_bridge = three_pass.build_three_pass_maps(
         data,
         ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry_generated.rs",
@@ -199,7 +207,7 @@ def project_current_uk(source: str) -> list[str]:
     # The current resolver accepts exact-domain surface maps, not historical
     # SID8/source-era dispatch. A canonical Ukrainian source is explicit.
     d9_residents = set(data["domains"].get("D9", {}).get("residents", {}))
-    resolver = three_pass.Resolver(my, upper, d9_residents, bridge_by_sid)
+    resolver = three_pass.Resolver(my, upper, d9_residents=d9_residents)
     visible = three_pass.migrate_file(
         source, resolver, text7, source_surface="укр"
     )
