@@ -1,37 +1,29 @@
 #lang my-lisp
 ;;;
-;;; constitution.my — канонічний файл мови my-lisp
+;;; constitution — канонічний файл мови (українська проєкція)
 ;;;
-;;; У цьому діалекті:
-;;;   * quote тільки явний: (quote x); апостроф ' є частиною символу;
+;;;   * quote тільки явний: (як-є x);
 ;;;   * істина — t, хиба — ();
-;;;   * atom/eq повертають t або ();
-;;;   * десяткові літерали — exact (0.5 → 1/2).
-;;;
-;;; Запуск: кнопка Run у DrRacket або `racket constitution.my`.
+;;;   * атом?/тотожне? повертають t або ();
+;;;   * десяткові літерали — exact.
 ;;;
 
-;; --- Точна арифметика: дріб лишається дробом ---
-(displayln (/ 5 336))                         ; ⇒ 5/336
-(displayln (/ 5.0 2))                         ; ⇒ 5/2
+(displayln (/ 5 336))
+(displayln (/ 5.0 2))
 
-;; --- Сім примітивів Маккарті ---
-(displayln (quote constitution))              ; quote
-(displayln (atom? (quote x)))                  ; atom ⇒ t
-(displayln (atom? (quote (x))))                ;      ⇒ ()
-(displayln (eq? (quote a) (quote a)))          ; eq   ⇒ t
-(displayln (eq? (quote a) (quote b)))          ;      ⇒ ()
-(displayln (car (quote (a b))))               ; car  ⇒ a
-(displayln (cdr (quote (a b))))               ; cdr  ⇒ (b)
-(displayln (cons (quote a) (quote (b))))      ; cons ⇒ (a b)
-(displayln (cond ((eq? (quote a) (quote b)) (quote ні))
-             (t (quote так))))            ; cond ⇒ так
+(displayln (як-є constitution))
+(displayln (атом? (як-є x)))
+(displayln (атом? (як-є (x))))
+(displayln (тотожне? (як-є a) (як-є a)))
+(displayln (тотожне? (як-є a) (як-є b)))
+(displayln (перше (як-є (a b))))
+(displayln (решта (як-є (a b))))
+(displayln (сполучити (як-є a) (як-є (b))))
+(displayln (за-умовою ((тотожне? (як-є a) (як-є b)) (як-є ні))
+             (t (як-є так))))
 
-;; --- Власний макрос з українською назвою ---
-;; Спеціальні форми if і begin належать цьому історичному діалекту
-;; Racket, тому їх не перейменовуємо без відповідного механізму.
 (defmacro (коли умова . тіло)
   `(if ,умова (begin ,@тіло)))
 
-(коли (eq? (quote лісп) (quote лісп))
-  (displayln (quote лісп-працює-на-chez-scheme-jit)))
+(коли (тотожне? (як-є лісп) (як-є лісп))
+  (displayln (як-є лісп-працює)))
