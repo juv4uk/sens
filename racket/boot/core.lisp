@@ -216,9 +216,9 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
-(00001010 let (bindings body)
-  (111 (list (001 lambda) (map (0010 (binding) (100 binding)) bindings) body)
-        (map (0010 (binding) (second binding)) bindings)))
+(00001010 let (зв'язування тіло)
+  (111 (list (001 lambda) (map (0010 (зв'язування-елемент) (100 зв'язування-елемент)) зв'язування) тіло)
+        (map (0010 (зв'язування-елемент) (second зв'язування-елемент)) зв'язування)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -278,12 +278,12 @@
 ; lib/unify.my anfangs passieren konnte (der dabei gefangene Bug steht im
 ; Header-Kommentar dieser Datei).
 (0011 equal?
-  (0010 (a b)
+  (0010 (ліве праве)
     (110
-      ((010 a) (110 ((010 b) (101 a b)) (t (001 ()))))
-      ((010 b) (001 ()))
+      ((010 ліве) (110 ((010 праве) (101 ліве праве)) (t (001 ()))))
+      ((010 праве) (001 ()))
       (t (110
-           ((equal? (100 a) (100 b)) (equal? (011 a) (011 b)))
+           ((equal? (100 ліве) (100 праве)) (equal? (011 ліве) (011 праве)))
            (t (001 ())))))))
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
@@ -303,38 +303,38 @@
 ; формою, яку lib/meta-eval.my's власний env-lookup уже вручну пише для
 ; свого специфічного випадку asoc-списку (symbol . value).
 (0011 nth
-  (0010 (i lst)
+  (0010 (індекс список)
     (110
-      ((101 i 0) (100 lst))
-      (t (nth (01011 i 1) (011 lst))))))
+      ((101 індекс 0) (100 список))
+      (t (nth (01011 індекс 1) (011 список))))))
 
 (0011 member?
-  (0010 (item lst)
+  (0010 (елемент список)
     (110
-      ((010 lst) (001 ()))
-      ((equal? item (100 lst)) t)
-      (t (member? item (011 lst))))))
+      ((010 список) (001 ()))
+      ((equal? елемент (100 список)) t)
+      (t (member? елемент (011 список))))))
 
 (0011 assoc
-  (0010 (key alist)
+  (0010 (ключ список-пар)
     (110
-      ((010 alist) (001 ()))
-      ((equal? key (100 (100 alist))) (100 alist))
-      (t (assoc key (011 alist))))))
+      ((010 список-пар) (001 ()))
+      ((equal? ключ (100 (100 список-пар))) (100 список-пар))
+      (t (assoc ключ (011 список-пар))))))
 
-(00001010 let* (bindings body)
+(00001010 let* (зв'язування тіло)
   (110
-    ((010 bindings) body)
+    ((010 зв'язування) тіло)
     (t
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
      ; helper as host/compiler semantic authority.
      (111 (001 let)
-           (111 (111 (100 bindings) (001 ()))
+           (111 (111 (100 зв'язування) (001 ()))
                  (111 (111 (001 let*)
-                             (111 (011 bindings)
-                                   (111 body (001 ()))))
+                             (111 (011 зв'язування)
+                                   (111 тіло (001 ()))))
                        (001 ())))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
@@ -357,29 +357,29 @@
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
 (0011 string-empty?
-  (0010 (s) (101 s "")))
+  (0010 (рядок) (101 рядок "")))
 
 (0011 string-length
-  (0010 (s)
+  (0010 (рядок)
     (110
-      ((string-empty? s) 0)
-      (t (01010 1 (string-length (110011101 s)))))))
+      ((string-empty? рядок) 0)
+      (t (01010 1 (string-length (110011101 рядок)))))))
 
 (0011 string-prefix?
-  (0010 (prefix s)
+  (0010 (префікс рядок)
     (110
-      ((string-empty? prefix) t)
-      ((string-empty? s) (001 ()))
-      ((101 (110101011 prefix) (110101011 s))
-       (string-prefix? (110011101 prefix) (110011101 s)))
+      ((string-empty? префікс) t)
+      ((string-empty? рядок) (001 ()))
+      ((101 (110101011 префікс) (110101011 рядок))
+       (string-prefix? (110011101 префікс) (110011101 рядок)))
       (t (001 ())))))
 
 (0011 string-contains?
-  (0010 (needle s)
+  (0010 (зразок рядок)
     (110
-      ((string-prefix? needle s) t)
-      ((string-empty? s) (001 ()))
-      (t (string-contains? needle (110011101 s))))))
+      ((string-prefix? зразок рядок) t)
+      ((string-empty? рядок) (001 ()))
+      (t (string-contains? зразок (110011101 рядок))))))
 
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
 ; expressible without exceptions: among atoms, exactly a Symbol is identical
@@ -391,11 +391,11 @@
 ; `symbol?` wurde aus Rust verschoben: Unter Atomen ist nur ein Symbol mit dem
 ; aus seinem kanonischen Text rekonstruierten Symbol identisch; `atom` schützt `eq`.
 (0011 symbol?
-  (0010 (value)
+  (0010 (значення)
     (110
-      ((010 value)
+      ((010 значення)
        (110
-         ((101 value (11101101 (11110100 value))) t)
+         ((101 значення (11101101 (11110100 значення))) t)
          (t (001 ()))))
       (t (001 ())))))
 
