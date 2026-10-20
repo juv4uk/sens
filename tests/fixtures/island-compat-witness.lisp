@@ -1,101 +1,113 @@
-; #749 — executable Lisp-owned witness for island compatibility.
-; Ukrainian projection only.
-
-(визначити island-compat-schema
+; Свідок договору сумісності островів #749 належить Lisp СЕНС.
+; Всі власні функції та локальні зв'язування записано українською.
+; Договірні поля, історичні маркери SID та значення очікувань збережено.
+; Зовнішній документ island-compat-document залишається незмінним джерелом.
+;
+(визначити схема-сумісності-островів
   (функція () (перше island-compat-document)))
 
-(визначити island-compat-entries
+(визначити записи-сумісності-островів
   (функція () (решта island-compat-document)))
 
-(визначити island-compat-field
-  (функція (entry field)
-    (нехай ((found (знайти-за-ключем field entry)))
+(визначити поле-сумісності-островів
+  (функція (запис поле)
+    (нехай ((знайдене (знайти-за-ключем поле запис)))
       (за-умовою
-        ((атом? found) (як-є ()))
-        (так (решта found))))))
+        ((атом? знайдене) (як-є ()))
+        (так (решта знайдене))))))
 
-(визначити island-compat-find
-  (функція (identity entries)
+(визначити знайти-запис-сумісності-островів
+  (функція (ідентичність записи)
     (за-умовою
-      ((атом? entries) (як-є ()))
-      ((однакові? (island-compat-field (перше entries) (як-є identity)) identity)
-       (перше entries))
-      (так (island-compat-find identity (решта entries))))))
+      ((атом? записи) (як-є ()))
+      ((однакові? (поле-сумісності-островів (перше записи) (як-є identity)) ідентичність)
+       (перше записи))
+      (так (знайти-запис-сумісності-островів ідентичність (решта записи))))))
 
-(визначити island-compat-entry
-  (функція (identity)
-    (island-compat-find identity (island-compat-entries))))
+(визначити запис-сумісності-островів
+  (функція (ідентичність)
+    (знайти-запис-сумісності-островів ідентичність (записи-сумісності-островів))))
 
-(визначити island-compat-check
-  (функція (identity field expected)
-    (нехай ((entry (island-compat-entry identity)))
+(визначити перевірити-сумісність-островів
+  (функція (ідентичність поле очікуване)
+    (нехай ((запис (запис-сумісності-островів ідентичність)))
       (за-умовою
-        ((атом? entry) (список (як-є missing-entry) identity))
-        ((однакові? (island-compat-field entry field) expected) (як-є ()))
-        (так (список (як-є mismatch) identity field expected
-                 (island-compat-field entry field)))))))
+        ((атом? запис) (список (як-є missing-entry) ідентичність))
+        ((однакові? (поле-сумісності-островів запис поле) очікуване) (як-є ()))
+        (так (список (як-є mismatch) ідентичність поле очікуване
+                 (поле-сумісності-островів запис поле)))))))
 
-(визначити island-compat-first-failure
-  (функція (checks)
+(визначити перша-помилка-сумісності-островів
+  (функція (перевірки)
     (за-умовою
-      ((атом? checks) (як-є ()))
-      ((атом? (перше checks)) (island-compat-first-failure (решта checks)))
-      (так (перше checks)))))
+      ((атом? перевірки) (як-є ()))
+      ((атом? (перше перевірки)) (перша-помилка-сумісності-островів (решта перевірки)))
+      (так (перше перевірки)))))
 
-(визначити island-compat-witness
+(визначити свідок-сумісності-островів
   (функція ()
-    (нехай ((failure
-            (island-compat-first-failure
+    (нехай ((помилка
+            (перша-помилка-сумісності-островів
               (список
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є semantic-id) (як-є owner) (як-є sens))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є semantic-id) (як-є representation) (як-є opaque-u8))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є semantic-id) (як-є kernel-interpretation) (як-є forbidden))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є execution-witness) (як-є cardinality) (як-є zero-or-more))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є execution-witness) (як-є multiple-kernels-per-sid) (як-є allowed))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є island-call) (як-є producer-required) (як-є yes))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є island-call) (як-є provenance-preserved) (як-є yes))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є island-call) (як-є universal-result-coercion) (як-є forbidden))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є zero-results) (як-є result-count) 0)
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є zero-results) (як-є literal-empty-list-alias) (як-є forbidden))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є one-result) (як-є result-count) 1)
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є many-results) (як-є result-count) (як-є many))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є many-results) (як-є multiplicity-preserved) (як-є yes))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є bridge) (як-є missing-bridge) (як-є legal))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є bridge) (як-є semantic-equivalence-assumed) (як-є no))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є missing-kernel) (як-є legal) (як-є yes))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є missing-kernel) (як-є changes-sid-meaning) (як-є no))
-                (island-compat-check
+                (перевірити-сумісність-островів
                   (як-є missing-kernel) (як-є changes-registry-numbering) (як-є no))))))
       (за-умовою
-        ((тотожне? (island-compat-schema) (як-є island-compat-contract/1))
+        ((тотожне? (схема-сумісності-островів) (як-є island-compat-contract/1))
          (за-умовою
-           ((атом? failure)
+           ((атом? помилка)
             (список (як-є island-compat-witness)
                   (список (як-є status) (як-є pass))
                   (список (як-є detail) (як-є semantic-owner-island-mechanism))))
            (так
             (список (як-є island-compat-witness)
                   (список (як-є status) (як-є fail))
-                  (список (як-є detail) failure)))))
+                  (список (як-є detail) помилка)))))
         (так
          (список (як-є island-compat-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail)
-                     (список (як-є schema) (island-compat-schema)))))))))
+                     (список (як-є schema) (схема-сумісності-островів)))))))))
+
+; Сумісні зовнішні назви — ті самі замикання, без повторних законів.
+(визначити island-compat-schema схема-сумісності-островів)
+(визначити island-compat-entries записи-сумісності-островів)
+(визначити island-compat-field поле-сумісності-островів)
+(визначити island-compat-find знайти-запис-сумісності-островів)
+(визначити island-compat-entry запис-сумісності-островів)
+(визначити island-compat-check перевірити-сумісність-островів)
+(визначити island-compat-first-failure перша-помилка-сумісності-островів)
+(визначити island-compat-witness свідок-сумісності-островів)
