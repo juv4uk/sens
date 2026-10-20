@@ -6,10 +6,10 @@
 (визначити нехай let)
 (визначити нехай* let*)
 
-; D8:10110101 ARITHMETIC-SHIFT — same as ASH for non-neg k
+; D8:10110101 ARITHMETIC-SHIFT — те саме, що ASH для невід'ємного k
 (визначити арифметично-зсунути арифметичний-зсув)
 (визначити arithmetic-shift арифметично-зсунути)
 
-; D8:10101111 COPY-STRUCTURE — for list trees = COPY-LIST
+; D8:10101111 COPY-STRUCTURE — для дерев списків = COPY-LIST
 (визначити копіювати-структуру копіювати-список)
 (визначити copy-structure копіювати-структуру)
