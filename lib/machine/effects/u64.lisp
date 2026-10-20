@@ -124,17 +124,3 @@
           (список (як-є bounded-u64-mul) ліве праве))
          ((атом? (як-є ())) (як-є machine-effect-rejected))))
       ((атом? (як-є ())) (як-є machine-effect-rejected)))))
-
-
-; Сумісність для чинних зовнішніх споживачів: решта назв
-; посилаються на ті самі українські замикання.
-(визначити machine-effect-exact-integer? машинний-ефект-точне-ціле?)
-(визначити machine-effect-within-inclusive-integer-range? машинний-ефект-ціле-в-межах?)
-(визначити machine-effect-u32-carrier? машинний-ефект-носій-беззнаковий-32?)
-(визначити machine-effect-bounded-u64-add-form? машинний-ефект-форма-додавання-64?)
-(визначити machine-effect-bounded-u64-add машинний-ефект-додавання-64)
-(визначити machine-effect-u64-carrier? машинний-ефект-носій-беззнаковий-64?)
-(визначити machine-effect-bounded-u64-sub-form? машинний-ефект-форма-віднімання-64?)
-(визначити machine-effect-bounded-u64-mul-form? машинний-ефект-форма-множення-64?)
-(визначити machine-effect-bounded-u64-sub машинний-ефект-віднімання-64)
-(визначити machine-effect-bounded-u64-mul машинний-ефект-множення-64)
