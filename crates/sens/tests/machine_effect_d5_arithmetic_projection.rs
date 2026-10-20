@@ -175,7 +175,7 @@ fn bounded_sub_effect_projects_with_form_byte_and_independent_decode_parity() {
             &mut session,
         );
         let donor = eval_value(
-            &format!("(x86-lower-difference-u64-forms {left} {right})"),
+            &format!("(машина-знизити-віднімання-беззнакових-64-до-форм {left} {right})"),
             &mut session,
         );
         assert_eq!(projected, donor, "SUB projection must preserve donor forms");
@@ -221,7 +221,7 @@ fn bounded_mul_effect_projects_with_form_and_byte_parity() {
             &mut session,
         );
         let donor = eval_value(
-            &format!("(x86-lower-times-u64-forms {left} {right})"),
+            &format!("(машина-знизити-множення-беззнакових-64-до-форм {left} {right})"),
             &mut session,
         );
         assert_eq!(projected, donor, "IMUL projection must preserve donor forms");

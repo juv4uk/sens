@@ -241,7 +241,7 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
-    let add_forms = eval_program("(x86-lower-add-u64-forms 2 3)", &mut session)
+    let add_forms = eval_program("(машина-знизити-додавання-беззнакових-64-до-форм 2 3)", &mut session)
         .expect("semantic lowering must expose structured admitted machine forms before bytes");
     assert_eq!(
         add_forms.value.to_string(),
@@ -249,7 +249,7 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     );
 
     let add = eval_program(
-        "(викликати-допущену-машинну-програму (x86-lower-add-u64-forms 2 3) 0)",
+        "(викликати-допущену-машинну-програму (машина-знизити-додавання-беззнакових-64-до-форм 2 3) 0)",
         &mut session,
     )
     .expect("admitted semantic ADD forms must execute through the canonical gateway");
@@ -259,12 +259,12 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
     let native_car = eval_program(
-        "(викликати-допущену-машинну-програму (x86-lower-cons-car-u64-forms 2 3) x86-pair-cell-bytes)",
+        "(викликати-допущену-машинну-програму (знизити-складену-пару-до-машинних-форм 2 3) x86-pair-cell-bytes)",
         &mut session,
     )
     .expect("CONS+CAR lowering must pass through admission before host execution");
     let native_cdr = eval_program(
-        "(викликати-допущену-машинну-програму (x86-lower-cons-cdr-u64-forms 2 3) x86-pair-cell-bytes)",
+        "(викликати-допущену-машинну-програму (машина-знизити-решту-пари-64 2 3) x86-pair-cell-bytes)",
         &mut session,
     )
     .expect("CONS+CDR lowering must pass through admission before host execution");
@@ -424,7 +424,7 @@ fn semantics_blind_raw_executor_accepts_optional_arena_bytes() {
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
     let result = eval_program(
-        "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-add-u64-forms 2 3)) 16)",
+        "(native-call-u64-raw (x86-encode-admitted-program (машина-знизити-додавання-беззнакових-64-до-форм 2 3)) 16)",
         &mut session,
     )
     .expect("raw host mechanism must receive only bytes materialized from admitted structured forms");
@@ -504,8 +504,8 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     // be misattributed to the raw CPU bridge. Failure-only observations never
     // alter the critical assertion below.
     for (name, source) in [
-        ("lowered-car-forms", "(x86-lower-cons-car-u64-forms 2 3)"),
-        ("lowered-car-admission", "(x86-admitted-program? (x86-lower-cons-car-u64-forms 2 3))"),
+        ("lowered-car-forms", "(знизити-складену-пару-до-машинних-форм 2 3)"),
+        ("lowered-car-admission", "(x86-admitted-program? (знизити-складену-пару-до-машинних-форм 2 3))"),
         ("encode-mov-imm-left", "(x86-encode-admitted-instruction (quote (mov-r64-imm64 rax 2)))"),
         ("encode-store-car", "(x86-encode-admitted-instruction (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
         ("encode-mov-imm-right", "(x86-encode-admitted-instruction (quote (mov-r64-imm64 rax 3)))"),
@@ -524,7 +524,7 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
         ("plus-disp8-zero", "(00001100 0 256)"),
         ("mod-disp8-zero", "(00010011 (00001100 0 256) 256)"),
         ("store-direct", "(x86-encode-mov-mem-disp8-r64 (quote rdi) 0 (quote rax))"),
-        ("lowered-car-encoding", "(x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3))"),
+        ("lowered-car-encoding", "(x86-encode-admitted-program (знизити-складену-пару-до-машинних-форм 2 3))"),
     ] {
         let result = eval_program(source, &mut session)
             .map(|value| format!("{:?}", value.value))
@@ -551,18 +551,18 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     }
 
     let native_car = eval_program(
-        "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3)) x86-pair-cell-bytes)",
+        "(native-call-u64-raw (x86-encode-admitted-program (знизити-складену-пару-до-машинних-форм 2 3)) x86-pair-cell-bytes)",
         &mut session,
     )
     .expect("Lisp-owned CONS+CAR forms must materialize through admission before raw host execution");
     let native_cdr = eval_program(
-        "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-cons-cdr-u64-forms 2 3)) x86-pair-cell-bytes)",
+        "(native-call-u64-raw (x86-encode-admitted-program (машина-знизити-решту-пари-64 2 3)) x86-pair-cell-bytes)",
         &mut session,
     )
     .expect("Lisp-owned CONS+CDR forms must materialize through admission before raw host execution");
 
     let native_semantic_car = eval_uk_program(
-        "(x86-call-semantic-car-u64 (сполучити 2 3))",
+        "(машина-викликати-семантичне-перше-64 (сполучити 2 3))",
         &mut session,
     );
     assert_eq!(
@@ -585,7 +585,7 @@ fn lisp_owned_add_bytes_execute_natively_through_semantics_blind_host() {
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
     let result = eval_program(
-        "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-add-u64-forms 2 3)))",
+        "(native-call-u64-raw (x86-encode-admitted-program (машина-знизити-додавання-беззнакових-64-до-форм 2 3)))",
         &mut session,
     )
     .expect("host must execute bytes admitted from Lisp-owned structured forms");

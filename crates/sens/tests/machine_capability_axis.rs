@@ -227,16 +227,16 @@ fn x86_target_witnesses_reference_existing_lowering_names_without_owning_meaning
         .expect("x86 semantic lowering");
 
     for name in [
-        "x86-lower-zerop-u64-forms",
-        "x86-lower-add-u64-forms",
-        "x86-lower-difference-u64-forms",
-        "x86-lower-times-u64-forms",
-        "x86-lower-quotient-i64-equal-forms",
-        "x86-lower-order-i64-forms",
-        "x86-lower-eq-cond-u64-forms",
-        "x86-lower-bounded-pair-store-u64-forms",
-        "x86-lower-cons-car-u64-forms",
-        "x86-lower-cons-cdr-u64-forms",
+        "машина-знизити-перевірку-нуля-64",
+        "машина-знизити-додавання-беззнакових-64-до-форм",
+        "машина-знизити-віднімання-беззнакових-64-до-форм",
+        "машина-знизити-множення-беззнакових-64-до-форм",
+        "машина-знизити-частку-знакових-64-до-форм",
+        "машина-знизити-порівняння-порядку-64",
+        "машина-знизити-рівність-та-умову-64",
+        "машина-знизити-запис-пари-64",
+        "знизити-складену-пару-до-машинних-форм",
+        "машина-знизити-решту-пари-64",
     ] {
         assert!(source.contains(name), "axis references {name}");
         assert!(

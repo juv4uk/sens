@@ -53,54 +53,54 @@
          (admitted-form cmp-r64-r64)
          (admitted-form sete-r8)
          (admitted-form movzx-r64-r8)
-         (lowering x86-lower-zerop-u64-forms))
+         (lowering машина-знизити-перевірку-нуля-64))
        (integer-add bounded-u32-inputs u64-result
          (admitted-form add-r64-r64)
-         (lowering x86-lower-add-u64-forms))
+         (lowering машина-знизити-додавання-беззнакових-64-до-форм))
        (integer-subtract bounded-u64 no-underflow
          (admitted-form sub-r64-r64)
-         (lowering x86-lower-difference-u64-forms))
+         (lowering машина-знизити-віднімання-беззнакових-64-до-форм))
        (integer-multiply bounded-u32-inputs u64-result
          (admitted-form imul-r64-r64)
-         (lowering x86-lower-times-u64-forms))
+         (lowering машина-знизити-множення-беззнакових-64-до-форм))
        (integer-quotient bounded-positive-i64 equal-operands-only
          (admitted-form cqo)
          (admitted-form idiv-r64)
-         (lowering x86-lower-quotient-i64-equal-forms))
+         (lowering машина-знизити-частку-знакових-64-до-форм))
        (integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary
          (admitted-form cmp-r64-r64)
          (admitted-form setl-r8)
          (admitted-form movzx-r64-r8)
-         (lowering x86-lower-order-i64-forms))
+         (lowering машина-знизити-порівняння-порядку-64))
        (integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary
          (admitted-form cmp-r64-r64)
          (admitted-form setg-r8)
          (admitted-form movzx-r64-r8)
-         (lowering x86-lower-order-i64-forms))
+         (lowering машина-знизити-порівняння-порядку-64))
        (integer-increment bounded-u64 no-overflow
          (admitted-form add-r64-r64)
-         (lowering x86-lower-add-u64-forms))
+         (lowering машина-знизити-додавання-беззнакових-64-до-форм))
        (integer-decrement bounded-u64 no-underflow
          (admitted-form sub-r64-r64)
-         (lowering x86-lower-difference-u64-forms))
+         (lowering машина-знизити-віднімання-беззнакових-64-до-форм))
        (identity-compare bounded-u64
          (admitted-form cmp-r64-r64)
-         (lowering x86-lower-eq-cond-u64-forms))
+         (lowering машина-знизити-рівність-та-умову-64))
        (conditional-branch bounded-u64
          (admitted-form jnz-rel8)
-         (lowering x86-lower-eq-cond-u64-forms))
+         (lowering машина-знизити-рівність-та-умову-64))
        (pair-field-store head bounded-u64
          (admitted-form mov-mem-disp8-r64)
-         (lowering x86-lower-bounded-pair-store-u64-forms))
+         (lowering машина-знизити-запис-пари-64))
        (pair-field-store tail bounded-u64
          (admitted-form mov-mem-disp8-r64)
-         (lowering x86-lower-bounded-pair-store-u64-forms))
+         (lowering машина-знизити-запис-пари-64))
        (pair-field-load head bounded-u64
          (admitted-form mov-r64-mem-disp8)
-         (lowering x86-lower-cons-car-u64-forms))
+         (lowering знизити-складену-пару-до-машинних-форм))
        (pair-field-load tail bounded-u64
          (admitted-form mov-r64-mem-disp8)
-         (lowering x86-lower-cons-cdr-u64-forms))))))
+         (lowering машина-знизити-решту-пари-64))))))
 
 (визначити статуси-свідків-цілей-машини-версія-1
   (як-є

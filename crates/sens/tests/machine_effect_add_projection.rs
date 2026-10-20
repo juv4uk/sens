@@ -103,7 +103,7 @@ fn bounded_add_effect_projects_to_same_forms_and_bytes_as_current_donor() {
             &mut session,
         );
         let donor = eval_value(
-            &format!("(x86-lower-add-u64-forms {left} {right})"),
+            &format!("(машина-знизити-додавання-беззнакових-64-до-форм {left} {right})"),
             &mut session,
         );
         assert_eq!(projected, donor, "projected forms must equal donor forms");
@@ -178,7 +178,7 @@ fn ukr_machine_key_projection_preserves_width_and_legacy_calls() {
         );
         let historical = eval_value(
             &format!(
-                "(x86-current-domain-key? {width} {bits} {expected_width} {expected_bits})"
+                "(машинний-ключ-поточного-домену? {width} {bits} {expected_width} {expected_bits})"
             ),
             &mut session,
         );

@@ -74,17 +74,17 @@ fn exact_d3_eq_cond_pair_selects_existing_bounded_x86_composition() {
     let mut session = machine_session();
 
     let current = eval_value(
-        "(x86-lower-current-eq-cond-u64-forms 3 5 3 6 2 3 111 222)",
+        "(машина-знизити-поточну-рівність-та-умову-64 3 5 3 6 2 3 111 222)",
         &mut session,
     );
     let existing = eval_value(
-        "(x86-lower-eq-cond-u64-forms 2 3 111 222)",
+        "(машина-знизити-рівність-та-умову-64 2 3 111 222)",
         &mut session,
     );
     assert_eq!(current, existing);
 
     let encoded = eval_value(
-        "(x86-encode-current-eq-cond-u64 3 5 3 6 2 3 111 222)",
+        "(машина-кодувати-поточну-рівність-та-умову-64 3 5 3 6 2 3 111 222)",
         &mut session,
     );
     assert!(
@@ -103,8 +103,8 @@ fn eq_cond_composition_fails_closed_on_wrong_exact_identity() {
     let mut session = machine_session();
 
     for source in [
-        "(x86-encode-current-eq-cond-u64 3 4 3 6 2 3 111 222)",
-        "(x86-encode-current-eq-cond-u64 3 5 3 7 2 3 111 222)",
+        "(машина-кодувати-поточну-рівність-та-умову-64 3 4 3 6 2 3 111 222)",
+        "(машина-кодувати-поточну-рівність-та-умову-64 3 5 3 7 2 3 111 222)",
     ] {
         assert_eq!(
             eval_value(source, &mut session),
@@ -122,10 +122,10 @@ fn current_eq_cond_route_does_not_publish_numeric_boolean_as_language_result() {
     .expect("semantic x86 lowering");
 
     let start = source
-        .find("(00001001 x86-lower-current-eq-cond-u64-forms")
+        .find("(00001001 машина-знизити-поточну-рівність-та-умову-64")
         .expect("current EQ+COND route");
     let block = &source[start..];
-    assert!(block.contains("x86-lower-eq-cond-u64-forms"));
+    assert!(block.contains("машина-знизити-рівність-та-умову-64"));
     assert!(
         !block.contains("numeric-boolean"),
         "machine route must not mint a numeric boolean language contract"

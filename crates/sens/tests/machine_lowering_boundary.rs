@@ -211,7 +211,7 @@ fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wra
         .unwrap_or_else(|error| panic!("{} must exist: {error}", lowering_path.display()));
 
     assert!(
-        lowering_source.contains("(def x86-lower-add-u64-forms"),
+        lowering_source.contains("(def машина-знизити-додавання-беззнакових-64-до-форм"),
         "semantic lowerer must expose structured machine forms"
     );
     assert!(
@@ -237,7 +237,7 @@ fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wra
     eval_program(&lowering_source, &mut session)
         .expect("semantic x86-64 lowering must load as ordinary sens");
 
-    let forms = eval_program("(x86-lower-add-u64-forms 2 3)", &mut session)
+    let forms = eval_program("(машина-знизити-додавання-беззнакових-64-до-форм 2 3)", &mut session)
         .expect("semantic ADD proof lowering must produce structured machine forms")
         .value
         .to_string();
@@ -247,7 +247,7 @@ fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wra
     );
 
     let bytes = eval_program(
-        "(x86-encode-admitted-program (x86-lower-add-u64-forms 2 3))",
+        "(x86-encode-admitted-program (машина-знизити-додавання-беззнакових-64-до-форм 2 3))",
         &mut session,
     )
     .expect("structured semantic forms must materialize bytes only through admission")

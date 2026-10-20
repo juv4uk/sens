@@ -66,7 +66,7 @@ fn render_forms(forms: &[String]) -> String {
 fn structural_car_profile_is_projected_from_the_existing_semantic_witness() {
     let mut session = profile_session();
 
-    let semantic_forms = eval_value("(x86-lower-cons-car-u64-forms 2 3)", &mut session);
+    let semantic_forms = eval_value("(знизити-складену-пару-до-машинних-форм 2 3)", &mut session);
     let profile_forms = eval_value("(x86-minimal-structural-car-forms 2 3)", &mut session);
     assert_eq!(profile_forms, semantic_forms);
 
@@ -149,7 +149,7 @@ fn bounded_cond_profile_matches_lisp_owned_machine_lowering() {
     // checks only lowering/profile mechanics below that semantic boundary.
 
     let semantic_forms = eval_value(
-        "(x86-lower-eq-cond-u64-forms 2 3 111 222)",
+        "(машина-знизити-рівність-та-умову-64 2 3 111 222)",
         &mut session,
     );
     assert_eq!(
