@@ -1,11 +1,14 @@
-; Machine-readable authority boundary between language meaning and physical target facts.
-; This file deliberately contains no target mnemonic, register, opcode, or ISA name.
-; SENS owns language meaning and semantic IDs. Hardware specifications own ISA
-; facts. SENS may represent and encode those facts. CML remains an optimizer,
-; while the host owns only raw executable-memory / invocation mechanisms.
+; Машинно-читана межа повноважень між змістом мови та фізичною ціллю.
+; Цей файл навмисно не містить мнемонік цільової машини, регістрів,
+; кодів операцій або назв наборів машинних інструкцій.
+; СЕНС визначає зміст мови й семантичні ідентичності. Специфікації
+; обладнання визначають машинні інструкції. СЕНС може представляти
+; та кодувати ці відомості. CML залишається оптимізатором, а зовнішнє
+; середовище забезпечує лише механізми виклику та виконувану пам'ять.
 ;
-; Machine authority is admitted by properties, not by a historical file path or
-; implementation name. An encoder/assembler file is only a replaceable carrier.
+; Допуск машинного виконання визначається властивостями, а не
+; історичним шляхом до файла чи назвою реалізації.
+; Файл кодера або асемблера — лише замінний носій механізму.
 
 (machine-lowering-boundary
   (schema machine-lowering-boundary/2)
@@ -27,8 +30,8 @@
   (machine-effect-semantic-authority forbidden)
   (reverse-authority forbidden)
 
-  ; Admission belongs to a closed witnessed subset, not to asm-x86.lisp,
-  ; x86-64.lisp, or any other implementation carrier by name.
+  ; Допускається тільки замкнена підмножина з перевіреними свідченнями.
+  ; Її не визначає назва asm-x86.lisp, x86-64.lisp чи іншого носія.
   (machine-authority-basis admitted-subset-properties)
   (admitted-subset-owner sens)
   (admitted-subset-closed required)
@@ -43,7 +46,8 @@
   (raw-execution-mechanism host)
   (machine-text projection-only)
   (machine-bytes lisp-owned-target-product)
-  ; 1153 briefly reached main from a compiler-originated experiment. It is burned:
-  ; never assign it to another language meaning, while keeping it out of the active
-  ; semantic registry because no language contract admitted that operation.
+  ; Ідентичність 1153 короткочасно потрапила до main з експерименту
+  ; компілятора. Її остаточно вилучено з ужитку: не призначати
+  ; іншому мовному значенню та не додавати до активного реєстру,
+  ; бо мовний контракт ніколи не допускав відповідну операцію.
   (retired-semantic-id 1153))
