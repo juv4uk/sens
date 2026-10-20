@@ -66,6 +66,26 @@ def main(argv: list[str] | None = None) -> int:
     ):
         print("RELEASE_BLOCKED: triple totals contradict per-file evidence", file=sys.stderr)
         return 1
+    # Структура sens-t5-triplet-inventory/v1 свідчить ЛИШЕ про байти:
+    # її виробник не має права на VERIFIED або release_admitted=True.
+    # Навіть узгоджена фальсифікація рядків та лічильників не є
+    # незалежним SENS-оракулом. Наявні F2/F4 докази треба перевіряти
+    # окремим засобом, а не вважати доведеними з цього JSON.
+    if (
+        s["uk_oracle_verified"] != 0
+        or s["release_admitted"] != 0
+        or any(
+            row.get("uk_oracle") != "NOT_VERIFIED"
+            or row.get("release_admitted") is not False
+            for row in rows
+        )
+    ):
+        print(
+            "RELEASE_BLOCKED: mechanical inventory cannot assert native "
+            "SENS semantic or release admission",
+            file=sys.stderr,
+        )
+        return 1
     print("RELEASE_TRIPLE_DEBT", json.dumps(s, sort_keys=True))
     # Inventory cannot claim independent Ukrainian oracle for all canaries.
     # A ratified proof ledger must be consumed; never promote one D1 witness.
@@ -88,8 +108,14 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
-    print("RELEASE_TRIPLE_FULL_CORPUS_PASS")
-    return 0
+    # Навіть фізично повна трійка не доводить укр → T5M → укр
+    # та позитивний і негативний семантичні SENS-свідки на exact SHA.
+    print(
+        "RELEASE_BLOCKED: complete physical views alone do not prove "
+        "Ukrainian SENS roundtrip, independent semantics or release GO",
+        file=sys.stderr,
+    )
+    return 1
 
 
 if __name__ == "__main__":
