@@ -25,8 +25,8 @@ from domain_tables import D7_TABLE, read_domain_table  # noqa: E402
 from sens_t5_codec import decode_bytes, encode_words, typed_sha256  # noqa: E402
 
 D7 = tuple(row.bits for row in read_domain_table(D7_TABLE))
-assert len(D7) == len(set(D7)) == 126
-assert not {"0100001", "0101010"}.intersection(D7)
+# Власник 2026-10-20: D7 ратифікована як 128 координат (усі різні).
+assert len(D7) == len(set(D7)) == 128
 
 def corpus(kind: str, n: int) -> list[str]:
     if kind == "d3":
@@ -109,7 +109,7 @@ def main() -> int:
         "scope": "Python reference T5 transport only; no language execution",
         "comparison": "physical T5 bytes versus canonical ASCII exact-word view",
         "limits": "GitHub shared runner timings are noisy; do not compare across distinct hardware",
-        "d7": "126 owner-ratified coordinates; 2 reserved and excluded",
+        "d7": "128 owner-ratified D7 coordinates; all distinct",
     }
     with (args.out / "environment.json").open("w", encoding="utf-8") as f:
         json.dump(environment, f, ensure_ascii=False, indent=2)
