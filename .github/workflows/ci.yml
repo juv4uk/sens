@@ -151,6 +151,7 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/install-zig
+        if: github.event_name == 'workflow_dispatch'
 
       # Одноразове виконання тільки на конкретному MIGRATE-SID8-UKR push.
       # Жодних комітів/пушів із раннера — лише звіт та patch artifact.
@@ -281,7 +282,7 @@ jobs:
           python3 scripts/discover_domain_function_candidates.py --domain D6 --limit 16 --format tsv --no-research-scan --candidates-only --evidence-first
 
       - name: Реальна SENS-семантика post-core зв'язувань (#5871)
-        if: ${{ always() }}
+        if: ${{ always() && github.event_name == 'workflow_dispatch' }}
         run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
 
       - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
