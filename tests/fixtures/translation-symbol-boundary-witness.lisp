@@ -1,6 +1,6 @@
-; #369 — external translation decisions must survive the symbol? result-domain
-; migration without preserving the historical t/() predicate sentinel.
-; Ukrainian projection only.
+; #369 — свідок межі символьної ідентичності при перекладі СЕНС.
+; Виклики звірено з визначеннями lib/translation.lisp.
+; Цитовані статуси, назви полів і значення відмов не перекладаються.
 
 (load "lib/unify.lisp")
 (load "lib/reason.lisp")
@@ -9,65 +9,70 @@
 (load "lib/result-status.lisp")
 (load "lib/translation.lisp")
 
-(визначити translation-symbol-boundary-rows
+(визначити рядки-межі-символів-перекладу
   (функція ()
-    (нехай ((symbol-refusal
+    (нехай ((відмова-символом
              (як-є
                (translation/1 rejected clause
                  "Colorless green ideas sleep furiously."
                  unsupported-translation)))
-           (non-symbol-refusal
+           (відмова-не-символом
              (як-є
                (translation/1 rejected clause
                  "Colorless green ideas sleep furiously."
                  42)))
-           (invalid-module-review
-             (translation-review 42 symbol-refusal))
-           (symbol-refusal-review
-             (translation-review (як-є corpus) symbol-refusal))
-           (non-symbol-refusal-review
-             (translation-review (як-є corpus) non-symbol-refusal)))
+           (огляд-неправильного-модуля
+             (переклад-перевірка 42 відмова-символом))
+           (огляд-відмови-символом
+             (переклад-перевірка (як-є corpus) відмова-символом))
+           (огляд-відмови-не-символом
+             (переклад-перевірка (як-є corpus) відмова-не-символом)))
       (список
         (список
           (як-є non-symbol-module-is-invalid)
           (список
-            (translation-review-status invalid-module-review)
-            (translation-review-code invalid-module-review))
+            (переклад-перевірка-стан огляд-неправильного-модуля)
+            (переклад-перевірка-код огляд-неправильного-модуля))
           (як-є (rejected invalid-module)))
         (список
           (як-є symbolic-refusal-is-recordable)
           (список
-            (translation-review-status symbol-refusal-review)
-            (translation-review-code symbol-refusal-review))
+            (переклад-перевірка-стан огляд-відмови-символом)
+            (переклад-перевірка-код огляд-відмови-символом))
           (як-є (rejected translator-rejected)))
         (список
           (як-є non-symbol-refusal-is-invalid)
           (список
-            (translation-review-status non-symbol-refusal-review)
-            (translation-review-code non-symbol-refusal-review))
+            (переклад-перевірка-стан огляд-відмови-не-символом)
+            (переклад-перевірка-код огляд-відмови-не-символом))
           (як-є (rejected invalid-rejection)))))))
 
-(визначити translation-symbol-boundary-check
-  (функція (rows)
+(визначити перевірити-межу-символів-перекладу
+  (функція (рядки)
     (за-умовою
-      ((атом? rows)
+      ((атом? рядки)
        (як-є (translation-symbol-boundary-witness (status pass))))
       (так
-       (нехай ((row (перше rows)))
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((однакові? (друге row) (третє row))
-            (translation-symbol-boundary-check (решта rows)))
+           ((однакові? (друге рядок) (третє рядок))
+            (перевірити-межу-символів-перекладу (решта рядки)))
            (так
             (список
               (як-є translation-symbol-boundary-witness)
               (список (як-є status) (як-є fail))
-              (список (як-є case) (перше row))
-              (список (як-є actual) (друге row))
-              (список (як-є expected) (третє row))))))))))
+              (список (як-є case) (перше рядок))
+              (список (як-є actual) (друге рядок))
+              (список (як-є expected) (третє рядок))))))))))
 
-(визначити translation-symbol-boundary-witness
+(визначити свідок-межі-символів-перекладу
   (функція ()
-    (translation-symbol-boundary-check
-      (translation-symbol-boundary-rows))))
+    (перевірити-межу-символів-перекладу
+      (рядки-межі-символів-перекладу))))
 
-(translation-symbol-boundary-witness)
+; Старі назви свідка — лише посилання для сумісності.
+(визначити translation-symbol-boundary-rows рядки-межі-символів-перекладу)
+(визначити translation-symbol-boundary-check перевірити-межу-символів-перекладу)
+(визначити translation-symbol-boundary-witness свідок-межі-символів-перекладу)
+
+(свідок-межі-символів-перекладу)
