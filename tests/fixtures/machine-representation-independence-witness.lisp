@@ -1,8 +1,9 @@
-; #211 — representation-independence witness.
-; Lisp's existing addition is the answer key. The machine layer realizes the
-; same inputs twice: once through the canonical bounded lowerer (RCX scratch),
-; once through an alternate admitted register choice (R8 scratch).
-; Ukrainian projection only.
+; #211 — свідок незалежності семантики від машинного представлення.
+; Еталоном є додавання, уже визначене самою мовою СЕНС.
+; Машинний механізм обчислює ті самі значення двома маршрутами:
+; через канонічне обмежене пониження з допоміжним RCX і
+; через інший допущений регістр R8. Виконувані функції українські;
+; назви регістрів та машинні інструкції залишаються даними ISA.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")

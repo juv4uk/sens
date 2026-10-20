@@ -86,11 +86,11 @@
           (як-є (structural-relation same)))
         (список
           (як-є exact-less-false-round-trip)
-          (однакові? (прочитати (значення-у-текст (< 2 1))) (< 2 1))
+          (однакові? (прочитати (значення-у-текст (менше? 2 1))) (менше? 2 1))
           (як-є (structural-relation same)))
         (список
           (як-є exact-less-true-round-trip)
-          (однакові? (прочитати (значення-у-текст (< 1 2))) (< 1 2))
+          (однакові? (прочитати (значення-у-текст (менше? 1 2))) (менше? 1 2))
           (як-є (structural-relation same)))
         (список
           (як-є external-json-false-remains-distinct)
