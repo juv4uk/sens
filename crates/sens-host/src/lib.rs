@@ -674,9 +674,12 @@ pub fn install() {
     register_evaluated_capability("load", 1, evaluate_load);
     register_capability("tcp-connect", evaluate_tcp_connect);
     register_capability("tcp-listen-raw", evaluate_tcp_listen_raw);
+    register_capability("протокол-передавання-сире-слухання", evaluate_tcp_listen_raw);
     register_evaluated_capability("tcp-accept", 1, evaluate_tcp_accept);
     register_evaluated_capability("tcp-read-raw", 1, evaluate_tcp_read_raw);
+    register_evaluated_capability("протокол-передавання-сире-читання", 1, evaluate_tcp_read_raw);
     register_capability("tcp-write-raw", evaluate_tcp_write_raw);
+    register_capability("протокол-передавання-сирий-запис", evaluate_tcp_write_raw);
     register_evaluated_capability("tcp-close", 1, evaluate_tcp_close);
     #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
     register_capability(
@@ -742,9 +745,12 @@ mod install_tests {
             "load",
             "tcp-connect",
             "tcp-listen-raw",
+            "протокол-передавання-сире-слухання",
             "tcp-accept",
             "tcp-read-raw",
+            "протокол-передавання-сире-читання",
             "tcp-write-raw",
+            "протокол-передавання-сирий-запис",
             "tcp-close",
         ] {
             assert!(installed.iter().any(|n| n == name), "{name} not registered");
