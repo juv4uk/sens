@@ -284,9 +284,12 @@ jobs:
       - name: Клавіатурні символи у проєкціях ук, укр і sym (D1–D11)
         if: ${{ always() }} # самостійна перевірка, навіть коли попередній guard червоний
         run: python3 -m unittest tests/test_ukrainian_domain_projection_rules.py -v
-      - name: Безпечність dry-run і незмінність доменних колонок
+      - name: Безпечність dry-run і чинні українські Core-бібліотеки
         if: ${{ always() }}
-        run: python3 -m unittest tests/test_ukrainian_domain_projection_migration.py -v
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests/test_ukrainian_domain_projection_migration.py -v
+          python3 -m unittest tests/test_core_ukr_primary_projection.py -v
 
       - name: D11 селекторні кандидати — точна бітність, похідність і негативні контролі
         if: ${{ always() }}
