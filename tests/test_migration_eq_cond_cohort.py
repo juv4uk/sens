@@ -111,7 +111,7 @@ class EqCondCohort(unittest.TestCase):
                     for item in ("--" + flag, str(ROOT / file))
                 ],
                 "--source-era",
-                "legacy",  # Input fixtures intentionally use provenance-pinned SID8 W8 heads.
+                "legacy",  # Input fixtures intentionally use provenance-pinned сід8 W8 heads.
                 "--report",
                 str(report),
             ]
