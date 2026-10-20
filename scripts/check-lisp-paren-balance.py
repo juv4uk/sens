@@ -81,10 +81,10 @@ ENCODER = pathlib.Path("lib/machine/encoding/x86-64.lisp")
 ADMISSION = pathlib.Path("lib/machine/admission/x86-64.lisp")
 
 REQUIRED_LOWERING_FORMS = (
-    "(0011 x86-lower-add-u64-forms",
-    "(0011 x86-lower-cons-car-u64-forms",
-    "(0011 x86-call-semantic-car-u64",
-    "(0011 x86-encode-current-eq-cond-u64",
+    "(визначити машина-знизити-додавання-беззнакових-64-до-форм",
+    "(визначити знизити-складену-пару-до-машинних-форм",
+    "(визначити машина-викликати-семантичне-перше-64",
+    "(визначити машина-кодувати-поточну-рівність-та-умову-64",
 )
 REQUIRED_ENCODER_FORMS = (
     "(0011 x86-reg-code",
