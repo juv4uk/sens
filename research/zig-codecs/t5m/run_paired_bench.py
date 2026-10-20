@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 T5M_DIR = "research/zig-codecs/t5m"
-ZIG_SOURCE = "research/zig-codecs/t5/bench.zig"  # той самий T5M-кодек (5 трітів/байт)
+ZIG_SOURCE = "research/zig-codecs/t5m_bench.zig"  # T5M-кодек t5m.zig (5 трітів/байт, дефолт)
 ASM_BENCH = f"{T5M_DIR}/bench_asm.zig"
 ASM_SOURCES = ["research/asm-t5m/t5m_words.S", "research/asm-t5m/t5m_pack.S"]
 RUST_EXAMPLE = "target/release/examples/zig_t5_matched_bench"
@@ -119,7 +119,7 @@ def main() -> int:
         meta["rustc"] = checked(["rustc", "-Vv"]).strip()
     (out / "environment.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
 
-    checked(["zig", "test", "research/zig-codecs/t5/t5.zig"])
+    checked(["zig", "test", "research/zig-codecs/t5m.zig"])
     binaries = build_binaries(out, impls)
     meta["binary_sha256"] = {name: digest(path) for name, path in binaries.items()}
     (out / "environment.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
