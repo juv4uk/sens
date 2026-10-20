@@ -1,6 +1,6 @@
 ; contracts/d6-ratification.lisp
-; OWNER-RATIFIED 2026-10-05 — issue #3393.
-; Current D6 semantic residency and coordinate authority.
+; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-05 — issue #3393.
+; Чинна семантична резидентність і координатна влада D6.
 
 (
   (schema . d6-ratification/1)
