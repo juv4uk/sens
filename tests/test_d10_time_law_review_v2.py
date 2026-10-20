@@ -93,8 +93,21 @@ class TimeReview(unittest.TestCase):
             root=Path(folder)
             (root/'lib').mkdir()
             (root/'lib/time.lisp').write_text('(00001001 civil-from-days 000)\n',encoding='utf-8')
-            with self.assertRaisesRegex(AssertionError,'live D4 DEFINE missing/duplicated'):
+            with self.assertRaisesRegex(AssertionError,'українське D4 DEFINE missing/duplicated'):
                 mod.verify(copy.deepcopy(ledger),root,require_checkout=True)
+
+    def test_historical_english_name_cannot_replace_live_ukrainian_definition(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            (root/'lib').mkdir()
+            source=(ROOT/'lib/time.lisp').read_text(encoding='utf-8')
+            ukrainian=mod.LIVE_UKRAINIAN_DEFINITIONS['CIVIL-FROM-DAYS']
+            original='(визначити '+ukrainian
+            self.assertEqual(source.count(original),1)
+            mutated=source.replace(original,'(визначити civil-from-days',1)
+            (root/'lib/time.lisp').write_text(mutated,encoding='utf-8')
+            with self.assertRaisesRegex(AssertionError,'українське D4 DEFINE missing/duplicated'):
+                mod.verify(copy.deepcopy(ledger),root,require_checkout=False)
 
     def test_source_optional_mode_is_explicitly_not_admission(self):
         with tempfile.TemporaryDirectory() as folder:
