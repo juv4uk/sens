@@ -275,6 +275,52 @@ pub(crate) fn exact_words_div_rem_u64(input: &[u64], divisor: u64) -> Option<(Ve
     }
 }
 
+/// Точне беззнакове ділення довільної кількості 64-бітних слів.
+/// Дані — little-endian; нульовий дільник і різні довжини заборонені.
+/// Дільник в одному слові: раніше перевірений ASM DIVQ.
+/// Ширший дільник: відновлювальне ділення з наявним ASM SBB.
+/// Жодного фіксованого мовного Dn чи округлення цей механізм не створює.
+pub(crate) fn exact_words_div_rem_unsigned(
+    input: &[u64],
+    divisor: &[u64],
+) -> Option<(Vec<u64>, Vec<u64>)> {
+    if input.is_empty() || input.len() != divisor.len() { return None; }
+    let n = input.len();
+    let highest = divisor.iter().rposition(|&word| word != 0)?;
+    if highest == 0 {
+        let (q, r) = exact_words_div_rem_u64(input, divisor[0])?;
+        let mut remainder = vec![0_u64; n];
+        remainder[0] = r;
+        return Some((q, remainder));
+    }
+
+    let count = n.checked_mul(64)?;
+    let mut quotient = vec![0_u64; n];
+    let mut remainder = vec![0_u64; n.checked_add(1)?];
+    let mut extended_divisor = divisor.to_vec();
+    extended_divisor.push(0);
+
+    // Після кожної ітерації remainder < divisor. Одне резервне
+    // слово гарантує відсутність усічення при зсуві.
+    for bit in (0..count).rev() {
+        let mut carry = (input[bit / 64] >> (bit % 64)) & 1;
+        for limb in &mut remainder {
+            let next = *limb >> 63;
+            *limb = (*limb << 1) | carry;
+            carry = next;
+        }
+        if remainder.iter().rev().cmp(extended_divisor.iter().rev())
+            != std::cmp::Ordering::Less
+        {
+            remainder = exact_words_add_sub("-", &remainder, &extended_divisor)?;
+            quotient[bit / 64] |= 1_u64 << (bit % 64);
+        }
+    }
+    if remainder[n] != 0 { return None; }
+    remainder.pop();
+    Some((quotient, remainder))
+}
+
 /// Точна цілочисельна частка двох явно допущених знакових D24/D48.
 /// Не зараховує ділення з остачею: воно йде до канонічного RATIO у SENS.
 /// Навіть D48 minimum/-1 вміщується в i64, але домен виходу має розширитися.
