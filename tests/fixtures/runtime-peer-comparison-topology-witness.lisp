@@ -9,7 +9,7 @@
 ; The CLI does not load lib/surface/uk.lisp or lib/surface/sa.lisp before this
 ; fixture, so these names exist only through the canonical runtime peer binder.
 
-(def runtime-peer-comparison-topology-observations
+(визначити runtime-peer-comparison-topology-observations
   (список
     ; Initial stable peer identities.
     (тотожне? менше? hīna?)
@@ -21,30 +21,30 @@
 
     ; 1014: shadow each spelling independently. The shadow becomes distinct,
     ; while the two untouched peers remain one callable identity.
-    (let ((менше? (функція (a b) (як-є shadowed))))
+    (нехай ((менше? (функція (a b) (як-є shadowed))))
       (список (тотожне? менше? hīna?) (тотожне? hīna? <)))
-    (let ((hīna? (функція (a b) (як-є shadowed))))
+    (нехай ((hīna? (функція (a b) (як-є shadowed))))
       (список (тотожне? hīna? менше?) (тотожне? менше? <)))
-    (let ((< (функція (a b) (як-є shadowed))))
+    (нехай ((< (функція (a b) (як-є shadowed))))
       (список (тотожне? < менше?) (тотожне? менше? hīna?)))
 
     ; 1015.
-    (let ((більше? (функція (a b) (як-є shadowed))))
+    (нехай ((більше? (функція (a b) (як-є shadowed))))
       (список (тотожне? більше? adhika?) (тотожне? adhika? >)))
-    (let ((adhika? (функція (a b) (як-є shadowed))))
+    (нехай ((adhika? (функція (a b) (як-є shadowed))))
       (список (тотожне? adhika? більше?) (тотожне? більше? >)))
-    (let ((> (функція (a b) (як-є shadowed))))
+    (нехай ((> (функція (a b) (як-є shadowed))))
       (список (тотожне? > більше?) (тотожне? більше? adhika?)))
 
     ; 1016.
-    (let ((рівне? (функція (a b) (як-є shadowed))))
+    (нехай ((рівне? (функція (a b) (як-є shadowed))))
       (список (тотожне? рівне? sama?) (тотожне? sama? =)))
-    (let ((sama? (функція (a b) (як-є shadowed))))
+    (нехай ((sama? (функція (a b) (як-є shadowed))))
       (список (тотожне? sama? рівне?) (тотожне? рівне? =)))
-    (let ((= (функція (a b) (як-є shadowed))))
+    (нехай ((= (функція (a b) (як-є shadowed))))
       (список (тотожне? = рівне?) (тотожне? рівне? sama?)))))
 
-(def runtime-peer-comparison-topology-expected
+(визначити runtime-peer-comparison-topology-expected
   (як-є
     (
       (identity-relation same)
@@ -68,12 +68,12 @@
     )))
 
 (за-умовою
-  ((equal?
+  ((однакові?
      runtime-peer-comparison-topology-observations
      runtime-peer-comparison-topology-expected)
    (structural-relation same)
    (як-є (runtime-peer-comparison-topology-witness (status pass))))
-  ((equal?
+  ((однакові?
      runtime-peer-comparison-topology-observations
      runtime-peer-comparison-topology-expected)
    (structural-relation distinct)
