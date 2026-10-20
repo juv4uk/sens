@@ -2335,7 +2335,7 @@
 
 ; === Д9: функції з перевіреними координатами без допуску нового машинного коду ===
 ; D9:110100101 NUMERIC-EQUALITY. Exact D24+ numeric order is from D5
-; LESSP/GREATERP; mixed widths and unqualified operands reject in D5.
+; Порівняння LESSP/GREATERP належать D5: різна бітність або операнди без домену відхиляються.
 (визначити числовий-рівність
   (функція (лівий правий)
     (за-умовою
@@ -2350,7 +2350,7 @@
     (однакові? (решта (сполучити голова хвіст)) хвіст)))
 
 ; D9:010110001 CDR-DOTTED. EQ on an atomic dotted tail; D3 EQ
-; rejects non-atomic carriers rather than silently inventing identity.
+; Неатомарні носії відхиляються, замість мовчазного вигадування тотожності.
 (визначити канон-закон-решта-крапковий
   (функція (голова хвіст)
     (тотожне? (решта (сполучити голова хвіст)) хвіст)))
@@ -2365,7 +2365,7 @@
       ((атом? значення) (тотожне? значення значення))
       ((атом? (як-є ())) (перше (як-є ()))))))
 
-; D9 Canon law harvest from lib/canon.lisp (owner-ratified D9 #4008).
+; Д9: закони Канону взято з lib/canon.lisp; домен ратифіковано власником у #4008.
 ; D9:001111001 CANON-EMPTY-LIST is structural D3:000, never D1:0.
 ; Наведені закони D9 повертають явний результат джерела з трьома полями:
 ; (canon-law-result закон стан), а не приведену істину чи новий примітив.
@@ -2769,7 +2769,7 @@
 ; після цієї редакторської зміни окремо не запускалися.
 ; D6:010011 ABS / модуль — точна арифметика D24+ і умова D1.
 ; D6:010011 ABS / модуль — exact D24+ arithmetic, exact D1 condition.
-; LESSP returns an exact numeric result; EQUAL? projects its 1/0 value to D1.
+; LESSP повертає точне числове значення; EQUAL? проєктує відповіді 1/0 у D1.
 (визначити модуль
   (функція (аргумент-х)
     (за-умовою
@@ -2830,16 +2830,16 @@
 (визначити min-list найменше-у-списку)
 (визначити max-list найбільше-у-списку)
 
-; #469 — post-core stable peer materialization.
+; #469 — стале формування сумісних імен після завантаження ядра.
 ;
-; Numeric semantic ID remains the authority. This table is only the runtime
-; projection needed by Lisp libraries loaded after the ordinary core bootstrap:
-; a library names the numeric ID and the binding it just defined; peer spellings
-; are never implemented as UK->EN or EN->UK aliases in that library.
+; Авторитетом залишається числова семантична тотожність. Ця таблиця
+; є лише виконавчою проєкцією для бібліотек, що завантажуються після ядра:
+; бібліотека зазначає числовий код і щойно визначене зв'язування.
+; Сумісні назви не реалізують через взаємні псевдоніми UK->EN або EN->UK.
 ;
-; Keep only unique stable spellings from lib/surface/semantic-registry.lisp.
-; Candidate spellings are deliberately absent and therefore cannot become
-; executable merely by appearing in documentation.
+; Зберігаємо лише унікальні сталі назви з lib/surface/semantic-registry.lisp.
+; Назв-кандидатів навмисно немає: згадка в документації не робить
+; їх виконуваними.
 (визначити сталі-відповідники-за-адресами
   (як-є (
     (1079 utc-now поточний-всч)
@@ -2983,7 +2983,7 @@
 ; Партія D6 · похідні власні закони, точні коди без прямого D6 opcode.
 ; D6:000101 MAPLIST — дія над усіма непорожніми хвостами.
 ; D6:000101 MAPLIST(list, function) — successive suffix observations.
-; Exact D6 law: knowledge/d6-v2-binary-law-families.json and #3744.
+; Точний закон D6 засвідчено у knowledge/d6-v2-binary-law-families.json і #3744.
 (визначити відобразити-залишки
   (функція (хвости дія)
     (за-умовою
@@ -3375,7 +3375,7 @@
       (так так))))
 
 ; D8:00110111 STRING= — lexical equality from both ratified orders.
-; String comparison rejects incompatible non-string operands by its own law.
+; Порівняння рядків за власним законом відхиляє несумісні нерядкові операнди.
 (визначити текст-рівний?
   (функція (ліве праве)
     (за-умовою
@@ -3385,7 +3385,7 @@
 
 
 ; D8:10101011 SCALE — exact numeric scaling through ratified D5 TIMES.
-; Both operands retain explicit qualified D24+ numeric carriers.
+; Обидва операнди зберігають явно вказані числові носії D24+.
 (визначити масштабувати
   (функція (число коефіцієнт)
     (помножити число коефіцієнт)))
@@ -3399,8 +3399,8 @@
 
 
 ; D8:00000001 DOSEQ — proper-list effect iteration, left to right.
-; Native SENS D6 MAP evaluates each application; all mapped values are
-; discarded, and the iteration itself returns canonical D3:000 empty ().
+; Власний для СЕНС обхід D6 MAP виконує кожне застосування, але відкидає
+; утворені значення. Сам обхід повертає канонічне порожнє () з D3:000.
 (визначити для-кожного-елемента
   (функція (дія елементи)
     ((функція (відкинуті-результати) (як-є ()))
@@ -3471,7 +3471,7 @@
 ; D8:01011011 CHAR — character cell at D24 index in a string.
 ; D9:110011100 STRING-EMPTY?, D9:110101011 STRING-FIRST and
 ; D9:110011101 STRING-REST are existing exact-domain mechanisms.
-; Bounds failure uses a native D3 CAR(()) error, never a false value.
+; Вихід за межі повертає штатну помилку D3 CAR(()) замість логічної хиби.
 (визначити символ
   (функція (текст індекс)
     (за-умовою
@@ -3493,7 +3493,7 @@
 (визначити identity тотожність)
 
 ; D9:001110110 CANON-LAW-CDR-IMPROPER: atomic dotted tail survives CONS/CDR.
-; Does not claim a new independent primitive or direct D9 opcode admission.
+; Це не новий незалежний примітив і не допуск прямого машинного виклику D9.
 (визначити канон-закон-решта-неправильний
   (функція (голова атомний-хвіст)
     (тотожне? (решта (сполучити голова атомний-хвіст)) атомний-хвіст)))
@@ -3579,8 +3579,8 @@
     (решта (решта (перше (перше (решта (решта (решта значення)))))))))
 
 
-; D9 canonical reasoning outcomes — ratified exact coordinates, from
-; lib/result-status.lisp (historical research source; only SENS owns meaning).
+; Д9: канонічні результати міркування з точними ратифікованими координатами.
+; Історичне джерело — lib/result-status.lisp; семантикою володіє лише СЕНС.
 ; Результати — звичайні спискові дані D3/D4,
 ; а не новий тип значення зовнішнього виконавця.
 ; Канонічні мітки лишаються цитованими даними, не викличними головами.
@@ -3655,7 +3655,7 @@
     (друге (знайти-за-ключем (як-є produces) (решта запис)))))
 
 ; D9:000000100 RESULT-TAGGED? — strict one-bit D1 verdict, not host truthiness.
-; A malformed pair-valued head is not an admitted status atom.
+; Некоректний заголовок у вигляді пари не є допустимим атомом стану.
 (визначити результат-позначений?
   (функція (результат)
     (за-умовою
@@ -3670,7 +3670,7 @@
       (так ні))))
 
 ; D9:000011001 RESULT-STATUS / D9:000110010 RESULT-PAYLOAD.
-; Unsupported outcome shapes project to (), as the research donor specifies.
+; Непідтримувані форми результату проєктуються в (), відповідно до дослідного джерела.
 (визначити результат-стан
   (функція (результат)
     (за-умовою
@@ -3843,7 +3843,7 @@
       (помножити дільник (округлити-до-нуля ділене дільник)))))
 
 
-; D9 guard decision/status algebra from lib/guard.lisp.
+; Д9: алгебра рішень і станів захисту взята з lib/guard.lisp.
 ; Ratified D9:000010001 GUARD-DECISION? and D9:000000000 GUARD-EVIDENCE-STATUS?
 ; Кожна відповідь — точний біт предиката D1.
 ; Неатомарне рішення чи стан відхиляється значенням «ні»,
@@ -3869,9 +3869,9 @@
 
 
 ; D8:11111101 PAIR — historical two-sequence pair constructor.
-; Historical Lisp PAIR is recursively derived from CAR/CDR/CONS; the
-; existing D6 ZIP expression has this exact list-of-cons geometry.
-; The new D8 coordinate is an identity/projection, not a direct opcode.
+; Історичну функцію PAIR в Lisp рекурсивно будують через CAR/CDR/CONS.
+; Наявне вираження ZIP домену D6 має ту саму будову списку пар.
+; Нова координата D8 — тотожність і проєкція, а не прямий машинний код.
 (визначити пара
   (функція (ліві праві)
     (спарувати-послідовності ліві праві)))
@@ -3911,8 +3911,8 @@
        (хибне? (біт-невідємного? позиція
                (відняти (модуль число) 1))))
       (так (біт-невідємного? позиція число)))))
-; D9 Canon record algebra, recovered from lib/canon.lisp. All six identities
-; have ratified nine-bit coordinates; no direct D9 opcode admission.
+; Д9: алгебру канонічних записів відновлено з lib/canon.lisp. Усі шість тотожностей
+; мають ратифіковані дев'ятибітні координати; прямого виклику D9 немає.
 ; D9:001110101 CANON-LAW-RESULT reuses the existing SENS record constructor.
 (визначити канон-закон-результат канон-запис-закону)
 ; D9:101000100 / D9:001010111 explicit SATISFIED/VIOLATED records.
@@ -3946,8 +3946,8 @@
          (так (канон-відповідність-результат (як-є violated))))))))
 
 ; D9:001111000 CANON-LAW-SYMBOLIC-SURFACE from lib/canon.lisp.
-; Exact D3 ATOM/CAR/CDR/EQ/CONS law, as the already admitted Canon record.
-; It is a D9 language definition, not a new host primitive or opcode.
+; Точний закон D3 ATOM/CAR/CDR/EQ/CONS, як у вже допущеному записі Канону.
+; Це мовне визначення D9, а не новий примітив хоста чи машинний код.
 (визначити канон-закон-символьний-поверхня
   (функція ()
     (за-умовою
@@ -3989,7 +3989,7 @@
 
 
 ; D8:11100110 LSH — left shift by a nonnegative D24+ count.
-; Recurrence uses only SENS arithmetic and SUB1; no host bit operator.
+; Рекурсія використовує тільки арифметику СЕНС і SUB1, без побітового оператора хоста.
 (визначити зсунути-вліво
   (функція (значення зсув)
     (за-умовою
@@ -4198,7 +4198,7 @@
 (визначити world-depth світ-глибина)
 
 
-; D9 content-store algebra — derived SENS representation from lib/content-store.lisp.
+; Д9: алгебра сховища вмісту, похідне представлення СЕНС із lib/content-store.lisp.
 ; Immutable address/value alist: ((address . value) ...), D3:101 atom key identity.
 ; Пошук повертає (значення), якщо адресу знайдено,
 ; або (), якщо її немає. Збережене () не плутається з відсутністю.
@@ -4254,7 +4254,7 @@
 
 
 ; D9:000010011 GUARD-REFERENCE-FIELD — tagged reference contains (field value).
-; Match keys via established D5 ASSOC / structural equality; never D9 direct call.
+; Ключі звіряємо через чинний D5 ASSOC та структурну рівність, без прямого виклику D9.
 ; D9:000010011 — SENS-owned direct traversal of the tagged record fields.
 ; Avoid anonymous call-head lowering; shape (tag (field value) ...).
 (визначити внутрішнє-поле-у-парах
