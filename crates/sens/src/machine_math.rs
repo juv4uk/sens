@@ -24,6 +24,48 @@ unsafe extern "C" {
     fn sens_dot_avx2(a: *const f64, b: *const f64, n: usize) -> f64;
 }
 
+
+#[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+unsafe extern "C" {
+    fn sens_i24_add_exact(left: i64, right: i64) -> i64;
+    fn sens_i24_sub_exact(left: i64, right: i64) -> i64;
+    fn sens_i24_mul_exact(left: i64, right: i64) -> i64;
+}
+
+/// Цілочисельний механізм для рівно двох НАЯВНИХ знакових слів D24.
+///
+/// Повертає математичний i64, але не обирає самовільно домен, не допускає
+/// змішані D24/D48 і не представляє точної дробової семантики SENS.
+/// Для D24 результат +, -, * завжди вкладається в знакові 48 бітів.
+pub(crate) fn exact_i24_integer_op(operator: &str, left: i64, right: i64) -> Option<i64> {
+    const MIN: i64 = -(1 << 23);
+    const MAX: i64 = (1 << 23) - 1;
+    if !(MIN..=MAX).contains(&left) || !(MIN..=MAX).contains(&right) {
+        return None;
+    }
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    {
+        // SAFETY: фіксований SysV ABI, параметри — числа у знаковій межі
+        // D24. Навіть добуток крайніх D24 не перевищує знакові 48 бітів.
+        // SIMD не потрібен: ADD/SUB/IMUL дозволені у звичайному x86-64.
+        return Some(unsafe {
+            match operator {
+                "+" => sens_i24_add_exact(left, right),
+                "-" => sens_i24_sub_exact(left, right),
+                "*" => sens_i24_mul_exact(left, right),
+                _ => return None,
+            }
+        });
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    match operator {
+        "+" => left.checked_add(right),
+        "-" => left.checked_sub(right),
+        "*" => left.checked_mul(right),
+        _ => None,
+    }
+}
+
 /// Вибір механізму за ISA процесора, а не ратифікація мовної функції.
 pub fn backend() -> Backend {
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
@@ -102,4 +144,39 @@ mod tests {
         #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
         assert_eq!(backend(), Backend::Scalar);
     }
+    #[test]
+    fn d24_assembly_exact_signed_boundaries_and_rejects_bad_inputs() {
+        const MIN: i64 = -(1 << 23);
+        const MAX: i64 = (1 << 23) - 1;
+        for a in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
+            for b in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
+                assert_eq!(exact_i24_integer_op("+", a, b), Some(a + b), "sum {a} {b}");
+                assert_eq!(exact_i24_integer_op("-", a, b), Some(a - b), "difference {a} {b}");
+                assert_eq!(exact_i24_integer_op("*", a, b), Some(a * b), "product {a} {b}");
+            }
+        }
+        assert_eq!(exact_i24_integer_op("+", MAX + 1, 0), None);
+        assert_eq!(exact_i24_integer_op("*", MIN - 1, 1), None);
+        assert_eq!(exact_i24_integer_op("/", 2, 2), None);
+        assert_eq!(exact_i24_integer_op("=", 2, 2), None);
+    }
+
+    #[test]
+    fn d24_assembly_matches_checked_scalar_across_seeded_samples() {
+        let mut state = 0x9e37_79b9_u64;
+        for _ in 0..4096 {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            let a = ((state & 0xff_ffff) as i64) - (1 << 23);
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            let b = ((state & 0xff_ffff) as i64) - (1 << 23);
+            assert_eq!(exact_i24_integer_op("+", a, b), a.checked_add(b));
+            assert_eq!(exact_i24_integer_op("-", a, b), a.checked_sub(b));
+            assert_eq!(exact_i24_integer_op("*", a, b), a.checked_mul(b));
+        }
+    }
+
 }

@@ -142,12 +142,45 @@ pub fn is_domain_value(v: &Value) -> bool {
     numeric_value_domain_width(v).is_some()
 }
 
+/// Точний швидкий механізм: лише два вже ратифіковані знакові D24.
+/// Асемблер виконує тільки арифметику; саме числовий домен перевіряє
+/// тотожності, обирає D24 чи D48 та збирає повні біти без усічення.
+/// Для композицій NEG/RATIO та інших ширин залишається старий закон.
+fn signed_d24_integer_fast(operator: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
+    if lhs.numeric_domain_width() != Some(24) || rhs.numeric_domain_width() != Some(24) {
+        return None;
+    }
+    let decode = |number: &BinaryNumber| -> Option<i64> {
+        let word = number.exact_numeric_domain_bits()?;
+        if word.len() != 24 { return None; }
+        let raw = word.into_iter().fold(0_u32, |bits, bit| (bits << 1) | u32::from(bit));
+        // Розширення знака двійково-доповняльного D24 без десяткових
+        // посередників або перетворення в f64.
+        Some((((raw as i32) << 8) >> 8) as i64)
+    };
+    let mathematical = crate::machine_math::exact_i24_integer_op(operator, decode(lhs)?, decode(rhs)?)?;
+    // Результат ніколи не виходить за межі D48; жодної циклічної
+    // арифметики із втратою перенесення.
+    let out_width = if (-(1_i64 << 23)..=(1_i64 << 23) - 1).contains(&mathematical) { 24 } else { 48 };
+    let bits: Vec<u8> = (0..out_width)
+        .rev()
+        .map(|shift| ((mathematical >> shift) & 1) as u8)
+        .collect();
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
+}
+
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
     // Reject D24/D48 (or non-Dn) BEFORE cloning potentially wide rational
     // constituents into the private calculation.
     let width = shared_numeric_domain_width(lhs, rhs)?;
+    // Перевірена арифметична реалізація D24, без неявного приведення D48.
+    if width == 24 && matches!(operator, "+" | "-" | "*") {
+        if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
+            return signed_d24_integer_fast(operator, left, right);
+        }
+    }
     let (_, x_neg, x_num, x_den) = ingredients(lhs)?;
     let (_, y_neg, y_num, y_den) = ingredients(rhs)?;
 
@@ -245,6 +278,34 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    #[test]
+    fn real_d24_asm_math_preserves_signed_bits_and_widening() {
+        fn d24_signed(v: i64) -> Value {
+            let bits: Vec<u8> = (0..24).rev().map(|s| ((v >> s) & 1) as u8).collect();
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
+        }
+        // Незалежна арифметична перевірка та перевірка ратифікованого
+        // механізму D24 -> D48, без f64 і без змішаних доменів.
+        for a in [-(1 << 23), -(1 << 23) + 1, -2, -1, 0, 1, 2, (1 << 23) - 1] {
+            for b in [-(1 << 23), -1, 0, 1, (1 << 23) - 1] {
+                let left = d24_signed(a);
+                let right = d24_signed(b);
+                for (operator, expected) in [("+", a + b), ("-", a - b), ("*", a * b)] {
+                    let value = compute(operator, &left, &right).expect("точна машинна операція D24");
+                    assert_eq!(value.to_string(), expected.to_string(), "{a} {operator} {b}");
+                    let Value::BinaryNumber(result) = value else { panic!("ціле D24+"); };
+                    let width = if (-(1_i64 << 23)..=(1_i64 << 23) - 1).contains(&expected) { 24 } else { 48 };
+                    assert_eq!(result.numeric_domain_width(), Some(width));
+                    assert_eq!(result.exact_numeric_domain_bits().unwrap().len(), width);
+                }
+            }
+        }
+        let d48 = Value::BinaryNumber(d(48, 1));
+        assert!(compute("+", &d24_signed(1), &d48).is_none(), "суміш D24 і D48 недопустима");
+        let half = compute("/", &d24_signed(1), &d24_signed(2)).expect("дробова композиція лишилась");
+        assert_eq!(half.to_string(), "1/2");
     }
 
     #[test]

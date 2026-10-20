@@ -63,4 +63,36 @@ sens_dot_avx2:
     vzeroupper
     ret
 .size sens_dot_avx2,.-sens_dot_avx2
+
+/* Точні знакові D24 механізми без плаваючої коми. Обидва аргументи
+ * уже допущені SENS і розширені зі знакових 24 до i64.
+ * Результат ADD/SUB/IMUL вміщується у знакові 48 бітів.
+ * Вибір D24 або D48 залишається за доменним законом SENS. */
+.p2align 4
+.globl sens_i24_add_exact
+.type sens_i24_add_exact,@function
+sens_i24_add_exact:
+    mov %rdi,%rax
+    add %rsi,%rax
+    ret
+.size sens_i24_add_exact,.-sens_i24_add_exact
+
+.p2align 4
+.globl sens_i24_sub_exact
+.type sens_i24_sub_exact,@function
+sens_i24_sub_exact:
+    mov %rdi,%rax
+    sub %rsi,%rax
+    ret
+.size sens_i24_sub_exact,.-sens_i24_sub_exact
+
+.p2align 4
+.globl sens_i24_mul_exact
+.type sens_i24_mul_exact,@function
+sens_i24_mul_exact:
+    mov %rdi,%rax
+    imul %rsi,%rax
+    ret
+.size sens_i24_mul_exact,.-sens_i24_mul_exact
+
 .section .note.GNU-stack,"",@progbits
