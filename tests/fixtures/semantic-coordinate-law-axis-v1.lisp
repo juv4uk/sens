@@ -3,26 +3,26 @@
 ; This is evidence/projection data, not a second semantic registry.
 ; SID identity remains owned by lib/surface/semantic-registry.lisp.
 ; Mathematical result domains remain owned by #225 and their existing fixtures.
-; Ukrainian projection only.
+; Ukrainian projection only. Coordinates as decimal.
 
 (визначити semantic-coordinate-law-axis-v1
   (як-є
-    ((00001100
+    ((12
        (axis mathematical)
        (domain exact-rational-arithmetic)
        (witness exact-rational-sum)
        (evidence tests/fixtures/mathematical-result-v1.lisp))
-     (00000100
+     (4
        (axis equational-structure)
        (domain pair-construction)
        (witness car-cons-left-inverse)
        (evidence lib/canon.lisp))
-     (00000101
+     (5
        (axis equational-structure)
        (domain pair-elimination)
        (witness car-cons-left-inverse)
        (evidence lib/canon.lisp))
-     (00000111
+     (7
        (axis semantic-control)
        (domain non-mathematical-in-this-slice)
        (witness no-mathematical-law-claimed)
