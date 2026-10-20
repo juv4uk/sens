@@ -72,27 +72,29 @@ def load_manifest(path: Path, root: Path) -> list[tuple[Path, str | None]]:
             raise ValueError("manifest entries must name a non-empty path")
 
         rel = Path(raw_path)
-        if rel.is_absolute() or rel.suffix.lower() != ".lisp":
-            raise ValueError(f"manifest entry must be a relative .lisp path: {raw_path}")
-
-        normalized = Path(os.path.normpath(rel.as_posix()))
-        if normalized in seen:
+        # Маніфест є точним списком джерел: жодного нормалізованого обходу.
+        # Не дозволяємо ../, ./, дубльований / чи зміну регістру суфікса:
+        # вхідний шлях має збігатися з тим, який реально мігруємо.
+        if (rel.is_absolute() or rel.suffix != ".lisp"
+                or "\\" in raw_path or raw_path != rel.as_posix()
+                or any(part in ("", ".", "..") for part in raw_path.split("/"))):
+            raise ValueError(f"manifest entry must be a safe relative .lisp path: {raw_path}")
+        if rel in seen:
             raise ValueError(f"duplicate manifest entry: {raw_path}")
-        seen.add(normalized)
+        seen.add(rel)
 
-        candidate = root / normalized
-        if candidate.is_symlink():
-            raise ValueError(f"manifest source must not be a symlink: {raw_path}")
-
+        candidate = root
+        for part in rel.parts:
+            candidate = candidate / part
+            if candidate.is_symlink():
+                raise ValueError(f"manifest source symlink component: {raw_path}")
         source = candidate.resolve()
-        try:
-            source.relative_to(root)
-        except ValueError as exc:
-            raise ValueError(f"manifest path escapes root: {raw_path}") from exc
+        if not source.is_relative_to(root):
+            raise ValueError(f"manifest path escapes root: {raw_path}")
         if not source.is_file():
             raise ValueError(f"manifest source is not a regular file: {raw_path}")
 
-        result.append((normalized, expected_sha))
+        result.append((rel, expected_sha))
 
     return sorted(result)
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -35,6 +36,44 @@ class CurrentManifestMigrationTests(unittest.TestCase):
         )
         self.assertEqual(len(foundation["domains"]["D10"]["residents"]), 1024)
         self.assertEqual(len(self.maps), 3)
+
+    def test_manifest_rejects_lexical_traversal_and_symlink_parent(self):
+        # Перевіряємо вхідне ім'я, не результат os.path.normpath.
+        with tempfile.TemporaryDirectory(prefix="sens-manifest-path-") as tmp:
+            root = Path(tmp) / "джерела"
+            root.mkdir()
+            directory = root / "програми"
+            directory.mkdir()
+            source = directory / "програма.lisp"
+            source.write_text("(як-є ())\\n", encoding="utf-8")
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            manifest = Path(tmp) / "manifest.json"
+
+            def check(path: str):
+                manifest.write_text(json.dumps({"files": [
+                    {"path": path, "sha256": digest},
+                ]}, ensure_ascii=False), encoding="utf-8")
+                return approved.load_manifest(manifest, root)
+
+            self.assertEqual(check("програми/програма.lisp"), [
+                (Path("програми/програма.lisp"), digest),
+            ])
+            for invalid in (
+                "програми/../програми/програма.lisp",
+                "програми/./програма.lisp",
+                "./програми/програма.lisp",
+                "програми//програма.lisp",
+                "програми\\\\програма.lisp",
+                "../джерела/програми/програма.lisp",
+                "/програми/програма.lisp",
+                "програми/програма.LISP",
+            ):
+                with self.subTest(path=invalid):
+                    with self.assertRaisesRegex(ValueError, "safe relative"):
+                        check(invalid)
+            (root / "посилання").symlink_to(directory, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlink component"):
+                check("посилання/програма.lisp")
 
     def test_manifest_root_selects_its_own_ratified_foundation(self):
         # Заміна --root не повинна потай брати D9 з директорії скрипта.
