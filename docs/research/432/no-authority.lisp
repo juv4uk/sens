@@ -1,6 +1,7 @@
-; Explicit guardrail: #432 artifacts are research only.
-(no-authority
-  (language-contract . unchanged)
-  (canon-registry . unchanged)
-  (runtime-producer . unchanged)
-  (classification . research-relative-only))
+; Артефакти дослідження 432 не встановлюють законів мови.
+; Наведені твердження обмежуються дослідницьким висновком.
+(немає-нормативних-повноважень
+  (контракт-мови . незмінний)
+  (канонічний-реєстр . незмінний)
+  (виконавець-програми . незмінний)
+  (класифікація . лише-відносне-дослідження))
