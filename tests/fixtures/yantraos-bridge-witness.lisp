@@ -1,183 +1,125 @@
 ; #1145 executable witness for the yantraOS bridge contract.
+; Ukrainian projection only.
 ;
 ; The witness proves the intended composition without network access:
 ; SENS constructs a typed action envelope, yantraOS is represented as
 ; the execution owner, and the returned execution observation remains data.
-; No raw shell command is admitted to the envelope.
 
-(0011 yo-proper-list?
-  (0010 (value)
-    (110
-      ((010 value)
-       (1)
-       (110
-         ((11110111 value (001 ()))
-          (1)
-          (001 yes))
-         ((001 always)
-          (001 always)
-          (001 invalid))))
-      ((001 always)
-       (001 always)
-       (yo-proper-list? (011 value))))))
+(визначити yo-proper-list?
+  (функція (value)
+    (за-умовою
+      ((атом? value)
+       (за-умовою
+         ((однакові? value (як-є ()))
+          (як-є yes))
+         (так (як-є invalid))))
+      (так (yo-proper-list? (решта value))))))
 
-(0011 yo-field
-  (0010 (name record)
-    (001000 ((found (11100 name record)))
-      (110
-        ((11110111 found (001 ()))
-         (1)
-         (001 ()))
-        ((001 always)
-         (001 always)
-         (011 found))))))
+(визначити yo-field
+  (функція (name record)
+    (нехай ((found (знайти-за-ключем name record)))
+      (за-умовою
+        ((однакові? found (як-є ()))
+         (як-є ()))
+        (так (решта found))))))
 
-(0011 yo-has-field?
-  (0010 (name record)
-    (001000 ((found (11100 name record)))
-      (110
-        ((11110111 found (001 ()))
-         (1)
-         (001 no))
-        ((001 always)
-         (001 always)
-         (001 yes))))))
+(визначити yo-has-field?
+  (функція (name record)
+    (нехай ((found (знайти-за-ключем name record)))
+      (за-умовою
+        ((однакові? found (як-є ()))
+         (як-є no))
+        (так (як-є yes))))))
 
-(0011 yo-no-raw-shell?
-  (0010 (envelope)
-    (001000 ((action (yo-field (001 action) envelope))
-          (parameters (yo-field (001 parameters) envelope)))
-      (110
-        ((11110111
-           (yo-field (001 capability) action)
-           (001 shell))
-         (1)
-         (001 no))
-        ((yo-has-field? (001 command) parameters)
-         (001 yes)
-         (001 no))
-        ((001 always)
-         (001 always)
-         (001 yes))))))
+(визначити yo-no-raw-shell?
+  (функція (envelope)
+    (нехай ((action (yo-field (як-є action) envelope))
+          (parameters (yo-field (як-є parameters) envelope)))
+      (за-умовою
+        ((однакові?
+           (yo-field (як-є capability) action)
+           (як-є shell))
+         (як-є no))
+        ((тотожне? (yo-has-field? (як-є command) parameters) (як-є yes))
+         (як-є no))
+        (так (як-є yes))))))
 
-(0011 yo-action-envelope
-  (0010 (goal capability operation target parameters verification provenance approval)
-    (1110
-      (111 (001 protocol) (001 (yantraos-bridge 1)))
-      (111 (001 intent)
-            (1110
-              (111 (001 goal) goal)
-              (111 (001 requires) (001 ()))
-              (111 (001 stop-on) (001 (verified)))
-              (111 (001 produces) (001 (execution-observation)))))
-      (111 (001 action)
-            (1110
-              (111 (001 capability) capability)
-              (111 (001 operation) operation)
-              (111 (001 target) target)))
-      (111 (001 parameters) parameters)
-      (111 (001 verification) verification)
-      (111 (001 provenance) provenance)
-      (111 (001 approval) approval))))
+(визначити yo-action-envelope
+  (функція (goal capability operation target parameters verification provenance approval)
+    (список
+      (сполучити (як-є protocol) (як-є (yantraos-bridge 1)))
+      (сполучити (як-є intent)
+            (список
+              (сполучити (як-є goal) goal)
+              (сполучити (як-є requires) (як-є ()))
+              (сполучити (як-є stop-on) (як-є (verified)))
+              (сполучити (як-є produces) (як-є (execution-observation)))))
+      (сполучити (як-є action)
+            (список
+              (сполучити (як-є capability) capability)
+              (сполучити (як-є operation) operation)
+              (сполучити (як-є target) target)))
+      (сполучити (як-є parameters) parameters)
+      (сполучити (як-є verification) verification)
+      (сполучити (як-є provenance) provenance)
+      (сполучити (як-є approval) approval))))
 
-(0011 yo-action-envelope?
-  (0010 (value)
-    (110
-      ((yo-proper-list? value)
-       (001 yes)
-       (110
-         ((yo-has-field? (001 protocol) value)
-          (001 yes)
-          (110
-            ((yo-has-field? (001 intent) value)
-             (001 yes)
-             (110
-               ((yo-has-field? (001 action) value)
-                (001 yes)
-                (110
-                  ((yo-has-field? (001 parameters) value)
-                   (001 yes)
-                   (110
-                     ((yo-has-field? (001 verification) value)
-                      (001 yes)
-                      (110
-                        ((yo-has-field? (001 provenance) value)
-                         (001 yes)
-                         (110
-                           ((yo-has-field? (001 approval) value)
-                            (001 yes)
+(визначити yo-action-envelope?
+  (функція (value)
+    (за-умовою
+      ((тотожне? (yo-proper-list? value) (як-є yes))
+       (за-умовою
+         ((тотожне? (yo-has-field? (як-є protocol) value) (як-є yes))
+          (за-умовою
+            ((тотожне? (yo-has-field? (як-є intent) value) (як-є yes))
+             (за-умовою
+               ((тотожне? (yo-has-field? (як-є action) value) (як-є yes))
+                (за-умовою
+                  ((тотожне? (yo-has-field? (як-є parameters) value) (як-є yes))
+                   (за-умовою
+                     ((тотожне? (yo-has-field? (як-є verification) value) (як-є yes))
+                      (за-умовою
+                        ((тотожне? (yo-has-field? (як-є provenance) value) (як-є yes))
+                         (за-умовою
+                           ((тотожне? (yo-has-field? (як-є approval) value) (як-є yes))
                             (yo-no-raw-shell? value))
-                           ((001 always)
-                            (001 always)
-                            (001 no))))
-                        ((001 always)
-                         (001 always)
-                         (001 no))))
-                     ((001 always)
-                      (001 always)
-                      (001 no))))
-                  ((001 always)
-                   (001 always)
-                   (001 no))))
-               ((001 always)
-                (001 always)
-                (001 no))))
-            ((001 always)
-             (001 always)
-             (001 no))))
-         ((001 always)
-          (001 always)
-          (001 no))))
-      ((001 always)
-       (001 always)
-       (001 no)))))
+                           (так (як-є no))))
+                        (так (як-є no))))
+                     (так (як-є no))))
+                  (так (як-є no))))
+               (так (як-є no))))
+            (так (як-є no))))
+         (так (як-є no))))
+      (так (як-є no)))))
 
-(0011 yo-execution-observation
-  (0010 (result route evidence audit-ref provenance)
-    (1110
-      (111 (001 protocol) (001 (yantraos-bridge 1)))
-      (111 (001 result) result)
-      (111 (001 route) route)
-      (111 (001 evidence) evidence)
-      (111 (001 audit-ref) audit-ref)
-      (111 (001 provenance) provenance))))
+(визначити yo-execution-observation
+  (функція (result route evidence audit-ref provenance)
+    (список
+      (сполучити (як-є protocol) (як-є (yantraos-bridge 1)))
+      (сполучити (як-є result) result)
+      (сполучити (як-є route) route)
+      (сполучити (як-є evidence) evidence)
+      (сполучити (як-є audit-ref) audit-ref)
+      (сполучити (як-є provenance) provenance))))
 
-(0011 yo-execution-observation?
-  (0010 (value)
-    (110
-      ((yo-proper-list? value)
-       (001 yes)
-       (110
-         ((yo-has-field? (001 protocol) value)
-          (001 yes)
-          (110
-            ((yo-has-field? (001 result) value)
-             (001 yes)
-             (110
-               ((yo-has-field? (001 route) value)
-                (001 yes)
-                (110
-                  ((yo-has-field? (001 evidence) value)
-                   (001 yes)
-                   (110
-                     ((yo-has-field? (001 audit-ref) value)
-                      (001 yes)
-                      (yo-has-field? (001 provenance) value))
-                     ((001 always)
-                      (001 always)
-                      (001 no))))
-                  ((001 always)
-                   (001 always)
-                   (001 no))))
-               ((001 always)
-                (001 always)
-                (001 no))))
-            ((001 always)
-             (001 always)
-             (001 no))))
-         ((001 always)
-          (001 always)
-          (001 no))))
-      ((001 always)
-       (001 always)
-       (001 no)))))
+(визначити yo-execution-observation?
+  (функція (value)
+    (за-умовою
+      ((тотожне? (yo-proper-list? value) (як-є yes))
+       (за-умовою
+         ((тотожне? (yo-has-field? (як-є protocol) value) (як-є yes))
+          (за-умовою
+            ((тотожне? (yo-has-field? (як-є result) value) (як-є yes))
+             (за-умовою
+               ((тотожне? (yo-has-field? (як-є route) value) (як-є yes))
+                (за-умовою
+                  ((тотожне? (yo-has-field? (як-є evidence) value) (як-є yes))
+                   (за-умовою
+                     ((тотожне? (yo-has-field? (як-є audit-ref) value) (як-є yes))
+                      (yo-has-field? (як-є provenance) value))
+                     (так (як-є no))))
+                  (так (як-є no))))
+               (так (як-є no))))
+            (так (як-є no))))
+         (так (як-є no))))
+      (так (як-є no)))))
