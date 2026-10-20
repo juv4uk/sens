@@ -1,12 +1,12 @@
-; #4342 — canonical target-neutral machine-effect boundary.
+; #4342 — канонічна межа машинних ефектів, незалежна від цільової платформи.
 ;
-; This file defines the authority seam only. It deliberately does not enumerate
-; an ISA and does not ratify a universal virtual instruction set.
+; Файл описує тільки межу повноважень. Він не встановлює перелік
+; інструкцій процесора й не ратифікує універсальну віртуальну ISA.
 ;
-; Language meaning is already fixed upstream by the language contract and
-; ratified exact-domain laws. A machine effect describes only the mechanism
-; required to realize an already-existing meaning. Target-specific forms are a
-; later projection and may reject fail-closed without changing that meaning.
+; Семантику вже визначають контракт мови й ратифіковані точнодоменні
+; закони. Машинний ефект описує лише механізм виконання відомого значення.
+; Форми конкретної платформи є наступною проєкцією: вони можуть
+; відмовити у виконанні, не змінюючи самого мовного закону.
 
 (machine-effect-boundary/1
   (role target-neutral-machine-mechanism)
