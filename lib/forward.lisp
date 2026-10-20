@@ -289,54 +289,16 @@
     (функція (поточний-факт)
       (список (як-є визначити) (як-є *обґрунтована-пам'ять*) (список (як-є відкликати-факт-система-істини) поточний-факт (як-є *обґрунтована-пам'ять*))))))
 
-; Step 5c: multiple justifications per fact — the limitation Step 5b
-; documented and deliberately left open. An entry is now `(fact
-; justification-1 justification-2 ...)`: each `justification-N` is its own
-; support set (a list of facts), one entry per *independent* way the fact
-; has been derived (or asserted as an axiom, with justification `()`).
-; Retracting a fact now only removes derivations that actually depended on
-; it: pruning drops any justification-set naming the retracted fact from
-; every other entry, and only when an entry's justification list becomes
-; fully empty does *that* fact cascade-retract too. A fact with a surviving
-; independent justification (e.g. also asserted directly, or derivable
-; another way) stays.
-;
-; Separate global (`*пам'ять-обґрунтувань*`) from both `*робоча-пам'ять*` (Step
-; 1-5a) and `*обґрунтована-пам'ять*` (Step 5b, single-justification) — neither
-; earlier layer is touched or replaced.
-;
-; Крок 5c: множинні обґрунтування на факт — обмеження, задокументоване й
-; свідомо залишене відкритим у Кроці 5b. Запис тепер — `(факт
-; обґрунтування-1 обґрунтування-2 ...)`: кожне `обґрунтування-N` — власний
-; набір підтримки (список фактів), один запис на кожен *незалежний* спосіб
-; виведення факту (або аксіому, з обґрунтуванням `()`). Видалення факту
-; тепер прибирає лише ті виведення, що справді залежали від нього:
-; обрізання відкидає будь-який набір підтримки, що називає видалений факт,
-; з кожного іншого запису, і лише коли список обґрунтувань запису стає
-; повністю порожнім, *цей* факт теж каскадно видаляється. Факт із живим
-; незалежним обґрунтуванням (напр. також заявлений напряму, або виведений
-; іншим шляхом) лишається.
-;
-; Окрема глобальна (`*пам'ять-обґрунтувань*`) від `*робоча-пам'ять*` (Крок 1-5a) і
-; `*обґрунтована-пам'ять*` (Крок 5b, одне обґрунтування) — жоден з попередніх
-; шарів не чіпається й не замінюється.
-;
-; Schritt 5c: mehrere Begründungen pro Fakt — die in Schritt 5b dokumentierte
-; und bewusst offen gelassene Einschränkung. Ein Eintrag ist nun `(fakt
-; begründung-1 begründung-2 ...)`: jede `begründung-N` ist eine eigene
-; Unterstützungsmenge (eine Faktenliste), ein Eintrag pro *unabhängigem* Weg,
-; auf dem der Fakt abgeleitet wurde (oder als Axiom mit Begründung `()`).
-; Das Entfernen eines Fakts entfernt nun nur Ableitungen, die tatsächlich
-; von ihm abhingen: das Beschneiden verwirft jede Unterstützungsmenge, die
-; den entfernten Fakt nennt, aus jedem anderen Eintrag, und nur wenn die
-; Begründungsliste eines Eintrags vollständig leer wird, wird *dieser* Fakt
-; ebenfalls kaskadierend entfernt. Ein Fakt mit einer überlebenden
-; unabhängigen Begründung (z. B. auch direkt behauptet oder anders
-; ableitbar) bleibt erhalten.
-;
-; Separate globale Variable (`*пам'ять-обґрунтувань*`) sowohl von `*робоча-пам'ять*`
-; (Schritt 1-5a) als auch von `*обґрунтована-пам'ять*` (Schritt 5b, eine
-; Begründung) — keine frühere Schicht wird berührt oder ersetzt.
+; Крок 5в. Підтримуємо кілька незалежних обґрунтувань одного факту.
+; Запис має форму (факт обґрунтування-1 обґрунтування-2 ...).
+; Кожне обґрунтування є списком потрібних фактів; порожній список
+; означає безпосередньо стверджену аксіому.
+; Під час відкликання вилучаємо тільки ті обґрунтування, які справді
+; містять відкликану підставу. Похідний факт зникає лише тоді,
+; коли жодного незалежного обґрунтування не залишилося.
+; Окрема *пам'ять-обґрунтувань* не замінює робочу пам'ять
+; і не змінює простішу систему одного обґрунтування з кроку 5б.
+
 (визначити обґрунтування-від (функція (поточний-запис) (решта поточний-запис)))
 
 (визначити запустити-правило-система-обґрунтувань
@@ -434,81 +396,19 @@
     (функція (поточні-правила)
       (список (як-є визначити) (як-є *пам'ять-обґрунтувань*) (список (як-є запустити-система-обґрунтувань) поточні-правила (як-є *пам'ять-обґрунтувань*))))))
 
-; Step 14: JTMS grows a multi-condition twin, the same way Step 6 grew
-; `fire-rule-multi`/`run-multi` alongside the Step 1-5 single-condition
-; layer. Verified before writing this (not guessed): `run-jtms!` with the
-; exact `grandparent`/`parent` rule literal used throughout this project
-; derived nothing at all — `fire-rule-jtms` was still built on Step 1's
-; `fire-rule`, matching exactly one `(pattern template)` condition against
-; one fact, with no path to a `(head cond1 cond2 ...)` rule at all, let
-; alone one containing `not`/`or`/`and`/`test`.
-;
-; `match-conditions-jtms` is `thread-conjunction` again, threading a
-; richer state — `(subst . used-facts)` instead of a bare substitution —
-; the exact same shape shift `lib/reason.lisp`'s `prove-goal-state` makes
-; for `(subst proofs)`. A plain condition's match adds the one fact it
-; matched to `used-facts`; `not`/`test` add nothing (no positive fact
-; supports a negative check or an arbitrary expression); `or` unions each
-; alternative's own `used-facts`; `and`/nested nested nested — is just
-; `match-conditions-jtms` again, over the sub-conditions, same reuse
-; `match-and-condition` already does non-JTMS.
-;
-; Deliberately additive, not a replacement: `fire-rule-jtms` and the
-; single-condition `run-jtms`/`run-jtms!` above are untouched, still valid
-; for the Step 1-5 `(pattern template)` rule shape. `run-jtms-multi!` is
-; the JTMS entry point for the shared `(head cond1 cond2 ...)` format.
-;
-; Крок 14: JTMS отримує багатоумовного близнюка, тим самим шляхом, яким
-; Крок 6 виростив `fire-rule-multi`/`run-multi` поряд із однофактовим
-; шаром Кроків 1-5. Перевірено перед написанням (не здогадано): `run-jtms!`
-; із точно тим самим літералом правила `grandparent`/`parent`, який
-; використовується по всьому проєкту, не виводив нічого — `fire-rule-jtms`
-; досі був побудований на `fire-rule` з Кроку 1, що зіставляє рівно одну
-; умову `(pattern template)` з одним фактом, без жодного шляху до правила
-; `(head cond1 cond2 ...)`, тим паче з `not`/`or`/`and`/`test`.
-;
-; `match-conditions-jtms` — знову `thread-conjunction`, що протягує
-; багатший стан — `(підстановка . використані-факти)` замість голої
-; підстановки — та сама зміна форми, яку `prove-goal-state` у
-; `lib/reason.lisp` робить для `(підстановка доведення)`. Зіставлення
-; звичайної умови додає той один факт, з яким зіставилось, до
-; `використані-факти`; `not`/`test` не додають нічого (жоден позитивний
-; факт не підтримує заперечну перевірку чи довільний вираз); `or` об'єднує
-; власні `використані-факти` кожної альтернативи; `and` — знову просто
-; `match-conditions-jtms` над під-умовами, те саме перевикористання, що
-; вже робить не-JTMS `match-and-condition`.
-;
-; Свідомо адитивно, не заміна: `fire-rule-jtms` і однофактові `run-jtms`/
-; `run-jtms!` вище не чіпаються, досі чинні для форми правила `(pattern
-; template)` Кроків 1-5. `run-jtms-multi!` — точка входу JTMS для спільного
-; формату `(head cond1 cond2 ...)`.
-;
-; Schritt 14: JTMS erhält einen Mehrbedingungs-Zwilling, genau wie Schritt
-; 6 `fire-rule-multi`/`run-multi` neben der Einzelbedingungs-Schicht aus
-; Schritt 1-5 wachsen ließ. Vor dem Schreiben verifiziert (nicht geraten):
-; `run-jtms!` mit genau demselben `grandparent`/`parent`-Regelliteral, das
-; im ganzen Projekt verwendet wird, leitete überhaupt nichts ab —
-; `fire-rule-jtms` war noch auf `fire-rule` aus Schritt 1 aufgebaut, das
-; genau eine `(pattern template)`-Bedingung gegen einen Fakt abgleicht,
-; ganz ohne Weg zu einer `(head cond1 cond2 ...)`-Regel, geschweige denn
-; mit `not`/`or`/`and`/`test`.
-;
-; `match-conditions-jtms` ist wieder `thread-conjunction`, das einen
-; reicheren Zustand fädelt — `(substitution . genutzte-fakten)` statt einer
-; bloßen Substitution — derselbe Formwechsel, den `prove-goal-state` in
-; `lib/reason.lisp` für `(substitution beweise)` macht. Der Abgleich einer
-; gewöhnlichen Bedingung fügt den einen gefundenen Fakt zu
-; `genutzte-fakten` hinzu; `not`/`test` fügen nichts hinzu; `or` vereinigt
-; die eigenen `genutzte-fakten` jeder Alternative; `and` ist wieder einfach
-; `match-conditions-jtms` über die Unterbedingungen, dieselbe
-; Wiederverwendung, die `match-and-condition` außerhalb von JTMS bereits
-; tut.
-;
-; Bewusst additiv, kein Ersatz: `fire-rule-jtms` und die
-; Einzelbedingungs-`run-jtms`/`run-jtms!` oben bleiben unberührt, weiterhin
-; gültig für die `(pattern template)`-Regelform aus Schritt 1-5.
-; `run-jtms-multi!` ist der JTMS-Einstiegspunkt für das gemeinsame Format
-; `(head cond1 cond2 ...)`.
+; Крок 14. Розширюємо підтримку обґрунтувань для правил із багатьма умовами.
+; Попередня одноумовна форма (pattern template) не могла застосувати
+; правило виду (head cond1 cond2 ...), що перевірено на фактах
+; grandparent/parent ще до створення нового механізму.
+; Тепер кожна умова передає стан (підстановка . використані-факти).
+; Звичайне зіставлення додає підтверджувальний факт до доказів;
+; not і test не додають позитивного факту до множини підстав;
+; or об'єднує докази окремих альтернатив, and рекурсивно
+; зіставляє підумови. Так повторно використовуємо структурний закон
+; послідовного оброблення умов, уже наявний у lib/reason.lisp.
+; Старе одноумовне виведення залишаємо без змін.
+; Багатоумовна точка входу — окрема функція, не прихована заміна.
+
 (визначити отримати-підстановку-зі-стану-система-обґрунтувань (функція (поточний-стан) (перше поточний-стан)))
 (визначити отримати-використані-факти-зі-стану-система-обґрунтувань (функція (поточний-стан) (решта поточний-стан)))
 (визначити система-обґрунтувань-створити-стан (функція (поточні-зв'язування використані-факти) (сполучити поточні-зв'язування використані-факти)))
@@ -644,82 +544,19 @@
     (функція (поточний-факт)
       (список (як-є визначити) (як-є *пам'ять-обґрунтувань*) (список (як-є відкликати-факт-система-обґрунтувань) поточний-факт (як-є *пам'ять-обґрунтувань*))))))
 
-; Step 6: a shared rule language with `lib/reason.lisp`. Steps 1-5c used a
-; forward-only `(pattern template)` shape, matched against exactly one
-; fact — different from `reason.lisp`'s `(head cond1 cond2 ...)` rules, which
-; already read naturally as "conclusion :- conditions" either direction:
-; backward-chaining proves `head` by proving every `cond`; forward-chaining
-; can just as well fire `head` once every `cond` is already a known fact.
-; A rule like `((grandparent (var x) (var y)) (parent (var x) (var z))
-; (parent (var z) (var y)))` — the exact literal `reason.rs`'s own tests
-; use — now runs unmodified through `run-multi` too.
-;
-; This needed real matching logic, not just a relabeling: firing a
-; multi-condition rule forward means finding a substitution that satisfies
-; *every* condition against *some* facts simultaneously (a conjunctive
-; join), not matching one pattern against one fact. `match-conditions`
-; threads a substitution across the condition list exactly the way
-; `prove-goals` in lib/reason.lisp threads one through a rule body — same
-; idea, just matching against an explicit fact list instead of recursing
-; into further rules.
-;
-; Deliberately additive: a third plain-fact-list layer (`fire-rule-multi`,
-; `fire-rules-multi`, `run-multi`), reusing `member?`/`append-new` from Step
-; 4. Doesn't touch or replace the Step 1-5a 2-element-rule layer, nor wire
-; into the Step 5b/5c truth-maintenance layers — those stay exactly as they
-; were.
-;
-; Крок 6: спільна мова правил із `lib/reason.lisp`. Кроки 1-5c
-; використовували форму `(pattern template)` лише для forward, зіставлену
-; рівно з одним фактом — інакше, ніж правила `reason.lisp` `(head cond1
-; cond2 ...)`, які й так природно читаються як "висновок :- умови" в обидва
-; боки: backward-chaining доводить `head`, доводячи кожен `cond`;
-; forward-chaining так само може застосувати `head`, щойно кожен `cond` уже
-; відомий факт. Правило на кшталт `((grandparent (var x) (var y)) (parent
-; (var x) (var z)) (parent (var z) (var y)))` — точно той самий літерал, що
-; й у тестах `reason.rs` — тепер незмінно працює й через `run-multi`.
-;
-; Це вимагало справжньої логіки зіставлення, не просто перейменування:
-; застосувати багатоумовне правило вперед означає знайти підстановку, що
-; задовольняє *кожну* умову проти *якихось* фактів одночасно (кон'юнктивне
-; з'єднання), не зіставлення одного шаблону з одним фактом.
-; `match-conditions` протягує підстановку через список умов так само, як
-; `prove-goals` у lib/reason.lisp протягує її через тіло правила — та сама
-; ідея, лише зіставлення з явним списком фактів замість рекурсії в подальші
-; правила.
-;
-; Свідомо адитивно: третій шар для плаского списку фактів
-; (`fire-rule-multi`, `fire-rules-multi`, `run-multi`), перевикористовує
-; `member?`/`append-new` з Кроку 4. Не чіпає й не замінює шар Кроку 1-5a з
-; 2-елементними правилами, і не підключається до шарів truth maintenance
-; Кроку 5b/5c — вони лишаються точно такими, як були.
-;
-; Schritt 6: eine gemeinsame Regelsprache mit `lib/reason.lisp`. Schritte
-; 1-5c verwendeten eine reine Forward-Form `(pattern template)`, gegen
-; genau einen Fakt abgeglichen — anders als `reason.lisp`s Regeln `(head
-; cond1 cond2 ...)`, die sich ohnehin natürlich als "Schlussfolgerung :-
-; Bedingungen" in beide Richtungen lesen: Backward-Chaining beweist `head`,
-; indem es jede `cond` beweist; Forward-Chaining kann `head` ebenso
-; auslösen, sobald jede `cond` bereits ein bekannter Fakt ist. Eine Regel
-; wie `((grandparent (var x) (var y)) (parent (var x) (var z)) (parent
-; (var z) (var y)))` — genau das Literal, das `reason.rs`s eigene Tests
-; verwenden — läuft nun unverändert auch durch `run-multi`.
-;
-; Das erforderte echte Abgleichslogik, keine bloße Umbenennung: eine
-; mehrbedingte Regel vorwärts auszulösen bedeutet, eine Substitution zu
-; finden, die *jede* Bedingung gleichzeitig gegen *irgendwelche* Fakten
-; erfüllt (ein konjunktiver Join), nicht ein Muster gegen einen Fakt
-; abzugleichen. `match-conditions` fädelt eine Substitution durch die
-; Bedingungsliste genauso, wie `prove-goals` in lib/reason.lisp sie durch
-; einen Regelrumpf fädelt — dieselbe Idee, nur gegen eine explizite
-; Faktenliste statt Rekursion in weitere Regeln.
-;
-; Bewusst additiv: eine dritte Schicht für flache Faktenlisten
-; (`fire-rule-multi`, `fire-rules-multi`, `run-multi`), die
-; `member?`/`append-new` aus Schritt 4 wiederverwendet. Berührt oder
-; ersetzt weder die 2-Element-Regel-Schicht aus Schritt 1-5a noch bindet
-; sie sich in die Truth-Maintenance-Schichten aus Schritt 5b/5c ein — die
-; bleiben genau, wie sie waren.
+; Крок 6. Узгоджуємо форму правил прямого виведення з lib/reason.lisp.
+; Історичний рушій приймав лише (pattern template) для одного факту.
+; Загальна форма (head cond1 cond2 ...) містить висновок і умови:
+; зворотне виведення доводить умови, пряме — добирає факти,
+; які одночасно їм відповідають.
+; Доказовий приклад: ((grandparent (var x) (var y))
+; (parent (var x) (var z)) (parent (var z) (var y))).
+; Для такого правила потрібне кон'юнктивне зіставлення, а не тільки
+; перейменування команд. Підстановку послідовно передаємо між умовами,
+; так само як у доведенні цілей, але відшукуємо збіги у списку фактів.
+; Це додатковий шар для правил із багатьма умовами; старі одноумовні
+; правила та окремі механізми підтримки обґрунтувань не переписуємо.
+
 (визначити зіставити-умову-із-набором-фактів
   (функція (поточна-умова поточні-факти поточні-зв'язування)
     (за-умовою
