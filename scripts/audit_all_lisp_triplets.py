@@ -29,6 +29,55 @@ def misnamed_binary_d2(path: Path) -> bool:
             and b"10" in words and (b"00" in words or b"01" in words))
 
 
+
+def reviewed_nonprogram_pins(root: Path) -> dict[str, tuple[str, str]]:
+    """Визнати лише явно перевірені, SHA-закріплені файли даних.
+
+    Схема / число записів / Git blob кожного джерела перевіряються
+    окремо. Відсутній чи пошкоджений маніфест НЕ звільняє файли
+    від обліку програм. Це не SENS semantic oracle.
+    """
+    from report_original_migration_candidates import NONPROGRAM_MANIFESTS
+
+    approved: dict[str, tuple[str, str]] = {}
+    for cohort, manifest_name, count in NONPROGRAM_MANIFESTS:
+        path = root / manifest_name
+        if path.is_symlink() or not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, ValueError):
+            continue
+        rows = data.get("entries")
+        if (data.get("schema") != "sens-migration-nonprogram-manifest/1"
+                or data.get("issue") != 4460
+                or data.get("automatic_sens_companion") is not False
+                or not isinstance(rows, list) or len(rows) != count):
+            continue
+        staged: dict[str, tuple[str, str]] = {}
+        valid = True
+        for row in rows:
+            if not isinstance(row, dict):
+                valid = False
+                break
+            name, sha = row.get("path"), row.get("git_blob_sha1")
+            if (not isinstance(name, str) or not name.endswith(".lisp")
+                    or name.startswith("/") or "\\" in name
+                    or any(part in ("", ".", "..") for part in name.split("/"))
+                    or not isinstance(sha, str) or len(sha) != 40
+                    or any(char not in "0123456789abcdef" for char in sha)
+                    or name in approved or name in staged):
+                valid = False
+                break
+            staged[name] = (sha, cohort)
+        if valid:
+            approved.update(staged)
+    return approved
+
+
+def git_blob_sha(data: bytes) -> str:
+    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+
 def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int = 20) -> dict:
     if not root.is_dir():
         raise NotADirectoryError(root)
@@ -39,6 +88,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         (p for p in root.rglob("*.lisp") if ".git" not in p.relative_to(root).parts),
         key=lambda p: p.relative_to(root).as_posix(),
     )
+    reviewed_pins = reviewed_nonprogram_pins(root)
     if verify_bounded and validator is None:
         from verify_uk_t5_triplet import verify
         # Поточний фізичний носій T5M, старий T5 — лише явний аудит.
@@ -101,6 +151,8 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
                   complete_triplets=0, bounded_verified=0,
                   misnamed_binary_lisp=0, undecidable_lisp_files=0,
                   comment_only_nonprogram_lisp=0,
+                  reviewed_nonprogram_lisp=0, reviewed_nonprogram_pin_drift=0,
+                  unapproved_nonprogram_physical=0, nonprogram_style_warnings=0,
                   potential_program_files=0, potential_program_missing_sens=0,
                   comment_only_style_warnings=0,
                   bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
@@ -117,9 +169,18 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             reject(relative, "не звичайний файл Lisp")
             continue
         comment_only = only_line_comments(source)
+        pinned = reviewed_pins.get(relative)
+        reviewed_ok = bool(pinned and git_blob_sha(source.read_bytes()) == pinned[0])
+        if pinned and not reviewed_ok:
+            counts["reviewed_nonprogram_pin_drift"] += 1
+            reject(relative, "SHA затверджених Lisp-даних змінився; потрібна пофайлова перевірка")
         keyboard_problem = examine_file(source)
         if keyboard_problem is None:
             counts["ukrainian_keyboard"] += 1
+        elif reviewed_ok:
+            # Схвалені незмінні дані не є кодом: латиниця у
+            # зовнішніх протокольних рядках — стиль, не runtime RED.
+            counts["nonprogram_style_warnings"] += 1
         elif comment_only:
             # Стиль коментаря або порожнього профілю -- телеметрія,
             # а НЕ семантичний блокер: виконуваного коду тут немає.
@@ -142,6 +203,14 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             counts["comment_only_nonprogram_lisp"] += 1
             if physical.exists() or physical.is_symlink():
                 reject(relative, "файл лише з коментарів має необґрунтований .sens")
+            continue
+        # Вже схвалена данна/схема/таблиця не є виконуваною формою.
+        # Жодного нового дозволу: лише точний Git blob з #4460.
+        if reviewed_ok:
+            counts["reviewed_nonprogram_lisp"] += 1
+            if physical.exists() or physical.is_symlink():
+                counts["unapproved_nonprogram_physical"] += 1
+                reject(relative, "затверджені Lisp-дані мають недопущений .sens")
             continue
         counts["potential_program_files"] += 1
         if not has_sens:
@@ -173,6 +242,8 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         # Відхилений .lisp (зокрема симлінк) не може зникнути
         # зі знаменника й дати хибний загальний PASS.
         and counts["undecidable_lisp_files"] == 0
+        and counts["reviewed_nonprogram_pin_drift"] == 0
+        and counts["unapproved_nonprogram_physical"] == 0
         and verify_bounded
     )
     # Окремий точний показник для поточного T5M. Історичний T5
