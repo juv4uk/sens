@@ -1,9 +1,10 @@
-; Випуск підготовленого snapshot: sens scripts/release.lisp 0.42.0
-; Версії семи Cargo.toml, Cargo.lock та packaging/install.sh оновлюються в PR.
-; Скрипт перевіряє чистий checkout, відповідність origin/main, версії та
-; зелений CI цього SHA. Не комітить файли й не пересуває наявні теги.
-; Після push тегу workflow Release повторює focused test/clippy gates.
-; Потрібні git, gh, timeout і cargo. Лише довірена CLI-сесія.
+; Випуск підготовленого знімка: sens scripts/release.lisp 0.42.0
+; Версії семи Cargo.toml, Cargo.lock і packaging/install.sh оновлюються окремою зміною.
+; Скрипт перевіряє чистий робочий каталог, відповідність origin/main,
+; версії та успішні перевірки саме цього SHA.
+; Він не створює комітів і не пересуває наявних тегів.
+; Після публікації тегу окремий процес повторює цільові перевірки.
+; Потрібні git, gh, timeout і cargo; запускати лише в довіреному середовищі.
 
 (визначити невдала-передвипускова-перевірка
   (функція ()
@@ -52,9 +53,9 @@
   ((тотожне? стан-різниці-фасл 0) (як-є ()))
   ((тотожне? стан-різниці-фасл 1)
    ((функція ()
-      ; Never create an implicit commit while preparing an exact-SHA release.
-      ; The snapshot must be reviewed and committed by the single main writer
-      ; in a separate change, then all exact-SHA gates must be replayed.
+      ; Заборонено створювати неявний коміт під час випуску за точним SHA.
+      ; Знімок має переглянути й закомітити єдиний записувач main.
+      ; Після цього всі перевірки повторюються саме для нового SHA.
       (друкувати "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
       (невдала-передвипускова-перевірка))))
   ((атом? (як-є ()))
@@ -84,10 +85,11 @@
           "crates/sens-literate/Cargo.toml" "crates/sens-wasm/Cargo.toml"
           "crates/sens-lsp/Cargo.toml" "crates/sens-host/Cargo.toml"
           "crates/sens-semantic/Cargo.toml")))
-; pretty=format дає SHA без кінцевого newline.
-; Active pre-tag gates must both complete green on this exact SHA.
-; Release Preflight includes cargo test/clippy --workspace; Hosted CI provides
-; separate strict Core/runtime witnesses. Do not rely on any older green run.
+; Формат pretty=format повертає SHA без завершального нового рядка.
+; Обидва передтегові процеси повинні успішно завершитися на точному SHA.
+; Передвипускова перевірка містить cargo test/clippy для робочого простору;
+; окремий CI перевіряє суворі свідчення ядра та виконання.
+; Попередні успішні запуски не підтверджують поточний SHA.
 (вимагати-для-випуску "Hosted CI не зелений на точному SHA"
   (виконати-для-випуску "timeout"
     (список "60" "gh" "run" "list" "--branch" "main" "--commit" коміт-випуску
@@ -100,7 +102,7 @@
           "--workflow" "release-preflight.yml" "--limit" "1" "--json" "conclusion,status"
           "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
   "true\n")
-; The owner must authorize the exact SHA and tag before this script creates a tag.
+; Перед створенням тегу власник має дозволити саме цей SHA і назву тегу.
 (вимагати-для-випуску "Немає явного дозволу власника для поточного SHA"
   (виконати-для-випуску "gh" (як-є ("variable" "get" "SENS_RELEASE_GO_SHA" "--repo" "juv4uk/sens")))
   (рядок-додати коміт-випуску "\n"))
@@ -119,7 +121,8 @@
 (виконати-для-випуску "timeout" (список "60" "git" "push" "origin" посилання-на-тег-випуску))
 (друкувати (рядок-додати "Тег опубліковано; очікуй завершення workflow Release: " тег-випуску))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+; Повна українська проєкція з точними тотожностями з lib/domains/d*.lisp;
+; сумісне зв'язування імен, без додаткової диспетчеризації.
 (визначити відповідь-не ANSWER-NOT)
 (визначити список LIST)
 (визначити процес-запустити PROCESS-RUN)
