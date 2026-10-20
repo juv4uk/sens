@@ -1,26 +1,26 @@
 use sens::{eval_program, Session};
 
 #[test]
-fn same_macro_value_under_two_heads_sees_same_operand_payload() {
+fn same_macro_value_under_two_heads_sees_same_operand_дані() {
     let mut session = Session::default();
 
     eval_program(
         r#"
-        (define shared-macro (make-macro (lambda (x) x)))
-        (define macro-a shared-macro)
-        (define macro-b shared-macro)
+        (визначити спільний-макрос (макрос (функція (x) x)))
+        (визначити макрос-а спільний-макрос)
+        (визначити макрос-б спільний-макрос)
         "#,
         &mut session,
     )
     .expect("shared macro aliases should be definable");
 
-    let a = eval_program("(macro-a (quote payload))", &mut session)
-        .expect("macro-a should expand");
-    let b = eval_program("(macro-b (quote payload))", &mut session)
-        .expect("macro-b should expand");
+    let a = eval_program("(макрос-а (як-є дані))", &mut session)
+        .expect("макрос-а should expand");
+    let b = eval_program("(макрос-б (як-є дані))", &mut session)
+        .expect("макрос-б should expand");
 
-    assert_eq!(a.value.to_string(), "payload");
-    assert_eq!(b.value.to_string(), "payload");
+    assert_eq!(a.value.to_string(), "дані");
+    assert_eq!(b.value.to_string(), "дані");
 }
 
 #[test]

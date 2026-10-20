@@ -67,7 +67,7 @@
          (перетворити-клаузи-на-події-повідомлення module-name (решта clauses)))))))
 
 (визначити defmodule
-  (make-macro
+  (макрос
     (функція (name rules)
       (список (як-є def) (як-є *knowledge-journal*)
       (список (як-є append)
@@ -78,7 +78,7 @@
 ; За ратифікованою таблицею D8:00000100 = PROG1, D3:111 = CONS.
 ; У цитованому AST макросу зберігаємо саме точний D3:111 (3 біти).
 (визначити retract-knowledge
-  (make-macro
+  (макрос
     (функція (module-name clause)
       (список (як-є def) (як-є *knowledge-journal*)
       (список (як-є 111)
@@ -134,7 +134,7 @@
             (зворот (отримати-події-журналу-окремого-модуля module-name *knowledge-journal*)))))
 
 (визначити load-knowledge
-  (make-macro
+  (макрос
     (функція (module-name)
       (список (як-є load) module-name))))
 
@@ -167,7 +167,7 @@
 
 ; COND macro expansion now carries its W1 guard directly, without ATOM.
 (визначити tell-knowledge
-  (make-macro
+  (макрос
     (функція (module-name rules)
       (список (як-є cond)
       (список (список (як-є check-conflict) (список (як-є quote) module-name) rules)

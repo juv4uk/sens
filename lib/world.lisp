@@ -260,7 +260,7 @@
 ;; `world-tell-all` die einzige Schreibsemantik liefert. Nach der Migration der
 ;; übrigen globalen Writer kann diese Hülle entfallen.
 (визначити defmodule
-  (make-macro
+  (макрос
     (функція (name rules)
   (список (як-є def) (як-є *knowledge-journal*)
         (список (як-є світ-журнал)
@@ -287,7 +287,7 @@
 ;; bedingungslos, weil Wissensentzug keinen Widerspruch erzeugen kann. Beide
 ;; gewinnen das Kompatibilitätsjournal aus einer unveränderlichen World zurück.
 (визначити tell-knowledge
-  (make-macro
+  (макрос
     (функція (module-name rules)
   (список (як-є cond)
         (список (список (як-є check-conflict) (список (як-є quote) module-name) rules)
@@ -301,7 +301,7 @@
                                 rules))))))))
 
 (визначити retract-knowledge
-  (make-macro
+  (макрос
     (функція (module-name clause)
   (список (як-є def) (як-є *knowledge-journal*)
         (список (як-є світ-журнал)
@@ -366,7 +366,7 @@
                             (список (як-є внутрішнє-рішення-переходу) (як-є *legacy-knowledge-transition*))))))))
 
 (визначити advise
-  (make-macro
+  (макрос
     (функція (module-name clause)
   (legacy-world-transition-expansion
     (список (як-є advise-world)
@@ -375,7 +375,7 @@
           clause)))))
 
 (визначити advise-all
-  (make-macro
+  (макрос
     (функція (module-name clauses)
   (legacy-world-transition-expansion
     (список (як-є порадити-всі-світ)
@@ -470,7 +470,7 @@
 ;; Konflikte und atomarer Übergang liegen beim datenreinen World-Importer; nur
 ;; ein akzeptiertes Ergebnis bindet das Journal neu.
 (визначити import-knowledge-package
-  (make-macro
+  (макрос
     (функція (package)
   (legacy-world-transition-expansion
     (список (як-є import-knowledge-package-world)

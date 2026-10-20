@@ -12,27 +12,27 @@ fn eval(source: &str) -> String {
 fn evaluation_time_transformer_observes_same_frame_redefinition_after_function_definition() {
     let value = eval(
         r#"
-        (define phase-transformer
-          (make-macro
-            (lambda ()
-              (quote (quote OLD)))))
+        (визначити перетворювач-фази
+          (макрос
+            (функція ()
+              (як-є (як-є OLD)))))
 
-        (define invoke-later
-          (lambda ()
-            (phase-transformer)))
+        (визначити викликати-пізніше
+          (функція ()
+            (перетворювач-фази)))
 
-        (define phase-transformer
-          (make-macro
-            (lambda ()
-              (quote (quote NEW)))))
+        (визначити перетворювач-фази
+          (макрос
+            (функція ()
+              (як-є (як-є NEW)))))
 
-        (invoke-later)
+        (викликати-пізніше)
         "#,
     );
 
     assert_eq!(
-        value, "NEW",
-        "current SENS expands the transformer call when invoke-later is evaluated,          so the same-frame transformer redefinition is visible"
+        value, "НОВЕ",
+        "current SENS expands the transformer call when викликати-пізніше is evaluated,          so the same-frame transformer redefinition is visible"
     );
 }
 
@@ -40,13 +40,13 @@ fn evaluation_time_transformer_observes_same_frame_redefinition_after_function_d
 fn evaluation_time_transformer_still_executes_generated_form_in_calling_environment() {
     let value = eval(
         r#"
-        (define emit-caller-name
-          (make-macro
-            (lambda ()
-              (quote caller-name))))
+        (визначити видати-імя-викликача
+          (макрос
+            (функція ()
+              (як-є імя-викликача))))
 
-        ((lambda (caller-name)
-           (emit-caller-name))
+        ((функція (імя-викликача)
+           (видати-імя-викликача))
          73)
         "#,
     );

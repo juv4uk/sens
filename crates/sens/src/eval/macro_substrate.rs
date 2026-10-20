@@ -16,19 +16,17 @@ pub(crate) fn install(environment: &Environment) {
 
     let mechanism = Value::Builtin(Rc::new(Builtin {
         name: "макрос",
-        func: Rc::new(make_macro_values),
+        func: Rc::new(materialize_macro_value),
     }));
     assert!(
         environment.bind_domain_code_slot_once(identity, mechanism.clone()),
         "єдиний механізм макроса не можна затінювати"
     );
 
-    // Existing unmigrated call sites share this same already existing
-    // mechanical constructor, not an independent semantic implementation.
-    environment.define("make-macro", mechanism);
+    // Механізм доступний лише за точною D5-ідентичністю «макрос».
 }
 
-fn make_macro_values(
+fn materialize_macro_value(
     arguments: &[Value],
     _environment: &Environment,
     span: Span,
@@ -36,7 +34,7 @@ fn make_macro_values(
     if arguments.len() != 1 {
         return Err(LanguageError::new(
             ErrorKind::Arity,
-            "make-macro expects exactly 1 argument(s)",
+            "макрос очікує рівно один аргумент",
             span,
         ));
     }
@@ -49,7 +47,7 @@ fn make_macro_values(
         }
         _ => Err(LanguageError::new(
             ErrorKind::Type,
-            "make-macro expects a closure · make-macro ochikuie zamykannia · make-macro erwartet eine Closure",
+            "макрос очікує значення-замикання",
             span,
         )),
     }

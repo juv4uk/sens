@@ -9,50 +9,50 @@ fn eval(source: &str) -> Result<String, sens::LanguageError> {
 fn d5_one_cap_w1_transformer_preserves_unused_raw_operand() {
     let value = eval(
         r#"
-        (define first-transformer
-          (make-macro
-            (lambda (a b) a)))
-        (first-transformer (quote ok) never-defined)
+        (визначити перший-перетворювач
+          (макрос
+            (функція (a b) a)))
+        (перший-перетворювач (як-є ok) невідоме-імя)
         "#,
     )
     .expect("transformer surrogate must preserve unused raw operand");
 
-    assert_eq!(value, "ok");
+    assert_eq!(value, "гаразд");
 }
 
 #[test]
 fn d5_one_cap_w2_nested_transformer_expands_without_macroexpand_identity() {
     let value = eval(
         r#"
-        (define inner-transformer
-          (make-macro
-            (lambda (x) x)))
+        (визначити внутрішній-перетворювач
+          (макрос
+            (функція (x) x)))
 
-        (define outer-transformer
-          (make-macro
-            (lambda (x)
-              (cons
-                (quote inner-transformer)
-                (cons x (quote ()))))))
+        (визначити зовнішній-перетворювач
+          (макрос
+            (функція (x)
+              (сполучити
+                (як-є внутрішній-перетворювач)
+                (сполучити x (як-є ()))))))
 
-        (outer-transformer (quote ok))
+        (зовнішній-перетворювач (як-є ok))
         "#,
     )
     .expect("outer transformer should expand to an inner transformer call");
 
-    assert_eq!(value, "ok");
+    assert_eq!(value, "гаразд");
 }
 
 #[test]
 fn d5_one_cap_w3_expansion_runs_in_callers_lexical_environment() {
     let value = eval(
         r#"
-        (define emit-local-x
-          (make-macro
-            (lambda () (quote local-x))))
+        (визначити видати-локальне-х
+          (макрос
+            (функція () (як-є локальне-х))))
 
-        ((lambda (local-x)
-           (emit-local-x))
+        ((функція (локальне-х)
+           (видати-локальне-х))
          42)
         "#,
     )
@@ -65,15 +65,15 @@ fn d5_one_cap_w3_expansion_runs_in_callers_lexical_environment() {
 fn d5_one_cap_w4_ordinary_lambda_remains_eager() {
     let error = eval(
         r#"
-        (define ordinary-first
-          (lambda (a b) a))
-        (ordinary-first (quote ok) never-defined)
+        (визначити звичайний-перший
+          (функція (a b) a))
+        (звичайний-перший (як-є ok) невідоме-імя)
         "#,
     )
     .expect_err("ordinary lambda must evaluate the unused second operand eagerly");
 
     assert_eq!(error.kind, ErrorKind::UnknownSymbol);
-    assert!(error.message.contains("never-defined"));
+    assert!(error.message.contains("невідоме-імя"));
 }
 
 #[test]

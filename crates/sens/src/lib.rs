@@ -294,7 +294,7 @@ pub use syntax::wire::{
 };
 
 /// Language-owned macro constructor. Its only host-side bootstrap dependency
-/// is the narrow first-class `make-macro` binding that materializes
+/// is the exact D5 `макрос` mechanism that materializes
 /// Closure -> Macro. The source returns one Macro value and deliberately binds
 /// no human surface name; `load_macro_library` installs peer spellings onto
 /// that same value after evaluation.
@@ -448,7 +448,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 ///
 /// This is the canonical bootstrap order for embedders that start from a bare
 /// `Environment::root()`: the root itself stays smaller, while the bootstrap
-/// explicitly gains `make-macro` before evaluating `lib/macro.lisp`.
+/// explicitly installs the D5 `макрос` mechanism before evaluating `lib/macro.lisp`.
 /// Per-thread cache of the *mechanical* Core4 binary decode and lowering.
 /// This is not a shared Environment, evaluated Value, macro, or Lisp semantic
 /// snapshot. Every caller still performs the full language-owned bootstrap.

@@ -62,8 +62,8 @@ pub(crate) fn run_tcp_repl(port: u16, core_lib: &str, allowed: &[String]) {
         let mut session = Session { environment };
 
         // Keep the same language bootstrap invariant as the local CLI:
-        // explicitly install the narrow make-macro mechanism, then let Lisp
-        // own defmacro before core.lisp defines its derived forms. No evaluator
+        // use the exact D5 «макрос» slot, then let SENS
+        // define «визначити-макрос» before Core4 defines its derived forms. No evaluator
         // head-name fallback is allowed to rescue a bare custom Environment.
         if load_macro_library(&mut session).is_ok() {
             if let Ok(core_ast) = parse(core_lib) {

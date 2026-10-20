@@ -6,13 +6,13 @@ fn d5_transformer_placement_preserves_lambda_closure_payload_identity() {
     let mut session = Session::default();
 
     let closure = eval_program(
-        "(define candidate-base (lambda (a b) a)) candidate-base",
+        "(визначити кандидатна-основа (функція (a b) a)) кандидатна-основа",
         &mut session,
     )
     .expect("ordinary LAMBDA closure should be constructible")
     .value;
 
-    let transformer = eval_program("(make-macro candidate-base)", &mut session)
+    let transformer = eval_program("(макрос кандидатна-основа)", &mut session)
         .expect("surrogate transformer materializer should accept a closure")
         .value;
 
@@ -28,11 +28,11 @@ fn d5_transformer_placement_preserves_lambda_closure_payload_identity() {
 #[test]
 fn d5_transformer_placement_materializer_rejects_non_closure_input() {
     let mut session = Session::default();
-    let error = eval_program("(make-macro 42)", &mut session)
+    let error = eval_program("(макрос 42)", &mut session)
         .expect_err("surrogate transformer materializer must require a closure");
 
     assert_eq!(error.kind, ErrorKind::Type);
-    assert!(error.message.contains("closure"));
+    assert!(error.message.contains("замикання"));
 }
 
 #[test]
@@ -41,22 +41,22 @@ fn d5_transformer_placement_changes_call_mode_not_body_payload() {
 
     eval_program(
         r#"
-        (define same-body (lambda (a b) a))
-        (define staged-same-body (make-macro same-body))
+        (визначити однакове-тіло (функція (a b) a))
+        (визначити staged-однакове-тіло (макрос однакове-тіло))
         "#,
         &mut session,
     )
     .expect("base and staged views should share one closure body");
 
     let ordinary = eval_program(
-        "(same-body (quote ok) never-defined)",
+        "(однакове-тіло (як-є ok) невідоме-імя)",
         &mut session,
     )
-    .expect_err("ordinary closure must eagerly evaluate never-defined");
+    .expect_err("ordinary closure must eagerly evaluate невідоме-імя");
     assert_eq!(ordinary.kind, ErrorKind::UnknownSymbol);
 
     let staged = eval_program(
-        "(staged-same-body (quote ok) never-defined)",
+        "(staged-однакове-тіло (як-є ok) невідоме-імя)",
         &mut session,
     )
     .expect("staged view must preserve unused raw operand")
@@ -67,29 +67,28 @@ fn d5_transformer_placement_changes_call_mode_not_body_payload() {
 }
 
 #[test]
-fn d5_transformer_placement_candidate_word_is_free_of_selector_subtree() {
-    const CANDIDATE: &str = "00101";
-    const FIXED_SELECTORS: [&str; 8] = [
-        "10100", "10101", "10110", "10111",
-        "11000", "11001", "11010", "11011",
-    ];
+fn d5_macro_uses_only_the_ratified_d5_identity() {
+    use sens::{parse_mixed_exact_domain, Expr, ExprKind};
 
-    assert!(!FIXED_SELECTORS.contains(&CANDIDATE));
-    assert_eq!(&CANDIDATE[..4], "0010", "candidate must refine D4 LAMBDA");
-    assert_eq!(&CANDIDATE[4..], "1", "candidate tests the staged/context suffix");
-}
+    fn collect_d5(expr: &Expr, identities: &mut Vec<u16>) {
+        match &expr.kind {
+            ExprKind::DomainIdentity(identity) if identity.width() == 5 => {
+                identities.push(identity.packed_bits());
+            }
+            ExprKind::List(items) => {
+                for child in items.iter() {
+                    collect_d5(child, identities);
+                }
+            }
+            _ => {}
+        }
+    }
 
-#[test]
-fn d5_transformer_placement_zero_child_stays_unallocated_in_research_model() {
-    const ORDINARY_PARENT: &str = "0010";
-    const ZERO_CHILD: &str = "00100";
-    const STAGED_CHILD: &str = "00101";
-
-    assert_eq!(&ZERO_CHILD[..4], ORDINARY_PARENT);
-    assert_eq!(&STAGED_CHILD[..4], ORDINARY_PARENT);
-
-    // Research law under test: ordinary closure semantics already live at the
-    // exact-width D4 parent. A zero-child would therefore duplicate the parent
-    // unless independent evidence later gives it a distinct observable role.
-    assert_ne!(ZERO_CHILD, STAGED_CHILD);
+    let parsed = parse_mixed_exact_domain("(макрос)")
+        .expect("український D5 резидент має читатися точним reader");
+    let mut identities = Vec::new();
+    for form in &parsed {
+        collect_d5(form, &mut identities);
+    }
+    assert_eq!(identities, vec![0b00011], "D5 «макрос» має власну точну ширину й координату");
 }

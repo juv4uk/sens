@@ -40,7 +40,7 @@
   ; optional compact notation over the same existing operations.
   (symbolic-sugar (+ - * / < = > <= >=))
   (internal
-    ((bootstrap (make-macro))
+    ((bootstrap (макрос))
      (core-library
        (довжина-до reverse-onto map-onto filter-onto знайти-найбільший-блок-частки
         перевірити-неспадання-значень? перевірити-незростання-значень? взяти-десятковий-символ
