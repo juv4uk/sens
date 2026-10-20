@@ -1,9 +1,11 @@
-; #219/#244 — reasoning observation honesty witness.
-; Merely failing to derive either side does not positively establish the
-; epistemic classification `unknown`. Without a named completeness/search
-; contract that justifies that stronger claim, the answer remains Canon 0.
+; #219/#244 — свідок чесності спостережуваного міркування.
+; Нездатність довести жодну зі сторін не встановлює статус unknown.
+; Без окремого доказу повноти пошуку такий висновок необґрунтований,
+; тому відповідь залишається у формі Канону 0.
+; Викличні голови Д3, Д6 і Д9 — з ратифікованої української проєкції.
+; Сталі імена фактів, очікувана відповідь і закон не змінюються.
 
-((expr . "(let ((rules (quote (((parent alice bob)))))) (reason-observe (quote (parent bob alice)) rules))")
+((expr . "(нехай ((правила (як-є (((parent alice bob)))))) (міркувати-спостерігати (як-є (parent bob alice)) правила))")
  (expected . "()")
  (active . t)
  (law . no-evidence-is-not-unknown))
