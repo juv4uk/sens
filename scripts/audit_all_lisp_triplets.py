@@ -42,10 +42,19 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if (witness.get("schema") != "sens-uk-t5-view-bounded-proof/v1"
                 or witness.get("status") != "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION"):
             raise ValueError("непідтверджена схема або статус обмеженого свідка")
-        for key in ("canonical_uk_roundtrip", "physical_T5_roundtrip",
-                    "canonical_view_roundtrip"):
+        for key in ("canonical_uk_roundtrip", "canonical_view_roundtrip"):
             if witness.get(key) is not True:
                 raise ValueError("не доведено " + key)
+        codec = witness.get("physical_codec")
+        expected_codec_flag = {
+            "t5": "physical_T5_roundtrip",
+            "t5m": "physical_T5M_roundtrip",
+        }.get(codec)
+        if (expected_codec_flag is None
+                or witness.get(expected_codec_flag) is not True
+                or witness.get("physical_T5_roundtrip") is (codec == "t5m")
+                or witness.get("physical_T5M_roundtrip") is (codec == "t5")):
+            raise ValueError("не доведено обертання фактичного T5/T5M носія")
         for key, expected in (("source", source), ("sens", physical), ("view", view)):
             if witness.get(key) != str(expected):
                 raise ValueError("свідок посилається на інший файл: " + key)
