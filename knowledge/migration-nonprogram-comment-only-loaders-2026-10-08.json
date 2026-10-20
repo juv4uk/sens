@@ -4,7 +4,7 @@
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
   "cohort": "comment-only compatibility/profile loader markers",
-  "reason": "Both reviewed current .lisp Git blobs contain only semicolon comments and blank lines; they remain metadata, not executable programs or SENS migration credits. SHA changes were checked against the current files.",
+  "reason": "Обидва точні чинні Lisp-файли оглянуто повторно 21.10.2026: лише крапка з комою та порожні рядки, нуль виконуваних форм. Оновлені SHA перевіряються суворо; це метадані профілю, не executable SENS та не кредит фізичної міграції.",
   "automatic_sens_companion": false,
   "not_executable_programs": true,
   "not_physical_migration_credit": true,
