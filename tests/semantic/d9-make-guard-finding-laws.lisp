@@ -1,6 +1,6 @@
-; D9:000100100 MAKE-GUARD-FINDING ratified in knowledge/d9-ratified.json.
-; Donor lib/guard.lisp: valid record schema, unknown route, two invalid cases.
-; Exact SENS D1 expected: (1 1 1 1 1 1 1 1). No host semantics.
+; D9:000100100 MAKE-GUARD-FINDING ратифіковано в knowledge/d9-ratified.json.
+; Донор lib/guard.lisp: чинна схема запису, невідомий маршрут, два недійсні випадки.
+; Точний очікуваний SENS D1: (1 1 1 1 1 1 1 1). Без семантики хоста.
 (список
   (однакові? (захист-еталон-поле (як-є decision) (створити-захист-висновок (як-є allow) (як-є confirmed) (як-є предмет) (як-є стан) (як-є контракт) (як-є різниця) (як-є вплив) (як-є порада) (як-є доказ))) (як-є allow))
   (однакові? (захист-еталон-поле (як-є evidence-status) (створити-захист-висновок (як-є allow) (як-є confirmed) (як-є предмет) (як-є стан) (як-є контракт) (як-є різниця) (як-є вплив) (як-є порада) (як-є доказ))) (як-є confirmed))
