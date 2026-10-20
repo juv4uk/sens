@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#4430 — conservative Ukrainian <-> typed words <-> physical T5 triplet proof.
+"""#4430 — conservative Ukrainian <-> typed words <-> physical legacy-T5 triplet proof.
 
 Deliberately bounded: ratified D1 predicates, exact D3 call-head syntax
 QUOTE/ATOM/CDR/CAR/EQ/COND/CONS and literal D3 EMPTY, plus D2 grammar.

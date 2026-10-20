@@ -3,7 +3,7 @@
 
 SOURCE/path/name.lisp (ratified canonical `ук`)
  -> MIRROR/path/name.lisp (byte-for-byte source copy)
- -> MIRROR/path/name.sens (physical five-trit T5)
+ -> MIRROR/path/name.sens (physical five-trit legacy T5; not T5M default)
  -> MIRROR/path/name (one-space bit-word view, one final LF)
 
 No semantic oracle proof is fabricated. Uses existing, bounded Ukrainian

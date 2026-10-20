@@ -2,6 +2,10 @@
 
 Команда: `python3 scripts/admit-t5-migration.py --help`.
 
+**Статус формату:** цей окремий доказовий admission tool читає/публікує
+історичний legacy T5. Це не поточний T5M default для `.sens`; новий загальний
+міграційний маршрут задає `scripts/migrate-three-pass.py --codec t5m`.
+
 Цей інструмент — **допуск** реального файла, а не четвертий перекладач і не
 обхід мови. Повторно використовує чинний `scripts/migrate-three-pass.py`,
 `scripts/sens_t5_codec.py` і незалежний Rust `sens-trit open`.

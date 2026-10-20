@@ -16,13 +16,14 @@ reader/evaluator.
 | **F3M / Micro Rank** | `.f3m` | bounded proven/research, не default production | сімейство явно як F3M; конкретний профіль **тільки довжиною** | максимальна щільність для скінченного канонічного каталогу коротких програм |
 | **Envelope E1/E2/E3** | research carriers | research/history | тільки явний research decoder | self-contained metadata/integrity envelopes |
 
-## Режим T5 / General
+## Режим T5M / General
 
-- Канонічний загальний фізичний шлях SENS.
+- Чинний канонічний загальний фізичний шлях і production default SENS.
 - Розширення: `.sens`.
+- Legacy T5 доступний лише через явний compatibility-маршрут.
 - Ніякого автоматичного переходу в F3C/F3M за вмістом файла.
-- Чинні migration/file-authority ворота залишаються T5-орієнтованими там,
-  де вони перевіряють canonical `.sens`.
+- Чинні migration/file-authority ворота перевіряють саме T5M там,
+  де перевіряють canonical `.sens`.
 - F3M/F3C не змінюють semantic identity програми.
 
 ## Режим F3C / Tiny Portable
@@ -31,10 +32,10 @@ reader/evaluator.
 - Розширення: `.senc`.
 - Історична коротка назва CLI/коду: `F3`; нормативна назва: **F3C**.
 - Marker `0xF3` лишається частиною повного фізичного файла.
-- Поточна обережна production-policy: розглядати F3C для T5-програм не
+- Поточна обережна production-policy: розглядати F3C для T5M-програм не
   більше 16 байтів і вибирати його тільки якщо **повний F3C файл**
-  строго менший за T5 та exact roundtrip успішний.
-- Decode failure є помилкою; fallback/sniffing у T5 заборонений.
+  строго менший за T5M та exact roundtrip успішний.
+- Decode failure є помилкою; fallback/sniffing у T5M заборонений.
 
 ## Режим F3M / Micro Rank
 
@@ -44,7 +45,7 @@ F3M не платить внутрішній байт за magic/version. Сім
 
 | Довжина | Профіль | Локальний rank-space | Активний стан доказу |
 |---:|---|---:|---|
-| 1 байт | **F3M-1** | 256 | dense **256/256** unique; exhaustive evaluator + T5 parity |
+| 1 байт | **F3M-1** | 256 | dense **256/256** unique; exhaustive evaluator + historical legacy-T5 witness parity |
 | 2 байти | **F3M-2** | 65 536 | dense **65 536/65 536** exhaustive encode/decode roundtrip |
 | 3 байти | **F3M-3** | 16 777 216 | dense rank window; boundary/sample roundtrip, real evaluator witnesses, exhaustive final-64K search |
 | 4 байти | **F3M-4** | 4 294 967 296 | dense rank window; algebraic capacity proof, 65 536 stratified roundtrip samples, real evaluator witness `DE AD BE EF` |
@@ -211,7 +212,7 @@ default project-mode selection.
 
 ## Fail-closed routing
 
-1. `.sens` → T5.
+1. `.sens` → T5M (default); T5 — лише явний legacy-маршрут.
 2. `.senc` → F3C.
 3. `.f3m` → F3M family, а **payload length 1/2/3/4/5** → F3M-1/2/3/4/5 відповідно; F3M-5 proof-admitted у bounded F3M route, але не є default production-кодеком.
 4. Content sniffing не дозволений.
