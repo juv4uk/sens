@@ -38,9 +38,9 @@
                     "New Rust paths are forbidden during retirement. See #299."))
                  ((тотожне? статус (як-є new)) (identity-relation distinct)
                   (за-умовою
-                    ((= додавання 0) 1
+                    ((числовий-рівність додавання 0) 1
                      (вердикт-виведення-rust-для (решта зміни)))
-                    ((= додавання 0) 0
+                    ((числовий-рівність додавання 0) 0
                      (список
                        (як-є rust-retirement-violation)
                        шлях
