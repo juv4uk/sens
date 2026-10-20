@@ -541,8 +541,8 @@
 ; Псевдонім не створює нової машинної команди.
 (визначити equal? однакові?)
 
-; NOT is a strict PredicateBit combinator. Any non-D1 input is rejected by
-; D3 COND instead of being coerced through retired host truthiness.
+; Заперечення «хибне?» приймає тільки точний біт предиката D1.
+; Будь-який інший вхід відхиляє D3 COND, без старої істинності хоста.
 (визначити хибне?
   (функція (значення-аргументу)
     (за-умовою
@@ -550,22 +550,13 @@
       (так так))))
 
 
-; nth/member?/assoc (G5 test: already expressible via existing means?)
-; — yes, same recursive-list-walk shape as length/reverse above.
-; Surfaced from the fpga-lisp session's assembler.lisp (2026-08-10), which
-; had independently reimplemented all three locally (as nth, contains?/
-; any-eq?, and assoc-str) because lib/core.lisp didn't have them — real,
-; evidenced duplication, not a speculative gap. A generalized assoc here
-; also matches the shape lib/meta-eval.lisp's own env-lookup already hand-
-; rolls for its specific (symbol . value) alist case.
-; nth/member?/assoc (G5-тест: уже виразне через наявне?) — так, та сама
-; форма рекурсивного обходу списку, що й length/reverse вище. Знахідка
-; з сесії fpga-lisp, assembler.lisp (2026-08-10), яка незалежно
-; перевинайшла всі три локально (як nth, contains?/any-eq? і assoc-str),
-; бо lib/core.lisp їх не мав — реальне, доказове дублювання, не
-; спекулятивна прогалина. Узагальнений assoc тут також збігається з
-; формою, яку lib/meta-eval.lisp's власний env-lookup уже вручну пише для
-; свого специфічного випадку asoc-списку (symbol . value).
+; nth/member?/assoc уже виражаються наявними законами обходу списку,
+; як довжина та обернення. Це не нові машинні примітиви.
+; У дослідженні fpga-lisp від 10.08.2026 (assembler.lisp) три операції
+; було незалежно повторено як nth, contains?/any-eq? і assoc-str:
+; доведене дублювання, а не припущення про відсутню функцію.
+; Узагальнений пошук за ключем відповідає локальному обходу
+; асоціативного списку (символ . значення) у lib/meta-eval.lisp.
 ; D6:000100 NTH — індекс тільки явно кваліфікований D24, відлік від нуля.
 ; Порожній хвіст / завеликий індекс повертає (); не викликаємо 000100 як число.
 (визначити елемент-списку-за-індексом
@@ -600,13 +591,14 @@
       (так (знайти-за-ключем ключ (решта список-пар))))))
 (визначити assoc знайти-за-ключем)
 
-; Lifted verbatim from research/d9-map-vec-list-batch-2026-10-17.lisp — ratified D9 identity, SENS-owned alist semantics.
+; Дослівний перенос із research/d9-map-vec-list-batch-2026-10-17.lisp:
+; ратифікована тотожність D9 і власна семантика асоціативного списку СЕНС.
 ; D9:101100011 MAP-EMPTY
 (визначити мапа-порожній
   (функція () (як-є ())))
 (визначити map-empty мапа-порожній)
 
-; D9:101100101 MAP-GET — value of assoc pair (cdr)
+; D9:101100101 MAP-GET — значення асоціативної пари через CDR.
 (визначити мапа-отримати
   (функція (ключ мапа)
     (за-умовою
@@ -621,7 +613,7 @@
     (хибне? (порожній? (знайти-за-ключем ключ мапа)))))
 (визначити map-contains? мапа-містить?)
 
-; D9:101001100 MAP->LIST — alist already a list
+; D9:101001100 MAP->LIST — асоціативний список уже є списком.
 (визначити мапа-список
   (функція (мапа) мапа))
 (визначити map->list мапа-список)
@@ -641,8 +633,9 @@
 (визначити вектор-н-тий вектор-n-тий)
 (визначити vec-nth вектор-н-тий)
 
-; D9 list-alist derived functions, lifted from research/d9-map-insert-store-batch-2026-10-17.lisp.
-; D9:101101110 MAP-INSERT — front pair + drop old key
+; Похідні функції списку асоціацій D9 із
+; research/d9-map-insert-store-batch-2026-10-17.lisp.
+; D9:101101110 MAP-INSERT — додаємо пару спереду та прибираємо старий ключ.
 (визначити мапа-вставити
   (функція (ключ значення мапа)
     (сполучити
@@ -661,8 +654,9 @@
 
 
 
-; D5:11110 PAIRLIS: Lisp-owned structural law. Canonical Ukrainian surface
-; owns the exact-domain binding; English spelling is compatibility-only.
+; D5:11110 PAIRLIS — структурний закон, що належить самому Lisp.
+; Точне доменне зв'язування задає українська поверхня,
+; англійський запис залишається тільки сумісним посиланням.
 ; Для порожнього списку ключів повертаємо хвіст.
 ; Для непорожнього списку створюємо пари в початковому порядку.
 (визначити спарувати
@@ -684,10 +678,10 @@
   (за-умовою
     ((атом? привязки) тіло)
     ((атом? (як-є ())) 
-     ; Build the recursive expansion from the primitive tree substrate only.
-     ; This keeps let* semantics in Lisp while allowing generic macro
-     ; frontends to execute the law without importing the higher-level list
-     ; helper as host/compiler semantic authority.
+     ; Рекурсивне розгортання будуємо лише з первинних операцій над деревом.
+     ; Семантика послідовних зв'язувань належить Lisp; інші макроси
+     ; користуються законом без залучення високорівневих спискових помічників
+     ; як незалежного джерела семантики компілятора або хоста.
      (сполучити (як-є нехай)
            (сполучити (сполучити (перше привязки) (як-є ()))
                  (сполучити (сполучити (як-є нехай-послідовно)
@@ -714,7 +708,7 @@
     (функція (перший-аргумент другий-аргумент)
       (функція-ф другий-аргумент перший-аргумент))))
 
-; English projections of the already-defined D6 residents; no new semantic laws.
+; Англійські псевдоніми вже визначених функцій D6 не створюють нових законів.
 (визначити compose скласти-функції)
 (визначити flip поміняти-аргументи)
 
@@ -726,12 +720,11 @@
 
 
 
-; D6:001110 ADD1 / D6:001111 SUB1 — purely derived D24+ arithmetic.
-; D5:01010 PLUS and D5:01011 DIFFERENCE preserve the qualified mathematical carrier.
-; No implied arithmetic on D1-D10 identities, no new direct D6 call admission.
-; D6:001110/001111 — точні похідні від кваліфікованої D5 арифметики.
-; Визначення без залежності від порядку пізніших SENS-алиасів.
-; Жодної шестибітної прямої callability чи числового посередника.
+; D6:001110 ADD1 і D6:001111 SUB1 — похідна арифметика чисел D24+.
+; Функції D5:01010 PLUS та D5:01011 DIFFERENCE зберігають
+; математичний носій, не виконують арифметику адрес доменів D1–D10.
+; Нового прямого допуску D6 чи числового посередника немає.
+; Визначення не залежать від порядку наступних сумісних псевдонімів.
 (визначити додати-1
   (функція (значення)
     (додати значення 1)))
