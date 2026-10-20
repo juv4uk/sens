@@ -1411,8 +1411,9 @@
 ; Кожний проміжний перенос <= 767 (D24). Не обчислюємо тимчасове
 ; 15-трітове число > межі звичайного знакового D24.
 ; Закон: [b0,b1,b2] = [0,0,0]; для тріта t повторити V := 3V+t.
-; T5M3 three-byte streaming step. Direct D4 LAMBDA applications bind v0/v1/v2;
-; LET macro projection is not an authority for domain-qualified numbers.
+; Крок потокового трьохбайтового кодування T5M3. Прямі застосування
+; функцій D4 зв'язують проміжні значення v0/v1/v2; макрос LET
+; не визначає закону чисел із явно заданим доменом.
 ; Кожен крок виконує точну арифметику D24: 3 × байт + тріт + попереднє перенесення.
 (визначити т5м3-байтовий-крок
   (функція (тріт байти)
@@ -1648,7 +1649,7 @@
     (зворот (відкинути кількість (зворот елементи)))))
 
 
-; D8 derived batch — owner-ratified D8 coordinates, SENS language laws only.
+; Д8: похідні функції з ратифікованими власником координатами; лише закони СЕНС.
 ; D8:00010110 REVAPPEND = D5:10101 REVERSE-ONTO, same closure.
 (визначити розвернути-й-приєднати зворот-до)
 
@@ -2331,7 +2332,7 @@
     (хибне? (атом? (сполучити ліве праве)))))
 
 
-; === D9 SENS-native verified-coordinate cohort: no D9 opcode admission ===
+; === Д9: функції з перевіреними координатами без допуску нового машинного коду ===
 ; D9:110100101 NUMERIC-EQUALITY. Exact D24+ numeric order is from D5
 ; LESSP/GREATERP; mixed widths and unqualified operands reject in D5.
 (визначити числовий-рівність
@@ -3346,10 +3347,10 @@
 
 
 ; D6:001010 SUBLIS — canonical ratified Ukrainian SENS tree substitution.
-; Search whole-subtree association first; a matching node is replaced without
-; descending into its descendants. Without a match, atoms stay unchanged
-; and every CONS child is traversed by D3 CAR/CDR, retaining dotted tails.
-; Search uses the existing structural D5 ASSOC/EQUAL law, not a D6 call-head.
+; Спершу шукаємо відповідність для цілого піддерева. Знайдений вузол
+; замінюємо без спуску в його нащадків. Якщо збігу немає, атом лишається
+; незмінним, а пари обходимо селекторами D3, зберігаючи крапкові хвости.
+; Пошук спирається на чинні закони D5 ASSOC/EQUAL, а не на новий виклик D6.
 (визначити підставити-пари
   (функція (відповідності дерево)
     ((функція (пара)
@@ -3455,7 +3456,7 @@
 
 
 ; D8:00000011 REMAP — proper-list specialization by D6:101000 MAP.
-; List-order and D1/structural results belong to SENS, not host iteration.
+; Порядок списку й відповіді D1 та структурні результати належать СЕНС, не циклу хоста.
 (визначити перевідобразити
   (функція (дія елементи)
     (відобразити дія елементи)))
@@ -3866,7 +3867,7 @@
   (функція (значення)
     (решта (решта (решта (решта (решта (решта (решта значення)))))))))
 
-; D9 four translation-envelope projections, harvested from lib/translation.lisp.
+; Д9: чотири проєкції оболонки перекладу за lib/translation.lisp.
 ; Оболонка (translation/1 STATUS KIND SOURCE PAYLOAD) — звичайні
 ; дані СЕНС. Зовнішній перекладач не ратифікує семантику.
 ; Поля читаються через D3 CAR/CDR, без реєстру хоста
