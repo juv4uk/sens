@@ -13,18 +13,18 @@
   (incf *д10-моп-лічильник*)
   (format t "OBS~C~A~CPASS~%" #\Tab назва #\Tab))
 
-(defclass d10-mop-parent () ((inherited :initform 5)))
-(defclass d10-mop-child (d10-mop-parent) ((direct :initform 7)))
-(defgeneric d10-mop-g (x))
-(defmethod d10-mop-g ((x integer)) :integer)
-(defmethod d10-mop-g ((x string)) :string)
+(defclass д10-моп-батьківський-клас () ((inherited :initform 5)))
+(defclass д10-моп-дочірній-клас (д10-моп-батьківський-клас) ((direct :initform 7)))
+(defgeneric д10-моп-узагальнена-функція (x))
+(defmethod д10-моп-узагальнена-функція ((x integer)) :integer)
+(defmethod д10-моп-узагальнена-функція ((x string)) :string)
 
 (unless (find-package :sb-mop)
   (error "Відсутній необхідний дослідний пакет SB-MOP"))
 
-(let* ((батьківський (find-class 'd10-mop-parent))
-       (дочірній (find-class 'd10-mop-child))
-       (узагальнена-функція (symbol-function 'd10-mop-g)))
+(let* ((батьківський (find-class 'д10-моп-батьківський-клас))
+       (дочірній (find-class 'д10-моп-дочірній-клас))
+       (узагальнена-функція (symbol-function 'д10-моп-узагальнена-функція)))
   (sb-mop:finalize-inheritance дочірній)
   (let ((порядок (sb-mop:class-precedence-list дочірній))
         (власні-назви (mapcar #'sb-mop:slot-definition-name
@@ -57,7 +57,7 @@
       (д10-моп-спостерігати "REMOVAL_PRESERVES_STRING"
         (member метод-рядків залишок :test #'eq))))
   (д10-моп-спостерігати "CHILD_CLASS_REMAINS_UNCHANGED"
-    (eq (find-class 'd10-mop-child) дочірній)))
+    (eq (find-class 'д10-моп-дочірній-клас) дочірній)))
 
 (format t "MOP-SUMMARY~C~A~C~D~%" #\Tab "SB-MOP-READER-OBS" #\Tab *д10-моп-лічильник*)
 (format t "MOP-DONOR~C~A~C~A~%" #\Tab "SBCL" #\Tab (lisp-implementation-version))
