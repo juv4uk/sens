@@ -22,10 +22,10 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 154,
+    "total": 155,
     "historical": 15,
-    "library": 139,
-    "distinct_families": 22
+    "library": 140,
+    "distinct_families": 23
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -2628,6 +2628,22 @@
       "provenance": {
         "repo_file": "lib/mechanism-selector.lisp",
         "blob_sha": "5d44c329da403b33ae5c022b377ceb9de04f9fb1",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "сі:створити-запис-константи",
+      "source_family": "si",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/si.lisp",
+        "blob_sha": "d7a04fcd0ec52d48d8c961894ec35b024660293f",
         "snapshot_not_live_proof": false
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
