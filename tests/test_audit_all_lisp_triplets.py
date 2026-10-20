@@ -279,9 +279,14 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertEqual(historical["bounded_verified_legacy_t5"], 1)
         self.assertEqual(historical["bounded_verified_t5m"], 0)
         self.assertFalse(historical["all_bounded_reverse_verified"])
+        # Для коротких точних слів T5 і T5M можуть мати тотожні
+        # фізичні байти. Автовибір законно визначає їх як T5M-сумісні;
+        # за самими байтами неможливо довести історичний спосіб створення.
         current = scan(self.root, verify_bounded=True)
-        self.assertEqual(current["bounded_verified_t5m"], 0)
-        self.assertFalse(current["all_bounded_reverse_verified"])
+        self.assertEqual(current["bounded_verified"], 1, current["blocked_sample"])
+        self.assertEqual(current["bounded_verified_t5m"], 1)
+        self.assertTrue(current["all_bounded_reverse_verified"])
+        self.assertFalse(current["semantic_runtime_proven"])
 
     def test_t5m_receipt_cannot_claim_legacy_t5_roundtrip_as_well(self):
         from sens_t5_codec import encode_t5m_projection
