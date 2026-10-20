@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[3]
 T5M_DIR = "research/zig-codecs/t5m"
 ZIG_SOURCE = "research/zig-codecs/t5/bench.zig"  # той самий T5M-кодек (5 трітів/байт)
 ASM_BENCH = f"{T5M_DIR}/bench_asm.zig"
-ASM_SOURCE = "research/asm-t5m/t5m_pack.S"
+ASM_SOURCES = ["research/asm-t5m/t5m_words.S", "research/asm-t5m/t5m_pack.S"]
 RUST_EXAMPLE = "target/release/examples/zig_t5_matched_bench"
 
 
@@ -63,10 +63,13 @@ def build_binaries(out: Path, impls: list[str]) -> dict[str, Path]:
         checked(["zig", "build-exe", ZIG_SOURCE, "-O", "ReleaseFast", "-lc", f"-femit-bin={zig_bin}"])
         binaries["zig"] = zig_bin
     if "asm" in impls:
-        asm_obj = out / "t5m_pack.o"
-        checked(["as", "--64", "-o", str(asm_obj), ASM_SOURCE])
+        objs = []
+        for src in ASM_SOURCES:
+            obj = out / (Path(src).stem + ".o")
+            checked(["as", "--64", "-o", str(obj), src])
+            objs.append(str(obj))
         asm_bin = out / "asm_t5m_bench"
-        checked(["zig", "build-exe", ASM_BENCH, str(asm_obj), "-O", "ReleaseFast", "-lc",
+        checked(["zig", "build-exe", ASM_BENCH, *objs, "-O", "ReleaseFast", "-lc",
                  f"-femit-bin={asm_bin}"])
         binaries["asm"] = asm_bin
     if "rust" in impls:
@@ -106,10 +109,9 @@ def main() -> int:
         "pairs": args.pairs,
         "seed": 20261020,
         "zig_flags": "-O ReleaseFast -lc",
-        "asm_flags": "as --64; zig build-exe bench_asm.zig <obj> -O ReleaseFast -lc",
+        "asm_flags": "as --64 (t5m_words.S + t5m_pack.S); zig build-exe bench_asm.zig <objs> -O ReleaseFast -lc",
         "expected_zig_pin": args.zig_pin,
-        "scope": ("zig/rust = word->byte end-to-end; asm = packing core (trit->byte) "
-                  "over a prebuilt trit stream, so asm rows are NOT directly comparable"),
+        "scope": "усі бекенди = word->byte end-to-end; рядки прямо порівнювані",
     }
     if meta["zig"] != args.zig_pin:
         raise RuntimeError(f"Zig pin mismatch: expected {args.zig_pin}, actual {meta['zig']}")
@@ -181,9 +183,8 @@ def main() -> int:
     sep = "|---:|---|" + "---:|" * len(impls)
     lines = ["# Zig ↔ asm ↔ Rust T5M · механічний A/B", "",
              "**ТІЛЬКИ transport**, не SENS semantic oracle. T5M = 5 трітів/байт.",
-             "Фізичні bytes/FNV-1a matched між усіма бекендами; "
-             "**asm міряє ядро пакування (trit→byte), zig/rust — word→byte**, тож рядки "
-             "не прямо порівнювані. **Статистика дослідницька, не K–J CI.**", "",
+             "Фізичні bytes/FNV-1a matched між усіма бекендами; усі бекенди міряють "
+             "word→byte end-to-end. **Статистика дослідницька, не K–J CI.**", "",
              header, sep]
     for forms in (1, 16, 128, 1024):
         for op in ("encode", "decode"):
