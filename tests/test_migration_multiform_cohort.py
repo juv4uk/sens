@@ -72,7 +72,7 @@ class PhysicalMultiformMigration(unittest.TestCase):
                 *[item for key, value in ARGS.items()
                   for item in ("--" + key.replace("_", "-"), str(value))],
                 "--report", str(report),
-                # This exact fixture predates D8 and preserves old SID8 heads.
+                # This exact fixture predates D8 and preserves old сід8 heads.
                 "--source-era", "legacy",
             ]
             first = subprocess.run(command, capture_output=True, text=True)
