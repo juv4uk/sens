@@ -1,30 +1,32 @@
-; #216 — Lisp-owned verdict for exact-Q binary comparison rows.
+; Свідчення #216: закон точного порівняння чисел визначає СЕНС.
+; Локальні зв'язування й параметри записано українською.
+; Зовнішні назви та поля результату збережено для сумісності.
 
 (визначити binary-field
-  (функція (row field)
-    (нехай ((found (знайти-за-ключем field row)))
+  (функція (рядок поле)
+    (нехай ((знайдене (знайти-за-ключем поле рядок)))
       (за-умовою
-        ((атом? found) (як-є ()))
-        (так (решта found))))))
+        ((атом? знайдене) (як-є ()))
+        (так (решта знайдене))))))
 
 (визначити binary-math-verdict
-  (функція (row actual-kind actual-render)
+  (функція (рядок фактичний-вид фактичний-запис)
     (за-умовою
-      ((хибне? (однакові? (binary-field row (як-є expected-kind)) actual-kind))
+      ((хибне? (однакові? (binary-field рядок (як-є expected-kind)) фактичний-вид))
        (список (як-є binary-math-result)
              (список (як-є status) (як-є fail))
              (список (як-є detail)
                    (список (як-є kind)
-                         (binary-field row (як-є expected-kind))
-                         actual-kind))))
-      ((хибне? (однакові? (binary-field row (як-є expected-render)) actual-render))
+                         (binary-field рядок (як-є expected-kind))
+                         фактичний-вид))))
+      ((хибне? (однакові? (binary-field рядок (як-є expected-render)) фактичний-запис))
        (список (як-є binary-math-result)
              (список (як-є status) (як-є fail))
              (список (як-є detail)
                    (список (як-є render)
-                         (binary-field row (як-є expected-render))
-                         actual-render))))
+                         (binary-field рядок (як-є expected-render))
+                         фактичний-запис))))
       (так
        (список (як-є binary-math-result)
              (список (як-є status) (як-є pass))
-             (список (як-є detail) (binary-field row (як-є decision))))))))
+             (список (як-є detail) (binary-field рядок (як-є decision))))))))
