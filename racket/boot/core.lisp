@@ -383,30 +383,34 @@
 ; лише по рядку, не по ланцюжку пар. string-append (справді невиразний
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
-(0011 string-empty?
+(0011 рядок-порожній?
   (0010 (рядок) (101 рядок "")))
+(0011 string-empty? рядок-порожній?)
 
-(0011 string-length
+(0011 рядок-довжина
   (0010 (рядок)
     (110
-      ((string-empty? рядок) 0)
-      (t (01010 1 (string-length (110011101 рядок)))))))
+      ((рядок-порожній? рядок) 0)
+      (t (01010 1 (рядок-довжина (110011101 рядок)))))))
+(0011 string-length рядок-довжина)
 
-(0011 string-prefix?
+(0011 рядок-префікс?
   (0010 (префікс рядок)
     (110
-      ((string-empty? префікс) t)
-      ((string-empty? рядок) (001 ()))
+      ((рядок-порожній? префікс) t)
+      ((рядок-порожній? рядок) (001 ()))
       ((101 (110101011 префікс) (110101011 рядок))
-       (string-prefix? (110011101 префікс) (110011101 рядок)))
+       (рядок-префікс? (110011101 префікс) (110011101 рядок)))
       (t (001 ())))))
+(0011 string-prefix? рядок-префікс?)
 
-(0011 string-contains?
+(0011 рядок-містить?
   (0010 (зразок рядок)
     (110
-      ((string-prefix? зразок рядок) t)
-      ((string-empty? рядок) (001 ()))
-      (t (string-contains? зразок (110011101 рядок))))))
+      ((рядок-префікс? зразок рядок) t)
+      ((рядок-порожній? рядок) (001 ()))
+      (t (рядок-містить? зразок (110011101 рядок))))))
+(0011 string-contains? рядок-містить?)
 
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
 ; expressible without exceptions: among atoms, exactly a Symbol is identical
@@ -417,7 +421,7 @@
 ; відновленому з його канонічного тексту. `atom` не допускає пари до `eq`.
 ; `symbol?` wurde aus Rust verschoben: Unter Atomen ist nur ein Symbol mit dem
 ; aus seinem kanonischen Text rekonstruierten Symbol identisch; `atom` schützt `eq`.
-(0011 symbol?
+(0011 символ?
   (0010 (значення)
     (110
       ((010 значення)
@@ -425,6 +429,7 @@
          ((101 значення (11101101 (11110100 значення))) t)
          (t (001 ()))))
       (t (001 ())))))
+(0011 symbol? символ?)
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
 ; Unlike bitwise operations (AND/OR/XOR/shift — no primitive exposes a
