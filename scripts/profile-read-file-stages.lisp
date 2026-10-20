@@ -1,10 +1,11 @@
-; #333 — measurement-only profiler for the Lisp-owned file/UTF-8 pipeline.
-; No semantic shortcut lives here: this runs the same current primitives in
-; separated stages so we can locate the real cost before changing mechanism.
+; #333 — вимірювання етапів читання файлу та UTF-8 мовою Lisp.
+; Тут немає обходу семантики: чинні примітиви виконуються окремо,
+; щоб знайти справжню вартість етапу до зміни механізму.
 ;
-; Pipeline under observation:
-;   read-file-bytes -> utf8-all-bytes? -> utf8-decode-onto (+ final reverse)
-;   -> unicode-scalars->string -> read-all
+; Досліджуваний шлях:
+;   читання байтів → перевірка послідовності UTF-8 →
+;   декодування зі зворотним упорядкуванням →
+;   побудова рядка зі скалярів Юнікоду → читання форм.
 
 (визначити шлях-профілю "lib/surface/semantic-registry.lisp")
 
@@ -12,22 +13,22 @@
 (визначити байти-профілю (read-file-bytes шлях-профілю))
 (визначити після-байтів-профілю (монотонний-наносекунди))
 
-; `utf8-decode` performs this validation pass before decoding. Time it alone.
+; Декодер UTF-8 спершу перевіряє байти: вимірюємо цей етап окремо.
 (визначити чинність-профілю (усі-елементи-є-байтами-кодування-юнікод-8? байти-профілю))
 (визначити після-валідації-профілю (монотонний-наносекунди))
 
-; The source registry is committed valid UTF-8. Calling the internal decode
-; worker directly avoids counting validation a second time. This stage includes
-; scalar accumulation and the worker's final `(reverse out)`.
+; Файл реєстру збережено у правильному UTF-8.
+; Прямий виклик декодувального механізму не рахує перевірку вдруге.
+; Цей етап містить накопичення скалярів і кінцевий розворот списку.
 (визначити декодоване-профілю (utf8-decode-onto байти-профілю (як-є ())))
 (визначити після-декодування-профілю (монотонний-наносекунди))
 (визначити скаляри-профілю (друге декодоване-профілю))
 
-; Materialize the already-decoded Unicode scalar list as one runtime String.
+; Із декодованого списку скалярів Юнікоду створюємо один рядок.
 (визначити текст-профілю (юнікод-скаляри-рядок скаляри-профілю))
 (визначити після-рядка-профілю (монотонний-наносекунди))
 
-; Keep parser cost separate so #333 does not optimize the wrong layer.
+; Час аналізатора форм вимірюємо окремо, щоб не оптимізувати інший шар.
 (визначити корінь-профілю (перше (читати-всі текст-профілю)))
 (визначити після-читання-всього-профілю (монотонний-наносекунди))
 
