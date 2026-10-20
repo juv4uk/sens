@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Expose actual old-source candidates from the existing fail-closed T5 census.
+"""Read-only inventory of unpaired Lisp candidates against current D1–D11.
 
-Read-only. A parse/codec-admissible dry-run is NOT semantic admission:
-only independent source-law and Rust oracle parity can authorize publication.
+D1–D10 exact-width residents do not imply callable mechanisms; D11 is a
+proposal catalogue, never automatic executable admission. Zig owns physical
+T5M, SENS owns the reader and evaluation laws. A dry-run proves neither
+native semantics nor a release candidate and never publishes physical bytes.
 """
 from __future__ import annotations
 
@@ -22,7 +24,7 @@ if SCRIPTS not in sys.path:
     sys.path.insert(0, SCRIPTS)
 from migration_source_scope import scope
 ARGS = [
-    "--foundation", "knowledge/d1-d9-foundation.json",
+    "--foundation", "knowledge/d1-d11-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",
     "--semantic-generated", "crates/sens/src/semantic_registry_generated.rs",
     "--semantic-registry", "crates/sens/src/semantic_registry.rs",
@@ -35,12 +37,12 @@ ARGS = [
 EMPTY_ACTIONS = {
     "w8-provenance": "Pin original source Git blob and prove legacy SID8 vs ratified current D8 before an explicit --source-era retry.",
     "host-effect": "Prove host I/O/effect semantics and independent old/current observable parity; do not guess PRINT mappings.",
-    "unmapped-function": "Resolve function identity against owner-ratified D1-D9 and historical successor ledger; unknown stays BLOCKED.",
+    "unmapped-function": "Resolve exact callable identity in ratified D1–D10; unresolved candidates go to the D11 proposal catalogue, not executable T5M. Unknown stays BLOCKED.",
     "d2-or-domain-data": "Inspect non-binary token and classify executable vs schema/archive/typed D2-as-data before any conversion.",
     "lexical-binding": "Prove lambda/define variable binding and call-head scope; keep symbolic locals blocked without a law.",
     "numeric-law": "Prove exact-width numeric representation and operations before emitting any words.",
     "text-or-quote": "Prove D7 Text7/quoted-data handling and code/data boundaries; no raw text masquerading as a program.",
-    "other-unproved": "Review exact source/reason and request one authoritative law plus Rust D2 and independent oracle proof.",
+    "other-unproved": "Review the exact source and D1–D10 law; require native SENS reader/eval positive and negative witnesses and Zig/T5M physical parity. Dry-run is not semantic proof.",
 }
 
 
@@ -391,7 +393,7 @@ def build_report(root: Path = ROOT) -> dict:
             raise RuntimeError("duplicate original source in migration ledger")
         return {
             "schema": "sens-original-three-pass-eligibility/v1",
-            "authority": "candidate discovery only; parser/codec parity is NOT oracle parity",
+            "mechanical_authority": "candidate discovery only; Zig/T5M bytes and source syntax are NOT native SENS semantic proof",
             "mode": "read-only canonical migrator dry-run",
             "summary": {
                 "scanned": len(rows),
@@ -421,7 +423,7 @@ def build_report(root: Path = ROOT) -> dict:
                 "physical_outputs_created": 0,
             },
             "source_era": "auto",
-            "authority": "original unpaired current D1-D9 source; candidate only; no oracle admission",
+            "authority": "current D1–D10 exact-width laws, D11 test-only catalogue, Zig/T5M physical preview; native SENS semantic admission NOT_VERIFIED",
             "already_paired_sources_excluded": excluded,
             "reviewed_nonprogram_sources": sorted(
                 classified.values(), key=lambda item: item["path"]),
@@ -441,10 +443,10 @@ def build_report(root: Path = ROOT) -> dict:
             "unpaired_empty_sample": blocked_sources[:20],
             "required_evidence": [
                 "prove original file is an executable SENS program, not an archive/catalogue",
-                "prove exact historical function successor, D1/D2/w8 era and no host/IO effects",
-                "run actual three-pass CLI to same-stem packed T5 without overwriting source",
-                "Rust exact-domain oracle parity including wrong-domain negatives and digest",
-                "merge only after focused and independent physical+syntax CI green",
+                "prove exact D1–D10 identity and widths, historical W8 ≠ D8, D11 noncallability and host/IO effects",
+                "after source-law admission, mint same-stem physical T5M using Zig only; preserve original .lisp and canonical bit view",
+                "prove actual SENS reader/eval program parity, typed ingress/EOF/error negatives, plus Zig T5M/F3C bit parity and digests; no Rust semantic fallback",
+                "require hosted exact-head CI, Cargo sens-cli --features zig-transport, and separately verified native SENS witnesses before review or release",
             ],
         }
 
