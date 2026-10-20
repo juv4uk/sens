@@ -1,9 +1,10 @@
-; #801 — minimal LIFE-1 orchestration scheduler.
+; #801 — мінімальний планувальник координації LIFE-1.
 ;
-; Scheduler state is ordinary Lisp data. It controls activation timing only:
-; it does not interpret Prolog, Datalog, CLIPS or Common Lisp semantics.
+; Стан планувальника є звичайними даними Lisp. Він визначає лише
+; момент активації; не тлумачить семантику Prolog, Datalog, CLIPS
+; або Common Lisp.
 ;
-; Pending invocation shape:
+; Форма очікуваного виклику (поля чинного протоколу не перекладати):
 ;   (pending-invocation
 ;     (producer datalog)
 ;     (trigger (projection-ready prolog-substitutions-to-datalog-facts))
@@ -11,17 +12,20 @@
 ;     (priority ordinary)
 ;     (semantic-id 00001100))
 ;
-; Projection availability shape:
+; Форма сповіщення про готовність проєкції:
 ;   (projection-ready
 ;     prolog-substitutions-to-datalog-facts
 ;     observation-42)
 ;
-; Quiescence is liveness/control data, never truth.
-
+; Стан спокою описує життєвість і керування, а не логічну істину.
+; Латинські назви всередині прикладів — точні значення протоколу
+; обміну; їх не можна заміняти без одночасної зміни споживачів.
+;
 ; Точне структурне порівняння для ключів рою: жодного історичного W8
 ; і жодного ототожнення W8:11110111 з D8:11110111.
-; D3 ATOM/ EQ/ CAR/ CDR/ COND; відповідь — виключно D1:1 або D1:0.
-; Порівняння атомів перед викликом D3 EQ, пар — рекурсивно.
+; Використано D3: атом?, тотожне?, перше, решта, за-умовою;
+; відповідь — виключно істина або хиба D1.
+; Атоми порівнюються перед викликом тотожне?, пари — рекурсивно.
 (визначити життя--рівні?
   (функція (ліве праве)
     (за-умовою
