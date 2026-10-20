@@ -5,8 +5,8 @@
 ; status=removed описує фізичний стан API. Сильніший claim про повністю
 ; підтверджений C5 робиться лише після зеленого C5 gate та full CI на цьому стані.
 
-(0011 *swarm-no-live-callers-audit*
-  (001
+(визначити *swarm-no-live-callers-audit*
+  (як-є
     ((schema . swarm-no-live-callers-audit/1)
      (as-of . "2026-09-07")
      (scope . ecosystem)
