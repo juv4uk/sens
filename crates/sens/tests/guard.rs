@@ -52,6 +52,18 @@ fn eval_guard_with_source(source: &str, exact_ukr: bool) -> String {
 }
 
 #[test]
+fn guard_real_ukrainian_lisp_witness_requires_no_commit_freeze() {
+    // Той самий SENS-свідок, що й у tests/fixtures; Rust лише спостерігає
+    // точний результат Д1, не переобчислюючи закон синхронізації.
+    let source = include_str!("../../../tests/fixtures/guard-exact-d3-semantic.lisp");
+    let observed = eval_guard_ukr(source);
+    assert_eq!(
+        observed, "1",
+        "Український свідок має довести всі перевірки Guard; фактично: {observed}"
+    );
+}
+
+#[test]
 fn guard_keeps_decision_and_evidence_status_separate() {
     let value = eval_guard(
         r#"(make-guard-finding
