@@ -1,39 +1,37 @@
-; #177 — typed x86-64 machine operands as Lisp-owned data.
-;
-; This layer owns operand *shape*, not instruction admission and not encoding.
-; Register knowledge is intentionally reused from x86-reg-code in the existing
-; Lisp encoder so this file cannot become a second GPR table. A well-typed
-; operand may still participate in an instruction form that #176 admission
-; rejects; type success is not capability/admission success.
+; Типізовані операнди машинної архітектури x86-64, описані мовою СЕНС.
+; Цей модуль визначає форму операнда, але не допуск інструкцій і не кодування.
+; Відповідність регістрів повторно використовує наявний машинний кодер.
+; Другої таблиці загальних регістрів тут не створюємо.
+; Коректна форма операнда не доводить, що інструкцію дозволено виконати.
 
 (визначити x86-machine-operand-rejection
-  (функція (expected actual)
-    (список (як-є rejected) (як-є machine-operand) expected actual)))
+  (функція (очікуване фактичне)
+    (список (як-є rejected) (як-є machine-operand) очікуване фактичне)))
 
 (визначити x86-machine-rejected?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((атом? value) (тотожне? (як-є ()) (як-є rejected)))
-      ((атом? ()) (тотожне? (перше value) (як-є rejected))))))
+      ((атом? значення) (тотожне? (як-є ()) (як-є rejected)))
+      ((атом? ()) (тотожне? (перше значення) (як-є rejected))))))
 
 (визначити x86-gpr8-name?
-  (функція (name)
+  (функція (назва)
     (за-умовою
-      ((символ? name)
+      ((символ? назва)
        (значення-у-списку?
-         name
+         назва
          (як-є
            (al cl dl bl spl bpl sil dil
                r8b r9b r10b r11b r12b r13b r14b r15b))))
       )))
 
 (визначити x86-gpr64-name?
-  (функція (name)
+  (функція (назва)
     (за-умовою
-      ((символ? name)
+      ((символ? назва)
        (та
-         (хибне? (тотожне? (x86-reg-code name) (як-є ())))
-         (хибне? (x86-gpr8-name? name))))
+         (хибне? (тотожне? (x86-reg-code назва) (як-є ())))
+         (хибне? (x86-gpr8-name? назва))))
       )))
 
 (визначити x86-gpr8?
@@ -98,14 +96,13 @@
   (функція (operand)
     (друге operand)))
 
-; A gpr32 operand is a 32-bit view of the same physical general-purpose
-; register named by its canonical 64-bit base name. The encoder already owns
-; the physical register-code mapping and the instruction form owns width, so
-; this typed view deliberately does not introduce a second eax/ecx/... code
-; table merely to say "lower 32 bits of rax/rcx/...".
+; Операнд загального регістра на 32 біти є видом того самого фізичного
+; регістра з канонічною 64-бітною назвою. Кодування регістрів уже належить
+; машинному кодеру, а ширину визначає форма інструкції.
+; Цей вид не створює другої таблиці адрес машинних регістрів.
 (визначити x86-gpr32-name?
-  (функція (name)
-    (x86-gpr64-name? name)))
+  (функція (назва)
+    (x86-gpr64-name? назва)))
 
 (визначити x86-gpr32?
   (функція (operand)
@@ -138,9 +135,9 @@
   (функція (operand)
     (друге operand)))
 
-; XMM is a separate register class even though encoding uses the same 4-bit
-; ModR/M namespace width. Validity is projected from x86-xmm-reg-code so this
-; typed layer does not become a second XMM number table.
+; Векторні регістри становлять окремий клас, хоча кодування використовує
+; спільний простір чотирибітних полів. Допустимість визначає наявний
+; кодер векторних регістрів, а не нова таблиця в цьому модулі.
 (визначити x86-xmm-name?
   (функція (name)
     (за-умовою
@@ -183,10 +180,10 @@
   (функція (operand)
     (друге operand)))
 
-; Exact integer recognition stays in Lisp and does not require a new host
-; `number?`/`integer?` primitive. Canonical exact Number identity is the
-; #q2:<num>/<den> wire, independent of human presentation.  In reduced form
-; an exact number is an integer exactly when its denominator is 1.
+; Розпізнавання точного цілого належить мові, не новому примітиву господаря.
+; Фізичне представлення чисел не змінює математичної тотожності.
+; Після скорочення точне раціональне число є цілим тоді й тільки тоді,
+; коли його знаменник дорівнює одиниці.
 (визначити x86-wire-denominator-one?
   (функція (text)
     (за-умовою
@@ -211,10 +208,10 @@
 
 (визначити x86-operand-in-inclusive-range?
   (функція (value lower upper)
-    ; Exact-Q comparisons answer 1 (так) / 0 (ні), and 0 is truthy -- so a
-    ; bare `and` over comparison results accepted every operand, overflowing
-    ; u64-imm/disp8 slots. E1 (#216): explicit expected-result domains,
-    ; reduced to a t/() structural predicate so it is safe as a cond query.
+    ; Числові результати порівняння не можна неявно вважати логічною хибою
+    ; за їхнім нульовим значенням: це допускало переповнення операндів.
+    ; Допустимість вимагає явного очікуваного домену результату
+    ; та структурного предиката для умовного вибору.
     (за-умовою
       ((не-менше? value lower) 
         (за-умовою
