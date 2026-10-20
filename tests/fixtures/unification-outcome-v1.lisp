@@ -1,6 +1,6 @@
-; #219 — explicit unification outcomes.
-; A completed unification query must preserve the distinction between an empty
-; successful substitution and a positively established algorithmic failure.
+; #219 — явні результати уніфікації.
+; Завершений запит уніфікації мусить зберігати розрізнення між порожньою
+; успішною підстановкою і позитивно встановленою алгоритмічною відмовою.
 
 ((expr . "(unify-observe (quote radio) (quote radio) (quote ()))")
  (expected . "(unified ())")
