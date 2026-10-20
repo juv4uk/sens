@@ -19,11 +19,11 @@ class DomainSpaceFileTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.widths = mod.domain_widths(
-            ROOT / "knowledge" / "d1-d9-foundation.json",
+            ROOT / "knowledge" / "d1-d11-foundation.json",
             ROOT / "knowledge" / "number-width-ratified.json",
         )
 
-    def audit(self, text, *, suffix=".sens"):
+    def audit(self, text, *, suffix=".bits"):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / f"candidate{suffix}"
             path.write_bytes(text.encode("utf-8"))
@@ -34,16 +34,17 @@ class DomainSpaceFileTests(unittest.TestCase):
         self.assertEqual(report["domain_widths"], [2, 3, 2, 3, 2])
         self.assertEqual(report["semantic_bits"], 12)
         self.assertEqual(report["separator_spaces"], 4)
-        self.assertEqual(report["physical_bytes"], 16)
-        self.assertEqual(report["physical_bits"], 128)
-        self.assertFalse(report["physical_bit_exact"])
+        self.assertEqual(report["view_bytes"], 16)
+        self.assertEqual(report["view_storage_bits"], 128)
+        self.assertEqual(report["status"], "VISIBLE_WORD_VIEW_ONLY_NOT_ORACLE_VERIFIED")
+        self.assertFalse(report["physical_codec_invoked"])
 
     def test_quote_nested_list_keeps_seven_separate_words(self):
         report = self.audit("10 001 00 10 000 01 01")
         self.assertEqual(report["domain_widths"], [2, 3, 2, 2, 3, 2, 2])
         self.assertEqual(report["semantic_bits"], 16)
-        self.assertEqual(report["physical_bytes"], 22)
-        self.assertFalse(report["physical_bit_exact"])
+        self.assertEqual(report["view_bytes"], 22)
+        self.assertEqual(report["physical_carrier"], "NOT_READ_ZIG_T5M")
 
     def test_identical_concatenation_retains_distinct_domain_boundaries(self):
         a = self.audit("1 01")
@@ -87,20 +88,31 @@ class DomainSpaceFileTests(unittest.TestCase):
     def test_empty_and_non_sens_files_rejected(self):
         with self.assertRaisesRegex(ValueError, "nonempty"):
             self.audit("")
-        with self.assertRaisesRegex(ValueError, "expected a .sens"):
-            self.audit("10 001", suffix=".lisp")
+        for suffix in (".lisp", ".sens"):
+            with self.subTest(suffix=suffix):
+                with self.assertRaisesRegex(ValueError, r"textual \.bits word view"):
+                    self.audit("10 001", suffix=suffix)
 
-    def test_no_false_physical_bit_exact_for_ascii_binary(self):
+    def test_view_storage_is_never_claimed_as_physical_t5m(self):
         for payload in ("1", "10", "11110110", "10 001 00 000 01"):
             with self.subTest(payload=payload):
                 report = self.audit(payload)
-                self.assertGreater(report["physical_bits"], report["semantic_bits"])
+                self.assertGreater(report["view_storage_bits"], report["semantic_bits"])
                 self.assertEqual(
-                    report["physical_bits"], 8 * (
+                    report["view_storage_bits"], 8 * (
                         report["semantic_bits"] + report["separator_spaces"]
                     )
                 )
-                self.assertEqual(report["status"], "BLOCKED_PHYSICAL_BIT_EXACT")
+                self.assertNotIn("physical_bit_exact", report)
+                self.assertEqual(report["physical_carrier"], "NOT_READ_ZIG_T5M")
+
+    def test_current_d10_and_d11_word_widths_are_visible_not_callable_proofs(self):
+        self.assertIn(10, self.widths)
+        self.assertIn(11, self.widths)
+        report = self.audit("0" * 10 + " " + "0" * 11)
+        self.assertEqual(report["domain_widths"], [10, 11])
+        self.assertFalse(report["reader_oracle_validated"])
+        self.assertEqual(report["physical_carrier"], "NOT_READ_ZIG_T5M")
 
 
 if __name__ == "__main__":
