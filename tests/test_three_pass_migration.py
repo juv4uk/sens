@@ -588,6 +588,23 @@ class ThreePassMigrationTests(unittest.TestCase):
                     codec="t5m", source_surface="укр",
                 )
 
+    def test_ukr_comments_and_strings_do_not_act_as_numeric_program_atoms(self):
+        original = mod.migrate_file(
+            "(перше ())\n", mod.Resolver(self.my, self.upper), self.text7,
+            codec="t5m", source_surface="укр",
+        )
+        for note in (
+            "; тут ١٢٣ не операнди\n(перше ())\n",
+            "#| інертний запис ५ #| вкладений ２ |# |#\n(перше ())\n",
+            "(перше ()) ; значення ١,٢ належить коментареві",
+        ):
+            with self.subTest(note=note):
+                actual = mod.migrate_file(
+                    note, mod.Resolver(self.my, self.upper), self.text7,
+                    codec="t5m", source_surface="укр",
+                )
+                self.assertEqual(actual, original)
+
     def test_decimal_zero_is_not_guessed_from_token_width(self):
         for width in (24, 48, 96):
             with self.subTest(width=width):
