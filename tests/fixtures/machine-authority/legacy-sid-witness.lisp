@@ -1,6 +1,6 @@
-; #4057 deliberate negative witness.
-; Contract authority is current, but the independent semantic witness uses the
-; retired SID8 witness ontology. The guard must reject it.
+; #4057 навмисний негативний свідок.
+; Влада контракту чинна, але незалежний семантичний свідок використовує
+; відкликану онтологію свідка SID8. Вартовий мусить його відкинути.
 (capability-provenance
   (name legacy-sid8-answer-key)
   (semantic-authority language-contract.lisp+ratified-domain-laws)
