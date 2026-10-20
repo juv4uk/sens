@@ -261,7 +261,15 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests/test_audit_all_lisp_triplets.py -v
-          python3 -m unittest tests/test_migration_readiness_contract.py -v
+          python3 -m unittest tests/test_report_nonprogram_pin_drift.py -v
+          # На кожному push: чинний D1–D11, точні слова та беззаписний dry-run.
+          # Повна перевірка 2026-10-08 SHA-маніфестів зберігається суворою
+          # у workflow_dispatch migration-readiness-census; застарілий пін
+          # не має блокувати незалежні зміни в main.
+          python3 -m unittest \
+            tests.test_migration_readiness_contract.ReadinessContractTests.test_uses_owner_ratified_d1_d11_not_stale_d1_d9 \
+            tests.test_migration_readiness_contract.ReadinessContractTests.test_census_invokes_era_auto_and_excludes_existing_pairs_without_writes -v
+          python3 scripts/report_nonprogram_pin_drift.py --limit 6
           python3 scripts/audit_all_lisp_triplets.py --verify-bounded --limit 8
 
       - name: SENS-визначення — баланс дужок і дублікати
