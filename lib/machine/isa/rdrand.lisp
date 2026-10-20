@@ -1,5 +1,7 @@
-; RDRAND instruction-family catalogue. Physical ISA facts only.
-; Runtime selection is gated by the CPUID RDRAND feature bit.
+; Каталог апаратної інструкції випадкових чисел RDRAND.
+; Описує лише фізичні факти ISA, не мовні закони СЕНС.
+; Використання дозволяється лише за підтвердженою ознакою RDRAND у CPUID.
+; Мнемоніки й структурні поля не перекладаються.
 
 (isa-catalogue/1
   (extension RDRAND)
