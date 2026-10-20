@@ -22,9 +22,9 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 157,
+    "total": 158,
     "historical": 15,
-    "library": 142,
+    "library": 143,
     "distinct_families": 24
   },
   "excluded": {
@@ -2692,6 +2692,26 @@
       "signature_candidate": "(ідентичність) → список чотирьох вибраних маршрутів",
       "law_candidate": "У визначеному порядку повертає чотири результати ядро3-маршрут для чинних протокольних виконавців; порядок і значення виконавців не перекодовуються.",
       "admission_note": "Це виконуване похідне визначення бібліотеки, а не новий примітив. Не створювати D11-координату, поки не встановлено незалежний закон і відсутність семантичного дублювання."
+    },
+    {
+      "surface_name": "першокласне-порівняти-послідовність",
+      "source_family": "meta-evaluation",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/meta-eval-first-class.lisp",
+        "blob_sha": "e648d3aaa6d0f7435ae7daa4331e0f5d62f34e36",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false,
+      "existing_lisp_definition": true,
+      "signature_candidate": "(оператор-порівняння, список аргументів) → однобітне так або ні",
+      "law_candidate": "Перевіряє суміжні пари зліва направо; використовує чинні менше?, однакові? або більше?; для одного аргументу повертає так.",
+      "admission_note": "Похідний SENS-механізм. Перевірити семантичне дублювання з ратифікованими багатомісними предикатами. Не призначати координату без власницької ратифікації."
     }
   ]
 }
