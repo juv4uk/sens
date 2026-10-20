@@ -1,24 +1,14 @@
-; Experimental extension for mutually recursive top-level lambda definitions.
-; Load after the current Core4 profile (`lib/core4.lisp`) and lib/meta-eval.lisp.
-;
-; Міграція: 10 однозв'язувальних D6:001000 LET усунено через чинну D4:0010 LAMBDA.
-; Семантика: те саме одноразове обчислення аргументу, те саме локальне зв'язування.
-; Двопольний D3 COND; резервна умова — прямий однобітний D1:YES.
-; Reuses existing evaluator application/body logic, argument binding,
-; lexical lookup, macro and lambda predicates, and positional accessors.
-; Width is identity; every bit of the domain address is valued.
-;
-; Consecutive top-level `(def name (lambda ...))` forms are treated as one
-; finite recursive group. No cyclic Rust Environment is required.
-;
-; A group closure stores the raw finite group as Lisp data:
-;   (recursive-group-closure name params body group captured-env)
-;
-; At call time the group environment is reconstructed from that data.
+; Метаобчислювач взаємно рекурсивних визначень верхнього рівня.
+; Завантажувати після чинного четвертого ядра та метаобчислювача.
+; Локальні зв'язування реалізовано через функції четвертого домену.
+; Умови мають два поля й використовують істину першого домену.
+; Застосування, лексичний пошук і розбір аргументів беруться з наявного обчислювача.
+; Послідовні визначення функцій утворюють скінченну рекурсивну групу.
+; Замикання зберігає назву, параметри, тіло, групу й захоплене оточення.
+; Під час виклику оточення групи відновлюється без циклічного зовнішнього стану.
+; Протокольні назви замикань залишаються цитованими даними.
+; Предикат групового замикання повертає точне значення першого домену.
 
-; D3:110 condition requires an exact D1 control bit, not quoted D3 empty.
-; These two predicates return D1:0 on negative branches so callers can
-; compose them inside D3 COND without historical truthiness.
 (визначити це-замикання-рекурсивної-групи?
   (функція (значення)
     (за-умовою
@@ -54,15 +44,15 @@
 
 (визначити створити-замикання-взаєморекурсивної-групи
   (функція (форма група захоплене-оточення)
-    ((функція (lambda-form) (список (як-є recursive-group-closure)
+    ((функція (форма-функції) (список (як-є recursive-group-closure)
             (друге форма)
-            (друге lambda-form)
-            (решта (решта lambda-form))
+            (друге форма-функції)
+            (решта (решта форма-функції))
             група
             захоплене-оточення)) (третє форма))))
 
-; Build onto the captured environment so later definitions in the same group
-; appear earlier in the alist, matching same-frame overwrite order.
+; Новіші визначення групи додаються попереду списку зв'язувань.
+; Це зберігає порядок перевизначення імен у спільному лексичному оточенні.
 (визначити додати-зв'язки-в-оточення-рекурсивної-групи
   (функція (форми група захоплене-оточення накопичувач)
     (за-умовою
@@ -90,7 +80,8 @@
           аргументи
           оточення-групи))) (побудувати-лексичні-зв'язки-рекурсивної-групи (п'ятий викликана-функція) (шосте-значення-групи викликана-функція)))))
 
-; Apply wrapper: group closures go through group path; others reuse my-apply.
+; Групові замикання застосовуються через груповий шлях.
+; Решта значень використовує чинний механізм застосування.
 (визначити застосувати-групове-замикання
   (функція (викликана-функція аргументи)
     (за-умовою
