@@ -299,6 +299,22 @@ jobs:
         if: ${{ always() && github.event_name == 'workflow_dispatch' }}
         run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
 
+      - name: Оборотність Lisp ↔ точні слова ↔ T5 — позитивні й негативні перевірки
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Це тести канонічної фізичної тотожності, НЕ незалежний SENS-eval.
+          # Нові помилки у міграторі, інвентарі або свідках мають робити CI червоним.
+          python3 -m unittest tests/test_verify_uk_t5_triplet.py -v
+          python3 -m unittest tests/test_audit_t5_file_pairs.py -v
+          python3 -m unittest tests/test_report_t5_triplet_inventory.py -v
+          # Залишковий історичний борг видно в кожному запуску; не підміняти
+          # частковий прогрес загальним релізним NO-GO чи фальшивим GREEN.
+          if ! python3 scripts/report_t5_triplet_inventory.py .; then
+            echo "::warning::T5_TRIPLET_INVENTORY_BLOCKED: перевірити пофайловий борг; універсальну оборотність не доведено"
+          fi
+
       - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
         if: ${{ always() }}
         run: |
