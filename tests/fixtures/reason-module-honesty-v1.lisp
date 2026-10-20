@@ -1,9 +1,11 @@
-; #219 — missing module is an established blocking fact, not epistemic unknown.
-; `module-known?` exhausts the concrete append-only knowledge journal. If no
-; event for the requested module exists, reasoning never starts: the known
-; precondition is absent, so the honest richer result is `blocked`.
+; #219 — відсутній модуль є встановленим фактом, що заважає виконанню,
+; а не невідомим епістемічним станом.
+; Перевірка наявності модуля переглядає журнал знань без перезапису.
+; Якщо жодної події для модуля немає, міркування не починається:
+; передумова відома як відсутня, тому результат має статус blocked.
+; Викличні голови Д9 та Д3 українські; протокольні поля незмінні.
 
-((expr . "(reason-in-observe (quote ghost) (quote (planet pluto)))")
+((expr . "(міркувати-у-спостерігати (як-є ghost) (як-є (planet pluto)))")
  (expected . "(blocked (module-not-found ghost))")
  (active . t)
  (law . missing-module-is-blocked))
