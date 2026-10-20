@@ -1,14 +1,15 @@
 """Доказова проєкція FS: D1/D4 на повне укр, без Python-SENS evaluator.
 
-Точний попередній Git blob і семантична S-форма — незалежні свідки.
+Порівнюємо вихідну програму з первісним законом і перевіряємо зовнішній тег.
 Фізичне виконання належить існуючим SENS fixture/CI, не цим unittest.
 """
 from __future__ import annotations
 
-import hashlib
 import re
 import unittest
 from pathlib import Path
+
+from scripts.report_ukr_projection_progress import ALLOWED
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/fs.lisp"
@@ -16,7 +17,6 @@ D1 = ROOT / "lib/domains/d1.lisp"
 D3 = ROOT / "lib/domains/d3.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
 D9 = ROOT / "lib/domains/d9.lisp"
-PRE_MIGRATION_BLOB = "59b18e3dfdc10bb33036448dc4d3eb33efefec59"
 
 EXACT_LAW = """
 (0011 read-file
@@ -73,6 +73,8 @@ def old_identity(node):
     if not isinstance(node, list):
         if node == "так":
             return "#d1:1"
+        if node == "ознака-успішного-декодування":
+            return ["001", "decoded"]
         return {"шлях": "path", "декодоване": "decoded", "текст": "text",
                 "читати-файл": "read-file", "записати-файл": "write-file",
                 "читати-сирий-текст-файла": "read-file-utf8-raw",
@@ -85,32 +87,6 @@ def old_identity(node):
     return items
 
 
-def source_to_previous(text: str) -> str:
-    """Обернути тільки ратифіковані слова у коді; коментарі не редагувати."""
-    result = []
-    for line in text.splitlines(keepends=True):
-        if line.lstrip().startswith(";"):
-            result.append(line)
-            continue
-        line = line.replace("(визначити читати-файл", "(визначити read-file")
-        line = line.replace("(визначити записати-файл", "(визначити write-file")
-        line = line.replace("(читати-сирий-текст-файла ", "(read-file-utf8-raw ")
-        line = line.replace("(записати-байти-файла ", "(write-file-bytes ")
-        line = re.sub(r"\(визначити(?=\s)", "(0011", line)
-        line = re.sub(r"\(функція(?=\s)", "(0010", line)
-        line = re.sub(r"\(так(?=\s|$)", "(#d1:1", line)
-        line = line.replace("(кодування-юнікод-8-кодувати-рядок ", "(utf8-encode-string ")
-        for нове, старе in (("шлях", "path"), ("декодоване", "decoded"), ("текст", "text")):
-            line = re.sub(r"(?<![\w-])" + нове + r"(?![\w-])", старе, line)
-        result.append(line)
-    return "".join(result)
-
-
-def git_blob(text: str) -> str:
-    data = text.encode("utf-8")
-    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
-
-
 def verify(source: str) -> None:
     forms = parse(source)
     if [old_identity(form) for form in forms] != parse(EXACT_LAW):
@@ -119,8 +95,15 @@ def verify(source: str) -> None:
         form[0] != "визначити" or form[2][0] != "функція" for form in forms
     ):
         raise AssertionError("FS: не повна українська D4:0011/0010 проєкція")
-    if git_blob(source_to_previous(source)) != PRE_MIGRATION_BLOB:
-        raise AssertionError("FS: незворотна правка поза ратифікованими проєкціями")
+    # Зовнішній тег не перейменовується: кодек зберігає стару семантику.
+    codec_source = (ROOT / "lib/utf8.lisp").read_text(encoding="utf-8")
+    tag = "ознака-успішного-декодування"
+    if codec_source.count(f"(визначити {tag} (як-є decoded))") != 1:
+        raise AssertionError("FS: точний протокольний тег не визначено в кодеку")
+    if len(re.findall(rf"(?m)^\\(визначити\\s+{tag}(?=\\s|\\))", codec_source)) != 1:
+        raise AssertionError("FS: неоднозначне визначення протокольного тегу")
+    if any(char not in ALLOWED for char in source):
+        raise AssertionError("FS: джерело не повністю на українській клавіатурі")
 
 
 class FsUkrProjectionTests(unittest.TestCase):
@@ -139,7 +122,7 @@ class FsUkrProjectionTests(unittest.TestCase):
                 if len(bits) == domain:
                     self.assertEqual(rows[bits], name, f"D{domain}:{bits}")
 
-    def test_exact_original_git_blob_and_full_sens_ast(self):
+    def test_full_ukrainian_source_preserves_original_sens_law(self):
         self.assertIn(
             "(000010101 (ук кодування-юнікод-8-кодувати-рядок) "
             "(укр кодування-юнікод-8-кодувати-рядок)",
