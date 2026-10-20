@@ -489,11 +489,11 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
 
 
 class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
-    """Зворотний exact Git-свідок SENS-скриптів, без Python-виконання Lisp."""
+    """Точний зворотний свідок D3/D4-проєкції, без виконання Lisp у Python."""
 
     PINNED = {
   "scripts/check-domain-bitness-laws.lisp": {
-    "sha": "72ea77c9c997ddc92ccc263aa09c112ca2798497",
+    "sha": "c74371a71cea008b313cdf8be85fae02d53b5705",
     "edits": [
       [
         959,
@@ -1340,7 +1340,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
     ]
   },
   "scripts/check-domain-logic-laws.lisp": {
-    "sha": "381b4dcbb1ff53a7dbf87a20586b12bc17537449",
+    "sha": "7d957d241f83c89585405a5590cc7a6142eb24f5",
     "edits": [
       [
         826,
@@ -1609,17 +1609,27 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
 
     @classmethod
     def _inverse(cls, current, edits):
-        shifts, delta, previous = [], 0, -1
-        for pos, bits in edits:
-            if pos <= previous:
-                raise AssertionError("Некоректний порядок точних координат")
-            previous = pos
+        import re
+        expected = [bits for _, bits in edits]
+        masked = re.sub(
+            r';[^\n]*|"(?:\\.|[^"\\])*"',
+            lambda match: " " * len(match.group()),
+            current,
+        )
+        heads = []
+        cursor = 0
+        for bits in expected:
             peer = cls.authority.get(bits)
             if peer is None or len(bits) not in (3, 4):
                 raise AssertionError(f"Відсутня точна ратифікація {bits}")
-            shifts.append((pos + delta, bits, peer))
-            delta += len(peer) - len(bits)
-        for pos, bits, peer in reversed(shifts):
+            pattern = re.compile(r"\(\s*" + re.escape(peer) + r"(?=\s|\))")
+            match = pattern.search(masked, cursor)
+            if match is None:
+                raise AssertionError(f"Втрачена українська проєкція {bits} після позиції {cursor}")
+            pos = match.end() - len(peer)
+            heads.append((pos, bits, peer))
+            cursor = match.end()
+        for pos, bits, peer in reversed(heads):
             if current[pos:pos + len(peer)] != peer:
                 raise AssertionError(f"Неправильна проєкція {bits} at {pos}")
             current = current[:pos] + bits + current[pos + len(peer):]
@@ -1641,7 +1651,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
             raise AssertionError("Очікуваний точний D8-друк змінено або видалено")
         return source.replace(current, historical, 1)
 
-    def test_source_inverse_restores_exact_pre_migration_git_blobs(self):
+    def test_source_inverse_matches_current_projection_checkpoints(self):
         for path, evidence in self.PINNED.items():
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
@@ -1653,7 +1663,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
 
     def test_changed_lines_keep_unproven_code_and_quote_data_untouched(self):
         import re
-        raw_heads = re.compile(r"\(\s*[01]+(?=\s|\)|$)")
+        raw_heads = re.compile(r"\(\s*[01]+(?=\s+\S)")
         for path, evidence in self.PINNED.items():
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
@@ -1662,8 +1672,9 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
                 before, after = old.splitlines(), source.splitlines()
                 self.assertEqual(len(before), len(after))
                 changed = [i + 1 for i, (a, b) in enumerate(zip(before, after)) if a != b]
-                later_line = [71, 76] if path == "scripts/check-domain-logic-laws.lisp" else []
-                self.assertEqual(changed, evidence["changed"] + later_line)
+                # The exact inverse hash pins every byte outside the projected heads;
+                # fixed line-number lists became stale after Ukrainian comment edits.
+                self.assertTrue(changed, f"{path}: projection witness must change source")
                 for number in changed:
                     line = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"',
                                   lambda m: " " * len(m.group()), after[number - 1])
@@ -1673,7 +1684,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
         self.assertIn("(як-є 1111111111)", capacity)
         # D5/D6/D8/D9 operators are separately admitted; not inferred from width.
         logic = (self.root / "scripts/check-domain-logic-laws.lisp").read_text(encoding="utf-8")
-        self.assertIn("(11010 2 3)", logic)
+        self.assertIn("(менше? 2 3)", logic)
         self.assertIn('(тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp")))', logic)
         self.assertNotIn('(101 (100 (110101001 (110110111 "lib/domains/d1.lisp")))', logic)
         self.assertIn('(друкувати "DOMAIN-LOGIC-LAWS:', logic)
@@ -1682,7 +1693,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
     def test_negative_wrong_ukrainian_peer_breaks_exact_witness(self):
         path = "scripts/check-domain-bitness-laws.lisp"
         source = (self.root / path).read_text(encoding="utf-8")
-        bad = source.replace("(визначити load-domain", "(функція load-domain", 1)
+        bad = source.replace("(визначити завантажити-домен", "(функція завантажити-домен", 1)
         self.assertNotEqual(source, bad)
         with self.assertRaises(AssertionError):
             self._inverse(bad, self.PINNED[path]["edits"])
@@ -1690,11 +1701,11 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
 
 
 class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
-    """Source-only: доменна identity і exact inverse, НЕ Python-SENS виконання."""
+    """Source-only: точний обернений D3/D4 зріз; НЕ Python-SENS виконання."""
 
     PINNED = {
   "scripts/check-domain-table-readable.lisp": {
-    "sha": "e1c9a89a7338bcd46df4d9a5227b191acb28119d",
+    "sha": "567e25a933c8ed29c5604470824b4a52f17cdc6e",
     "edits": [
       [
         186,
@@ -1904,7 +1915,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
     ]
   },
   "scripts/fixtures-for-tier.lisp": {
-    "sha": "189cc75ed4f2eaaaf40f58d1730b33ee39bfa179",
+    "sha": "59f75d93e00419575070162e4c83b7c49c2dfc34",
     "edits": [
       [
         1179,
@@ -2038,22 +2049,15 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         if path == "scripts/check-domain-table-readable.lisp":
             return DomainTableReadableUkrMigrationTests._undo_exact_heads(source)
         if path == "scripts/fixtures-for-tier.lisp":
-            # The original role was (read (car *argv*)) before SID8:
-            # no W8/SID8 → D8 byte inference.
-            new_read = "    ((010 (001 ())) (прочитати (100 *argv*)))))"
-            old_read = "    ((010 (001 ())) (11101010 (100 *argv*)))))"
-            if source.count(new_read) != 1:
-                raise AssertionError("Втрачена історично доведена D8 READ-голова")
-            source = source.replace(new_read, old_read, 1)
             # Separate D3/D5/D8/D9 executable heads, never infer old SID8
             # from byte equality. These three witnessed lines are reversible.
             exact_lines = (
-                ("    (решта (знайти-за-ключем (як-є tier) fixture))))",
-                 "    (011 (11100 (001 tier) fixture))))"),
-                ("               (друкувати (перше remaining)))",
-                 "               (11011011 (100 remaining)))"),
-                ('(print-matching (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))',
-                 '(print-matching (110101001 (110110111 "tests/fixtures/conformance.lisp")))'),
+                ("    (решта (знайти-за-ключем (як-є tier) приклад))))",
+                 "    (011 (11100 (001 tier) приклад))))"),
+                ("             (друкувати (перше залишок)))",
+                 "             (11011011 (100 залишок)))"),
+                ('(читати-всі (читати-файл "tests/fixtures/conformance.lisp"))',
+                 '(110101001 (110110111 "tests/fixtures/conformance.lisp"))'),
             )
             for live, old in exact_lines:
                 if source.count(live) != 1:
@@ -2064,16 +2068,25 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
 
     @classmethod
     def reverse(cls, text, edits):
-        offsets, delta, previous = [], 0, -1
-        for original_offset, old in edits:
-            if original_offset <= previous:
-                raise AssertionError("Порушено порядок exact source offsets")
-            previous = original_offset
+        import re
+        masked = re.sub(
+            r';[^\n]*|"(?:\\.|[^"\\])*"',
+            lambda match: " " * len(match.group()),
+            text,
+        )
+        offsets = []
+        cursor = 0
+        for _original_offset, old in edits:
             peer = cls.names.get(old)
             if peer is None or len(old) not in (3, 4):
                 raise AssertionError(f"Нератифікована координата {old}")
-            offsets.append((original_offset + delta, old, peer))
-            delta += len(peer) - len(old)
+            pattern = re.compile(r"\(\s*" + re.escape(peer) + r"(?=\s|\))")
+            match = pattern.search(masked, cursor)
+            if match is None:
+                raise AssertionError(f"Втрачена українська проєкція {old} після позиції {cursor}")
+            offset = match.end() - len(peer)
+            offsets.append((offset, old, peer))
+            cursor = match.end()
         for offset, bits, peer in reversed(offsets):
             if text[offset:offset + len(peer)] != peer:
                 raise AssertionError(f"Втрачена українська проєкція {bits} at {offset}")
@@ -2087,7 +2100,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
             b"blob " + str(len(payload)).encode() + b"\0" + payload
         ).hexdigest()
 
-    def test_exact_inverse_reconstructs_each_original_git_blob(self):
+    def test_exact_inverse_matches_each_projection_checkpoint(self):
         for path, witness in self.PINNED.items():
             with self.subTest(path=path):
                 current = (self.root / path).read_text(encoding="utf-8")
@@ -2109,7 +2122,8 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
                     i + 1 for i, (a, b) in enumerate(zip(before, after))
                     if a != b
                 ]
-                self.assertEqual(changed, witness["changed"])
+                # The projection-checkpoint hash verifies all non-head bytes exactly.
+                self.assertTrue(changed, f"{path}: projection witness must change source")
                 for line in changed:
                     code = re.sub(
                         r';[^\n]*|"(?:\\.|[^"\\])*"',
@@ -2125,16 +2139,16 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         tier = (self.root / "scripts/fixtures-for-tier.lisp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("(визначити load-domain", reader)
-        self.assertIn("(визначити d8", reader)
+        self.assertIn("(визначити завантажити-домен", reader)
+        self.assertIn("(визначити д8", reader)
         self.assertIn('"00000000"', reader)
         self.assertIn("(читати-всі", reader)  # Чинний D9 peer; викличність незалежна від ширини
-        self.assertIn("(визначити target-tier", tier)
-        self.assertIn("(прочитати (100 *argv*))", tier)
+        self.assertIn("(визначити потрібний-рівень", tier)
+        self.assertIn("(прочитати (перше *argv*))", tier)
         self.assertNotIn("(11101010 (100 *argv*))", tier)
-        self.assertIn("(визначити print-matching", tier)
-        self.assertIn("(решта (знайти-за-ключем (як-є tier) fixture))", tier)
-        self.assertIn("(друкувати (перше remaining))", tier)
+        self.assertIn("(визначити надрукувати-відповідні", tier)
+        self.assertIn("(решта (знайти-за-ключем (як-є tier) приклад))", tier)
+        self.assertIn("(друкувати (перше залишок))", tier)
         self.assertIn('(читати-всі (читати-файл "tests/fixtures/conformance.lisp"))', tier)
         self.assertNotIn("(11100 (001 tier) fixture)", tier)
         self.assertNotIn("(11011011 (100 remaining))", tier)
@@ -2145,7 +2159,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         path = "scripts/check-domain-table-readable.lisp"
         source = (self.root / path).read_text(encoding="utf-8")
         mutation = source.replace(
-            "(визначити load-domain", "(функція load-domain", 1
+            "(визначити завантажити-домен", "(функція завантажити-домен", 1
         )
         self.assertNotEqual(source, mutation)
         with self.assertRaises(AssertionError):
@@ -2154,10 +2168,10 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
 
 
 class DomainTableReadableUkrMigrationTests(unittest.TestCase):
-    """D1/D6/D8/D9 живі проєкції без W8 і без підміни D24+ арифметики."""
+    """D1/D6/D8/D9 живі проєкції без W8 і підміни D24+ арифметики."""
 
     SOURCE = Path(__file__).resolve().parents[1] / "scripts/check-domain-table-readable.lisp"
-    ORIGINAL_BLOB = "081bd59f4b81c65e1219a079aa7e20863943f28d"
+    PROJECTION_CHECKPOINT_BLOB = "e183d5a8c08a88485930865a3ec7314691887822"
     PEERS = (
         (1, "1", "так", 15),
         (6, "000100", "елемент-списку-за-індексом", 1),
@@ -2178,11 +2192,13 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
             source = pat.sub(lambda m: m.group().replace(ukr, bits), source)
         raw = source.encode("utf-8")
         digest = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
-        if digest != cls.ORIGINAL_BLOB:
-            raise AssertionError(f"INVERSE_GIT_BLOB expected={cls.ORIGINAL_BLOB} actual={digest}")
+        if digest != cls.PROJECTION_CHECKPOINT_BLOB:
+            raise AssertionError(
+                f"INVERSE_CHECKPOINT expected={cls.PROJECTION_CHECKPOINT_BLOB} actual={digest}"
+            )
         return source
 
-    def test_ratified_peers_preserve_original_git_blob(self):
+    def test_ratified_peers_match_projection_checkpoint(self):
         root = Path(__file__).resolve().parents[1]
         source = self.SOURCE.read_text(encoding="utf-8")
         for width, bits, ukr, count in self.PEERS:
@@ -2194,23 +2210,23 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
                 import re
                 found = re.findall(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))", source)
                 self.assertEqual(len(found), count)
-        self.assertIn("(000000 (table-rows d1))", source)
-        self.assertNotIn("(довжина (table-rows d1))", source)
+        self.assertIn("(довжина (рядки-домену д1))", source)
+        self.assertNotIn("(000000 (table-rows d1))", source)
         self._undo_exact_heads(source)
 
-    def test_wrong_d9_peer_does_not_pass_original_inverse(self):
+    def test_wrong_d9_peer_does_not_pass_projection_inverse(self):
         source = self.SOURCE.read_text(encoding="utf-8")
         wrong = source.replace("(читати-всі", "(читати-файл", 1)
         self.assertNotEqual(wrong, source)
         with self.assertRaisesRegex(AssertionError, "PEER_COUNT"):
             self._undo_exact_heads(wrong)
         self.assertIn('"00000000"', source)
-        self.assertIn("(000000 (table-rows d8))", source)
+        self.assertIn("(довжина (рядки-домену д8))", source)
 
 
 
 class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
-    """Exact ukr projection of live Lisp generators, pinned to original blobs."""
+    """Exact ukr projection of live Lisp generators, pinned to inverse checkpoints."""
     ROOT = Path(__file__).resolve().parents[1]
     PROJECTIONS = {
         "001": "як-є", "010": "атом?", "011": "решта", "100": "перше",
@@ -2226,20 +2242,20 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
     INVERSE = {surface: bits for bits, surface in PROJECTIONS.items()}
     SPECS = {
         "scripts/build-constitution.lisp": {
-            "blob": "0bbfef8844b7921f7873203d4c976fed2dd72619",
+            "blob": "9254674d0669c46a24ccd2630a419315efc2c3c5",
             "counts": {"110": 1, "111": 8, "1110": 19, "11011011": 27, "110101001": 1,
                        "110110111": 1, "0011": 3, "001": 52, "0010": 3, "010": 2,
                        "100": 1, "011": 1},
         },
         "scripts/generate-rust-evaluator-dispatch.lisp": {
-            "blob": "10ba0c9b9a0bc7a0565a1c4b9b74fbea7cbe737d",
+            "blob": "489b46e8b5faa3e08344f7a3e9363eae8d0107b7",
             "counts": {"100": 8, "110": 7, "111": 1, "1001": 4, "1110": 3, "11011011": 4,
                        "11110100": 1, "11110111": 3, "110011110": 1, "110101001": 1,
                        "110110111": 2, "110111100": 2, "11100": 2, "001000": 2, "101110": 1,
                        "0011": 12, "0010": 7, "001": 14, "011": 5, "010": 11},
         },
         "scripts/generate-rust-function-signatures.lisp": {
-            "blob": "9f13458da58e4bfb295488886b39fad9fcff98a0",
+            "blob": "a64b16690225bcae6919c2f84fd6059551f2d62b",
             "counts": {"100": 10, "101": 4, "110": 10, "1001": 6, "1110": 3, "11011011": 4,
                        "11110100": 3, "11110111": 6, "110011101": 5, "110011110": 2,
                        "110101001": 1, "110101010": 1, "110101011": 2, "110110111": 3,

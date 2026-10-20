@@ -83,13 +83,13 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
         )
         for required in (
             "(створити-світ (як-є ()) (як-є ()) (як-є ()))",
-            "(світ-запис world (список (як-є tell) module-name clause))",
-            "(світ-запис world (список (як-є retract) module-name clause))",
-            "(світ-журнал world)",
-            "(світ-метадані world)",
-            "(значення-у-текст knowledge)",
-            "(світ-адреса-вміст world)",
-            "(знання-вміст-адреса (світ-адреса-вміст world))",
+            "(світ-запис світ (список (як-є tell) назва-модуля клауза))",
+            "(світ-запис світ (список (як-є retract) назва-модуля клауза))",
+            "(світ-журнал світ)",
+            "(світ-метадані світ)",
+            "(значення-у-текст знання)",
+            "(світ-адреса-вміст світ)",
+            "(знання-вміст-адреса (світ-адреса-вміст світ))",
         ):
             with self.subTest(expression=required):
                 self.assertIn(required, primary_code)
@@ -99,11 +99,11 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertNotRegex(source, r"\(\s*[01]{9}(?:\s|\))")
         primary = source.split(ALIAS_MARKER, 1)[0]
         for helper in (
-            "world?",
-            "world-remove-first",
-            "world-apply-event",
-            "legacy-world-transition-expansion",
-            "world-diff",
+            "світ?",
+            "внутрішній-світ-прибрати-перше",
+            "внутрішній-світ-застосувати-подію",
+            "внутрішній-світ-розгорнути-історичний-перехід",
+            "світ-різниця",
         ):
             with self.subTest(helper=helper):
                 self.assertRegex(primary, rf"(?m)^\(визначити\s+{re.escape(helper)}\s")
