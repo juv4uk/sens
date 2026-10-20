@@ -230,7 +230,7 @@ class BoundedUkTripletTests(unittest.TestCase):
 
     def test_caar_real_uk_source_against_original_unmodified_physical_t5(self):
         source_dir = ROOT / "tests/fixtures/migration-d4-selector-cohort"
-        self.assertEqual(mod.uk_surface(4)["1000"], "п-п")
+        self.assertEqual(mod.uk_surface(4)["1000"], "перше-першого")
         with tempfile.TemporaryDirectory(prefix="sens-d4-uk-triple-") as td:
             stage = Path(td)
             for suffix in (".lisp", ".sens", ""):
@@ -239,7 +239,7 @@ class BoundedUkTripletTests(unittest.TestCase):
             lisp, sens, view = stage / "caar.lisp", stage / "caar.sens", stage / "caar"
             original = (lisp.read_bytes(), sens.read_bytes(), view.read_bytes())
             self.assertEqual(lisp.read_text(encoding="utf-8"),
-                "(п-п (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n")
+                "(перше-першого (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n")
             words = mod.decode_bytes(original[1])
             self.assertEqual(words[0:2], ["10", "1000"])
             self.assertEqual(mod.canonical_uk_from_words(words), lisp.read_text(encoding="utf-8"))
