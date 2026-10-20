@@ -24,6 +24,22 @@ class StageTwoProjectionsTests(unittest.TestCase):
         self.assertIn("keyboard-v2", text7)
         self.assertTrue(pair.BITS.fullmatch("0101010101"))
 
+    def test_current_exact_word_widths_exclude_d11_proposals(self):
+        # D1–D10 are eligible word widths; D11 is catalogue-only.
+        # D24+ can carry exact mathematical words, but these bytes alone
+        # cannot prove a callable identity or authorize semantic execution.
+        for width in range(1, 11):
+            with self.subTest(width=width):
+                self.assertIsNotNone(pair.BITS.fullmatch("0" * width))
+        for width in (11, 12, 16, 23):
+            with self.subTest(rejected_width=width):
+                self.assertIsNone(pair.BITS.fullmatch("0" * width))
+        for width in (24, 48, 96):
+            with self.subTest(math_width=width):
+                self.assertIsNotNone(pair.BITS.fullmatch("0" * width))
+        self.assertIsNone(pair.BITS.fullmatch("0" * 24 + "2"))
+        self.assertIsNone(pair.BITS.fullmatch("0" * 24 + " "))
+
     def test_legacy_source_era_cannot_reanimate_retired_bridge(self):
         with tempfile.TemporaryDirectory(prefix="sens-two-legacy-") as td:
             mirror = Path(td) / "mirror"
