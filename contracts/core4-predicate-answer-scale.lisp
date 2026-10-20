@@ -1,14 +1,14 @@
-; Core4 15-state predicate-answer scale — Lisp-owned law for #1391.
+; Шкала відповідей предиката з 15 станів Core4 — закон, що належить Lisp, для #1391.
 ;
-; Two orthogonal spaces:
-;   logic answers: 0^n | 1^n | (), n=1..7
-;   SENS functions: 00000000..11111111
+; Два ортогональні простори:
+;   логічні відповіді: 0^n | 1^n | (), n=1..7
+;   функції SENS: 00000000..11111111
 ;
-; The grading path never enters the 8-bit SENS function space.
-; More repeated bits mean less determination and convergence toward ().
+; Шлях оцінювання ніколи не входить у 8-бітовий простір функцій SENS.
+; Більше повторюваних бітів означає меншу визначеність і збіжність до ().
 ;
-; Sanskrit labels are SENS/Core4 terminology anchors, not a claim that
-; historical Nyāya defined this exact 15-state scale.
+; Санскритські мітки — термінологічні якорі SENS/Core4, а не твердження, що
+; історична ньяя визначала саме цю 15-станову шкалу.
 ;
 ; /3 (2026-09-26, рішення власника в #1391): затверджено NOT/AND/OR/COND,
 ; носій відповіді — список двійкових бітів, проєкції atom?/eq? для Core4.
