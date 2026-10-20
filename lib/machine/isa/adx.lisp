@@ -1,4 +1,5 @@
-; Multi-precision add-carry instruction-family catalogue. Physical ISA facts only.
+; Каталог машинних команд ADX для багаторозрядного додавання з переносом.
+; Це фізичні відомості ISA, а не математичні закони доменів SENS.
 
 (isa-catalogue/1
   (extension ADX)
