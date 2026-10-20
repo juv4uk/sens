@@ -370,6 +370,62 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(summary["release_ready"])
         self.assertIn("не звичайний файл", str(summary["blocked_sample"]))
 
+    def _put_reviewed_evidence(self):
+        # Тільки справжній маніфест #4460 із чинним pinned Git blob.
+        manifest = "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json"
+        original = ("evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp")
+        self.put(manifest, (ROOT / manifest).read_bytes())
+        self.put(original, (ROOT / original).read_bytes())
+        return original, manifest
+
+    def test_reviewed_evidence_data_does_not_need_fake_sens(self):
+        original, _ = self._put_reviewed_evidence()
+        report = scan(self.root, verify_bounded=True,
+                      validator=lambda *_: self.fail("дані не запускаються"))
+        self.assertEqual(report["total_lisp_files"], 1)
+        self.assertEqual(report["reviewed_nonprogram_lisp"], 1)
+        self.assertEqual(report["reviewed_nonprogram_pin_drift"], 0)
+        self.assertEqual(report["nonprogram_style_warnings"], 1)
+        self.assertEqual(report["potential_program_files"], 0)
+        self.assertEqual(report["blocked_count"], 0, report["blocked_sample"])
+        self.assertEqual(report["bounded_verified"], 0)
+        self.assertFalse(report["all_current_t5m_bounded_reverse_verified"])
+        self.assertFalse(report["release_ready"])
+
+    def test_changed_reviewed_data_loses_exemption_without_a_review(self):
+        original, _ = self._put_reviewed_evidence()
+        path = self.root / original
+        path.write_text(path.read_text(encoding="utf-8").replace(
+            'status (як-є passed)', 'status (як-є failed)'), encoding="utf-8")
+        report = scan(self.root)
+        self.assertEqual(report["reviewed_nonprogram_lisp"], 0)
+        self.assertEqual(report["reviewed_nonprogram_pin_drift"], 1)
+        self.assertEqual(report["potential_program_files"], 1)
+        self.assertIn("SHA затверджених Lisp-даних", str(report["blocked_sample"]))
+        self.assertFalse(report["release_ready"])
+
+    def test_reviewed_nonprogram_with_unapproved_sens_is_reported(self):
+        original, _ = self._put_reviewed_evidence()
+        self.put(original[:-5] + ".sens", b"not-admitted")
+        report = scan(self.root)
+        self.assertEqual(report["reviewed_nonprogram_lisp"], 1)
+        self.assertEqual(report["unapproved_nonprogram_physical"], 1)
+        self.assertEqual(report["potential_program_files"], 0)
+        self.assertIn("недопущений .sens", str(report["blocked_sample"]))
+        self.assertFalse(report["release_ready"])
+
+    def test_incomplete_nonprogram_manifest_is_not_wildcard_exemption(self):
+        original, manifest = self._put_reviewed_evidence()
+        import json
+        data = json.loads((self.root / manifest).read_text(encoding="utf-8"))
+        data["entries"] = data["entries"][:1]
+        self.put(manifest, json.dumps(data, ensure_ascii=False))
+        report = scan(self.root)
+        self.assertEqual(report["reviewed_nonprogram_lisp"], 0)
+        self.assertEqual(report["potential_program_files"], 1)
+        self.assertEqual(report["potential_program_missing_sens"], 1)
+        self.assertFalse(report["all_bounded_reverse_verified"])
+
     def test_empty_repository_is_not_vacuously_proven(self):
         summary = scan(self.root, verify_bounded=True, validator=lambda *_: {})
         self.assertEqual(summary["total_lisp_files"], 0)
