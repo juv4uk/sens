@@ -3319,7 +3319,7 @@
 ; - codes 8..15 (r8b..r15b) require REX.B=1 prefix (0x41).
 (0011 x86-encode-setcc-r8
   (0010 (condition-code register)
-    (let ((code (x86-reg-code register)))
+    (нехай ((code (x86-reg-code register)))
       ; Exact-D1 predicate selects REX; structural default is the
       ; explicit D1 true witness, never legacy (query expected result).
       (110
@@ -3369,7 +3369,7 @@
 ; REX.W=1 extends the 8-bit source into the full 64-bit destination register.
 (0011 x86-encode-movzx-r64-r8
   (0010 (destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3381,7 +3381,7 @@
 ; Destination receives the low 64 bits of the signed product.
 (0011 x86-encode-imul-r64-r64
   (0010 (destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3409,7 +3409,7 @@
 ; Moves source to destination if condition code is satisfied.
 (0011 x86-encode-cmovcc-r64-r64
   (0010 (condition-code destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3466,7 +3466,7 @@
 ; Sets Carry Flag (CF) to the value of the bit at the given index.
 (0011 x86-encode-bt-r64-r64
   (0010 (base index)
-    (let ((base-code (x86-reg-code base))
+    (нехай ((base-code (x86-reg-code base))
           (index-code (x86-reg-code index)))
       (1110
         (x86-encode-rex 1 (x86-high1 index-code) 0 (x86-high1 base-code))
@@ -3503,7 +3503,7 @@
 ; MOVSX r64, r/m8: opcode 0x0F 0xBE /r. Sign-extend 8-bit to 64-bit.
 (0011 x86-encode-movsx-r64-r8
   (0010 (destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3514,7 +3514,7 @@
 ; MOVSXD r64, r/m32: opcode 0x63 /r. Sign-extend 32-bit to 64-bit.
 (0011 x86-encode-movsxd-r64-r32
   (0010 (destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3524,7 +3524,7 @@
 ; POPCNT r64, r/m64: opcode 0xF3 0x0F 0xB8 /r. Count set bits (population count).
 (0011 x86-encode-popcnt-r64-r64
   (0010 (destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         243
@@ -3536,7 +3536,7 @@
 ; TZCNT r64, r/m64: opcode 0xF3 0x0F 0xBC /r. Count trailing zeros.
 (0011 x86-encode-tzcnt-r64-r64
   (0010 (destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         243
@@ -3548,7 +3548,7 @@
 ; BSF r64, r/m64: opcode 0x0F 0xBC /r. Bit Scan Forward (first set bit).
 (0011 x86-encode-bsf-r64-r64
   (0010 (destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3559,7 +3559,7 @@
 ; BSR r64, r/m64: opcode 0x0F 0xBD /r. Bit Scan Reverse (last set bit).
 (0011 x86-encode-bsr-r64-r64
   (0010 (destination source)
-    (let ((dest-code (x86-reg-code destination))
+    (нехай ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (1110
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -3587,7 +3587,7 @@
 ; XCHG r64, r64: opcode 0x87 /r. Exchange register values.
 (0011 x86-encode-xchg-r64-r64
   (0010 (dst src)
-    (let ((dst-code (x86-reg-code dst))
+    (нехай ((dst-code (x86-reg-code dst))
           (src-code (x86-reg-code src)))
       (1110
         (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -3646,7 +3646,7 @@
 
 (0011 x86-encode-sse2-f2-xmm-xmm
   (0010 (opcode-byte dst src)
-    (let ((dst-code (x86-xmm-reg-code dst))
+    (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
         ((менше? (додати (x86-high1 dst-code) (x86-high1 src-code)) 1)
@@ -3657,7 +3657,7 @@
 
 (0011 x86-encode-sse2-66-xmm-xmm
   (0010 (opcode-byte dst src)
-    (let ((dst-code (x86-xmm-reg-code dst))
+    (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
         ((менше? (додати (x86-high1 dst-code) (x86-high1 src-code)) 1)
@@ -3672,7 +3672,7 @@
 ; машинне кодування; значення AES-операцій тут не визначається.
 (0011 x86-encode-sse-66-map-xmm-xmm
   (0010 (map-byte opcode-byte dst src)
-    (let ((dst-code (x86-xmm-reg-code dst))
+    (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
         ((менше? (додати (x86-high1 dst-code) (x86-high1 src-code)) 1)
@@ -3730,9 +3730,9 @@
 ; інструкція AES, тому цей helper не створює окремої семантики пам'яті.
 (0011 x86-encode-sse-66-map-xmm-mem-disp8
   (0010 (map-byte opcode-byte dst base displacement)
-    (let ((dst-code (x86-xmm-reg-code dst))
+    (нехай ((dst-code (x86-xmm-reg-code dst))
           (base-code (x86-reg-code base)))
-      (let ((modrm
+      (нехай ((modrm
               (x86-encode-modrm
                 1
                 (x86-low3 dst-code)
@@ -3865,7 +3865,7 @@
 ; CVTSI2SD xmm, r64: opcode 0xF2 REX.W 0x0F 0x2A /r
 (0011 x86-encode-cvtsi2sd-xmm-r64
   (0010 (dst src)
-    (let ((dst-code (x86-xmm-reg-code dst))
+    (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-reg-code src)))
       (1110 242 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 42 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
@@ -3873,7 +3873,7 @@
 ; CVTTSD2SI r64, xmm: opcode 0xF2 REX.W 0x0F 0x2C /r
 (0011 x86-encode-cvttsd2si-r64-xmm
   (0010 (dst src)
-    (let ((dst-code (x86-reg-code dst))
+    (нехай ((dst-code (x86-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (1110 242 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 44 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
@@ -3881,7 +3881,7 @@
 ; MOVQ xmm, r64: opcode 0x66 REX.W 0x0F 0x6E /r
 (0011 x86-encode-movq-xmm-r64
   (0010 (dst src)
-    (let ((dst-code (x86-xmm-reg-code dst))
+    (нехай ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-reg-code src)))
       (1110 102 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 #d110 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
@@ -3889,7 +3889,7 @@
 ; MOVQ r64, xmm: opcode 0x66 REX.W 0x0F 0x7E /r
 (0011 x86-encode-movq-r64-xmm
   (0010 (dst src)
-    (let ((dst-code (x86-reg-code dst))
+    (нехай ((dst-code (x86-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (1110 102 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
             15 126 (x86-encode-modrm 3 (x86-low3 src-code) (x86-low3 dst-code))))))
@@ -3899,7 +3899,7 @@
 ; The shared helper is the encoding law; mnemonic wrappers are derived projections.
 (0011 x86-encode-0f-c7-group-r64
   (0010 (opcode-extension register)
-    (let ((code (x86-reg-code register))
+    (нехай ((code (x86-reg-code register))
           (mechanism-extension
             (x86-project-bin3-to-mechanism-u3 opcode-extension)))
       ; Emitted instruction bytes are the legacy/mechanical byte carrier.
@@ -3928,7 +3928,7 @@
 ; CMPXCHG r64, r64: opcode REX.W 0x0F 0xB1 /r
 (0011 x86-encode-cmpxchg-r64-r64
   (0010 (dst src)
-    (let ((dst-code (x86-reg-code dst))
+    (нехай ((dst-code (x86-reg-code dst))
           (src-code (x86-reg-code src)))
       (1110 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
             15 177 (x86-encode-modrm 3 (x86-low3 src-code) (x86-low3 dst-code))))))
