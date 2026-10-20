@@ -122,7 +122,14 @@ fn collect(base: &Path, files: &mut Vec<PathBuf>, errors: &mut Vec<String>) {
         }
     };
     if metadata.file_type().is_symlink() {
-        errors.push(format!("{}: cannot scan symlink", base.display()));
+        // Сумісність із попереднім обходом: звичайні Lisp-файли можуть
+        // бути символічними посиланнями. Три машинні авторитети нижче
+        // перевіряються окремо й залишаються забороненими посиланнями.
+        if base.is_file() {
+            files.push(base.to_path_buf());
+        } else {
+            errors.push(format!("{}: dangling or non-file symlink", base.display()));
+        }
     } else if metadata.is_file() {
         files.push(base.to_path_buf());
     } else if metadata.is_dir() {
