@@ -1,22 +1,23 @@
-; scripts/generate-uk-surface-audit.lisp — generated Ukrainian surface inventory
-; for my-lisp#85. This is an AUDIT PROJECTION, never semantic authority.
+; Інвентаризація української поверхні для my-lisp#85.
+; Це перевірочна проєкція, а не джерело семантичних повноважень.
 ;
-; Authority path:
+; Шлях походження затверджених відомостей:
 ;   semantic-registry.lisp
-;       -> scripts/generate-function-table.lisp
-;       -> lib/generated/function-table.lisp
-;       -> this audit projection
+;       → scripts/generate-function-table.lisp
+;       → lib/generated/function-table.lisp
+;       → цей перевірочний звіт
 ;
-; Candidate evidence path:
-;   lib/surface/український-профіль-джерела.lisp
-; Candidate spellings remain proposals. `lib/generated/function-table.lisp`
-; is a checked projection, not a second semantic authority. This generator
-; MUST NOT promote staging candidates into that current `full-uk` projection.
+; Джерело свідчень щодо кандидатів:
+;   lib/surface/український-профіль-джерела.lisp.
+; Пропоновані назви залишаються кандидатами.
+; Перевірена таблиця lib/generated/function-table.lisp не створює
+; іншого джерела семантики. Генератор не переносить кандидати
+; без ратифікації до чинної повної української проєкції.
 ;
-; Output:
+; Вихідний файл:
 ;   lib/generated/uk-surface-audit.lisp
 ;
-; Usage from repo root:
+; Запуск із кореня репозиторію:
 ;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-uk-surface-audit.lisp
 
 (визначити рядок+
@@ -36,14 +37,16 @@
       ((атом? (як-є ())) (зєднати-новим-рядком-у (решта рядки-рядків) (рядок+ накопичувач "\n" (перше рядки-рядків)))))))
 (визначити зєднати-новим-рядком (функція (рядки-рядків) (зєднати-новим-рядком-у рядки-рядків "")))
 
-; Function-table rows have the generated schema ft/2:
+; Рядки таблиці функцій мають похідну схему ft/2:
 ; (sid-bitstring formal (ук word) (укр word) (en word) (sa word) (sym word) authority)
-; A surface is present or missing; ft/2 carries no per-surface status. The
-; per-identity status (current, candidate, compatibility-only) comes from the
-; Ukrainian staging profile below.
+; Поверхня або наявна, або відсутня: ft/2 не містить
+; окремого статусу кожної поверхні. Статус тотожності
+; (чинна, кандидатна чи лише сумісна) походить
+; із українського профілю підготовки нижче.
 (визначити форма-таблиці-функцій (перше (читати-всі (читати-файл "lib/generated/function-table.lisp"))))
 
-; The 256-row table also lists every unused code with only () surfaces.
+; Історична таблиця з 256 рядків також перелічує вільні
+; координати, для яких усі поверхні мають значення ().
 (визначити поверхня-порожня?
   (функція (поверхня)
     (за-умовою
@@ -114,9 +117,10 @@
     (або (тотожне? (статус-поверхні поверхня) (як-є missing))
         (тотожне? (слово-поверхні поверхня) (як-є —)))))
 
-; Classification here is intentionally conservative. The audit may report a
-; candidate, but only an explicit later review may classify it as compact,
-; ambiguous, etc. We therefore never infer linguistic facts from spelling.
+; Класифікація навмисно консервативна. Звіт може показати
+; кандидата, але лише окремий огляд визначає, чи він короткий,
+; неоднозначний тощо. Мовні властивості не виводяться
+; автоматично з написання.
 (визначити клас-аудиту
   (функція (ук кандидат)
     (за-умовою
@@ -136,8 +140,9 @@
   (функція (кандидат)
     (за-умовою ((атом? кандидат) (як-є no-staging-evidence)) ((атом? (як-є ())) (четверте кандидат)))))
 
-; `candidate-compact-uk` belongs to #86/#89. #85 must expose the empty slot,
-; not invent abbreviations while performing an inventory.
+; Назва поля `candidate-compact-uk` належить завданням #86/#89.
+; У #85 потрібно показувати порожню позицію,
+; а не вигадувати скорочення під час інвентаризації.
 (визначити компактне-слово-кандидата (функція () (як-є —)))
 
 (визначити статус-неоднозначності
