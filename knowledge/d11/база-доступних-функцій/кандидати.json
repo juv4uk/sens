@@ -22,9 +22,9 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 153,
+    "total": 154,
     "historical": 15,
-    "library": 138,
+    "library": 139,
     "distinct_families": 22
   },
   "excluded": {
@@ -2043,6 +2043,24 @@
       "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false
+    },
+    {
+      "surface_name": "цілочисельна-частка-з-блоку",
+      "source_family": "derived-core",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/core4.lisp",
+        "blob_sha": "09af11b0c8dcbd49cacf9eb01da22a582bd7893f",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false,
+      "signature_candidate": "(ціле a, ненульове ціле b, пара (c . m)) → m + (a − c) / b за поточним тілом SENS; перевірка області та округлення ще потрібна",
+      "admission_note": "Похідна внутрішня бібліотечна функція: ратифікований D5 «частка» не доводить окремого цілочисельного закону. Не призначати D11-координату без незалежного доказу нової семантики."
     },
     {
       "surface_name": "SSTATUS",
