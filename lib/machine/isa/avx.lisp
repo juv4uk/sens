@@ -1,5 +1,6 @@
-; AVX instruction-family catalogue. Physical ISA facts only.
-; AVX execution is runtime-gated by CPUID.OSXSAVE and XGETBV state.
+; Каталог машинних команд AVX; жодних семантичних законів SENS.
+; Виконання AVX дозволене лише після перевірки CPUID.OSXSAVE
+; і стану регістрів, прочитаного через XGETBV.
 
 (isa-catalogue/1
   (extension AVX)
