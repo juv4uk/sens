@@ -1304,7 +1304,7 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
     @staticmethod
     def executable(source: str) -> str:
         # Не плутати рядки, коментарі та протокольні payload із викликами.
-        return re.sub(r';[^\\n]*|"(?:\\\\.|[^"\\\\])*"',
+        return re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"',
                       lambda match: " " * len(match.group()), source)
 
     def test_domain_capacity_source_uses_current_ukrainian_laws(self):
