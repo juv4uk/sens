@@ -2,7 +2,8 @@
 """Міграція одного .lisp у парні фізичний T5M .sens та двійковий перегляд.
 
 Один вихідний файл -> перевірена Zig/T5M пара .sens + файл без розширення.
-Джерело та наявні артефакти не перезаписуються. --codec t5 для legacy.
+Джерело та наявні артефакти не перезаписуються. Історичний T5 — тільки перегляд,
+нові фізичні файли випускаються через Zig/T5M.
 Цей фізичний доказ сам по собі НЕ засвідчує семантику виконання.
 """
 from __future__ import annotations
@@ -117,6 +118,13 @@ def main() -> int:
     parser.add_argument("--codec", choices=("t5m", "t5"), default="t5m")
     parser.add_argument("--source-surface", choices=("default", "ук", "укр"), default="укр")
     args = parser.parse_args()
+    # Історичний T5 — лише діагностика. Нові фізичні .sens
+    # створюються тільки через сучасний Zig/T5M.
+    if args.codec == "t5" and not args.dry_run:
+        raise SystemExit(
+            "LEGACY_T5_PUBLICATION_DISABLED: use Zig/T5M for current .sens; "
+            "--codec t5 is read-only with --dry-run"
+        )
     source = resolve_without_links(args.source, "source")
     if source.suffix != ".lisp":
         raise SystemExit("BLOCK: source must have .lisp extension")
