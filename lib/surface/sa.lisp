@@ -1,5 +1,5 @@
-; Sanskrit surface for canonical primitives and derived core vocabulary.
-; संस्कृत-पृष्ठम् — Sanskrit surface layer.
+; Санскритська проєкція канонічних примітивів і похідної лексики ядра.
+; संस्कृत-पृष्ठम् — санскритська мовна проєкція.
 ;
 ; Canon 0+7 names are NOT defined here. The immutable Canon resolver owns the
 ; ratified Sanskrit spellings directly, before ordinary lexical lookup.
@@ -7,107 +7,107 @@
 ; environment, except identities migrated under ADR-007: those peer spellings
 ; are installed directly by the runtime and are not defined here.
 ;
-; Principle: one semantic implementation, multiple human surfaces.
+; Принцип: одна семантична реалізація, кілька людських проєкцій.
 ;
 ; Status legend:
 ;   stable    — ratified against primary sources (Canon 0+7 calibration doc)
 ;   candidate — proposed in Batch 1 research, pending ratification
 ;
-; Full-profile loading order: macro.lisp → core.lisp → unify.lisp → reason.lisp →
+; Порядок завантаження повного профілю: macro.lisp → core.lisp → unify.lisp → reason.lisp →
 ; forward.lisp → knowledge.lisp → persistent-map.lisp → persistent-vector.lisp →
-; time.lisp → epistemic.lisp → sa.lisp (this file).
+; time.lisp → epistemic.lisp → sa.lisp (цей файл).
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Canon 0+7 — owned by immutable resolver (status: stable)
+;; Канон 0+7 — незмінний розв'язувач (стан: stable)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; svarūpa, aṇu, abheda, saṃyuj, ādi, śeṣa, anukrama
 ; are reserved Canon spellings and are intentionally not ordinary bindings.
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 1 — Arithmetic (status: candidate)
+;; Добірка 1 — арифметика (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; ADR-007/008 / 0104, 1001–1003: yoga, viyoga, guṇana and haraṇa
 ; are ratified stable peers installed directly by the runtime together with
 ; Ukrainian and symbolic spellings. None is defined through another surface.
 ; rūpa = absolute value (candidate — polysemous)
-(визначити rūpa abs)
+(визначити rūpa модуль)
 ; alpatara = least (alpa + -tara comparative)
-(визначити alpatara min)
+(визначити alpatara найменше)
 ; brhattara = greatest (bṛhat + -tara comparative)
-(визначити brhattara max)
+(визначити brhattara найбільше)
 ; avasiṣṭa = remainder (ava-śiṣ; ≠ śeṣa CDR)
-(визначити avasiṣṭa mod)
+(визначити avasiṣṭa модульна-остача)
 ; bhāga = quotient (result of division)
-(визначити bhāga quotient)
+(визначити bhāga частка)
 ; mūla = square root
-(визначити mūla sqrt)
+(визначити mūla корінь)
 ; sakalamūla = integer square root
-(визначити sakalamūla isqrt)
+(визначити sakalamūla цілий-корінь)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 1 — Comparisons (status: candidate)
+;; Добірка 1 — порівняння (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; ADR-007/008 / 1014–1016: hīna?, adhika? and sama? are ratified
 ; stable peers installed directly by the runtime with UK and symbolic names.
 ; na-adhika = not-greater (compound)
-(визначити na-adhika? <=)
+(визначити na-adhika? не-більше?)
 ; na-hīna = not-lesser (compound)
-(визначити na-hīna? >=)
+(визначити na-hīna? не-менше?)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 1 — Predicates (status: candidate)
+;; Добірка 1 — предикати (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; na = not (universal negation)
 ; tulya = structurally equal (≠ abheda eq, sama =)
-(визначити tulya? equal?)
+(визначити tulya? однакові?)
 ; nāman = symbol/name (Pāṇini 1.1.62)
-(визначити nāman? symbol?)
+(визначити nāman? символ?)
 ; śabda = string/text
-(визначити śabda-hīna? string<?)
+(визначити śabda-hīna? текст-передує?)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 1 — Lists (status: candidate)
+;; Добірка 1 — списки (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; śreṇī = ordered sequence
-(визначити śreṇī list)
+(визначити śreṇī список)
 ; pramāṇa = measure/quantity
-(визначити pramāṇa length)
+(визначити pramāṇa довжина)
 ; saṅkalana = collection (≠ saṃyuj CONS)
-(визначити saṅkalana append)
+(визначити saṅkalana приєднати)
 ; viloma = reverse order
-(визначити viloma reverse)
+(визначити viloma зворот)
 ; kramāṅka = ordinal number (candidate)
-(визначити kramāṅka nth)
+(визначити kramāṅka елемент-списку-за-індексом)
 ; sambaddha = included/bound (candidate)
-(визначити sambaddha? member?)
+(визначити sambaddha? значення-у-списку?)
 ; saṃbandha = relation/connection
-(визначити saṃbandha assoc)
+(визначити saṃbandha знайти-за-ключем)
 ; «dvandva» лишається назвою проєкції у реєстрі поверхонь.
 ; Тут не створюємо викличний alias: доменна identity сама не дає допуску.
-; ordinals — safe: return element, not sublist
-(визначити dvitīya second)
-(визначити tṛtīya third)
-(визначити caturtha fourth)
-(визначити pañcama fifth)
+; Порядкові селектори повертають елемент, а не хвіст списку.
+(визначити dvitīya друге)
+(визначити tṛtīya третє)
+(визначити caturtha четверте)
+(визначити pañcama п'ятий)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 1 — Higher-order (status: candidate)
+;; Добірка 1 — функції вищого порядку (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; āvartana = repeated application (candidate — no direct traditional source)
-(визначити āvartana map)
+(визначити āvartana відобразити)
 ; kalpana = selection/postulation (Mīmāṃsā)
-(визначити kalpana filter)
+(визначити kalpana відсіяти)
 ; saṅgraha = comprehension/collection
-(визначити saṅgraha reduce)
+(визначити saṅgraha згорнути)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 1 — Strings (status: candidate)
+;; Добірка 1 — рядки (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; śabdasaṃyoga = joining of words (≠ saṃyuj CONS)
@@ -118,14 +118,14 @@
 ; cheda = cut/slice
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 1 — Other (status: candidate)
+;; Добірка 1 — інші (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; svabhāva = own nature/identity (≠ svarūpa QUOTE)
-(визначити svabhāva identity)
+(визначити svabhāva тотожність)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — I/O (status: candidate)
+;; Добірка 2 — введення/виведення (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; mudraṇa = impression/printing
@@ -136,50 +136,50 @@
 ; āśraya = substrate/environment
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — Vectors (status: candidate)
+;; Добірка 2 — вектори (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; samūha = collection/aggregate
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — Conversions (status: candidate)
+;; Добірка 2 — перетворення (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; saṅkhyā-śabda = number-to-word
-(визначити saṅkhyā-śabda number->string)
+(визначити saṅkhyā-śabda число-рядок)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — Time (status: candidate)
+;; Добірка 2 — час (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; kāla = time
-(визначити kāla-adya utc-now)
-(визначити kāla-mono-ms mono-ms)
-(визначити kāla-millisecondāni milliseconds-from-nanoseconds)
+(визначити kāla-adya узгоджений-час-зараз)
+(визначити kāla-mono-ms монотонний-мс)
+(визначити kāla-millisecondāni мілісекунди-з-наносекунди)
 ; deśa-kāla = timezone
-(визначити deśa-kāla-nāma timezone-name)
-(визначити deśa-kāla-jñāna timezone-detect)
-(визначити deśa-kāla-śeṣa timezone-offset-seconds)
+(визначити deśa-kāla-nāma часовий-пояс-ім'я)
+(визначити deśa-kāla-jñāna часовий-пояс-визначити)
+(визначити deśa-kāla-śeṣa часовий-пояс-зсув-секунди)
 ;avadhi = deadline
-(визначити avadhi-gatā? deadline-reached?)
-(визначити avadhi-gatā-kadā? deadline-reached-at?)
-(визначити avadhi-nirmāṇa deadline-from)
-(визначити avadhi-anantara-ns deadline-after-ns)
-(визначити atīta-ns elapsed-ns)
+(визначити avadhi-gatā? крайній-час-досягнуто?)
+(визначити avadhi-gatā-kadā? крайній-час-досягнуто-у?)
+(визначити avadhi-nirmāṇa крайній-час-з)
+(визначити avadhi-anantara-ns крайній-час-після-нс)
+(визначити atīta-ns минуло-нс)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — Persistent map (status: candidate)
+;; Добірка 2 — незмінна мапа (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; kośa = repository/map
-(визначити kośa-śūnya map-empty)
-(визначити kośa-grahaṇa map-get)
-(визначити kośa-niveśana map-insert)
-(визначити kośa-sambaddha? map-contains?)
-(визначити kośa-śreṇī map->list)
+(визначити kośa-śūnya мапа-порожній)
+(визначити kośa-grahaṇa мапа-отримати)
+(визначити kośa-niveśana мапа-вставити)
+(визначити kośa-sambaddha? мапа-містить?)
+(визначити kośa-śreṇī мапа-список)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — Persistent vector (status: candidate)
+;; Добірка 2 — незмінний вектор (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 (визначити samūha-śūnya вектор-порожній)
@@ -190,58 +190,58 @@
 (визначити śreṇī-samūha вектор-з-список)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — Knowledge/Reasoning (status: candidate)
+;; Добірка 2 — знання й міркування (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; jñāna = knowledge
-(визначити jñāna-satya? is-fact?)
-(визначити varṇana describe)
-(визначити jñāna-saṅgraha collect-facts-about)
-(визначити aṇu-sambaddha? contains-atom?)
+(визначити jñāna-satya? є-факт?)
+(визначити varṇana описати)
+(визначити jñāna-saṅgraha зібрати-факти-про)
+(визначити aṇu-sambaddha? містить-атом?)
 ; abhimukha = forward
-(визначити abhimukha-anumāna forward-in)
+(визначити abhimukha-anumāna вперед-у)
 ; anumāna = inference
-(визначити anumāna reason-in)
-(визначити virodha-parīkṣā check-conflict)
+(визначити anumāna міркувати-у)
+(визначити virodha-parīkṣā перевірити-конфлікт)
 ; pramāṇa-siddhi = proof
-(визначити siddhi-sādhana prove-goal)
-(визначити siddhi-sādhana-sarva prove-goals)
-(визначити siddhi-vyākhyā explain-proof)
-(визначити siddhi-mūla source-of)
-(визначити utpatti provenance)
-(визначити tarka reason)
-(визначити tarka-vyākhyā reason-explain)
+(визначити siddhi-sādhana довести-ціль)
+(визначити siddhi-sādhana-sarva довести-цілі)
+(визначити siddhi-vyākhyā пояснити-доказ)
+(визначити siddhi-mūla джерело-від)
+(визначити utpatti походження)
+(визначити tarka міркувати)
+(визначити tarka-vyākhyā міркувати-пояснити)
 
-; Unification
-(визначити ekīkaraṇa unify)
-(визначити tarka-cihna logic-var)
-(визначити cihna? var?)
-(визначити pratyāroha apply-subst)
-(визначити vicāraṇa-gamana walk)
+; Уніфікація
+(визначити ekīkaraṇa уніфікувати)
+(визначити tarka-cihna логічна-змінна)
+(визначити cihna? змінна?)
+(визначити pratyāroha застосувати-підстановка)
+(визначити vicāraṇa-gamana пройти)
 (визначити parivṛtti-parīkṣā occurs-check)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — Epistemic (status: candidate)
+;; Добірка 2 — епістеміка (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; pratyaya = claim/conviction
-(визначити pratyaya? claim?)
-(визначити pratyaya-vākya claim-statement)
-(визначити pratyaya-parīkṣā claim-review)
+(визначити pratyaya? твердження?)
+(визначити pratyaya-vākya твердження-твердження)
+(визначити pratyaya-parīkṣā твердження-перевірка)
 ; pramāṇa = evidence
-(визначити pramāṇa? evidence?)
-(визначити pramāṇa-vidhi evidence-method)
-(визначити pramāṇa-phala evidence-outcome)
+(визначити pramāṇa? доказ?)
+(визначити pramāṇa-vidhi доказ-метод)
+(визначити pramāṇa-phala доказ-підсумок)
 ; pratyakṣa = observation
-(визначити pratyakṣa? observation?)
-(визначити pratyakṣa-vākya observation-statement)
+(визначити pratyakṣa? спостереження?)
+(визначити pratyakṣa-vākya спостереження-твердження)
 ; saṅkalpa = intent
-(визначити saṅkalpa? intent?)
-(визначити saṅkalpa-lakṣya intent-goal)
-(визначити sahāya-pramāṇa supporting-evidence)
+(визначити saṅkalpa? намір?)
+(визначити saṅkalpa-lakṣya намір-ціль)
+(визначити sahāya-pramāṇa підтверджувальний-доказ)
 
 ;; ═══════════════════════════════════════════════════════════════
-;; Batch 2 — Missing SA fill (status: candidate)
+;; Добірка 2 — доповнення санскритської проєкції (стан: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; nāman-nirmāṇa = name generation
