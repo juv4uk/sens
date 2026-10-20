@@ -1,133 +1,142 @@
-; #218 — Lisp-owned verifier for remaining structural-observation rows.
-; The host transports the contract document into `structural-observation-document`.
+; Перевірка договору структурного спостереження #218 мовою СЕНС.
+; Зовнішній виконавець передає незмінний документ договору
+; в історичному зв'язуванні structural-observation-document.
+; Перевірки читають договорні поля без переозначення їхньої семантики.
+; Власні функції та локальні змінні — українською.
+; Позначки класів, випадків і статусів не перекладаються.
 ;
-; Case tables are verified one case at a time. This avoids asking the historical
-; macro expander to reconstruct a nested dotted-alist literal merely to compare
-; two pieces of semantic data. The contract remains authoritative; this witness
-; only reads its fields and checks the required domain facts.
-
-(визначити so-field
-  (функція (entry field)
-    (нехай ((found (знайти-за-ключем field entry)))
+(визначити спостереження-поле
+  (функція (запис поле)
+    (нехай ((знайдене (знайти-за-ключем поле запис)))
       (за-умовою
-        ((атом? found) (як-є ()))
-        (так (решта found))))))
+        ((атом? знайдене) (як-є ()))
+        (так (решта знайдене))))))
 
-(визначити so-find
-  (функція (identity entries)
+(визначити спостереження-знайти
+  (функція (ідентичність записи)
     (за-умовою
-      ((атом? entries) (як-є ()))
-      ((однакові? (so-field (перше entries) (як-є identity)) identity)
-       (перше entries))
-      (так (so-find identity (решта entries))))))
+      ((атом? записи) (як-є ()))
+      ((однакові? (спостереження-поле (перше записи) (як-є identity)) ідентичність)
+       (перше записи))
+      (так (спостереження-знайти ідентичність (решта записи))))))
 
-(визначити so-entry
-  (функція (identity)
-    (so-find identity (решта structural-observation-document))))
+(визначити спостереження-запис
+  (функція (ідентичність)
+    (спостереження-знайти ідентичність (решта structural-observation-document))))
 
-(визначити so-case-find
-  (функція (case-name cases)
+(визначити спостереження-знайти-випадок
+  (функція (назва-випадку випадки)
     (за-умовою
-      ((атом? cases) (як-є ()))
-      ((однакові? (so-field (перше cases) (як-є when)) case-name)
-       (перше cases))
-      (так (so-case-find case-name (решта cases))))))
+      ((атом? випадки) (як-є ()))
+      ((однакові? (спостереження-поле (перше випадки) (як-є when)) назва-випадку)
+       (перше випадки))
+      (так (спостереження-знайти-випадок назва-випадку (решта випадки))))))
 
-(визначити so-expect
-  (функція (identity field expected)
-    (нехай ((entry (so-entry identity)))
+(визначити спостереження-очікувати
+  (функція (ідентичність поле очікуване)
+    (нехай ((запис (спостереження-запис ідентичність)))
       (за-умовою
-        ((атом? entry) (список (як-є missing-entry) identity))
-        ((однакові? (so-field entry field) expected) (як-є ()))
-        (так (список (як-є mismatch) identity field expected
-                 (so-field entry field)))))))
+        ((атом? запис) (список (як-є missing-entry) ідентичність))
+        ((однакові? (спостереження-поле запис поле) очікуване) (як-є ()))
+        (так (список (як-є mismatch) ідентичність поле очікуване
+                 (спостереження-поле запис поле)))))))
 
-(визначити so-expect-case
-  (функція (identity case-name expected-result)
-    (нехай ((entry (so-entry identity)))
+(визначити спостереження-очікувати-випадок
+  (функція (ідентичність назва-випадку очікуваний-результат)
+    (нехай ((запис (спостереження-запис ідентичність)))
       (за-умовою
-        ((атом? entry) (список (як-є missing-entry) identity))
+        ((атом? запис) (список (як-є missing-entry) ідентичність))
         (так
-         (нехай ((case-entry
-                 (so-case-find case-name (so-field entry (як-є cases)))))
+         (нехай ((запис-випадку
+                 (спостереження-знайти-випадок назва-випадку (спостереження-поле запис (як-є cases)))))
            (за-умовою
-             ((атом? case-entry) (список (як-є missing-case) identity case-name))
-             ((однакові? (so-field case-entry (як-є result)) expected-result)
+             ((атом? запис-випадку) (список (як-є missing-case) ідентичність назва-випадку))
+             ((однакові? (спостереження-поле запис-випадку (як-є result)) очікуваний-результат)
               (як-є ()))
              (так
               (список
                 (як-є case-mismatch)
-                identity
-                case-name
-                expected-result
-                (so-field case-entry (як-є result)))))))))))
+                ідентичність
+                назва-випадку
+                очікуваний-результат
+                (спостереження-поле запис-випадку (як-є result)))))))))))
 
-(визначити so-first-failure
-  (функція (checks)
+(визначити спостереження-перша-помилка
+  (функція (перевірки)
     (за-умовою
-      ((атом? checks) (як-є ()))
-      ((атом? (перше checks)) (so-first-failure (решта checks)))
-      (так (перше checks)))))
+      ((атом? перевірки) (як-є ()))
+      ((атом? (перше перевірки)) (спостереження-перша-помилка (решта перевірки)))
+      (так (перше перевірки)))))
 
-(визначити structural-observation-contract-witness
+(визначити свідок-договору-структурного-спостереження
   (функція ()
-    (нехай ((failure
-            (so-first-failure
+    (нехай ((помилка
+            (спостереження-перша-помилка
               (список
-                (so-expect "1024" (як-є result-form) (як-є class-membership))
-                (so-expect "1024" (як-є target-class) (як-є string))
-                (so-expect-case
+                (спостереження-очікувати "1024" (як-є result-form) (як-є class-membership))
+                (спостереження-очікувати "1024" (як-є target-class) (як-є string))
+                (спостереження-очікувати-випадок
                   "1024"
                   (як-є string)
                   (як-є (class-membership string member)))
-                (so-expect-case
+                (спостереження-очікувати-випадок
                   "1024"
                   (як-є non-string)
                   (як-є (class-membership string nonmember)))
-                (so-expect "1024" (як-є generic-truth-coercion) (як-є forbidden))
-                (so-expect "1024" (як-є control-dispatch) (як-є explicit-result-equality))
+                (спостереження-очікувати "1024" (як-є generic-truth-coercion) (як-є forbidden))
+                (спостереження-очікувати "1024" (як-є control-dispatch) (як-є explicit-result-equality))
 
-                (so-expect "1025" (як-є input-domain) (як-є (string string)))
-                (so-expect "1025" (як-є result-form) (як-є text-order))
-                (so-expect-case
+                (спостереження-очікувати "1025" (як-є input-domain) (як-є (string string)))
+                (спостереження-очікувати "1025" (як-є result-form) (як-є text-order))
+                (спостереження-очікувати-випадок
                   "1025"
                   (як-є left-before-right)
                   (як-є (text-order before)))
-                (so-expect-case
+                (спостереження-очікувати-випадок
                   "1025"
                   (як-є same-text)
                   (як-є (text-order same)))
-                (so-expect-case
+                (спостереження-очікувати-випадок
                   "1025"
                   (як-є left-after-right)
                   (як-є (text-order after)))
-                (so-expect "1025" (як-є outside-domain) (як-є type-error))
-                (so-expect "1025" (як-є generic-truth-coercion) (як-є forbidden))
-                (so-expect "1025" (як-є control-dispatch) (як-є explicit-result-equality))
+                (спостереження-очікувати "1025" (як-є outside-domain) (як-є type-error))
+                (спостереження-очікувати "1025" (як-є generic-truth-coercion) (як-є forbidden))
+                (спостереження-очікувати "1025" (як-є control-dispatch) (як-є explicit-result-equality))
 
-                (so-expect "1026" (як-є result-form) (як-є class-membership))
-                (so-expect "1026" (як-є target-class) (як-є numeric-buffer))
-                (so-expect-case
+                (спостереження-очікувати "1026" (як-є result-form) (як-є class-membership))
+                (спостереження-очікувати "1026" (як-є target-class) (як-є numeric-buffer))
+                (спостереження-очікувати-випадок
                   "1026"
                   (як-є numeric-buffer)
                   (як-є (class-membership numeric-buffer member)))
-                (so-expect-case
+                (спостереження-очікувати-випадок
                   "1026"
                   (як-є non-numeric-buffer)
                   (як-є (class-membership numeric-buffer nonmember)))
-                (so-expect "1026" (як-є generic-truth-coercion) (як-є forbidden))
-                (so-expect "1026" (як-є control-dispatch) (як-є explicit-result-equality))))))
+                (спостереження-очікувати "1026" (як-є generic-truth-coercion) (як-є forbidden))
+                (спостереження-очікувати "1026" (як-є control-dispatch) (як-є explicit-result-equality))))))
       (за-умовою
         ((хибне? (тотожне? (перше structural-observation-document)
                   (як-є structural-observation-contract/1)))
          (список (як-є structural-observation-contract-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail) (як-є schema))))
-        ((атом? failure)
+        ((атом? помилка)
          (список (як-є structural-observation-contract-witness)
                (список (як-є status) (як-є pass))
                (список (як-є detail) (як-є explicit-domain-results))))
         (так
          (список (як-є structural-observation-contract-witness)
                (список (як-є status) (як-є fail))
-               (список (як-є detail) failure)))))))
+               (список (як-є detail) помилка)))))))
+
+; Історичні виклики збережено як сумісні прив'язки, не як нові закони.
+(визначити so-field спостереження-поле)
+(визначити so-find спостереження-знайти)
+(визначити so-entry спостереження-запис)
+(визначити so-case-find спостереження-знайти-випадок)
+(визначити so-expect спостереження-очікувати)
+(визначити so-expect-case спостереження-очікувати-випадок)
+(визначити so-first-failure спостереження-перша-помилка)
+(визначити structural-observation-contract-witness свідок-договору-структурного-спостереження)
