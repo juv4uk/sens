@@ -31,12 +31,12 @@ fn empty_success_and_real_failure_are_distinct_data() {
     let mut session = session();
     assert_eq!(
         observe(&mut session,
-            "(unify-observe (001 radio) (001 radio) (001 ()))"),
+            "(спостерігати-уніфікацію (001 radio) (001 radio) (001 ()))"),
         "(unified ())"
     );
     assert_eq!(
         observe(&mut session,
-            "(unify-observe (001 radio) (001 antenna) (001 ()))"),
+            "(спостерігати-уніфікацію (001 radio) (001 antenna) (001 ()))"),
         "(unification-failure radio antenna ())"
     );
 }
