@@ -1,7 +1,8 @@
-; Concrete CPU capability profile for the user's Intel Core i5-6400 (Skylake).
-; This is hardware capability data, not a semantic registry.
-; Static SKU facts come from Intel ARK / Intel SDM. Features whose actual use
-; also depends on process state remain runtime-gated by CPUID/XGETBV/OS support.
+; Конкретний профіль можливостей процесора Intel Core i5-6400 (Skylake).
+; Це відомості про обладнання, а не семантичний реєстр СЕНС.
+; Статичні властивості моделі походять з Intel ARK та Intel SDM.
+; Можливості, залежні від стану процесу, перевіряються під час
+; виконання через CPUID, XGETBV та підтримку операційної системи.
 
 (cpu-profile/1
   (cpu intel-core-i5-6400)
@@ -9,7 +10,7 @@
   (isa x86-64)
   (mode 64-bit)
 
-  ; Architectural baseline available in 64-bit user mode.
+  ; Базові можливості архітектури в 64-бітному режимі користувача.
   (supported-extension X86-BASE)
   (supported-extension X86-64)
   (supported-extension X87)
@@ -21,9 +22,10 @@
   (supported-extension SSE4.1)
   (supported-extension SSE4.2)
 
-  ; Vector, crypto, entropy, and bit-manipulation families available on this
-  ; Skylake client target. Runtime code still verifies the named CPUID/XGETBV
-  ; gate before selecting a path that depends on process/OS-enabled state.
+  ; Векторні, криптографічні, випадкові та побітові можливості
+  ; цього клієнтського процесора Skylake. Перед вибором шляху,
+  ; залежного від стану процесу чи ОС, виконавець перевіряє
+  ; відповідні CPUID та XGETBV.
   (gated-extension AES-NI (gate cpuid-aes))
   (gated-extension PCLMULQDQ (gate cpuid-pclmulqdq))
   (gated-extension AVX (gate cpuid-avx+osxsave+xgetbv-xmm-ymm))
@@ -38,18 +40,18 @@
   (gated-extension XSAVE (gate cpuid-xsave))
   (gated-extension CLFLUSHOPT (gate cpuid-clflushopt))
 
-  ; SKU-advertised facilities with additional firmware/OS/platform constraints.
+  ; Можливості моделі, які додатково обмежує прошивка, ОС чи платформа.
   (platform-gated-extension MPX (gate cpuid-mpx+os-support))
   (platform-gated-extension SGX (gate cpuid-sgx+firmware+os-support))
 
-  ; Virtualization is processor/platform capability, not an ordinary user-mode
-  ; instruction-family surface for semantic lowering.
+  ; Віртуалізація належить до можливостей процесора та платформи,
+  ; а не до звичайних команд режиму користувача для зниження семантики.
   (virtualization-capability VT-X supported)
   (virtualization-capability VT-D supported)
   (virtualization-capability EPT supported)
 
-  ; Explicit negative facts keep target selection from silently assuming later
-  ; Intel generations or features disabled on this exact SKU.
+  ; Явні відомості про відсутні можливості забороняють вибирати
+  ; пізніші покоління Intel або вимкнені функції цієї моделі.
   (unavailable-extension TSX)
   (unavailable-extension AVX-512)
   (unavailable-extension AMX)
