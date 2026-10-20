@@ -759,6 +759,47 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_would_write"], 1)
             self.assertEqual(state["summary"]["files_written"], 0)
 
+    def test_partial_t5m_preview_reports_blocked_without_hiding_valid_program(self):
+        # Пакет з коректною і некоректною формою не може заявити
+        # повне завершення міграції за успішним елементом.
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            src = base / "in"
+            src.mkdir()
+            (src / "справне.lisp").write_text(
+                "; коментар поза програмою\n()\n", encoding="utf-8",
+            )
+            (src / "несправне.lisp").write_text(
+                "(незавершене\n", encoding="utf-8",
+            )
+            out = base / "out"
+            report = base / "report.json"
+            run = subprocess.run([
+                sys.executable, str(SCRIPT), str(src),
+                "--out", str(out), "--foundation", str(FOUNDATION),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY),
+                "--text7", str(TEXT7), "--report", str(report),
+                "--dry-run", "--codec", "t5m", "--source-surface", "укр",
+            ], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 2, run.stdout + run.stderr)
+            evidence = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(evidence["summary"]["files_would_write"], 1)
+            self.assertEqual(evidence["summary"]["files_blocked"], 1)
+            self.assertEqual(evidence["summary"]["files_not_program"], 0)
+            self.assertFalse(evidence["physical_batch_complete"])
+            self.assertFalse(evidence["migration_complete"])
+            self.assertFalse(evidence["semantic_admitted"])
+            self.assertFalse(out.exists())
+            self.assertIn(
+                "несправне.lisp",
+                [row["path"] for row in evidence["files"]
+                 if row["status"] == "blocked"],
+            )
+
+
     def test_cli_dry_run_accepts_ukr_decimal_comma(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
