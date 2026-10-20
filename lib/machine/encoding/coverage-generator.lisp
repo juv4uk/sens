@@ -10,10 +10,10 @@
   (функція аргументи
     (згорнути (функція (накопичене фрагмент) (рядок-додати накопичене фрагмент)) "" аргументи)))
 
-; Coverage authority uses exact D1 PredicateBit for every control decision.
-; Deep structural equality is Lisp-owned here and is built only from current
-; exact D3 laws: ATOM classifies pair-vs-atom and EQ compares admitted atoms.
-; Historical deep-equality carriers do not cross into the authority path.
+; Кожне керувальне рішення про покриття використовує точний D1 PredicateBit.
+; Глибоку структурну рівність визначає СЕНС за чинними законами D3:
+; ATOM розрізняє атом і пару, EQ порівнює допущені атоми.
+; Історичні носії глибокої рівності не переходять межу повноважень.
 ; Власні D1:0/D1:1 проєкції — ні та так; EQ-маркери не потрібні.
 (визначити покриття-кодувальника-тотожні-атоми?
   (функція (ліве-значення праве-значення)
@@ -35,8 +35,9 @@
       (так
        ні))))
 
-; Traversal needs structural EMPTY, not the broader ATOM classification.
-; This preserves the D1:0 != D3:000 distinction and avoids using ATOM as NIL.
+; Для обходу потрібна саме порожня структура EMPTY, а не ширший ATOM.
+; Так зберігається відмінність D1:0 від D3:000;
+; предикат ATOM не підміняє порожню структуру NIL.
 (визначити покриття-кодувальника-порожній-список?
   (функція (значення)
     (покриття-кодувальника-тотожні-структури? значення (як-є ()))))
@@ -62,8 +63,9 @@
        (покриття-кодувальника-кількість-елементів елементи))))
 
 
-; Conjunction over already-admitted predicate answers. Structural EMPTY is
-; only no-witness/non-selection; no generic T/NIL truthiness is consulted.
+; Кон'юнкція працює лише з допущеними відповідями предикатів.
+; Структурна порожнеча EMPTY означає відсутність свідка чи вибору,
+; а не загальну істинність T/NIL.
 (визначити покриття-кодувальника-усі-підтверджені?
   (функція (відповіді)
     (за-умовою
@@ -86,8 +88,9 @@
       (так
        (покриття-кодувальника-містить-елемент? елемент (решта елементи))))))
 
-; Pairwise rounds form a rope-like balanced concatenation tree. This avoids
-; copying an ever-growing ~200 KB accumulator once per emitted coverage row.
+; Попарне об'єднання формує збалансоване дерево сполучень.
+; Це усуває копіювання дедалі більшого накопичувача (~200 КБ)
+; під час формування кожного нового рядка покриття.
 (визначити покриття-кодувальника-коло-поєднання
   (функція (рядки накопичені-рядки)
     (за-умовою
@@ -152,9 +155,11 @@
   (решта (решта (решта покриття-кодувальника-історична-форма))))
 
 
-; Both generated inputs share the same canonical ICLASS/extension order.
-; Equality is enough: on mismatch advance the admitted index; an out-of-order
-; or stale partial remains unconsumed and fails closed at index exhaustion.
+; Обидва згенеровані набори мають однаковий канонічний порядок
+; ICLASS і розширень. Достатньо перевірки рівності: за розбіжності
+; просуваємо індекс допущених форм. Застарілий або переставлений
+; частковий запис залишиться невикористаним і спричинить відмову
+; після вичерпання індексу.
 (визначити покриття-кодувальника-рівні-ключі-рядків?
   (функція (ліве-значення праве-значення)
     (покриття-кодувальника-усі-підтверджені?
@@ -212,9 +217,10 @@
         "    (status " (символ-у-текст стан-покриття) ")\n"
         "    (reason " (значення-у-текст підстава) "))\n"))))
 
-; One tail-recursive ordered-subset merge performs classification,
-; stale-partial detection, rendering and partial counting.
-; Result = (rendered-rows partial-count exact-D1-stale-partial?).
+; Одне хвостоворекурсивне злиття впорядкованих підмножин
+; класифікує рядки, знаходить застарілі часткові записи,
+; формує вивід і рахує часткове покриття.
+; Результат: (рядки кількість-часткових предикат-застарілості-D1).
 (визначити покриття-кодувальника-побудувати-до
   (функція (рядки-індексу часткові-записи побудовані-рядки кількість)
     (за-умовою
