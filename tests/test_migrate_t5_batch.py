@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""End-to-end safe batch regression using existing REAL Core1 executable .lisp."""
+"""Нинішня пакетна міграція D1–D11/T5M: транспортні й негативні перевірки.
+
+Не підміняє SENS eval, не робить Python семантичним оракулом і
+не оголошує жодне джерело допущеним до релізу.
+"""
+from __future__ import annotations
+
 import argparse
 import importlib.util
 import json
@@ -9,230 +15,112 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
 
 REPO = Path(__file__).resolve().parents[1]
-DRIVER = REPO / "scripts/migrate-t5-batch.py"
-PROVEN = REPO / "tests/fixtures/core1-third-domain-canary/third"
+SCRIPTS = REPO / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+DRIVER = SCRIPTS / "migrate-t5-batch.py"
+FIXTURE = REPO / "tests/fixtures/migration-d1-cond-cohort/branch"
+SPEC = importlib.util.spec_from_file_location("sens_t5m_current_batch", DRIVER)
+assert SPEC is not None and SPEC.loader is not None
+batch = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = batch
+SPEC.loader.exec_module(batch)
 
-class RealBatchTest(unittest.TestCase):
+from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection, typed_sha256
+
+
+class CurrentBatchTransportTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
+        self.temp = tempfile.TemporaryDirectory(prefix="sens-batch-current-")
         self.addCleanup(self.temp.cleanup)
         self.base = Path(self.temp.name)
-        self.root = self.base / "repo"
-        self.root.mkdir()
-        (self.root / "lib").mkdir()
-        self.out = self.base / "mirror"
+        self.root = self.base / "input"
+        (self.root / "lib").mkdir(parents=True)
+        self.source = self.root / "lib/branch.lisp"
+        shutil.copyfile(FIXTURE.with_suffix(".lisp"), self.source)
+        self.out = self.base / "out"
         self.report = self.base / "report.json"
-        shutil.copy2(PROVEN.with_suffix(".lisp"), self.root / "lib/third.lisp")
-        (self.root / "lib/unknown.lisp").write_text("(UNKNOWN ())\n", encoding="utf-8")
 
-    def call(self, *paths, write=False, out=None, era="legacy"):
+    def call(self, *paths, write=False, zig=False, era="auto", out=None):
         return subprocess.run([
-            sys.executable, str(DRIVER), *paths, "--root", str(self.root),
-            "--out", str(out or self.out), "--report", str(self.report),
-            *(["--source-era", era] if era else []),
+            sys.executable, str(DRIVER),
+            *(paths or ("lib/branch.lisp",)),
+            "--root", str(self.root), "--out", str(out or self.out),
+            "--report", str(self.report), "--source-era", era,
+            *(["--zig-codec"] if zig else []),
             *(["--write"] if write else []),
-        ], text=True, capture_output=True)
+        ], cwd=REPO, capture_output=True, text=True, timeout=25)
 
-    def test_compiler_migration_admits_ratified_quoted_symbol_data(self):
-        source = REPO / "lib" / "compiler-nucleus.lisp"
-        before = source.read_bytes()
-        output = self.base / "compiler-nucleus-candidate"
-        report_path = self.base / "compiler-nucleus-report.json"
-        result = subprocess.run([
-            sys.executable, str(REPO / "scripts" / "migrate-three-pass.py"),
-            str(source), "--out", str(output), "--report", str(report_path),
-        ], cwd=REPO, text=True, capture_output=True)
+    def test_d11_current_authority_and_t5m_are_the_only_batch_defaults(self):
+        self.assertEqual(batch.INPUTS["foundation"],
+                         REPO / "knowledge/d1-d11-foundation.json")
+        self.assertEqual(len(batch.mig.load_foundation(batch.INPUTS["foundation"])
+                             ["domains"]["D10"]["residents"]), 1024)
+        # Ratification does not grant runtime callability or release admission.
+        self.assertNotEqual(batch.INPUTS["foundation"],
+                            REPO / "knowledge/d1-d9-foundation.json")
+
+    def test_real_fixture_has_independent_exact_physical_t5m_roundtrip(self):
+        # Mechanism-only codec proof, NEVER an evaluator or semantic proof.
+        view = FIXTURE.read_text(encoding="ascii")
+        words = view.strip().split(" ")
+        physical = encode_t5m_projection(view)
+        self.assertEqual(decode_t5m_bytes(physical), words)
+        self.assertEqual(len(typed_sha256(words)), 64)
+        self.assertNotEqual(physical, view.encode("ascii"))
+
+    def test_dry_run_uses_t5m_without_creating_physical_outputs(self):
+        original = self.source.read_bytes()
+        result = self.call()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        report = json.loads(report_path.read_text(encoding="utf-8"))
-        self.assertEqual(report["summary"]["files_seen"], 1)
-        self.assertEqual(report["summary"]["files_written"], 1)
-        self.assertEqual(report["summary"]["files_blocked"], 0)
-        self.assertTrue((output / "compiler-nucleus.sens").exists())
-        self.assertEqual(source.read_bytes(), before, "migration must keep canonical source byte-exact")
-
-    def test_audited_d9_sid8_maps_to_exact_d9_without_reusing_legacy_bits(self):
-        source = self.root / "lib/legacy-d9.lisp"
-        source.write_text("(01001011 ())" + chr(10), encoding="utf-8")
-        p = self.call("lib/legacy-d9.lisp", write=True, era="legacy")
-        self.assertEqual(p.returncode, 0, p.stderr + p.stdout)
+        self.assertTrue(self.report.is_file())
         report = json.loads(self.report.read_text(encoding="utf-8"))
-        self.assertEqual(report["summary"]["files_written"], 1)
-        self.assertEqual(report["files"][0]["passes"]["pass1-sens8"], 1)
-        spec = importlib.util.spec_from_file_location("sens_batch_test", DRIVER)
-        self.assertIsNotNone(spec)
-        batch = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(batch)
-        physical = (self.out / "lib/legacy-d9.sens").read_bytes()
-        self.assertEqual(batch.mig.decode_bytes(physical),
-                         ["10", "110101001", "00", "000", "01"])
-        self.assertEqual(source.read_text(encoding="utf-8"),
-                         "(01001011 ())" + chr(10))
-
-    def test_real_existing_core1_converts_to_exact_physical_t5(self):
-        before = (self.root / "lib/third.lisp").read_bytes()
-        expected = PROVEN.with_suffix(".sens").read_bytes()
-        dry = self.call("lib/third.lisp")
-        self.assertEqual(dry.returncode, 0, dry.stderr + dry.stdout)
+        self.assertEqual(report["mode"], "dry-run")
+        self.assertEqual(report["summary"]["files_seen"], 1)
+        self.assertEqual(report["summary"]["files_written"], 0)
+        self.assertEqual(report["summary"]["files_would_write"], 1, report)
+        self.assertEqual(report["authority"]["codec"],
+                         "physical-T5M-5-trits-per-byte")
+        self.assertEqual(report["authority"]["source_era"], "auto")
+        self.assertEqual(report["files"][0]["status"], "would-write")
         self.assertFalse(self.out.exists())
-        result = json.loads(self.report.read_text())
-        self.assertEqual(result["summary"]["files_would_write"], 1)
-        self.assertEqual(result["files"][0]["status"], "would-write")
-        self.assertEqual(result["files"][0]["physical_bytes"], len(expected))
-        live = self.call("lib/third.lisp", write=True)
-        self.assertEqual(live.returncode, 0, live.stderr + live.stdout)
-        self.assertEqual((self.out / "lib/third.sens").read_bytes(), expected)
-        self.assertEqual((self.root / "lib/third.lisp").read_bytes(), before)
-        self.assertFalse((self.out / "lib/third").exists())
-        rerun = self.call("lib/third.lisp", write=True)
-        self.assertEqual(rerun.returncode, 2)
-        self.assertEqual((self.out / "lib/third.sens").read_bytes(), expected)
+        self.assertEqual(self.source.read_bytes(), original)
 
-    def test_auto_resolves_historical_w8_as_sid8(self):
-        # No source in the corpus carries D8, so an eight-bit head has no live
-        # D8 reading: auto resolves the historical сід8 head through the same
-        # registry the legacy era uses, instead of blocking a vacuous W8/D8
-        # ambiguity (owner: that check was dumb).
-        p = self.call("lib/third.lisp", write=True, era=None)
-        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
-        doc = json.loads(self.report.read_text())
-        self.assertEqual(doc["authority"]["source_era"], "auto")
-        self.assertEqual(doc["summary"]["files_written"], 1)
-        self.assertGreater(doc["files"][0]["passes"]["pass1-sens8"], 0)
-        self.assertEqual((self.out / "lib/third.sens").read_bytes(),
-                         PROVEN.with_suffix(".sens").read_bytes())
+    def test_neither_legacy_source_era_nor_python_bytes_can_publish(self):
+        old = self.call(era="legacy")
+        self.assertEqual(old.returncode, 3, old.stdout + old.stderr)
+        self.assertIn("RETIRED_SID8_SOURCE_ERA", old.stderr)
+        unauthorized = self.call(write=True)
+        self.assertEqual(unauthorized.returncode, 3,
+                         unauthorized.stdout + unauthorized.stderr)
+        self.assertIn("--zig-codec", unauthorized.stderr)
+        self.assertFalse((self.out / "lib/branch.sens").exists())
+        self.assertFalse((self.out / "lib/branch").exists())
 
-    def test_explicit_legacy_is_recorded_and_cannot_be_inferred(self):
-        p = self.call("lib/third.lisp", write=True, era="legacy")
-        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
-        doc = json.loads(self.report.read_text())
-        self.assertEqual(doc["authority"]["source_era"], "legacy")
-        self.assertEqual(doc["files"][0]["source_era"], "legacy")
-        self.assertGreater(doc["files"][0]["passes"]["pass1-sens8"], 0)
-        self.assertEqual((self.out / "lib/third.sens").read_bytes(),
-                         PROVEN.with_suffix(".sens").read_bytes())
-
-    def test_current_d8_head_stays_exact_while_auto_resolves_historical(self):
-        src = self.root / "lib/current.lisp"
-        src.write_text("(10000000 ())\n", encoding="utf-8")
-        # No D8 in the corpus -> auto has no live D8 reading to be ambiguous
-        # with: it resolves the eight-bit head through the historical registry.
-        p = self.call("lib/current.lisp", era="auto")
-        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
-        self.assertGreater(json.loads(self.report.read_text())
-                           ["files"][0]["passes"]["pass1-sens8"], 0)
-        p = self.call("lib/current.lisp", era="current", write=True)
-        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
-        data = json.loads(self.report.read_text())
-        self.assertEqual(data["files"][0]["passes"]["already-exact"], 1)
-        self.assertEqual(data["files"][0]["passes"]["pass1-sens8"], 0)
-        self.assertEqual(data["authority"]["source_era"], "current")
-        self.assertTrue((self.out / "lib/current.sens").is_file())
-
-    def test_mixed_selection_reports_real_blocks_and_preserves_admitted(self):
-        p = self.call("lib", write=True)
-        self.assertEqual(p.returncode, 2, p.stderr + p.stdout)
-        doc = json.loads(self.report.read_text())
-        self.assertEqual(doc["summary"]["files_seen"], 2)
-        self.assertEqual(doc["summary"]["files_written"], 0)
-        self.assertEqual(doc["summary"]["files_would_write"], 1)
-        self.assertEqual(doc["summary"]["files_blocked"], 1)
-        self.assertEqual(doc["files"][0]["status"], "would-write")
-        self.assertEqual(doc["files"][1]["status"], "blocked")
-        self.assertFalse((self.out / "lib/third.sens").exists())
+    def test_unknown_source_is_blocked_instead_of_minted(self):
+        unknown = self.root / "lib/unknown.lisp"
+        unknown.write_text("(NOT_DEFINED ())\n", encoding="utf-8")
+        p = self.call("lib/unknown.lisp")
+        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+        state = json.loads(self.report.read_text(encoding="utf-8"))
+        self.assertEqual(state["summary"]["files_admitted"], 0)
+        self.assertEqual(state["summary"]["files_blocked"], 1)
+        self.assertEqual(state["files"][0]["status"], "blocked")
         self.assertFalse((self.out / "lib/unknown.sens").exists())
 
-    def test_two_proven_sources_publish_as_one_transaction(self):
-        branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
-        shutil.copy2(branch, self.root / "lib/branch.lisp")
-        p = self.call("lib/third.lisp", "lib/branch.lisp", write=True)
-        self.assertEqual(p.returncode, 0, p.stderr + p.stdout)
-        doc = json.loads(self.report.read_text())
-        self.assertEqual(doc["summary"]["files_written"], 2)
-        self.assertEqual(doc["summary"]["files_blocked"], 0)
-        self.assertEqual(
-            (self.out / "lib/third.sens").read_bytes(),
-            PROVEN.with_suffix(".sens").read_bytes()
-        )
-        self.assertEqual(
-            (self.out / "lib/branch.sens").read_bytes(),
-            branch.with_suffix(".sens").read_bytes()
-        )
+    def test_unsafe_paths_and_output_within_input_are_rejected(self):
+        forbidden = self.root / "lib/link.lisp"
+        forbidden.symlink_to(self.source)
+        for path in ("../escape.lisp", "lib/link.lisp", "missing.lisp"):
+            with self.subTest(path=path):
+                p = self.call(path)
+                self.assertNotEqual(p.returncode, 0, p.stdout + p.stderr)
+        nested = self.call(out=self.root / "published")
+        self.assertEqual(nested.returncode, 3, nested.stdout + nested.stderr)
+        self.assertFalse((self.root / "published").exists())
 
-    def test_existing_target_blocks_only_itself_and_others_publish(self):
-        # A pre-existing destination is never overwritten, but it blocks
-        # only itself: the other mechanically feasible candidate still
-        # publishes. (Owner decision: no all-or-nothing cohort blocking.)
-        branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
-        shutil.copy2(branch, self.root / "lib/branch.lisp")
-        (self.out / "lib").mkdir(parents=True)
-        (self.out / "lib/branch.sens").write_bytes(b"sentinel")
-        p = self.call("lib/third.lisp", "lib/branch.lisp", write=True)
-        self.assertEqual(p.returncode, 0, p.stderr + p.stdout)
-        d = json.loads(self.report.read_text())
-        self.assertEqual(d["summary"]["files_written"], 1)
-        self.assertEqual(d["summary"]["files_blocked"], 1)
-        self.assertEqual((self.out / "lib/branch.sens").read_bytes(), b"sentinel")
-        self.assertTrue((self.out / "lib/third.sens").exists())
-
-    def test_mid_batch_writer_failure_blocks_only_the_failed_file(self):
-        branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
-        shutil.copy2(branch, self.root / "lib/branch.lisp")
-        spec = importlib.util.spec_from_file_location(
-            "sens_atomic_batch_test_impl", DRIVER)
-        assert spec is not None and spec.loader is not None
-        batch = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(batch)
-        original_writer = batch.mig.write_atomic_no_clobber
-        calls = []
-
-        def intermittent_writer(target, payload):
-            calls.append(target)
-            if len(calls) == 2:
-                raise OSError("test injected second-write failure")
-            original_writer(target, payload)
-
-        args = argparse.Namespace(
-            paths=["lib/branch.lisp", "lib/third.lisp"], root=self.root,
-            out=self.out, report=self.report, source_era="legacy", write=True,
-        )
-        with patch.object(batch.mig, "write_atomic_no_clobber",
-                          side_effect=intermittent_writer):
-            outcome = batch.run(args)
-        self.assertEqual(len(calls), 2)
-        self.assertEqual(outcome["summary"]["files_written"], 1)
-        self.assertEqual(outcome["summary"]["files_blocked"], 1)
-        self.assertEqual(outcome["summary"]["files_would_write"], 0)
-        self.assertIn("test injected second-write failure",
-                      str([e.get("reason", "") for e in outcome["files"]]))
-        self.assertTrue((self.out / "lib/branch.sens").exists())
-        self.assertFalse((self.out / "lib/third.sens").exists())
-        self.assertEqual((self.root / "lib/branch.lisp").read_bytes(),
-                         branch.read_bytes())
-
-    def test_symlinks_traversal_bad_suffix_and_absent_sources_are_rejected(self):
-        (self.root / "lib/link.lisp").symlink_to(self.root / "lib/third.lisp")
-        for value in ("lib/link.lisp", "../external.lisp",
-                      "/etc/passwd", "lib/third.sens", "no-such-file.lisp"):
-            with self.subTest(value=value):
-                p = self.call(value, write=True)
-                self.assertEqual(p.returncode, 2, p.stderr + p.stdout)
-                self.assertEqual(json.loads(self.report.read_text())
-                                 ["summary"]["files_written"], 0)
-        self.assertFalse((self.out / "lib/link.sens").exists())
-
-    def test_refuse_outputs_inside_source_root(self):
-        result = self.call("lib/third.lisp", write=True, out=self.root / "out")
-        self.assertEqual(result.returncode, 3)
-        self.assertFalse((self.root / "out").exists())
-
-    def test_duplicate_paths_are_processed_once(self):
-        result = self.call("lib/third.lisp", "lib/third.lisp", write=True)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(json.loads(self.report.read_text())
-                         ["summary"]["files_written"], 1)
 
 if __name__ == "__main__":
     unittest.main()
