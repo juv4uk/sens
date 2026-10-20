@@ -295,7 +295,7 @@ mod tests {
                 for (operator, expected) in [("+", a + b), ("-", a - b), ("*", a * b)] {
                     let value = compute(operator, &left, &right).expect("точна машинна операція D24");
                     assert_eq!(value.to_string(), expected.to_string(), "{a} {operator} {b}");
-                    let Value::BinaryNumber(result) = value else { panic!("ціле D24+"); };
+                    let Value::BinaryNumber(ref result) = value else { panic!("ціле D24+"); };
                     let width = if (-(1_i64 << 23)..=(1_i64 << 23) - 1).contains(&expected) { 24 } else { 48 };
                     assert_eq!(result.numeric_domain_width(), Some(width));
                     assert_eq!(result.exact_numeric_domain_bits().unwrap().len(), width);
