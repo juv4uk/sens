@@ -408,9 +408,9 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
     def test_first_class_source_is_current_ukrainian_not_historical_sid8(self):
         current_src = (Path(__file__).resolve().parents[1] / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
         self.assertTrue(current_src.startswith("; Першокласні функції: експериментальний метаобчислювач"))
-        active = "\\n".join(line.split(";", 1)[0] for line in current_src.splitlines())
+        active = "\n".join(line.split(";", 1)[0] for line in current_src.splitlines())
         self.assertNotIn("#d1:", active)
-        self.assertNotRegex(active, r"(?m)^\\s*\\([01]{3,9}\\s")
+        self.assertNotRegex(active, r"(?m)^\s*\([01]{3,9}\s")
         for head in ("визначити", "функція", "як-є", "за-умовою",
                      "першокласне-застосувати", "першокласне-обчислити"):
             self.assertIn(head, active)
