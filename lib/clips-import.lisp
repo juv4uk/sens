@@ -324,42 +324,12 @@
            (список (сполучити (перше тіло) (перше решта-форм)) (друге решта-форм)))
            (розділити-правило-кліпс (решта тіло)))))))
 
-; Step 3: any number of `(assert (...))` forms after `=>`, not just one.
-; my-lisp's rule format only ever has one head per clause, so N assertions
-; sharing one LHS become N separate clauses, one per assertion, all with
-; the *same* condition list — logically equivalent to CLIPS firing all N
-; assertions together whenever the shared conditions hold.
-;
-; Still scoped to `assert` only: a `defrule` whose `=>` side contains any
-; other CLIPS action (`printout`, `retract`, `modify`, ...) imports as no
-; clauses rather than guessing at an action this project doesn't model —
-; same "skip, don't error" policy as an unsupported top-level form.
-;
-; Крок 3: будь-яка кількість форм `(assert (...))` після `=>`, не лише
-; одна. Формат правил my-lisp має рівно одну голову на clause, тож N
-; тверджень з однією LHS стають N окремими clause, по одному на кожне
-; твердження, усі з тим самим списком умов — логічно еквівалентно тому, як
-; CLIPS застосовує всі N тверджень разом, коли спільні умови виконані.
-;
-; Досі обмежено лише `assert`: `defrule`, чия сторона `=>` містить будь-яку
-; іншу CLIPS-дію (`printout`, `retract`, `modify`, ...), імпортується як
-; відсутність clause замість здогадки про дію, яку цей проєкт не моделює —
-; та сама політика "пропустити, не впасти", що й для непідтримуваної
-; форми верхнього рівня.
-;
-; Schritt 3: beliebig viele `(assert (...))`-Formen nach `=>`, nicht nur
-; eine. Das Regelformat von my-lisp hat immer nur einen Kopf pro Clause,
-; also werden N Behauptungen mit einer gemeinsamen LHS zu N separaten
-; Clauses, eine pro Behauptung, alle mit derselben Bedingungsliste —
-; logisch äquivalent dazu, dass CLIPS alle N Behauptungen zusammen auslöst,
-; sobald die gemeinsamen Bedingungen erfüllt sind.
-;
-; Weiterhin nur auf `assert` beschränkt: eine `defrule`, deren `=>`-Seite
-; irgendeine andere CLIPS-Aktion enthält (`printout`, `retract`, `modify`,
-; ...), importiert als keine Clauses, statt eine Aktion zu erraten, die
-; dieses Projekt nicht modelliert — dieselbe "überspringen statt
-; fehlschlagen"-Politik wie bei einer nicht unterstützten Form der obersten
-; Ebene.
+; Крок 3: у правій частині правила CLIPS може бути кілька assert.
+; Кожне твердження утворює окрему клаузу з тим самим переліком умов:
+; це відповідає спільному спрацьовуванню правила.
+; Тут не вигадуємо семантику для інших дій CLIPS.
+; Непідтримувані retract і modify не перетворюємо довільно.
+
 (визначити твердження-кліпс?
   (функція (форма)
     (за-умовою
@@ -367,65 +337,16 @@
       ((атом? (перше форма)) (тотожне? (перше форма) (як-є assert)))
       (так ні))))
 
-; Step 9: `printout` alongside `assert` no longer disqualifies a whole
-; rule. Verified before writing this (not guessed): a rule shaped
-; `(defrule mass-rule (planet ?x) => (printout t "found planet " ?x crlf)
-; (assert (has-mass ?x)))` — an extremely ordinary CLIPS pattern, debug
-; output next to the actual assertion — previously imported as *no
-; clauses at all*, silently dropping a perfectly representable `assert`
-; just because a harmless side-effecting `printout` sat next to it.
-; `printout` writes to a stream and asserts nothing; my-lisp has no
-; matching capability to run it in, but running nothing is exactly the
-; same as CLIPS not having anything meaningful to assert from it — safe
-; to drop, not to treat as disqualifying.
-;
-; Still no such leniency for `retract`/`modify`: both refer to a specific
-; already-asserted fact by its CLIPS fact-address, a concept this
-; project's set-of-facts model has no equivalent for (my-lisp facts are
-; compared structurally via `equal?`, not addressed by identity) — a rule
-; containing either still imports as no clauses rather than guessing at
-; semantics it cannot faithfully represent.
-;
-; Крок 9: `printout` поряд з `assert` більше не дискваліфікує все
-; правило. Перевірено перед написанням (не здогадано): правило форми
-; `(defrule mass-rule (planet ?x) => (printout t "found planet " ?x crlf)
-; (assert (has-mass ?x)))` — надзвичайно звичайний CLIPS-патерн,
-; debug-вивід поряд із самим твердженням — раніше імпортувалось як
-; *взагалі відсутність clause*, мовчки відкидаючи цілком представний
-; `assert` лише тому, що поруч сидів нешкідливий `printout` з побічним
-; ефектом. `printout` пише в потік і нічого не стверджує; my-lisp не має
-; відповідної можливості його виконати, але виконати нічого — точно те
-; саме, що й CLIPS без нічого осмисленого для ствердження звідти —
-; безпечно відкинути, не трактувати як дискваліфікуючу.
-;
-; Досі без такої поблажки для `retract`/`modify`: обидва посилаються на
-; конкретний уже ствердений факт за його CLIPS fact-address, поняття, для
-; якого модель множини фактів цього проєкту не має відповідника (факти
-; my-lisp порівнюються структурно через `equal?`, не адресуються за
-; ідентичністю) — правило з будь-яким із них і далі імпортується як
-; відсутність clause замість здогадки про семантику, яку не можна чесно
-; представити.
-;
-; Schritt 9: `printout` neben `assert` disqualifiziert eine Regel nicht
-; mehr vollständig. Vor dem Schreiben verifiziert (nicht geraten): eine
-; Regel der Form `(defrule mass-rule (planet ?x) => (printout t "found
-; planet " ?x crlf) (assert (has-mass ?x)))` — ein äußerst gewöhnliches
-; CLIPS-Muster, Debug-Ausgabe neben der eigentlichen Behauptung — wurde
-; zuvor als *überhaupt keine Clauses* importiert und verwarf
-; stillschweigend eine perfekt darstellbare `assert`-Anweisung nur, weil
-; ein harmloser `printout`-Seiteneffekt daneben stand. `printout` schreibt
-; in einen Stream und behauptet nichts; my-lisp hat keine passende
-; Fähigkeit, es auszuführen, aber nichts auszuführen ist genau dasselbe,
-; wie wenn CLIPS nichts Sinnvolles daraus zu behaupten hätte — sicher zu
-; verwerfen, nicht als disqualifizierend zu behandeln.
-;
-; Weiterhin keine solche Nachsicht für `retract`/`modify`: beide beziehen
-; sich auf einen bestimmten, bereits behaupteten Fakt über seine
-; CLIPS-Fakt-Adresse, ein Konzept, für das das Mengen-von-Fakten-Modell
-; dieses Projekts kein Äquivalent hat (my-lisp-Fakten werden strukturell
-; über `equal?` verglichen, nicht über Identität adressiert) — eine Regel
-; mit einem von beiden importiert weiterhin als keine Clauses, statt eine
-; Semantik zu erraten, die nicht treu dargestellt werden kann.
+; Крок 9: службове виведення printout поряд із assert не
+; скасовує твердження, яке можна імпортувати.
+; Приклад: (defrule mass-rule (planet ?x) =>
+;           (printout t "found planet " ?x crlf)
+;           (assert (has-mass ?x))).
+; Виведення повідомлення не має окремого наслідку в базі фактів,
+; але assert продовжує діяти.
+; Дії retract та modify вимагають адрес CLIPS-фактів;
+; структурна база СЕНС не повинна вдавати, що має ці адреси.
+
 (визначити виведення-кліпс?
   (функція (форма)
     (за-умовою
@@ -448,45 +369,14 @@
       ((твердження-кліпс? (перше форми)) (усі-твердження-кліпс? (решта форми)))
       (так ні))))
 
-; Step 15: real CLIPS `assert` accepts *multiple* facts in one call —
-; `(assert (number 0) (number 1) (number 2) ...)`, not just one. Verified
-; against a genuine external `.clp` file, not a hand-written example:
-; importing the classic GERALD+DONALD=ROBERT word-puzzle from CLIPS's own
-; distributed examples (see tests/fixtures/wordgame-external.clp), its
-; `startup` rule's single `(assert (number 0) (number 1) ... (letter T))`
-; call — twenty facts — only ever produced `(number 0)`; the other
-; nineteen silently vanished, because `(second (car forms))` only ever
-; read the *first* fact argument out of each `assert` form. `(cdr (car
-; forms))` reads *every* fact argument instead, `append`-ed across every
-; `assert` form in the RHS (a rule can still have more than one `assert`
-; call, each itself multi-fact).
-;
-; Крок 15: справжній CLIPS `assert` приймає **кілька** фактів за один
-; виклик — `(assert (number 0) (number 1) (number 2) ...)`, не лише один.
-; Перевірено на справжньому зовнішньому `.clp`-файлі, не вигаданому
-; прикладі: імпортуючи класичну задачу GERALD+DONALD=ROBERT з офіційних
-; прикладів CLIPS (див. tests/fixtures/wordgame-external.clp), її правило
-; `startup` з одним викликом `(assert (number 0) (number 1) ... (letter
-; T))` — двадцять фактів — давало лише `(number 0)`; решта дев'ятнадцять
-; мовчки зникали, бо `(second (car forms))` читав лише *перший* аргумент-
-; факт з кожної форми `assert`. `(cdr (car forms))` читає *кожен*
-; аргумент-факт, `append`-нуто через усі форми `assert` у RHS (правило
-; й далі може мати кілька викликів `assert`, кожен сам по собі
-; багатофактовий).
-;
-; Schritt 15: echtes CLIPS-`assert` akzeptiert **mehrere** Fakten in einem
-; Aufruf — `(assert (number 0) (number 1) (number 2) ...)`, nicht nur
-; einen. Verifiziert gegen eine echte externe `.clp`-Datei, kein
-; handgeschriebenes Beispiel: beim Import des klassischen
-; GERALD+DONALD=ROBERT-Worträtsels aus CLIPS' eigenen mitgelieferten
-; Beispielen (siehe tests/fixtures/wordgame-external.clp) lieferte der
-; einzelne `(assert (number 0) (number 1) ... (letter T))`-Aufruf der
-; `startup`-Regel — zwanzig Fakten — nur `(number 0)`; die anderen
-; neunzehn verschwanden stillschweigend, weil `(second (car forms))` nur
-; das *erste* Fakt-Argument jeder `assert`-Form las. `(cdr (car forms))`
-; liest *jedes* Fakt-Argument, über alle `assert`-Formen der RHS
-; `append`-t (eine Regel kann weiterhin mehrere `assert`-Aufrufe haben,
-; jeder selbst mehrfaktig).
+; Крок 15: одна форма assert може містити багато фактів:
+; (assert (number 0) (number 1) (number 2)).
+; Імпортер бере всі аргументи кожної форми, а не лише перший.
+; Кілька окремих assert у тілі правила також обробляються.
+; Історичний контроль — зовнішній приклад словесної задачі
+; GERALD + DONALD = ROBERT із набору CLIPS.
+; Порядок і кількість фактів не можна втрачати мовчки.
+
 (визначити зібрати-висновки-кліпс
   (функція (форми)
     (за-умовою
@@ -619,35 +509,13 @@
       ((преамбула-правила-кліпс? (перше тіло)) (прибрати-преамбулу-кліпс (решта тіло)))
       (так тіло))))
 
-; Step 19's `exists`/`forall` guard — skip a whole rule rather than
-; import one that could never fire — is gone now that `lib/forward.lisp`
-; Step 15 gives `exists`/`forall` real dispatcher support, the same way
-; Step 5's `not` guard was removed once `lib/forward.lisp` Step 7 gave `not`
-; real support. `clips-convert-template` also learned to recurse into
-; `exists`/`forall` sub-conditions (same lesson Step 13 already taught for
-; `not`/`or`/`and`), so a template fact nested inside either now gets its
-; named slots converted to positional form too.
-; Guard `exists`/`forall` із Кроку 19 — пропустити все правило замість
-; імпорту того, що ніколи б не спрацювало — прибрано, тепер коли
-; `lib/forward.lisp` Крок 15 дає `exists`/`forall` справжню диспетчерну
-; підтримку, так само як guard `not` з Кроку 5 прибрано, коли
-; `lib/forward.lisp` Крок 7 дав `not` справжню підтримку.
-; `clips-convert-template` також навчилась рекурсувати в під-умови
-; `exists`/`forall` (той самий урок, що Крок 13 уже дав для `not`/`or`/
-; `and`), тож факт-шаблон, вкладений у будь-яку з них, тепер теж отримує
-; конвертацію іменованих слотів у позиційну форму.
-; Steps 19s `exists`/`forall`-Guard — die ganze Regel überspringen statt
-; eine zu importieren, die nie feuern könnte — ist jetzt weg, da
-; `lib/forward.lisp` Schritt 15 `exists`/`forall` echte Dispatcher-
-; Unterstützung gibt, genauso wie Schritt 5s `not`-Guard entfernt wurde,
-; als `lib/forward.lisp` Schritt 7 `not` echte Unterstützung gab.
-; `clips-convert-template` hat auch gelernt, in `exists`/`forall`-
-; Unterbedingungen zu rekursieren (dieselbe Lehre, die Schritt 13 bereits
-; für `not`/`or`/`and` gab), sodass ein Template-Fakt, verschachtelt in
-; einer von beiden, jetzt auch seine benannten Slots in positionale Form
-; umgewandelt bekommt.
-; Each intermediate list is computed once by language-owned derived
-; functions. No ambiguous computed LAMBDA head or unadmitted LET slot.
+; Крок 19: більше не відхиляємо правило лише через exists або
+; forall: бібліотека прямого виведення вже має відповідні переходи.
+; Вкладені шаблони в exists, forall, not, or та and
+; рекурсивно перетворюються з іменованих слотів на позиційні.
+; Кожен проміжний список обчислюємо один раз мовними функціями,
+; без неоднозначної обчисленої голови лямбди чи нератифікованого LET.
+
 (визначити кліпс-клаузи-правила-з-частин
   (функція (умови доречні шаблони)
     (за-умовою
@@ -739,26 +607,12 @@
   (функція (форми)
     (кліпс-імпорт-форми форми (кліпс-шаблони-з-форми форми))))
 
-; Step 4: read a real CLIPS source file off disk and import it — the tool
-; this whole file exists to build. `read-file` (new Rust primitive, see
-; crates/my-lisp/src/eval/special_forms.rs's header comment on it) reads
-; the raw text; `read-all` (also new) parses it into every top-level form
-; as data, the multi-form counterpart to `read`; `clips-import` does the
-; rest exactly as it would for a caller-supplied quoted literal.
-;
-; Крок 4: прочитати справжній CLIPS-файл з диска й імпортувати його —
-; інструмент, заради якого існує весь цей файл. `read-file` (новий
-; Rust-примітив) читає сирий текст; `read-all` (теж новий) парсить його в
-; кожну форму верхнього рівня як дані — багатоформний відповідник `read`;
-; `clips-import` робить решту точно так само, як і для наданого викликачем
-; quoted-літералу.
-;
-; Schritt 4: eine echte CLIPS-Quelldatei von der Festplatte lesen und
-; importieren — das Werkzeug, für das diese ganze Datei existiert.
-; `read-file` (neues Rust-Primitiv) liest den rohen Text; `read-all`
-; (ebenfalls neu) parst ihn in jede Form der obersten Ebene als Daten — das
-; Mehrform-Gegenstück zu `read`; `clips-import` erledigt den Rest genau so
-; wie für ein vom Aufrufer bereitgestelltes Quote-Literal.
+; Крок 4: імпорт справжнього файла вихідного коду CLIPS.
+; Читання файла повертає текст, читання всіх форм — список
+; верхньорівневих даних. Решту обробляє кліпс-імпорт.
+; Це той самий шлях перетворення, що й для цитованого
+; списку форм, переданого безпосередньо викликачем.
+
 (визначити кліпс-імпорт-файл
   (функція (шлях)
     (кліпс-імпорт (читати-всі (читати-файл шлях)))))
