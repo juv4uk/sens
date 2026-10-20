@@ -1,10 +1,10 @@
-; Runtime fact policy for the wsm-guard-facts adapter (G2 slice).
+; Політика фактів часу виконання для адаптера wsm-guard-facts (зріз G2).
 ; Runtime-політика фактів для адаптера wsm-guard-facts (G2 зріз).
 ;
-; wsm-guard-facts normalizes read-only Git/systemd/swarm observations into
+; wsm-guard-facts нормалізує лише-читальні спостереження Git/systemd/swarm у
 ; `(fact (source S) (subject X) (state ...))` clauses. This policy owns the
-; classification decision. Missing or unobservable evidence stays UNKNOWN via
-; guard-unknown - never an implicit reject.
+; рішенням класифікації. Відсутнє чи неспостережуване свідчення лишається UNKNOWN через
+; guard-unknown - ніколи не неявне відкидання.
 ;
 ; wsm-guard-facts нормалізує read-only спостереження Git/systemd/swarm у
 ; `(fact (source S) (subject X) (state ...))` clause. Ця політика визначає
