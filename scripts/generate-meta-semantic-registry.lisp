@@ -1,101 +1,98 @@
-; #76 — Lisp-owned meta semantic registry projection from the canonical semantic registry.
-;
-; Authority stays in lib/surface/semantic-registry.lisp.
-; This script owns projection mechanics only: it reads the registry as
-; ordinary my-lisp data and never re-parses source text with host regexes.
-;
-; Registry rows are:
-;   ("SID" (namespace surface) ...)
-; Empty surfaces are omitted. The reader-only apostrophe is represented as
-; a string and is omitted because the reader consumes it as quote syntax.
-; Every other admitted symbol is projected in registry order.
+; Створення похідної метасемантичної проєкції засобами мови СЕНС.
+; Семантичне джерело: lib/surface/semantic-registry.lisp.
+; Генератор читає структуровані Lisp-значення власним читачем.
+; Вибираються лише непорожні проєкції, крім апострофа читача.
+; Порядок записів із канонічного реєстру зберігається.
+; Машинні коди всередині рядків результату — дані формату, а не
+; нові виконувані викличні голови цього генератора.
+; Рядки вихідного файлу та зовнішні протокольні значення незмінні.
 
-(визначити surface-word
-  (функція (surface)
-    (перше (решта surface))))
+(визначити назва-проєкції
+  (функція (проєкція)
+    (перше (решта проєкція))))
 
-(визначити surface-namespace
-  (функція (surface)
-    (перше surface)))
+(визначити простір-імен-проєкції
+  (функція (проєкція)
+    (перше проєкція)))
 
-(визначити surface-included?
-  (функція (surface)
+(визначити проєкція-допущена?
+  (функція (проєкція)
     (за-умовою
-      ((атом? surface) ())
+      ((атом? проєкція) ())
       
-      ((однакові? (surface-word surface) (як-є ())) ())
-      ((однакові? (surface-word surface) "'") ())
+      ((однакові? (назва-проєкції проєкція) (як-є ())) ())
+      ((однакові? (назва-проєкції проєкція) "'") ())
       ((атом? (як-є ())) t))))
 
-(визначити collect-surfaces
-  (функція (sid surfaces rows)
+(визначити зібрати-проєкції
+  (функція (ідентичність проєкції рядки)
     (за-умовою
-      ((атом? surfaces) rows)
+      ((атом? проєкції) рядки)
       
       ((атом? (як-є ()))
-       (нехай ((surface (перше surfaces)))
+       (нехай ((проєкція (перше проєкції)))
          (за-умовою
-           ((surface-included? surface)
-            (collect-surfaces
-              sid
-              (решта surfaces)
+           ((проєкція-допущена? проєкція)
+            (зібрати-проєкції
+              ідентичність
+              (решта проєкції)
               (сполучити
                 (список
-                  (surface-word surface)
-                  sid
-                  (surface-namespace surface))
-                rows)))
+                  (назва-проєкції проєкція)
+                  ідентичність
+                  (простір-імен-проєкції проєкція))
+                рядки)))
            ((атом? (як-є ()))
-            (collect-surfaces sid (решта surfaces) rows))))))))
+            (зібрати-проєкції ідентичність (решта проєкції) рядки))))))))
 
-(визначити collect-entries
-  (функція (entries rows)
+(визначити зібрати-записи
+  (функція (записи рядки)
     (за-умовою
-      ((атом? entries) rows)
+      ((атом? записи) рядки)
       
       ((атом? (як-є ()))
-       (нехай ((entry (перше entries)))
-         (collect-entries
-           (решта entries)
-           (collect-surfaces (перше entry) (решта entry) rows)))))))
+       (нехай ((запис (перше записи)))
+         (зібрати-записи
+           (решта записи)
+           (зібрати-проєкції (перше запис) (решта запис) рядки)))))))
 
-(визначити str+
-  (функція args
+(визначити зчепити-рядки
+  (функція аргументи
     (згорнути
-      (функція (acc part)
-        (рядок-додати acc part))
+      (функція (накопичувач фрагмент)
+        (рядок-додати накопичувач фрагмент))
       ""
-      args)))
+      аргументи)))
 
-(визначити render-row
-  (функція (row)
-    (str+
+(визначити подати-рядок
+  (функція (рядок)
+    (зчепити-рядки
       "    ("
-      (значення-у-текст (перше row))
+      (значення-у-текст (перше рядок))
       " "
-      (значення-у-текст (друге row))
+      (значення-у-текст (друге рядок))
       ") ; "
-      (значення-у-текст (третє row))
+      (значення-у-текст (третє рядок))
       "\n")))
 
-(визначити join-rows
-  (функція (rows)
+(визначити поєднати-рядки
+  (функція (рядки)
     (згорнути
-      (функція (acc row)
-        (рядок-додати acc (render-row row)))
+      (функція (накопичувач рядок)
+        (рядок-додати накопичувач (подати-рядок рядок)))
       ""
-      rows)))
+      рядки)))
 
-(визначити render-projection
-  (функція (rows)
-    (str+
+(визначити подати-проєкцію
+  (функція (рядки)
+    (зчепити-рядки
       "; GENERATED FILE — DO NOT EDIT.\n"
       "; Source authority: lib/surface/semantic-registry.lisp\n"
       "; Generator: scripts/generate-meta-semantic-registry.lisp\n"
       "; Registry surfaces; empty and reader-only apostrophe surfaces omitted.\n\n"
       "(00001001 my-semantic-surface-registry\n"
       "  (00000001 (\n"
-      (join-rows (зворот rows))
+      (поєднати-рядки (зворот рядки))
       "  )))\n\n"
       "(00001001 my-semantic-id-for-surface\n"
       "  (00001000 (name)\n"
@@ -104,29 +101,29 @@
       "        ((00000010 entry) () (00000001 ()))\n"
       "        ((00000010 entry) (0) (00101111 entry))))))\n")))
 
-(визначити registry-form
+(визначити форма-реєстру
   (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
-(визначити projection-rows
-  (collect-entries
-    registry-form
+(визначити рядки-проєкції
+  (зібрати-записи
+    форма-реєстру
     (як-є ())))
 
-(визначити generated
-  (render-projection projection-rows))
+(визначити згенерований-вміст
+  (подати-проєкцію рядки-проєкції))
 
-(визначити output-path "lib/generated/meta-semantic-registry.lisp")
+(визначити шлях-результату "lib/generated/meta-semantic-registry.lisp")
 
 (за-умовою
   ((атом? *argv*) (друге
      (список
-       (записати-файл output-path generated)
+       (записати-файл шлях-результату згенерований-вміст)
        (друкувати "meta semantic registry projection written"))))
   
   ((тотожне? (перше *argv*) "--check")
-   (нехай ((current (читати-файл output-path)))
+   (нехай ((чинний-вміст (читати-файл шлях-результату)))
      (за-умовою
-       ((тотожне? current generated)
+       ((тотожне? чинний-вміст згенерований-вміст)
         (друкувати "meta semantic registry projection is current"))
        ((атом? (як-є ()))
         (друге
@@ -136,5 +133,5 @@
   ((атом? (як-є ()))
    (друге
      (список
-       (записати-файл output-path generated)
+       (записати-файл шлях-результату згенерований-вміст)
        (друкувати "meta semantic registry projection written")))))
