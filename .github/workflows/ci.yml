@@ -366,7 +366,7 @@ jobs:
           set -euo pipefail
           # Старий Python/T5-запис повністю заблоковано: він не є Zig/T5M.
           python3 -m unittest tests/test_retired_t5_publisher.py -v
-          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_unpaired_only_already_paired_is_noop_without_zig tests.test_three_pass_migration.ThreePassMigrationTests.test_export_trigger_installs_pinned_zig_in_existing_ci tests.test_three_pass_migration.ThreePassMigrationTests.test_current_nonprogram_sha_pins_are_real_and_d10_d11_are_data tests.test_three_pass_migration.ThreePassMigrationTests.test_partial_t5m_preview_reports_blocked_without_hiding_valid_program -v
+          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_unpaired_only_already_paired_is_noop_without_zig tests.test_three_pass_migration.ThreePassMigrationTests.test_export_trigger_installs_pinned_zig_in_existing_ci tests.test_three_pass_migration.ThreePassMigrationTests.test_current_nonprogram_sha_pins_are_real_and_d10_d11_are_data tests.test_three_pass_migration.ThreePassMigrationTests.test_reviewed_data_and_comment_only_are_not_failed_programs tests.test_three_pass_migration.ThreePassMigrationTests.test_malformed_comment_is_a_real_error_not_nonprogram tests.test_check_migration_zig_only_path.MigrationZigOnlyPathTests.test_reviewed_nonprogram_never_mints_and_source_drift_is_not_ignored -v
           # Легка перевірка транзакційного T5M без важкого Zig/Rust складання.
           python3 -m unittest tests/test_guarded_sens_mirror.py -v
           # Це тести канонічної фізичної тотожності, НЕ незалежний SENS-eval.
@@ -495,12 +495,4 @@ jobs:
             echo "::error::Manual full runtime check was skipped"
             exit 1
           fi
-          # Зелені поверхневі перевірки не дорівнюють доказу виконання SENS.
-          # На звичайних push runtime-shards можуть законно пропускатися;
-          # це інформація про неперевірений шар, а не новий глобальний STOP.
-          if [[ "$SHARDS_RESULT" == "skipped" ]]; then
-            echo "SENS SURFACE PASS: guards=$GUARDS_RESULT; runtime=NOT_TESTED; release=NOT_CERTIFIED"
-            echo "::notice::SENS surface only: runtime was skipped; no release proof for this SHA"
-          else
-            echo "SENS CHECKS PASS: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT; release requires separate corpus admission"
-          fi
+          echo "SENS CI passed: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT"

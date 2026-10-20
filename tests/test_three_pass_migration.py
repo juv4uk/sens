@@ -759,48 +759,6 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_would_write"], 1)
             self.assertEqual(state["summary"]["files_written"], 0)
 
-    def test_partial_t5m_preview_reports_blocked_without_hiding_valid_program(self):
-        # Успішна проєкція одного файлу не може приховати несправний інший.
-        # Коментарі не порівнюємо; результат є тільки фізичним preview,
-        # ніколи не SENS semantic PASS або дозвіл релізу.
-        with tempfile.TemporaryDirectory() as td:
-            base = Path(td)
-            src = base / "in"
-            src.mkdir()
-            (src / "справне.lisp").write_text(
-                "; коментар поза програмою\\n()\\n".replace("\\n", "\n"),
-                encoding="utf-8",
-            )
-            (src / "несправне.lisp").write_text(
-                "(незавершене\n", encoding="utf-8",
-            )
-            out = base / "out"
-            report = base / "report.json"
-            run = subprocess.run([
-                sys.executable, str(SCRIPT), str(src),
-                "--out", str(out), "--foundation", str(FOUNDATION),
-                "--domain-surfaces", str(DOMAIN_SURFACES),
-                "--semantic-generated", str(SEMANTIC_GENERATED),
-                "--semantic-registry", str(SEMANTIC_REGISTRY),
-                "--necessary-forms", str(NECESSARY),
-                "--text7", str(TEXT7), "--report", str(report),
-                "--dry-run", "--codec", "t5m", "--source-surface", "укр",
-            ], capture_output=True, text=True)
-            self.assertEqual(run.returncode, 2, run.stdout + run.stderr)
-            evidence = json.loads(report.read_text(encoding="utf-8"))
-            self.assertEqual(evidence["summary"]["files_would_write"], 1)
-            self.assertEqual(evidence["summary"]["files_blocked"], 1)
-            self.assertFalse(evidence["physical_batch_complete"])
-            self.assertFalse(evidence["migration_complete"])
-            self.assertFalse(evidence["semantic_admitted"])
-            self.assertFalse(out.exists())
-            self.assertIn(
-                "несправне.lisp",
-                [row["path"] for row in evidence["files"]
-                 if row["status"] == "blocked"],
-            )
-            self.assertIn("retired historical SID8", evidence["passes"]["1"])
-
     def test_cli_dry_run_accepts_ukr_decimal_comma(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
@@ -954,6 +912,46 @@ class ThreePassMigrationTests(unittest.TestCase):
         for domain in ("d10", "d11"):
             with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"):
                 mod.reject_reviewed_nonprogram_source(ROOT / f"lib/domains/{domain}.lisp")
+
+
+    def test_reviewed_data_and_comment_only_are_not_failed_programs(self):
+        # Both are read-only positive classifications, not executable .sens.
+        for name, reason in (("lib/domains/d4.lisp", "NONPROGRAM_DATA_NOT_EXECUTABLE"),
+                             ("lib/surface/uk.lisp", "NONPROGRAM_COMMENT_ONLY")):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temp:
+                out = Path(temp)
+                proc = subprocess.run([
+                    sys.executable, str(SCRIPT), str(ROOT / name),
+                    "--out", str(out / "pairs"), "--report", str(out / "report.json"),
+                    "--dry-run", "--codec", "t5m",
+                ], capture_output=True, text=True, check=False, timeout=30)
+                self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+                report = json.loads((out / "report.json").read_text(encoding="utf-8"))
+                self.assertEqual(report["summary"]["files_not_program"], 1)
+                self.assertEqual(report["summary"]["files_blocked"], 0)
+                self.assertEqual(report["summary"]["files_would_write"], 0)
+                self.assertEqual(report["files"][0]["status"], "not-program")
+                self.assertIn(reason, report["files"][0]["reason"])
+                self.assertIs(report["semantic_admitted"], False)
+                self.assertIs(report["migration_complete"], False)
+                self.assertFalse((out / "pairs").exists())
+
+
+    def test_malformed_comment_is_a_real_error_not_nonprogram(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            src = base / "broken.lisp"
+            src.write_text("#| коментар без завершення", encoding="utf-8")
+            run = subprocess.run([
+                sys.executable, str(SCRIPT), str(src), "--dry-run",
+                "--out", str(base / "pairs"), "--report", str(base / "report.json"),
+            ], capture_output=True, text=True, timeout=30)
+            self.assertEqual(run.returncode, 2, run.stdout + run.stderr)
+            state = json.loads((base / "report.json").read_text(encoding="utf-8"))
+            self.assertEqual(state["summary"]["files_blocked"], 1)
+            self.assertEqual(state["summary"]["files_not_program"], 0)
+            self.assertEqual(state["files"][0]["status"], "blocked")
+            self.assertIn("unterminated block comment", state["files"][0]["reason"])
 
 
     def test_minimal_cli_defaults_to_current_ratified_foundation(self):

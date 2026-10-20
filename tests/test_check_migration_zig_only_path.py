@@ -394,9 +394,11 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
                  "--dry-run", "--report", str(dest / "report.json")],
                 capture_output=True, text=True, timeout=30, check=False,
             )
-            self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
             report = json.loads((dest / "report.json").read_text(encoding="utf-8"))
-            self.assertEqual(report["summary"]["files_blocked"], 1)
+            self.assertEqual(report["summary"]["files_blocked"], 0)
+            self.assertEqual(report["summary"]["files_not_program"], 1)
+            self.assertEqual(report["files"][0]["status"], "not-program")
             self.assertEqual(report["summary"]["files_would_write"], 0)
             self.assertIn("NONPROGRAM_DATA_NOT_EXECUTABLE", report["files"][0]["reason"])
             self.assertFalse((dest / "d4.sens").exists())

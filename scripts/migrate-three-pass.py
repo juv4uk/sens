@@ -1591,6 +1591,7 @@ def main():
     rows = []
     written = 0
     blocked = 0
+    not_program = 0
     totals = {"already-exact": 0,
               "pass2-my-lisp": 0, "pass3-lisp15": 0,
               "pass4-text7-global": 0, "passthrough-head": 0}
@@ -1645,6 +1646,10 @@ def main():
             if target.exists() or target.is_symlink():
                 raise SensT5Error(f"target already exists; not overwriting {dest}")
             source = path.read_text(encoding="utf-8")
+            # Немає виконуваних форм — немає причини створювати .sens.
+            # Незакритий блоковий коментар є реальною помилкою.
+            if not strip_comments(source).strip():
+                raise SensT5Error("NONPROGRAM_COMMENT_ONLY layer=source")
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
             try:
@@ -1697,10 +1702,22 @@ def main():
             written += 1
         except (MigrationError, SensT5Error, UnicodeError, OSError,
                 ValueError, zig_codec_bridge.ZigCodecError) as error:
-            blocked += 1
+            reason = getattr(error, "message", str(error))
+            # Тільки SHA-верифіковані owner-reviewed дані та файли без
+            # виконуваних форм не є програмами. SHA drift, нерозпізнані
+            # виклики та всі помилки кодека залишаються BLOCKED.
+            is_not_program = isinstance(error, SensT5Error) and (
+                reason.startswith("NONPROGRAM_DATA_NOT_EXECUTABLE layer=encode ")
+                or reason == "NONPROGRAM_COMMENT_ONLY layer=source"
+            )
+            if is_not_program:
+                not_program += 1
+            else:
+                blocked += 1
             row = {
                 "path": str(rel), "output": str(dest),
-                "status": "blocked", "reason": getattr(error, "message", str(error)),
+                "status": "not-program" if is_not_program else "blocked",
+                "reason": reason,
                 "passes": resolver.counts,
             }
             token = getattr(error, "tok", None)
@@ -1709,8 +1726,8 @@ def main():
                 line, column = line_col(text, token.offset)
                 row.update({"token": token.text, "line": line, "column": column})
             rows.append(row)
-        if (written + blocked) % 25 == 0:
-            print(f"PROGRESS seen={written + blocked} written={written} blocked={blocked}",
+        if (written + blocked + not_program) % 25 == 0:
+            print(f"PROGRESS seen={written + blocked + not_program} written={written} blocked={blocked} not_program={not_program}",
                   flush=True)
 
     if zig_temp is not None:
@@ -1739,7 +1756,7 @@ def main():
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
         "migration_complete": False,  # batch transport never certifies semantic migration
-        "physical_batch_complete": bool(paths) and blocked == 0 and not args.dry_run,
+        "physical_batch_complete": written > 0 and blocked == 0 and not args.dry_run,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
         "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; under the D1–24+ frame, width alone grants neither identity nor callability; this migration requires a named current identity and an admitted call mechanism",
@@ -1755,7 +1772,8 @@ def main():
             "files_skipped_paired": len(skipped_paired),
             "files_written": written if not args.dry_run else 0,
             "files_would_write": written if args.dry_run else 0,
-            "files_blocked": blocked, "resolved_heads": totals,
+            "files_blocked": blocked, "files_not_program": not_program,
+            "resolved_heads": totals,
         },
         "files": rows,
     }
@@ -1769,7 +1787,7 @@ def main():
     # Частковий пакет не є успіхом: лишаємо вдалі окремі результати,
     # але звітуємо код 2, якщо хоча б одна програма не перетворилася.
     # CI може зберегти артефакти та показати точні причини без глобального STOP.
-    return 0 if blocked == 0 and (written or (not paths and bool(skipped_paired))) else 2
+    return 0 if blocked == 0 and (written or not_program or (not paths and bool(skipped_paired))) else 2
 
 
 if __name__ == "__main__":
