@@ -134,7 +134,7 @@ fn lisp_fs_empty_name_is_literal_and_unknown_object_address_is_not_found() {
               (let ((written (fs-write empty "" (quote value))))
                 (let ((malformed
                         (list (fs-objects (car written))
-                              (map-insert "ghost" "missing-address" map-empty)
+                              (мапа-вставити "ghost" "missing-address" мапа-порожній)
                               9)))
                   (list
                     (fs-read (car written) "")
