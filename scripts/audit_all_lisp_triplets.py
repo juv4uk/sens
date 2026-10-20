@@ -83,10 +83,18 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             raise ValueError("механічний свідок не дозволяє семантичний або релізний допуск")
         return codec
 
+    # Коментарний профіль без форм не є програмою. Визнаємо тільки
+    # порожні рядки та ;коментарі, ніякої довільної декларативної
+    # Lisp-форми автоматично до не-програм не зараховуємо.
+    def only_line_comments(file: Path) -> bool:
+        return all(not line.strip() or line.lstrip().startswith(b";")
+                   for line in file.read_bytes().splitlines())
+
     # Не прирівнюємо історичний T5 до сучасного фізичного T5M.
     counts = dict(ukrainian_keyboard=0, with_sens=0, with_view=0,
                   complete_triplets=0, bounded_verified=0,
-                  misnamed_binary_lisp=0,
+                  misnamed_binary_lisp=0, comment_only_nonprogram_lisp=0,
+                  potential_program_files=0, potential_program_missing_sens=0,
                   bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
     blocked: list[dict[str, str]] = []
 
@@ -108,6 +116,14 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if binary_disguised:
             counts["misnamed_binary_lisp"] += 1
             reject(relative, "двійкові слова D2 під розширенням .lisp; потрібен .bits")
+        # Коментарі не мають машинної семантики, їх НЕ пакуємо до SENS.
+        # Якщо їм уже видали .sens — не приховуємо цю аномалію.
+        if only_line_comments(source):
+            counts["comment_only_nonprogram_lisp"] += 1
+            if source.with_suffix(".sens").exists():
+                reject(relative, "файл лише з коментарів має необґрунтований .sens")
+            continue
+        counts["potential_program_files"] += 1
         physical = source.with_suffix(".sens")
         view = source.with_suffix("")
         has_sens = physical.is_file() and not physical.is_symlink()
@@ -115,6 +131,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         counts["with_sens"] += int(has_sens)
         counts["with_view"] += int(has_view)
         if not has_sens:
+            counts["potential_program_missing_sens"] += 1
             reject(relative, "немає звичайного однойменного .sens")
             continue
         if not has_view:
@@ -132,8 +149,8 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
                 counts["bounded_verified_t5m" if codec == "t5m"
                        else "bounded_verified_legacy_t5"] += 1
 
-    all_verified = bool(sources) and (
-        counts["bounded_verified"] == len(sources)
+    all_verified = counts["potential_program_files"] > 0 and (
+        counts["bounded_verified"] == counts["potential_program_files"]
         # Keyboard style is a separate source-quality metric. Comments,
         # whitespace and quoted external protocol data are not executable
         # program identity; do not let them veto proved roundtrips.
@@ -144,6 +161,8 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         "schema": SCHEMA,
         "total_lisp_files": len(sources),
         **counts,
+        # Загальна відсутність фізичних пар і виконавчий борг різні:
+        # коментарні файли тут НЕ утворюють штучний semantic BLOCK.
         "missing_sens": len(sources) - counts["with_sens"],
         "missing_complete_triplet": len(sources) - counts["complete_triplets"],
         "unverified_triplets": counts["complete_triplets"] - counts["bounded_verified"],

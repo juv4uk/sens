@@ -29,6 +29,39 @@ class AllLispTripletCensusTests(unittest.TestCase):
             path.write_text(content, encoding="utf-8")
         return path
 
+    def test_comment_only_lisp_has_no_machine_program_to_reverse(self):
+        self.put("lib/опис.lisp", "; Український опис\n; Без програми\n")
+        self.put("lib/порожній.lisp", "  \n\t\n")
+        self.put("lib/програма.lisp", "(визначити проба так)\n")
+        report = scan(self.root, verify_bounded=True,
+                      validator=lambda *_: self.fail("немає фізичної пари"))
+        self.assertEqual(report["total_lisp_files"], 3)
+        self.assertEqual(report["comment_only_nonprogram_lisp"], 2)
+        self.assertEqual(report["potential_program_files"], 1)
+        self.assertEqual(report["potential_program_missing_sens"], 1)
+        self.assertEqual(report["missing_sens"], 3)  # повний фізичний перепис
+        self.assertEqual(report["blocked_count"], 1)  # не 3 штучних блокери
+        self.assertEqual(report["blocked_sample"][0]["path"], "lib/програма.lisp")
+        self.assertFalse(report["all_bounded_reverse_verified"])
+        self.assertFalse(report["release_ready"])
+
+    def test_noncommented_lisp_is_never_auto_exempted_from_program_census(self):
+        self.put("lib/опис.lisp", '; опис\n(визначити функцію так)\n')
+        report = scan(self.root)
+        self.assertEqual(report["comment_only_nonprogram_lisp"], 0)
+        self.assertEqual(report["potential_program_files"], 1)
+        self.assertEqual(report["potential_program_missing_sens"], 1)
+        self.assertIn("немає", str(report["blocked_sample"]))
+
+    def test_comment_only_with_unproved_sens_is_not_silently_exempt(self):
+        self.put("lib/опис.lisp", "; тільки опис\n")
+        self.put("lib/опис.sens", b"fake")
+        report = scan(self.root)
+        self.assertEqual(report["comment_only_nonprogram_lisp"], 1)
+        self.assertEqual(report["potential_program_files"], 0)
+        self.assertIn("необґрунтований", str(report["blocked_sample"]))
+        self.assertFalse(report["release_ready"])
+
     def test_every_directory_counts_including_history(self):
         self.put("lib/один.lisp", "(визначити один так)\n")
         self.put("lib/один.sens", b"\x01")
