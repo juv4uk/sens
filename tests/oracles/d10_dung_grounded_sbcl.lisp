@@ -1,93 +1,118 @@
-;;;; Research-only exact donor oracle — Dung grounded argumentation (1995).
+;;;; Д10: незалежний дослідницький оракул обґрунтованої аргументації Данга (1995).
 ;;;; (role research-only)
 ;;;; (semantic-authority-change none)
-;;;; This checks the characteristic-function least fixed point in REAL SBCL,
-;;;; independently of Python's synchronous IN/OUT wave propagation.
+;;;; У справжньому SBCL перевіряємо найменшу нерухому точку
+;;;; характеристичної функції незалежно від поширення станів IN/OUT у Python.
+;;;; Це стандартна Common Lisp, а не виконуваний двійковий код СЕНС.
+;;;; Ключі :in, :out, :undec і назва пакета є незмінним форматом свідчення.
 
 (defpackage :d10-dung-oracle (:use :cl))
 (in-package :d10-dung-oracle)
-(defvar *checks* 0)
-(defvar *graph-cases* 0)
-(defun check (label actual expected)
-  (unless (equal actual expected)
-    (error "~A: expected ~S; actual ~S" label expected actual))
-  (incf *checks*))
-(defun is-exact-node-list (nodes)
-  (and (listp nodes)
-       (every (lambda (node) (and (symbolp node) node)) nodes)
-       (= (length nodes) (length (remove-duplicates nodes :test #'eq)))))
-(defun valid-graph? (nodes edges)
-  (and (is-exact-node-list nodes)
-       (listp edges)
-       (every (lambda (edge)
-                (and (listp edge)
-                     (= (length edge) 2)
-                     (member (first edge) nodes :test #'eq)
-                     (member (second edge) nodes :test #'eq)))
-              edges)
-       (= (length edges)
-          (length (remove-duplicates edges :test #'equal)))))
-(defun attacks? (a b edges)
-  (member (list a b) edges :test #'equal))
-(defun defended? (argument accepted nodes edges)
-  (every (lambda (attacker)
-           (or (not (attacks? attacker argument edges))
-               (some (lambda (defender)
-                       (attacks? defender attacker edges))
-                     accepted)))
-         nodes))
-(defun characteristic (accepted nodes edges)
-  (remove-if-not (lambda (node)
-                   (defended? node accepted nodes edges))
-                 nodes))
-(defun grounded (nodes edges)
-  (unless (valid-graph? nodes edges)
-    (error "finite attack framework: duplicate/invalid identity or edge"))
-  (let ((accepted nil))
-    (loop for step from 0 to (1+ (length nodes)) do
-      (let ((next (characteristic accepted nodes edges)))
-        (when (equal next accepted)
+
+(defvar *перевірок* 0)
+(defvar *перевірених-графів* 0)
+
+(defun перевірити (назва фактичне очікуване)
+  (unless (equal фактичне очікуване)
+    (error "~A: очікувано ~S; отримано ~S" назва очікуване фактичне))
+  (incf *перевірок*))
+
+(defun точний-список-вузлів? (вузли)
+  (and (listp вузли)
+       (every (lambda (вузол) (and (symbolp вузол) вузол)) вузли)
+       (= (length вузли)
+          (length (remove-duplicates вузли :test #'eq)))))
+
+(defun коректний-граф? (вузли ребра)
+  (and (точний-список-вузлів? вузли)
+       (listp ребра)
+       (every (lambda (ребро)
+                (and (listp ребро)
+                     (= (length ребро) 2)
+                     (member (first ребро) вузли :test #'eq)
+                     (member (second ребро) вузли :test #'eq)))
+              ребра)
+       (= (length ребра)
+          (length (remove-duplicates ребра :test #'equal)))))
+
+(defun атакує? (нападник ціль ребра)
+  (member (list нападник ціль) ребра :test #'equal))
+
+(defun захищений? (аргумент прийняті вузли ребра)
+  (every (lambda (нападник)
+           (or (not (атакує? нападник аргумент ребра))
+               (some (lambda (захисник)
+                       (атакує? захисник нападник ребра))
+                     прийняті)))
+         вузли))
+
+(defun характеристична-функція (прийняті вузли ребра)
+  (remove-if-not (lambda (вузол)
+                   (захищений? вузол прийняті вузли ребра))
+                 вузли))
+
+(defun обґрунтоване-розширення (вузли ребра)
+  (unless (коректний-граф? вузли ребра)
+    (error "Некоректний скінченний граф атак: повторені чи невідомі вузли або ребра"))
+  (let ((прийняті nil))
+    (loop for крок from 0 to (1+ (length вузли)) do
+      (let ((наступні (характеристична-функція прийняті вузли ребра)))
+        (when (equal наступні прийняті)
           (return))
-        (when (= step (1+ (length nodes)))
-          (error "failed to reach finite characteristic fixed point"))
-        (setf accepted next)))
-    (let ((rejected (remove-if-not
-                     (lambda (node)
-                       (some (lambda (a) (attacks? a node edges))
-                             accepted))
-                     nodes)))
-      (list :in accepted
-            :out rejected
+        (when (= крок (1+ (length вузли)))
+          (error "Не досягнуто нерухомої точки скінченної характеристичної функції"))
+        (setf прийняті наступні)))
+    (let ((відхилені
+            (remove-if-not
+              (lambda (вузол)
+                (some (lambda (прийнятий)
+                        (атакує? прийнятий вузол ребра))
+                      прийняті))
+              вузли)))
+      (list :in прийняті
+            :out відхилені
             :undec (remove-if
-                    (lambda (node)
-                      (or (member node accepted :test #'eq)
-                          (member node rejected :test #'eq)))
-                    nodes)))))
-(defun rejected-input? (nodes edges)
-  (handler-case (progn (grounded nodes edges) nil)
+                     (lambda (вузол)
+                       (or (member вузол прийняті :test #'eq)
+                           (member вузол відхилені :test #'eq)))
+                     вузли)))))
+
+(defun відхилено-вхід? (вузли ребра)
+  (handler-case
+      (progn (обґрунтоване-розширення вузли ребра) nil)
     (error () t)))
-(defun all-mask-edges (nodes code)
-  (let ((counter -1))
-    (loop for attacker in nodes nconc
-      (loop for target in nodes
-            for bit = (incf counter)
-            when (logbitp bit code) collect (list attacker target)))))
-(defun check-invariants (answer nodes edges)
-  (let* ((i (getf answer :in))
-         (o (getf answer :out))
-         (u (getf answer :undec)))
-    (unless (and (= (length (append i o u)) (length nodes))
-                 (null (intersection i o))
-                 (null (intersection i u))
-                 (null (intersection o u))
-                 (equal i (characteristic i nodes edges))
-                 (every (lambda (v)
-                          (some (lambda (a) (attacks? a v edges)) i))
-                        o)
-                 (every (lambda (v) (not (member v o))) u))
-      (error "grounded partition or fixed-point invariant failed"))))
-(defun suite ()
-  (dolist (row
+
+(defun ребра-за-маскою (вузли код)
+  (let ((лічильник -1))
+    (loop for нападник in вузли nconc
+      (loop for ціль in вузли
+            for біт = (incf лічильник)
+            when (logbitp біт код)
+              collect (list нападник ціль)))))
+
+(defun перевірити-інваріанти (відповідь вузли ребра)
+  (let* ((прийняті (getf відповідь :in))
+         (відхилені (getf відповідь :out))
+         (невизначені (getf відповідь :undec)))
+    (unless
+        (and (= (length (append прийняті відхилені невизначені))
+                (length вузли))
+             (null (intersection прийняті відхилені))
+             (null (intersection прийняті невизначені))
+             (null (intersection відхилені невизначені))
+             (equal прийняті (характеристична-функція прийняті вузли ребра))
+             (every (lambda (вузол)
+                      (some (lambda (нападник)
+                              (атакує? нападник вузол ребра))
+                            прийняті))
+                    відхилені)
+             (every (lambda (вузол)
+                      (not (member вузол відхилені)))
+                    невизначені))
+      (error "Порушено інваріант поділу або нерухомої точки"))))
+
+(defun набір-перевірок ()
+  (dolist (рядок
            '(((a) () (:in (a) :out () :undec ()))
              ((a b) ((a b)) (:in (a) :out (b) :undec ()))
              ((a b c) ((a b) (b c)) (:in (a c) :out (b) :undec ()))
@@ -100,32 +125,35 @@
              ((x a b) ((a b) (b a))
               (:in (x) :out () :undec (a b)))
              (() () (:in () :out () :undec ()))))
-    (check "Dung primary grounded semantic witness"
-           (grounded (first row) (second row)) (third row)))
-  (check "reject duplicate arguments"
-         (rejected-input? '(a a) nil) t)
-  (check "reject unknown attack endpoint"
-         (rejected-input? '(a) '((b a))) t)
-  (check "reject duplicate attack"
-         (rejected-input? '(a b) '((a b) (a b))) t)
-  (check "reject atom instead of graph"
-         (rejected-input? 'a '((a a))) t)
-  (check "self attack cannot force IN"
-         (grounded '(a) '((a a)))
-         '(:in () :out () :undec (a)))
-  (loop for n from 0 to 3 do
-    (let ((nodes (subseq '(a b c) 0 n)))
-      (loop for code from 0 below (ash 1 (* n n)) do
-        (let* ((edges (all-mask-edges nodes code))
-               (label (grounded nodes edges)))
-          (check-invariants label nodes edges)
-          (incf *graph-cases*)))))
-  (unless (= *graph-cases* 531)
-    (error "expected 531 finite directed graphs, got ~D" *graph-cases*))
+    (перевірити "Основний еталон обґрунтованої семантики Данга"
+               (обґрунтоване-розширення (first рядок) (second рядок))
+               (third рядок)))
+  (перевірити "Повторені аргументи відхилено"
+             (відхилено-вхід? '(a a) nil) t)
+  (перевірити "Невідому вершину атаки відхилено"
+             (відхилено-вхід? '(a) '((b a))) t)
+  (перевірити "Повторене ребро відхилено"
+             (відхилено-вхід? '(a b) '((a b) (a b))) t)
+  (перевірити "Атом замість графа відхилено"
+             (відхилено-вхід? 'a '((a a))) t)
+  (перевірити "Самоатака не робить аргумент прийнятим"
+             (обґрунтоване-розширення '(a) '((a a)))
+             '(:in () :out () :undec (a)))
+  (loop for кількість from 0 to 3 do
+    (let ((вузли (subseq '(a b c) 0 кількість)))
+      (loop for код from 0 below (ash 1 (* кількість кількість)) do
+        (let* ((ребра (ребра-за-маскою вузли код))
+               (відповідь (обґрунтоване-розширення вузли ребра)))
+          (перевірити-інваріанти відповідь вузли ребра)
+          (incf *перевірених-графів*)))))
+  (unless (= *перевірених-графів* 531)
+    (error "Очікувано 531 скінченний орієнтований граф, отримано ~D"
+           *перевірених-графів*))
   (format t "D10 DUNG independent real SBCL oracle PASS ~D named checks and ~D complete finite graphs~%"
-          *checks* *graph-cases*)
+          *перевірок* *перевірених-графів*)
   (finish-output))
-(handler-case (suite)
-  (error (reason)
-    (format *error-output* "D10 DUNG independent SBCL oracle FAIL: ~A~%" reason)
+
+(handler-case (набір-перевірок)
+  (error (причина)
+    (format *error-output* "D10 DUNG independent SBCL oracle FAIL: ~A~%" причина)
     (sb-ext:exit :code 1)))
