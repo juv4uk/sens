@@ -80,7 +80,7 @@ fn multistep_rules_survive_admission_reasoning_and_presentation() {
         (let* ((outcome
                  (міркувати-у-спостерігати (001 science) (001 (valuable earth))))
                (words (narrate-outcome outcome)))
-          (list (result-status outcome) (100 words)))
+          (list (результат-стан outcome) (100 words)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved proved)");
 }
@@ -102,7 +102,7 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
                    (001 family)
                    (001 (ancestor alice charlie))))
                (words (narrate-outcome outcome)))
-          (list (result-status outcome) (100 words)))
+          (list (результат-стан outcome) (100 words)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved proved)");
 }
@@ -115,7 +115,7 @@ fn explicit_conflict_is_rejected_and_cannot_replace_the_existing_fact() {
                  (advise ethics (001 ((not? (mortal socrates))))))
                (outcome
                  (міркувати-у-спостерігати (001 ethics) (001 (mortal socrates)))))
-          (list (100 decision) (result-status outcome)))
+          (list (100 decision) (результат-стан outcome)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(conflict proved)");
 }

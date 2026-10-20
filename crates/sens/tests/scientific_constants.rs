@@ -99,15 +99,15 @@ fn advice_taker_can_reason_about_an_admitted_scientific_constant() {
             (scientific-constant->clauses сі:визначальна-швидкість-світла)))
         (list
           (car admission)
-          (result-status
+          (результат-стан
             (міркувати-у-спостерігати
               (quote science)
               (quote (constant-value si:speed-of-light 299792458))))
-          (result-status
+          (результат-стан
             (міркувати-у-спостерігати
               (quote science)
               (quote (constant-status si:speed-of-light exact-by-definition))))
-          (result-status
+          (результат-стан
             (міркувати-у-спостерігати
               (quote science)
               (list

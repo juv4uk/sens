@@ -106,8 +106,8 @@ fn profile_size(distractors: usize) -> (u128, u128, u128, u128, u128, usize) {
 
     let indexed_direct = "(length (міркувати (quote (valuable target)) bench-rules))";
     let linear_direct = "(length (довести-ціль (quote (valuable target)) bench-rules (quote ()) (лінійний-індекс-міркування bench-rules) 0))";
-    let raw_reason = "(result-status (міркувати-спостерігати (quote (valuable target)) bench-rules))";
-    let end_to_end = "(result-status (міркувати-у-спостерігати (quote bench) (quote (valuable target))))";
+    let raw_reason = "(результат-стан (міркувати-спостерігати (quote (valuable target)) bench-rules))";
+    let end_to_end = "(результат-стан (міркувати-у-спостерігати (quote bench) (quote (valuable target))))";
 
     // Warm every measured reasoning path before the three-sample median. The
     // direct pair intentionally has the same projected corpus, goal and result

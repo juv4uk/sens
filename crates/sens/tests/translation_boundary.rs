@@ -58,7 +58,7 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
         (list
           before-known
           (car admission)
-          (result-status
+          (результат-стан
             (міркувати-у-спостерігати (quote corpus) (quote (human socrates)))))
     "#;
     assert_eq!(eval_translation(source), "(() accepted proved)");
@@ -170,7 +170,7 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
           (translation-review-code review)
           (translation-admission-payload review)
           (equal? before *knowledge-journal*)
-          (result-status
+          (результат-стан
             (міркувати-у-спостерігати (quote corpus) (translation-payload proposal))))
     "#;
     assert_eq!(eval_translation(source), "(accepted query () (1) blocked)");
