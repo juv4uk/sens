@@ -1,5 +1,6 @@
-; BMI1 instruction-family catalogue. Physical ISA facts only.
-; Exact VEX fields stay sourced from XED until the Lisp encoder admits a form.
+; Каталог машинних команд BMI1; лише фізичні факти ISA.
+; Точні поля VEX звіряються з XED, доки кодувальник Lisp
+; не допустить конкретну форму з перевіреною відповідністю.
 
 (isa-catalogue/1
   (extension BMI1)
