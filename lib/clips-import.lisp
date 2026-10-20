@@ -179,7 +179,7 @@
         (кліпс-рядок-після-останньої-подвійної-двокрапки (рядок-решта (рядок-решта s)))))
       (так (кліпс-рядок-після-останньої-подвійної-двокрапки (рядок-решта s))))))
 
-(визначити clips-strip-module-prefix
+(визначити прибрати-префікс-модуля-кліпс
   (функція (sym)
     (за-умовою
       ((символ? sym)
@@ -485,7 +485,7 @@
 ; Guards the `=>`-check with `(atom (car body))` first: a condition like
 ; `(planet ?x)` is itself a compound list, and `eq` errors on non-atom
 ; arguments instead of just correctly answering "not the `=>` marker".
-(визначити clips-split-at-arrow
+(визначити розділити-правило-кліпс
   (функція (body)
     (за-умовою
       ((атом? body) (список (як-є ()) (як-є ())))
@@ -535,7 +535,7 @@
 ; dieses Projekt nicht modelliert — dieselbe "überspringen statt
 ; fehlschlagen"-Politik wie bei einer nicht unterstützten Form der obersten
 ; Ebene.
-(визначити clips-assert-form?
+(визначити твердження-кліпс?
   (функція (form)
     (за-умовою
       ((атом? form) ні)
@@ -601,14 +601,14 @@
 ; über `equal?` verglichen, nicht über Identität adressiert) — eine Regel
 ; mit einem von beiden importiert weiterhin als keine Clauses, statt eine
 ; Semantik zu erraten, die nicht treu dargestellt werden kann.
-(визначити clips-printout-form?
+(визначити виведення-кліпс?
   (функція (form)
     (за-умовою
       ((атом? form) ні)
       ((атом? (перше form)) (тотожне? (перше form) (як-є printout)))
       (так ні))))
 
-(визначити clips-drop-printouts
+(визначити прибрати-виведення-кліпс
   (функція (forms)
     (за-умовою
       
@@ -616,7 +616,7 @@
       ((виведення-кліпс? (перше forms)) (прибрати-виведення-кліпс (решта forms)))
       (так (сполучити (перше forms) (прибрати-виведення-кліпс (решта forms)))))))
 
-(визначити clips-all-asserts?
+(визначити усі-твердження-кліпс?
   (функція (forms)
     (за-умовою
       ((атом? forms) так)
@@ -662,14 +662,14 @@
 ; liest *jedes* Fakt-Argument, über alle `assert`-Formen der RHS
 ; `append`-t (eine Regel kann weiterhin mehrere `assert`-Aufrufe haben,
 ; jeder selbst mehrfaktig).
-(визначити clips-assert-conclusions
+(визначити зібрати-висновки-кліпс
   (функція (forms)
     (за-умовою
       
       ((атом? forms)  (як-є ()))
       (так (приєднати (решта (перше forms)) (зібрати-висновки-кліпс (решта forms)))))))
 
-(визначити clips-clauses-for-conclusions
+(визначити правила-для-висновків-кліпс
   (функція (conclusions conditions)
     (за-умовою
       
@@ -775,7 +775,7 @@
 ; optional documentation datum; valid conditions and (declare ...) are pairs.
 ; This is a position-specific SENS structural law, NOT a general stringp.
 ; Do not grant the unadmitted D9:110100110 STRINGP runtime authority.
-(визначити clips-rule-preamble-form?
+(визначити преамбула-правила-кліпс?
   (функція (form)
     (за-умовою
       ((атом? form)
@@ -786,7 +786,7 @@
       ((тотожне? (перше form) (як-є declare)) так)
       (так ні))))
 
-(визначити clips-strip-rule-preamble
+(визначити прибрати-преамбулу-кліпс
   (функція (body)
     (за-умовою
       
@@ -934,7 +934,7 @@
 ; (ebenfalls neu) parst ihn in jede Form der obersten Ebene als Daten — das
 ; Mehrform-Gegenstück zu `read`; `clips-import` erledigt den Rest genau so
 ; wie für ein vom Aufrufer bereitgestelltes Quote-Literal.
-(визначити clips-import-file
+(визначити кліпс-імпорт-файл
   (функція (path)
     (кліпс-імпорт (читати-всі (читати-файл path)))))
 
@@ -984,13 +984,13 @@
 ; D9:001011000
 (визначити clips-імпорт кліпс-імпорт)
 ; D9:001000100
-(визначити clips-імпорт-файл clips-import-file)
+(визначити clips-імпорт-файл кліпс-імпорт-файл)
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити усі-твердження-кліпс? clips-all-asserts?)
-(визначити зібрати-висновки-кліпс clips-assert-conclusions)
-(визначити твердження-кліпс? clips-assert-form?)
-(визначити правила-для-висновків-кліпс clips-clauses-for-conclusions)
+(визначити clips-all-asserts? усі-твердження-кліпс?)
+(визначити clips-assert-conclusions зібрати-висновки-кліпс)
+(визначити clips-assert-form? твердження-кліпс?)
+(визначити clips-clauses-for-conclusions правила-для-висновків-кліпс)
 (визначити clips-convert-template кліпс-перетворити-шаблон)
 (визначити clips-convert-template-list кліпс-перетворити-шаблон-список)
 (визначити clips-convert-vars кліпс-перетворити-змінні)
@@ -999,7 +999,7 @@
 (визначити clips-deftemplate-form? кліпс-визначити-шаблон-форма?)
 (визначити clips-deftemplate-name кліпс-визначити-шаблон-ім'я)
 (визначити clips-deftemplate-slots кліпс-визначити-шаблон-слоти)
-(визначити прибрати-виведення-кліпс clips-drop-printouts)
+(визначити clips-drop-printouts прибрати-виведення-кліпс)
 (визначити clips-fact-clause кліпс-факт-клауза)
 (визначити clips-facts->clauses кліпс-факти-клаузи)
 (визначити clips-form->clauses кліпс-форма-клаузи)
@@ -1007,14 +1007,16 @@
 (визначити clips-import-forms кліпс-імпорт-форми)
 (визначити clips-lookup-slot-value знайти-значення-слота-кліпс)
 (визначити clips-positional-args позиційні-аргументи-кліпс)
-(визначити виведення-кліпс? clips-printout-form?)
-(визначити преамбула-правила-кліпс? clips-rule-preamble-form?)
+(визначити clips-printout-form? виведення-кліпс?)
+(визначити clips-rule-preamble-form? преамбула-правила-кліпс?)
 (визначити clips-slot-name кліпс-слот-ім'я)
 (визначити clips-slot-names кліпс-слот-імена)
-(визначити розділити-правило-кліпс clips-split-at-arrow)
-(визначити прибрати-префікс-модуля-кліпс clips-strip-module-prefix)
-(визначити прибрати-преамбулу-кліпс clips-strip-rule-preamble)
+(визначити clips-split-at-arrow розділити-правило-кліпс)
+(визначити clips-strip-module-prefix прибрати-префікс-модуля-кліпс)
+(визначити clips-strip-rule-preamble прибрати-преамбулу-кліпс)
 (визначити clips-template-slot-order кліпс-шаблон-слот-порядок)
 (визначити clips-templates-from-forms кліпс-шаблони-з-форми)
 (визначити clips-var-term кліпс-змінна-терм)
 (визначити clips-var? кліпс-змінна?)
+; Зовнішня історична назва лишається посиланням на вже визначену українську функцію.
+(визначити clips-import-file кліпс-імпорт-файл)
