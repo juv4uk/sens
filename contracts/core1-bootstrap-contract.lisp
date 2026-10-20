@@ -1,16 +1,5 @@
 ; #1132 — Контракт початкового завантаження першого ядра.
-;
-; Перше ядро — мінімальний профіль завантаження Ліспу засобами самого Ліспу.
-; Контракт належить СЕНС; mccarthy-eval є лише початковим виконавчим
-; механізмом нульового етапу.
-;
-; Важлива межа:
-; історичні написання й механізми S0 НЕ стають автоматично псевдонімами
-; чинних семантичних тотожностей СЕНС. Це початковий механізм, необхідний
-; для виконання lib/core1.lisp. Перехід до чинної семантичної тотожності
-; потребує явного свідка.
-;
-; Файл містить дані контракту, а не виконувані закони семантики.
+; Дані контракту; історичні назви лишаються як дані, не call-heads.
 
 (core1-bootstrap-contract/1
   ((identity . authority)
@@ -36,102 +25,13 @@
    (pinned-commit . "1ae9745b66a1439c1929b0d9038c680567118a58")
    (surface-case . exact-uppercase)
    (historical-forms .
-     (QUOTE ATOM EQ COND CAR CDR CONS LABEL LAMBDA DEFINE FUNCTION FUNARG))
+     (як-є ATOM EQ COND CAR CDR CONS LABEL LAMBDA DEFINE FUNCTION FUNARG))
    (historical-control-values . (T NIL))
    (first-class-closures . explicit-function-funarg)
-   (naked-lambda-as-value . historically-unavailable)
-   (closure-gap-policy . consume-lisp15-function-funarg)
-   (unsupported-form-policy . fail-closed))
+   (naked-lambda-as-value . historically-unavailable))
 
-  ((identity . s0-surface-boundary)
-   (kind . sid-owned-historical-mechanism-projection)
-   (semantic-alias-claim . forbidden-without-witness)
-   (sid-mechanism-map . "contracts/core1-historical-sid-map.lisp")
-   (identity-source . semantic-registry-sid)
-   (historical-name-authority . no)
-   (projection-must-be-explicit . yes)
-   (seed-only-mechanisms . (LABEL apply appq evcon evlis FUNCTION FUNARG T)))
-
-  ((identity . historical-root)
-   (mccarthy-1960-mechanisms-consumed .
-     (apply appq eval evcon evlis assoc pair append
-      QUOTE ATOM EQ COND CAR CDR CONS LABEL LAMBDA))
-   (lisp15-mechanisms-consumed . (FUNCTION FUNARG))
-   (closure-provenance . lisp15-appendix-b)
-   (closure-representation . (FUNARG fn captured-environment))
-   (semantic-authority . sens)
-   (mechanism-provenance . mccarthy-eval))
-
-  ((identity . s1-source)
-   (path . "lib/core1.lisp")
-   (source-surface . historical-uppercase-s0)
-   (host-arithmetic-required . no)
-   (host-first-class-functions-required . historical-function-funarg)
-   (host-mutation-required . no)
-   (host-strings-required . no))
-
-  ((identity . s1-owned-mechanisms)
-   (implemented-in-lisp .
-     (lookup
-      lexical-binding
-      argument-evaluation
-      application
-      explicit-top-level-frame
-      function-funarg-adapter
-      program-evaluation
-      named-bootstrap-error-data))
-   (closure-representation . historical-FUNARG)
-   (world-representation . (C1-WORLD last-value global-frame))
-   (error-representation . (C1-ERROR kind detail)))
-
-  ((identity . s1-language-shapes)
-   (special-forms . (QUOTE COND LAMBDA DEFINE))
-   (callable-bootstrap-operations . (ATOM EQ CONS CAR CDR LIST NOT))
-   (derived-not-seed-primitives . (LIST NOT))
-   (compiler-surface-projection . lazy-lisp-owned-dispatch)
-   (compiler-surface-source . lowercase-wsm-my-lisp)
-   (projection-preserves-quoted-payload . yes)
-   (projection-allocation . zero-copy)
-   (whole-ast-copy . forbidden)
-   (recursive-definition-mechanism . explicit-global-frame)
-   (conditional-policy . historical-two-part-truthiness)
-   (predicate-result-domain . historical-t-nil)
-   (eq-result-domain . historical-t-nil)
-   (atom-result-domain . historical-t-nil)
-   (core4-identity-relation . out-of-profile)
-   (core4-structural-kind . out-of-profile)
-   (exhausted-cond . named-bootstrap-error)
-   (modern-core4-structural-results . forbidden))
-
-  ((identity . bootstrap-minimality)
-   (admission-question . "Чи необхідно це Ліспу, щоб побудувати наступне покоління Ліспу або компілятора?")
-   (arithmetic . excluded-until-real-witness)
-   (strings . excluded-until-real-witness)
-   (io . excluded-until-real-witness)
-   (macros . excluded-until-real-witness)
-   (reasoning . excluded)
-   (external-kernels . excluded)
-   (machine-opcodes-as-language-semantics . forbidden))
-
-  ((identity . current-known-consumer)
-   (repository . juv4uk/wsm-my-lisp)
-   (pinned-commit . "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947")
-   (compiler-source . "lib/compiler.lisp")
-   (requires-at-bootstrap-runtime .
-     (QUOTE ATOM EQ CONS CAR CDR COND LAMBDA DEFINE LIST NOT recursion))
-   (mentions-but-does-not-require-to-run-compiler .
-     (+ -))
-   (fixed-point-owner . wsm-my-lisp-issue-39)
-   (compiler-mechanism-owner . cml-issue-190))
-
-  ((identity . acceptance)
-   (s0-loads-core1-source . required)
-   (historical-function-funarg-witness . required)
-   (core1-lambda-produces-funarg . required)
-   (closure-witness-runs-through-historical-funarg . required)
-   (recursive-definition-witness . required)
-   (compiler-source-load-witness . required)
-   (unsupported-modern-operation-fails-closed . required)
-   (s0-source-sha . required)
-   (s1-source-sha . required)
-   (artifact-hashes . required)))
+  ((identity . uk-projection)
+   (current-forms .
+     (як-є атом? тотожне? за-умовою перше решта сполучити визначити функція))
+   (decimals . required)
+   (sid8-call-heads . retired)))
