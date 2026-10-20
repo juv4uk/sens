@@ -1,0 +1,42 @@
+{
+  "schema": "sens.d11.function-proposals/v1",
+  "date": "2026-10-20",
+  "baseline_main_sha": "de81e232dcf72fc546c58f6980a0bda311c30370",
+  "source": "lib/unify.lisp",
+  "status": "ДОСЛІДНИЦЬКА_ПРОПОЗИЦІЯ_НЕ_РАТИФІКОВАНО",
+  "coordinate": null,
+  "ratified": false,
+  "callable_as_d11": false,
+  "existing_implementation": true,
+  "source_ukr_projection": "розв'язати-один-раз",
+  "checked_against": [
+    "lib/domains/d1.lisp — lib/domains/d10.lisp",
+    "knowledge/d11/база-доступних-функцій/кандидати.json"
+  ],
+  "proposals": [
+    {
+      "ukr": "розв'язати-один-раз",
+      "historical_name": "resolve-once",
+      "arity": 2,
+      "inputs": [
+        "логічний терм",
+        "список зв'язувань підстановки"
+      ],
+      "output": "значення одного кроку розіменування",
+      "law": "Якщо терм є логічною змінною та має зв'язування, повертає її безпосереднє значення; якщо немає зв'язування або терм не є змінною — повертає терм. На відміну від пройти (D9), не здійснює транзитивного розіменування.",
+      "d1_d10_exact_name_found": false,
+      "existing_d9_related": [
+        "пройти",
+        "логічна-змінна"
+      ],
+      "existing_d10_related": [
+        "отримати-значення-з-підстановки",
+        "обійти-розв'язаний"
+      ],
+      "independent_primitive_law_unproven": true,
+      "library_helper_preferred": true,
+      "owner_review_required": true,
+      "semantic_witness": "Не атестовано фізичним SENS; потрібні позитивний і негативний випадки з ланцюгом змінних."
+    }
+  ]
+}
