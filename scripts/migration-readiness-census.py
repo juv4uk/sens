@@ -229,8 +229,16 @@ def build_report() -> dict:
                 "pass": (
                     views["auto"]["exit"] in (0, 2)
                     and summary["files_written"] == 0
-                    and summary["files_would_write"] == len(archived_auto) + len(reviewed_auto)
-                    and not nonarchive_auto
+                    and summary["files_seen"] == len(queue_rows)
+                    and summary["files_would_write"] == sum(
+                        row["status"]["auto"] == "would-write" for row in queue_rows
+                    )
+                    and summary["files_blocked"] == sum(
+                        row["status"]["auto"] == "blocked" for row in queue_rows
+                    )
+                    # Progress is NOT an inventory error. New executable
+                    # candidates stay in the queue, without oracle admission.
+                    # Release remains NO-GO separately until actual proofs.
                     and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                 ),
                 "rule": "read-only AUTO census PASS means only complete bookkeeping; it emits no .sens, grants no executable credit and cannot authorize release",
