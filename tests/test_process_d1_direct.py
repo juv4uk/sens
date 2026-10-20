@@ -141,14 +141,14 @@ class ProcessDirectD1(unittest.TestCase):
     def test_wrong_peer_and_quoted_data_mutants_rejected(self):
         for broken in (
             self.source.replace("(друге сирий-результат)", "(третє сирий-результат)", 1),
-            self.source.replace("(список\n                 (як-є decoded-process)",
-                                "(сполучити\n                 (як-є decoded-process)", 1),
+            self.source.replace("(список\n                  (як-є decoded-process)",
+                                "(сполучити\n                  (як-є decoded-process)", 1),
             self.source.replace("(як-є process-result)", "(як-є changed)", 1),
             self.source.replace("(так", "(ні", 1),
         ):
-            if broken != self.source:
-                with self.assertRaises(ValueError):
-                    audit(broken)
+            self.assertNotEqual(broken, self.source, "мутація має змінювати чинний код")
+            with self.assertRaises(ValueError):
+                audit(broken)
 
     def test_numeric_exit_code_and_structural_nil_unchanged(self):
         data = self.source
