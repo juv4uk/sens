@@ -76,7 +76,7 @@
        (сполучити (перше події) (внутрішні-події-модуля назва-модуля (решта події))))
       (так (внутрішні-події-модуля назва-модуля (решта події))))))
 
-(визначити world-module-events
+(визначити світ-модуль-події
   (функція (світ назва-модуля)
     (внутрішні-події-модуля назва-модуля (світ-журнал світ))))
 
@@ -105,7 +105,7 @@
 
 ; D4 NOT of the D3 ATOM predicate: a module is known only when its
 ; event stream is a nonempty pair. D3 CONS cannot be a one-argument NOT.
-(визначити world-module-known?
+(визначити світ-модуль-відомий?
   (функція (світ назва-модуля)
     (хибне? (атом? (світ-модуль-події світ назва-модуля)))))
 
@@ -133,7 +133,7 @@
                   (решта події)
                   (внутрішній-світ-застосувати-подію клаузи (перше події)))))))
 
-(визначити world-clauses
+(визначити світ-клаузи
   (функція (світ назва-модуля)
     (внутрішнє-згортання-подій
       (внутрішній-зворот-подій (світ-модуль-події світ назва-модуля) (як-є ()))
@@ -240,7 +240,7 @@
                     (список (як-є existing) (друге conflict))
                     (список (як-є proof) (третє conflict)))))))))))
 
-(визначити world-tell-all
+(визначити світ-повідомити-всі
   (функція (world module-name clauses)
     (створити-світ world
                 (приєднати (перетворити-клаузи-на-події-повідомлення module-name clauses)
@@ -317,7 +317,7 @@
                     (список (як-є quote) module-name)
                     clause))))))
 
-(визначити advise-all-world
+(визначити порадити-всі-світ
   (функція (world module-name clauses)
     (нехай-похідне ((decision (порада-всі-рішення-у-світ world module-name clauses)))
       (за-умовою
@@ -500,14 +500,14 @@
 ;; absolut ab der Wurzel (`empty-world` = 0). `world-diff from to` liefert
 ;; chronologische Ereignisse nur für einen Vorfahren; getrennte Zweige ergeben
 ;; `World-not-ancestor`, bis ein ausdrückliches Merge-Gesetz definiert ist.
-(визначити world-depth
+(визначити світ-глибина
   (функція (world)
     (за-умовою
       
       ((атом? (світ-батько world))  0)
       (так (додати 1 (світ-глибина (світ-батько world)))))))
 
-(визначити world-at-depth-from
+(визначити отримати-світ-на-заданій-глибині-від-поточного
   (функція (world current-depth target-depth)
     (за-умовою
       ((тотожне? current-depth target-depth)  world)
@@ -536,14 +536,14 @@
            ((цей-світ-не-є-предком-іншого? rest) rest)
            (так (сполучити (перше journal) rest))))))))
 
-(визначити world-not-ancestor?
+(визначити цей-світ-не-є-предком-іншого?
   (функція (value)
     (за-умовою
       
       ((атом? value)  (тотожне? value (як-є World-not-ancestor)))
       )))
 
-(визначити world-diff
+(визначити світ-різниця
   (функція (from to)
     (за-умовою
       ((внутрішня-рівність-версій from to) (як-є ()))
@@ -577,7 +577,7 @@
 ;; auf gleiche Tiefe gebracht und gemeinsam bis zum gleichen Vorfahren verfolgt.
 ;; Bei unveränderlichen Werten sind strukturell gleiche Geschichten dieselbe
 ;; semantische Welt. `world-branch-diff` zeigt Basis und beide Zeitdeltas.
-(визначити world-climb-to-depth
+(визначити піднятись-ланцюгом-світу-до-заданої-глибини
   (функція (world current-depth target-depth)
     (за-умовою
       ((тотожне? current-depth target-depth)  world)
@@ -585,7 +585,7 @@
                                (відняти current-depth 1)
                                target-depth)))))
 
-(визначити world-common-ancestor-aligned
+(визначити вирівняний-спільний-предок-двох-світів
   (функція (left right)
     (за-умовою
       ((внутрішня-рівність-версій left right) left)
@@ -610,7 +610,7 @@
 
 ; The first ancestor of left occurring in right's ancestry is the deepest
 ; common world. This is pure SENS structure, independent of D24+ arithmetic.
-(визначити world-common-ancestor
+(визначити світ-спільний-предок
   (функція (left right)
     (за-умовою
       ((атом? left) (як-є World-no-common-ancestor))
@@ -619,7 +619,7 @@
       ((атом? (світ-батько left)) (як-є World-no-common-ancestor))
       (так (світ-спільний-предок (світ-батько left) right)))))
 
-(визначити world-no-common-ancestor?
+(визначити світи-не-мають-спільного-предка?
   (функція (value)
     (за-умовою
       ((атом? value) (тотожне? value (як-є World-no-common-ancestor)))
@@ -671,27 +671,27 @@
     (знання-вміст-адреса (світ-адреса-вміст world))))
 
 ; opt-in повна укр-поверхня: первинні D9-визначення в цьому блоці названі укр.
-(визначити порадити-всі-світ advise-all-world)
+(визначити advise-all-world порадити-всі-світ)
 (визначити knowledge-content-address знання-вміст-адреса)
 (визначити make-world створити-світ)
 (визначити world-address-content світ-адреса-вміст)
-(визначити отримати-світ-на-заданій-глибині-від-поточного world-at-depth-from)
-(визначити світ-клаузи world-clauses)
-(визначити піднятись-ланцюгом-світу-до-заданої-глибини world-climb-to-depth)
-(визначити світ-спільний-предок world-common-ancestor)
-(визначити вирівняний-спільний-предок-двох-світів world-common-ancestor-aligned)
-(визначити світ-глибина world-depth)
-(визначити світ-різниця world-diff)
+(визначити world-at-depth-from отримати-світ-на-заданій-глибині-від-поточного)
+(визначити world-clauses світ-клаузи)
+(визначити world-climb-to-depth піднятись-ланцюгом-світу-до-заданої-глибини)
+(визначити world-common-ancestor світ-спільний-предок)
+(визначити world-common-ancestor-aligned вирівняний-спільний-предок-двох-світів)
+(визначити world-depth світ-глибина)
+(визначити world-diff світ-різниця)
 (визначити world-journal світ-журнал)
 (визначити world-metadata світ-метадані)
-(визначити світ-модуль-події world-module-events)
-(визначити світ-модуль-відомий? world-module-known?)
-(визначити світи-не-мають-спільного-предка? world-no-common-ancestor?)
-(визначити цей-світ-не-є-предком-іншого? world-not-ancestor?)
+(визначити world-module-events світ-модуль-події)
+(визначити world-module-known? світ-модуль-відомий?)
+(визначити world-no-common-ancestor? світи-не-мають-спільного-предка?)
+(визначити world-not-ancestor? цей-світ-не-є-предком-іншого?)
 (визначити world-parent світ-батько)
 (визначити world-record світ-запис)
 (визначити world-tell світ-повідомити)
-(визначити світ-повідомити-всі world-tell-all)
+(визначити world-tell-all світ-повідомити-всі)
 
 (визначити empty-world порожній-світ)
 (визначити world-retract світ-відкликати)
