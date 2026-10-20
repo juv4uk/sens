@@ -293,4 +293,19 @@ sens_words_mul_exact:
     ret
 .size sens_words_mul_exact,.-sens_words_mul_exact
 
+/* Signed IDIVQ; SysV a in RDI, b in RSI, remainder_ptr in RDX.
+ * Quotient in RAX, remainder stored through pointer. Only D24/D48
+ * admitted, so divide by zero and signed i64 minimum / -1 excluded. */
+.p2align 4
+.globl sens_i64_divrem_exact
+.type sens_i64_divrem_exact,@function
+sens_i64_divrem_exact:
+    mov %rdx,%rcx
+    mov %rdi,%rax
+    cqto
+    idivq %rsi
+    mov %rdx,(%rcx)
+    ret
+.size sens_i64_divrem_exact,.-sens_i64_divrem_exact
+
 .section .note.GNU-stack,"",@progbits

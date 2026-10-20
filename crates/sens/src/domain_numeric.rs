@@ -155,9 +155,11 @@ fn signed_small_integer_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -
         Some(((raw as i64) << shift) >> shift)
     };
     let (left, right) = (decode(lhs)?, decode(rhs)?);
-    let math: i128 = match width {
-        24 => i128::from(crate::machine_math::exact_i24_integer_op(op, left, right)?),
-        48 => crate::machine_math::exact_i48_integer_op(op, left, right)?,
+    let math: i128 = match (width, op) {
+        (24 | 48, "/") =>
+            i128::from(crate::machine_math::exact_small_integer_quotient(width, left, right)?),
+        (24, _) => i128::from(crate::machine_math::exact_i24_integer_op(op, left, right)?),
+        (48, _) => crate::machine_math::exact_i48_integer_op(op, left, right)?,
         _ => return None,
     };
     let limit = 1_i128 << (width - 1);
@@ -330,10 +332,14 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
     // Reject D24/D48 (or non-Dn) BEFORE cloning potentially wide rational
     // constituents into the private calculation.
     let width = shared_numeric_domain_width(lhs, rhs)?;
-    // Машинний шлях лише для цілих одного D24 або D48.
-    if matches!(width, 24 | 48) && matches!(operator, "+" | "-" | "*") {
+    // У D24/D48 машинний IDIV працює лише для цілих часток.
+    // Із ненульовою остачею повертаємося до точного закону RATIO.
+    if matches!(width, 24 | 48) && matches!(operator, "+" | "-" | "*" | "/") {
         if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
-            return signed_small_integer_fast(operator, left, right);
+            if let Some(result) = signed_small_integer_fast(operator, left, right) {
+                return Some(result);
+            }
+            if operator != "/" { return None; }
         }
     }
     // Два допущені цілі D96: +/- через ADC/SBB, * через повний 192-бітний MUL.
@@ -453,6 +459,37 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    #[test]
+    fn d24_d48_idiv_integrates_without_losing_rational_or_domain_laws() {
+        let number = |width: usize, value: i64| -> Value {
+            let bits = (0..width).rev().map(|i| ((value >> i) & 1) as u8).collect::<Vec<_>>();
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
+        };
+        for width in [24_usize, 48] {
+            let min = -(1_i64 << (width - 1));
+            for (a, b, expected, overflow) in [
+                (6, 3, "2", false), (-6, 3, "-2", false),
+                (6, -3, "-2", false), (-6, -3, "2", false),
+                (0, 3, "0", false), (min, -1, "wide", true),
+                (7, 3, "7/3", false), (-7, 3, "-7/3", false),
+                (7, -3, "-7/3", false), (-7, -3, "7/3", false)
+            ] {
+                let value = compute("/", &number(width, a), &number(width, b)).unwrap();
+                assert_eq!(value.to_string(), if overflow {
+                    (1_i64 << (width - 1)).to_string()
+                } else { expected.to_owned() });
+                if a % b == 0 {
+                    let Value::BinaryNumber(ref integer) = value else { panic!("точна ціла частка"); };
+                    assert_eq!(integer.numeric_domain_width(),
+                               Some(if overflow { width * 2 } else { width }));
+                } else { assert!(matches!(value, Value::NumericComposition(_))); }
+            }
+            assert!(compute("/", &number(width, 1), &number(width, 0)).is_none());
+        }
+        assert!(compute("/", &number(24, 6), &number(48, 3)).is_none());
+        assert!(compute("/", &Value::BinaryNumber(BinaryNumber::one()), &number(24, 1)).is_none());
     }
 
     #[test]

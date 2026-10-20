@@ -31,6 +31,7 @@ unsafe extern "C" {
     fn sens_i24_sub_exact(left: i64, right: i64) -> i64;
     fn sens_i24_mul_exact(left: i64, right: i64) -> i64;
     fn sens_i48_mul_exact(left: i64, right: i64, high: *mut i64) -> i64;
+    fn sens_i64_divrem_exact(left: i64, right: i64, remainder: *mut i64) -> i64;
     fn sens_i96_add_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
     fn sens_i96_sub_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
     fn sens_u96_mul_exact(a_low: u64, a_high: u64, b_low: u64, b_high: u64,
@@ -241,6 +242,30 @@ pub(crate) fn exact_words_mul_unsigned(left: &[u64], right: &[u64]) -> Option<Ve
         }
     }
     Some(output)
+}
+
+/// Точна цілочисельна частка двох явно допущених знакових D24/D48.
+/// Не зараховує ділення з остачею: воно йде до канонічного RATIO у SENS.
+/// Навіть D48 minimum/-1 вміщується в i64, але домен виходу має розширитися.
+pub(crate) fn exact_small_integer_quotient(width: usize, a: i64, b: i64) -> Option<i64> {
+    if !matches!(width, 24 | 48) { return None; }
+    let bound = 1_i64 << (width - 1);
+    if !(-bound..=bound - 1).contains(&a)
+        || !(-bound..=bound - 1).contains(&b)
+        || b == 0 { return None; }
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    {
+        // SAFETY: b != 0, обидва операнди <= 48 знакових бітів,
+        // тому IDIV не переповнить i64, &mut remainder придатний для запису.
+        let mut remainder = 0_i64;
+        let quotient = unsafe { sens_i64_divrem_exact(a, b, &mut remainder) };
+        return (remainder == 0).then_some(quotient);
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    {
+        let quotient = a.checked_div(b)?;
+        (a % b == 0).then_some(quotient)
+    }
 }
 
 /// Вибір механізму за ISA процесора, а не ратифікація мовної функції.
@@ -539,6 +564,38 @@ mod tests {
                 assert_eq!(exact_words_mul_unsigned(&left, &right), Some(oracle),
                            "words={n} repetition={repeat}");
             }
+        }
+    }
+    #[test]
+    fn exact_idiv_boundary_and_fraction_rejection() {
+        for width in [24_usize, 48] {
+            let bound = 1_i64 << (width - 1);
+            let xs = [-bound, -bound + 1, -17, -3, -1, 0, 1, 3, 17, bound - 1];
+            for a in xs {
+                for b in xs {
+                    let expected = if b == 0 || a % b != 0 { None } else { Some(a / b) };
+                    assert_eq!(exact_small_integer_quotient(width, a, b), expected, "D{width} {a}/{b}");
+                }
+            }
+            assert_eq!(exact_small_integer_quotient(width, -bound, -1), Some(bound));
+            assert_eq!(exact_small_integer_quotient(width, 0, 7), Some(0));
+            assert_eq!(exact_small_integer_quotient(width, 1, 0), None);
+            assert_eq!(exact_small_integer_quotient(width, bound, 1), None);
+            assert_eq!(exact_small_integer_quotient(width, -bound - 1, 1), None);
+        }
+        assert_eq!(exact_small_integer_quotient(96, 10, 2), None);
+    }
+
+    #[test]
+    fn exact_idiv_matches_independent_integer_oracle_4096_cases() {
+        let mut seed = 0xd8a7_6f59_c213_4e0b_u64;
+        for _ in 0..4096 {
+            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            let a = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
+            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            let b = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
+            let expected = if b == 0 || a % b != 0 { None } else { Some(a / b) };
+            assert_eq!(exact_small_integer_quotient(48, a, b), expected);
         }
     }
 }
