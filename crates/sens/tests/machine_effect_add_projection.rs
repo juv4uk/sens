@@ -99,7 +99,7 @@ fn bounded_add_effect_projects_to_same_forms_and_bytes_as_current_donor() {
         assert_eq!(effect, format!("(bounded-u64-add {left} {right})"));
 
         let projected = eval_value(
-            &format!("(x86-project-machine-effect (quote {effect}))"),
+            &format!("(проєктувати-машинний-ефект-на-х86 (quote {effect}))"),
             &mut session,
         );
         let donor = eval_value(
@@ -109,7 +109,7 @@ fn bounded_add_effect_projects_to_same_forms_and_bytes_as_current_donor() {
         assert_eq!(projected, donor, "projected forms must equal donor forms");
 
         let projected_bytes = eval_value(
-            &format!("(x86-encode-machine-effect (quote {effect}))"),
+            &format!("(закодувати-машинний-ефект-на-х86 (quote {effect}))"),
             &mut session,
         );
         let donor_bytes = eval_value(
@@ -146,14 +146,14 @@ fn effect_and_projection_rejections_are_distinct_and_fail_closed() {
 
     assert_eq!(
         eval_value(
-            "(x86-project-machine-effect (quote (unknown-effect 2 3)))",
+            "(проєктувати-машинний-ефект-на-х86 (quote (unknown-effect 2 3)))",
             &mut session,
         ),
         "x86-projection-rejected"
     );
     assert_eq!(
         eval_value(
-            "(x86-encode-machine-effect (quote (unknown-effect 2 3)))",
+            "(закодувати-машинний-ефект-на-х86 (quote (unknown-effect 2 3)))",
             &mut session,
         ),
         "x86-projection-rejected"
