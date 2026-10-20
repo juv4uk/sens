@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       compare_math_languages:
-        description: 'Ручний дослід: Fortran, C, Rust, Zig, ASM SSE2/AVX2'
+        description: 'Повторити автоматичний дослід вручну: Fortran, C, Rust, Zig, ASM'
         type: boolean
         required: false
         default: false
@@ -385,7 +385,7 @@ jobs:
 
   language-fit-math:
     name: Математика під Skylake — Zig, Fortran, C, Rust і ASM
-    if: github.event_name == 'workflow_dispatch' && inputs.compare_math_languages == true && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.compare_math_languages == true && github.ref == 'refs/heads/main')
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -394,5 +394,11 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/install-zig
       - name: Порівняти шість математичних реалізацій з одним контролем
+        id: language_fit
         shell: bash
+        continue-on-error: true
         run: bash benchmarks/language-fit/run.sh
+      - name: Сповістити про невдале вимірювання без зупинки семантичного CI
+        if: steps.language_fit.outcome == 'failure'
+        shell: bash
+        run: echo "::warning title=SENS — мовний бенчмарк::Дослід не завершився успішно; перевірте журнал. Семантичні закони СЕНС цим виміром не оцінюються."
