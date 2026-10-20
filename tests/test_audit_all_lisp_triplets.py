@@ -64,6 +64,10 @@ class AllLispTripletCensusTests(unittest.TestCase):
             shutil.copyfile(fixture / ("branch" + suffix),
                             source.with_suffix(suffix))
         self.make_current_t5m(source.with_suffix(""))
+        from sens_t5_codec import encode_t5m_projection
+        source.with_suffix(".sens").write_bytes(
+            encode_t5m_projection(source.with_suffix("").read_text(encoding="ascii"))
+        )
         self.put("lib/пояснення.lisp", "; Це лише документація\n")
         result = scan(self.root, verify_bounded=True)
         self.assertEqual(result["total_lisp_files"], 2)
@@ -205,6 +209,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(fixture / ("branch" + suffix), target)
         self.make_current_t5m(self.root / "lib/branch")
+        from sens_t5_codec import encode_t5m_projection
+        target = self.root / "lib" / "branch"
+        target.with_suffix(".sens").write_bytes(
+            encode_t5m_projection(target.read_text(encoding="ascii"))
+        )
         summary = scan(self.root, verify_bounded=True)
         self.assertEqual(summary["complete_triplets"], 1)
         self.assertEqual(summary["bounded_verified"], 1, summary["blocked_sample"])
@@ -224,6 +233,10 @@ class AllLispTripletCensusTests(unittest.TestCase):
         source = target.with_suffix(".lisp")
         source.write_text("; inert historical comment ٢\n" +
                           source.read_text(encoding="utf-8"), encoding="utf-8")
+        from sens_t5_codec import encode_t5m_projection
+        target.with_suffix(".sens").write_bytes(
+            encode_t5m_projection(target.read_text(encoding="ascii"))
+        )
         report = scan(self.root, verify_bounded=True)
         self.assertEqual(report["ukrainian_keyboard"], 0)
         self.assertEqual(report["bounded_verified"], 1, report["blocked_sample"])
@@ -250,28 +263,6 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertEqual(evidence["current_t5m_without_bounded_proof"], 0)
         self.assertFalse(evidence["semantic_runtime_proven"])
         self.assertFalse(evidence["release_ready"])
-
-    def test_legacy_t5_bounded_proof_is_not_current_t5m_completion(self):
-        from sens_t5_codec import encode_words, parse_words
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
-        target = self.root / "lib" / "branch"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        for suffix in (".lisp", ".sens", ""):
-            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
-        # Явно створюємо історичний T5 із тих самих точних слів.
-        words = parse_words(target.read_text(encoding="ascii"))
-        target.with_suffix(".sens").write_bytes(encode_words(words))
-        report = scan(self.root, verify_bounded=True)
-        self.assertEqual(report["bounded_verified"], 1, report["blocked_sample"])
-        self.assertEqual(report["bounded_verified_legacy_t5"], 1)
-        self.assertEqual(report["bounded_verified_t5m"], 0)
-        self.assertTrue(report["all_bounded_reverse_verified"])
-        self.assertFalse(report["all_current_t5m_bounded_reverse_verified"])
-        self.assertEqual(report["current_t5m_without_bounded_proof"], 1)
-        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-            self.assertEqual(main([
-                "--root", str(self.root), "--verify-bounded", "--require-reversible"
-            ]), 2)
 
     def test_legacy_t5_cannot_certify_the_current_corpus(self):
         # Старі фізичні T5-байти не означають сучасний T5M-доказ.
