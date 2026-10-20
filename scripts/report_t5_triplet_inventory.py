@@ -15,7 +15,7 @@ import subprocess
 import sys
 import tempfile
 
-from audit_t5_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode)
+from audit_t5_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode, SKIP_DIRS)
 from sens_t5_codec import typed_sha256
 
 SCHEMA = "sens-t5-triplet-inventory/v1"
@@ -39,6 +39,23 @@ def tracked_paths(root: Path) -> set[str]:
     if proc.returncode:
         raise ValueError("tracked Git inventory unavailable; use --include-untracked for temporary fixtures")
     return {os.fsdecode(x) for x in proc.stdout.split(b"\0") if x}
+
+
+def lisp_source_names(root: Path, tracked: set[str] | None) -> list[str]:
+    """List all .lisp inputs, not merely sources already paired with .sens."""
+    if tracked is not None:
+        return sorted(name for name in tracked if name.endswith(".lisp"))
+    found: list[str] = []
+    for directory, subdirs, files in os.walk(root, followlinks=False):
+        subdirs[:] = sorted(
+            name for name in subdirs
+            if name not in SKIP_DIRS and not (Path(directory) / name).is_symlink()
+        )
+        found.extend(
+            (Path(directory) / name).relative_to(root).as_posix()
+            for name in files if name.endswith(".lisp")
+        )
+    return sorted(found)
 
 
 def safe_relative(name: str) -> Path:
@@ -72,6 +89,7 @@ def inspect(root: Path, *, include_untracked: bool = False,
     # and source provenance; this report adds VIEW only, not new semantics.
     pairs = inspect_pairs(root, include_untracked=include_untracked)
     tracked = None if include_untracked else tracked_paths(root)
+    sources = lisp_source_names(root, tracked)
     records: list[dict] = []
     statuses = {}
     for pair in pairs["files"]:
@@ -144,6 +162,11 @@ def inspect(root: Path, *, include_untracked: bool = False,
             row["view_status"] = "BLOCKED"
             row["reason"] = str(exc)[:320]
 
+    physical_names = set(statuses)
+    unpaired_sources = [
+        name for name in sources
+        if Path(name).with_suffix(".sens").as_posix() not in physical_names
+    ]
     failed_required = sorted(
         name for name in required_names
         if name not in statuses or statuses[name]["view_status"] != "PHYSICAL_VIEW_PASS"
@@ -156,8 +179,9 @@ def inspect(root: Path, *, include_untracked: bool = False,
     # INCOMPLETE_VIEWS is a debt-bearing informational result, not release GREEN.
     status = ("NO_FILES" if not records else
               "BLOCKED" if blocked_physical or invalid or failed_required or
-                          (strict and ready != len(records)) else
+                          (strict and (ready != len(records) or unpaired_sources)) else
               "INCOMPLETE_VIEWS" if ready != len(records) else
+              "INCOMPLETE_SOURCE_PAIRS" if unpaired_sources else
               "PHYSICAL_VIEW_ONLY_UK_PENDING")
     return {
         "schema": SCHEMA,
@@ -166,7 +190,11 @@ def inspect(root: Path, *, include_untracked: bool = False,
         "strict": strict,
         "required": sorted(required_names),
         "failed_required": failed_required,
+        "unpaired_lisp_sources": unpaired_sources,
         "summary": {
+            "lisp_sources_seen": len(sources),
+            "lisp_with_physical": len(sources) - len(unpaired_sources),
+            "lisp_without_physical": len(unpaired_sources),
             "physical_pairs_seen": len(records),
             "physical_blocked": blocked_physical,
             "view_present_valid": ready,
@@ -178,6 +206,7 @@ def inspect(root: Path, *, include_untracked: bool = False,
         },
         "files": records,
         "warning": (
+            "Tracked .lisp without same-stem .sens is counted explicitly. "
             "T5↔ASCII view identity is mechanical ONLY. Ukrainian uk source "
             "roundtrip, independent runtime semantics and release are NOT_VERIFIED."
         ),
@@ -236,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--require-view", action="append", default=[],
                         help="require exact physical/view parity for named .sens path")
     parser.add_argument("--strict", action="store_true",
-                        help="BLOCK if ANY tracked physical pair lacks a canonical view")
+                        help="BLOCK if any physical view OR Lisp source pair is missing")
     parser.add_argument("--report", type=Path,
                         help="write JSON audit receipt, never a program or view")
     args = parser.parse_args(argv)
