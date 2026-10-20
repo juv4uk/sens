@@ -176,10 +176,20 @@ class SelectedOriginalT5(unittest.TestCase):
         projected = migration.migrate_file(
             original, current, text7, source_surface="укр", codec="t5")
         self.assertTrue(projected.startswith("10 1000 00 "), projected)
-        ambiguous = migration.Resolver(my, upper)
-        with self.assertRaisesRegex(migration.MigrationError, "ambiguous eight-bit"):
+        # Восьмизначний запис відсікається інспектором як неоднозначний
+        # історичний байт; парсер чинної мови бачить числовий атом.
+        # У жодному разі числові дані не стають викличною головою D8.
+        self.assertEqual(
+            app.ambiguous_eight_bit_atoms(migration, "(01001000 000)\n"),
+            ["01001000"],
+        )
+        numeric_head = migration.Resolver(my, upper)
+        with self.assertRaisesRegex(
+            migration.MigrationError, r"D24\+ numeric value is data and is not callable"
+        ):
             migration.migrate_file(
-                "(01001000 000)\n", ambiguous, text7, source_surface="укр", codec="t5")
+                "(01001000 000)\n", numeric_head, text7,
+                source_surface="укр", codec="t5")
 
     def test_real_unpaired_original_files_are_audited_not_converted(self):
         # These are tracked old files, not fabricated canaries or newly authored
