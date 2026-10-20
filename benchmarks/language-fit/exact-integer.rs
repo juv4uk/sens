@@ -89,27 +89,21 @@ fn inputs(width: u32) -> Vec<(i128, i128)> {
     values
 }
 
-fn median_per_operation(
+fn measure_per_operation(
     data: &[(i128,i128)],
     function: fn(i128, i128) -> i128,
 ) -> f64 {
-    let mut samples = [0.0_f64; 5];
-    for sample in &mut samples {
-        let start = Instant::now();
-        let mut check = 0_i128;
-        for _ in 0..128 {
-            for &(a,b) in data {
-                // Однакова кількість реальних викликів та black_box
-                // для обох реалізацій; введення-виведення поза виміром.
-                let value = function(black_box(a), black_box(b));
-                check = check.wrapping_add(black_box(value));
-            }
+    let start = Instant::now();
+    let mut check = 0_i128;
+    for _ in 0..128 {
+        for &(a,b) in data {
+            // Однакова кількість викликів і black_box для ASM та Rust.
+            let value = function(black_box(a), black_box(b));
+            check = check.wrapping_add(black_box(value));
         }
-        black_box(check);
-        *sample = start.elapsed().as_nanos() as f64 / (128 * data.len()) as f64;
     }
-    samples.sort_by(|a,b| a.total_cmp(b));
-    samples[2]
+    black_box(check);
+    start.elapsed().as_nanos() as f64 / (128 * data.len()) as f64
 }
 
 fn one_case(
@@ -123,12 +117,24 @@ fn one_case(
             return Err(format!("{label}: невідповідність ASM: a={a}, b={b}, очікувано={expected}, отримано={actual}"));
         }
     }
-    // Чергуємо Rust і ASM, щоб зменшити позиційний шум.
-    black_box(median_per_operation(&data, rust));
-    black_box(median_per_operation(&data, asm));
-    let rust_ns = median_per_operation(&data, rust);
-    let asm_ns = median_per_operation(&data, asm);
-    Ok((rust_ns,asm_ns))
+    // Прогрів не враховуємо в статистиці. Далі справді змінюємо порядок:
+    // Rust,ASM / ASM,Rust / Rust,ASM / ASM,Rust / Rust,ASM.
+    black_box(measure_per_operation(&data, rust));
+    black_box(measure_per_operation(&data, asm));
+    let mut rust_times = [0.0_f64; 5];
+    let mut asm_times = [0.0_f64; 5];
+    for sample in 0..5 {
+        if sample % 2 == 0 {
+            rust_times[sample] = measure_per_operation(&data, rust);
+            asm_times[sample] = measure_per_operation(&data, asm);
+        } else {
+            asm_times[sample] = measure_per_operation(&data, asm);
+            rust_times[sample] = measure_per_operation(&data, rust);
+        }
+    }
+    rust_times.sort_by(|a,b| a.total_cmp(b));
+    asm_times.sort_by(|a,b| a.total_cmp(b));
+    Ok((rust_times[2],asm_times[2]))
 }
 
 fn run() -> Result<(), String> {
