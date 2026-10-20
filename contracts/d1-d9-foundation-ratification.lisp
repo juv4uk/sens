@@ -1,7 +1,7 @@
 ; contracts/d1-d9-foundation-ratification.lisp
-; OWNER-RATIFIED 2026-10-07 — issue #4008.
-; Single current semantic foundation chain through D9.
-; Exact resident maps are delegated to per-domain current authorities.
+; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-07 — issue #4008.
+; Єдиний чинний ланцюг семантичної основи до D9.
+; Точні карти резидентів делеговано поточним владам відповідних доменів.
 
 (
   (schema . d1-d9-foundation-ratification/1)
