@@ -236,16 +236,26 @@ class AuditT5PairsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown T5 report"):
             require_changed_views({"schema": "unsupported"}, [src])
 
-    def test_changed_legacy_t5_with_valid_view_is_not_new_t5m(self):
-        self.pair("lib/legacy", "10 01\n", ["10", "01"])
-        (self.root / "lib/legacy").write_text("10 01\n", encoding="ascii")
+    def test_identical_t5_and_t5m_wire_is_current_canonical_t5m(self):
+        # Both codecs emit the same exact physical bytes for this stream.
+        # Byte identity cannot establish historical origin; do not invent
+        # a legacy classification when canonical T5M accepts those bytes.
+        words = ["10", "01"]
+        self.assertEqual(encode_words(words), encode_t5m_projection("10 01\n"))
+        self.pair("lib/shared-wire", "10 01\n", words)
+        (self.root / "lib/shared-wire").write_text("10 01\n", encoding="ascii")
         report = self.audit()
-        self.assertEqual(report["files"][0]["physical_codec"], "t5")
+        self.assertEqual(report["files"][0]["physical_codec"], "t5m")
         self.assertEqual(report["files"][0]["view_status"], "PASS")
-        # Existing historical pairs remain readable; changed ones cannot pass.
         self.assertEqual(report["status"], "EXACT_BINARY_PAIRS")
+        require_changed_views(report, ["lib/shared-wire.sens"])
+
+        # A genuinely identified legacy row remains unfit for NEW physical
+        # artifacts. This negative guard is an explicit report-state witness,
+        # not an invented claim about identical wire bytes.
+        report["files"][0]["physical_codec"] = "t5"
         with self.assertRaisesRegex(ValueError, "canonical T5M"):
-            require_changed_views(report, ["lib/legacy.sens"])
+            require_changed_views(report, ["lib/shared-wire.sens"])
 
     def test_cli_generates_read_only_report_without_overwrite(self):
         self.pair("p", "10 01\n", ["10", "01"])
