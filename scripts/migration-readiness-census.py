@@ -26,7 +26,7 @@ from migration_source_scope import scope
 # nonprogram classification from a filename or an unfamiliar Lisp head.
 from report_original_migration_candidates import load_nonprogram_classification, git_blob_sha
 ARTIFACT_ARGS = [
-    "--foundation", "knowledge/d1-d9-foundation.json",
+    "--foundation", "knowledge/d1-d11-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",
     "--semantic-generated", "crates/sens/src/semantic_registry_generated.rs",
     "--semantic-registry", "crates/sens/src/semantic_registry.rs",
@@ -192,8 +192,8 @@ def build_report() -> dict:
         )
         result = {
             "schema": "sens-t5-migration-readiness/v2",
-            "authority": "research-only; ratified D1-D9; no candidate is oracle-certified",
-            "foundation_path": "knowledge/d1-d9-foundation.json",
+            "authority": "research-only; ratified exact D1–D10 and catalog-only D11; no candidate is oracle-certified",
+            "foundation_path": "knowledge/d1-d11-foundation.json",
             "source_era": "auto",
             "ratified_foundation_sha256": auto.get("authority", {}).get("foundation_sha256"),
             "mode": "original unpaired .lisp only; one physical-free dry-run (SID8/Sens8 eras retired)",
