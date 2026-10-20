@@ -55,6 +55,32 @@ fn time_library_builds_public_meanings_over_raw_host_observations() {
 }
 
 
+
+#[test]
+fn raw_time_primitives_are_not_redefined_as_self_recursive_lisp_functions() {
+    let source = include_str!("../../../lib/time.lisp");
+    for (raw_surface, english_peer) in [
+        ("мережевий-протокол-часу-запит-сирий", "ntp-query-raw"),
+        ("часовий-пояс-оголошення-сирий", "timezone-declarations-raw"),
+        ("юнікс-час-зараз", "unix-time-now"),
+    ] {
+        assert!(
+            is_raw_primitive(english_peer),
+            "{english_peer}: сирий механізм має залишатися ратифікованим примітивом"
+        );
+        let rebound = source.lines().any(|line| {
+            line.trim_start()
+                .strip_prefix("(визначити ")
+                .and_then(|rest| rest.split_whitespace().next())
+                == Some(raw_surface)
+        });
+        assert!(
+            !rebound,
+            "{raw_surface}: заборонено замінювати машинний примітив саморекурсивним Lisp-замиканням"
+        );
+    }
+}
+
 #[test]
 fn time_stable_peers_reuse_the_same_lisp_closures() {
     use std::rc::Rc;
