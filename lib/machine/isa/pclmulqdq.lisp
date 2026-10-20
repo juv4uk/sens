@@ -1,4 +1,6 @@
-; Carry-less multiplication instruction-family catalogue. Physical ISA facts only.
+; Каталог інструкції PCLMULQDQ для множення без перенесення.
+; Це лише фізичні факти ISA, а не математичні закони СЕНС.
+; Машинні мнемоніки й поля каталогу залишаються точними даними.
 
 (isa-catalogue/1
   (extension PCLMULQDQ)
