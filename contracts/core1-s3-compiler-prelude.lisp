@@ -1,7 +1,8 @@
-; #1140 — Core1 S3 compiler-prelude admission.
+; #1140 — Допуск підготовчої бібліотеки компілятора першого ядра, етап S3.
 ;
-; Data only. This contract records why the prelude exists and the authority
-; direction CML must preserve while compiling it.
+; Файл містить тільки дані. Контракт пояснює призначення підготовчої
+; бібліотеки та напрямок семантичних повноважень, який компілятор CML
+; зобов'язаний зберігати під час компіляції.
 
 (core1-s3-compiler-prelude/1
   ((profile . core1)
