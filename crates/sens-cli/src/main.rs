@@ -568,7 +568,7 @@ fn main() {
                             };
                             session.environment.define("*lint-target*", target_ast);
 
-                            let lint_call_src = "(lint-check *lint-target* (quote ((max-size . 5000) (max-nesting . 50) (max-complexity . 100) (max-globals . 500) (max-effects . 10))))";
+                            let lint_call_src = "(аналіз-перевірити *lint-target* (quote ((max-size . 5000) (max-nesting . 50) (max-complexity . 100) (max-globals . 500) (max-effects . 10))))";
                             match parse(lint_call_src) {
                                 Ok(lint_ast) => {
                                     match eval_parsed_expressions(&lint_ast, &mut session) {

@@ -52,7 +52,7 @@ fn linter_gate() {
                     ((атом? violations) (check-file-loop path (cdr remaining) all-violations))
                     ((атом? (quote fallback))
                      (check-file-loop path (cdr remaining) (cons (list path (car remaining) violations) all-violations)))))
-                (lint-check (car remaining) thresholds))))))
+                (аналіз-перевірити (car remaining) thresholds))))))
 
         (def check-file
           (lambda (path)
