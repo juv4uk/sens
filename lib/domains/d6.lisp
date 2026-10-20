@@ -1,9 +1,10 @@
-; Canonical human-readable domain table.
-; D6: exact-width 6-bit keys only.
-; The binary key width is the domain address.
-; Columns: ук → укр → san → en → LISP → sym
-; Predicate marker rule: ук/укр/en end in ?, Sanskrit does not.
-; Empty/missing: ()
+; Канонічна таблиця людських проєкцій домену Д6.
+; Д6: лише ключі точної ширини 6 біт.
+; Ширина двійкового слова є частиною доменної адреси.
+; Стовпці: ук → укр → san → en → LISP → sym.
+; Позначку питання мають предикати в українській та англійській колонках;
+; санскритський запис не має такого закінчення.
+; Порожнє або відсутнє значення: ().
 
 (domain-table/1
   (000000 (ук довжина) (укр довжина) (san pramāṇa) (en length) (LISP LENGTH) (sym "№д"))
