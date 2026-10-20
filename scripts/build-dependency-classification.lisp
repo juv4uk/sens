@@ -38,27 +38,28 @@
 ; кожен запис conformance.lisp перелічує аксіоми; позначка S1
 ; відповідає забороні непомітно наближати точне число
 ; неточним. Отже, приклад S1 перевіряє семантику точних чисел.
-; This is honestly a coarser signal than a real type check would be
-; (reported as axiom-tagged-s1, not silently presented as equivalent to
-; the other buckets' direct symbol-table matches) but it is not guessed.
+; Це менш точне свідчення, ніж справжня перевірка типу.
+; Тому виводимо окрему позначку axiom-tagged-s1 і не прирівнюємо
+; її до безпосередніх збігів таблиці символів інших категорій.
+; Водночас позначка походить із реального джерела, а не припущення.
 ;
-; Run: my-lisp scripts/build-dependency-classification.lisp > tests/fixtures/dependency-classification.lisp
+; Запуск: my-lisp scripts/build-dependency-classification.lisp > tests/fixtures/dependency-classification.lisp
 
 ; ---------------------------------------------------------------------
-; Hardcoded Rust-side tables (no self-hosted source to generate these from)
+; Явні таблиці зовнішніх механізмів Rust, для яких немає джерела мовою СЕНС.
 ; ---------------------------------------------------------------------
 
-; crates/my-lisp/src/eval/mod.rs evaluate_list's own match arms
+; Гілки вибору evaluate_list з crates/my-lisp/src/eval/mod.rs.
 (визначити ядрові-спеціальні-форми
   (як-є (quote lambda def defmacro cond print princ write-to-string read
           eval string-append string<? read-all string? symbol->string
           string->symbol string-first string-rest sha256-hex json-parse)))
 
-; crates/my-lisp/src/eval/builtins.rs environment.define registrations.
-; Derived time operations such as mono-ms, utc-now, internet-time-sync, and
-; timezone-detect intentionally do not appear here: they are defined by
-; lib/time.lisp. The retained host-facing time operations expose observations
-; only: mono-ns, unix-time-now, ntp-query-raw, timezone-declarations-raw.
+; Реєстрації environment.define з crates/my-lisp/src/eval/builtins.rs.
+; Похідні часові дії mono-ms, utc-now, internet-time-sync та
+; timezone-detect тут навмисно не наведено: вони визначені
+; в lib/time.lisp. Хостові дії повертають лише спостереження:
+; mono-ns, unix-time-now, ntp-query-raw, timezone-declarations-raw.
 (визначити ядрові-вбудовані
   (як-є (* + - / < = > abs atom car cdr cons env eq f32 f32-buffer i32
           i32-buffer make-vector max max-list min min-list mono-ns
@@ -67,14 +68,14 @@
           timezone-declarations-raw unix-time-now vector vector-length vector-ref
           vector-set!)))
 
-; crates/my-lisp-host/src/lib.rs register_capability calls
+; Виклики register_capability у crates/my-lisp-host/src/lib.rs.
 (визначити хостові-здатності
   (як-є (load process-run read-dir read-file read-file-bytes tcp-accept
           tcp-close tcp-connect tcp-listen tcp-read tcp-write write-file
           записати-байти-файла)))
 
-; the string/reader-flavored subset of the two tables above, called out
-; as its own bucket per the task description ("strings/reader")
+; Дії для рядків і читача, виокремлені з двох попередніх
+; таблиць в окрему категорію «strings/reader».
 (визначити підмножина-рядки-читач
   (як-є (write-to-string read read-all string-append string<? string?
           symbol->string string->symbol string-first string-rest
@@ -82,7 +83,7 @@
           string-prefix? взяти-десятковий-символ number->string number->string-onto)))
 
 ; ---------------------------------------------------------------------
-; Generated tables: read the real library sources, don't hand-copy them
+; Похідні таблиці: читаємо справжні бібліотечні файли, не копіюємо вручну.
 ; ---------------------------------------------------------------------
 
 (визначити верхньорівневі-імена-визначень
@@ -103,8 +104,9 @@
 (визначити ядрові-мої-символи
   (імена-символів-з-файлу "lib/core.lisp"))
 
-; every file under lib/ except core.lisp (and its .fasl cache), paired with
-; the symbol names it defines -- an alist of (filename . (symbols...))
+; Для кожного файла в lib/, крім core.lisp та кешу .fasl,
+; записуємо всі визначені символи як асоціацію
+; (назва-файла . (символи...)).
 (визначити таблиці-інших-бібліотек
   (функція ()
     (нехай-послідовно ((записи (read-dir "lib"))
