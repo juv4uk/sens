@@ -1,59 +1,61 @@
-; #790 executable bounded witness.
-; The scheduler coordinates references only. It never interprets producer payloads.
-
-(визначити blackboard-key-seen?
-  (функція (key keys)
+; Виконуваний обмежений свідок координації #790.
+; Планувальник узгоджує лише посилання, не тлумачить вміст виробників.
+; Власні функції, їхні параметри й локальні імена — українською.
+; Теги спостережень, маршрути виробників і форма звіту залишаються даними.
+;
+(визначити дошка-ключ-уже-спостережено?
+  (функція (ключ ключі)
     (за-умовою
-      ((атом? keys) (structural-kind empty-list) (як-є no))
-      ((атом? keys) (structural-kind pair)
+      ((атом? ключі) (structural-kind empty-list) (як-є no))
+      ((атом? ключі) (structural-kind pair)
        (за-умовою
-         ((однакові? key (перше keys)) (structural-relation same) (як-є yes))
-         ((однакові? key (перше keys)) (structural-relation distinct)
-          (blackboard-key-seen? key (решта keys))))))))
+         ((однакові? ключ (перше ключі)) (structural-relation same) (як-є yes))
+         ((однакові? ключ (перше ключі)) (structural-relation distinct)
+          (дошка-ключ-уже-спостережено? ключ (решта ключі))))))))
 
-(визначити blackboard-enqueue
-  (функція (activation seen queue)
-    (нехай ((key (друге activation)))
+(визначити дошка-додати-до-черги
+  (функція (активація спостережені черга)
+    (нехай ((ключ (друге активація)))
       (за-умовою
-        ((тотожне? (blackboard-key-seen? key seen) (як-є yes))
+        ((тотожне? (дошка-ключ-уже-спостережено? ключ спостережені) (як-є yes))
          (identity-relation same)
-         (список seen queue))
-        ((тотожне? (blackboard-key-seen? key seen) (як-є no))
+         (список спостережені черга))
+        ((тотожне? (дошка-ключ-уже-спостережено? ключ спостережені) (як-є no))
          (identity-relation same)
          (список
-           (сполучити key seen)
-           (приєднати queue (список activation))))))))
+           (сполучити ключ спостережені)
+           (приєднати черга (список активація))))))))
 
-(визначити blackboard-run-790
+(визначити дошка-перевірити-790
   (функція ()
     (нехай-послідовно (
-      (a1
+      (перша-активація
         (як-є
           (activation
             (prolog p17 datalog)
             (observation-ref prolog p17)
             (consumer datalog)
             (provenance user-query q1))))
-      (a1-repeat
+      (повторна-активація
         (як-є
           (activation
             (prolog p17 datalog)
             (observation-ref prolog p17)
             (consumer datalog)
             (provenance user-query q1))))
-      (a2
+      (друга-активація
         (як-є
           (activation
             (clips c9 lisp-observer)
             (observation-ref clips c9)
             (consumer lisp-observer)
             (provenance rule-fire r4))))
-      (s1 (blackboard-enqueue a1 (як-є ()) (як-є ())))
-      (s2 (blackboard-enqueue a1-repeat (перше s1) (друге s1)))
-      (s3 (blackboard-enqueue a2 (перше s2) (друге s2)))
-      (queue (друге s3)))
+      (перший-стан (дошка-додати-до-черги перша-активація (як-є ()) (як-є ())))
+      (другий-стан (дошка-додати-до-черги повторна-активація (перше перший-стан) (друге перший-стан)))
+      (третій-стан (дошка-додати-до-черги друга-активація (перше другий-стан) (друге другий-стан)))
+      (черга (друге третій-стан)))
       (за-умовою
-        ((однакові? queue (список a1 a2))
+        ((однакові? черга (список перша-активація друга-активація))
          (structural-relation same)
          (як-є
            (blackboard-790-witness
@@ -62,4 +64,4 @@
              (duplicate-activation suppressed))))
         (так (перше (як-є ())))))))
 
-(blackboard-run-790)
+(дошка-перевірити-790)
