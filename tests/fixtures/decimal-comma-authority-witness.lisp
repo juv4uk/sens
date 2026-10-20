@@ -1,7 +1,8 @@
-; #220 — decimal comma semantic expectations belong to Lisp, not Rust.
-; Rust may continue to observe parser mechanics, but equivalence/identity
-; verdicts for comma/dot exact numbers and numeric buffers are language data.
-; Ukrainian projection only. Decimal math uses human decimal digits.
+; Свідчення #220: семантика десяткової коми належить СЕНС, а не Rust.
+; Rust може спостерігати роботу читача, але не визначає тотожність
+; та рівність чисел з крапкою і комою.
+; Математичні операнди записані людськими десятковими цифрами.
+; Позначки результатів залишаються даними чинного протоколу.
 
 (визначити decimal-comma-authority-rows
   (функція ()
@@ -20,22 +21,22 @@
             (як-є (1))))))
 
 (визначити decimal-comma-authority-check
-  (функція (rows)
+  (функція (рядки)
     (за-умовою
-      ((атом? rows)
+      ((атом? рядки)
        (як-є (decimal-comma-authority-witness (status pass))))
       (так
-       (нехай ((row (перше rows)))
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((тотожне? (друге row) (третє row))
-            (decimal-comma-authority-check (решта rows)))
+           ((тотожне? (друге рядок) (третє рядок))
+            (decimal-comma-authority-check (решта рядки)))
            (так
             (список
               (як-є decimal-comma-authority-witness)
               (список (як-є status) (як-є fail))
-              (список (як-є case) (перше row))
-              (список (як-є actual) (друге row))
-              (список (як-є expected) (третє row))))))))))
+              (список (як-є case) (перше рядок))
+              (список (як-є actual) (друге рядок))
+              (список (як-є expected) (третє рядок))))))))))
 
 (визначити decimal-comma-authority-witness
   (функція ()
