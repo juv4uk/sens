@@ -1,57 +1,34 @@
-; lib/core1.lisp — Core1 evaluator profile on exact domains.
+; Перший профіль обчислювача СЕНС на точних доменах.
 ;
-; D1:YES = 1; D1:NO = 0 in CANONICAL positional-binary SENS;
-;   D2 framing/word position supplies exact one-bit domain identity.
-; TEMPORARY (#5605 READER / #5609 LIB): #d1:1 and #d1:0 BELOW are ONLY
-;   a LegacyCompatibility Lisp-reader bridge: that reader parses bare 0/1
-;   as Number, not PredicateBit. Never treat the sigil as canonical syntax.
-;   Removal: route this lib consumer through canonical exact-domain
-;   READER/AST, then prove SENS-native D1 positive + one-bit negative and
-;   exact T5 round-trip before switching to bare positional bits.
-;   (001 ()) is structural D3:000 EMPTY, never a D1:NO predicate.
-; Duplicate D4:0011 arm removed (one kept). Two-field COND discipline.
-; Width is identity; every bit of the domain address is valued.
-; Bounded physical migration: D3 CAR/CDR selectors C1-SECOND/C1-THIRD/
-; C1-FOURTH live as exact binary at lib/core1-selectors.{bits,sens}.
-; SENS itself executes nine semantic observations in
-; tests/fixtures/core1-selectors-semantic.{bits,sens}, returning D1:1 on PASS. D4 CADR and D5 CADDR are verified against D3-composed selectors.
-; D6:100111 CADDDR stays RATIFIED DATA but is not physically callable yet;
-; no Rust/Python backdoor may silently admit that runtime function.
-; This is NOT full Core1 cutover; historic evaluator paths stay unchanged.
-; Exact physical D1/D3/D4 arity slice: C1-ONE-ARGP and C1-TWO-ARGP.
-; lib/core1-arity.{bits,sens} encodes the current Core1 laws without host
-; name interpretation. 20 language-owned semantic laws are executed by
-; tests/fixtures/core1-arity-semantic.{bits,sens}; no Python/Rust semantic
-; expectations. Historical false result () differs from exact D1 0.
-; No new primitive; no implicit D6/D10 callability or D7 function duplicate.
-; Exact binary Core1 admission slice: C1-ADMITTED-SID-VALUEP runs from
-; lib/core1-admission.{bits,sens}; 21 SENS-owned laws live in
-; tests/fixtures/core1-admission-semantic.{bits,sens}.
-; 13 accepted domain words, 7 rejected (including D6 noncallable data),
-; and short-circuit COND. This historical Core1 predicate returns structural
-; () for a negative answer; it is NOT the canonical D1:0. The test preserves
-; that observable mismatch; it does not assert modern D1 predicate admission.
-; Exact physical FOUND constructors/projector:
-; C1-MAKE-FOUND and C1-FOUND-VALUE -> lib/core1-found.{bits,sens}.
-; Direct D4:1001 CADR replaces the duplicate D7 name C1-SECOND;
-; the output behavior of the selector is unchanged.
-; SENS-only semantics: tests/fixtures/core1-found-semantic.{bits,sens}.
-; Tag C1-FOUND has no ratified function code; its D7 datum is non-atomic
-; and must not be compared with an atom by EQ. No tag coercion is added.
-; Quoted record tags remain blocked pending a real atomic D7 datum law;
-; no fake D7 representation may be EQ-comparable to an atom.
-
-; 2026-10-14: дев'ять внутрішніх викликів Core1 більше не проходять через
-; текстові C1-SECOND/C1-THIRD: п'ять D4:1001 і чотири D5:10011.
-; Старі визначення поки збережені для зовнішніх викликачів; тут не
-; створено нового способу виконання чи другої семантики.
-; Семантику селекторів доводить виконавчий SENS-свідок
-; tests/fixtures/core1-selectors-semantic.{bits,sens} і його D1-мутант.
+; Канонічне значення істини належить однобітному домену.
+; Межу слова визначає структура запису, а не текстовий тег ширини.
+; Старий читач цього профілю ще розрізняє число та однобітний
+; предикат через тимчасове позначення. Таке позначення не є законом мови.
+; Прибирати його можна лише після переходу конкретного читача
+; на точнодоменне дерево й підтвердження справжнім виконанням СЕНС.
+; Структурна порожнеча третього домену не дорівнює логічній хибі.
 ;
-; Exact selector cutover: D4:1001 CADR and D5:10011 CADDR.
-; Fourth = admitted D5 CADDR after D3:011 CDR.
-; D6 CADDDR is a ratified identity, not an admitted physical call.
-; This profile does not gain any new primitive or D7 text fallback.
+; Тут збережено дисципліну двопольових умов та відсутність
+; самовільних перетворень між доменами різної ширини.
+; Послідовні вибірки другого і третього елементів спираються
+; на вже ратифіковані селектори четвертого й п'ятого доменів.
+; Дев'ять внутрішніх звернень уже використовують ці селектори.
+; Для четвертого елемента дозволено композицію з третього
+; та п'ятого доменів. Резидент шостого домену без виконуваного
+; механізму не стає викликуваним через саме існування адреси.
+;
+; Фізичні свідчення охоплюють вибірки, перевірку кількості
+; аргументів, допуск історичних слів і структуру знайденого.
+; Відмінності історичних результатів від однобітної хиби
+; необхідно зберігати як спостережувані відмінності.
+; Цитовані мітки записів не можна довільно вважати атомами
+; чи порівнювати як атоми без доведеного закону даних.
+;
+; Старі назви деяких внутрішніх визначень ще потрібні
+; історичним споживачам. Вони не ратифікують нових функцій.
+; Повного перенесення всього профілю ще не доведено.
+; Жодних нових примітивів, неявної викликуваності
+; чи дублювання текстом машинних функцій не додається.
 
 (визначити C1-SECOND
   (функція (значення)
