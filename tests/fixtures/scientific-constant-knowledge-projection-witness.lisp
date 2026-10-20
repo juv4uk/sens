@@ -1,12 +1,9 @@
-; #305 — preserve useful scientific-constant -> knowledge projection laws
-; before retiring stale Rust semantic sentinels.
-;
-; Semantic meaning remains in Lisp libraries. This witness proves only:
-;   * the speed-of-light record projects to exactly seven clauses;
-;   * the projected batch is admitted by the existing knowledge validator;
-;   * projection is pure: the global knowledge journal is unchanged.
-;
-; Ukrainian projection only.
+; Свідчення #305: проєкція наукової константи в базу знань.
+; Значення належить бібліотекам СЕНС, а не історичному перевіряльнику Rust.
+; Швидкість світла породжує рівно сім клауз, які приймає чинна
+; перевірка бази знань. Проєкція не змінює глобального журналу.
+; Викличні голови звірено з ратифікованими українськими назвами
+; доменів Д9 і Д10. Протокольні маркери залишено незмінними.
 
 (load "lib/core.lisp")
 (load "lib/unify.lisp")
@@ -17,25 +14,25 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
-(визначити scientific-constant-knowledge-projection-observation
+(визначити спостерегти-проєкцію-наукової-константи
   (функція ()
-    (нехай ((before *knowledge-journal*)
-           (clauses
-             (scientific-constant->clauses
-               si:defining-speed-of-light))
-           (count (довжина clauses))
-           (admitted (knowledge-clauses-valid? clauses))
-           (journal-relation
-             (однакові? before *knowledge-journal*)))
-      (список count admitted journal-relation))))
+    (нехай ((журнал-до *knowledge-journal*)
+           (клаузи
+             (науковий-константа-клаузи
+               сі:визначальна-швидкість-світла))
+           (кількість (довжина клаузи))
+           (допущено (клаузи-бази-знань-коректні? клаузи))
+           (журнал-незмінний
+             (однакові? журнал-до *knowledge-journal*)))
+      (список кількість допущено журнал-незмінний))))
 
-(визначити scientific-constant-knowledge-projection-witness
+(визначити перевірити-проєкцію-наукової-константи
   (функція ()
-    (нехай ((observation
-            (scientific-constant-knowledge-projection-observation)))
+    (нехай ((спостереження
+            (спостерегти-проєкцію-наукової-константи)))
       (за-умовою
         ((однакові?
-           observation
+           спостереження
            (як-є (7 так (1))))
          (як-є
            (scientific-constant-knowledge-projection-witness
@@ -44,9 +41,9 @@
          (список
            (як-є scientific-constant-knowledge-projection-witness)
            (як-є (status fail))
-           (список (як-є actual) observation)
+           (список (як-є actual) спостереження)
            (як-є
              (expected
                (7 так (1))))))))))
 
-(scientific-constant-knowledge-projection-witness)
+(перевірити-проєкцію-наукової-константи)
