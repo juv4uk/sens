@@ -279,34 +279,14 @@
     (решта (решта значення-аргументів))))
 (визначити cddr решта-решти)
 
-; length/map/filter build their result via a tail-recursive `-onto`
-; accumulator, same shape as reverse/reverse-onto below, instead of consing
-; after the recursive call returns (the way append naively would if it
-; didn't reuse reverse/reverse-onto) — that non-tail shape grows the Rust
-; call stack one frame per element, same risk `crates/my-lisp/tests/stack_safety.rs`
-; exists to catch for the language's own tail calls. map/filter accumulate
-; in reverse order, so they call `reverse` once at the end to undo that;
-; length doesn't build a list at all, so it just returns its accumulator.
-; length/map/filter будують результат через хвостово-рекурсивний
-; `-onto`-акумулятор, тієї самої форми, що й reverse/reverse-onto нижче,
-; замість консити після повернення з рекурсивного виклику (як append робив
-; би наївно, якби не перевикористовував reverse/reverse-onto) — та
-; не-хвостова форма ростить Rust call stack на один фрейм на елемент, той
-; самий ризик, який `crates/my-lisp/tests/stack_safety.rs` існує, щоб
-; ловити для власних хвостових викликів мови. map/filter накопичують у
-; зворотному порядку, тож викликають `reverse` раз наприкінці, щоб це
-; скасувати; length взагалі не будує список, тож просто повертає свій
-; акумулятор.
-; length/map/filter bauen ihr Ergebnis über einen endrekursiven
-; `-onto`-Akkumulator auf, derselben Form wie reverse/reverse-onto unten,
-; statt nach der Rückkehr des rekursiven Aufrufs zu konsen (wie append es
-; naiv täte, würde es nicht reverse/reverse-onto wiederverwenden) — diese
-; Nicht-Tail-Form lässt den Rust-Call-Stack um einen Frame pro Element
-; wachsen, dasselbe Risiko, das `crates/my-lisp/tests/stack_safety.rs` für
-; die eigenen Tail Calls der Sprache abfängt. map/filter akkumulieren in
-; umgekehrter Reihenfolge und rufen daher am Ende einmal `reverse` auf, um
-; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
-; einfach seinen Akkumulator zurück.
+; Довжину, відображення та відбір обчислюємо хвостовою рекурсією
+; з накопичувачем. На відміну від додавання елемента після повернення
+; рекурсії, тут глибина стека хоста не зростає з довжиною списку.
+; Відображення й відбір спочатку накопичують елементи у зворотному
+; порядку, а потім один раз відновлюють порядок функцією «зворот».
+; Підрахунок довжини не створює списку, а повертає накопичене число.
+; Історичне свідчення стійкості стека:
+; crates/my-lisp/tests/stack_safety.rs.
 (визначити довжина-до
   (функція (значення акумулятор)
     (за-умовою ((порожній? значення) акумулятор) ((хибне? (порожній? значення)) (довжина-до (решта значення) (додати акумулятор 1))))))
@@ -318,8 +298,8 @@
     (довжина-до значення 0)))
 (визначити length довжина)
 
-; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
-; binding. The historical English spelling below is compatibility-only.
+; D5:10101: точний доменний закон належить ратифікованій назві
+; «зворот-до». Історичний латинський псевдонім нижче — лише сумісність.
 (визначити зворот-до
   (функція (значення-аргументів накопичувач)
     (за-умовою
