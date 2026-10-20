@@ -156,27 +156,25 @@ def run(args) -> dict:
         raise ValueError("same-stem .sens already exists; no overwrite even if identical")
     migration = load_migrator()
     ambiguous = ambiguous_eight_bit_atoms(migration, source_text)
-    if ambiguous and args.source_era == "auto":
-        raise ValueError("ambiguous W8/D8 words: explicit --source-era and oracle required: " +
-                         ", ".join(ambiguous[:8]))
+    if ambiguous:
+        raise ValueError("ambiguous W8/SID8-or-D8 source: no source-era flag "
+                         "may authorize new D8 semantics: " + ", ".join(ambiguous[:8]))
     foundation = migration.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
-    legacy, my, upper = migration.build_three_pass_maps(
+    my, upper, retired_bridge = migration.build_three_pass_maps(
         foundation,
         ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry.rs",
         ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
-        ROOT / "contracts/core1-historical-sid-map.lisp",
-        ROOT / "knowledge/sens8-current-coverage-v1.json",
     )
     text7 = migration.build_text7(
         foundation, ROOT / "knowledge/d7-keyboard-v2-ratified.json")
-    resolver = migration.Resolver(
-        legacy, my, upper, source_era=args.source_era,
-        admitted_d8=foundation["domains"]["D8"]["residents"],
-    )
+    # The retired bridge never contributes executable identities.
+    resolver = migration.Resolver(my, upper, bridge_by_sid=retired_bridge)
     try:
-        projection = migration.migrate_file(source_text, resolver, text7)
+        projection = migration.migrate_file(
+            source_text, resolver, text7, source_surface="укр", codec="t5"
+        )
     except migration.MigrationError as exc:
         raise ValueError("three-pass migration BLOCKED: " + str(exc)) from exc
     physical = encode_projection(projection)  # Unknown names/numbers fail here.
