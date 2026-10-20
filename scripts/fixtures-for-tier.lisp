@@ -1,51 +1,38 @@
-; scripts/fixtures-for-tier.lisp — filters tests/fixtures/conformance.lisp down
-; to one tier, on demand (2026-08-09, my-lisp replacing the old Python
-; version now that conformance.lisp is native data and print escapes
-; strings correctly — no parser or string-append needed for this either).
+; Вибір прикладів визначеного рівня з tests/fixtures/conformance.lisp.
+; Корпус лишається одним файлом, а цей скрипт друкує тільки записи
+; потрібного рівня, зберігаючи їхній порядок і вміст.
 ;
-; conformance.lisp deliberately stays one file (see PLAN.md) — this script
-; makes "which fixtures must I pass to be my-lisp at Tier N?" trivial to
-; answer without a future implementer reinventing the filter logic. This
-; is exactly the tool fpga-lisp's own roadmap step 28 ("run the real
-; Tier-1 fixtures, not a hand-picked subset") needs repeatedly during
-; bring-up — friction here is friction there too.
-;
-; Usage:
+; Запуск:
 ;   cargo run -p my-lisp-cli -- scripts/fixtures-for-tier.lisp 1
-; *argv* (added 2026-08-09 for scripts/release.lisp, general-purpose in
-; my-lisp-cli since then) carries the tier as a string; assoc (added
-; 2026-08-10, lib/core.lisp) replaced this file's own hand-rolled
-; assoc-my — both were dead weight this script no longer needs to carry
-; on its own, updated here as soon as the underlying gaps closed instead
-; of leaving the workaround comment stale.
+; У *argv* рівень передається текстом. Поле tier у прикладі є
+; частиною незмінної схеми даних, а не виконуваною функцією.
 
-(визначити target-tier
+(визначити потрібний-рівень
   (за-умовою
-    ((атом? *argv*) (missing-tier-argument))
+    ((атом? *argv*) (бракує-аргументу-рівня))
     ((010 (001 ())) (прочитати (100 *argv*)))))
 
-; `missing-tier-argument` is deliberately unbound — calling it is a real
-; named ErrorKind::UnknownSymbol (S2), not an invented ad-hoc error
-; primitive, same convention scripts/release.lisp already uses for its own
-; missing-argument case.
-; `missing-tier-argument` навмисно незв'язаний — виклик дає реальну
-; названу ErrorKind::UnknownSymbol (S2), не вигаданий ad-hoc примітив
-; помилки, та сама конвенція, яку вже використовує scripts/release.lisp
-; для власного випадку відсутнього аргументу.
+; бракує-аргументу-рівня навмисно не визначене: відсутній
+; аргумент породжує штатну помилку невідомого символу.
+; Старі закодовані викличні голови в умові потребують окремого
+; доведення доменної тотожності перед міграцією; нових значень
+; за схожістю бітів тут не призначаємо.
 
-(визначити fixture-tier
-  (функція (fixture)
-    (решта (знайти-за-ключем (як-є tier) fixture))))
+(визначити рівень-прикладу
+  (функція (приклад)
+    (решта (знайти-за-ключем (як-є tier) приклад))))
 
-(визначити print-matching
-  (функція (remaining)
+(визначити надрукувати-відповідні
+  (функція (залишок)
     (за-умовою
-      ((атом? remaining) (як-є ()))
-      ((атом? (як-є ())) ((функція ()
-            (за-умовою
-              ((тотожне? (fixture-tier (перше remaining)) target-tier)
-               (друкувати (перше remaining)))
-              ((атом? (як-є ())) (як-є ())))
-            (print-matching (решта remaining))))))))
+      ((атом? залишок) (як-є ()))
+      ((атом? (як-є ()))
+       ((функція ()
+          (за-умовою
+            ((тотожне? (рівень-прикладу (перше залишок)) потрібний-рівень)
+             (друкувати (перше залишок)))
+            ((атом? (як-є ())) (як-є ())))
+          (надрукувати-відповідні (решта залишок)))))))
 
-(print-matching (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
+(надрукувати-відповідні
+  (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
