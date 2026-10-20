@@ -1,11 +1,10 @@
-; #834 — bounded semantic-coordinate law witness.
-;
-; This is evidence/projection data, not a second semantic registry.
-; SID identity remains owned by lib/surface/semantic-registry.lisp.
-; Mathematical result domains remain owned by #225 and their existing fixtures.
-; Ukrainian projection only. Coordinates as decimal.
+; Обмежений свідок осі законів семантичних координат #834.
+; Це доказові дані, а не друга таблиця семантичної ратифікації.
+; Тотожності та закони належать чинному канону СЕНС.
+; Власні Lisp-функції й параметри — українською, таблиця свідчень незмінна.
+; Людські числа залишено десятковими, без виведення домену з байтів.
 
-(визначити semantic-coordinate-law-axis-v1
+(визначити вісь-законів-семантичних-координат-1
   (як-є
     ((12
        (axis mathematical)
@@ -28,13 +27,18 @@
        (witness no-mathematical-law-claimed)
        (evidence contracts/control-dispatch-contract.lisp)))))
 
-(визначити semantic-coordinate-law-row
-  (функція (sid rows)
+(визначити рядок-закону-семантичної-координати
+  (функція (ідентичність рядки)
     (за-умовою
-      ((атом? rows) (як-є ()))
-      ((тотожне? sid (перше (перше rows))) (перше rows))
-      (так (semantic-coordinate-law-row sid (решта rows))))))
+      ((атом? рядки) (як-є ()))
+      ((тотожне? ідентичність (перше (перше рядки))) (перше рядки))
+      (так (рядок-закону-семантичної-координати ідентичність (решта рядки))))))
 
-(визначити semantic-coordinate-law-for-sid
-  (функція (sid)
-    (semantic-coordinate-law-row sid semantic-coordinate-law-axis-v1)))
+(визначити закон-семантичної-координати-за-ідентичністю
+  (функція (ідентичність)
+    (рядок-закону-семантичної-координати ідентичність вісь-законів-семантичних-координат-1)))
+
+; Історичні сумісні імена не створюють нових ідентичностей.
+(визначити semantic-coordinate-law-axis-v1 вісь-законів-семантичних-координат-1)
+(визначити semantic-coordinate-law-row рядок-закону-семантичної-координати)
+(визначити semantic-coordinate-law-for-sid закон-семантичної-координати-за-ідентичністю)
