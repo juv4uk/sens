@@ -24,6 +24,9 @@ class StageTwoProjectionsTests(unittest.TestCase):
             self.assertEqual(result["summary"]["files_created"], 2)
             self.assertEqual(result["semantic_oracle"], "NOT_VERIFIED")
             self.assertFalse(result["physical_codec_invoked"])
+            self.assertEqual(result["third_file"],
+                             "name.sens PENDING verified Zig/T5M physical encoding")
+            self.assertFalse(result["release_admitted"])
             self.assertFalse(list(mirror.rglob("*.sens")))
             source = ROOT / self.BRANCH
             uk = mirror / self.BRANCH

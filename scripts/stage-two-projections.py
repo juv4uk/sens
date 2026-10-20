@@ -5,9 +5,9 @@ For each explicitly named .lisp input, create in an OUTSIDE-repo mirror:
   name.lisp  canonical Ukrainian source (ук)
   name       exact-width 0/1 word view, single spaces and final LF
 
-The future name.sens is deliberately NOT created here. This is NOT a
-semantic-equivalence or release certificate; historical sources retain their
-original bytes in the repository. No new parser or surface table is defined.
+Physical name.sens is deliberately NOT created here. The current carrier is
+T5M, but this two-projection step does NOT run Zig/T5M, SENS evaluation or a
+semantic oracle. Source files remain unchanged; no new surface law is defined.
 """
 from __future__ import annotations
 
@@ -83,7 +83,7 @@ def prepare(root: Path, supplied: str, source_era: str, maps: tuple) -> dict:
         if not words or any(BITS.fullmatch(word) is None for word in words):
             raise ProjectionBlocked("not a complete exact-width binary-word projection")
         # The existing bounded canonical UK renderer is independent of the
-        # physical packing choice: no T5/Frame3 encode or decode happens here.
+        # physical packing choice: no Zig/T5M encode or decode happens here.
         canonical_uk = canonical_uk_from_words(words)
         if project_current_uk(canonical_uk) != words:
             raise ProjectionBlocked("UK -> typed words roundtrip changed identity")
@@ -188,7 +188,7 @@ def stage(root: Path, mirror: Path, sources: list[str],
     return {
         "schema": "sens-two-projections-no-physical-codec/v1",
         "mode": "write-two" if write else "preview",
-        "third_file": "name.sens PENDING Frame3 codec",
+        "third_file": "name.sens PENDING verified Zig/T5M physical encoding",
         "physical_codec_invoked": False,
         "semantic_oracle": "NOT_VERIFIED",
         "release_admitted": False,
