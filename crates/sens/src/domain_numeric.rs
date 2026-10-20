@@ -505,6 +505,41 @@ mod tests {
     }
 
     #[test]
+    fn wide_divisor_machine_path_preserves_exact_domain_and_ratio() {
+        let word = |width: usize, powers: &[usize]| -> Value {
+            let mut bits = vec![0_u8; width];
+            for &bit in powers { bits[width - 1 - bit] = 1; }
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
+        };
+        // Дільник у кожному випадку ширший за одне машинне слово.
+        for (width, high, divisor_bit) in [
+            (96_usize, 85_usize, 65_usize),
+            (192, 170, 110),
+            (384, 320, 210),
+            (768, 700, 510),
+        ] {
+            let numerator = word(width, &[high, divisor_bit]);
+            let divisor = word(width, &[divisor_bit]);
+            let expected = word(width, &[high - divisor_bit, 0]);
+            let quotient = compute("/", &numerator, &divisor).unwrap();
+            assert_eq!(quotient, expected, "D{width}: точна ціла частка");
+
+            // За ненульової остачі залишається вже ратифікована
+            // канонічна дробова композиція, а не округлена частка.
+            let fractional = word(width, &[high, 0]);
+            let actual = compute("/", &fractional, &divisor).unwrap();
+            let (_, a_neg, a_num, a_den) = ingredients(&fractional).unwrap();
+            let (_, b_neg, b_num, b_den) = ingredients(&divisor).unwrap();
+            let previous_law = canonical(
+                a_neg ^ b_neg, a_num.mul(&b_den), a_den.mul(&b_num), width
+            ).unwrap();
+            assert_eq!(actual, previous_law, "D{width}: остача не загублена");
+            assert!(compute("/", &numerator, &word(width * 2, &[1])).is_none());
+            assert!(compute("/", &numerator, &word(width, &[])).is_none());
+        }
+    }
+
+    #[test]
     fn wide_divrem_respects_full_d96_plus_semantics_and_fractions() {
         let admitted = |width: usize, n: i64| -> Value {
             let bits = (0..width).rev()
