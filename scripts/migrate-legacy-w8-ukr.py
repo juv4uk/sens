@@ -25,7 +25,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from domain_tables import read_domain_table
 
 # Тільки ІСТОРИЧНЕ свідчення: цей Git commit передує фізичному вилученню
-# SID8-реєстру з main. Данні використовує ВИКЛЮЧНО одноразовий мігратор.
+# сід8-реєстру з main. Данні використовує ВИКЛЮЧНО одноразовий мігратор.
 # Жодних поточних runtime alias/dispatch чи відновлення lib/surface/bridge.
 HISTORICAL_BRIDGE_COMMIT = "364c20e89429962928ea39027651f2bb47875aa0"
 HISTORICAL_BRIDGE_BLOB = "2c776a6947dacc88b312eacff89f4f7d66ed7813"
