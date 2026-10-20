@@ -1,0 +1,29 @@
+name: T5M-3 — асемблер проти Zig і Rust
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  t5m-asm-bench:
+    name: T5M-3 pack/unpack — asm vs Zig vs Rust
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Зібрати asm, Zig, Rust і прогнати бенчмарк
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/asm-t5m
+          as --64 -o t5m_pack.o t5m_pack.S
+          zig build-obj t5m_ref.zig -O ReleaseFast -femit-bin=t5m_ref.o
+          rustc -O --edition 2021 --crate-type staticlib t5m_ref.rs -o librust_t5m_ref.a
+          zig cc -O2 -DHAVE_RUST bench.c t5m_pack.o t5m_ref.o librust_t5m_ref.a -o bench
+          ./bench
