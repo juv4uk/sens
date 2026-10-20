@@ -1,29 +1,29 @@
 ; #305 / TASK-001 — the empty metacircular program is a Lisp-owned law.
 ; An empty form list must preserve the supplied environment exactly and return
-; Canon 0 as the program result.  Rust observes only the named pass envelope.
+; empty as the program result. Ukrainian projection only.
 
 (load "lib/meta-eval.lisp")
 
-(00001001 meta-eval-empty-program-check
-  (00001000 ()
-    (10011100 ((env-ref (00100111 (00000100 (00000001 sentinel) 42))))
-      (10011100 ((loaded (обчислити-послідовність-форм (00000001 ()) env-ref)))
-        (00000111
-          ((00100010 (00000101 loaded) env-ref) (1)
-           (00000111
-             ((00100010 (00000110 loaded) (00000001 ())) (1)
-              (00000001 (meta-eval-empty-program-witness (status pass))))
-             ((00100010 (00000110 loaded) (00000001 ())) (0)
-              (00100111
-                (00000001 meta-eval-empty-program-witness)
-                (00000001 (status fail))
-                (00000001 (law empty-result))
-                (00100111 (00000001 actual) (00000110 loaded))))))
-          ((00100010 (00000101 loaded) env-ref) (0)
-           (00100111
-             (00000001 meta-eval-empty-program-witness)
-             (00000001 (status fail))
-             (00000001 (law environment-preserved))
-             (00100111 (00000001 actual) (00000101 loaded)))))))))
+(визначити meta-eval-empty-program-check
+  (функція ()
+    (нехай ((env-ref (список (сполучити (як-є sentinel) 42))))
+      (нехай ((loaded (обчислити-послідовність-форм (як-є ()) env-ref)))
+        (за-умовою
+          ((тотожне? (перше loaded) env-ref)
+           (за-умовою
+             ((тотожне? (решта loaded) (як-є ()))
+              (як-є (meta-eval-empty-program-witness (status pass))))
+             (так
+              (список
+                (як-є meta-eval-empty-program-witness)
+                (як-є (status fail))
+                (як-є (law empty-result))
+                (список (як-є actual) (решта loaded))))))
+          (так
+           (список
+             (як-є meta-eval-empty-program-witness)
+             (як-є (status fail))
+             (як-є (law environment-preserved))
+             (список (як-є actual) (перше loaded)))))))))
 
 (meta-eval-empty-program-check)

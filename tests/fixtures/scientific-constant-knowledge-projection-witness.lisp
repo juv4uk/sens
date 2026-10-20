@@ -6,8 +6,7 @@
 ;   * the projected batch is admitted by the existing knowledge validator;
 ;   * projection is pure: the global knowledge journal is unchanged.
 ;
-; It deliberately does not advise/import the clauses and does not turn this
-; evidence file into a second scientific-constant registry.
+; Ukrainian projection only.
 
 (load "lib/core.lisp")
 (load "lib/unify.lisp")
@@ -18,40 +17,36 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
-(0011 scientific-constant-knowledge-projection-observation
-  (0010 ()
-    (001001 ((before *knowledge-journal*)
+(визначити scientific-constant-knowledge-projection-observation
+  (функція ()
+    (нехай ((before *knowledge-journal*)
            (clauses
              (scientific-constant->clauses
                si:defining-speed-of-light))
-           (count (000000 clauses))
+           (count (довжина clauses))
            (admitted (knowledge-clauses-valid? clauses))
            (journal-relation
-             (11110111 before *knowledge-journal*)))
-      (1110 count admitted journal-relation))))
+             (однакові? before *knowledge-journal*)))
+      (список count admitted journal-relation))))
 
-(0011 scientific-constant-knowledge-projection-witness
-  (0010 ()
-    (001000 ((observation
+(визначити scientific-constant-knowledge-projection-witness
+  (функція ()
+    (нехай ((observation
             (scientific-constant-knowledge-projection-observation)))
-      (110
-        ((11110111
+      (за-умовою
+        ((однакові?
            observation
-           (001 (7 t (1))))
-         (1)
-         (001
+           (як-є (7 так (1))))
+         (як-є
            (scientific-constant-knowledge-projection-witness
              (status pass))))
-        ((11110111
-           observation
-           (001 (7 t (1))))
-         (0)
-         (1110
-           (001 scientific-constant-knowledge-projection-witness)
-           (001 (status fail))
-           (1110 (001 actual) observation)
-           (001
+        (так
+         (список
+           (як-є scientific-constant-knowledge-projection-witness)
+           (як-є (status fail))
+           (список (як-є actual) observation)
+           (як-є
              (expected
-               (7 t (1))))))))))
+               (7 так (1))))))))))
 
 (scientific-constant-knowledge-projection-witness)
