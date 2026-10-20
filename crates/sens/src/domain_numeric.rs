@@ -326,12 +326,47 @@ fn signed_wide_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value>
     Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
 }
 
+/// Точна цілочисельна частка двох вже допущених знакових D96+.
+/// Машинний дільник має вміщатися в u64. Для ненульової остачі
+/// виконується попередній канонічний закон RATIO — без округлення.
+fn signed_wide_div_exact_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
+    let width = lhs.numeric_domain_width()?;
+    if width < 96 || rhs.numeric_domain_width() != Some(width) { return None; }
+    let (a_negative, a) = lhs.signed_magnitude()?;
+    let (b_negative, b) = rhs.signed_magnitude()?;
+    if b.is_zero() || b.width() > 64 { return None; }
+    let divisor = b.as_bits().iter()
+        .fold(0_u64, |value, bit| (value << 1) | u64::from(*bit));
+    let limbs = a.as_bits().rchunks(64)
+        .map(|block| block.iter().fold(0_u64, |value, bit| (value << 1) | u64::from(*bit)))
+        .collect::<Vec<_>>();
+    let (quotient, remainder) = crate::machine_math::exact_words_div_rem_u64(&limbs, divisor)?;
+    if remainder != 0 { return None; }
+    let bits = quotient.iter().rev()
+        .flat_map(|limb| (0..64).rev().map(move |shift| ((limb >> shift) & 1) as u8))
+        .collect::<Vec<_>>();
+    let magnitude = BinaryNumber::from_bits(bits).ok()?;
+    let signed = BinaryNumber::from_signed_magnitude_growing(
+        width, a_negative != b_negative, &magnitude
+    )?;
+    Some(Value::BinaryNumber(signed))
+}
+
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
     // Reject D24/D48 (or non-Dn) BEFORE cloning potentially wide rational
     // constituents into the private calculation.
     let width = shared_numeric_domain_width(lhs, rhs)?;
+    // Для широких Dn машинний DIVQ повертає лише точні цілі частки.
+    // Остача або великий дільник переходять до існуючого RATIO.
+    if width >= 96 && operator == "/" {
+        if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
+            if let Some(result) = signed_wide_div_exact_fast(left, right) {
+                return Some(result);
+            }
+        }
+    }
     // У D24/D48 машинний IDIV працює лише для цілих часток.
     // Із ненульовою остачею повертаємося до точного закону RATIO.
     if matches!(width, 24 | 48) && matches!(operator, "+" | "-" | "*" | "/") {
@@ -459,6 +494,45 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    #[test]
+    fn wide_divrem_respects_full_d96_plus_semantics_and_fractions() {
+        let admitted = |width: usize, n: i64| -> Value {
+            let bits = (0..width).rev()
+                .map(|shift| if shift >= 64 { u8::from(n < 0) }
+                     else { ((n >> shift) & 1) as u8 })
+                .collect::<Vec<_>>();
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
+        };
+        for width in [96_usize, 192, 384, 768] {
+            for (a, b, expected) in [
+                (6, 3, "2"), (-6, 3, "-2"), (6, -3, "-2"),
+                (-6, -3, "2"), (0, 3, "0"),
+                (7, 3, "7/3"), (-7, 3, "-7/3"), (7, -3, "-7/3")
+            ] {
+                let left = admitted(width, a);
+                let right = admitted(width, b);
+                let got = compute("/", &left, &right).unwrap();
+                assert_eq!(got.to_string(), expected, "D{width}: {a}/{b}");
+                let (_, an, am, ad) = ingredients(&left).unwrap();
+                let (_, bn, bm, bd) = ingredients(&right).unwrap();
+                let original = canonical(an ^ bn, am.mul(&bd), ad.mul(&bm), width).unwrap();
+                assert_eq!(got, original, "D{width}: бітово точний попередній закон");
+            }
+            let mut min_bits = vec![0; width];
+            min_bits[0] = 1;
+            let min = Value::BinaryNumber(
+                BinaryNumber::from_numeric_domain_bits(width, &min_bits).unwrap());
+            let out = compute("/", &min, &admitted(width, -1)).unwrap();
+            let Value::BinaryNumber(ref number) = out else { panic!("ціле Dn"); };
+            assert_eq!(number.numeric_domain_width(), Some(width * 2));
+            let mut expected_bits = vec![0; width * 2];
+            expected_bits[width] = 1;
+            assert_eq!(number.exact_numeric_domain_bits().unwrap(), expected_bits);
+            assert!(compute("/", &admitted(width, 1), &admitted(width * 2, 1)).is_none());
+            assert!(compute("/", &admitted(width, 1), &admitted(width, 0)).is_none());
+        }
     }
 
     #[test]
