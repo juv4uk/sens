@@ -1,6 +1,6 @@
 ; contracts/bija3-l1-l5-ratification.lisp
-; OWNER-RATIFIED 2026-10-04 — issue #3202.
-; This is current D3 semantic authority together with language-contract.lisp.
+; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-04 — issue #3202.
+; Це чинна семантична влада D3 разом із language-contract.lisp.
 
 (
   (schema . bija3-l1-l5-ratification/1)
