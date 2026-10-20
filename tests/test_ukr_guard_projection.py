@@ -11,7 +11,7 @@ SOURCE = ROOT / "lib/guard.lisp"
 ORIGINAL_GIT_BLOB = "37b4175a437de8274d71273c58e9f4f726921cd1"
 ALIAS_MARKER = "; Історичні викличні поверхні Guard — ті самі closure, без дублювання."
 
-# Authority is the actual domain table at this repository commit, never W8/SID8.
+# Authority is the actual domain table at this repository commit, never W8/сід8.
 NATIVE = {
     3: {"001": "як-є", "010": "атом?", "011": "решта",
         "100": "перше", "101": "тотожне?", "110": "за-умовою"},
