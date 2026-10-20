@@ -12,5 +12,6 @@ path = "src/main.rs"
 
 [dependencies]
 sens = { path = "../sens" }
+sens-cli = { path = "../sens-cli", features = ["zig-transport"] }
 
 [dev-dependencies]
