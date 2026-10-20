@@ -28,8 +28,8 @@
              (t (quote так))))            ; cond ⇒ так
 
 ;; --- Макроси в традиційному Lisp-стилі ---
-(defmacro (when test . body)
-  `(if ,test (begin ,@body)))
+(defmacro (when умова . тіло)
+  `(if ,умова (begin ,@тіло)))
 
 (when (eq? (quote lisp) (quote lisp))
   (displayln (quote my-lisp-works-on-chez-scheme-jit)))
