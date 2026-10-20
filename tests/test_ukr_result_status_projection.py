@@ -86,13 +86,22 @@ class ResultStatusProjectionTests(unittest.TestCase):
                 self.assertNotRegex(code, r"\(\s*" + bits + r"(?=[\s()])")
         self.assertNotIn("D7", SOURCE.splitlines()[0])
 
-    def test_only_needed_legacy_entrypoints_and_protocol_tags_remain(self):
+    def test_current_ukrainian_result_entrypoints_and_protocol_tags(self):
         code = source_code(SOURCE)
-        for name in ("make-proved", "make-unknown", "make-partial",
-                     "make-blocked", "make-disputed", "make-invalid",
-                     "result-status", "result-payload", "reason-observe",
-                     "reason-in-observe"):
+        for name in ("створити-доведений", "створити-невідоме",
+                     "створити-частковий", "створити-заблокований",
+                     "створити-спірний", "створити-некоректний",
+                     "результат-стан", "результат-вміст",
+                     "результат-є-правильним-списком?"):
             self.assertIn("(визначити " + name + "\n", code)
+        for obsolete in ("make-proved", "make-unknown", "make-partial",
+                         "make-blocked", "make-disputed", "make-invalid",
+                         "result-status", "result-payload",
+                         "result-proper-list?"):
+            self.assertNotIn("(визначити " + obsolete + " ", code)
+        # Два історичні входи спостереження мають окремих споживачів.
+        for compat in ("reason-observe", "reason-in-observe"):
+            self.assertIn("(визначити " + compat + " ", code)
         for obsolete in ("result-goal?", "result-negated-goal?",
                          "result-opposite-goal"):
             self.assertNotIn("(визначити " + obsolete + " ", code)
