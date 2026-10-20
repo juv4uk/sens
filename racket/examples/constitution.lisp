@@ -27,9 +27,11 @@
 (displayln (cond ((eq? (quote a) (quote b)) (quote ні))
              (t (quote так))))            ; cond ⇒ так
 
-;; --- Макроси в традиційному Lisp-стилі ---
-(defmacro (when умова . тіло)
+;; --- Власний макрос з українською назвою ---
+;; Спеціальні форми if і begin належать цьому історичному діалекту
+;; Racket, тому їх не перейменовуємо без відповідного механізму.
+(defmacro (коли умова . тіло)
   `(if ,умова (begin ,@тіло)))
 
-(when (eq? (quote lisp) (quote lisp))
-  (displayln (quote my-lisp-works-on-chez-scheme-jit)))
+(коли (eq? (quote лісп) (quote лісп))
+  (displayln (quote лісп-працює-на-chez-scheme-jit)))
