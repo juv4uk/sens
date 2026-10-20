@@ -1,48 +1,50 @@
-; #305 — semantic-registry meaning is Lisp-owned before the stale Rust oracle
-; is retired. Ukrainian projection only.
-; Expected values and the comparison logic stay here in Lisp.
+; Свідок семантичного реєстру #305 належить Lisp СЕНС.
+; Пряме виконання й метаобчислення звіряють незалежні очікування.
+; Власні функції та параметри — українською, джерельні рядки незмінні.
+; Історичні назви відповідей усередині рядків — дані свідка.
+; Пара завантажуваних бібліотек — залежності, не джерело законів.
 
 (load "lib/generated/meta-semantic-registry.lisp")
 (load "lib/meta-eval.lisp")
 
-(визначити registry-native-value
-  (функція (source)
-    (прочитати-вираз source)))
+(визначити реєстр-пряме-значення
+  (функція (джерело)
+    (прочитати-вираз джерело)))
 
-(визначити registry-meta-value
-  (функція (source)
-    (обчислити-мета-вираз (прочитати-вираз source) (як-є ()))))
+(визначити реєстр-мета-значення
+  (функція (джерело)
+    (обчислити-мета-вираз (прочитати-вираз джерело) (як-є ()))))
 
-(визначити registry-meta-program-result
-  (функція (source)
-    (решта (обчислити-послідовність-форм (прочитати-форми source) (як-є ())))))
+(визначити реєстр-мета-результат-програми
+  (функція (джерело)
+    (решта (обчислити-послідовність-форм (прочитати-форми джерело) (як-є ())))))
 
-(визначити registry-witness-failure
-  (функція (case actual expected)
+(визначити реєстр-помилка-свідка
+  (функція (випадок фактичне очікуване)
     (список
       (як-є meta-semantic-registry-witness)
       (як-є (status fail))
-      (список (як-є case) case)
-      (список (як-є actual) actual)
-      (список (як-є expected) expected))))
+      (список (як-є case) випадок)
+      (список (як-є actual) фактичне)
+      (список (як-є expected) очікуване))))
 
-(визначити registry-check-rows
-  (функція (rows)
+(визначити реєстр-перевірити-рядки
+  (функція (рядки)
     (за-умовою
-      ((атом? rows)
+      ((атом? рядки)
        (як-є (meta-semantic-registry-witness (status pass))))
       (так
-       (нехай ((row (перше rows)))
+       (нехай ((рядок (перше рядки)))
          (за-умовою
-           ((однакові? (друге row) (третє row))
-            (registry-check-rows (решта rows)))
+           ((однакові? (друге рядок) (третє рядок))
+            (реєстр-перевірити-рядки (решта рядки)))
            (так
-            (registry-witness-failure
-              (перше row)
-              (друге row)
-              (третє row)))))))))
+            (реєстр-помилка-свідка
+              (перше рядок)
+              (друге рядок)
+              (третє рядок)))))))))
 
-(визначити registry-witness-rows
+(визначити реєстр-рядки-свідка
   (функція ()
     (список
       (список (як-є quote-id-en)
@@ -67,49 +69,57 @@
             (my-semantic-id-for-surface (як-є not-a-surface))
             (як-є ()))
       (список (як-є atom-native-legacy-byte)
-            (registry-native-value "(атом? (як-є x))")
+            (реєстр-пряме-значення "(атом? (як-є x))")
             (як-є (1)))
       (список (як-є atom-meta-en)
-            (registry-meta-value "(атом? (як-є x))")
+            (реєстр-мета-значення "(атом? (як-є x))")
             (як-є (1)))
       (список (як-є atom-meta-uk)
-            (registry-meta-value "(атом? (як-є x))")
+            (реєстр-мета-значення "(атом? (як-є x))")
             (як-є (1)))
       (список (як-є atom-meta-sa)
-            (registry-meta-value "(aṇu (svarūpa x))")
+            (реєстр-мета-значення "(aṇu (svarūpa x))")
             (як-є (1)))
       (список (як-є atom-meta-symbolic)
-            (registry-meta-value "(.? (як-є x))")
+            (реєстр-мета-значення "(.? (як-є x))")
             (як-є (1)))
       (список (як-є lambda-native-en)
-            (registry-native-value "((функція (x) x) 42)")
+            (реєстр-пряме-значення "((функція (x) x) 42)")
             42)
       (список (як-є lambda-native-uk)
-            (registry-native-value "((функція (x) x) 42)")
+            (реєстр-пряме-значення "((функція (x) x) 42)")
             42)
       (список (як-є define-native-en)
-            (registry-native-value "(визначити registry-native-en-answer 42)")
+            (реєстр-пряме-значення "(визначити registry-native-en-answer 42)")
             42)
       (список (як-є define-native-uk)
-            (registry-native-value "(визначити registry-native-uk-answer 42)")
+            (реєстр-пряме-значення "(визначити registry-native-uk-answer 42)")
             42)
       (список (як-є def-native-compat)
-            (registry-native-value "(визначити registry-native-def-answer 42)")
+            (реєстр-пряме-значення "(визначити registry-native-def-answer 42)")
             42)
       (список (як-є lambda-meta-en)
-            (registry-meta-value "((функція (x) x) 42)")
+            (реєстр-мета-значення "((функція (x) x) 42)")
             42)
       (список (як-є lambda-meta-uk)
-            (registry-meta-value "((функція (x) x) 42)")
+            (реєстр-мета-значення "((функція (x) x) 42)")
             42)
       (список (як-є define-meta-en)
-            (registry-meta-program-result "(визначити registry-meta-en-answer 42)")
+            (реєстр-мета-результат-програми "(визначити registry-meta-en-answer 42)")
             42)
       (список (як-є define-meta-uk)
-            (registry-meta-program-result "(визначити registry-meta-uk-answer 42)")
+            (реєстр-мета-результат-програми "(визначити registry-meta-uk-answer 42)")
             42)
       (список (як-є def-meta-compat)
-            (registry-meta-program-result "(визначити registry-meta-def-answer 42)")
+            (реєстр-мета-результат-програми "(визначити registry-meta-def-answer 42)")
             42))))
 
-(registry-check-rows (registry-witness-rows))
+(реєстр-перевірити-рядки (реєстр-рядки-свідка))
+
+; Історичні зовнішні зв'язування для сумісності.
+(визначити registry-native-value реєстр-пряме-значення)
+(визначити registry-meta-value реєстр-мета-значення)
+(визначити registry-meta-program-result реєстр-мета-результат-програми)
+(визначити registry-witness-failure реєстр-помилка-свідка)
+(визначити registry-check-rows реєстр-перевірити-рядки)
+(визначити registry-witness-rows реєстр-рядки-свідка)
