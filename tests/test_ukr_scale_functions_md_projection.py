@@ -184,14 +184,28 @@ def verify(path: str, source: str):
 
 class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
 
-    def test_manual_function_helper_names_are_exact_ukrainian_projection(self):
-        before = source_for_audit(MANUAL_NAME_PATH)
-        self.assertEqual(blob_sha(before), MANUAL_NAME_BLOB)
+    def test_current_generator_uses_ukrainian_d4_definitions_and_diagnostics(self):
         current = (ROOT / MANUAL_NAME_PATH).read_text(encoding="utf-8")
-        self.assertEqual(manual_name_projection(before), current)
-        self.assertIn("(визначити відстежувані-файли", current)
-        self.assertIn("(визначити замінити-всі-розділи", current)
-        self.assertNotIn("(визначити replace-all", current)
+        forms = audit.parse(current)
+        self.assertTrue(forms, "Генератор повинен лишатися програмою СЕНС")
+        for definition in ("відстежувані-файли", "голова-визначення?",
+                           "замінити-всі-розділи", "поточний-вміст",
+                           "згенерований-вміст"):
+            self.assertIn("(визначити " + definition, current)
+        self.assertIn("(тотожне? голова (як-є визначити))", current)
+        for obsolete in ("(як-є def)", "(як-є define)",
+                         "sections refreshed", "sections are current",
+                         "sections are stale"):
+            self.assertNotIn(obsolete, current)
+        for phrase in ("Оновлено розділи docs/FUNCTIONS.md",
+                       "Розділи docs/FUNCTIONS.md актуальні",
+                       "Розділи docs/FUNCTIONS.md потребують оновлення"):
+            self.assertIn(phrase, current)
+        heads = [token.text for token in audit.candidate_heads(forms)]
+        self.assertIn("визначити", heads)
+        self.assertIn("за-умовою", heads)
+        self.assertNotIn("def", heads)
+        self.assertNotIn("define", heads)
 
     def test_ratified_peer_ownership_at_exact_width(self):
         for bits, expected in PEERS.items():
