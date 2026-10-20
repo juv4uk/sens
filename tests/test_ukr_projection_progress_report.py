@@ -96,6 +96,20 @@ class WholeFileMetricTests(FileTree):
         self.assertIn("англомовна назва визначення", reasons["lib/alias.lisp"])
         self.assertEqual(result.excluded_nonprogram_files, 2)
 
+    def test_latin_value_reference_is_not_mistaken_for_quoted_data(self):
+        root = self.tree({
+            "lib/значення.lisp": "(визначити результат legacy-value)\\n".replace("\\n", "\n"),
+            "lib/аргумент.lisp": "(визначити результат (тотожне? так legacy-value))\\n".replace("\\n", "\n"),
+            "lib/цитата.lisp": "(визначити протокол (як-є legacy-value))\\n".replace("\\n", "\n"),
+        })
+        result = report.measure_source_projection(root)
+        self.assertEqual(result.total_source_files, 3)
+        self.assertEqual(result.fully_projected_source_files, 1)
+        reasons = {item.path: item.reason for item in result.pending}
+        self.assertIn("англомовне посилання на значення", reasons["lib/значення.lisp"])
+        self.assertIn("англомовне посилання на значення", reasons["lib/аргумент.lisp"])
+        self.assertNotIn("lib/цитата.lisp", reasons)
+
     def test_primary_projection_report_is_separate_from_keyboard_completion(self):
         root = self.tree({
             "lib/код.lisp": '(визначити сума (функція (значення) (додати значення 1)))\n',

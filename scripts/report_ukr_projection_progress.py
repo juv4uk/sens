@@ -278,7 +278,13 @@ def _projection_reasons(source: str) -> list[str]:
         reasons.append(f"{token.line}:{token.column}: {kind} {value!r}")
 
     def visit(node: object) -> None:
-        if isinstance(node, LispQuoted) or isinstance(node, LispOpaque) or isinstance(node, LispAtom):
+        if isinstance(node, (LispQuoted, LispOpaque)):
+            return
+        if isinstance(node, LispAtom):
+            # Вільний ідентифікатор у тілі є виконуваним посиланням,
+            # навіть якщо він не стоїть на місці викличної голови.
+            if LATIN_IDENTIFIER.search(node.token.value):
+                add(node.token, "англомовне посилання на значення", node.token.value)
             return
         if not isinstance(node, LispForm) or not node.items:
             return
@@ -303,9 +309,11 @@ def _projection_reasons(source: str) -> list[str]:
             target = node.items[1]
             target_value = _atom_value(target)
             if target_value and LATIN_IDENTIFIER.search(target_value):
-                # Історичний DEFINE-аліас теж є виконуваним зв'язуванням.
-                # Коментар/маркер сумісності не може робити міграцію зеленою.
+                # Назва визначення — зв'язування, а не звернення до значення.
                 add(target.token, "англомовна назва визначення", target_value)
+            for child in node.items[2:]:
+                visit(child)
+            return
 
         if head_value == "функція" and len(node.items) >= 2:
             formals = node.items[1]
@@ -314,6 +322,9 @@ def _projection_reasons(source: str) -> list[str]:
                     formal_value = _atom_value(formal)
                     if formal_value and LATIN_IDENTIFIER.search(formal_value):
                         add(formal.token, "англомовний локальний параметр", formal_value)
+            for child in node.items[2:]:
+                visit(child)
+            return
 
         for child in node.items[1:]:
             visit(child)
