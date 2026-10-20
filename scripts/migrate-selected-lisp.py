@@ -4,9 +4,11 @@
 This is an adapter over migrate-three-pass.py and sens_t5_codec.py,
 NOT a new parser, codec, domain table, or semantic oracle.
 
-Proof before publication: immutable Git source blob, explicit historical era
-when 8-bit identity is ambiguous, canonical physical T5 bytes, *real* Rust D2
-reader, and independent executable oracle attestation. Anything unproved BLOCKS.
+Proof before publication: immutable Git source blob, ONE current AUTO source
+interpretation, exact T5 bytes, *real* Rust D2 reader, and independent
+executable oracle attestation. Ambiguous W8/D8 BLOCKS; retired historical
+source-era switches cannot select semantics. This adapter is a bounded legacy
+T5 inspection route, not the default T5M publisher.
 """
 from __future__ import annotations
 
@@ -141,6 +143,14 @@ def check_oracle(verifier: Path, source: Path, physical: Path,
     }
 
 def run(args) -> dict:
+    # A command-line epoch must never override the ratified D1-D10 ladder.
+    # Retain retired spellings in the parser only to return a structured
+    # BLOCKED receipt rather than silently reinterpreting W8 as D8.
+    if args.source_era != "auto":
+        raise ValueError(
+            "RETIRED_SOURCE_ERA: legacy/current cannot authorize binary "
+            "callability; use the single current AUTO scan"
+        )
     rel, source = selection(args.source)
     if args.source_blob != "HEAD" and not HEX40.fullmatch(args.source_blob):
         raise ValueError("source-blob must be HEAD or a pinned 40-hex Git SHA")
@@ -229,7 +239,10 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--source", required=True, help="original tracked repo-relative .lisp")
     ap.add_argument("--source-blob", default="HEAD", help="pinned 40-hex Git blob SHA or checked-out HEAD")
-    ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto")
+    ap.add_argument(
+        "--source-era", choices=("auto", "legacy", "current"), default="auto",
+        help="AUTO is mandatory; legacy/current are rejected with a BLOCKED receipt",
+    )
     ap.add_argument("--out-root", required=True, type=Path, help="output hierarchy root")
     ap.add_argument("--reader", type=Path, help="real compiled sens-trit executable")
     ap.add_argument("--oracle", type=Path, help="independent executable verifier, source + staged T5 args")
