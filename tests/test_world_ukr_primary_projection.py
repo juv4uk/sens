@@ -75,6 +75,19 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
                     rf"(?m)^\(визначити\s+{re.escape(english)}\s+{re.escape(ukr)}\)\s*$",
                 )
 
+    def test_missing_module_uses_only_ukrainian_binding_and_witness(self):
+        source, _ = read_sources()
+        self.assertRegex(
+            source,
+            r"(?m)^\(визначити\s+внутрішній-світ-модуль-відсутній\?\s+\(функція\b",
+        )
+        self.assertNotIn("(визначити world-module-missing?", source)
+        witness = (ROOT / "crates/sens/tests/fs_bridge_diagnostics.rs").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("(внутрішній-світ-модуль-відсутній? (порожній-світ)", witness)
+        self.assertNotIn("(world-module-missing?", witness)
+
     def test_world_operations_compose_through_ukr_primary_names(self):
         source, _ = read_sources()
         primary = source.split(ALIAS_MARKER, 1)[0]
