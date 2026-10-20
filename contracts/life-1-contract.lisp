@@ -1,13 +1,15 @@
-; LIFE-1 — Lisp-owned living-spine contract.
+; LIFE-1 — Мовний контракт наскрізного ланцюга виконання Ліспу.
 ;
-; This document defines what must remain true when one producer-native
-; observation is explicitly projected into input for another execution island.
-; It does not define Prolog, Datalog, CLIPS or Common Lisp semantics.
+; Контракт визначає, які умови обов'язково зберігати, коли
+; результат спостереження одного виконавчого острова явно
+; перетворюють на вхідні дані іншого острова.
+; Він не визначає семантику Prolog, Datalog, CLIPS чи Common Lisp.
 ;
-; Outer form:
+; Зовнішня форма:
 ;   (life-1-contract/1 ENTRY ...)
 ;
-; A LIFE trace is provenance/causality data, never a truth value.
+; Слід LIFE містить походження й причинні зв'язки, але ніколи
+; не є значенням логічної істини.
 
 (life-1-contract/1
   ((identity . life-trace)
