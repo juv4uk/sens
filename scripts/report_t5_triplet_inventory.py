@@ -17,6 +17,7 @@ import tempfile
 
 from audit_t5_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode, SKIP_DIRS)
 from sens_t5_codec import typed_sha256
+from report_ukr_projection_progress import tokenize_lisp
 
 SCHEMA = "sens-t5-triplet-inventory/v1"
 GOLDEN = "tests/fixtures/migration-d1-cond-cohort/branch.sens"
@@ -56,6 +57,24 @@ def lisp_source_names(root: Path, tracked: set[str] | None) -> list[str]:
             for name in files if name.endswith(".lisp")
         )
     return sorted(found)
+
+
+def is_comment_only_lisp(root: Path, name: str) -> bool:
+    """Коментарі й пробіли не породжують машинної програми для пакування.
+
+    Вкладені #| ... |# та ; розпізнаються чинним Lisp-токенізатором.
+    Неправильний UTF-8, обірваний коментар або посилання не звільняються
+    від обліку виконуваних кандидатів.
+    """
+    relative = Path(name)
+    path = root / relative
+    if (not path.is_file() or path.is_symlink()
+            or not no_link_ancestors(root, relative)):
+        return False
+    try:
+        return not tokenize_lisp(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, ValueError):
+        return False
 
 
 def safe_relative(name: str) -> Path:
@@ -167,6 +186,13 @@ def inspect(root: Path, *, include_untracked: bool = False,
         name for name in sources
         if Path(name).with_suffix(".sens").as_posix() not in physical_names
     ]
+    # Усі .lisp залишаються в історичному знаменнику, але інертні
+    # коментарі не стають недоведеними виконуваними SENS-програмами.
+    unpaired_nonprogram = [
+        name for name in unpaired_sources if is_comment_only_lisp(root, name)
+    ]
+    nonprogram = set(unpaired_nonprogram)
+    unpaired_programs = [name for name in unpaired_sources if name not in nonprogram]
     failed_required = sorted(
         name for name in required_names
         if name not in statuses or statuses[name]["view_status"] != "PHYSICAL_VIEW_PASS"
@@ -179,9 +205,9 @@ def inspect(root: Path, *, include_untracked: bool = False,
     # INCOMPLETE_VIEWS is a debt-bearing informational result, not release GREEN.
     status = ("NO_FILES" if not records else
               "BLOCKED" if blocked_physical or invalid or failed_required or
-                          (strict and (ready != len(records) or unpaired_sources)) else
+                          (strict and (ready != len(records) or unpaired_programs)) else
               "INCOMPLETE_VIEWS" if ready != len(records) else
-              "INCOMPLETE_SOURCE_PAIRS" if unpaired_sources else
+              "INCOMPLETE_SOURCE_PAIRS" if unpaired_programs else
               "PHYSICAL_VIEW_ONLY_UK_PENDING")
     return {
         "schema": SCHEMA,
@@ -191,10 +217,14 @@ def inspect(root: Path, *, include_untracked: bool = False,
         "required": sorted(required_names),
         "failed_required": failed_required,
         "unpaired_lisp_sources": unpaired_sources,
+        "unpaired_nonprogram_lisp_sources": unpaired_nonprogram,
+        "unpaired_program_lisp_sources": unpaired_programs,
         "summary": {
             "lisp_sources_seen": len(sources),
             "lisp_with_physical": len(sources) - len(unpaired_sources),
             "lisp_without_physical": len(unpaired_sources),
+            "unpaired_nonprogram_lisp_sources": len(unpaired_nonprogram),
+            "unpaired_program_lisp_sources": len(unpaired_programs),
             "physical_pairs_seen": len(records),
             "physical_blocked": blocked_physical,
             "view_present_valid": ready,
@@ -206,7 +236,8 @@ def inspect(root: Path, *, include_untracked: bool = False,
         },
         "files": records,
         "warning": (
-            "Tracked .lisp without same-stem .sens is counted explicitly. "
+            "All .lisp without .sens are counted; comment-only sources are "
+            "reported separately and are not missing machine programs. "
             "T5↔ASCII view identity is mechanical ONLY. Ukrainian uk source "
             "roundtrip, independent runtime semantics and release are NOT_VERIFIED."
         ),

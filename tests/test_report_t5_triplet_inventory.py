@@ -87,6 +87,35 @@ class TripletInventoryTests(unittest.TestCase):
         self.assertEqual(self.scan(strict=True)["status"], "BLOCKED")
         self.assertEqual(additional.read_bytes(), original)
 
+    def test_nonprogram_lisp_does_not_require_physical_t5m(self):
+        self.view.write_bytes(self.expected)
+        comment = self.root / "пояснення.lisp"
+        comment.write_text(
+            "; український опис\n#| зовнішній #| вкладений |# коментар |#\n",
+            encoding="utf-8",
+        )
+        report = self.scan(strict=True, required=())
+        self.assertEqual(report["status"], "PHYSICAL_VIEW_ONLY_UK_PENDING")
+        self.assertEqual(report["summary"]["lisp_without_physical"], 1)
+        self.assertEqual(report["summary"]["unpaired_nonprogram_lisp_sources"], 1)
+        self.assertEqual(report["summary"]["unpaired_program_lisp_sources"], 0)
+        self.assertEqual(report["unpaired_lisp_sources"], ["пояснення.lisp"])
+        self.assertEqual(report["unpaired_program_lisp_sources"], [])
+        self.assertEqual(report["summary"]["uk_oracle_verified"], 0)
+        self.assertEqual(report["summary"]["release_admitted"], 0)
+
+    def test_unclosed_block_comment_is_not_silently_exempted(self):
+        self.view.write_bytes(self.expected)
+        (self.root / "невалідний.lisp").write_text(
+            "#| незакритий коментар\n", encoding="utf-8"
+        )
+        report = self.scan(strict=True, required=())
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["summary"]["unpaired_nonprogram_lisp_sources"], 0)
+        self.assertEqual(report["summary"]["unpaired_program_lisp_sources"], 1)
+        self.assertEqual(report["unpaired_program_lisp_sources"], ["невалідний.lisp"])
+        self.assertEqual(report["summary"]["release_admitted"], 0)
+
     def test_noncanonical_ascii_views_are_rejected_byte_for_byte(self):
         variants = (
             b"",
