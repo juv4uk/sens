@@ -1,10 +1,9 @@
-; #4347 — explicit projection from canonical machine effects to one target.
-;
-; Upstream effect identity is target-neutral. This file alone chooses physical
-; registers and admitted target forms. Projection rejection is distinct from
-; effect-construction rejection.
+; #4347 — явна проєкція канонічних машинних ефектів на конкретну ціль.
+; Ідентичність ефекту не залежить від процесорної архітектури.
+; Тільки цей модуль вибирає фізичні регістри та допустимі форми команд.
+; Відмова проєкції відрізняється від відмови під час побудови ефекту.
 
-(визначити x86-project-machine-effect
+(визначити проєктувати-машинний-ефект-на-х86
   (функція (ефект)
     (за-умовою
       ((машинний-ефект-форма-додавання-64? ефект)
@@ -36,11 +35,15 @@
            (список (як-є ret)))))
       ((атом? ()) (як-є x86-projection-rejected)))))
 
-(визначити x86-encode-machine-effect
+(визначити закодувати-машинний-ефект-на-х86
   (функція (ефект)
-    (нехай ((форми (x86-project-machine-effect ефект)))
+    (нехай ((форми (проєктувати-машинний-ефект-на-х86 ефект)))
       (за-умовою
         ((атом? форми)
          (як-є x86-projection-rejected))
         ((атом? ())
          (x86-encode-admitted-program форми))))))
+
+; Історичні імена зовнішнього інтерфейсу лише посилаються на ті самі функції.
+(визначити x86-project-machine-effect проєктувати-машинний-ефект-на-х86)
+(визначити x86-encode-machine-effect закодувати-машинний-ефект-на-х86)
