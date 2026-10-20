@@ -2,14 +2,14 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(0011 identity (0010 (value) value))
+(0011 identity (0010 (значення) значення))
 
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
 (0011 binary
-  (0010 (width)
-    (1110 (001 binary) width)))
+  (0010 (ширина)
+    (1110 (001 binary) ширина)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -27,29 +27,29 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(0011 list (0010 args args))
+(0011 list (0010 аргументи аргументи))
 
 (0011 not
-  (0010 (value)
+  (0010 (значення)
     (110
-      (value (001 ()))
+      (значення (001 ()))
       (t t))))
 
 (0011 pair
-  (0010 (left right)
-    (111 left (111 right (001 ())))))
+  (0010 (лівий правий)
+    (111 лівий (111 правий (001 ())))))
 
 (0011 second
-  (0010 (values)
-    (100 (011 values))))
+  (0010 (значення)
+    (100 (011 значення))))
 
 (0011 third
-  (0010 (values)
-    (100 (011 (011 values)))))
+  (0010 (значення)
+    (100 (011 (011 значення)))))
 
 (0011 fourth
-  (0010 (values)
-    (100 (011 (011 (011 values))))))
+  (0010 (значення)
+    (100 (011 (011 (011 значення))))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -74,20 +74,20 @@
 ; посимвольно ідентичний, і node-right у lib/persistent-map.my — та
 ; сама операція, виписана вручну замість названа.
 (0011 fifth
-  (0010 (values)
-    (100 (011 (011 (011 (011 values)))))))
+  (0010 (значення)
+    (100 (011 (011 (011 (011 значення)))))))
 
 (0011 caar
-  (0010 (values)
-    (100 (100 values))))
+  (0010 (значення)
+    (100 (100 значення))))
 
 (0011 cadr
-  (0010 (values)
-    (100 (011 values))))
+  (0010 (значення)
+    (100 (011 значення))))
 
 (0011 cddr
-  (0010 (values)
-    (011 (011 values))))
+  (0010 (значення)
+    (011 (011 значення))))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
