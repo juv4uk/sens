@@ -1,13 +1,13 @@
-; #217 — executable targets for canonical explicit control.
+; #217 — виконувані цілі для канонічного явного контролю.
 ;
-; Control consumes domain-owned results. It does not decide that arbitrary
-; Lisp values are true/false from their shape.
+; Контроль споживає результати, що належать домену. Він не вирішує, що довільні
+; значення Lisp є істинними/хибними з їхньої форми.
 ;
-; Exact-Q decisions are the one mathematical binary input in this first slice:
-;   1/1 (canonical write 1) -> select clause
-;   0/1 (canonical write 0) -> continue to the next clause
+; Exact-Q рішення — єдиний математичний бінарний вхід у цьому першому зрізі:
+;   1/1 (канонічний запис 1) -> вибрати клаузу
+;   0/1 (канонічний запис 0) -> перейти до наступної клаузи
 ;
-; All other rows below must be rejected when used implicitly as a condition.
+; Усі інші рядки нижче мусять бути відкинуті при неявному вжитку як умова.
 
 ((expr . "(cond (1 7))")
  (expected . "7")
