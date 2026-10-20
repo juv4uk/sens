@@ -3,6 +3,7 @@
 (specifications->manifest
  (quote ("rust"
          "rust:cargo"
+         "zig"
          "gcc-toolchain"
          "bash"
          "coreutils"
