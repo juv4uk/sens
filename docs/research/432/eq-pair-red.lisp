@@ -1,7 +1,7 @@
-; #432 research-only RED probe.
-; The lower-basis search must not pretend EQ can inspect pair contents.
-; Current Canon contract: EQ accepts atoms only; pair operands must fail Type.
+; Дослідне негативне свідчення щодо порівняння пар.
+; Тотожність третього домену застосовується до атомів.
+; Передавання двох пар не повинно приховано порівнювати їхній вміст.
 
-(eq
-  (cons (quote left-a) (quote right-a))
-  (cons (quote left-b) (quote right-b)))
+(тотожне?
+  (сполучити (як-є ліве-а) (як-є праве-а))
+  (сполучити (як-є ліве-б) (як-є праве-б)))
