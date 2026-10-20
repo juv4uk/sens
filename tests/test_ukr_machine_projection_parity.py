@@ -359,10 +359,10 @@ def undo_current_lexical_binders(path: str, source: str) -> str:
     Це лише α-перейменування. Жоден цитований payload чи виклична голова
     не змінюється; точний Git blob і число відповідностей перевіряються.
     """
-    from tests.test_machine_projection_ukr_locals import SOURCE, rewrite_bound_atoms
+    from tests.test_machine_projection_ukr_locals import SOURCE, rewrite_bound_atoms, historical_projection_source
     old_sha, forward = SOURCE[path]
     backward = {new: old for old, new in forward.items()}
-    restored, count = rewrite_bound_atoms(source, backward)
+    restored, count = rewrite_bound_atoms(historical_projection_source(source), backward)
     expected = {
         "lib/machine/projection/x86-64.lisp": 27,
     }[path]
@@ -470,11 +470,13 @@ class MachineUkrMigrationTests(unittest.TestCase):
         self.assertNotEqual(mutant, source)
         self.assertNotIn('(перше (решта (решта (решта (решта рядок))))))', mutant)
 
-    def test_projections_do_not_change_host_call_names(self):
+    def test_projection_has_only_current_ukrainian_calls(self):
         proj = (ROOT / 'lib/machine/projection/x86-64.lisp').read_text(encoding='utf-8')
         parity = (ROOT / 'lib/machine/dispatch/native-first-parity.lisp').read_text(encoding='utf-8')
-        self.assertIn('(визначити x86-project-machine-effect', proj)
-        self.assertIn('(визначити x86-encode-machine-effect', proj)
+        self.assertIn('(визначити проєктувати-машинний-ефект-на-х86', proj)
+        self.assertIn('(визначити закодувати-машинний-ефект-на-х86', proj)
+        self.assertNotIn('(визначити x86-project-machine-effect', proj)
+        self.assertNotIn('(визначити x86-encode-machine-effect', proj)
         self.assertIn('(визначити нативний-паритет-перевірити-корпус', parity)
         self.assertIn('(визначити нативний-паритет-усі-вердикти-успішні?', parity)
         self.assertNotIn('(визначити native-first-parity-', parity)
@@ -483,13 +485,15 @@ class MachineUkrMigrationTests(unittest.TestCase):
 
     def test_negative_wrong_peer_cannot_pass_inverse(self):
         path = 'lib/machine/projection/x86-64.lisp'
-        text = undo_current_lexical_binders(
-            path, (ROOT / path).read_text(encoding='utf-8'))
-        mutated = text.replace('(визначити x86-project-machine-effect',
-                               '(визначити-невірно x86-project-machine-effect', 1)
-        self.assertNotEqual(mutated, text)
+        source = (ROOT / path).read_text(encoding='utf-8')
+        mutated = source.replace('(визначити проєктувати-машинний-ефект-на-х86',
+                                 '(визначити-невірно проєктувати-машинний-ефект-на-х86', 1)
+        self.assertNotEqual(mutated, source)
+        from tests.test_machine_projection_ukr_locals import historical_projection_source
         with self.assertRaises(AssertionError):
-            invert_projection(mutated, MANIFEST[path]['edits'], self.authority)
+            historical_projection_source(mutated)
+            restored = undo_current_lexical_binders(path, mutated)
+            invert_projection(restored, MANIFEST[path]['edits'], self.authority)
 
 
 if __name__ == '__main__':
