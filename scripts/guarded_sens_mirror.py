@@ -31,6 +31,7 @@ if str(SCRIPTS) not in sys.path:
 from sens_t5_codec import decode_t5m_bytes, typed_sha256, SensT5Error
 
 DEFAULT_DRIVER = SCRIPTS / "migrate-to-sens-codes.py"
+DEFAULT_FOUNDATION = REPO / "knowledge/d1-d11-foundation.json"
 SKIP = {".git", ".hg", ".svn", ".venv", "venv", "target",
         "__pycache__", "dist", "build", "node_modules"}
 MAX_SOURCES = 100_000
@@ -173,7 +174,7 @@ def atomic_new_directory(source: Path, destination: Path) -> None:
 
 
 def transaction(*, root: Path, out: Path, driver: Path = DEFAULT_DRIVER,
-                foundation: Path = REPO / "knowledge/d1-d9-foundation.json",
+                foundation: Path = DEFAULT_FOUNDATION,
                 timeout: int = 180) -> dict:
     root = root.absolute()
     out = out.absolute()
@@ -234,7 +235,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, required=True,
                     help="NEW output directory that must not exist")
     ap.add_argument("--foundation", type=Path,
-                    default=REPO / "knowledge/d1-d9-foundation.json")
+                    default=DEFAULT_FOUNDATION)
     args = ap.parse_args(argv)
     try:
         proof = transaction(root=args.root, out=args.out,
