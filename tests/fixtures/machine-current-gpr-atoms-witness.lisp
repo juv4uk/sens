@@ -2,12 +2,12 @@
 ; Ukrainian projection only. Encoder/admission owns machine facts;
 ; atoms own typed composition only.
 
-(load "lib/core.lisp")
-(load "lib/machine/block.lisp")
-(load "lib/machine/encoding/x86-64.lisp")
-(load "lib/machine/operands/x86-64.lisp")
-(load "lib/machine/admission/x86-64.lisp")
-(load "lib/machine/atoms/x86-64.lisp")
+(завантажити-файл "lib/core.lisp")
+(завантажити-файл "lib/machine/block.lisp")
+(завантажити-файл "lib/machine/encoding/x86-64.lisp")
+(завантажити-файл "lib/machine/operands/x86-64.lisp")
+(завантажити-файл "lib/machine/admission/x86-64.lisp")
+(завантажити-файл "lib/machine/atoms/x86-64.lisp")
 
 (визначити рядки-атомів-поточних-машинних-регістрів
   (функція ()
