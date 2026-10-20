@@ -97,6 +97,12 @@ class UkrainianLinterProjection(unittest.TestCase):
         self.assertNotIn("(11110111 head ", self.active)
         self.assertNotIn("(11110111 голова ", self.active)
 
+    def test_effect_primitive_registry_has_no_legacy_english_binding(self):
+        # Первинна функція визначається в Lisp, а не історичним псевдонімом.
+        self.assertIn("(визначити лінтер-примітиви-з-ефектами", self.active)
+        self.assertIn(" лінтер-примітиви-з-ефектами)", self.active)
+        self.assertNotIn("(визначити effectful-primitives", self.active)
+
     def test_wrong_peer_and_reintroduced_binary_head_fail_source_contract(self):
         wrong_peer = self.active.replace(
             "(як-є визначити)) (як-є визначити))",
