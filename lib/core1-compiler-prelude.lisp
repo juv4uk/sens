@@ -1,25 +1,22 @@
-; Core1 S3 compiler prelude.
+; Історична підготовка компілятора для першого ядра СЕНС.
+; Це бібліотечний механізм обчислення заперечення за історичним
+; законом першого ядра, а не джерело нового закону мови.
+; Першоджерела семантики зберігаються у першому ядрі
+; та історичній таблиці відповідності старих викличних кодів.
 ;
-; This file is an explicit Lisp-owned mechanism for compiling the existing
-; Core1 NOT law before wsm-my-lisp/lib/compiler.lisp.
+; Історичний обчислювач повертав власні значення істини та порожнечі.
+; Їх не можна непомітно замінити сучасними однобітними значеннями.
+; Цитоване значення історичної істини і стара публічна назва
+; збережені для сумісності з компілятором. Вони ще потребують
+; окремого перенесення споживачів на українську проєкцію.
 ;
-; Semantic authority does not originate here. The law is already present in:
-;   lib/core1.lisp                       C1-APPLY-PRIMITIVE / NOT
-;   contracts/core1-historical-sid-map.lisp  SID 00100001 -> historical NOT
+; Тіло використовує лише умовний вибір і цитування.
+; Назва параметра переведена українською без зміни області зв'язування.
 ;
-; Core1 truth is historical T/NIL. Do not replace this result domain with
-; Core4 identity-relation / structural-kind records.
-;
-; The definition intentionally uses only historical two-part COND + QUOTE.
-; It does not require CML to invent a NOT primitive or to know Core1 meaning.
-;
-; CML may key this definition/call by SID 00100001 as a compilation mechanism,
-; but the selected law remains Core1-owned.
-
 (визначити not
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      (value (як-є ()))
+      (значення (як-є ()))
       ((як-є T) (як-є T)))))
 
 (як-є core1-s3-compiler-prelude-ready)
