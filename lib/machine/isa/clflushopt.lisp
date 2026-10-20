@@ -1,4 +1,6 @@
-; Optimized cache-line flush instruction-family catalogue. Physical ISA facts only.
+; Каталог оптимізованої інструкції очищення рядка кешу CLFLUSHOPT.
+; Містить лише фізичні факти ISA, не мовні закони СЕНС.
+; Назви апаратних можливостей та полів залишаються незмінними.
 
 (isa-catalogue/1
   (extension CLFLUSHOPT)
