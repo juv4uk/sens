@@ -176,19 +176,19 @@ class SelectedOriginalT5(unittest.TestCase):
         projected = migration.migrate_file(
             original, current, text7, source_surface="укр", codec="t5")
         self.assertTrue(projected.startswith("10 1000 00 "), projected)
-        # Восьмизначний запис відсікається інспектором як неоднозначний
-        # історичний байт; парсер чинної мови бачить числовий атом.
-        # У жодному разі числові дані не стають викличною головою D8.
+        # Восьмибітне слово тут неоднозначне між SID8 та D8.
+        # Його не можна прирівняти ні до викличного D8, ні до
+        # математичних даних D24+. Точна відмова — W8-неоднозначність.
         self.assertEqual(
             app.ambiguous_eight_bit_atoms(migration, "(01001000 000)\n"),
             ["01001000"],
         )
-        numeric_head = migration.Resolver(my, upper)
+        ambiguous_head = migration.Resolver(my, upper)
         with self.assertRaisesRegex(
-            migration.MigrationError, r"D24\+ numeric value is data and is not callable"
+            migration.MigrationError, r"ambiguous eight-bit SID8/D8 call head"
         ):
             migration.migrate_file(
-                "(01001000 000)\n", numeric_head, text7,
+                "(01001000 000)\n", ambiguous_head, text7,
                 source_surface="укр", codec="t5")
 
     def test_real_unpaired_original_files_are_audited_not_converted(self):
