@@ -18,19 +18,19 @@ fn canon_session() -> Session {
 fn canon_constitutive_laws_use_current_predicate_results() {
     let mut session = canon_session();
     let cases: [(&str, &str); 13] = [
-        ("canon-empty-list", "()"),
-        ("(canon-law-empty-list)", "(canon-law-result empty-list satisfied)"),
-        ("(canon-law-atom-cons (quote left) (quote right))", "(canon-law-result atom-cons satisfied)"),
-        ("(canon-law-car-cons (quote left) (quote right))", "(canon-law-result car-cons satisfied)"),
-        ("(canon-law-cdr-cons (quote left) (quote right))", "(canon-law-result cdr-cons satisfied)"),
-        ("(canon-law-eq-reflexive-atom (quote left))", "(canon-law-result eq-reflexive-atom satisfied)"),
-        ("(canon-law-cdr-dotted)", "(canon-law-result cdr-dotted satisfied)"),
-        ("(canon-law-cdr-proper)", "(canon-law-result cdr-proper satisfied)"),
-        ("(canon-law-cdr-improper)", "(canon-law-result cdr-improper satisfied)"),
-        ("(canon-law-quote-suppresses-evaluation)", "(canon-law-result quote-suppresses-evaluation satisfied)"),
-        ("(canon-law-cond-first-match-short-circuit)", "(canon-law-result cond-first-match-short-circuit satisfied)"),
-        ("(canon-law-symbolic-surface)", "(canon-law-result symbolic-surface satisfied)"),
-        ("(canon-conforms?)", "(canon-conformance satisfied)"),
+        ("канон-порожній-список", "()"),
+        ("(канон-закон-порожній-список)", "(canon-law-result empty-list satisfied)"),
+        ("(канон-закон-атом-пара (quote left) (quote right))", "(canon-law-result atom-cons satisfied)"),
+        ("(канон-закон-перше-пара (quote left) (quote right))", "(canon-law-result car-cons satisfied)"),
+        ("(канон-закон-решта-пара (quote left) (quote right))", "(canon-law-result cdr-cons satisfied)"),
+        ("(канон-закон-рівність-рефлексивний-атом (quote left))", "(canon-law-result eq-reflexive-atom satisfied)"),
+        ("(канон-закон-решта-крапковий)", "(canon-law-result cdr-dotted satisfied)"),
+        ("(канон-закон-решта-правильний)", "(canon-law-result cdr-proper satisfied)"),
+        ("(канон-закон-решта-неправильний)", "(canon-law-result cdr-improper satisfied)"),
+        ("(канон-закон-цитування-пригнічує-обчислення)", "(canon-law-result quote-suppresses-evaluation satisfied)"),
+        ("(канон-закон-умова-перший-збіг-короткий-ланцюг)", "(canon-law-result cond-first-match-short-circuit satisfied)"),
+        ("(канон-закон-символьний-поверхня)", "(canon-law-result symbolic-surface satisfied)"),
+        ("(канон-відповідає?)", "(canon-conformance satisfied)"),
     ];
     for (expr, expected) in cases {
         let actual = eval_program(expr, &mut session)
@@ -47,15 +47,15 @@ fn canon_negative_predicate_polarity_and_exhaustion_are_not_truthiness() {
     // Пара не є атомом: YES і NO тут не взаємозамінні.
     let cases: [(&str, &str); 3] = [
         (
-            "(canon-law-eq-reflexive-atom (quote (left right)))",
+            "(канон-закон-рівність-рефлексивний-атом (quote (left right)))",
             "(canon-law-result eq-reflexive-atom violated)",
         ),
         (
-            "(canon-conformance-from (quote ()))",
+            "(канон-відповідність-з (quote ()))",
             "(canon-conformance satisfied)",
         ),
         (
-            "(canon-conformance-from (quote ((canon-law-result example violated))))",
+            "(канон-відповідність-з (quote ((canon-law-result example violated))))",
             "(canon-conformance violated)",
         ),
     ];

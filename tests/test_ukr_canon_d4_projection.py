@@ -98,8 +98,8 @@ class CanonD4FullUkrTests(unittest.TestCase):
                 self.assertNotRegex(code, r"\(" + bits + r"(?=\s|\))")
 
     def test_canon_empty_list_uses_exact_d3_quote_without_wire_literal(self):
-        self.assertIn("(визначити canon-empty-list (як-є ()))", self.source)
-        self.assertNotIn("(визначити canon-empty-list (001 ()))", self.source)
+        self.assertIn("(визначити канон-порожній-список (як-є ()))", self.source)
+        self.assertNotRegex(self.source, r"\(визначити canon-empty-list\b")
         for token in ("(як-є x)", "(як-є y)", "(як-є ())"):
             self.assertIn(token, self.source)
         for old_head in ("(001 x)", "(001 y)", "(001 ())"):
@@ -113,10 +113,11 @@ class CanonD4FullUkrTests(unittest.TestCase):
             self.assertNotIn(corrupted, self.source)
 
     def test_canon_public_entrypoints_survive(self):
-        for name in ("canon-empty-list", "canon-law-result",
-                     "canon-law-satisfied", "canon-law-violated",
-                     "canon-law-status", "canon-conformance-result"):
+        for name in ("канон-порожній-список", "канон-закон-результат",
+                     "канон-закон-виконаний", "канон-закон-порушений",
+                     "канон-закон-стан", "канон-відповідність-результат"):
             self.assertIn(f"(визначити {name}", self.source)
+        self.assertNotRegex(self.source, r"\(визначити canon-[a-z-]+\b")
 
     def test_parentheses_balance_excluding_comments_and_strings(self):
         level = 0

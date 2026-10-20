@@ -98,8 +98,8 @@ class CallsiteAuditTests(unittest.TestCase):
         }
         self.assertEqual(sorted(migrated.intersection(active_heads)), [])
         self.assertIn("(як-є canon-law-result)", source)  # D3:001 українська проєкція; цитований тег, не виклик
-        self.assertIn("(визначити canon-law-result", source)  # exact D4:0011 full укр, не нова identity
-        self.assertNotIn("(0011 canon-law-result", source)  # колишня coded DEFINE більше не source
+        self.assertIn("(визначити канон-закон-результат", source)
+        self.assertNotRegex(source, r"\(визначити canon-[a-z-]+\b")
 
         index, _ = mod.peer_index(repo_root)
         exact = {
