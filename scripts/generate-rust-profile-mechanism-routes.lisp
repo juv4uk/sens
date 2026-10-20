@@ -1,11 +1,13 @@
-; #1422 — generate the mechanical Core×SENS mechanism-admission projection.
+; #1422 — породження механічної проєкції допуску механізмів Core×SENS.
 ;
-; Authority: lib/function-table-mechanisms.lisp (profile-routes section).
-; Rust receives only coordinates + route kind. No law, surface, kernel syntax,
-; result semantics, or independently editable admission data may live there.
+; Єдине джерело істини — розділ profile-routes у
+; lib/function-table-mechanisms.lisp. Rust отримує тільки координати й вид
+; маршруту. Він не визначає мовних законів, поверхонь, синтаксису ядер,
+; семантики результатів чи незалежних правил допуску.
 ;
-; Usage:
+; Запуск із кореня репозиторію:
 ;   cargo run -p sens-cli -- scripts/generate-rust-profile-mechanism-routes.lisp
+; Перевірка без перезапису породженого файла:
 ;   cargo run -p sens-cli -- scripts/generate-rust-profile-mechanism-routes.lisp --check
 
 (визначити шлях-джерела "lib/function-table-mechanisms.lisp")
