@@ -56,15 +56,15 @@ jobs:
           if ($static.Count -ne 1) {
             throw "expected exactly one Cargo-reported static .lib, found $($static.Count)"
           }
-          "MY_LISP_EMBED_STATIC=$($static[0])" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "SENS_EMBED_STATIC=$($static[0])" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Require Windows static library artifact
         shell: pwsh
         run: |
-          if (-not (Test-Path $env:MY_LISP_EMBED_STATIC)) {
-            throw "Cargo-reported staticlib does not exist: $env:MY_LISP_EMBED_STATIC"
+          if (-not (Test-Path $env:SENS_EMBED_STATIC)) {
+            throw "Cargo-reported staticlib does not exist: $env:SENS_EMBED_STATIC"
           }
-          Write-Output "staticlib=$env:MY_LISP_EMBED_STATIC"
+          Write-Output "staticlib=$env:SENS_EMBED_STATIC"
 
       - name: Ask rustc for native static link dependencies
         shell: pwsh
@@ -87,14 +87,14 @@ jobs:
             throw 'native-static-libs report was empty'
           }
           $libs | ForEach-Object { Write-Output "native-lib=$_" }
-          "MY_LISP_NATIVE_LIBS=$($libs -join ';')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "SENS_EMBED_NATIVE_LIBS=$($libs -join ';')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Configure native static C consumer
         shell: pwsh
         run: |
           cmake -S crates/sens-embed/tests/static-consumer -B target/static-consumer `
-            "-DMY_LISP_EMBED_STATIC=$env:MY_LISP_EMBED_STATIC" `
-            "-DMY_LISP_NATIVE_LIBS=$env:MY_LISP_NATIVE_LIBS"
+            "-DSENS_EMBED_STATIC=$env:SENS_EMBED_STATIC" `
+            "-DSENS_EMBED_NATIVE_LIBS=$env:SENS_EMBED_NATIVE_LIBS"
           if ($LASTEXITCODE -ne 0) { throw 'static consumer configure failed' }
 
       - name: Link native static C consumer

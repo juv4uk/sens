@@ -18,21 +18,21 @@ use std::{
 /// C ABI contract version.  Hosts must compare this value before using the
 /// session exports, rather than treating matching symbol names as proof of
 /// compatibility.
-pub const MY_LISP_EMBED_ABI_VERSION: u32 = 5;
+pub const SENS_EMBED_ABI_VERSION: u32 = 6;
 
 /// Result tags that a nullary or typed-unary host mechanism may return
 /// through the C ABI.
-pub const MY_LISP_EMBED_NIL: u32 = 0;
-pub const MY_LISP_EMBED_TRUE: u32 = 1;
+pub const SENS_EMBED_NIL: u32 = 0;
+pub const SENS_EMBED_TRUE: u32 = 1;
 
 /// One atomic host mechanism. It must only observe or perform the requested
-/// action; the caller's Lisp program keeps all policy and orchestration.
-pub type MyLispEmbedNullaryFn = unsafe extern "C" fn(*mut c_void, *mut u32) -> i32;
+/// action; the caller's SENS program keeps all policy and orchestration.
+pub type SensEmbedNullaryFn = unsafe extern "C" fn(*mut c_void, *mut u32) -> i32;
 
 /// One atomic host mechanism that takes exactly one opaque host-handle
 /// argument of a fixed, registration-time `kind`. `token` is the handle's
-/// bound `u64` (the same value passed to `my_lisp_embed_bind_host_handle`);
-/// the mechanism never receives a raw handle any other Lisp value could
+/// bound `u64` (the same value passed to `sens_embed_bind_host_handle`);
+/// the mechanism never receives a raw handle any other SENS value could
 /// have produced, since `kind` is checked before this callback runs.
 ///
 /// v1 keeps the result space identical to the nullary mechanism's
@@ -40,22 +40,22 @@ pub type MyLispEmbedNullaryFn = unsafe extern "C" fn(*mut c_void, *mut u32) -> i
 /// unary mechanism to hand back a fresh opaque handle -- ABI#181 left that
 /// open as a later increment; nothing here forecloses adding it once a
 /// concrete downstream need exists.
-pub type MyLispEmbedUnaryFn = unsafe extern "C" fn(*mut c_void, u64, *mut u32) -> i32;
+pub type SensEmbedUnaryFn = unsafe extern "C" fn(*mut c_void, u64, *mut u32) -> i32;
 
 /// Opaque owner of one canonical, persistent sens session.
-pub struct MyLispEmbedSession {
+pub struct SensEmbedSession {
     session: Session,
 }
 
-fn new_session() -> Result<MyLispEmbedSession, String> {
+fn new_session() -> Result<SensEmbedSession, String> {
     let mut session = Session {
         environment: Environment::root(),
     };
     load_core_library(&mut session).map_err(|error| error.render(sens::CORE_LIBRARY_SOURCE))?;
-    Ok(MyLispEmbedSession { session })
+    Ok(SensEmbedSession { session })
 }
 
-fn response_for(session: &mut MyLispEmbedSession, source: &str) -> String {
+fn response_for(session: &mut SensEmbedSession, source: &str) -> String {
     match parse(source) {
         Ok(expressions) => {
             match eval_parsed_expressions_incremental(&expressions, &mut session.session) {
@@ -83,7 +83,7 @@ fn into_c_string(response: String) -> *mut c_char {
 }
 
 fn invoke_nullary(
-    callback: MyLispEmbedNullaryFn,
+    callback: SensEmbedNullaryFn,
     context: *mut c_void,
     surface: &str,
     arguments: &[sens::Value],
@@ -96,7 +96,7 @@ fn invoke_nullary(
             span,
         ));
     }
-    let mut raw_result = MY_LISP_EMBED_NIL;
+    let mut raw_result = SENS_EMBED_NIL;
     let status = unsafe { callback(context, &mut raw_result) };
     if status != 0 {
         return Err(sens::LanguageError::new(
@@ -106,8 +106,8 @@ fn invoke_nullary(
         ));
     }
     match raw_result {
-        MY_LISP_EMBED_NIL => Ok(sens::Value::Nil),
-        MY_LISP_EMBED_TRUE => Ok(sens::Value::predicate_bit(true)),
+        SENS_EMBED_NIL => Ok(sens::Value::Nil),
+        SENS_EMBED_TRUE => Ok(sens::Value::predicate_bit(true)),
         _ => Err(sens::LanguageError::new(
             sens::ErrorKind::InvalidForm,
             format!("{surface}: host returned an unknown result tag {raw_result}"),
@@ -117,7 +117,7 @@ fn invoke_nullary(
 }
 
 fn invoke_unary(
-    callback: MyLispEmbedUnaryFn,
+    callback: SensEmbedUnaryFn,
     context: *mut c_void,
     expected_kind: &str,
     surface: &str,
@@ -127,9 +127,7 @@ fn invoke_unary(
     let [argument] = arguments else {
         return Err(sens::LanguageError::new(
             sens::ErrorKind::InvalidForm,
-            format!(
-                "{surface} expects exactly 1 argument, an opaque {expected_kind} handle"
-            ),
+            format!("{surface} expects exactly 1 argument, an opaque {expected_kind} handle"),
             span,
         ));
     };
@@ -150,7 +148,7 @@ fn invoke_unary(
         ));
     }
 
-    let mut raw_result = MY_LISP_EMBED_NIL;
+    let mut raw_result = SENS_EMBED_NIL;
     let status = unsafe { callback(context, token, &mut raw_result) };
     if status != 0 {
         return Err(sens::LanguageError::new(
@@ -160,8 +158,8 @@ fn invoke_unary(
         ));
     }
     match raw_result {
-        MY_LISP_EMBED_NIL => Ok(sens::Value::Nil),
-        MY_LISP_EMBED_TRUE => Ok(sens::Value::predicate_bit(true)),
+        SENS_EMBED_NIL => Ok(sens::Value::Nil),
+        SENS_EMBED_TRUE => Ok(sens::Value::predicate_bit(true)),
         _ => Err(sens::LanguageError::new(
             sens::ErrorKind::InvalidForm,
             format!("{surface}: host returned an unknown result tag {raw_result}"),
@@ -172,21 +170,21 @@ fn invoke_unary(
 
 /// Returns the version of the C embedding contract implemented by this DLL.
 #[no_mangle]
-pub extern "C" fn my_lisp_embed_abi_version() -> u32 {
-    MY_LISP_EMBED_ABI_VERSION
+pub extern "C" fn sens_embed_abi_version() -> u32 {
+    SENS_EMBED_ABI_VERSION
 }
 
-/// Binds an embedding-owned opaque handle. Lisp may pass this value to a host
+/// Binds an embedding-owned opaque handle. SENS may pass this value to a host
 /// mechanism, but source syntax cannot construct or inspect its token.
 ///
 /// # Safety
 ///
-/// `session` must be null or a live pointer returned by `my_lisp_embed_session_new`.
+/// `session` must be null or a live pointer returned by `sens_embed_session_new`.
 /// `surface` and `kind` must be null or valid NUL-terminated strings for this call.
 /// Calls using one session must remain on its owning host thread.
 #[no_mangle]
-pub unsafe extern "C" fn my_lisp_embed_bind_host_handle(
-    session: *mut MyLispEmbedSession,
+pub unsafe extern "C" fn sens_embed_bind_host_handle(
+    session: *mut SensEmbedSession,
     surface: *const c_char,
     kind: *const c_char,
     token: u64,
@@ -215,19 +213,19 @@ pub unsafe extern "C" fn my_lisp_embed_bind_host_handle(
 ///
 /// Returns zero on success. Negative results indicate an invalid session,
 /// surface, or callback. A non-zero result from the host callback becomes a
-/// Lisp error for that evaluation and leaves the session usable.
+/// SENS error for that evaluation and leaves the session usable.
 ///
 /// # Safety
 ///
-/// `session` must be null or a live pointer returned by `my_lisp_embed_session_new`.
+/// `session` must be null or a live pointer returned by `sens_embed_session_new`.
 /// `surface` must be null or a valid NUL-terminated string for this call. When
 /// present, `callback` and `context` must remain valid for later invocations from
 /// this session. Calls using one session must remain on its owning host thread.
 #[no_mangle]
-pub unsafe extern "C" fn my_lisp_embed_register_nullary(
-    session: *mut MyLispEmbedSession,
+pub unsafe extern "C" fn sens_embed_register_nullary(
+    session: *mut SensEmbedSession,
     surface: *const c_char,
-    callback: Option<MyLispEmbedNullaryFn>,
+    callback: Option<SensEmbedNullaryFn>,
     context: *mut c_void,
 ) -> i32 {
     if session.is_null() || surface.is_null() || callback.is_none() {
@@ -253,26 +251,26 @@ pub unsafe extern "C" fn my_lisp_embed_register_nullary(
 
 /// Binds a one-argument host mechanism into one canonical session. The
 /// mechanism's single argument must be an opaque host handle bound via
-/// `my_lisp_embed_bind_host_handle` whose `kind` matches `kind` exactly;
+/// `sens_embed_bind_host_handle` whose `kind` matches `kind` exactly;
 /// any other value (wrong kind, or not a handle at all) becomes an
-/// ordinary Lisp-catchable error, not a host-side abort.
+/// ordinary SENS-catchable error, not a host-side abort.
 ///
 /// Returns zero on success. Negative results indicate an invalid session,
 /// surface, kind, or callback. A non-zero result from the host callback
-/// becomes a Lisp error for that evaluation and leaves the session usable.
+/// becomes a SENS error for that evaluation and leaves the session usable.
 ///
 /// # Safety
 ///
-/// `session` must be null or a live pointer returned by `my_lisp_embed_session_new`.
+/// `session` must be null or a live pointer returned by `sens_embed_session_new`.
 /// `surface` and `kind` must be null or valid NUL-terminated strings for this call.
 /// When present, `callback` and `context` must remain valid for later invocations
 /// from this session. Calls using one session must remain on its owning host thread.
 #[no_mangle]
-pub unsafe extern "C" fn my_lisp_embed_register_unary(
-    session: *mut MyLispEmbedSession,
+pub unsafe extern "C" fn sens_embed_register_unary(
+    session: *mut SensEmbedSession,
     surface: *const c_char,
     kind: *const c_char,
-    callback: Option<MyLispEmbedUnaryFn>,
+    callback: Option<SensEmbedUnaryFn>,
     context: *mut c_void,
 ) -> i32 {
     if session.is_null() || surface.is_null() || kind.is_null() || callback.is_none() {
@@ -292,7 +290,14 @@ pub unsafe extern "C" fn my_lisp_embed_register_unary(
     let diagnostic_surface = surface.clone();
     let function = std::rc::Rc::new(
         move |arguments: &[sens::Value], _environment: &sens::Environment, span| {
-            invoke_unary(callback, context, &kind, &diagnostic_surface, arguments, span)
+            invoke_unary(
+                callback,
+                context,
+                &kind,
+                &diagnostic_surface,
+                arguments,
+                span,
+            )
         },
     );
     (&mut *session)
@@ -305,7 +310,7 @@ pub unsafe extern "C" fn my_lisp_embed_register_unary(
 /// Creates a persistent canonical sens session with the ordinary core
 /// library loaded.  Returns null only if bootstrap unexpectedly panics.
 #[no_mangle]
-pub extern "C" fn my_lisp_embed_session_new() -> *mut MyLispEmbedSession {
+pub extern "C" fn sens_embed_session_new() -> *mut SensEmbedSession {
     catch_unwind(AssertUnwindSafe(new_session))
         .ok()
         .and_then(Result::ok)
@@ -315,17 +320,17 @@ pub extern "C" fn my_lisp_embed_session_new() -> *mut MyLispEmbedSession {
 }
 
 /// Evaluates UTF-8 source against this session and returns caller-owned UTF-8
-/// text.  The returned pointer must be freed with `my_lisp_embed_free_string`.
+/// text.  The returned pointer must be freed with `sens_embed_free_string`.
 /// Null source or a null session return null.
 ///
 /// # Safety
 ///
-/// `session` must be null or a live pointer returned by `my_lisp_embed_session_new`.
+/// `session` must be null or a live pointer returned by `sens_embed_session_new`.
 /// `source` must be null or a valid NUL-terminated byte sequence for this call.
 /// Calls using one session must remain on its owning host thread.
 #[no_mangle]
-pub unsafe extern "C" fn my_lisp_embed_eval(
-    session: *mut MyLispEmbedSession,
+pub unsafe extern "C" fn sens_embed_eval(
+    session: *mut SensEmbedSession,
     source: *const c_char,
 ) -> *mut c_char {
     if session.is_null() || source.is_null() {
@@ -342,28 +347,28 @@ pub unsafe extern "C" fn my_lisp_embed_eval(
         .unwrap_or_else(|_| into_c_string("error: canonical session panicked".to_owned()))
 }
 
-/// Frees a string returned by `my_lisp_embed_eval`.  A null pointer is a no-op.
+/// Frees a string returned by `sens_embed_eval`.  A null pointer is a no-op.
 ///
 /// # Safety
 ///
-/// `value` must be null or a pointer returned by `my_lisp_embed_eval` that has
+/// `value` must be null or a pointer returned by `sens_embed_eval` that has
 /// not already been freed; it must not come from another allocator or API.
 #[no_mangle]
-pub unsafe extern "C" fn my_lisp_embed_free_string(value: *mut c_char) {
+pub unsafe extern "C" fn sens_embed_free_string(value: *mut c_char) {
     if !value.is_null() {
         drop(CString::from_raw(value));
     }
 }
 
-/// Frees a session returned by `my_lisp_embed_session_new`.  A null pointer is
+/// Frees a session returned by `sens_embed_session_new`.  A null pointer is
 /// a no-op.  All calls for a session must remain on its owning host thread.
 ///
 /// # Safety
 ///
-/// `session` must be null or a live pointer returned by `my_lisp_embed_session_new`
+/// `session` must be null or a live pointer returned by `sens_embed_session_new`
 /// that has not already been freed; it must not come from another allocator or API.
 #[no_mangle]
-pub unsafe extern "C" fn my_lisp_embed_session_free(session: *mut MyLispEmbedSession) {
+pub unsafe extern "C" fn sens_embed_session_free(session: *mut SensEmbedSession) {
     if !session.is_null() {
         drop(Box::from_raw(session));
     }
@@ -399,7 +404,7 @@ fn binary_frame_stream_for_value(value: &Value) -> Result<PackedBitstream, Strin
     Ok(packer.finish())
 }
 
-/// Binary value channel (ABI v5). Evaluates `source` and, when the result
+/// Binary value channel (introduced in ABI v5). Evaluates `source` and, when the result
 /// value has a canonical binary domain frame, writes it as a densely packed
 /// bit stream (8 bits per byte, MSB-first, no padding) to `*out_bytes` with
 /// byte length `*out_len` and meaningful bit length `*out_bit_len`. The
@@ -408,16 +413,16 @@ fn binary_frame_stream_for_value(value: &Value) -> Result<PackedBitstream, Strin
 ///
 /// Returns 0 on success, 1 when the value has no canonical binary frame
 /// (fail-closed; nothing written), and 2 on parse/eval error with the rendered
-/// error in `*out_error` (release with `my_lisp_embed_free_string`).
+/// error in `*out_error` (release with `sens_embed_free_string`).
 ///
 /// # Safety
 ///
 /// `session` must be null or a live session, `source` a valid NUL-terminated
 /// string, and every out pointer non-null and writable. Bytes written to
-/// `*out_bytes` must be released with `my_lisp_embed_free_bits`.
+/// `*out_bytes` must be released with `sens_embed_free_bits`.
 #[no_mangle]
-pub unsafe extern "C" fn my_lisp_embed_eval_binary(
-    session: *mut MyLispEmbedSession,
+pub unsafe extern "C" fn sens_embed_eval_binary(
+    session: *mut SensEmbedSession,
     source: *const c_char,
     out_bytes: *mut *mut u8,
     out_len: *mut usize,
@@ -457,7 +462,8 @@ pub unsafe extern "C" fn my_lisp_embed_eval_binary(
 
     let outcome = catch_unwind(AssertUnwindSafe(|| -> Result<PackedBitstream, String> {
         let session = &mut *session;
-        let expressions = parse(&source).map_err(|error| format!("error: {}", error.render(&source)))?;
+        let expressions =
+            parse(&source).map_err(|error| format!("error: {}", error.render(&source)))?;
         let result = eval_parsed_expressions_incremental(&expressions, &mut session.session)
             .map_err(|error| format!("error: {}", error.render(&source)))?;
         binary_frame_stream_for_value(&result.value)
@@ -488,15 +494,15 @@ pub unsafe extern "C" fn my_lisp_embed_eval_binary(
     }
 }
 
-/// Releases bytes returned by `my_lisp_embed_eval_binary`. A null pointer or
+/// Releases bytes returned by `sens_embed_eval_binary`. A null pointer or
 /// zero length is a no-op.
 ///
 /// # Safety
 ///
 /// `bytes`/`len` must be exactly the pair returned by one successful
-/// `my_lisp_embed_eval_binary` call that has not already been freed.
+/// `sens_embed_eval_binary` call that has not already been freed.
 #[no_mangle]
-pub unsafe extern "C" fn my_lisp_embed_free_bits(bytes: *mut u8, len: usize) {
+pub unsafe extern "C" fn sens_embed_free_bits(bytes: *mut u8, len: usize) {
     if !bytes.is_null() && len > 0 {
         drop(Box::from_raw(ptr::slice_from_raw_parts_mut(bytes, len)));
     }
@@ -511,26 +517,26 @@ mod tests {
 
     unsafe extern "C" fn true_fact(_context: *mut c_void, out_result: *mut u32) -> i32 {
         NULLARY_CALLS.fetch_add(1, Ordering::SeqCst);
-        *out_result = MY_LISP_EMBED_TRUE;
+        *out_result = SENS_EMBED_TRUE;
         0
     }
 
-    fn eval(session: *mut MyLispEmbedSession, source: &str) -> String {
+    fn eval(session: *mut SensEmbedSession, source: &str) -> String {
         let source = CString::new(source).unwrap();
-        let raw_result = unsafe { my_lisp_embed_eval(session, source.as_ptr()) };
+        let raw_result = unsafe { sens_embed_eval(session, source.as_ptr()) };
         assert!(!raw_result.is_null());
         let result = unsafe { CStr::from_ptr(raw_result) }
             .to_str()
             .unwrap()
             .to_owned();
-        unsafe { my_lisp_embed_free_string(raw_result) };
+        unsafe { sens_embed_free_string(raw_result) };
         result
     }
 
     #[test]
     fn reports_the_documented_abi_version() {
-        assert_eq!(my_lisp_embed_abi_version(), MY_LISP_EMBED_ABI_VERSION);
-        assert_eq!(MY_LISP_EMBED_ABI_VERSION, 5);
+        assert_eq!(sens_embed_abi_version(), SENS_EMBED_ABI_VERSION);
+        assert_eq!(SENS_EMBED_ABI_VERSION, 6);
     }
 
     #[test]
@@ -559,12 +565,12 @@ mod tests {
     }
 
     #[test]
-    fn nullary_host_mechanism_returns_canonical_truth_to_lisp() {
+    fn nullary_host_mechanism_returns_canonical_truth_to_SENS() {
         NULLARY_CALLS.store(0, Ordering::SeqCst);
-        let session = my_lisp_embed_session_new();
+        let session = sens_embed_session_new();
         assert_eq!(
             unsafe {
-                my_lisp_embed_register_nullary(
+                sens_embed_register_nullary(
                     session,
                     CString::new("гравець-присутній?").unwrap().as_ptr(),
                     Some(true_fact),
@@ -574,13 +580,13 @@ mod tests {
             0
         );
 
-        assert_eq!(eval(session, "(гравець-присутній?)"), "t");
+        assert_eq!(eval(session, "(гравець-присутній?)"), "1");
         assert_eq!(NULLARY_CALLS.load(Ordering::SeqCst), 1);
         assert!(eval(session, "(гравець-присутній? 1)").starts_with("error: "));
-        assert_eq!(eval(session, "(гравець-присутній?)"), "t");
+        assert_eq!(eval(session, "(гравець-присутній?)"), "1");
         assert_eq!(NULLARY_CALLS.load(Ordering::SeqCst), 2);
 
-        unsafe { my_lisp_embed_session_free(session) };
+        unsafe { sens_embed_session_free(session) };
     }
 
     static UNARY_CALLS: AtomicUsize = AtomicUsize::new(0);
@@ -593,17 +599,17 @@ mod tests {
     ) -> i32 {
         UNARY_CALLS.fetch_add(1, Ordering::SeqCst);
         LAST_UNARY_TOKEN.store(token as usize, Ordering::SeqCst);
-        *out_result = MY_LISP_EMBED_TRUE;
+        *out_result = SENS_EMBED_TRUE;
         0
     }
 
     #[test]
     fn typed_unary_host_mechanism_receives_matching_handle_token_and_returns_canonical_truth() {
         UNARY_CALLS.store(0, Ordering::SeqCst);
-        let session = my_lisp_embed_session_new();
+        let session = sens_embed_session_new();
         assert_eq!(
             unsafe {
-                my_lisp_embed_bind_host_handle(
+                sens_embed_bind_host_handle(
                     session,
                     CString::new("гравець").unwrap().as_ptr(),
                     CString::new("player").unwrap().as_ptr(),
@@ -614,7 +620,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                my_lisp_embed_register_unary(
+                sens_embed_register_unary(
                     session,
                     CString::new("гравець-живий?").unwrap().as_ptr(),
                     CString::new("player").unwrap().as_ptr(),
@@ -625,24 +631,24 @@ mod tests {
             0
         );
 
-        assert_eq!(eval(session, "(гравець-живий? гравець)"), "t");
+        assert_eq!(eval(session, "(гравець-живий? гравець)"), "1");
         assert_eq!(UNARY_CALLS.load(Ordering::SeqCst), 1);
         assert_eq!(LAST_UNARY_TOKEN.load(Ordering::SeqCst), 777);
 
-        unsafe { my_lisp_embed_session_free(session) };
+        unsafe { sens_embed_session_free(session) };
     }
 
     #[test]
-    fn typed_unary_host_mechanism_rejects_wrong_kind_handle_as_lisp_error() {
-        let session = my_lisp_embed_session_new();
+    fn typed_unary_host_mechanism_rejects_wrong_kind_handle_as_SENS_error() {
+        let session = sens_embed_session_new();
         unsafe {
-            my_lisp_embed_bind_host_handle(
+            sens_embed_bind_host_handle(
                 session,
                 CString::new("зброя").unwrap().as_ptr(),
                 CString::new("weapon").unwrap().as_ptr(),
                 1,
             );
-            my_lisp_embed_register_unary(
+            sens_embed_register_unary(
                 session,
                 CString::new("гравець-живий?").unwrap().as_ptr(),
                 CString::new("player").unwrap().as_ptr(),
@@ -653,16 +659,19 @@ mod tests {
 
         let outcome = eval(session, "(гравець-живий? зброя)");
         assert!(outcome.starts_with("error: "), "got: {outcome}");
-        assert!(outcome.contains("player") && outcome.contains("weapon"), "got: {outcome}");
+        assert!(
+            outcome.contains("player") && outcome.contains("weapon"),
+            "got: {outcome}"
+        );
 
-        unsafe { my_lisp_embed_session_free(session) };
+        unsafe { sens_embed_session_free(session) };
     }
 
     #[test]
     fn typed_unary_host_mechanism_rejects_non_handle_argument_and_wrong_arity() {
-        let session = my_lisp_embed_session_new();
+        let session = sens_embed_session_new();
         unsafe {
-            my_lisp_embed_register_unary(
+            sens_embed_register_unary(
                 session,
                 CString::new("гравець-живий?").unwrap().as_ptr(),
                 CString::new("player").unwrap().as_ptr(),
@@ -675,15 +684,15 @@ mod tests {
         assert!(eval(session, "(гравець-живий?)").starts_with("error: "));
         assert!(eval(session, "(гравець-живий? 1 2)").starts_with("error: "));
 
-        unsafe { my_lisp_embed_session_free(session) };
+        unsafe { sens_embed_session_free(session) };
     }
 
     #[test]
-    fn host_handle_binding_is_opaque_to_lisp_source() {
-        let session = my_lisp_embed_session_new();
+    fn host_handle_binding_is_opaque_to_SENS_source() {
+        let session = sens_embed_session_new();
         assert_eq!(
             unsafe {
-                my_lisp_embed_bind_host_handle(
+                sens_embed_bind_host_handle(
                     session,
                     CString::new("гравець").unwrap().as_ptr(),
                     CString::new("cyberpunk.IScriptable").unwrap().as_ptr(),
@@ -697,43 +706,44 @@ mod tests {
             "#<host-handle cyberpunk.IScriptable>"
         );
         assert!(!eval(session, "гравець").contains("42"));
-        unsafe { my_lisp_embed_session_free(session) };
+        unsafe { sens_embed_session_free(session) };
     }
 
     #[test]
     fn ukrainian_definition_persists_in_one_canonical_session() {
-        let session = my_lisp_embed_session_new();
+        let session = sens_embed_session_new();
         assert!(!session.is_null());
 
         assert_eq!(eval(session, "(визначити repl-перевірка 42)"), "42");
         assert_eq!(eval(session, "repl-перевірка"), "42");
 
-        unsafe { my_lisp_embed_session_free(session) };
+        unsafe { sens_embed_session_free(session) };
     }
 
     #[test]
     fn ukrainian_closure_persists_in_one_canonical_session() {
-        let session = my_lisp_embed_session_new();
+        let session = sens_embed_session_new();
         assert!(!session.is_null());
 
         let definition = eval(
             session,
-            "(визначити подвоїти (функція (значення) (+ значення значення)))",
+            "(визначити тотожне-значення (функція (значення) значення))",
         );
         assert_eq!(definition, "<lambda>");
-        assert_eq!(eval(session, "(подвоїти 21)"), "42");
+        assert_eq!(eval(session, "(тотожне-значення 21)"), "21");
 
-        unsafe { my_lisp_embed_session_free(session) };
+        unsafe { sens_embed_session_free(session) };
     }
 
     #[test]
     fn language_errors_return_text_without_destroying_the_session() {
-        let session = my_lisp_embed_session_new();
+        let session = sens_embed_session_new();
         assert!(!session.is_null());
 
         assert!(eval(session, "(car 7)").starts_with("error: "));
-        assert_eq!(eval(session, "(+ 20 22)"), "42");
+        assert_eq!(eval(session, "(визначити збережене-значення 42)"), "42");
+        assert_eq!(eval(session, "збережене-значення"), "42");
 
-        unsafe { my_lisp_embed_session_free(session) };
+        unsafe { sens_embed_session_free(session) };
     }
 }
