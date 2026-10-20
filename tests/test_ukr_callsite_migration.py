@@ -1340,7 +1340,8 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
     ]
   },
   "scripts/check-domain-logic-laws.lisp": {
-    "sha": "7d957d241f83c89585405a5590cc7a6142eb24f5",
+    # Відновлений зріз включає чинні українські описи законів у самому .lisp.
+    "sha": "21ceae843197512aeea2b619ca9d8dd502609500",
     "edits": [
       [
         826,
@@ -1637,7 +1638,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
 
     @staticmethod
     def _restore_prior_domain_logic_calls(path, source):
-        """Preserve the pinned Git blob after separately verified D3/D9 and D8 migrations."""
+        """Відновити пінований зріз після окремо перевірених міграцій D3/D9 та D8."""
         if path != "scripts/check-domain-logic-laws.lisp":
             return source
         new_schema = '  (тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp"))) (як-є domain-table/1)))'
@@ -2248,9 +2249,10 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                        "100": 1, "011": 1},
         },
         "scripts/generate-rust-evaluator-dispatch.lisp": {
-            "blob": "489b46e8b5faa3e08344f7a3e9363eae8d0107b7",
-            # Newly surfaced raw heads add four calls: two D1, one D3, one D8;
-            # the inverse projection still restores the pinned source blob.
+            # Зворотний зріз після українізації локальних імен і параметрів.
+            "blob": "72f0ab9946f078a7060fbaf0412ad05a2d911c9f",
+            # Нові сирі голови додають чотири виклики: два D1, один D3 і один D8.
+            # Зворотна проєкція відновлює цей зріз після українізації локальних імен.
             "counts": {"100": 9, "110": 7, "111": 1, "1001": 4, "1110": 3, "11011011": 4,
                        "11110100": 1, "11110111": 4, "110011110": 1, "110101001": 1,
                        "110110111": 2, "110111100": 2, "11100": 2, "001000": 2, "101110": 1,
@@ -2370,7 +2372,7 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
             self.assertEqual(restored[offset:offset + len(head)], head, f"{path}: offset drift")
             restored = restored[:offset] + bits + restored[offset + len(head):]
         self.assertEqual(self._blob_sha(restored), spec["blob"],
-                         f"{path}: reverse projection must restore original Git blob")
+                         f"{path}: зворотна проєкція має відновити пінований зріз джерела")
         mod.parse(source)
         mod.parse(restored)
         self.assertEqual(len(source.splitlines()), len(restored.splitlines()))
