@@ -23,7 +23,8 @@ def fixtures() -> tuple[dict, dict, set[str]]:
         "summary": {"sens_files": 1, "physical_pass": 1},
         "files": [{
             "source": "lib/one.lisp", "sens": "lib/one.sens",
-            "physical_status": "PASS", "source_status": "PENDING_ORACLE",
+            "physical_status": "PASS", "physical_codec": "t5m",
+            "source_status": "PENDING_ORACLE",
             "physical_sha256": ZERO_SHA, "source_sha256": "1" * 64,
             "typed_word_sha256": "2" * 64,
         }],
@@ -63,7 +64,7 @@ class T5ProgressLedgerTests(unittest.TestCase):
         self.assertEqual(report["summary"]["independently_oracle_certified_from_these_inputs"], 0)
         self.assertEqual([r["status"] for r in report["files"]], [
             "NONPROGRAM_ARCHIVED_NO_EXECUTABLE_T5",
-            "PHYSICAL_T5_PAIR_PENDING_INDEPENDENT_ORACLE",
+            "PHYSICAL_T5M_PAIR_PENDING_INDEPENDENT_ORACLE",
             "UNPAIRED_SOURCE_BLOCKED",
         ])
         self.assertTrue(all(not x["semantic_admitted"] for x in report["files"]))
@@ -79,6 +80,33 @@ class T5ProgressLedgerTests(unittest.TestCase):
             "blocked_or_unverified": 2,
             "nonprogram_excluded_from_executable_target": 1,
         })
+
+    def test_legacy_t5_does_not_count_as_current_t5m(self):
+        pairs, ready, sources = fixtures()
+        pairs["files"][0]["physical_codec"] = "t5"
+        report = mod.combine(pairs, ready, sources)
+        self.assertEqual(report["status"], "COMPLETE_MECHANICAL_INVENTORY_ONLY")
+        self.assertEqual(report["files"][1]["status"],
+                         "PHYSICAL_LEGACY_T5_PAIR_REQUIRES_T5M")
+        self.assertEqual(report["files"][1]["physical_codec"], "t5")
+        self.assertEqual(report["summary"]["mechanically_canonical_physical_pairs"], 1)
+        self.assertEqual(report["summary"]["mechanically_canonical_current_t5m_pairs"], 0)
+        self.assertEqual(report["summary"]["legacy_t5_pairs_requiring_t5m"], 1)
+        self.assertFalse(report["all_executable_lisp_roundtrip_verified"])
+
+    def test_current_t5m_is_mechanical_only_without_native_oracle(self):
+        pairs, ready, sources = fixtures()
+        report = mod.combine(pairs, ready, sources)
+        self.assertEqual(report["summary"]["mechanically_canonical_current_t5m_pairs"], 1)
+        self.assertEqual(report["summary"]["legacy_t5_pairs_requiring_t5m"], 0)
+        self.assertEqual(report["files"][1]["physical_codec"], "t5m")
+        self.assertFalse(report["files"][1]["semantic_admitted"])
+
+    def test_physical_pass_without_identified_codec_is_rejected(self):
+        pairs, ready, sources = fixtures()
+        pairs["files"][0].pop("physical_codec")
+        with self.assertRaisesRegex(ValueError, "without identified T5M/T5 codec"):
+            mod.combine(pairs, ready, sources)
 
     def test_strict_cli_blocks_missing_native_oracle_even_when_inventory_complete(self):
         import json
