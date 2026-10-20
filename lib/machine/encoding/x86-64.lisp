@@ -179,8 +179,8 @@
       ((атом? (як-є ())) (як-є ()))))
       ((атом? (як-є ())) (як-є ())))))
 
-; ModR/M is a finite (mode:2, reg:3, rm:3) machine field.
-; Each admitted tuple maps directly to its byte; unsupported values fail closed.
+; ModR/M — скінченне машинне поле: режим — 2 біти, регістр — 3, r/m — 3.
+; Кожна допущена трійка точно відповідає байту; інші значення відхиляються.
 (визначити машина-кодувати-модрм
   (функція (режим регістр регістр-або-память)
     (за-умовою
@@ -806,11 +806,11 @@
       ((атом? (як-є ())) (як-є ()))))
       ((атом? (як-є ())) (як-є ())))))
 
-; #4104 — explicit representation boundary for an exact 3-bit machine field.
-; Canonical BinaryNumber remains the source identity (#b...).  The shared
-; legacy byte packer below still consumes mechanical Number fields, so project
-; only the closed u3 domain 0..7 here.  This is intentionally not a general
-; BinaryNumber -> legacy Number coercion.
+; #4104 — явна межа представлення точного трибітного машинного поля.
+; Канонічний BinaryNumber (#b...) зберігає вихідну тотожність.
+; Історичний пакувальник байтів нижче приймає механічне числове поле,
+; тому тут проєктуємо лише замкнену множину u3 від 0 до 7.
+; Це не загальне перетворення BinaryNumber на історичне число.
 (визначити машина-проєктувати-три-біти-до-механізму
   (функція (значення)
     (за-умовою
@@ -825,8 +825,8 @@
       ((атом? ()) (як-є ())))))
 
 
-; SIB is a finite (scale:2, index:3, base:3) machine field.
-; Explicit tuples preserve the exact byte without semantic-number arithmetic.
+; SIB — скінченне машинне поле: масштаб — 2 біти, індекс — 3, база — 3.
+; Явні комбінації полів зберігають точний байт без арифметики мовних чисел.
 (визначити машина-кодувати-сіб
   (функція (масштаб індекс база)
     (за-умовою
@@ -1452,12 +1452,12 @@
       ((атом? (як-є ())) (як-є ()))))
       ((атом? (як-є ())) (як-є ())))))
 
-; Reuse the already proved exact Lisp long-division byte extractor.
-; Four iterations are the imm32 wire shape; historical W8 quotient/remainder
-; heads are not executable machine authority under strict D1 COND.
-; Canonical #q2 wire is the source of exact integer magnitude here.
-; Parse numerator bits only after checking the tag and denominator; negative,
-; fractional, malformed and over-width values fail closed. No Number arithmetic.
+; Повторно використовуємо доведений у Lisp добувач байтів через ділення стовпчиком.
+; Чотири ітерації задають фізичне подання imm32; старі голови W8
+; для частки й остачі не мають повноважень у строгому D1 COND.
+; Канонічний запис #q2 задає точну величину цілого.
+; Біти чисельника читаємо тільки після перевірки тега та знаменника.
+; Від'ємні, дробові, пошкоджені й завеликі числа явно відхиляємо.
 (визначити машина-розділити-ціле-подання
   (функція (текст біти)
     (за-умовою
@@ -1498,8 +1498,10 @@
          ((атом? ()) (як-є ()))))
      (значення-у-текст значення))))))
 
-; Exact finite 8-bit decode. The source owns every transition and every byte;
-; output projection never uses +, mod, division, or a host integer conversion.
+; Точне декодування скінченного восьмибітного поля.
+; Саме джерело задає кожен перехід та кожен байт.
+; Для проєкції результату не використовуємо додавання, остачу, ділення
+; або числове перетворення зовнішнім виконавцем.
 (визначити машина-байт-із-восьми-бітів
   (функція (біт-нуль біт-один біт-два біт-три біт-чотири біт-пять біт-шість біт-сім)
     (за-умовою
@@ -2376,13 +2378,13 @@
            (машина-байти-64 безпосереднє-значення))))
      (машина-код-регістра регістр))))
 
-; Project a signed disp8 to its canonical byte after adding 256.
-; The biased input is in [128,383], so the existing Lisp-owned binary
-; long-division routine can return the exact remainder without borrowing the
-; historical D8:00010011 coordinate (currently MAPLIST-right, not MOD).
-; D3 CDR selects the remainder from the returned (quotient . remainder) pair.
-; Signed disp8 is a finite machine field. Negative values map by the
-; two's-complement byte projection, without invoking Core math or host coercion.
+; Знаковий disp8 проєктуємо в канонічний байт після додавання 256.
+; Зміщений вхід належить [128,383], тому власний для Lisp
+; алгоритм ділення стовпчиком повертає точну остачу без історичної
+; координати D8:00010011 (тепер це MAPLIST-right, не MOD).
+; D3 CDR добуває остачу із пари (частка . остача).
+; Від'ємні значення скінченного поля disp8 перетворюємо через
+; двійкове доповнення без математики ядра й перетворення хостом.
 (визначити машина-байт-восьмибітного-зсуву
   (функція (зміщення)
     (за-умовою
@@ -2900,9 +2902,9 @@
        127)
       ((атом? (як-є ())) (як-є ())))))
 
-; MOV r64, [base + disp8], opcode 8B /r.
-; ModR/M mode 01 always carries one displacement byte. RSP/R12 bases use the
-; required no-index SIB byte instead of silently emitting an invalid address.
+; MOV r64, [база + disp8]: код операції 8B /r.
+; Режим ModR/M 01 містить один байт зсуву. Бази RSP/R12
+; потребують байта SIB без індексу, інакше адреса буде некоректною.
 (визначити машина-кодувати-зчитування-памяті-зі-зсувом-8
   (функція (призначення база зміщення)
     ((функція (код-призначення) ((функція (код-бази) ((функція (байт-рекс) ((функція (байт-модрм) (за-умовою
@@ -2916,7 +2918,7 @@
               ((атом? ())
                 (список байт-рекс 139 байт-модрм (машина-байт-восьмибітного-зсуву зміщення))))) (машина-кодувати-модрм 1 (машина-молодші-три-біти код-призначення) (машина-молодші-три-біти код-бази)))) (машина-кодувати-поле-рекс 1 (машина-старший-біт код-призначення) 0 (машина-старший-біт код-бази)))) (машина-код-регістра база))) (машина-код-регістра призначення))))
 
-; MOV [base + disp8], r64, opcode 89 /r.
+; MOV [база + disp8], r64: код операції 89 /r.
 (визначити машина-кодувати-запис-у-память-зі-зсувом-8
   (функція (база зміщення джерело)
     ((функція (код-бази) ((функція (код-джерела) ((функція (байт-рекс) ((функція (байт-модрм) (за-умовою
@@ -2930,16 +2932,13 @@
               ((атом? ())
                 (список байт-рекс 137 байт-модрм (машина-байт-восьмибітного-зсуву зміщення))))) (машина-кодувати-модрм 1 (машина-молодші-три-біти код-джерела) (машина-молодші-три-біти код-бази)))) (машина-кодувати-поле-рекс 1 (машина-старший-біт код-джерела) 0 (машина-старший-біт код-бази)))) (машина-код-регістра джерело))) (машина-код-регістра база))))
 
-; LEA r64, [base + disp8], opcode 0x8D /r -- per #175's pinned XED evidence
-; (`PATTERN : 0x8D MOD[mm] MOD!=3 REG[rrr] RM[nnn] MODRM() REMOVE_SEGMENT()`,
-; `OPERANDS : REG0=GPRv_R():w AGEN:r`). AGEN means the operand is an address
-; computed from the ModRM/SIB/displacement, never an actual memory read --
-; the identical addressing shape #199's mov-r64-mem-disp8 already encodes,
-; only the opcode byte differs and no memory access happens. This is the
-; first form the encoder admits that computes an address without touching
-; any flags, needed once pointer/offset arithmetic (e.g. advancing a
-; bump-pointer arena, or computing a struct field's address) must not
-; disturb a CMP result still pending in a nearby branch.
+; LEA r64, [база + disp8]: код операції 0x8D /r за закріпленим доказом XED #175.
+; Шаблон: `PATTERN : 0x8D MOD[mm] MOD!=3 REG[rrr] RM[nnn] MODRM() REMOVE_SEGMENT()`.
+; Операнди: `REG0=GPRv_R():w AGEN:r`. AGEN означає обчислення адреси
+; з ModRM/SIB/зсуву, а не читання пам'яті. Форма адресування збігається
+; з mov-r64-mem-disp8 із #199, відрізняється лише байт операції.
+; LEA не змінює прапорці: це необхідно для арифметики вказівників
+; і зсувів, коли результат CMP ще потрібний наступній гілці.
 (визначити машина-кодувати-обчислення-адреси-зі-зсувом-8
   (функція (призначення база зміщення)
     ((функція (код-призначення) ((функція (код-бази) ((функція (байт-рекс) ((функція (байт-модрм) (за-умовою
