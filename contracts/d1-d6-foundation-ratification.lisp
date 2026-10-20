@@ -1,7 +1,7 @@
 ; contracts/d1-d6-foundation-ratification.lisp
 ; OWNER-RATIFIED 2026-10-05 — issue #3393.
-; Single current semantic foundation chain through D6.
-; Exact resident maps are delegated to per-domain current authorities.
+; Єдиний чинний ланцюг семантичної основи до D6.
+; Точні карти резидентів делеговано поточним владам відповідних доменів.
 
 (
   (schema . d1-d6-foundation-ratification/1)
