@@ -21,6 +21,7 @@ jobs:
       - name: Independently execute current admitted D4 CAAR oracle
         run: cargo test -p sens --test migration_d4_selector_cohort -- --nocapture
       - name: Inspect REAL tracked original Lisp sources (no publishing)
+        # The retired legacy/current source-era flags NEVER grant D8 callability.
         shell: bash
         run: |
           set -euo pipefail
@@ -30,7 +31,7 @@ jobs:
             report="triage-reports/$slug.json"
             set +e
             python3 scripts/migrate-selected-lisp.py \
-              --source "$src" --source-blob HEAD --source-era legacy \
+              --source "$src" --source-blob HEAD --source-era auto \
               --inspect --out-root "$RUNNER_TEMP/sens-inspect-only" \
               --reader target/debug/sens-trit --report "$report"
             code=$?
