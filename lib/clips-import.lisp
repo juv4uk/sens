@@ -1,123 +1,33 @@
-; A universal(-ish) importer for old symbolic-AI systems, starting with
-; CLIPS (see NASA's Johnson Space Center, 1985 — the same forward-chaining
-; lineage lib/forward.lisp grew independently). "Universal" here means: this
-; project reads *whatever S-expression syntax the old system used* as raw
-; data via my-lisp's own `read`/`quote` — no dedicated tokenizer, no string
-; primitives, no new Rust code. CLIPS forms like `(defrule foo (bar ?x) =>
-; (assert (baz ?x)))` parse cleanly as ordinary my-lisp data (`?x`, `=>`,
-; `defrule` are all just symbols to the reader) even though none of them
-; are meaningful my-lisp forms to *evaluate* — homoiconicity used exactly
-; as McCarthy's own S-expression choice intended: code (or someone else's
-; code) is data first.
+; Імпортер історичних систем символьного штучного інтелекту.
+; Перший підтриманий формат — CLIPS, створений у NASA Johnson Space Center.
+; Правила прямого виведення розвиваються окремо в lib/forward.lisp.
 ;
-; Step 1 (deliberately small, by explicit agreement before writing this):
-; `deffacts` only — CLIPS's variable-free fact declarations. A CLIPS form
-; `(deffacts name (fact1 ...) (fact2 ...) ...)` becomes the same
-; `(head . body)` clause list `defmodule` already expects, one
-; zero-condition clause per fact. `defrule` (rules, and CLIPS's `?x`
-; variable syntax needing conversion to `(var x)`) is a separate, later
-; step — not assumed here.
+; Зовнішні S-вирази читаються як дані, а не виконуються як програми СЕНС.
+; Мова не потребує окремого токенізатора CLIPS чи нового примітива Rust:
+; гомоіконічність дає змогу розбирати структуру списків засобами Lisp.
+; Наприклад, чужа форма (defrule foo (bar ?x) => (assert (baz ?x)))
+; містить лише символи зовнішньої граматики, а не викличні голови СЕНС.
 ;
-; Універсальний(-уватий) імпортер зі старих символьних AI-систем, починаючи
-; з CLIPS (NASA Johnson Space Center, 1985 рік — та сама forward-chaining
-; лінія, яку lib/forward.lisp виростив незалежно). "Універсальний" тут
-; означає: цей проєкт читає *будь-який S-вираз старої системи* як сирі дані
-; через власні `read`/`quote` my-lisp — без окремого токенізатора, без
-; рядкових примітивів, без нового Rust-коду. CLIPS-форми на кшталт
-; `(defrule foo (bar ?x) => (assert (baz ?x)))` парсяться як звичайні
-; my-lisp дані (`?x`, `=>`, `defrule` — просто символи для reader'а), хоча
-; жоден з них не є осмисленою my-lisp-формою для *виконання* —
-; гомоіконічність, використана саме так, як і задумував вибір S-виразів
-; Маккарті: код (навіть чужий) — спершу дані.
+; Перший етап імпорту: оголошення CLIPS deffacts без змінних.
+; Форми (deffacts name (fact1 ...) (fact2 ...) ...) стають окремими
+; клаузами (head . body), які очікує мовна система модулів.
+; Підтримка defrule, перетворення змінних ?x на (var x) та виконання
+; правил не випливають з одного лише читання форми.
 ;
-; Крок 1 (свідомо маленький, за явною домовленістю перед написанням):
-; лише `deffacts` — CLIPS-декларації фактів без змінних. CLIPS-форма
-; `(deffacts name (факт1 ...) (факт2 ...) ...)` стає тим самим списком
-; clause `(head . body)`, якого вже чекає `defmodule`, по одному
-; clause-факту без умов на кожен факт. `defrule` (правила, і CLIPS-синтаксис
-; змінних `?x`, який треба конвертувати в `(var x)`) — окремий, пізніший
-; крок, тут не мається на увазі.
+; Наступний етап: шаблони CLIPS deftemplate з іменованими слотами.
+; Позиційний факт (planet earth) не має іменованих слотів.
+; Шаблон (deftemplate reading (slot sensor) (slot value)) задає порядок
+; sensor, value. Тому (reading (value 98) (sensor probe1))
+; перетворюється на позиційний (reading probe1 98), незалежно
+; від порядку запису слотів у вихідному факті.
 ;
-; Ein universeller(-ähnlicher) Importer für alte symbolische KI-Systeme,
-; beginnend mit CLIPS (NASA Johnson Space Center, 1985 — dieselbe
-; Forward-Chaining-Linie, die lib/forward.lisp unabhängig entwickelt hat).
-; "Universell" bedeutet hier: dieses Projekt liest *jede S-Ausdruck-Syntax
-; des alten Systems* als Rohdaten über my-lisps eigenes `read`/`quote` —
-; kein eigener Tokenizer, keine String-Primitive, kein neuer Rust-Code.
-; CLIPS-Formen wie `(defrule foo (bar ?x) => (assert (baz ?x)))` parsen
-; sauber als gewöhnliche my-lisp-Daten (`?x`, `=>`, `defrule` sind für den
-; Reader nur Symbole), obwohl keine davon eine sinnvolle my-lisp-Form zum
-; *Auswerten* ist — Homoikonizität genau so eingesetzt, wie McCarthys
-; eigene Wahl der S-Ausdrücke es beabsichtigte: Code (auch fremder) ist
-; zuerst Daten.
+; Імпортер спочатку одноразово проходить усі форми та складає
+; звичайний список (назва . (слот1 слот2 ...)). Далі зіставлення
+; фактів, умов і висновків користується цим списком без змінюваного
+; глобального реєстру. Терми без відомого імені шаблону
+; проходять без змін. Імена зовнішніх форм залишено точними
+; протокольними даними, а не латинськими викликами СЕНС.
 ;
-; Schritt 1 (bewusst klein, nach ausdrücklicher Absprache vor dem
-; Schreiben): nur `deffacts` — CLIPS' variablenfreie Faktendeklarationen.
-; Eine CLIPS-Form `(deffacts name (fakt1 ...) (fakt2 ...) ...)` wird zur
-; selben `(head . body)`-Clause-Liste, die `defmodule` bereits erwartet,
-; eine bedingungslose Clause pro Fakt. `defrule` (Regeln, und CLIPS'
-; `?x`-Variablensyntax, die zu `(var x)` konvertiert werden muss) ist ein
-; separater, späterer Schritt, hier nicht unterstellt.
-; --- Step 8: deftemplate, CLIPS's named-slot facts -----------------------
-; Ordinary CLIPS facts are positional, the same shape my-lisp facts always
-; were: `(planet earth)`. A `deftemplate` changes that for facts of its
-; name: `(deftemplate reading (slot sensor) (slot value))` means every
-; `reading` fact from then on is written by slot name, in any order —
-; `(reading (value 98) (sensor probe1))`, not `(reading probe1 98)`.
-; my-lisp facts stay purely positional (no reason to grow that
-; representation just to mirror CLIPS) — so a template's declared slot
-; order becomes the fixed positional order its facts get converted to on
-; import: the example above becomes `(reading probe1 98)`, matching
-; `(slot sensor)` then `(slot value)`.
-;
-; Deliberately a two-pass, pure-functional approach, not a running mutable
-; registry: `clips-templates-from-forms` scans the *whole* form list once
-; up front and builds a plain `(name . (slot1 slot2 ...))` alist, which
-; every fact/condition/conclusion conversion then just looks up — no
-; `def`-based global state needed (see `lib/knowledge.lisp`'s
-; `*knowledge-base*` for why that would need the same top-level-only-def
-; care this project keeps avoiding when a pure function already works).
-; A term whose head isn't a known template name passes through unchanged.
-;
-; Крок 8: deftemplate, іменовані слоти CLIPS. Звичайні CLIPS-факти —
-; позиційні, та сама форма, що й факти my-lisp завжди мали: `(planet
-; earth)`. `deftemplate` змінює це для фактів своєї назви: `(deftemplate
-; reading (slot sensor) (slot value))` означає, що відтепер кожен факт
-; `reading` записується за іменем слота, у будь-якому порядку — `(reading
-; (value 98) (sensor probe1))`, не `(reading probe1 98)`. Факти my-lisp
-; лишаються чисто позиційними (нема причини розширювати це представлення
-; лише щоб віддзеркалити CLIPS) — тож оголошений порядок слотів шаблону
-; стає фіксованим позиційним порядком, у який його факти конвертуються при
-; імпорті: приклад вище стає `(reading probe1 98)`, відповідно до `(slot
-; sensor)`, тоді `(slot value)`.
-;
-; Свідомо дво-прохідний, чисто функціональний підхід, не робочий
-; мутабельний реєстр: `clips-templates-from-forms` сканує *весь* список
-; форм наперед один раз і будує звичайний alist `(назва . (слот1 слот2
-; ...))`, який потім просто шукає кожна конвертація факту/умови/висновку —
-; жодного `def`-based глобального стану не потрібно. Терм, чия голова не є
-; відомою назвою шаблону, проходить незмінним.
-;
-; Schritt 8: deftemplate, CLIPS' benannte Slots. Gewöhnliche CLIPS-Fakten
-; sind positional, dieselbe Form, die my-lisp-Fakten immer hatten:
-; `(planet earth)`. Ein `deftemplate` ändert das für Fakten seines Namens:
-; `(deftemplate reading (slot sensor) (slot value))` bedeutet, dass jeder
-; `reading`-Fakt fortan per Slot-Name geschrieben wird, in beliebiger
-; Reihenfolge — `(reading (value 98) (sensor probe1))`, nicht `(reading
-; probe1 98)`. my-lisp-Fakten bleiben rein positional (kein Grund, diese
-; Darstellung nur zu erweitern, um CLIPS zu spiegeln) — die deklarierte
-; Slot-Reihenfolge eines Templates wird also zur festen positionalen
-; Reihenfolge, in die seine Fakten beim Import umgewandelt werden: das
-; obige Beispiel wird zu `(reading probe1 98)`, entsprechend `(slot
-; sensor)`, dann `(slot value)`.
-;
-; Bewusst ein zweistufiger, rein funktionaler Ansatz, keine laufende
-; mutable Registry: `clips-templates-from-forms` durchsucht die *ganze*
-; Formliste einmal im Voraus und baut eine gewöhnliche Alist `(name .
-; (slot1 slot2 ...))`, die jede Fakt-/Bedingungs-/Schlussfolgerungs-
-; Konvertierung dann einfach nachschlägt — kein `def`-basierter globaler
-; Zustand nötig. Ein Term, dessen Kopf kein bekannter Template-Name ist,
-; bleibt unverändert.
 (визначити кліпс-визначити-шаблон-форма?
   (функція (форма)
     (за-умовою
