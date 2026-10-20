@@ -1,4 +1,4 @@
-; #432 branch scope, research-only.
+; #432 обсяг гілки, лише дослідження.
 (branch-scope
   (base-main . "23cfdc141ef1e7ab4275d27c536a99d1018f3292")
   (owned-prefix . "docs/research/432/")
