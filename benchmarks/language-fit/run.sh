@@ -103,6 +103,8 @@ done
   echo
   echo '| Реалізація | Медіана, мс | Компіляція, мс | Бінарник, байт | SHA-256 джерела |'
   echo '|---|---:|---:|---:|---|'
+  # В анотації використовуємо ті самі значення, що й у таблиці.
+  brief_times=()
   for lang in "${variants[@]}"; do
     median_ns="$(awk -F '\t' -v lang="$lang" '$1==lang {print $3}' "$scratch/samples.tsv" | sort -n | sed -n '3p')"
     build_ns="$(awk -F '\t' -v lang="$lang" '$1==lang {print $2}' "$scratch/build.tsv")"
@@ -117,7 +119,35 @@ done
     median_ms="$(awk -v ns="$median_ns" 'BEGIN {printf "%.3f", ns/1000000}')"
     build_ms="$(awk -v ns="$build_ns" 'BEGIN {printf "%.3f", ns/1000000}')"
     printf '| %s | %s | %s | %s | %s |\n' "$lang" "$median_ms" "$build_ms" "$binary_bytes" "$hash"
+    brief_times+=("$lang=${median_ms}ms")
   done
+
+  # ::notice:: друкуємо лише після перевірки точності для всіх п'яти.
+  # stderr не входить до повної Markdown-таблиці Step Summary.
+  if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    cpu_brief="$(awk -F: '/model name/ {sub(/^[[:space:]]+/, "", $2); print $2; exit}' /proc/cpuinfo)"
+    cpu_brief="${cpu_brief//%/%25}"
+    cpu_brief="${cpu_brief//
+  echo 'Це дослідницький вимір; результати GitHub-hosted CPU не є результатами i5-6400.'
+  echo 'AVX2/FMA може змінювати порядок додавання f64; застосовано числовий допуск.'
+} | tee "$scratch/result.md"
+
+if [[ -v GITHUB_STEP_SUMMARY && -n "$GITHUB_STEP_SUMMARY" ]]; then
+  cat "$scratch/result.md" >> "$GITHUB_STEP_SUMMARY"
+fi
+\r'/%0D}"
+    cpu_brief="${cpu_brief//
+  echo 'Це дослідницький вимір; результати GitHub-hosted CPU не є результатами i5-6400.'
+  echo 'AVX2/FMA може змінювати порядок додавання f64; застосовано числовий допуск.'
+} | tee "$scratch/result.md"
+
+if [[ -v GITHUB_STEP_SUMMARY && -n "$GITHUB_STEP_SUMMARY" ]]; then
+  cat "$scratch/result.md" >> "$GITHUB_STEP_SUMMARY"
+fi
+\n'/%0A}"
+    printf -v compact '%s; ' "${brief_times[@]}"
+    printf '::notice title=SENS Skylake — короткі результати::CPU=%s; %sточність=PASS; медіани 5 запусків цілого процесу; дослід\n' "$cpu_brief" "$compact" >&2
+  fi
   echo
   echo 'Це дослідницький вимір; результати GitHub-hosted CPU не є результатами i5-6400.'
   echo 'AVX2/FMA може змінювати порядок додавання f64; застосовано числовий допуск.'
