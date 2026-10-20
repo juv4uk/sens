@@ -1,5 +1,5 @@
-; Forward-chaining rule engine (CLIPS-style). Ukrainian projection only (candidate).
-; Working memory of facts + pattern/action rules. Uses unify from lib/unify.
+; Рушій прямого виведення (у стилі CLIPS). Лише українська проєкція (кандидат).
+; Робоча пам'ять фактів + правила шаблон/дія. Використовує unify з lib/unify.
 
 (load "lib/unify.lisp")
 
