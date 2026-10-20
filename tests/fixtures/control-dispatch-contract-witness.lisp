@@ -1,106 +1,107 @@
-; #217 — Lisp-owned verifier for the canonical control-dispatch contract.
-; The host transports contracts/control-dispatch-contract.lisp into
-; `control-dispatch-document`; semantic expectations live here.
+; Свідчення #217: закон канонічного умовного керування визначає СЕНС.
+; Зовнішній виконавець лише передає незмінний документ
+; contracts/control-dispatch-contract.lisp у зв'язуванні control-dispatch-document.
+; Очікувані значення та перевірки залишаються в цій програмі.
 
-(визначити cd-field
-  (функція (entry field)
-    (нехай ((found (знайти-за-ключем field entry)))
+(визначити поле-керування
+  (функція (запис поле)
+    (нехай ((знайдене (знайти-за-ключем поле запис)))
       (за-умовою
-        ((атом? found) (як-є ()))
-        (так (решта found))))))
+        ((атом? знайдене) (як-є ()))
+        (так (решта знайдене))))))
 
-(визначити cd-find
-  (функція (identity entries)
+(визначити знайти-запис-керування
+  (функція (ідентичність записи)
     (за-умовою
-      ((атом? entries) (як-є ()))
-      ((однакові? (cd-field (перше entries) (як-є identity)) identity)
-       (перше entries))
-      (так (cd-find identity (решта entries))))))
+      ((атом? записи) (як-є ()))
+      ((однакові? (поле-керування (перше записи) (як-є identity)) ідентичність)
+       (перше записи))
+      (так (знайти-запис-керування ідентичність (решта записи))))))
 
-(визначити cd-entry
-  (функція (identity)
-    (cd-find identity (решта control-dispatch-document))))
+(визначити запис-керування
+  (функція (ідентичність)
+    (знайти-запис-керування ідентичність (решта control-dispatch-document))))
 
-(визначити cd-expect
-  (функція (identity field expected)
-    (нехай ((entry (cd-entry identity)))
+(визначити очікувати-поле-керування
+  (функція (ідентичність поле очікуване)
+    (нехай ((запис (запис-керування ідентичність)))
       (за-умовою
-        ((атом? entry) (список (як-є missing-entry) identity))
-        ((однакові? (cd-field entry field) expected) (як-є ()))
+        ((атом? запис) (список (як-є missing-entry) ідентичність))
+        ((однакові? (поле-керування запис поле) очікуване) (як-є ()))
         (так
          (список
            (як-є mismatch)
-           identity
-           field
-           expected
-           (cd-field entry field)))))))
+           ідентичність
+           поле
+           очікуване
+           (поле-керування запис поле)))))))
 
-(визначити cd-first-failure
-  (функція (checks)
+(визначити перша-помилка-керування
+  (функція (перевірки)
     (за-умовою
-      ((атом? checks) (як-є ()))
-      ((атом? (перше checks)) (cd-first-failure (решта checks)))
-      (так (перше checks)))))
+      ((атом? перевірки) (як-є ()))
+      ((атом? (перше перевірки)) (перша-помилка-керування (решта перевірки)))
+      (так (перше перевірки)))))
 
-(визначити control-dispatch-contract-witness
+(визначити свідок-договору-керування
   (функція ()
-    (нехай ((failure
-            (cd-first-failure
+    (нехай ((помилка
+            (перша-помилка-керування
               (список
-                (cd-expect (як-є canonical-cond)
+                (очікувати-поле-керування (як-є canonical-cond)
                            (як-є semantic-id)
                            "0007")
-                (cd-expect (як-є canonical-cond)
+                (очікувати-поле-керування (як-є canonical-cond)
                            (як-є role)
                            (як-є ordered-dispatch))
-                (cd-expect (як-є canonical-cond)
+                (очікувати-поле-керування (як-є canonical-cond)
                            (як-є generic-value-coercion)
                            (як-є forbidden))
-                (cd-expect (як-є canonical-cond)
+                (очікувати-поле-керування (як-є canonical-cond)
                            (як-є nil-as-false)
                            (як-є forbidden))
-                (cd-expect (як-є canonical-cond)
+                (очікувати-поле-керування (як-є canonical-cond)
                            (як-є host-bool-authority)
                            (як-є forbidden))
 
-                (cd-expect (як-є exact-q-control)
+                (очікувати-поле-керування (як-є exact-q-control)
                            (як-є accepted-domain)
                            (як-є exact-q-decision))
-                (cd-expect (як-є exact-q-control)
+                (очікувати-поле-керування (як-є exact-q-control)
                            (як-є yes-action)
                            (як-є select))
-                (cd-expect (як-є exact-q-control)
+                (очікувати-поле-керування (як-є exact-q-control)
                            (як-є no-action)
                            (як-є continue))
 
-                (cd-expect (як-є structural-control)
+                (очікувати-поле-керування (як-є structural-control)
                            (як-є implicit-consumption)
                            (як-є forbidden))
-                (cd-expect (як-є structural-control)
+                (очікувати-поле-керування (як-є structural-control)
                            (як-є dispatch)
                            (як-є explicit-match-required))
 
-                (cd-expect (як-є mathematical-result-control)
+                (очікувати-поле-керування (як-є mathematical-result-control)
                            (як-є implicit-consumption)
                            (як-є forbidden))
 
-                (cd-expect (як-є reasoning-control)
+                (очікувати-поле-керування (як-є reasoning-control)
                            (як-є implicit-consumption)
                            (як-є forbidden))
-                (cd-expect (як-є reasoning-control)
+                (очікувати-поле-керування (як-є reasoning-control)
                            (як-є dispatch)
                            (як-є explicit-match-required))
 
-                (cd-expect (як-є no-answer-control)
+                (очікувати-поле-керування (як-є no-answer-control)
                            (як-є false-meaning)
                            (як-є forbidden))
-                (cd-expect (як-є no-answer-control)
+                (очікувати-поле-керування (як-є no-answer-control)
                            (як-є implicit-consumption)
                            (як-є forbidden))
 
-                ; Syntax is deliberately not invented before the semantic
-                ; protocol is stable. #217 may later ratify a matching surface.
-                (cd-expect (як-є structural-control)
+                ; Синтаксис не вигадуємо до усталення семантичного протоколу.
+                ; Окрему поверхню можна ратифікувати за законом #217.
+                (очікувати-поле-керування (як-є structural-control)
                            (як-є clause-syntax)
                            (як-є not-yet-ratified))))))
       (за-умовою
@@ -109,11 +110,19 @@
          (список (як-є control-dispatch-contract-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail) (як-є schema))))
-        ((атом? failure)
+        ((атом? помилка)
          (список (як-є control-dispatch-contract-witness)
                (список (як-є status) (як-є pass))
                (список (як-є detail) (як-є explicit-domain-control))))
         (так
          (список (як-є control-dispatch-contract-witness)
                (список (як-є status) (як-є fail))
-               (список (як-є detail) failure)))))))
+               (список (як-є detail) помилка)))))))
+
+; Історичні зовнішні назви посилаються на ті самі українські функції.
+(визначити cd-field поле-керування)
+(визначити cd-find знайти-запис-керування)
+(визначити cd-entry запис-керування)
+(визначити cd-expect очікувати-поле-керування)
+(визначити cd-first-failure перша-помилка-керування)
+(визначити control-dispatch-contract-witness свідок-договору-керування)
