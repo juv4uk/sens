@@ -272,6 +272,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
             shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+        # Чинний T5-кодек, не невизначена історична послідовність байтів.
+        from sens_t5_codec import encode_words
+        target.with_suffix(".sens").write_bytes(
+            encode_words(target.read_text(encoding="ascii").split())
+        )
         historical = scan(self.root, verify_bounded=True,
                           validator=lambda source, physical, view: verify(
                               source, physical, view, codec="t5"))
