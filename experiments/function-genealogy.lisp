@@ -20,132 +20,132 @@
 ;   cadr    00110100
 ;   cddr    00110101
 
-(визначити genealogy-depends-on 11110000)
+(визначити родовід-залежить-від 11110000)
 
 ; One edge means: SOURCE is directly used by an executable laboratory
 ; reconstruction of TARGET.  Relation meaning lives in this experiment, not in
 ; the bit pattern itself.
-(визначити function-genealogy
+(визначити родовід-функцій
   (список
-    (список 00000100 genealogy-depends-on 00101110)
-    (список 00000001 genealogy-depends-on 00101110)
+    (список 00000100 родовід-залежить-від 00101110)
+    (список 00000001 родовід-залежить-від 00101110)
 
-    (список 00000101 genealogy-depends-on 00101111)
-    (список 00000110 genealogy-depends-on 00101111)
+    (список 00000101 родовід-залежить-від 00101111)
+    (список 00000110 родовід-залежить-від 00101111)
 
-    (список 00000101 genealogy-depends-on 00110000)
-    (список 00000110 genealogy-depends-on 00110000)
+    (список 00000101 родовід-залежить-від 00110000)
+    (список 00000110 родовід-залежить-від 00110000)
 
-    (список 00000101 genealogy-depends-on 00110001)
-    (список 00000110 genealogy-depends-on 00110001)
+    (список 00000101 родовід-залежить-від 00110001)
+    (список 00000110 родовід-залежить-від 00110001)
 
-    (список 00000101 genealogy-depends-on 00110010)
-    (список 00000110 genealogy-depends-on 00110010)
+    (список 00000101 родовід-залежить-від 00110010)
+    (список 00000110 родовід-залежить-від 00110010)
 
-    (список 00000101 genealogy-depends-on 00110011)
+    (список 00000101 родовід-залежить-від 00110011)
 
-    (список 00000101 genealogy-depends-on 00110100)
-    (список 00000110 genealogy-depends-on 00110100)
+    (список 00000101 родовід-залежить-від 00110100)
+    (список 00000110 родовід-залежить-від 00110100)
 
-    (список 00000110 genealogy-depends-on 00110101)))
+    (список 00000110 родовід-залежить-від 00110101)))
 
 ; Laboratory reconstructions.  The names are intentionally not registry names:
 ; the existing functions remain untouched while we test sufficiency.
 
-(визначити experiment-pair
-  (функція (left right)
-    (сполучити left (сполучити right (як-є ())))))
+(визначити дослід-пара
+  (функція (ліве праве)
+    (сполучити ліве (сполучити праве (як-є ())))))
 
-(визначити experiment-second
-  (функція (values)
-    (перше (решта values))))
+(визначити дослід-друге
+  (функція (значення)
+    (перше (решта значення))))
 
-(визначити experiment-third
-  (функція (values)
-    (перше (решта (решта values)))))
+(визначити дослід-третє
+  (функція (значення)
+    (перше (решта (решта значення)))))
 
-(визначити experiment-fourth
-  (функція (values)
-    (перше (решта (решта (решта values))))))
+(визначити дослід-четверте
+  (функція (значення)
+    (перше (решта (решта (решта значення))))))
 
-(визначити experiment-fifth
-  (функція (values)
-    (перше (решта (решта (решта (решта values)))))))
+(визначити дослід-п'яте
+  (функція (значення)
+    (перше (решта (решта (решта (решта значення)))))))
 
-(визначити experiment-caar
-  (функція (values)
-    (перше (перше values))))
+(визначити дослід-перше-першого
+  (функція (значення)
+    (перше (перше значення))))
 
-(визначити experiment-cadr
-  (функція (values)
-    (перше (решта values))))
+(визначити дослід-перше-решти
+  (функція (значення)
+    (перше (решта значення))))
 
-(визначити experiment-cddr
-  (функція (values)
-    (решта (решта values))))
+(визначити дослід-решта-решти
+  (функція (значення)
+    (решта (решта значення))))
 
 ; Explicit result records keep () available as ordinary data.
-(визначити genealogy-check
-  (функція (identity observed expected)
+(визначити перевірити-родовід
+  (функція (ідентичність спостережене очікуване)
     (за-умовою
-      ((11110111 observed expected) (1)
-       (список identity (як-є reproduced)))
-      ((11110111 observed expected) (0)
-       (список identity (як-є diverged))))))
+      ((11110111 спостережене очікуване) (1)
+       (список ідентичність (як-є reproduced)))
+      ((11110111 спостережене очікуване) (0)
+       (список ідентичність (як-є diverged))))))
 
-(визначити function-genealogy-witness
+(визначити свідчення-родоводу-функцій
   (функція ()
-    (001000 ((flat (001 (a b c d e))))
-      (001000 ((nested (001 ((left inner) right))))
+    (001000 ((плаский-набір (001 (a b c d e))))
+      (001000 ((вкладений-набір (001 ((left inner) right))))
         (список
-          (genealogy-check
+          (перевірити-родовід
             00101110
-            (experiment-pair (як-є left) (як-є right))
+            (дослід-пара (як-є left) (як-є right))
             (11111101 (001 left) (001 right)))
-          (genealogy-check 00101111 (experiment-second flat) (друге flat))
-          (genealogy-check 00110000 (experiment-third flat) (10011 flat))
-          (genealogy-check 00110001 (experiment-fourth flat) (100111 flat))
-          (genealogy-check 00110010 (experiment-fifth flat) (110110101 flat))
-          (genealogy-check 00110011 (experiment-caar nested) (1000 nested))
-          (genealogy-check 00110100 (experiment-cadr flat) (друге flat))
-          (genealogy-check 00110101 (experiment-cddr flat) (0111 flat)))))))
+          (перевірити-родовід 00101111 (дослід-друге плаский-набір) (друге плаский-набір))
+          (перевірити-родовід 00110000 (дослід-третє плаский-набір) (10011 плаский-набір))
+          (перевірити-родовід 00110001 (дослід-четверте плаский-набір) (100111 плаский-набір))
+          (перевірити-родовід 00110010 (дослід-п'яте плаский-набір) (110110101 плаский-набір))
+          (перевірити-родовід 00110011 (дослід-перше-першого вкладений-набір) (1000 вкладений-набір))
+          (перевірити-родовід 00110100 (дослід-перше-решти плаский-набір) (друге плаский-набір))
+          (перевірити-родовід 00110101 (дослід-решта-решти плаский-набір) (0111 плаский-набір)))))))
 
 ; Graph queries over the experimental genealogy.  They are directed:
 ; "what targets directly depend on SOURCE?"  We intentionally return every
 ; matching target rather than choosing one.
 
-(визначити genealogy-direct-targets
-  (функція (graph source)
+(визначити прямі-нащадки-родоводу
+  (функція (граф джерело)
     (за-умовою
-      ((атом? graph) ()
+      ((атом? граф) ()
        (як-є ()))
-      ((атом? graph) (0)
-       (001000 ((edge (100 graph)))
+      ((атом? граф) (0)
+       (001000 ((ребро (100 граф)))
          (за-умовою
-           ((тотожне? (перше edge) source) (1)
+           ((тотожне? (перше ребро) джерело) (1)
             (сполучити
-              (10011 edge)
-              (genealogy-direct-targets (решта graph) source)))
-           ((тотожне? (перше edge) source) (0)
-            (genealogy-direct-targets (решта graph) source)))))
-      ((атом? graph) (1)
+              (10011 ребро)
+              (прямі-нащадки-родоводу (решта граф) джерело)))
+           ((тотожне? (перше ребро) джерело) (0)
+            (прямі-нащадки-родоводу (решта граф) джерело)))))
+      ((атом? граф) (1)
        (як-є ())))))
 
-(визначити function-genealogy-observation
+(визначити спостереження-родоводу-функцій
   (функція ()
     (список
       (список
         (як-є from-cons)
-        (genealogy-direct-targets function-genealogy 00000100))
+        (прямі-нащадки-родоводу родовід-функцій 00000100))
       (список
         (як-є from-car)
-        (genealogy-direct-targets function-genealogy 00000101))
+        (прямі-нащадки-родоводу родовід-функцій 00000101))
       (список
         (як-є from-cdr)
-        (genealogy-direct-targets function-genealogy 00000110))
+        (прямі-нащадки-родоводу родовід-функцій 00000110))
       (список
         (як-є reproductions)
-        (function-genealogy-witness)))))
+        (свідчення-родоводу-функцій)))))
 
 
 ; ---------------------------------------------------------------------------
@@ -156,26 +156,26 @@
 ; That does NOT automatically collapse their semantic identities.  It produces
 ; candidate-equivalence evidence for later experiments.
 
-(визначити genealogy-observes-like 11110001)
+(визначити родовід-спостерігає-подібність 11110001)
 
-(визначити observation-pair
-  (функція (left right)
-    (список left right)))
+(визначити пара-спостереження
+  (функція (ліве праве)
+    (список ліве праве)))
 
-(визначити observation-same?
-  (функція (left right)
-    (11110111 left right)))
+(визначити спостереження-однакові?
+  (функція (ліве праве)
+    (11110111 ліве праве)))
 
-(визначити sample-equivalent-two-unary?
-  (функція (f g sample-a sample-b)
+(визначити зразки-еквівалентні-для-двох-унарних?
+  (функція (перша-функція друга-функція перший-зразок другий-зразок)
     (за-умовою
-      ((observation-same? (f sample-a) (g sample-a)) (1)
+      ((спостереження-однакові? (перша-функція перший-зразок) (друга-функція перший-зразок)) (1)
        (за-умовою
-         ((observation-same? (f sample-b) (g sample-b)) (1)
+         ((спостереження-однакові? (перша-функція другий-зразок) (друга-функція другий-зразок)) (1)
           (як-є (1)))
-         ((observation-same? (f sample-b) (g sample-b)) (0)
+         ((спостереження-однакові? (перша-функція другий-зразок) (друга-функція другий-зразок)) (0)
           (як-є (0)))))
-      ((observation-same? (f sample-a) (g sample-a)) (0)
+      ((спостереження-однакові? (перша-функція перший-зразок) (друга-функція перший-зразок)) (0)
        (як-є (0))))))
 
 ; Distinct registry identities:
@@ -187,30 +187,30 @@
 ; Current core implementation:
 ;   second and cadr have identical bodies;
 ;   cadddr is literally defined as the same closure object as fourth.
-(визначити function-overlap-candidates
+(визначити кандидати-перекриття-функцій
   (список
-    (список 00101111 genealogy-observes-like 00110100)
-    (список 00110001 genealogy-observes-like 00110110)))
+    (список 00101111 родовід-спостерігає-подібність 00110100)
+    (список 00110001 родовід-спостерігає-подібність 00110110)))
 
-(визначити function-overlap-witness
+(визначити свідчення-перекриття-функцій
   (функція ()
-    (001000 ((sample-a (001 (a b c d e))))
-      (001000 ((sample-b (001 ((x y) (p q) r s t))))
+    (001000 ((перший-зразок (001 (a b c d e))))
+      (001000 ((другий-зразок (001 ((x y) (p q) r s t))))
         (список
           (список
             (як-є second-vs-cadr)
-            (sample-equivalent-two-unary?
-              second cadr sample-a sample-b))
+            (зразки-еквівалентні-для-двох-унарних?
+              second cadr перший-зразок другий-зразок))
           (список
             (як-є fourth-vs-cadddr)
-            (sample-equivalent-two-unary?
-              fourth cadddr sample-a sample-b))
+            (зразки-еквівалентні-для-двох-унарних?
+              fourth cadddr перший-зразок другий-зразок))
           ; A deliberately weaker overlap: pair and list agree on exactly two
           ; arguments, but LIST is variadic, so this is only overlap evidence,
           ; never an equivalence claim.
           (список
             (як-є pair-vs-list-two-args)
-            (observation-same?
+            (спостереження-однакові?
               (11111101 (001 left) (001 right))
               (список (як-є left) (як-є right)))))))))
 
@@ -221,7 +221,7 @@
 ; registered identities together. Internal helpers stay apparatus and are not
 ; assigned synthetic semantic identities.
 
-(визначити genealogy-requires 11110010)
+(визначити родовід-потребує 11110010)
 
 ; Registry IDs:
 ; logic-var   10001000
@@ -242,87 +242,87 @@
 ; second 00101111
 ; equal? 00100010
 
-(визначити unification-genealogy
+(визначити родовід-уніфікації
   (список
     ; logic-var = list + quote/data construction
-    (список 00100111 genealogy-requires 10001000)
+    (список 00100111 родовід-потребує 10001000)
 
     ; var? depends structurally on atom/car/eq/cond
-    (список 00000010 genealogy-requires 10001001)
-    (список 00000101 genealogy-requires 10001001)
-    (список 00000011 genealogy-requires 10001001)
-    (список 00000111 genealogy-requires 10001001)
+    (список 00000010 родовід-потребує 10001001)
+    (список 00000101 родовід-потребує 10001001)
+    (список 00000011 родовід-потребує 10001001)
+    (список 00000111 родовід-потребує 10001001)
 
     ; walk uses var? plus structural substitution lookup
-    (список 10001001 genealogy-requires 10001011)
+    (список 10001001 родовід-потребує 10001011)
 
     ; occurs-check recursively needs walk/var?/equal?/second/car/cdr
-    (список 10001011 genealogy-requires 10001100)
-    (список 10001001 genealogy-requires 10001100)
-    (список 00100010 genealogy-requires 10001100)
-    (список 00101111 genealogy-requires 10001100)
-    (список 00000101 genealogy-requires 10001100)
-    (список 00000110 genealogy-requires 10001100)
+    (список 10001011 родовід-потребує 10001100)
+    (список 10001001 родовід-потребує 10001100)
+    (список 00100010 родовід-потребує 10001100)
+    (список 00101111 родовід-потребує 10001100)
+    (список 00000101 родовід-потребує 10001100)
+    (список 00000110 родовід-потребує 10001100)
 
     ; apply-subst dereferences via walk and reconstructs terms with cons/car/cdr
-    (список 10001011 genealogy-requires 10001010)
-    (список 00000100 genealogy-requires 10001010)
-    (список 00000101 genealogy-requires 10001010)
-    (список 00000110 genealogy-requires 10001010)
+    (список 10001011 родовід-потребує 10001010)
+    (список 00000100 родовід-потребує 10001010)
+    (список 00000101 родовід-потребує 10001010)
+    (список 00000110 родовід-потребує 10001010)
 
     ; unify itself is centered around walk, var?, occurs-check, equal?
-    (список 10001011 genealogy-requires 10000111)
-    (список 10001001 genealogy-requires 10000111)
-    (список 10001100 genealogy-requires 10000111)
-    (список 00100010 genealogy-requires 10000111)))
+    (список 10001011 родовід-потребує 10000111)
+    (список 10001001 родовід-потребує 10000111)
+    (список 10001100 родовід-потребує 10000111)
+    (список 00100010 родовід-потребує 10000111)))
 
-(визначити genealogy-sources-for
-  (функція (graph target)
+(визначити джерела-родоводу-для
+  (функція (граф ціль)
     (за-умовою
-      ((атом? graph) ()
+      ((атом? граф) ()
        (як-є ()))
-      ((атом? graph) (0)
-       (001000 ((edge (100 graph)))
+      ((атом? граф) (0)
+       (001000 ((ребро (100 граф)))
          (за-умовою
-           ((101 (10011 edge) target) (1)
+           ((101 (10011 ребро) ціль) (1)
             (сполучити
-              (перше edge)
-              (genealogy-sources-for (решта graph) target)))
-           ((101 (10011 edge) target) (0)
-            (genealogy-sources-for (решта graph) target)))))
-      ((атом? graph) (1)
+              (перше ребро)
+              (джерела-родоводу-для (решта граф) ціль)))
+           ((101 (10011 ребро) ціль) (0)
+            (джерела-родоводу-для (решта граф) ціль)))))
+      ((атом? граф) (1)
        (як-є ())))))
 
-(визначити unification-genealogy-witness
+(визначити свідчення-родоводу-уніфікації
   (функція ()
     (список
       (список
         (як-є walk-needs)
-        (genealogy-sources-for unification-genealogy 10001011))
+        (джерела-родоводу-для родовід-уніфікації 10001011))
       (список
         (як-є occurs-check-needs)
-        (genealogy-sources-for unification-genealogy 10001100))
+        (джерела-родоводу-для родовід-уніфікації 10001100))
       (список
         (як-є apply-subst-needs)
-        (genealogy-sources-for unification-genealogy 10001010))
+        (джерела-родоводу-для родовід-уніфікації 10001010))
       (список
         (як-є unify-needs)
-        (genealogy-sources-for unification-genealogy 10000111))
+        (джерела-родоводу-для родовід-уніфікації 10000111))
       ; Executable behavioral probe showing UNIFY creates a substitution that
       ; APPLY-SUBST can consume. This is a dynamic relation, not just static
       ; dependency metadata.
       (список
         (як-є unify-produces-for-apply-subst)
-        (001000 ((subst
+        (001000 ((підстановка
                 (101010000
                   (1110 (001 parent) (001 alice) (101110010 (001 x)))
                   (список (як-є parent) (як-є alice) (як-є bob))
                   (як-є ()))))
-          (101101001 (101110010 (001 x)) subst))))))
+          (101101001 (101110010 (001 x)) підстановка))))))
 
-(визначити function-laboratory-witness
+(визначити свідчення-лабораторії-функцій
   (функція ()
     (список
-      (список (як-є structural-genealogy) (function-genealogy-observation))
-      (список (як-є overlap-candidates) (function-overlap-witness))
-      (список (як-є unification-island) (unification-genealogy-witness)))))
+      (список (як-є structural-genealogy) (спостереження-родоводу-функцій))
+      (список (як-є overlap-candidates) (свідчення-перекриття-функцій))
+      (список (як-є unification-island) (свідчення-родоводу-уніфікації)))))
