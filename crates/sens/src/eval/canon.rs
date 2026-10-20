@@ -1,8 +1,8 @@
 //! Evaluator mechanism routing.
 //!
-//! Contract 11 canonical identity is exact domain + exact bits. Historical
-//! CoreDomainIdentity tables remain a compatibility/backend lane while migrated D3 calls
-//! route directly from `CoreDomainIdentity` without reconstructing a byte.
+//! Contract 11 canonical identity is exact domain + exact bits. Executable
+//! routes are selected by ratified domain identity and concrete mechanisms;
+//! historical flat W8 slots never supply callability.
 
 use super::{
     arithmetic, builtins, closures, necessary_forms,
@@ -130,124 +130,6 @@ fn exact_args(
         ),
         span,
     ))
-}
-
-type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageError>;
-
-/// Вузька таблиця тільки історичних backend-механізмів.
-///
-/// Цей сумісний транспорт ніколи не визначає координату, роль чи закон
-/// поточних D1–D10. Виклики через CoreDomainIdentity мають власні
-/// допущені механізми і перевіряються ПЕРЕД цим маршрутом.
-/// Замість плоского масиву 256 слотів дозволяємо лише явні старі
-/// механізми, які ще мають підтверджених споживачів.
-fn legacy_backend_primitive(sid: CoreDomainIdentity) -> Option<PrimitiveFn> {
-    // The Lisp surface must certify this exact domain before any old host route.
-    match semantic_registry::legacy_slot_for_exact_identity(sid)? {
-        0b00001100 => Some(prim_00001100),
-        0b00001101 => Some(prim_00001101),
-        0b00001110 => Some(prim_00001110),
-        0b00001111 => Some(prim_00001111),
-        0b00011010 => Some(prim_00011010),
-        0b00011011 => Some(prim_00011011),
-        0b00011100 => Some(prim_00011100),
-        0b01001101 => Some(prim_01001101),
-        0b00111011 => Some(builtins::prim_00111011),
-        0b00111100 => Some(builtins::prim_00111100),
-        0b00111101 => Some(builtins::prim_00111101),
-        0b00111110 => Some(builtins::prim_00111110),
-        0b01010000 => Some(builtins::prim_01010000),
-        0b01001111 => Some(builtins::prim_01001111),
-        0b01011010 => Some(builtins::prim_01011010),
-        0b01011011 => Some(builtins::prim_01011011),
-        0b01011100 => Some(builtins::prim_01011100),
-        0b01011101 => Some(builtins::prim_01011101),
-        0b01010001 => Some(builtins::prim_01010001),
-        0b01010010 => Some(builtins::prim_01010010),
-        0b01010011 => Some(builtins::prim_01010011),
-        0b01010100 => Some(builtins::prim_01010100),
-        0b01010101 => Some(builtins::prim_01010101),
-        0b01000001 => Some(builtins::prim_01000001),
-        0b00111010 => Some(builtins::prim_00111010),
-        0b00100100 => Some(builtins::prim_00100100),
-        0b01000010 => Some(builtins::prim_01000010),
-        0b01000011 => Some(builtins::prim_01000011),
-        0b00111111 => Some(builtins::prim_00111111),
-        0b01000000 => Some(builtins::prim_01000000),
-        0b01000100 => Some(builtins::prim_01000100),
-        0b01000101 => Some(builtins::prim_01000101),
-        0b10100001 => Some(builtins::prim_10100001),
-        0b10100000 => Some(builtins::prim_10100000),
-        0b01001000 => Some(builtins::prim_01001000),
-        0b01001001 => Some(builtins::prim_01001001),
-        0b01001100 => Some(builtins::prim_01001100),
-        0b01001010 => Some(builtins::prim_01001010),
-        0b01001011 => Some(builtins::prim_01001011),
-        0b00100110 => Some(builtins::prim_00100110),
-        0b01010110 => Some(builtins::prim_01010110),
-        0b01010111 => Some(builtins::prim_01010111),
-        0b01011000 => Some(builtins::prim_01011000),
-        0b01011001 => Some(builtins::prim_01011001),
-        0b01001110 => Some(builtins::prim_01001110),
-        _ => None,
-    }
-}
-
-fn prim_00001100(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
-    arithmetic::arithmetic_on_values("+", args, env, span)
-}
-
-fn prim_00001101(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
-    arithmetic::arithmetic_on_values("-", args, env, span)
-}
-
-fn prim_00001110(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
-    arithmetic::arithmetic_on_values("*", args, env, span)
-}
-
-fn prim_00001111(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    // Довільна арність: (/ 5 6 8 7) -> 5/336 (conformance.lisp).
-    arithmetic::division_on_values(args, args.len(), env, span)
-}
-
-fn prim_00011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    arithmetic::comparison_on_values("<", args, span)
-}
-
-fn prim_00011011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    arithmetic::comparison_on_values(">", args, span)
-}
-
-fn prim_00011100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    arithmetic::comparison_on_values("=", args, span)
-}
-
-fn prim_01001101(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::CoreDomainIdentity::D4(crate::CoreD4::from_word(crate::Bit4::new(0b0001).expect("eval"))), args, 1, span)?;
-    special_forms::eval_values(args, env, span)
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -707,10 +589,8 @@ pub(crate) fn invoke_semantic_ref(
             return invoke_domain_identity(identity, args, environment, span);
         }
     }
-    // Unmigrated non-D3 host capabilities remain on the temporary backend lane.
-    if let Some(primitive) = legacy_backend_primitive(sid) {
-        return primitive(args, environment, span);
-    }
+    // Execution requires an exact current mechanism or a concrete callable
+    // bound to this domain-qualified identity. No historical W8 dispatch.
     match &environment.code_slot(sid) {
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
@@ -746,11 +626,8 @@ pub(crate) fn invoke_semantic_ref(
 }
 
 /// #1455: чи має код примітив Rust.
-pub(crate) fn has_primitive(sid: CoreDomainIdentity) -> bool {
-    // D3 is protected by the current exact-domain mechanism even when the
-    // caller still arrives through a historical, read-only compatibility SID.
-    matches!(route_kind_for_sid(sid), Some(SidRouteKind::ValueCall))
-        || legacy_backend_primitive(sid).is_some()
+pub(crate) fn has_primitive(identity: CoreDomainIdentity) -> bool {
+    matches!(route_kind_for_sid(identity), Some(SidRouteKind::ValueCall))
 }
 
 /// #1455: визначення (функція або макрос) верхнього рівня з назвою з таблиці функцій, чий код не
@@ -1094,81 +971,39 @@ mod exact_domain_primitive_tests {
     }
 
     #[test]
-    fn legacy_backend_is_sparse_and_never_autocreates_current_domain_calls() {
-        let expected = [
-            0b00001100,
-            0b00001101,
-            0b00001110,
-            0b00001111,
-            0b00011010,
-            0b00011011,
-            0b00011100,
-            0b01001101,
-            0b00111011,
-            0b00111100,
-            0b00111101,
-            0b00111110,
-            0b01010000,
-            0b01001111,
-            0b01011010,
-            0b01011011,
-            0b01011100,
-            0b01011101,
-            0b01010001,
-            0b01010010,
-            0b01010011,
-            0b01010100,
-            0b01010101,
-            0b01000001,
-            0b00111010,
-            0b00100100,
-            0b01000010,
-            0b01000011,
-            0b00111111,
-            0b01000000,
-            0b01000100,
-            0b01000101,
-            0b10100001,
-            0b10100000,
-            0b01001000,
-            0b01001001,
-            0b01001100,
-            0b01001010,
-            0b01001011,
-            0b00100110,
-            0b01010110,
-            0b01010111,
-            0b01011000,
-            0b01011001,
-            0b01001110,
-        ];
-        assert_eq!(expected.len(), 45);
-        for candidate in 0..=u8::MAX {
-            let routed = legacy_backend_primitive(CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(candidate).expect("8-bit source word"))).expect("exact domain word")).is_some();
-            assert_eq!(
-                routed,
-                expected.contains(&candidate),
-                "сумісний backend допускає лише явно збережені історичні механізми"
-            );
-        }
-        // Та сама числова величина у іншій доменній ширині — інша
-        // ідентичність; D3 механізмів у старому backend не існує.
-        for bits in 0..=7 {
-            let exact = d3(bits);
-            assert_eq!(exact.width(), 3);
-            assert!(legacy_backend_primitive(CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(bits).expect("8-bit source word"))).expect("exact domain word")).is_none());
-        }
+    fn historical_mono_ns_w8_never_aliases_ratified_d8_butlast() {
+        // The old flat row 01011010 meant mono-ns. Under the current ladder,
+        // exact D8:01011010 is "без-останнього" (BUTLAST), while the clock has
+        // its own D10:0011110110 identity. An empty call must never return a
+        // clock reading via the old W8 backend.
+        let identity = CoreDomainIdentity::D8(
+            crate::CoreD8::from_word(
+                crate::Bit8::new(0b01011010).expect("exact D8 coordinate"),
+            ),
+        );
+        assert!(domain_primitive_kind(identity).is_none(),
+            "D8:01011010 has no native primitive merely from residency");
+        assert!(!has_primitive(identity),
+            "D8:01011010 must not inherit old W8 mono-ns callability");
+
+        let environment = Environment::root();
+        let error = invoke_semantic_ref(identity, &[], &environment, Span::default())
+            .expect_err("zero-argument D8 BUTLAST cannot fall through to the old clock");
+        assert_ne!(error.kind, ErrorKind::Parse);
     }
 
     #[test]
-    fn d3_uses_one_domain_mechanism_without_duplicate_byte_primitives() {
-        // The historical Canon byte slots have no independent primitive
-        // implementation; all current D3 operations use domain laws.
-        for old_byte in 2..7 {
-            assert!(
-                legacy_backend_primitive(CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(old_byte).expect("8-bit source word"))).expect("exact domain word")).is_none(),
-                "історичний байт D3 не отримує дубльований примітив"
-            );
+    fn d3_calls_use_exact_domain_laws_without_w8_backend_slots() {
+        // D3 callability comes from its exact ratified mechanism, not a
+        // projected eight-bit row.
+        for (bits, expected) in [
+            (0b010, Some(SidRouteKind::ValueCall)),
+            (0b011, Some(SidRouteKind::ValueCall)),
+            (0b100, Some(SidRouteKind::ValueCall)),
+            (0b101, Some(SidRouteKind::ValueCall)),
+            (0b111, Some(SidRouteKind::ValueCall)),
+        ] {
+            assert_eq!(route_kind_for_sid(d3(bits)), expected);
         }
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
