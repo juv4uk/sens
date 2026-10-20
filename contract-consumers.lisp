@@ -20,8 +20,8 @@
     (repository juv4uk/wsm-os-lisp)
     (role bare-metal-lisp-target))
 
-  ; wsm-os belongs to the independent wsm hardware line and is intentionally
-  ; not a direct consumer of the sens language contract.
+  ; wsm-os належить до незалежної апаратної лінії wsm, тому
+  ; не є безпосереднім споживачем мовного контракту СЕНС.
   (excluded
     (repository juv4uk/wsm-os)
     (reason independent-wsm-line)))
