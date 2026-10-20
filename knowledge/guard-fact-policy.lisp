@@ -2,7 +2,7 @@
 ; Runtime-політика фактів для адаптера wsm-guard-facts (G2 зріз).
 ;
 ; wsm-guard-facts нормалізує лише-читальні спостереження Git/systemd/swarm у
-; `(fact (source S) (subject X) (state ...))` clauses. This policy owns the
+; клаузи `(fact (source S) (subject X) (state ...))`. Ця політика володіє
 ; рішенням класифікації. Відсутнє чи неспостережуване свідчення лишається UNKNOWN через
 ; guard-unknown - ніколи не неявне відкидання.
 ;
