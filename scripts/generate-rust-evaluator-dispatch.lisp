@@ -1,9 +1,9 @@
-; Lisp-owned generator for the evaluator necessary-form dispatch projection.
+; Генератор проєкції диспетчеризації необхідних форм обчислювача.
+; Джерело повноважень — lib/surface/function-signatures.lisp,
+; поле (form ...) у рядку таблиці.
+; Rust отримує лише механічний опис виконання, без нової семантики.
 ;
-; Authority: lib/surface/function-signatures.lisp (поле (form ...) рядка таблиці)
-; Rust receives only a mechanical execution projection.
-;
-; Usage:
+; Запуск:
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp --check
 
