@@ -1,14 +1,16 @@
-; #1132 — Core1 bootstrap contract.
+; #1132 — Контракт початкового завантаження першого ядра.
 ;
-; Core1 is the minimal Lisp-on-Lisp bootstrap profile. SENS owns this
-; contract; mccarthy-eval is only the Stage-0 execution seed.
+; Перше ядро — мінімальний профіль завантаження Ліспу засобами самого Ліспу.
+; Контракт належить СЕНС; mccarthy-eval є лише початковим виконавчим
+; механізмом нульового етапу.
 ;
-; Important boundary:
-; historical S0 spellings/mechanisms are NOT automatically aliases for current
-; SENS identity laws. They are a bootstrap substrate used to execute lib/core1.lisp.
-; Any bridge to a current semantic identity requires an explicit witness.
+; Важлива межа:
+; історичні написання й механізми S0 НЕ стають автоматично псевдонімами
+; чинних семантичних тотожностей СЕНС. Це початковий механізм, необхідний
+; для виконання lib/core1.lisp. Перехід до чинної семантичної тотожності
+; потребує явного свідка.
 ;
-; This file is data, not executable semantics.
+; Файл містить дані контракту, а не виконувані закони семантики.
 
 (core1-bootstrap-contract/1
   ((identity . authority)
@@ -102,7 +104,7 @@
    (modern-core4-structural-results . forbidden))
 
   ((identity . bootstrap-minimality)
-   (admission-question . "Is this required for Lisp to build the next Lisp/compiler generation?")
+   (admission-question . "Чи необхідно це Ліспу, щоб побудувати наступне покоління Ліспу або компілятора?")
    (arithmetic . excluded-until-real-witness)
    (strings . excluded-until-real-witness)
    (io . excluded-until-real-witness)
