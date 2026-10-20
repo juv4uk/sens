@@ -1080,7 +1080,7 @@ def verify_current_peers(source: str) -> None:
     # Поточний файл перевіряємо за назвами викличних голів, а не за
     # розташуванням пробілів чи відтворенням старого blob.
     for peer in {item[2] for item in EDITS}:
-        if re.search(r"\\(" + re.escape(peer) + r"(?=[\\s)])", source) is None:
+        if re.search(r"\(" + re.escape(peer) + r"(?=[\s)])", source) is None:
             raise ValueError(f"peer drift: {peer}")
 
 
