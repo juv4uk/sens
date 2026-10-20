@@ -141,6 +141,18 @@ class SelectedOriginalT5(unittest.TestCase):
         self.assertFalse(list(self.output.rglob("*.sens")))
         self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
 
+    def test_retired_source_eras_are_rejected_before_projection(self):
+        # Historical interpretation is provenance, not an execution switch.
+        # No native reader/semantic oracle is needed for this negative law.
+        for era in ("legacy", "current"):
+            with self.subTest(era=era):
+                code, receipt = self.call(era=era, oracle=False, reader=False)
+                self.assertEqual((code, receipt["status"]), (2, "BLOCKED"))
+                self.assertEqual(receipt["source_era"], era)
+                self.assertIn("RETIRED_SOURCE_ERA", receipt["reason"])
+                self.assertEqual(receipt["files_written"], 0)
+                self.assertFalse(list(self.output.rglob("*.sens")))
+
     def test_one_file_resolver_uses_current_ukr_and_rejects_ambiguous_w8(self):
         # Historical SID8 bytes are not a source of ratified D8 callability.
         migration = app.load_migrator()
@@ -172,7 +184,7 @@ class SelectedOriginalT5(unittest.TestCase):
                     "lib/machine/block.lisp"):
             with self.subTest(source=old):
                 original = (ROOT / old).read_bytes()
-                code, state = self.call(old, blob="HEAD", era="legacy",
+                code, state = self.call(old, blob="HEAD", era="auto",
                                         inspect=True, oracle=False)
                 self.assertIn(state["status"], {"BLOCKED", "SYNTAX_ONLY_UNVERIFIED"})
                 self.assertIn(code, (0, 2))
