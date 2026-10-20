@@ -440,8 +440,6 @@ class ExactDomainMigrationTests(unittest.TestCase):
     def test_public_names_and_unknown_d5_preserved(self):
         checks = {
             'lib/unify-observe.lisp': ('unify-observe', 'уніфікація-спостереження-стан'),
-            'lib/bridge/prolog-to-datalog.lisp': ('prolog-values-to-datalog-facts',
-                                                 'prolog-substitutions-to-datalog-facts'),
             'lib/machine/lowering/semantic-effects.lisp': (
                 'machine-effect-current-domain-key?', 'machine-lower-current-binary-effect'),
         }
@@ -451,10 +449,18 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 with self.subTest(path=path, name=name):
                     self.assertIn('(визначити ' + name, src)
         bridge = (ROOT / 'lib/bridge/prolog-to-datalog.lisp').read_text(encoding='utf-8')
+        for name in ('перетворити-значення-пролог-на-факти-даталог',
+                     'перетворити-підстановки-пролог-на-факти-даталог'):
+            with self.subTest(name=name):
+                self.assertIn('(визначити ' + name, bridge)
+        for legacy_name in ('prolog-values-to-datalog-facts',
+                            'prolog-substitutions-to-datalog-facts'):
+            with self.subTest(legacy_name=legacy_name):
+                self.assertNotIn('(визначити ' + legacy_name, bridge)
         for field in ('source-ref', 'variable', 'values'):
             with self.subTest(field=field):
-                projected = f'(знайти-за-ключем (як-є {field}) (решта observation))'
-                encoded = f'(11100 (001 {field}) (011 observation))'
+                projected = f'(знайти-за-ключем (як-є {field}) (решта спостереження))'
+                encoded = f'(11100 (001 {field}) (011 спостереження))'
                 self.assertIn(projected, bridge)
                 self.assertNotIn(encoded, bridge)
 

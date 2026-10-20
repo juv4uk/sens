@@ -121,9 +121,7 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     // Lisp owns the admitted mapping from selected variable role + bound
     // values into ordinary Datalog fact data.
     let projected = eval_program(
-        &format!(
-            "(prolog-substitutions-to-datalog-facts (quote {source_observation}))"
-        ),
+        &format!("(перетворити-підстановки-пролог-на-факти-даталог (quote {source_observation}))"),
         &mut session,
     )
     .expect("Lisp-owned projection must execute")
@@ -261,7 +259,7 @@ fn malformed_projection_input_is_named_failure_not_false() {
     load_bridge(&mut session);
 
     let result = eval_program(
-        "(prolog-substitutions-to-datalog-facts \
+        "(перетворити-підстановки-пролог-на-факти-даталог \
            (quote (prolog-substitution-observation \
              (variable ancestor-answer) \
              (values bob))))",

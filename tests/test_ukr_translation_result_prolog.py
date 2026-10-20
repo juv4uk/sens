@@ -89,11 +89,11 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
     def test_quoted_data_and_definition_names_remain_distinct(self):
         translation = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
         bridge = (ROOT / "lib/bridge/prolog-to-datalog.lisp").read_text(encoding="utf-8")
-        self.assertIn("(001 candidate)", translation)
-        self.assertIn("(001 projection-result)", bridge)
-        self.assertIn("(0011 translation-status", translation)
-        self.assertIn("(0011 prolog-values-to-datalog-facts", bridge)
-        sample = '(001 (translation-status datum)) (як-є (translation-payload datum))'
+        self.assertIn("(як-є candidate)", translation)
+        self.assertIn("(як-є projection-result)", bridge)
+        self.assertIn("(визначити translation-status переклад-стан)", translation)
+        self.assertIn("(як-є prolog-substitutions-to-datalog-facts)", bridge)
+        sample = '(як-є (translation-status дані)) (як-є (translation-payload дані))'
         heads = [t.text for t in audit.candidate_heads(audit.parse(sample))]
         self.assertNotIn("translation-status", heads)
         self.assertNotIn("translation-payload", heads)
