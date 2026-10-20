@@ -223,7 +223,7 @@ def sha256(data: bytes) -> str:
 
 
 def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "auto") -> dict:
-    """Pure read-only 3-way proof, never creates an executable or a mirror."""
+    """Read-only proof of *program identity*, not original .lisp byte restoration."""
     if lisp.suffix != ".lisp" or sens != lisp.with_suffix(".sens") or view != lisp.with_suffix(""):
         raise ProjectionBlocked("all three inputs must be exact same-stem paths")
     src = checked_file(lisp)
@@ -256,9 +256,10 @@ def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "auto") -> dict:
     if len({tuple(candidate_words) for _, candidate_words in candidates}) != 1:
         raise ProjectionBlocked("ambiguous T5M/T5 words: explicit codec required")
     physical_codec, words = candidates[0]
-    canonical_source = canonical_uk_from_words(words).encode("utf-8")
-    if src != canonical_source:
-        raise ProjectionBlocked("noncanonical українська ук source or wrong T5 semantics")
+    # Canonical output is a *rendering* of the decoded program, not a copy of
+    # the original file. Comments, spaces and line endings carry no SENS law.
+    # Compare its exact typed words with those of the actual Ukrainian source.
+    canonical_source = canonical_uk_from_words(words)
     canonical_view = (" ".join(words) + "\n").encode("ascii")
     if readable != canonical_view:
         raise ProjectionBlocked("missing, stale or noncanonical ASCII 0/1 view")
@@ -268,10 +269,11 @@ def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "auto") -> dict:
         raise ProjectionBlocked("physical carrier not byte-canonical")
     try:
         projected = project_current_uk(source)
+        reconstructed = project_current_uk(canonical_source)
     except (three_pass.MigrationError, SensT5Error, OSError, ValueError) as exc:
-        raise ProjectionBlocked("Ukrainian source could not be encoded to exact words") from exc
-    if projected != words or encode_current(projected) != binary:
-        raise ProjectionBlocked("Ukrainian source and physical T5 do not agree")
+        raise ProjectionBlocked("Ukrainian program could not be projected to exact words") from exc
+    if projected != words or reconstructed != words or encode_current(projected) != binary:
+        raise ProjectionBlocked("program identity changed across Ukrainian Lisp ↔ exact words ↔ physical T5")
     return {
         "schema": SCHEMA,
         "status": "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION",
@@ -289,6 +291,7 @@ def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "auto") -> dict:
         "physical_T5_roundtrip": physical_codec == "t5",
         "physical_T5M_roundtrip": physical_codec == "t5m",
         "canonical_uk_roundtrip": True,
+        "program_identity_roundtrip": True,
         "canonical_view_roundtrip": True,
         "runtime_oracle_admitted_by_this_audit": False,
         "old_originals_migrated_by_this_audit": 0,
