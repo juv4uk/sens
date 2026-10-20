@@ -52,6 +52,41 @@ class CurrentManifestMigrationTests(unittest.TestCase):
         self.assertEqual(receipt["source_sha256"], hashlib.sha256(before).hexdigest())
         self.assertEqual(SOURCE.read_bytes(), before)
 
+    def test_physical_and_bits_view_are_published_as_a_pair(self):
+        before = SOURCE.read_bytes()
+        rel, physical, _ = approved.migrate_one(
+            SOURCE, ROOT, self.maps, before, source_era="current",
+        )
+        with tempfile.TemporaryDirectory(prefix="sens-pair-publish-") as temp:
+            out = Path(temp)
+            approved.publish_batch([(rel, physical)], out)
+            self.assertEqual((out / rel).read_bytes(), physical)
+            self.assertEqual(
+                (out / rel.with_suffix("")).read_bytes(),
+                VIEW.read_bytes(),
+            )
+            self.assertEqual(SOURCE.read_bytes(), before)
+            with self.assertRaisesRegex(approved.engine.SensT5Error, "exists"):
+                approved.publish_batch([(rel, physical)], out)
+            self.assertEqual((out / rel).read_bytes(), physical)
+
+    def test_later_view_collision_rolls_back_earlier_pair(self):
+        _, physical, _ = approved.migrate_one(
+            SOURCE, ROOT, self.maps, source_era="current",
+        )
+        with tempfile.TemporaryDirectory(prefix="sens-pair-rollback-") as temp:
+            out = Path(temp)
+            (out / "b").write_bytes(b"existing-user-data")
+            with self.assertRaisesRegex(approved.engine.SensT5Error, "exists"):
+                approved.publish_batch([
+                    (Path("a.sens"), physical),
+                    (Path("b.sens"), physical),
+                ], out)
+            self.assertFalse((out / "a.sens").exists())
+            self.assertFalse((out / "a").exists())
+            self.assertFalse((out / "b.sens").exists())
+            self.assertEqual((out / "b").read_bytes(), b"existing-user-data")
+
     def test_legacy_sid8_is_not_an_executable_era(self):
         with self.assertRaisesRegex(approved.engine.MigrationError,
                                     "HISTORICAL_SOURCE_ERA_DISABLED"):
