@@ -120,6 +120,13 @@ class CurrentManifestMigrationTests(unittest.TestCase):
     def test_unrepresentable_codepoint_blocks_not_coerces_to_text7(self):
         with tempfile.TemporaryDirectory(prefix="sens-t5m-negative-") as temp:
             root = Path(temp)
+            # Тимчасове дерево зберігає власне джерело ратифікованих
+            # доменів: мігратор не має потай підвантажувати глобальний ROOT.
+            foundation = root / "knowledge/d1-d11-foundation.json"
+            foundation.parent.mkdir(parents=True)
+            foundation.write_bytes(
+                (ROOT / "knowledge/d1-d11-foundation.json").read_bytes()
+            )
             source = root / "неприпустиме.lisp"
             source.write_text("(перше ☃)\n", encoding="utf-8")
             with self.assertRaises((
