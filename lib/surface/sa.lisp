@@ -182,12 +182,12 @@
 ;; Batch 2 — Persistent vector (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-(визначити samūha-śūnya vec-empty)
-(визначити samūha-yukti vec-conj)
-(визначити samūha-gaṇana vec-count)
-(визначити samūha-kramāṅka vec-nth)
-(визначити samūha-śreṇī vec->list)
-(визначити śreṇī-samūha vec-from-list)
+(визначити samūha-śūnya вектор-порожній)
+(визначити samūha-yukti вектор-додати)
+(визначити samūha-gaṇana вектор-кількість)
+(визначити samūha-kramāṅka вектор-н-тий)
+(визначити samūha-śreṇī вектор-список)
+(визначити śreṇī-samūha вектор-з-список)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Knowledge/Reasoning (status: candidate)

@@ -1,52 +1,15 @@
-; A persistent (immutable, structural-sharing) vector, backed by an
-; AVL-balanced binary search tree keyed by integer index (OPT-PERSISTENT-
-; VECTOR). Same discipline as lib/persistent-map.lisp (whose rotation/
-; balance code this file reuses verbatim, only the key type and ordering
-; predicate change from string/string<? to integer/<): no mutation
-; anywhere, vec-conj returns a *new* vector sharing every subtree it
-; didn't touch.
-;
-; Honest scope, not overclaimed: OPT-PERSISTENT-VECTOR's own text asks
-; for "O(1) nth/conj... reference Clojure HAMT implementation." This is
-; NOT a HAMT -- a HAMT is a 32-way branching trie over hashed/partitioned
-; bits, a materially different (and materially larger) undertaking than
-; adapting the tree already proven correct in this codebase. What this
-; delivers is O(log n) nth/conj via the same AVL tree, a real,
-; verified improvement over core.lisp's `nth` (linear cdr-walk, O(n) per
-; call -- confirmed by reading its own definition before writing this
-; file) that directly addresses the problem OPT-PERSISTENT-VECTOR cites
-; (WSM-24: an O(n) `nth` inside a subsample loop over a 4607-point list
-; made the whole loop O(n^2)) -- O(log n) turns that into O(n log n).
-; A true O(1) HAMT is a legitimate future refinement if O(log n) proves
-; insufficient in practice; not built speculatively now (G4: earn
-; complexity as demonstrated need arises, not ahead of it).
-;
-; Персистентний (незмінний, зі структурним sharing) вектор на основі
-; AVL-збалансованого дерева пошуку, індексованого цілим числом
-; (OPT-PERSISTENT-VECTOR). Та сама дисципліна, що й lib/persistent-map.lisp
-; (чий код ротацій/балансування цей файл перевикористовує буквально,
-; міняється лише тип ключа й предикат порядку — з рядка/string<? на
-; ціле/<): жодної мутації, vec-conj повертає *новий* вектор, ділячи
-; кожне не зачеплене піддерево.
-;
-; Чесний обсяг, не завищений: сама OPT-PERSISTENT-VECTOR просить
-; "O(1) nth/conj... за зразком Clojure HAMT". Це НЕ HAMT — HAMT це
-; 32-гіллясте дерево над хешованими/розбитими на біти індексами,
-; матеріально інша (і матеріально більша) робота, ніж адаптація вже
-; доведеного дерева з цього кодбейзу. Тут — O(log n) nth/conj через те
-; саме AVL-дерево, реальне, перевірене покращення над `nth` з core.lisp
-; (лінійний cdr-обхід, O(n) на виклик — перевірено читанням його
-; визначення перед написанням цього файлу), яке прямо закриває
-; проблему, яку цитує OPT-PERSISTENT-VECTOR (WSM-24: O(n) `nth`
-; усередині циклу subsample над списком з 4607 точок робив увесь цикл
-; O(n^2)) — O(log n) перетворює це на O(n log n). Справжній O(1) HAMT —
-; законне майбутнє уточнення, якщо O(log n) виявиться недостатнім на
-; практиці; не побудований наперед спекулятивно (G4: складність
-; заробляється продемонстрованою потребою, не наперед).
-;
-; A vector is a pair (count . tree). The tree is empty '() for an empty
-; vector. Each tree node is a 5-element list: (index value height left
-; right) -- the identical shape lib/persistent-map.lisp's node uses.
+; Персистентний вектор СЕНС зі структурним спільним використанням вузлів.
+; Значення вектора є парою: кількість елементів та корінь дерева.
+; Вузол дерева містить індекс, значення, висоту, ліве і праве піддерева.
+; Додавання не змінює попереднього вектора, а повертає нове значення.
+; Повороти підтримують збалансовану висоту дерева.
+; Пошук за індексом повертає порожній список за відсутності елемента,
+; а для знайденого елемента повертає одноелементний список.
+; Перетворення зі списку зберігає початковий порядок значень.
+; Основні визначення мають повну ратифіковану проєкцію укр домену Д9.
+; Назви інших мов не дублюються в цій українській бібліотеці.
+; Перевірка поведінки належить справжньому обчислювачу СЕНС.
+
 
 (визначити вектор-порожній (сполучити 0 (як-є ())))
 (визначити вектор-кількість (функція (вектор-лічильника) (перше вектор-лічильника)))
@@ -96,7 +59,7 @@
 (визначити вектор-збалансувати
   (функція (вузол-для-балансування)
     (за-умовою
-      
+
       ((атом? вузол-для-балансування)  вузол-для-балансування)
       ((більше? (вектор-коефіцієнт-балансу вузол-для-балансування) 1) 
        (за-умовою
@@ -113,12 +76,10 @@
          (так (вектор-повернути-ліворуч вузол-для-балансування))))
       (так вузол-для-балансування))))
 
-; Returns a new tree with `index`/`value` inserted (or `value` replacing
-; an existing entry at `index`) -- the original tree is untouched.
 (визначити вставити-в-дерево-вектора
   (функція (індекс-вставки-вектора значення-вставки-вектора дерево-вставки-вектора)
     (за-умовою
-      
+
       ((атом? дерево-вставки-вектора)  (вектор-створити-збалансований-вузол індекс-вставки-вектора значення-вставки-вектора (як-є ()) (як-є ())))
       ((тотожне? індекс-вставки-вектора (вектор-вузол-індекс дерево-вставки-вектора))
        (вектор-створити-збалансований-вузол індекс-вставки-вектора значення-вставки-вектора (вектор-вузол-ліве-піддерево дерево-вставки-вектора) (вектор-вузол-праве-піддерево дерево-вставки-вектора)))
@@ -131,43 +92,27 @@
                    (вектор-вузол-ліве-піддерево дерево-вставки-вектора)
                    (вставити-в-дерево-вектора індекс-вставки-вектора значення-вставки-вектора (вектор-вузол-праве-піддерево дерево-вставки-вектора))))))))
 
-; O(log n): the AVL tree is height-balanced, so this recursion depth
-; (and therefore the work done) never exceeds ~1.44*log2(count).
 (визначити отримати-з-дерева-вектора
   (функція (шуканий-індекс-вектора дерево-пошуку-вектора)
     (за-умовою
-      
+
       ((атом? дерево-пошуку-вектора)  (як-є ()))
       ((тотожне? шуканий-індекс-вектора (вектор-вузол-індекс дерево-пошуку-вектора)) (список (вектор-вузол-значення дерево-пошуку-вектора)))
       ((менше? шуканий-індекс-вектора (вектор-вузол-індекс дерево-пошуку-вектора))  (отримати-з-дерева-вектора шуканий-індекс-вектора (вектор-вузол-ліве-піддерево дерево-пошуку-вектора)))
       (так (отримати-з-дерева-вектора шуканий-індекс-вектора (вектор-вузол-праве-піддерево дерево-пошуку-вектора))))))
 
-; `vec-nth` returns the classic "maybe" shape ('() or (value)), the same
-; idiom lib/persistent-map.lisp's map-get already uses -- deliberately NOT
-; a drop-in replacement for core.lisp's `nth` (which returns the bare value
-; and has no way to signal "out of bounds" except erroring on `()`).
-; Mixing the two conventions silently would be exactly the kind of
-; accidental-vs-intentional confusion this session already spent a long
-; conversation on with macro hygiene -- named differently on purpose.
 (визначити вектор-н-тий
   (функція (індекс-для-читання-вектора вектор-для-читання) (отримати-з-дерева-вектора індекс-для-читання-вектора (отримати-дерево-вектора вектор-для-читання))))
 
-; O(log n): appends `value` at the current end (index = current count),
-; then increments count. The new count/tree pair shares every subtree
-; the insert path didn't touch with the original vector.
 (визначити вектор-додати
   (функція (значення-для-додавання-вектора вектор-до-додавання)
     (сполучити (додати 1 (вектор-кількість вектор-до-додавання))
           (вставити-в-дерево-вектора (вектор-кількість вектор-до-додавання) значення-для-додавання-вектора (отримати-дерево-вектора вектор-до-додавання)))))
 
-; In-order traversal over an index-keyed BST comes back in index order
-; for free, the same free side effect lib/persistent-map.lisp's map->list
-; already relies on. Top-level helper, not a nested letrec -- my-lisp
-; has no letrec; `def` at top level is how a helper refers to itself.
 (визначити перетворити-дерево-вектора-на-список
   (функція (дерево-для-проєкції-списку)
     (за-умовою
-      
+
       ((атом? дерево-для-проєкції-списку)  (як-є ()))
       (так (приєднати (перетворити-дерево-вектора-на-список (вектор-вузол-ліве-піддерево дерево-для-проєкції-списку))
                  (сполучити (вектор-вузол-значення дерево-для-проєкції-списку)
@@ -176,32 +121,12 @@
 (визначити вектор-список
   (функція (вектор-для-проєкції-списку) (перетворити-дерево-вектора-на-список (отримати-дерево-вектора вектор-для-проєкції-списку))))
 
-; Builds a persistent vector from an ordinary list, in list order --
-; the on-ramp for adopting existing O(n)-vector code without hand-writing
-; a fold of vec-conj at every call site. Accumulator-passing (the same
-; `-onto` shape core.lisp's map-onto/filter-onto already use), not naive
-; recursion: naive `(vec-conj (car lst) (vec-from-list (cdr lst)))`
-; would conj the LAST element first (its own recursive call bottoms out
-; before any conj runs), reversing the list into the vector -- caught
-; before this file was ever tested, not after.
 (визначити створити-вектор-зі-списку-до
   (функція (список-для-побудови-вектора накопичувач-побудови-вектора)
     (за-умовою
-      
+
       ((атом? список-для-побудови-вектора)  накопичувач-побудови-вектора)
       (так (створити-вектор-зі-списку-до (решта список-для-побудови-вектора) (вектор-додати (перше список-для-побудови-вектора) накопичувач-побудови-вектора))))))
 
 (визначити вектор-з-список
   (функція (вхідний-список-вектора) (створити-вектор-зі-списку-до вхідний-список-вектора вектор-порожній)))
-
-; AVL-вектор: усі внутрішні викличні голови є українськими.
-; Алгоритм збалансованого дерева та формат даних збережено.
-; Зовнішні D9 peer-імена «en» залишаються лише визначеннями того
-; самого ратифікованого значення, без повторного виконуваного коду.
-; Жодних адаптерів SID8/Sens8, сирих бітових викликів чи fallback.
-(визначити vec-empty вектор-порожній)
-(визначити vec-count вектор-кількість)
-(визначити vec->list вектор-список)
-(визначити vec-conj вектор-додати)
-(визначити vec-from-list вектор-з-список)
-(визначити vec-nth вектор-н-тий)
