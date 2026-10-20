@@ -9,6 +9,7 @@ from collections import Counter
 import hashlib
 from pathlib import Path
 import re
+import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -343,6 +344,111 @@ PINNED = {
     73
   ]
 }
+
+# Історичний source-only свідок фіксує стан ДО наступного ручного
+# перейменування локальних імен. Живий файл додатково перевіряється
+# як його точна, виключно лексична українська проєкція.
+PRE_RENAME_BLOB = "e6eba54d1078e556124fb82a57fd57d53dffe5f4"
+ALPHA_RENAMES = {
+    "nil-marker": "ознака-порожнього",
+    "pos-of": "позиція-підрядка",
+    "has": "містить-підрядок?",
+    "slice-from": "зріз-від",
+    "digit?": "цифра?",
+    "skip-ws": "пропустити-пробіли",
+    "word-digits": "послідовність-цифр",
+    "word-nonspace": "слово-до-пробілу",
+    "split-lines": "розділити-рядки",
+    "reverse-acc": "зворот-накопичувача",
+    "count-lst": "довжина-списку",
+    "asm-id": "асемблер-ідентифікатор",
+    "asm-name": "асемблер-назва",
+    "keep-pair": "зберегти-пару",
+    "process-asm-line": "обробити-рядок-асемблера",
+    "process-lines-asm": "обробити-рядки-асемблера",
+    "inc-name": "назва-з-включення",
+    "probe": "спостерігати-значення",
+    "inc-id": "ідентифікатор-з-включення",
+    "process-define-line": "обробити-рядок-визначення",
+    "process-lines-inc": "обробити-рядки-включення",
+    "str-eq?": "однакові-рядки?",
+    "id-in-base?": "ідентифікатор-у-базі?",
+    "merge-pair": "злити-пару",
+    "merge-all": "злити-всі",
+    "emit-all": "вивести-всі",
+    "main": "головна",
+    "s": "рядок",
+    "marker": "позначка",
+    "i": "позиція",
+    "m": "підрядок",
+    "c": "символ",
+    "lst": "елементи",
+    "acc": "накопичувач",
+    "line": "рядок-джерела",
+    "lines": "рядки-джерела",
+    "tag": "позначка-спостереження",
+    "value": "значення",
+    "name": "назва",
+    "tail": "залишок",
+    "id": "ідентифікатор",
+    "base": "база",
+    "pair": "пара",
+    "pairs": "пари",
+    "a": "ліве",
+    "b": "праве",
+    "asm-path": "шлях-асемблера",
+    "inc-path": "шлях-включення",
+    "asm-pairs": "асемблерні-пари",
+    "inc-pairs": "пари-включення",
+    "merged": "злиті"
+}
+
+
+def source_before_manual_names():
+    return subprocess.run(
+        ["git", "cat-file", "-p", PRE_RENAME_BLOB],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+        encoding="utf-8",
+    ).stdout
+
+
+def manually_renamed_code(source):
+    out, token = [], []
+    in_comment = in_string = escaped = False
+
+    def flush():
+        if token:
+            word = "".join(token)
+            out.append(ALPHA_RENAMES.get(word, word))
+            token.clear()
+
+    for char in source:
+        if in_comment:
+            out.append(char)
+            if char == "\n":
+                in_comment = False
+            continue
+        if in_string:
+            out.append(char)
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char.isspace() or char in ("(", ")", "'", '"', ";"):
+            flush()
+            out.append(char)
+            if char == ";":
+                in_comment = True
+            elif char == '"':
+                in_string = True
+        else:
+            token.append(char)
+    flush()
+    return "".join(out)
+
 ROW = re.compile(r"^\s*\(([01]+)\s+\(ук\s+[^()]*\)\s+\(укр\s+([^\s()]+)\)")
 NUMERIC_HEAD = re.compile(r"\(\s*[01]+(?=\s|\)|$)")
 ENCODED_LITERAL = re.compile(r"#(?:d\d+:[01]+|b[01]+)")
@@ -410,6 +516,16 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
     def setUpClass(cls):
         cls.peers = authority()
 
+
+    def test_manual_ukrainian_names_are_exact_source_projection(self):
+        original = source_before_manual_names()
+        self.assertEqual(git_blob(original), PRE_RENAME_BLOB)
+        actual = SOURCE.read_text(encoding="utf-8")
+        self.assertEqual(manually_renamed_code(original), actual)
+        self.assertIn("(визначити ознака-порожнього (як-є ()))", actual)
+        self.assertIn("(головна (перше *argv*)", actual)
+        self.assertNotIn("(визначити nil-marker", actual)
+
     def test_ratified_coordinates_and_exact_count(self):
         self.assertEqual(Counter(old for _, old in PINNED["edits"]), EXPECTED)
         self.assertEqual(len(PINNED["edits"]), 75)
@@ -422,12 +538,12 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
         self.assertEqual(self.peers["110"], "за-умовою")
 
     def test_exact_original_git_blob_reconstructed(self):
-        source = SOURCE.read_text(encoding="utf-8")
+        source = source_before_manual_names()
         restored = inverse(reverse_probe_ukr(source), PINNED["edits"], self.peers)
         self.assertEqual(git_blob(restored), PINNED["sha"])
 
     def test_changed_lines_have_no_numeric_head(self):
-        source = SOURCE.read_text(encoding="utf-8")
+        source = source_before_manual_names()
         old = inverse(reverse_probe_ukr(source), PINNED["edits"], self.peers)
         lines_before, lines_after = old.splitlines(), source.splitlines()
         self.assertEqual(len(lines_before), len(lines_after))
@@ -440,7 +556,7 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
             self.assertIsNone(ENCODED_LITERAL.search(mask), f"line {line}")
 
     def test_unproved_domain_words_and_historical_cond_debt_preserved(self):
-        source = SOURCE.read_text(encoding="utf-8")
+        source = source_before_manual_names()
         self.assertIn("(визначити nil-marker (як-є ()))", source)
         self.assertIn("(визначити reverse-acc", source)
         self.assertIn("((атом? lst) acc)", source)
@@ -450,7 +566,7 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
         self.assertNotIn("(0011 nil-marker", source)
 
     def test_negative_wrong_peer_fails_inverse(self):
-        source = SOURCE.read_text(encoding="utf-8")
+        source = source_before_manual_names()
         mutated = source.replace(
             "(визначити nil-marker", "(функція nil-marker", 1
         )
