@@ -1,23 +1,14 @@
 ; tests/fixtures/semantic/cond-2part-v1.lisp — #1709, закон #1713.
-; УCondition допускаються лише 2-частинні клаузи (test expression):
-;   test = 1       -> select; результат = значення виразу
-;   test = 0       -> skip; перейти до наступної клаузи
-;   усі skip       -> вичерпання, структурне ()
-;   інша форма     -> не допускається (negative fixture)
+; Умовний вибір допускає лише пари «умова — вираз»:
+;   умова = 1 → обчислити й повернути вираз;
+;   умова = 0 → перейти до наступної гілки;
+;   усі умови = 0 → повернути структурний порожній список ();
+;   інша форма гілки → відхилити як недопустиму.
 ;
-; Важлива різниця: () тут НЕ є відповіддю предиката. () тут — структурне
-; значення вичерпання COND, яке існує і буде існувати. Заборонене
-; представлення () стосується відповіді предиката, а не цього виразу.
-;
-; COND admits only 2-part clauses (test expression):
-;   test = 1   -> select; result is the expression value
-;   test = 0   -> skip; continue to the next clause
-;   all skip   -> exhaustion, the structural value ()
-;   other form -> not admissible (negative fixture)
-;
-; Note the boundary: () here is NOT a predicate answer. () here is the
-; structural exhaustion value of COND and stays legal. The forbidden ()
-; presentation is about predicate answers, not about this expression.
+; Порожній список, який повертає вичерпаний умовний вибір,
+; є звичайним структурним значенням, а НЕ відповіддю предиката.
+; Тому заборона третього стану відповіді Д1 його не скасовує.
+; Історичні коди та тестові рядки нижче залишено незмінними.
 
 ((expect . expect-value)
  (expr . "(00000111 ((00100010 1 1) 7))")
@@ -46,14 +37,12 @@
  (governs . "#1713")
  (note . "0 пропускається, наступний 1 вибирає 9 — не перший ненулльовий."))
 
-; Negative fixture. Тричастинна клауза (query expected-result expression) —
-; спадоковий migration-форма, який #1713/#1714 мають прибрати з читача.
-; Ряд НЕ активний: поки що рантайм приймає її як query і повертає
-; UnsatisfiedConditional замість відхилення читачем.
-; Negative fixture. A 3-part clause is a legacy migration form that
-; #1713/#1714 must remove from the reader. Inactive: the runtime still
-; accepts it as a query and fails with UnsatisfiedConditional instead of
-; being rejected by the reader.
+; Негативне свідчення: історична тричастинна гілка
+; «запит — очікувана відповідь — вираз» не відповідає закону #1713.
+; Ряд залишено неактивним за історичним станом міграції #1713/#1714:
+; тодішній читач ще допускав таку форму, а обчислювач повертав
+; UnsatisfiedConditional замість відхилення безпосередньо читачем.
+; Не слід приписувати цей історичний стан теперішньому main без перевірки.
 ((expect . expect-rejected)
  (expr . "(00000111 (0 7 8))")
  (expected . (rejected "(00000111 (0 7 8))"))
