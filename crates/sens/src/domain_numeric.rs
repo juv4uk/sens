@@ -456,6 +456,71 @@ mod tests {
     }
 
     #[test]
+    fn wide_asm_seeded_full_domain_parity() {
+        // Чинний закон SENS — незалежний оракул: старе точне
+        // множення двійкових величин та канонічний результат, а не ASM.
+        // Це реальний Value/DomainNumeric шлях, а не текстовий муляж.
+        fn admitted(width: usize, state: &mut u64) -> Value {
+            let mut bits = Vec::with_capacity(width);
+            for _ in 0..width {
+                *state ^= *state << 13;
+                *state ^= *state >> 7;
+                *state ^= *state << 17;
+                bits.push((*state >> 63) as u8);
+            }
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits)
+                .expect("точний D24+ домен"))
+        }
+        let mut state = 0xc3a5_c85c_97cb_3127_u64;
+        for width in [24_usize, 48, 96, 192, 384, 768] {
+            for case in 0..5 {
+                let left = admitted(width, &mut state);
+                let right = admitted(width, &mut state);
+                let (_, x_negative, x_num, x_den) = ingredients(&left).unwrap();
+                let (_, y_negative, y_num, y_den) = ingredients(&right).unwrap();
+                for op in ["+", "-", "*"] {
+                    let (negative, numerator, denominator) = match op {
+                        "+" | "-" => {
+                            let y_sign = if op == "-" { !y_negative } else { y_negative };
+                            let xn = x_num.mul(&y_den);
+                            let yn = y_num.mul(&x_den);
+                            let d = x_den.mul(&y_den);
+                            if x_negative == y_sign {
+                                (x_negative, xn.add(&yn), d)
+                            } else if xn >= yn {
+                                (x_negative, xn.checked_sub(&yn).unwrap(), d)
+                            } else {
+                                (y_sign, yn.checked_sub(&xn).unwrap(), d)
+                            }
+                        }
+                        "*" => (x_negative ^ y_negative, x_num.mul(&y_num), x_den.mul(&y_den)),
+                        _ => unreachable!(),
+                    };
+                    let expected = canonical(negative, numerator, denominator, width)
+                        .expect("точний нормативний механізм");
+                    let actual = compute(op, &left, &right)
+                        .expect("чинне виконання домену");
+                    assert_eq!(actual, expected, "D{width}, набір {case}, операція {op}");
+                    // Перевіряємо не лише десятковий вигляд, а й домен
+                    // і кожен біт — через точну структурну рівність Value.
+                }
+            }
+        }
+        // Різні домени не стають однаковими через однакові величини.
+        let one = |width| {
+            let mut bits = vec![0; width];
+            bits[width - 1] = 1;
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
+        };
+        for (small, large) in [(24,48), (48,96), (96,192), (192,384), (384,768)] {
+            for op in ["+", "-", "*"] {
+                assert!(compute(op, &one(small), &one(large)).is_none(),
+                    "змішані D{small}/D{large}, {op}");
+            }
+        }
+    }
+
+    #[test]
     fn wide_asm_multiplication_matches_original_exact_binary_law() {
         let admitted = |width: usize, word: Vec<u8>| -> Value {
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &word).unwrap())
