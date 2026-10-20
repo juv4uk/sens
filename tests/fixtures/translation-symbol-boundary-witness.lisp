@@ -2,12 +2,12 @@
 ; Виклики звірено з визначеннями lib/translation.lisp.
 ; Цитовані статуси, назви полів і значення відмов не перекладаються.
 
-(load "lib/unify.lisp")
-(load "lib/reason.lisp")
-(load "lib/forward.lisp")
-(load "lib/knowledge.lisp")
-(load "lib/result-status.lisp")
-(load "lib/translation.lisp")
+(завантажити-файл "lib/unify.lisp")
+(завантажити-файл "lib/reason.lisp")
+(завантажити-файл "lib/forward.lisp")
+(завантажити-файл "lib/knowledge.lisp")
+(завантажити-файл "lib/result-status.lisp")
+(завантажити-файл "lib/translation.lisp")
 
 (визначити рядки-межі-символів-перекладу
   (функція ()
