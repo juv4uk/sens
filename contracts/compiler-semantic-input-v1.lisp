@@ -1,24 +1,24 @@
 ; contracts/compiler-semantic-input-v1.lisp
-; #3757 — єдина межа семантичного вводу для evaluator/compiler.
+; #3757 — єдина межа семантичного вводу для обчислювача й компілятора.
 ;
-; Цей файл НЕ визначає значення жодної функції й НЕ дублює карти D1–D8.
+; Цей файл НЕ визначає значення функцій і НЕ дублює таблиць Д1–Д8.
 ; Семантична влада лишається в language-contract.lisp та чинних
-; доменних законах/ратифікаціях. Тут визначено лише форму доказового пакета,
-; який споживач має перевірити ПЕРЕД lowering/виконанням.
+; ратифікованих доменних законах. Тут визначено лише форму пакета свідчень,
+; який споживач перевіряє ПЕРЕД зниженням до машинних форм і виконанням.
 ;
 ; Основний закон межі:
 ;
-;   exact identity
-;   + exact authority provenance
-;   + admitted law/proof reference
-;   + explicit mechanism status
-;   -> compiler/evaluator may consume
+;   точна доменна тотожність
+;   + підтверджене походження семантичних повноважень
+;   + посилання на допущений закон і доказ
+;   + явний статус механізму
+;   -> пакет можуть споживати компілятор та обчислювач
 ;
-; Біти без домену, домен без закону, або семантика зі stale provenance
-; не є допустимим compiler input.
+; Біти без домену, домен без закону чи застарілі свідчення походження
+; не допускаються як семантичний вхід компілятора.
 ;
-; Статус proposal навмисний: merge цього файла є implementation decision,
-; а не новою ратифікацією мовної семантики.
+; Статус пропозиції навмисний: злиття цього файла є рішенням щодо
+; реалізації, а не новою ратифікацією мовної семантики.
 
 (
   (schema . compiler-semantic-input/1)
@@ -35,9 +35,9 @@
        (packed-byte-authority . forbidden)
        (legacy-sens8-authority . forbidden)))
 
-  ; Один request несе identity, а не людське ім'я.
-  ; width не дублюється окремим числом: він є властивістю exact domain/bits
-  ; і має бути перевірений доменним carrier/law.
+  ; Запит передає точну тотожність, а не людське ім'я.
+  ; Ширина не дублюється окремим числом: вона належить точній парі
+  ; домену та бітового слова й перевіряється доменним законом і носієм.
   (request-shape
     . ((ідентичність
         . ((domain . required)
@@ -56,10 +56,10 @@
            (revision . required-full-sha)
            (authority-path . required)
            (authority-sha256 . required)
-           (language-contract-version . required))))))
+           (language-contract-version . required)))))
 
-  ; semantic-status і mechanism-status — різні факти.
-  ; Поточна semantic residency не обіцяє наявність executable mechanism.
+  ; Статус семантичної тотожності та статус механізму — різні факти.
+  ; Чинне доменне значення не гарантує наявності виконавчого механізму.
   (status-separation
     . ((semantic-status . (current research unallocated unknown))
        (mechanism-status . (admitted blocked-mechanism not-required unknown))
@@ -78,8 +78,8 @@
        (legacy-width-coercion-policy . reject)
        (human-name-roundtrip-policy . reject)))
 
-  ; Відмова має бути категоризована до backend execution, щоб помилка
-  ; семантичної влади не маскувалася як target/toolchain failure.
+  ; Відмову потрібно класифікувати до машинного виконання, щоб помилка
+  ; семантичних повноважень не маскувалася як несправність цілі чи інструментів.
   (fail-closed-categories
     . (missing-domain
        width-domain-mismatch
@@ -101,9 +101,9 @@
        (same-semantic-verdict . required)
        (mechanism-may-differ . yes)))
 
-  ; Cross-repo consumer зобов'язаний перевірити не лише номер Contract,
-  ; а exact revision+digest. Номер версії є пояснювальним provenance,
-  ; digest — захистом від "11.8, але інший файл".
+  ; Споживач в іншому репозиторії перевіряє не лише номер контракту,
+  ; а й точну редакцію та контрольний відбиток. Версія пояснює походження,
+  ; а відбиток виключає підміну файла зі збереженим номером 11.8.
   (cross-repository-law
     . ((pin-revision . required)
        (pin-authority-sha256 . required)
@@ -111,9 +111,9 @@
        (stale-pin-fallback . forbidden)
        (auto-upgrade-semantic-meaning . forbidden)))
 
-  ; Перший bounded witness належить #3758/cml#494.
-  ; Конкретні координати навмисно НЕ повторюються тут: вони беруться
-  ; з поточної SENS authority, щоб цей contract не став другою картою.
+  ; Перший обмежений доказ належить #3758/cml#494.
+  ; Конкретні координати навмисно НЕ повторюються: їх беруть із чинних
+  ; доменних таблиць СЕНС, щоб цей контракт не став другою картою.
   (first-witness
     . ((producer . sens)
        (consumer . cml)
