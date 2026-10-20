@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import re
+import subprocess
 import sys
 import unittest
 from collections import Counter
@@ -41,6 +42,97 @@ SPECS = {
     },
 }
 
+
+
+# Історичне exact D3/D4 свідчення перевіряємо за попереднім Git blob.
+# Точне ручне перейменування функцій та змінних перевіряємо окремо.
+MANUAL_NAME_BLOB = "d73eb60620842d226f33a4f8b5b0feb418be1723"
+MANUAL_NAME_PATH = "scripts/generate-functions-md.lisp"
+MANUAL_NAME_MAP = {
+    "tracked": "відстежувані-файли",
+    "reference-path": "шлях-довідника",
+    "str+": "сполучити-текст",
+    "definition-head?": "голова-визначення?",
+    "defined-names": "назви-визначень",
+    "count-items": "кількість-елементів",
+    "functions-md-decimal-radix": "десяткова-основа-для-довідника",
+    "decimal-count->string-onto": "десятковий-підрахунок-у-рядок-дописати",
+    "decimal-count->string": "десятковий-підрахунок-у-рядок",
+    "backtick-join": "об'єднати-назви-лапками",
+    "render-section": "створити-розділ",
+    "pos-of": "позиція-підрядка",
+    "to-end": "межа-зрізу",
+    "slice-from": "зріз-від",
+    "replace-section": "замінити-розділ",
+    "replace-all": "замінити-всі-розділи",
+    "current": "поточний-вміст",
+    "generated": "згенерований-вміст",
+    "args": "аргументи",
+    "acc": "накопичувач",
+    "head": "голова",
+    "forms": "форми",
+    "items": "елементи",
+    "n": "кількість",
+    "names": "назви",
+    "file": "файл",
+    "s": "рядок",
+    "marker": "позначка",
+    "i": "позиція",
+    "doc": "документ",
+    "files": "файли",
+    "start": "початок",
+    "after": "після-початку",
+    "offset": "зміщення",
+    "end": "кінець"
+}
+
+
+def source_for_audit(path):
+    if path != MANUAL_NAME_PATH:
+        return (ROOT / path).read_text(encoding="utf-8")
+    return subprocess.run(
+        ["git", "cat-file", "-p", MANUAL_NAME_BLOB],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+        encoding="utf-8",
+    ).stdout
+
+
+def manual_name_projection(source):
+    out, token = [], []
+    in_comment = in_string = escaped = False
+
+    def flush():
+        if token:
+            symbol = "".join(token)
+            out.append(MANUAL_NAME_MAP.get(symbol, symbol))
+            token.clear()
+
+    for char in source:
+        if in_comment:
+            out.append(char)
+            if char == "\n":
+                in_comment = False
+            continue
+        if in_string:
+            out.append(char)
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char.isspace() or char in ("(", ")", "'", '"', ";"):
+            flush()
+            out.append(char)
+            if char == ";":
+                in_comment = True
+            elif char == '"':
+                in_string = True
+        else:
+            token.append(char)
+    flush()
+    return "".join(out)
 
 def blob_sha(content: str) -> str:
     raw = content.encode("utf-8")
@@ -91,6 +183,16 @@ def verify(path: str, source: str):
 
 
 class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
+
+    def test_manual_function_helper_names_are_exact_ukrainian_projection(self):
+        before = source_for_audit(MANUAL_NAME_PATH)
+        self.assertEqual(blob_sha(before), MANUAL_NAME_BLOB)
+        current = (ROOT / MANUAL_NAME_PATH).read_text(encoding="utf-8")
+        self.assertEqual(manual_name_projection(before), current)
+        self.assertIn("(визначити відстежувані-файли", current)
+        self.assertIn("(визначити замінити-всі-розділи", current)
+        self.assertNotIn("(визначити replace-all", current)
+
     def test_ratified_peer_ownership_at_exact_width(self):
         for bits, expected in PEERS.items():
             d = len(bits)
@@ -108,7 +210,7 @@ class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
     def test_exact_original_blob_inverse_and_s_expression_safety(self):
         for path, expected in SPECS.items():
             with self.subTest(path=path):
-                text = (ROOT / path).read_text(encoding="utf-8")
+                text = source_for_audit(path)
                 count = verify(path, text)
                 self.assertEqual(count, sum(expected["counts"].values()))
 
@@ -124,7 +226,7 @@ class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
 
     def test_wrong_ukr_peer_is_rejected_by_inverse(self):
         path = "scripts/generate-functions-md.lisp"
-        source = (ROOT / path).read_text(encoding="utf-8")
+        source = source_for_audit(path)
         token = next(t for t in observed_heads(source)
                      if t.text == "визначити")
         lines = source.splitlines(keepends=True)
