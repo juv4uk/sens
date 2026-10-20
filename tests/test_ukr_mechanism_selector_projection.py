@@ -15,7 +15,7 @@ SOURCE = ROOT / "lib/mechanism-selector.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
 D5 = ROOT / "lib/domains/d5.lisp"
 REPLACEMENTS = (
-    ("0011", "визначити", "define", "DEFINE", 12),
+    ("0011", "визначити", "define", "DEFINE", 8),
     ("0010", "функція", "lambda", "LAMBDA", 6),
 )
 LOCAL_RENAMES = (
@@ -87,12 +87,12 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertIn("(en caddr)", rows[0])
         self.assertIn("(LISP CADDR)", rows[0])
 
-    def test_local_helper_names_are_ukrainian_active_heads_and_english_value_aliases(self):
+    def test_local_helper_names_are_only_ukrainian(self):
         code = uncommented(self.source)
         for english, ukrainian in LOCAL_RENAMES:
             with self.subTest(helper=english):
                 self.assertRegex(code, rf"\(визначити\s+{re.escape(ukrainian)}(?=\s)")
-                self.assertIn(f"(визначити {english} {ukrainian})", self.source)
+                self.assertNotRegex(code, rf"\(визначити\s+{re.escape(english)}(?=\s)")
                 self.assertNotRegex(code, rf"\({re.escape(english)}(?=\s)")
         self.assertEqual(len(re.findall(r"\(визначити\s+вибрати-механізм(?=\s)", self.source)), 1)
 
@@ -117,11 +117,12 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         for token in ("(як-є rows)", "(як-є no)", "(як-є yes)",
                       "(як-є mechanism-selected)", "(як-є sid-not-in-function-table)"):
             self.assertIn(token, self.source)
-        for name in ("mechanism-selector-find-section",
-                     "mechanism-selector-registry-has-sid?",
-                     "mechanism-selector-find-route",
-                     "mechanism-select"):
-            self.assertIn(f"(визначити {name}", self.source)
+        for legacy, current in LOCAL_RENAMES:
+            self.assertIn(f"(визначити {current}", self.source)
+            self.assertNotIn(f"(визначити {legacy} ", self.source)
+        for legacy in ("mechanism-selector-registry", "mechanism-selector-metadata",
+                       "mechanism-selector-registry-rows", "mechanism-selector-routes"):
+            self.assertNotIn(f"(визначити {legacy} ", self.source)
 
     def test_only_balanced_source_parentheses_outside_strings_and_comments(self):
         code = uncommented(self.source)
