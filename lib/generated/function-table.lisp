@@ -2,10 +2,10 @@
 ; ІСТОРИЧНА МІГРАЦІЙНА ПРОЄКЦІЯ — НЕ СЕМАНТИЧНА ВЛАДА
 ; Донор: lib/surface/semantic-registry.lisp
 ; Генератор: scripts/generate-function-table.lisp
-; Schema ft/2: (legacy-bitstring formal ук укр en sa sym projection)
-; ук = current Ukrainian; укр = full Ukrainian peer surface
-; Display order for humans: ук → укр → English → Sanskrit
-; проєкція = лише історичний/міграційний огляд
+; Схема ft/2: (legacy-bitstring formal ук укр en sa sym projection)
+; ук — чинна коротка українська проєкція; укр — повна українська проєкція
+; Порядок читання: ук → укр → англійська → санскрит
+; поле projection — лише історичний/міграційний огляд
 
 (ft/2
   (00000000 identity:00000000 (ук ()) (укр ()) (en ()) (sa ()) (sym ()) my-lisp)
