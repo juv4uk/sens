@@ -1,22 +1,22 @@
-; #432 research-only abstract fixed-point checker.
-; This is NOT semantic authority and does not implement CAR/CDR.
+; #432 дослідницький абстрактний перевіряч нерухомої точки.
+; Це НЕ семантична влада і не реалізує CAR/CDR.
 ;
-; Declared lower basis B:
-;   Canon 0, QUOTE, ATOM, EQ, CONS, COND, ordinary LAMBDA/DEFINE composition.
-; Explicitly excluded:
-;   CAR, CDR, peer-surface/registry round-trips, host pair destructuring,
-;   backend loads, and any stronger hidden pair eliminator.
+; Оголошена нижня основа B:
+;   Canon 0, QUOTE, ATOM, EQ, CONS, COND, звичайна композиція LAMBDA/DEFINE.
+; Явно виключено:
+;   CAR, CDR, round-trip peer-surface/реєстру, деструктуризацію пар хоста,
+;   завантаження бекенда й будь-який сильніший прихований елімінатор пар.
 ;
-; The checker itself may use CAR/CDR to walk its research data structures.
-; That meta-level convenience is not a candidate derivation in basis B.
+; Сам перевіряч може вживати CAR/CDR для обходу своїх дослідницьких структур даних.
+; Ця мета-рівнева зручність не є кандидатною деривацією в основі B.
 ;
-; Abstract capability states:
-;   static-atom      literal atom independent of runtime input
-;   static-pair      pair containing no fresh runtime payload
-;   fresh-nested     fresh runtime payload exists only inside a pair/structure
-;   record-pair      ATOM/EQ structured observation record
-;   undefined        route is not defined (for example EQ on pair data)
-;   fresh-top-level  forbidden target: extracted runtime payload atom
+; Абстрактні стани можливостей:
+;   static-atom      літеральний атом, незалежний від вхідних даних часу виконання
+;   static-pair      пара без свіжого корисного навантаження часу виконання
+;   fresh-nested     свіже корисне навантаження часу виконання існує лише всередині пари/структури
+;   record-pair      структурований запис спостереження ATOM/EQ
+;   undefined        маршрут не визначено (наприклад EQ на даних пари)
+;   fresh-top-level  заборонена ціль: витягнутий атом корисного навантаження часу виконання
 
 (def research-same?
   (lambda (left right)
@@ -41,14 +41,14 @@
       ((research-set-contains? value values) yes values)
       ((research-set-contains? value values) no (cons value values)))))
 
-; One abstract closure step for the declared lower basis.
+; Один абстрактний крок замикання для оголошеної нижньої основи.
 ;
-; QUOTE contributes static-atom/static-pair (already seeded).
-; ATOM maps every defined input class to a structured record => record-pair.
-; EQ on non-pairs yields a structured record; on pair data it is undefined.
-; CONS creates a pair; if an operand carries fresh payload, freshness remains nested.
-; COND returns one branch value and therefore adds no capability absent in branches.
-; LAMBDA/DEFINE bind/compose existing values and add no projection capability.
+; QUOTE дає static-atom/static-pair (уже засіяні).
+; ATOM відображає кожен визначений вхідний клас у структурований запис => record-pair.
+; EQ на не-парах дає структурований запис; на даних пари він невизначений.
+; CONS створює пару; якщо операнд несе свіже навантаження, свіжість лишається вкладеною.
+; COND повертає одне значення гілки і тому не додає можливості, відсутньої в гілках.
+; LAMBDA/DEFINE зв'язують/компонують наявні значення й не додають можливості проєкції.
 (def research-transfer-step
   (lambda (states)
     (cond
