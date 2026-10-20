@@ -255,13 +255,6 @@
 ;; й допускає лише підтверджений перехід. Відкликання не потребує
 ;; попередньої перевірки: вилучення твердження не породжує суперечності.
 ;; Обидва відновлюють сумісний журнал з поверненого незмінного світу.
-;; журнал із поверненого незмінного World.
-;;
-;; Die beiden anderen alten Journal-Makros nutzen dieselbe Brücke.
-;; `tell-knowledge` behält seine Konfliktprüfung vor dem Schreiben und
-;; delegiert nur den akzeptierten Übergang; `retract-knowledge` bleibt
-;; bedingungslos, weil Wissensentzug keinen Widerspruch erzeugen kann. Beide
-;; gewinnen das Kompatibilitätsjournal aus einer unveränderlichen World zurück.
 (визначити повідомити-знання
   (макрос
     (функція (назва-модуля правила)
