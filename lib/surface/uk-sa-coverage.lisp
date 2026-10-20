@@ -1,28 +1,29 @@
-; LEGACY AUDIT / ІСТОРИЧНИЙ АУДИТ — НЕ SEMANTIC AUTHORITY.
-; Authoritative machine identities live in semantic-registry.lisp and are numeric-only.
-; Machine-readable English ↔ Ukrainian ↔ Sanskrit coverage table.
-; Машинно-читана таблиця покриття EN ↔ UK ↔ SA.
+; ІСТОРИЧНИЙ АУДИТ — НЕ ДЖЕРЕЛО СЕМАНТИЧНИХ ПОВНОВАЖЕНЬ.
+; Машинно-читана таблиця покриття англійської, української
+; та санскритської поверхонь (EN ↔ UK ↔ SA).
+; Історичні машинні ідентичності тут — лише дані обліку;
+; вони не замінюють чинних доменних таблиць СЕНС.
 ;
-; This table records surface-name mappings for every eligible public
-; English-facing name. It does NOT define semantics — every mapping targets
-; an existing semantic identity or public definition.
+; Кожний рядок зіставляє назви вже наявної публічної функції.
+; Таблиця не визначає її семантики й не ратифікує нової координати.
 ;
-; Status values:
-;   stable            — name selected, implemented as alias, tested
-;   candidate         — proposed name, not yet ratified
-;   missing           — no mapping yet
-;   compatibility-only — English name intentionally has no separate translation
+; Стани (літерали поля status не перейменовуємо):
+;   stable             — назву обрано, реалізовано й перевірено
+;   candidate          — пропозиція, ще не ратифікована
+;   missing            — чинного зіставлення поки немає
+;   compatibility-only — історичне англійське ім'я без окремого перекладу
 ;
-; Format: (entry (category EN UK SA uk-status sa-status notes))
+; Форма запису: (entry (category EN UK SA uk-status sa-status notes)).
+; Системні ключі запису є протокольними даними.
 ;
-; Canon 0+7 + necessary forms: stable (ratified in calibration doc).
-; All translation-eligible UK rows are stable (implemented in uk.lisp and
-; checked from this table by uk_surface_equivalence.rs).
-; Batch 1 SA: stable for Canon + arithmetic + comparisons + predicates + lists;
-;             candidate for higher-order, strings, other (implemented but
-;             pending broader review of Sanskrit term choices).
-; Batch 2 SA: candidate (I/O, vectors, conversions, time, persistent map,
-;             persistent vector, knowledge/reasoning, unification, epistemic, gensym).
+; Історично Canon 0+7 та необхідні форми мали стан stable.
+; Для відповідних рядків української поверхні стан перевіряв
+; uk_surface_equivalence.rs за наявністю зв'язування в uk.lisp.
+; Перша санскритська партія: основні форми, арифметика,
+; порівняння, предикати та списки; решта термінів потребувала розгляду.
+; Друга партія: введення-виведення, вектори, перетворення,
+; час, сталі мапи, логічне виведення, уніфікація й епістеміка.
+; Актуальну семантику та назви перевіряти за ратифікованими D1–D10.
 
 (uk-sa-coverage
   (schema uk-sa-coverage/3)
