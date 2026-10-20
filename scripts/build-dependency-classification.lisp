@@ -302,22 +302,22 @@
              ((однакові? бібліотека (як-є ())) (сполучити (як-є unknown) (як-є ())))
              ((атом? (як-є ())) (сполучити (як-є reasoning-world-or-host) бібліотека))))))))
 
-; my-lisp has no try/catch: a fixture whose own point is that its source
-; text exceeds the reader's decimal-literal exponent resource bound
-; (crates/my-lisp/src/value.rs's MAX_DECIMAL_LITERAL_EXPONENT_MAGNITUDE,
-; 10000 as of commit 3a90df3) makes read-all itself throw a hard parse
-; error, aborting the whole batch -- exactly the same shape of problem
-; scripts/oracle-batch.lisp hit and fixed by not locally re-parsing at
-; all. This classifier DOES need a local parse to walk the AST, so it
-; cannot avoid reading altogether; instead it special-cases the exact,
-; currently-known set of such fixtures (verified via
+; my-lisp не має try/catch: фікстура, чий власний сенс у тому, що її вихідний
+; текст перевищує ресурсну межу показника десяткового літерала читача
+; (crates/my-lisp/src/value.rs, MAX_DECIMAL_LITERAL_EXPONENT_MAGNITUDE,
+; 10000 станом на коміт 3a90df3), змушує сам read-all кинути жорстку помилку
+; розбору, перериваючи весь батч -- точнісінько така сама форма проблеми,
+; на яку натрапив scripts/oracle-batch.lisp і виправив, зовсім не розбираючи
+; локально. Цей класифікатор ТАКИ потребує локального розбору, щоб обійти AST, тож він
+; не може уникнути читання взагалі; натомість він особливо обробляє точний,
+; наразі відомий набір таких фікстур (перевірено через
 ; `grep -n 'e100001\|e-100001' tests/fixtures/conformance.lisp`: exactly
-; three, all S3 axiom-tagged, all with error . "NumericOverflow" already
-; recorded) rather than guessing at a general-purpose exponent scanner --
-; the R1 lesson earlier in this investigation was specifically about the
-; risk of hand-rolling number classification outside the real reader. If
-; a future fixture adds a different oversized-exponent literal, this
-; check needs re-verification against the live corpus, not silent trust.
+; три, усі з тегом аксіоми S3, усі з error . "NumericOverflow" уже
+; записаним) замість вгадування загального сканера показників --
+; урок R1 раніше в цьому дослідженні був саме про
+; ризик ручного виготовлення класифікації чисел поза справжнім читачем. Якщо
+; майбутня фікстура додасть інший літерал із надвеликим показником, ця
+; перевірка потребує повторної верифікації проти живого корпусу, а не тихої довіри.
 (визначити відомо-нечитний-завеликий-показник?
   (функція (рядок-виразу)
     (або (рядок-містить? "e100001" рядок-виразу)
