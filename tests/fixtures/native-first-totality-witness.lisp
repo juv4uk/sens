@@ -1,6 +1,7 @@
-; #626 — total native-first classifier witness for pair-headed applications.
-; Unsupported expression data must fall back unchanged.
-; Ukrainian projection: Sid8/Sens8 → D3/D4/D8.
+; Свідчення #626: повнота класифікації рідного виконання над парами.
+; Непідтриманий вираз має повертатися незмінним до обчислювача СЕНС.
+; Цитовані вирази та мітки транспортного результату не перекладаємо.
+; Виконувані локальні зв'язування використовують українську проєкцію.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
@@ -9,20 +10,20 @@
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 (load "lib/machine/dispatch/native-first.lisp")
 
-(визначити native-first-totality-check
-  (функція (expression)
+(визначити перевірити-повноту-рідного-виконання
+  (функція (вираз)
     (за-умовою
       ((однакові?
-         (класифікувати-нативний-вираз expression)
-         (список (як-є evaluator-fallback) expression))
+         (класифікувати-нативний-вираз вираз)
+         (список (як-є evaluator-fallback) вираз))
        (як-є pass))
       ((однакові?
-         (класифікувати-нативний-вираз expression)
-         (список (як-є evaluator-fallback) expression))
+         (класифікувати-нативний-вираз вираз)
+         (список (як-є evaluator-fallback) вираз))
        (як-є fail)))))
 
 (список
-  (native-first-totality-check
+  (перевірити-повноту-рідного-виконання
     (як-є ((функція (x) (+ x 1)) 41)))
-  (native-first-totality-check
+  (перевірити-повноту-рідного-виконання
     (як-є (перше ((функція (x) x) 1)))))
