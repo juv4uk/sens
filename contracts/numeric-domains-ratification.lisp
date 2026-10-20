@@ -1,6 +1,6 @@
-; Ratified directly by owner 2026-10-11: D24/D48/D96/D192/... = full SENS domains.
-; Peers of D1-D9; not out-of-domain Number24 storage tiers. The exact domain
-; is mandatory to interpret an exact binary word. No numeric literals required.
+; Ратифіковано безпосередньо власником 2026-10-11: D24/D48/D96/D192/... = повні домени SENS.
+; Рівні D1-D9; не позадоменні рівні зберігання Number24. Точний домен
+; обов'язковий для тлумачення точного бінарного слова. Числові літерали не потрібні.
 (
   (schema . numeric-domains-ratification/1)
   (status . owner-ratified)
