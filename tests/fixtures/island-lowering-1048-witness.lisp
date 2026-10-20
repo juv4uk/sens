@@ -3,10 +3,10 @@
 ; Виконувані виклики й локальні зв'язування наведено українською.
 ; Точні рядки транспортного формату та цитовані мітки результатів незмінні.
 
-(load "lib/core.lisp")
-(load "lib/surface/semantic-registry-api.lisp")
-(load "lib/mechanism-selector.lisp")
-(load "lib/island-lowering.lisp")
+(завантажити-файл "lib/core.lisp")
+(завантажити-файл "lib/surface/semantic-registry-api.lisp")
+(завантажити-файл "lib/mechanism-selector.lisp")
+(завантажити-файл "lib/island-lowering.lisp")
 
 (визначити свідок-пониження-островів-1048
   (функція ()
