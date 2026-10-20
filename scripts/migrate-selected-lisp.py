@@ -7,8 +7,8 @@ NOT a new parser, codec, domain table, or semantic oracle.
 Proof before publication: immutable Git source blob, ONE current AUTO source
 interpretation, exact T5 bytes, *real* Rust D2 reader, and independent
 executable oracle attestation. Ambiguous W8/D8 BLOCKS; retired historical
-source-era switches cannot select semantics. This adapter is a bounded legacy
-T5 inspection route, not the default T5M publisher.
+source-era switches cannot select semantics. This adapter is a read-only legacy T5 inspection route. Physical publication
+is disabled; use migrate-one-to-sens.py for the current Zig/T5M triplet.
 """
 from __future__ import annotations
 
@@ -143,6 +143,14 @@ def check_oracle(verifier: Path, source: Path, physical: Path,
     }
 
 def run(args) -> dict:
+    # This retired T5 adapter is read-only. Physical publication belongs to
+    # the current Zig/T5M triplet publisher, never the Python reference codec.
+    if not args.inspect and not args.dry_run:
+        raise ValueError(
+            "LEGACY_T5_PUBLICATION_DISABLED: use scripts/migrate-one-to-sens.py "
+            "for Zig-produced T5M .sens and its same-stem exact-bit view; "
+            "only --inspect and --dry-run remain supported here"
+        )
     # A command-line epoch must never override the ratified D1-D10 ladder.
     # Retain retired spellings in the parser only to return a structured
     # BLOCKED receipt rather than silently reinterpreting W8 as D8.
@@ -224,16 +232,10 @@ def run(args) -> dict:
         if args.dry_run:
             report["status"] = "VERIFIED_DRY_RUN"
             return report
-        # Preserve hierarchy, ensure output root cannot be escaped through symlinks.
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        if not out_path.parent.resolve().is_relative_to(out_root):
-            raise ValueError("output directory escapes selected output root")
-        migration.write_atomic_no_clobber(out_path, physical)
-        if git_blob(source.read_bytes()) != actual_blob:
-            raise ValueError("source changed after admission; manual investigation required")
-    report["status"] = "WRITTEN"
-    report["physical_path"] = str(out_path)
-    return report
+        # A legacy oracle is evidence for an inspection, NOT permission to
+        # publish a Python-built T5 carrier without the canonical Zig T5M
+        # transport, companion view and current source proof.
+        raise ValueError("LEGACY_T5_PUBLICATION_DISABLED: Zig/T5M triplet required")
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
