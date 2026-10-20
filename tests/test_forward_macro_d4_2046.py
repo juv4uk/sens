@@ -138,6 +138,32 @@ class ForwardMacroD4Witness(unittest.TestCase):
     def setUpClass(cls):
         cls.forms = parse(FORWARD.read_text(encoding="utf-8"))
 
+    def test_forward_has_only_ukr_top_level_definitions(self):
+        source = FORWARD.read_text(encoding="utf-8")
+        definitions = [
+            form for form in self.forms
+            if isinstance(form, list) and len(form) == 3
+            and form[0] == "визначити"
+        ]
+        names = [form[1] for form in definitions]
+        self.assertTrue(names)
+        self.assertTrue(
+            all(isinstance(name, str) and not re.search(r"[A-Za-z]", name)
+                for name in names),
+            "forward.lisp містить неукраїнське первинне визначення",
+        )
+        for old_name in (
+            "add-new-entries-jtms", "fire-rule-jtms", "run-jtms",
+            "thread-conjunction", "condition-is-exists?", "unsupported-facts",
+        ):
+            with self.subTest(old_name=old_name):
+                self.assertNotIn(old_name, names)
+                self.assertNotIn(f"(визначити {old_name} ", source)
+        self.assertNotIn(
+            "(визначити потік-виконання-кон'юнкція thread-conjunction)",
+            source,
+        )
+
     def test_ten_forward_macros_have_exact_d4_composition(self):
         self.assertEqual(len(validate_forward(self.forms)), 10)
 
