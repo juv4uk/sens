@@ -4,12 +4,12 @@
 
 mod surface_catalog;
 
-use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
+use rustyline::error::ReadlineError;
 use sens::{
-    eval_program, render_value_for_presentation, BinaryNumber, CoreDomainIdentity, DomainIdentity,
-    Environment, ExactDomainWord, Expr, ExprKind, PhysicalT5Program, PresentationLanguage, Session,
-    Value,
+    BinaryNumber, CoreDomainIdentity, DomainIdentity, Environment, ExactDomainWord, Expr, ExprKind,
+    PhysicalT5Program, PresentationLanguage, Session, Value, eval_program,
+    render_value_for_presentation,
 };
 use std::env;
 use std::path::PathBuf;
@@ -92,6 +92,7 @@ fn t5m_surface_layout(surface: ReplSurface) -> sens::Text7Layout {
         ReplSurface::Core | ReplSurface::English => sens::Text7Layout::En,
         ReplSurface::Ukrainian | ReplSurface::UkrainianFull => sens::Text7Layout::Uk,
         ReplSurface::Sanskrit => sens::Text7Layout::SaDeva,
+        ReplSurface::Lisp => sens::Text7Layout::En,
     }
 }
 
@@ -155,7 +156,7 @@ fn append_t5m_expression(
             words.push(control(0b01)?);
         }
         ExprKind::Number(..) => {
-            return Err("T5M requires exact source projection to D24+ before transport".into())
+            return Err("T5M requires exact source projection to D24+ before transport".into());
         }
         ExprKind::Rational(value) => {
             let spelling = value.to_string();
@@ -174,16 +175,16 @@ fn append_t5m_expression(
         ExprKind::String(..) => {
             return Err(
                 "T5M string values have no admitted exact D7 projection in this REPL path".into(),
-            )
+            );
         }
         ExprKind::NumericBuffer(..) => {
-            return Err("T5M REPL has no admitted NumericBuffer source form".into())
+            return Err("T5M REPL has no admitted NumericBuffer source form".into());
         }
         ExprKind::Call(..) | ExprKind::Sid(..) => {
-            return Err("T5M rejects historical SID8/SENS8 call nodes".into())
+            return Err("T5M rejects historical SID8/SENS8 call nodes".into());
         }
         ExprKind::Local { .. } => {
-            return Err("T5M REPL cannot transport an unresolved lexical slot".into())
+            return Err("T5M REPL cannot transport an unresolved lexical slot".into());
         }
     }
     Ok(())
@@ -192,14 +193,114 @@ fn append_t5m_expression(
 fn exact_integer_source_word(source: &str) -> Result<Expr, String> {
     let forms = sens::parse_mixed_exact_domain(source).map_err(|error| error.render(source))?;
     match forms.as_slice() {
-        [expression @ Expr {
-            kind: ExprKind::BinaryNumber(_),
-            ..
-        }] => Ok(expression.clone()),
+        [
+            expression @ Expr {
+                kind: ExprKind::BinaryNumber(_),
+                ..
+            },
+        ] => Ok(expression.clone()),
         _ => Err(format!(
             "T5M exact ratio component did not lower to D24+: {source}"
         )),
     }
+}
+
+fn catalog_domain_identity(identity: &str) -> Result<Option<DomainIdentity>, String> {
+    let Some((domain, bits)) = identity.split_once(':') else {
+        return Err(format!(
+            "projection catalog identity is malformed: {identity}"
+        ));
+    };
+    let width = domain
+        .strip_prefix('D')
+        .and_then(|value| value.parse::<usize>().ok())
+        .ok_or_else(|| format!("projection catalog domain is malformed: {identity}"))?;
+    if bits.len() != width || !bits.bytes().all(|bit| matches!(bit, b'0' | b'1')) {
+        return Err(format!(
+            "projection catalog word is not exact-width: {identity}"
+        ));
+    }
+    let packed = u16::from_str_radix(bits, 2)
+        .map_err(|_| format!("projection catalog word is out of range: {identity}"))?;
+    t5m_domain_identity(width, packed).map(Some)
+}
+
+/// Non-Ukrainian REPL spellings are accepted only when the selected table
+/// column maps to the same callable identity already admitted by the full
+/// Ukrainian source-head projection. This adds a surface route, not callability.
+fn selected_surface_callable(
+    surface: ReplSurface,
+    name: &str,
+) -> Result<Option<sens::CoreDomainIdentity>, String> {
+    let projected_name = match surface {
+        // The projection is displayed in its canonical uppercase spelling,
+        // while the interactive reader accepts the same Lisp name lowercase.
+        ReplSurface::Lisp => name.to_uppercase(),
+        _ => name.to_owned(),
+    };
+    let Some(identity_text) =
+        surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?
+    else {
+        return Ok(None);
+    };
+    let Some(identity) = catalog_domain_identity(&identity_text)? else {
+        return Ok(None);
+    };
+    let Some(ukr_name) = surface_catalog::ukr_name_for_identity(&identity_text)? else {
+        return Ok(None);
+    };
+    Ok(
+        sens::semantic_registry_export::exact_uk_callable_for_source_head(&ukr_name)
+            .filter(|admitted| *admitted == identity)
+            .and_then(DomainIdentity::core_operation),
+    )
+}
+
+fn project_repl_surface_expression(
+    expression: &Expr,
+    session: &Session,
+    surface: ReplSurface,
+    depth: usize,
+) -> Result<Expr, String> {
+    if depth > 768 {
+        return Err("REPL projection lowering exceeds the SENS nesting limit".into());
+    }
+    let ExprKind::List(items) = &expression.kind else {
+        return Ok(expression.clone());
+    };
+    if items.is_empty() {
+        return Ok(expression.clone());
+    }
+    if matches!(
+        &items[0].kind,
+        ExprKind::DomainIdentity(identity)
+            if identity.width() == 3 && identity.packed_bits() == 0b001
+    ) || matches!(&items[0].kind, ExprKind::Symbol(name) if matches!(name.as_ref(), "quote" | "як-є" | "'"))
+    {
+        return Ok(expression.clone());
+    }
+
+    let mut projected = items
+        .iter()
+        .map(|item| project_repl_surface_expression(item, session, surface, depth + 1))
+        .collect::<Result<Vec<_>, _>>()?;
+    if let ExprKind::Symbol(name) = &items[0].kind {
+        // A user binding in the persistent REPL frame shadows a projection
+        // alias, preserving ordinary interactive rebinding behavior.
+        if session.environment.get(name).is_none() {
+            if let Some(identity) = selected_surface_callable(surface, name)? {
+                let arguments = projected.drain(1..).collect::<Vec<_>>();
+                return Ok(Expr {
+                    kind: ExprKind::DomainCall(identity, arguments.into()),
+                    span: expression.span,
+                });
+            }
+        }
+    }
+    Ok(Expr {
+        kind: ExprKind::List(projected.into()),
+        span: expression.span,
+    })
 }
 
 fn exact_t5m_carrier_words(
@@ -303,7 +404,7 @@ fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
             Ok(vec![ExactDomainWord::Identity(*identity)])
         }
         Value::BinaryNumber(number) => Ok(vec![
-            ExactDomainWord::number(number.clone()).map_err(str::to_owned)?
+            ExactDomainWord::number(number.clone()).map_err(str::to_owned)?,
         ]),
         Value::NumericComposition(composition) => {
             let (negative, numerator, denominator) = composition.as_parts();
@@ -406,8 +507,16 @@ fn roundtrip_repl_result(value: Value) -> Result<Value, String> {
     Ok(output)
 }
 
-fn prepare_t5m_repl_program(line: &str, surface: ReplSurface) -> Result<PhysicalT5Program, String> {
-    let expressions = sens::parse_mixed_exact_domain(line).map_err(|error| error.render(line))?;
+fn prepare_t5m_repl_program(
+    line: &str,
+    surface: ReplSurface,
+    session: &Session,
+) -> Result<PhysicalT5Program, String> {
+    let parsed = sens::parse_mixed_exact_domain(line).map_err(|error| error.render(line))?;
+    let expressions = parsed
+        .iter()
+        .map(|expression| project_repl_surface_expression(expression, session, surface, 0))
+        .collect::<Result<Vec<_>, _>>()?;
     if expressions.is_empty() {
         return Err("T5M_REPL_EMPTY: no SENS form".into());
     }
@@ -426,7 +535,7 @@ fn eval_t5m_repl_line(
     session: &mut Session,
     surface: ReplSurface,
 ) -> Result<sens::EvalResult, String> {
-    let program = prepare_t5m_repl_program(line, surface)?;
+    let program = prepare_t5m_repl_program(line, surface, session)?;
     let mut result = program
         .execute(session)
         .map_err(|error| format!("SENS binary evaluator: {}", error.render(line)))?;
@@ -549,6 +658,7 @@ fn ukr_surface_source() -> Result<String, String> {
     }
 }
 // The original Sanskrit source is Zig-owned opaque bytes, never a Rust embed.
+#[cfg(test)]
 fn sanskrit_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
@@ -568,6 +678,7 @@ pub(crate) enum ReplSurface {
     Ukrainian,
     UkrainianFull,
     Sanskrit,
+    Lisp,
 }
 
 impl ReplSurface {
@@ -578,6 +689,7 @@ impl ReplSurface {
             "ук" | "uk" | "українська" => Some(Self::Ukrainian),
             "укр" | "ukr" | "українська-повна" => Some(Self::UkrainianFull),
             "sa" | "sanskrit" | "санскрит" => Some(Self::Sanskrit),
+            "lisp" | "лісп" => Some(Self::Lisp),
             _ => None,
         }
     }
@@ -589,6 +701,7 @@ impl ReplSurface {
             Self::Ukrainian => "ук",
             Self::UkrainianFull => "укр",
             Self::Sanskrit => "sa",
+            Self::Lisp => "LISP",
         }
     }
 
@@ -599,6 +712,7 @@ impl ReplSurface {
             Self::Ukrainian => "українська",
             Self::UkrainianFull => "українська (повна)",
             Self::Sanskrit => "санскрит",
+            Self::Lisp => "ЛІСП",
         }
     }
 
@@ -608,6 +722,7 @@ impl ReplSurface {
             Self::English => PresentationLanguage::English,
             Self::Ukrainian | Self::UkrainianFull => PresentationLanguage::Ukrainian,
             Self::Sanskrit => PresentationLanguage::Sanskrit,
+            Self::Lisp => PresentationLanguage::English,
         }
     }
 }
@@ -635,8 +750,9 @@ fn build_surface_layer(
         ReplSurface::Ukrainian | ReplSurface::UkrainianFull | ReplSurface::Sanskrit
     );
     // Meta-eval + repl-core are needed both for surface projection
-    // and for the SENS-owned `--sens-loop` mode. They load here once; the
-    // surface-specific sources below load only for uk/укр/sa.
+    // and for the SENS-owned `--sens-loop` mode. They load here once. The
+    // active human aliases come from selected D1–D11 table columns and are
+    // admitted only when they pair with a full-ukr callable identity.
     if sens_loop || needs_surface {
         // Used only inside the zig-transport block below; without that feature
         // this binding is unused and need not be mutable.
@@ -715,45 +831,24 @@ fn build_surface_layer(
             .map_err(|error| format!("не вдалося завантажити {name}: {}", error.render(source)))?;
         }
         // Keep the same SENS evaluation order; only source transport changes.
-        let uk_source = if surface == ReplSurface::Ukrainian {
-            Some(uk_surface_source()?)
-        } else {
-            None
+        let selected_source = match surface {
+            ReplSurface::Ukrainian => Some(("uk.lisp", uk_surface_source()?)),
+            ReplSurface::UkrainianFull => Some(("ukr.lisp", ukr_surface_source()?)),
+            // sa.lisp contains candidate/legacy aliases which are not the
+            // current domain-table projection. Resolve only current table
+            // names through selected_surface_callable instead.
+            ReplSurface::Sanskrit
+            | ReplSurface::Lisp
+            | ReplSurface::Core
+            | ReplSurface::English => None,
         };
-        let ukr_source = if surface == ReplSurface::UkrainianFull {
-            Some(ukr_surface_source()?)
-        } else {
-            None
-        };
-        let sanskrit_source = if surface == ReplSurface::Sanskrit {
-            Some(sanskrit_surface_source()?)
-        } else {
-            None
-        };
-        let (name, source) = match surface {
-            ReplSurface::Ukrainian => (
-                "uk.lisp",
-                uk_source
-                    .as_deref()
-                    .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian compact source")?,
-            ),
-            ReplSurface::UkrainianFull => (
-                "ukr.lisp",
-                ukr_source
-                    .as_deref()
-                    .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian full source")?,
-            ),
-            ReplSurface::Sanskrit => (
-                "sa.lisp",
-                sanskrit_source
-                    .as_deref()
-                    .ok_or("RUST_ZIG_ONLY: missing Zig Sanskrit source")?,
-            ),
-            ReplSurface::Core | ReplSurface::English => unreachable!(),
-        };
-        sens::parse_mixed_exact_domain(source)
-            .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
-            .map_err(|error| format!("не вдалося завантажити {name}: {}", error.render(source)))?;
+        if let Some((name, source)) = selected_source {
+            sens::parse_mixed_exact_domain(&source)
+                .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
+                .map_err(|error| {
+                    format!("не вдалося завантажити {name}: {}", error.render(&source))
+                })?;
+        }
     }
     Ok(layer)
 }
@@ -861,13 +956,13 @@ pub(crate) fn history_path() -> Option<PathBuf> {
 }
 
 fn print_surface_help() {
-    println!("Поверхні: :мова ук | укр | en | sa | core");
-    println!("Технічний alias: :surface ук | укр | en | sa | core");
+    println!("Поверхні: :мова ук | укр | en | sa | LISP | core");
+    println!("Технічний alias: :surface ук | укр | en | sa | LISP | core");
     println!("Каталог поточної людської поверхні: :імена / :names");
     println!("Одна semantic identity у всіх людських поверхнях: :ім'я <назва> / :name <name>");
     println!("Стан людських поверхонь: :поверхні / :surfaces");
     println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
-    println!("core — канонічний машинний шар, не четверта людська мова.");
+    println!("LISP — окрема проєкція з доменних таблиць; core — канонічний машинний шар.");
     println!("Перемикання змінює лише surface-frame; ваші define/closures лишаються живими.");
 }
 
@@ -963,7 +1058,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
         env!("CARGO_PKG_VERSION")
     );
     println!(
-        "Поверхня: {} ({}) · змінити: :мова ук|укр|en|sa|core · :допомога",
+        "Поверхня: {} ({}) · змінити: :мова ук|укр|en|sa|LISP|core · :допомога",
         state.surface.title(),
         state.surface.code()
     );
@@ -1048,6 +1143,7 @@ mod tests {
     fn core_state() -> ReplState {
         let mut session = Session::bare();
         sens::load_core_library(&mut session).expect("core bootstrap");
+        sens::load_time_library(&mut session).expect("time bootstrap");
         ReplState::new(session, ReplSurface::Core, false).expect("REPL state")
     }
 
@@ -1062,6 +1158,64 @@ mod tests {
         };
         assert_eq!(number.numeric_domain_width(), Some(24));
         assert_eq!(number.to_decimal_string(), "3");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn interactive_t5m_uses_the_same_d5_identity_across_repl_projections() {
+        let cases = [
+            (ReplSurface::Core, "(додати 1 2)"),
+            (ReplSurface::English, "(plus 1 2)"),
+            (ReplSurface::Ukrainian, "(додати 1 2)"),
+            (ReplSurface::UkrainianFull, "(додати 1 2)"),
+            (ReplSurface::Sanskrit, "(yoga 1 2)"),
+            (ReplSurface::Lisp, "(plus 1 2)"),
+        ];
+
+        for (surface, source) in cases {
+            if surface != ReplSurface::Core {
+                let head = source
+                    .trim_start_matches('(')
+                    .split_whitespace()
+                    .next()
+                    .expect("projection call head");
+                let identity = selected_surface_callable(surface, head)
+                    .expect("projection catalog")
+                    .expect("selected projection must resolve an admitted callable");
+                assert_eq!(identity.width(), 5, "{}", surface.code());
+                assert_eq!(identity.packed_bits(), 0b01010, "{}", surface.code());
+            }
+            let mut state = core_state();
+            state.switch_surface(surface).unwrap_or_else(|error| {
+                panic!("{} surface initialization: {error}", surface.code())
+            });
+            let result = eval_repl_step_t5m(&mut state, source).unwrap_or_else(|error| {
+                panic!(
+                    "{} surface source {source:?} must cross Zig T5M: {error}",
+                    surface.code()
+                )
+            });
+            let Value::BinaryNumber(ref number) = result.value else {
+                panic!("{} surface did not return exact D24+", surface.code());
+            };
+
+            assert_eq!(
+                number.numeric_domain_width(),
+                Some(24),
+                "{}",
+                surface.code()
+            );
+            assert_eq!(number.to_decimal_string(), "3", "{}", surface.code());
+        }
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn interactive_t5m_does_not_accept_a_name_from_an_unselected_projection() {
+        let mut session = Session::default();
+        let error = eval_t5m_repl_line("(plus 1 2)", &mut session, ReplSurface::UkrainianFull)
+            .expect_err("English alias must not leak into the selected Ukrainian projection");
+        assert!(error.contains("Uk has no current D7 v2 glyph"), "{error}");
     }
 
     #[cfg(feature = "zig-transport")]
@@ -1220,6 +1374,22 @@ mod tests {
     }
 
     #[test]
+    fn every_repl_surface_returns_symbol_data_in_uppercase() {
+        let symbol = Value::Symbol("car".into());
+        for surface in [
+            ReplSurface::Core,
+            ReplSurface::English,
+            ReplSurface::Ukrainian,
+            ReplSurface::UkrainianFull,
+            ReplSurface::Sanskrit,
+            ReplSurface::Lisp,
+        ] {
+            let reply = render_repl_reply(&symbol, surface.presentation());
+            assert_eq!(reply, reply.to_uppercase(), "surface {}", surface.code());
+        }
+    }
+
+    #[test]
     fn classic_repl_reply_uppercases_d1_human_projection_but_not_machine_bits() {
         let no = Value::DomainIdentity(sens::DomainIdentity::D1(sens::PredicateBit::from_word(
             sens::Bit1::new(0).unwrap(),
@@ -1295,7 +1465,10 @@ mod tests {
             bytes.as_slice(),
             "ZIG_PERSISTENT_MAP_REPL byte parity"
         );
-        println!("ZIG_PERSISTENT_MAP_REPL_PASS test_id=zig-repl-persistent-map layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
+        println!(
+            "ZIG_PERSISTENT_MAP_REPL_PASS test_id=zig-repl-persistent-map layer=transport bytes={} semantic_admission=NOT_TESTED",
+            bytes.len()
+        );
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -1320,7 +1493,10 @@ mod tests {
             bytes.as_slice(),
             "ZIG_KNOWLEDGE_REPL exact byte parity"
         );
-        println!("ZIG_KNOWLEDGE_REPL_PASS test_id=knowledge-repl-zig-only layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
+        println!(
+            "ZIG_KNOWLEDGE_REPL_PASS test_id=knowledge-repl-zig-only layer=transport bytes={} semantic_admission=NOT_TESTED",
+            bytes.len()
+        );
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -1350,7 +1526,10 @@ mod tests {
             source.starts_with("; Чинний рушій прямого виведення СЕНС:"),
             "wrong SENS source asset"
         );
-        println!("ZIG_FORWARD_CARRIER_PASS test_id=zig-forward-exact-carry layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
+        println!(
+            "ZIG_FORWARD_CARRIER_PASS test_id=zig-forward-exact-carry layer=transport bytes={} semantic_admission=NOT_TESTED",
+            bytes.len()
+        );
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -1568,13 +1747,17 @@ mod tests {
         assert_eq!(ReplSurface::parse("uk"), Some(ReplSurface::Ukrainian));
         assert_eq!(ReplSurface::parse("укр"), Some(ReplSurface::UkrainianFull));
         assert_eq!(ReplSurface::parse("ukr"), Some(ReplSurface::UkrainianFull));
+        assert_eq!(ReplSurface::parse("lisp"), Some(ReplSurface::Lisp));
+        assert_eq!(ReplSurface::parse("лісп"), Some(ReplSurface::Lisp));
         assert_ne!(
             ReplSurface::Ukrainian.code(),
             ReplSurface::UkrainianFull.code()
         );
-        assert!(surface_catalog::render_name("укр", "D6:101000")
-            .expect("UKR registry lookup")
-            .starts_with("identity: D6:101000"));
+        assert!(
+            surface_catalog::render_name("укр", "D6:101000")
+                .expect("UKR registry lookup")
+                .starts_with("identity: D6:101000")
+        );
     }
 
     #[test]
@@ -1587,6 +1770,9 @@ mod tests {
         assert!(uk.contains("surface ук:"));
         assert!(ukr.contains("surface укр:"));
         assert!(sa.contains("surface san:"));
+        let lisp = render_surface_names(ReplSurface::Lisp).expect("LISP catalog");
+        assert!(lisp.contains("surface LISP:"));
+        assert!(lisp.contains("PLUS"));
     }
 
     #[test]
@@ -1596,9 +1782,11 @@ mod tests {
         assert!(help.contains("EN: map"));
         assert!(help.contains("UK: відобразити"));
         assert!(help.contains("SAN: āvartana"));
-        assert!(render_surface_name(ReplSurface::Ukrainian, "map")
-            .expect("ambiguous map is described")
-            .contains("неоднозначне"));
+        assert!(
+            render_surface_name(ReplSurface::Ukrainian, "map")
+                .expect("ambiguous map is described")
+                .contains("неоднозначне")
+        );
     }
 
     #[test]

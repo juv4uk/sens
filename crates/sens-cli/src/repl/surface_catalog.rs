@@ -1,5 +1,5 @@
 use sens::syntax::Expr;
-use sens::{parse, ExprKind};
+use sens::{ExprKind, parse};
 
 const HUMAN_SURFACES: [&str; 4] = ["ук", "укр", "en", "san"];
 const FIXED_SURFACES: [&str; 6] = ["ук", "укр", "san", "en", "LISP", "sym"];
@@ -176,6 +176,35 @@ fn find_entries<'a>(entries: &'a [SurfaceEntry], requested: &str) -> Vec<&'a Sur
         .collect()
 }
 
+/// Resolve a spelling only in the selected projection column. Ambiguous names
+/// fail closed; the returned coordinate is still only a table projection, not
+/// proof that the resident is callable.
+pub(super) fn identity_for_surface_name(
+    surface: &str,
+    requested: &str,
+) -> Result<Option<String>, String> {
+    let entries = registry_entries()?;
+    let mut matches = entries.iter().filter(|entry| {
+        surface_name(entry, surface).and_then(|name| name.name.as_deref()) == Some(requested)
+    });
+    let Some(entry) = matches.next() else {
+        return Ok(None);
+    };
+    if matches.next().is_some() {
+        return Ok(None);
+    }
+    Ok(Some(entry.identity.clone()))
+}
+
+/// Return the full Ukrainian spelling paired with one exact table identity.
+pub(super) fn ukr_name_for_identity(identity: &str) -> Result<Option<String>, String> {
+    let entries = registry_entries()?;
+    let Some(entry) = entries.iter().find(|entry| entry.identity == identity) else {
+        return Ok(None);
+    };
+    Ok(surface_name(entry, "укр").and_then(|name| name.name.clone()))
+}
+
 fn rendered_name(surface: Option<&SurfaceName>) -> String {
     surface
         .and_then(|surface| surface.name.as_deref())
@@ -287,6 +316,7 @@ pub(crate) fn render_status() -> Result<String, String> {
     let en = counts_for(&entries, "en");
     let ukr = counts_for(&entries, "укр");
     let san = counts_for(&entries, "san");
+    let lisp = counts_for(&entries, "LISP");
     let symbolic = entries
         .iter()
         .filter(|entry| {
@@ -312,9 +342,19 @@ pub(crate) fn render_status() -> Result<String, String> {
          UKR present {:>3} · empty {:>3}\n\
          EN  present {:>3} · empty {:>3}\n\
          SAN present {:>3} · empty {:>3}\n\
+         LISP present {:>3} · empty {:>3}\n\
          shared sym identities: {symbolic}\n\
          rows with all four human projections: {four_projection_rows}/{denominator}",
-        uk.present, uk.empty, ukr.present, ukr.empty, en.present, en.empty, san.present, san.empty,
+        uk.present,
+        uk.empty,
+        ukr.present,
+        ukr.empty,
+        en.present,
+        en.empty,
+        san.present,
+        san.empty,
+        lisp.present,
+        lisp.empty,
     ))
 }
 
@@ -370,7 +410,7 @@ pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, Stri
     let matches = find_entries(&entries, requested);
     if matches.is_empty() {
         return Ok(format!(
-        "«{requested}» не знайдено серед координат таблиць D1–D11; викличність з цього каталогу не випливає."
+            "«{requested}» не знайдено серед координат таблиць D1–D11; викличність з цього каталогу не випливає."
         ));
     };
 
