@@ -8,7 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PATH = ROOT / "lib" / "world.lisp"
 D9_PATH = ROOT / "lib" / "domains" / "d9.lisp"
-ALIAS_MARKER = "; opt-in повна укр-поверхня"
+# Межу визначає перший реальний сумісний аліас, а не змінний коментар у Lisp.
+ALIAS_MARKER = "(визначити advise-all-world порадити-всі-світ)"
 
 RESIDENTS = {
     "111100001": ("створити-світ", "make-world"),
