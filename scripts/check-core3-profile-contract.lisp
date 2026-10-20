@@ -1,9 +1,9 @@
 ; #1134 — executable witness for the thin Core3 profile.
 
-(load "lib/core4.lisp")
-(load "lib/surface/semantic-registry-api.lisp")
-(load "lib/mechanism-selector.lisp")
-(load "lib/core3.lisp")
+(завантажити-файл "lib/core4.lisp")
+(завантажити-файл "lib/surface/semantic-registry-api.lisp")
+(завантажити-файл "lib/mechanism-selector.lisp")
+(завантажити-файл "lib/core3.lisp")
 
 (визначити ідентичність-плюса
   (отримати-ідентичність-семантичного-реєстру (як-є +)))
