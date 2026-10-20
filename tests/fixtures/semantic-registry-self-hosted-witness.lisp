@@ -1,37 +1,45 @@
-; Executable Lisp-owned witness for the canonical semantic registry.
-; Ukrainian projection only. Registry occupancy and full binary domain remain separate.
-
-(визначити semantic-registry-self-hosted-witness
-  (функція (source)
-    (нехай ((registry (semantic-registry-read-source source))
-           (rows (semantic-registry-rows registry))
-           (quote-row (semantic-registry-row-in registry 1))
-           (quote-id (semantic-registry-id-in registry (як-є quote)))
-           (invoke-id (semantic-registry-id-in registry (як-є invoke)))
-           (leading-zero-row (semantic-registry-row-in registry 5))
-           (max-roundtrip (semantic-registry-round-trip 255))
-           (invoke-roundtrip (semantic-registry-round-trip 168)))
+; Самостійний виконавчий свідок канонічного семантичного реєстру СЕНС.
+; Власні функції та виклики мовного API — українською.
+; Зайнятість історичного реєстру й повнота двійкового домену — різні факти.
+; Значення проєкцій, поля протоколу та межові числа збережено.
+; binary-print і source-digest залишено як зовнішні історичні механізми:
+; їх не можна перейменувати без підтвердженого ратифікованого відповідника.
+;
+(визначити свідок-самостійного-семантичного-реєстру
+  (функція (джерело)
+    (нехай ((реєстр (прочитати-джерело-семантичного-реєстру джерело))
+           (рядки (рядки-семантичного-реєстру реєстр))
+           (рядок-цитування (рядок-у-семантичному-реєстрі реєстр 1))
+           (ідентичність-цитування (ідентичність-у-семантичному-реєстрі реєстр (як-є quote)))
+           (ідентичність-виклику (ідентичність-у-семантичному-реєстрі реєстр (як-є invoke)))
+           (рядок-із-початковим-нулем (рядок-у-семантичному-реєстрі реєстр 5))
+           (найбільший-круговий-перехід (перевірити-кругове-читання-реєстру 255))
+           (круговий-перехід-виклику (перевірити-кругове-читання-реєстру 168)))
       (список
-        (довжина rows)
-        (binary-print (semantic-registry-row-id quote-row))
-        (semantic-registry-surface-name (як-є en) quote-row)
-        (binary-print quote-id)
-        (binary-print invoke-id)
-        (binary-print (semantic-registry-row-id leading-zero-row))
-        (binary-print max-roundtrip)
-        (semantic-registry-row-in registry 255)
-        (binary-print invoke-roundtrip)
-        (однакові? invoke-roundtrip (semantic-registry-row-id (semantic-registry-row-in registry 168)))))))
+        (довжина рядки)
+        (binary-print (ідентичність-рядка-реєстру рядок-цитування))
+        (назва-проєкції-реєстру (як-є en) рядок-цитування)
+        (binary-print ідентичність-цитування)
+        (binary-print ідентичність-виклику)
+        (binary-print (ідентичність-рядка-реєстру рядок-із-початковим-нулем))
+        (binary-print найбільший-круговий-перехід)
+        (рядок-у-семантичному-реєстрі реєстр 255)
+        (binary-print круговий-перехід-виклику)
+        (однакові? круговий-перехід-виклику (ідентичність-рядка-реєстру (рядок-у-семантичному-реєстрі реєстр 168)))))))
 
-(визначити semantic-registry-handoff-witness
-  (функція (source)
-    (нехай ((registry (semantic-registry-read-source source))
-           (rows (semantic-registry-rows registry)))
+(визначити свідок-передавання-семантичного-реєстру
+  (функція (джерело)
+    (нехай ((реєстр (прочитати-джерело-семантичного-реєстру джерело))
+           (рядки (рядки-семантичного-реєстру реєстр)))
       (список
         (як-є semantic-registry-handoff/1)
-        (список (як-є authority) semantic-registry-source-path)
+        (список (як-є authority) шлях-джерела-семантичного-реєстру)
         (список (як-є revision-policy) (як-є pin-git-commit-containing-authority))
-        (список (як-є source-digest) (source-digest source))
+        (список (як-є source-digest) (source-digest джерело))
         (список (як-є binary-width) 8)
-        (список (як-є row-count) (довжина rows))
-        (сполучити (як-є canonical-rows) rows)))))
+        (список (як-є row-count) (довжина рядки))
+        (сполучити (як-є canonical-rows) рядки)))))
+
+; Історичні назви для сумісності зі споживачами.
+(визначити semantic-registry-self-hosted-witness свідок-самостійного-семантичного-реєстру)
+(визначити semantic-registry-handoff-witness свідок-передавання-семантичного-реєстру)
