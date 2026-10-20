@@ -72,6 +72,33 @@ class GoGateTests(unittest.TestCase):
         self.assertIs(report["release_go"], False)
         self.assertEqual(report["release_admission"], "NOT_VERIFIED")
 
+    def test_structural_only_can_pass_without_claiming_release_go(self) -> None:
+        import json
+        self._all_receipts()
+        receipt = self.root / "preflight.json"
+        proc = subprocess.run(
+            [sys.executable, str(CHECKER), str(self.root),
+             "--structural-only", "--json", str(receipt)],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("RELEASE_STRUCTURAL_ONLY_PASS", proc.stdout)
+        self.assertNotIn("RELEASE_GATE_GO every", proc.stdout)
+        report = json.loads(receipt.read_text(encoding="utf-8"))
+        self.assertFalse(report["release_go"])
+        self.assertEqual(report["release_admission"], "NOT_VERIFIED")
+
+    def test_structural_only_does_not_hide_a_red_corridor(self) -> None:
+        self._all_receipts()
+        self._write("check_rust_isolated_only_zig.py", 1, "RED")
+        proc = subprocess.run(
+            [sys.executable, str(CHECKER), str(self.root), "--structural-only"],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(proc.returncode, 1)
+        self.assertIn("RELEASE_GATE_NO_GO", proc.stdout)
+        self.assertNotIn("RELEASE_STRUCTURAL_ONLY_PASS", proc.stdout)
+
     def test_one_red_is_no_go(self) -> None:
         self._all_receipts()
         self._write("check_rust_isolated_only_zig.py", 1, "RED")
