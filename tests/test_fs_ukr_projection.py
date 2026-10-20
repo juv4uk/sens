@@ -100,7 +100,7 @@ def verify(source: str) -> None:
     tag = "ознака-успішного-декодування"
     if codec_source.count(f"(визначити {tag} (як-є decoded))") != 1:
         raise AssertionError("FS: точний протокольний тег не визначено в кодеку")
-    if len(re.findall(rf"(?m)^\\(визначити\\s+{tag}(?=\\s|\\))", codec_source)) != 1:
+    if sum(line.startswith(f"(визначити {tag} ") for line in codec_source.splitlines()) != 1:
         raise AssertionError("FS: неоднозначне визначення протокольного тегу")
     if any(char not in ALLOWED for char in source):
         raise AssertionError("FS: джерело не повністю на українській клавіатурі")
