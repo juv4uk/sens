@@ -11,21 +11,21 @@
 ; Two-field COND only. Width is identity; every bit of the domain address valued.
 
 (визначити захист-рішення?
-  (функція (decision)
+  (функція (рішення)
     (за-умовою
-      ((тотожне? decision (як-є allow)) так)
-      ((тотожне? decision (як-є warn)) так)
-      ((тотожне? decision (як-є reject)) так)
-      ((тотожне? decision (як-є unknown)) так)
+      ((тотожне? рішення (як-є allow)) так)
+      ((тотожне? рішення (як-є warn)) так)
+      ((тотожне? рішення (як-є reject)) так)
+      ((тотожне? рішення (як-є unknown)) так)
       (так ні))))
 
 (визначити захист-доказ-стан?
-  (функція (status)
+  (функція (стан-доказу)
     (за-умовою
-      ((тотожне? status (як-є confirmed)) так)
-      ((тотожне? status (як-є partial)) так)
-      ((тотожне? status (як-є unresolved)) так)
-      ((тотожне? status (як-є broken)) так)
+      ((тотожне? стан-доказу (як-є confirmed)) так)
+      ((тотожне? стан-доказу (як-є partial)) так)
+      ((тотожне? стан-доказу (як-є unresolved)) так)
+      ((тотожне? стан-доказу (як-є broken)) так)
       (так ні))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
@@ -49,44 +49,44 @@
         (verify citations-and-access-date))))))
 
 (визначити створити-захист-висновок
-  (функція (decision evidence-status subject state contract delta impact guidance evidence)
+  (функція (рішення стан-свідчення предмет стан контракт різниця вплив порада докази)
     (за-умовою
-      ((хибне? (захист-рішення? decision))
-       (список (як-є invalid-guard-decision) decision))
-      ((хибне? (захист-доказ-стан? evidence-status))
-       (список (як-є invalid-evidence-status) evidence-status))
+      ((хибне? (захист-рішення? рішення))
+       (список (як-є invalid-guard-decision) рішення))
+      ((хибне? (захист-доказ-стан? стан-свідчення))
+       (список (як-є invalid-evidence-status) стан-свідчення))
       (так
        (список
          (як-є guard-finding)
          (список (як-є schema) (як-є guard/1))
-         (список (як-є decision) decision)
-         (список (як-є evidence-status) evidence-status)
-         (список (як-є subject) subject)
-         (список (як-є state) state)
-         (список (як-є contract) contract)
-         (список (як-є difference) delta)
-         (список (як-є impact) impact)
-         (список (як-є guidance) guidance)
-         (список (як-є evidence) evidence)
+         (список (як-є decision) рішення)
+         (список (як-є evidence-status) стан-свідчення)
+         (список (як-є subject) предмет)
+         (список (як-є state) стан)
+         (список (як-є contract) контракт)
+         (список (як-є difference) різниця)
+         (список (як-є impact) вплив)
+         (список (як-є guidance) порада)
+         (список (як-є evidence) докази)
          (список
            (як-є unknown-routes)
            (за-умовою
-             ((тотожне? decision (як-є unknown)) (захист-невідоме-маршрути))
+             ((тотожне? рішення (як-є unknown)) (захист-невідоме-маршрути))
              (так (як-є ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
 (визначити guard-unknown
-  (функція (subject missing-evidence guidance)
+  (функція (предмет відсутні-докази порада)
     (створити-захист-висновок
       (як-є unknown)
       (як-є unresolved)
-      subject
+      предмет
       (як-є not-observed)
       (як-є insufficient-evidence)
-      missing-evidence
+      відсутні-докази
       (як-є decision-not-earned)
-      guidance
+      порада
       (як-є ()))))
 
 ; Oracle gives expected semantic truth; an observer gives actual truth;
@@ -110,52 +110,52 @@
       (так ні))))
 
 (визначити guard-compare
-  (функція (subject expected observed evidence)
+  (функція (предмет очікуване спостережене докази)
     (за-умовою
-      ((сторожа--рівні? expected observed)
+      ((сторожа--рівні? очікуване спостережене)
        (створити-захист-висновок
-         (як-є allow) (як-є confirmed) subject observed expected
-         (як-є ()) (як-є invariant-preserved) (як-є no-action) evidence))
+         (як-є allow) (як-є confirmed) предмет спостережене очікуване
+         (як-є ()) (як-є invariant-preserved) (як-є no-action) докази))
       (так
        (створити-захист-висновок
-         (як-є warn) (як-є confirmed) subject observed expected
-         (список (як-є expected) expected (як-є observed) observed)
+         (як-є warn) (як-є confirmed) предмет спостережене очікуване
+         (список (як-є expected) очікуване (як-є observed) спостережене)
          (як-є contract-drift)
          (як-є reconcile-observation-with-contract)
-         evidence)))))
+         докази)))))
 
 ; Synchronization is verified by observed completion and recorded drift.
 ; No repository-wide commit freeze or administrative HOLD is required.
 ; Синхронізація: спочатку фактичне виконання, потім запис змін.
 ; Незалежні коміти не заморожуються; невідоме повертає локальне WARN.
 (визначити guard-sync-window
-  (функція (commit-state sync-state drift-state evidence)
+  (функція (стан-коміту стан-синхронізації стан-відхилень докази)
     (за-умовою
-      ((хибне? (тотожне? sync-state (як-є completed)))
+      ((хибне? (тотожне? стан-синхронізації (як-є completed)))
        (створити-захист-висновок
          (як-є warn) (як-є unresolved) (як-є ecosystem-sync)
-         sync-state (як-є synchronization-completed)
-         (список (як-є expected) (як-є completed) (як-є observed) sync-state)
+         стан-синхронізації (як-є synchronization-completed)
+         (список (як-є expected) (як-є completed) (як-є observed) стан-синхронізації)
          (як-є drift-cannot-yet-be-classified)
          (як-є complete-sync-and-preserve-logs)
-         evidence))
-      ((хибне? (тотожне? drift-state (як-є recorded)))
+         докази))
+      ((хибне? (тотожне? стан-відхилень (як-є recorded)))
        (створити-захист-висновок
          (як-є warn) (як-є unresolved) (як-є ecosystem-sync)
-         drift-state (як-є drift-recorded)
-         (список (як-є expected) (як-є recorded) (як-є observed) drift-state)
+         стан-відхилень (як-є drift-recorded)
+         (список (як-є expected) (як-є recorded) (як-є observed) стан-відхилень)
          (як-є synchronization-result-has-no-drift-record)
          (як-є record-drift-and-continue)
-         evidence))
+         докази))
       (так
        (створити-захист-висновок
          (як-є allow) (як-є confirmed) (як-є ecosystem-sync)
-         (список commit-state sync-state drift-state)
+         (список стан-коміту стан-синхронізації стан-відхилень)
          (як-є sync-record-and-continue)
          (як-є ())
          (як-є synchronization-boundary-observed)
          (як-є continue-independent-commits)
-         evidence)))))
+         докази)))))
 
 ; Reference records are ordinary data. The evolving ecosystem directory lives
 ; in knowledge/guard-reference.lisp; these accessors remain generic.
@@ -188,21 +188,21 @@
 ; SENS Lisp owns semantics. Zig handles domain-ladder codes. Rust consumes them.
 ; Unknown language or wrong role is always rejected.
 (визначити guard-language-allowed?
-  (функція (language role)
+  (функція (мова роль)
     (за-умовою
-      ((тотожне? language (як-є sens))
-       (за-умовою ((тотожне? role (як-є semantics)) так) (так ні)))
-      ((тотожне? language (як-є lisp))
-       (за-умовою ((тотожне? role (як-є semantics)) так) (так ні)))
-      ((тотожне? language (як-є zig))
-       (за-умовою ((тотожне? role (як-є domain-ladder)) так) (так ні)))
-      ((тотожне? language (як-є rust))
-       (за-умовою ((тотожне? role (як-є domain-consumer)) так) (так ні)))
+      ((тотожне? мова (як-є sens))
+       (за-умовою ((тотожне? роль (як-є semantics)) так) (так ні)))
+      ((тотожне? мова (як-є lisp))
+       (за-умовою ((тотожне? роль (як-є semantics)) так) (так ні)))
+      ((тотожне? мова (як-є zig))
+       (за-умовою ((тотожне? роль (як-є domain-ladder)) так) (так ні)))
+      ((тотожне? мова (як-є rust))
+       (за-умовою ((тотожне? роль (як-є domain-consumer)) так) (так ні)))
       (так ні))))
 
 (визначити guard-language-decision
-  (функція (language role)
-    (за-умовою ((guard-language-allowed? language role) (як-є allow))
+  (функція (мова роль)
+    (за-умовою ((guard-language-allowed? мова роль) (як-є allow))
          (так (як-є reject)))))
 
 ; D9:000110011 GUARD-SYNC-WINDOW — українська поверхня SENS.
