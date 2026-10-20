@@ -176,7 +176,7 @@ def run(args) -> dict:
     if ambiguous:
         raise ValueError("ambiguous W8/SID8-or-D8 source: no source-era flag "
                          "may authorize new D8 semantics: " + ", ".join(ambiguous[:8]))
-    foundation = migration.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
+    foundation = migration.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
     my, upper, retired_bridge = migration.build_three_pass_maps(
         foundation,
         ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
