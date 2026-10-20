@@ -185,23 +185,48 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.view.write_bytes(original)
         self.assertTrue(self.verify()["canonical_view_roundtrip"])
 
-    def test_noncanonical_uk_aliases_english_and_whitespace_fail(self):
+    def test_comments_whitespace_and_line_endings_do_not_change_program(self):
+        # The machine must preserve the D1/D2/D3 program, NOT comments or
+        # byte-identical human formatting. Even non-keyboard digits in a
+        # comment are inert, while those in an executable atom are not.
+        variants = (
+            "   " + UK,
+            UK.replace(" ", "\\t"),
+            UK.rstrip("\\n"),
+            UK.rstrip("\\n") + "\\n\\n",
+            UK.replace("\\n", "\\r\\n"),
+            "; Коментар із чужою цифрою ٢\\n" + UK,
+            "#| коментар #| вкладений ५ |# завершено |#\\n" + UK,
+            UK.replace(" (так так)", " #| інертний |# (так    так)") +
+                "; наприкінці",
+        )
+        for source in variants:
+            with self.subTest(source=source):
+                self.lisp.write_text(source, encoding="utf-8")
+                original = self.lisp.read_bytes()
+                report = self.verify()
+                self.assertTrue(report["canonical_uk_roundtrip"])
+                self.assertTrue(report["program_identity_roundtrip"])
+                self.assertEqual(self.lisp.read_bytes(), original)
+                self.assertEqual(mod.project_current_uk(source), WORDS.split())
+        self.lisp.write_text(UK, encoding="utf-8")
+
+    def test_english_aliases_and_changed_program_fail(self):
+        # Changed domain identity or a different operation is a real
+        # regression even when .sens and its canonical view remain intact.
         original = self.lisp.read_bytes()
         for candidate in (
             UK.replace("за-умовою", "COND"),
             UK.replace("перше", "CAR"),
             UK.replace("так", "T"),
             UK.replace("ні", "NIL"),
-            UK.replace("(так так)", "(так  так)"),
-            UK.replace("\n", "\r\n"),
-            UK.replace("\n", "\n\n"),
-            " " + UK,
-            UK.rstrip("\n"),
             UK.replace("так", "правда"),
+            UK.replace("(так так)", "(так ні)"),
+            UK.replace("(ні (перше ()))", "(так (перше ()))"),
         ):
             with self.subTest(source=candidate):
                 self.lisp.write_bytes(candidate.encode("utf-8"))
-                with self.assertRaisesRegex(mod.ProjectionBlocked, "noncanonical"):
+                with self.assertRaises(mod.ProjectionBlocked):
                     self.verify()
         self.lisp.write_bytes(original)
 
