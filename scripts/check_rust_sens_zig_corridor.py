@@ -8,8 +8,9 @@ Rust/C source routes; THIS guard owns the ABI's own purity, the pin, and
 host-neutral parity. No rule is enforced only here and also there.
 
 R3  research/zig-codecs/transport_abi.zig: exports ONLY physical `sens_zig_*`
-    functions (T5 + E1 + F3C physical ops), imports ONLY physical codec
-    modules (`std` or t5/ + f3c/ + transport/) and never a registry/host/
+    functions (default T5M + explicit legacy T5 + E1 + F3C physical ops),
+    imports ONLY physical codec modules (`std`, t5m.zig, t5/ + f3c/ + transport/)
+    and never a registry/host/
     semantic module, and declares no host `extern`/padded structs.
 R4  `.zig-version` is a concrete X.Y.Z string (not `latest` or a branch).
 R5  HOST-NEUTRAL: every host crosses the SAME corridor. The C header
@@ -34,9 +35,14 @@ ZIGVER = ".zig-version"
 C_HEADER = "research/zig-codecs/host-c/zig_transport_v2.h"
 C_HOST_DIR = "research/zig-codecs/host-c"
 
-PHYSICAL_IMPORT_PREFIXES = ("t5/", "f3c/", "transport/")
+PHYSICAL_IMPORT_PREFIXES = ("t5m.zig", "t5/", "f3c/", "transport/")
 FORBIDDEN_IMPORT_RE = re.compile(r"registry|semantic|host|sens", re.I)
 REQUIRED_ABI_EXPORTS = (
+    "sens_zig_t5m_validate",
+    "sens_zig_t5m_encode_be3",
+    "sens_zig_t5m_decode_be3",
+    "sens_zig_t5m_encode_words",
+    "sens_zig_t5m_decode_words",
     "sens_zig_t5_validate",
     "sens_zig_t5_encode_be3",
     "sens_zig_t5_decode_be3",

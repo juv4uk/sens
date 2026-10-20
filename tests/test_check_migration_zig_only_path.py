@@ -38,6 +38,10 @@ def main():
 
 BRIDGE_OK = """class ZigCodecError(ValueError):
     pass
+def carry_t5(binary, canonical_view, *, codec: str = "t5m", trusted_source_sha256=None):
+    pass
+def verify_t5(binary, physical, *, codec: str = "t5m", trusted_source_sha256=None):
+    pass
 def pinned_compiler():
     expected = PIN_FILE.read_text().strip()
     if expected != "0.16.0":
@@ -184,6 +188,24 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
         failures = self.module.check(self.root)
         self.assertTrue(any("M5:" in message for message in failures), failures)
 
+    def test_explicit_legacy_t5_carry_is_not_current_migration_evidence(self) -> None:
+        self._mutate(
+            "scripts/migrate-t5-batch.py",
+            "zig_codec_bridge.carry_t5(zig_binary, projection)",
+            'zig_codec_bridge.carry_t5(zig_binary, projection, codec="t5")',
+        )
+        failures = self.module.check(self.root)
+        self.assertTrue(any("M8:" in message for message in failures), failures)
+
+    def test_explicit_legacy_t5_verification_is_not_current_migration_evidence(self) -> None:
+        self._mutate(
+            "scripts/migrate-t5-batch.py",
+            "zig_codec_bridge.verify_t5(zig_binary, packed)",
+            'zig_codec_bridge.verify_t5(zig_binary, packed, codec="t5")',
+        )
+        failures = self.module.check(self.root)
+        self.assertTrue(any("M5:" in message for message in failures), failures)
+
     def test_carry_noncanonical_source_cannot_mint_staged_sens(self) -> None:
         self._mutate(
             "scripts/migrate-t5-batch.py",
@@ -300,10 +322,10 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
         self.assertEqual(physical, reference)
         self.assertEqual(actual_receipt, receipt)
         bridge.carry_t5.assert_called_once_with(
-            binary, projection, trusted_source_sha256=expected,
+            binary, projection, codec="t5m", trusted_source_sha256=expected,
         )
         bridge.verify_t5.assert_called_once_with(
-            binary, reference, trusted_source_sha256=expected,
+            binary, reference, codec="t5m", trusted_source_sha256=expected,
         )
 
         # The physical carrier must NEVER be replaced by the Python reference.

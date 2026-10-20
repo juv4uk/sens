@@ -108,18 +108,25 @@ def check_default_zig_build_gate(build: str) -> None:
     # Zig 0.16 exports a C-compatible archive; fail closed if Cargo omits
     # either the pinned compiler, real root module build, or archive link.
     if not re.search(
-        r'let\s+archive\s*=\s*out\.join\(\s*"libsens_zig_transport\.a"\s*\)\s*;',
+        r'let\s+archive_name\s*=\s*if\s+target_env\s*==\s*"msvc"\s*'
+        r'\{\s*"sens_zig_transport\.lib"\s*\}\s*else\s*'
+        r'\{\s*"libsens_zig_transport\.a"\s*\}\s*;'
+        r'[\s\S]*?let\s+archive\s*=\s*out\.join\(archive_name\)\s*;',
         active,
     ):
         raise CorridorBlocked("build.rs missing Zig transport output archive")
+    command_decl = re.search(
+        r'let\s+mut\s+command\s*=\s*Command::new\(\s*&compiler\s*\)\s*;',
+        active,
+    )
     command = re.search(
-        r'let\s+result\s*=\s*Command::new\(\s*&compiler\s*\)'
-        r'(?P<args>.*?)\.status\(\)\s*\.expect\([^;]*\)\s*;'
+        r'let\s+result\s*=\s*command(?P<args>.*?)'
+        r'\.status\(\)\s*\.expect\([^;]*\)\s*;'
         r'\s*assert!\(\s*result\.success\(\)',
         active,
         re.S,
     )
-    if command is None:
+    if command is None or command_decl is None or command_decl.start() > command.start():
         raise CorridorBlocked("build.rs must run checked Zig compiler build-lib command")
     before = active[:command.start()]
     pinned_route = (
@@ -131,7 +138,7 @@ def check_default_zig_build_gate(build: str) -> None:
     positions = [before.find(fragment) for fragment in pinned_route]
     if any(pos < 0 for pos in positions) or positions != sorted(positions):
         raise CorridorBlocked("build.rs must verify pinned Zig version before building")
-    args = command.group("args")
+    args = active[command_decl.end():command.start()] + command.group("args")
     archive_route = (
         '.arg("build-lib")',
         '.arg("zig_transport_root.zig")',
@@ -158,10 +165,46 @@ def check_default_zig_build_gate(build: str) -> None:
 
 
 def _production_source(source: str) -> str:
-    """Drop #[cfg(test)] modules so string literals in tests cannot fake routes."""
-    marker = "\n#[cfg(test)]"
-    if marker in source:
-        return source.split(marker, 1)[0]
+    """Remove cfg(test) items without discarding later production functions.
+
+    Some Rust files place a test-only helper between production items. Cutting
+    at its attribute hides all following live code, so remove the attributed
+    item's balanced body while ignoring ordinary strings and comments.
+    """
+    marker = re.compile(r"(?m)^[ \t]*#\[cfg\(test\)\][ \t]*\n")
+    while match := marker.search(source):
+        opening = source.find("{", match.end())
+        if opening < 0:
+            source = source[:match.start()] + source[match.end():]
+            continue
+        depth, i, state, block_depth = 0, opening, "code", 0
+        while i < len(source):
+            char = source[i]
+            nxt = source[i + 1] if i + 1 < len(source) else ""
+            if state == "line":
+                if char == "\n": state = "code"
+            elif state == "block":
+                if char == "/" and nxt == "*": block_depth += 1; i += 1
+                elif char == "*" and nxt == "/":
+                    block_depth -= 1; i += 1
+                    if block_depth == 0: state = "code"
+            elif state in ("string", "char"):
+                if char == "\\": i += 1
+                elif (state == "string" and char == '"') or (state == "char" and char == "'"):
+                    state = "code"
+            else:
+                if char == "/" and nxt == "/": state = "line"; i += 1
+                elif char == "/" and nxt == "*": state = "block"; block_depth = 1; i += 1
+                elif char == '"': state = "string"
+                elif char == "'": state = "char"
+                elif char == "{": depth += 1
+                elif char == "}":
+                    depth -= 1
+                    if depth == 0:
+                        i += 1
+                        break
+            i += 1
+        source = source[:match.start()] + source[i:]
     return source
 
 
@@ -172,7 +215,7 @@ def _route_between(source: str, begin: str, end: str) -> str:
         raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
     start = prod.index(begin) + len(begin)
     if end == "\n#[cfg(test)]":
-        if not source[len(prod):].startswith(end):
+        if end not in source:
             raise CorridorBlocked(f"sens main production/test boundary missing: {begin}")
         return prod[start:]
     if end not in prod[start:]:
@@ -351,7 +394,9 @@ def check_trit_e1_ingress(source: str) -> None:
             or "sens::PhysicalT5Program::from_exact_words(&words)" not in active
             or "program.execute(&mut session)" not in active):
         raise CorridorBlocked("sens-trit E1 bypasses Zig physical reader or SENS D2/eval")
-    if "sens::eval_e1_program(" in route or "sens::envelope_e1::decode(" in route:
+    if ("sens::eval_e1_program(" in route
+            or "sens::envelope_e1::decode(" in route
+            or "sens::PhysicalT5Program::decode(" in route):
         raise CorridorBlocked("sens-trit E1 uses direct Rust physical decoder")
     arm = _route_between(source, '\n        "eval-e1" => {\n',
                          '\n        "encode-f3" =>')
@@ -422,8 +467,9 @@ def check_trit_f3_no_rust_fallback(source: str) -> None:
 def check_f3c_validate_before_no_savings(body: str) -> None:
     """F3C no-savings must never bypass Zig physical T5 validation.
 
-    Production encode_f3 must call validate_t5 before any length-based Ok(None).
-    A carrier that is oversize but invalid must fail closed, not report None.
+    The public input is current T5M. encode_f3 decodes it through
+    decode_t5_words, whose first step is the Zig T5M validator, before any
+    no-savings decision. A malformed carrier must fail closed, not report None.
     """
     prod = _production_source(body)
     begin = "pub fn encode_f3("
@@ -434,27 +480,43 @@ def check_f3c_validate_before_no_savings(body: str) -> None:
     if end not in prod[start:]:
         raise CorridorBlocked("zig_transport.rs encode_f3 route not bounded")
     route = prod[start:prod.index(end, start)]
-    if "validate_t5(t5)?" not in route and "validate_t5(t5)" not in route:
+    decode_call = "decode_t5_words(t5)?"
+    no_savings = "if legacy.len() > 16"
+    if decode_call not in route:
         raise CorridorBlocked(
-            "encode_f3 must call validate_t5 before any no-savings decision"
+            "encode_f3 must decode/validate its T5M input through the Zig path"
         )
-    val_at = route.find("validate_t5")
-    len_at = route.find("t5.len() > 16")
-    if len_at != -1 and (val_at == -1 or val_at > len_at):
+    decode_words = "pub fn decode_t5_words("
+    decode_words_end = "fn decode_legacy_t5_words("
+    if decode_words not in prod or decode_words_end not in prod[prod.index(decode_words):]:
+        raise CorridorBlocked("zig_transport.rs missing bounded T5M decoder")
+    decode_start = prod.index(decode_words)
+    decode_route = prod[decode_start:prod.index(decode_words_end, decode_start)]
+    if "validate_t5(bytes)?" not in decode_route:
+        raise CorridorBlocked("decode_t5_words must validate T5M before Zig decode")
+    validate = "pub fn validate_t5(bytes: &[u8])"
+    if validate not in prod:
+        raise CorridorBlocked("zig_transport.rs missing T5M validator")
+    validate_start = prod.index(validate)
+    validate_route = prod[validate_start:prod.index("fn validate_legacy_t5", validate_start)]
+    if "sens_zig_t5m_validate" not in validate_route:
+        raise CorridorBlocked("validate_t5 must call the physical Zig T5M validator")
+    len_at = route.find(no_savings)
+    if len_at != -1 and route.find(decode_call) > len_at:
         raise CorridorBlocked(
-            "encode_f3 length-based Ok(None) must not precede Zig T5 validate"
+            "encode_f3 no-savings decision must follow T5M validation"
         )
     if "sens_zig_f3c_pack" not in route:
         raise CorridorBlocked("encode_f3 must call Zig F3C pack FFI")
     if "ternary_transport" in route or "PhysicalT5Program" in route:
-        raise CorridorBlocked("encode_f3 must not embed Rust physical T5 codec")
+        raise CorridorBlocked("encode_f3 must not embed a Rust physical codec")
 
 
 def check_f3c_decode_validates_t5(body: str) -> None:
-    """decode_f3 must re-enter Zig T5 validate on recovered bytes.
+    """decode_f3 must re-enter the Zig legacy-T5 validator after unpack.
 
-    Unpacked F3C is still physical T5; without validate the host could admit
-    a corrupted carrier into SENS. Fail closed: validate_t5 after unpack.
+    F3C contains legacy T5; decode_legacy_t5_words validates that physical
+    payload through Zig before it is converted back to the current T5M carrier.
     """
     prod = _production_source(body)
     begin = "pub fn decode_f3("
@@ -469,18 +531,33 @@ def check_f3c_decode_validates_t5(body: str) -> None:
             stop = i
     route = rest[:stop]
     active = re.sub(r"/\*.*?\*/|//[^\n]*", "", route, flags=re.S)
-    validation = re.search(
-        r"(?m)^[ \t]*validate_t5[ \t]*\([ \t]*&output[ \t]*\)[ \t]*\?[ \t]*;",
-        active,
-    )
     unpack_at = active.find("sens_zig_f3c_unpack")
     truncate_at = active.find("output.truncate(len as usize);")
-    return_at = active.find("Ok(output)")
-    if (validation is None or unpack_at < 0 or truncate_at < 0 or return_at < 0
-            or not (unpack_at < truncate_at < validation.start() < return_at)):
+    decode_at = active.find("decode_legacy_t5_words(&output)?")
+    if (unpack_at < 0 or truncate_at < 0 or decode_at < 0
+            or not (unpack_at < truncate_at < decode_at)):
         raise CorridorBlocked(
-            "decode_f3 must propagate Zig validate_t5(&output)? after unpack/truncate and before return"
+            "decode_f3 must validate/decode unpacked legacy T5 through Zig before returning T5M"
         )
+    prod = _production_source(body)
+    helper, helper_end = "fn decode_legacy_t5_words(", "pub fn encode_e1_direct("
+    if helper not in prod or helper_end not in prod[prod.index(helper):]:
+        raise CorridorBlocked("decode_f3 missing bounded legacy-T5 decoder")
+    helper_route = prod[prod.index(helper):prod.index(helper_end, prod.index(helper))]
+    helper_active = re.sub(r"/\*.*?\*/|//[^\n]*", "", helper_route, flags=re.S)
+    validation_at = helper_active.find("validate_legacy_t5(bytes)?")
+    decode_at = helper_active.find("sens_zig_t5_decode_be3")
+    return_at = helper_active.find("return ")
+    if (validation_at < 0 or decode_at < 0 or validation_at > decode_at
+            or (return_at >= 0 and validation_at > return_at)):
+        raise CorridorBlocked("legacy T5 decode must validate bytes before Zig decode")
+    validator = "fn validate_legacy_t5(bytes: &[u8])"
+    if validator not in prod:
+        raise CorridorBlocked("missing explicit legacy-T5 validator")
+    start = prod.index(validator)
+    end = prod.index("pub fn validate_t5_coordinates", start)
+    if "sens_zig_t5_validate" not in prod[start:end]:
+        raise CorridorBlocked("legacy-T5 validator must call physical Zig validation")
 
 
 def check_f3c_bounds_reported_lengths(body: str) -> None:
@@ -493,7 +570,7 @@ def check_f3c_bounds_reported_lengths(body: str) -> None:
     for name, markers in (
         (
             "encode_f3",
-            ("usize::try_from(len)", "n <= bytes.len()", "n < t5.len()"),
+            ("usize::try_from(len)", "n <= bytes.len()", "n < legacy.len()"),
         ),
         (
             "decode_f3",
@@ -658,54 +735,23 @@ def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str,
 def check_sanskrit_surface_zig_only(
     repl_source: str, rust_corridor: str, zig_root: str, build: str,
 ) -> None:
-    """Sanskrit bytes are Zig-owned; SENS remains the only evaluator."""
+    """The active Sanskrit REPL projection is table-driven, not source-loaded."""
     def active(source: str) -> str:
         return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(source), flags=re.S)
     repl = active(repl_source)
     if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*lib/surface/sa\.lisp"', repl):
         raise CorridorBlocked("SANSKRIT_ZIG_ONLY direct Rust source embed")
-    helper = active(_route_between(
-        repl_source, "fn sanskrit_surface_source(", "\n#[derive(Clone, Copy"
+    resolver = active(_route_between(
+        repl_source, "fn selected_surface_callable(", "\nfn project_repl_surface_expression("
     ))
-    if (helper.count('#[cfg(feature = "zig-transport")]') != 1
-            or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
-            or "super::zig_transport::sanskrit_surface_bytes()?" not in helper
-            or "String::from_utf8(bytes)" not in helper
-            or "RUST_ZIG_ONLY: Sanskrit surface requires Zig; no Rust source fallback" not in helper):
-        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing live Zig or Zigless rejection")
-    loader = active(_route_between(
-        repl_source, "fn build_surface_layer(", "\nstruct ReplState {"
-    ))
-    if ("Some(sanskrit_surface_source()?)" not in loader
-            or "sanskrit_source.as_deref()" not in loader
-            or 'eval_program(source, &mut session)' not in loader):
-        raise CorridorBlocked("SANSKRIT_ZIG_ONLY REPL must pass Zig bytes to SENS evaluator")
-
-    ffi = "sens_zig_sanskrit_bytes_copy"
-    asset_path = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
-    if not asset_path.is_file() or asset_path.is_symlink():
-        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing separate reviewed Zig asset ABI")
-    ffi_source = active(asset_path.read_text(encoding="utf-8"))
-    if ("pub(super) fn sens_zig_sanskrit_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in ffi_source):
-        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing declared C ABI signature")
-    host = active(_route_between(
-        rust_corridor, "pub fn sanskrit_surface_bytes(", "\n/// Opaque full-Ukrainian REPL source;"
-    ))
-    if (host.count(f"asset_ffi::{ffi}(") != 2
-            or "version()?;" not in host
-            or "if copied != required" not in host
-            or "Ok(bytes)" not in host):
-        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing verified two-call copy")
-    root = active(zig_root)
-    if (root.count('const sanskrit_asset = @embedFile("lib/surface/sa.lisp");') != 1
-            or f"pub export fn {ffi}(" not in root
-            or "if (capacity == 0) return @intCast(sanskrit_asset.len);" not in root
-            or "if (capacity < sanskrit_asset.len) return -2;" not in root
-            or "@memcpy(dst[0..sanskrit_asset.len], sanskrit_asset[0..sanskrit_asset.len]);" not in root):
-        raise CorridorBlocked("SANSKRIT_ZIG_ONLY incorrect Zig byte carrier or short-buffer refusal")
-    if ('.arg("zig_transport_root.zig")' not in active(build)
-            or "cargo:rerun-if-changed=../../lib/surface/sa.lisp" not in build):
-        raise CorridorBlocked("SANSKRIT_ZIG_ONLY stale build asset / different Zig root")
+    if ("surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?" not in resolver
+            or "exact_uk_callable_for_source_head(&ukr_name)" not in resolver
+            or "DomainIdentity::core_operation" not in resolver):
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY surface must resolve through current domain-table identity")
+    if 'Self::Sanskrit => "sa"' not in repl:
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY Sanskrit REPL selector is missing")
+    if "fn sanskrit_surface_source(" in repl:
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY test-only source loader became production code")
 
 
 def check_ukr_surface_zig_only(
@@ -727,9 +773,9 @@ def check_ukr_surface_zig_only(
             or "RUST_ZIG_ONLY: Ukrainian full surface requires Zig; no Rust source fallback" not in helper):
         raise CorridorBlocked("UKR_ZIG_ONLY missing real Zig source / Zigless refusal")
     loader = active(_route_between(repl_source, "fn build_surface_layer(", "\nstruct ReplState {"))
-    if ("Some(ukr_surface_source()?)" not in loader
-            or "ukr_source.as_deref()" not in loader
-            or 'eval_program(source, &mut session)' not in loader):
+    if ('Some(("ukr.lisp", ukr_surface_source()?))' not in loader
+            or "sens::parse_mixed_exact_domain(&source)" not in loader
+            or "sens::eval_parsed_expressions(&forms, &mut session)" not in loader):
         raise CorridorBlocked("UKR_ZIG_ONLY REPL bypasses Zig ingress or SENS eval")
     ffi = "sens_zig_ukr_bytes_copy"
     asset_path = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
@@ -778,9 +824,9 @@ def check_uk_surface_zig_only(
             or "RUST_ZIG_ONLY: Ukrainian compact surface requires Zig; no Rust source fallback" not in helper):
         raise CorridorBlocked("UK_ZIG_ONLY missing Zig ingress or Zigless refusal")
     loader = active(_route_between(repl_source, "fn build_surface_layer(", "\nstruct ReplState {"))
-    if ("Some(uk_surface_source()?)" not in loader
-            or "uk_source.as_deref()" not in loader
-            or 'eval_program(source, &mut session)' not in loader):
+    if ('Some(("uk.lisp", uk_surface_source()?))' not in loader
+            or "sens::parse_mixed_exact_domain(&source)" not in loader
+            or "sens::eval_parsed_expressions(&forms, &mut session)" not in loader):
         raise CorridorBlocked("UK_ZIG_ONLY REPL bypasses Zig source or SENS evaluator")
     ffi = "sens_zig_uk_bytes_copy"
     asset_path = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"

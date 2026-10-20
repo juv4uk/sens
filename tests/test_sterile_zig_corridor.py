@@ -150,51 +150,32 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaisesRegex(blocked, "CONTRACT_ZIG_ONLY"):
                     check(modified["main"], modified["host"], modified["zig"], modified["build"])
 
-    def test_sanskrit_repl_zig_carrier_rejects_legacy_rust_mutants(self) -> None:
+    def test_sanskrit_repl_uses_current_table_projection(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_sanskrit_surface_zig_only"]
         blocked = module["CorridorBlocked"]
-        files = {
-            "repl": (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8"),
-            "host": (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8"),
-            "zig": (ROOT / "zig_transport_root.zig").read_text(encoding="utf-8"),
-            "build": (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8"),
-        }
-        check(files["repl"], files["host"], files["zig"], files["build"])
-        mutations = (
-            ("repl", "Some(sanskrit_surface_source()?)",
-             'Some(include_str!("../../../lib/surface/sa.lisp").to_owned())'),
-            ("repl", "super::zig_transport::sanskrit_surface_bytes()?", "Vec::new()"),
-            ("repl",
-             '"RUST_ZIG_ONLY: Sanskrit surface requires Zig; no Rust source fallback"',
-             '"rust-sanskrit-fallback-enabled"'),
-            ("host", "if copied != required",
-             "if false /* acceptance of incorrect Zig byte length */"),
-            ("zig", '@embedFile("lib/surface/sa.lisp")', '@embedFile("lib/surface/uk.lisp")'),
-            ("zig", "if (capacity < sanskrit_asset.len) return -2;", "if (false) return -2;"),
-            ("zig", "@memcpy(dst[0..sanskrit_asset.len], sanskrit_asset[0..sanskrit_asset.len]);",
-             "// @memcpy(dst[0..sanskrit_asset.len], sanskrit_asset[0..sanskrit_asset.len]);"),
-            ("build", "cargo:rerun-if-changed=../../lib/surface/sa.lisp",
-             "cargo:rerun-if-changed=../../lib/surface/missing.lisp"),
+        repl = (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
+        host = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
+        zig = (ROOT / "zig_transport_root.zig").read_text(encoding="utf-8")
+        build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
+        check(repl, host, zig, build)
+
+        direct_embed = repl.replace(
+            "fn selected_surface_callable(",
+            'const LEGACY_SA: &str = include_str!("../../../lib/surface/sa.lisp");\n'
+            "fn selected_surface_callable(",
+            1,
         )
-        for target, anchor, mutation in mutations:
-            with self.subTest(target=target, anchor=anchor):
-                original = files[target]
-                # Host mutation must target the Sanskrit function only.
-                if target == "host":
-                    left = original.index("pub fn sanskrit_surface_bytes(")
-                    right = original.index("\nfn require_same_exact_words(", left)
-                    self.assertIn(anchor, original[left:right])
-                    changed = original[:left] + original[left:right].replace(
-                        anchor, mutation, 1
-                    ) + original[right:]
-                else:
-                    self.assertIn(anchor, original)
-                    changed = original.replace(anchor, mutation, 1)
-                altered = dict(files)
-                altered[target] = changed
-                with self.assertRaisesRegex(blocked, "SANSKRIT_ZIG_ONLY"):
-                    check(altered["repl"], altered["host"], altered["zig"], altered["build"])
+        with self.assertRaisesRegex(blocked, "SANSKRIT_ZIG_ONLY"):
+            check(direct_embed, host, zig, build)
+
+        renamed_surface_identity = repl.replace(
+            "surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?",
+            "surface_catalog::identity_for_surface_name(\"legacy-sa\", &projected_name)?",
+            1,
+        )
+        with self.assertRaisesRegex(blocked, "SANSKRIT_ZIG_ONLY"):
+            check(renamed_surface_identity, host, zig, build)
 
     def test_full_ukrainian_repl_zig_rejects_embeds_and_broken_transport(self) -> None:
         module = runpy.run_path(str(SCRIPT))
@@ -208,7 +189,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         }
         check(files["repl"], files["host"], files["zig"], files["build"])
         mutants = (
-            ("repl", "Some(ukr_surface_source()?)",
+            ("repl", 'Some(("ukr.lisp", ukr_surface_source()?))',
              'Some(include_str!("../../../lib/surface/ukr.lisp").to_owned())'),
             ("repl", "super::zig_transport::ukr_surface_bytes()?", "Vec::new()"),
             ("repl", '"RUST_ZIG_ONLY: Ukrainian full surface requires Zig; no Rust source fallback"',
@@ -250,7 +231,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         }
         check(files["repl"], files["host"], files["zig"], files["build"])
         mutants = (
-            ("repl", "Some(uk_surface_source()?)",
+            ("repl", 'Some(("uk.lisp", uk_surface_source()?))',
              'Some(include_str!("../../../lib/surface/uk.lisp").to_owned())'),
             ("repl", "super::zig_transport::uk_surface_bytes()?", "Vec::new()"),
             ("repl", '"RUST_ZIG_ONLY: Ukrainian compact surface requires Zig; no Rust source fallback"',
@@ -315,15 +296,16 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertIn("packed_bits", body)
         self.assertNotIn("from_width_bits", body)
 
-    def test_f3c_no_savings_rejects_validate_bypass_mutants(self) -> None:
-        """encode_f3 must validate via Zig before any length-based Ok(None)."""
+    def test_f3c_no_savings_rejects_t5m_validation_bypass_mutants(self) -> None:
+        """encode_f3 must validate T5M via Zig before a no-savings result."""
         module = runpy.run_path(str(SCRIPT))
         check = module["check_f3c_validate_before_no_savings"]
         blocked = module["CorridorBlocked"]
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         check(body)
 
-        no_validate = body.replace("validate_t5(t5)?;", "/* bypassed */", 1)
+        no_validate = body.replace("let logical_words = decode_t5_words(t5)?;",
+                                   "let logical_words = vec![];", 1)
         with self.assertRaises(blocked):
             check(no_validate)
 
@@ -331,16 +313,11 @@ class SterileZigCorridorTests(unittest.TestCase):
         end = body.index("pub fn decode_f3(")
         route = body[start:end]
         swapped = route.replace(
-            "validate_t5(t5)?;\n    if t5.len() > 16 {",
-            "if t5.len() > 16 {\n        // mutant: length before Zig validate\n    }\n    if false {\n        validate_t5(t5)?;\n    if t5.len() > 16 {",
+            "let logical_words = decode_t5_words(t5)?;\n    let legacy",
+            "if legacy.len() > 16 { return Ok(None); }\n    let logical_words = decode_t5_words(t5)?;\n    let legacy",
             1,
         )
-        if swapped == route:
-            swapped = route.replace(
-                "validate_t5(t5)?;",
-                "if t5.len() > 16 { return Ok(None); }\n    // mutant moved validate after length",
-                1,
-            )
+        self.assertNotEqual(swapped, route, "mutation must move live validation")
         mutant = body[:start] + swapped + body[end:]
         with self.assertRaises(blocked):
             check(mutant)
@@ -353,33 +330,33 @@ class SterileZigCorridorTests(unittest.TestCase):
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         check(body)
 
-        no_validate = body.replace("validate_t5(&output)?;", "/* no validate */", 1)
+        no_validate = body.replace("validate_legacy_t5(bytes)?;", "/* no validate */", 1)
         with self.assertRaises(blocked):
             check(no_validate)
 
-        stripped = body.replace("validate_t5(&output)?;\n", "", 1)
+        stripped = body.replace("validate_legacy_t5(bytes)?;\n", "", 1)
         if stripped == body:
-            stripped = body.replace("validate_t5(&output)?;", "", 1)
+            stripped = body.replace("validate_legacy_t5(bytes)?;", "", 1)
         with self.assertRaises(blocked):
             check(stripped)
 
         for bypass in (
-            "let _ = validate_t5(&output);",
-            "validate_t5(&output);",
-            "// validate_t5(&output)?;",
-            "/* validate_t5(&output)?; */",
-            "validate_t5(carrier)?;",
-            "return Ok(output);\n    validate_t5(&output)?;",
+            "let _ = validate_legacy_t5(bytes);",
+            "validate_legacy_t5(bytes);",
+            "// validate_legacy_t5(bytes)?;",
+            "/* validate_legacy_t5(bytes)?; */",
+            "validate_legacy_t5(carrier)?;",
+            "return Ok(words);\n    validate_legacy_t5(bytes)?;",
         ):
             with self.subTest(bypass=bypass):
-                mutant = body.replace("validate_t5(&output)?;", bypass, 1)
+                mutant = body.replace("validate_legacy_t5(bytes)?;", bypass, 1)
                 self.assertNotEqual(mutant, body)
                 with self.assertRaises(blocked):
                     check(mutant)
 
         mutant = body.replace(
-            "output.truncate(len as usize);\n    validate_t5(&output)?;",
-            "validate_t5(&output)?;\n    output.truncate(len as usize);",
+            "validate_legacy_t5(bytes)?;\n    let capacity",
+            "let capacity",
             1,
         )
         self.assertNotEqual(mutant, body)
@@ -395,7 +372,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         check(body)
 
         no_bound = body.replace(
-            "usize::try_from(len).ok().filter(|&n| n < t5.len() && n <= bytes.len())",
+            "usize::try_from(len).ok().filter(|&n| n < legacy.len() && n <= bytes.len())",
             "Some(0usize) /* mutant: no capacity filter */",
             1,
         )
@@ -691,6 +668,9 @@ class SterileZigCorridorTests(unittest.TestCase):
         blocked = module["CorridorBlocked"]
         source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
         check(source)
+        start = source.index("fn eval_e1_bytes(")
+        end = source.index("\nfn read_explicit_f3(", start)
+        route = source[start:end]
 
         mutations = (
             (
@@ -705,16 +685,22 @@ class SterileZigCorridorTests(unittest.TestCase):
                 'Err("E1 physical execution requires Zig; no Rust fallback".into())',
                 'sens::eval_e1_program(bytes, &mut sens::Session::default()).map_err(|e| format!("{e:?}"))',
             ),
-            (
-                "let result = eval_e1_bytes(&e1)?;",
-                'let result = sens::eval_e1_program(&e1, &mut session).unwrap();',
-            ),
         )
         for original, bypass in mutations:
             with self.subTest(mutant=original):
-                self.assertIn(original, source)
+                self.assertIn(original, route)
+                mutated_route = route.replace(original, bypass, 1)
                 with self.assertRaises(blocked):
-                    check(source.replace(original, bypass, 1))
+                    check(source[:start] + mutated_route + source[end:])
+
+        dispatch_mutant = source.replace(
+            "let result = eval_e1_bytes(&e1)?;",
+            'let result = sens::eval_e1_program(&e1, &mut session).unwrap();',
+            1,
+        )
+        self.assertNotEqual(dispatch_mutant, source)
+        with self.assertRaises(blocked):
+            check(dispatch_mutant)
 
     def test_live_t5_eval_and_core4_reject_rust_execution_bypass_mutants(self) -> None:
         """Mutate the *actual* guarded execution routine, never test fixtures."""
@@ -829,8 +815,8 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaisesRegex(blocked, "live Zig ABI v2 export"):
                     check(changed)
         changed_version = source.replace(
-            "pub export fn sens_zig_codec_abi_version() u32 { return 2; }",
-            "pub export fn sens_zig_codec_abi_version() u32 { return 3; }",
+            "pub export fn sens_zig_codec_abi_version() u32 {\n    return 2;\n}",
+            "pub export fn sens_zig_codec_abi_version() u32 {\n    return 3;\n}",
             1,
         )
         self.assertNotEqual(changed_version, source)

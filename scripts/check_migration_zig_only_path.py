@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import re
 import sys
 from pathlib import Path
 
@@ -140,23 +141,32 @@ def _is_named(node: ast.AST, name: str) -> bool:
     return isinstance(node, ast.Name) and node.id == name
 
 
+def _uses_t5m_by_default(node: ast.Call) -> bool:
+    """An explicit codec may not route the current migration through legacy T5."""
+    codec = next((kw.value for kw in node.keywords if kw.arg == "codec"), None)
+    return codec is None or (
+        isinstance(codec, ast.Constant) and codec.value == "t5m"
+    )
+
+
 def _is_zig_carry(node: ast.AST) -> bool:
-    """Only canonical Zig carry of the exact staged projection is evidence."""
+    """Only canonical Zig T5M carry of the exact staged projection is evidence."""
     return (
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Attribute)
         and node.func.attr == "carry_t5"
         and _is_named(node.func.value, "zig_codec_bridge")
         and len(node.args) == 2
-        and all(keyword.arg == "trusted_source_sha256" for keyword in node.keywords)
-        and len(node.keywords) <= 1
+        and _uses_t5m_by_default(node)
+        and all(keyword.arg in ("codec", "trusted_source_sha256")
+                for keyword in node.keywords)
         and _is_named(node.args[0], "zig_binary")
         and _is_named(node.args[1], "projection")
     )
 
 
 def _is_verified_packed(node: ast.AST) -> bool:
-    """The pre-publish verifier must check the SAME Zig-minted packed bytes."""
+    """The pre-publish verifier must check the SAME Zig-minted T5M bytes."""
     return (
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Attribute)
@@ -165,8 +175,9 @@ def _is_verified_packed(node: ast.AST) -> bool:
         and len(node.args) == 2
         and _is_named(node.args[0], "zig_binary")
         and _is_named(node.args[1], "packed")
-        and all(keyword.arg == "trusted_source_sha256" for keyword in node.keywords)
-        and len(node.keywords) <= 1
+        and _uses_t5m_by_default(node)
+        and all(keyword.arg in ("codec", "trusted_source_sha256")
+                for keyword in node.keywords)
     )
 
 
@@ -252,7 +263,7 @@ def check_migration_driver_ast(source: str) -> list[str]:
     if not _has_zig_mint_on_write(run):
         problems.append(
             "M8: --write staged bytes are not exclusively minted by live "
-            "zig_codec_bridge.carry_t5() in the same per-file loop "
+            "zig_codec_bridge.carry_t5() using T5M in the same per-file loop "
             "(Python reference and unproven staging forbidden)"
         )
     # Prove that the physical Zig call is reachable ON THE WRITE PATH,
@@ -279,7 +290,7 @@ def check_migration_driver_ast(source: str) -> list[str]:
         problems.append(
             "M5: layer=transport test_id=migration-zig-verified-packed "
             "--write staged.append() requires a preceding write-reachable "
-            "zig_codec_bridge.verify_t5(zig_binary, packed) in the same "
+            "zig_codec_bridge.verify_t5(zig_binary, packed) using T5M in the same "
             "per-file loop; repro=python3 -m unittest discover -s tests "
             "-p test_check_migration_zig_only_path.py -v"
         )
@@ -320,6 +331,11 @@ def check(root: Path) -> list[str]:
         problems.append("M6: zig_codec_bridge.py does not refuse to overwrite the binary")
     if "UNATTESTED_BINARY" not in bridge:
         problems.append("M6: zig_codec_bridge.py does not reject a non-attested binary")
+    if not all(re.search(pattern, bridge) for pattern in (
+        r"def carry_t5\([\s\S]*?codec:\s*str\s*=\s*\"t5m\"",
+        r"def verify_t5\([\s\S]*?codec:\s*str\s*=\s*\"t5m\"",
+    )):
+        problems.append("M10: physical bridge does not default both carry and verify to T5M")
 
     return problems
 
