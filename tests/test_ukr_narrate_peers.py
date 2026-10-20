@@ -36,6 +36,8 @@ HISTORIC = tuple(en for _width, _bits, en, _ukr in PRIMARY)
 ВИЛУЧЕНІ_ПСЕВДОНІМИ = {
     "provenance-goal", "provenance-source",
     "provenance-rule", "provenance-derived-from",
+    "narrate-derivation", "narrate-provenance", "narrate-answer",
+    "narrate-proved-outcome", "narrate-invalid-outcome-shape",
 }
 
 
@@ -161,15 +163,13 @@ class NarrateUkrPeerTests(unittest.TestCase):
         self.assertIn("пояснити-неприпустиму-структуру-результату", heads)
         self.assertIn("пояснити-результат-із-доказом", heads)
 
-    def test_negative_wrong_alias_is_caught(self):
-        broken = self.src.replace(
-            "(визначити narrate-proved-outcome пояснити-результат-із-доказом)",
-            "(визначити narrate-proved-outcome пояснити-щось-інше)", 1)
+    def test_negative_return_of_removed_alias_is_caught(self):
+        broken = self.src + "\n(визначити narrate-proved-outcome пояснити-факт)\n"
         self.assertNotEqual(broken, self.src)
         broken_defs = definitions(broken)
-        with self.assertRaises(AssertionError):
-            if broken_defs.get("narrate-proved-outcome") != "пояснити-результат-із-доказом":
-                raise AssertionError("exact-value DEFINE alias втрачено")
+        with self.assertRaisesRegex(AssertionError, "застарілий англійський псевдонім"):
+            if "narrate-proved-outcome" in broken_defs:
+                raise AssertionError("застарілий англійський псевдонім повернувся")
 
     def test_malformed_forms_rejected(self):
         with self.assertRaisesRegex(ValueError, "незакритий"):
