@@ -1,3 +1,5 @@
-(claim-boundary
-  (may-say "no target behavior found through round 2 in the declared eager ATOM/EQ/CONS basis")
-  (must-not-say "CAR or CDR is globally irreducible"))
+(межі-тверджень
+  (дозволено-стверджувати
+    "За два раунди обмеженого жадібного пошуку в базисі атом, тотожність і сполучення цільову поведінку не знайдено")
+  (заборонено-стверджувати
+    "Операції першого та решти неможливо вивести за жодних умов"))
