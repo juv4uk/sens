@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""All-or-nothing safety wrapper for legacy --sens-mirror migration.
+"""All-or-nothing safety wrapper for current Zig/T5M --sens-mirror migration.
 
 The legacy manifest migrator may return success even if it wrote only some
 .sens files and BLOCKED other inputs. Never expose that partial output as
@@ -28,7 +28,7 @@ SCRIPTS = REPO / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-from sens_t5_codec import decode_bytes, typed_sha256, SensT5Error
+from sens_t5_codec import decode_t5m_bytes, typed_sha256, SensT5Error
 
 DEFAULT_DRIVER = SCRIPTS / "migrate-to-sens-codes.py"
 SKIP = {".git", ".hg", ".svn", ".venv", "venv", "target",
@@ -122,9 +122,9 @@ def canonical_stage(stage: Path, report: dict,
             raise TransactionBlocked(f"missing staged bytes: {target}")
         data = filename.read_bytes()
         try:
-            words = decode_bytes(data)
+            words = decode_t5m_bytes(data)
         except SensT5Error as e:
-            raise TransactionBlocked(f"invalid physical T5 {target}: {e}") from e
+            raise TransactionBlocked(f"invalid physical T5M {target}: {e}") from e
         if digest(data) != row.get("physical_sha256"):
             raise TransactionBlocked("physical SHA mismatch")
         if typed_sha256(words) != row.get("typed_word_sha256"):
@@ -243,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"BLOCKED: {e}", file=sys.stderr)
         return 2
     print(json.dumps(proof["summary"], ensure_ascii=False))
-    print("NOTICE: physical T5 only, NO semantic oracle admission")
+    print("NOTICE: physical Zig/T5M only, NO semantic oracle admission")
     return 0
 
 
