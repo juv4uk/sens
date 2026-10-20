@@ -1,25 +1,25 @@
 ; tests/fixtures/semantic/runner.lisp — #1709 LISP-SEMANTIC-WITNESSES-1
 ; мінімальний протокол тверджень, який SENS належить сам собі.
-; minimal assertion/verdict protocol, owned by the language itself.
+; мінімальний протокол тверджень/вироків, що належить самій мові.
 ;
 ; ПРИНЦИП: мова тестує власний зміст; реалізації лише доводять, що йому
 ; підкоряються. Expected outcome живе тут, у Lisp-даних, а host-код
 ; переносить лише те, що фактично відбулося.
 ;
-; PRINCIPLE: the language tests its own meaning; implementations only prove
-; that they obey it. The expected outcome lives here, in Lisp data; host code
-; transports only what actually happened.
+; ПРИНЦИП: мова перевіряє власне значення; реалізації лише доводять,
+; що підкоряються йому. Очікуваний результат живе тут, у даних Lisp; код хоста
+; транспортує лише те, що справді сталося.
 ;
 ; Рядок твердження (alist; усі поля обов'язкові):
 ;   expect      — вид твердження: expect-value | expect-error | expect-rejected
-;                 (assertion kind: value | named error | reader rejection)
+;                 (вид твердження: value | названа помилка | відмова читача)
 ;   expr        — вихідний текст: обчислити або відхилити
-;                 (source text to evaluate, or to be rejected by the reader)
+;                 (вихідний текст для обчислення або для відхилення читачем)
 ;   expected    — очікувана конвенція як ЖИВІ Lisp-дані, ніколи не рядок Rust:
 ;                   (value <datum>) | (error "Type") | (rejected "<source>")
-;                 (expected outcome as live Lisp data, never a host literal)
+;                 (очікуваний результат як живі дані Lisp, ніколи не літерал хоста)
 ;   active      — ряд виконуваний проти поточного рантайму
-;                 (row is executable against the current runtime)
+;                 (рядок виконуваний проти поточного середовища виконання)
 ;   name        — коротка людська назва закону
 ;   semantic-id — точний голий SENS ідентифікатор функції під перевіркою
 ;   governs     — номери issue, які встановлюють закон
@@ -35,31 +35,31 @@
 ;
 ; Усі три конвенції мають рівно два елементи, тому порівняння тотальне: жодної
 ; гілки, жодного умовного оператора. Усе однаково.
-; All three envelopes have exactly two elements, so the comparison is total:
-; no branch, no conditional operator anywhere in this protocol.
+; Усі три конверти мають рівно два елементи, тож порівняння є повним:
+; жодного розгалуження, жодного умовного оператора будь-де в цьому протоколі.
 ;
 ; ЧОМУ ТУТ НЕМАЄ cond/if: 2-частинний cond на поточному main трактує 0 як
 ; істину (міграційна шкала), а 3-частинний — запит-форма, яку #1713/#1714
 ; замінює. Протокол, який перевіряє саме цей закон, не може стояти на ньому.
-; WHY NO cond/if HERE: the two-part cond on current main still treats 0 as
-; true (migration scale) and the three-part form is a query shape that
-; #1713/#1714 replace. A protocol that tests that very law cannot stand on it.
+; ЧОМУ ТУТ НЕМА cond/if: двочастинний cond на поточному main досі трактує 0 як
+; істину (міграційна шкала), а тричастинна форма — це форма запиту, яку
+; #1713/#1714 замінюють. Протокол, що перевіряє саме цей закон, не може на ньому стояти.
 ;
 ; ВИМІРЯНА АСИМЕТРІЯ assoc У ЦЬОМУ РАНТАЙМІ (перевірено на main):
 ;   (cdr (assoc 'k '((k . v)))) → v          — прократкова пара
 ;   (cdr (assoc 'k '((k  v)))) → (v)        — звичайний список, зайвий рівень
 ; Тому кожна таблиця, з якої цей протокол читає через assoc+cdr, має бути
 ; прократковою: і поля рядка (так їх пише читач фістури), і таблиця міток.
-; WHY THE VERDICT IS THE BARE RESULT, NOT A RECORD: the measured asymmetry
-; above makes any field list the host would have to read back ambiguous, and a
-; protocol that cannot reliably read itself is no use for testing a law. The
-; verdict is the datum, and nothing else.
-; MEASURED assoc ASYMMETRY IN THIS RUNTIME (verified on main):
-;   (cdr (assoc 'k '((k . v)))) -> v     dotted pair
-;   (cdr (assoc 'k '((k  v)))) -> (v)   proper list, one extra level
-; Every table this protocol reads through assoc+cdr must therefore be dotted:
-; the row fields (which is how the fixture reader writes them) and the label
-; table alike.
+; ЧОМУ ВИРОК — ГОЛИЙ РЕЗУЛЬТАТ, А НЕ ЗАПИС: виміряна асиметрія
+; вище робить будь-який список полів, який хост мав би зчитувати назад, неоднозначним, а
+; протокол, що не може надійно прочитати себе, не придатний для перевірки закону.
+; Вирок — це датум, і ніщо інше.
+; ВИМІРЯНА АСИМЕТРІЯ assoc У ЦЬОМУ СЕРЕДОВИЩІ (перевірено на main):
+;   (cdr (assoc 'k '((k . v)))) -> v     точкова пара
+;   (cdr (assoc 'k '((k  v)))) -> (v)   правильний список, на один рівень більше
+; Кожна таблиця, яку цей протокол читає через assoc+cdr, мусить бути точковою:
+; поля рядка (так їх записує читач фікстур) і таблиця
+; міток однаково.
 
 ; 00001001 define / визначити
 ; 00001000 lambda
@@ -73,8 +73,8 @@
 
 ; Константи відповіді належать самій мові, а не host-ом: якщо представлення
 ; відповіді зміниться (#1714), обидві сторони тесту зміняться разом.
-; The language's own answer constants, not host booleans: when the answer
-; representation changes (#1714), both sides of the test move together.
+; Власні константи відповіді мови, не булеві хоста: коли подання
+; відповіді змінюється (#1714), обидві сторони тесту рухаються разом.
 (00001001 semantic-pass-answer (00100010 1 1))
 (00001001 semantic-fail-answer (00100010 1 2))
 
@@ -82,29 +82,29 @@
 ; повертає їх значення. Кодом прократкову пару створити не можна
 ; ("a dotted pair is not executable code") — тому код спирається наassoc лише
 ; на читання, а не на побудову.
-; Row fields are dotted pairs, because that is how the fixture reader writes
-; them, and assoc+cdr returns their values. Code cannot build a dotted pair
-; ("a dotted pair is not executable code"), so the code path only ever READS
-; alists, it never constructs one.
+; Поля рядка — точкові пари, бо так їх записує читач фікстур,
+; і assoc+cdr повертає їхні значення. Код не може побудувати точкову пару
+; ("точкова пара не є виконуваним кодом"), тож шлях коду лише ЧИТАЄ
+; алісти, ніколи не конструює їх.
 (00001001 semantic-row-expect (00001000 (row) (00000110 (00101101 (00000001 expect) row))))
 (00001001 semantic-row-expected (00001000 (row) (00000110 (00101101 (00000001 expected) row))))
 (00001001 semantic-row-name (00001000 (row) (00000110 (00101101 (00000001 name) row))))
 
 ; Чи активний рядок? Активність — політика виконання корпусу, не семантика.
-; Is the row active? Activation is corpus execution policy, not semantics.
+; Чи активний рядок? Активація — це політика виконання корпусу, а не семантика.
 (00001001 semantic-row-active?
   (00001000 (row)
     (00100010 (00000110 (00101101 (00000001 active) row)) (00000001 t))))
 
 ; Транспортований факт, прочитаний назад як datum. Host ніколи не порівнює.
-; The transported fact, read back as a datum. The host never compares.
+; Транспортований факт, зчитаний назад як датум. Хост ніколи не порівнює.
 (00001001 semantic-actual-datum
   (00001000 (actual)
     (00100111 (00000101 actual) (01001010 (00101111 actual)))))
 
 ; Нормативне порівняння. Host дає лише actual; expected читається з рядка.
-; The normative comparison. The host supplies ACTUAL only; expected is read
-; from the Lisp-owned row.
+; Нормативне порівняння. Хост надає лише ACTUAL; expected читається
+; з рядка, що належить Lisp.
 (00001001 semantic-verdict
   (00001000 (row actual)
     (00100010 (semantic-row-expected row) (semantic-actual-datum actual))))
@@ -112,10 +112,10 @@
 ; Мітка обчислюється тут, у Lisp: host порівнює символ, який належить цьому
 ; протоколу, а не біт, вигаданий ним самим. Ключі — власний carrier відповіді
 ; цієї мови, тому зміна представлення (#1714) рухає мітку разом із відповіддю.
-; The label is computed here, in Lisp: the host compares a symbol that belongs
-; to this protocol, not a bit it invented. The keys are this language's own
-; answer carrier, so a representation change (#1714) moves the label together
-; with the answer.
+; Мітка обчислюється тут, у Lisp: хост порівнює символ, що належить
+; цьому протоколу, а не біт, який він вигадав. Ключі — це власний
+; носій відповіді мови, тож зміна подання (#1714) рухає мітку разом
+; з відповіддю.
 (00001001 semantic-verdict-label
   (00001000 (row actual)
     (00000110 (00101101 (semantic-verdict row actual)
