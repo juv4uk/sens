@@ -36,6 +36,31 @@ class CurrentManifestMigrationTests(unittest.TestCase):
         self.assertEqual(len(foundation["domains"]["D10"]["residents"]), 1024)
         self.assertEqual(len(self.maps), 3)
 
+    def test_manifest_root_selects_its_own_ratified_foundation(self):
+        # Заміна --root не повинна потай брати D9 з директорії скрипта.
+        # Справжню програму D4 проєктує чинний engine; mock тільки
+        # фіксує шлях завантаження таблиці, не імітує SENS-обчислення.
+        from unittest.mock import patch
+        foundation = approved.engine.load_foundation(
+            ROOT / "knowledge/d1-d11-foundation.json"
+        )
+        with tempfile.TemporaryDirectory(prefix="sens-root-provenance-") as temp:
+            root = Path(temp)
+            source = root / "program.lisp"
+            original = SOURCE.read_bytes()
+            source.write_bytes(original)
+            with patch.object(approved.engine, "load_foundation",
+                              return_value=foundation) as load:
+                rel, payload, receipt = approved.migrate_one(
+                    source, root, self.maps, original, source_era="current"
+                )
+            load.assert_called_with(root / "knowledge/d1-d11-foundation.json")
+            self.assertEqual(rel, Path("program.sens"))
+            self.assertEqual(receipt["physical_codec"], "T5M")
+            self.assertEqual(receipt["semantic_oracle"], "NOT_VERIFIED")
+            self.assertEqual(source.read_bytes(), original)
+            self.assertTrue(approved.engine.decode_t5m_bytes(payload))
+
     def test_proven_d4_fixture_preserves_exact_t5m_words_without_source_write(self):
         before = SOURCE.read_bytes()
         expected_words = VIEW.read_text(encoding="ascii").strip().split(" ")
