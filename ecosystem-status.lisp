@@ -1,22 +1,17 @@
-; ecosystem-status.my — machine-readable current-state snapshot for the
-; four-repository ecosystem (my-lisp, fpga-lisp, cml, my-idea).
+; ecosystem-status.lisp — машинозчитуваний знімок стану
+; екосистеми з чотирьох репозиторіїв (my-lisp, fpga-lisp, cml, my-idea).
 ;
-; Data only, same convention as language-contract.my/isa-contract.my/
-; compatibility.my — one flat alist, read via (read-file ...) or (read
-; (read-file "ecosystem-status.my")), never loaded as executable source.
-; docs/ecosystem-sync.md's prose narrates the same facts for humans;
-; this file is the version another session's my-lisp code could actually
-; consume (e.g. a future my-idea "System Observatory" panel) without
-; scraping Markdown.
+; Це лише дані: один список асоціацій за домовленістю файлів
+; language-contract.my, isa-contract.my та compatibility.my.
+; Його читають як дані, а не завантажують як виконувану програму.
+; Людинозрозумілий опис стану міститься в docs/ecosystem-sync.md.
+; Цей запис дає іншим інструментам змогу читати стан без аналізу Markdown.
 ;
-; Not the contract itself — language-contract.my/isa-contract.my/
-; compatibility.my remain authoritative; this file is a snapshot,
-; refreshed by hand after each cross-session sync, per
-; docs/ecosystem-sync.md's four-point status request.
-;
-; ecosystem-status.my — машинно-читаний знімок поточного стану
-; чотирьох-репозиторної екосистеми. Дані, не код; та сама конвенція, що
-; й у language-contract.my/isa-contract.my/compatibility.my.
+; Файл не замінює контрактів: авторитетними залишаються
+; language-contract.my, isa-contract.my та compatibility.my.
+; Знімок оновлюють вручну після узгодження стану відповідно
+; до docs/ecosystem-sync.md. Ключі схеми та історичні значення
+; не перекладаємо, щоб зберегти сумісність споживачів.
 
 ((kind . ecosystem-status)
  (as-of . "2026-08-12")
@@ -66,9 +61,9 @@
    (my-idea .
     ((role . observer-and-ide)
      (joined-ecosystem-sync . "2026-08-11")
-     ;; updated 2026-08-24: vestigial embedded external/my-lisp submodule
-     ;; REMOVED from my-idea (verified: zero build/source references);
-     ;; historical risk note below kept for provenance only.
+     ;; Оновлено 24.08.2026: залишковий підмодуль external/my-lisp
+     ;; вилучено з my-idea (підтверджено відсутність залежностей коду та збирання).
+     ;; Історичний опис ризику нижче збережено для простежуваності.
      (depends-on-my-lisp-via . nil)
      (revision-sync-risk . "RESOLVED 2026-08-24: vestigial submodule removed (was pinned 85b53f2, l0.20-era); my-idea consumes nothing from my-lisp build-wise")
      (evidence-matrix-fixture-drill-down . "live, commit 3dc7121 — click a requirement row for source+expected/actual/commit/note per implementation")
