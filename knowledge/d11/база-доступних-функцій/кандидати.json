@@ -22,10 +22,10 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 158,
+    "total": 159,
     "historical": 15,
-    "library": 143,
-    "distinct_families": 24
+    "library": 144,
+    "distinct_families": 25
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -2712,6 +2712,22 @@
       "signature_candidate": "(оператор-порівняння, список аргументів) → однобітне так або ні",
       "law_candidate": "Перевіряє суміжні пари зліва направо; використовує чинні менше?, однакові? або більше?; для одного аргументу повертає так.",
       "admission_note": "Похідний SENS-механізм. Перевірити семантичне дублювання з ратифікованими багатомісними предикатами. Не призначати координату без власницької ратифікації."
+    },
+    {
+      "surface_name": "ядро3-стан-профілю",
+      "source_family": "core3-profile",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/core3.lisp",
+        "blob_sha": "04ad3bbb1d8dc192882b604ff6d433b8faff225a",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "ratified": false,
+      "callable": false
     }
   ]
 }
