@@ -1,17 +1,17 @@
-; semantic-lineage-core-v1.lisp — bounded first lineage inventory for #1113.
-; This is audit data, not a semantic authority table. It records provenance,
-; current law status, and known uncertainty so implementation artifacts cannot
-; silently masquerade as language design.
+; semantic-lineage-core-v1.lisp — перший обмежений інвентар походження для #1113.
+; Це дані аудиту, а не таблиця семантичної влади. Вони фіксують походження,
+; стан законів на дату зрізу й відомі невизначеності, щоб артефакти реалізації не могли
+; непомітно видавати себе за мовний проєкт.
 ;
-; Authority remains the canonical function table / registry:
+; Джерелом повноважень залишається канонічна таблиця функцій / реєстр:
 ;   lib/surface/semantic-registry.lisp
 ;
-; Classification vocabulary follows #1113:
+; Класифікаційні категорії визначено в #1113:
 ;   mccarthy-inspired | my-lisp-native | deliberate-departure
 ;   compatibility-only | substrate-projection | historical-only | unresolved
 ;
-; Every row is intentionally evidence-linked. "unresolved" means the project
-; must not treat the current implementation shape as final language law.
+; Кожен рядок прив'язано до свідчень. «unresolved» означає, що проєкт
+; не має права вважати поточний вигляд реалізації остаточним мовним законом.
 
 (semantic-lineage/1
   (issue 1113)
@@ -25,11 +25,11 @@
       (identity ())
       (surface "S-expression")
       (lineage mccarthy-inspired)
-      (historical-reference "McCarthy Lisp S-expression model")
-      (my-lisp-rationale "Portable symbolic data substrate retained as the language's basic expression/data representation.")
-      (observable-law "Programs and quoted data are representable as Lisp-readable symbolic structure.")
+      (historical-reference "Модель S-виразів Ліспу Маккарті")
+      (my-lisp-rationale "Переносне символьне подання даних збережено як основу представлення виразів і даних мови.")
+      (observable-law "Програми й цитовані дані можна подати як символьні структури, доступні читачеві Ліспу.")
       (current-witness "crates/my-lisp/src/parser.rs;tests/fixtures/conformance.lisp")
-      (deliberate-differences "my-lisp adds exact SID8 function identities and richer explicit result domains downstream.")
+      (deliberate-differences "У цьому історичному зрізі my-lisp додавав точні тотожності функцій SID8 та ширші явні домени результатів.")
       (substrate-assumptions none)
       (portability-risk low)
       (owner-issue 1113)
@@ -40,11 +40,11 @@
       (identity 00000010)
       (surface atom)
       (lineage mccarthy-inspired)
-      (historical-reference "McCarthy atom/structure distinction")
-      (my-lisp-rationale "Retains an explicit structural distinction while current predicate/classifier representation is being re-separated under #218.")
-      (observable-law "Atomic values and pair-shaped values are distinguishable by a language-owned observation.")
+      (historical-reference "Розрізнення атома й структури в Маккарті")
+      (my-lisp-rationale "Зберігає явну структурну відмінність, поки представлення предикатів і класифікаторів розмежовується в #218.")
+      (observable-law "Атомарні значення й пари розрізняє спостереження, визначене самою мовою.")
       (current-witness "tests/fixtures/semantic/atom-1bit-v1.lisp;tests/fixtures/semantic/eq-1bit-v1.lisp")
-      (deliberate-differences "Current #218 treats predicate questions and richer structural classifiers as distinct concepts; final predicate answer representation is not yet frozen.")
+      (deliberate-differences "У #218 предикатні запитання й ширші структурні класифікатори є різними поняттями; остаточне представлення відповіді предиката в цьому зрізі ще не було закріплене.")
       (substrate-assumptions none)
       (portability-risk medium)
       (owner-issue 218)
@@ -55,12 +55,12 @@
       (identity 00000001)
       (surface quote)
       (lineage mccarthy-inspired)
-      (historical-reference "McCarthy quote")
-      (my-lisp-rationale "Preserves the evaluation boundary between code and literal symbolic data.")
-      (observable-law "Quoted structure is returned as data without ordinary evaluation.")
+      (historical-reference "Цитування Маккарті")
+      (my-lisp-rationale "Зберігає межу обчислення між кодом і буквальними символьними даними.")
+      (observable-law "Цитована структура повертається як дані без звичайного обчислення.")
       (current-witness "crates/my-lisp/tests/mccarthy.rs;tests/fixtures/conformance.lisp")
-      (deliberate-differences "None currently ratified beyond SID8 transport representation.")
-      (substrate-assumptions "reader/evaluator implementation")
+      (deliberate-differences "На дату цього зрізу поза транспортним поданням SID8 нічого додатково не було ратифіковано.")
+      (substrate-assumptions "Реалізація читача й обчислювача")
       (portability-risk low)
       (owner-issue 1113)
       (status current))
@@ -70,11 +70,11 @@
       (identity 00000100)
       (surface cons)
       (lineage mccarthy-inspired)
-      (historical-reference "McCarthy cons")
-      (my-lisp-rationale "Pair construction remains a basic portable data operation.")
-      (observable-law "Construct a pair from two values.")
+      (historical-reference "Побудова пари за Маккарті")
+      (my-lisp-rationale "Побудова пари залишається базовою переносною операцією над даними.")
+      (observable-law "Побудувати пару з двох значень.")
       (current-witness "crates/my-lisp/tests/mccarthy.rs;tests/fixtures/conformance.lisp")
-      (deliberate-differences "Exact bare SID8 is the function identity after resolution.")
+      (deliberate-differences "У цьому історичному зрізі точне слово SID8 було тотожністю функції після розв'язання назви.")
       (substrate-assumptions none)
       (portability-risk low)
       (owner-issue 1113)
@@ -85,11 +85,11 @@
       (identity 00000101)
       (surface car)
       (lineage mccarthy-inspired)
-      (historical-reference "McCarthy car")
-      (my-lisp-rationale "Pair projection remains a basic portable data operation.")
-      (observable-law "Project the first component of a valid pair.")
+      (historical-reference "Вибір першого елемента за Маккарті")
+      (my-lisp-rationale "Проєкція пари залишається базовою переносною операцією над даними.")
+      (observable-law "Отримати першу складову правильної пари.")
       (current-witness "crates/my-lisp/tests/mccarthy.rs;tests/fixtures/conformance.lisp")
-      (deliberate-differences "Errors and explicit failure observations are my-lisp boundary policy.")
+      (deliberate-differences "Помилки й явні свідчення невдачі визначає політика межі my-lisp.")
       (substrate-assumptions none)
       (portability-risk low)
       (owner-issue 1113)
@@ -100,11 +100,11 @@
       (identity 00000110)
       (surface cdr)
       (lineage mccarthy-inspired)
-      (historical-reference "McCarthy cdr")
-      (my-lisp-rationale "Pair-tail projection remains a basic portable data operation.")
-      (observable-law "Project the second component/tail of a valid pair.")
+      (historical-reference "Вибір хвоста пари за Маккарті")
+      (my-lisp-rationale "Проєкція хвоста пари залишається базовою переносною операцією над даними.")
+      (observable-law "Отримати другу складову — хвіст — правильної пари.")
       (current-witness "crates/my-lisp/tests/mccarthy.rs;tests/fixtures/conformance.lisp")
-      (deliberate-differences "Dotted-pair reader support is an implementation-independent language witness.")
+      (deliberate-differences "Підтримка читання крапкових пар є незалежним від реалізації мовним свідченням.")
       (substrate-assumptions none)
       (portability-risk low)
       (owner-issue 1113)
