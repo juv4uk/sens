@@ -1,49 +1,50 @@
-; #114/#220/#275 — Lisp owns the semantic relation verdicts used by the
-; content-store regression evidence. Ukrainian projection only.
+; #114/#220/#275 — мовний свідок семантичних відношень сховища вмісту.
+; Викличні голови D9 використовують повні ратифіковані назви «укр».
+; Локальні зв'язування українські; цитовані маркери протоколу незмінні.
 
 (визначити content-store-no?
-  (функція (value)
-    (тотожне? value (як-є (d1-no-left d1-no-right)))))
+  (функція (значення)
+    (тотожне? значення (як-є (d1-no-left d1-no-right)))))
 
-(визначити content-store-authority-witness
+(визначити свідок-повноважень-сховища-вмісту
   (функція ()
-    (нехай ((value
+    (нехай ((значення
               (як-є
                 (функція
                   (x)
                   x
                 )
               ))
-            (written
-              (fs-write
-                (fs-empty)
+            (результат-запису
+              (фс-записати
+                (фс-порожній)
                 "code"
-                value
+                значення
               ))
-            (fs
-              (перше written)
+            (файлова-система
+              (перше результат-запису)
             )
-            (root-a
-              (fs-serialize-root fs)
+            (перший-корінь
+              (фс-серіалізувати-корінь файлова-система)
             )
-            (root-b
-              (fs-serialize-root fs)
+            (другий-корінь
+              (фс-серіалізувати-корінь файлова-система)
             )
-            (object-a
-              (fs-serialize-object value)
+            (перший-об'єкт
+              (фс-серіалізувати-об'єкт значення)
             )
-            (object-b
-              (fs-serialize-object value)
+            (другий-об'єкт
+              (фс-серіалізувати-об'єкт значення)
             )
-            (root-relation
-              (однакові? root-a root-b)
+            (рівність-коренів?
+              (однакові? перший-корінь другий-корінь)
             )
-            (object-relation
-              (однакові? object-a object-b)
+            (рівність-об'єктів?
+              (однакові? перший-об'єкт другий-об'єкт)
             )
-            (direct
-              (world-tell
-                (empty-world)
+            (пряме-твердження
+              (світ-повідомити
+                (порожній-світ)
                 (як-є zoo)
                 (як-є
                   ((has-fur cat)
@@ -51,11 +52,11 @@
                 )
               )
             )
-            (retold
-              (world-tell
-                (world-retract
-                  (world-tell
-                    (empty-world)
+            (відтворене-твердження
+              (світ-повідомити
+                (світ-відкликати
+                  (світ-повідомити
+                    (порожній-світ)
                     (як-є zoo)
                     (як-є
                       ((has-fur cat)
@@ -75,24 +76,24 @@
                 )
               )
             )
-            (projection-relation
+            (рівність-проєкцій?
               (однакові?
-                (world-clauses
-                  direct
+                (світ-клаузи
+                  пряме-твердження
                   (як-є zoo)
                 )
-                (world-clauses
-                  retold
+                (світ-клаузи
+                  відтворене-твердження
                   (як-є zoo)
                 )
               )
             ))
       (за-умовою
-        (root-relation
+        (рівність-коренів?
           (за-умовою
-            (object-relation
+            (рівність-об'єктів?
               (за-умовою
-                (projection-relation
+                (рівність-проєкцій?
                   (як-є
                     (content-store-authority-witness
                       (status pass)
@@ -103,7 +104,7 @@
                       )
                     )
                   ))
-                ((content-store-no? projection-relation)
+                ((сховище-вмісту-хиба? рівність-проєкцій?)
                   (як-є
                     (content-store-authority-witness
                       (status fail)
@@ -111,7 +112,7 @@
                     )
                   ))
               ))
-            ((content-store-no? object-relation)
+            ((сховище-вмісту-хиба? рівність-об'єктів?)
               (як-є
                 (content-store-authority-witness
                   (status fail)
@@ -119,7 +120,7 @@
                 )
               ))
           ))
-        ((content-store-no? root-relation)
+        ((сховище-вмісту-хиба? рівність-коренів?)
           (як-є
             (content-store-authority-witness
               (status fail)
@@ -127,3 +128,8 @@
             )
           ))
       ))))
+
+; Історичні псевдоніми для споживачів старого імені свідка.
+; Семантика належить українським мовним визначенням, не хосту.
+(визначити content-store-no? сховище-вмісту-хиба?)
+(визначити content-store-authority-witness свідок-повноважень-сховища-вмісту)
