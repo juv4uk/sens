@@ -185,7 +185,16 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         "semantic_runtime_proven": False,
         "release_ready": False,
         "release_decision": "NO-GO: потрібні докази виконання SENS та повної семантики",
+        # Кількість діагностик може перевищувати число різних файлів.
+        # Облік інформативний, не додає жодних нових release gate.
         "blocked_count": len(blocked),
+        "blocked_file_count": len({row["path"] for row in blocked}),
+        "potential_program_missing_complete_triplet": (
+            counts["potential_program_files"] - counts["complete_triplets"]
+        ),
+        "potential_program_without_bounded_proof": (
+            counts["potential_program_files"] - counts["bounded_verified"]
+        ),
         "blocked_sample": blocked[:limit],
     }
 
