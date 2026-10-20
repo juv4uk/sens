@@ -192,4 +192,47 @@ sens_u96_mul_exact:
     ret
 .size sens_u96_mul_exact,.-sens_u96_mul_exact
 
+/* Точний 64*N-бітний ADD/SUB, молодше слово перше.
+ * System V: RDI=left, RSI=right, RDX=out, RCX=length (u64 words).
+ * Критично: LEA та DEC не змінюють CF між ADC/SBB! */
+.p2align 4
+.globl sens_words_add_exact
+.type sens_words_add_exact,@function
+sens_words_add_exact:
+    test %rcx,%rcx
+    jz .Lwide_add_done
+    clc
+.Lwide_add_loop:
+    mov (%rdi),%r8
+    adc (%rsi),%r8
+    mov %r8,(%rdx)
+    lea 8(%rdi),%rdi
+    lea 8(%rsi),%rsi
+    lea 8(%rdx),%rdx
+    dec %rcx
+    jnz .Lwide_add_loop
+.Lwide_add_done:
+    ret
+.size sens_words_add_exact,.-sens_words_add_exact
+
+.p2align 4
+.globl sens_words_sub_exact
+.type sens_words_sub_exact,@function
+sens_words_sub_exact:
+    test %rcx,%rcx
+    jz .Lwide_sub_done
+    clc
+.Lwide_sub_loop:
+    mov (%rdi),%r8
+    sbb (%rsi),%r8
+    mov %r8,(%rdx)
+    lea 8(%rdi),%rdi
+    lea 8(%rsi),%rsi
+    lea 8(%rdx),%rdx
+    dec %rcx
+    jnz .Lwide_sub_loop
+.Lwide_sub_done:
+    ret
+.size sens_words_sub_exact,.-sens_words_sub_exact
+
 .section .note.GNU-stack,"",@progbits

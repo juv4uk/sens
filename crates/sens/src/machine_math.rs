@@ -35,6 +35,9 @@ unsafe extern "C" {
     fn sens_i96_sub_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
     fn sens_u96_mul_exact(a_low: u64, a_high: u64, b_low: u64, b_high: u64,
                            out_middle: *mut u64, out_high: *mut u64) -> u64;
+    // Багатослівна арифметика: на відміну від двослівних D96, довільна довжина.
+    fn sens_words_add_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
+    fn sens_words_sub_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
 }
 
 /// Цілочисельний механізм для рівно двох НАЯВНИХ знакових слів D24.
@@ -163,6 +166,48 @@ pub(crate) fn exact_u96_multiply(a: u128, b: u128) -> Option<[u64; 3]> {
         let high = (middle >> 64) + (p01 >> 64) + (p10 >> 64) + p11;
         Some([p00 as u64, middle as u64, high as u64])
     }
+}
+
+
+/// Точний багатослівний ADD/SUB з переносом, молодше слово перше.
+///
+/// Вхідні зрізи мусять мати однакову ненульову довжину. Це лише
+/// механічне додавання/віднімання modulo 2^(64*N); верхній знаковий
+/// резерв і ратифіковане розширення D192->D384 належать SENS.
+pub(crate) fn exact_words_add_sub(operator: &str, left: &[u64], right: &[u64]) -> Option<Vec<u64>> {
+    if left.is_empty() || left.len() != right.len() || !matches!(operator, "+" | "-") {
+        return None;
+    }
+    let mut out = vec![0_u64; left.len()];
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    unsafe {
+        // SAFETY: обидва входи та вихід містять рівно len чинних
+        // елементів u64; вихідний буфер окремий; системний ABI x86-64.
+        match operator {
+            "+" => sens_words_add_exact(left.as_ptr(), right.as_ptr(), out.as_mut_ptr(), left.len()),
+            "-" => sens_words_sub_exact(left.as_ptr(), right.as_ptr(), out.as_mut_ptr(), left.len()),
+            _ => unreachable!(),
+        }
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    {
+        let mut carry = 0_u64;
+        for i in 0..left.len() {
+            let (value, first) = if operator == "+" {
+                left[i].overflowing_add(right[i])
+            } else {
+                left[i].overflowing_sub(right[i])
+            };
+            let (value, second) = if operator == "+" {
+                value.overflowing_add(carry)
+            } else {
+                value.overflowing_sub(carry)
+            };
+            out[i] = value;
+            carry = u64::from(first || second);
+        }
+    }
+    Some(out)
 }
 
 /// Вибір механізму за ISA процесора, а не ратифікація мовної функції.
@@ -366,6 +411,47 @@ mod tests {
             let result = a * b;
             let limbs = exact_u96_multiply(a,b).unwrap();
             assert_eq!(limbs, [result as u64, (result >> 64) as u64, 0]);
+        }
+    }
+
+    #[test]
+    fn wide_limb_asm_retains_carries_borrows_and_sign_extensions() {
+        for len in [1, 2, 3, 4, 6, 12] {
+            let mut a = vec![u64::MAX; len];
+            let mut b = vec![0_u64; len];
+            b[0] = 1;
+            assert_eq!(exact_words_add_sub("+", &a, &b), Some(vec![0; len]));
+            assert_eq!(exact_words_add_sub("-", &vec![0; len], &b),
+                       Some(vec![u64::MAX; len]));
+            a[0] = 0;
+            let diff = exact_words_add_sub("-", &a, &b).unwrap();
+            assert_eq!(diff[0], u64::MAX);
+            assert!(diff[1..].iter().all(|&x| x == u64::MAX - 1 || x == u64::MAX));
+        }
+        assert_eq!(exact_words_add_sub("+", &[], &[]), None);
+        assert_eq!(exact_words_add_sub("-", &[1], &[1, 2]), None);
+        assert_eq!(exact_words_add_sub("*", &[2], &[3]), None);
+    }
+
+    #[test]
+    fn wide_limb_asm_matches_independent_u128_oracle() {
+        let mut seed = 0x15be_0297_a486_cdf1_u64;
+        for _ in 0..4096 {
+            let mut next = || {
+                seed ^= seed << 13;
+                seed ^= seed >> 7;
+                seed ^= seed << 17;
+                seed
+            };
+            let (a0, a1, b0, b1) = (next(), next(), next(), next());
+            let a = u128::from(a0) | (u128::from(a1) << 64);
+            let b = u128::from(b0) | (u128::from(b1) << 64);
+            let sum = exact_words_add_sub("+", &[a0, a1], &[b0, b1]).unwrap();
+            let sub = exact_words_add_sub("-", &[a0, a1], &[b0, b1]).unwrap();
+            let expect_sum = a.wrapping_add(b);
+            let expect_sub = a.wrapping_sub(b);
+            assert_eq!(sum, [expect_sum as u64, (expect_sum >> 64) as u64]);
+            assert_eq!(sub, [expect_sub as u64, (expect_sub >> 64) as u64]);
         }
     }
 }

@@ -222,6 +222,54 @@ fn signed_d96_add_sub_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> 
     Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
 }
 
+/// Точний ASM ADD/SUB для знакових D192 та наступних D(24·2^k).
+///
+/// Вхідні слова зберігають ЯВНУ доменну ідентичність; ASM не вирішує
+/// допуск або розширення. Додаємо 64-бітний знаковий резерв, щоб
+/// результат Dn + Dn не загубив перенос. Вихід лише Dn або D(2n).
+fn signed_wide_add_sub_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
+    let width = lhs.numeric_domain_width()?;
+    if width < 192 || width % 64 != 0 || rhs.numeric_domain_width() != Some(width) {
+        return None;
+    }
+    let words_count = width / 64;
+    let read = |n: &BinaryNumber| -> Option<Vec<u64>> {
+        let bits = n.exact_numeric_domain_bits()?;
+        if bits.len() != width { return None; }
+        let mut words = Vec::with_capacity(words_count + 1);
+        for block in bits.rchunks(64) {
+            let mut value = 0_u64;
+            for bit in block { value = (value << 1) | u64::from(*bit); }
+            words.push(value);
+        }
+        words.push(if bits[0] == 1 { u64::MAX } else { 0 });
+        Some(words)
+    };
+    let left = read(lhs)?;
+    let right = read(rhs)?;
+    let result = crate::machine_math::exact_words_add_sub(op, &left, &right)?;
+    // Якщо додаткове слово дорівнює знаковому розширенню Dn, Dn вистачає.
+    // Інакше рівно наступний ратифікований D(2n), без кругового переповнення.
+    let sign = result[words_count - 1] >> 63 != 0;
+    let sign_extension = if sign { u64::MAX } else { 0 };
+    let fits = result[words_count] == sign_extension;
+    let result_width = if fits { width } else { width.checked_mul(2)? };
+    let mut output_words = if fits {
+        result[..words_count].to_vec()
+    } else {
+        let top_sign = result[words_count] >> 63 != 0;
+        let mut full = result;
+        full.resize(result_width / 64, if top_sign { u64::MAX } else { 0 });
+        full
+    };
+    if output_words.len().checked_mul(64)? != result_width { return None; }
+    let mut bits = Vec::with_capacity(result_width);
+    for word in output_words.drain(..).rev() {
+        for shift in (0..64).rev() { bits.push(((word >> shift) & 1) as u8); }
+    }
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(result_width, &bits)?))
+}
+
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
@@ -242,6 +290,13 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
             } else {
                 signed_d96_add_sub_fast(operator, left, right)
             };
+        }
+    }
+    // D192 і наступні ратифіковані ширини: тільки знакові цілі +/−,
+    // без неявної зміни доменів, дробових композицій або нового opcode.
+    if width >= 192 && matches!(operator, "+" | "-") {
+        if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
+            return signed_wide_add_sub_fast(operator, left, right);
         }
     }
     let (_, x_neg, x_num, x_den) = ingredients(lhs)?;
@@ -341,6 +396,55 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    #[test]
+    fn d192_d384_wide_asm_keeps_exact_sign_carry_and_domain_laws() {
+        let signed = |width: usize, word: &[u8]| -> Value {
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, word).unwrap())
+        };
+        for width in [192_usize, 384, 768] {
+            let zero = vec![0; width];
+            let one = { let mut bits = zero.clone(); bits[width - 1] = 1; bits };
+            let minus_one = vec![1; width];
+            let max = { let mut bits = minus_one.clone(); bits[0] = 0; bits };
+            let min = { let mut bits = zero.clone(); bits[0] = 1; bits };
+            let v = |data: &[u8]| signed(width, data);
+            let verify = |op: &str, a: &[u8], b: &[u8], result_width: usize,
+                          expected: Vec<u8>| {
+                let Value::BinaryNumber(n) = compute(op, &v(a), &v(b)).expect("точна сума Dn") else {
+                    panic!("результат має бути цілим");
+                };
+                assert_eq!(n.numeric_domain_width(), Some(result_width));
+                assert_eq!(n.exact_numeric_domain_bits().unwrap(), expected);
+            };
+            verify("+", &max, &one, width * 2, {
+                let mut bits = vec![0; width * 2];
+                bits[width] = 1;
+                bits
+            });
+            verify("-", &min, &one, width * 2, {
+                // -2^(n-1)-1 у D(2n): усі старші n бітів одиниці,
+                // далі 0, потім n-2 одиниці, останній біт 1.
+                let mut bits = vec![1; width * 2];
+                bits[width] = 0;
+                bits
+            });
+            verify("+", &minus_one, &one, width, zero.clone());
+            verify("-", &zero, &one, width, minus_one.clone());
+            verify("+", &min, &max, width, minus_one.clone());
+            verify("-", &max, &min, width * 2, {
+                let mut bits = vec![0; width * 2];
+                bits[width - 1] = 1; // 2^n-1
+                bits[..width].fill(0);
+                bits[width..].fill(1);
+                bits
+            });
+        }
+        let d192_one = { let mut b = vec![0; 192]; b[191] = 1; signed(192, &b) };
+        let d384_one = { let mut b = vec![0; 384]; b[383] = 1; signed(384, &b) };
+        assert!(compute("+", &d192_one, &d384_one).is_none());
+        assert_eq!(compute("/", &d192_one, &d192_one).unwrap().to_string(), "1");
     }
 
     #[test]
