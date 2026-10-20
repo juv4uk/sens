@@ -340,7 +340,7 @@ pub const PROCESS_LIBRARY_SOURCE: &str = include_str!("../../../lib/process.lisp
 pub const TCP_LIBRARY_SOURCE: &str = include_str!("../../../lib/tcp.lisp");
 
 /// File text interpretation owned by Lisp. The host contributes only raw
-/// bytes through `read-file-bytes`/`write-file-bytes`; this layer defines
+/// bytes through `read-file-bytes`/`записати-байти-файла`; this layer defines
 /// public `read-file`/`write-file` by applying the shared UTF-8 semantics.
 pub const FS_LIBRARY_SOURCE: &str = include_str!("../../../lib/fs.lisp");
 
@@ -816,7 +816,7 @@ pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageErr
 }
 
 /// Load language-owned file text semantics: public `read-file`/`write-file`
-/// composed entirely on the existing `read-file-bytes`/`write-file-bytes` raw
+/// composed entirely on the existing `read-file-bytes`/`записати-байти-файла` raw
 /// host capabilities plus the shared UTF-8 layer. No new host capability is
 /// introduced for this migration.
 pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageError> {

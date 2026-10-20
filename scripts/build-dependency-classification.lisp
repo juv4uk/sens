@@ -74,7 +74,7 @@
 (визначити host-capabilities
   (як-є (load process-run read-dir read-file read-file-bytes tcp-accept
           tcp-close tcp-connect tcp-listen tcp-read tcp-write write-file
-          write-file-bytes)))
+          записати-байти-файла)))
 
 ; the string/reader-flavored subset of the two tables above, called out
 ; as its own bucket per the task description ("strings/reader")

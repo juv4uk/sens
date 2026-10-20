@@ -158,18 +158,18 @@ fn evaluate_write_file_bytes(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("write-file-bytes", arguments, 2, span)?;
+    exact_arity("записати-байти-файла", arguments, 2, span)?;
     let path_value = eval_expr(&arguments[0], environment)?;
     let Value::String(ref path) = path_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
-            "write-file-bytes expects a string path · write-file-bytes ochikuie riadok-shliakh · write-file-bytes erwartet einen String-Pfad",
+            "записати-байти-файла expects a string path · записати-байти-файла ochikuie riadok-shliakh · записати-байти-файла erwartet einen String-Pfad",
             span,
         ));
     };
     let bytes_value = eval_expr(&arguments[1], environment)?;
     let bytes = expect_byte_list(&bytes_value, arguments[1].span)?;
-    ensure_fs_write_allowed(environment, "write-file-bytes", path, span)?;
+    ensure_fs_write_allowed(environment, "записати-байти-файла", path, span)?;
     write_file_bytes(path, &bytes, span)?;
     Ok(bytes_value)
 }
@@ -214,11 +214,11 @@ fn evaluate_read_file_utf8_raw(
     let Value::String(path) = evaluated else {
         return Err(LanguageError::new(
             ErrorKind::Type,
-            "read-file-utf8-raw expects a string path · read-file-utf8-raw ochikuie riadok-shliakh · read-file-utf8-raw erwartet einen String-Pfad",
+            "читати-сирий-текст-файла expects a string path · читати-сирий-текст-файла ochikuie riadok-shliakh · читати-сирий-текст-файла erwartet einen String-Pfad",
             span,
         ));
     };
-    ensure_fs_read_allowed(environment, "read-file-utf8-raw", path, span)?;
+    ensure_fs_read_allowed(environment, "читати-сирий-текст-файла", path, span)?;
     let bytes = read_file_bytes(path, span)?;
     match std::str::from_utf8(&bytes) {
         Ok(text) => Ok(Value::list([
@@ -242,14 +242,14 @@ fn expect_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageError>
                 let Value::Number(number, _) = **head else {
                     return Err(LanguageError::new(
                         ErrorKind::Type,
-                        "write-file-bytes expects a list of integers 0-255 · write-file-bytes ochikuie spysok tsilykh chysel 0-255 · write-file-bytes erwartet eine Liste von Ganzzahlen 0-255",
+                        "записати-байти-файла expects a list of integers 0-255 · записати-байти-файла ochikuie spysok tsilykh chysel 0-255 · записати-байти-файла erwartet eine Liste von Ganzzahlen 0-255",
                         span,
                     ));
                 };
                 if number.fract() != 0.0 || !(0.0..=255.0).contains(&number) {
                     return Err(LanguageError::new(
                         ErrorKind::Type,
-                        "write-file-bytes expects each element to be an integer between 0 and 255 · write-file-bytes ochikuie, shchob kozhen element buv tsilym chyslom vid 0 do 255 · write-file-bytes erwartet, dass jedes Element eine Ganzzahl zwischen 0 und 255 ist",
+                        "записати-байти-файла expects each element to be an integer between 0 and 255 · записати-байти-файла ochikuie, shchob kozhen element buv tsilym chyslom vid 0 do 255 · записати-байти-файла erwartet, dass jedes Element eine Ganzzahl zwischen 0 und 255 ist",
                         span,
                     ));
                 }
@@ -259,7 +259,7 @@ fn expect_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageError>
             _ => {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
-                    "write-file-bytes expects a proper list of integers 0-255 · write-file-bytes ochikuie pravylnyi spysok tsilykh chysel 0-255 · write-file-bytes erwartet eine echte Liste von Ganzzahlen 0-255",
+                    "записати-байти-файла expects a proper list of integers 0-255 · записати-байти-файла ochikuie pravylnyi spysok tsilykh chysel 0-255 · записати-байти-файла erwartet eine echte Liste von Ganzzahlen 0-255",
                     span,
                 ))
             }
@@ -361,7 +361,7 @@ fn write_file_bytes(path: &str, bytes: &[u8], span: Span) -> Result<(), Language
     std::fs::write(path, bytes).map_err(|error| {
         LanguageError::new(
             ErrorKind::InvalidForm,
-            format!("write-file-bytes: failed to write file {path}: {error}"),
+            format!("записати-байти-файла: failed to write file {path}: {error}"),
             span,
         )
     })
@@ -371,7 +371,7 @@ fn write_file_bytes(path: &str, bytes: &[u8], span: Span) -> Result<(), Language
 fn write_file_bytes(_path: &str, _bytes: &[u8], span: Span) -> Result<(), LanguageError> {
     Err(LanguageError::new(
         ErrorKind::InvalidForm,
-        "write-file-bytes: file system access is not available in this build",
+        "записати-байти-файла: file system access is not available in this build",
         span,
     ))
 }
@@ -668,8 +668,8 @@ pub fn install() {
     register_evaluated_capability("clock-mono-raw", 0, observe_monotonic_nanoseconds);
     register_evaluated_capability("read-dir", 1, evaluate_read_dir);
     register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
-    register_evaluated_capability("read-file-utf8-raw", 1, evaluate_read_file_utf8_raw);
-    register_capability("write-file-bytes", evaluate_write_file_bytes);
+    register_evaluated_capability("читати-сирий-текст-файла", 1, evaluate_read_file_utf8_raw);
+    register_capability("записати-байти-файла", evaluate_write_file_bytes);
     register_capability("process-run-raw", process_raw::evaluate_process_run_raw);
     register_evaluated_capability("load", 1, evaluate_load);
     register_capability("tcp-connect", evaluate_tcp_connect);
@@ -736,8 +736,8 @@ mod install_tests {
             "clock-mono-raw",
             "read-dir",
             "read-file-bytes",
-            "read-file-utf8-raw",
-            "write-file-bytes",
+            "читати-сирий-текст-файла",
+            "записати-байти-файла",
             "process-run-raw",
             "load",
             "tcp-connect",
@@ -756,7 +756,7 @@ mod install_tests {
         super::install();
         let mut session = sens::Session::default();
         let error = sens::eval_program(
-            "(write-file-bytes 42 definitely-missing-order-probe)",
+            "(записати-байти-файла 42 definitely-missing-order-probe)",
             &mut session,
         )
         .expect_err("argument 0 type failure must short-circuit argument 1 evaluation");

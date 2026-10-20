@@ -4,8 +4,8 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/fs.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:1 form (010 (001 ())) is present as fallback
-  3. Reuses utf8-encode-string and read-file-utf8-raw / write-file-bytes
+  2. The fallback uses the ratified named D1 true value, not an encoded token
+  3. Reuses Ukrainian UTF-8 and raw filesystem capability projections
   4. Key fs surface present
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
@@ -22,13 +22,13 @@ ROOT = Path(__file__).resolve().parents[1]
 FS = ROOT / "lib" / "fs.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
+D1_TRUE = "(так"
 REQUIRED = (
-    "read-file",
-    "write-file",
-    "utf8-encode-string",
-    "read-file-utf8-raw",
-    "write-file-bytes",
+    "читати-файл",
+    "записати-файл",
+    "кодування-юнікод-8-кодувати-рядок",
+    "читати-сирий-текст-файла",
+    "записати-байти-файла",
 )
 
 
@@ -45,9 +45,15 @@ def check_fs() -> list[str]:
         errs.append(f"fs: host truthiness {m.group()!r} at offset {m.start()}")
     if D1_TRUE not in text:
         errs.append("fs: exact D1:1 form (010 (001 ())) missing")
+    if "#d1:1" in text:
+        errs.append("fs: encoded D1 literal is forbidden in primary source")
+    executable = "\n".join(line for line in text.splitlines()
+                             if not line.lstrip().startswith(";"))
+    if re.search(r"\(\s*[01]{3,9}(?=\s|\))", executable):
+        errs.append("fs: raw binary call head is forbidden in primary source")
     for fn in REQUIRED:
         if fn not in text:
-            errs.append(f"fs: required surface missing: {fn}")
+            errs.append(f"fs: required Ukrainian projection missing: {fn}")
     return errs
 
 
@@ -80,7 +86,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("FS: PASS — two-field COND, exact D1, utf8/fs-raw reuse")
+    print("FS: PASS — two-field COND, named D1, Ukrainian raw-capability calls")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")

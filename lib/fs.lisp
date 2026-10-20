@@ -26,13 +26,13 @@
          (друге декодоване))
         (так
          декодоване)))
-     (read-file-utf8-raw шлях))))
+     (читати-сирий-текст-файла шлях))))
 
 ; Historical write-file returns the text after successful write;
 ; encoding policy belongs to Lisp, host only persists bytes.
 (визначити записати-файл
   (функція (шлях текст)
-    (друге (список (write-file-bytes шлях (кодування-юнікод-8-кодувати-рядок текст)) текст))))
+    (друге (список (записати-байти-файла шлях (кодування-юнікод-8-кодувати-рядок текст)) текст))))
 
 ; Stable surface peers are projected by load_fs_library after the public
 ; file closures exist. Avoid the retired per-file post-core materializer.

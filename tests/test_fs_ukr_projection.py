@@ -74,7 +74,9 @@ def old_identity(node):
         if node == "так":
             return "#d1:1"
         return {"шлях": "path", "декодоване": "decoded", "текст": "text",
-                "читати-файл": "read-file", "записати-файл": "write-file"}.get(node, node)
+                "читати-файл": "read-file", "записати-файл": "write-file",
+                "читати-сирий-текст-файла": "read-file-utf8-raw",
+                "записати-байти-файла": "write-file-bytes"}.get(node, node)
     items = [old_identity(value) for value in node]
     if items and isinstance(items[0], str):
         reversed_peers = {value: key for key, value in REQUIRED.items()}
@@ -92,6 +94,8 @@ def source_to_previous(text: str) -> str:
             continue
         line = line.replace("(визначити читати-файл", "(визначити read-file")
         line = line.replace("(визначити записати-файл", "(визначити write-file")
+        line = line.replace("(читати-сирий-текст-файла ", "(read-file-utf8-raw ")
+        line = line.replace("(записати-байти-файла ", "(write-file-bytes ")
         line = re.sub(r"\(визначити(?=\s)", "(0011", line)
         line = re.sub(r"\(функція(?=\s)", "(0010", line)
         line = re.sub(r"\(так(?=\s|$)", "(#d1:1", line)
@@ -154,9 +158,13 @@ class FsUkrProjectionTests(unittest.TestCase):
 
     def test_host_io_boundary_and_public_ukr_names(self):
         for literal in ("(визначити читати-файл", "(визначити записати-файл",
-                        "(read-file-utf8-raw шлях)",
-                        "(write-file-bytes шлях (кодування-юнікод-8-кодувати-рядок текст))"):
+                        "(читати-сирий-текст-файла шлях)",
+                        "(записати-байти-файла шлях (кодування-юнікод-8-кодувати-рядок текст))"):
             self.assertIn(literal, self.source)
+        executable = "\\n".join(line for line in self.source.splitlines()
+                                 if not line.lstrip().startswith(";"))
+        self.assertNotIn("(read-file-utf8-raw ", executable)
+        self.assertNotIn("(write-file-bytes ", executable)
         verify(self.source)
 
     def test_negative_wrong_operation_or_d1_semantics(self):
@@ -164,7 +172,7 @@ class FsUkrProjectionTests(unittest.TestCase):
             self.source.replace("(тотожне?", "(сполучити", 1),
             self.source.replace("(так", "(ні", 1),
             self.source.replace("(визначити читати-файл", "(функція читати-файл", 1),
-            self.source.replace("read-file-utf8-raw", "read-file-bytes", 1),
+            self.source.replace("читати-сирий-текст-файла", "читати-файл-байти", 1),
         ):
             with self.assertRaises(AssertionError):
                 verify(changed)
@@ -173,8 +181,8 @@ class FsUkrProjectionTests(unittest.TestCase):
         for corrupted in (
             self.source.replace("(кодування-юнікод-8-кодувати-рядок текст)",
                                 "(кодування-юнікод-8-декодувати-рядок текст)", 1),
-            self.source.replace("(read-file-utf8-raw шлях)",
-                                "(read-file-utf8-raw текст)", 1),
+            self.source.replace("(читати-сирий-текст-файла шлях)",
+                                "(читати-сирий-текст-файла текст)", 1),
         ):
             with self.assertRaises(AssertionError):
                 verify(corrupted)
