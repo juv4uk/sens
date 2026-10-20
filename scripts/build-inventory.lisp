@@ -10,7 +10,7 @@
 ; and adds stable content-addressed IDs plus mechanically observed forms.
 ; Never hand-edit the generated file.
 
-(визначити fixtures (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
+(визначити приклади (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
 
 ;; ---- Helpers ----
 
@@ -145,9 +145,9 @@
 (друкувати (сполучити (як-є generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
 (друкувати (сполучити (як-є source) "tests/fixtures/conformance.lisp"))
 
-(вивести-всі fixtures)
+(вивести-всі приклади)
 
 (як-є ())
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити знайти-за-ключем assoc)
+(визначити знайти-за-ключем знайти-пару)
