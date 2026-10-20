@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Verify ratified D1–D9, W8 fail-closed and unpaired-only contract
+      - name: Перевірити чинні D1–D11, без SID8, лише непарні джерела
         run: python3 -m unittest discover -s tests -p test_migration_readiness_contract.py -v
       - name: Run migration readiness census
         run: |
