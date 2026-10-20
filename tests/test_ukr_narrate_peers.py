@@ -34,7 +34,7 @@ PRIMARY = (
 EXTERNAL_PEER = ("0010010110", "result-proper-list?", "результат-є-правильним-списком?")
 HISTORIC = tuple(en for _width, _bits, en, _ukr in PRIMARY)
 ВИЛУЧЕНІ_ПСЕВДОНІМИ = {
-    "provenance-goal", "provenance-source",
+    "narrate-fact", "provenance-goal", "provenance-source",
     "provenance-rule", "provenance-derived-from",
     "narrate-derivation", "narrate-provenance", "narrate-answer",
     "narrate-outcome", "narrate-proved-outcome", "narrate-invalid-outcome-shape",
@@ -172,13 +172,21 @@ class NarrateUkrPeerTests(unittest.TestCase):
         self.assertIn("пояснити-неприпустиму-структуру-результату", heads)
         self.assertIn("пояснити-результат-із-доказом", heads)
 
+    def test_no_english_define_aliases_remain(self):
+        self.assertFalse(
+            set(HISTORIC) & set(self.defs),
+            "англомовний DEFINE-дубль повернувся до активної бібліотеки",
+        )
+        self.assertEqual(set(self.defs) & {"пояснити-факт"}, {"пояснити-факт"})
+
     def test_negative_return_of_removed_alias_is_caught(self):
-        broken = self.src + "\n(визначити narrate-proved-outcome пояснити-факт)\n"
-        self.assertNotEqual(broken, self.src)
-        broken_defs = definitions(broken)
-        with self.assertRaisesRegex(AssertionError, "застарілий англійський псевдонім"):
-            if "narrate-proved-outcome" in broken_defs:
-                raise AssertionError("застарілий англійський псевдонім повернувся")
+        for legacy in ("narrate-fact", "narrate-proved-outcome"):
+            with self.subTest(legacy=legacy):
+                broken = self.src + f"\n(визначити {legacy} пояснити-факт)\n"
+                broken_defs = definitions(broken)
+                with self.assertRaisesRegex(AssertionError, "застарілий англійський псевдонім"):
+                    if legacy in broken_defs:
+                        raise AssertionError("застарілий англійський псевдонім повернувся")
 
     def test_malformed_forms_rejected(self):
         with self.assertRaisesRegex(ValueError, "незакритий"):
