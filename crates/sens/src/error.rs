@@ -137,6 +137,14 @@ impl fmt::Display for LanguageError {
 
 impl std::error::Error for LanguageError {}
 
+fn clamp_to_char_boundary(source: &str, offset: usize) -> usize {
+    let mut boundary = offset.min(source.len());
+    while !source.is_char_boundary(boundary) {
+        boundary -= 1;
+    }
+    boundary
+}
+
 impl LanguageError {
     /// 1-indexed (line, column) of the span's start, counted in chars (not
     /// bytes) so multi-byte UTF-8 source — Cyrillic identifiers included —
@@ -148,7 +156,7 @@ impl LanguageError {
     /// (nicht Bytes), damit mehrbyteiger UTF-8-Quellcode — auch kyrillische
     /// Bezeichner — visuell mit dem "^" in `render` übereinstimmt.
     pub fn line_col(&self, source: &str) -> (usize, usize) {
-        let offset = self.span.start.min(source.len());
+        let offset = clamp_to_char_boundary(source, self.span.start);
         let mut line = 1;
         let mut column = 1;
         for ch in source[..offset].chars() {
@@ -174,10 +182,9 @@ impl LanguageError {
     pub fn render(&self, source: &str) -> String {
         let (line, column) = self.line_col(source);
         let line_text = source.lines().nth(line - 1).unwrap_or("");
-        let span_chars = source[self.span.start.min(source.len())..self.span.end.min(source.len())]
-            .chars()
-            .count()
-            .max(1);
+        let span_start = clamp_to_char_boundary(source, self.span.start);
+        let span_end = clamp_to_char_boundary(source, self.span.end).max(span_start);
+        let span_chars = source[span_start..span_end].chars().count().max(1);
         let gutter = format!("{line}");
         let indent = " ".repeat(gutter.len());
         let caret = " ".repeat(column.saturating_sub(1)) + &"^".repeat(span_chars);
