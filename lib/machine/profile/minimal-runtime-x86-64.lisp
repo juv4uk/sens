@@ -16,65 +16,65 @@
     ((materialize-value
        mov-r64-imm64
        required-for-minimal-runtime
-       "materialize bounded u64 pair fields")
+       "підготувати поля пари з обмеженими 64-бітними беззнаковими значеннями")
      (store-pair-field
        mov-mem-disp8-r64
        required-for-minimal-runtime
-       "store bounded pair head/tail into the host-provided arena")
+       "записати перший елемент і решту пари в область пам'яті, надану виконавцем")
      (load-pair-field
        mov-r64-mem-disp8
        required-for-minimal-runtime
-       "load the CAR field from the bounded pair")
+       "прочитати перший елемент обмеженої пари")
      (return-result
        ret
        required-for-minimal-runtime
-       "return the bounded result through the host ABI"))))
+       "повернути обмежений результат через двійковий інтерфейс виконавця"))))
 
 (визначити мінімальна-машина-рівність-умова-залежності
   (як-є
     ((materialize-value
        mov-r64-imm64
        required-for-minimal-runtime
-       "materialize bounded u64 predicate operands and selected-arm values")
+       "підготувати 64-бітні операнди предиката й значення обох гілок вибору")
      (compare-equality
        cmp-r64-r64
        required-for-minimal-runtime
-       "produce the equality condition required by the bounded EQ predicate")
+       "обчислити умову тотожності для обмеженого предиката EQ")
      (branch-on-false
        jnz-rel8
        required-for-minimal-runtime
-       "select the ELSE arm when the bounded equality predicate is false")
+       "вибрати альтернативну гілку, коли умова тотожності хибна")
      (return-selected-result
        ret
        required-for-minimal-runtime
-       "return the selected bounded result through the guest ABI"))))
+       "повернути вибраний обмежений результат через двійковий інтерфейс програми"))))
 
 (визначити мінімальна-машина-рівність-умова-пара-залежності
   (як-є
     ((materialize-values
        mov-r64-imm64
        required-for-minimal-runtime
-       "materialize bounded EQ operands and branch-local pair fields, including r8-r11")
+       "підготувати обмежені операнди EQ та поля пар кожної гілки, зокрема в регістрах r8–r11")
      (compare-equality
        cmp-r64-r64
        required-for-minimal-runtime
-       "produce the equality condition required by the bounded EQ predicate")
+       "обчислити умову тотожності для обмеженого предиката EQ")
      (branch-on-false
        jnz-rel8
        required-for-minimal-runtime
-       "select the ELSE structural arm when bounded equality is false")
+       "вибрати структурну альтернативну гілку, коли тотожність хибна")
      (store-pair-field
        mov-mem-disp8-r64
        required-for-minimal-runtime
-       "store the selected branch pair into the native-call arena")
+       "зберегти пару вибраної гілки в області пам'яті машинного виклику")
      (load-pair-car
        mov-r64-mem-disp8
        required-for-minimal-runtime
-       "load the selected branch CAR result from the bounded pair")
+       "прочитати перший елемент пари вибраної гілки")
      (return-result
        ret
        required-for-minimal-runtime
-       "return the selected structural result through the guest ABI"))))
+       "повернути вибраний структурний результат через двійковий інтерфейс програми"))))
 
 (визначити мінімальна-машина-містить-сімейство?
   (функція (сімейство сімейства)
