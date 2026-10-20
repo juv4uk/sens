@@ -207,11 +207,14 @@ class GuardProjectionTests(unittest.TestCase):
         self.assertIn("(0 (ук ні) (укр ні)", d1)
         self.assertIn("(1 (ук так) (укр так)", d1)
 
-    def test_no_authority_for_unratified_helpers_was_invented(self):
-        for name in ["guard-unknown", "guard-compare", "guard-reference-field",
-                     "захист-мова-дозволена?", "guard-language-decision"]:
+    def test_ukrainian_language_policy_is_primary_not_legacy_alias(self):
+        # Політика мовних ролей виконується українськими визначеннями.
+        for name in ("захист-мова-дозволена?", "захист-мовне-рішення"):
             with self.subTest(name=name):
                 self.assertIn("(визначити " + name + "\n", self.text)
+        self.assertIn("(захист-мова-дозволена? мова роль)", self.text)
+        self.assertNotIn("(визначити guard-language-decision", self.text)
+        # Не припускаємо D9-ратифікацію лише з локального імені функції.
         self.assertIn("(визначити захист-синхронізувати-вікно guard-sync-window)",
                       self.text)
 
