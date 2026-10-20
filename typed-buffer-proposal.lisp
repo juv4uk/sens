@@ -1,5 +1,7 @@
-; Machine-readable summary of docs/PROPOSAL-TYPED-NUMERIC-BUFFERS.md.
-; Machine-readable summary of the ratified language contract 2.2 boundary.
+; Машинно-читаний підсумок docs/PROPOSAL-TYPED-NUMERIC-BUFFERS.md.
+; Межі типізованих числових буферів визначає ратифікований контракт мови 2.2.
+; Назви полів нижче належать формату даних; їх не перекладаємо
+; без окремої міграції схеми та всіх її споживачів.
 
 ((kind . typed-numeric-buffer-proposal)
  (version . (0 1))
