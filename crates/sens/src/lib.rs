@@ -267,7 +267,8 @@ pub use text7_projection::{
 };
 
 pub use binary_execution::{
-    eval_t5_program, eval_e1_program, PhysicalT5Program, T5ExecutionError, E1ExecutionError,
+    eval_t5_program, eval_e1_program, ExactDomainWord, PhysicalT5Program, T5ExecutionError,
+    E1ExecutionError,
 };
 
 pub use eval::exact_arity;

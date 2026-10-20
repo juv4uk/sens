@@ -5,9 +5,9 @@
 //! machine-code claim is constructed by this adapter.
 
 use crate::{
-    BinarySourceWord, decode_ternary_words, eval_lowered_expressions,
+    decode_ternary_words,
     eval::{lower::lower_exact_domain_program, validate_exact_executable_heads},
-    ternary_transport::parse_t5_domain_words, EvalResult, Expr,
+    eval_lowered_expressions, BinaryNumber, BinarySourceWord, DomainIdentity, EvalResult, Expr,
     LanguageError, Session, TernaryTransportError,
 };
 
@@ -16,6 +16,28 @@ use crate::{
 pub enum T5ExecutionError {
     Transport(TernaryTransportError),
     Language(LanguageError),
+}
+
+/// SENS-owned word after physical T5M restoration. Identity is explicit:
+/// exact domain words are not inferred from payload width, and D24+ numbers
+/// retain their numeric-domain qualification.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum ExactDomainWord {
+    Identity(DomainIdentity),
+    Number(BinaryNumber),
+}
+
+impl ExactDomainWord {
+    pub fn identity(identity: DomainIdentity) -> Self {
+        Self::Identity(identity)
+    }
+
+    pub fn number(number: BinaryNumber) -> Result<Self, &'static str> {
+        if number.numeric_domain_width().is_none() || number.exact_numeric_domain_bits().is_none() {
+            return Err("T5M number must retain an exact D24+ identity and exact-width bits");
+        }
+        Ok(Self::Number(number))
+    }
 }
 
 /// Canonically validated physical T5 program, stored as the current lowered AST.
@@ -44,7 +66,19 @@ impl PhysicalT5Program {
     /// entry performs canonical SENS D2 reading and callable admission only.
     /// No text, re-encoding, hidden Rust T5 decoding or historical dispatch.
     pub fn from_exact_words(words: &[BinarySourceWord]) -> Result<Self, LanguageError> {
-        let parsed = parse_t5_domain_words(words)?;
+        let exact = words
+            .iter()
+            .copied()
+            .map(|word| ExactDomainWord::Identity(DomainIdentity::from_source_word(word)))
+            .collect::<Vec<_>>();
+        Self::from_exact_domain_words(&exact)
+    }
+
+    /// Build an executable SENS program from words already restored by a
+    /// physical carrier such as Zig T5M. This reader accepts only explicit
+    /// domain identities plus explicitly qualified D24+ numbers.
+    pub fn from_exact_domain_words(words: &[ExactDomainWord]) -> Result<Self, LanguageError> {
+        let parsed = parse_exact_domain_words(words)?;
         let forms = lower_exact_domain_program(&parsed);
         validate_exact_executable_heads(&forms)?;
         Ok(Self { forms })
@@ -55,6 +89,13 @@ impl PhysicalT5Program {
         self.forms.len()
     }
 
+    /// Exact SENS AST reconstructed from the supplied domain-qualified words.
+    /// This is a read-only witness for hosts that need SENS-owned meta-eval;
+    /// callers still use `execute` or their explicitly selected evaluator.
+    pub fn forms(&self) -> &[Expr] {
+        &self.forms
+    }
+
     /// Execute decoded forms in an explicitly supplied interpreter session.
     ///
     /// The program does not retain a mutable runtime between calls. Bootstrap,
@@ -62,6 +103,144 @@ impl PhysicalT5Program {
     pub fn execute(&self, session: &mut Session) -> Result<EvalResult, LanguageError> {
         eval_lowered_expressions(&self.forms, session)
     }
+}
+
+fn parse_exact_domain_words(words: &[ExactDomainWord]) -> Result<Vec<Expr>, LanguageError> {
+    use crate::{DomainIdentity::D2, ErrorKind};
+    const OPEN: u8 = 0b10;
+    const CLOSE: u8 = 0b01;
+    const SEPARATOR: u8 = 0b00;
+    const DOT: u8 = 0b11;
+
+    fn d2(word: &ExactDomainWord, bits: u8) -> bool {
+        matches!(word, ExactDomainWord::Identity(D2(value)) if value.word().packed_bits() == bits)
+    }
+    fn error(message: &'static str, index: usize) -> LanguageError {
+        LanguageError::new(
+            ErrorKind::Parse,
+            message,
+            crate::Span {
+                start: index,
+                end: index + 1,
+            },
+        )
+    }
+    fn parse_expr(
+        words: &[ExactDomainWord],
+        cursor: &mut usize,
+        depth: usize,
+    ) -> Result<Expr, LanguageError> {
+        let index = *cursor;
+        let word = words
+            .get(index)
+            .ok_or_else(|| error("expected an exact SENS domain word", index))?;
+        if depth > 768 {
+            return Err(error("exact D2 nesting exceeds AST depth limit", index));
+        }
+        if d2(word, OPEN) {
+            return parse_list(words, cursor, depth + 1);
+        }
+        if matches!(word, ExactDomainWord::Identity(D2(_))) {
+            return Err(error(
+                "D2 control word is not valid in expression position",
+                index,
+            ));
+        }
+        *cursor += 1;
+        let kind = match word {
+            ExactDomainWord::Identity(DomainIdentity::D3(value))
+                if value.word().packed_bits() == 0 =>
+            {
+                crate::ExprKind::List(std::rc::Rc::from(Vec::<Expr>::new().into_boxed_slice()))
+            }
+            ExactDomainWord::Identity(identity) => crate::ExprKind::DomainIdentity(*identity),
+            ExactDomainWord::Number(number) => crate::ExprKind::BinaryNumber(number.clone()),
+        };
+        Ok(Expr {
+            kind,
+            span: crate::Span {
+                start: index,
+                end: *cursor,
+            },
+        })
+    }
+    fn parse_list(
+        words: &[ExactDomainWord],
+        cursor: &mut usize,
+        depth: usize,
+    ) -> Result<Expr, LanguageError> {
+        let start = *cursor;
+        *cursor += 1;
+        let mut items = Vec::new();
+        loop {
+            while words.get(*cursor).is_some_and(|word| d2(word, SEPARATOR)) {
+                *cursor += 1;
+            }
+            let Some(word) = words.get(*cursor) else {
+                return Err(error("unterminated exact D2 structure", start));
+            };
+            if d2(word, CLOSE) {
+                *cursor += 1;
+                return Ok(Expr {
+                    kind: crate::ExprKind::List(std::rc::Rc::from(items.into_boxed_slice())),
+                    span: crate::Span {
+                        start,
+                        end: *cursor,
+                    },
+                });
+            }
+            if d2(word, DOT) {
+                if items.is_empty() {
+                    return Err(error("D2 dot requires a pair head", *cursor));
+                }
+                *cursor += 1;
+                while words.get(*cursor).is_some_and(|word| d2(word, SEPARATOR)) {
+                    *cursor += 1;
+                }
+                let tail = parse_expr(words, cursor, depth + 1)?;
+                while words.get(*cursor).is_some_and(|word| d2(word, SEPARATOR)) {
+                    *cursor += 1;
+                }
+                if !words.get(*cursor).is_some_and(|word| d2(word, CLOSE)) {
+                    return Err(error(
+                        "dotted D2 structure requires one tail and a close word",
+                        *cursor,
+                    ));
+                }
+                *cursor += 1;
+                let mut result = tail;
+                for head in items.into_iter().rev() {
+                    result = Expr {
+                        kind: crate::ExprKind::Pair(
+                            std::rc::Rc::new(head),
+                            std::rc::Rc::new(result),
+                        ),
+                        span: crate::Span {
+                            start,
+                            end: *cursor,
+                        },
+                    };
+                }
+                return Ok(result);
+            }
+            items.push(parse_expr(words, cursor, depth + 1)?);
+        }
+    }
+
+    if words.is_empty() {
+        return Err(error("T5M SENS program has no exact words", 0));
+    }
+    let mut cursor = 0;
+    let mut forms = Vec::new();
+    while cursor < words.len() {
+        while words.get(cursor).is_some_and(|word| d2(word, SEPARATOR)) {
+            cursor += 1;
+        }
+        if cursor < words.len() {
+            forms.push(parse_expr(words, &mut cursor, 0)?);
+        }
+    }
+    Ok(forms)
 }
 
 /// E1 is a physical carrier, not another semantic evaluator.
@@ -77,10 +256,9 @@ pub fn eval_e1_program(
     physical_e1: &[u8],
     session: &mut Session,
 ) -> Result<EvalResult, E1ExecutionError> {
-    let words = crate::envelope_e1::decode(physical_e1)
-        .map_err(E1ExecutionError::Transport)?;
-    let program = PhysicalT5Program::from_exact_words(&words)
-        .map_err(E1ExecutionError::Language)?;
+    let words = crate::envelope_e1::decode(physical_e1).map_err(E1ExecutionError::Transport)?;
+    let program =
+        PhysicalT5Program::from_exact_words(&words).map_err(E1ExecutionError::Language)?;
     program.execute(session).map_err(E1ExecutionError::Language)
 }
 
@@ -96,11 +274,46 @@ pub fn eval_t5_program(
     program.execute(session).map_err(T5ExecutionError::Language)
 }
 
-
 #[cfg(test)]
 mod exact_t5_cutover_tests {
     use super::*;
     use crate::{encode_ternary_words, parse_binary_source_words, ExprKind};
+
+    #[test]
+    fn zig_restored_exact_t5m_d24_words_execute_as_binary_sens() {
+        let identity = |width, bits| {
+            ExactDomainWord::identity(DomainIdentity::from_coordinate(
+                crate::domain_ladder::DomainCoordinate::new(width, bits).unwrap(),
+            ))
+        };
+        let number = |value| {
+            let mut bits = vec![0; 24];
+            bits[23] = 1;
+            if value == 2 {
+                bits[22] = 1;
+                bits[23] = 0;
+            }
+            ExactDomainWord::number(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
+                .unwrap()
+        };
+        let program = PhysicalT5Program::from_exact_domain_words(&[
+            identity(2, 0b10),
+            identity(5, 0b01010),
+            number(1),
+            number(2),
+            identity(2, 0b01),
+        ])
+        .expect("D2 structure + admitted D5 head + exact D24 leaves");
+
+        let result = program
+            .execute(&mut Session::default())
+            .expect("the binary SENS evaluator executes the restored words");
+        let crate::Value::BinaryNumber(number) = &result.value else {
+            panic!("D5 addition of two D24 values returns an exact D24 number");
+        };
+        assert_eq!(number.numeric_domain_width(), Some(24));
+        assert_eq!(number.to_decimal_string(), "3");
+    }
 
     fn physical(source: &str) -> Vec<u8> {
         let words = parse_binary_source_words(source)
@@ -125,7 +338,9 @@ mod exact_t5_cutover_tests {
         ));
         // Syntax/transport proof only. The meaning of QUOTE is judged by
         // the binary SENS selftest below, never by a Rust expected value.
-        let output = program.execute(&mut Session::default()).expect("pure D3 quote");
+        let output = program
+            .execute(&mut Session::default())
+            .expect("pure D3 quote");
         assert!(output.output.is_empty());
     }
 
@@ -134,9 +349,14 @@ mod exact_t5_cutover_tests {
         // Equal payloads in D1, D3 and D9 have DISTINCT identities; the
         // higher D9 bit must not be truncated into a historical W8 byte.
         let words = ["1", "001", "000000001", "100000001"];
-        let codes = words.iter().map(|source| physical(source)).collect::<Vec<_>>();
-        assert!(codes.iter().enumerate().all(|(i, x)|
-            codes.iter().enumerate().all(|(j, y)| i == j || x != y)));
+        let codes = words
+            .iter()
+            .map(|source| physical(source))
+            .collect::<Vec<_>>();
+        assert!(codes
+            .iter()
+            .enumerate()
+            .all(|(i, x)| codes.iter().enumerate().all(|(j, y)| i == j || x != y)));
         let mut widths = Vec::new();
         for physical in codes {
             let decoded = decode_ternary_words(&physical).unwrap();
@@ -151,7 +371,10 @@ mod exact_t5_cutover_tests {
     #[test]
     fn physical_t5_rejects_d2_as_data_before_any_side_effect() {
         let raw = parse_binary_source_words("01")
-            .unwrap().into_iter().map(|x| x.word).collect::<Vec<_>>();
+            .unwrap()
+            .into_iter()
+            .map(|x| x.word)
+            .collect::<Vec<_>>();
         let physical = encode_ternary_words(&raw).unwrap();
         assert!(matches!(
             PhysicalT5Program::decode(&physical),
@@ -190,7 +413,10 @@ mod exact_t5_cutover_tests {
                 if width == 10 {
                     // The current D1-D9 *execution* reader MUST NOT
                     // silently infer D10 callability from physical data.
-                    assert!(decode_ternary_words(&physical).is_err(), "D10={payload} is not callable");
+                    assert!(
+                        decode_ternary_words(&physical).is_err(),
+                        "D10={payload} is not callable"
+                    );
                 }
                 semantic_bits += usize::from(width);
                 count += 1;

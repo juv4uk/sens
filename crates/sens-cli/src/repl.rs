@@ -4,13 +4,13 @@
 
 mod surface_catalog;
 
-use sens::{
-    eval_parsed_expressions_incremental, eval_program, parse, render_error_for_presentation,
-    render_value_for_presentation, Environment, ErrorKind, ExprKind, PresentationLanguage, Session,
-    Value,
-};
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
+use sens::{
+    eval_program, render_value_for_presentation, BinaryNumber, CoreDomainIdentity, DomainIdentity,
+    Environment, ExactDomainWord, Expr, ExprKind, PhysicalT5Program, PresentationLanguage, Session,
+    Value,
+};
 use std::env;
 use std::path::PathBuf;
 use std::process;
@@ -26,18 +26,25 @@ unsafe extern "C" {
 }
 #[cfg(feature = "zig-transport")]
 fn repl_zig_source(
-    copy: unsafe extern "C" fn(*mut u8, usize) -> isize, label: &str,
+    copy: unsafe extern "C" fn(*mut u8, usize) -> isize,
+    label: &str,
 ) -> Result<String, String> {
     if unsafe { sens_zig_codec_abi_version() } != 2 {
         return Err(format!("{label}: Zig ABI version mismatch"));
     }
     let n = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
-    if n <= 0 { return Err(format!("{label}: invalid Zig byte length {n}")); }
+    if n <= 0 {
+        return Err(format!("{label}: invalid Zig byte length {n}"));
+    }
     let len = usize::try_from(n).map_err(|_| format!("{label}: Zig length overflow"))?;
-    if len > 8 * 1024 * 1024 { return Err(format!("{label}: host byte bound exceeded")); }
+    if len > 8 * 1024 * 1024 {
+        return Err(format!("{label}: host byte bound exceeded"));
+    }
     let mut bytes = vec![0u8; len];
     let got = unsafe { copy(bytes.as_mut_ptr(), len) };
-    if got != n { return Err(format!("{label}: Zig exact copy rejected {got}")); }
+    if got != n {
+        return Err(format!("{label}: Zig exact copy rejected {got}"));
+    }
     String::from_utf8(bytes).map_err(|err| format!("{label}: UTF-8 source error {err}"))
 }
 // No Rust include_str! of SENS project source. Zig owns byte transport.
@@ -45,9 +52,21 @@ fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String>
     #[cfg(feature = "zig-transport")]
     {
         Ok(vec![
-            ("persistent-vector.lisp", repl_zig_source(sens_zig_repl_persistent_vector_bytes_copy, "ZIG_REPL_PERSISTENT_VECTOR")?),
-            ("time.lisp", repl_zig_source(sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")?),
-            ("epistemic.lisp", repl_zig_source(sens_zig_repl_epistemic_bytes_copy, "ZIG_REPL_EPISTEMIC")?),
+            (
+                "persistent-vector.lisp",
+                repl_zig_source(
+                    sens_zig_repl_persistent_vector_bytes_copy,
+                    "ZIG_REPL_PERSISTENT_VECTOR",
+                )?,
+            ),
+            (
+                "time.lisp",
+                repl_zig_source(sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")?,
+            ),
+            (
+                "epistemic.lisp",
+                repl_zig_source(sens_zig_repl_epistemic_bytes_copy, "ZIG_REPL_EPISTEMIC")?,
+            ),
         ])
     }
     #[cfg(not(feature = "zig-transport"))]
@@ -61,8 +80,358 @@ fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String>
 // it never interprets the pair. This is the `--sens-loop` mode's only state.
 const SENS_LOOP_STATE: &str = "--sens-loop-стан--";
 
-fn escape_lisp_string(input: &str) -> String {
-    input.replace('\\', "\\\\").replace('"', "\\\"")
+fn t5m_domain_identity(width: usize, bits: u16) -> Result<DomainIdentity, String> {
+    let width = u8::try_from(width).map_err(|_| "T5M domain width exceeds u8")?;
+    let coordinate = sens::domain_ladder::DomainCoordinate::new(width, bits)
+        .ok_or_else(|| format!("invalid exact D{width} coordinate {bits}"))?;
+    Ok(DomainIdentity::from_coordinate(coordinate))
+}
+
+fn t5m_surface_layout(surface: ReplSurface) -> sens::Text7Layout {
+    match surface {
+        ReplSurface::Core | ReplSurface::English => sens::Text7Layout::En,
+        ReplSurface::Ukrainian | ReplSurface::UkrainianFull => sens::Text7Layout::Uk,
+        ReplSurface::Sanskrit => sens::Text7Layout::SaDeva,
+    }
+}
+
+fn append_t5m_expression(
+    expression: &Expr,
+    layout: sens::Text7Layout,
+    words: &mut Vec<ExactDomainWord>,
+    depth: usize,
+) -> Result<(), String> {
+    if depth > 768 {
+        return Err("T5M source AST exceeds the SENS nesting limit".into());
+    }
+    let control = |bits| t5m_domain_identity(2, bits).map(ExactDomainWord::Identity);
+    match &expression.kind {
+        ExprKind::DomainCall(identity, arguments) => {
+            words.push(control(0b10)?);
+            words.push(ExactDomainWord::Identity(DomainIdentity::from(*identity)));
+            for argument in arguments.iter() {
+                append_t5m_expression(argument, layout, words, depth + 1)?;
+            }
+            words.push(control(0b01)?);
+        }
+        ExprKind::DomainIdentity(identity) => {
+            if matches!(identity, DomainIdentity::D2(_)) {
+                return Err(
+                    "D2 identity is structural and cannot be a standalone T5M value".into(),
+                );
+            }
+            words.push(ExactDomainWord::Identity(*identity));
+        }
+        ExprKind::BinaryNumber(number) => {
+            words.push(ExactDomainWord::number(number.clone()).map_err(str::to_owned)?);
+        }
+        ExprKind::List(items) if items.is_empty() => {
+            words.push(ExactDomainWord::Identity(t5m_domain_identity(3, 0)?));
+        }
+        ExprKind::List(items) => {
+            words.push(control(0b10)?);
+            for item in items.iter() {
+                append_t5m_expression(item, layout, words, depth + 1)?;
+            }
+            words.push(control(0b01)?);
+        }
+        ExprKind::Pair(head, tail) => {
+            words.push(control(0b10)?);
+            append_t5m_expression(head, layout, words, depth + 1)?;
+            words.push(control(0b11)?);
+            append_t5m_expression(tail, layout, words, depth + 1)?;
+            words.push(control(0b01)?);
+        }
+        ExprKind::Symbol(name) => {
+            let text = sens::encode_text7(name, layout)
+                .map_err(|error| format!("T5M identifier projection: {error}"))?;
+            words.push(control(0b10)?);
+            for cell in text.cells() {
+                words.push(ExactDomainWord::Identity(t5m_domain_identity(
+                    7,
+                    u16::from(*cell),
+                )?));
+            }
+            words.push(control(0b01)?);
+        }
+        ExprKind::Number(..) => {
+            return Err("T5M requires exact source projection to D24+ before transport".into())
+        }
+        ExprKind::Rational(value) => {
+            let spelling = value.to_string();
+            let (numerator, denominator) = spelling
+                .split_once('/')
+                .map_or((spelling.as_str(), "1"), |parts| parts);
+            let numerator = exact_integer_source_word(numerator)?;
+            let denominator = exact_integer_source_word(denominator)?;
+            let quotient = exact_d5_surface("частка")?;
+            let ratio = Expr {
+                kind: ExprKind::DomainCall(quotient, vec![numerator, denominator].into()),
+                span: expression.span,
+            };
+            append_t5m_expression(&ratio, layout, words, depth + 1)?;
+        }
+        ExprKind::String(..) => {
+            return Err(
+                "T5M string values have no admitted exact D7 projection in this REPL path".into(),
+            )
+        }
+        ExprKind::NumericBuffer(..) => {
+            return Err("T5M REPL has no admitted NumericBuffer source form".into())
+        }
+        ExprKind::Call(..) | ExprKind::Sid(..) => {
+            return Err("T5M rejects historical SID8/SENS8 call nodes".into())
+        }
+        ExprKind::Local { .. } => {
+            return Err("T5M REPL cannot transport an unresolved lexical slot".into())
+        }
+    }
+    Ok(())
+}
+
+fn exact_integer_source_word(source: &str) -> Result<Expr, String> {
+    let forms = sens::parse_mixed_exact_domain(source).map_err(|error| error.render(source))?;
+    match forms.as_slice() {
+        [expression @ Expr {
+            kind: ExprKind::BinaryNumber(_),
+            ..
+        }] => Ok(expression.clone()),
+        _ => Err(format!(
+            "T5M exact ratio component did not lower to D24+: {source}"
+        )),
+    }
+}
+
+fn exact_t5m_carrier_words(
+    words: &[ExactDomainWord],
+) -> Result<Vec<crate::zig_transport::ExactT5Word>, String> {
+    words
+        .iter()
+        .map(|word| match word {
+            ExactDomainWord::Identity(identity) => {
+                let width = identity.width();
+                let bits = (0..width)
+                    .rev()
+                    .map(|shift| ((identity.packed_bits() >> shift) & 1) as u8)
+                    .collect();
+                crate::zig_transport::ExactT5Word::new(width, bits)
+            }
+            ExactDomainWord::Number(number) => {
+                let width = number
+                    .numeric_domain_width()
+                    .ok_or("T5M number lost its D24+ identity")?;
+                crate::zig_transport::ExactT5Word::new(
+                    width,
+                    number
+                        .exact_numeric_domain_bits()
+                        .ok_or("T5M number has no exact bits")?,
+                )
+            }
+        })
+        .collect()
+}
+
+fn restore_t5m_words(
+    expected: &[ExactDomainWord],
+    restored: &[crate::zig_transport::ExactT5Word],
+) -> Result<Vec<ExactDomainWord>, String> {
+    if expected.len() != restored.len() {
+        return Err(format!(
+            "T5M_WORD_MISMATCH expected={} restored={}",
+            expected.len(),
+            restored.len()
+        ));
+    }
+    expected
+        .iter()
+        .zip(restored)
+        .enumerate()
+        .map(|(index, (expected, actual))| {
+            let (width, bits) = match expected {
+                ExactDomainWord::Identity(identity) => {
+                    let width = identity.width();
+                    let bits = (0..width)
+                        .rev()
+                        .map(|shift| ((identity.packed_bits() >> shift) & 1) as u8)
+                        .collect::<Vec<_>>();
+                    (width, bits)
+                }
+                ExactDomainWord::Number(number) => (
+                    number
+                        .numeric_domain_width()
+                        .ok_or("T5M number lost its D24+ identity")?,
+                    number
+                        .exact_numeric_domain_bits()
+                        .ok_or("T5M number has no exact bits")?,
+                ),
+            };
+            if actual.width != width || actual.bits != bits {
+                return Err(format!(
+                    "T5M_WORD_MISMATCH index={index} expected_width={width} actual_width={}",
+                    actual.width
+                ));
+            }
+            match expected {
+                ExactDomainWord::Identity(identity) => Ok(ExactDomainWord::Identity(*identity)),
+                ExactDomainWord::Number(_) => Ok(ExactDomainWord::Number(
+                    BinaryNumber::from_numeric_domain_bits(width, &actual.bits).ok_or_else(
+                        || format!("T5M returned invalid D{width}+ numeric bits at word {index}"),
+                    )?,
+                )),
+            }
+        })
+        .collect()
+}
+
+#[cfg(feature = "zig-transport")]
+fn t5m_roundtrip_words(words: &[ExactDomainWord]) -> Result<Vec<ExactDomainWord>, String> {
+    let carrier = exact_t5m_carrier_words(words)?;
+    let physical = crate::zig_transport::encode_t5_exact_words(&carrier)?;
+    let decoded = crate::zig_transport::decode_t5_exact_words(&physical)?;
+    restore_t5m_words(words, &decoded)
+}
+
+#[cfg(not(feature = "zig-transport"))]
+fn t5m_roundtrip_words(_words: &[ExactDomainWord]) -> Result<Vec<ExactDomainWord>, String> {
+    Err("RUST_ZIG_ONLY: REPL requires the Zig T5M transport; no Rust fallback".into())
+}
+
+fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
+    match value {
+        Value::Nil => Ok(vec![ExactDomainWord::Identity(t5m_domain_identity(3, 0)?)]),
+        Value::DomainIdentity(identity) if !matches!(identity, DomainIdentity::D2(_)) => {
+            Ok(vec![ExactDomainWord::Identity(*identity)])
+        }
+        Value::BinaryNumber(number) => Ok(vec![
+            ExactDomainWord::number(number.clone()).map_err(str::to_owned)?
+        ]),
+        Value::NumericComposition(composition) => {
+            let (negative, numerator, denominator) = composition.as_parts();
+            let quotient = exact_d5_surface("частка")?;
+            let difference = exact_d5_surface("відняти")?;
+            let mut expression = if let Some(denominator) = denominator {
+                Expr {
+                    kind: ExprKind::DomainCall(
+                        quotient,
+                        vec![
+                            Expr {
+                                kind: ExprKind::BinaryNumber(numerator.clone()),
+                                span: Default::default(),
+                            },
+                            Expr {
+                                kind: ExprKind::BinaryNumber(denominator.clone()),
+                                span: Default::default(),
+                            },
+                        ]
+                        .into(),
+                    ),
+                    span: Default::default(),
+                }
+            } else {
+                Expr {
+                    kind: ExprKind::BinaryNumber(numerator.clone()),
+                    span: Default::default(),
+                }
+            };
+            if negative {
+                let zero = BinaryNumber::from_numeric_domain_bits(24, &[0; 24])
+                    .ok_or("could not form exact D24+ zero for NEG result")?;
+                expression = Expr {
+                    kind: ExprKind::DomainCall(
+                        difference,
+                        vec![
+                            Expr {
+                                kind: ExprKind::BinaryNumber(zero),
+                                span: Default::default(),
+                            },
+                            expression,
+                        ]
+                        .into(),
+                    ),
+                    span: Default::default(),
+                };
+            }
+            let mut words = Vec::new();
+            append_t5m_expression(&expression, sens::Text7Layout::Uk, &mut words, 0)?;
+            Ok(words)
+        }
+        other => Err(format!(
+            "T5M_RESULT_UNSUPPORTED value={}",
+            match other {
+                Value::Nil => "Nil",
+                Value::Bool(_) => "Bool",
+                Value::Number(..) => "Number",
+                Value::Rational(_) => "Rational",
+                Value::BinaryNumber(_) => "BinaryNumber",
+                Value::NumericComposition(_) => "NumericComposition",
+                Value::Sid(_) => "legacy SID",
+                Value::DomainIdentity(_) => "DomainIdentity",
+                Value::String(_) => "String",
+                Value::Text7(_) => "Text7",
+                Value::Symbol(_) => "Symbol",
+                Value::Pair(..) => "Pair",
+                Value::Closure(_) => "Closure",
+                Value::Macro(_) => "Macro",
+                Value::Builtin(_) => "Builtin",
+                Value::HostHandle { .. } => "HostHandle",
+                Value::Vector(_) => "Vector",
+                Value::NumericBuffer(_) => "NumericBuffer",
+                Value::TcpConnection(_) => "TcpConnection",
+                Value::TcpListener(_) => "TcpListener",
+            }
+        )),
+    }
+}
+
+fn exact_d5_surface(surface: &str) -> Result<CoreDomainIdentity, String> {
+    sens::semantic_registry_export::admitted_core_domain_for_surface(surface)
+        .filter(|identity| identity.width() == 5)
+        .ok_or_else(|| format!("SENS surface {surface} does not resolve to a current D5 mechanism"))
+}
+
+fn roundtrip_repl_result(value: Value) -> Result<Value, String> {
+    let source_words = result_t5m_words(&value)?;
+    let restored_words = t5m_roundtrip_words(&source_words)?;
+    let program = PhysicalT5Program::from_exact_domain_words(&restored_words)
+        .map_err(|error| format!("SENS result reader: {error:?}"))?;
+    let output = program
+        .execute(&mut Session::default())
+        .map_err(|error| format!("SENS result evaluator: {}", error.render("<T5M result>")))?
+        .value;
+    if output != value {
+        return Err(format!(
+            "T5M_RESULT_MISMATCH expected={value} actual={output}"
+        ));
+    }
+    Ok(output)
+}
+
+fn prepare_t5m_repl_program(line: &str, surface: ReplSurface) -> Result<PhysicalT5Program, String> {
+    let expressions = sens::parse_mixed_exact_domain(line).map_err(|error| error.render(line))?;
+    if expressions.is_empty() {
+        return Err("T5M_REPL_EMPTY: no SENS form".into());
+    }
+    let mut words = Vec::new();
+    for expression in &expressions {
+        append_t5m_expression(expression, t5m_surface_layout(surface), &mut words, 0)?;
+    }
+    let restored = t5m_roundtrip_words(&words)?;
+    let program = PhysicalT5Program::from_exact_domain_words(&restored)
+        .map_err(|error| format!("SENS binary reader: {error:?}"))?;
+    Ok(program)
+}
+
+fn eval_t5m_repl_line(
+    line: &str,
+    session: &mut Session,
+    surface: ReplSurface,
+) -> Result<sens::EvalResult, String> {
+    let program = prepare_t5m_repl_program(line, surface)?;
+    let mut result = program
+        .execute(session)
+        .map_err(|error| format!("SENS binary evaluator: {}", error.render(line)))?;
+    result.value = roundtrip_repl_result(result.value)?;
+    Ok(result)
 }
 
 /// Initialise the SENS loop from `repl-core` (`репл-почати`).
@@ -83,24 +452,12 @@ fn init_sens_loop(session: &mut Session) -> Result<(), String> {
     })
 }
 
-/// One SENS-owned REPL step: thread the meta-environment through
-/// `репл-крок` → `обчислити-верхню-форму`. Returns the SENS value (остання-форма).
-fn sens_loop_step(session: &mut Session, line: &str) -> Result<Value, sens::LanguageError> {
-    let source = format!(
-        "(визначити {SENS_LOOP_STATE} (репл-крок (прочитати \"{}\") {SENS_LOOP_STATE}))",
-        escape_lisp_string(line)
-    );
-    eval_program(&source, session)?;
-    Ok(eval_program(&format!("(решта {SENS_LOOP_STATE})"), session)?.value)
-}
-
 // The persistent map is a separate host-neutral root Zig byte asset.
 fn persistent_map_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
         let bytes = super::zig_transport::persistent_map_source_bytes()?;
-        String::from_utf8(bytes)
-            .map_err(|error| format!("ZIG_PERSISTENT_MAP_REPL UTF-8: {error}"))
+        String::from_utf8(bytes).map_err(|error| format!("ZIG_PERSISTENT_MAP_REPL UTF-8: {error}"))
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -113,8 +470,7 @@ fn knowledge_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
         let bytes = super::zig_transport::knowledge_source_bytes()?;
-        String::from_utf8(bytes)
-            .map_err(|err| format!("ZIG_KNOWLEDGE_REPL UTF-8: {err}"))
+        String::from_utf8(bytes).map_err(|err| format!("ZIG_KNOWLEDGE_REPL UTF-8: {err}"))
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -153,8 +509,7 @@ fn reason_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
         let bytes = super::zig_transport::reason_source_bytes()?;
-        String::from_utf8(bytes)
-            .map_err(|e| format!("ZIG_REASON_CARRIER UTF-8: {e}"))
+        String::from_utf8(bytes).map_err(|e| format!("ZIG_REASON_CARRIER UTF-8: {e}"))
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -179,8 +534,7 @@ fn ukr_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
         let bytes = super::zig_transport::ukr_surface_bytes()?;
-        String::from_utf8(bytes)
-            .map_err(|e| format!("ZIG_UKR_CARRIER UTF-8 error: {e}"))
+        String::from_utf8(bytes).map_err(|e| format!("ZIG_UKR_CARRIER UTF-8 error: {e}"))
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -192,8 +546,7 @@ fn sanskrit_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
         let bytes = super::zig_transport::sanskrit_surface_bytes()?;
-        String::from_utf8(bytes)
-            .map_err(|e| format!("ZIG_SANSKRIT_CARRIER UTF-8 error: {e}"))
+        String::from_utf8(bytes).map_err(|e| format!("ZIG_SANSKRIT_CARRIER UTF-8 error: {e}"))
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -264,7 +617,11 @@ fn render_surface_status() -> Result<String, String> {
     surface_catalog::render_status()
 }
 
-fn build_surface_layer(base: &Environment, surface: ReplSurface, sens_loop: bool) -> Result<Environment, String> {
+fn build_surface_layer(
+    base: &Environment,
+    surface: ReplSurface,
+    sens_loop: bool,
+) -> Result<Environment, String> {
     let layer = base.child();
     let needs_surface = matches!(
         surface,
@@ -283,19 +640,24 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface, sens_loop: bool
         #[cfg(feature = "zig-transport")]
         {
             let meta_eval = repl_zig_source(sens_zig_meta_eval_bytes_copy, "ZIG_SENS_META_EVAL")?;
-            sens::load_meta_evaluator_library_from_source(&mut session, &meta_eval)
-                .map_err(|error| {
+            sens::load_meta_evaluator_library_from_source(&mut session, &meta_eval).map_err(
+                |error| {
                     format!(
                         "не вдалося завантажити MetaEval: {}",
                         error.render(&meta_eval)
                     )
-                })?;
-            let repl_core = crate::zig_transport::repl_core_source_bytes()
-                .and_then(|bytes| String::from_utf8(bytes).map_err(|err| format!("ZIG_SENS_REPL UTF-8: {err}")))?;
+                },
+            )?;
+            let repl_core = crate::zig_transport::repl_core_source_bytes().and_then(|bytes| {
+                String::from_utf8(bytes).map_err(|err| format!("ZIG_SENS_REPL UTF-8: {err}"))
+            })?;
             sens::parse_mixed_exact_domain(&repl_core)
                 .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
                 .map_err(|error| {
-                    format!("не вдалося завантажити repl-core: {}", error.render(&repl_core))
+                    format!(
+                        "не вдалося завантажити repl-core: {}",
+                        error.render(&repl_core)
+                    )
                 })?;
         }
     }
@@ -312,24 +674,38 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface, sens_loop: bool
         let prerequisites = std::iter::once(("unify.lisp", unify_source.as_str()))
             .chain(std::iter::once(("reason.lisp", reason_source.as_str())))
             .chain(std::iter::once(("forward.lisp", forward_source.as_str())))
-            .chain(std::iter::once(("knowledge.lisp", knowledge_source.as_str())))
-            .chain(std::iter::once(("persistent-map.lisp", persistent_map_source.as_str())))
-            .chain(prerequisite_sources.iter().map(|(name, source)| (*name, source.as_str())));
+            .chain(std::iter::once((
+                "knowledge.lisp",
+                knowledge_source.as_str(),
+            )))
+            .chain(std::iter::once((
+                "persistent-map.lisp",
+                persistent_map_source.as_str(),
+            )))
+            .chain(
+                prerequisite_sources
+                    .iter()
+                    .map(|(name, source)| (*name, source.as_str())),
+            );
         for (name, source) in prerequisites {
             (if name == "time.lisp" {
                 sens::load_time_library_from_source(&mut session, source)
-            } else if matches!(name, "unify.lisp" | "reason.lisp" | "forward.lisp" | "knowledge.lisp" | "persistent-map.lisp") {
-                sens::eval_pinned_reasoning_source(
-                    &format!("lib/{name}"), source, &mut session
-                )
+            } else if matches!(
+                name,
+                "unify.lisp"
+                    | "reason.lisp"
+                    | "forward.lisp"
+                    | "knowledge.lisp"
+                    | "persistent-map.lisp"
+            ) {
+                sens::eval_pinned_reasoning_source(&format!("lib/{name}"), source, &mut session)
             } else if matches!(name, "persistent-vector.lisp" | "epistemic.lisp") {
                 sens::parse_mixed_exact_domain(source)
                     .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
             } else {
                 eval_program(source, &mut session)
-            }).map_err(|error| {
-                format!("не вдалося завантажити {name}: {}", error.render(source))
-            })?;
+            })
+            .map_err(|error| format!("не вдалося завантажити {name}: {}", error.render(source)))?;
         }
         // Keep the same SENS evaluation order; only source transport changes.
         let uk_source = if surface == ReplSurface::Ukrainian {
@@ -348,12 +724,24 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface, sens_loop: bool
             None
         };
         let (name, source) = match surface {
-            ReplSurface::Ukrainian => ("uk.lisp", uk_source.as_deref()
-                .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian compact source")?),
-            ReplSurface::UkrainianFull => ("ukr.lisp", ukr_source.as_deref()
-                .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian full source")?),
-            ReplSurface::Sanskrit => ("sa.lisp", sanskrit_source.as_deref()
-                .ok_or("RUST_ZIG_ONLY: missing Zig Sanskrit source")?),
+            ReplSurface::Ukrainian => (
+                "uk.lisp",
+                uk_source
+                    .as_deref()
+                    .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian compact source")?,
+            ),
+            ReplSurface::UkrainianFull => (
+                "ukr.lisp",
+                ukr_source
+                    .as_deref()
+                    .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian full source")?,
+            ),
+            ReplSurface::Sanskrit => (
+                "sa.lisp",
+                sanskrit_source
+                    .as_deref()
+                    .ok_or("RUST_ZIG_ONLY: missing Zig Sanskrit source")?,
+            ),
             ReplSurface::Core | ReplSurface::English => unreachable!(),
         };
         sens::parse_mixed_exact_domain(source)
@@ -393,13 +781,18 @@ impl ReplState {
         if self.surface == surface {
             return Ok(());
         }
-        let surface_environment = build_surface_layer(&self.base_environment, surface, self.sens_loop)?;
+        let surface_environment =
+            build_surface_layer(&self.base_environment, surface, self.sens_loop)?;
         self.user_environment
             .reparent(surface_environment)
             .map_err(str::to_string)?;
         self.surface = surface;
         Ok(())
     }
+}
+
+fn eval_repl_step_t5m(state: &mut ReplState, line: &str) -> Result<sens::EvalResult, String> {
+    eval_t5m_repl_line(line, &mut state.session, state.surface)
 }
 
 /// Classic Lisp REPL printer policy: user-entered symbols may be lowercase,
@@ -558,14 +951,17 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
         }
     };
 
-    println!("sens REPL v{} (pure Rust)", env!("CARGO_PKG_VERSION"));
+    println!(
+        "sens REPL v{} (Zig T5M → binary SENS → Rust mechanisms)",
+        env!("CARGO_PKG_VERSION")
+    );
     println!(
         "Поверхня: {} ({}) · змінити: :мова ук|укр|en|sa|core · :допомога",
         state.surface.title(),
         state.surface.code()
     );
     if state.sens_loop {
-        println!("Режим: SENS-цикл (repl-core · обчислити-верхню-форму), не нативний оцінювач.");
+        println!("Режим: repl-core ініціалізовано; кожна інтерактивна форма проходить Zig T5M.");
     }
     println!("Символи можна вводити малими літерами; REPL друкує їх ВЕЛИКИМИ.");
     println!("D1 лишається 1/0 у Canon; людські проекції друкуються ВЕЛИКИМИ.");
@@ -603,65 +999,30 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                     continue;
                 }
 
-                if state.sens_loop {
-                    match sens_loop_step(&mut state.session, line) {
-                        Ok(value) => println!(
+                match eval_repl_step_t5m(&mut state, line) {
+                    Ok(result) => {
+                        for out in result.output {
+                            println!("{out}");
+                        }
+                        println!(
                             "{}",
-                            render_repl_reply(&value, state.surface.presentation())
-                        ),
-                        Err(error) => eprintln!(
-                            "{}",
-                            render_error_for_presentation(
-                                &error,
-                                line,
-                                state.surface.presentation()
-                            )
-                        ),
+                            render_repl_reply(&result.value, state.surface.presentation())
+                        );
                     }
-                    continue;
-                }
-
-                match parse(line) {
-                    Ok(ast) => {
-                        match eval_parsed_expressions_incremental(&ast, &mut state.session) {
-                            Ok(result) => {
-                                for out in result.output {
-                                    println!("{out}");
-                                }
-                                println!(
-                                    "{}",
-                                    render_repl_reply(
-                                        &result.value,
-                                        state.surface.presentation(),
-                                    )
-                                );
-                            }
-                            Err(e) => {
-                                // Це лише interaction policy: невідомий standalone symbol
-                                // вітається через `echo`, але всередині справжньої форми
-                                // UnknownSymbol лишається звичайною мовною помилкою.
-                                if e.kind == ErrorKind::UnknownSymbol
-                                    && ast.len() == 1
-                                    && matches!(ast[0].kind, ExprKind::Symbol(_))
-                                {
-                                    println!("echo {line}");
-                                } else {
-                                    eprintln!(
-                                        "{}",
-                                        render_error_for_presentation(
-                                            &e,
-                                            line,
-                                            state.surface.presentation(),
-                                        )
-                                    );
-                                }
-                            }
+                    Err(error) => {
+                        // Зберігаємо interaction policy для окремого невідомого імені;
+                        // усі форми оцінюються тільки після Zig T5M roundtrip.
+                        let standalone_symbol = sens::parse_mixed_exact_domain(line)
+                            .ok()
+                            .is_some_and(|forms| {
+                                forms.len() == 1 && matches!(forms[0].kind, ExprKind::Symbol(_))
+                            });
+                        if standalone_symbol && error.contains("unknown symbol") {
+                            println!("echo {line}");
+                        } else {
+                            eprintln!("REPL/T5M: {error}");
                         }
                     }
-                    Err(e) => eprintln!(
-                        "{}",
-                        render_error_for_presentation(&e, line, state.surface.presentation(),)
-                    ),
                 }
             }
             Err(ReadlineError::Interrupted | ReadlineError::Eof) => break,
@@ -681,6 +1042,152 @@ mod tests {
         let mut session = Session::default();
         sens::load_core_library(&mut session).expect("core bootstrap");
         ReplState::new(session, ReplSurface::Core, false).expect("REPL state")
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn interactive_t5m_roundtrips_d24_input_and_result_through_zig() {
+        let mut session = Session::default();
+        let result = eval_t5m_repl_line("(додати 1 2)", &mut session, ReplSurface::UkrainianFull)
+            .expect("exact D24 source -> Zig T5M -> binary SENS -> Zig T5M result");
+        let Value::BinaryNumber(ref number) = result.value else {
+            panic!("D5 addition must return exact D24+");
+        };
+        assert_eq!(number.numeric_domain_width(), Some(24));
+        assert_eq!(number.to_decimal_string(), "3");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn interactive_t5m_projects_ukrainian_decimal_commas_as_exact_ratios() {
+        let mut session = Session::default();
+        let result = eval_t5m_repl_line(
+            "(додати 2,467 1,533)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("decimal comma lowers to exact D5 ratio/D24 words before Zig T5M");
+        let Value::BinaryNumber(ref number) = result.value else {
+            panic!("exact decimal sum is the D24 integer four");
+        };
+        assert_eq!(number.numeric_domain_width(), Some(24));
+        assert_eq!(number.to_decimal_string(), "4");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn interactive_t5m_roundtrips_exact_fraction_result() {
+        let mut session = Session::default();
+        let result = eval_t5m_repl_line("(частка 1 3)", &mut session, ReplSurface::UkrainianFull)
+            .expect("exact ratio result must cross the Zig T5M return path");
+        let Value::NumericComposition(ref composition) = result.value else {
+            panic!("D5 quotient returns an exact rational composition");
+        };
+        let (negative, numerator, denominator) = composition.as_parts();
+        assert!(!negative);
+        assert_eq!(numerator.to_decimal_string(), "1");
+        assert_eq!(
+            denominator
+                .expect("nonintegral quotient has denominator")
+                .to_decimal_string(),
+            "3"
+        );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn interactive_t5m_roundtrips_negative_exact_fraction_result() {
+        let mut session = Session::default();
+        let result = eval_t5m_repl_line(
+            "(відняти 0 (частка 1 3))",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("negative exact ratio uses the admitted D5 subtraction call");
+        let Value::NumericComposition(ref composition) = result.value else {
+            panic!("negative quotient remains an exact rational composition");
+        };
+        let (negative, numerator, denominator) = composition.as_parts();
+        assert!(negative);
+        assert_eq!(numerator.to_decimal_string(), "1");
+        assert_eq!(
+            denominator
+                .expect("nonintegral quotient has denominator")
+                .to_decimal_string(),
+            "3"
+        );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn interactive_t5m_keeps_bindings_between_repl_lines() {
+        let mut session = Session::default();
+        let definition = eval_t5m_repl_line(
+            "(визначити значення 40)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("definition crosses the Zig T5M path");
+        let Value::BinaryNumber(ref number) = definition.value else {
+            panic!("definition expression returns its defined exact value");
+        };
+        assert_eq!(number.to_decimal_string(), "40");
+
+        let result = eval_t5m_repl_line(
+            "(додати значення 2)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("next REPL line sees the prior binding");
+        let Value::BinaryNumber(ref number) = result.value else {
+            panic!("D5 addition must return exact D24+");
+        };
+        assert_eq!(number.to_decimal_string(), "42");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn sens_loop_mode_uses_the_same_t5m_step_and_keeps_session_state() {
+        let mut session = Session::default();
+        let base_environment = session.environment.clone();
+        let user_environment = base_environment.child();
+        session.environment = user_environment.clone();
+        let mut state = ReplState {
+            session,
+            base_environment,
+            user_environment,
+            surface: ReplSurface::UkrainianFull,
+            sens_loop: true,
+        };
+        let result = eval_repl_step_t5m(&mut state, "(додати 1 2)")
+            .expect("--sens-loop must use the same Zig T5M interactive step");
+        let Value::BinaryNumber(ref number) = result.value else {
+            panic!("SENS binary evaluator returns exact D24+");
+        };
+        assert_eq!(number.to_decimal_string(), "3");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_repl_rejects_changed_word_before_program_reconstruction() {
+        let identity = DomainIdentity::from_coordinate(
+            sens::domain_ladder::DomainCoordinate::new(5, 0b01010).unwrap(),
+        );
+        let expected = vec![ExactDomainWord::Identity(identity)];
+        let altered = vec![crate::zig_transport::ExactT5Word::new(5, vec![0, 1, 0, 1, 1]).unwrap()];
+
+        let error = restore_t5m_words(&expected, &altered).expect_err("bit drift fails closed");
+        assert!(error.starts_with("T5M_WORD_MISMATCH index=0"), "{error}");
+    }
+
+    #[test]
+    fn t5m_repl_names_values_without_an_exact_encoding() {
+        let error = result_t5m_words(&Value::String("не кодувати мовчки".into()))
+            .expect_err("unratified text-value carrier must fail explicitly");
+        assert!(
+            error.starts_with("T5M_RESULT_UNSUPPORTED value=String"),
+            "{error}"
+        );
     }
 
     fn value(state: &mut ReplState, source: &str) -> String {
@@ -714,31 +1221,40 @@ mod tests {
 
     #[test]
     fn classic_repl_reply_uppercases_d1_human_projection_but_not_machine_bits() {
-        let no = Value::DomainIdentity(sens::DomainIdentity::D1(
-            sens::PredicateBit::from_word(sens::Bit1::new(0).unwrap()),
-        ));
-        let yes = Value::DomainIdentity(sens::DomainIdentity::D1(
-            sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap()),
-        ));
+        let no = Value::DomainIdentity(sens::DomainIdentity::D1(sens::PredicateBit::from_word(
+            sens::Bit1::new(0).unwrap(),
+        )));
+        let yes = Value::DomainIdentity(sens::DomainIdentity::D1(sens::PredicateBit::from_word(
+            sens::Bit1::new(1).unwrap(),
+        )));
 
         assert_eq!(render_repl_reply(&no, PresentationLanguage::Canonical), "0");
-        assert_eq!(render_repl_reply(&yes, PresentationLanguage::Canonical), "1");
+        assert_eq!(
+            render_repl_reply(&yes, PresentationLanguage::Canonical),
+            "1"
+        );
         assert_eq!(render_repl_reply(&no, PresentationLanguage::English), "0");
         assert_eq!(render_repl_reply(&yes, PresentationLanguage::English), "1");
-        assert_eq!(render_repl_reply(&no, PresentationLanguage::Ukrainian), "НІ");
-        assert_eq!(render_repl_reply(&yes, PresentationLanguage::Ukrainian), "ТАК");
+        assert_eq!(
+            render_repl_reply(&no, PresentationLanguage::Ukrainian),
+            "НІ"
+        );
+        assert_eq!(
+            render_repl_reply(&yes, PresentationLanguage::Ukrainian),
+            "ТАК"
+        );
         assert_eq!(render_repl_reply(&no, PresentationLanguage::Sanskrit), "NA");
-        assert_eq!(render_repl_reply(&yes, PresentationLanguage::Sanskrit), "ĀM");
+        assert_eq!(
+            render_repl_reply(&yes, PresentationLanguage::Sanskrit),
+            "ĀM"
+        );
     }
 
     #[test]
     fn classic_repl_reply_accepts_lowercase_source_and_prints_uppercase_symbols() {
         let mut state = core_state();
-        let result = eval_program(
-            "(quote (car cons \"MiXeD\" 42))",
-            &mut state.session,
-        )
-        .expect("lowercase REPL source should evaluate");
+        let result = eval_program("(quote (car cons \"MiXeD\" 42))", &mut state.session)
+            .expect("lowercase REPL source should evaluate");
 
         assert_eq!(
             render_repl_reply(&result.value, PresentationLanguage::Canonical),
@@ -771,9 +1287,14 @@ mod tests {
     #[test]
     fn zig_linter_carrier_persistent_map_repl_exact_bytes() {
         let source = persistent_map_surface_source().expect("persistent map via Zig root");
-        let bytes = crate::zig_transport::persistent_map_source_bytes().expect("second Zig byte copy");
+        let bytes =
+            crate::zig_transport::persistent_map_source_bytes().expect("second Zig byte copy");
         assert!(!source.is_empty());
-        assert_eq!(source.as_bytes(), bytes.as_slice(), "ZIG_PERSISTENT_MAP_REPL byte parity");
+        assert_eq!(
+            source.as_bytes(),
+            bytes.as_slice(),
+            "ZIG_PERSISTENT_MAP_REPL byte parity"
+        );
         println!("ZIG_PERSISTENT_MAP_REPL_PASS test_id=zig-repl-persistent-map layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
     }
 
@@ -781,16 +1302,24 @@ mod tests {
     #[test]
     fn zig_linter_carrier_persistent_map_no_rust_fallback() {
         let err = persistent_map_surface_source().expect_err("must not bypass Zig");
-        assert_eq!(err, "RUST_ZIG_ONLY: persistent-map.lisp requires Zig; no Rust source fallback");
+        assert_eq!(
+            err,
+            "RUST_ZIG_ONLY: persistent-map.lisp requires Zig; no Rust source fallback"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
     #[test]
     fn zig_linter_carrier_knowledge_repl_preserves_exact_bytes() {
         let source = knowledge_surface_source().expect("knowledge source via Zig C ABI");
-        let bytes = crate::zig_transport::knowledge_source_bytes().expect("independent Zig C byte copy");
+        let bytes =
+            crate::zig_transport::knowledge_source_bytes().expect("independent Zig C byte copy");
         assert!(!source.is_empty(), "ZIG_KNOWLEDGE_REPL empty source");
-        assert_eq!(source.as_bytes(), bytes.as_slice(), "ZIG_KNOWLEDGE_REPL exact byte parity");
+        assert_eq!(
+            source.as_bytes(),
+            bytes.as_slice(),
+            "ZIG_KNOWLEDGE_REPL exact byte parity"
+        );
         println!("ZIG_KNOWLEDGE_REPL_PASS test_id=knowledge-repl-zig-only layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
     }
 
@@ -798,8 +1327,13 @@ mod tests {
     #[test]
     fn zig_linter_carrier_knowledge_without_zig_fails_closed() {
         let error = knowledge_surface_source().expect_err("no Rust fallback for knowledge.lisp");
-        assert_eq!(error, "RUST_ZIG_ONLY: knowledge.lisp requires Zig; no Rust source fallback");
-        println!("ZIG_KNOWLEDGE_NO_FALLBACK_PASS test_id=knowledge-repl-no-rust-source layer=transport");
+        assert_eq!(
+            error,
+            "RUST_ZIG_ONLY: knowledge.lisp requires Zig; no Rust source fallback"
+        );
+        println!(
+            "ZIG_KNOWLEDGE_NO_FALLBACK_PASS test_id=knowledge-repl-no-rust-source layer=transport"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
@@ -807,8 +1341,15 @@ mod tests {
     fn zig_linter_carrier_forward_source_preserves_every_byte() {
         let source = forward_surface_source().expect("forward source via Zig C ABI");
         let bytes = crate::zig_transport::forward_source_bytes().expect("second Zig C byte copy");
-        assert_eq!(source.as_bytes(), bytes.as_slice(), "ZIG_FORWARD_CARRIER exact byte parity");
-        assert!(source.starts_with("; Чинний рушій прямого виведення СЕНС:"), "wrong SENS source asset");
+        assert_eq!(
+            source.as_bytes(),
+            bytes.as_slice(),
+            "ZIG_FORWARD_CARRIER exact byte parity"
+        );
+        assert!(
+            source.starts_with("; Чинний рушій прямого виведення СЕНС:"),
+            "wrong SENS source asset"
+        );
         println!("ZIG_FORWARD_CARRIER_PASS test_id=zig-forward-exact-carry layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
     }
 
@@ -816,7 +1357,10 @@ mod tests {
     #[test]
     fn zig_linter_carrier_forward_without_zig_denies_rust_bypass() {
         let error = forward_surface_source().expect_err("only Zig may carry forward.lisp");
-        assert!(error.contains("RUST_ZIG_ONLY: forward.lisp requires Zig; no Rust source fallback"), "{error}");
+        assert!(
+            error.contains("RUST_ZIG_ONLY: forward.lisp requires Zig; no Rust source fallback"),
+            "{error}"
+        );
         println!("ZIG_FORWARD_NO_FALLBACK_PASS test_id=zig-forward-no-rust-bypass layer=transport");
     }
 
@@ -824,9 +1368,17 @@ mod tests {
     #[test]
     fn zig_unify_repl_source_matches_opaque_c_abi_bytes() {
         let source = unify_surface_source().expect("Zig exact lib/unify.lisp bytes");
-        let copied = crate::zig_transport::unify_source_bytes().expect("Zig copied original source");
-        assert_eq!(source.as_bytes(), copied.as_slice(), "ZIG_UNIFY_CARRIER byte parity");
-        assert!(source.starts_with("; Уніфікація зіставляє структури"), "wrong unify asset");
+        let copied =
+            crate::zig_transport::unify_source_bytes().expect("Zig copied original source");
+        assert_eq!(
+            source.as_bytes(),
+            copied.as_slice(),
+            "ZIG_UNIFY_CARRIER byte parity"
+        );
+        assert!(
+            source.starts_with("; Уніфікація зіставляє структури"),
+            "wrong unify asset"
+        );
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -842,10 +1394,23 @@ mod tests {
     fn zig_uk_surface_preserves_original_bytes() {
         let source = uk_surface_source().expect("root Zig C ABI original Ukrainian surface");
         let bytes = crate::zig_transport::uk_surface_bytes().expect("second Zig ABI copy");
-        assert_eq!(source.as_bytes(), bytes.as_slice(), "UK surface exact byte identity");
-        assert!(source.starts_with("; Ukrainian surface"), "not canonical source asset");
-        assert!(source.contains("одна семантична реалізація"), "truncated or swapped source");
-        println!("ZIG_UK_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
+        assert_eq!(
+            source.as_bytes(),
+            bytes.as_slice(),
+            "UK surface exact byte identity"
+        );
+        assert!(
+            source.starts_with("; Ukrainian surface"),
+            "not canonical source asset"
+        );
+        assert!(
+            source.contains("одна семантична реалізація"),
+            "truncated or swapped source"
+        );
+        println!(
+            "ZIG_UK_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
+            bytes.len()
+        );
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -861,10 +1426,23 @@ mod tests {
     fn zig_ukr_surface_preserves_actual_source_bytes() {
         let source = ukr_surface_source().expect("real Zig full Ukrainian bytes");
         let bytes = crate::zig_transport::ukr_surface_bytes().expect("second Zig ABI copy");
-        assert_eq!(source.as_bytes(), bytes.as_slice(), "UKR original byte parity");
-        assert!(source.starts_with("; Повна українська проєкція"), "wrong source");
-        assert!(source.contains("рівноправною мовною поверхнею"), "truncated source");
-        println!("ZIG_UKR_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
+        assert_eq!(
+            source.as_bytes(),
+            bytes.as_slice(),
+            "UKR original byte parity"
+        );
+        assert!(
+            source.starts_with("; Повна українська проєкція"),
+            "wrong source"
+        );
+        assert!(
+            source.contains("рівноправною мовною поверхнею"),
+            "truncated source"
+        );
+        println!(
+            "ZIG_UKR_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
+            bytes.len()
+        );
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -879,12 +1457,25 @@ mod tests {
     #[test]
     fn zig_sanskrit_surface_preserves_actual_source_bytes() {
         let source = sanskrit_surface_source().expect("live root Zig C ABI");
-        let bytes = crate::zig_transport::sanskrit_surface_bytes()
-            .expect("second Zig ABI byte copy");
-        assert_eq!(source.as_bytes(), bytes.as_slice(), "Sanskrit exact-byte replay");
-        assert!(source.starts_with("; Sanskrit surface"), "expected tracked source");
-        assert!(source.contains("svarūpa"), "source identity/truncation witness");
-        println!("ZIG_SANSKRIT_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
+        let bytes =
+            crate::zig_transport::sanskrit_surface_bytes().expect("second Zig ABI byte copy");
+        assert_eq!(
+            source.as_bytes(),
+            bytes.as_slice(),
+            "Sanskrit exact-byte replay"
+        );
+        assert!(
+            source.starts_with("; Sanskrit surface"),
+            "expected tracked source"
+        );
+        assert!(
+            source.contains("svarūpa"),
+            "source identity/truncation witness"
+        );
+        println!(
+            "ZIG_SANSKRIT_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
+            bytes.len()
+        );
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -939,12 +1530,13 @@ mod tests {
         assert_eq!(ReplSurface::parse("uk"), Some(ReplSurface::Ukrainian));
         assert_eq!(ReplSurface::parse("укр"), Some(ReplSurface::UkrainianFull));
         assert_eq!(ReplSurface::parse("ukr"), Some(ReplSurface::UkrainianFull));
-        assert_ne!(ReplSurface::Ukrainian.code(), ReplSurface::UkrainianFull.code());
-        assert!(
-            surface_catalog::render_name("укр", "D6:101000")
-                .expect("UKR registry lookup")
-                .starts_with("identity: D6:101000")
+        assert_ne!(
+            ReplSurface::Ukrainian.code(),
+            ReplSurface::UkrainianFull.code()
         );
+        assert!(surface_catalog::render_name("укр", "D6:101000")
+            .expect("UKR registry lookup")
+            .starts_with("identity: D6:101000"));
     }
 
     #[test]

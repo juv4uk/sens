@@ -457,7 +457,7 @@ fn main() {
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
             println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
-            println!("  --sens-loop                  Evaluate REPL input through the SENS-owned loop (repl-core), not the native evaluator");
+            println!("  --sens-loop                  Initialize repl-core state; interactive forms still use Zig T5M → binary SENS");
             println!("  --core=3|4                    Explicitly select Core3 laboratory or default Core4 before evaluation");
             println!(
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
