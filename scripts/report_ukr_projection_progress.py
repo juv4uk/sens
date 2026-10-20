@@ -88,6 +88,312 @@ def examine_file(path: Path) -> str | None:
     return None
 
 
+
+@dataclass(frozen=True)
+class SourceProjection:
+    total_source_files: int
+    fully_projected_source_files: int
+    pending: tuple[Unfinished, ...]
+    excluded_nonprogram_files: int
+
+    @property
+    def percent(self) -> float:
+        return (
+            round(self.fully_projected_source_files * 100 / self.total_source_files, 1)
+            if self.total_source_files else 0.0
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "total_source_files": self.total_source_files,
+            "fully_projected_source_files": self.fully_projected_source_files,
+            "percent": self.percent,
+            "excluded_nonprogram_files": self.excluded_nonprogram_files,
+        }
+
+
+@dataclass(frozen=True)
+class LispToken:
+    kind: str
+    value: str
+    line: int
+    column: int
+
+
+@dataclass(frozen=True)
+class LispAtom:
+    token: LispToken
+
+
+@dataclass(frozen=True)
+class LispOpaque:
+    token: LispToken
+
+
+@dataclass(frozen=True)
+class LispQuoted:
+    value: object
+
+
+@dataclass(frozen=True)
+class LispForm:
+    items: tuple[object, ...]
+    line: int
+    column: int
+
+
+LATIN_IDENTIFIER = re.compile(r"[A-Za-z]")
+RAW_BINARY_HEAD = re.compile(r"[01]{3,11}\Z")
+UKR_ALIAS_MARKER = "; opt-in повна укр-поверхня"
+NONPROGRAM_LIB_PATHS = (
+    "lib/domains/",
+    "lib/surface/",
+    "lib/generated/",
+)
+NONPROGRAM_LIB_FILES = frozenset({
+    "lib/machine/encoding/coverage.lisp",
+})
+
+
+def _advance_position(fragment: str, line: int, column: int) -> tuple[int, int]:
+    newlines = fragment.count("\n")
+    if newlines:
+        return line + newlines, len(fragment.rsplit("\n", 1)[-1]) + 1
+    return line, column + len(fragment)
+
+
+def tokenize_lisp(source: str) -> list[LispToken]:
+    """Tokenize enough Lisp structure for a source-only projection census."""
+    tokens: list[LispToken] = []
+    i, line, column, size = 0, 1, 1, len(source)
+    while i < size:
+        char = source[i]
+        if char.isspace():
+            line, column = _advance_position(char, line, column)
+            i += 1
+            continue
+        if source.startswith("#|", i):
+            start, depth = i, 1
+            i += 2
+            while i < size and depth:
+                if source.startswith("#|", i):
+                    depth += 1
+                    i += 2
+                elif source.startswith("|#", i):
+                    depth -= 1
+                    i += 2
+                else:
+                    i += 1
+            if depth:
+                raise ValueError(f"{line}:{column}: незакритий блоковий коментар")
+            fragment = source[start:i]
+            line, column = _advance_position(fragment, line, column)
+            continue
+        if char == ";":
+            start = i
+            while i < size and source[i] != "\n":
+                i += 1
+            fragment = source[start:i]
+            line, column = _advance_position(fragment, line, column)
+            continue
+        start, start_line, start_column = i, line, column
+        if char == '"':
+            i += 1
+            while i < size:
+                if source[i] == "\\":
+                    i += 2
+                elif source[i] == '"':
+                    i += 1
+                    break
+                else:
+                    i += 1
+            else:
+                raise ValueError(f"{start_line}:{start_column}: незакритий рядок")
+            value = source[start:i]
+            tokens.append(LispToken("STRING", value, start_line, start_column))
+        elif char == "(":
+            i += 1
+            tokens.append(LispToken("LPAREN", char, start_line, start_column))
+        elif char == ")":
+            i += 1
+            tokens.append(LispToken("RPAREN", char, start_line, start_column))
+        elif char == "'" and (i == 0 or source[i - 1].isspace() or source[i - 1] in "();"):
+            i += 1
+            tokens.append(LispToken("QUOTE", char, start_line, start_column))
+        else:
+            i += 1
+            while i < size and not source[i].isspace() and source[i] not in '();"':
+                i += 1
+            value = source[start:i]
+            tokens.append(LispToken("ATOM", value, start_line, start_column))
+        fragment = source[start:i]
+        line, column = _advance_position(fragment, start_line, start_column)
+    return tokens
+
+
+def parse_lisp_tokens(tokens: list[LispToken]) -> list[object]:
+    """Parse list boundaries and quote forms; no evaluation or name resolution."""
+    def one(index: int) -> tuple[object, int]:
+        if index >= len(tokens):
+            raise ValueError("неочікуваний кінець Lisp-файла")
+        token = tokens[index]
+        if token.kind == "STRING":
+            return LispOpaque(token), index + 1
+        if token.kind == "ATOM":
+            return LispAtom(token), index + 1
+        if token.kind == "QUOTE":
+            quoted, after = one(index + 1)
+            return LispQuoted(quoted), after
+        if token.kind == "RPAREN":
+            raise ValueError(f"{token.line}:{token.column}: зайва закривальна дужка")
+        if token.kind == "LPAREN":
+            items: list[object] = []
+            index += 1
+            while index < len(tokens) and tokens[index].kind != "RPAREN":
+                child, index = one(index)
+                items.append(child)
+            if index >= len(tokens):
+                raise ValueError(f"{token.line}:{token.column}: незакрита форма")
+            return LispForm(tuple(items), token.line, token.column), index + 1
+        raise ValueError(f"{token.line}:{token.column}: невідомий токен {token.kind}")
+
+    forms: list[object] = []
+    index = 0
+    while index < len(tokens):
+        node, index = one(index)
+        forms.append(node)
+    return forms
+
+
+def _atom_value(node: object) -> str | None:
+    return node.token.value if isinstance(node, LispAtom) else None
+
+
+def _projection_reasons(source: str) -> list[str]:
+    """Find executable English heads/binders and raw bit heads, not data words."""
+    marker = source.find(UKR_ALIAS_MARKER)
+    alias_line = source.count("\n", 0, marker) + 1 if marker >= 0 else 0
+    forms = parse_lisp_tokens(tokenize_lisp(source))
+    reasons: list[str] = []
+
+    def add(token: LispToken, kind: str, value: str) -> None:
+        reasons.append(f"{token.line}:{token.column}: {kind} {value!r}")
+
+    def visit(node: object) -> None:
+        if isinstance(node, LispQuoted) or isinstance(node, LispOpaque) or isinstance(node, LispAtom):
+            return
+        if not isinstance(node, LispForm) or not node.items:
+            return
+        head = node.items[0]
+        head_value = _atom_value(head)
+        if head_value is None:
+            for child in node.items:
+                visit(child)
+            return
+
+        # The contents of SENS's quote form are data, not executable call heads.
+        if head_value == "як-є":
+            return
+
+        head_token = head.token
+        if RAW_BINARY_HEAD.fullmatch(head_value):
+            add(head_token, "сира бінарна голова", head_value)
+        elif LATIN_IDENTIFIER.search(head_value):
+            add(head_token, "англомовна виклична голова", head_value)
+
+        if head_value == "визначити" and len(node.items) >= 2:
+            target = node.items[1]
+            target_value = _atom_value(target)
+            if target_value and LATIN_IDENTIFIER.search(target_value):
+                rhs_value = _atom_value(node.items[2]) if len(node.items) == 3 else None
+                is_explicit_alias = (
+                    alias_line > 0
+                    and node.line > alias_line
+                    and len(node.items) == 3
+                    and rhs_value is not None
+                    and not LATIN_IDENTIFIER.search(rhs_value)
+                )
+                if not is_explicit_alias:
+                    add(target.token, "англомовна назва визначення", target_value)
+
+        if head_value == "функція" and len(node.items) >= 2:
+            formals = node.items[1]
+            if isinstance(formals, LispForm):
+                for formal in formals.items:
+                    formal_value = _atom_value(formal)
+                    if formal_value and LATIN_IDENTIFIER.search(formal_value):
+                        add(formal.token, "англомовний локальний параметр", formal_value)
+
+        for child in node.items[1:]:
+            visit(child)
+
+    for form in forms:
+        visit(form)
+    return reasons
+
+
+def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
+    """Active authored library programs; semantic tables and generated inventory are reported separately."""
+    lib = root / "lib"
+    if not lib.is_dir():
+        return [], 0
+    all_files = sorted(
+        (path for path in lib.rglob("*.lisp") if path.is_file() and not path.is_symlink()),
+        key=lambda path: path.relative_to(root).as_posix(),
+    )
+    selected: list[Path] = []
+    excluded = 0
+    for path in all_files:
+        relative = path.relative_to(root).as_posix()
+        if relative in NONPROGRAM_LIB_FILES or any(
+            relative.startswith(prefix) for prefix in NONPROGRAM_LIB_PATHS
+        ):
+            excluded += 1
+        else:
+            selected.append(path)
+    return selected, excluded
+
+
+def examine_source_projection(path: Path) -> str | None:
+    try:
+        source = path.read_bytes().decode("utf-8", errors="strict")
+    except (OSError, UnicodeError) as exc:
+        return f"непрочитаний файл або неправильний UTF-8: {type(exc).__name__}"
+    if not source.strip():
+        return "порожній файл або лише пробіли"
+    try:
+        reasons = _projection_reasons(source)
+    except ValueError as exc:
+        return str(exc)
+    return reasons[0] if reasons else None
+
+
+def measure_source_projection(root: Path) -> SourceProjection:
+    root = root.resolve()
+    if not root.is_dir():
+        raise NotADirectoryError(root)
+    files, excluded = iter_projectable_source_files(root)
+    pending = []
+    for path in files:
+        reason = examine_source_projection(path)
+        if reason is not None:
+            pending.append(Unfinished(path.relative_to(root).as_posix(), reason))
+    return SourceProjection(
+        total_source_files=len(files),
+        fully_projected_source_files=len(files) - len(pending),
+        pending=tuple(pending),
+        excluded_nonprogram_files=excluded,
+    )
+
+
+def render_source_projection(progress: SourceProjection) -> str:
+    return (
+        "УКР-ПРОЄКЦІЯ: виконувані назви, голови та параметри в активних lib-файлах — "
+        f"{progress.fully_projected_source_files}/{progress.total_source_files} "
+        f"({progress.percent:.1f}%)"
+    )
+
+
 def measure(root: Path) -> Progress:
     root = root.resolve()
     if not root.is_dir():
@@ -120,6 +426,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="записати лише три показники у JSON")
     parser.add_argument("--list", action="store_true",
                         help="перелічити файли з недоступними символами")
+    parser.add_argument("--projection-list", action="store_true",
+                        help="перелічити активні lib-файли з непроєктованими виконуваними іменами")
     parser.add_argument("--top", type=int, default=0,
                         help="кількість рядків у --list, 0 означає всі")
     parser.add_argument("--no-annotation", action="store_true",
@@ -133,22 +441,38 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--top має бути невід'ємним")
 
     progress = measure(args.root)
-    message = render(progress)
-    print(message)
+    source_projection = measure_source_projection(args.root)
+    keyboard_message = render(progress)
+    projection_message = render_source_projection(source_projection)
+    print(projection_message)
+    print("СТРОГИЙ КЛАВІАТУРНИЙ ЗРІЗ: " + keyboard_message)
     if not args.no_annotation and os.getenv("GITHUB_ACTIONS") == "true":
-        print(f"::notice::{message}")
+        print(f"::notice::{projection_message}")
+        print(f"::notice::СТРОГИЙ КЛАВІАТУРНИЙ ЗРІЗ: {keyboard_message}")
 
     if args.list:
         pending = progress.pending
         shown = pending[:args.top] if args.top else pending
+        print("СТРОГИЙ КЛАВІАТУРНИЙ ЗРІЗ — незавершені файли:")
+        for item in shown:
+            print(f"{item.path}: {item.reason}")
+        if args.top and len(pending) > args.top:
+            print(f"… ще {len(pending) - args.top}")
+
+    if args.projection_list:
+        pending = source_projection.pending
+        shown = pending[:args.top] if args.top else pending
+        print("УКР-ПРОЄКЦІЯ — невиконані активні lib-файли:")
         for item in shown:
             print(f"{item.path}: {item.reason}")
         if args.top and len(pending) > args.top:
             print(f"… ще {len(pending) - args.top}")
 
     if args.json is not None:
+        payload = progress.to_dict()
+        payload["source_projection"] = source_projection.to_dict()
         args.json.write_text(
-            json.dumps(progress.to_dict(), ensure_ascii=False, indent=2) + "\n",
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
     return 0

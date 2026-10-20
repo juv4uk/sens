@@ -72,6 +72,38 @@ class WholeFileMetricTests(FileTree):
             "УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 2/6 (33.3%)",
         )
 
+    def test_source_projection_ignores_comments_strings_and_quoted_data(self):
+        root = self.tree({
+            "lib/ок.lisp": '(визначити сума (функція (значення) (додати значення 1)))\n'
+                            '; English comment is not executable\n'
+                            '(визначити схема (як-є dimension/1))\n',
+            "lib/alias.lisp": '; opt-in повна укр-поверхня\n(визначити old-name нова-назва)\n',
+            "lib/not-ok.lisp": '(визначити сума (функція (x) (add x 1)))\n',
+            "lib/raw.lisp": '(101 x)\n',
+            "lib/domains/d9.lisp": '(101000000 (ук приклад) (укр приклад))\n',
+            "lib/surface/uk-inventory.lisp": '; metadata\n',
+        })
+        result = report.measure_source_projection(root)
+        self.assertEqual(result.total_source_files, 4)
+        self.assertEqual(result.fully_projected_source_files, 2)
+        self.assertEqual(result.percent, 50.0)
+        reasons = {item.path: item.reason for item in result.pending}
+        self.assertTrue(
+            "англомовний локальний параметр" in reasons["lib/not-ok.lisp"]
+            or "англомовна виклична голова" in reasons["lib/not-ok.lisp"]
+        )
+        self.assertIn("сира бінарна голова", reasons["lib/raw.lisp"])
+        self.assertEqual(result.excluded_nonprogram_files, 2)
+
+    def test_primary_projection_report_is_separate_from_keyboard_completion(self):
+        root = self.tree({
+            "lib/код.lisp": '(визначити сума (функція (значення) (додати значення 1)))\n',
+            "lib/коментар.lisp": '(визначити сума (функція (значення) (додати значення 1)))\n; TODO\n',
+        })
+        self.assertEqual(report.measure_source_projection(root).fully_projected_source_files, 2)
+        self.assertEqual(report.measure(root).fully_ukrainian_files, 1)
+
+
     def test_english_comment_removal_really_increments_the_numerator(self):
         root = self.tree({"lib/завдання.lisp": "(визначити річ 1)\n; TODO\n"})
         self.assertEqual(report.measure(root).fully_ukrainian_files, 0)
@@ -164,11 +196,18 @@ class ReportCliTests(FileTree):
         code, _ = self.cli("--root", str(root), "--json", str(destination),
                            "--no-annotation")
         self.assertEqual(code, 0)
-        self.assertEqual(json.loads(destination.read_text(encoding="utf-8")), {
+        payload = json.loads(destination.read_text(encoding="utf-8"))
+        self.assertEqual({
+            "total_lisp_files": payload["total_lisp_files"],
+            "fully_ukrainian_files": payload["fully_ukrainian_files"],
+            "percent": payload["percent"],
+        }, {
             "total_lisp_files": 2,
             "fully_ukrainian_files": 1,
             "percent": 50.0,
         })
+        self.assertIn("source_projection", payload)
+        self.assertEqual(payload["source_projection"]["total_source_files"], 0)
 
     def test_errors_on_absent_root(self):
         stderr = io.StringIO()
