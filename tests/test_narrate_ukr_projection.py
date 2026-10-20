@@ -12,7 +12,7 @@ SOURCE = ROOT / "lib/narrate.lisp"
 # Historical raw encodings must never return as executable heads.
 OLD_DERIVED = "(0011 provenance-derived-from (0010 (prov) (1001 (110110101 prov))))"
 OLD_SYMBOL_CHECK = "((0100 (110101100 (100 outcome)))"
-DERIVED_ALIAS = "(визначити provenance-derived-from походження-похідний-з)"
+ЗАСТАРІЛИЙ_ПСЕВДОНІМ = "(визначити provenance-derived-from походження-похідний-з)"
 
 IDENTITIES = (
     (3, "100", "перше"),
@@ -27,8 +27,8 @@ IDENTITIES = (
 
 
 def verify(source: str) -> None:
-    if DERIVED_ALIAS not in source:
-        raise AssertionError("бракує чинного українського визначення")
+    if ЗАСТАРІЛИЙ_ПСЕВДОНІМ in source:
+        raise AssertionError("англійський псевдонім походження повернувся")
     if OLD_DERIVED in source or OLD_SYMBOL_CHECK in source:
         raise AssertionError("застаріла сира бітова голова повернулася")
     parsed = definitions(source)
@@ -36,8 +36,8 @@ def verify(source: str) -> None:
         "функція", ["походження"], ["друге", ["п'ятий", "походження"]]
     ]:
         raise AssertionError("порушено український D9 accessor походження")
-    if parsed.get("provenance-derived-from") != "походження-похідний-з":
-        raise AssertionError("англійський compatibility-вхід має бути тим самим укр-замиканням")
+    if "provenance-derived-from" in parsed:
+        raise AssertionError("англійський псевдонім походження повернувся")
     if parsed.get("пояснити-підсумок") is None:
         raise AssertionError("втрачено повну укр-функцію підсумку")
     heads = call_heads(parsed["пояснити-підсумок"])
@@ -77,13 +77,10 @@ class NarrateProjectionTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "D9 predicate"):
             verify(broken)
 
-    def test_negative_wrong_english_alias_rejected(self):
-        broken = self.source.replace(
-            DERIVED_ALIAS,
-            "(визначити provenance-derived-from пояснити-факт)", 1
-        )
+    def test_negative_return_of_english_alias_rejected(self):
+        broken = self.source + "\n(визначити provenance-derived-from пояснити-факт)\n"
         self.assertNotEqual(broken, self.source)
-        with self.assertRaisesRegex(AssertionError, "англійський compatibility"):
+        with self.assertRaisesRegex(AssertionError, "англійський псевдонім"):
             verify(broken)
 
 
