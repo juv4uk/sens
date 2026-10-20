@@ -45,7 +45,8 @@ class CurrentManifestMigrationTests(unittest.TestCase):
             directory = root / "програми"
             directory.mkdir()
             source = directory / "програма.lisp"
-            source.write_text("(як-є ())\\n", encoding="utf-8")
+            # Реальна українська програма, а не синтетичний текст.
+            source.write_bytes(SOURCE.read_bytes())
             digest = hashlib.sha256(source.read_bytes()).hexdigest()
             manifest = Path(tmp) / "manifest.json"
 
