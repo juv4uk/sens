@@ -1,6 +1,5 @@
-; D9:000011101 RESULT-GOAL?, D9:000111010 RESULT-NEGATED-GOAL?,
-; D9:000111110 RESULT-OPPOSITE-GOAL; donor lib/result-status.lisp.
-; Exactly eight D1:YES judgements, including malformed unary negations.
+; Вісім законів визначення цілі, її заперечення та протилежної цілі.
+; Неправильні одноаргументні заперечення повинні відхилятися.
 (список
   (результат-ціль? (як-є (факт яблуко)))
   (результат-ціль? (як-є (хибне? (факт яблуко))))
