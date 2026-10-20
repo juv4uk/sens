@@ -259,5 +259,43 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
             parse("(визначити f (функція (x) x)")
 
 
+class EncoderCoverageLispDiagnosticsTests(unittest.TestCase):
+    """Діагностика формується самою SENS, без повторного розбору тексту."""
+
+    CASES = (
+        (
+            "scripts/check-encoder-coverage.lisp",
+            (
+                "(як-є (encoder-coverage-check (status pass)))",
+                "(як-є (encoder-coverage-check (status fail) (reason projection-mismatch)))",
+                "(як-є (reason invalid-coverage-input-projection))",
+            ),
+            1,
+        ),
+        (
+            "scripts/generate-encoder-coverage.lisp",
+            (
+                "(як-є (status written))",
+                "(як-є (encoder-coverage-generate (status rejected) (reason invalid-coverage-input-projection)))",
+            ),
+            0,
+        ),
+    )
+
+    def test_direct_quoted_positive_and_negative_diagnostics(self):
+        for path, forms, file_readers in self.CASES:
+            with self.subTest(path=path):
+                text = (ROOT / path).read_text(encoding="utf-8")
+                parse(text)  # Відсутність зламаних дужок або рядків.
+                for form in forms:
+                    self.assertEqual(text.count(form), 1, (path, form))
+                    mutant = text.replace(form, "(як-є (пошкоджене-повідомлення))", 1)
+                    self.assertNotIn(form, mutant)
+                self.assertNotIn('(перше (читати-всі "', text)
+                self.assertEqual(text.count("(читати-всі"), file_readers)
+                self.assertIn("(так", text)
+
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
