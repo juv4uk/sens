@@ -145,6 +145,22 @@ fn an_ordinary_value_is_not_a_tagged_result() {
 }
 
 #[test]
+fn ukrainian_status_predicate_rejects_composite_head_as_d1_no() {
+    let source = "(результат-позначений? (як-є ((вкладений-тег) значення)))";
+    let actual = eval_result_status_value(source);
+    assert_eq!(
+        actual.as_predicate_bit(),
+        Some(false),
+        "Складена голова не є протокольною міткою: {actual}"
+    );
+
+    let valid = eval_result_status_value(
+        "(результат-позначений? (як-є (proved твердження ())))"
+    );
+    assert_eq!(valid.as_predicate_bit(), Some(true));
+}
+
+#[test]
 fn result_status_predicates_are_exact_d1_bits() {
     for (source, expected) in [
         ("(result-tagged? (make-unknown (quote x)))", true),
