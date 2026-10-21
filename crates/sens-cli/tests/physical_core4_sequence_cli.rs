@@ -315,6 +315,15 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-cdar-dotted-tail-atom",
         "d4-append-associative-third",
 
+        "d4-not-atom-cons",
+        "d4-double-not-atom-nil",
+        "d4-null-after-cdr-one",
+        "d4-cddr-third-in-three",
+        "d4-caar-two-inner-atoms",
+        "d4-cdar-exact-atom-tail",
+        "d4-cadr-from-cons-tail",
+        "d4-append-three-order",
+        "d4-not-eq-distinct-symbols",
 ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
