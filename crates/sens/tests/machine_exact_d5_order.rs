@@ -86,6 +86,54 @@ fn decode_order_tail(bytes: &[u8]) -> Option<OrderTail> {
 }
 
 #[test]
+fn x86_register_field_bits_use_real_d5_numeric_comparison() {
+    // Виконуємо чинні Lisp-визначення через SENS; Rust тут лише runner.
+    // D3 EQ залишається для атомів ISA, але не для чисел D24+.
+    let source = fs::read_to_string(repo_root().join("lib/machine/encoding/x86-64.lisp"))
+        .expect("актуальний український машинний кодер");
+    let marker = "(визначити машина-числа-рівні?";
+    let start = source.find(marker).expect("чинна D5 числова рівність");
+    let end = source[start..]
+        .find("\n; REX —")
+        .map(|offset| start + offset)
+        .expect("кінець лише двох числових селекторів");
+    let definitions = &source[start..end];
+    assert!(!definitions.contains("(тотожне? код "),
+        "D3 EQ не може порівнювати математичне D24+");
+    assert_eq!(definitions.matches("(машина-числа-рівні? код ").count(), 32);
+
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("живий SENS Core4");
+    let parsed = parse(definitions).expect("дійсний Lisp");
+    let exact = sens::source_projection::project_ukr_decimal_integer_literals(
+        &parsed, definitions,
+    ).expect("точний D24+ з людських десяткових чисел");
+    sens::eval_parsed_expressions(&exact, &mut session)
+        .expect("справжній SENS визначає три функції");
+
+    for (input, low, high) in [
+        ("0", "0", "0"), ("1", "1", "0"),
+        ("7", "7", "0"), ("8", "0", "1"),
+        ("15", "7", "1"), ("-1", "()", "()"), ("16", "()", "()"),
+    ] {
+        for (function, expected) in [
+            ("машина-молодші-три-біти", low),
+            ("машина-старший-біт", high),
+        ] {
+            let expression = format!("({function} {input})");
+            let parsed = parse(&expression).expect("український виклик SENS");
+            let exact = sens::source_projection::project_ukr_decimal_integer_literals(
+                &parsed, &expression,
+            ).expect("точний D24+ аргумент");
+            let actual = sens::eval_parsed_expressions(&exact, &mut session)
+                .unwrap_or_else(|error| panic!("реальний SENS {expression}: {error}"))
+                .value.to_string();
+            assert_eq!(actual, expected, "{expression}");
+        }
+    }
+}
+
+#[test]
 fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
     // Беремо точне чинне українське DEFINE з репозиторію, не створюємо
     // Python-імітації чи другий код закону. D5 вирішує порядок у SENS.
