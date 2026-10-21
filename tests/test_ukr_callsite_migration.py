@@ -415,7 +415,12 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         self.assertIn("(так", map_source)
         self.assertNotIn("#d1:0", life_source)
         self.assertIn("(нехай-послідовно ", life_source)
-        self.assertIn("(так ні)", life_source)
+        # Чинний LIFE-1 виводить D1 без голих host-істин.
+        # Позитивний та негативний біти будуються живими D3 ATOM.
+        self.assertNotIn("(так ні)", life_source)
+        self.assertIn("(атом? (як-є ()))", life_source)
+        self.assertIn("(атом? (як-є (()))", life_source)
+        self.assertIn("(хибне? (атом? проєкції))", life_source)
         sample = "(як-є (100 цитоване)) (сполучити (як-є ліве) (як-є ()))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
         self.assertNotIn("100", heads)
