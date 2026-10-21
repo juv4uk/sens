@@ -13,7 +13,7 @@ NAMES = ("smoke-quote", "smoke-atom", "smoke-cond", "smoke-nested")
 
 class ThreeProjectionMigrationTests(unittest.TestCase):
     def test_pinned_source_and_canonical_pairs(self):
-        original = ROOT / "tests/fixtures/canonical-binary-smoke.lisp"
+        original = ROOT / "tests/fixtures/canonical-binary-smoke.bits"
         source_lines = original.read_text(encoding="ascii").splitlines()
         self.assertEqual(len(source_lines), 4)
         for name, source_line in zip(NAMES, source_lines):

@@ -6,7 +6,7 @@ use sens::{
     wire_encode_program, Expr, ExprKind, Session, Value,
 };
 
-const SOURCE: &str = include_str!("../../../tests/fixtures/canonical-binary-smoke.lisp");
+const SOURCE: &str = include_str!("../../../tests/fixtures/canonical-binary-smoke.bits");
 
 fn assert_exact_binary_tree(expr: &Expr) {
     match &expr.kind {
@@ -28,7 +28,7 @@ fn assert_exact_binary_tree(expr: &Expr) {
 fn only_bits_are_enough_for_quote_atom_cond_and_cons() {
     assert!(
         SOURCE.bytes().all(|byte| byte == b'0' || byte == b'1' || byte.is_ascii_whitespace()),
-        "physical .lisp source must contain no human names or punctuation"
+        "exact-bit .bits witness must contain no human names or punctuation"
     );
 
     let parsed = parse_canonical_binary(SOURCE).expect("canonical D1/D2/D3 binary program");
