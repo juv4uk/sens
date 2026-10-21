@@ -6,12 +6,27 @@ from pathlib import Path
 import unittest
 import subprocess
 import tempfile
+import os
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts/execute_changed_lisp_t5m.sh"
 CI = ROOT / ".github/workflows/ci.yml"
 
 class ChangedLispT5MRouteTests(unittest.TestCase):
+    def setUp(self):
+        # Історичні fixtures нижче перевіряють тільки явний preview,
+        # а не типовий native SENS/T5M. Повертаємо env після тесту.
+        legacy = patch.dict(os.environ, {"SENS_NATIVE_T5M": "0"})
+        legacy.start()
+        self.addCleanup(legacy.stop)
+
+    def test_default_path_requires_no_python_or_json(self):
+        script = RUNNER.read_text(encoding="utf-8")
+        self.assertEqual(script.count('${SENS_NATIVE_T5M:-1}'), 2)
+        self.assertLess(script.index('run_native_t5m_program'),
+                        script.index('python3 scripts/migrate-three-pass.py'))
+
     def test_native_route_without_python_or_json_and_true_red_propagation(self):
         # Це тест ТІЛЬКИ shell-оркестрації. Семантику виконує CI через
         # реальний sens --t5m-pair, а не цей замінник командного інтерфейсу.
@@ -43,6 +58,15 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                                 capture_output=True, text=True, timeout=20)
             self.assertEqual(ok.returncode, 0, ok.stdout + ok.stderr)
             self.assertIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", ok.stdout)
+            # При невстановленому SENS_NATIVE_T5M справжнім типовим шляхом
+            # лишається той самий native SENS, без виклику Python/JSON.
+            default_env = dict(environment)
+            default_env.pop("SENS_NATIVE_T5M", None)
+            default = subprocess.run(cmd, cwd=root, env=default_env,
+                                     capture_output=True, text=True, timeout=20)
+            self.assertEqual(default.returncode, 0, default.stdout + default.stderr)
+            self.assertIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", default.stdout)
+            self.assertNotIn("T5M_MIGRATION_NO_REPORT", default.stderr)
             self.assertNotIn("T5M_MIGRATION_NO_REPORT", ok.stderr)
             self.assertTrue(list((root / "evidence").glob("*/module.sens")))
             (root / "reject-pair").touch()
