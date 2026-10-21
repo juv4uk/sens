@@ -15,7 +15,8 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import sens_spaced_view as view
-from sens_t5_codec import SensT5Error, decode_bytes, encode_words
+from sens_t5_codec import (SensT5Error, decode_bytes, encode_words,
+                           decode_t5m_bytes, encode_t5m_projection)
 
 FIXTURE = ROOT / "tests/fixtures/migration-d1-cond-cohort"
 EXPECTED = "10 110 00 10 0 00 10 100 00 000 01 01 00 10 1 00 1 01 01\n"
@@ -126,6 +127,23 @@ class PhysicalSpacedViewTests(unittest.TestCase):
         with self.assertRaisesRegex(view.ViewError, "Rust D2"):
             view.check_or_stage(self.root, "fixtures/branch.sens", reader=Path(reader))
 
+    def test_default_t5m_preserves_d24_word_and_fails_on_drift(self):
+        # Перевіряємо тільки транспорт/view, не семантику та не native eval.
+        words = ["101010101010101010101010", "001", "10"]
+        physical = encode_t5m_projection(" ".join(words))
+        self.sens.write_bytes(physical)
+        self.plain.write_bytes((" ".join(words) + "\n").encode("ascii"))
+        report = view.check_or_stage(self.root, "fixtures/branch.sens")
+        self.assertEqual(report["physical_codec"], "t5m")
+        self.assertEqual(report["words"], 3)
+        self.assertEqual(decode_t5m_bytes(physical), words)
+        self.assertFalse(report["release_admitted"])
+        with self.assertRaises((SensT5Error, view.ViewError)):
+            view.check_or_stage(self.root, "fixtures/branch.sens", codec="t5")
+        self.plain.write_bytes(b"0\n")
+        with self.assertRaises(view.ViewError):
+            view.check_or_stage(self.root, "fixtures/branch.sens")
+
     def test_distinct_domain_widths_survive_cycle(self):
         sequence = ["0", "00", "000", "1", "10", "101010101"]
         physical = encode_words(sequence)
@@ -146,11 +164,15 @@ class PhysicalSpacedViewTests(unittest.TestCase):
     def test_view_rejects_all_noncanonical_whitespace_and_content(self):
         bad = [b"", b"\n", b"0", b"0\n\n", b" 0\n", b"0 \n", b"0  1\n",
                b"0\t1\n", b"0\r\n", b"0\x001\n", b"0\xc2\xa01\n",
-               b"0 2\n", b"0000000000\n", b"D3:110\n",
+               b"0 2\n", b"D3:110\n",
                b"(110)\n", b"0b1\n", b"1 # comment\n"]
         for data in bad:
             with self.subTest(data=data), self.assertRaises(view.ViewError):
                 view.parse_view(data)
+        # Лише явний історичний T5 обмежений дев'ятьма бітами.
+        with self.assertRaises(view.ViewError):
+            view.parse_view(b"0000000000\n", codec="t5")
+        self.assertEqual(view.parse_view(b"0000000000\n"), ["0000000000"])
 
     def test_verified_pair_rejects_stale_view(self):
         cases = [b"0\n", EXPECTED.encode("ascii") + b"\n",
@@ -212,7 +234,8 @@ class PhysicalSpacedViewTests(unittest.TestCase):
         run = subprocess.run(cmd, capture_output=True, text=True)
         self.assertEqual(run.returncode, 0, run.stderr)
         report = json.loads(run.stdout)
-        self.assertEqual(report["schema"], "sens-t5-spaced-view/v1")
+        self.assertEqual(report["schema"], "sens-t5m-spaced-view/v1")
+        self.assertEqual(report["physical_codec"], "t5m")
         self.assertEqual(report["view"], "fixtures/branch")
         self.assertEqual(len(report["typed_word_sha256"]), 64)
         self.assertFalse(report["release_admitted"])
