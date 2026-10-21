@@ -191,6 +191,41 @@ class SelectedOriginalT5(unittest.TestCase):
                 "(01001000 000)\n", ambiguous_head, text7,
                 source_surface="укр", codec="t5")
 
+    def test_preloaded_lisp_closure_is_not_fabricated_d9_callability(self):
+        # Доказ DEFINE походить із чинного завантаженого Lisp-файла,
+        # а не з ратифікованості координати D9 без механізму.
+        migration = app.load_migrator()
+        foundation = migration.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
+        my, upper, _retired = migration.build_three_pass_maps(
+            foundation,
+            ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
+            ROOT / "crates/sens/src/semantic_registry_generated.rs",
+            ROOT / "crates/sens/src/semantic_registry.rs",
+            ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
+        )
+        text7 = migration.build_text7(
+            foundation, ROOT / "knowledge/d7-keyboard-v2-ratified.json")
+        program = "(модуль-відомий? (як-є зоря))\n"
+        without = migration.Resolver(my, upper)
+        with self.assertRaisesRegex(migration.MigrationError, "101010010"):
+            migration.migrate_file(
+                program, without, text7, codec="t5m", source_surface="укр")
+        imported_source = (ROOT / "lib/knowledge.lisp").read_text(encoding="utf-8")
+        forms = migration.Parser(migration.tokenize(
+            migration.strip_comments(imported_source),
+            source_surface="укр",
+        )).parse_program()
+        imported = migration.collect_global_bindings(forms)
+        self.assertIn("модуль-відомий?", {name for name, _ in imported})
+        with_preload = migration.Resolver(my, upper)
+        words = migration.migrate_file(
+            program, with_preload, text7, codec="t5m", source_surface="укр",
+            imported_bindings=imported,
+        )
+        self.assertNotIn("101010010", words.split())
+        self.assertEqual(with_preload.counts["pass4-text7-global"], 1)
+        self.assertTrue(words.startswith("10 10 "), words)
+
     def test_real_unpaired_original_files_are_audited_not_converted(self):
         # These are tracked old files, not fabricated canaries or newly authored
         # snapshots. They include local binding, Text7 and machine-data issues.
