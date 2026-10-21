@@ -15,23 +15,36 @@ MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
 
 class UkrainianT5MDefaultContract(unittest.TestCase):
     def test_ci_never_treats_human_lisp_as_physical_t5m(self):
-        # Це контракт маршруту, а НЕ Python-підміна семантики SENS.
+        # Структурний закон маршруту, а не Python-імітація виконання SENS.
+        # У CI лишається один виклик: скрипт створює Zig/T5M-пару, після
+        # чого фізичні байти передаються реальному виконуваному SENS.
         workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
+            encoding="utf-8"
+        )
         start = workflow.index(
             "      - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS"
         )
         end = workflow.index("      # Одноразове вимірювання T5M", start)
         execution = workflow[start:end]
-        self.assertIn('python3 scripts/migrate-three-pass.py "$file"', execution)
-        self.assertIn('--codec t5m --source-surface укр', execution)
-        # Відповідно до чинного CLI: --t5m-file приймає текстовий .lisp,
-        # сам виконує Zig/T5M і не читає готовий .sens як UTF-8-джерело.
-        # Фізичний артефакт перевіряється ОКРЕМО в міграторі.
-        self.assertIn('physical="$output/$name.sens"', execution)
-        self.assertIn('"$binary" --t5m-file "$file"', execution)
-        self.assertNotIn('"$binary" --t5m-file "$physical"', execution)
-        self.assertIn('T5M_SOURCE_MIGRATION_BLOCKED', execution)
-        self.assertNotIn('T5M_FILE_EXECUTION_EMPTY_RESULT', execution)
+        self.assertIn("bash scripts/execute_changed_lisp_t5m.sh", execution)
+        self.assertNotIn('--t5m-file "$file"', execution)
+        self.assertIn('python3 scripts/migrate-three-pass.py "$file"', runner)
+        self.assertIn('--codec t5m --source-surface укр', runner)
+        self.assertIn('pair="$dir/$(basename "$file" .lisp).sens"', runner)
+        self.assertIn('"$binary" --t5m-file "$pair"', runner)
+        self.assertNotIn('"$binary" --t5m-file "$file"', runner)
+        self.assertLess(
+            runner.index('scripts/migrate-three-pass.py "$file"'),
+            runner.index('"$binary" --t5m-file "$pair"'),
+        )
+        # Невдалі та непідтверджені програми лишаються видимими.
+        for receipt in ("T5M_MIGRATION_NO_REPORT", "T5M_MIGRATION_UNPROVEN",
+                        "T5M_COMMITTED_PAIR_DRIFT", "T5M_FILE_EXECUTION_FAIL",
+                        "semantic=NOT_CERTIFIED"):
+            with self.subTest(receipt=receipt):
+                self.assertIn(receipt, runner)
+        self.assertNotIn("T5M_FILE_EXECUTION_EMPTY_RESULT", runner)
 
     def test_default_ukr_preserves_program_identity_not_source_comments(self):
         with tempfile.TemporaryDirectory(prefix="sens-ukr-t5m-default-") as temp:
