@@ -1,7 +1,7 @@
 //! Реальний Rust-оракул мігрованого Advice Taker Lisp джерела.
 //! Без обхідних host-макетів: завантажуємо source-pinned ядро й справжній
 //! `lib/understand.lisp` через точнодоменний D3/D4 reader.
-use sens::{eval_parsed_expressions, load_core_library, parse_mixed_exact_domain, Session};
+use sens::{eval_parsed_expressions, load_core_library, lower_program, parse_mixed_exact_domain, Session};
 
 fn loaded() -> Session {
     let mut session = Session::default();
@@ -11,14 +11,18 @@ fn loaded() -> Session {
         .expect("точнодоменне ядро SENS має завантажитись");
     let forms = parse_mixed_exact_domain(include_str!("../../../lib/understand.lisp"))
         .expect("D3/D4 заголовки мають розпізнаватися без W8-підміни");
-    eval_parsed_expressions(&forms, &mut session)
+    // Лексичні українські D1 значення потрібні у виконуваній
+    // двійковій формі; цитати залишаються незмінними даними.
+    let lowered = lower_program(&forms);
+    eval_parsed_expressions(&lowered, &mut session)
         .expect("реальний understand-модуль повинен завантажитися");
     session
 }
 
 fn run(session: &mut Session, source: &str) -> String {
     let forms = parse_mixed_exact_domain(source).expect("правильне D3 джерело");
-    eval_parsed_expressions(&forms, session)
+    let lowered = lower_program(&forms);
+    eval_parsed_expressions(&lowered, session)
         .unwrap_or_else(|error| panic!("виконання {source} не пройшло: {error:?}"))
         .value
         .to_string()
