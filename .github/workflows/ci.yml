@@ -454,7 +454,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test core4_migration_point core4_ukrainian_structural_equality_executes_both_d1_bits -- --exact --nocapture
+          cargo test --locked -p sens --test core4_migration_point core4_ukrainian_ -- --nocapture
           cargo test --locked -p sens --test yantra yantra_json_string_classifier_yields_d1_condition_from_structured_witness -- --exact --nocapture
           cargo test --locked -p sens --test yantra yantra_json_d1_boolean_values_are_distinct -- --exact --nocapture
           cargo test --locked -p sens --test yantra yantra_json_class_membership_is_a_checked_d3_triple -- --exact --nocapture
