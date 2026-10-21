@@ -41,6 +41,26 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                 self.assertIn('failed_files=$((failed_files + 1))', arm)
         self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
 
+    def test_stale_committed_pair_does_not_hide_current_sens_execution(self):
+        # Стара фізична пара — це RED для релізу, а не привід приховати
+        # виконання НОВОЇ пари. Це guard shell-маршруту, не Python-eval SENS.
+        source = RUNNER.read_text(encoding="utf-8")
+        start = source.index("  committed_drift=0")
+        execution = source.index('  if timeout 45s "$binary" "$pair"', start)
+        checks = source[start:execution]
+        for receipt in ("T5M_COMMITTED_PAIR_DRIFT",
+                        "T5M_COMMITTED_VIEW_MISSING",
+                        "T5M_COMMITTED_VIEW_DRIFT"):
+            self.assertIn(receipt, checks)
+        # Жодне з трьох розходжень не перескакує через фізичний SENS.
+        self.assertNotIn("continue", checks.lower())
+        self.assertIn("committed_drift=1", checks)
+        self.assertIn("failed_files=$((failed_files + 1))", checks)
+        self.assertIn("T5M_DIAGNOSTICS_CONTINUE", checks)
+        self.assertIn("committed_drift=$committed_drift semantic=NOT_CERTIFIED",
+                      source[execution:])
+        self.assertIn("if (( failed_files > 0 )); then\\n  exit 2", source)
+
     def test_w24_uses_explicit_domain_source_runtime_without_fake_physical_pass(self):
         # Це контроль маршрутів, а не Python-обчислення Lisp.
         source = RUNNER.read_text(encoding="utf-8")
