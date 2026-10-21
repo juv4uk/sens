@@ -105,7 +105,7 @@ jobs:
       - name: Ізольовані перевірки інсталятора
         run: python3 -m unittest discover -s packaging/tests -p test_install.py -v
 
-      - name: Український Lisp ↔ SENS: чинний T5M, облік програм і негативні свідки
+      - name: "Український Lisp ↔ SENS: чинний T5M, облік програм і негативні свідки"
         shell: bash
         run: |
           set -euo pipefail
