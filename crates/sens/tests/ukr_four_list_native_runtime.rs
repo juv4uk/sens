@@ -60,3 +60,74 @@ fn swap_second_third_preserves_outer_positions_and_rejects_identity_swap() {
         "(перше (решта четвірка))",
     );
 }
+
+
+#[test]
+fn pair_swap_executes_car_cdr_involution_and_rejects_identity() {
+    execute_with_negative(
+        "lib/pair-swap.lisp",
+        include_str!("../../../lib/pair-swap.lisp"),
+        "(сполучити (решта пара) (перше пара))",
+        "(сполучити (перше пара) (решта пара))",
+    );
+}
+
+#[test]
+fn pair_replace_first_executes_tail_preservation_and_rejects_old_head() {
+    execute_with_negative(
+        "lib/pair-replace-first.lisp",
+        include_str!("../../../lib/pair-replace-first.lisp"),
+        "(сполучити нове (решта пара))",
+        "(сполучити (перше пара) (решта пара))",
+    );
+}
+
+#[test]
+fn pair_replace_rest_executes_head_preservation_and_rejects_old_tail() {
+    execute_with_negative(
+        "lib/pair-replace-rest.lisp",
+        include_str!("../../../lib/pair-replace-rest.lisp"),
+        "(сполучити (перше пара) новий-хвіст)",
+        "(сполучити (перше пара) (решта пара))",
+    );
+}
+
+#[test]
+fn interleave_pairs_executes_four_positions_and_rejects_duplicate_second() {
+    execute_with_negative(
+        "lib/interleave-pairs.lisp",
+        include_str!("../../../lib/interleave-pairs.lisp"),
+        "(перше друга-пара)",
+        "(перше перша-пара)",
+    );
+}
+
+#[test]
+fn zip_unzip_two_executes_inverse_and_rejects_swapped_pair() {
+    execute_with_negative(
+        "lib/pair-zip-unzip-two.lisp",
+        include_str!("../../../lib/pair-zip-unzip-two.lisp"),
+        "(сполучити (перше ліві) (перше праві))",
+        "(сполучити (перше праві) (перше ліві))",
+    );
+}
+
+#[test]
+fn delete_second_executes_removal_and_rejects_unchanged_list() {
+    execute_with_negative(
+        "lib/list-delete-second.lisp",
+        include_str!("../../../lib/list-delete-second.lisp"),
+        "(сполучити (перше елементи) (решта-решти елементи))",
+        "(сполучити (перше елементи) (решта елементи))",
+    );
+}
+
+#[test]
+fn insert_second_executes_insertion_and_rejects_duplicate_first() {
+    execute_with_negative(
+        "lib/list-insert-second.lisp",
+        include_str!("../../../lib/list-insert-second.lisp"),
+        "(сполучити вставлене (решта елементи))",
+        "(сполучити (перше елементи) (решта елементи))",
+    );
+}
