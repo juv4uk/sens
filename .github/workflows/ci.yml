@@ -224,7 +224,11 @@ jobs:
           fi
 
           # Справжнє SENS-виконання змінюваного Core4/JSON, не Python-макет.
-          if grep -Eq '^(lib/core4\\.lisp|lib/yantra\\.lisp|crates/sens/tests/yantra\\.rs|\\.github/workflows/ci\\.yml)
+          if grep -Eq '^(lib/core4\.lisp|lib/yantra\.lisp|crates/sens/tests/yantra\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'yantra_runtime_tests=true' >> "$GITHUB_OUTPUT"
+          fi
+
+          # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
@@ -872,11 +876,6 @@ jobs:
           else
             echo "SENS CHECKS PASS: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT; release requires corpus admission"
           fi
- "$changed_all"; then
-            echo 'yantra_runtime_tests=true' >> "$GITHUB_OUTPUT"
-          fi
-
-          # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
