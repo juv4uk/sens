@@ -2,8 +2,9 @@
 ; Семантику задає ратифікований закон SENS. Таблиця нижче лише описує
 ; доступні обмежені машинні реалізації та їхні підтверджені свідчення.
 ;
-; Ключ таблиці: (ширина-домену упаковані-біти). Обидва поля — звичайні
-; десяткові дані механізму, отримані з точного домену поза цим файлом.
+; Ключ таблиці: (ширина-домену упаковані-біти). Обидва поля —
+; обчислені числові значення D24+, не текстові атоми всередині QUOTE.
+; Описи можливостей залишаються незмінними цитованими даними.
 ; Рівність другого поля не дає права відкидати перше.
 ; Жодних сід8/сенс8-псевдонімів, повторного визначення семантики
 ; або прихованого перенесення значень між доменами.
@@ -15,36 +16,22 @@
 ; Каталоги перевіряються на збереження точних наявних записів.
 
 (визначити вісь-спроможностей-машини-версія-3
-  (як-є
-    ((5 8
-       ((integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary)))
-     (5 10
-       ((integer-add bounded-u32-inputs u64-result)))
-     (5 11
-       ((integer-subtract bounded-u64 no-underflow)))
-     (5 22
-       ((integer-multiply bounded-u32-inputs u64-result)))
-     (5 23
-       ((integer-quotient bounded-positive-i64 equal-operands-only)))
-     (5 26
-       ((integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary)))
-     (5 27
-       ((integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary)))
-     (6 14
-       ((integer-increment bounded-u64 no-overflow)))
-     (6 15
-       ((integer-decrement bounded-u64 no-underflow)))
-     (3 5
-       ((identity-compare bounded-u64)))
-     (3 6
-       ((conditional-branch bounded-u64)))
-     (3 7
-       ((pair-field-store head bounded-u64)
-        (pair-field-store tail bounded-u64)))
-     (3 4
-       ((pair-field-load head bounded-u64)))
-     (3 3
-       ((pair-field-load tail bounded-u64))))))
+  (список
+    (список 5 8 (як-є ((integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary))))
+    (список 5 10 (як-є ((integer-add bounded-u32-inputs u64-result))))
+    (список 5 11 (як-є ((integer-subtract bounded-u64 no-underflow))))
+    (список 5 22 (як-є ((integer-multiply bounded-u32-inputs u64-result))))
+    (список 5 23 (як-є ((integer-quotient bounded-positive-i64 equal-operands-only))))
+    (список 5 26 (як-є ((integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary))))
+    (список 5 27 (як-є ((integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary))))
+    (список 6 14 (як-є ((integer-increment bounded-u64 no-overflow))))
+    (список 6 15 (як-є ((integer-decrement bounded-u64 no-underflow))))
+    (список 3 5 (як-є ((identity-compare bounded-u64))))
+    (список 3 6 (як-є ((conditional-branch bounded-u64))))
+    (список 3 7 (як-є ((pair-field-store head bounded-u64)
+        (pair-field-store tail bounded-u64))))
+    (список 3 4 (як-є ((pair-field-load head bounded-u64))))
+    (список 3 3 (як-є ((pair-field-load tail bounded-u64))))))
 
 (визначити свідки-цілей-спроможності-машини-версія-2
   (як-є
