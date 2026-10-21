@@ -65,3 +65,39 @@ fn function_listing_empty_input_evaluates_real_d1_without_textual_true() {
         "test_id=gen-functions-d1 layer=SENS input=() expected=D3:000 empty"
     );
 }
+
+#[test]
+fn oracle_batch_selects_cli_peer_with_live_sens_cond() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("test_id=oracle-batch-peer SENS core");
+    let source = include_str!("../../../scripts/oracle-batch.lisp");
+    install_section(
+        source,
+        "(визначити адреса-оракула",
+        "\n(визначити обчислити-через-оракул",
+        &mut session,
+    );
+
+    // Відсутній аргумент: старий вузол зберігається, D1 вирішує першу гілку.
+    session.environment.define("*argv*", sens::Value::Nil);
+    let default_peer = eval_program("(адреса-оракула)", &mut session)
+        .expect("test_id=oracle-batch-peer layer=SENS default D1");
+    assert_eq!(
+        default_peer.value,
+        sens::Value::String(std::rc::Rc::from("100.113.68.50")),
+        "test_id=oracle-batch-peer input=empty-argv expected=old-peer",
+    );
+
+    // Явний локальний вузол: друга гілка SENS читає перший елемент списку.
+    session.environment.define(
+        "*argv*",
+        sens::Value::list([sens::Value::String(std::rc::Rc::from("127.0.0.1"))]),
+    );
+    let selected_peer = eval_program("(адреса-оракула)", &mut session)
+        .expect("test_id=oracle-batch-peer layer=SENS explicit D1");
+    assert_eq!(
+        selected_peer.value,
+        sens::Value::String(std::rc::Rc::from("127.0.0.1")),
+        "test_id=oracle-batch-peer input=local-argv expected=local-peer",
+    );
+}
