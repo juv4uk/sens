@@ -47,7 +47,7 @@
         },
         {
           "kind": "fixture",
-          "expr": "(unify (quote (var x)) (quote (f (var x))) (quote ()))"
+          "expr": "(уніфікувати (як-є (var x)) (як-є (f (var x))) (як-є ()))"
         }
       ]
     },
@@ -86,11 +86,11 @@
         },
         {
           "kind": "fixture",
-          "expr": "(understand (quote (earth is a planet)))"
+          "expr": "(розібрати (як-є (earth is a planet)))"
         },
         {
           "kind": "fixture",
-          "expr": "(narrate-fact (car (understand (quote (earth is a planet)))))"
+          "expr": "(пояснити-факт (перше (розібрати (як-є (earth is a planet)))))"
         }
       ]
     }
