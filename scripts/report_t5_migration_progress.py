@@ -23,7 +23,7 @@ from pathlib import Path, PurePosixPath
 PAIRS_SCHEMA = "sens-t5-file-pair-audit/v1"
 READINESS_SCHEMA = "sens-t5-migration-readiness/v2"
 SCHEMA = "sens-t5-migration-progress/v1"
-VALID_SOURCE_STATES = {"blocked", "would-write"}
+VALID_SOURCE_STATES = {"blocked", "would-write", "not-program"}
 
 
 def _source_name(path: object, *, allow_bits: bool = False) -> str:
@@ -105,6 +105,11 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
             raise ValueError(f"incomplete source-era evidence: {source}")
         if any(v not in VALID_SOURCE_STATES for v in statuses.values()):
             raise ValueError(f"unexpected source-era state: {source}")
+        if statuses["auto"] == "not-program" and row.get("source_scope") not in (
+            "NONPROGRAM_DATA_REVIEWED", "NONPROGRAM_COMMENT_ONLY",
+            "ARCHIVED_BENCHMARK_NONPROGRAM",
+        ):
+            raise ValueError(f"unreviewed not-program in source ledger: {source}")
         if row.get("physical_published") is not False or row.get("semantic_oracle_admitted") is not False:
             raise ValueError(f"unpaired report falsely claims published/admitted: {source}")
         if not isinstance(row.get("source_sha256"), str) or len(row["source_sha256"]) != 64:
@@ -164,10 +169,13 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
             u = queue[source]
             archived = u.get("source_scope") == "ARCHIVED_BENCHMARK_NONPROGRAM"
             reviewed = u.get("source_scope") == "NONPROGRAM_DATA_REVIEWED"
+            comment_only = u.get("source_scope") == "NONPROGRAM_COMMENT_ONLY"
             condition = ("NONPROGRAM_ARCHIVED_NO_EXECUTABLE_T5"
                          if archived else
                          "NONPROGRAM_REVIEWED_NO_EXECUTABLE_T5"
                          if reviewed else
+                         "NONPROGRAM_COMMENT_ONLY_NO_EXECUTABLE_T5"
+                         if comment_only else
                          "MECHANICAL_CANDIDATE_NEEDS_ORACLE"
                          if any(v == "would-write" for v in u["status"].values()) else
                          "UNPAIRED_SOURCE_BLOCKED")
@@ -186,7 +194,8 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
     # Mechanical inventory is not proof that all executable Lisp reverses to SENS.
     # Non-program DATA and archives are deliberately not executable targets.
     nonprogram = {"NONPROGRAM_ARCHIVED_NO_EXECUTABLE_T5",
-                  "NONPROGRAM_REVIEWED_NO_EXECUTABLE_T5"}
+                  "NONPROGRAM_REVIEWED_NO_EXECUTABLE_T5",
+                  "NONPROGRAM_COMMENT_ONLY_NO_EXECUTABLE_T5"}
     executable_rows = [row for row in ledger if row["status"] not in nonprogram]
     semantic_proved = sum(
         row["semantic_admitted"] is True and row["oracle_witness"] is not None

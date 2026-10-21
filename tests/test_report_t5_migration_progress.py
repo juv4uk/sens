@@ -137,6 +137,22 @@ class T5ProgressLedgerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "incomplete source-era"):
             mod.combine(pairs, ready, sources)
 
+    def test_current_nonprogram_status_stays_out_of_executable_denominator(self):
+        pairs, ready, sources = fixtures()
+        item = ready["candidate_rows"][0]
+        item["status"]["auto"] = "not-program"
+        item["source_scope"] = "NONPROGRAM_DATA_REVIEWED"
+        report = mod.combine(pairs, ready, sources)
+        self.assertEqual(report["executable_roundtrip_coverage"]["nonprogram_excluded_from_executable_target"], 2)
+        self.assertFalse(report["all_executable_lisp_roundtrip_verified"])
+        item["source_scope"] = "NONPROGRAM_COMMENT_ONLY"
+        report = mod.combine(pairs, ready, sources)
+        self.assertIn("NONPROGRAM_COMMENT_ONLY_NO_EXECUTABLE_T5",
+                      [row["status"] for row in report["files"]])
+        item["source_scope"] = "UNCLASSIFIED_NEEDS_SOURCE_PROOF"
+        with self.assertRaisesRegex(ValueError, "unreviewed not-program"):
+            mod.combine(pairs, ready, sources)
+
     def test_reviewed_data_never_counts_as_executable_migration(self):
         pairs, ready, sources = fixtures()
         ready["candidate_rows"][0]["source_scope"] = "NONPROGRAM_DATA_REVIEWED"

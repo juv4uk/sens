@@ -75,7 +75,7 @@ def _checked_rows(state: dict, era: str) -> dict[str, dict]:
         if rel.is_absolute() or ".." in rel.parts or name in result:
             raise RuntimeError(f"{era}: invalid or duplicate source path {name!r}")
         result[name] = row
-    if summary["files_written"] != 0 or summary["files_blocked"] + summary["files_would_write"] != len(rows):
+    if summary["files_written"] != 0 or summary["files_blocked"] + summary["files_would_write"] + summary.get("files_not_program", 0) != len(rows):
         raise RuntimeError(f"{era}: migration dry-run accounting disagrees")
     return result
 
@@ -88,6 +88,8 @@ def _candidate_class(statuses: dict[str, str]) -> str:
     # Старий текстовий статус зберігаємо для наявних споживачів.
     if statuses["auto"] == "would-write":
         return "mechanical-candidate-needs-oracle"
+    if statuses["auto"] == "not-program":
+        return "nonprogram-no-executable-artifact"
     return "blocked-needs-semantic-or-nonprogram-triage"
 
 
@@ -144,8 +146,13 @@ def build_report() -> dict:
                 if reviewed_row["semantic_oracle_admitted"] or reviewed_row["automatic_sens_companion"]:
                     raise RuntimeError(f"nonprogram incorrectly granted executable admission: {path}")
             state_one = by_era["auto"][path].get("status", "")
-            if state_one not in ("blocked", "would-write"):
+            if state_one not in ("blocked", "would-write", "not-program"):
                 raise RuntimeError(f"unrecognized migration status on {path}: {state_one}")
+            reason = by_era["auto"][path].get("reason") or ""
+            comment_only = (state_one == "not-program" and reviewed_row is None
+                            and reason == "NONPROGRAM_COMMENT_ONLY layer=source")
+            if state_one == "not-program" and reviewed_row is None and not comment_only:
+                raise RuntimeError(f"unreviewed not-program claim on {path}: {reason}")
             cohort = _candidate_class({"auto": state_one})
             queues[cohort] += 1
             queue_rows.append({
@@ -153,6 +160,7 @@ def build_report() -> dict:
                 "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                 "queue": cohort,
                 "source_scope": (reviewed_row["source_class"] if reviewed_row
+                                 else "NONPROGRAM_COMMENT_ONLY" if comment_only
                                  else scope(path)),
                 "reviewed_nonprogram_cohort": (reviewed_row["cohort"] if reviewed_row
                                                else None),
@@ -177,17 +185,20 @@ def build_report() -> dict:
         nonarchive_auto = [
             row for row in queue_rows
             if row["source_scope"] not in ("ARCHIVED_BENCHMARK_NONPROGRAM",
-                                          "NONPROGRAM_DATA_REVIEWED")
+                                          "NONPROGRAM_DATA_REVIEWED",
+                                          "NONPROGRAM_COMMENT_ONLY")
             and row["status"]["auto"] == "would-write"
         ]
         actionable_rows = [
             row for row in queue_rows
             if row["source_scope"] not in ("ARCHIVED_BENCHMARK_NONPROGRAM",
-                                          "NONPROGRAM_DATA_REVIEWED")
+                                          "NONPROGRAM_DATA_REVIEWED",
+                                          "NONPROGRAM_COMMENT_ONLY")
         ]
         actionable_queues = collections.Counter(row["queue"] for row in actionable_rows)
         if len(actionable_rows) + len(reviewed) + sum(
-                row["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"
+                row["source_scope"] in ("ARCHIVED_BENCHMARK_NONPROGRAM",
+                                       "NONPROGRAM_COMMENT_ONLY")
                 for row in queue_rows) != len(queue_rows):
             raise RuntimeError("source class partitions overlap or omit originals")
 
@@ -238,6 +249,10 @@ def build_report() -> dict:
                     for cohort in sorted({x["cohort"] for x in reviewed.values()})
                 },
                 "active_or_unknown_originals": len(actionable_rows),
+                "comment_only_not_executable": sum(
+                    row["source_scope"] == "NONPROGRAM_COMMENT_ONLY"
+                    for row in queue_rows
+                ),
                 "archived_benchmark_mechanical_only": len(archived_auto),
                 "nonarchive_mechanical_unproved": len(nonarchive_auto),
                 "archived_candidate_paths": [row["path"] for row in archived_auto],
@@ -255,12 +270,16 @@ def build_report() -> dict:
                     and summary["files_blocked"] == sum(
                         row["status"]["auto"] == "blocked" for row in queue_rows
                     )
+                    and summary.get("files_not_program", 0) == sum(
+                        row["status"]["auto"] == "not-program" for row in queue_rows
+                    )
                     # A new mechanical candidate is progress in the source
                     # inventory, not semantic admission. Keep it visible in
                     # nonarchive_candidate_paths; only native SENS evidence
                     # can close the separate executable/release requirement.
                     # Do not turn a valid read-only census into a CI red.
-                    and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
+                    and summary["files_blocked"] + summary["files_would_write"]
+                        + summary.get("files_not_program", 0) == summary["files_seen"]
                 ),
                 "rule": "read-only AUTO census PASS means only complete bookkeeping; it emits no .sens, grants no executable credit and cannot authorize release",
             },

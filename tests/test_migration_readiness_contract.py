@@ -83,6 +83,24 @@ class ReadinessContractTests(unittest.TestCase):
         self.addCleanup(mock.stop)
 
 
+    def test_not_program_is_not_an_executable_blocker_or_a_fake_oracle(self):
+        state = {
+            "summary": {
+                "files_seen": 2, "files_written": 0, "files_blocked": 0,
+                "files_would_write": 1, "files_not_program": 1,
+            },
+            "files": [
+                {"path": "lib/surface/ukr.lisp", "status": "not-program",
+                 "reason": "NONPROGRAM_DATA_NOT_EXECUTABLE layer=encode"},
+                {"path": "tests/fixtures/core1-third-domain-canary/third.lisp",
+                 "status": "would-write"},
+            ],
+        }
+        self.assertEqual(census._checked_rows(state, "auto")["lib/surface/ukr.lisp"]["status"], "not-program")
+        state["summary"]["files_not_program"] = 0
+        with self.assertRaisesRegex(RuntimeError, "accounting disagrees"):
+            census._checked_rows(state, "auto")
+
     def test_original_source_symlinks_are_rejected_before_resolution(self):
         # Джерело перевіряється до розіменування. Ніяких SENS-fake тестів.
         import tempfile
