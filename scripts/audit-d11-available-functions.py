@@ -112,6 +112,21 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
             {bits: key_upper(name) for bits, name in aggregate["domains"]["D10"]["residents"].items()},
             "D10_AGGREGATE", "D10 aggregate does not match pinned owner inventory")
 
+    # 512 селекторів уже визначені композицією 256 чинних селекторів D10.
+    # Не дозволяти бібліотечним переможцям займати їхні математичні адреси.
+    selector_parents = {
+        bits for bits, name in by_code.items()
+        if len(name) == 10 and name.startswith("C") and name.endswith("R")
+        and len(name[1:-1]) == 8 and set(name[1:-1]) <= {"A", "D"}
+    }
+    require(len(selector_parents) == 256, "D11_DERIVED_PARENTS",
+            f"expected 256 exact selector parents, got {len(selector_parents)}")
+    mathematically_defined_selector_codes = {
+        bits + suffix for bits in selector_parents for suffix in ("0", "1")
+    }
+    require(len(mathematically_defined_selector_codes) == 512, "D11_DERIVED_COUNT",
+            "512 selector laws must be unique")
+
     test_names, test_coordinates = set(), set()
     tests = d11.get("table")
     require(isinstance(tests, list) and len(tests) == 43, "D11_TEST_ROWS", "expected 43 D11 testing entries")
@@ -156,7 +171,8 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
         else:
             coordinate = item.get("coordinate")
             require(isinstance(coordinate, str) and len(coordinate) == 11 and
-                    set(coordinate) <= {"0", "1"} and coordinate not in test_coordinates,
+                    set(coordinate) <= {"0", "1"} and coordinate not in test_coordinates
+                    and coordinate not in mathematically_defined_selector_codes,
                     "WINNER_WIDTH", f"row {index}: invalid/occupied D11 coordinate")
             require(coordinate not in winner_positions,
                     "WINNER_COORD_COLLISION", f"row {index}: repeated winner coordinate")
@@ -263,6 +279,11 @@ def self_test(s: dict, hashes: dict, root: Path) -> int:
     def bad_admission(x):
         x["base"]["rows"][0]["coordinate"] = "00000000000"
     cases.append(("NOT_ADMITTED", bad_admission))
+
+    def bad_selector_overlap(x):
+        winning = next(row for row in x["base"]["rows"] if row.get("winner_20261022"))
+        winning["coordinate"] = "01100000000"
+    cases.append(("WINNER_WIDTH", bad_selector_overlap))
 
     def bad_test_width(x):
         x["d11_test"]["table"][0]["bits"] = "0000000000"
