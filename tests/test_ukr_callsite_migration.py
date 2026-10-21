@@ -1287,7 +1287,11 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         self.assertIn('"00000000"', reader)
         self.assertIn("(читати-всі", reader)  # Чинний D9 peer; викличність незалежна від ширини
         self.assertIn("(визначити потрібний-рівень", tier)
-        self.assertIn("(прочитати (перше *argv*))", tier)
+        # Чинний CLI не має допущеного «прочитати»; допустимі
+        # рівні конституційного корпусу явно зіставляються у SENS.
+        for level in ("1", "2", "3"):
+            self.assertIn(f'(тотожне? (перше *argv*) "{level}")', tier)
+        self.assertNotIn("(прочитати (перше *argv*))", tier)
         self.assertNotIn("(11101010 (100 *argv*))", tier)
         self.assertIn("(визначити надрукувати-відповідні", tier)
         self.assertIn("(решта (знайти-за-ключем (як-є tier) приклад))", tier)
@@ -1350,7 +1354,9 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
                          "(визначити рівень-прикладу",
                          "(визначити надрукувати-відповідні",
                          "(знайти-за-ключем (як-є tier) приклад)",
-                         "(прочитати (перше *argv*))",
+                         '(тотожне? (перше *argv*) "1")',
+                         '(тотожне? (перше *argv*) "2")',
+                         '(тотожне? (перше *argv*) "3")',
                          "(читати-всі (читати-файл ",
                          "(за-умовою", "(друкувати "):
             self.assertIn(required, code)
