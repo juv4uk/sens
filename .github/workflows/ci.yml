@@ -239,6 +239,11 @@ jobs:
             echo 'life_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
+          # Канон: адресний реальний SENS, не строкове порівняння Lisp.
+          if grep -Eq '^(lib/canon\.lisp|crates/sens/tests/canon_d1_migration_cohort\.rs|tests/test_ukr_canon_d4_projection\.py)$' "$changed_all"; then
+            echo 'canon_runtime_tests=true' >> "$GITHUB_OUTPUT"
+            echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+          fi
           # Метаобчислювач перевіряється живим SENS після зміни бібліотеки чи свідка.
           if grep -Eq '^(lib/meta-eval\.lisp|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-lexical-shadow-d1\.sh|tests/semantic/meta-eval-lexical-shadow-d1-(law|mutant|mutants)\.lisp)$' "$changed_all"; then
             echo 'meta_eval_d1_tests=true' >> "$GITHUB_OUTPUT"
@@ -347,6 +352,13 @@ jobs:
           set -euo pipefail
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test life_1_scheduler -- --nocapture
 
+      - name: "Канон — живі позитивні та негативні D1 закони SENS"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.canon_runtime_tests == 'true' }}
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test canon_d1_migration_cohort -- --nocapture
       - name: "Guard/Mechanism D1 — живе SENS та чинні джерельні закони"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' }}
         timeout-minutes: 8
