@@ -165,7 +165,7 @@
       (host-capability "external optional raw-Expr hook cannot define capability-free core semantics")
       (lambda "thunks can delay branch bodies, but current arbitrary-data query matching still needs a selector to choose which thunk to invoke"))
     (lower-bound-hypothesis
-      "Some runtime selective-evaluation power must remain unless a non-eager lower mechanism is exhibited; replacing cond with if/select/branch without reducing that power is renaming, not sculpture."))
+      "Some runtime selective-evaluation power must remain unless a non-eager lower mechanism is exhibited; replacing cond with if/select/branch without reducing that power is renaming, not sculpture.")
     (remaining-question
       "Can canonical three-part cond be derived from a strictly smaller declared selector while preserving arbitrary-value result matching and skipped-branch non-evaluation?"))
 
