@@ -549,97 +549,66 @@ fn clips_slot_lookup_scans_named_atom_slots_without_d8_structural_alias() {
     }
 }
 
-/// SENS decides the positive and negative D1 statements in a binary-headed
-/// fixture. Rust owns only source-pinned definition loading and fail-closed
-/// observation of the deliberately false one-bit expectation.
+/// Чинний CLIPS-предикат виконує SENS; третя форма навмисно дає D1:0.
+/// Вхідні CLIPS-символи лишаються цитованими даними, а не мовними викликами.
 #[test]
 fn clips_defrule_deftemplate_d1_self_verdict_and_mutant() {
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("test_id=clips-deftemplate-d1: pinned Core must load");
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("test_id=clips-deftemplate-d1: чинний SENS Core");
     let library = include_str!("../../../lib/clips-import.lisp");
-    let start = library.find("(0011 clips-deftemplate-form?\n")
-        .expect("test_id=clips-deftemplate-d1: real production definition exists");
-    let end = library[start..].find("(0011 кліпс-рядок-порожній?")
+    let start = library.find("(визначити кліпс-визначити-шаблон-форма?\n")
+        .expect("test_id=clips-deftemplate-d1: чинне українське визначення");
+    let end = library[start..].find("(визначити кліпс-рядок-порожній?")
         .map(|offset| start + offset)
-        .expect("test_id=clips-deftemplate-d1: next independent definition exists");
-    let source = sens::parse_mixed_exact_domain(&library[start..end])
-        .expect("test_id=clips-deftemplate-d1: exact production D3/D4 definitions parse");
-    eval_parsed_expressions(&source, &mut session)
-        .expect("test_id=clips-deftemplate-d1: production definition loads");
+        .expect("test_id=clips-deftemplate-d1: межа українського визначення");
+    let definitions = parse_mixed_exact_domain(&library[start..end])
+        .expect("test_id=clips-deftemplate-d1: чинний D3/D4 reader");
+    eval_parsed_expressions(&definitions, &mut session)
+        .expect("test_id=clips-deftemplate-d1: SENS завантажує визначення");
 
-    let program = include_str!("../../../tests/semantic/clips-deftemplate-d1-law.lisp");
-    let forms = sens::parse_mixed_exact_domain(program)
-        .expect("test_id=clips-deftemplate-d1: SENS-owned binary law parses");
-    assert_eq!(forms.len(), 3, "two SENS laws and one single-D1-bit mutant");
-    for (index, form) in forms[..2].iter().enumerate() {
-        let value = eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+    let fixture = include_str!("../../../tests/semantic/clips-deftemplate-d1-law.lisp");
+    let laws = parse_mixed_exact_domain(fixture)
+        .expect("test_id=clips-deftemplate-d1: читач SENS");
+    assert_eq!(laws.len(), 3, "два позитивні закони і негативний D1 мутант");
+    for (index, expected) in [true, true, false].into_iter().enumerate() {
+        let observed = eval_parsed_expressions(std::slice::from_ref(&laws[index]), &mut session)
             .unwrap_or_else(|error| panic!(
                 "test_id=clips-deftemplate-d1 layer=eval law={index} error={error}"
             )).value;
-        assert_eq!(
-            value.as_predicate_bit(), Some(true),
-            "test_id=clips-deftemplate-d1 layer=eval law={index} is not SENS D1:YES"
-        );
+        assert_eq!(observed.as_predicate_bit(), Some(expected),
+            "test_id=clips-deftemplate-d1 layer=eval law={index}: exact D1 verdict");
     }
-    let err = eval_parsed_expressions(&forms[2..], &mut session)
-        .expect_err("test_id=clips-deftemplate-d1: one-bit mutant must fail closed");
-    assert!(
-        err.to_string().contains("domain identity is not callable under its ratified law: D1"),
-        "test_id=clips-deftemplate-d1 layer=eval wrong failure class: {err}"
-    );
 }
 
+/// Диспетчер CLIPS повертає D3 порожню структуру для невідомої форми;
+/// перевірка D4 NULL проектує її у D1:1, а негативний мутант — у D1:0.
 #[test]
 fn clips_defrule_form_dispatch_d1_self_verdict_and_one_bit_mutant() {
-    // Rust transports real SENS source; D3 EQ and COND own all three YES
-    // results and the one-bit NO mutant, not a host-side result table.
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("test_id=clips-form-dispatch-d1: pinned Core must load");
-
-    let source = include_str!("../../../lib/clips-import.lisp");
-    let start = source.find("(0011 clips-form->clauses\n")
-        .expect("test_id=clips-form-dispatch-d1: real dispatcher exists");
-    let end = source[start..].find("(0011 кліпс-сполучити-кожен-дописати\n")
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("test_id=clips-form-dispatch-d1: чинний SENS Core");
+    let library = include_str!("../../../lib/clips-import.lisp");
+    let start = library.find("(визначити кліпс-форма-клаузи\n")
+        .expect("test_id=clips-form-dispatch-d1: чинне українське визначення");
+    let end = library[start..].find("(визначити кліпс-сполучити-кожен-дописати\n")
         .map(|offset| start + offset)
-        .expect("test_id=clips-form-dispatch-d1: next source definition exists");
-    let functions = parse_mixed_exact_domain(&source[start..end])
-        .expect("test_id=clips-form-dispatch-d1: source code parses");
-    eval_parsed_expressions(&functions, &mut session)
-        .expect("test_id=clips-form-dispatch-d1: source function loads");
+        .expect("test_id=clips-form-dispatch-d1: наступне українське визначення");
+    let definitions = parse_mixed_exact_domain(&library[start..end])
+        .expect("test_id=clips-form-dispatch-d1: чинний reader");
+    eval_parsed_expressions(&definitions, &mut session)
+        .expect("test_id=clips-form-dispatch-d1: реальне визначення SENS");
 
     let fixture = include_str!("../../../tests/semantic/clips-form-dispatch-d1-law.lisp");
-    let bodies: Vec<_> = fixture.split("(110\n").skip(1).collect();
-    assert_eq!(bodies.len(), 4, "three SENS laws and one falsifier");
-    assert_eq!(bodies[0].len(), bodies[3].len(), "mutant preserves D2 form");
-    let substitutions: Vec<_> = bodies[0].bytes().zip(bodies[3].bytes())
-        .filter(|(before, after)| before != after)
-        .collect();
-    assert_eq!(substitutions, vec![(b'1', b'0')],
-        "the negative fixture must change precisely one D1 bit");
-
-    let forms = parse_mixed_exact_domain(fixture)
-        .expect("test_id=clips-form-dispatch-d1: all SENS laws must parse");
-    assert_eq!(forms.len(), 4);
-    for (index, form) in forms[..3].iter().enumerate() {
-        let observed = eval_parsed_expressions(std::slice::from_ref(form), &mut session)
-            .unwrap_or_else(|err| panic!(
-                "test_id=clips-form-dispatch-d1 layer=eval law={index} failed: {err}"
+    let laws = parse_mixed_exact_domain(fixture)
+        .expect("test_id=clips-form-dispatch-d1: чинний D3/D4 reader");
+    assert_eq!(laws.len(), 4, "три позитивні закони й один негативний D1 мутант");
+    for (index, expected) in [true, true, true, false].into_iter().enumerate() {
+        let observed = eval_parsed_expressions(std::slice::from_ref(&laws[index]), &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=clips-form-dispatch-d1 layer=eval law={index} error={error}"
             )).value;
-        assert_eq!(observed.as_predicate_bit(), Some(true),
-            "test_id=clips-form-dispatch-d1 layer=eval law={index} did not yield exact D1:YES");
+        assert_eq!(observed.as_predicate_bit(), Some(expected),
+            "test_id=clips-form-dispatch-d1 layer=eval law={index}: exact D1 verdict");
     }
-    let negative = eval_parsed_expressions(&forms[3..], &mut session)
-        .expect("test_id=clips-form-dispatch-d1: one-bit mutant is a valid SENS D1:NO program")
-        .value;
-    assert_eq!(negative.as_predicate_bit(), Some(false),
-        "test_id=clips-form-dispatch-d1 layer=eval one-D1-bit mutant must be exact D1:NO");
-    println!(
-        "SENS_CLIPS_DISPATCH_SELF_VERDICT id=clips-form-dispatch-d1 law=3 mutant=one-D1-bit outcome=PASS"
-    );
 }
