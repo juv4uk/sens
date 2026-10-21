@@ -131,6 +131,9 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
         "(як-є (tell alpha запис . пошкоджений-хвіст))",
         "(як-є (retract alpha запис зайве))",
         "(як-є (retract alpha запис . пошкоджений-хвіст))",
+        // Внутрішня пара не є атомною міткою дії і не доходить до D3 EQ.
+        "(як-є ((tell) alpha запис))",
+        "(як-є ((retract) alpha запис))",
     ] {
         let expression = format!("(застосувати-одну-подію-журналу {clauses} {malformed})");
         let actual = eval_program(&expression, &mut session)
