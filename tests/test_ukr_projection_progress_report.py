@@ -96,6 +96,28 @@ class WholeFileMetricTests(FileTree):
         self.assertIn("англомовна назва визначення", reasons["lib/alias.lisp"])
         self.assertEqual(result.excluded_nonprogram_files, 2)
 
+    def test_isa_catalogue_is_data_not_a_lisp_program(self):
+        # Це фізичні факти CPU, не D7/українські викличні імена.
+        # Новий executable у тій самій теці НЕ можна приховувати.
+        root = self.tree({
+            "lib/machine/isa/avx.lisp":
+                "; апаратний опис\\n(isa-catalogue/1 (extension AVX) "
+                "(instructions (instruction VADDPS)))\\n".replace("\\n", "\n"),
+            "lib/machine/isa/реальна.lisp":
+                "(визначити обчислити (функція (аргумент) (атом? аргумент)))\n",
+            "lib/machine/isa/старе.lisp":
+                "(визначити old-name (функція (x) x))\n",
+            "lib/живе.lisp": "(визначити правда (атом? (як-є ())))\n",
+        })
+        progress = report.measure_source_projection(root)
+        self.assertEqual(progress.excluded_nonprogram_files, 1)
+        self.assertEqual(progress.total_source_files, 3)
+        self.assertEqual(progress.fully_projected_source_files, 2)
+        self.assertIn("lib/machine/isa/старе.lisp",
+                      {entry.path for entry in progress.pending})
+        # Загальна метрика всього .lisp дерева не має «зникати».
+        self.assertEqual(report.measure(root).total_lisp_files, 4)
+
     def test_latin_value_reference_is_not_mistaken_for_quoted_data(self):
         root = self.tree({
             "lib/значення.lisp": "(визначити результат legacy-value)\\n".replace("\\n", "\n"),
