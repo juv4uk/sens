@@ -348,6 +348,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
 
         "d4-append-nested-pair-preserved",
         "lib/d3-pair-laws",
+        "lib/rotate-left",
     ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
