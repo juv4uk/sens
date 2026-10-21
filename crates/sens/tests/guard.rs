@@ -335,7 +335,10 @@ fn guard_reference_field_uses_current_ukrainian_lisp_and_executes_in_sens() {
     let definition = &GUARD_SOURCE[start..end];
     assert_eq!(parse_mixed_exact_domain(definition).expect("точний SENS-читач").len(), 1);
     assert!(definition.contains("(функція (поле посилання)"));
-    assert!(definition.contains("(функція (запис)"));
+    assert!(definition.contains("(захист-еталон-поле-із-запису"));
+    assert!(!definition.contains("((функція"), "виклик D5 FUNCTION як значення заборонено");
+    assert!(GUARD_SOURCE.contains("(визначити захист-знайти-запис-у-рядку\n"));
+    assert!(GUARD_SOURCE.contains("(визначити захист-еталон-поле-із-запису\n"));
     assert!(definition.contains("(захист-знайти-запис поле (решта посилання))"));
     for forbidden in ["(знайти-за-ключем ", "(001000 ", "(11110111 ", "(assoc "] {
         assert!(!definition.contains(forbidden), "застаріла викличність: {forbidden}");
