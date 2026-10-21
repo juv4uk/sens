@@ -38,18 +38,18 @@ fn eval_probabilistic_decision(source: &str) -> String {
 fn choice_observation_keeps_probability_confidence_and_provenance() {
     let source = r#"
         (let* ((question
-                (pd-question-choice
+                (запит-вибору
                   (quote route)
                   (quote (billing technical))))
               (observation
-                (pd-choice-observe
+                (спостерегти-вибір
                   question
                   (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic) (revision 1))))))
           (list
-            (pd-observation-confidence observation)
-            (pd-observation-provenance observation)
-            (second (pd-choice-policy observation (quote billing) (частка 2 3)))))
+            (упевненість-спостереження observation)
+            (походження-спостереження observation)
+            (second (правило-вибору observation (quote billing) (частка 2 3)))))
     "#;
 
     assert_eq!(
@@ -62,11 +62,11 @@ fn choice_observation_keeps_probability_confidence_and_provenance() {
 fn invalid_choice_distribution_fails_closed_when_not_normalized() {
     let source = r#"
         (let* ((question
-                (pd-question-choice
+                (запит-вибору
                   (quote route)
                   (quote (billing technical)))))
           (result-status
-            (pd-choice-observe
+            (спостерегти-вибір
               question
               (list (list (quote billing) (частка 2 3)) (list (quote technical) (частка 1 4)))
               (quote ((source malformed))))))
@@ -78,16 +78,16 @@ fn invalid_choice_distribution_fails_closed_when_not_normalized() {
 #[test]
 fn noul_policy_is_explicit_threshold_control_not_truthiness() {
     let source = r#"
-        (let* ((question (pd-question-noul (quote urgent)))
+        (let* ((question (запит-так-ні (quote urgent)))
               (observation
-                (pd-noul-observe
+                (спостерегти-так-ні
                   question
                   (частка 3 4)
                   (quote ((source synthetic))))))
           (list
-            (second (pd-noul-policy observation (частка 2 3)))
-            (second (pd-noul-policy observation (частка 4 5)))
-            (pd-observation-confidence observation)))
+            (second (правило-так-ні observation (частка 2 3)))
+            (second (правило-так-ні observation (частка 4 5)))
+            (упевненість-спостереження observation)))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "(accept defer 3/4)");
@@ -97,18 +97,18 @@ fn noul_policy_is_explicit_threshold_control_not_truthiness() {
 fn score_observation_uses_the_same_typed_distribution_contract() {
     let source = r#"
         (let* ((question
-                (pd-question-score
+                (запит-шкали
                   (quote severity)
                   (quote (low medium high))))
               (observation
-                (pd-score-observe
+                (спостерегти-шкалу
                   question
                   (list (list (quote low) (частка 1 4)) (list (quote medium) (частка 1 2)) (list (quote high) (частка 1 4)))
                   (quote ((source synthetic))))))
           (list
             (car observation)
-            (pd-observation-confidence observation)
-            (pd-observation-provenance observation)))
+            (упевненість-спостереження observation)
+            (походження-спостереження observation)))
     "#;
 
     assert_eq!(
@@ -121,20 +121,20 @@ fn score_observation_uses_the_same_typed_distribution_contract() {
 fn independent_questions_do_not_invent_joint_consistency() {
     let source = r#"
         (let ((left
-                (pd-choice-observe
-                  (pd-question-choice
+                (спостерегти-вибір
+                  (запит-вибору
                     (quote route)
                     (quote (billing technical)))
                   (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source a)))))
               (right
-                (pd-choice-observe
-                  (pd-question-choice
+                (спостерегти-вибір
+                  (запит-вибору
                     (quote route-2)
                     (quote (billing technical)))
                   (list (list (quote billing) (частка 1 4)) (list (quote technical) (частка 3 4)))
                   (quote ((source b))))))
-          (car (pd-two-question-consistency left right (quote independent))))
+          (car (узгодженість-двох-запитів left right (quote independent))))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "decision-relation-1");
@@ -144,21 +144,21 @@ fn independent_questions_do_not_invent_joint_consistency() {
 fn declared_agreement_with_different_distributions_is_disputed() {
     let source = r#"
         (let ((left
-                (pd-choice-observe
-                  (pd-question-choice
+                (спостерегти-вибір
+                  (запит-вибору
                     (quote route)
                     (quote (billing technical)))
                   (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source a)))))
               (right
-                (pd-choice-observe
-                  (pd-question-choice
+                (спостерегти-вибір
+                  (запит-вибору
                     (quote route)
                     (quote (billing technical)))
                   (list (list (quote billing) (частка 1 4)) (list (quote technical) (частка 3 4)))
                   (quote ((source b))))))
           (result-status
-            (pd-two-question-consistency left right (quote agree))))
+            (узгодженість-двох-запитів left right (quote agree))))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "disputed");
@@ -167,14 +167,14 @@ fn declared_agreement_with_different_distributions_is_disputed() {
 #[test]
 fn noul_policy_rejects_out_of_domain_threshold() {
     let source = r#"
-        (let* ((question (pd-question-noul (quote urgent)))
+        (let* ((question (запит-так-ні (quote urgent)))
               (observation
-                (pd-noul-observe
+                (спостерегти-так-ні
                   question
                   (частка 3 4)
                   (quote ((source synthetic))))))
           (result-status
-            (pd-noul-policy observation (частка 3 2))))
+            (правило-так-ні observation (частка 3 2))))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "invalid");
@@ -184,16 +184,16 @@ fn noul_policy_rejects_out_of_domain_threshold() {
 fn choice_policy_rejects_out_of_domain_threshold() {
     let source = r#"
         (let* ((question
-                (pd-question-choice
+                (запит-вибору
                   (quote route)
                   (quote (billing technical))))
               (observation
-                (pd-choice-observe
+                (спостерегти-вибір
                   question
                   (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic))))))
           (result-status
-            (pd-choice-policy observation (quote billing) (частка 3 2))))
+            (правило-вибору observation (quote billing) (частка 3 2))))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "invalid");
@@ -203,21 +203,21 @@ fn choice_policy_rejects_out_of_domain_threshold() {
 fn synthetic_witness_carries_one_state_through_three_typed_questions() {
     let source = r#"
         (let ((witness
-                (pd-synthetic-witness
+                (синтетичний-свідок-рішення
                   (quote ((case billing) (revision 1)))
-                  (pd-question-choice
+                  (запит-вибору
                     (quote route)
                     (quote (billing technical)))
-                  (pd-question-noul (quote urgent))
-                  (pd-question-score
+                  (запит-так-ні (quote urgent))
+                  (запит-шкали
                     (quote severity)
                     (quote (low medium high))))))
           (list
             (car witness)
             (second witness)
             (car (third witness))
-            (pd-observation-confidence (fourth witness))
-            (pd-observation-confidence (fifth witness))))
+            (упевненість-спостереження (fourth witness))
+            (упевненість-спостереження (fifth witness))))
     "#;
 
     assert_eq!(
@@ -230,11 +230,11 @@ fn synthetic_witness_carries_one_state_through_three_typed_questions() {
 fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
     let selected = r#"
         (let* ((question
-                (pd-question-choice
+                (запит-вибору
                   (quote route)
                   (quote (billing technical))))
               (observation
-                (pd-choice-observe
+                (спостерегти-вибір
                   question
                   (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic) (revision 1)))))
@@ -242,7 +242,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
           (list
             (second decision)
             (second (fourth decision))
-            (pd-observation-provenance (third decision))))
+            (походження-спостереження (third decision))))
     "#;
     assert_eq!(
         eval_probabilistic_decision(selected),
@@ -251,11 +251,11 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
 
     let tied = r#"
         (let* ((question
-                (pd-question-choice
+                (запит-вибору
                   (quote route)
                   (quote (billing technical))))
               (observation
-                (pd-choice-observe
+                (спостерегти-вибір
                   question
                   (list (list (quote billing) (частка 1 2)) (list (quote technical) (частка 1 2)))
                   (quote ((source synthetic) (case tied)))))
@@ -272,11 +272,11 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
 
     let below_threshold = r#"
         (let* ((question
-                (pd-question-choice
+                (запит-вибору
                   (quote route)
                   (quote (billing technical))))
               (observation
-                (pd-choice-observe
+                (спостерегти-вибір
                   question
                   (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic)))))
@@ -285,7 +285,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
             (second decision)
             (second (fourth decision))
             (second (fifth decision))
-            (pd-observation-confidence (third decision))))
+            (упевненість-спостереження (third decision))))
     "#;
     assert_eq!(
         eval_probabilistic_decision(below_threshold),
@@ -294,7 +294,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
 
     let forged_confidence = r#"
         (let* ((question
-                (pd-question-choice
+                (запит-вибору
                   (quote route)
                   (quote (billing technical))))
               (observation
@@ -310,11 +310,11 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
 
     let invalid_threshold = r#"
         (let* ((question
-                (pd-question-choice
+                (запит-вибору
                   (quote route)
                   (quote (billing technical))))
               (observation
-                (pd-choice-observe
+                (спостерегти-вибір
                   question
                   (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic))))))
