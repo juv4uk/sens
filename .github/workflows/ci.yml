@@ -826,6 +826,10 @@ jobs:
           if grep -Eq '^(lib/lisp-fs\.lisp|crates/sens/tests/fs_bridge_diagnostics\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage -- --exact --nocapture
           fi
+          # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
+          if grep -Eq '^(lib/time\.lisp|crates/sens/tests/time_host_surface\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test time_host_surface ntp_mode_and_stratum_execute_exact_d1_and_reject_lists -- --exact --nocapture
+          fi
           # Тільки змінений механізм: реальні позитивні та негативні SENS-випадки.
           # Python тут перевіряє форму, а не заміняє роботу виконавця SENS.
           if grep -Eq '^(lib/machine/capability-axis\.lisp|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|\.github/workflows/ci\.yml)$' "$changed"; then
