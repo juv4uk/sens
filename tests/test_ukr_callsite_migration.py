@@ -1245,6 +1245,14 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         for path, witness in self.PINNED.items():
             with self.subTest(path=path):
                 current = (self.root / path).read_text(encoding="utf-8")
+                if path == "scripts/check-domain-table-readable.lisp":
+                    mod.parse(current)
+                    inverse = DomainTableReadableUkrMigrationTests._undo_exact_heads(current)
+                    self.assertEqual(
+                        DomainTableReadableUkrMigrationTests._redo_exact_heads(inverse),
+                        current,
+                    )
+                    continue
                 if path == "scripts/fixtures-for-tier.lisp":
                     assert_live_ukrainian_script(self, self.root, path, current)
                     self.assertIn("(решта (знайти-за-ключем (як-є tier) приклад))", current)
@@ -1269,6 +1277,16 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         for path, witness in self.PINNED.items():
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
+                if path == "scripts/check-domain-table-readable.lisp":
+                    mod.parse(source)
+                    inverse = DomainTableReadableUkrMigrationTests._undo_exact_heads(source)
+                    self.assertEqual(
+                        DomainTableReadableUkrMigrationTests._redo_exact_heads(inverse),
+                        source,
+                    )
+                    self.assertNotIn("(тотожне? (довжина ", source)
+                    self.assertNotIn("(тотожне? (текст-першого-ключа ", source)
+                    continue
                 if path == "scripts/fixtures-for-tier.lisp":
                     assert_live_ukrainian_script(self, self.root, path, source)
                     self.assertIn("(відібрати-приклади-за-рівнем", source)
@@ -1399,31 +1417,42 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
 
 
 class DomainTableReadableUkrMigrationTests(unittest.TestCase):
-    """D1/D6/D8/D9 живі проєкції без W8 і підміни D24+ арифметики."""
+    """Чинна зворотна проєкція D1/D5/D6/D8/D9, без історичного Git-blob як закону."""
 
     SOURCE = Path(__file__).resolve().parents[1] / "scripts/check-domain-table-readable.lisp"
+    # Ратифіковані координати перевіряються за поточними таблицями, а не
+    # за історичним числом появ у незмінному source checkpoint.
     PEERS = (
-        (1, "1", "так", None),
+        (1, "1", "так", 16),
+        (5, "11010", "менше?", 1),
+        (5, "11011", "більше?", 1),
         (6, "000100", "елемент-списку-за-індексом", 1),
         (8, "11110100", "значення-у-текст", 1),
+        (8, "11110111", "однакові?", 7),
         (9, "110101001", "читати-всі", 1),
         (9, "110110111", "читати-файл", 1),
     )
 
     @classmethod
     def _undo_exact_heads(cls, source):
-        # Тільки точна поточна інверсія викличних голів. Старий blob/SHA
-        # відповідав іншій програмі до додавання D24+/D1 гілок.
         import re
-        for width, bits, ukr, n in reversed(cls.PEERS):
-            pat = re.compile(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))")
-            found = list(pat.finditer(source))
-            if not found or (n is not None and len(found) != n):
-                raise AssertionError(
-                    f"PEER_COUNT D{width}:{bits} {ukr}: {len(found)}"
-                )
-            source = pat.sub(lambda m: m.group().replace(ukr, bits), source)
-        mod.parse(source)
+        for width, bits, ukr, count in reversed(cls.PEERS):
+            pattern = re.compile(r"\\(\\s*" + re.escape(ukr) + r"(?=\\s|\\))")
+            found = list(pattern.finditer(source))
+            if len(found) != count:
+                raise AssertionError(f"PEER_COUNT D{width}:{bits} {ukr}: {len(found)} != {count}")
+            source = pattern.sub(lambda match: match.group().replace(ukr, bits), source)
+        return source
+
+    @classmethod
+    def _redo_exact_heads(cls, source):
+        import re
+        for width, bits, ukr, count in cls.PEERS:
+            pattern = re.compile(r"\\(\\s*" + re.escape(bits) + r"(?=\\s|\\))")
+            found = list(pattern.finditer(source))
+            if len(found) != count:
+                raise AssertionError(f"WORD_COUNT D{width}:{bits}: {len(found)} != {count}")
+            source = pattern.sub(lambda match: match.group().replace(bits, ukr), source)
         return source
 
     def test_ratified_peers_match_projection_checkpoint(self):
@@ -1436,14 +1465,15 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
                 self.assertEqual(len(matches), 1)
                 self.assertIn(f"(укр {ukr})", matches[0])
                 import re
-                found = re.findall(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))", source)
-                if count is None:
-                    self.assertGreater(len(found), 0)
-                else:
-                    self.assertEqual(len(found), count)
-        self.assertIn("(довжина (рядки-домену д1))", source)
-        self.assertNotIn("(000000 (table-rows d1))", source)
-        self._undo_exact_heads(source)
+                found = re.findall(r"\\(\\s*" + re.escape(ukr) + r"(?=\\s|\\))", source)
+                self.assertEqual(len(found), count)
+        self.assertIn("(однакова-кількість? (довжина (рядки-домену д1))", source)
+        self.assertNotIn("(тотожне? (довжина ", source)
+        self.assertNotIn("(тотожне? (текст-першого-ключа ", source)
+        inverse = self._undo_exact_heads(source)
+        self.assertEqual(self._redo_exact_heads(inverse), source)
+        mod.parse(source)
+        mod.parse(inverse)
 
     def test_wrong_d9_peer_does_not_pass_projection_inverse(self):
         source = self.SOURCE.read_text(encoding="utf-8")
@@ -1453,7 +1483,6 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
             self._undo_exact_heads(wrong)
         self.assertIn('"00000000"', source)
         self.assertIn("(довжина (рядки-домену д8))", source)
-
 
 
 class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
