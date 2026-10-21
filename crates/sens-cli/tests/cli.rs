@@ -730,9 +730,9 @@ fn український_скрипт_відбирає_саме_запитан�
         .find("(визначити рівень-прикладу\n")
         .expect("чинний український селектор");
     let end = source[start..]
-        .find("\n(визначити надрукувати-відповідні\n")
+        .find("\n; SENS CLI відображає значення останнього виразу.")
         .map(|index| start + index)
-        .expect("кінець селектора");
+        .expect("кінець чистого українського селектора");
     let selector = &source[start..end];
     for (level, value) in [("1", "зоря"), ("2", "телескоп"), ("3", "зоря")] {
         let code = format!(
@@ -834,38 +834,35 @@ fn український_скрипт_відбирає_саме_запитан�
             assert_eq!(result.trim(), "()", "непорожній третій рівень: {result}");
         }
     }
-    // Додаткова реальна перевірка оболонки друку: файл SENS, а не
-    // імітація його побічних ефектів у Rust/Python.
-    let print_start = source
-        .find("(визначити надрукувати-відповідні\n")
-        .expect("українська Lisp-оболонка друку");
-    let print_end = source[print_start..]
-        .find("\n\n(надрукувати-відповідні\n")
-        .map(|index| print_start + index)
-        .expect("кінець оболонки друку");
-    let printer = &source[print_start..print_end];
+    // SENS CLI показує останнє значення програми. Відсутнього D9
+    // друкувати немає; перевіряємо справжній SENS-result, не host-ефект.
+    assert!(!source.contains("(друкувати "), "не можна вигадувати D9 виконавець");
+    assert!(source.trim_end().ends_with("потрібний-рівень)"),
+        "повна програма повертає вибрані записи як значення");
     for (level, expected, forbidden) in [
         ("1", "зоря", "телескоп"),
         ("2", "телескоп", "зоря"),
     ] {
         let code = format!(
-            "{selector}\n{printer}\n(надрукувати-відповідні (відібрати-приклади-за-рівнем (список (список (сполучити (як-є expr) (як-є зоря)) (сполучити (як-є tier) 1)) (список (сполучити (як-є expr) (як-є телескоп)) (сполучити (як-є tier) 2))) {level}))\n"
+            "{selector}\n(відібрати-приклади-за-рівнем (список (список (сполучити (як-є expr) (як-є зоря)) (сполучити (як-є tier) 1)) (список (сполучити (як-є expr) (як-є телескоп)) (сполучити (як-є tier) 2))) {level})\n"
         );
         let path = std::env::temp_dir().join(format!(
-            "sens-ukr-tier-print-{level}-{}.lisp", std::process::id()
+            "sens-ukr-tier-value-{level}-{}.lisp", std::process::id()
         ));
-        std::fs::write(&path, code).expect("виконувана Lisp-оболонка");
-        let output = sens().arg(&path).output().expect("виклик SENS CLI");
+        std::fs::write(&path, code).expect("тимчасова українська програма");
+        let output = sens().arg(&path).output().expect("SENS CLI повинен виконати програму");
         let _ = std::fs::remove_file(&path);
         assert!(
             output.status.success(),
-            "SENS не виконав друк рівня {level}: stderr={} stdout={}",
+            "SENS не повернув рівень {level}: stderr={} stdout={}",
             String::from_utf8_lossy(&output.stderr),
-            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stdout)
         );
         let actual = String::from_utf8_lossy(&output.stdout);
-        assert!(actual.contains(expected), "не надруковано {expected}: {actual}");
-        assert!(!actual.contains(forbidden), "надруковано чужий рівень {forbidden}: {actual}");
+        assert!(actual.trim().starts_with('(') && actual.trim().ends_with(')'),
+            "SENS має повернути список, а не результат стороннього друку: {actual}");
+        assert!(actual.contains(expected), "втрачено {expected}: {actual}");
+        assert!(!actual.contains(forbidden), "прийнято чужий рівень {forbidden}: {actual}");
     }
     // Жодного фальшивого статусу GO для файлового виконання.
     let full = sens()
