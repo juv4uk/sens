@@ -1017,22 +1017,31 @@ def lambda_parameter_names(node: ListNode | Atom) -> tuple[str, ...]:
     return tuple(names)
 
 
-def encode_lambda_params(node: ListNode,text7):
-    names=lambda_parameter_names(node)
-    words=[D2_OPEN]
-    for index,name in enumerate(names):
+def encode_lambda_params(node: ListNode | Atom, text7):
+    """Preserve the actual binding shape, not merely parameter names.
+
+    (функція аргументи ...) is variadic, NOT (функція (аргументи) ...).
+    (функція (голова . хвіст) ...) has a REST binder, NOT two fixed args.
+    Empty parameter lists use canonical D3 EMPTY, never an empty D2 frame.
+    The same distinction applies to shorthand DEFINE signatures.
+    """
+    names = lambda_parameter_names(node)
+    if isinstance(node, Atom):
+        return encode_text7_identifier(node.tok.text, text7, node.tok)
+    if not node.items and node.tail is None:
+        return [D3_EMPTY]
+    words = [D2_OPEN]
+    for index, param in enumerate(node.items):
         if index:
             words.append(D2_SEP)
-        words.extend(
-            encode_text7_identifier(
-                name,
-                text7,
-                Tok("ATOM",name,node.tok.offset),
-            )
-        )
+        words.extend(encode_text7_identifier(param.tok.text, text7, param.tok))
+    if node.tail is not None:
+        words.append(D2_DOT)
+        words.extend(encode_text7_identifier(
+            node.tail.tok.text, text7, node.tail.tok,
+        ))
     words.append(D2_CLOSE)
     return words
-
 
 def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None):
     t=node.tok.text
@@ -1245,17 +1254,10 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
             # Variadic lambda: bare symbol parameter binds all args as a list.
             if not quoted and head_bits=="0010" and idx==1:
                 if isinstance(item, Atom):
-                    # Variadic lambda: single parameter name
+                    # A bare binder is variadic: encode its Text7 identity
+                    # directly, without inventing a one-element parameter list.
                     lambda_names = (item.tok.text,)
-                    words.append(D2_OPEN)
-                    words.extend(
-                        encode_text7_identifier(
-                            item.tok.text,
-                            text7,
-                            Tok("ATOM", item.tok.text, item.tok.offset),
-                        )
-                    )
-                    words.append(D2_CLOSE)
+                    words.extend(encode_lambda_params(item, text7))
                     continue
                 if not isinstance(item, ListNode):
                     raise MigrationError(
