@@ -1197,8 +1197,6 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
             exact_lines = (
                 ("    (решта (знайти-за-ключем (як-є tier) приклад))))",
                  "    (011 (11100 (001 tier) приклад))))"),
-                ("             (друкувати (перше залишок)))",
-                 "             (11011011 (100 залишок)))"),
                 ('(читати-всі (читати-файл "tests/fixtures/conformance.lisp"))',
                  '(110101001 (110110111 "tests/fixtures/conformance.lisp"))'),
             )
@@ -1264,7 +1262,9 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
                 source = (self.root / path).read_text(encoding="utf-8")
                 if path == "scripts/fixtures-for-tier.lisp":
                     assert_live_ukrainian_script(self, self.root, path, source)
-                    self.assertIn("(надрукувати-відповідні", source)
+                    self.assertIn("(відібрати-приклади-за-рівнем", source)
+                    self.assertNotIn("(надрукувати-відповідні", source)
+                    self.assertNotIn("(друкувати (перше залишок))", source)
                     continue
                 original = self.reverse(self._pre_last_projection(path, source), witness["edits"])
                 before, after = original.splitlines(), self._pre_last_projection(path, source).splitlines()
@@ -1293,9 +1293,12 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
             self.assertIn(f'(тотожне? (перше *argv*) "{level}")', tier)
         self.assertNotIn("(прочитати (перше *argv*))", tier)
         self.assertNotIn("(11101010 (100 *argv*))", tier)
-        self.assertIn("(визначити надрукувати-відповідні", tier)
+        self.assertIn("(визначити відібрати-приклади-за-рівнем", tier)
+        self.assertNotIn("(визначити надрукувати-відповідні", tier)
         self.assertIn("(решта (знайти-за-ключем (як-є tier) приклад))", tier)
-        self.assertIn("(друкувати (перше залишок))", tier)
+        self.assertNotIn("(друкувати (перше залишок))", tier)
+        self.assertIn("(менше? (рівень-прикладу (перше залишок)) рівень)", tier)
+        self.assertIn("(більше? (рівень-прикладу (перше залишок)) рівень)", tier)
         self.assertIn('(читати-всі (читати-файл "tests/fixtures/conformance.lisp"))', tier)
         self.assertNotIn("(11100 (001 tier) fixture)", tier)
         self.assertNotIn("(11011011 (100 remaining))", tier)
@@ -1352,12 +1355,15 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
         code = self.executable(source)
         for required in ("(визначити потрібний-рівень",
                          "(визначити рівень-прикладу",
-                         "(визначити надрукувати-відповідні",
+                         "(визначити відібрати-приклади-за-рівнем",
                          "(знайти-за-ключем (як-є tier) приклад)",
                          "(тотожне? (перше *argv*)",
                          "(читати-всі (читати-файл ",
-                         "(за-умовою", "(друкувати "):
+                         "(за-умовою", "(менше? ", "(більше? "):
             self.assertIn(required, code)
+        # CLI повертає структурне значення, а не викликає недопущений D9 друк.
+        self.assertNotIn("(надрукувати-відповідні", code)
+        self.assertNotIn("(друкувати ", code)
         # executable() стирає рядкові літерали; їх звіряємо з джерелом.
         for level in ("1", "2", "3"):
             self.assertIn(f'(тотожне? (перше *argv*) "{level}")', source)
