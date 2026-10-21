@@ -293,7 +293,6 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-swap-middle-four",
         "list-replace-fourth",
         "list-swap-ends-five",
-        "замінити-третій-в-четвірці",
         "поміняти-другий-і-третій",
         "list-swap-inner-five",
         "list-reverse-general",
@@ -335,6 +334,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-delete-second"
                 | "list-insert-second"
                 | "list-drop-last-general"
+                | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
