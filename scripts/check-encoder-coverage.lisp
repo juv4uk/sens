@@ -21,9 +21,9 @@
       (як-є
         (encoder-coverage-check
           (status pass))))
-     (так
+     ((атом? (як-є ()))
       (як-є (encoder-coverage-check (status fail) (reason projection-mismatch))))))
-  (так
+  ((атом? (як-є ()))
    (список
      (як-є encoder-coverage-check)
      (як-є (status fail))
