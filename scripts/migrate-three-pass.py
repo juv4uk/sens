@@ -1626,7 +1626,13 @@ def main():
                     help="явний попередньо завантажений .lisp із DEFINE; лише для одного файла")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
+    ap.add_argument("--refresh-existing", action="store_true",
+                    help="явно оновити перевірені Zig фізичні .sens та однойменні перегляди; без зміни .lisp")
     args = ap.parse_args()
+    if args.refresh_existing and args.unpaired_only:
+        ap.error("--refresh-existing несумісний з --unpaired-only")
+    if args.refresh_existing and args.codec != "t5m":
+        ap.error("--refresh-existing дозволяє лише чинний T5M")
     if args.report is None:
         args.report = args.out.with_name(args.out.name + ".report.json")
 
@@ -1723,7 +1729,7 @@ def main():
             # A reviewed DATA source may never acquire an executable carrier.
             # This check precedes the Zig codec and every filesystem write.
             reject_reviewed_nonprogram_source(path)
-            if target.exists() or target.is_symlink():
+            if not args.refresh_existing and (target.exists() or target.is_symlink()):
                 raise SensT5Error(f"target already exists; not overwriting {dest}")
             source = path.read_text(encoding="utf-8")
             # Немає виконуваних форм — немає причини створювати .sens.
@@ -1759,15 +1765,23 @@ def main():
                     codec=args.codec,
                 )
                 # The extensionless spaced-bit view is not an executable .sens.
-                migration_publish_pair.publish_pair(
-                    write_atomic_no_clobber, target, payload,
-                    target.with_suffix(""), projection.encode("ascii"),
-                )
+                if args.refresh_existing:
+                    # Явне поновлення тільки після exact-word roundtrip і
+                    # Zig parity; двофайлова транзакція має rollback.
+                    migration_publish_pair.replace_pair(
+                        target, payload, target.with_suffix(""),
+                        projection.encode("ascii"),
+                    )
+                else:
+                    migration_publish_pair.publish_pair(
+                        write_atomic_no_clobber, target, payload,
+                        target.with_suffix(""), projection.encode("ascii"),
+                    )
             else:
                 payload = reference  # dry-run only, NEVER published
             for key, value in resolver.counts.items():
                 totals[key] += value
-            status = "would-write" if args.dry_run else "written"
+            status = ("would-refresh" if args.refresh_existing else "would-write") if args.dry_run else ("refreshed" if args.refresh_existing else "written")
             row = {
                 "path": str(rel), "output": str(dest), "status": status,
                 "bytes": len(payload), "semantic_word_count": len(words),
@@ -1841,9 +1855,9 @@ def main():
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
         "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; under the D1–24+ frame, width alone grants neither identity nor callability; this migration requires a named current identity and an admitted call mechanism",
-        "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
+        "source_policy": ("input .lisp never rewritten; paired .sens + view refreshed only after explicit --refresh-existing and pinned Zig parity" if args.refresh_existing else "input .lisp never rewritten; existing .sens never overwritten"),
         "explicit_preloaded_binding_sources": binding_receipts,
-        "mode": "dry-run" if args.dry_run else "write-new-only-zig-minted",
+        "mode": ("dry-run" if args.dry_run else "refresh-existing-zig-minted" if args.refresh_existing else "write-new-only-zig-minted"),
         "semantic_admitted": False,
         "physical_producer": ("NOT_INVOKED_ALREADY_PAIRED"
                               if not paths and skipped_paired else
