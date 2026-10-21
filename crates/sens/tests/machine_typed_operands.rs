@@ -65,6 +65,27 @@ fn typed_operands_are_explicit_lisp_machine_data() {
 }
 
 #[test]
+fn machine_operand_exact_d1_inclusive_bounds_use_admitted_d5_d4() {
+    // Межа 8-бітного знакового зсуву — реальні D1 результати SENS.
+    // Старі каталожні D6 GEQ/LEQ не дозволено викликати без механізму.
+    let mut session = machine_session();
+    for (source, expected) in [
+        ("(машинний-операнд-в-межах? -128 -128 127)", true),
+        ("(машинний-операнд-в-межах? 127 -128 127)", true),
+        ("(машинний-операнд-в-межах? 0 -128 127)", true),
+        ("(машинний-операнд-в-межах? -129 -128 127)", false),
+        ("(машинний-операнд-в-межах? 128 -128 127)", false),
+        ("(машинний-операнд-в-межах? 0 0 18446744073709551615)", true),
+        ("(машинний-операнд-в-межах? 18446744073709551616 0 18446744073709551615)", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|e| panic!("SENS D1 for {source}: {e}"))
+            .value;
+        assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
+    }
+}
+
+#[test]
 fn invalid_operand_values_fail_closed_before_machine_form_creation() {
     let mut session = machine_session();
 
