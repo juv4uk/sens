@@ -252,9 +252,10 @@ jobs:
           set -euo pipefail
           # Живий математичний D24+ приклад: не достатньо самої DEFINE.
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program -- --exact --nocapture
-          # Окремий незалежний SENS source-reader свідок: перевірити,
-          # що українські Lisp-визначення і фізичний T5M CLI погоджені.
-          cargo test --locked --manifest-path benchmarks/cross-language/sens-vs-python/runner/Cargo.toml \
+          # Окремий бенчмарк-крейт має власний застарілий Cargo.lock;
+          # тільки допоміжний parity-тест дозволяє offline-оновлення lock.
+          # Релізні Cargo-команди лишаються --locked.
+          cargo test --offline --manifest-path benchmarks/cross-language/sens-vs-python/runner/Cargo.toml \
             --test sens_parity numeric_base_cases_are_executed_by_sens_not_d3_eq -- --exact --nocapture
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24 -- --exact --nocapture
           # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
