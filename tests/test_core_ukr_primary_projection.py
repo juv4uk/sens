@@ -17,6 +17,20 @@ def source(path: str) -> str:
 
 
 class CoreUkrPrimaryProjectionTests(unittest.TestCase):
+    def test_meta_registry_diagnostic_uses_ukrainian_name_without_false_readiness(self):
+        script = source("scripts/generate-meta-semantic-registry.lisp")
+        self.assertIn(
+            "(визначити готовність-породження-метасемантичного-реєстру",
+            script,
+        )
+        self.assertNotIn("(визначити generate-meta-semantic-registry-ready", script)
+        # Сталі зовнішні імена генератора та протокольні позначки не
+        # перейменовуються як викличні голови до міграції споживачів.
+        self.assertIn("(як-є (generate-meta-semantic-registry (status not-verified)", script)
+        self.assertNotIn("(status verified)", script)
+        self.assertNotIn("(status pass)", script)
+        self.assertEqual(script.count("(визначити готовність-породження-метасемантичного-реєстру"), 1)
+
     def test_generated_function_table_headers_match_ukrainian_generator(self):
         # Синхронізація похідних даних, не семантичний тест SENS.
         generator = source("scripts/generate-function-table.lisp")
