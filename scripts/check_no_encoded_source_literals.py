@@ -89,6 +89,17 @@ def _is_legacy_signature_key(source: str, path: str | Path | None, offset: int) 
     return bool(match and line_start + match.start("bits") == offset)
 
 
+# Frozen donor snapshots: content is byte-pinned by the filename's Git blob
+# hash (knowledge/d10-source-snapshots/<sha>.lisp). They are immutable evidence,
+# not live code, and cannot be edited to satisfy the live-code ban -- the donor
+# checker asserts sha1(content) == filename, so any edit breaks it.
+FROZEN_SNAPSHOT_PATH = re.compile(r"^knowledge/d10-source-snapshots/[0-9a-f]{40}\.lisp$")
+
+
+def _is_frozen_source_snapshot(path: str | Path | None) -> bool:
+    return path is not None and FROZEN_SNAPSHOT_PATH.fullmatch(Path(path).as_posix()) is not None
+
+
 def _mask_comments_and_strings(source: str) -> str:
     """Keep offsets/newlines while removing comments and string contents."""
     out = list(source)
@@ -172,7 +183,8 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
         if start in quoted_numeric_heads:
             continue
         if (_is_domain_table_key_head(source, path, start)
-                or _is_legacy_signature_key(source, path, start)):
+                or _is_legacy_signature_key(source, path, start)
+                or _is_frozen_source_snapshot(path)):
             continue
         line = code.count("\n", 0, start) + 1
         column = start - code.rfind("\n", 0, start)
