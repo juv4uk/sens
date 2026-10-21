@@ -16,9 +16,11 @@ import subprocess
 import sys
 import tempfile
 
-from sens_t5_codec import SensT5Error, decode_bytes, encode_words, typed_sha256
+from sens_t5_codec import (SensT5Error, decode_bytes, decode_t5m_bytes,
+                           encode_words, encode_t5m_projection, typed_sha256)
 
 VIEW_PATTERN = re.compile(rb"[01]{1,9}(?: [01]{1,9})*\n")
+T5M_VIEW_PATTERN = re.compile(rb"[01]+(?: [01]+)*\n")
 MAX_VIEW_BYTES = 32 * 1024 * 1024
 
 
@@ -26,19 +28,22 @@ class ViewError(ValueError):
     """Блокувальна помилка: невірне джерело, шлях або неканонічний перегляд."""
 
 
-def parse_view(blob: bytes) -> list[str]:
-    """Лише ASCII 0/1, один SP між точними словами, один кінцевий LF."""
-    if not blob or len(blob) > MAX_VIEW_BYTES or VIEW_PATTERN.fullmatch(blob) is None:
+def parse_view(blob: bytes, *, codec: str = "t5") -> list[str]:
+    """Точні слова, один пробіл і LF. D24+ у T5M не обрізаємо до D9."""
+    if codec not in ("t5", "t5m"):
+        raise ViewError("unknown physical codec; choose t5m or explicit legacy t5")
+    pattern = T5M_VIEW_PATTERN if codec == "t5m" else VIEW_PATTERN
+    if not blob or len(blob) > MAX_VIEW_BYTES or pattern.fullmatch(blob) is None:
         raise ViewError("noncanonical 0/1 view: expected single-space words and one LF")
     return [item.decode("ascii") for item in blob[:-1].split(b" ")]
 
 
-def render_view(words: list[str]) -> bytes:
+def render_view(words: list[str], *, codec: str = "t5") -> bytes:
     """Не виводити текстового транспортного трита 2 чи ширинних префіксів."""
     if not words:
         raise ViewError("cannot render empty word sequence")
     candidate = (" ".join(words) + "\n").encode("ascii")
-    if parse_view(candidate) != words:
+    if parse_view(candidate, codec=codec) != words:
         raise ViewError("view render did not preserve exact domain word boundaries")
     return candidate
 
@@ -130,17 +135,25 @@ def verify_actual_rust_d2(reader: Path, source: Path, canonical_view: bytes) -> 
 
 
 def check_or_stage(root: Path, relative: str, *, stage: Path | None = None,
-                   preview: bool = False, reader: Path | None = None) -> dict:
+                   preview: bool = False, reader: Path | None = None,
+                   codec: str = "t5") -> dict:
     rel = _relative_sens(relative)
     source = _source_path(root, rel)
     lisp_name, lisp_bytes = _source_lisp(source)
     packed = source.read_bytes()
-    words = decode_bytes(packed)  # includes canonical padding and byte range
-    if encode_words(words) != packed:
-        raise ViewError("T5 decode/encode failed exact physical byte parity")
-    view = render_view(words)
-    if encode_words(parse_view(view)) != packed:
-        raise ViewError("view -> T5 did not reproduce source bytes")
+    if codec == "t5m":
+        words = decode_t5m_bytes(packed)
+        encode = lambda exact_words: encode_t5m_projection(" ".join(exact_words))
+    elif codec == "t5":
+        words = decode_bytes(packed)  # Явна історична сумісність.
+        encode = encode_words
+    else:
+        raise ViewError("unknown physical codec; choose t5m or explicit legacy t5")
+    if encode(words) != packed:
+        raise ViewError(f"{codec} decode/encode failed exact physical byte parity")
+    view = render_view(words, codec=codec)
+    if encode(parse_view(view, codec=codec)) != packed:
+        raise ViewError(f"view -> {codec} did not reproduce source bytes")
     if preview and stage is None:
         raise ViewError("preview requires a staging target")
     if reader is not None:
@@ -150,7 +163,7 @@ def check_or_stage(root: Path, relative: str, *, stage: Path | None = None,
         if target.is_symlink() or not target.is_file():
             raise ViewError("missing same-stem readable view")
         observed = target.read_bytes()
-        if parse_view(observed) != words or observed != view:
+        if parse_view(observed, codec=codec) != words or observed != view:
             raise ViewError("stale or modified view does not match physical T5")
         mode = "VERIFY"
     else:
@@ -178,7 +191,8 @@ def check_or_stage(root: Path, relative: str, *, stage: Path | None = None,
             _atomic_new_view(target, view, staging_root)
             mode = "STAGED_NO_CLOBBER"
     return {
-        "schema": "sens-t5-spaced-view/v1",
+        "schema": "sens-t5m-spaced-view/v1" if codec == "t5m" else "sens-t5-spaced-view/v1",
+        "physical_codec": codec,
         "status": mode,
         "source": str(rel.with_suffix(".lisp")),
         "binary": str(rel),
@@ -199,6 +213,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--sens", required=True, help="one explicit relative file.sens; no bulk scan")
+    parser.add_argument("--codec", choices=("t5m", "t5"), default="t5",
+                        help="t5m: current physical carrier; t5: legacy explicit route")
     commands = parser.add_mutually_exclusive_group(required=True)
     commands.add_argument("--verify", action="store_true", help="read-only check committed triple")
     commands.add_argument("--stage", type=Path, help="existing OUTSIDE-repo staging directory; no overwrite")
@@ -211,7 +227,7 @@ def main(argv: list[str] | None = None) -> int:
         target = args.stage if args.stage is not None else args.preview_stage
         record = check_or_stage(args.root, args.sens, stage=target,
                                 preview=args.preview_stage is not None,
-                                reader=args.reader)
+                                reader=args.reader, codec=args.codec)
     except (ViewError, SensT5Error, OSError, ValueError, UnicodeError) as error:
         print(f"BLOCKED: {error}", file=sys.stderr)
         return 2
