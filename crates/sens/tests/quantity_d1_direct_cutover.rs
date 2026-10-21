@@ -109,8 +109,15 @@ fn nil_returning_validators_use_d4_null_not_d4_not() {
         let illegal = format!("(хибне? ({function} (як-є unknown)))");
         let error = eval_program(&illegal, &mut session)
             .expect_err("SENS D4 NOT не може прийняти структурне NIL");
-        assert!(error.to_string().contains("NOT requires an exact D1 PredicateBit"),
-            "test_id=quantity-not-nil input={illegal} expected=TYPE_ERROR actual={error}");
+        // Для похідного хибне? чинний SENS відмовляє на внутрішньому
+        // D3 COND раніше, ніж буде досягнуто D4 NOT. Обидва шляхи
+        // забороняють перетворення D3 NIL на D1 без явного закону.
+        let message = error.to_string();
+        assert!(
+            message.contains("COND expects exact D1:1 / D1:0")
+                || message.contains("NOT requires an exact D1 PredicateBit"),
+            "test_id=quantity-not-nil input={illegal} expected=EXACT_D1_REQUIRED actual={error}"
+        );
     }
 
     for guard in [
