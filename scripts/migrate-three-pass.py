@@ -1579,8 +1579,8 @@ def main():
     ap.add_argument("--codec", choices=("t5m", "t5"), default="t5m",
                     help="T5M — дефолтний 5-тритовий транспорт (1 байт); T5 — явний legacy-формат")
     ap.add_argument("--source-surface", choices=("default", "ук", "укр"),
-                    default="default",
-                    help="людська проєкція джерела; ук/укр дозволяють десяткову кому")
+                    default="укр",
+                    help="типово повна українська проєкція укр і десяткова кома; default — явний історичний режим")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
