@@ -220,7 +220,7 @@ fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
            (список
              (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список слабке сильне)))
              (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список сильне слабке)))))
-          (так (як-є ())))
+          ((атом? (як-є ())) (як-є ())))
     "#;
     let value = eval_guard_ukr(source);
     assert!(
@@ -314,19 +314,19 @@ fn collect_call_head_coordinates(expr: &Expr, coordinates: &mut Vec<(usize, u16)
 #[test]
 fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
     let start = GUARD_SOURCE
-        .find("(визначити guard-compare\n")
-        .expect("Lisp-owned guard-compare must exist");
+        .find("(визначити захист-порівняти\n")
+        .expect("Lisp-owned захист-порівняти має містити реальне українське визначення");
     let end = GUARD_SOURCE[start..]
-        .find("\n(визначити guard-sync-window")
+        .find("\n(визначити захист-синхронізувати-вікно")
         .map(|offset| start + offset)
-        .expect("guard-compare definition must end before guard-sync-window");
+        .expect("український захист-порівняти завершується перед наступним DEFINE");
     let source = &GUARD_SOURCE[start..end];
 
     assert!(!source.contains("(11110111 expected observed)"));
-    assert!(source.contains("(сторожа--рівні? expected observed)"));
+    assert!(source.contains("(сторожа--рівні? очікуване спостережене)"));
 
     let parsed = parse_mixed_exact_domain(source)
-        .expect("guard-compare must retain exact domain identities");
+        .expect("український захист-порівняти зберігає точні домени");
     assert_eq!(parsed.len(), 1);
     let mut coordinates = Vec::new();
     collect_call_head_coordinates(&parsed[0], &mut coordinates);
@@ -340,12 +340,12 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
     assert_eq!(
         widths,
         [1usize, 3usize, 4usize].into_iter().collect(),
-        "guard-compare keeps a D1 predicate and exact D3/D4 callable identities"
+        "захист-порівняти зберігає точний D1-предикат і викличні D3/D4"
     );
     for required in [(1, 0b1), (3, 0b001), (3, 0b110), (4, 0b0010), (4, 0b0011), (4, 0b1110)] {
         assert!(
             coordinates.contains(&required),
-            "guard-compare is missing D{}:{:0width$b}",
+            "захист-порівняти: відсутній D{}:{:0width$b}",
             required.0,
             required.1,
             width = required.0
@@ -357,12 +357,12 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
 #[test]
 fn guard_reference_field_uses_exact_d1_d3_d4_ukr_surfaces() {
     let start = GUARD_SOURCE
-        .find("(визначити guard-reference-field\n")
-        .expect("the live Ukrainian guard accessor must exist");
+        .find("(визначити захист-еталон-поле\n")
+        .expect("має існувати первинний український захист-еталон-поле");
     let end = GUARD_SOURCE[start..]
         .find("\n(визначити ")
         .map(|offset| start + offset)
-        .expect("guard-reference-field must remain one bounded definition");
+        .expect("захист-еталон-поле має залишатися одним завершеним визначенням");
     let source = &GUARD_SOURCE[start..end];
 
     assert!(source.contains("(функція (поле посилання)"));
@@ -390,7 +390,7 @@ fn guard_reference_field_uses_exact_d1_d3_d4_ukr_surfaces() {
     assert_eq!(
         widths,
         [1usize, 3usize, 4usize].into_iter().collect(),
-        "guard-reference-field keeps D1 truth, D3 structure and exact D4 lambda/selector/NULL"
+        "захист-еталон-поле зберігає D1, структури D3 і точні D4"
     );
 }
 
@@ -409,5 +409,5 @@ fn guard_reference_data_reader_is_path_pinned_and_keeps_the_directory_as_data() 
         "the legacy W8 data wrapper must not become a general reader"
     );
     let rendered = format!("{:?}", parsed[0].kind);
-    assert!(rendered.contains("guard-reference-directory"));
+    assert!(rendered.contains("довідник-гвардії"));
 }
