@@ -2,7 +2,7 @@
 """Bounded domain-native specialization of the EXISTING Core1 C1-SECOND helper.
 
 No evaluator is created here. Canonical semantic identities come from the pinned
-SENS foundation. Physical bytes are produced only by sens_t5_codec.
+SENS foundation. Existing physical bytes are checked read-only by the historical reference codec.
 The positive T5 fixture is *not* independent oracle/native execution evidence.
 """
 from __future__ import annotations
@@ -21,7 +21,9 @@ from sens_t5_codec import decode_bytes, encode_words, typed_sha256
 
 SOURCE = ROOT / "lib" / "core1.lisp"
 FOUNDATION = ROOT / "knowledge" / "d1-d9-foundation.json"
-PROJECTION = HERE / "second.lisp"
+PROJECTION = HERE / "second"
+HUMAN = HERE / "second.lisp"
+CURRENT_HUMAN_LISP = "(перше\n  (решта\n    (сполучити\n      (як-є ())\n      (сполучити (як-є ()) (як-є ())))))\n"
 PHYSICAL = HERE / "second.sens"
 
 # An already implemented Core1 helper; preserve its source and semantics.
@@ -99,7 +101,9 @@ def expected_artifacts(root: Path = ROOT) -> tuple[str, bytes, str]:
 def verify_checked_in() -> tuple[int, str]:
     projection, physical, digest = expected_artifacts()
     if PROJECTION.read_text(encoding="utf-8") != projection:
-        raise ValueError("BLOCK: Core1 same-stem .lisp projection drift")
+        raise ValueError("BLOCK: Core1 exact-bit view drift")
+    if HUMAN.read_text(encoding="utf-8") != CURRENT_HUMAN_LISP:
+        raise ValueError("BLOCK: Core1 Ukrainian Lisp source drift")
     if PHYSICAL.read_bytes() != physical:
         raise ValueError("BLOCK: Core1 physical .sens mismatch or noncanonical bytes")
     if PROJECTION.stem != PHYSICAL.stem:
@@ -110,17 +114,15 @@ def verify_checked_in() -> tuple[int, str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--create", action="store_true",
-                    help="create ONLY absent same-stem fixture files; never overwrite")
+                    help="retired: will refuse Python-minted physical files")
     args = ap.parse_args()
     if args.create:
-        if PROJECTION.exists() or PHYSICAL.exists():
+        if PROJECTION.exists() or PHYSICAL.exists() or HUMAN.exists():
             ap.error("BLOCK: refusing to overwrite existing projection or physical .sens")
         projection, physical, _digest = expected_artifacts()
         # Exclusive creates, even if another agent races the prior exists-check.
-        with PROJECTION.open("x", encoding="utf-8") as out:
-            out.write(projection)
-        with PHYSICAL.open("xb") as out:
-            out.write(physical)
+        # Архівний Python-кодек не має права створювати сучасний .sens.
+        ap.error("Заборонено mint через Python: фізичний T5M створює лише Zig")
     size, typed_digest = verify_checked_in()
     physical_sha = hashlib.sha256(PHYSICAL.read_bytes()).hexdigest()
     print(f"PASS: C1-SECOND existing-source -> exact D2/D3 -> T5 {size} bytes "

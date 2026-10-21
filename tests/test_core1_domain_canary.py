@@ -35,6 +35,9 @@ class ExistingCore1DomainCanaryTests(unittest.TestCase):
     def test_same_stem_binary_is_real_and_exact(self):
         rendered, physical, expected_digest = mod.expected_artifacts()
         self.assertEqual(mod.PROJECTION.read_text(encoding="utf-8"), rendered)
+        self.assertEqual(mod.HUMAN.read_text(encoding="utf-8"), mod.CURRENT_HUMAN_LISP)
+        self.assertIn("(сполучити (як-є ()) (як-є ()))", mod.CURRENT_HUMAN_LISP)
+        self.assertNotEqual(mod.HUMAN.read_text(encoding="utf-8").strip(), rendered.strip())
         self.assertEqual(mod.PHYSICAL.read_bytes(), physical)
         self.assertEqual(decode_bytes(physical), mod.words_from_existing_core1())
         self.assertEqual(encode_projection(rendered), physical)
