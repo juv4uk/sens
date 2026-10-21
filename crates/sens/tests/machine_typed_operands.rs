@@ -98,6 +98,25 @@ fn invalid_operand_values_fail_closed_before_machine_form_creation() {
     }
 }
 
+
+#[test]
+fn ukrainian_machine_register_shapes_return_exact_d1_and_never_trust_extra_fields() {
+    // Виконує саме Lisp/SENS, не Python-імітатор. Чотири типи регістрів
+    // повинні проходити валідні форми й відхиляти чужі назви.
+    let mut session = machine_session();
+    for (source, expected) in [
+        ("(машинний-регістр-8 (quote al))", "(gpr8 al)"),
+        ("(машинний-регістр-8 (quote rax))", "(rejected machine-operand gpr8 rax)"),
+        ("(машинний-регістр-32 (quote rax))", "(gpr32 rax)"),
+        ("(машинний-регістр-32 (quote xmm0))", "(rejected machine-operand gpr32 xmm0)"),
+        ("(машинний-векторний-регістр (quote xmm0))", "(xmm xmm0)"),
+        ("(машинний-векторний-регістр (quote rax))", "(rejected machine-operand xmm rax)"),
+        ("(x86-gpr64 (quote al))", "(rejected machine-operand gpr64 al)"),
+    ] {
+        assert_eq!(eval_value(source, &mut session), expected, "{source}");
+    }
+}
+
 #[test]
 fn typed_registers_and_immediates_project_to_existing_176_forms() {
     let mut session = machine_session();
