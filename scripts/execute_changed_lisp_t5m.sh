@@ -12,7 +12,7 @@ outdir="$3"
 test -x "$binary"
 test -f "$manifest"
 mkdir -p "$outdir"
-if [[ "${SENS_NATIVE_T5M:-0}" == 1 ]]; then
+if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then
   native_open="${SENS_T5M_OPEN:-$(dirname "$binary")/sens-trit}"
   test -x "$native_open" || { echo "::error::SENS_NATIVE_VIEW_READER_MISSING path=$native_open" >&2; exit 2; }
 fi
@@ -26,6 +26,9 @@ mark_file_failed() {
     failed_files=$((failed_files + 1))
   fi
 }
+# Лише в явному історичному режимі SENS_NATIVE_T5M=0: за розходження 
+# Python preview із SENS/T5M діагностуємо відповідну розбіжність. 
+# Основний маршрут SENS_NATIVE_T5M=1 не залежить від Python/JSON.
 # На справжній розбіжності source ↔ Python minted T5M залучаємо
 # чинний SENS reader як незалежне джерело точних слів. Він користується
 # тим самим Zig codec, що й --t5m-pair. Помилку не приховуємо:
@@ -168,7 +171,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   mkdir -p "$dir"
   report="$dir/migration.json"
   echo "T5M_CHANGED_SOURCE path=$file"
-  if [[ "${SENS_NATIVE_T5M:-0}" == 1 ]]; then
+  if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then
     run_native_t5m_program
     continue
   fi
