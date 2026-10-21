@@ -29,7 +29,7 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
             MOD.validate_documents(docs)
         self.assertEqual(caught.exception.test_id, test_id)
 
-    def test_current_selector_seed_is_exactly_512_deriveds_not_residents(self):
+    def test_all_512_selectors_are_mathematically_defined_not_direct_opcodes(self):
         report = MOD.validate_documents(self.documents)
         self.assertEqual(report["status"], "MECHANICAL_PASS")
         self.assertEqual(report["semantic_status"], "DERIVED_BY_COMPOSITION")
@@ -38,6 +38,8 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         self.assertEqual(self.documents["seed"]["law"]["derived_by_law"], True)
         self.assertEqual(self.documents["seed"]["accounting"]["d11_mathematically_defined_selectors"], 512)
         self.assertEqual(self.documents["seed"]["accounting"]["selector_derived_coordinates"], 512)
+        self.assertEqual(self.documents["seed"]["accounting"]["defined_d11_selector_functions_in_math"], 512)
+        self.assertEqual(self.documents["seed"]["accounting"]["independently_ratified_selector_primitive_laws"], 0)
         self.assertEqual(self.documents["seed"]["accounting"]["derived_selectors_without_direct_opcode_admission"], 512)
         self.assertEqual(report["selector_parents"], 256)
         self.assertEqual(report["unique_coordinates"], 512)
