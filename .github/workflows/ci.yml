@@ -465,6 +465,7 @@ jobs:
           cargo test --locked -p sens --test translation_boundary -- --nocapture
 
       - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
+        id: t5m_changed_execute
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
         timeout-minutes: 15
         shell: bash
@@ -477,6 +478,17 @@ jobs:
           bash scripts/execute_changed_lisp_t5m.sh \
             "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
             "$RUNNER_TEMP/changed-t5m-pairs"
+
+      # Свіжі Zig-байти зберігаємо тільки коли CI знайшов розходження,
+      # щоб фізичну пару можна було виправити, не копіюючи host-імітацію.
+      - name: "T5M — свіжа фізична пара для виправлення RED"
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' && steps.t5m_changed_execute.outcome == 'failure' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
+        with:
+          name: sens-t5m-refresh-${{ github.sha }}
+          path: ${{ runner.temp }}/changed-t5m-pairs/
+          if-no-files-found: ignore
+          retention-days: 1
 
       # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - name: "BENCH-T5M — Zig, x86-64 ASM, Rust"
