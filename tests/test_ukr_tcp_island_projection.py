@@ -1,187 +1,158 @@
-"""Read-only negative/positive witnesses for the ratified Ukrainian TCP/Island cut.
+"""Чинна українська проєкція TCP/островів: закони джерела, не старий SID8 знімок.
 
-This checks source AST identity and domain surfaces only, not SENS call admission
-or Zig/T5M transport. The frozen fingerprints are from the pre-change source AST.
+Це статична перевірка Lisp AST. Реальне SENS виконання захисту D6
+перевіряє crates/sens/tests/island_lowering_ukr_runtime.rs.
+Цей тест НЕ видає допуску T5M, oracle або релізу.
 """
 from __future__ import annotations
 
-import json
 from pathlib import Path
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
-LOCAL_HELPERS = {"вибрати-механізм": "mechanism-select"}
 PEERS = {
-    "функція": (4, "0010"), "як-є": (3, "001"), "атом?": (3, "010"),
-    "решта": (3, "011"), "перше": (3, "100"),
-    "тотожне?": (3, "101"), "за-умовою": (3, "110"),
-    "сполучити": (3, "111"), "друге": (4, "1001"),
-    "список": (4, "1110"), "рядок-додати": (9, "110011110"),
+    "функція": (4, "0010"),
+    "як-є": (3, "001"),
+    "атом?": (3, "010"),
+    "решта": (3, "011"),
+    "перше": (3, "100"),
+    "тотожне?": (3, "101"),
+    "за-умовою": (3, "110"),
+    "сполучити": (3, "111"),
+    "друге": (4, "1001"),
+    "список": (4, "1110"),
+    "рядок-додати": (9, "110011110"),
     "четверте": (6, "100111"),
 }
-# Frozen pre-migration AST, NOT a сід8 byte/width authority.
-BASELINE = {
-  "lib/tcp.lisp": {
-    "fingerprint": "9566f4cd27d15f90",
-    "count": 5,
-    "forms": 7
-  },
-  "lib/island-lowering.lisp": {
-    "fingerprint": "dcc87879d0c95fa0",
-    "count": 50,
-    "forms": 3
-  }
-}
 
 
-def parse(source: str):
-    words = [item.group() for item in TOKEN.finditer(source)
-             if not item.group().startswith(";")]
-    index = 0
+def parse(source: str) -> list:
+    words = [match.group() for match in TOKEN.finditer(source)
+             if not match.group().startswith(";")]
+    offset = 0
 
     def read():
-        nonlocal index
-        if index >= len(words):
-            raise ValueError("незавершена Lisp форма")
-        word = words[index]
-        index += 1
+        nonlocal offset
+        if offset >= len(words):
+            raise ValueError("незавершена Lisp-форма")
+        word = words[offset]
+        offset += 1
         if word == ")":
             raise ValueError("зайва закривальна дужка")
         if word != "(":
             return word
-        values = []
-        while index < len(words) and words[index] != ")":
-            values.append(read())
-        if index >= len(words):
+        children = []
+        while offset < len(words) and words[offset] != ")":
+            children.append(read())
+        if offset >= len(words):
             raise ValueError("немає закривальної дужки")
-        index += 1
-        return values
+        offset += 1
+        return children
 
-    forms = []
-    while index < len(words):
-        forms.append(read())
-    return forms
-
-
-def current_to_exact(node):
-    """Only call heads. No decoding quoted data or changing literal values."""
-    if not isinstance(node, list) or not node:
-        return node
-    first = node[0]
-    if isinstance(first, str):
-        first = LOCAL_HELPERS.get(first, PEERS.get(first, (None, first))[1])
-    else:
-        first = current_to_exact(first)
-    if first == "001":  # ratified D3 QUOTE owns data
-        return [first] + node[1:]
-    return [first] + [current_to_exact(child) for child in node[1:]]
-
-
-def signature(forms):
-    # Same FNV-1a convention as the original-domain AST regressions;
-    # hash character codepoints, never physical T5M bytes.
-    data = json.dumps(forms, ensure_ascii=False, separators=(",", ":"))
-    h = 0xCBF29CE484222325
-    for char in data:
-        h = ((h ^ ord(char)) * 0x100000001B3) & ((1 << 64) - 1)
-    return f"{h:016x}"
-
-
-def heads(node):
-    if not isinstance(node, list) or not node:
-        return []
-    first = node[0]
-    result = [first] if isinstance(first, str) else heads(first)
-    if first in ("001", "як-є"):
-        return result
-    for child in node[1:]:
-        result.extend(heads(child))
+    result = []
+    while offset < len(words):
+        result.append(read())
     return result
 
 
-def validate(path: str, source: str):
+def heads(node) -> list[str]:
+    if not isinstance(node, list) or not node:
+        return []
+    head = node[0]
+    called = [head] if isinstance(head, str) else heads(head)
+    if head == "як-є":
+        return called  # цитоване значення не містить викличних голів
+    for child in node[1:]:
+        called.extend(heads(child))
+    return called
+
+
+def definitions(forms: list) -> dict[str, list]:
+    rows: dict[str, list] = {}
+    for form in forms:
+        if isinstance(form, list) and len(form) == 3 and form[0] == "визначити":
+            name = form[1]
+            if not isinstance(name, str) or name in rows:
+                raise AssertionError("повторна або неатомарна Lisp-назва")
+            rows[name] = form
+    return rows
+
+
+def validate_current(path: str, source: str) -> dict[str, list]:
     forms = parse(source)
-    if len(forms) != BASELINE[path]["forms"]:
-        raise AssertionError("змінилася кількість форм")
-    if signature([current_to_exact(node) for node in forms]) != BASELINE[path]["fingerprint"]:
-        raise AssertionError("порушено початковий точний AST закон, арність або цитату")
-    called = [name for node in forms for name in heads(node)]
-    translated = [x for x in called if x in PEERS]
-    if len(translated) != BASELINE[path]["count"]:
-        raise AssertionError("не всі викличні голови на українській поверхні")
-    leftovers = [name for name in called
-                 if re.fullmatch(r"[01]{3,10}", name) and name not in
-                 ("0010", "0011", "100111")]
-    if leftovers:
-        raise AssertionError(f"невиправдані сирі голови: {leftovers}")
-    return forms
+    defs = definitions(forms)
+    called = [head for form in forms for head in heads(form)]
+    old_encoded = [head for head in called
+                   if re.fullmatch(r"[01]{3,11}", head)]
+    if old_encoded:
+        raise AssertionError(f"{path}: машинні викличні голови замість укр: {old_encoded}")
+    if "#d1:" in source or "#d8:" in source or "#b" in source:
+        raise AssertionError(f"{path}: старі кодовані літерали")
+    if not defs:
+        raise AssertionError(f"{path}: немає виконуваних визначень")
+    return defs
 
 
-class UkrainianTcpIslandTests(unittest.TestCase):
-    def test_ratified_domain_bits_and_both_ukrainian_peers(self):
+def validate_island_guard(source: str) -> None:
+    defs = validate_current("lib/island-lowering.lisp", source)
+    if "острів-є-четверте-поле?" not in defs or "острів-обробити-вибір" not in defs:
+        raise AssertionError("не визначено захисну функцію та обробник")
+    if "(острів-є-четверте-поле? вибір)" not in source:
+        raise AssertionError("немає перевірки перед четвертим полем")
+    if "(четверте вибір)" not in source:
+        raise AssertionError("змінено ратифікований D6-селектор")
+    if source.count("(як-є malformed-selection)") < 2:
+        raise AssertionError("обрізана форма мусить дати іменовану відмову")
+    shape = defs["острів-є-четверте-поле?"]
+    checks = heads(shape)
+    if checks.count("атом?") < 4 or "решта" not in checks:
+        raise AssertionError("кожен крок D3 CDR має перевірятися до D6")
+    if "(вибрати-механізм ідентичність виконавець)" not in source:
+        raise AssertionError("обхід добору механізму неприпустимий")
+
+
+class UkrainianTcpIslandCurrentTests(unittest.TestCase):
+    def test_current_ratified_ukrainian_head_coordinates(self):
         for spelling, (width, bits) in PEERS.items():
-            with self.subTest(surface=spelling, domain=width, bits=bits):
-                rows = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
-                line = next((s for s in rows.splitlines() if s.startswith(f"  ({bits} ")), None)
-                self.assertIsNotNone(line)
-                if spelling == "четверте":
-                    # D6 compact ук=пррр; full укр=четверте is distinct.
-                    self.assertIn("(ук пррр)", line)
-                else:
-                    self.assertIn(f"(ук {spelling})", line)
-                self.assertIn(f"(укр {spelling})", line)
+            with self.subTest(surface=spelling):
+                source = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
+                row = next((line for line in source.splitlines()
+                            if line.startswith(f"  ({bits} ")), None)
+                self.assertIsNotNone(row, (spelling, bits))
+                self.assertIn(f"(укр {spelling})", row)
 
-    def test_exact_unchanged_ast_and_all_projection_callsites(self):
-        for path in BASELINE:
-            with self.subTest(path=path):
-                validate(path, (ROOT / path).read_text(encoding="utf-8"))
-
-    def test_quote_data_and_host_tcp_string_stay_data(self):
-        data = (ROOT / "lib/tcp.lisp").read_text(encoding="utf-8")
-        self.assertIn('"0.0.0.0"', data)
-        self.assertIn("#d1:1", data)
-        validate("lib/tcp.lisp", data)
+    def test_current_tcp_and_island_lisp_without_obsolete_blob_requirements(self):
+        tcp = (ROOT / "lib/tcp.lisp").read_text(encoding="utf-8")
         island = (ROOT / "lib/island-lowering.lisp").read_text(encoding="utf-8")
-        self.assertIn("(четверте selection)", island)  # exact D6:100111 CADDDR
-        self.assertNotIn("(100111 selection)", island)
-        self.assertIn("(вибрати-механізм sid executor)", island)
-        self.assertNotIn("(mechanism-select sid executor)", island)
-        self.assertIn("(рядок-додати", island)
-        self.assertEqual(island.count("((функція ("), 4)
-        self.assertEqual(island.count("(0010 ("), 3)
-        validate("lib/island-lowering.lisp", island)
+        self.assertIn('"0.0.0.0"', tcp)
+        self.assertIn("(визначити протокол-передавання-читати", tcp)
+        self.assertIn("(визначити протокол-передавання-записати", tcp)
+        validate_current("lib/tcp.lisp", tcp)
+        validate_island_guard(island)
 
-    def test_negative_wrong_current_operation_or_domain(self):
-        path = "lib/island-lowering.lisp"
-        original = (ROOT / path).read_text(encoding="utf-8")
-        for changed in [
-            original.replace("(рядок-додати", "(сполучити", 1),
-            original.replace("((функція (selection)", "((сполучити (selection)", 1),
-            original.replace("(тотожне?", "(сполучити", 1),
-            original.replace("(рядок-додати", "(00000101", 1),
-            original.replace("(четверте selection)", "(третє selection)", 1),
-        ]:
-            with self.assertRaises(AssertionError):
-                validate(path, changed)
+    def test_negative_mutations_reject_unguarded_d6_and_obsolete_literals(self):
+        island = (ROOT / "lib/island-lowering.lisp").read_text(encoding="utf-8")
+        for mutant in (
+            island.replace("(острів-є-четверте-поле? вибір)", "так", 1),
+            island.replace("(четверте вибір)", "(третє вибір)", 1),
+            island.replace("(як-є malformed-selection)", "(як-є success)", 2),
+            island.replace("(решта запис)", "(00001101 запис)", 1),
+        ):
+            with self.subTest(change=mutant != island):
+                self.assertNotEqual(mutant, island)
+                with self.assertRaises(AssertionError):
+                    validate_island_guard(mutant)
+        tcp = (ROOT / "lib/tcp.lisp").read_text(encoding="utf-8")
+        with self.assertRaises(AssertionError):
+            validate_current("lib/tcp.lisp", tcp + "\n(визначити проба #d1:1)\n")
 
-    def test_negative_quote_and_d1_fallback_mutants(self):
-        path = "lib/tcp.lisp"
-        original = (ROOT / path).read_text(encoding="utf-8")
-        for changed in [
-            original.replace("(як-є decoded)", "(як-є rejected)", 1),
-            original.replace("#d1:1", "#d1:0", 1),
-            original.replace('"0.0.0.0"', '"127.0.0.1"', 1),
-        ]:
-            with self.assertRaises(AssertionError):
-                validate(path, changed)
-
-    def test_negative_malformed_source_rejected(self):
-        for value in ("(", ")", "(за-умовою (тотожне?"):
+    def test_malformed_lisp_is_not_counted_as_reversible(self):
+        for source in ("(", ")", "(за-умовою (тотожне?", "(визначити x) )"):
             with self.assertRaises(ValueError):
-                parse(value)
+                parse(source)
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main()
