@@ -43,25 +43,27 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                 self.assertIn('failed_files=$((failed_files + 1))', arm)
         self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
 
-    def test_w24_uses_explicit_domain_source_runtime_without_fake_physical_pass(self):
-        # Це контроль маршрутів, а не Python-обчислення Lisp.
+    def test_w24_is_executed_only_from_a_verified_physical_pair(self):
+        # Структурний свідок маршруту; реальне SENS-eval перевіряє Rust CLI.
         source = RUNNER.read_text(encoding="utf-8")
         physical = source.index('if timeout 45s "$binary" "$pair"')
-        marker = source.index("T5M_PHYSICAL_D24_NOT_EXECUTED", physical)
-        source_runtime = source.index('timeout 45s "$binary" --t5m-file "$file"', marker)
-        source_pass = source.index("T5M_DOMAIN_SOURCE_RUNTIME_PASS", source_runtime)
-        source_fail = source.index("T5M_DOMAIN_SOURCE_RUNTIME_FAIL", source_pass)
+        marker = source.index("T5M_STANDALONE_D24_NOT_SUPPORTED", physical)
+        paired_runtime = source.index('timeout 45s "$binary" --t5m-pair "$file" "$pair"', marker)
+        paired_pass = source.index("T5M_PHYSICAL_PAIRED_D24_PASS", paired_runtime)
+        paired_fail = source.index("T5M_PHYSICAL_PAIRED_D24_FAIL", paired_pass)
         self.assertLess(physical, marker)
-        self.assertLess(marker, source_runtime)
-        self.assertLess(source_runtime, source_pass)
-        self.assertLess(source_pass, source_fail)
-        branch = source[marker:source_fail]
+        self.assertLess(marker, paired_runtime)
+        self.assertLess(paired_runtime, paired_pass)
+        self.assertLess(paired_pass, paired_fail)
+        branch = source[marker:paired_fail]
         self.assertIn('точні ширини слів [24]', source)
         self.assertIn('адаптер BinarySourceWord приймає лише W1–W9', source)
-        self.assertIn('physical=NOT_SUPPORTED', branch)
+        self.assertIn('physical=ZIG_VERIFIED', branch)
+        self.assertIn('semantic=NOT_CERTIFIED', branch)
         self.assertIn('release=NOT_CERTIFIED', branch)
+        self.assertNotIn('--t5m-file "$file"', branch)
         self.assertNotIn('T5M_FILE_EXECUTION PASS', branch)
-        self.assertIn('failed_files=$((failed_files + 1))', source[source_fail:])
+        self.assertIn('failed_files=$((failed_files + 1))', source[paired_fail:])
 
     def test_nonprogram_cannot_hide_obsolete_committed_sens(self):
         # Перевірка самого Bash-маршруту на синтетичному звіті мігратора:
