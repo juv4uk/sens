@@ -14,7 +14,7 @@ GOOD_GUARD = "((хибне? (атом? (перше (перше форми-сло
 SKIP_ATOM = "((атом? (перше форми-слотів))  (знайти-значення-слота-кліпс назва-слота (решта форми-слотів)))"
 OLD_EQUAL = "((11110111 назва-слота (перше (перше форми-слотів))) (кліпс-значення-слота (перше форми-слотів)))"
 NEW_EQ = "((тотожне? назва-слота (перше (перше форми-слотів))) (кліпс-значення-слота (перше форми-слотів)))"
-STRING_EQUAL = '((тотожне? (рядок-перший рядок) ":") (тотожне? (рядок-перший (рядок-решта рядок)) ":"))'
+STRING_EQUAL = '((тотожне? (рядок-перший рядок) (символ-у-текст (як-є :))) (тотожне? (рядок-перший (рядок-решта рядок)) (символ-у-текст (як-є :))))'
 
 
 def lookup_body(source):
@@ -39,6 +39,12 @@ def verify_source(source):
         raise AssertionError("канонічне порівняння двокрапок змінено без доказу")
     if source.count(STRING_EQUAL) != 1:
         raise AssertionError("канонічне порівняння двокрапок дубльоване або втрачено")
+    if '(тотожне? рядок "")' in source or '(рядок-перший "?_")' in source or '(рядок-перший рядок) ":"' in source:
+        raise AssertionError("CLIPS повернув недопущені рядкові літерали замість точного D7/D8")
+    if '(визначити кліпс-рядок-порожній? (функція (рядок) (рядок-порожній? рядок)))' not in source:
+        raise AssertionError("CLIPS не використовує чинний D9-предикат порожнього рядка")
+    if '(рядок-перший (символ-у-текст (як-є ?_)))' not in source:
+        raise AssertionError("CLIPS втратив точне одержання знака питання")
     if "11110111" in body:
         raise AssertionError("старий D8 EQUAL повернувся у викличну позицію")
     return body
@@ -144,9 +150,21 @@ class ClipsSlotD3Exact2046(unittest.TestCase):
     def test_negative_do_not_alias_string_equal_to_atomic_eq(self):
         verify_source(self.source)
         broken = self.source.replace(STRING_EQUAL, STRING_EQUAL.replace(
-            '":"', '";"', 1), 1)
+            '(як-є :)', '(як-є !)', 1), 1)
         with self.assertRaisesRegex(AssertionError, "порівняння двокрапок"):
             verify_source(broken)
+
+    def test_exact_text_constructs_and_legacy_string_mutants(self):
+        verify_source(self.source)
+        for current, legacy in (
+            ('(рядок-порожній? рядок)', '(тотожне? рядок "")'),
+            ('(символ-у-текст (як-є :))', '":"'),
+            ('(рядок-перший (символ-у-текст (як-є ?_)))', '(рядок-перший "?_")'),
+        ):
+            self.assertIn(current, self.source)
+            broken = self.source.replace(current, legacy, 1)
+            with self.assertRaises(AssertionError):
+                verify_source(broken)
 
     def test_negative_malformed_slot_guard_order(self):
         verify_source(self.source)
