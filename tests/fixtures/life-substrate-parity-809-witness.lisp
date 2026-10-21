@@ -14,7 +14,7 @@
          (як-є life-substrate-parity-witness)
          (список (як-є status) (як-є pass))
          (список (як-є detail) (як-є awaiting-real-graal-evidence))))
-      (так
+      ((атом? (як-є ()))
        (список
          (як-є life-substrate-parity-witness)
          (список (як-є status) (як-є fail))
