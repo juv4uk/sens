@@ -63,3 +63,26 @@ fn замикання_виконується_з_реальної_фізично�
     assert!(!stderr.contains("T5M_RESULT_UNSUPPORTED"),
             "відмова має бути семантичною, не відсутністю transport результату");
 }
+
+#[test]
+fn t5m_result_retains_proper_and_dotted_d3_pairs_without_host_shortcut() {
+    // Результат має пройти власні точні слова → Zig T5M → D3 QUOTE → SENS eval.
+    // Крапкова пара не може перетворитися на правильний список.
+    for (index, (expression, expected)) in [
+        ("(як-є (радіо . антена))", "(радіо . антена)"),
+        ("(як-є (радіо антена))", "(радіо антена)"),
+        ("(як-є (радіо (антена . сигнал)))", "(радіо (антена . сигнал))"),
+    ].into_iter().enumerate() {
+        let output = run_source(expression, index + 10);
+        assert!(
+            output.status.success(),
+            "test_id=t5m-result-pair layer=zig-sens input={expression} stderr={}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert_eq!(
+            String::from_utf8_lossy(&output.stdout).trim(),
+            expected,
+            "test_id=t5m-result-pair layer=sens expected={expected}"
+        );
+    }
+}
