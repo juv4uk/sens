@@ -19,15 +19,17 @@ D4 = ROOT / "lib/domains/d4.lisp"
 D9 = ROOT / "lib/domains/d9.lisp"
 
 EXACT_LAW = """
+(0011 файл-обробити-декодоване
+  (0010 (decoded)
+    (110
+      ((успішно-декодовано? decoded)
+       (1001 decoded))
+      ((010 (001 ()))
+       decoded))))
 (0011 read-file
   (0010 (path)
-    ((0010 (decoded)
-      (110
-        ((успішно-декодовано? decoded)
-         (1001 decoded))
-        ((010 (001 ()))
-         decoded)))
-     (read-file-utf8-raw path))))
+    (файл-обробити-декодоване
+      (read-file-utf8-raw path))))
 (0011 write-file
   (0010 (path text)
     (1001 (1110 (write-file-bytes path (utf8-encode-string text)) text))))
@@ -87,7 +89,7 @@ def verify(source: str) -> None:
     forms = parse(source)
     if [old_identity(form) for form in forms] != parse(EXACT_LAW):
         raise AssertionError("FS: порушено початковий D1/D3/D4 закон, арність або I/O")
-    if len(forms) != 2 or any(
+    if len(forms) != 3 or any(
         form[0] != "визначити" or form[2][0] != "функція" for form in forms
     ):
         raise AssertionError("FS: не повна українська D4:0011/0010 проєкція")
@@ -131,10 +133,12 @@ class FsUkrProjectionTests(unittest.TestCase):
                          if not line.lstrip().startswith(";"))
         self.assertNotRegex(code, r"\([01]{3,9}(?=\s|\))")
         self.assertNotIn("#d1:1", code)
-        self.assertEqual(code.count("(визначити "), 2)
+        self.assertEqual(code.count("(визначити "), 3)
         self.assertEqual(code.count("(функція "), 3)
         self.assertIn("((атом? (як-є ()))", code)
         self.assertNotIn("(так", code)
+        self.assertNotIn("((функція ", code)
+        self.assertIn("(файл-обробити-декодоване", code)
 
     def test_host_io_boundary_and_public_ukr_names(self):
         for literal in ("(визначити читати-файл", "(визначити записати-файл",
@@ -153,6 +157,7 @@ class FsUkrProjectionTests(unittest.TestCase):
             self.source.replace("(атом? (як-є ()))", "(атом? (як-є (())))", 1),
             self.source.replace("(визначити читати-файл", "(функція читати-файл", 1),
             self.source.replace("читати-сирий-текст-файла", "читати-файл-байти", 1),
+            self.source.replace("(файл-обробити-декодоване\n", "(читати-файл\n", 1),
         ):
             with self.assertRaises(AssertionError):
                 verify(changed)
