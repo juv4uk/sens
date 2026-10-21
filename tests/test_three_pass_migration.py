@@ -220,6 +220,29 @@ class ThreePassMigrationTests(unittest.TestCase):
         resolver=mod.Resolver(self.my,self.upper)
         return mod.migrate_file(source,resolver,self.text7),resolver
 
+    def test_ukrainian_apostrophe_is_identifier_data_not_a_quote(self):
+        # lib/forward.lisp actually uses *робоча-пам'ять*; splitting the
+        # apostrophe invents a QUOTE node and destroys program identity.
+        source = "(визначити *робоча-пам'ять* (як-є ()))"
+        parsed = mod.Parser(mod.tokenize(source)).parse_program()
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0].items[1].tok.text, "*робоча-пам'ять*")
+        self.assertEqual(
+            [t.kind for t in mod.tokenize("(функція (ім'я) ім'я)")],
+            ["LP", "ATOM", "LP", "ATOM", "RP", "ATOM", "RP"],
+        )
+        self.assertEqual(
+            [t.text for t in mod.tokenize("'ім'я")],
+            ["'", "ім'я"],
+        )
+        self.assertEqual(
+            [t.kind for t in mod.tokenize("'ім'я")],
+            ["QUOTE", "ATOM"],
+        )
+        projection, _ = self.migrate("(функція (ім'я) ім'я)")
+        self.assertTrue(projection.startswith("10 0010 00 "))
+        self.assertEqual(projection.split()[-1], mod.D2_CLOSE)
+
     def test_lambda_parameter_shape_is_real_program_identity(self):
         # D4: variadic atom != one-element fixed binder list.
         # Proper, dotted and empty binders have different machine syntax.
