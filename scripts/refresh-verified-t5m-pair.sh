@@ -242,6 +242,12 @@ installed_view=1
 view_stamp="$(stat -c '%d:%i' "$view")"
 if (( ! had_view )); then rm -- "$publish_dir/new.view"; fi
 cmp "$publish_dir/expected.view" "$view"
+# Джерело могло змінитися між двома записами пари. Поки EXIT trap
+# активний, відкидаємо тільки власні inode, а не чужі паралельні зміни.
+if [[ "$snapshot" != "$(sha256sum "$source_file" | cut -d' ' -f1)" ]]; then
+  echo "T5M_REPAIR_SOURCE_CHANGED_AFTER_INSTALL path=$source_file; фізичну пару відкочено" >&2
+  exit 2
+fi
 trap - EXIT INT TERM
 rm -rf -- "$publish_dir" "$scratch"
 echo "T5M_REPAIR_OK source=$source_file physical=$physical view=$view mode=$mode exact=ZIG_AND_SENS negative=REJECTED semantic_parity=NOT_CERTIFIED release=NOT_CERTIFIED"
