@@ -61,6 +61,35 @@ fn transport_failure_becomes_blocked_result_with_evidence() {
 
 
 #[test]
+fn yantra_json_key_symbol_predicate_is_real_d1_not_unbound_d9() {
+    // Реальний SENS, не Rust/Python-імітація SYMBOLP.
+    // Точні D1 значення не можуть потрапити в D8 WRITE.
+    let mut session = agent_session();
+    let source = include_str!("../../../lib/yantra.lisp");
+    assert!(source.contains("(визначити янтра-внутрішній-символ?"));
+    assert!(source.contains("(янтра-внутрішній-символ? ключ-для-кодування)"));
+    assert!(!source.contains("(символ? ключ-для-кодування)"));
+    for (case, input, expected) in [
+        ("symbol", "(як-є ключ)", true),
+        ("text", "\"ключ\"", false),
+        ("nil", "(як-є ())", false),
+        ("list", "(як-є (ключ))", false),
+        ("d1-yes", "(атом? (як-є ()))", false),
+        ("d1-no", "(хибне? (атом? (як-є ())))", false),
+    ] {
+        let code = format!("(янтра-внутрішній-символ? {input})");
+        let result = eval_program(&code, &mut session)
+            .unwrap_or_else(|e| panic!("test_id=yantra-json-symbol case={case} input={code} error={e}"));
+        assert_eq!(result.value.as_predicate_bit(), Some(expected),
+            "test_id=yantra-json-symbol case={case} input={code} expected=D1:{expected} actual={}", result.value);
+    }
+    // Негативна перевірка: D8 справді не серіалізує D1,
+    // отже SENS-охорона повинна спрацювати до D8.
+    assert!(eval_program("(значення-у-текст (атом? (як-є ())))", &mut session).is_err(),
+        "test_id=yantra-json-symbol-bare-d8 expected=TYPE_ERROR");
+}
+
+#[test]
 fn yantra_json_class_membership_is_a_checked_d3_triple() {
     // Виконується справжнім SENS: неповний або зайвий D3 список
     // не повинен передаватися в ТРЕТЄ/​CDR як повноцінний свідок.
