@@ -61,6 +61,31 @@ fn transport_failure_becomes_blocked_result_with_evidence() {
 
 
 #[test]
+fn yantra_json_string_classifier_yields_d1_condition_from_structured_witness() {
+    // Чинний Core4 класифікує рядок трійкою даних, а не булевим D1.
+    // Справжній SENS JSON-кодер має сам порівняти членство у класі.
+    let mut session = agent_session();
+    for (expression, oracle) in [
+        (
+            "(кодувати-значення-формат-обміну-даними \"зоря\")",
+            "(кодувати-рядок-формат-обміну-даними \"зоря\")",
+        ),
+        (
+            "(кодувати-значення-формат-обміну-даними 23)",
+            "(значення-у-текст 23)",
+        ),
+    ] {
+        let actual = eval_program(expression, &mut session)
+            .unwrap_or_else(|error| panic!("SENS JSON {expression}: {error}"))
+            .value;
+        let expected = eval_program(oracle, &mut session)
+            .unwrap_or_else(|error| panic!("SENS оракул {oracle}: {error}"))
+            .value;
+        assert_eq!(actual, expected, "D8 class-membership не може бути умовою D3");
+    }
+}
+
+#[test]
 fn yantra_json_d1_boolean_values_are_distinct() {
     // Справжній SENS обчислює D1:так, D1:ні та порожній D3 як різні
     // об'єкти; Rust лише порівнює отримані значення.
