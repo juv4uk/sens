@@ -106,8 +106,7 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertIn(
                 "(визначити четверте\n"
                 "  (функція (значення-аргументів)\n"
-                "    (третє (решта значення-аргументів))))\n"
-                "",
+                "    (третє (решта значення-аргументів))))",
                 core4,
             )
             self.assertNotIn("(визначити четверте fourth)", core4)
@@ -145,6 +144,7 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertIn("(визначити число-рядок", core4)
         self.assertNotIn("(визначити number->string число-рядок)", core4)
         self.assertNotIn("(визначити list список)", core4)
+        self.assertNotRegex(core4, r"(?m)^\(визначити\s+[A-Za-z]")
         live_callers = (
             "lib/yantra.lisp",
             "lib/translation.lisp",
