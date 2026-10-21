@@ -225,13 +225,34 @@ def project_current_uk(source: str) -> list[str]:
         for _row in _rows:
             if _row.en:
                 _english_heads.add(_row.en.upper())
-    previous = None
-    for token in tokens:
-        if (token.kind == "ATOM" and re.search(r"[A-Za-z]", token.text)
-                and previous is not None and previous.kind == "LP"
-                and token.text.upper() in _english_heads):
-            raise ProjectionBlocked("noncanonical Ukrainian source: Latin executable head")
-        previous = token
+    # Перевіряти лише виконувані голови AST. Після D3 QUOTE або '
+    # навіть (CAR ...) є даними, а не спробою виклику англійського CAR.
+    # Це reader-класифікація, не Python-імітація SENS-eval.
+    forms = three_pass.Parser(tokens).parse_program()
+
+    def reject_english_executable_heads(node, *, quoted=False):
+        if quoted or isinstance(node, three_pass.Quote):
+            return
+        if not isinstance(node, three_pass.ListNode) or not node.items:
+            return
+        head = node.items[0]
+        if isinstance(head, three_pass.Atom):
+            name = head.tok.text
+            if re.search(r"[A-Za-z]", name) and name.upper() in _english_heads:
+                raise ProjectionBlocked(
+                    "noncanonical Ukrainian source: Latin executable head"
+                )
+            if name == "як-є":
+                # Цитований payload, у тому числі його внутрішні LP,
+                # не може набути викличності від текстового збігу.
+                return
+        for item in node.items:
+            reject_english_executable_heads(item)
+        if node.tail is not None:
+            reject_english_executable_heads(node.tail)
+
+    for form in forms:
+        reject_english_executable_heads(form)
     data = three_pass.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
     my, upper, _retired_bridge = three_pass.build_three_pass_maps(
         data,
