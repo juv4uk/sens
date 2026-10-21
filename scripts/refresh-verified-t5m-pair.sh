@@ -191,19 +191,20 @@ if (( had_physical )); then
   mv -fT -- "$publish_dir/new.sens" "$physical"
 else
   ln -- "$publish_dir/new.sens" "$physical"
-  rm -- "$publish_dir/new.sens"
 fi
+# З нової цілі вже відповідаємо за rollback; rm stage може завершитися RED.
 installed_physical=1
 physical_stamp="$(stat -c '%d:%i' "$physical")"
+if (( ! had_physical )); then rm -- "$publish_dir/new.sens"; fi
 cmp "$publish_dir/expected.sens" "$physical"
 if (( had_view )); then
   mv -fT -- "$publish_dir/new.view" "$view"
 else
   ln -- "$publish_dir/new.view" "$view"
-  rm -- "$publish_dir/new.view"
 fi
 installed_view=1
 view_stamp="$(stat -c '%d:%i' "$view")"
+if (( ! had_view )); then rm -- "$publish_dir/new.view"; fi
 cmp "$publish_dir/expected.view" "$view"
 trap - EXIT INT TERM
 rm -rf -- "$publish_dir" "$scratch"
