@@ -687,10 +687,34 @@ fn prepare_t5m_repl_program(
 /// SENS визначає точні слова, Zig створює фізичні T5M байти.
 /// Це один і той самий reader, що надалі перевіряє --t5m-pair.
 /// Механічний roundtrip не підмінює семантичний SENS oracle.
+// Визначення з інших Lisp-файлів виконує сам SENS через Zig/T5M.
+#[cfg(feature = "zig-transport")]
+fn preload_t5m_binding_sources(session: &mut Session, bindings: &[String]) -> Result<(), String> {
+    for (index, binding) in bindings.iter().enumerate() {
+        let program = prepare_t5m_repl_program(
+            binding, ReplSurface::UkrainianFull, session,
+        )
+        .map_err(|error| format!("T5M_BINDING_READER index={index}: {error}"))?;
+        program.execute(session).map_err(|error| format!(
+            "T5M_BINDING_SENS index={index}: {}", error.render(binding)
+        ))?;
+    }
+    Ok(())
+}
+
 #[cfg(feature = "zig-transport")]
 pub(crate) fn mint_t5m_source_pair(source: &str) -> Result<(Vec<u8>, String), String> {
+    mint_t5m_source_pair_with_bindings(source, &[])
+}
+
+#[cfg(feature = "zig-transport")]
+pub(crate) fn mint_t5m_source_pair_with_bindings(
+    source: &str, bindings: &[String],
+) -> Result<(Vec<u8>, String), String> {
+    let mut session = Session::default();
+    preload_t5m_binding_sources(&mut session, bindings)?;
     let words = prepare_t5m_repl_words(
-        source, ReplSurface::UkrainianFull, &Session::default(),
+        source, ReplSurface::UkrainianFull, &session,
     )?;
     let carrier = exact_t5m_carrier_words(&words)?;
     let physical = crate::zig_transport::encode_t5_exact_words(&carrier)?;
@@ -727,7 +751,15 @@ pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
 /// На відміну від --t5m-file, виконується саме наданий фізичний носій.
 #[cfg(feature = "zig-transport")]
 pub(crate) fn eval_t5m_paired_file(source: &str, physical: &[u8]) -> Result<sens::EvalResult, String> {
+    eval_t5m_paired_file_with_bindings(source, physical, &[])
+}
+
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_paired_file_with_bindings(
+    source: &str, physical: &[u8], bindings: &[String],
+) -> Result<sens::EvalResult, String> {
     let mut session = Session::default();
+    preload_t5m_binding_sources(&mut session, bindings)?;
     let expected = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)?;
     let actual = crate::zig_transport::decode_t5_exact_words(physical)?;
     let restored = restore_t5m_words(&expected, &actual)
