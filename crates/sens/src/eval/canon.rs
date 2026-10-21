@@ -877,7 +877,7 @@ mod exact_domain_primitive_tests {
     }
 
     #[test]
-    fn five_ratified_d9_string_operations_have_explicit_exact_domain_mechanisms() {
+    fn six_ratified_d9_string_operations_have_explicit_exact_domain_mechanisms() {
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
 
@@ -974,6 +974,29 @@ mod exact_domain_primitive_tests {
         assert_eq!(arity_error.kind, ErrorKind::Arity);
         assert!(arity_error.message.contains(&d9(0b110101010).to_string()));
         assert!(!arity_error.message.contains("00111101"));
+    }
+
+    #[test]
+    fn d9_stringp_distinguishes_text7_from_same_named_symbol_in_exact_d1() {
+        let environment = Environment::root();
+        let span = Span::default();
+        let identity = d9(0b110100110);
+        assert!(has_d9_string_mechanism(identity));
+        for (value, expected) in [
+            (Value::String(std::rc::Rc::from("0010")), true),
+            (Value::String(std::rc::Rc::from("")), true),
+            (Value::Symbol("0010".into()), false),
+            (Value::Nil, false),
+        ] {
+            let result = invoke_d9_string_mechanism(identity, &[value], &environment, span)
+                .expect("D9 STRINGP exact-code route")
+                .expect("D9 STRINGP D1 result");
+            assert_eq!(result.as_predicate_bit(), Some(expected));
+        }
+        let arity = invoke_d9_string_mechanism(identity, &[], &environment, span)
+            .expect("D9 STRINGP route")
+            .expect_err("D9 STRINGP rejects zero arguments");
+        assert_eq!(arity.kind, ErrorKind::Arity);
     }
 
     #[test]
