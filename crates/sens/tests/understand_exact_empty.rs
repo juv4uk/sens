@@ -50,6 +50,8 @@ fn incomplete_word_lists_do_not_reach_second_or_third_selectors() {
         "(розібрати-запит (001 (does mars orbit)))",
         "(розібрати-загальний (001 (all planets have)))",
         "(розібрати-запит-відношення (001 (does mars orbit)))",
+        "(розібрати (001 (all planets have . хвіст)))",
+        "(розібрати-запит (001 (does mars orbit . хвіст)))",
         "(розібрати-загальний (001 ()))",
         "(розібрати-запит-відношення (001 ()))",
     ] {
@@ -68,6 +70,8 @@ fn ordinary_nonempty_words_preserve_exact_advice_taker_laws() {
         ("(розібрати-запит (001 (is mars a planet)))", "(planet mars)"),
         ("(розібрати (001 (all planets have mass)))", "((has (var w) mass) (planets (var w)))"),
         ("(розібрати-запит (001 (does mars orbit sun)))", "(orbit mars sun)"),
+        ("(розібрати-загальний (001 (all planets have mass)))", "((has (var w) mass) (planets (var w)))"),
+        ("(розібрати-запит-відношення (001 (does mars orbit sun)))", "(orbit mars sun)"),
     ] {
         assert_eq!(run(&mut session, program), expected, "{program}");
     }
