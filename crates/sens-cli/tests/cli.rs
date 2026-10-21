@@ -539,7 +539,7 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
 /// читається як D7 ASCII-дані, а не як неіснуючий український glyph.
 #[cfg(feature = "zig-transport")]
 #[test]
-fn t5m_physical_pair_quoted_world_is_ascii_data_not_ukrainian_call() {
+fn t5m_physical_pair_quoted_world_preserves_exact_d7_data_not_symbol_parity() {
     use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
     let word = |width: usize, bits: u64| ExactT5Word::new(
         width, (0..width).rev().map(|shift| ((bits >> shift) & 1) as u8).collect(),
@@ -568,7 +568,13 @@ fn t5m_physical_pair_quoted_world_is_ascii_data_not_ukrainian_call() {
     let positive = evaluate();
     assert!(positive.status.success(), "цитоване world не виконано SENS: {}",
         String::from_utf8_lossy(&positive.stderr));
-    assert_eq!(String::from_utf8_lossy(&positive.stdout).trim(), "world");
+    // Чинний SENS повертає канонічні D7 слова, не host-Symbol «world».
+    // Це доказ фізичних координат, НЕ semantic parity текстового атома.
+    let exact_d7 = b"world".iter().map(|glyph| format!("{glyph:07b}"))
+        .collect::<Vec<_>>().join(" ");
+    assert_eq!(String::from_utf8_lossy(&positive.stdout).trim(),
+        format!("({exact_d7})"),
+        "SENS мусить зберігати координати D7 без текстової підміни");
 
     // Відрізнити загублену цитату і підмінене D7 ім'я.
     let mut altered = words.clone();
