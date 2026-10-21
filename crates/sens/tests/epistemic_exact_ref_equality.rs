@@ -1,6 +1,6 @@
 //! Виконуваний SENS-свідок української Lisp-проєкції епістемічних законів.
 
-use sens::{eval_parsed_expressions, load_core_library, lower_program, parse, Session};
+use sens::{eval_parsed_expressions, load_core_library, lower_program, parse, parse_mixed_exact_domain, Session};
 
 const SOURCES: &[&str] = &[
     include_str!("../../../lib/unify.lisp"),
@@ -14,7 +14,9 @@ const SOURCES: &[&str] = &[
 ];
 
 fn evaluate_ukr(source: &str, session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
-    let parsed = parse(source)?;
+    // D1 «так»/«ні» — ратифіковані однобітні слова, а не глобальні
+    // незв'язані Lisp-символи. Чинний mixed reader зберігає quoted data.
+    let parsed = parse_mixed_exact_domain(source)?;
     let projected = lower_program(&parsed);
     eval_parsed_expressions(&projected, session)
 }
