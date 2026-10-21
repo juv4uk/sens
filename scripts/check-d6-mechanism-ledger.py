@@ -45,7 +45,7 @@ assert "only_d6_add1_and_sub1_project_to_callable_core" in witness
 assert "equal_payloads_in_other_domains_do_not_inherit_d6_mechanisms" in witness
 
 # No unrelated D6 mechanism is admitted through old selector/registry paths.
-assert "if !(3..=5).contains(&width)" in selector
+assert "if !matches!(width, 3..=6 | 8..=10)" in selector
 assert "let CoreDomainIdentity::D4(word) = identity else" in forms
 assert "6 => Some(CoreDomainIdentity::D6" not in registry
 

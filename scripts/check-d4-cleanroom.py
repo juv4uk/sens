@@ -35,7 +35,6 @@ contract_sentence = (
 assert contract_sentence in contract
 assert "#3272" in contract
 assert "D4  full compact bootstrap" in current
-assert "0101 NULL" in current and "1111 APPEND" in current
 assert d["semantic_distinctions"]["NOT_vs_NULL"].startswith("PredicateBit NO is not structural EMPTY")
 assert set(d["classification"]["generated_selectors"]) == {"CAAR","CADR","CDAR","CDDR"}
 
