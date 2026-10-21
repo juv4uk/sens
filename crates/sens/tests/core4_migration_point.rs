@@ -146,15 +146,21 @@ fn core4_ukrainian_order_predicates_recurse_until_empty_tail_in_sens() {
     let mut session = migrated_core();
     for (source, expected) in [
         ("(перевірити-неспадання-значень? 1 (як-є ()))", true),
-        ("(перевірити-неспадання-значень? 1 (як-є (1 2)))", true),
-        ("(перевірити-неспадання-значень? 1 (як-є (2 1)))", false),
-        ("(перевірити-неспадання-значень? 2 (як-є (1)))", false),
+        ("(перевірити-неспадання-значень? 1 (список 1 2))", true),
+        ("(перевірити-неспадання-значень? 1 (список 2 1))", false),
+        ("(перевірити-неспадання-значень? 2 (список 1))", false),
         ("(перевірити-незростання-значень? 2 (як-є ()))", true),
-        ("(перевірити-незростання-значень? 2 (як-є (2 1)))", true),
-        ("(перевірити-незростання-значень? 2 (як-є (1 2)))", false),
-        ("(перевірити-незростання-значень? 1 (як-є (2)))", false),
+        ("(перевірити-незростання-значень? 2 (список 2 1))", true),
+        ("(перевірити-незростання-значень? 2 (список 1 2))", false),
+        ("(перевірити-незростання-значень? 1 (список 2))", false),
     ] {
-        let result = eval_program(source, &mut session)
+        // Числові літерали стають точними D24+ у чинній проєкції мови
+        // ДО виконання. Цитований список голих Number не є D24.
+        let parsed = sens::parse(source)
+            .unwrap_or_else(|error| panic!("test_id=core4-order-d1 parse input={source} error={error}"));
+        let exact = sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)
+            .unwrap_or_else(|error| panic!("test_id=core4-order-d1 numeric projection input={source} error={error}"));
+        let result = sens::eval_parsed_expressions(&exact, &mut session)
             .unwrap_or_else(|error| panic!("test_id=core4-order-d1 source={source} error={error}"));
         assert_eq!(
             result.value.as_predicate_bit(),
