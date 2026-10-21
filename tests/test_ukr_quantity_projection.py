@@ -239,7 +239,10 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
                 ),
             )
             self.assertIn(name, core)
-        self.assertIn("(символ?", self.source)
+        # D9 каталог утримує ратифіковане ім’я, але не надає викличності.
+        # Виконувана бібліотека мусить користуватися локальним D1-законом.
+        self.assertNotIn("(символ?", self.source)
+        self.assertIn("(науковий-внутрішній-символ?", self.source)
         self.assertIn("(п'ятий", self.source)
 
 
