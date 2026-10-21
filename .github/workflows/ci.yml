@@ -318,6 +318,19 @@ jobs:
           python3 scripts/check_d11_selector_seed.py
           python3 scripts/audit_ukrainian_domain_projections.py
 
+      - name: SI — перевірити чинний український Lisp і точні D24+ аргументи
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.test_code_runs.SiDerivedUkrProjectionTests -v
+          python3 scripts/test-si-derived-d1-bitness.py
+
+      - name: SI — реальне обчислення похідних констант у SENS
+        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'SI:') }}
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens --test si_names -- --nocapture
+
       - name: Повний облік Lisp → SENS → перегляд без хибного допуску релізу
         if: ${{ always() }}
         run: |
