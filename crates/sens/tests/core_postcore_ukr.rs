@@ -1,17 +1,15 @@
 //! Живе виконання виправлених post-core функцій через справжній SENS evaluator.
 //! Не підмінює семантику Rust або Python; Rust лише викликає SENS та звіряє результат.
-use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session};
+use sens::{eval_program, Session};
 
 fn core_session() -> Session {
-    // Справжній незалежний запуск lib/core.lisp: Session::default()
-    // допускає D5 MACRO один раз і не підміняє цей файл Core4/FASL.
-    // Виявлені відсутні D8-механізми лишаються реальними помилками,
-    // а не приховуються завантаженням іншого ядра.
+    // Post-core функції визначені в канонічному Core4, тому тест має
+    // використовувати штатний bootstrap Core/FASL, а не лише lib/core.lisp.
+    // Відсутні механізми лишаються реальними помилками; bootstrap не
+    // додає сторонніх адаптерів до виконання SENS.
     let mut session = Session::default();
-    let forms = parse_mixed_exact_domain(include_str!("../../../lib/core.lisp"))
-        .expect("чинний Core має читатися загальним SENS reader");
-    eval_parsed_expressions(&forms, &mut session)
-        .expect("чинний Core має виконуватися SENS evaluator без legacy adapter");
+    sens::load_core_library(&mut session)
+        .expect("чинне Core4 має завантажуватися через штатний SENS bootstrap");
     session
 }
 
