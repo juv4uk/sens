@@ -165,13 +165,17 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
                 self.assertIn("класифікувати-рядкове-значення", code)
                 self.assertNotIn("(string-membership-helper ", code)
         inventory = source("lib/surface/uk-inventory.lisp")
-        self.assertIn("(current-projection ukr)", inventory)
-        self.assertIn("(sid8-call-heads retired)", inventory)
-        self.assertIn("історичні-імена-лише-дані", inventory)
-        # У таблиці дозволено назву спеціальної форми як ДАНІ,
-        # але заборонено верхньорівневе виконавче DEFINE.
-        self.assertIn("(necessary-forms (визначити функція))", inventory)
-        self.assertNotRegex(inventory, r"(?m)^\s*\(визначити\s+")
+        # Чинна форма є виконуваним українським визначенням, яке
+        # повертає цитовані дані; старі SID8-рядки більше не є контрактом.
+        self.assertEqual(inventory.count("(визначити інвентар-укр"), 1)
+        self.assertIn("(функція ()", inventory)
+        self.assertIn("(як-є (uk-inventory", inventory)
+        self.assertIn("(визначити функція за-умовою тотожне? як-є перше решта список)", inventory)
+        self.assertIn("(інвентар-укр)", inventory)
+        self.assertNotIn("(визначити uk-inventory", inventory)
+        self.assertNotIn("(current-projection ukr)", inventory)
+        self.assertNotIn("(sid8-call-heads retired)", inventory)
+        self.assertNotIn("(necessary-forms ", inventory)
 
         # These three helpers deliberately have no D-domain resident names:
         # keep them internal, Ukrainian, and exactly reversible at the callsite.
