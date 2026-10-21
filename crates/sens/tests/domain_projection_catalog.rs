@@ -1,10 +1,11 @@
 use sens::domain_projection_catalog::{lookup, ProjectionSource, ProjectionValue};
+use sens::{d7_keyboard, render_text7, Text7, Text7Layout};
 
 #[test]
 fn generated_inventory_covers_the_current_source_tables() {
-    // D1–D10 are full tables, D11 has its ratified 43-row test vocabulary;
-    // separate JSON namespaces contain D7 keyboard-v2 and D11 authority.
-    assert_eq!(sens::domain_projection_catalog::entry_count(), 13_347);
+    // The general current-domain catalog contains only D1–D10 Lisp tables.
+    // D11+ stays future; D7 text modes are served by the current codec.
+    assert_eq!(sens::domain_projection_catalog::entry_count(), 12_276);
 }
 
 #[test]
@@ -19,7 +20,7 @@ fn source_namespaces_keep_exact_values_and_do_not_merge_d7_san_columns() {
     );
     assert_eq!(
         lookup(ProjectionSource::D7KeyboardV2, 7, "1000001", "san"),
-        Some(ProjectionValue::Text("ओ")),
+        Some(ProjectionValue::Character(d7_keyboard::SAN[0b1000001])),
     );
     assert_eq!(
         lookup(ProjectionSource::DomainTable, 7, "0000000", "ук"),
@@ -27,7 +28,7 @@ fn source_namespaces_keep_exact_values_and_do_not_merge_d7_san_columns() {
     );
     assert_eq!(
         lookup(ProjectionSource::D7KeyboardV2, 7, "0000000", "uk"),
-        Some(ProjectionValue::Text("\0")),
+        Some(ProjectionValue::Character(d7_keyboard::UK[0])),
     );
 }
 
@@ -39,78 +40,56 @@ fn unknown_or_inexact_coordinates_fail_closed() {
         None
     );
     assert_eq!(
-        lookup(ProjectionSource::DomainTable, 11, "00000000000", "missing"),
+        lookup(ProjectionSource::DomainTable, 10, "0000000000", "missing"),
         None
     );
     assert_eq!(
-        lookup(ProjectionSource::DomainTable, 11, "0000000000x", "ук"),
+        lookup(ProjectionSource::DomainTable, 10, "000000000x", "ук"),
         None
+    );
+    assert_eq!(
+        lookup(ProjectionSource::DomainTable, 11, "00000000000", "ук"),
+        None,
+        "future D11 must not enter the current runtime catalog",
     );
 }
 
 #[test]
-fn every_ratified_d11_projection_matches_its_json_authority() {
-    let authority: serde_json::Value = serde_json::from_str(include_str!(
-        "../../../knowledge/d11-testing-vocabulary-ratified.json"
-    ))
-    .expect("D11 ratified authority JSON parses");
-    assert_eq!(authority["schema"], "sens.d11.testing/v1");
-    assert_eq!(authority["status"], "owner-ratified");
-    assert_eq!(authority["width"], 11);
-    assert_eq!(authority["occupancy"], 43);
+fn future_d11_is_not_part_of_the_current_projection_catalog() {
     assert_eq!(
-        authority["semantic_scope"],
-        "Testing vocabulary for binary SENS semantic tests; not callable Core"
+        lookup(ProjectionSource::DomainTable, 11, "00000000000", "ук"),
+        None,
     );
-
-    let rows = authority["table"].as_array().expect("D11 table array");
-    assert_eq!(rows.len(), 43);
-    let mut seen = std::collections::BTreeSet::new();
-    for row in rows {
-        let bits = row["bits"].as_str().expect("exact D11 bits");
-        assert_eq!(bits.len(), 11, "D11 coordinate width: {bits}");
-        assert!(bits.bytes().all(|byte| matches!(byte, b'0' | b'1')));
-        assert!(seen.insert(bits), "duplicate D11 coordinate {bits}");
-        for (json_column, table_column) in [("uk", "ук"), ("ukr", "укр"), ("sym", "sym")] {
-            let expected = row[json_column].as_str().expect("D11 projection string");
-            let actual = lookup(ProjectionSource::DomainTable, 11, bits, table_column)
-                .expect("D11 table projection exists");
-            let actual = match actual {
-                ProjectionValue::Symbol(value) | ProjectionValue::Text(value) => value,
-                ProjectionValue::EmptyList => "",
-            };
-            assert_eq!(actual, expected, "D11:{bits} projection {table_column}");
-        }
-    }
-    assert_eq!(seen.len(), 43);
 }
 
 #[test]
-fn every_d7_keyboard_v2_cell_is_available_without_collapsing_columns() {
-    let authority: serde_json::Value = serde_json::from_str(include_str!(
-        "../../../knowledge/d7-keyboard-v2-ratified.json"
-    ))
-    .expect("D7 keyboard-v2 authority JSON parses");
-    assert_eq!(authority["schema"], "sens.d7.keyboard/v2");
-    assert_eq!(authority["status"], "owner-ratified");
-    assert_eq!(authority["width"], 7);
-    let rows = authority["table"].as_array().expect("D7 table array");
-    assert_eq!(rows.len(), 128);
-    for row in rows {
-        let bits = row["bits"].as_str().expect("exact D7 bits");
-        assert_eq!(bits.len(), 7);
-        for column in ["ascii", "uk", "san", "iast"] {
-            let expected = row[column].as_str().expect("D7 projection string");
-            let actual = lookup(ProjectionSource::D7KeyboardV2, 7, bits, column)
-                .expect("D7 JSON projection exists");
-            assert_eq!(
-                match actual {
-                    ProjectionValue::Text(value) | ProjectionValue::Symbol(value) => value,
-                    ProjectionValue::EmptyList => "()",
-                },
-                expected,
-                "D7 keyboard-v2:{bits} column={column}",
-            );
-        }
+fn every_d7_keyboard_v2_cell_uses_the_native_projection_tables() {
+    for code in 0_u8..=127 {
+        let bits = format!("{code:07b}");
+        assert_eq!(
+            lookup(ProjectionSource::D7KeyboardV2, 7, &bits, "ascii"),
+            Some(ProjectionValue::Character(char::from(code))),
+        );
+        assert_eq!(
+            lookup(ProjectionSource::D7KeyboardV2, 7, &bits, "uk"),
+            Some(ProjectionValue::Character(
+                d7_keyboard::UK[usize::from(code)]
+            )),
+        );
+        assert_eq!(
+            lookup(ProjectionSource::D7KeyboardV2, 7, &bits, "san"),
+            Some(ProjectionValue::Character(
+                d7_keyboard::SAN[usize::from(code)]
+            )),
+        );
+        let datum = Text7::from_cells(vec![code]).unwrap();
+        let iast = render_text7(&datum, Text7Layout::SaIast).unwrap();
+        assert_eq!(
+            lookup(ProjectionSource::D7KeyboardV2, 7, &bits, "iast").map(|value| match value {
+                ProjectionValue::Text(value) => value,
+                _ => panic!("IAST projection must remain text"),
+            }),
+            Some(iast.as_str()),
+        );
     }
 }

@@ -1,4 +1,3 @@
-use serde_json::Value as Json;
 use std::{
     collections::HashSet,
     env, fs,
@@ -134,7 +133,7 @@ fn add_entry(
 }
 
 fn domain_tables(root: &Path, out: &mut String) {
-    for domain in 1..=11u16 {
+    for domain in 1..=10u16 {
         let relative = format!("lib/domains/d{domain}.lisp");
         let path = root.join(&relative);
         println!("cargo:rerun-if-changed={}", path.display());
@@ -207,85 +206,11 @@ fn domain_tables(root: &Path, out: &mut String) {
             );
             count += 1;
         }
-        let expected = if domain == 11 { 43 } else { 1usize << domain };
+        let expected = 1usize << domain;
         assert_eq!(
             count, expected,
             "{relative}: unexpected domain table occupancy"
         );
-    }
-}
-
-fn json_source(
-    root: &Path,
-    relative: &str,
-    source_name: &str,
-    domain: u16,
-    columns: &[&str],
-    out: &mut String,
-) {
-    let path = root.join(relative);
-    println!("cargo:rerun-if-changed={}", path.display());
-    let data: Json = serde_json::from_slice(
-        &fs::read(&path).unwrap_or_else(|error| panic!("{relative}: {error}")),
-    )
-    .unwrap_or_else(|error| panic!("{relative}: {error}"));
-    let expected_schema = match source_name {
-        "D7KeyboardV2" => "sens.d7.keyboard/v2",
-        "D11RatifiedVocabulary" => "sens.d11.testing/v1",
-        _ => unreachable!("source names are fixed in this build script"),
-    };
-    assert_eq!(
-        data["schema"].as_str(),
-        Some(expected_schema),
-        "{relative}: wrong schema"
-    );
-    assert_eq!(
-        data["status"].as_str(),
-        Some("owner-ratified"),
-        "{relative}: source is not ratified"
-    );
-    assert_eq!(
-        data["width"].as_u64(),
-        Some(u64::from(domain)),
-        "{relative}: wrong domain width"
-    );
-    let rows = data["table"]
-        .as_array()
-        .unwrap_or_else(|| panic!("{relative}: missing table array"));
-    let expected_rows = match source_name {
-        "D7KeyboardV2" => 128,
-        "D11RatifiedVocabulary" => 43,
-        _ => unreachable!("source names are fixed in this build script"),
-    };
-    assert_eq!(
-        rows.len(),
-        expected_rows,
-        "{relative}: wrong table occupancy"
-    );
-    let mut coordinates = HashSet::new();
-    for row in rows {
-        let bits = row["bits"]
-            .as_str()
-            .unwrap_or_else(|| panic!("{relative}: row missing bits"));
-        assert_eq!(
-            bits.len(),
-            usize::from(domain),
-            "{relative}: wrong exact coordinate width {bits}"
-        );
-        assert!(
-            bits.bytes().all(|bit| matches!(bit, b'0' | b'1')),
-            "{relative}: non-binary coordinate {bits}"
-        );
-        assert!(
-            coordinates.insert(bits.to_owned()),
-            "{relative}: duplicate coordinate {bits}"
-        );
-        for column in columns {
-            let value = row[*column]
-                .as_str()
-                .unwrap_or_else(|| panic!("{relative}: {bits} missing string column {column}"));
-            out.push_str(&format!("    Entry {{ source: ProjectionSource::{source_name}, domain: {domain}, bits: {}, column: {}, value: ProjectionValue::Text({}) }},\n", rust_str(bits), rust_str(column), rust_str(value)));
-        }
     }
 }
 
@@ -294,22 +219,6 @@ fn main() {
         PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("manifest dir")).join("../..");
     let mut generated = String::from("pub(super) static ENTRIES: &[Entry] = &[\n");
     domain_tables(&root, &mut generated);
-    json_source(
-        &root,
-        "knowledge/d7-keyboard-v2-ratified.json",
-        "D7KeyboardV2",
-        7,
-        &["ascii", "uk", "san", "iast"],
-        &mut generated,
-    );
-    json_source(
-        &root,
-        "knowledge/d11-testing-vocabulary-ratified.json",
-        "D11RatifiedVocabulary",
-        11,
-        &["ascii", "uk", "ukr", "san", "en", "lisp", "sym"],
-        &mut generated,
-    );
     generated.push_str("];\n");
     let destination = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"))
         .join("domain_projection_catalog.rs");
