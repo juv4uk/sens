@@ -127,19 +127,18 @@ fn compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match() {
 }
 
 
-// Зворотна перевірка реального D1-виконання: свідомо затінюємо
-// історичний глобальний alias, щоб жодна запасна гілка Forward
-// не брала істину з host-подання або незв'язаного символу «так».
-// Семантика вирішується у SENS evaluator, а не в текстовому сканері.
+// Живий D1 свідок для точних fallback-гілок Forward: більше немає
+// (так ...) як викличної голови. «так» — ратифіковане значення D1,
+// а не глобальний host-псевдонім чи обов'язкова змінна.
 #[test]
-fn forward_fallback_branches_execute_real_d1_even_after_truth_alias_shadowing() {
+fn forward_fallback_branches_execute_ratified_d1_without_tak_call() {
+    assert!(!FORWARD_D3.contains("(так "), "Forward must not call textual так");
+    assert!(!FORWARD_D3.contains("(так\n"), "Forward must not call textual так");
     let mut runtime = session();
-    eval_program("(визначити так (атом? (як-є (()))))", &mut runtime)
-        .expect("SENS допускає затінення звичайного зв'язування так");
-    let shadow = eval_program("так", &mut runtime)
-        .expect("перевірити реальне значення затіненого імені")
+    let truth = eval_program("так", &mut runtime)
+        .expect("ратифіковане D1 значення має обчислюватися самим SENS")
         .value;
-    assert_eq!(shadow.as_predicate_bit(), Some(false));
+    assert_eq!(truth.as_predicate_bit(), Some(true));
 
     for (program, expected) in [
         (
