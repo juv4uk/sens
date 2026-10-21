@@ -223,3 +223,52 @@ fn d11_world_event_and_module_presence_are_native_sens_compositions() {
         );
     }
 }
+
+#[test]
+fn d11_world_internal_three_defined_compositions() {
+    // D11 переможці — поточні SENS-бібліотечні закони, не нові опкоди.
+    // Для кожної функції — взаємно відмінні позитивний і негативний випадки.
+    let mut session = world_session();
+    let cases = [
+        (
+            "reverse-empty-acc",
+            "(внутрішній-зворот-подій (як-є (а б в)) (як-є ()))",
+            "(в б а)",
+        ),
+        (
+            "reverse-nonempty-acc",
+            "(внутрішній-зворот-подій (як-є (а б)) (як-є (з)))",
+            "(б а з)",
+        ),
+        (
+            "nested-equal",
+            "(внутрішня-рівність-версій (як-є (а (б в))) (як-є (а (б в))))",
+            "1",
+        ),
+        (
+            "nested-unequal",
+            "(внутрішня-рівність-версій (як-є (а (б в))) (як-є (а (б г))))",
+            "0",
+        ),
+        (
+            "fold-two-tells",
+            "(внутрішнє-згортання-подій (як-є ((tell м а) (tell м б))) (як-є ()))",
+            "(б а)",
+        ),
+        (
+            "fold-with-retract",
+            "(внутрішнє-згортання-подій (як-є ((tell м а) (tell м б) (retract м а))) (як-є ()))",
+            "(б)",
+        ),
+    ];
+    for (case, source, expected) in cases {
+        let actual = sens::eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=D11-WORLD-{case} layer=SENS source={source} error={error}"))
+            .value
+            .to_string();
+        assert_eq!(
+            actual, expected,
+            "test_id=D11-WORLD-{case} layer=SENS source={source} expected={expected} actual={actual}"
+        );
+    }
+}
