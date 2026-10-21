@@ -130,3 +130,25 @@ fn repl_duplicate_name_rejects_ambiguous_d4_code() {
         "test_id=repl-d4-ambiguous layer=SENS input={source} expected=() actual={result}"
     );
 }
+
+#[test]
+fn repl_uses_exact_d9_stringp_not_historical_text_alias() {
+    // Справжній evaluator: тип рядка — ратифіковане D9:110100110,
+    // результат — точне D1, не Python/JSON truthiness і не Unicode-carrier.
+    let mut session = repl_session();
+    for (source, expected) in [
+        ("(рядок? \"0010\")", true),
+        ("(рядок? \"\")", true),
+        ("(рядок? (як-є ключ))", false),
+        ("(рядок? (як-є ()))", false),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS D9 string-type on {source}: {error:?}"))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "test_id=repl-d9-stringp layer=SENS input={source} expected={expected} actual={value}"
+        );
+    }
+}
