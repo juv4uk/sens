@@ -1497,16 +1497,44 @@ mod tests {
     }
 
     #[test]
-    fn t5m_uk_projection_reports_the_exact_unmappable_protocol_atom() {
-        let forms = sens::parse_mixed_exact_domain("(як-є reason-index/1)")
-            .expect("старий протокольний атом лишається вихідними даними Lisp");
+    fn t5m_uk_projection_separates_quoted_ascii_data_from_executable_names() {
+        // Дані зовнішнього протоколу не є викличними іменами української
+        // програми. Мають проходити точним D7/en маршрутом через W7 клітини.
+        let source = "(як-є reason-index/1)";
+        let forms = sens::parse_mixed_exact_domain(source)
+            .expect("український QUOTE приймає латинські дані");
         let mut words = Vec::new();
+        append_t5m_expression(&forms[0], sens::Text7Layout::Uk, &mut words, 0)
+            .expect("цитований ASCII-атом має точний D7/en транспорт");
+        let ascii_r = u16::from(b'r');
+        assert!(
+            words.iter().any(|word| matches!(
+                word, ExactDomainWord::Identity(identity)
+                    if identity.width() == 7 && identity.packed_bits() == ascii_r
+            )),
+            "цитований протокол має зберегти W7 ASCII, а не транслітерувати дані"
+        );
+
+        // Той самий текст у викличній голові НЕ набуває D7/uk або D5
+        // повноважень через поблажливу англійську проєкцію.
+        let invalid = sens::parse_mixed_exact_domain("(reason-index/1)")
+            .expect("розбір тексту не дає викличності");
+        let mut forbidden = Vec::new();
         let error = append_t5m_expression(
-            &forms[0], sens::Text7Layout::Uk, &mut words, 0
-        ).expect_err("латинський атом не має української D7 v2-проєкції");
+            &invalid[0], sens::Text7Layout::Uk, &mut forbidden, 0
+        ).expect_err("латинський виклик не допущено");
         assert!(error.contains("symbol=\"reason-index/1\""), "{error}");
-        assert!(error.contains("source_byte="), "{error}");
         assert!(error.contains("Uk has no current D7 v2 glyph"), "{error}");
+
+        #[cfg(feature = "zig-transport")]
+        {
+            let roundtrip = t5m_roundtrip_words(&words)
+                .expect("справжній Zig T5M зберігає точні W7 клітини");
+            assert_eq!(roundtrip.len(), words.len());
+            for (before, after) in words.iter().zip(roundtrip.iter()) {
+                assert_eq!(format!("{before:?}"), format!("{after:?}"));
+            }
+        }
     }
 
     #[test]
