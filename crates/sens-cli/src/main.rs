@@ -179,6 +179,25 @@ fn t5m_file_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     Some(Ok(args[2].as_str()))
 }
 
+/// Генерувати фізичні байти SENS за тим самим reader, що --t5m-pair.
+/// Zig пакує точні слова T5M; жодного Python-eval чи старого T5.
+fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str), &'static str>> {
+    if !args.iter().skip(1).any(|part| part == "--t5m-mint") {
+        return None;
+    }
+    if args.len() != 4 || args[1] != "--t5m-mint" {
+        return Some(Err("usage: sens --t5m-mint <source.lisp> <output.sens>"));
+    }
+    let source = std::path::Path::new(&args[2]);
+    let physical = std::path::Path::new(&args[3]);
+    if source.extension().and_then(|ext| ext.to_str()) != Some("lisp")
+        || physical.extension().and_then(|ext| ext.to_str()) != Some("sens")
+    {
+        return Some(Err("--t5m-mint requires .lisp input and .sens output"));
+    }
+    Some(Ok((&args[2], &args[3])))
+}
+
 /// Парне виконання дозволяє читати D24+ з реальних байтів Zig T5M,
 /// лише якщо український Lisp свідчить ТОЧНО ту саму доменну послідовність.
 /// Це не дозвіл трактувати довільний W24 за числову ідентичність.
@@ -312,6 +331,31 @@ fn main() {
                 eprintln!("sens: T5M file execution failed: {error}");
                 process::exit(1);
             }
+        }
+        return;
+    }
+    if let Some(request) = t5m_mint_request(&raw_args) {
+        let result = match request {
+            Ok((source_path, physical_path)) => fs::read_to_string(source_path)
+                .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
+                .and_then(|source| {
+                    #[cfg(feature = "zig-transport")]
+                    {
+                        repl::mint_t5m_source_file(&source)
+                    }
+                    #[cfg(not(feature = "zig-transport"))]
+                    {
+                        let _ = source;
+                        Err("--t5m-mint requires the Zig T5M transport corridor".into())
+                    }
+                })
+                .and_then(|bytes| fs::write(physical_path, bytes)
+                    .map_err(|error| format!("write physical T5M .sens: {error}"))),
+            Err(message) => Err(message.to_owned()),
+        };
+        if let Err(error) = result {
+            eprintln!("sens: T5M mint failed: {error}");
+            process::exit(1);
         }
         return;
     }
@@ -535,6 +579,7 @@ fn main() {
             println!("Textual compatibility source: .lisp and historical aliases; physical .sens is packed T5, not UTF-8 Lisp.");
             println!("  sens program.sens            Run exact physical T5 with pure SENS (no implicit Core4/host effects)");
             println!("  sens --t5m-file program.lisp Run Ukrainian Lisp source through Zig T5M and execute its SENS words");
+            println!("  sens --t5m-mint program.lisp program.sens Mint physical Zig/T5M from the same SENS reader as --t5m-pair");
             println!("  sens-trit open program.sens  Display exact binary words without running");
             println!("\nOptions:");
             println!("  lsp                          Run the Language Server (LSP over stdio)");

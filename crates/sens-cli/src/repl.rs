@@ -657,6 +657,21 @@ fn prepare_t5m_repl_program(
         .map_err(|error| format!("SENS binary reader: {error:?}"))
 }
 
+/// SENS визначає точні слова, Zig створює фізичні T5M байти.
+/// Це один і той самий reader, що надалі перевіряє --t5m-pair.
+/// Механічний roundtrip не підмінює семантичний SENS oracle.
+#[cfg(feature = "zig-transport")]
+pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
+    let words = prepare_t5m_repl_words(
+        source, ReplSurface::UkrainianFull, &Session::default(),
+    )?;
+    let carrier = exact_t5m_carrier_words(&words)?;
+    let physical = crate::zig_transport::encode_t5_exact_words(&carrier)?;
+    let restored = crate::zig_transport::decode_t5_exact_words(&physical)?;
+    restore_t5m_words(&words, &restored)?;
+    Ok(physical)
+}
+
 /// Явно парний фізичний шлях: .lisp НАДАЄ перевірену доменну ідентичність,
 /// Zig відновлює справжні байти .sens. Повний збіг усіх ширин і бітів
 /// обов'язковий до SENS D2 та виконання. Однакова ширина НЕ є доказом домену.

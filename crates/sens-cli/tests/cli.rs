@@ -442,6 +442,39 @@ fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
     assert_eq!(observed, expected, "Точні SENS D24+ свідки: арифметика, листки, рекурсія");
 }
 
+/// Справжня обернена пара: SENS reader -> Zig bytes -> SENS evaluator.
+/// Негативна мутація джерела має ламати тотожність, не виконувати старі байти.
+#[cfg(feature = "zig-transport")]
+#[test]
+fn t5m_physical_pair_minted_by_sens_reader_executes_and_rejects_mutant() {
+    let dir = std::env::temp_dir().join(format!(
+        "sens-mint-d24-{}", std::process::id()
+    ));
+    std::fs::create_dir_all(&dir).expect("isolated physical pair");
+    let source = dir.join("джерело.lisp");
+    let physical = dir.join("джерело.sens");
+    std::fs::write(&source, "(додати 1 2)\n").expect("Ukrainian Lisp source");
+    let mint = sens()
+        .args(["--t5m-mint", source.to_str().unwrap(), physical.to_str().unwrap()])
+        .output().expect("real Zig/T5M mint");
+    assert!(mint.status.success(), "SENS mint failed: {}",
+        String::from_utf8_lossy(&mint.stderr));
+    assert!(!std::fs::read(&physical).expect("physical T5M").is_empty());
+    let evaluate = || sens()
+        .args(["--t5m-pair", source.to_str().unwrap(), physical.to_str().unwrap()])
+        .output().expect("paired SENS runtime");
+    let valid = evaluate();
+    assert!(valid.status.success(), "paired execution failed: {}",
+        String::from_utf8_lossy(&valid.stderr));
+    assert_eq!(String::from_utf8_lossy(&valid.stdout).trim(), "3");
+    std::fs::write(&source, "(додати 1 4)\n").expect("mutated source");
+    let altered = evaluate();
+    assert!(!altered.status.success(), "old physical words executed with a new source");
+    assert!(String::from_utf8_lossy(&altered.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "missing exact-width diagnostic: {}", String::from_utf8_lossy(&altered.stderr));
+    let _ = std::fs::remove_dir_all(dir);
+}
+
 /// Справжня пара: .sens читається Zig, а домен D24 задано незмінним
 /// українським .lisp. Пошкоджені байти й підмінене джерело не виконуються.
 #[cfg(feature = "zig-transport")]
