@@ -890,6 +890,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests.test_migrate_one_to_sens.CanonicalOneFileMigration.test_batch_zig_t5m_refresh_existing_pair_preserves_exact_words -v
+          # Перевіряти D7 escape-інверсію лише при змінах T5M-міграції.
+          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_string_escapes_preserve_d7_control_words -v
 
       - name: Оборотність Lisp ↔ точні слова ↔ T5M — позитивні й негативні перевірки
         if: ${{ always() }}
