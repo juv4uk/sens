@@ -325,6 +325,20 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
 
 #[test]
 fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
+    // Цей test_id запускається чинним CI після зміни System One джерела.
+    // Без посередництва Python/JSON: SENS сам має відрізняти прямі Д1
+    // «так» / «ні», а не успадковувати historical T/NIL truthiness.
+    for (source, expected) in [
+        ("(за-умовою (ні (як-є помилка)) (так (як-є гаразд)))", "гаразд"),
+        ("(за-умовою (так (як-є гаразд)) (ні (як-є помилка)))", "гаразд"),
+    ] {
+        assert_eq!(
+            eval_probabilistic_decision(source),
+            expected,
+            "test_id=system-one-d1-positive-negative layer=actual-SENS source={source}"
+        );
+    }
+
     let valid_batch = r#"
       (нехай-послідовно ((state (як-є ((message "double charge") (locale uk))))
              (choice-question (запитання-вибору-системи-один
