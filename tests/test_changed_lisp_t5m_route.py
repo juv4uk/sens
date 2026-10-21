@@ -53,14 +53,18 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertIn("files_checked=1 files_failed=1", red.stdout)
             self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", red.stdout)
 
-    def test_mint_before_execution(self):
+    def test_native_sens_mint_is_primary_ci_path_and_python_is_optional_tooling(self):
         source = RUNNER.read_text(encoding="utf-8")
-        self.assertIn('scripts/migrate-three-pass.py "$file"', source)
-        self.assertIn('--codec t5m --source-surface укр', source)
-        self.assertIn('"$binary" "$pair"', source)
+        ci = CI.read_text(encoding="utf-8")
+        self.assertIn('SENS_NATIVE_T5M=1 SENS_T5M_OPEN=', ci)
+        self.assertIn('run_native_t5m_program', source)
+        self.assertIn('"$binary" --t5m-mint "$file" "$physical"', source)
+        self.assertIn('"$binary" --t5m-pair "$file" "$physical"', source)
+        self.assertIn('"$native_open" open "$physical"', source)
+        # Опційний Python-мігратор не може передувати SENS у робочому CI.
+        self.assertLess(source.index('    run_native_t5m_program\n    continue'),
+                        source.index('scripts/migrate-three-pass.py'))
         self.assertNotIn('--t5m-file "$pair"', source)
-        self.assertLess(source.index('scripts/migrate-three-pass.py'),
-                        source.index('"$binary" "$pair"'))
 
     def test_fail_closed_without_false_release_success(self):
         source = RUNNER.read_text(encoding="utf-8")
