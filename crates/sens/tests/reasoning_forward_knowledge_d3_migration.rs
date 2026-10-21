@@ -134,7 +134,7 @@ fn compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match() {
 #[test]
 fn forward_fallback_branches_execute_real_d1_even_after_truth_alias_shadowing() {
     let mut runtime = session();
-    eval_program("(визначити так (атом? (як-є (())))", &mut runtime)
+    eval_program("(визначити так (атом? (як-є (()))))", &mut runtime)
         .expect("SENS допускає затінення звичайного зв'язування так");
     let shadow = eval_program("так", &mut runtime)
         .expect("перевірити реальне значення затіненого імені")
