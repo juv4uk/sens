@@ -115,6 +115,20 @@ class LibUkrPeerTests(unittest.TestCase):
             names = [x.group(1) for x in DEF.finditer(src)]
             self.assertEqual(len(names), len(set(names)), f"{rel}: дубль визначення")
 
+    def test_lisp_fs_has_only_ukrainian_definitions(self):
+        # Структурний негативний свідок: лексичне ім'я DEFINE не можна
+        # передати чинному українському D7/T5M reader як старе fs-foo.
+        # Семантику перевіряють SENS-тести файлової системи.
+        src = (ROOT / "lib/lisp-fs.lisp").read_text(encoding="utf-8")
+        defs = definitions(src)
+        self.assertIn("фс-об'єкти", defs)
+        self.assertIn("фс-порожній", defs)
+        self.assertIn("фс-журнал-відтворити-подію", defs)
+        legacy = sorted(name for name in defs if name.startswith("fs-"))
+        self.assertEqual(legacy, [], f"історичні латинські DEFINE ламають T5M: {legacy}")
+        self.assertIn("(як-є wsm-fs-root)", src,
+                      "дані протоколу не можна перейменовувати разом із функціями")
+
     def test_retired_legacy_tail_bindings_do_not_return(self):
         # Файли з українськими виконуваними іменами не повинні
         # повторно прив'язувати їх до історичної латинської поверхні.
