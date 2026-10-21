@@ -1,4 +1,4 @@
-"""D7 v2 Lisp-to-SENS migration: one real definition -> three physical T5 files."""
+"""Історичний D7 v2 приклад: єдиний фізичний носій, без видавання T5 за T5M-оракул."""
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -22,7 +22,7 @@ def frame(parts: list[list[str]]) -> list[str]:
     return words
 
 class D7CoreIdentityTriplet(unittest.TestCase):
-    def test_three_carriers_contain_exact_d7_code(self):
+    def test_one_historical_carrier_contain_exact_d7_code(self):
         # Чинна укр-реальність: джерело — ратифікована укр-голова визначити
         # з D7-кодованим іменем, а не історична двійкова форма
         # (0011 identity (0010 (value) value)). Канонічна тотожність
@@ -54,11 +54,14 @@ class D7CoreIdentityTriplet(unittest.TestCase):
         expected_bytes = encode_words(visible)
         self.assertEqual(len(expected_bytes), 50)
         self.assertEqual(decode_bytes(expected_bytes), visible)
-        for lang in ("uk", "en", "san"):
-            with self.subTest(lang=lang):
-                raw = (OUT / f"identity.{lang}.sens").read_bytes()
-                self.assertEqual(raw, expected_bytes)
-                self.assertEqual(decode_bytes(raw), expected)
+        # Три англійсько/санскритсько/українські копії були
+        # побайтово ідентичні source.sens; це не три окремі SENS-механізми.
+        raw = (OUT / "source.sens").read_bytes()
+        self.assertEqual(raw, expected_bytes)
+        self.assertEqual(decode_bytes(raw), expected)
+        self.assertEqual((OUT / "source").read_text(encoding="ascii").split(), expected)
+        for language in ("uk", "en", "san"):
+            self.assertFalse((OUT / f"identity.{language}.sens").exists())
 
 if __name__ == "__main__":
     unittest.main()
