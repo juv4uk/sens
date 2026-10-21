@@ -90,7 +90,7 @@ fn exact_d2_quote_of_dotted_pair_executes_without_text7_marker_proxies() {
     assert_eq!(program.form_count(), 1);
     let result = program.execute(&mut Session::default())
         .expect("real SENS QUOTE executes dotted D2 pair");
-    let Value::Pair(head, tail) = result.value else {
+    let Value::Pair(head, tail) = &result.value else {
         panic!("D2:11 must produce a dotted SENS pair, not a proxy list");
     };
     let Value::DomainIdentity(head) = head.as_ref() else {
