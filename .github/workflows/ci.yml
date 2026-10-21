@@ -570,6 +570,28 @@ jobs:
           fi
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_typed_operands -- --nocapture
 
+      - name: Реальний SENS — точна двопольова форма правил виведення
+        if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+        timeout-minutes: 4
+        shell: bash
+        env:
+          PUSH_BEFORE: ${{ github.event.before }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          base="$PUSH_BEFORE"
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE"; fi
+          if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
+            git fetch --no-tags --depth=1 origin "$base"
+            changed="$(git diff --name-only "$base" HEAD -- lib/forward.lisp crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs .github/workflows/ci.yml)"
+            if [[ -z "$changed" ]]; then
+              echo "SENS-ВИВЕДЕННЯ: закон незмінний; повторне складання не потрібне"
+              exit 0
+            fi
+          fi
+          # Справжнє виконання джерел SENS D3/D4, не Python-імітація.
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration -- --nocapture
+
       - name: Оборотність Lisp ↔ точні слова ↔ T5M — позитивні й негативні перевірки
         if: ${{ always() }}
         shell: bash
