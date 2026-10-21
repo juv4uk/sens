@@ -96,12 +96,17 @@ class UkrainianUnifySourceTests(unittest.TestCase):
         body = self.definitions["входить-перевірити?"][2]
         self.assertEqual(body[0], "функція")
         self.assertEqual(body[1], ["змінна", "терм", "підстановки"])
-        # The resolved term is computed once, then checked recursively.
-        self.assertEqual(body[2][0], "нехай")
-        self.assertEqual(body[2][1][0][1], "розв'язаний")
-        self.assertEqual(body[2][1][0][2], ["пройти", "терм", "підстановки"])
-        self.assertIn("уніфікація-рівні?", str(body))
-        self.assertIn("змінна?", str(body))
+        # Чинна реалізація використовує D4 замикання, не недопущений
+        # D6 «нехай». Справжню поведінку перевіряє Rust/SENS test.
+        application = body[2]
+        self.assertEqual(len(application), 2)
+        self.assertEqual(application[0][0], "функція")
+        self.assertEqual(application[0][1], ["розв'язаний"])
+        self.assertEqual(application[1], ["пройти", "терм", "підстановки"])
+        self.assertEqual(application[0][2][0], "за-умовою")
+        self.assertIn("уніфікація-рівні?", str(application[0][2]))
+        self.assertIn("змінна?", str(application[0][2]))
+        self.assertNotIn("нехай", str(application))
 
 
 if __name__ == "__main__":
