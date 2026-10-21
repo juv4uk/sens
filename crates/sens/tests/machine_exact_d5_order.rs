@@ -193,12 +193,14 @@ fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
         .expect("межа закону disp8");
     let definition = &encoder[start..end];
     for required in [
-        "(ціле? зміщення)", "(менше? зміщення -128)",
+        "(менше? зміщення -128)",
         "(більше? зміщення 127)", "(менше? зміщення 0)",
         "(додати зміщення 256)",
     ] {
         assert!(definition.contains(required), "мовний закон SENS: {required}");
     }
+    assert!(!definition.contains("(ціле? зміщення)"),
+        "D5:01001 NUMBERP не має викличного механізму; D24+ операнди типізовано reader-ом");
     assert!(!definition.contains("(тотожне? зміщення "),
         "D3 EQ не є математичною D24+ рівністю");
 
