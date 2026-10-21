@@ -15,7 +15,7 @@
   ((law . empty-substitution-is-success-data)
    (raw-result . ())
    (observed-result . (unified ()))
-   (not-equal . ())))
+   (not-equal . ()))
 
   ((law . established-unification-failure-is-not-canon-zero)
    (raw-result . fail)
