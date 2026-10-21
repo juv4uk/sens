@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (backend | encode path.bits | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | encode-e1 path.sens | eval-e1 path.e1 | verify path.bits | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (backend | encode path.bits | verify-view path.sens | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | encode-e1 path.sens | eval-e1 path.e1 | verify path.bits | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 // Compiled only in the official Zig-transport build. Rust validates SENS
 // program syntax; Zig owns all physical wire bytes for these commands.
@@ -111,6 +111,35 @@ fn render_exact_t5m_words(bytes: &[u8], separator: &str) -> Result<String, Strin
     Ok(words.into_iter().map(|word| {
         word.bits.into_iter().map(|bit| if bit == 0 { '0' } else { '1' }).collect::<String>()
     }).collect::<Vec<_>>().join(separator))
+}
+
+/// Механічне обернення фізичного перегляду без семантичних припущень.
+/// W24+ не пропускаємо через застарілий читач точних слів W1–W9.
+#[cfg(feature = "zig-transport")]
+fn verify_exact_t5m_view(physical: &[u8], view: &[u8]) -> Result<(), String> {
+    let canonical = format!("{}\n", render_exact_t5m_words(physical, " ")?);
+    if view != canonical.as_bytes() {
+        return Err("T5M_VIEW_NOT_CANONICAL: expected one space between exact words and one final LF".into());
+    }
+    let exact = zig_transport::decode_t5_exact_words(physical)?;
+    if zig_transport::encode_t5_exact_words(&exact)? != physical {
+        return Err("T5M_VIEW_PHYSICAL_ROUNDTRIP_MISMATCH: Zig did not restore exact bytes".into());
+    }
+    Ok(())
+}
+
+#[cfg(all(test, feature = "zig-transport"))]
+#[test]
+fn t5m_view_inverse_preserves_d24_and_rejects_noncanonical_view() {
+    let words = vec![
+        zig_transport::ExactT5Word::new(3, vec![1, 0, 0]).unwrap(),
+        zig_transport::ExactT5Word::new(24, vec![1; 24]).unwrap(),
+    ];
+    let physical = zig_transport::encode_t5_exact_words(&words).unwrap();
+    let canonical_view = format!("100 {}\n", "1".repeat(24));
+    assert!(verify_exact_t5m_view(&physical, canonical_view.as_bytes()).is_ok());
+    assert!(verify_exact_t5m_view(&physical, canonical_view.trim_end().as_bytes()).is_err());
+    assert!(verify_exact_t5m_view(&physical, format!("100  {}\n", "1".repeat(24)).as_bytes()).is_err());
 }
 
 /// SENS owns exact source words and D2 admission. The host does not create
@@ -465,6 +494,24 @@ fn execute() -> Result<(), String> {
             };
             println!("{human}");
             Ok(())
+        }
+        "verify-view" => {
+            let bytes = read_sens(path)?;
+            #[cfg(feature = "zig-transport")]
+            {
+                let view_path = path.with_extension("");
+                let view = fs::read(&view_path)
+                    .map_err(|e| format!("read T5M exact-bit view {}: {e}", view_path.display()))?;
+                verify_exact_t5m_view(&bytes, &view)?;
+                println!("T5M_VIEW_ROUNDTRIP_PASS file={} physical=ZIG_VERIFIED semantic=NOT_CERTIFIED",
+                         path.display());
+                Ok(())
+            }
+            #[cfg(not(feature = "zig-transport"))]
+            {
+                let _ = bytes;
+                Err("T5M view inversion requires Zig; no Rust fallback".into())
+            }
         }
         "decode" => {
             let bytes = read_sens(path)?;
