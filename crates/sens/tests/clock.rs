@@ -11,14 +11,14 @@ fn time_session() -> Session {
 }
 
 #[test]
-fn core_quotient_and_mod_return_numeric_values_for_nonzero_divisors() {
+fn core_integer_quotient_and_mod_keep_exact_lisp_laws() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
     for (source, expected) in [
         ("(знайти-найбільший-блок-частки 10 3 3 1)", "(6 . 2)"),
-        ("(частка 10 3)", "3"),
-        ("(частка 1 3)", "0"),
+        ("(частка-через-подвоєння 10 3)", "3"),
+        ("(частка-через-подвоєння 1 3)", "0"),
         ("(модульна-остача 10 3)", "1"),
         ("(модульна-остача 0 7)", "0"),
     ] {
@@ -31,6 +31,15 @@ fn core_quotient_and_mod_return_numeric_values_for_nonzero_divisors() {
             "{source}"
         );
     }
+
+    // D5 ЧАСТКА є точною раціональною операцією; 10/3 не дорівнює
+    // цілочисельній FLOOR-частці і не має вдавати такий результат.
+    let exact = eval_program("(частка 10 3)", &mut session)
+        .expect("адмітоване математичне D24+ ділення");
+    assert!(
+        matches!(exact.value, Value::NumericComposition(_)),
+        "дробове D5 ділення не можна підміняти цілочисельною часткою"
+    );
 }
 
 /// A raw host observation is a Rust primitive on its SENS code (#1477), not a
