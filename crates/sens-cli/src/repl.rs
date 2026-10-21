@@ -221,7 +221,7 @@ fn append_t5m_expression_context(
             }
             words.push(control(0b01)?);
         }
-        ExprKind::Number(value) => {
+        ExprKind::Number(value, _exactness) => {
             // Усередині QUOTE числовий вузол може залишитися у людському AST.
             // Точне зниження до D24+ вже існує для звичайних числових джерел;
             // використовуємо його ж, без текстового W7 або host-арифметики.
