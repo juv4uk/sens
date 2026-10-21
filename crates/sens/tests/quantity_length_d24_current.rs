@@ -112,3 +112,51 @@ fn quantity_unit_constructor_selector_roundtrips_in_real_sens() {
             "test_id=quantity-unit-mutant input={roundtrip} expected=D1:NO actual={wrong}");
     }
 }
+
+#[test]
+fn quantity_unit_rejects_non_dimensions_in_real_sens() {
+    // Перевіряємо власне SENS-eval, а не Python-скан чи форму тексту.
+    // Коректна одиниця має складатися тільки з записів dimension/1.
+    let current = [
+        "схема-розмірності",
+        "схема-одиниці-виміру",
+        "науковий-список-правильний?",
+        "науковий-список-довжина-дорівнює?",
+        "створити-розмірність",
+        "розмірність?",
+        "створити-одиниця",
+        "науковий-всі-розмірності-коректні?",
+        "одиниця-виміру?",
+    ].iter().map(|name| unit_definition(name)).collect::<Vec<_>>().join("\n");
+
+    let mut session = prepare_unit_session(&current);
+    for (record, admitted) in [
+        ("(створити-одиниця (як-є ()))", true),
+        ("(створити-одиниця (список (створити-розмірність (як-є метр) 1)))", true),
+        ("(створити-одиниця (як-є (невідома)))", false),
+        ("(створити-одиниця (як-є ((dimension/1 метр))))", false),
+        ("(створити-одиниця (як-є ((dimension/1 метр 1) . недопустимий-хвіст)))", false),
+    ] {
+        let input = format!("(одиниця-виміру? {record})");
+        let actual = evaluate(&mut session, &input);
+        if admitted {
+            assert_eq!(actual.as_predicate_bit(), Some(true),
+                "test_id=quantity-unit-valid layer=SENS input={input} expected=D1:1 actual={actual}");
+        } else {
+            assert!(matches!(actual, sens::Value::Nil),
+                "test_id=quantity-unit-invalid layer=SENS input={input} expected=D3:NIL actual={actual}");
+        }
+    }
+
+    // Негативний мутант повторює стару помилку: довільні елементи у
+    // правильному списку були помилково визнані розмірностями.
+    let guarded = "(науковий-всі-розмірності-коректні? (решта значення))";
+    let obsolete = "(науковий-список-правильний? (решта значення))";
+    assert_eq!(current.matches(guarded).count(), 1);
+    let mutant = current.replacen(guarded, obsolete, 1);
+    let mut old = prepare_unit_session(&mutant);
+    let bad = "(одиниця-виміру? (створити-одиниця (як-є (невідома))))";
+    let incorrect = evaluate(&mut old, bad);
+    assert_eq!(incorrect.as_predicate_bit(), Some(true),
+        "test_id=quantity-unit-old-mutant layer=SENS має виявляти хибний допуск");
+}
