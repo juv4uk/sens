@@ -171,3 +171,29 @@ fn core4_ukrainian_association_search_handles_later_and_missing_keys() {
         );
     }
 }
+
+#[test]
+fn core4_ukrainian_member_executes_positive_negative_and_recursive_d1() {
+    // Справжній SENS, а не лексичний oracle: член першого, останнього,
+    // відсутнього, порожнього списку й структурного вкладеного елемента.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        ("(значення-у-списку? (як-є а) (як-є (а б в)))", true),
+        ("(значення-у-списку? (як-є в) (як-є (а б в)))", true),
+        ("(значення-у-списку? (як-є г) (як-є (а б в)))", false),
+        ("(значення-у-списку? (як-є а) (як-є ()))", false),
+        ("(значення-у-списку? (як-є (а б)) (як-є ((в г) (а б))))", true),
+        ("(значення-у-списку? (як-є (а б)) (як-є ((в г) (а в))))", false),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=core4-member-exec layer=SENS input={source} error={error}"
+            ));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id=core4-member-exec layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
+    }
+}
