@@ -158,6 +158,8 @@ jobs:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
           cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
           cargo test --locked -p sens --test result_status -- --nocapture
+          # Український D24+ обчислювач: позитивний закон і негативний мутант.
+          cargo test --locked -p sens --test uk_sa_surface peer_identity_acceptance_ -- --nocapture
 
       # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - uses: dtolnay/rust-toolchain@1.99.0
