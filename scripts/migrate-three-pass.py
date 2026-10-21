@@ -605,7 +605,9 @@ def build_text7(data, projection_path: Path):
 def text7_encode(spelling: str,candidates,tok: Tok):
     if "keyboard-v2" in candidates:
         if not spelling:
-            raise MigrationError("empty D7 keyboard/v2 identifier", tok)
+            # Порожній рядок — це D2-пропуск (порожнє/пропуск у D2), а не
+            # D7-ідентифікатор і не D3:000. () — це D3; "" — це D2.
+            return []
         # lisp-symbol-replacement-plan.uk.md: em/en dash and box glyphs used in an
         # identifier map to keyboard glyphs. Scoped to the identifier path only.
         spelling = spelling.translate({0x2014: "-", 0x2013: "-", 0x2500: "-", 0x2550: "="})
@@ -827,7 +829,9 @@ class Resolver:
 
 def frame_text7(cells, tok: Tok):
     if not cells:
-        raise MigrationError("empty Text7 identifier is not admissible",tok)
+        # Порожній рядок кодується як самотній D2-пропуск (D2_SEP), а не як
+        # порожній D2-каркас і не як D3:000 (D3 лишається для () ).
+        return [D2_SEP]
     words=[D2_OPEN]
     for index,cell in enumerate(cells):
         if index:
