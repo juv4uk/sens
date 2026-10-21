@@ -1280,3 +1280,61 @@ fn український_лінтер_повертає_точні_резуль�
         );
     }
 }
+
+#[cfg(feature = "zig-transport")]
+#[test]
+fn t5m_repair_uses_sens_mint_and_executes_real_physical_pair() {
+    use std::{fs, path::Path};
+    let repo = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+    let dir = std::env::temp_dir().join(format!(
+        "sens-real-t5m-repair-{}-{}", std::process::id(), line!()
+    ));
+    fs::create_dir_all(&dir).expect("ізольоване джерело");
+    let src = dir.join("обертання.lisp");
+    let physical = dir.join("обертання.sens");
+    let view = dir.join("обертання");
+    let script = repo.join("scripts/refresh-verified-t5m-pair.sh");
+    let run = || Command::new("bash")
+        .arg(&script)
+        .arg(&src)
+        .arg(env!("CARGO_BIN_EXE_sens"))
+        .arg(env!("CARGO_BIN_EXE_sens-trit"))
+        .current_dir(repo)
+        .output().expect("запуск справжнього SENS/Zig мігратора");
+
+    fs::write(&src, "(як-є ())\n").expect("вихідна D3 програма");
+    let first = run();
+    assert!(first.status.success(),
+        "test_id=t5m-repair-first layer=SENS/Zig stderr={} stdout={}",
+        String::from_utf8_lossy(&first.stderr),
+        String::from_utf8_lossy(&first.stdout));
+    assert!(String::from_utf8_lossy(&first.stdout).contains("T5M_REPAIR_OK"));
+    let original = fs::read(&physical).expect("справжні T5M байти");
+    assert!(!original.is_empty());
+    assert!(!fs::read_to_string(&view).unwrap().trim().is_empty());
+    let paired = sens().args(["--t5m-pair", src.to_str().unwrap(),
+        physical.to_str().unwrap()]).output().expect("SENS eval");
+    assert!(paired.status.success(), "SENS paired stderr={}",
+        String::from_utf8_lossy(&paired.stderr));
+
+    // Заміна власне Lisp змінює фізичну пару; стара не залишається
+    // формально допущеною, навіть якщо попередній CI був зелений.
+    fs::write(&src, "(як-є (()))\n").expect("новий Lisp");
+    let refreshed = run();
+    assert!(refreshed.status.success(),
+        "test_id=t5m-repair-refresh layer=SENS/Zig stderr={}",
+        String::from_utf8_lossy(&refreshed.stderr));
+    let new_physical = fs::read(&physical).expect("оновлена пара");
+    assert_ne!(original, new_physical, "пара повинна оновитися разом з Lisp");
+
+    // Негативна перевірка: пошкоджений SENS source → точна відмова,
+    // і раніше перевірений .sens не переписується через невдалий ремонт.
+    fs::write(&src, "(невідома-недопущена-функція (як-є ()))\n")
+        .expect("неприпустима програма");
+    let refused = run();
+    assert!(!refused.status.success(), "невідома викличність не може пройти");
+    assert_eq!(fs::read(&physical).unwrap(), new_physical,
+        "помилка не має псувати попередню фізичну пару");
+
+    let _ = fs::remove_dir_all(&dir);
+}
