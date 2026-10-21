@@ -493,7 +493,10 @@ jobs:
           # Цитоване ціле проходить ту саму D24+ проєкцію, Zig/T5M і обернення.
           cargo test --locked -p sens-cli --bin sens quoted_integer_in_t5m_source_preserves_exact_d24_word -- --nocapture
           cargo test --locked -p sens-cli --bin sens two_top_level_forms_have_exact_d2_separator_and_execute_after_zig_t5m -- --nocapture
-          cargo test --locked -p sens-cli --bin sens native_sens_mint_and_pair_execute_without_python_or_json_oracle -- --exact --nocapture
+          # Нуль відібраних тестів не є доказом: спершу перевірити точне ім'я.
+          cargo test --locked -p sens-cli --bin sens -- --list |
+            grep -Fqx 'repl::tests::native_sens_mint_and_pair_execute_without_python_or_json_oracle: test'
+          cargo test --locked -p sens-cli --bin sens repl::tests::native_sens_mint_and_pair_execute_without_python_or_json_oracle -- --exact --nocapture
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' }}
