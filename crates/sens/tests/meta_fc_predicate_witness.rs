@@ -19,6 +19,26 @@ fn session() -> Session {
     session
 }
 
+
+#[test]
+fn first_class_sequential_body_executes_in_sens_and_preserves_last_result() {
+    // Справжній SENS evaluator виконує обидві цитовані форми.
+    // LET* лише впорядковує обчислення: тут немає Python/JSON oracle.
+    let mut live = session();
+    let source = "(першокласне-обчислити-тіло
+        (як-є ((як-є ()) (як-є (()))))
+        першокласне-початкове-середовище)";
+    let observed = exact(source, &mut live)
+        .unwrap_or_else(|err| panic!(
+            "test_id=meta-fc-body-order layer=eval expected=quoted-pair actual={err}"
+        ));
+    assert_eq!(
+        observed.value.to_string(),
+        "(())",
+        "test_id=meta-fc-body-order: друга форма повинна бути результатом SENS"
+    );
+}
+
 #[test]
 fn first_class_predicates_obey_sens_d1_law_and_reject_one_bit_mutant() {
     let changes: Vec<_> = LAW.bytes().zip(MUTANT.bytes())
