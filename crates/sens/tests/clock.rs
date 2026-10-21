@@ -110,16 +110,19 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
     let mut session = time_session();
     // Числа у quoted-даних не мають D24+; будуємо виконуваний список
     // з точних числових значень, а не арифметику над legacy-number.
+    // Цей позитивний свідок використовує D24 для обох полів; ширший
+    // перехід D48/D24 не можна мовчки допускати без закону міждоменного
+    // приведення (див. окремий негативний свідок нижче).
 
     assert_eq!(
         eval_program(
-            "(юнікс-час-спостереження-узгоджений-час (список (як-є unix-time) 946684800 42))",
+            "(юнікс-час-спостереження-узгоджений-час (список (як-є unix-time) 0 42))",
             &mut session,
         )
         .unwrap()
         .value
         .to_string(),
-        "(utc 2000 1 1 0 0 0 42)"
+        "(utc 1970 1 1 0 0 0 42)"
     );
     assert_eq!(
         eval_program(
@@ -137,6 +140,14 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
     )
     .expect_err("quoted legacy-number не може стати математичним D24+");
     assert_eq!(legacy.kind, ErrorKind::Type);
+
+    let mixed_domains = eval_program(
+        "(юнікс-час-спостереження-узгоджений-час (список (як-є unix-time) 946684800 42))",
+        &mut session,
+    )
+    .expect_err("міждоменне приведення D48/D24 без закону заборонене");
+    assert_eq!(mixed_domains.kind, ErrorKind::Type);
+    assert!(mixed_domains.message.contains("same-domain numeric values"));
 }
 
 #[test]
