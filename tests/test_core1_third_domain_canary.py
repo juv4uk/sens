@@ -55,7 +55,11 @@ class Core1ThirdCurrentMigration(unittest.TestCase):
             self.assertIn(name, readable)
         self.assertNotIn("00000101", readable)
         self.assertNotIn("C1-THIRD", readable)
-        self.assertIn("(00001001 C1-THIRD",
+        # У чинному Core1 немає історичної машинної голови C1-THIRD.
+        # Третій елемент реалізується через ратифікований селектор.
+        self.assertIn("(визначити ядро1-третій-елемент",
+                      (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
+        self.assertIn("(третє значення)",
                       (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
         self.assertEqual(self.bridge, {})
 
