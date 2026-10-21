@@ -228,7 +228,7 @@ jobs:
           if grep -Eq '^(lib/meta-eval\.lisp|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-lexical-shadow-d1\.sh|tests/semantic/meta-eval-lexical-shadow-d1-(law|mutant|mutants)\.lisp)$' "$changed_all"; then
             echo 'meta_eval_d1_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(benchmarks/parser\.lisp|crates/sens/src/source_projection\.rs|crates/sens/tests/ukr_unpaired_benchmark_runtime\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(benchmarks/parser\.lisp|benchmarks/cross-language/sens-vs-python/sens/(ackermann|fib)\.(setup|call)\.lisp|crates/sens/src/source_projection\.rs|crates/sens/tests/ukr_unpaired_benchmark_runtime\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'parser_benchmark_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Зміна чинної Lisp-семантики має запускати SENS, не лише source audit.
@@ -370,6 +370,7 @@ jobs:
           # Окремий D7/D24+ runtime-свідок навіть після RED іншого тесту.
           # Не видавати успішний source eval за фізичну оберненість .sens.
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
+          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime незалежне_виконання_аккермана_та_фібоначчі_у_sens -- --exact --nocapture
 
       # Лише адресний Zig/T5M-експорт після змін у виконуваних Lisp.
       - name: "LISP-TIER — діагностувати дві актуальні фізичні пари"
