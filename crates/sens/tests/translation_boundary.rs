@@ -187,6 +187,21 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
 }
 
 #[test]
+fn translation_alternatives_reject_improper_d3_tail_in_live_sens() {
+    // Справжній SENS eval; не плутати атомарний хвіст і канонічний NIL.
+    for (alternatives, expected) in [
+        ("(((hot mercury-planet)) ((hot mercury-element)))", "1"),
+        ("(((hot mercury-planet)) . зіпсований-хвіст)", "()"),
+    ] {
+        let expression = format!(
+            "(альтернативні-варіанти-перекладу-коректні? (як-є clause) (як-є {alternatives}))"
+        );
+        assert_eq!(eval_translation(&expression), expected,
+                   "SENS неправильно прийняв хвіст: {expression}");
+    }
+}
+
+#[test]
 fn one_alternative_is_not_allowed_to_masquerade_as_ambiguity() {
     let source = r#"
         (визначити proposal
