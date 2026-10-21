@@ -29,6 +29,19 @@ class CurrentTranslationD1Tests(unittest.TestCase):
         self.assertEqual(guard.main(), 0)
         self.assertNotIn("(визначити translation-status ", self.source)
 
+    def test_both_advice_paths_use_live_ukrainian_journal_accessor(self):
+        # Назва діючого глобального символу не повинна просочуватись
+        # у нові виконувані вирази перекладу.
+        self.assertEqual(self.source.count("(поточний-журнал-знань)"), 2)
+        self.assertNotIn("*knowledge-journal*", self.source)
+        old = self.source.replace(
+            "(поточний-журнал-знань)", "*knowledge-journal*", 1
+        )
+        self.assertTrue(any(
+            "англомовне посилання" in reason
+            for reason in guard.check_translation_text(old)
+        ))
+
     def test_latin_definition_and_old_raw_d1_are_rejected(self):
         renamed = self.source.replace(
             "(визначити переклад-стан\n", "(визначити translation-status\n", 1
