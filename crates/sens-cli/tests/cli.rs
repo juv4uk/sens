@@ -355,6 +355,39 @@ fn t5m_file_mode_rejects_malformed_ukrainian_source() {
 }
 
 #[test]
+fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
+    // Без Python-eval: оригінальні Lisp-визначення, D24+ й SENS T5M.
+    let source = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../benchmarks/cross-language/sens-vs-python/sens/binary-trees.setup.lisp"
+    ))
+    .expect("справжній український Lisp-бенчмарк");
+    let path = std::env::temp_dir().join(format!(
+        "sens-real-binary-trees-d24-{}.lisp", std::process::id()
+    ));
+    std::fs::write(
+        &path,
+        format!("{source}\n(перевірити-дерево (створити-дерево 2))\n"),
+    )
+    .expect("точна програма D24+");
+    let output = sens()
+        .args(["--t5m-file", path.to_str().expect("тимчасове ім'я UTF-8")])
+        .output()
+        .expect("реальний SENS CLI з Zig T5M");
+    let _ = std::fs::remove_file(&path);
+    assert!(
+        output.status.success(),
+        "SENS T5M не виконав дерево D24+: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        String::from_utf8_lossy(&output.stdout).trim(),
+        "7",
+        "Два рівні дерева містять сім перевірюваних вузлів"
+    );
+}
+
+#[test]
 fn t5m_file_mode_executes_the_changed_ukrainian_source_through_the_physical_route() {
     let path = std::env::temp_dir().join(format!("sens-cli-t5m-file-{}.lisp", std::process::id()));
     std::fs::write(&path, "(додати 20 22)\n").expect("write T5M source fixture");
