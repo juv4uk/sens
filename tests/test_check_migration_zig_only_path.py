@@ -363,7 +363,7 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
             # Жодного маніфесту в sandbox: програма не має залежати від
             # перевірки чужих маніфестів даних, їхнього SHA чи дати.
             live = sandbox / "lib/програма.lisp"
-            live.write_text("(визначити відповідь (як-є так))\\n", encoding="utf-8")
+            live.write_text("(визначити відповідь (як-є так))\n", encoding="utf-8")
             self.assertIsNone(
                 migrator.reject_reviewed_nonprogram_source(live, sandbox)
             )
@@ -371,7 +371,7 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
             # А от файл із визнаного не-виконуваного набору не може
             # обходити відсутню маніфестну авторизацію.
             domain = sandbox / "lib/domains/d4.lisp"
-            domain.write_text("(непрограма)\\n", encoding="utf-8")
+            domain.write_text("(непрограма)\n", encoding="utf-8")
             with self.assertRaisesRegex(
                 migrator.SensT5Error, "NONPROGRAM_MANIFEST_UNAVAILABLE"
             ):
