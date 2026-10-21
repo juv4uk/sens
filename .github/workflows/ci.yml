@@ -204,6 +204,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
+          cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
           # Український D24+ обчислювач: позитивний закон і негативний мутант.
           cargo test --locked -p sens --test uk_sa_surface peer_identity_acceptance_ -- --nocapture
           # Спершу справжній SENS-eval українського читача:
@@ -217,8 +219,6 @@ jobs:
           # Чинний SENS CLI: не підміняємо обчислення друком ефектів.
           cargo test --locked -p sens-cli --test cli український_лінтер_повертає_точні_результати_без_незвязаних_d1 -- --exact --nocapture
           cargo test --locked -p sens-cli --test cli український_скрипт_відбирає_саме_запитаний_рівень -- --exact --nocapture
-          # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
-          cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
           # Реальне SENS виконання українських D1/D3 правил:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
           cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
