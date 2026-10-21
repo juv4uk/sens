@@ -77,6 +77,31 @@ class ActiveLibDriverTests(unittest.TestCase):
         self.assertFalse(self.log.exists())
         self.assertNotIn("MIGRATION_COMPLETE", run.stdout)
 
+    def test_scanner_nonzero_cannot_be_reported_as_green(self):
+        # A truncated/crashed native tool can print convertible=0 before
+        # exiting with a failure. A green-looking row is not a clean scan.
+        for name in ("first", "second"):
+            (self.root / f"lib/{name}.lisp").write_text("DONE\n", encoding="utf-8")
+        self.mock.write_text(
+            '#!/usr/bin/env bash\n'
+            'set -euo pipefail\n'
+            'if [[ "$1" == "--check" ]]; then\n'
+            '  shift\n'
+            '  for file in "$@"; do\n'
+            '    echo "$file: convertible=0 blocked-unratified=0"\n'
+            '  done\n'
+            '  exit 23\n'
+            'fi\n'
+            'exit 23\n', encoding="utf-8",
+        )
+        run = self.run_driver("--check")
+        self.assertEqual(run.returncode, 23, run.stdout + run.stderr)
+        self.assertIn("SOURCE_SCAN_ERROR: scanner exit=23", run.stderr)
+        self.assertNotIn("EXACT_SOURCE_SCAN_PASS:", run.stdout)
+        self.assertFalse(self.log.exists())
+        for name in ("first", "second"):
+            self.assertEqual((self.root / f"lib/{name}.lisp").read_text(), "DONE\n")
+
     def test_apply_converts_both_files_and_checks_consumers_only_once(self):
         run = self.run_driver("--apply")
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
