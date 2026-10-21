@@ -255,6 +255,8 @@ jobs:
           set -euo pipefail
           # Живий математичний D24+ приклад: не достатньо самої DEFINE.
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program -- --exact --nocapture
+          # Чинний benchmarks/arithmetic.lisp: D24+ результат і негативний нечисловий аргумент.
+          cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
           # Окремий бенчмарк-крейт має власний застарілий Cargo.lock;
           # тільки допоміжний parity-тест дозволяє offline-оновлення lock.
           # Релізні Cargo-команди лишаються --locked.
