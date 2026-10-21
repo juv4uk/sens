@@ -271,11 +271,33 @@ fn world_module_name_symbol_law_is_d1_and_rejects_non_symbols() {
         ("7", false),
         ("(quote (zoo))", false),
         ("(quote ())", false),
+        // D1:1/D1:0 є атомами, але не текстовими символами.
+        // Без явного D1 guard D8 WRITE повертає runtime-помилку.
+        ("(атом? (як-є ()))", false),
+        ("(хибне? (атом? (як-є ())))", false),
     ] {
         let code = format!("(внутрішній-символ? {value})");
         let observed = eval_program(&code, &mut session)
             .unwrap_or_else(|e| panic!("world module name {code}: {e:?}")).value;
         assert_eq!(observed.as_predicate_bit(), Some(expected), "{code}");
+    }
+}
+
+#[test]
+fn world_d1_symbol_guard_must_precede_d8_write() {
+    // Негативний SENS-свідок: голий D8 WRITE не приймає D1,
+    // тому світ мусить відхилити предикат ще до цього механізму.
+    let mut s = session();
+    let bare = "(значення-у-текст (атом? (як-є ())))";
+    assert!(eval_program(bare, &mut s).is_err(),
+        "test_id=world-d1-d8-bare expected=TYPE_ERROR input={bare}");
+    for value in ["(атом? (як-є ()))", "(хибне? (атом? (як-є ())))"] {
+        let source = format!("(внутрішній-символ? {value})");
+        let actual = eval_program(&source, &mut s)
+            .unwrap_or_else(|e| panic!("test_id=world-d1-d8-guard input={source} error={e:?}"))
+            .value;
+        assert_eq!(actual.as_predicate_bit(), Some(false),
+            "test_id=world-d1-d8-guard input={source} expected=D1:0 actual={actual}");
     }
 }
 
