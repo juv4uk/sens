@@ -128,3 +128,37 @@ fn d8_do_while_product_two_axes_are_observable_in_native_sens() {
     assert!(eval_program(invalid, &mut session).is_err(),
         "test_id=d8-loop-product layer=SENS expected=D1-type-rejection actual=accepted");
 }
+
+#[test]
+fn d8_eight_product_invariants_reuse_executable_ukrainian_laws() {
+    // Тільки затверджений Lisp-контракт вирішує, які координати мають
+    // незалежно доведений 2x2 добуток. Не JSON-каталог і не повний D8.
+    let authority = include_str!("../../../contracts/d8-ratification.lisp");
+    let surfaces = include_str!("../../../lib/domains/d8.lisp");
+    let definitions = include_str!("../../../lib/core4.lisp");
+    let mut invariant_count = 0usize;
+    for line in authority.lines() {
+        if !line.contains("owner-ratified-product-invariant PRODUCT-INVARIANT") {
+            continue;
+        }
+        let bits = line.split('"').nth(1)
+            .expect("D8 resident carries its exact binary coordinate");
+        assert_eq!(bits.len(), 8, "test_id=d8-product-geometry width={bits}");
+        assert!(bits.ends_with("11"),
+            "test_id=d8-product-geometry invariant must be the commuting 11 corner: {bits}");
+        let row = surfaces.lines()
+            .find(|line| line.trim_start().starts_with(&format!("({bits} ")))
+            .unwrap_or_else(|| panic!("test_id=d8-product-geometry no Ukrainian projection for {bits}"));
+        let ukr = row.split("(укр ").nth(1)
+            .and_then(|rest| rest.split(')').next())
+            .expect("each ratified product invariant has Ukrainian source spelling");
+        let definition = format!("(визначити {ukr}");
+        assert!(
+            definitions.contains(&definition),
+            "test_id=d8-product-definition layer=SENS coordinate={bits} ukr={ukr} expected=real-Lisp-DEFINE actual=missing"
+        );
+        invariant_count += 1;
+    }
+    assert_eq!(invariant_count, 8,
+        "test_id=d8-product-authority expected=8 proof-anchored-corners actual={invariant_count}");
+}
