@@ -798,6 +798,40 @@ fn український_скрипт_відбирає_саме_запитан�
             "SENS змінив порядок/тотожність або пропустив не той рівень"
         );
     }
+    // Всі три рівні та запис без поля tier: виконується саме
+    // українська рекурсивна функція із Lisp-файла, не Rust-емуляція.
+    for (level, expected, forbidden) in [
+        ("1", vec!["зоря", "сонце"], vec!["телескоп"]),
+        ("2", vec!["телескоп"], vec!["зоря", "сонце"]),
+        ("3", vec![], vec!["зоря", "сонце", "телескоп"]),
+    ] {
+        let code = format!(
+            "{selector}\n(відібрати-приклади-за-рівнем (як-є (((expr . зоря) (tier . 1)) ((expr . телескоп) (tier . 2)) ((expr . без-рівня)) ((expr . сонце) (tier . 1)))) {level})\n"
+        );
+        let path = std::env::temp_dir().join(format!(
+            "sens-ukr-tier-filter-{level}-{}.lisp", std::process::id()
+        ));
+        std::fs::write(&path, code).expect("тимчасова українська програма");
+        let output = sens().arg(&path).output().expect("SENS CLI запускається");
+        let _ = std::fs::remove_file(&path);
+        assert!(
+            output.status.success(),
+            "рівень {level}: stderr={} stdout={}",
+            String::from_utf8_lossy(&output.stderr),
+            String::from_utf8_lossy(&output.stdout),
+        );
+        let result = String::from_utf8_lossy(&output.stdout);
+        for value in expected {
+            assert!(result.contains(value), "втрачено {value}: {result}");
+        }
+        for value in forbidden {
+            assert!(!result.contains(value), "чужий рівень {value}: {result}");
+        }
+        assert!(!result.contains("без-рівня"), "відсутній tier прийнято: {result}");
+        if level == "3" {
+            assert_eq!(result.trim(), "()", "непорожній третій рівень: {result}");
+        }
+    }
     // Жодного фальшивого статусу GO для файлового виконання.
     let full = sens()
         .args(["scripts/fixtures-for-tier.lisp", "1"])
