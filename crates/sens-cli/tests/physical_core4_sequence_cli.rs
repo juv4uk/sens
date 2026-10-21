@@ -271,8 +271,91 @@ impl Drop for SourceTriplet {
     }
 }
 
+
+// Перевіряємо реальне виконання ще не опублікованих фізичних трійок.
+// Український Lisp є джерелом; exact-слова читає SENS, T5M пакує Zig.
+fn verify_unpaired_ukrainian_libs_natively() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    for stem in ["pair-replace-first", "pair-replace-rest", "поміняти-перші-два"] {
+        let source = root.join("lib").join(format!("{stem}.lisp"));
+        assert!(source.is_file(), "{stem}: українське джерело відсутнє");
+        let sequence = UNIQUE.fetch_add(1, Ordering::Relaxed);
+        let scratch = std::env::temp_dir().join(format!(
+            "sens-native-unpaired-{}-{sequence}", std::process::id()
+        ));
+        fs::create_dir(&scratch).expect("створити ізольоване місце SENS-програми");
+        let physical = scratch.join("програма.sens");
+        let view = scratch.join("програма");
+        let minted = Command::new(env!("CARGO_BIN_EXE_sens"))
+            .arg("--t5m-mint-pair")
+            .arg(&source)
+            .arg(&physical)
+            .output()
+            .expect("SENS reader -> Zig/T5M");
+        assert!(
+            minted.status.success(),
+            "test_id=ukr-lib-mint source={stem} stderr={}", error(&minted)
+        );
+        assert!(physical.is_file() && view.is_file(), "{stem}: створено фізичну пару");
+        let verify = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+            .arg("verify-view")
+            .arg(&physical)
+            .output()
+            .expect("Zig verify-view");
+        assert!(
+            verify.status.success(),
+            "test_id=ukr-lib-inverse source={stem} stderr={}", error(&verify)
+        );
+        let pair = Command::new(env!("CARGO_BIN_EXE_sens"))
+            .arg("--t5m-pair")
+            .arg(&source)
+            .arg(&physical)
+            .output()
+            .expect("реальне парне виконання SENS");
+        assert!(
+            pair.status.success(),
+            "test_id=ukr-lib-pair source={stem} stderr={}", error(&pair)
+        );
+        assert_eq!(
+            observed(&pair).trim(), "1",
+            "test_id=ukr-lib-d1 source={stem}: правильний виконуваний закон"
+        );
+        let bare = Command::new(env!("CARGO_BIN_EXE_sens"))
+            .arg(&physical)
+            .output()
+            .expect("самостійне виконання фізичного SENS");
+        assert!(
+            bare.status.success(),
+            "test_id=ukr-lib-bare source={stem} stderr={}", error(&bare)
+        );
+        assert_eq!(
+            bare.stdout, pair.stdout,
+            "test_id=ukr-lib-parity source={stem}: обидва шляхи мають однаковий D1 результат"
+        );
+        let mutant = scratch.join("змінене-джерело.lisp");
+        let mut source_bytes = fs::read(&source).expect("зчитати чинний Lisp");
+        source_bytes.extend_from_slice("\n(як-є ())\n".as_bytes());
+        fs::write(&mutant, source_bytes).expect("зберегти лише тестовий мутант");
+        let mismatch = Command::new(env!("CARGO_BIN_EXE_sens"))
+            .arg("--t5m-pair")
+            .arg(&mutant)
+            .arg(&physical)
+            .output()
+            .expect("негативний SENS-мутант");
+        assert!(
+            !mismatch.status.success() &&
+                error(&mismatch).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+            "test_id=ukr-lib-mutant source={stem} actual={}",
+            error(&mismatch)
+        );
+        fs::remove_dir_all(&scratch).expect("прибрати лише власні тимчасові файли");
+        println!("SENS_UKR_EXECUTABLE_PASS file=lib/{stem}.lisp exact=Zig/T5M d1=1");
+    }
+}
+
 #[test]
 fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
+    verify_unpaired_ukrainian_libs_natively();
     // Executable Ukrainian D3/D4 .lisp programs; the stable test
     // name is retained for the existing exact-target CI invocation, not
     // static metadata or mock examples; SENS evaluates each physical program.
