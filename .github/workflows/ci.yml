@@ -281,6 +281,11 @@ jobs:
           if grep -Eq '^(lib/machine/admission/x86-64\.lisp|crates/sens/tests/machine_admission_false_width\.rs|crates/sens/tests/machine_admission_adversarial\.rs)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
+          # Чинна українська UTF-8 програма запускає справжній SENS D1, не Python/JSON oracle.
+          if grep -Eq '^(lib/utf8\.lisp|crates/sens/tests/utf8\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'utf8_runtime_tests=true' >> "$GITHUB_OUTPUT"
+            echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+          fi
           # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|lib/machine/capability-axis\.lisp|lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -479,7 +484,7 @@ jobs:
           retention-days: 1
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
@@ -520,6 +525,15 @@ jobs:
           test "$(sha256sum "$repair_dir/current.sens" | cut -d' ' -f1)" = "$repaired_sha"
           cmp "$repair_dir/readback" "$repair_dir/current"
           echo "T5M_REPAIR_LIVE_SENS PASS: native mint, pair, replacement, inverse view, negative"
+
+      - name: "UTF-8 — справжнє SENS D1 виконання після зміни Lisp"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' }}
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens --test utf8 utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols -- --exact --nocapture
+          cargo test --locked -p sens --test utf8 utf8_direct_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' }}
@@ -857,12 +871,6 @@ jobs:
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage -- --exact --nocapture
             # Та сама поточна SENS-семантика для кореневого пакета: тільки атомний D3 EQ.
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_root_recovery_rejects_compound_stage_before_d3_eq -- --exact --nocapture
-          fi
-          # Мовний закон UTF-8 і D1 negative mutant виконуються САМИМ SENS.
-          # Python/JSON не є семантичним оракулом.
-          if grep -Eq '^(lib/utf8\.lisp|crates/sens/tests/utf8\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test utf8 utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test utf8 utf8_direct_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
           fi
           # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
           if grep -Eq '^(lib/time\.lisp|crates/sens/tests/(time_host_surface|timezone_raw)\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
