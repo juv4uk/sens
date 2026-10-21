@@ -366,3 +366,43 @@ fn guard_reference_data_reader_is_path_pinned_and_keeps_the_directory_as_data() 
     let rendered = format!("{:?}", parsed[0].kind);
     assert!(rendered.contains("довідник-гвардії"));
 }
+
+
+#[test]
+fn mechanism_selector_named_d4_helpers_execute_real_sens_positive_and_negative() {
+    // Не імітуємо SENS у Rust. Перевіряємо саме DEFINE із чинного Lisp.
+    // Зовнішній читач каталогу D9 перевіряється окремо: тут D4 ядро
+    // мусить виконати обидва нові іменовані замикання.
+    let source = include_str!("../../../lib/mechanism-selector.lisp");
+    let start = source.find("(визначити механізм-зіставити-маршрут")
+        .expect("чинне визначення першого D4 helper-а");
+    let end = source.find("\n(визначити вибрати-механізм")
+        .expect("межа helper-ів у чинному Lisp");
+    let helpers = &source[start..end];
+    let mut session = Session::default();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("SENS D3–D5 core для виконуваних українських імен");
+    let definitions = parse_mixed_exact_domain(helpers)
+        .expect("парсер SENS: чинні D4 DEFINE");
+    sens::eval_parsed_expressions(&definitions, &mut session)
+        .expect("два D4 helper-и реально завантажуються SENS");
+
+    for (input, expected) in [
+        ("(механізм-знайти-маршрут (як-є target) (як-є runner) (як-є ((other runner x) (target runner chosen))))",
+         "(target runner chosen)"),
+        ("(механізм-знайти-маршрут (як-є target) (як-є absent) (як-є ((other runner x) (target runner chosen))))",
+         "()"),
+        ("(механізм-оформити-вибір (як-є ()) (як-є target) (як-є runner))",
+         "(mechanism-unavailable target runner)"),
+        ("(механізм-оформити-вибір (як-є (target runner chosen)) (як-є target) (як-є runner))",
+         "(mechanism-selected target runner chosen)"),
+    ] {
+        let forms = parse_mixed_exact_domain(input)
+            .expect("читач SENS не підміняється тестовим парсером");
+        let actual = sens::eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|e| panic!("SENS D4 mechanism selector input={input}: {e}"))
+            .value.to_string();
+        assert_eq!(actual, expected,
+            "test_id=mechanism-d4 layer=SENS input={input} expected={expected} actual={actual}");
+    }
+}
