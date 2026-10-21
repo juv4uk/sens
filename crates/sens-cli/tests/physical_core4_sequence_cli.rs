@@ -284,6 +284,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "вставити-посеред-пари",
         "розділити-четвірку-на-пари",
         "pair-zip-unzip-two",
+        "list-delete-second",
+        "list-insert-second",
+        "rotate-four-left",
+        "rotate-four-right",
         "list-swap-neighbors-four",
         "list-swap-middle-four",
     ] {
