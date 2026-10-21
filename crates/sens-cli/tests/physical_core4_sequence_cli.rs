@@ -352,6 +352,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-zip-general"
                 | "list-drop-last-general"
                 | "list-append-general"
+                | "розділити-до-першого-входження"
                 | "list-unique-stable"
                 | "замінити-третій-в-четвірці"
         ) {
