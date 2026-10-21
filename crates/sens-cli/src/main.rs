@@ -913,6 +913,44 @@ fn main() {
 mod core_profile_bootstrap_tests {
     use super::*;
 
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn native_t5m_pair_mint_matches_zig_and_executes_without_python() {
+        let source = "(як-є ())";
+        let (physical, view) = repl::mint_t5m_source_pair(source)
+            .expect("SENS reader + pinned Zig must mint the physical pair");
+        let restored = zig_transport::decode_t5_exact_words(&physical)
+            .expect("Zig must decode its own carrier");
+        let expected = restored.iter()
+            .map(|word| word.bits.iter()
+                .map(|bit| if *bit == 0 { '0' } else { '1' })
+                .collect::<String>())
+            .collect::<Vec<_>>()
+            .join(" ") + "\n";
+        assert_eq!(view, expected, "view must use exact Zig-returned words");
+        repl::eval_t5m_paired_file(source, &physical)
+            .expect("real SENS evaluator must execute source-verified bytes");
+
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system time")
+            .as_nanos();
+        let dir = std::env::temp_dir()
+            .join(format!("sens-native-pair-{}-{unique}", std::process::id()));
+        fs::create_dir(&dir).expect("create isolated output directory");
+        let path = dir.join("single.sens");
+        let result = write_new_t5m_pair(
+            path.to_str().expect("utf8 temporary path"), &physical, &view,
+        );
+        assert!(result.is_ok(), "publish exact carrier and view: {result:?}");
+        assert_eq!(fs::read(&path).unwrap(), physical);
+        assert_eq!(fs::read(path.with_extension("")).unwrap(), view.as_bytes());
+        assert!(write_new_t5m_pair(
+            path.to_str().unwrap(), &physical, &view,
+        ).is_err(), "cannot overwrite a committed pair");
+        fs::remove_dir_all(&dir).expect("clean test fixtures");
+    }
+
     #[test]
     fn human_lisp_file_uses_d24_source_projection_in_real_core_evaluation() {
         let source = "(додати 2 3)\n(додати 4 5)\n";
