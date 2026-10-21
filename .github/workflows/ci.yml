@@ -237,7 +237,9 @@ jobs:
             echo 'closure_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # CLIPS — лише змінений виконуваний імпортер або його справжній SENS-тест.
-          if grep -Eq '^(lib/clips-import\\.lisp|crates/sens/tests/clips_import\\.rs|\\.github/workflows/ci\\.yml)
+          if grep -Eq '^(lib/clips-import\.lisp|crates/sens/tests/clips_import\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'clips_runtime_tests=true' >> "$GITHUB_OUTPUT"
+          fi
 
           # Справжнє SENS-виконання змінюваного Core4/JSON, не Python-макет.
           if grep -Eq '^(lib/core4\.lisp|lib/yantra\.lisp|crates/sens/tests/yantra\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -279,6 +281,7 @@ jobs:
         run: |
           set -euo pipefail
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clips_import clips_d6_binding_executes_real_rule_split_and_symbol_prefix -- --exact --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clips_import clips_text_data_uses_current_sens_d7_d8_d9_without_legacy_string_literals -- --exact --nocapture
 
       - name: "SENS Yantra/Core4 — реальні D1 позитивні й негативні класифікації"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' }}
