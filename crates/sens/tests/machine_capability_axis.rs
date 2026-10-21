@@ -76,6 +76,26 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
 }
 
 #[test]
+fn numeric_coordinates_match_the_current_quoted_d24_source_in_real_sens() {
+    // Пряма перевірка кожного шару, щоб відрізнити збій декодування даних
+    // від числового порівняння і рекурсивного пошуку у виконуваному Lisp.
+    let mut s = session();
+    for (source, expected) in [
+        ("(можливість-правильний-рядок-домену? (друге вісь-спроможностей-машини-версія-3))", "1"),
+        ("(однакові? 5 (перше (друге вісь-спроможностей-машини-версія-3)))", "1"),
+        ("(однакові? 10 (друге (друге вісь-спроможностей-машини-версія-3)))", "1"),
+        ("(однакові? 8 (друге (перше вісь-спроможностей-машини-версія-3)))", "1"),
+        ("(можливість-знайти-рядок-домену 5 10 вісь-спроможностей-машини-версія-3)",
+            "(5 10 ((integer-add bounded-u32-inputs u64-result)))"),
+    ] {
+        let actual = eval_program(source, &mut s)
+            .unwrap_or_else(|error| panic!("SENS numeric coordinate source={source} error={error}"))
+            .value.to_string();
+        assert_eq!(actual, expected, "SENS numeric coordinate source={source}");
+    }
+}
+
+#[test]
 fn packed_bits_do_not_cross_domain_widths() {
     let mut s = session();
 
