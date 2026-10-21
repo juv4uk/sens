@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
 D8_AUTHORITY = ROOT / "knowledge/d8-ratified.json"
 D9_AUTHORITY = ROOT / "knowledge/d9-ratified.json"
+D7_KEYBOARD_V2 = ROOT / "knowledge/d7-keyboard-v2-ratified.json"
 
 
 def fail(message: str) -> None:
@@ -81,17 +82,41 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
 
 
 def validate_d7():
-    # The current domain projections live in d7.lisp. The separate JSON
-    # keyboard map is historical for this gate and must not override them.
+    # Both current human projections and the owner's ratified v2 keyboard
+    # describe the SAME exact W7 coordinates. Historical Devanagari/v1
+    # values must never silently replace the current IAST display.
     rows = read_domain_table(D7_TABLE)
+    authority = json.loads(D7_KEYBOARD_V2.read_text(encoding="utf-8"))
+    if (authority.get("schema") != "sens.d7.keyboard/v2"
+            or authority.get("status") != "owner-ratified"
+            or authority.get("width") != 7
+            or authority.get("capacity") != 128
+            or authority.get("occupancy") != 128
+            or not isinstance(authority.get("table"), list)
+            or len(authority["table"]) != 128):
+        fail("D7: owner-ratified keyboard v2 missing/incomplete")
     expected_bits = [f"{number:07b}" for number in range(128)]
     if len(rows) != 128:
         fail("D7: exactly 128 rows required")
-    for bits, row in zip(expected_bits, rows):
-        if row.width != 7 or row.bits != bits:
+    for number, (bits, row, keyboard) in enumerate(zip(expected_bits, rows, authority["table"])):
+        if row.width != 7 or row.bits != bits or keyboard.get("bits") != bits:
             fail(f"D7:{bits}: current domain coordinate/order drift")
         if row.lisp is not None:
             fail(f"D7:{bits}: data glyph cannot mint a Lisp callable")
+        # C0/DEL are real W7 data but deliberately have no printable human
+        # projection in d7.lisp; their raw machine scalar stays in the JSON.
+        control = number < 32 or number == 127
+        expected = {
+            "uk": keyboard.get("uk"),
+            "ukr": keyboard.get("uk"),
+            "en": keyboard.get("ascii"),
+            "san": keyboard.get("iast"),
+        }
+        for column, glyph in expected.items():
+            if not isinstance(glyph, str) or len(glyph) == 0:
+                fail(f"D7:{bits}: missing ratified {column} glyph")
+            if getattr(row, column) != (None if control else glyph):
+                fail(f"D7:{bits}: current {column} glyph disagrees with keyboard v2")
     return rows
 
 
