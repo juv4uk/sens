@@ -1610,9 +1610,9 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         },
         "scripts/generate-rust-evaluator-dispatch.lisp": {
             # Зворотний зріз після українізації локальних імен і параметрів.
-            "blob": "60168952a756fa8cfd7393c46ca43cba992b42aa",
-            # Контрольну точку оновлено після виправлення fallback-гілок COND:
-            # точні head-лічильники та inverse blob відповідають нинішньому main.
+            "blob": "d6cd8fe1afd7d3cda3c4f17eac233ee3ea2d8fe9",
+            # Контрольний inverse blob і точні лічильники від фактичних
+            # D1 fallback-гілок поточного генератора; інші голови не послаблено.
             "counts": {
                        "100": 9,
                        "110": 7,
@@ -1631,9 +1631,9 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                        "001000": 2,
                        "0011": 12,
                        "0010": 7,
-                       "001": 8,
+                       "001": 15,
                        "011": 5,
-                       "010": 5
+                       "010": 12
                        },
         },
         "scripts/generate-rust-function-signatures.lisp": {
