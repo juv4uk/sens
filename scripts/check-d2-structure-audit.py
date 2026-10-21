@@ -12,6 +12,7 @@ audit=json.loads((root/"knowledge/d2-structure-audit.json").read_text(encoding="
 assert audit["schema"]=="d2-structure-audit/v1"
 assert audit["authority"]=="#4160"
 assert audit["parent"]=="#4157"
+assert audit["contract"]=="11.9"
 assert audit["invariant"]["language_structure_owner"]=="D2 only"
 assert audit["invariant"]["d2_roles"]=={
     "00":"SEPARATOR",
@@ -51,7 +52,6 @@ for literal in [
     'D2_OPEN="10"',
     'D2_DOT="11"',
     "D2 word {t} is structural control only; it cannot be an executable head",
-    "D2 word {t} is structural control only; it cannot be ordinary data",
 ]:
     assert literal in migrate, literal
 assert rows["scripts/migrate-three-pass.py"]["status"]=="PASS"

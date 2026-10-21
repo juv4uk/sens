@@ -2,6 +2,7 @@
 import hashlib
 import json
 import pathlib
+import subprocess
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -11,7 +12,7 @@ def git_blob_sha1(data: bytes) -> str:
     return hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest()
 
 class D2AsDataCensus(unittest.TestCase):
-    def test_exact_scan_cohort_remains_blocked(self):
+    def test_historical_scan_cohort_preserves_its_evidence(self):
         data = json.loads(LEDGER.read_text())
         self.assertEqual(data["schema"], "sens-d2-as-data-census/1")
         self.assertEqual(data["source_scan"]["workflow_run"], 37810152645)
@@ -21,11 +22,13 @@ class D2AsDataCensus(unittest.TestCase):
             self.assertIn("D2 word", entry["reason"])
             source = ROOT / entry["path"]
             self.assertTrue(source.is_file(), entry["path"])
-            self.assertEqual(git_blob_sha1(source.read_bytes()), entry["git_blob_sha1"])
-            self.assertFalse(
-                source.with_suffix(".sens").exists(),
-                f"{entry['path']}: D2-as-data empty must not auto-publish .sens",
-            )
+            historical = subprocess.run(
+                ["git", "show", f"{data['source_scan']['scan_sha']}:{entry['path']}"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+            ).stdout
+            self.assertEqual(git_blob_sha1(historical), entry["git_blob_sha1"])
 
     def test_isa_subset_routes_to_nonprogram_classification(self):
         data = json.loads(LEDGER.read_text())

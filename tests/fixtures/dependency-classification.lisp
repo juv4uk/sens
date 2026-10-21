@@ -25,7 +25,7 @@
 (dependency-classification (id . "F-f15c56544b026e08") (buckets core exact-numbers) (unknown-symbols) (world-host-libraries) (axiom-tagged-s1 . t))
 (dependency-classification (id . "F-5130d05aa388c129") (buckets core exact-numbers) (unknown-symbols) (world-host-libraries) (axiom-tagged-s1 . t))
 (dependency-classification (id . "F-eed4406f6f480681") (buckets core exact-numbers) (unknown-symbols) (world-host-libraries) (axiom-tagged-s1 . t))
-(dependency-classification (id . "F-08b05bd6a8e5d0c6") (buckets) (unknown-symbols .) (world-host-libraries) (axiom-tagged-s1))
+(dependency-classification (id . "F-08b05bd6a8e5d0c6") (buckets) (unknown-symbols (".")) (world-host-libraries) (axiom-tagged-s1))
 (dependency-classification (id . "F-501bfc5e12537f48") (buckets) (unknown-symbols .e3) (world-host-libraries) (axiom-tagged-s1))
 (dependency-classification (id . "F-8f49c78abd4742dc") (buckets) (unknown-symbols 1e) (world-host-libraries) (axiom-tagged-s1))
 (dependency-classification (id . "F-1eeaef415b777f87") (buckets) (unknown-symbols 1e+) (world-host-libraries) (axiom-tagged-s1))

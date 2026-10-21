@@ -4,7 +4,7 @@
   "authority": "#4160",
   "parent": "#4157",
   "implementation_owner": "#4164",
-  "contract": "11.8",
+  "contract": "11.9",
   "invariant": {
     "language_structure_owner": "D2 only",
     "d2_roles": {
@@ -30,7 +30,7 @@
     {
       "path": "scripts/migrate-three-pass.py",
       "status": "PASS",
-      "claim": "Migration emits D2 10/00/11/01 for list structure and rejects two-bit words as executable heads or ordinary data."
+      "claim": "Migration emits D2 10/00/11/01 for list structure and rejects two-bit words as executable heads. The dated D2-as-data census is historical evidence, not a current blanket migration blocker."
     },
     {
       "path": "scripts/translate-domain-program.py",
