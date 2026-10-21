@@ -4,6 +4,8 @@
 """
 from pathlib import Path
 import unittest
+import subprocess
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts/execute_changed_lisp_t5m.sh"
@@ -60,6 +62,46 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn('release=NOT_CERTIFIED', branch)
         self.assertNotIn('T5M_FILE_EXECUTION PASS', branch)
         self.assertIn('failed_files=$((failed_files + 1))', source[source_fail:])
+
+    def test_nonprogram_cannot_hide_obsolete_committed_sens(self):
+        # Перевірка самого Bash-маршруту на синтетичному звіті мігратора:
+        # тут НЕ виконується і НЕ підмінюється обчислювач SENS.
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-stale-pair-") as td:
+            root = Path(td)
+            (root / "scripts").mkdir()
+            (root / "module.lisp").write_text("; це більше не програма\\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\\n", encoding="utf-8")
+            (root / "module.sens").write_bytes(b"\\x01")
+            migrator = root / "scripts/migrate-three-pass.py"
+            migrator.write_text(
+                "import json, pathlib, sys\\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\\n"
+                "out.parent.mkdir(parents=True, exist_ok=True)\\n"
+                "out.write_text(json.dumps({'summary': {'files_written': 0, "
+                "'files_blocked': 0, 'files_not_program': 1}, 'files': []}))\\n",
+                encoding="utf-8",
+            )
+            binary = root / "never-call-sens"
+            binary.write_text(
+                "#!/bin/sh\\necho invoked > executed.marker\\nexit 99\\n",
+                encoding="utf-8",
+            )
+            binary.chmod(0o755)
+            command = [
+                "bash", str(RUNNER), str(binary), "changed.txt", "evidence",
+            ]
+            stale = subprocess.run(command, cwd=root, capture_output=True, text=True)
+            self.assertEqual(stale.returncode, 2, stale.stdout + stale.stderr)
+            self.assertIn("T5M_NONPROGRAM_STALE_PAIR", stale.stderr)
+            self.assertIn("module.sens", stale.stderr)
+            self.assertFalse((root / "executed.marker").exists())
+            # Після справжнього вилучення застарілого фізичного носія
+            # дані лишаються даними: нема фальшивого виконання і RED.
+            (root / "module.sens").unlink()
+            cleaned = subprocess.run(command, cwd=root, capture_output=True, text=True)
+            self.assertEqual(cleaned.returncode, 0, cleaned.stdout + cleaned.stderr)
+            self.assertIn("T5M_NOT_PROGRAM path=module.lisp", cleaned.stdout)
+            self.assertFalse((root / "executed.marker").exists())
 
     def test_shell_parses(self):
         import subprocess
