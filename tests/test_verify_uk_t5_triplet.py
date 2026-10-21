@@ -21,10 +21,10 @@ mod = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
 
-F = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+F = ROOT / "tests/semantic/native-t5"
 PAIR = ROOT / "tests/fixtures/migration-pair-cohort-main"
-WORDS = "10 110 00 10 0 00 10 100 00 000 01 01 00 10 1 00 1 01 01"
-UK = "(за-умовою (ні (перше ())) (так так))\n"
+WORDS = "10 110 00 10 10 010 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01 01 00 10 100 00 000 01 01 00 10 10 010 00 10 001 00 000 01 01 00 10 010 00 10 001 00 000 01 01 01 01"
+UK = "(за-умовою ((атом? (сполучити (як-є ()) (як-є ()))) (перше ())) ((атом? (як-є ())) (атом? (як-є ()))))\n"
 
 
 class BoundedUkTripletTests(unittest.TestCase):
@@ -36,8 +36,11 @@ class BoundedUkTripletTests(unittest.TestCase):
             self.dir / "branch.sens",
             self.dir / "branch",
         )
-        for name in ("branch.lisp", "branch.sens", "branch"):
-            shutil.copyfile(F / name, self.dir / name)
+        for suffix in (".lisp", ".sens", ""):
+            shutil.copyfile(F / ("cond-short-circuit" + suffix),
+                            self.dir / ("branch" + suffix))
+        # Джерело й канонічна проєкція відрізняються лише зайвим LF.
+        self.lisp.write_text(UK, encoding="utf-8")
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -50,8 +53,8 @@ class BoundedUkTripletTests(unittest.TestCase):
         record = self.verify()
         self.assertEqual(self.lisp.read_text(encoding="utf-8"), UK)
         self.assertEqual(self.view.read_text(encoding="ascii"), WORDS + "\n")
-        self.assertEqual(self.sens.read_bytes().hex(), "67386515bf123b2dc4a9b1a1")
-        self.assertEqual(record["physical_bytes"], 12)
+        self.assertEqual(self.sens.read_bytes(), encode_t5m_projection(WORDS))
+        self.assertEqual(record["physical_bytes"], 18)
         self.assertEqual(record["typed_word_count"], len(WORDS.split()))
         self.assertTrue(record["canonical_uk_roundtrip"])
         self.assertTrue(record["canonical_view_roundtrip"])
@@ -210,7 +213,8 @@ class BoundedUkTripletTests(unittest.TestCase):
             UK.replace("\n", "\r\n"),
             "; Коментар із чужою цифрою ٢\n" + UK,
             "#| коментар #| вкладений ५ |# завершено |#\n" + UK,
-            UK.replace(" (так так)", " #| інертний |# (так    так)") +
+            UK.replace("(атом? (як-є ()))",
+                       "#| інертний |# (атом? (як-є ()))", 1) +
                 "; наприкінці",
         )
         for source in variants:
@@ -231,11 +235,11 @@ class BoundedUkTripletTests(unittest.TestCase):
         for candidate in (
             UK.replace("за-умовою", "COND"),
             UK.replace("перше", "CAR"),
-            UK.replace("так", "T"),
-            UK.replace("ні", "NIL"),
-            UK.replace("так", "правда"),
-            UK.replace("(так так)", "(так ні)"),
-            UK.replace("(ні (перше ()))", "(так (перше ()))"),
+            UK.replace("атом?", "ATOM"),
+            UK.replace("сполучити", "CONS"),
+            UK.replace("(як-є ())", "(як-є так)", 1),
+            UK.replace("(перше ())", "(решта ())"),
+            UK.replace("(атом? (як-є ()))", "(атом? (сполучити (як-є ()) (як-є ())))", 1),
         ):
             with self.subTest(source=candidate):
                 self.lisp.write_bytes(candidate.encode("utf-8"))
@@ -287,7 +291,7 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.view.unlink()
         with self.assertRaisesRegex(mod.ProjectionBlocked, "missing"):
             self.verify()
-        self.view.symlink_to(F / "branch")
+        self.view.symlink_to(F / "cond-short-circuit")
         with self.assertRaisesRegex(mod.ProjectionBlocked, "symlink"):
             self.verify()
 
@@ -409,6 +413,8 @@ class BoundedUkTripletTests(unittest.TestCase):
         # Одні байти можуть одночасно бути канонічним T5M.
         self.assertEqual(old_default.returncode, 0, old_default.stderr)
         self.assertIn('"physical_codec": "t5m"', old_default.stdout)
+        # Лише явний legacy T5 у тимчасовій копії, без auto fallback.
+        self.sens.write_bytes(mod.encode_words(WORDS.split()))
         legacy = subprocess.run([*cmd, "--codec", "t5"], cwd=ROOT, text=True,
                                 capture_output=True, timeout=90)
         self.assertEqual(legacy.returncode, 0, legacy.stderr)
