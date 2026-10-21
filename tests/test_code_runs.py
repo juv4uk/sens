@@ -465,6 +465,11 @@ class CodecUkrProjectionTests(unittest.TestCase):
             self.assertIn(head, allowed, f"невідомий виконуваний механізм {head}")
             if head == "як-є":
                 return  # Цитовані символи D2 — дані, не виклики.
+            if head == "функція":
+                self.assertEqual(len(node), 3, "D4 LAMBDA має параметри й тіло")
+                self.assertIsInstance(node[1], list, "неправильні параметри D4")
+                visit(node[2])
+                return
             if head == "за-умовою":
                 conditional_count += 1
                 self.assertGreaterEqual(len(node), 2, "COND без гілок")
@@ -474,15 +479,18 @@ class CodecUkrProjectionTests(unittest.TestCase):
                 for clause in node[1:]:
                     self.assertIsInstance(clause, list)
                     self.assertEqual(len(clause), 2, "зламана COND пара")
+                    visit(clause[0])
+                    visit(clause[1])
+                return
             for child in node[1:]:
                 visit(child)
 
         for form in forms:
             visit(form[2])
         self.assertEqual(conditional_count, 8, "втрачені перевірені гілки D2")
-        self.assertIn(
-            ["решта", ["решта", "декодоване"]],
+        self.assertEqual(
             found["кодек-д2-зібрати-крапкову-пару"][2][2],
+            ["решта", ["решта", "декодоване"]],
             "внутрішній D2 close не спожито перед зовнішнім хвостом",
         )
         return forms
