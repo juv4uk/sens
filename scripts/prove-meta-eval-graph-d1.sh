@@ -20,16 +20,30 @@ fi
 python3 - "$law" "$mutant" <<'PY'
 from pathlib import Path
 import sys
-p = Path(sys.argv[1]).read_text(encoding="utf-8")
-m = Path(sys.argv[2]).read_text(encoding="utf-8")
-needle = "(my-cond-has-migration-clause? (001 ())) #d1:0"
-if p.count(needle) != 1 or m != p.replace(needle, needle[:-1] + "1"):
-    raise SystemExit("META_GRAPH_TRANSPORT_RED: expected one D1:0 -> D1:1 word mutation")
-for fn in ("my-cond-has-migration-clause?", "my-params-bind-name?",
-           "my-forms-reference-name?", "my-graph-dependencies-reach?"):
-    if "(" + fn + " " not in p:
-        raise SystemExit("META_GRAPH_TRANSPORT_RED: missing live helper call " + fn)
-print("META_GRAPH_TRANSPORT_OK mutation=one-D1-bit semantic_pass=NOT_INFERRED")
+
+def code(path):
+    source = Path(path).read_text(encoding="utf-8")
+    return "\n".join(line for line in source.splitlines()
+                     if not line.lstrip().startswith(";")).strip()
+
+positive = code(sys.argv[1])
+mutant = code(sys.argv[2])
+before = "(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є requested))"
+after = "(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є other))"
+if positive.count(before) != 1 or mutant != positive.replace(before, after):
+    raise SystemExit("META_GRAPH_FIXTURE_RED: mutant must change one SENS call")
+for name, expected in (
+    ("має-перехідну-гілку-за-умовою?", 2),
+    ("ім'я-зв'язане-формальними-параметрами?", 3),
+    ("форма-посилається-на-ім'я?", 1),
+    ("досяжність-залежностей-графа?", 1),
+):
+    actual = positive.count("(" + name + " ")
+    if actual != expected:
+        raise SystemExit(f"META_GRAPH_FIXTURE_RED: {name} expected={expected} actual={actual}")
+if "#d1:" in positive or "(ні)" in positive or "(так)" in positive:
+    raise SystemExit("META_GRAPH_FIXTURE_RED: historical D1 text cannot run in SENS")
+print("META_GRAPH_MUTATION_CHECK input=one-exact-quoted-symbol positive=D1:1 mutant=D1:0")
 PY
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
@@ -52,17 +66,17 @@ if ! cmp -s "$tmp/expected" "$tmp/actual"; then
   printf 'REGRESSION id=%s layer=eval fixture=%s expected=D1:YES actual=wrong-verdict first_diff=0 reproduce=%q\n' "$id" "$law" "$reproduce" >&2
   exit 1
 fi
-if "$cli" "$tmp/mutant.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
-  printf 'REGRESSION id=%s-mutant layer=eval fixture=%s expected=D1-noncallable actual=accepted first_diff=D1:0-to-1 reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
-  sha256sum "$tmp/mutant.out" >&2
-  exit 1
-fi
-if ! grep -Fq 'domain identity is not callable under its ratified law: D1' "$tmp/mutant.err"; then
-  printf 'UNINFORMATIVE-NEGATIVE id=%s-mutant layer=eval fixture=%s expected=D1-noncallable actual=unrelated-failure first_diff=unknown reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
+printf '0\n' > "$tmp/expected-mutant"
+if ! "$cli" "$tmp/mutant.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
+  printf 'REGRESSION id=%s-mutant layer=eval fixture=%s expected=D1:0 actual=execution-error reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
   cat "$tmp/mutant.err" >&2
-  sha256sum "$tmp/mutant.err" >&2
   exit 1
 fi
-printf 'NATIVE_SENS_NEGATIVE id=%s-mutant stderr_sha256=' "$id"
-sha256sum "$tmp/mutant.err"
-printf 'NATIVE_SENS_PASS id=%s checks=7 semantic_authority=SENS\n' "$id"
+if ! cmp -s "$tmp/expected-mutant" "$tmp/mutant.out"; then
+  printf 'REGRESSION id=%s-mutant layer=eval fixture=%s expected=D1:0 actual=wrong-verdict reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
+  sha256sum "$tmp/expected-mutant" "$tmp/mutant.out" >&2
+  exit 1
+fi
+printf 'NATIVE_SENS_NEGATIVE id=%s-mutant expected=D1:0 actual_sha256=' "$id"
+sha256sum "$tmp/mutant.out"
+printf 'NATIVE_SENS_PASS id=%s checks=7 mutant=D1:0 semantic_authority=SENS\n' "$id"
