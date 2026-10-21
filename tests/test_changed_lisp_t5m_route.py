@@ -371,7 +371,8 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             binary.write_text(
                 "#!/bin/sh\nprintf '%s\\n' \"$*\" >> invoked.marker\n"
                 "if [ \"$1\" = --t5m-mint ]; then\n"
-                "  printf '\\\\002' > \"$3\"\n  exit 0\nfi\n"
+                "  if [ -e fail-paired ]; then printf '\\002' > \"$3\";\n"
+                "  else printf '\\001' > \"$3\"; fi\n  exit 0\nfi\n"
                 "if [ \"$1\" = --t5m-pair ] && [ -e fail-paired ]; then\n"
                 "  case \"$3\" in *sens-authority.sens) printf 'stub transport only\\n'; exit 0;; esac\n"
                 "  echo T5M_PHYSICAL_PAIR_MISMATCH >&2\n  exit 19\nfi\n"
