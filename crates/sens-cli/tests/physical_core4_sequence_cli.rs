@@ -365,6 +365,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "вилучити-перше-входження"
                 | "list-unique-stable"
                 | "list-stable-difference-general"
+                | "list-swap-adjacent-pairs"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
