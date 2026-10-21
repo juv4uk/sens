@@ -583,7 +583,7 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE"; fi
           if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
             git fetch --no-tags --depth=1 origin "$base"
-            changed="$(git diff --name-only "$base" HEAD -- lib/forward.lisp crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs .github/workflows/ci.yml)"
+            changed="$(git diff --name-only "$base" HEAD -- lib/forward.lisp lib/unify.lisp crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs .github/workflows/ci.yml)"
             if [[ -z "$changed" ]]; then
               echo "SENS-ВИВЕДЕННЯ: закон незмінний; повторне складання не потрібне"
               exit 0
