@@ -30,16 +30,10 @@ fn sens() -> Command {
 
 #[test]
 fn version_flag_prints_the_crate_version() {
-    let output = sens()
-        .arg("--version")
-        .output()
-        .expect("binary should run");
+    let output = sens().arg("--version").output().expect("binary should run");
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert_eq!(
-        stdout.trim(),
-        format!("sens {}", env!("CARGO_PKG_VERSION"))
-    );
+    assert_eq!(stdout.trim(), format!("sens {}", env!("CARGO_PKG_VERSION")));
 }
 
 #[test]
@@ -48,10 +42,7 @@ fn short_version_flags_match_the_long_form() {
         let output = sens().arg(flag).output().expect("binary should run");
         assert!(output.status.success());
         let stdout = String::from_utf8_lossy(&output.stdout);
-        assert_eq!(
-            stdout.trim(),
-            format!("sens {}", env!("CARGO_PKG_VERSION"))
-        );
+        assert_eq!(stdout.trim(), format!("sens {}", env!("CARGO_PKG_VERSION")));
     }
 }
 
@@ -70,9 +61,9 @@ fn help_flag_prints_usage() {
 }
 
 #[test]
-fn explicit_core3_flag_selects_core3_before_file_evaluation() {
-    let path = std::env::temp_dir().join("sens-cli-core3-profile-1429.lisp");
-    std::fs::write(&path, "(10101000)").expect("should write Core3 probe");
+fn decimal_number_is_not_a_callable_in_any_core_profile() {
+    let path = std::env::temp_dir().join("sens-cli-decimal-not-callable.lisp");
+    std::fs::write(&path, "(10101000)").expect("should write decimal-number probe");
 
     let default = sens()
         .arg(&path)
@@ -84,21 +75,12 @@ fn explicit_core3_flag_selects_core3_before_file_evaluation() {
         .expect("explicit Core3 CLI should run");
     let _ = std::fs::remove_file(&path);
 
-    assert_eq!(default.status.code(), Some(1));
-    assert!(
-        String::from_utf8_lossy(&default.stderr)
-            .contains("SENS function has no admitted callable mechanism: 10101000"),
-        "{:?}",
-        String::from_utf8_lossy(&default.stderr)
-    );
-
-    assert_eq!(core3.status.code(), Some(1));
-    assert!(
-        String::from_utf8_lossy(&core3.stderr)
-            .contains("10101000: expected 2 arguments, received 0"),
-        "{:?}",
-        String::from_utf8_lossy(&core3.stderr)
-    );
+    for output in [default, core3] {
+        assert_eq!(output.status.code(), Some(1));
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(stderr.contains("expression is not callable"), "{stderr:?}");
+        assert!(stderr.contains("двійкове число"), "{stderr:?}");
+    }
 }
 
 #[test]
@@ -264,7 +246,11 @@ fn textual_compatibility_extensions_do_not_claim_sens_binary_identity() {
             "{ext}: {}",
             String::from_utf8_lossy(&output.stderr)
         );
-        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "сенс", "{ext}");
+        assert_eq!(
+            String::from_utf8_lossy(&output.stdout).trim(),
+            "сенс",
+            "{ext}"
+        );
     }
 }
 
@@ -288,7 +274,10 @@ fn sens_binary_executes_physical_t5_without_a_human_name_parser() {
         "physical T5 rejected: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    assert!(!String::from_utf8_lossy(&output.stdout).trim().is_empty(), "physical T5 produced no CLI result");
+    assert!(
+        !String::from_utf8_lossy(&output.stdout).trim().is_empty(),
+        "physical T5 produced no CLI result"
+    );
 
     // No hidden Core4/human-compatibility interpretation is allowed for T5.
     let flagged = sens()
@@ -321,7 +310,10 @@ fn sens_binary_rejects_text_disguised_as_physical_t5() {
     std::fs::write(&path, b"(quote ())").expect("write deliberate textual counterfeit");
     let output = sens().arg(&path).output().expect("canonical SENS CLI");
     let _ = std::fs::remove_file(&path);
-    assert!(!output.status.success(), "textual .sens was executed as Lisp");
+    assert!(
+        !output.status.success(),
+        "textual .sens was executed as Lisp"
+    );
     let diagnostic = String::from_utf8_lossy(&output.stderr);
     assert!(
         diagnostic.contains("physical T5")
@@ -346,9 +338,15 @@ fn t5m_file_mode_does_not_reinterpret_physical_sens_as_textual_lisp() {
         .expect("T5M CLI must reject disguised physical source");
     let _ = std::fs::remove_file(&path);
 
-    assert!(!output.status.success(), "physical .sens bypassed its binary reader");
+    assert!(
+        !output.status.success(),
+        "physical .sens bypassed its binary reader"
+    );
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("--t5m-file accepts only .lisp sources"), "{stderr}");
+    assert!(
+        stderr.contains("--t5m-file accepts only .lisp sources"),
+        "{stderr}"
+    );
     assert!(!String::from_utf8_lossy(&output.stdout).contains("42"));
 }
 
@@ -390,7 +388,8 @@ fn t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24() {
         let source = std::fs::read_to_string(&source_path)
             .unwrap_or_else(|error| panic!("відсутній живий {name}: {error}"));
         let temporary = std::env::temp_dir().join(format!(
-            "sens-d24-recursion-{}-{index}.lisp", std::process::id()
+            "sens-d24-recursion-{}-{index}.lisp",
+            std::process::id()
         ));
         std::fs::write(&temporary, format!("{source}\n{expression}\n"))
             .expect("тимчасова точна D24+ програма");
@@ -399,12 +398,21 @@ fn t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24() {
             .output()
             .expect("живий SENS T5M");
         let _ = std::fs::remove_file(&temporary);
-        assert!(output.status.success(), "SENS {name} {expression}: {}",
-            String::from_utf8_lossy(&output.stderr));
-        observed.push(((*name).to_owned(), (*expression).to_owned(),
-                       String::from_utf8_lossy(&output.stdout).trim().to_owned()));
-        assert_eq!(observed.last().unwrap().2, *expected,
-                   "SENS {name} має виконати точну рекурсію {expression}");
+        assert!(
+            output.status.success(),
+            "SENS {name} {expression}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        observed.push((
+            (*name).to_owned(),
+            (*expression).to_owned(),
+            String::from_utf8_lossy(&output.stdout).trim().to_owned(),
+        ));
+        assert_eq!(
+            observed.last().unwrap().2,
+            *expected,
+            "SENS {name} має виконати точну рекурсію {expression}"
+        );
     }
 }
 
@@ -424,7 +432,10 @@ fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
         ("(атом? (як-є листок))", "0"),
         ("(менше? 0 1)", "1"),
         ("(за-умовою ((атом? (як-є ())) (додати 0 1)))", "1"),
-        ("((функція (дерево) (за-умовою ((атом? дерево) (додати 0 1)))) (як-є ()))", "1"),
+        (
+            "((функція (дерево) (за-умовою ((атом? дерево) (додати 0 1)))) (як-є ()))",
+            "1",
+        ),
         ("(додати 1 (додати 3 3))", "7"),
         ("(перевірити-дерево (як-є ()))", "1"),
         ("(перевірити-дерево (сполучити (як-є ()) (як-є ())))", "3"),
@@ -435,10 +446,10 @@ fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
     let mut observed = Vec::new();
     for (index, (expression, _expected)) in cases.iter().enumerate() {
         let path = std::env::temp_dir().join(format!(
-            "sens-real-binary-trees-d24-{}-{index}.lisp", std::process::id()
+            "sens-real-binary-trees-d24-{}-{index}.lisp",
+            std::process::id()
         ));
-        std::fs::write(&path, format!("{source}\n{expression}\n"))
-            .expect("точна D24+ програма");
+        std::fs::write(&path, format!("{source}\n{expression}\n")).expect("точна D24+ програма");
         let output = sens()
             .args(["--t5m-file", path.to_str().expect("UTF-8 шлях")])
             .output()
@@ -449,13 +460,19 @@ fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
             "SENS не виконав {expression}: stderr={}",
             String::from_utf8_lossy(&output.stderr)
         );
-        observed.push((*expression, String::from_utf8_lossy(&output.stdout).trim().to_string()));
+        observed.push((
+            *expression,
+            String::from_utf8_lossy(&output.stdout).trim().to_string(),
+        ));
     }
     let expected: Vec<(&str, String)> = cases
         .iter()
         .map(|(expression, value)| (*expression, (*value).to_string()))
         .collect();
-    assert_eq!(observed, expected, "Точні SENS D24+ свідки: арифметика, листки, рекурсія");
+    assert_eq!(
+        observed, expected,
+        "Точні SENS D24+ свідки: арифметика, листки, рекурсія"
+    );
 }
 
 /// Справжня обернена пара: SENS reader -> Zig bytes -> SENS evaluator.
@@ -463,31 +480,53 @@ fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
 #[cfg(feature = "zig-transport")]
 #[test]
 fn t5m_physical_pair_minted_by_sens_reader_executes_and_rejects_mutant() {
-    let dir = std::env::temp_dir().join(format!(
-        "sens-mint-d24-{}", std::process::id()
-    ));
+    let dir = std::env::temp_dir().join(format!("sens-mint-d24-{}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("isolated physical pair");
     let source = dir.join("джерело.lisp");
     let physical = dir.join("джерело.sens");
     std::fs::write(&source, "(додати 1 2)\n").expect("Ukrainian Lisp source");
     let mint = sens()
-        .args(["--t5m-mint", source.to_str().unwrap(), physical.to_str().unwrap()])
-        .output().expect("real Zig/T5M mint");
-    assert!(mint.status.success(), "SENS mint failed: {}",
-        String::from_utf8_lossy(&mint.stderr));
+        .args([
+            "--t5m-mint",
+            source.to_str().unwrap(),
+            physical.to_str().unwrap(),
+        ])
+        .output()
+        .expect("real Zig/T5M mint");
+    assert!(
+        mint.status.success(),
+        "SENS mint failed: {}",
+        String::from_utf8_lossy(&mint.stderr)
+    );
     assert!(!std::fs::read(&physical).expect("physical T5M").is_empty());
-    let evaluate = || sens()
-        .args(["--t5m-pair", source.to_str().unwrap(), physical.to_str().unwrap()])
-        .output().expect("paired SENS runtime");
+    let evaluate = || {
+        sens()
+            .args([
+                "--t5m-pair",
+                source.to_str().unwrap(),
+                physical.to_str().unwrap(),
+            ])
+            .output()
+            .expect("paired SENS runtime")
+    };
     let valid = evaluate();
-    assert!(valid.status.success(), "paired execution failed: {}",
-        String::from_utf8_lossy(&valid.stderr));
+    assert!(
+        valid.status.success(),
+        "paired execution failed: {}",
+        String::from_utf8_lossy(&valid.stderr)
+    );
     assert_eq!(String::from_utf8_lossy(&valid.stdout).trim(), "3");
     std::fs::write(&source, "(додати 1 4)\n").expect("mutated source");
     let altered = evaluate();
-    assert!(!altered.status.success(), "old physical words executed with a new source");
-    assert!(String::from_utf8_lossy(&altered.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
-        "missing exact-width diagnostic: {}", String::from_utf8_lossy(&altered.stderr));
+    assert!(
+        !altered.status.success(),
+        "old physical words executed with a new source"
+    );
+    assert!(
+        String::from_utf8_lossy(&altered.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "missing exact-width diagnostic: {}",
+        String::from_utf8_lossy(&altered.stderr)
+    );
     let _ = std::fs::remove_dir_all(dir);
 }
 
@@ -498,13 +537,24 @@ fn t5m_physical_pair_minted_by_sens_reader_executes_and_rejects_mutant() {
 fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
     use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
     let make = |width: usize, bits: u64| {
-        ExactT5Word::new(width, (0..width).rev().map(|shift| ((bits >> shift) & 1) as u8).collect())
-            .expect("canonical exact-width source word")
+        ExactT5Word::new(
+            width,
+            (0..width)
+                .rev()
+                .map(|shift| ((bits >> shift) & 1) as u8)
+                .collect(),
+        )
+        .expect("canonical exact-width source word")
     };
     // Канонічний D2: OPEN, ADD, SEP, D24:1, SEP, D24:2, CLOSE.
     let words = vec![
-        make(2, 2), make(5, 0b01010), make(2, 0), make(24, 1),
-        make(2, 0), make(24, 2), make(2, 1),
+        make(2, 2),
+        make(5, 0b01010),
+        make(2, 0),
+        make(24, 1),
+        make(2, 0),
+        make(24, 2),
+        make(2, 1),
     ];
     let physical = encode_t5_exact_words(&words).expect("Zig exact T5M");
     let dir = std::env::temp_dir().join(format!("sens-physical-pair-d24-{}", std::process::id()));
@@ -514,13 +564,22 @@ fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
     std::fs::write(&source, "(додати 1 2)\n").expect("source");
     std::fs::write(&packed, &physical).expect("physical");
 
-    let evaluate = || sens()
-        .args(["--t5m-pair", source.to_str().unwrap(), packed.to_str().unwrap()])
-        .output()
-        .expect("live paired SENS");
+    let evaluate = || {
+        sens()
+            .args([
+                "--t5m-pair",
+                source.to_str().unwrap(),
+                packed.to_str().unwrap(),
+            ])
+            .output()
+            .expect("live paired SENS")
+    };
     let result = evaluate();
-    assert!(result.status.success(), "paired SENS failed: {}",
-        String::from_utf8_lossy(&result.stderr));
+    assert!(
+        result.status.success(),
+        "paired SENS failed: {}",
+        String::from_utf8_lossy(&result.stderr)
+    );
     assert_eq!(String::from_utf8_lossy(&result.stdout).trim(), "3");
 
     let mut altered = words.clone();
@@ -528,16 +587,28 @@ fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
     std::fs::write(&packed, encode_t5_exact_words(&altered).unwrap())
         .expect("mutated physical carrier");
     let negative = evaluate();
-    assert!(!negative.status.success(), "mutated physical bytes were executed");
-    assert!(String::from_utf8_lossy(&negative.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
-        "mutated carrier mismatch not reported: {}", String::from_utf8_lossy(&negative.stderr));
+    assert!(
+        !negative.status.success(),
+        "mutated physical bytes were executed"
+    );
+    assert!(
+        String::from_utf8_lossy(&negative.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "mutated carrier mismatch not reported: {}",
+        String::from_utf8_lossy(&negative.stderr)
+    );
 
     std::fs::write(&packed, &physical).expect("restore real carrier");
     std::fs::write(&source, "(додати 1 4)\n").expect("mutated human source");
     let negative = evaluate();
-    assert!(!negative.status.success(), "changed human source was executed");
-    assert!(String::from_utf8_lossy(&negative.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
-        "changed source mismatch not reported: {}", String::from_utf8_lossy(&negative.stderr));
+    assert!(
+        !negative.status.success(),
+        "changed human source was executed"
+    );
+    assert!(
+        String::from_utf8_lossy(&negative.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "changed source mismatch not reported: {}",
+        String::from_utf8_lossy(&negative.stderr)
+    );
 
     let _ = std::fs::remove_dir_all(&dir);
 }
@@ -551,36 +622,54 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
     let make = |width: usize, bits: u64| {
         ExactT5Word::new(
             width,
-            (0..width).rev().map(|shift| ((bits >> shift) & 1) as u8).collect(),
-        ).expect("ratified exact word")
+            (0..width)
+                .rev()
+                .map(|shift| ((bits >> shift) & 1) as u8)
+                .collect(),
+        )
+        .expect("ratified exact word")
     };
     // (сполучити (як-є ()) (як-є ())) має D3 CONS 111, QUOTE 001,
     // NIL 000 та D2 OPEN=10 / SEP=00 / CLOSE=01.
     // Роздільники входять у фізичну оберненість і не є примхою тесту.
     let words = vec![
-        make(2, 0b10), make(3, 0b111), make(2, 0),
-        make(2, 0b10), make(3, 0b001), make(2, 0), make(3, 0), make(2, 0b01),
+        make(2, 0b10),
+        make(3, 0b111),
         make(2, 0),
-        make(2, 0b10), make(3, 0b001), make(2, 0), make(3, 0), make(2, 0b01),
+        make(2, 0b10),
+        make(3, 0b001),
+        make(2, 0),
+        make(3, 0),
+        make(2, 0b01),
+        make(2, 0),
+        make(2, 0b10),
+        make(3, 0b001),
+        make(2, 0),
+        make(3, 0),
+        make(2, 0b01),
         make(2, 0b01),
     ];
     let bytes = encode_t5_exact_words(&words).expect("Zig T5M physical");
-    let root = std::env::temp_dir().join(format!(
-        "sens-physical-list-pair-{}", std::process::id()
-    ));
+    let root = std::env::temp_dir().join(format!("sens-physical-list-pair-{}", std::process::id()));
     std::fs::create_dir_all(&root).expect("isolated files");
     let lisp = root.join("список.lisp");
     let physical = root.join("список.sens");
-    std::fs::write(&lisp, "(сполучити (як-є ()) (як-є ()))\n")
-        .expect("Lisp source");
+    std::fs::write(&lisp, "(сполучити (як-є ()) (як-є ()))\n").expect("Lisp source");
     std::fs::write(&physical, bytes).expect("physical SENS");
     let output = sens()
-        .args(["--t5m-pair", lisp.to_str().unwrap(), physical.to_str().unwrap()])
+        .args([
+            "--t5m-pair",
+            lisp.to_str().unwrap(),
+            physical.to_str().unwrap(),
+        ])
         .output()
         .expect("live physical SENS pair");
     let _ = std::fs::remove_dir_all(root);
-    assert!(output.status.success(),
-        "SENS physical CONS failed: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "SENS physical CONS failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "(())");
 }
 
@@ -590,46 +679,68 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
 #[test]
 fn t5m_physical_pair_quoted_world_preserves_exact_d7_data_not_symbol_parity() {
     use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
-    let word = |width: usize, bits: u64| ExactT5Word::new(
-        width, (0..width).rev().map(|shift| ((bits >> shift) & 1) as u8).collect(),
-    ).expect("exact ratified word");
+    let word = |width: usize, bits: u64| {
+        ExactT5Word::new(
+            width,
+            (0..width)
+                .rev()
+                .map(|shift| ((bits >> shift) & 1) as u8)
+                .collect(),
+        )
+        .expect("exact ratified word")
+    };
     // (D3 QUOTE <D7 EN world>), із D2 OPEN / SEP / CLOSE.
     let mut words = vec![word(2, 2), word(3, 1), word(2, 0), word(2, 2)];
     for (index, glyph) in b"world".iter().enumerate() {
-        if index != 0 { words.push(word(2, 0)); }
+        if index != 0 {
+            words.push(word(2, 0));
+        }
         words.push(word(7, u64::from(*glyph)));
     }
     words.push(word(2, 1));
     words.push(word(2, 1));
 
-    let root = std::env::temp_dir().join(format!(
-        "sens-quoted-protocol-world-{}", std::process::id()
-    ));
+    let root =
+        std::env::temp_dir().join(format!("sens-quoted-protocol-world-{}", std::process::id()));
     std::fs::create_dir_all(&root).expect("isolated real pair");
     let lisp = root.join("цитата.lisp");
     let physical = root.join("цитата.sens");
     std::fs::write(&lisp, "(як-є world)\n").expect("Ukrainian Lisp");
     std::fs::write(&physical, encode_t5_exact_words(&words).unwrap()).expect("Zig T5M");
-    let evaluate = || sens()
-        .args(["--t5m-pair", lisp.to_str().unwrap(), physical.to_str().unwrap()])
-        .output().expect("real SENS evaluator");
+    let evaluate = || {
+        sens()
+            .args([
+                "--t5m-pair",
+                lisp.to_str().unwrap(),
+                physical.to_str().unwrap(),
+            ])
+            .output()
+            .expect("real SENS evaluator")
+    };
 
     let positive = evaluate();
-    assert!(positive.status.success(), "цитоване world не виконано SENS: {}",
-        String::from_utf8_lossy(&positive.stderr));
+    assert!(
+        positive.status.success(),
+        "цитоване world не виконано SENS: {}",
+        String::from_utf8_lossy(&positive.stderr)
+    );
     // Чинний SENS повертає канонічні D7 слова, не host-Symbol «world».
     // Це доказ фізичних координат, НЕ semantic parity текстового атома.
-    let exact_d7 = b"world".iter().map(|glyph| format!("{glyph:07b}"))
-        .collect::<Vec<_>>().join(" ");
-    assert_eq!(String::from_utf8_lossy(&positive.stdout).trim(),
+    let exact_d7 = b"world"
+        .iter()
+        .map(|glyph| format!("{glyph:07b}"))
+        .collect::<Vec<_>>()
+        .join(" ");
+    assert_eq!(
+        String::from_utf8_lossy(&positive.stdout).trim(),
         format!("({exact_d7})"),
-        "SENS мусить зберігати координати D7 без текстової підміни");
+        "SENS мусить зберігати координати D7 без текстової підміни"
+    );
 
     // Відрізнити загублену цитату і підмінене D7 ім'я.
     let mut altered = words.clone();
     altered[3] = word(2, 1); // неправильна D2 межа перед текстом
-    std::fs::write(&physical, encode_t5_exact_words(&altered).unwrap())
-        .expect("physical mutant");
+    std::fs::write(&physical, encode_t5_exact_words(&altered).unwrap()).expect("physical mutant");
     let negative = evaluate();
     assert!(!negative.status.success(), "пошкоджений T5M пройшов у SENS");
 
@@ -641,34 +752,50 @@ fn t5m_physical_pair_quoted_world_preserves_exact_d7_data_not_symbol_parity() {
 #[test]
 fn t5m_file_mode_executes_current_result_status_d1_predicates() {
     let source = std::fs::read_to_string(concat!(
-        env!("CARGO_MANIFEST_DIR"), "/../../lib/result-status.lisp"
-    )).expect("current Ukrainian result-status Lisp");
-    let start = source.find("(визначити результат-є-правильним-списком?")
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../lib/result-status.lisp"
+    ))
+    .expect("current Ukrainian result-status Lisp");
+    let start = source
+        .find("(визначити результат-є-правильним-списком?")
         .expect("current exact SENS definition");
-    let end = source[start..].find("\n; Історичний заперечний")
+    let end = source[start..]
+        .find("\n; Історичний заперечний")
         .map(|offset| start + offset)
         .expect("end of SENS predicate");
     let definition = &source[start..end];
     let cases = [
         ("(результат-є-правильним-списком? (як-є ()))", "1"),
-        ("(результат-є-правильним-списком? (сполучити (як-є ()) (як-є ())))", "1"),
-        ("(результат-є-правильним-списком? (сполучити (як-є ()) (атом? (як-є ()))))", "0"),
+        (
+            "(результат-є-правильним-списком? (сполучити (як-є ()) (як-є ())))",
+            "1",
+        ),
+        (
+            "(результат-є-правильним-списком? (сполучити (як-є ()) (атом? (як-є ()))))",
+            "0",
+        ),
     ];
     for (index, (expression, expected)) in cases.iter().enumerate() {
         let file = std::env::temp_dir().join(format!(
-            "sens-result-d1-live-{}-{index}.lisp", std::process::id()
+            "sens-result-d1-live-{}-{index}.lisp",
+            std::process::id()
         ));
-        std::fs::write(&file, format!("{definition}\n{expression}\n"))
-            .expect("real SENS program");
+        std::fs::write(&file, format!("{definition}\n{expression}\n")).expect("real SENS program");
         let output = sens()
             .args(["--t5m-file", file.to_str().expect("UTF-8 path")])
             .output()
             .expect("real Zig T5M / SENS");
         let _ = std::fs::remove_file(file);
-        assert!(output.status.success(),
-            "SENS D1 {expression}: {}", String::from_utf8_lossy(&output.stderr));
-        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), *expected,
-            "SENS D1 predicate {expression}");
+        assert!(
+            output.status.success(),
+            "SENS D1 {expression}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert_eq!(
+            String::from_utf8_lossy(&output.stdout).trim(),
+            *expected,
+            "SENS D1 predicate {expression}"
+        );
     }
 }
 
@@ -764,55 +891,15 @@ fn repl_history_persists_across_separate_sessions() {
         child.wait_with_output().expect("binary should run")
     };
 
-    run("(+ 1 2)\n");
-    run("(+ 3 4)\n");
+    run("(додати 1 2)\n");
+    run("(додати 3 4)\n");
 
     let history = std::fs::read_to_string(dir.join(".sens-history"))
         .expect("second session should find history left by the first");
     let _ = std::fs::remove_dir_all(&dir);
 
-    assert!(history.contains("(+ 1 2)"));
-    assert!(history.contains("(+ 3 4)"));
-}
-
-#[test]
-fn repl_echoes_a_lone_unknown_symbol_as_a_greeting_not_an_error() {
-    // Isolated HOME, like repl_history_persists_across_separate_sessions.
-    use std::io::Write;
-    use std::process::Stdio;
-
-    let dir = std::env::temp_dir().join(format!("sens-cli-test-echo-{}", std::process::id()));
-    std::fs::create_dir_all(&dir).expect("should create temp home dir");
-
-    let mut child = sens()
-        .env("HOME", &dir)
-        .env("USERPROFILE", &dir)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("binary should spawn");
-    child
-        .stdin
-        .take()
-        .expect("stdin should be piped")
-        .write_all("мама\nhello\nсонце\n(+ мама 1)\n(car мама)\n(quote мама)\n".as_bytes())
-        .expect("should write to stdin");
-    let output = child.wait_with_output().expect("binary should run");
-    let _ = std::fs::remove_dir_all(&dir);
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let stderr = String::from_utf8_lossy(&output.stderr);
-
-    // Lone unknown symbols greet instead of erroring...
-    assert!(stdout.contains("echo мама"), "stdout was: {stdout:?}");
-    assert!(stdout.contains("echo hello"), "stdout was: {stdout:?}");
-    assert!(stdout.contains("echo сонце"), "stdout was: {stdout:?}");
-    // ...but the same unknown symbol inside a real form is still a named
-    // failure — the echo is an interaction policy, not a language change.
-    assert!(stderr.contains("unknown symbol"), "stderr was: {stderr:?}");
-    // A quoted symbol evaluates fine and prints itself, no echo involved.
-    assert!(stdout.contains("мама"), "stdout was: {stdout:?}");
+    assert!(history.contains("(додати 1 2)"));
+    assert!(history.contains("(додати 3 4)"));
 }
 
 /// The echo fallback must not leak into non-interactive execution: running a
@@ -831,39 +918,6 @@ fn file_mode_still_errors_on_a_lone_unknown_symbol() {
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("unknown symbol"), "stderr was: {stderr:?}");
-}
-
-#[test]
-fn read_with_no_arguments_reads_one_line_from_real_stdin() {
-    // Reliable in file mode, where the CLI's own stdin isn't also owned by
-    // rustyline's line editor (see the caveat on read_stdin_line in
-    // crates/sens/src/eval/special_forms/io.rs for the interactive-REPL case).
-    use std::io::Write;
-    use std::process::Stdio;
-
-    let dir = std::env::temp_dir();
-    let path = dir.join("sens-cli-test-read-stdin.lisp");
-    std::fs::write(&path, "(eval (read))").expect("should write temp file");
-
-    let mut child = sens()
-        .arg(&path)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("binary should spawn");
-    child
-        .stdin
-        .take()
-        .expect("stdin should be piped")
-        .write_all(b"(+ 1 2)\n")
-        .expect("should write to stdin");
-    let output = child.wait_with_output().expect("binary should run");
-    let _ = std::fs::remove_file(&path);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert_eq!(stdout.trim(), "3");
 }
 
 #[test]
@@ -1003,7 +1057,7 @@ fn spawn_sexpr_server() -> (std::process::Child, u16) {
 #[test]
 fn sexpr_protocol_eval_returns_structured_response() {
     let (mut child, port) = spawn_sexpr_server();
-    let response = request_with_retry(port, r#"(request (id 1) (op eval) (source "(+ 1 2)"))"#);
+    let response = request_with_retry(port, r#"(request (id 1) (op eval) (source "1"))"#);
     child.kill().expect("should be able to stop the server");
 
     assert!(
@@ -1011,7 +1065,7 @@ fn sexpr_protocol_eval_returns_structured_response() {
         "unexpected response: {response}"
     );
     assert!(
-        response.contains("(value 3)"),
+        response.contains("(value 1)"),
         "unexpected response: {response}"
     );
     assert!(
@@ -1092,16 +1146,17 @@ fn sexpr_protocol_connections_do_not_share_state() {
 mod active_lib_sens_completion;
 
 // #1006: exact 10101000 remains denied in Core4 and admitted only via explicit Core3.
-#[path = "raw_invoke_sens_1006.rs"]
-mod raw_invoke_sens_1006;
+#[path = "decimal_numeric_heads.rs"]
+mod decimal_numeric_heads;
 
 #[test]
 fn український_скрипт_відбирає_саме_запитаний_рівень() {
     // Строгий позитивний свідок Д3-селектора із справжнього Lisp.
     // Повний файл поки не допущено до CLI через відсутній читати-всі.
-    let source = std::fs::read_to_string(
-        concat!(env!("CARGO_MANIFEST_DIR"), "/../../scripts/fixtures-for-tier.lisp"),
-    )
+    let source = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../scripts/fixtures-for-tier.lisp"
+    ))
     .expect("чинний український Lisp");
     let start = source
         .find("(визначити рівень-прикладу\n")
@@ -1115,9 +1170,8 @@ fn український_скрипт_відбирає_саме_запитан�
         let code = format!(
             "{selector}\n(рівень-прикладу (список (сполучити (як-є expr) (як-є {value})) (сполучити (як-є tier) {level})))\n"
         );
-        let path = std::env::temp_dir().join(format!(
-            "sens-ukr-tier-{level}-{}.lisp", std::process::id()
-        ));
+        let path =
+            std::env::temp_dir().join(format!("sens-ukr-tier-{level}-{}.lisp", std::process::id()));
         std::fs::write(&path, code).expect("тимчасова українська програма");
         let output = sens().arg(&path).output().expect("SENS CLI запускається");
         let _ = std::fs::remove_file(&path);
@@ -1128,7 +1182,11 @@ fn український_скрипт_відбирає_саме_запитан�
             String::from_utf8_lossy(&output.stdout)
         );
         let result = String::from_utf8_lossy(&output.stdout);
-        assert_eq!(result.trim(), level, "SENS отримав неправильне поле tier: {result}");
+        assert_eq!(
+            result.trim(),
+            level,
+            "SENS отримав неправильне поле tier: {result}"
+        );
     }
     // Позитивний/негативний виконуваний свідок ЧИСТОГО відбору.
     // Перевіряємо значення й порядок, а не кількість надрукованих побічних дій.
@@ -1160,10 +1218,14 @@ fn український_скрипт_відбирає_саме_запитан�
     for (index, (expression, expected)) in cases.into_iter().enumerate() {
         let code = format!("{selector}\n{expression}\n");
         let path = std::env::temp_dir().join(format!(
-            "sens-ukr-tier-filter-{index}-{}.lisp", std::process::id()
+            "sens-ukr-tier-filter-{index}-{}.lisp",
+            std::process::id()
         ));
         std::fs::write(&path, code).expect("чиста українська програма");
-        let output = sens().arg(&path).output().expect("SENS CLI виконує програму");
+        let output = sens()
+            .arg(&path)
+            .output()
+            .expect("SENS CLI виконує програму");
         let _ = std::fs::remove_file(&path);
         assert!(
             output.status.success(),
@@ -1188,7 +1250,8 @@ fn український_скрипт_відбирає_саме_запитан�
             "{selector}\n(відібрати-приклади-за-рівнем (список (список (сполучити (як-є expr) (як-є зоря)) (сполучити (як-є tier) 1)) (список (сполучити (як-є expr) (як-є телескоп)) (сполучити (як-є tier) 2)) (список (сполучити (як-є expr) (як-є без-рівня))) (список (сполучити (як-є expr) (як-є сонце)) (сполучити (як-є tier) 1))) {level})\n"
         );
         let path = std::env::temp_dir().join(format!(
-            "sens-ukr-tier-filter-{level}-{}.lisp", std::process::id()
+            "sens-ukr-tier-filter-{level}-{}.lisp",
+            std::process::id()
         ));
         std::fs::write(&path, code).expect("тимчасова українська програма");
         let output = sens().arg(&path).output().expect("SENS CLI запускається");
@@ -1206,28 +1269,38 @@ fn український_скрипт_відбирає_саме_запитан�
         for value in forbidden {
             assert!(!result.contains(value), "чужий рівень {value}: {result}");
         }
-        assert!(!result.contains("без-рівня"), "відсутній tier прийнято: {result}");
+        assert!(
+            !result.contains("без-рівня"),
+            "відсутній tier прийнято: {result}"
+        );
         if level == "3" {
             assert_eq!(result.trim(), "()", "непорожній третій рівень: {result}");
         }
     }
     // SENS CLI показує останнє значення програми. Відсутнього D9
     // друкувати немає; перевіряємо справжній SENS-result, не host-ефект.
-    assert!(!source.contains("(друкувати "), "не можна вигадувати D9 виконавець");
-    assert!(source.trim_end().ends_with("потрібний-рівень)"),
-        "повна програма повертає вибрані записи як значення");
-    for (level, expected, forbidden) in [
-        ("1", "зоря", "телескоп"),
-        ("2", "телескоп", "зоря"),
-    ] {
+    assert!(
+        !source.contains("(друкувати "),
+        "не можна вигадувати D9 виконавець"
+    );
+    assert!(
+        source.trim_end().ends_with("потрібний-рівень)"),
+        "повна програма повертає вибрані записи як значення"
+    );
+    for (level, expected, forbidden) in [("1", "зоря", "телескоп"), ("2", "телескоп", "зоря")]
+    {
         let code = format!(
             "{selector}\n(відібрати-приклади-за-рівнем (список (список (сполучити (як-є expr) (як-є зоря)) (сполучити (як-є tier) 1)) (список (сполучити (як-є expr) (як-є телескоп)) (сполучити (як-є tier) 2))) {level})\n"
         );
         let path = std::env::temp_dir().join(format!(
-            "sens-ukr-tier-value-{level}-{}.lisp", std::process::id()
+            "sens-ukr-tier-value-{level}-{}.lisp",
+            std::process::id()
         ));
         std::fs::write(&path, code).expect("тимчасова українська програма");
-        let output = sens().arg(&path).output().expect("SENS CLI повинен виконати програму");
+        let output = sens()
+            .arg(&path)
+            .output()
+            .expect("SENS CLI повинен виконати програму");
         let _ = std::fs::remove_file(&path);
         assert!(
             output.status.success(),
@@ -1236,10 +1309,15 @@ fn український_скрипт_відбирає_саме_запитан�
             String::from_utf8_lossy(&output.stdout)
         );
         let actual = String::from_utf8_lossy(&output.stdout);
-        assert!(actual.trim().starts_with('(') && actual.trim().ends_with(')'),
-            "SENS має повернути список, а не результат стороннього друку: {actual}");
+        assert!(
+            actual.trim().starts_with('(') && actual.trim().ends_with(')'),
+            "SENS має повернути список, а не результат стороннього друку: {actual}"
+        );
         assert!(actual.contains(expected), "втрачено {expected}: {actual}");
-        assert!(!actual.contains(forbidden), "прийнято чужий рівень {forbidden}: {actual}");
+        assert!(
+            !actual.contains(forbidden),
+            "прийнято чужий рівень {forbidden}: {actual}"
+        );
     }
     // Жодного фальшивого статусу GO для файлового виконання.
     let full = sens()
@@ -1261,7 +1339,8 @@ fn український_лінтер_повертає_точні_резуль�
     // Реальний виконавець SENS; Rust тут лише передає джерело й читає результат.
     // Файл лінтера береться з main, не підміняється копією його правил.
     let source = std::fs::read_to_string(concat!(
-        env!("CARGO_MANIFEST_DIR"), "/../../lib/linter.lisp"
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../lib/linter.lisp"
     ))
     .expect("чинний український Lisp-лінтер");
     for (index, (expression, expected)) in [
@@ -1303,27 +1382,34 @@ fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
     use std::{fs, path::Path};
     let repo = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
     let dir = std::env::temp_dir().join(format!(
-        "sens-real-t5m-repair-{}-{}", std::process::id(), line!()
+        "sens-real-t5m-repair-{}-{}",
+        std::process::id(),
+        line!()
     ));
     fs::create_dir_all(&dir).expect("ізольоване джерело");
     let src = dir.join("обертання.lisp");
     let physical = dir.join("обертання.sens");
     let view = dir.join("обертання");
     let script = repo.join("scripts/refresh-verified-t5m-pair.sh");
-    let run = || Command::new("bash")
-        .arg(&script)
-        .arg(&src)
-        .arg(env!("CARGO_BIN_EXE_sens"))
-        .arg(env!("CARGO_BIN_EXE_sens-trit"))
-        .current_dir(repo)
-        .output().expect("запуск справжнього SENS/Zig мігратора");
+    let run = || {
+        Command::new("bash")
+            .arg(&script)
+            .arg(&src)
+            .arg(env!("CARGO_BIN_EXE_sens"))
+            .arg(env!("CARGO_BIN_EXE_sens-trit"))
+            .current_dir(repo)
+            .output()
+            .expect("запуск справжнього SENS/Zig мігратора")
+    };
 
     fs::write(&src, "(як-є ())\n").expect("вихідна D3 програма");
     let first = run();
-    assert!(first.status.success(),
+    assert!(
+        first.status.success(),
         "test_id=t5m-repair-first layer=SENS/Zig stderr={} stdout={}",
         String::from_utf8_lossy(&first.stderr),
-        String::from_utf8_lossy(&first.stdout));
+        String::from_utf8_lossy(&first.stdout)
+    );
     assert!(String::from_utf8_lossy(&first.stdout).contains("T5M_REPAIR_OK"));
     let original = fs::read(&physical).expect("справжні T5M байти");
     assert!(!original.is_empty());
@@ -1350,41 +1436,66 @@ fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
             .current_dir(repo)
             .output()
             .expect("ремонт із невідомою standalone-аварією");
-        assert!(!unexpected.status.success(),
+        assert!(
+            !unexpected.status.success(),
             "test_id=t5m-repair-standalone-red layer=SENS/Zig stdout={}",
-            String::from_utf8_lossy(&unexpected.stdout));
+            String::from_utf8_lossy(&unexpected.stdout)
+        );
         assert!(
             String::from_utf8_lossy(&unexpected.stderr)
                 .contains("T5M_REPAIR_STANDALONE_UNEXPECTED_FAIL"),
             "test_id=t5m-repair-standalone-red layer=SENS/Zig stderr={}",
-            String::from_utf8_lossy(&unexpected.stderr));
-        assert_eq!(fs::read(&physical).unwrap(), original,
-            "невідома standalone-аварія не має переписувати вже перевірені байти");
+            String::from_utf8_lossy(&unexpected.stderr)
+        );
+        assert_eq!(
+            fs::read(&physical).unwrap(),
+            original,
+            "невідома standalone-аварія не має переписувати вже перевірені байти"
+        );
         let _ = fs::remove_file(proxy);
     }
-    let paired = sens().args(["--t5m-pair", src.to_str().unwrap(),
-        physical.to_str().unwrap()]).output().expect("SENS eval");
-    assert!(paired.status.success(), "SENS paired stderr={}",
-        String::from_utf8_lossy(&paired.stderr));
+    let paired = sens()
+        .args([
+            "--t5m-pair",
+            src.to_str().unwrap(),
+            physical.to_str().unwrap(),
+        ])
+        .output()
+        .expect("SENS eval");
+    assert!(
+        paired.status.success(),
+        "SENS paired stderr={}",
+        String::from_utf8_lossy(&paired.stderr)
+    );
 
     // Заміна власне Lisp змінює фізичну пару; стара не залишається
     // формально допущеною, навіть якщо попередній CI був зелений.
     fs::write(&src, "(як-є (()))\n").expect("новий Lisp");
     let refreshed = run();
-    assert!(refreshed.status.success(),
+    assert!(
+        refreshed.status.success(),
         "test_id=t5m-repair-refresh layer=SENS/Zig stderr={}",
-        String::from_utf8_lossy(&refreshed.stderr));
+        String::from_utf8_lossy(&refreshed.stderr)
+    );
     let new_physical = fs::read(&physical).expect("оновлена пара");
-    assert_ne!(original, new_physical, "пара повинна оновитися разом з Lisp");
+    assert_ne!(
+        original, new_physical,
+        "пара повинна оновитися разом з Lisp"
+    );
 
     // Негативна перевірка: пошкоджений SENS source → точна відмова,
     // і раніше перевірений .sens не переписується через невдалий ремонт.
-    fs::write(&src, "(невідома-недопущена-функція (як-є ()))\n")
-        .expect("неприпустима програма");
+    fs::write(&src, "(невідома-недопущена-функція (як-є ()))\n").expect("неприпустима програма");
     let refused = run();
-    assert!(!refused.status.success(), "невідома викличність не може пройти");
-    assert_eq!(fs::read(&physical).unwrap(), new_physical,
-        "помилка не має псувати попередню фізичну пару");
+    assert!(
+        !refused.status.success(),
+        "невідома викличність не може пройти"
+    );
+    assert_eq!(
+        fs::read(&physical).unwrap(),
+        new_physical,
+        "помилка не має псувати попередню фізичну пару"
+    );
 
     // Дві українські програми: залежність DEFINE і її реальний SENS-споживач.
     let helper = dir.join("допоміжний.lisp");

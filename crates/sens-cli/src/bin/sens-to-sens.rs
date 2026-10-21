@@ -21,6 +21,7 @@ struct Analysis {
     named_calls: usize,
     blocked_host_capabilities: usize,
     blocked_unratified: usize,
+    blocked_unratified_heads: HashSet<String>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -79,6 +80,7 @@ fn resolve_head<'a>(
             let admitted = semantic_registry_export::semantic_id_for_admitted_surface(name);
             if admitted.is_none() {
                 analysis.blocked_unratified += 1;
+                analysis.blocked_unratified_heads.insert(name.to_string());
             }
             admitted.map(|sens| (Some(name.as_ref()), sens))
         }
@@ -486,12 +488,19 @@ fn main() {
         };
 
         if check {
+            let mut unratified_heads: Vec<_> = analysis.blocked_unratified_heads.iter().collect();
+            unratified_heads.sort_unstable();
             println!(
-                "{filename}: convertible={} named-calls={} blocked-host={} blocked-unratified={}",
+                "{filename}: convertible={} named-calls={} blocked-host={} blocked-unratified={} unratified-heads={}",
                 analysis.edits.len(),
                 analysis.named_calls,
                 analysis.blocked_host_capabilities,
-                analysis.blocked_unratified
+                analysis.blocked_unratified,
+                unratified_heads
+                    .iter()
+                    .map(|name| name.as_str())
+                    .collect::<Vec<_>>()
+                    .join(",")
             );
             changes_available |= !analysis.edits.is_empty() || analysis.blocked_unratified > 0;
             continue;

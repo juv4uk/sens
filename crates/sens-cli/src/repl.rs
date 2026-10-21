@@ -4,12 +4,12 @@
 
 mod surface_catalog;
 
-use rustyline::DefaultEditor;
 use rustyline::error::ReadlineError;
+use rustyline::DefaultEditor;
 use sens::{
-    BinaryNumber, CoreDomainIdentity, DomainIdentity, Environment, ExactDomainWord, Expr, ExprKind,
-    PhysicalT5Program, PresentationLanguage, Session, Value, eval_program,
-    render_value_for_presentation,
+    eval_program, render_value_for_presentation, BinaryNumber, CoreDomainIdentity, DomainIdentity,
+    Environment, ExactDomainWord, Expr, ExprKind, PhysicalT5Program, PresentationLanguage, Session,
+    Value,
 };
 use std::env;
 use std::path::PathBuf;
@@ -126,7 +126,10 @@ fn append_t5m_expression_context(
             for argument in arguments.iter() {
                 words.push(control(0b00)?);
                 append_t5m_expression_context(
-                    argument, layout, words, depth + 1,
+                    argument,
+                    layout,
+                    words,
+                    depth + 1,
                     quoted_data || (identity.width() == 3 && identity.packed_bits() == 0b001),
                 )?;
             }
@@ -150,14 +153,17 @@ fn append_t5m_expression_context(
             // Поточний Lisp QUOTE задає D3:001, не W7 напис «як-є».
             // Нормалізація відбувається лише в коді; вкладені цитовані
             // списки залишаються незмінними даними.
-            let quoted_head = !quoted_data && matches!(
-                items.first().map(|item| &item.kind),
-                Some(ExprKind::DomainIdentity(identity))
-                    if identity.width() == 3 && identity.packed_bits() == 0b001
-            ) || !quoted_data && matches!(
-                items.first().map(|item| &item.kind),
-                Some(ExprKind::Symbol(name)) if name.as_ref() == "як-є"
-            );
+            let quoted_head = !quoted_data
+                && matches!(
+                    items.first().map(|item| &item.kind),
+                    Some(ExprKind::DomainIdentity(identity))
+                        if identity.width() == 3 && identity.packed_bits() == 0b001
+                )
+                || !quoted_data
+                    && matches!(
+                        items.first().map(|item| &item.kind),
+                        Some(ExprKind::Symbol(name)) if name.as_ref() == "як-є"
+                    );
             words.push(control(0b10)?);
             if quoted_head {
                 words.push(ExactDomainWord::Identity(t5m_domain_identity(3, 0b001)?));
@@ -170,9 +176,7 @@ fn append_t5m_expression_context(
                     if index > 0 {
                         words.push(control(0b00)?);
                     }
-                    append_t5m_expression_context(
-                        item, layout, words, depth + 1, quoted_data,
-                    )?;
+                    append_t5m_expression_context(item, layout, words, depth + 1, quoted_data)?;
                 }
             }
             words.push(control(0b01)?);
@@ -279,12 +283,10 @@ fn append_t5m_expression_context(
 fn exact_integer_source_word(source: &str) -> Result<Expr, String> {
     let forms = sens::parse_mixed_exact_domain(source).map_err(|error| error.render(source))?;
     match forms.as_slice() {
-        [
-            expression @ Expr {
-                kind: ExprKind::BinaryNumber(_),
-                ..
-            },
-        ] => Ok(expression.clone()),
+        [expression @ Expr {
+            kind: ExprKind::BinaryNumber(_),
+            ..
+        }] => Ok(expression.clone()),
         _ => Err(format!(
             "T5M exact ratio component did not lower to D24+: {source}"
         )),
@@ -430,9 +432,7 @@ fn restore_t5m_words(
         let first_mismatch_index = carrier
             .iter()
             .zip(restored)
-            .position(|(left, right)| {
-                left.width != right.width || left.bits != right.bits
-            })
+            .position(|(left, right)| left.width != right.width || left.bits != right.bits)
             .unwrap_or_else(|| expected.len().min(restored.len()));
         return Err(format!(
             "T5M_WORD_MISMATCH expected={} restored={} first_mismatch_index={first_mismatch_index}",
@@ -518,7 +518,10 @@ fn exact_t5m_result_data(value: &Value, depth: usize) -> Result<Expr, String> {
             ));
         }
     };
-    Ok(Expr { kind, span: Default::default() })
+    Ok(Expr {
+        kind,
+        span: Default::default(),
+    })
 }
 
 fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
@@ -528,7 +531,7 @@ fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
             Ok(vec![ExactDomainWord::Identity(*identity)])
         }
         Value::BinaryNumber(number) => Ok(vec![
-            ExactDomainWord::number(number.clone()).map_err(str::to_owned)?,
+            ExactDomainWord::number(number.clone()).map_err(str::to_owned)?
         ]),
         Value::Pair(..) => {
             // Результат проходить власний Zig T5M roundtrip і D3 QUOTE eval,
@@ -691,13 +694,11 @@ fn prepare_t5m_repl_program(
 #[cfg(feature = "zig-transport")]
 fn preload_t5m_binding_sources(session: &mut Session, bindings: &[String]) -> Result<(), String> {
     for (index, binding) in bindings.iter().enumerate() {
-        let program = prepare_t5m_repl_program(
-            binding, ReplSurface::UkrainianFull, session,
-        )
-        .map_err(|error| format!("T5M_BINDING_READER index={index}: {error}"))?;
-        program.execute(session).map_err(|error| format!(
-            "T5M_BINDING_SENS index={index}: {}", error.render(binding)
-        ))?;
+        let program = prepare_t5m_repl_program(binding, ReplSurface::UkrainianFull, session)
+            .map_err(|error| format!("T5M_BINDING_READER index={index}: {error}"))?;
+        program.execute(session).map_err(|error| {
+            format!("T5M_BINDING_SENS index={index}: {}", error.render(binding))
+        })?;
     }
     Ok(())
 }
@@ -709,13 +710,12 @@ pub(crate) fn mint_t5m_source_pair(source: &str) -> Result<(Vec<u8>, String), St
 
 #[cfg(feature = "zig-transport")]
 pub(crate) fn mint_t5m_source_pair_with_bindings(
-    source: &str, bindings: &[String],
+    source: &str,
+    bindings: &[String],
 ) -> Result<(Vec<u8>, String), String> {
     let mut session = Session::default();
     preload_t5m_binding_sources(&mut session, bindings)?;
-    let words = prepare_t5m_repl_words(
-        source, ReplSurface::UkrainianFull, &session,
-    )?;
+    let words = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)?;
     let carrier = exact_t5m_carrier_words(&words)?;
     let physical = crate::zig_transport::encode_t5_exact_words(&carrier)?;
     let restored = crate::zig_transport::decode_t5_exact_words(&physical)?;
@@ -751,13 +751,18 @@ pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
 /// На відміну від --t5m-file, виконується саме наданий фізичний носій.
 #[cfg(feature = "zig-transport")]
 #[cfg(test)]
-pub(crate) fn eval_t5m_paired_file(source: &str, physical: &[u8]) -> Result<sens::EvalResult, String> {
+pub(crate) fn eval_t5m_paired_file(
+    source: &str,
+    physical: &[u8],
+) -> Result<sens::EvalResult, String> {
     eval_t5m_paired_file_with_bindings(source, physical, &[])
 }
 
 #[cfg(feature = "zig-transport")]
 pub(crate) fn eval_t5m_paired_file_with_bindings(
-    source: &str, physical: &[u8], bindings: &[String],
+    source: &str,
+    physical: &[u8],
+    bindings: &[String],
 ) -> Result<sens::EvalResult, String> {
     let mut session = Session::default();
     preload_t5m_binding_sources(&mut session, bindings)?;
@@ -1313,6 +1318,21 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
     }
 }
 
+fn is_interaction_only_unresolved_name(line: &str, error: &str) -> bool {
+    let standalone_name = sens::parse_mixed_exact_domain(line)
+        .ok()
+        .is_some_and(|forms| {
+            forms.len() == 1
+                && matches!(
+                    forms[0].kind,
+                    ExprKind::Symbol(_) | ExprKind::DomainIdentity(DomainIdentity::D7(_))
+                )
+        });
+    let unresolved_name =
+        error.contains("unknown symbol") || error.contains("domain identity is not callable");
+    standalone_name && unresolved_name
+}
+
 pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop: bool) {
     let mut state = match ReplState::new(session, initial_surface, sens_loop) {
         Ok(state) => state,
@@ -1383,12 +1403,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                     Err(error) => {
                         // Зберігаємо interaction policy для окремого невідомого імені;
                         // усі форми оцінюються тільки після Zig T5M roundtrip.
-                        let standalone_symbol = sens::parse_mixed_exact_domain(line)
-                            .ok()
-                            .is_some_and(|forms| {
-                                forms.len() == 1 && matches!(forms[0].kind, ExprKind::Symbol(_))
-                            });
-                        if standalone_symbol && error.contains("unknown symbol") {
+                        if is_interaction_only_unresolved_name(line, &error) {
                             println!("echo {line}");
                         } else {
                             eprintln!("REPL/T5M: {error}");
@@ -1410,12 +1425,22 @@ mod tests {
     use super::*;
 
     #[test]
+    fn standalone_d7_text_identity_uses_repl_echo_without_granting_callability() {
+        let error =
+            "SENS binary evaluator: domain identity is not callable under its ratified law: D7";
+        assert!(is_interaction_only_unresolved_name("мама", error));
+        assert!(!is_interaction_only_unresolved_name("(мама)", error));
+        assert!(!is_interaction_only_unresolved_name(
+            "мама",
+            "unrelated error"
+        ));
+    }
+
+    #[test]
     fn t5m_length_divergence_reports_first_changed_exact_word() {
         let expected = [1u16, 2, 3]
             .into_iter()
-            .map(|bits| {
-                ExactDomainWord::Identity(t5m_domain_identity(3, bits).unwrap())
-            })
+            .map(|bits| ExactDomainWord::Identity(t5m_domain_identity(3, bits).unwrap()))
             .collect::<Vec<_>>();
         let mut restored = exact_t5m_carrier_words(&expected).unwrap();
         restored.remove(1);
@@ -1436,26 +1461,25 @@ mod tests {
     fn two_top_level_forms_have_exact_d2_separator_and_execute_after_zig_t5m() {
         let session = Session::default();
         let line = "(атом? (як-є ()))";
-        let single = prepare_t5m_repl_words(
-            line, ReplSurface::UkrainianFull, &session,
-        ).expect("одна виконувана D1 форма");
+        let single = prepare_t5m_repl_words(line, ReplSurface::UkrainianFull, &session)
+            .expect("одна виконувана D1 форма");
         let source = format!("{line}\n{line}");
-        let combined = prepare_t5m_repl_words(
-            &source, ReplSurface::UkrainianFull, &session,
-        ).expect("дві форми з точним D2:00");
+        let combined = prepare_t5m_repl_words(&source, ReplSurface::UkrainianFull, &session)
+            .expect("дві форми з точним D2:00");
         assert_eq!(combined.len(), single.len() * 2 + 1);
         assert_eq!(combined[..single.len()], single);
         assert_eq!(
             combined[single.len()],
             ExactDomainWord::Identity(t5m_domain_identity(2, 0b00).unwrap())
         );
-        assert_eq!(combined[single.len()+1..], single);
-        let restored = t5m_roundtrip_words(&combined)
-            .expect("Zig/T5M має зберегти D2 роздільник і всі слова");
+        assert_eq!(combined[single.len() + 1..], single);
+        let restored =
+            t5m_roundtrip_words(&combined).expect("Zig/T5M має зберегти D2 роздільник і всі слова");
         let program = PhysicalT5Program::from_exact_domain_words(&restored)
             .expect("SENS має прочитати дві фізичні форми");
         let mut runtime = Session::default();
-        let result = program.execute(&mut runtime)
+        let result = program
+            .execute(&mut runtime)
             .expect("справжній SENS має виконати обидві форми");
         assert_eq!(result.value.as_predicate_bit(), Some(true));
     }
@@ -1466,12 +1490,12 @@ mod tests {
         // Один живий SENS reader є владою для обох маршрутів.
         // Python preview і JSON-маніфест сюди не потрапляють.
         let source = "(атом? (як-є ()))";
-        let physical = mint_t5m_source_file(source)
-            .expect("SENS має видати фізичний Zig/T5M носій");
+        let physical =
+            mint_t5m_source_file(source).expect("SENS має видати фізичний Zig/T5M носій");
         assert!(!physical.is_empty());
 
-        let from_source = eval_t5m_source_file(source)
-            .expect("SENS оцінює точну українську форму після Zig");
+        let from_source =
+            eval_t5m_source_file(source).expect("SENS оцінює точну українську форму після Zig");
         let from_pair = eval_t5m_paired_file(source, &physical)
             .expect("SENS виконує ті самі фізичні слова, не Python-міграцію");
         assert_eq!(from_source.value.as_predicate_bit(), Some(true));
@@ -1485,23 +1509,26 @@ mod tests {
 
         let mut altered = physical;
         altered[0] ^= 1;
-        assert!(eval_t5m_paired_file(source, &altered).is_err(),
-            "пошкоджений фізичний носій не повинен виконатися");
+        assert!(
+            eval_t5m_paired_file(source, &altered).is_err(),
+            "пошкоджений фізичний носій не повинен виконатися"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
     #[test]
     fn quoted_integer_in_t5m_source_preserves_exact_d24_word() {
         let session = Session::default();
-        let words = prepare_t5m_repl_words(
-            "(як-є (7))", ReplSurface::UkrainianFull, &session,
-        )
-        .expect("quoted decimal must lower to the same exact D24 as ordinary source");
-        assert!(words.iter().any(|word| matches!(word,
-            ExactDomainWord::Number(number)
-                if number.numeric_domain_width() == Some(24)
-                    && number.to_decimal_string() == "7"
-        )), "the quoted number must remain exact D24, not become W7 text");
+        let words = prepare_t5m_repl_words("(як-є (7))", ReplSurface::UkrainianFull, &session)
+            .expect("quoted decimal must lower to the same exact D24 as ordinary source");
+        assert!(
+            words.iter().any(|word| matches!(word,
+                ExactDomainWord::Number(number)
+                    if number.numeric_domain_width() == Some(24)
+                        && number.to_decimal_string() == "7"
+            )),
+            "the quoted number must remain exact D24, not become W7 text"
+        );
         let restored = t5m_roundtrip_words(&words).expect("Zig must carry the exact word");
         assert_eq!(restored.len(), words.len());
     }
@@ -1724,16 +1751,15 @@ mod tests {
         let invalid = sens::parse_mixed_exact_domain("(reason-index-1)")
             .expect("розбір тексту не дає викличності");
         let mut forbidden = Vec::new();
-        let error = append_t5m_expression(
-            &invalid[0], sens::Text7Layout::Uk, &mut forbidden, 0
-        ).expect_err("латинський виклик не допущено");
+        let error = append_t5m_expression(&invalid[0], sens::Text7Layout::Uk, &mut forbidden, 0)
+            .expect_err("латинський виклик не допущено");
         assert!(error.contains("symbol=\"reason-index-1\""), "{error}");
         assert!(error.contains("Uk has no current D7 v2 glyph"), "{error}");
 
         #[cfg(feature = "zig-transport")]
         {
-            let roundtrip = t5m_roundtrip_words(&words)
-                .expect("справжній Zig T5M зберігає точні W7 клітини");
+            let roundtrip =
+                t5m_roundtrip_words(&words).expect("справжній Zig T5M зберігає точні W7 клітини");
             assert_eq!(roundtrip.len(), words.len());
             for (before, after) in words.iter().zip(roundtrip.iter()) {
                 assert_eq!(format!("{before:?}"), format!("{after:?}"));
@@ -1797,7 +1823,10 @@ mod tests {
         let mut words = Vec::new();
         append_t5m_expression(&forms[0], sens::Text7Layout::Uk, &mut words, 0)
             .expect("українські дані D7 v2 кодуються точними словами");
-        assert!(!words.is_empty(), "позитивний свідок має мати фізичні слова");
+        assert!(
+            !words.is_empty(),
+            "позитивний свідок має мати фізичні слова"
+        );
     }
 
     #[test]
@@ -2212,11 +2241,9 @@ mod tests {
             ReplSurface::Ukrainian.code(),
             ReplSurface::UkrainianFull.code()
         );
-        assert!(
-            surface_catalog::render_name("укр", "D6:101000")
-                .expect("UKR registry lookup")
-                .starts_with("identity: D6:101000")
-        );
+        assert!(surface_catalog::render_name("укр", "D6:101000")
+            .expect("UKR registry lookup")
+            .starts_with("identity: D6:101000"));
     }
 
     #[test]
@@ -2241,11 +2268,9 @@ mod tests {
         assert!(help.contains("EN: map"));
         assert!(help.contains("UK: відобразити"));
         assert!(help.contains("SAN: āvartana"));
-        assert!(
-            render_surface_name(ReplSurface::Ukrainian, "map")
-                .expect("ambiguous map is described")
-                .contains("неоднозначне")
-        );
+        assert!(render_surface_name(ReplSurface::Ukrainian, "map")
+            .expect("ambiguous map is described")
+            .contains("неоднозначне"));
     }
 
     #[test]
