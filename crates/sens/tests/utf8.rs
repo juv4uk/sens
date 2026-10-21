@@ -115,6 +115,28 @@ fn utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols() {
     }
 }
 
+/// Ділення D24+ у самій SENS: вирішальна гілка COND мусить мати D1:1,
+/// а остача повинна залишатися цілою, не дробовою часткою D5.
+#[test]
+fn utf8_integer_quotient_and_remainder_execute_in_sens_with_d1_branch() {
+    let source = include_str!("../../../lib/utf8.lisp");
+    assert!(!source.contains("      (так\\n"), "неприпустимий невизначений предикат у мовному COND");
+    for (program, expected) in [
+        ("(кодування-юнікод-8-ціла-частка 0 64)", "0"),
+        ("(кодування-юнікод-8-ціла-частка 63 64)", "0"),
+        ("(кодування-юнікод-8-ціла-частка 64 64)", "1"),
+        ("(кодування-юнікод-8-ціла-частка 65 64)", "1"),
+        ("(кодування-юнікод-8-ціла-частка 255 64)", "3"),
+        ("(кодування-юнікод-8-ціла-частка 256 64)", "4"),
+        ("(кодування-юнікод-8-ціла-остача 255 64)", "63"),
+        ("(кодування-юнікод-8-ціла-остача 256 64)", "0"),
+    ] {
+        let actual = eval(program);
+        assert_eq!(actual, expected,
+            "test_id=utf8-d24-integer-quotient layer=SENS input={program} expected={expected} actual={actual}");
+    }
+}
+
 #[test]
 fn utf8_decodes_ascii_exactly() {
     assert_eq!(eval("(utf8-decode (quote (65 66 67)))"), "(decoded (65 66 67))");
