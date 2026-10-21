@@ -11,11 +11,13 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from report_t5_triplet_inventory import GOLDEN, inspect, main
+from audit_all_lisp_triplets import git_blob_sha
 from sens_t5_codec import encode_words
 
 # Під'єднання вже наявного релізного gate, без дублювання його законів.
@@ -103,6 +105,31 @@ class TripletInventoryTests(unittest.TestCase):
         self.assertEqual(report["unpaired_program_lisp_sources"], [])
         self.assertEqual(report["summary"]["uk_oracle_verified"], 0)
         self.assertEqual(report["summary"]["release_admitted"], 0)
+
+    def test_reviewed_nonprogram_sha_pin_is_not_a_fake_runtime_block(self):
+        self.view.write_bytes(self.expected)
+        approved = self.root / "затверджені-дані.lisp"
+        approved.write_text("(таблиця (дані так))\n", encoding="utf-8")
+        original = approved.read_bytes()
+        pin = {"затверджені-дані.lisp": (git_blob_sha(original), "перевірені-дані")}
+
+        with patch("report_t5_triplet_inventory.reviewed_nonprogram_pins",
+                   return_value=pin):
+            report = self.scan(strict=True, required=())
+        self.assertEqual(report["status"], "PHYSICAL_VIEW_ONLY_UK_PENDING")
+        self.assertEqual(report["unpaired_nonprogram_lisp_sources"],
+                         ["затверджені-дані.lisp"])
+        self.assertEqual(report["unpaired_program_lisp_sources"], [])
+        self.assertEqual(report["summary"]["release_admitted"], 0)
+
+        # Зміна бодай одного біта втрачає право на статус затверджених даних.
+        approved.write_text("(таблиця (дані ні))\n", encoding="utf-8")
+        with patch("report_t5_triplet_inventory.reviewed_nonprogram_pins",
+                   return_value=pin):
+            drift = self.scan(strict=True, required=())
+        self.assertEqual(drift["status"], "BLOCKED")
+        self.assertEqual(drift["unpaired_program_lisp_sources"],
+                         ["затверджені-дані.lisp"])
 
     def test_unclosed_block_comment_is_not_silently_exempted(self):
         self.view.write_bytes(self.expected)
