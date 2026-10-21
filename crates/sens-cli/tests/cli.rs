@@ -767,3 +767,38 @@ fn український_скрипт_відбирає_саме_запитан�
         eprintln!("SENS_FILE_READER_NOT_ADMITTED: читати-всі");
     }
 }
+
+#[test]
+fn український_лінтер_повертає_точні_результати_без_незвязаних_d1() {
+    // Реальний виконавець SENS; Rust тут лише передає джерело й читає результат.
+    // Файл лінтера береться з main, не підміняється копією його правил.
+    let source = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"), "/../../lib/linter.lisp"
+    ))
+    .expect("чинний український Lisp-лінтер");
+    for (index, (expression, expected)) in [
+        ("(аналіз-форма-голова (як-є зоря))", "зоря"),
+        ("(аналіз-форма-голова (як-є (визначити)))", "визначити"),
+        ("(аналіз-форма-голова (як-є (за-умовою а б)))", "за-умовою"),
+        ("(лінтер-максимум-двох 2 7)", "7"),
+    ].into_iter().enumerate() {
+        let path = std::env::temp_dir().join(format!(
+            "sens-linter-d1-{}-{}.lisp", std::process::id(), index,
+        ));
+        std::fs::write(&path, format!("{source}\n{expression}\n"))
+            .expect("тимчасове виконуване джерело");
+        let output = sens().arg(&path).output().expect("запуск SENS");
+        let _ = std::fs::remove_file(&path);
+        assert!(
+            output.status.success(),
+            "SENS не виконав {expression}: stderr={} stdout={}",
+            String::from_utf8_lossy(&output.stderr),
+            String::from_utf8_lossy(&output.stdout),
+        );
+        assert_eq!(
+            String::from_utf8_lossy(&output.stdout).trim(),
+            expected,
+            "виконана програма: {expression}"
+        );
+    }
+}
