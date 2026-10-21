@@ -149,7 +149,6 @@ LATIN_IDENTIFIER = re.compile(r"[A-Za-z]")
 RAW_BINARY_HEAD = re.compile(r"[01]{3,11}\Z")
 NONPROGRAM_LIB_PATHS = (
     "lib/domains/",
-    "lib/surface/",
     "lib/generated/",
 )
 NONPROGRAM_LIB_FILES = frozenset({
@@ -342,6 +341,24 @@ def _projection_reasons(source: str) -> list[str]:
     return reasons
 
 
+def _contains_source_definitions(path: Path) -> bool:
+    """A surface file with top-level DEFINE is a program, not a projection table.
+
+    Only inspect syntax here: executable semantics belong to native SENS.
+    Invalid or unreadable source stays in the audit instead of disappearing.
+    """
+    try:
+        forms = parse_lisp_tokens(tokenize_lisp(path.read_text(encoding="utf-8")))
+    except (OSError, UnicodeError, ValueError):
+        return True
+    return any(
+        isinstance(form, LispForm)
+        and bool(form.items)
+        and _atom_value(form.items[0]) in {"визначити", "define"}
+        for form in forms
+    )
+
+
 def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
     """Active authored library programs; semantic tables and generated inventory are reported separately."""
     lib = root / "lib"
@@ -355,6 +372,11 @@ def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
     excluded = 0
     for path in all_files:
         relative = path.relative_to(root).as_posix()
+        # Виконувані DEFINE у lib/surface — не каталог. Раніше всі вони
+        # випадали зі знаменника, приховуючи реальні незавершені програми.
+        if relative.startswith("lib/surface/") and not _contains_source_definitions(path):
+            excluded += 1
+            continue
         if relative in NONPROGRAM_LIB_FILES or any(
             relative.startswith(prefix) for prefix in NONPROGRAM_LIB_PATHS
         ):

@@ -106,6 +106,31 @@ class WholeFileMetricTests(FileTree):
         self.assertIn("англомовна назва визначення", reasons["lib/alias.lisp"])
         self.assertEqual(result.excluded_nonprogram_files, 2)
 
+    def test_live_surface_definitions_count_but_metadata_do_not(self):
+        root = self.tree({
+            "lib/surface/діюче.lisp":
+                "(визначити обчислити (функція (аргумент) аргумент))\n",
+            "lib/surface/старе.lisp":
+                "(define old-name (функція (x) x))\n",
+            "lib/surface/метадані.lisp":
+                "(простори (укр джерело) (en source))\n",
+            "lib/surface/вкладені-дані.lisp":
+                "(опис (визначити це-дані 1))\n",
+            "lib/surface/пошкоджене.lisp":
+                "(визначити незакрите (функція (аргумент) аргумент)\n",
+            "lib/звичайне.lisp":
+                "(визначити результат (функція (значення) значення))\n",
+        })
+        result = report.measure_source_projection(root)
+        self.assertEqual(result.total_source_files, 4)
+        self.assertEqual(result.excluded_nonprogram_files, 2)
+        self.assertEqual(result.fully_projected_source_files, 2)
+        reasons = {entry.path: entry.reason for entry in result.pending}
+        self.assertIn("lib/surface/старе.lisp", reasons)
+        self.assertIn("lib/surface/пошкоджене.lisp", reasons)
+        self.assertNotIn("lib/surface/метадані.lisp", reasons)
+        self.assertNotIn("lib/surface/вкладені-дані.lisp", reasons)
+
     def test_isa_catalogue_is_data_not_a_lisp_program(self):
         # Це фізичні факти CPU, не D7/українські викличні імена.
         # Новий executable у тій самій теці НЕ можна приховувати.
