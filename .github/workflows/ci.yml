@@ -305,7 +305,7 @@ jobs:
             echo 'd11_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
-          # SENS-уніфікація: окремий адресний native-тест.
+          # SENS: адресний контроль одноразового та повного розіменування.
           if grep -Eq '^(crates/sens/tests/d11_unify_once[.]rs|lib/unify[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'd11_unify_once_tests=true' >> "$GITHUB_OUTPUT"
           fi
