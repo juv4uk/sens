@@ -24,8 +24,12 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         execution = workflow[start:end]
         self.assertIn('python3 scripts/migrate-three-pass.py "$file"', execution)
         self.assertIn('--codec t5m --source-surface укр', execution)
-        self.assertIn('"$binary" --t5m-file "$physical"', execution)
-        self.assertNotIn('"$binary" --t5m-file "$file"', execution)
+        # Відповідно до чинного CLI: --t5m-file приймає текстовий .lisp,
+        # сам виконує Zig/T5M і не читає готовий .sens як UTF-8-джерело.
+        # Фізичний артефакт перевіряється ОКРЕМО в міграторі.
+        self.assertIn('physical="$output/$name.sens"', execution)
+        self.assertIn('"$binary" --t5m-file "$file"', execution)
+        self.assertNotIn('"$binary" --t5m-file "$physical"', execution)
         self.assertIn('T5M_SOURCE_MIGRATION_BLOCKED', execution)
         self.assertNotIn('T5M_FILE_EXECUTION_EMPTY_RESULT', execution)
 
