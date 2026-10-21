@@ -33,10 +33,29 @@ fn division_error(span: Span) -> LanguageError {
 /// Only explicit numeric D24/D48/... values admit Core mathematical operations.
 /// Reader literals and host/Rust Number remain representable as data, not math.
 fn require_math_domain(values: &[Value], span: Span) -> Result<(), LanguageError> {
-    if values.is_empty() || values.iter().any(|v| !domain_numeric::is_domain_value(v)) {
+    const REASON: &str =
+        "math requires explicit D24+ operands; D1-D10 bit words and unqualified numbers are not arithmetic values";
+    if values.is_empty() {
+        return Err(LanguageError::new(ErrorKind::Type, REASON, span));
+    }
+    if let Some((index, rejected)) = values
+        .iter()
+        .enumerate()
+        .find(|(_, value)| !domain_numeric::is_domain_value(value))
+    {
+        // Діагностувати справжній зламаний операнд, а не маскувати RED:
+        // жодного допуску Number/Rational чи перетворення D1–D10 на число.
+        let kind = match rejected {
+            Value::Number(..) => "legacy-number",
+            Value::Rational(..) => "unqualified-rational",
+            Value::BinaryNumber(..) => "non-D24-binary",
+            Value::DomainIdentity(..) => "domain-word",
+            Value::Nil => "structural-empty",
+            _ => "non-numeric",
+        };
         return Err(LanguageError::new(
             ErrorKind::Type,
-            "math requires explicit D24+ operands; D1-D10 bit words and unqualified numbers are not arithmetic values",
+            format!("{REASON}; operand_position={} actual_kind={kind}", index + 1),
             span,
         ));
     }
