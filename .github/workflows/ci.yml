@@ -164,6 +164,52 @@ jobs:
           # Український D24+ обчислювач: позитивний закон і негативний мутант.
           cargo test --locked -p sens --test uk_sa_surface peer_identity_acceptance_ -- --nocapture
 
+      # Лише адресний Zig/T5M-експорт після змін у виконуваних Lisp.
+      - name: "LISP-TIER — діагностувати дві актуальні фізичні пари"
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
+        timeout-minutes: 7
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$RUNNER_TEMP/sens-live-pairs"
+          mkdir -p "$output"
+          for name in epistemic result-status; do
+            dest="$output/$name"
+            mkdir -p "$dest"
+            set +e
+            python3 scripts/migrate-three-pass.py "lib/$name.lisp" \
+              --out "$dest" --report "$dest/MIGRATION-REPORT.json" \
+              --codec t5m --source-surface укр
+            code=$?
+            set -e
+            if [[ ! -s "$dest/MIGRATION-REPORT.json" ]]; then
+              echo "::error::SENS_PAIR_NO_REPORT source=$name rc=$code"
+              exit 1
+            fi
+            python3 - "$dest/MIGRATION-REPORT.json" "$name" <<'PY'
+          import json, sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          print("SENS_PAIR_DIAG " + sys.argv[2] +
+                " summary=" + json.dumps(report["summary"], ensure_ascii=False) +
+                " reasons=" + json.dumps(
+                    [row.get("reason") for row in report["files"]
+                     if row.get("status") == "blocked"], ensure_ascii=False))
+          PY
+            if ((code > 2)); then
+              echo "::error::SENS_PAIR_INTERNAL_FAILURE source=$name rc=$code"
+              exit "$code"
+            fi
+          done
+
+      - name: "LISP-TIER — зберегти T5M і звіти цих двох програм"
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        with:
+          name: sens-live-pairs-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-live-pairs/
+          if-no-files-found: warn
+          retention-days: 1
+
       # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - uses: dtolnay/rust-toolchain@1.99.0
         if: ${{ github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:')) }}
