@@ -138,3 +138,36 @@ fn core4_ukrainian_structural_equality_executes_both_d1_bits() {
         );
     }
 }
+
+#[test]
+fn core4_ukrainian_association_search_handles_later_and_missing_keys() {
+    // SENS проходить усі гілки: перший ключ, наступний ключ і відсутність.
+    // Старий (так ...) мав неявне незв'язане ім'я у рекурсивній гілці.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        (
+            "(знайти-за-ключем (як-є а) (як-є ((а . перший) (б . другий))))",
+            "(а . перший)",
+        ),
+        (
+            "(знайти-за-ключем (як-є б) (як-є ((а . перший) (б . другий))))",
+            "(б . другий)",
+        ),
+        (
+            "(знайти-за-ключем (як-є немає) (як-є ((а . перший) (б . другий))))",
+            "()",
+        ),
+        ("(знайти-за-ключем (як-є немає) (як-є ()))", "()"),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=core4-assoc-exec layer=SENS input={source} error={error}"
+            ));
+        assert_eq!(
+            result.value.to_string(),
+            expected,
+            "test_id=core4-assoc-exec layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
+    }
+}
