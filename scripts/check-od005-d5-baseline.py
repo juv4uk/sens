@@ -85,7 +85,7 @@ def build_result() -> dict[str, Any]:
     for coordinate, expected_name in EXPECTED_SELECTORS.items():
         generated = generated_rows[coordinate]
         owner = by_coord[coordinate]
-        require(generated["display_name"] == expected_name,
+        require(generated["generated_display_name"] == expected_name,
                 f"{coordinate}: selector generator name drift")
         require(owner["name"] == expected_name,
                 f"{coordinate}: owner map disagrees with selector generator")
