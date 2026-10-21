@@ -64,6 +64,20 @@ fn d10_advice_decisions_are_pure_world_derived_sens_functions() {
 }
 
 #[test]
+fn translation_content_validity_is_exact_d1_in_real_sens() {
+    // Кожна гілка валідатора повертає D1:1/0, а не D3 NIL;
+    // перевіряється реальним SENS eval з чинними бібліотеками.
+    for (source, expected) in [
+        ("(вміст-кандидата-перекладу-коректний? (як-є clause) (як-є ((human socrates))))", "1"),
+        ("(вміст-кандидата-перекладу-коректний? (як-є clause) (як-є ((human (var)))))", "0"),
+        ("(вміст-кандидата-перекладу-коректний? (як-є batch) (як-є ()))", "0"),
+        ("(вміст-кандидата-перекладу-коректний? (як-є невідомий-вид) (як-є ((human socrates))))", "0"),
+    ] {
+        assert_eq!(eval_translation(source), expected, "D1 валідатор: {source}");
+    }
+}
+
+#[test]
 fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
     let source = r#"
         (визначити before *knowledge-journal*)
