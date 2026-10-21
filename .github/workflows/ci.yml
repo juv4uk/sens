@@ -208,6 +208,9 @@ jobs:
           if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_journal_d3_ukr\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'knowledge_tests=true' >> "$GITHUB_OUTPUT"
           fi
+          if grep -Eq '^(benchmarks/parser\.lisp|crates/sens/src/source_projection\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'parser_benchmark_tests=true' >> "$GITHUB_OUTPUT"
+          fi
           # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -215,12 +218,18 @@ jobs:
           fi
 
       - uses: ./.github/actions/install-zig
-        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
         shell: bash
         run: cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
+
+      - name: "Український Lisp-парсер — D5 результат і негативний SENS-свідок"
+        if: steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true'
+        timeout-minutes: 5
+        shell: bash
+        run: cargo test --locked -p sens --lib український_парсер_виконує_точний_дріб_та_відхиляє_ділення_на_нуль -- --nocapture
 
       - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
         if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
