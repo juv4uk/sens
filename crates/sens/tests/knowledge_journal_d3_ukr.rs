@@ -6,8 +6,8 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
     let source = include_str!("../../../lib/knowledge.lisp");
     let start = source.find("(визначити внутрішній-зворот-журналу-знань")
         .expect("український D3-механізм");
-    let end = source.find("(визначити отримати-події-журналу-окремого-модуля")
-        .expect("межа визначення фільтра");
+    let end = source.find("(визначити знання-символ?")
+        .expect("межа виконуваних функцій журналу");
     assert!(start < end);
     let mut session = Session::default();
     // Справжній канонічний Core визначає однобітні так/ні та D3 закони.
@@ -53,4 +53,21 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
     let expected_reversed = eval_program("(як-є (c b a))", &mut session)
         .expect("очікуваний D3-список").value.to_string();
     assert_eq!(reversed, expected_reversed);
+
+    // Позитивний і негативний D1 свідки без невизначених голих так/ні.
+    let yes = eval_program("(атом? (як-є ()))", &mut session)
+        .expect("справжнє D1 YES").value.to_string();
+    let no = eval_program("(атом? (як-є (запис)))", &mut session)
+        .expect("справжнє D1 NO").value.to_string();
+    let found = eval_program(
+        "(журнал-містить-записи-модуля? (як-є alpha) (як-є ((tell alpha a) (tell beta b))))",
+        &mut session,
+    ).expect("SENS знаходить модуль").value.to_string();
+    assert_eq!(found, yes, "дійсний модуль має повертати D1 YES");
+
+    let missing = eval_program(
+        "(журнал-містить-записи-модуля? (як-є alpha) (як-є ((tell) (tell beta b))))",
+        &mut session,
+    ).expect("неповна подія не повинна ламати SENS").value.to_string();
+    assert_eq!(missing, no, "неповна подія не є свідком модуля");
 }
