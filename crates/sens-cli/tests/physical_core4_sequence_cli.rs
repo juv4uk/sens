@@ -623,6 +623,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-rotate-inverse-general",
         "lib/list-middle-even",
         "lib/list-split-first-occurrence-general",
+        "lib/list-split-last-occurrence-general",
         "lib/list-flatten-nested-general",
         "lib/list-cartesian-product-general",
         "lib/list-stable-intersection-general",
