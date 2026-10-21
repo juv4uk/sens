@@ -354,6 +354,26 @@ fn guard_reference_field_uses_current_ukrainian_lisp_and_executes_in_sens() {
 }
 
 #[test]
+fn guard_field_requires_exact_two_cell_record_in_real_sens() {
+    // Читає і виконує саме SENS; Rust тільки звіряє готовий результат.
+    // Старе CAR/CDR на атомі та мовчазне відкидання третього поля
+    // не можуть давати удаваний доказ.
+    for (record, expected) in [
+        ("(як-є (decision allow))", "allow"),
+        ("(як-є ())", "()"),
+        ("(як-є decision)", "()"),
+        ("(як-є (decision))", "()"),
+        ("(як-є (decision allow extra))", "()"),
+        ("(як-є (decision . allow))", "()"),
+    ] {
+        let source = format!("(захист-еталон-поле-із-запису {record})");
+        let actual = eval_guard_ukr(&source);
+        assert_eq!(actual, expected,
+            "test_id=guard-exact-record layer=SENS input={source} expected={expected} actual={actual}");
+    }
+}
+
+#[test]
 fn guard_reference_data_reader_is_path_pinned_and_keeps_the_directory_as_data() {
     let source = include_str!("../../../knowledge/guard-reference.lisp");
     let parsed = sens::parse_mixed_exact_domain_guard_reference_source(
