@@ -40,7 +40,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                         'T5M_COMMITTED_VIEW_DRIFT', 'T5M_FILE_EXECUTION_FAIL'):
             with self.subTest(receipt=receipt):
                 arm = source.split('::error::' + receipt, 1)[1].split('continue', 1)[0]
-                self.assertIn('failed_files=$((failed_files + 1))', arm)
+                self.assertIn('mark_file_failed', arm)
         self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
 
     def test_w24_is_executed_only_from_a_verified_physical_pair(self):
