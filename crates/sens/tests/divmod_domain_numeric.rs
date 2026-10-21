@@ -28,3 +28,30 @@ fn divmod_returns_integer_quotient_and_euclidean_remainder_for_d24_operands() {
 
     assert_eq!(result.to_string(), "(3 2)");
 }
+
+#[test]
+fn truncate_executes_named_sens_sign_logic_for_d24() {
+    // Справжній SENS eval: D8-ціла частка має йти через іменоване
+    // мовне замикання, а не через виклик анонімної LAMBDA як значення.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("чинний Core4");
+    session.environment.define("ділене", d24(7));
+    session.environment.define("дільник", d24(3));
+    for (program, expected) in [
+        ("(округлити-до-нуля ділене дільник)", "2"),
+        ("(округлити-до-нуля (змінити-знак ділене) дільник)", "-2"),
+        ("(округлити-до-нуля ділене (змінити-знак дільник))", "-2"),
+        ("(округлити-до-нуля (змінити-знак ділене) (змінити-знак дільник))", "2"),
+        ("(остача-зі-знаком ділене дільник)", "1"),
+    ] {
+        let result = eval_program(program, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=d8-truncate-named layer=SENS input={program} error={error}"
+            ));
+        assert_eq!(
+            result.value.to_string(), expected,
+            "test_id=d8-truncate-named layer=SENS input={program} expected={expected} actual={}",
+            result.value
+        );
+    }
+}
