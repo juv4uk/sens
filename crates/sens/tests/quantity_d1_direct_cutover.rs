@@ -85,3 +85,42 @@ fn d1_false_and_d3_nil_are_distinct_in_sens() {
     assert!(matches!(absent, Value::Nil));
     assert_eq!(absent.as_predicate_bit(), None);
 }
+
+#[test]
+fn nil_returning_validators_use_d4_null_not_d4_not() {
+    // У D4 NOT є лише домен D1, D3 NIL не допускається.
+    // Невірний стан/вид повертає NIL згідно з реальною SENS-евалюацією.
+    let mut session = setup(admitted_source());
+    for (function, good) in [
+        ("науковий-константа-стан-чинний?", "measured"),
+        ("науковий-константа-вид-чинний?", "physical-derived"),
+    ] {
+        let admitted = format!("(порожній? ({function} (як-є {good})))");
+        let unadmitted = format!("(порожній? ({function} (як-є unknown)))");
+        let positive = eval_program(&admitted, &mut session)
+            .expect("SENS D4 NULL для допущеного результату").value;
+        let negative = eval_program(&unadmitted, &mut session)
+            .expect("SENS D4 NULL для відсутнього результату").value;
+        assert_eq!(positive.as_predicate_bit(), Some(false),
+            "test_id=quantity-nil-good input={admitted} expected=D1:NO actual={positive}");
+        assert_eq!(negative.as_predicate_bit(), Some(true),
+            "test_id=quantity-nil-bad input={unadmitted} expected=D1:YES actual={negative}");
+
+        let illegal = format!("(хибне? ({function} (як-є unknown)))");
+        let error = eval_program(&illegal, &mut session)
+            .expect_err("SENS D4 NOT не може прийняти структурне NIL");
+        assert!(error.to_string().contains("NOT requires an exact D1 PredicateBit"),
+            "test_id=quantity-not-nil input={illegal} expected=TYPE_ERROR actual={error}");
+    }
+
+    for guard in [
+        "(порожній? (величина? (третє значення)))",
+        "(порожній? (науковий-константа-стан-чинний? (четверте значення)))",
+        "(порожній? (науковий-константа-вид-чинний? (п'ятий значення)))",
+        "(порожній? (наука-джерело? (науковий-сьомий значення)))",
+        "(порожній? (науковий-константа? константа))",
+    ] {
+        assert!(SOURCE.contains(guard),
+            "виконувана бібліотека втратила потрібну перевірку D3 NIL: {guard}");
+    }
+}
