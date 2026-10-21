@@ -279,6 +279,9 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
     let mut first: Option<SourceTriplet> = None;
     for name in [
         "atom-empty",
+        "d3-cond-false-branch-skips-car",
+        "d3-cond-short-circuit-unsafe-car",
+        "d3-empty-data-distinct-from-d1-no",
         "d4-fourth-after-two-list-append",
         "d4-cdar-first-pair-after-append",
         "d4-not-null-nonempty-cddr",
