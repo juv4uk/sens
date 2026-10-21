@@ -202,7 +202,7 @@ jobs:
           else
             git diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" > "$changed_all"
           fi
-          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|crates/sens-cli/tests/core1_array_bounds_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|tests/test_core1_(third|fourth)_domain_canary\.py|tests/fixtures/core1-(third|fourth)-domain-canary/.*|crates/sens-cli/tests/core1_array_bounds_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'core1_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/knowledge_d1_recovery\.rs|tests/test_knowledge_d1_recovery\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -237,6 +237,9 @@ jobs:
           # Змінений lib/core.lisp: точна D1 семантика порожніх макросів,
           # через справжній виконавець SENS (не Python/source-matcher).
           cargo test --locked -p sens --test core_postcore_ukr core_zero_arity_and_or_return_real_d1_bits -- --exact --nocapture
+          # Лише аудит сучасного українського джерела й точних слів; це НЕ SENS-eval.
+          # Фактичне SENS-виконання лишається в Rust CLI-свідках вище.
+          python3 -m unittest tests.test_core1_third_domain_canary tests.test_core1_fourth_domain_canary -v
 
       - name: "Український Lisp-парсер — D5 результат і негативний SENS-свідок"
         if: steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true'
