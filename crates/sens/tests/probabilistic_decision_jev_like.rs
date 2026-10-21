@@ -233,7 +233,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                   question
                   (quote ((billing 3/4) (technical 1/4)))
                   (quote ((source synthetic) (revision 1)))))
-              (decision (pd-choice-auto-policy observation 2/3)))
+              (decision (правило-автоматичного-вибору observation 2/3)))
           (list
             (second decision)
             (second (fourth decision))
@@ -254,7 +254,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                   question
                   (quote ((billing 1/2) (technical 1/2)))
                   (quote ((source synthetic) (case tied)))))
-              (decision (pd-choice-auto-policy observation 1/2)))
+              (decision (правило-автоматичного-вибору observation 1/2)))
           (list
             (second decision)
             (second (fourth decision))
@@ -275,7 +275,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                   question
                   (quote ((billing 3/4) (technical 1/4)))
                   (quote ((source synthetic)))))
-              (decision (pd-choice-auto-policy observation 4/5)))
+              (decision (правило-автоматичного-вибору observation 4/5)))
           (list
             (second decision)
             (second (fourth decision))
@@ -299,7 +299,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                   (quote ((billing 3/4) (technical 1/4)))
                   1/4
                   (quote ((source synthetic))))))
-          (result-status (pd-choice-auto-policy observation 2/3)))
+          (result-status (правило-автоматичного-вибору observation 2/3)))
     "#;
     assert_eq!(eval_probabilistic_decision(forged_confidence), "invalid");
 
@@ -313,7 +313,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                   question
                   (quote ((billing 3/4) (technical 1/4)))
                   (quote ((source synthetic))))))
-          (result-status (pd-choice-auto-policy observation 3/2)))
+          (result-status (правило-автоматичного-вибору observation 3/2)))
     "#;
     assert_eq!(eval_probabilistic_decision(invalid_threshold), "invalid");
 }
