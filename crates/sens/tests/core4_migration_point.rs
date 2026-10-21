@@ -363,3 +363,24 @@ fn core4_ukrainian_answer_algebra_executes_both_sides_of_distinctions() {
         );
     }
 }
+
+#[test]
+fn core4_ukrainian_rest_args_are_executed_after_d7_dotted_tail_removal() {
+    // Варіативні визначення з lib/core4.lisp виконуються в живому SENS.
+    // Перевіряємо поведінку, не просто відсутність текстового шаблону.
+    let mut session = migrated_core();
+    for (program, expected) in [
+        ("(повернути-перше (як-є а) (як-є б) (як-є в))", "а"),
+        ("(повернути-друге (як-є а) (як-є б) (як-є в))", "б"),
+        ("(найменше 8 3 5)", "3"),
+        ("(найбільше 8 3 5)", "8"),
+    ] {
+        let value = eval_program(program, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=core4-ukr-varargs layer=SENS input={program} error={error}"))
+            .value;
+        assert_eq!(
+            value.to_string(), expected,
+            "test_id=core4-ukr-varargs layer=SENS input={program} expected={expected} actual={value}"
+        );
+    }
+}
