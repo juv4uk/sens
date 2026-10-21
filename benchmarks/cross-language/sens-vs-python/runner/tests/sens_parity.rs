@@ -99,12 +99,24 @@ fn json_parse_is_blocked_without_an_admitted_d9_call_mechanism() {
     session
         .environment
         .define("json-input", Value::String(Rc::from(document.as_str())));
-    let expressions = parse_exact_domain_source(&source("json-parse-serialize.call.lisp"))
-        .expect("explicit D9 JSON identity is accepted by the exact reader");
-    let error = eval_parsed_expressions(&expressions, &mut session)
-        .expect_err("D9 JSON parse currently has no callable runtime mechanism");
+    let current = source("json-parse-serialize.call.lisp");
     assert!(
-        error.message.contains("D9") || error.message.contains("mechanism"),
-        "unexpected JSON mechanism blocker: {error:?}"
+        current.contains("(формат-обміну-даними-розібрати json-input)"),
+        "чинне D9 джерело мусить використовувати ратифіковану українську поверхню"
+    );
+    let expressions = parse_exact_domain_source(&current)
+        .expect("українське D9 джерело приймається чинним exact reader");
+    let lowered = sens::lower_program(&expressions);
+    assert!(
+        matches!(&lowered[0].kind,
+            sens::ExprKind::DomainCall(identity, _)
+                if identity.width() == 9 && identity.packed_bits() == 0b110100100),
+        "D9 JSON-PARSE має зберігати точний ратифікований код без SID8"
+    );
+    let error = eval_parsed_expressions(&expressions, &mut session)
+        .expect_err("наявність ідентичності D9 не означає runtime-допуску JSON");
+    assert!(
+        !error.message.is_empty(),
+        "відсутній D9 JSON-механізм потребує явної SENS-діагностики"
     );
 }
