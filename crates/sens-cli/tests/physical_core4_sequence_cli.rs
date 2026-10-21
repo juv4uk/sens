@@ -280,6 +280,8 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
     for name in [
         "atom-empty",
         "d3-cond-false-branch-skips-car",
+        "d3-nested-tail-head-identity-lazy",
+        "d3-false-tail-atom-skips-unsafe-head",
         "d3-cond-short-circuit-unsafe-car",
         "d3-empty-data-distinct-from-d1-no",
         "d4-fourth-after-two-list-append",
