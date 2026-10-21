@@ -45,6 +45,27 @@ fn filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage() {
             "test_id=fs-commit-stage layer=SENS input={source} expected=D1:{expected} actual={result}"
         );
     }
+    // Відновлення після коміту: перевіряємо саме обчислений D1-контроль
+    // у Lisp, не голий символ так і не правдоподібність хоста.
+    for (stage, expected) in [
+        ("objects", "(recovered before)"),
+        ("journal", "(recovered before)"),
+        ("root-pointer", "(recovered after)"),
+        ("unknown", "(rejected unknown-commit-stage)"),
+        ("(root-pointer)", "(rejected unknown-commit-stage)"),
+    ] {
+        let source = format!(
+            "(відновити-завершену-фіксацію-файлової-системи (як-є before) (як-є after) (як-є {stage}))"
+        );
+        let result = eval_program(&source, &mut s)
+            .unwrap_or_else(|e| panic!("test_id=fs-commit-recovery layer=SENS input={source} error={e:?}"));
+        assert_eq!(
+            result.value.to_string(),
+            expected,
+            "test_id=fs-commit-recovery layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
+    }
     // Реальний SENS зобов'язаний повернути D1:0 ще до D3 EQ над парою.
     // Вкладена та крапкова форма не є атомарним маркером F4.
     for invalid in ["(objects)", "(journal root-pointer)", "(objects . journal)"] {
