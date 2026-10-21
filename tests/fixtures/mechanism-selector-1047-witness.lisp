@@ -28,6 +28,6 @@
                  (так (як-є (mechanism-selector-1047 (status fail))))))
               (так (як-є (mechanism-selector-1047 (status fail))))))
            (так (як-є (mechanism-selector-1047 (status fail))))))
-        (так (як-є (mechanism-selector-1047 (status fail)))))))
+        (так (як-є (mechanism-selector-1047 (status fail))))))))
 
 (свідок-вибору-механізму-1047)
