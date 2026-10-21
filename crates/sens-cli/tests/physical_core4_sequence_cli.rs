@@ -296,6 +296,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "замінити-третій-в-четвірці",
         "поміняти-другий-і-третій",
         "list-swap-inner-five",
+        "list-reverse-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
