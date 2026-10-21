@@ -615,6 +615,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-flatten-nested-general",
         "lib/list-cartesian-product-general",
         "lib/list-stable-intersection-general",
+        "lib/list-stable-symmetric-difference-general",
         "lib/list-remove-first-atom",
         "lib/list-remove-all-atoms-general",
         "lib/list-remove-last-atom",
