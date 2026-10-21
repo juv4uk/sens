@@ -121,6 +121,42 @@ fn yantra_json_string_classifier_yields_d1_condition_from_structured_witness() {
             .value;
         assert_eq!(actual, expected, "класифікатор не може повертати хибну або неповну трійку");
     }
+    // Порядок кодових точок: після непорожнього лівого рядка
+    // гілка AFTER дозволена лише для порожнього правого.
+    for (source, oracle) in [
+        (
+            r#"(порівняти-рядки-за-кодовими-точками "" "")"#,
+            "(як-є (text-order same))",
+        ),
+        (
+            r#"(порівняти-рядки-за-кодовими-точками "" "а")"#,
+            "(як-є (text-order before))",
+        ),
+        (
+            r#"(порівняти-рядки-за-кодовими-точками "а" "")"#,
+            "(як-є (text-order after))",
+        ),
+        (
+            r#"(порівняти-рядки-за-кодовими-точками "а" "а")"#,
+            "(як-є (text-order same))",
+        ),
+        (
+            r#"(порівняти-рядки-за-кодовими-точками "а" "б")"#,
+            "(як-є (text-order before))",
+        ),
+        (
+            r#"(порівняти-рядки-за-кодовими-точками "б" "а")"#,
+            "(як-є (text-order after))",
+        ),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS string order {source}: {error}"))
+            .value;
+        let expected = eval_program(oracle, &mut session)
+            .unwrap_or_else(|error| panic!("SENS order oracle {oracle}: {error}"))
+            .value;
+        assert_eq!(actual, expected, "D9 порівняння повинне дійти до коду символів");
+    }
     for (expression, oracle) in [
         (
             "(кодувати-значення-формат-обміну-даними \"зоря\")",
