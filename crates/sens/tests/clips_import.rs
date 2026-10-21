@@ -82,6 +82,16 @@ fn clips_d6_binding_executes_real_rule_split_and_symbol_prefix() {
             "(розділити-правило-кліпс (як-є ((planet ?x) => (assert (has-mass ?x)))))",
             "(((planet ?x)) ((assert (has-mass ?x))))",
         ),
+        // Дві передумови доводять рекурсивне накопичення у поточному SENS.
+        (
+            "(розділити-правило-кліпс (як-є ((planet ?x) (mass ?x ?m) => (assert (heavy ?x)))))",
+            "(((planet ?x) (mass ?x ?m)) ((assert (heavy ?x))))",
+        ),
+        // Без => не можна вигадувати наслідки з переліку умов.
+        (
+            "(розділити-правило-кліпс (як-є ((planet ?x) (has-mass ?x))))",
+            "(((planet ?x) (has-mass ?x)) ())",
+        ),
         (
             "(розділити-правило-кліпс (як-є (=> (assert (has-mass ?x)))))",
             "(() ((assert (has-mass ?x))))",
