@@ -1354,12 +1354,13 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
                          "(визначити рівень-прикладу",
                          "(визначити надрукувати-відповідні",
                          "(знайти-за-ключем (як-є tier) приклад)",
-                         '(тотожне? (перше *argv*) "1")',
-                         '(тотожне? (перше *argv*) "2")',
-                         '(тотожне? (перше *argv*) "3")',
+                         "(тотожне? (перше *argv*)",
                          "(читати-всі (читати-файл ",
                          "(за-умовою", "(друкувати "):
             self.assertIn(required, code)
+        # executable() стирає рядкові літерали; їх звіряємо з джерелом.
+        for level in ("1", "2", "3"):
+            self.assertIn(f'(тотожне? (перше *argv*) "{level}")', source)
         for obsolete in ("(load ", "(quote ", "(cond ", "(lambda ",
                          "(define ", "(0011 ", "(0010 ", "(11011011 "):
             self.assertNotIn(obsolete, code)
