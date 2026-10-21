@@ -226,7 +226,7 @@ class UkrainianNarrateBlockProjectionTests(unittest.TestCase):
         source = (ROOT / "lib/narrate.lisp").read_text(encoding="utf-8")
         code = "\n".join(line for line in source.splitlines()
                          if not line.lstrip().startswith(";"))
-        self.assertNotRegex(code, r"(?<![\\w-])(так|ні)(?![\\w-])")
+        self.assertNotRegex(code, r"(?<![\w-])(так|ні)(?![\w-])")
         self.assertIn("(атом? (як-є ()))", code)
         self.assertIn("(атом? (як-є (())))", code)
 
