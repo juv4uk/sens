@@ -208,8 +208,11 @@ jobs:
           if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/knowledge_d1_recovery\.rs|tests/test_knowledge_d1_recovery\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'knowledge_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          # Живий механізм пошуку правил перевіряємо адресно.
-          if grep -Eq '^(lib/reason\.lisp|crates/sens/tests/reason_index\.rs)
+          # Адресний запуск чинного D3 механізму та його незалежного SENS тесту.
+          if grep -Eq '^(lib/reason\.lisp|crates/sens/tests/reason_index\.rs)$' "$changed_all"; then
+            echo 'reason_tests=true' >> "$GITHUB_OUTPUT"
+          fi
+          if grep -Eq '^(benchmarks/parser\.lisp|crates/sens/src/source_projection\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'parser_benchmark_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Зміна чинної Lisp-семантики має запускати SENS, не лише source audit.
