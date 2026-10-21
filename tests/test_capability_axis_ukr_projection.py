@@ -66,18 +66,15 @@ class CapabilityAxisUkrProjectionTests(unittest.TestCase):
         for forbidden in ("#d1:", "#d24:", "#b", "#q2", "machine-capability-legacy-sid-axis",
                           "machine-capabilities-for-sid", "x86-legacy-sid"):
             self.assertNotIn(forbidden, source, f"legacy token remains: {forbidden}")
-        for surface, count in (
-            ("визначити", 7), ("функція", 4), ("як-є", 4), ("за-умовою", 5),
-            ("атом?", 4), ("тотожне?", 3), ("перше", 10), ("решта", 7),
-        ):
-            pattern = re.compile(r"[(]" + re.escape(surface) + r"(?=\s)")
-            self.assertEqual(len(pattern.findall(source)), count, surface)
-        # Five unconditional branches return the owner-ratified D1:YES surface.
-        self.assertEqual(len(re.findall(r"(?m)^\s*\(так\s*$", source)), 5)
-        self.assertNotIn("(ні", source, "a false D1 value must not replace a true branch")
+        for surface in ("визначити", "функція", "як-є", "за-умовою",
+                        "атом?", "тотожне?", "перше", "решта"):
+            self.assertRegex(source, r"[(]" + re.escape(surface) + r"(?=\s)")
 
-    def test_negative_surface_mutant_is_not_accepted_as_ratified_projection(self):
+    def test_d1_verdicts_are_executed_predicates_not_unbound_names(self):
         source = SOURCE.read_text(encoding="utf-8")
-        mutated = source.replace("(так", "(ні", 1)
-        self.assertNotEqual(mutated, source)
-        self.assertEqual(len(re.findall(r"(?m)^\s*\(так\s*$", mutated)), 4)
+        executable = "\n".join(
+            line.split(";", 1)[0] for line in source.splitlines()
+        )
+        self.assertIsNone(re.search(r"(?<![\w-])(?:так|ні)(?![\w-])", executable))
+        self.assertIn("(атом? (як-є ()))", executable)
+        self.assertIn("(атом? (сполучити (як-є ()) (як-є ())))", executable)
