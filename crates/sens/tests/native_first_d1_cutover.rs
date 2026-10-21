@@ -17,9 +17,9 @@ fn session() -> Session {
     let mut s = Session::default();
     let defs = parse_mixed_exact_domain_machine_source(PATH, SOURCE)
         .expect("current exact machine reader");
-    assert_eq!(defs.len(), 15);
+    assert_eq!(defs.len(), 16);
     eval_parsed_expressions(&defs, &mut s)
-        .expect("усі 15 визначень native-first завантажені через SENS");
+        .expect("усі 16 визначень native-first завантажені через SENS");
     s
 }
 
@@ -72,6 +72,24 @@ fn dotted_tail_is_not_a_valid_single_argument_car_plan() {
         result.to_string().starts_with("(evaluator-fallback "),
         "пошкоджена арність не повинна створювати native-plan: {result}"
     );
+}
+
+#[test]
+fn typed_native_operands_use_named_sens_execution_not_anonymous_d5_value_call() {
+    let mut s = session();
+    // Позитивні runtime-свідки: непридатний лівий чи правий операнд
+    // зберігає исходний вираз; невикличний D5 FUNCTION не виконується.
+    for source in [
+        "(нативний-план-пари-типізовані-операнди (як-є джерело) (як-є ()) (як-є (u64-imm аргумент)))",
+        "(нативний-план-пари-типізовані-операнди (як-є джерело) (як-є (u64-imm аргумент)) (як-є ()))",
+    ] {
+        let result = eval(&mut s, source).expect("іменована функція SENS повинна виконатися");
+        assert_eq!(result.to_string(), "(evaluator-fallback джерело)", "{source}");
+    }
+    // Негативний свідок: історична анонімна голова не допущена.
+    let error = eval(&mut s, "((функція (значення) значення) (як-є джерело))")
+        .expect_err("не можна повернути нератифікований D5 value-call");
+    assert!(error.message.contains("00001"), "{error}");
 }
 
 #[test]
