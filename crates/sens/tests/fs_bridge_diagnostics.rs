@@ -90,8 +90,8 @@ fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
 fn content_store_membership_is_an_exact_d1_bit_not_structural_one() {
     let mut session = session();
     for (source, expected) in [
-        ("(content-store-contains? (content-store-put (empty-content-store) (quote star)) (знання-вміст-адреса (quote star)))", true),
-        ("(content-store-contains? (empty-content-store) (знання-вміст-адреса (quote star)))", false),
+        ("(вміст-сховище-містить? (вміст-сховище-покласти (порожній-вміст-сховище) (quote star)) (знання-вміст-адреса (quote star)))", true),
+        ("(вміст-сховище-містить? (порожній-вміст-сховище) (знання-вміст-адреса (quote star)))", false),
         ("(фс-містить? (car (фс-записати (фс-порожній) \"x\" (quote star))) \"x\")", true),
         ("(фс-містить? (фс-порожній) \"x\")", false),
     ] {
@@ -119,7 +119,7 @@ fn world_fourth_field_uses_d3_projection_not_unadmitted_d6_cadddr() {
 #[test]
 fn world_dedup_source_can_export_its_own_knowledge_envelope() {
     let mut session = session();
-    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (car (make-world-knowledge-package source (quote zoo))))";
+    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (car (створити-світ-знання-пакет source (quote zoo))))";
     assert_eq!(observe(&mut session, src), "(format . my-lisp-knowledge)");
 }
 
@@ -129,7 +129,7 @@ fn world_dedup_can_import_its_exported_knowledge_package() {
     // The import returns (receipt world); the receipt is itself a tagged
     // record (accepted (module ...) (knowledge ...)), not a bare symbol.
     // Probe only its D3 CAR tag, retaining the richer language-owned receipt.
-    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (car (car (import-knowledge-package-world (порожній-світ) (make-world-knowledge-package source (quote zoo))))))";
+    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (car (car (імпорт-знання-пакет-світ (порожній-світ) (створити-світ-знання-пакет source (quote zoo))))))";
     assert_eq!(observe(&mut session, src), "accepted",
         "an exported immutable world package must be reimportable");
 }
@@ -137,14 +137,14 @@ fn world_dedup_can_import_its_exported_knowledge_package() {
 #[test]
 fn world_dedup_two_equal_world_contents_share_one_key() {
     let mut session = session();
-    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (let ((copy (second (import-knowledge-package-world (порожній-світ) (make-world-knowledge-package source (quote zoo)))))) (content-store-size (content-store-put-world (content-store-put-world (empty-content-store) source) copy))))";
+    let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (let ((copy (second (імпорт-знання-пакет-світ (порожній-світ) (створити-світ-знання-пакет source (quote zoo)))))) (вміст-сховище-розмір (вміст-сховище-покласти-світ (вміст-сховище-покласти-світ (порожній-вміст-сховище) source) copy))))";
     assert_eq!(observe(&mut session, src), "1");
 }
 
 #[test]
 fn object_package_fold_consumes_every_valid_package() {
     let mut session = session();
-    let source = "(let ((decision (фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote first)) (фс-об'єкт-пакет (quote second))) (empty-content-store)))) (list (car decision) (content-store-size (second decision))))";
+    let source = "(let ((decision (фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote first)) (фс-об'єкт-пакет (quote second))) (порожній-вміст-сховище)))) (list (car decision) (вміст-сховище-розмір (second decision))))";
     assert_eq!(observe(&mut session, source), "(accepted 2)",
         "nonempty packages may not be accepted without insertion");
 }
@@ -152,14 +152,14 @@ fn object_package_fold_consumes_every_valid_package() {
 #[test]
 fn object_package_fold_rejects_invalid_second_package_without_partial_success() {
     let mut session = session();
-    let source = "(фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote first)) (list (cons (quote format) (quote wsm-fs-object)) (cons (quote version) (quote (0 1))) (cons (quote address) \"incorrect\") (cons (quote value) (quote second)))) (empty-content-store))";
+    let source = "(фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote first)) (list (cons (quote format) (quote wsm-fs-object)) (cons (quote version) (quote (0 1))) (cons (quote address) \"incorrect\") (cons (quote value) (quote second)))) (порожній-вміст-сховище))";
     assert_eq!(observe(&mut session, source), "(rejected address-mismatch)");
 }
 
 #[test]
 fn object_package_fold_rejects_an_improper_tail() {
     let mut session = session();
-    let source = "(фс-побудувати-об'єкт-сховище (cons (фс-об'єкт-пакет (quote first)) (quote broken-tail)) (empty-content-store))";
+    let source = "(фс-побудувати-об'єкт-сховище (cons (фс-об'єкт-пакет (quote first)) (quote broken-tail)) (порожній-вміст-сховище))";
     assert_eq!(observe(&mut session, source), "(rejected invalid-object-packages)");
 }
 
@@ -198,7 +198,7 @@ fn referenced_root_decisions_isolate_the_rejected_stage() {
     let cases = [
         ("(рішення-щодо-кореневого-пакета-файлової-системи root)", "accepted"),
         ("(рішення-щодо-пакета-об'єкта-файлової-системи object)", "accepted"),
-        ("(фс-побудувати-об'єкт-сховище (list object) (empty-content-store))", "accepted"),
+        ("(фс-побудувати-об'єкт-сховище (list object) (порожній-вміст-сховище))", "accepted"),
         ("(фс-відновити-корінь root (list object))", "accepted"),
     ];
     for (form, expected_tag) in cases {
@@ -220,7 +220,7 @@ fn one_object_store_has_a_bounded_reconstruction_witness() {
     let mut session = session();
     assert_eq!(
         observe(&mut session,
-            "(car (фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote hello))) (empty-content-store)))"),
+            "(car (фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote hello))) (порожній-вміст-сховище)))"),
         "accepted",
         "one canonical object envelope should enter the immutable content store"
     );
@@ -246,11 +246,11 @@ fn empty_root_can_be_reconstructed_without_object_packages() {
 fn referenced_address_checks_are_d1_and_fail_closed() {
     let mut session = session();
     for (source, expected) in [
-        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote ()) (empty-content-store))", true),
-        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote missing) (empty-content-store))", false),
-        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote (missing)) (empty-content-store))", false),
-        ("(усі-адреси-зв'язувань-у-файловій-системі-наявні? (quote ()) (empty-content-store))", true),
-        ("(усі-адреси-зв'язувань-у-файловій-системі-наявні? (quote ((a . missing))) (empty-content-store))", false),
+        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote ()) (порожній-вміст-сховище))", true),
+        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote missing) (порожній-вміст-сховище))", false),
+        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote (missing)) (порожній-вміст-сховище))", false),
+        ("(усі-адреси-зв'язувань-у-файловій-системі-наявні? (quote ()) (порожній-вміст-сховище))", true),
+        ("(усі-адреси-зв'язувань-у-файловій-системі-наявні? (quote ((a . missing))) (порожній-вміст-сховище))", false),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|e| panic!("D1 address validation {source}: {e:?}"))
@@ -388,7 +388,7 @@ fn root_envelope_accepts_its_own_schema_without_object_only_fields() {
 fn empty_object_store_uses_an_admitted_two_argument_lisp_closure() {
     let mut s = session();
     assert_eq!(
-        observe(&mut s, "(фс-побудувати-об'єкт-сховище (quote ()) (empty-content-store))"),
+        observe(&mut s, "(фс-побудувати-об'єкт-сховище (quote ()) (порожній-вміст-сховище))"),
         "(accepted ())",
         "nested reconstruction must not shadow the two-argument closure"
     );
@@ -402,7 +402,7 @@ fn derived_macro_binds_list_values_as_one_variable() {
         "4"
     );
     assert_eq!(
-        observe(&mut s, "(нехай-похідне ((x (фс-побудувати-об'єкт-сховище (quote ()) (empty-content-store)))) (car x))"),
+        observe(&mut s, "(нехай-похідне ((x (фс-побудувати-об'єкт-сховище (quote ()) (порожній-вміст-сховище)))) (car x))"),
         "accepted"
     );
 }
