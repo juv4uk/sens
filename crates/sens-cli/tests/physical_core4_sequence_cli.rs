@@ -327,7 +327,11 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-not-eq-distinct-symbols",
         "d4-cdar-cadr-independent-head-tail",
         "d4-null-not-double-inversion",
-        "d4-null-cdr-two-preserves-second",
+        "d4-null-cdr-two-preserves-second",        "d4-caar-after-append-nested",
+        "d4-cdar-nonempty-structural-tail",
+        "d4-cddr-append-third-exact",
+        "d4-null-after-cddr-two",
+
 ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
