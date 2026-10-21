@@ -90,3 +90,35 @@ fn world_ancestor_one_bit_mutant_is_rejected_by_sens() {
         "the mutated D1:NO branch must fail inside SENS as non-callable, got: {error}"
     );
 }
+
+const WORLD_MODULE_LAWS: &str =
+    include_str!("../../../tests/semantic/d9-world-shape-module-events-laws.lisp");
+
+/// Чинний SENS сам обчислює вісім законів D9 над реальними Lisp
+/// визначеннями світу. Rust перевіряє лише спостережуваний D1 результат,
+/// а не імітує WORLD?/рівність або машинний D7.
+#[test]
+fn world_module_eight_laws_execute_in_sens() {
+    let mut session = world_session();
+    let forms = parse_mixed_exact_domain(WORLD_MODULE_LAWS)
+        .expect("український файл восьми D9 законів повинен читатися");
+    assert_eq!(forms.len(), 1, "одна виконувана форма, вісім незалежних D1 результатів");
+    let actual = eval_parsed_expressions(&forms, &mut session)
+        .expect("SENS мусить реально виконати українську програму");
+    assert_eq!(actual.value.to_string(), "(1 1 1 1 1 1 1 1)",
+        "реальні D1 відповіді SENS по всіх восьми законах");
+
+    // Один неправдивий світ не можна перетворити на успіх зміною
+    // форматування/проєкції. Негативний свідок виконує той самий SENS.
+    let old = "(хибне? (світ? (як-є world)))";
+    let new = "(світ? (як-є world))";
+    assert_eq!(WORLD_MODULE_LAWS.matches(old).count(), 1,
+        "негативний якір рівно один у чинному джерелі");
+    let mutant = WORLD_MODULE_LAWS.replacen(old, new, 1);
+    let mutant_forms = parse_mixed_exact_domain(&mutant)
+        .expect("мутант лишається синтаксично точним SENS");
+    let bad = eval_parsed_expressions(&mutant_forms, &mut world_session())
+        .expect("SENS обчислює також відмінний негативний свідок");
+    assert_eq!(bad.value.to_string(), "(1 1 0 1 1 1 1 1)",
+        "підмінений закон має дати реальний D1:NO, а не PASS");
+}
