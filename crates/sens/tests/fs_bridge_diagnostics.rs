@@ -358,6 +358,8 @@ fn derived_macro_binds_list_values_as_one_variable() {
 #[test]
 fn journal_module_probe_fail_closed_on_malformed_event() {
     // Це справжній виконавець SENS із чинним lib/knowledge.lisp.
+    // Виклики використовують канонічну українську проєкцію D3 QUOTE,
+    // не англомовне сумісне ім’я; результат оцінює SENS, а не Python.
     // Атом, одноелементна форма та крапковий хвіст не мають
     // другого поля: D4 «друге» у цих випадках заборонене.
     let mut s = session();
@@ -372,7 +374,7 @@ fn journal_module_probe_fail_closed_on_malformed_event() {
         ("((tell зоря факт))", true),
     ] {
         let code = format!(
-            "(журнал-містить-записи-модуля? (quote зоря) (quote {journal}))"
+            "(журнал-містить-записи-модуля? (як-є зоря) (як-є {journal}))"
         );
         let actual = eval_program(&code, &mut s)
             .unwrap_or_else(|error| panic!("SENS не виконав {code}: {error:?}"))
