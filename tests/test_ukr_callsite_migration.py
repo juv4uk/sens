@@ -1417,13 +1417,12 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
 
 
 class DomainTableReadableUkrMigrationTests(unittest.TestCase):
-    """Чинна зворотна проєкція D1/D5/D6/D8/D9, без історичного Git-blob як закону."""
+    """Чинна зворотна проєкція D5/D6/D8/D9; D1 відповіді генерує SENS."""
 
     SOURCE = Path(__file__).resolve().parents[1] / "scripts/check-domain-table-readable.lisp"
     # Ратифіковані координати перевіряються за поточними таблицями, а не
     # за історичним числом появ у незмінному source checkpoint.
     PEERS = (
-        (1, "1", "так", 16),
         (5, "11010", "менше?", 1),
         (5, "11011", "більше?", 1),
         (6, "000100", "елемент-списку-за-індексом", 1),
@@ -1470,6 +1469,13 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
         self.assertIn("(однакова-кількість? (довжина (рядки-домену д1))", source)
         self.assertNotIn("(тотожне? (довжина ", source)
         self.assertNotIn("(тотожне? (текст-першого-ключа ", source)
+        # Немає незв'язаних D1 поверхонь «так»/«ні»: обидва результати
+        # породжують точні живі D3 предикати без host-істини.
+        self.assertNotIn("(так ", source)
+        self.assertNotIn("(так)", source)
+        self.assertNotIn(") ні)", source)
+        self.assertIn("(менше? ліва права) (атом? (сполучити", source)
+        self.assertIn("(більше? ліва права) (атом? (сполучити", source)
         inverse = self._undo_exact_heads(source)
         self.assertEqual(self._redo_exact_heads(inverse), source)
         mod.parse(source)
