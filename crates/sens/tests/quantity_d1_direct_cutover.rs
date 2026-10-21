@@ -165,6 +165,7 @@ fn quantity_symbol_guard_executes_real_sens_and_rejects_non_symbols() {
         ("nil", "(науковий-внутрішній-символ? (як-є ()))", false),
         ("pair", "(науковий-внутрішній-символ? (як-є (метр)))", false),
         ("d1-value", "(науковий-внутрішній-символ? (атом? (як-є ())))", false),
+        ("d1-no", "(науковий-внутрішній-символ? (хибне? (атом? (як-є ()))))", false),
     ] {
         let actual = eval_program(expression, &mut real)
             .unwrap_or_else(|err| panic!("test_id=quantity-symbol case={case} input={expression} error={err}")).value;
