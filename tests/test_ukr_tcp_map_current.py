@@ -67,11 +67,11 @@ class UkrainianTcpMapCurrentTests(unittest.TestCase):
         # Цей тест лише охороняє форму; виконання перевіряє справжній SENS.
         # У чинному Lisp недопустимі анонімна голова і незв'язане так.
         self.assertNotIn("((функція ", source)
-        self.assertNotRegex(source, r"(?m)^\\s*\\(так(?:\\s|\\))")
+        self.assertNotRegex(source, r"(?m)^\s*\(так(?:\s|\))")
         self.assertEqual(source.count("(визначити протокол-передавання-обробити-декодоване"), 1)
-        self.assertIn("(протокол-передавання-обробити-декодоване\\n", source)
-        self.assertIn("((атом? (як-є ()))\\n       декодований-вміст)", source)
-        self.assertIn("(друге\\n      (список\\n        (протокол-передавання-сирий-запис", source)
+        self.assertIn("(протокол-передавання-обробити-декодоване\n", source)
+        self.assertIn("((атом? (як-є ()))\n       декодований-вміст)", source)
+        self.assertIn("(друге\n      (список\n        (протокол-передавання-сирий-запис", source)
 
     def test_tcp_host_capability_aliases_keep_real_handlers_and_arity_witness(self):
         source = HOST.read_text(encoding="utf-8")
