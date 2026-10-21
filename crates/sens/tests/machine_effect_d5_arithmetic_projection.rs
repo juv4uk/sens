@@ -2,7 +2,6 @@ use sens::{
     eval_parsed_expressions, eval_program, load_core_library, lower_program,
     parse, parse_mixed_exact_domain_machine_source, ExprKind, Session,
 };
-use serde_json::Value;
 use std::fs;
 use std::path::PathBuf;
 
@@ -66,19 +65,39 @@ fn machine_session() -> Session {
 }
 
 fn current_d5_coordinate(resident: &str) -> (usize, u16) {
-    let foundation: Value =
-        serde_json::from_str(&read("knowledge/d1-d9-foundation.json")).expect("foundation JSON");
-    let d5 = &foundation["domains"]["D5"];
-    let width = d5["width"].as_u64().expect("D5 width") as usize;
-    let residents = d5["residents"].as_object().expect("D5 residents");
-    let (bits, _) = residents
-        .iter()
-        .find(|(_, role)| role.as_str() == Some(resident))
-        .unwrap_or_else(|| panic!("current D5 foundation must contain {resident}"));
-    (
-        width,
-        u16::from_str_radix(bits, 2).expect("current D5 resident bits"),
-    )
+    // Джерело координат — чинна таблиця SENS, не історичний JSON-знімок.
+    // Власну семантику не симулюємо: нижче SENS lower_program перевіряє
+    // фактичну тотожність виконуваного виклику.
+    let en = match resident {
+        "PLUS" => "plus",
+        "DIFFERENCE" => "difference",
+        "TIMES" => "times",
+        "QUOTIENT" => "quotient",
+        other => panic!("Невідомий резидент D5: {other}"),
+    };
+    let expected_column = format!("(en {en})");
+    let table = read("lib/domains/d5.lisp");
+    let mut matches = table.lines().filter_map(|line| {
+        let row = line.trim();
+        if !row.contains(&expected_column) {
+            return None;
+        }
+        let (bits, _) = row.strip_prefix('(')?.split_once(' ')?;
+        assert_eq!(bits.len(), 5, "D5 мусить містити 5-бітні ключі");
+        assert!(
+            bits.bytes().all(|bit| matches!(bit, b'0' | b'1')),
+            "Канонічний ключ D5 має бути двійковим"
+        );
+        Some(u16::from_str_radix(bits, 2).expect("Двійковий ключ D5"))
+    });
+    let bits = matches
+        .next()
+        .unwrap_or_else(|| panic!("Таблиця D5 не містить {expected_column}"));
+    assert!(
+        matches.next().is_none(),
+        "Повторна координата D5 для {expected_column}"
+    );
+    (5, bits)
 }
 
 fn lowered_identity(source: &str) -> (usize, u16) {
