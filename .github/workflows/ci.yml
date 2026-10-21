@@ -631,6 +631,8 @@ jobs:
           # Локальний --require-full залишається доступним і має fail-closed тести.
           # Лексичний звіт не замінює фізичний SENS-eval та не стверджує callability.
           python3 -m unittest tests/test_ukr_callsite_migration.py -v
+          # Читаємо Lisp-контракти як дані; не удаємо виконання SENS.
+          python3 -m unittest tests/test_contract_lisp_data_structure.py -v
           # Точні D6/D8 виклики: цитовані біти й коментарі — дані, не псевдовиклики.
           python3 -m unittest tests/test_sid8_broad_source_cutover.py -v
           python3 -m unittest tests/test_ukr_narrate_peers.py -v
