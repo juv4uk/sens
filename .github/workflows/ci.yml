@@ -309,6 +309,10 @@ jobs:
           if grep -Eq '^(crates/sens/tests/d11_unify_once[.]rs|lib/unify[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'd11_unify_once_tests=true' >> "$GITHUB_OUTPUT"
           fi
+          # Три бібліотечні закони D2, виконання у SENS.
+          if grep -Eq '^(crates/sens/tests/codec_in_sens[.]rs|lib/codec-d2[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
+            echo 'd11_codec_law_tests=true' >> "$GITHUB_OUTPUT"
+          fi
           # Три функції D11 SI виконуються бібліотечними законами, не host-oracle.
           if grep -Eq '^(crates/sens/tests/scientific_constants[.]rs|lib/si[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'd11_si_law_tests=true' >> "$GITHUB_OUTPUT"
@@ -910,6 +914,9 @@ jobs:
           fi
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_unify_once_tests }}" == "true" ]]; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test d11_unify_once -- --nocapture
+          fi
+          if [[ "${{ steps.changed-t5m-lisp.outputs.d11_codec_law_tests }}" == "true" ]]; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test codec_in_sens d11_кодек_д2_три_допоміжні_закони_у_sens -- --exact --nocapture
           fi
 
       - name: Знання — виконання українського D3-журналу та оберненість викличних голів
