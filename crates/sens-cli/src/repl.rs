@@ -178,6 +178,22 @@ fn append_t5m_expression_context(
             words.push(control(0b01)?);
         }
         ExprKind::Pair(head, tail) => {
+            // D7-символ із кількох glyph-ів нині має D2-рамку списку.
+            // У *хвості* крапкової пари це робить improper пару
+            // правильним списком без жодної помилки. Не проголошуємо
+            // таку зміну структури оборотною: атомний текстовий носій
+            // мусить бути доведений окремо, а не вигаданий у Rust.
+            if quoted_data {
+                if let ExprKind::Symbol(name) = &tail.kind {
+                    if sens::semantic_registry_export::admitted_core_domain_for_surface(name)
+                        .is_none()
+                    {
+                        return Err(format!(
+                            "T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC symbol={name:?}:                              D7 glyph-list cannot replace a dotted-pair atom"
+                        ));
+                    }
+                }
+            }
             words.push(control(0b10)?);
             append_t5m_expression_context(head, layout, words, depth + 1, quoted_data)?;
             words.push(control(0b11)?);
