@@ -231,7 +231,12 @@ jobs:
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
         shell: bash
-        run: cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
+          # Змінений lib/core.lisp: точна D1 семантика порожніх макросів,
+          # через справжній виконавець SENS (не Python/source-matcher).
+          cargo test --locked -p sens --test core_postcore_ukr core_zero_arity_and_or_return_real_d1_bits -- --exact --nocapture
 
       - name: "Український Lisp-парсер — D5 результат і негативний SENS-свідок"
         if: steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true'
