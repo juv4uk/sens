@@ -1,4 +1,15 @@
-# Whole-program domains benchmark (#2003)
+# Whole-program domains model benchmark (#2003)
+
+> **Історичний модельний стенд.** Його Python-реалізація — окремий малий
+> Lisp I/Lisp 1.5 evaluator із логічними лічильниками; вона не є поточним
+> SENS reader/runtime, не обходить SENS AST і не вимірює програмний артефакт.
+> Не використовуйте її як актуальний розмір або продуктивність SENS.
+>
+> Поточний вимір повного українського source-файла рахує AST через SENS,
+> пакує слова реальним Zig/T5M і перевіряє виконання: див.
+> [`sens-program-size`](../sens-program-size/README.md). Цей стенд лишається
+> відтворюваним дослідженням моделі identity-resolution, не джерелом runtime
+> семантики.
 
 Parent benchmark gate: **#1987**. Whole-model accounting: #1973. Corpus: #1962.
 Execution: #1988. Carrier: #1989. Framing: #1993. Compiler: juv4uk/cml#397.

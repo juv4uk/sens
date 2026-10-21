@@ -1,4 +1,8 @@
-# Current English vs D1-D8 — representation/transport lane
+# Historical English vs D1-D8 — representation/transport lane
+
+Це історичний D1–D8 стенд; він не є поточним описом мови чи дефолтного
+кодека. Поточний вузький вимір повного джерела, AST, точних слів і фізичних
+T5M-байтів підтримується в [`sens-program-size`](../sens-program-size/README.md).
 
 This is the representation/accounting lane for #3088 / #3137.
 

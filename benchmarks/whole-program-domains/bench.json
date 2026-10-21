@@ -6,13 +6,13 @@
     "RESEARCH",
     "FALSIFIER"
   ],
-  "question": "What bounded observation does the existing benchmarks/whole-program-domains/whole_program.py witness provide for Whole Program Domains, and what counterexample limits the conclusion?",
-  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "question": "What bounded model-cost observation does the historical Python Lisp I evaluator provide for identity-resolution strategies, and why is it not current SENS AST/T5M program-size evidence?",
+  "claim": "Historical model-cost evidence only: a separate Python evaluator counts its declared logical operations. It does not run current SENS, count current SENS AST nodes, or measure T5M bytes. Current full-source size evidence lives in benchmarks/sens-program-size.",
   "witness": [
     "benchmarks/whole-program-domains/README.md",
     "benchmarks/whole-program-domains/whole_program.py"
   ],
-  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "status": "HISTORICAL-MODEL-ONLY; NOT CURRENT SENS RUNTIME EVIDENCE",
   "generation": "unknown",
   "axis": "research/backfill/whole-program-domains",
   "reproduce": "python3 benchmarks/whole-program-domains/whole_program.py"

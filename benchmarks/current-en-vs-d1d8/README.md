@@ -1,4 +1,12 @@
-# English surface vs canonical D1-D8 — historical/current-transition CPU lane
+# English surface vs canonical D1-D8 — historical transition lane
+
+> **Статус на main:** історичний експеримент, не чинний SENS-vs-SENS або
+> T5M-розмір benchmark. Він порівнює англійську поверхню та D1–D8 і має
+> старий schema/runner; ці назви та артефакти збережені лише для provenance.
+> Для поточного виміру повного українського Lisp-файла використовуйте
+> [`sens-program-size`](../sens-program-size/README.md): повний AST → точні
+> слова → фізичний Zig/T5M → парне виконання SENS. CI не трактує історичний
+> runner як обов'язковий поточний доказ.
 
 > **Authority notice:** the directory name and D1–D8 scope are preserved for
 > provenance. Current language authority is Contract 11.8 / D1–D9. This harness

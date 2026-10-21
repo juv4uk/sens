@@ -379,8 +379,22 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
 
+          # Обов'язковий повнофайловий AST/T5M smoke використовує live Zig codec.
+          echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+
       - uses: ./.github/actions/install-zig
         if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.reason_tests == 'true' || steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:')) || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+
+      - name: Повна програма — SENS AST → фізичний T5M (обов'язкова перевірка)
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          timeout 360s cargo build --locked -p sens-cli --bin sens --bin sens-trit
+          timeout 240s cargo test --locked -p sens --example program_size -- --nocapture
+          python3 -m unittest benchmarks/sens-program-size/test_run.py -v
+          python3 benchmarks/sens-program-size/run.py
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}

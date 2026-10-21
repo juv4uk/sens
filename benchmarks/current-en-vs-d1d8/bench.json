@@ -6,14 +6,14 @@
     "RESEARCH",
     "FALSIFIER"
   ],
-  "question": "What bounded observation does the existing benchmarks/current-en-vs-d1d8/validate.py witness provide for Current En Vs D1d8, and what counterexample limits the conclusion?",
-  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "question": "What historical observation does the D1-D8 English-vs-binary transition runner preserve, and what limits prevent it from representing current Ukrainian SENS/T5M program size?",
+  "claim": "Historical transition evidence only. The runner uses an older English/D1-D8 schema and is not current SENS/T5M size evidence; current full-source AST and physical T5M measurement lives in benchmarks/sens-program-size.",
   "witness": [
     "benchmarks/current-en-vs-d1d8/README.md",
     "benchmarks/current-en-vs-d1d8/validate.py",
     "benchmarks/current-en-vs-d1d8/schema.json"
   ],
-  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "status": "HISTORICAL-TRANSITION; SUPERSEDED FOR CURRENT AST/T5M SIZE",
   "generation": "unknown",
   "axis": "research/backfill/current-en-vs-d1d8",
   "reproduce": "python3 benchmarks/current-en-vs-d1d8/validate.py"
