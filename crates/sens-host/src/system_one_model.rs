@@ -5,7 +5,7 @@
 //! deferring, or rejecting the observation. Only loopback HTTP is accepted: this boundary
 //! is for a local vLLM-compatible model, not arbitrary network exfiltration.
 
-use sens::{ErrorKind, Environment, LanguageError, Rational, Span, Value};
+use sens::{exact_domain_fraction_parts, BinaryNumber, ErrorKind, Environment, LanguageError, Span, Value};
 use serde_json::{json, Value as Json};
 use std::{
     collections::HashMap,
@@ -17,6 +17,7 @@ use std::{
 };
 
 const PROBABILITY_DENOMINATOR: u64 = 1_000_000_000;
+const PROBABILITY_DOMAIN_WIDTH: usize = 48;
 const MAX_OPTIONS: usize = 19;
 const MAX_RESPONSE_BYTES: usize = 8 * 1024 * 1024;
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
@@ -402,6 +403,28 @@ fn log_probabilities(
         .collect()
 }
 
+fn domain_word(value: u64, span: Span) -> Result<BinaryNumber, LanguageError> {
+    // D48 keeps the fixed-point denominator 1e9 positive in a signed exact domain.
+    if value >= (1_u64 << (PROBABILITY_DOMAIN_WIDTH - 1)) {
+        return Err(fail(
+            ErrorKind::NumericOverflow,
+            "model probability count does not fit a positive signed D48 word",
+            span,
+        ));
+    }
+    let bits: Vec<u8> = (0..PROBABILITY_DOMAIN_WIDTH)
+        .rev()
+        .map(|shift| ((value >> shift) & 1) as u8)
+        .collect();
+    BinaryNumber::from_numeric_domain_bits(PROBABILITY_DOMAIN_WIDTH, &bits).ok_or_else(|| {
+        fail(
+            ErrorKind::InvalidForm,
+            "could not construct a domain-qualified D48 probability component",
+            span,
+        )
+    })
+}
+
 fn exact_distribution(
     log_probabilities: &[f64],
     criteria: &[Criterion],
@@ -435,8 +458,10 @@ fn exact_distribution(
         ));
     }
 
-    // Quantization changes only the transport representation, not decision authority.
-    // Largest-remainder allocation gives nonnegative exact fractions whose sum is exactly 1.
+    // The model's floating-point scores are quantized once at this adapter edge.
+    // Largest-remainder allocation preserves a total of exactly 1e9 integer units.
+    // Each count becomes an exact D48 fraction through the core's canonical factory:
+    // no bare Rational/float is promoted into arithmetic and no new Value variant exists.
     let scaled: Vec<f64> = exponentials
         .iter()
         .map(|value| value / total * PROBABILITY_DENOMINATOR as f64)
@@ -467,21 +492,18 @@ fn exact_distribution(
         counts[index] += 1;
     }
 
-    let denominator_text = PROBABILITY_DENOMINATOR.to_string();
+    let denominator = domain_word(PROBABILITY_DENOMINATOR, span)?;
     let mut entries = Vec::with_capacity(criteria.len());
     for (criterion, count) in criteria.iter().zip(counts.iter()) {
-        let numerator_text = count.to_string();
-        let exact = Rational::from_literal(&numerator_text, &denominator_text).ok_or_else(|| {
+        let numerator = domain_word(*count, span)?;
+        let exact = exact_domain_fraction_parts(false, &numerator, &denominator).ok_or_else(|| {
             fail(
                 ErrorKind::NumericOverflow,
-                "could not encode the normalized model probability as an exact rational",
+                "could not encode normalized model probability as an exact D48 fraction",
                 span,
             )
         })?;
-        entries.push(Value::list([
-            criterion.label.clone(),
-            Value::Rational(exact),
-        ]));
+        entries.push(Value::list([criterion.label.clone(), exact]));
     }
     Ok(Value::list(entries))
 }
