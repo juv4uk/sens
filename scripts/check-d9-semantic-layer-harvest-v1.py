@@ -54,7 +54,7 @@ assert actual_sources==expected_sources
 
 for source_file,count in expected_sources.items():
     text=(root/source_file).read_text(encoding="utf-8")
-    defs={m.group(1) for m in re.finditer(r'^\([01]{8}\s+([^\s()]+)\s+', text, re.MULTILINE)}
+    defs={m.group(1) for m in re.finditer(r'^\((?:[01]{8}|визначити)\s+([^\s()]+)\s+', text, re.MULTILINE)}
     claimed={row["source_name"] for row in rows if row["source_file"]==source_file}
     assert len(claimed)==count
     assert claimed <= defs
