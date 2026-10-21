@@ -90,7 +90,7 @@
     (row 11101101 string->symbol PACK lisp15-1962 direct admitted)
     (row 11110100 write-to-string PRIN1 lisp15-1962 direct admitted)
     (row 11100000 char-code CHAR-CODE lisp15-1962 direct admitted)
-    (row 11110110 divide DIVIDE lisp15-1962 direct admitted)
+    (row 11110110 divide DIVIDE lisp15-1962 direct admitted))
 
   (historical-support-without-my-lisp-sid
     (mechanism appq mccarthy-1960 evaluator-support)
