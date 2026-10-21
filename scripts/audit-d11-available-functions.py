@@ -132,6 +132,8 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
     rows = base.get("rows")
     require(isinstance(rows, list), "CANDIDATE_ROWS", "catalogue has no rows list")
     seen = set()
+    winner_positions = set()
+    selected_winners = 0
     families = set()
     kinds = {"HISTORICAL_LISP": 0, "SENS_LIBRARY_SNAPSHOT": 0}
     for index, item in enumerate(rows):
@@ -142,12 +144,35 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
         require(label not in lower_names, "LOWER_DOMAIN_COLLISION", f"row {index}: {name} already in D1–D10")
         require(label not in test_names, "D11_TEST_COLLISION", f"row {index}: {name} already in D11 testing table")
         seen.add(label)
-        require(item.get("coordinate") is None and item.get("callable") is False and
-                item.get("ratified") is False and item.get("exact_bit_width_if_admitted") == 11,
-                "NOT_ADMITTED", f"row {index}: candidate {name} silently gained executable/coordinate status")
-        require(item.get("domain_candidate") == "D11_OR_LIBRARY_REVIEW" and
-                item.get("review_status") == "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
-                "REVIEW_PENDING", f"row {index}: candidate {name} bypasses behavioral dedup")
+        # Матеріальний переможець визначеного SENS-закону вже має адресу.
+        # Це не допуск до прямого D11 opcode і не ратифікація нового примітива.
+        winner = item.get("winner_20261022")
+        require(item.get("callable") is False and item.get("ratified") is False and
+                item.get("exact_bit_width_if_admitted") == 11,
+                "NOT_ADMITTED", f"row {index}: new direct opcode was not authorized")
+        if winner is None:
+            require(item.get("coordinate") is None,
+                    "NOT_ADMITTED", f"row {index}: missing executable winner law for {name}")
+        else:
+            coordinate = item.get("coordinate")
+            require(isinstance(coordinate, str) and len(coordinate) == 11 and
+                    set(coordinate) <= {"0", "1"} and coordinate not in test_coordinates,
+                    "WINNER_WIDTH", f"row {index}: invalid/occupied D11 coordinate")
+            require(coordinate not in winner_positions,
+                    "WINNER_COORD_COLLISION", f"row {index}: repeated winner coordinate")
+            winner_positions.add(coordinate)
+            selected_winners += 1
+            require(item.get("domain_candidate") == "D11_DEFINED_COMPOSITE_WINNER" and
+                    item.get("review_status") == "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER" and
+                    winner.get("coordinate") == coordinate and
+                    winner.get("status") == "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ" and
+                    winner.get("semantic_defined") is True and
+                    winner.get("new_primitive") is False and
+                    winner.get("direct_d11_opcode_verified") is False and
+                    winner.get("source_file") == "lib/persistent-vector.lisp" and
+                    winner.get("native_law_test") ==
+                    "crates/sens/tests/persistent_vector.rs::d11_пятнадцять_визначених_переможців_виконує_sens",
+                    "WINNER_LAW", f"row {index}: missing real SENS-defined winner law")
         kind, family = item.get("source_kind"), item.get("source_family")
         require(kind in kinds and isinstance(family, str) and bool(family),
                 "SOURCE_CLASS", f"row {index}: invalid source kind/family")
@@ -165,15 +190,40 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
     }
     require(base.get("counts") == actual, "CATALOG_COUNTS", f"counts declared={base.get('counts')} actual={actual}")
     require(base.get("current_d11", {}).get("occupied") == 43, "D11_CATALOG_SCOPE", "D11 test census mismatch")
+    expect_winners = base.get("winners_20261022", {})
+    require(selected_winners == 15 and len(winner_positions) == 15 and
+            expect_winners.get("native_sens_composition_winners") == 15 and
+            expect_winners.get("mathematically_derived_selectors") == 512 and
+            expect_winners.get("semantic_winners_total") == 527,
+            "WINNER_COUNT", "D11 needs exactly 512 selector-law + 15 live SENS-library winners")
+    if source_files:
+        source_text = (root / "lib/persistent-vector.lisp").read_text(encoding="utf-8")
+        proof_text = (root / "crates/sens/tests/persistent_vector.rs").read_text(encoding="utf-8")
+        require("fn d11_пятнадцять_визначених_переможців_виконує_sens()" in proof_text,
+                "WINNER_NATIVE_TEST", "real SENS witness test is absent")
+        for item in rows:
+            winner = item.get("winner_20261022")
+            if winner is None:
+                continue
+            source_head = winner["ukr"]
+            require(f"(визначити {source_head}" in source_text,
+                    "WINNER_SOURCE", f"missing actual SENS function {source_head}")
+        map_path = root / "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv"
+        selected = [line.split("\t") for line in map_path.read_text(encoding="utf-8").splitlines()
+                    if "\tWINNER_DEFINED_SENS_COMPOSITION\t" in line]
+        require(len(selected) == 15 and
+                {row[0] for row in selected} == winner_positions,
+                "WINNER_PLACEMENT", "winner addresses must agree with existing D11 geometric map")
     # A source snapshot is historical evidence, NOT a veto if modern authority evolves.
     original = base.get("exclusion_snapshot", {})
     require(original.get("d10_blob_sha") == owner["inventory"]["git_blob"],
             "D10_CATALOG_PIN", "candidate exclusion was not made against owner-pinned D10")
     return {
         "test_id": "D11_AVAILABLE_FUNCTIONS_CANDIDATE_INVENTORY", "layer": "registry",
-        "status": "MECHANICAL_PASS", "semantic_status": "NOT_VERIFIED",
+        "status": "MECHANICAL_PASS", "semantic_status": "15_LIBRARY_WINNERS_SENS_LAW_512_DERIVED_SELECTORS",
         "target": "D11", "bit_width": 11, "capacity": 2048,
-        "candidates": actual, "d10_owner_pinned": 1024, "d11_testing_only": 43,
+        "candidates": actual, "winner_compositions": selected_winners, "derived_selectors": 512,
+        "defined_functions_total": 527, "d10_owner_pinned": 1024, "d11_testing_only": 43,
         "historical_aggregate_sha": original.get("foundation_blob_sha"),
         "current_aggregate_sha": hashes["aggregate"]["git_blob_sha1"],
         "aggregate_changed_since_ingest": original.get("foundation_blob_sha") != hashes["aggregate"]["git_blob_sha1"],
