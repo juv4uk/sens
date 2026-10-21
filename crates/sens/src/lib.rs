@@ -204,7 +204,7 @@ mod value;
 
 pub use binary_number::{BinaryNumber, BinaryNumberError};
 /// Canonical constructor for an existing domain-qualified exact rational.
-—Do not use this to mint a language identity: it only preserves the admitted Dn
+/// Do not use this to mint a language identity: it only preserves the admitted Dn
 /// identity carried by the numerator and denominator.
 pub use domain_numeric::{canonical_parts as exact_domain_fraction_parts, DomainNumericComposition};
 
