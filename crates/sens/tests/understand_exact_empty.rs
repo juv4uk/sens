@@ -34,6 +34,20 @@ fn empty_word_lists_never_evaluate_car() {
 }
 
 #[test]
+fn incomplete_word_lists_do_not_reach_second_or_third_selectors() {
+    let mut session = loaded();
+    for program in [
+        "(розібрати (001 (mars)))",
+        "(розібрати (001 (mars orbits)))",
+        "(розібрати-запит (001 (is)))",
+        "(розібрати-запит (001 (is mars)))",
+        "(розібрати-запит (001 (does mars)))",
+    ] {
+        assert_eq!(run(&mut session, program), "()", "{program}");
+    }
+}
+
+#[test]
 fn ordinary_nonempty_words_preserve_exact_advice_taker_laws() {
     let mut session = loaded();
     for (program, expected) in [
