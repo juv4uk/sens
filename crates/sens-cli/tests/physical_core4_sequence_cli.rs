@@ -285,6 +285,12 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-null-not-cons",
             "cdr-dotted-tail-domain-identity",
         "cons-two-projections-joint-domain-identity",
+        "d4-caar-nested-list",
+        "d4-cdar-pair-tail",
+        "d4-cddr-exact-two",
+        "d4-cadr-exact-second",
+        "d4-not-not-null-empty",
+        "d4-append-empty-left",
 ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
