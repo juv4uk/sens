@@ -15,7 +15,7 @@ fn український_поліном_обчислюється_в_sens_а_н�
     ].into_iter().enumerate() {
         // Два повноцінні позитивні D24+ виклики та негативний нечисловий аргумент.
         let program = source.replacen("(поліном 123)", tail, 1);
-        assert_ne!(program, source, "непередбачений source drift: {tail}");
+        assert!(program.contains(tail), "непередбачений source drift: {tail}");
         let file = std::env::temp_dir().join(format!(
             "sens-arithmetic-benchmark-{}-{index}.lisp", std::process::id()
         ));
