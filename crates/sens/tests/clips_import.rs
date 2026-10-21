@@ -72,6 +72,36 @@ fn clips_text_data_uses_current_sens_d7_d8_d9_without_legacy_string_literals() {
     }
 }
 
+/// Справжній виклик SENS: роздільник CLIPS і префікс модуля
+/// проходять чинні D6 зв'язування замість недопущеного D5 FUNCTION.
+#[test]
+fn clips_d6_binding_executes_real_rule_split_and_symbol_prefix() {
+    for (source, expected) in [
+        (
+            "(розділити-правило-кліпс (як-є ((planet ?x) => (assert (has-mass ?x)))))",
+            "(((planet ?x)) ((assert (has-mass ?x))))",
+        ),
+        (
+            "(розділити-правило-кліпс (як-є (=> (assert (has-mass ?x)))))",
+            "(() ((assert (has-mass ?x))))",
+        ),
+        (
+            "(прибрати-префікс-модуля-кліпс (як-є QUESTIONS::question))",
+            "question",
+        ),
+        (
+            "(прибрати-префікс-модуля-кліпс (як-є question))",
+            "question",
+        ),
+    ] {
+        let actual = eval_import(source);
+        assert_eq!(
+            actual, expected,
+            "test_id=clips-d6-binding layer=real-SENS input={source} expected={expected} actual={actual}"
+        );
+    }
+}
+
 #[test]
 fn clips_double_colon_prefix_is_an_exact_d1_total_predicate() {
     // The SENS library, not Rust, computes all predicates. One removed ':'
