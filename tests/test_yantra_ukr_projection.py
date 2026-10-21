@@ -51,6 +51,30 @@ def verify(source: str) -> None:
         if exact_form not in source:
             raise AssertionError(f"Yantra: втрачено чинний закон {label}")
 
+    # Механічна охорона джерельної послідовності. Реальна D1/D3
+    # поведінка (включно з неповним свідком) перевіряється SENS у yantra.rs.
+    helper = "(визначити рядкове-членство-формат-обміну-даними?"
+    start = source.find(helper)
+    if start < 0:
+        raise AssertionError("Yantra: немає перевірки повноти D3-свідка")
+    body = source[start:source.find("(визначити кодувати-значення-формат-обміну-даними", start)]
+    guards = (
+        "((атом? свідок)",
+        "((атом? (решта свідок))",
+        "((атом? (решта (решта свідок)))",
+        "(порожній? (решта (решта (решта свідок))))",
+    )
+    position = -1
+    for guard in guards:
+        found = body.find(guard)
+        if found < position or found < 0:
+            raise AssertionError("Yantra: неповна D3-трійка доступна без перевірки")
+        position = found
+    if body.find("(третє свідок)") <= position:
+        raise AssertionError("Yantra: ТРЕТЄ застосовується до неперевіреного списку")
+    if "(третє (класифікувати-рядкове-значення" in source:
+        raise AssertionError("Yantra: небезпечний безпосередній CDR на класифікаторі")
+
     definitions = re.findall(r"(?m)^\s*\(визначити\s+([^\s()]+)", source)
     if not definitions or len(definitions) != len(set(definitions)):
         raise AssertionError("Yantra: немає українських визначень або є дублікати")
