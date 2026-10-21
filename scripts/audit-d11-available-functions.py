@@ -185,7 +185,7 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
                     winner.get("semantic_defined") is True and
                     winner.get("new_primitive") is False and
                     winner.get("direct_d11_opcode_verified") is False and
-                    winner.get("source_file") in {"lib/persistent-vector.lisp", "lib/unify.lisp", "lib/codec-d2.lisp", "lib/world.lisp", "lib/si.lisp"} and
+                    winner.get("source_file") in {"lib/persistent-vector.lisp", "lib/unify.lisp", "lib/codec-d2.lisp", "lib/world.lisp", "lib/si.lisp, "lib/repl-core.lisp"} and
                     winner.get("native_law_test") in {
                         "crates/sens/tests/persistent_vector.rs::d11_пятнадцять_визначених_переможців_виконує_sens",
                         "crates/sens/tests/d11_unify_once.rs::d11_розвязати_один_раз_не_підмінює_рекурсивне_проходження",
@@ -195,6 +195,7 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
                         "crates/sens/tests/world_ancestor_sens.rs::d11_world_remove_first_native_law_and_mutant",
                         "crates/sens/tests/world_ancestor_sens.rs::d11_world_event_and_module_presence_are_native_sens_compositions",
                         "crates/sens/tests/scientific_constants.rs::d11_si_три_закони_запису_значення_та_одиниці",
+                        "crates/sens/tests/repl_core_malformed_tails.rs::d11_four_repl_library_laws_run_inside_sens",
                     },
                     "WINNER_LAW", f"row {index}: missing real SENS-defined winner law")
         kind, family = item.get("source_kind"), item.get("source_family")
