@@ -89,6 +89,16 @@ class CurrentTranslationD1Tests(unittest.TestCase):
             for reason in guard.check_translation_text(illegal_define)
         ))
 
+    def test_legacy_live_journal_reference_is_rejected(self):
+        self.assertEqual(self.source.count("(поточний-журнал-знань)"), 2)
+        outdated = self.source.replace(
+            "(поточний-журнал-знань)", "*knowledge-journal*", 1
+        )
+        self.assertTrue(any(
+            "англомовне посилання" in reason
+            for reason in guard.check_translation_text(outdated)
+        ))
+
     def test_duplicate_and_malformed_forms_are_rejected(self):
         duplicate = self.source + "\n(визначити переклад-стан (як-є ()))\n"
         self.assertTrue(any(
