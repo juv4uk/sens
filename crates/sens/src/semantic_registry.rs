@@ -219,21 +219,35 @@ pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::Dom
     if let Some(identity) = exact_source_index().uk.get(name).copied().flatten() {
         return Some(identity);
     }
-    // Use owner-ratified D9/D10 rows for the two proved selector roots;
-    // source spellings do not define new semantic identities.
-    for row in D9_DEFINITION_BINDINGS {
-        if matches!(row.bits >> 6, 0b011 | 0b100)
-            && row.names.len() == 5 && row.names[..2].contains(&name) {
-            return Some(DomainIdentity::D9(CoreD9::from_word(Bit9::new(row.bits).unwrap())));
+    higher_selector_uk_index().get(name).copied()
+        .or_else(|| d8_selector_uk_index().get(name).copied())
+}
+
+/// Lazily cache only the mathematical selector subfamily from the
+/// current owner tables. Unrelated D9/D10 residents remain non-callable.
+/// No linear table scan is performed for each SENS source expression.
+fn higher_selector_uk_index() -> &'static HashMap<&'static str, DomainIdentity> {
+    static INDEX: OnceLock<HashMap<&'static str, DomainIdentity>> = OnceLock::new();
+    INDEX.get_or_init(|| {
+        let mut names = HashMap::new();
+        for row in D9_DEFINITION_BINDINGS {
+            if matches!(row.bits >> 6, 0b011 | 0b100) && row.names.len() == 5 {
+                let id = DomainIdentity::D9(CoreD9::from_word(Bit9::new(row.bits).unwrap()));
+                for name in &row.names[..2] {
+                    names.insert(*name, id);
+                }
+            }
         }
-    }
-    for row in D10_DEFINITION_BINDINGS {
-        if matches!(row.bits >> 7, 0b011 | 0b100)
-            && row.names.len() == 5 && row.names[..2].contains(&name) {
-            return Some(DomainIdentity::D10(crate::DomainD10::new(row.bits).unwrap()));
+        for row in D10_DEFINITION_BINDINGS {
+            if matches!(row.bits >> 7, 0b011 | 0b100) && row.names.len() == 5 {
+                let id = DomainIdentity::D10(crate::DomainD10::new(row.bits).unwrap());
+                for name in &row.names[..2] {
+                    names.insert(*name, id);
+                }
+            }
         }
-    }
-    d8_selector_uk_index().get(name).copied()
+        names
+    })
 }
 
 /// D8 has 64 proved selector addresses. Their human names are projected
