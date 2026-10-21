@@ -63,6 +63,14 @@ fn malformed_bucket_does_not_hide_later_valid_sens_rules() {
             "(міркування-пошук-кошика (як-є missing) (як-є (() (p first))))",
             "()",
         ),
+        (
+            "(міркування-пошук-кошика (як-є p) (як-є (((bad key) orphan))))",
+            "()",
+        ),
+        (
+            "(міркування-пошук-кошика (як-є p) (як-є ()))",
+            "()",
+        ),
     ] {
         assert_eq!(eval(&mut s, input), expected, "неповний кошик: {input}");
     }
