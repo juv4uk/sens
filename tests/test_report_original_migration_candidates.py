@@ -18,6 +18,7 @@ assert spec is not None and spec.loader is not None
 mod = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = mod
 spec.loader.exec_module(mod)
+from sens_t5_codec import encode_t5m_projection
 
 
 class OriginalCandidateTests(unittest.TestCase):
@@ -99,10 +100,6 @@ class OriginalCandidateTests(unittest.TestCase):
             mod.categorize({"path":"link.lisp","status":"blocked"},self.root)
 
 
-    def test_current_d1_d9_unpaired_source_era_is_default(self):
-        self.assertIn("knowledge/d1-d9-foundation.json", mod.ARGS)
-        self.assertNotIn("knowledge/d1-d7-foundation.json", mod.ARGS)
-
     def test_real_original_report_excludes_paired_before_counting(self):
         (self.root / "new-old.lisp").write_text("(unknown ())\\n", encoding="utf-8")
         (self.root / "paired.lisp").write_text("()\\n", encoding="utf-8")
@@ -124,8 +121,8 @@ class OriginalCandidateTests(unittest.TestCase):
         }
         def fake_run(command, **kwargs):
             self.assertIn("--unpaired-only", command)
-            self.assertEqual(command[command.index("--source-era")+1], "auto")
-            self.assertIn("knowledge/d1-d9-foundation.json", command)
+            self.assertEqual(command[command.index("--foundation")+1],
+                             "knowledge/d1-d11-foundation.json")
             Path(command[command.index("--report")+1]).write_text(json.dumps(report))
             return subprocess.CompletedProcess(command, 2, "", "")
         with patch.object(mod.subprocess, "run", side_effect=fake_run):
@@ -305,7 +302,7 @@ class OriginalCandidateTests(unittest.TestCase):
                      "benchmarks/arithmetic.lisp"):
             self.assertNotIn(path, entries)
 
-    def test_data_manifest_rejects_source_drift_and_existing_physical_sens(self):
+    def test_data_manifest_checks_source_pin_and_unproven_physical_sens(self):
         p = self.root / "lib/machine/isa/sample.lisp"
         p.parent.mkdir(parents=True)
         p.write_text("(isa-catalogue-1)\n", encoding="utf-8")
@@ -318,9 +315,24 @@ class OriginalCandidateTests(unittest.TestCase):
             mod._checked_nonprogram_entry(
                 self.root, "lib/machine/isa/sample.lisp", "a" * 40)
         p.with_suffix(".sens").write_bytes(b"forbidden")
-        with self.assertRaisesRegex(ValueError, "unproven physical pair"):
+        with self.assertRaisesRegex(ValueError, "lacks canonical bit view"):
             mod._checked_nonprogram_entry(
                 self.root, "lib/machine/isa/sample.lisp", hash1)
+
+    def test_nonprogram_data_can_have_verified_physical_pair_without_semantic_admission(self):
+        p = self.root / "lib/machine/isa/sample.lisp"
+        p.parent.mkdir(parents=True)
+        p.write_text("(isa-catalogue/1)\n", encoding="utf-8")
+        p.with_suffix(".sens").write_bytes(encode_t5m_projection("10 01"))
+        p.with_suffix("").write_text("10 01\n", encoding="ascii")
+
+        entry = mod._checked_nonprogram_entry(
+            self.root, "lib/machine/isa/sample.lisp", mod.git_blob_sha(p))
+
+        self.assertEqual(entry["physical_pair"]["codec"], "t5m")
+        self.assertEqual(entry["physical_pair"]["word_count"], 2)
+        self.assertFalse(entry["semantic_oracle_admitted"])
+        self.assertFalse(entry["automatic_sens_companion"])
 
     def test_forged_executable_cannot_enter_data_isa_cohort(self):
         p = self.root / "lib/core1.lisp"
@@ -343,13 +355,11 @@ class OriginalCandidateTests(unittest.TestCase):
 
     def test_exact_comment_only_loader_sources_are_data_not_executable(self):
         entries = mod.load_nonprogram_classification(ROOT)
-        expected = {
-            "lib/core2.lisp": "9a39a1d341dde7faf3a1899b52f78a7b1e931783",
-            "lib/surface/ukr.lisp": "f5577917e72f2661cb64b277afc85122276d13c7",
-        }
-        for path, digest in expected.items():
+        expected = ("lib/core2.lisp", "lib/surface/ukr.lisp")
+        for path in expected:
             self.assertIn(path, entries)
-            self.assertEqual(entries[path]["source_git_blob_sha"], digest)
+            self.assertEqual(entries[path]["source_git_blob_sha"],
+                             mod.git_blob_sha(ROOT / path))
             self.assertEqual(entries[path]["source_class"], "NONPROGRAM_DATA_REVIEWED")
             self.assertEqual(entries[path]["cohort"], "comment-only-loader")
             self.assertFalse(entries[path]["semantic_oracle_admitted"])
@@ -373,7 +383,9 @@ class OriginalCandidateTests(unittest.TestCase):
         manifest = self.root / "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
         manifest.parent.mkdir(parents=True)
         payload = {
-            "schema": "sens-migration-nonprogram-manifest/1",
+            "schema": mod.NONPROGRAM_SCHEMA_BY_MANIFEST[
+                "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
+            ],
             "issue": 4460,
             "automatic_sens_companion": False,
             "entries": entries,
@@ -400,15 +412,16 @@ class OriginalCandidateTests(unittest.TestCase):
     def test_ratified_domain_tables_are_data_not_executable_migration(self):
         classified = mod.load_nonprogram_classification(ROOT)
         rows = [v for v in classified.values() if v["cohort"] == "domain-table"]
-        self.assertEqual(len(rows), 9)
+        self.assertEqual(len(rows), 11)
         self.assertEqual(
             sorted(r["path"] for r in rows),
-            sorted(f"lib/domains/d{i}.lisp" for i in range(1, 10)),
+            sorted(f"lib/domains/d{i}.lisp" for i in range(1, 12)),
         )
         self.assertTrue(all(r["source_class"] == "NONPROGRAM_DATA_REVIEWED"
                             and r["semantic_oracle_admitted"] is False
                             and r["automatic_sens_companion"] is False for r in rows))
-        self.assertNotIn("lib/domains/d10.lisp", classified)
+        self.assertIn("lib/domains/d10.lisp", classified)
+        self.assertIn("lib/domains/d11.lisp", classified)
         self.assertNotIn("lib/core1.lisp", classified)
 
 

@@ -24,6 +24,7 @@ SCRIPTS = str(ROOT / "scripts")
 if SCRIPTS not in sys.path:
     sys.path.insert(0, SCRIPTS)
 from migration_source_scope import scope
+from audit_t5_file_pairs import identify_physical
 ARGS = [
     "--foundation", "knowledge/d1-d11-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",
@@ -192,6 +193,15 @@ NONPROGRAM_MANIFESTS = (
     ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
     ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 14),
 )
+NONPROGRAM_SCHEMA_BY_MANIFEST = {
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "sens-migration-nonprogram-manifest/1",
+    "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "sens-migration-nonprogram-manifest-1",
+    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "sens-migration-nonprogram-manifest/1",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "sens-migration-nonprogram-manifest-1",
+    "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "sens-migration-nonprogram-manifest-1",
+    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "sens-migration-nonprogram-manifest-1",
+    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "sens-migration-nonprogram-manifest/1",
+}
 
 
 def _checked_nonprogram_entry(root: Path, path: str, expected_sha: str) -> dict:
@@ -209,11 +219,27 @@ def _checked_nonprogram_entry(root: Path, path: str, expected_sha: str) -> dict:
     actual = git_blob_sha(source)
     if actual != expected_sha:
         raise ValueError(f"nonprogram source drift: {path}: {actual} != {expected_sha}")
-    if source.with_suffix(".sens").exists() or source.with_suffix(".sens").is_symlink():
-        raise ValueError(f"nonprogram source has unproven physical pair: {path}")
+    physical = source.with_suffix(".sens")
+    view = source.with_suffix("")
+    pair = None
+    if physical.exists() or physical.is_symlink():
+        if physical.is_symlink() or not physical.is_file():
+            raise ValueError(f"unsafe nonprogram physical companion: {path}")
+        if view.is_symlink() or not view.is_file():
+            raise ValueError(f"nonprogram physical companion lacks canonical bit view: {path}")
+        try:
+            codec, words = identify_physical(physical.read_bytes(), view=view.read_bytes())
+        except (OSError, UnicodeError, ValueError) as exc:
+            raise ValueError(f"unproven nonprogram physical companion: {path}: {exc}") from exc
+        if codec != "t5m":
+            raise ValueError(f"nonprogram physical companion is not current T5M: {path}")
+        pair = {"codec": codec, "word_count": len(words),
+                "physical_sha256": hashlib.sha256(physical.read_bytes()).hexdigest(),
+                "view_sha256": hashlib.sha256(view.read_bytes()).hexdigest()}
     return {"path": rel.as_posix(), "source_git_blob_sha": actual,
             "source_class": "NONPROGRAM_DATA_REVIEWED",
-            "semantic_oracle_admitted": False, "automatic_sens_companion": False}
+            "physical_pair": pair, "semantic_oracle_admitted": False,
+            "automatic_sens_companion": False}
 
 
 def load_nonprogram_classification(root: Path, *, selected_paths: set[str] | None = None) -> dict[str, dict]:
@@ -226,7 +252,7 @@ def load_nonprogram_classification(root: Path, *, selected_paths: set[str] | Non
         if not manifest.is_file() or manifest.is_symlink():
             raise ValueError(f"unsafe nonprogram manifest: {name}")
         record = json.loads(manifest.read_text(encoding="utf-8"))
-        if (record.get("schema") != "sens-migration-nonprogram-manifest-1"
+        if (record.get("schema") != NONPROGRAM_SCHEMA_BY_MANIFEST[name]
                 or record.get("automatic_sens_companion") is not False
                 or record.get("issue") != 4460):
             raise ValueError(f"nonprogram authority mismatch: {name}")

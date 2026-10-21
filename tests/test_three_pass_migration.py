@@ -232,8 +232,12 @@ class ThreePassMigrationTests(unittest.TestCase):
         source = (ROOT / "lib/repl-core.lisp").read_text(encoding="utf-8")
         self.assertNotIn("текст?", source)
         self.assertIn("рядок?", source)
-        projection, _ = self.migrate('(рядок? "x")')
-        self.assertEqual(projection.split()[1], "110100110")
+        self.assertEqual(self.my.get("рядок?"), ("110100110", "D9"))
+        projection, resolver = self.migrate('(рядок? "x")')
+        self.assertNotIn("110100110", projection.split())
+        words, origin = resolver.head(mod.Tok("ATOM", "рядок?", 0), self.text7)
+        self.assertEqual(origin, "d7-resident-head")
+        self.assertNotIn("110100110", words)
         with self.assertRaisesRegex(mod.MigrationError, "legacy-unmapped"):
             self.migrate('(текст? "x")')
 
