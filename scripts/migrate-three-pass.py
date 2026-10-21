@@ -1552,7 +1552,8 @@ def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge
     return physical, receipt
 
 
-def migrate_file(source: str,resolver,text7,*,codec="t5m",source_surface="default"):
+def migrate_file(source: str,resolver,text7,*,codec="t5m",source_surface="default",
+                 imported_bindings=()):
     if codec not in ("t5", "t5m"):
         raise MigrationError(f"unsupported physical codec {codec!r}")
     if source_surface not in ("default", "ук", "укр"):
@@ -1574,7 +1575,12 @@ def migrate_file(source: str,resolver,text7,*,codec="t5m",source_surface="defaul
                         Tok("ATOM", ch, tok.pos + offset),
                     )
     forms=Parser(tokens).parse_program()
-    resolver.set_global_bindings(collect_global_bindings(forms, resolver), text7)
+    # A caller can identify an actually loaded Lisp dependency. Its DEFINE
+    # target is a source binding (D7 name), NOT a callable D9 resident.
+    # Current-file DEFINE shadows an imported one, like Lisp loading order.
+    resolver.set_global_bindings(
+        [*imported_bindings, *collect_global_bindings(forms, resolver)], text7
+    )
     all_words=[]
     for i,form in enumerate(forms):
         if i: all_words.append(D2_SEP)
@@ -1603,6 +1609,8 @@ def main():
     ap.add_argument("--source-surface", choices=("default", "ук", "укр"),
                     default="укр",
                     help="типово повна українська проєкція укр і десяткова кома; default — явний історичний режим")
+    ap.add_argument("--binding-source", type=Path, action="append", default=[],
+                    help="явний попередньо завантажений .lisp із DEFINE; лише для одного файла")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
@@ -1639,6 +1647,30 @@ def main():
         paths = sorted(source_files(root))
     else:
         ap.error(f"input path does not exist: {root}")
+    # Cross-file Lisp functions cannot be inferred from D9 residency. Read
+    # only caller-declared source definitions, never a provisional registry.
+    imported_bindings = []
+    binding_receipts = []
+    if args.binding_source and not root.is_file():
+        ap.error("--binding-source requires exactly one input .lisp file")
+    for bound_path in args.binding_source:
+        candidate = bound_path.absolute()
+        if (candidate.suffix != ".lisp" or not candidate.is_file()
+                or any(p.is_symlink() for p in (candidate, *candidate.parents))
+                or not candidate.resolve().is_relative_to(REPO_ROOT.resolve())
+                or candidate.resolve() == root):
+            ap.error(f"invalid previously loaded Lisp source: {bound_path}")
+        raw = candidate.read_bytes()
+        imported_forms = Parser(tokenize(
+            strip_comments(raw.decode("utf-8")),
+            source_surface=args.source_surface,
+        )).parse_program()
+        imported_bindings.extend(collect_global_bindings(imported_forms))
+        binding_receipts.append({
+            "path": candidate.relative_to(REPO_ROOT).as_posix(),
+            "sha256": hashlib.sha256(raw).hexdigest(),
+            "define_bindings": len(collect_global_bindings(imported_forms)),
+        })
     skipped_paired = []
     if args.unpaired_only:
         candidates = []
@@ -1686,6 +1718,7 @@ def main():
                 projection = migrate_file(
                     source, resolver, text7, codec=args.codec,
                     source_surface=args.source_surface,
+                    imported_bindings=imported_bindings,
                 )
             finally:
                 signal.alarm(0)
@@ -1791,6 +1824,7 @@ def main():
         "skipped_paired_paths": skipped_paired,
         "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; under the D1–24+ frame, width alone grants neither identity nor callability; this migration requires a named current identity and an admitted call mechanism",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
+        "explicit_preloaded_binding_sources": binding_receipts,
         "mode": "dry-run" if args.dry_run else "write-new-only-zig-minted",
         "semantic_admitted": False,
         "physical_producer": ("NOT_INVOKED_ALREADY_PAIRED"
