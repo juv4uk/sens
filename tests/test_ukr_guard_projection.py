@@ -127,11 +127,15 @@ class GuardProjectionTests(unittest.TestCase):
         self.assertGreater(end, start)
         guard_field = self.text[start:end]
         self.assertIn("(функція (поле посилання)", guard_field)
-        self.assertIn("(функція (запис)", guard_field)
+        self.assertIn("(захист-еталон-поле-із-запису", guard_field)
+        self.assertNotIn("((функція", guard_field)
         for old_binding in ("(функція (field reference)", "(функція (entry)", "(друге entry)"):
             self.assertNotIn(old_binding, guard_field)
-        # The current Lisp law recursively finds a field; the old D5 helper
-        # remains ratified but is no longer a required call in this source.
+        # Обидва реальні D4 визначення повертають ті самі записи й поля.
+        # Заборонений value-call на анонімну FUNCTION більше не потрібен.
+        self.assertIn("(визначити захист-знайти-запис-у-рядку\n", self.text)
+        self.assertIn("(визначити захист-еталон-поле-із-запису\n", self.text)
+        self.assertNotIn("((функція", self.text)
         self.assertIn("(визначити захист-знайти-запис\n", self.text)
         self.assertIn("(захист-знайти-запис поле (решта посилання))", guard_field)
         self.assertIn("((сторожа--рівні? ключ (перше запис)) запис)", self.text)
