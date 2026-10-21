@@ -604,6 +604,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-insert-second",
         "lib/list-delete-second",
         "lib/list-halfturn-six",
+        "lib/list-unique-stable",
         "lib/замінити-третій-в-четвірці",
         "lib/поміняти-другий-і-третій",
         "lib/виключне-або-д1",
