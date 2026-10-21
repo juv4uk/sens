@@ -71,8 +71,11 @@ PY
     # не може тихо вважатися правильною: це колишній виконуваний артефакт,
     # якого нове джерело вже не визначає. Не зачіпаємо чужі файли.
     stale_pair="$(dirname "$file")/$(basename "$file" .lisp).sens"
-    if [[ -e "$stale_pair" || -L "$stale_pair" ]]; then
-      echo "::error::T5M_NONPROGRAM_STALE_PAIR source=$file companion=$stale_pair action=remove-obsolete-pair-or-restore-source" >&2
+    stale_view="${stale_pair%.sens}"
+    # Похідний перегляд без носія так само є залишком колишньої програми.
+    # Перевіряємо і dangling symlink, не лише звичайний файл.
+    if [[ -e "$stale_pair" || -L "$stale_pair" || -e "$stale_view" || -L "$stale_view" ]]; then
+      echo "::error::T5M_NONPROGRAM_STALE_PAIR source=$file companion=$stale_pair view=$stale_view action=remove-obsolete-pair-and-view-or-restore-source" >&2
       failed_files=$((failed_files + 1))
       continue
     fi
@@ -121,7 +124,14 @@ PY
       failed_files=$((failed_files + 1))
     fi
   else
-    echo "::notice::T5M_PAIR_NOT_COMMITTED path=$file release=NOT_CERTIFIED"
+    # Без фізичного .sens однойменний перегляд не може засвідчувати пару.
+    # Не зупиняємо новий SENS-виклик: покажемо його результат попри борг.
+    if [[ -e "$committed_view" || -L "$committed_view" ]]; then
+      echo "::error::T5M_ORPHAN_VIEW source=$file view=$committed_view companion=$committed action=refresh-complete-pair" >&2
+      failed_files=$((failed_files + 1))
+    else
+      echo "::notice::T5M_PAIR_NOT_COMMITTED path=$file release=NOT_CERTIFIED"
+    fi
   fi
   stdout="$dir/runtime.stdout"
   stderr="$dir/runtime.stderr"
