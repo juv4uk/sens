@@ -371,6 +371,7 @@ mod tests {
             0b110011101, // STRING-REST
             0b110101010, // STRING-PREFIX?
             0b110101011, // STRING-FIRST
+            0b110100110, // STRINGP
         ] {
             let operation = DomainIdentity::from_source_word(
                 BinarySourceWord::W9(Bit9::new(raw).unwrap()),
