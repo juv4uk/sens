@@ -117,3 +117,42 @@ fn exact_d2_quote_of_dotted_pair_executes_without_text7_marker_proxies() {
             "malformed D2 admitted as SENS data: {bad}");
     }
 }
+
+#[test]
+fn d11_кодек_д2_три_допоміжні_закони_у_sens() {
+    // Перевіряємо тіла виконуваної SENS-бібліотеки, без нових
+    // D11-примітивів, Python-оракулів чи підміни D2-маркерів.
+    let mut s = codec_session();
+    for (name, positive, expected, negative, rejected) in [
+        (
+            "кодек-д2-додати-префікс",
+            "(кодек-д2-додати-префікс (як-є (альфа бета)) (як-є (гамма)))",
+            "(альфа бета гамма)",
+            "(кодек-д2-додати-префікс (як-є (альфа)) (як-є (гамма)))",
+            "(альфа гамма)",
+        ),
+        (
+            "кодек-д2-перший-декодований",
+            "(кодек-д2-перший-декодований (кодек-д2-кодувати-вузол (як-є (альфа бета)) (як-є (хвіст))))",
+            "(альфа бета)",
+            "(кодек-д2-перший-декодований (кодек-д2-кодувати-вузол (як-є (альфа . бета)) (як-є (хвіст))))",
+            "(альфа . бета)",
+        ),
+        (
+            "кодек-д2-декодувати-вузол",
+            "(кодек-д2-декодувати-вузол (кодек-д2-кодувати-вузол (як-є (альфа бета)) (як-є (хвіст))))",
+            "((альфа бета) хвіст)",
+            "(кодек-д2-декодувати-вузол (кодек-д2-кодувати-вузол (як-є (альфа . бета)) (як-є (хвіст))))",
+            "((альфа . бета) хвіст)",
+        ),
+    ] {
+        let actual = eval(positive, &mut s);
+        assert_eq!(actual, expected,
+            "test_id=D11-CODEC-{name}-POS layer=SENS source={positive} expected={expected} actual={actual}");
+        let opposite = eval(negative, &mut s);
+        assert_eq!(opposite, rejected,
+            "test_id=D11-CODEC-{name}-NEG layer=SENS source={negative} expected={rejected} actual={opposite}");
+        assert_ne!(actual, opposite,
+            "test_id=D11-CODEC-{name}-DISTINCT layer=SENS");
+    }
+}
