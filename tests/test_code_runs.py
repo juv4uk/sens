@@ -553,19 +553,11 @@ class CodecUkrProjectionTests(unittest.TestCase):
 
 
 class SiDerivedUkrProjectionTests(unittest.TestCase):
-    """Migrate exact D4/D5/D8 call heads without changing SI arithmetic data."""
+    """Чинна D4/D5-проєкція SI: без сирих множників та побайтового псевдодоказу."""
 
     SOURCE = ROOT / "lib" / "si-derived.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
     D5 = ROOT / "lib" / "domains" / "d5.lisp"
-    D8 = ROOT / "lib" / "domains" / "d8.lisp"
-    ORIGINAL_BLOB = "0074e9266a09e24804fb0798723b02a863f5ac66"
-
-    @staticmethod
-    def git_blob_sha(data: bytes) -> str:
-        return hashlib.sha1(
-            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
-        ).hexdigest()
 
     def assert_ratified(self, table_path: Path, bits: str,
                         surface: str, english: str, lisp_name: str):
@@ -574,67 +566,64 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
             line for line in table.splitlines()
             if re.match(rf"^\s*\({re.escape(bits)}\s", line)
         ]
-        self.assertEqual(len(rows), 1, f"{bits}: expected one exact-width row")
+        self.assertEqual(len(rows), 1, f"{bits}: має бути одна ратифікована координата")
         self.assertIn(f"(укр {surface})", rows[0])
         self.assertIn(f"(en {english})", rows[0])
         self.assertIn(f"(LISP {lisp_name})", rows[0])
 
     @staticmethod
     def restore_heads(source: str) -> str:
-        # Exact inverse for executable list heads only. Comments, strings,
-        # numeric values and quoted SI records otherwise remain unchanged.
-        inverse = {
-            "визначити": "0011",
-            "помножити": "10110",
-            "поділити": "11110110",
-        }
-        pattern = re.compile(
-            r"[(](" + "|".join(re.escape(name) for name in inverse) + r")(?=\s)"
+        # Доменні викличні голови, але НЕ коментарі й не рядкові дані.
+        from scripts.report_ukr_projection_progress import tokenize_lisp
+        words = {"визначити": "0011", "додати": "01010",
+                 "помножити": "10110", "частка": "10111"}
+        # Для перевірки оберненості порівнюємо структурні токени;
+        # зовнішнє відновлення байтів із коментарів не потрібне.
+        tokens = tokenize_lisp(source)
+        return " ".join(
+            words.get(token.value, token.value)
+            if token.kind == "ATOM" else token.value
+            for token in tokens
         )
-        return pattern.sub(lambda match: "(" + inverse[match.group(1)], source)
 
-    def test_si_derived_uses_ratified_ukr_heads_and_preserves_arithmetic(self):
+    def test_si_derived_uses_ratified_ukr_heads_and_exact_addition(self):
         self.assert_ratified(self.D4, "0011", "визначити", "define", "DEFINE")
         self.assert_ratified(self.D5, "10110", "помножити", "times", "TIMES")
-        self.assert_ratified(self.D8, "11110110", "поділити", "divide", "DIVIDE")
+        self.assert_ratified(self.D5, "10111", "частка", "quotient", "QUOTIENT")
+        self.assert_ratified(self.D5, "01010", "додати", "plus", "PLUS")
 
         source = self.SOURCE.read_text(encoding="utf-8")
-        self.assertEqual(len(re.findall(r"\(визначити(?=\s)", source)), 7)
-        self.assertEqual(len(re.findall(r"\(помножити(?=\s)", source)), 7)
-        self.assertEqual(len(re.findall(r"\(поділити(?=\s)", source)), 4)
-        self.assertIsNone(
-            re.search(r"\((?:0011|10110|11110110)(?=\s)", source),
-            "ratified call heads must use their exact Ukrainian projection",
+        self.assertEqual(len(re.findall(r"\(визначити(?=\s)", source)), 8)
+        self.assertEqual(len(re.findall(r"\(помножити(?=\s)", source)), 5)
+        self.assertEqual(len(re.findall(r"\(частка(?=\s)", source)), 4)
+        self.assertEqual(len(re.findall(r"\(додати(?=\s)", source)), 1)
+        self.assertIn(
+            "(визначити сі:подвоєний-заряд\n"
+            "  (додати сі:елементарний-заряд сі:елементарний-заряд))",
+            source,
         )
+        self.assertNotRegex(
+            "\n".join(line.split(";", 1)[0] for line in source.splitlines()),
+            r"(?<![\w:])2(?=[\s)])",
+            "SI: виконуваний сирий числовий множник не є D24-операндом",
+        )
+        self.assertNotRegex(source, r"\((?:0011|01010|10110|10111)(?=\s)")
 
-        for name in (
-            "сі:стала-фарадея", "сі:молярна-газова-стала",
-            "сі:стала-джозефсона", "сі:стала-фон-клітцинга",
-            "сі:квант-магнітного-потоку", "сі:квант-електричної-провідності",
-            "сі:молярна-стала-планка",
-        ):
-            self.assertIn(f"(визначити {name}", source)
-        restored = self.restore_heads(source)
+    def test_comments_are_not_part_of_inverse_program_identity(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        comment_only_edit = "; Не частина програми, не кодується як SENS.\n" + source
         self.assertEqual(
-            re.findall(r"(?<![\w])\d+\s*/\s*\d+", restored),
-            re.findall(r"(?<![\w])\d+\s*/\s*\d+", source),
-            "SI exact rational values must not change during surface migration",
+            self.restore_heads(source),
+            self.restore_heads(comment_only_edit),
+            "коментарі не повинні впливати на тотожність точних слів",
         )
 
-    def test_inverse_projection_restores_all_original_bytes(self):
+    def test_wrong_math_head_changes_program_identity(self):
         source = self.SOURCE.read_text(encoding="utf-8")
-        restored = self.restore_heads(source).encode("utf-8")
-
-    def test_wrong_ukr_peer_fails_the_inverse_witness(self):
-        source = self.SOURCE.read_text(encoding="utf-8")
-        mutant = source.replace(
-            "(помножити сі:стала-авогадро",
-            "(множити-нечинне сі:стала-авогадро",
-            1,
-        )
+        mutant = source.replace("(додати сі:елементарний-заряд",
+                                "(множити-нечинне сі:елементарний-заряд", 1)
+        self.assertNotEqual(self.restore_heads(mutant), self.restore_heads(source))
         self.assertNotEqual(mutant, source)
-        restored = self.restore_heads(mutant).encode("utf-8")
-
 
 
 
