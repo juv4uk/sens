@@ -26,18 +26,18 @@ fn eval_translation(source: &str) -> String {
 #[test]
 fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
     let source = r#"
-        (def before *knowledge-journal*)
-        (def proposal
-          (quote (translation/1 candidate clause
+        (визначити before *knowledge-journal*)
+        (визначити proposal
+          (як-є (translation/1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
-        (def review (переклад-перевірка (quote corpus) proposal))
-        (list
+        (визначити review (переклад-перевірка (як-є corpus) proposal))
+        (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
-          (equal? before *knowledge-journal*)
-          (equal? (переклад-допуск-вміст review)
-                  (quote ((human socrates)))))
+          (однакові? before *knowledge-journal*)
+          (однакові? (переклад-допуск-вміст review)
+                  (як-є ((human socrates)))))
     "#;
     assert_eq!(
         eval_translation(source),
@@ -48,38 +48,38 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
 #[test]
 fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
     let source = r#"
-        (def proposal
-          (quote (translation/1 candidate clause
+        (визначити proposal
+          (як-є (translation/1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
-        (def review (переклад-перевірка (quote corpus) proposal))
-        (def before-known (module-known? (quote corpus)))
-        (def admission (advise corpus (переклад-допуск-вміст review)))
-        (list
+        (визначити review (переклад-перевірка (як-є corpus) proposal))
+        (визначити before-known (модуль-відомий? (як-є corpus)))
+        (повідомити-знання corpus (переклад-допуск-вміст review))
+        (список
           before-known
-          (car admission)
+          (модуль-відомий? (як-є corpus))
           (результат-стан
-            (міркувати-у-спостерігати (quote corpus) (quote (human socrates)))))
+            (міркувати-у-спостерігати (як-є corpus) (як-є (human socrates)))))
     "#;
-    assert_eq!(eval_translation(source), "(() accepted proved)");
+    assert_eq!(eval_translation(source), "(() (1) proved)");
 }
 
 #[test]
 fn ambiguous_translation_is_evidence_not_knowledge() {
     let source = r#"
-        (def before *knowledge-journal*)
-        (def proposal
-          (quote (translation/1 ambiguous clause
+        (визначити before *knowledge-journal*)
+        (визначити proposal
+          (як-є (translation/1 ambiguous clause
                    "Mercury is hot."
                    (((hot mercury-planet))
                     ((hot mercury-element))))))
-        (def review (переклад-перевірка (quote corpus) proposal))
-        (def evidence (переклад-доказ-наступний review (quote ())))
-        (list
+        (визначити review (переклад-перевірка (як-є corpus) proposal))
+        (визначити evidence (переклад-доказ-наступний review (як-є ())))
+        (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
-          (length evidence)
-          (equal? before *knowledge-journal*)
+          (довжина evidence)
+          (однакові? before *knowledge-journal*)
           (переклад-допустимий? review))
     "#;
     assert_eq!(
@@ -91,18 +91,18 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
 #[test]
 fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
     let source = r#"
-        (def before *knowledge-journal*)
-        (def proposal
-          (quote (translation/1 candidate clause
+        (визначити before *knowledge-journal*)
+        (визначити proposal
+          (як-є (translation/1 candidate clause
                    "Socrates is human."
                    ((human (var))))))
-        (def review (переклад-перевірка (quote corpus) proposal))
-        (def evidence (переклад-доказ-наступний review (quote ())))
-        (list
+        (визначити review (переклад-перевірка (як-є corpus) proposal))
+        (визначити evidence (переклад-доказ-наступний review (як-є ())))
+        (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
-          (length evidence)
-          (equal? before *knowledge-journal*)
+          (довжина evidence)
+          (однакові? before *knowledge-journal*)
           (переклад-допуск-вміст review))
     "#;
     assert_eq!(
@@ -114,18 +114,18 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
 #[test]
 fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
     let source = r#"
-        (def before *knowledge-journal*)
-        (def proposal
-          (quote (translation/1 rejected clause
+        (визначити before *knowledge-journal*)
+        (визначити proposal
+          (як-є (translation/1 rejected clause
                    "Colorless green ideas sleep furiously."
                    unsupported-translation)))
-        (def review (переклад-перевірка (quote corpus) proposal))
-        (def evidence (переклад-доказ-наступний review (quote ())))
-        (list
+        (визначити review (переклад-перевірка (як-є corpus) proposal))
+        (визначити evidence (переклад-доказ-наступний review (як-є ())))
+        (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
-          (length evidence)
-          (equal? before *knowledge-journal*)
+          (довжина evidence)
+          (однакові? before *knowledge-journal*)
           (переклад-допуск-вміст review))
     "#;
     assert_eq!(
@@ -137,17 +137,17 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
 #[test]
 fn existing_explicit_opposite_overrules_an_external_candidate() {
     let source = r#"
-        (advise corpus (quote ((not? (human socrates)))))
-        (def before *knowledge-journal*)
-        (def proposal
-          (quote (translation/1 candidate clause
+        (повідомити-знання corpus (як-є ((not? (human socrates)))))
+        (визначити before *knowledge-journal*)
+        (визначити proposal
+          (як-є (translation/1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
-        (def review (переклад-перевірка (quote corpus) proposal))
-        (list
+        (визначити review (переклад-перевірка (як-є corpus) proposal))
+        (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
-          (equal? before *knowledge-journal*)
+          (однакові? before *knowledge-journal*)
           (переклад-допуск-вміст review))
     "#;
     assert_eq!(
@@ -159,19 +159,19 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
 #[test]
 fn accepted_query_is_a_question_not_a_knowledge_write() {
     let source = r#"
-        (def before *knowledge-journal*)
-        (def proposal
-          (quote (translation/1 candidate query
+        (визначити before *knowledge-journal*)
+        (визначити proposal
+          (як-є (translation/1 candidate query
                    "Is Plato metallic?"
                    (metallic plato))))
-        (def review (переклад-перевірка (quote corpus) proposal))
-        (list
+        (визначити review (переклад-перевірка (як-є corpus) proposal))
+        (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
           (переклад-допуск-вміст review)
-          (equal? before *knowledge-journal*)
+          (однакові? before *knowledge-journal*)
           (результат-стан
-            (міркувати-у-спостерігати (quote corpus) (переклад-вміст proposal))))
+            (міркувати-у-спостерігати (як-є corpus) (переклад-вміст proposal))))
     "#;
     assert_eq!(eval_translation(source), "(accepted query () (1) blocked)");
 }
@@ -179,12 +179,12 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
 #[test]
 fn one_alternative_is_not_allowed_to_masquerade_as_ambiguity() {
     let source = r#"
-        (def proposal
-          (quote (translation/1 ambiguous clause
+        (визначити proposal
+          (як-є (translation/1 ambiguous clause
                    "Mercury is hot."
                    (((hot mercury))))))
-        (def review (переклад-перевірка (quote corpus) proposal))
-        (list
+        (визначити review (переклад-перевірка (як-є corpus) proposal))
+        (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
           (переклад-допуск-вміст review))
@@ -198,11 +198,11 @@ fn one_alternative_is_not_allowed_to_masquerade_as_ambiguity() {
 #[test]
 fn malformed_protocol_envelope_is_named_before_semantic_admission() {
     let source = r#"
-        (def review
+        (визначити review
           (переклад-перевірка
-            (quote corpus)
-            (quote (translation/2 candidate clause "text" ((human socrates))))))
-        (list
+            (як-є corpus)
+            (як-є (translation/2 candidate clause "text" ((human socrates))))))
+        (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review))
     "#;
