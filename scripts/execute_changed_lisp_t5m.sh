@@ -179,6 +179,24 @@ PY
       failed_files=$((failed_files + 1))
       continue
     fi
+    # Нове T5M D7: виконуване людське ім'я може мати лише Text7
+    # транспортне слово. Голий .sens не знає його джерельного зв'язування.
+    # Парний вхід перевіряє exact width+bits через Zig, потім виконує SENS.
+    # UnknownSymbol після парної перевірки все ще реальна помилка, не PASS.
+    if grep -Fq 'unknown Text7 binding:' "$stderr"; then
+      echo "::notice::T5M_STANDALONE_D7_NEEDS_SOURCE_AUTHORITY source=$file pair=$pair status=$status"
+      if timeout 45s "$binary" --t5m-pair "$file" "$pair" >"$stdout" 2>"$stderr"; then
+        result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
+        echo "T5M_PHYSICAL_PAIRED_D7_PASS source=$file pair=$pair physical=ZIG_VERIFIED result_sha256=$result_sha semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+        continue
+      else
+        status=$?
+        sed 's/^/T5M paired D7 stderr: /' "$stderr" >&2
+        echo "::error::T5M_PHYSICAL_PAIRED_D7_FAIL source=$file pair=$pair status=$status"
+        failed_files=$((failed_files + 1))
+        continue
+      fi
+    fi
     sed 's/^/T5M stderr: /' "$stderr" >&2
     echo "::error::T5M_FILE_EXECUTION_FAIL path=$file pair=$pair status=$status" >&2
     failed_files=$((failed_files + 1))
