@@ -326,35 +326,35 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
 #[test]
 fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
     let valid_batch = r#"
-      (let* ((state (quote ((message "double charge") (locale uk))))
+      (нехай-послідовно ((state (як-є ((message "double charge") (locale uk))))
              (choice-question (запитання-вибору-системи-один
-               (quote route)
+               (як-є route)
                "Choose the support team for this request."
-               (quote ((billing "Payment or refund issues")
+               (як-є ((billing "Payment or refund issues")
                        (technical "Software malfunction")))))
              (noul-question (запитання-так-ні-системи-один
-               (quote urgent)
+               (як-є urgent)
                "Does this request need urgent handling?"))
              (score-question (запитання-шкали-системи-один
-               (quote severity)
+               (як-є severity)
                "Rate urgency from low to high."
-               (quote ((low "No deadline")
+               (як-є ((low "No deadline")
                        (medium "Needed soon")
                        (high "Immediate attention")))))
-             (questions (list choice-question noul-question score-question))
+             (questions (список choice-question noul-question score-question))
              (request (запит-системи-один state questions))
              (answers
-               (list
+               (список
                  (спостерегти-вибір-системи-один choice-question
-                   (quote ((billing 3/4) (technical 1/4)))
-                   (quote ((source synthetic) (question route))))
-                 (pd-noul-observe noul-question 2/3
-                   (quote ((source synthetic) (question urgent))))
+                   (як-є ((billing 3/4) (technical 1/4)))
+                   (як-є ((source synthetic) (question route))))
+                 (спостерегти-так-ні noul-question 2/3
+                   (як-є ((source synthetic) (question urgent))))
                  (спостерегти-шкалу-системи-один score-question
-                   (quote ((low 1/4) (medium 1/2) (high 1/4)))
-                   (quote ((source synthetic) (question severity))))))
+                   (як-є ((low 1/4) (medium 1/2) (high 1/4)))
+                   (як-є ((source synthetic) (question severity))))))
              (response (відповідь-системи-один request answers)))
-        (list
+        (список
           (за-умовою
             ((перевірити-запит-системи-один? request) (як-є valid))
             (так (як-є invalid)))
@@ -369,27 +369,27 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
     );
 
     let invalid_batches = r#"
-      (let* ((state (quote ((message "double charge"))))
+      (нехай-послідовно ((state (як-є ((message "double charge"))))
              (choice-question (запитання-вибору-системи-один
-               (quote route)
+               (як-є route)
                "Choose the support team for this request."
-               (quote ((billing "Payment or refund issues")
+               (як-є ((billing "Payment or refund issues")
                        (technical "Software malfunction")))))
              (noul-question (запитання-так-ні-системи-один
-               (quote urgent)
+               (як-є urgent)
                "Does this request need urgent handling?"))
-             (questions (list choice-question noul-question))
+             (questions (список choice-question noul-question))
              (request (запит-системи-один state questions))
              (choice-answer (спостерегти-вибір-системи-один choice-question
-               (quote ((billing 3/4) (technical 1/4)))
-               (quote ((source synthetic)))))
-             (missing (відповідь-системи-один request (list choice-answer)))
-             (duplicate (відповідь-системи-один request (list choice-answer choice-answer)))
+               (як-є ((billing 3/4) (technical 1/4)))
+               (як-є ((source synthetic)))))
+             (missing (відповідь-системи-один request (список choice-answer)))
+             (duplicate (відповідь-системи-один request (список choice-answer choice-answer)))
              (duplicate-question-request
                (запит-системи-один state
-                 (list choice-question
-                       (запитання-так-ні-системи-один (quote route) "Does this request require urgent handling?")))))
-        (list
+                 (список choice-question
+                       (запитання-так-ні-системи-один (як-є route) "Does this request require urgent handling?")))))
+        (список
           (за-умовою
             ((відповідь-системи-один-допустима? missing request) (як-є valid))
             (так (як-є invalid)))
