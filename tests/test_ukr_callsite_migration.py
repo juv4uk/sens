@@ -906,12 +906,17 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
                     self.assertNotRegex(source, r"\(\s*так(?=\s|\))")
                     self.assertNotIn("((атом? рядки) так)", source)
                     for width in range(1, 12):
+                        # Точний D7 текстовий шлях замість недопущеного
+                        # D8 SYMBOL->STRING у фізичному paired evaluator.
                         self.assertIn(
-                            f"(визначити д{width} (завантажити-домен "
-                            f"(символ-у-текст (як-є lib/domains/d{width}.lisp))))",
+                            f'(визначити д{width} (завантажити-домен '
+                            f'"lib/domains/d{width}.lisp"))',
                             source,
                         )
-                        self.assertNotIn(f'"lib/domains/d{width}.lisp"', source)
+                        self.assertNotIn(
+                            f"(символ-у-текст (як-є lib/domains/d{width}.lisp))",
+                            source,
+                        )
                     continue
                 restored = self._inverse(source, evidence["edits"])
                 restored = self._restore_prior_domain_logic_calls(path, restored)
