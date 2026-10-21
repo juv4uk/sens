@@ -45,11 +45,16 @@ fn filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage() {
             "test_id=fs-commit-stage layer=SENS input={source} expected=D1:{expected} actual={result}"
         );
     }
-    let result = eval_program("(фс-етап-коміту? (як-є (objects)))", &mut s)
-        .expect("SENS повинен виконувати негативний структурний випадок")
-        .value;
-    assert_eq!(result.as_predicate_bit(), Some(false),
-        "список не є маркером етапу; фактично {result}");
+    // Реальний SENS зобов'язаний повернути D1:0 ще до D3 EQ над парою.
+    // Вкладена та крапкова форма не є атомарним маркером F4.
+    for invalid in ["(objects)", "(journal root-pointer)", "(objects . journal)"] {
+        let source = format!("(фс-етап-коміту? (як-є {invalid}))");
+        let result = eval_program(&source, &mut s)
+            .unwrap_or_else(|e| panic!("SENS негативний структурний етап {invalid}: {e:?}"))
+            .value;
+        assert_eq!(result.as_predicate_bit(), Some(false),
+            "test_id=fs-stage-invalid layer=SENS input={source} expected=D1:0 actual={result}");
+    }
 }
 
 #[test]
