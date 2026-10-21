@@ -56,11 +56,9 @@ class DomainTableNotExecutableTest(unittest.TestCase):
                     if line.strip() and not line.lstrip().startswith(";")
                 ]
                 self.assertTrue(body, path.as_posix())
-                # D3/D8 збережено у переглянутому архівному schema/1; 
-                # перевіряємо рівно дозволену форму разом із точним SHA,
-                # без допуску виконання цієї таблиці як Lisp-програми.
-                expected_header = "(domain-table/1" if n in (3, 8) else "(domain-table-1"
-                self.assertEqual(body[0], expected_header)
+                # Єдиний чинний заголовок у D1–D11, той самий що у збірці Rust.
+                # Не дозволяємо історичний domain-table/1 як відкат джерела.
+                self.assertEqual(body[0], "(domain-table-1")
                 self.assertEqual(body[-1], ")")
                 codes = resident_codes(source, n)
                 self.assertEqual(len(codes), entry["expected_rows"])
