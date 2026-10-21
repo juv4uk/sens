@@ -54,6 +54,7 @@ jobs:
               cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match -- --exact --nocapture
               # SENS reader/evaluator: позитивні й негативні native-first плани (#5872).
               cargo test --locked -p sens --test native_first_plan_shape -- --nocapture
+              cargo test --locked -p sens --test machine_capability_axis -- --nocapture
               # Точна D5 арифметика, похідні SI та індексація правил у справжньому SENS.
               cargo test --locked -p sens --test sens_exact_rational_division --test si_names --test reason_index -- --nocapture
               cargo test --locked -p sens --test yantra yantra_json_object_predicate_is_actual_d1_behavior -- --nocapture
@@ -230,7 +231,7 @@ jobs:
 
           # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
-          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|lib/machine/capability-axis\.lisp|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -659,28 +660,23 @@ jobs:
         if: ${{ always() && github.event_name == 'workflow_dispatch' }}
         run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
 
-      - name: Реальне виконання SENS — змінені українські машинні операнди
-        if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
-        timeout-minutes: 4
+      - name: Реальне виконання SENS — змінені машинні Lisp-механізми
+        if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'pull_request') }}
+        timeout-minutes: 7
         shell: bash
-        env:
-          PUSH_BEFORE: ${{ github.event.before }}
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          base="$PUSH_BEFORE"
-          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE"; fi
-          if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
-            git fetch --no-tags --depth=1 origin "$base"
-            # Незалежні правки CI не є змінами машинних операндів.
-            changed="$(git diff --name-only "$base" HEAD -- lib/machine/operands/x86-64.lisp crates/sens/tests/machine_typed_operands.rs)"
-            if [[ -z "$changed" ]]; then
-              echo "SENS-ОПЕРАНДИ: закони не змінювалися, важкий тест не запускаємо"
-              exit 0
-            fi
+          changed="$RUNNER_TEMP/changed-core-dependencies.txt"
+          test -f "$changed"
+          # Тільки змінений механізм: реальні позитивні та негативні SENS-випадки.
+          # Python тут перевіряє форму, а не заміняє роботу виконавця SENS.
+          if grep -Eq '^(lib/machine/capability-axis\.lisp|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|\.github/workflows/ci\.yml)$' "$changed"; then
+            python3 -m unittest tests/test_capability_axis_ukr_projection.py -v
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_capability_axis -- --nocapture
           fi
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_typed_operands -- --nocapture
-
+          if grep -Eq '^(lib/machine/operands/x86-64\.lisp|crates/sens/tests/machine_typed_operands\.rs)$' "$changed"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_typed_operands -- --nocapture
+          fi
       - name: Реальний SENS — точна двопольова форма правил виведення
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
         timeout-minutes: 4
