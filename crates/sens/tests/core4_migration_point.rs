@@ -231,3 +231,22 @@ fn core4_ukrainian_d10_listp_returns_exact_d1_for_nil_atom_and_cons() {
             "test_id=d10-listp-sens layer=SENS input={source} expected={expected} actual={}", result.value);
     }
 }
+
+#[test]
+fn core4_ukrainian_d10_find_leaf_evaluates_real_predicate_with_d1() {
+    // SENS рекурсія D10: на атомі й вкладеній парі обидва D1 виходи,
+    // на NIL предикат обчислюється, а не підмінюється truthiness Rust.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        ("(є-листок-дерева-що-задовольняє-предикат? (функція (x) (тотожне? x (як-є б))) (як-є б))", true),
+        ("(є-листок-дерева-що-задовольняє-предикат? (функція (x) (тотожне? x (як-є б))) (як-є а))", false),
+        ("(є-листок-дерева-що-задовольняє-предикат? (функція (x) (тотожне? x (як-є б))) (як-є ((а в) (г б))))", true),
+        ("(є-листок-дерева-що-задовольняє-предикат? (функція (x) (тотожне? x (як-є б))) (як-є ((а в) (г д))))", false),
+        ("(є-листок-дерева-що-задовольняє-предикат? (функція (x) (тотожне? x (як-є ()))) (як-є ()))", true),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=d10-find-leaf-sens layer=SENS input={source} error={error}"));
+        assert_eq!(result.value.as_predicate_bit(), Some(expected),
+            "test_id=d10-find-leaf-sens layer=SENS input={source} expected={expected} actual={}", result.value);
+    }
+}
