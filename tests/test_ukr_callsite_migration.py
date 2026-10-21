@@ -1493,7 +1493,7 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
         for width, count in ((7, 128), (9, 512), (10, 1024)):
             with self.subTest(domain=f"D{width}"):
                 self.assertIn(
-                    f'(визначити д{width} (завантажити-домен (символ-у-текст (як-є lib/domains/d{width}.lisp))))',
+                    f'(визначити д{width} (завантажити-домен "lib/domains/d{width}.lisp"))',
                     source,
                 )
                 expected_key = "0" * width
