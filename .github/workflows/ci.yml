@@ -214,7 +214,7 @@ jobs:
             echo 'reason_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Метаобчислювач перевіряється живим SENS після зміни бібліотеки чи свідка.
-          if grep -Eq '^(lib/meta-eval\.lisp|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp)$' "$changed_all"; then
+          if grep -Eq '^(lib/meta-eval\.lisp|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp)$' "$changed_all"; then
             echo 'meta_eval_d1_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(benchmarks/parser\.lisp|crates/sens/src/source_projection\.rs|crates/sens/tests/ukr_unpaired_benchmark_runtime\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -618,6 +618,7 @@ jobs:
         run: |
           set -euo pipefail
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_predicates_are_actual_d1_bits -- --exact --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens -- --exact --nocapture
 
       - name: "Reason: SENS перевіряє індекс і лексичне застосування функцій"
         if: ${{ always() && (steps.changed-t5m-lisp.outputs.reason_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:'))) }}
