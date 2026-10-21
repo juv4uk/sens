@@ -32,10 +32,10 @@ fn observed(session: &mut Session, source: &str) -> String {
 fn occurs_check_rejects_self_reference_and_accepts_acyclic_term() {
     let mut session = session();
     for (source, expected) in [
-        ("(входить-перевірити? (001 (var x)) (001 (var x)) (001 ()))", "1"),
-        ("(входить-перевірити? (001 (var x)) (001 (f (var x))) (001 ()))", "1"),
-        ("(входить-перевірити? (001 (var x)) (001 (f y)) (001 ()))", "0"),
-        ("(входить-перевірити? (001 (var x)) (001 y) (001 ()))", "0"),
+        ("(входить-перевірити? (як-є (var x)) (як-є (var x)) (як-є ()))", "1"),
+        ("(входить-перевірити? (як-є (var x)) (як-є (f (var x))) (як-є ()))", "1"),
+        ("(входить-перевірити? (як-є (var x)) (як-є (f y)) (як-є ()))", "0"),
+        ("(входить-перевірити? (як-є (var x)) (як-є y) (як-є ()))", "0"),
     ] {
         assert_eq!(observed(&mut session, source), expected, "{source}");
     }
@@ -46,11 +46,11 @@ fn occurs_check_follows_one_existing_substitution_before_testing_reference() {
     let mut session = session();
     for (source, expected) in [
         (
-            "(входить-перевірити? (001 (var x)) (001 (var y)) (001 (((var y) (var x)))) )",
+            "(входить-перевірити? (як-є (var x)) (як-є (var y)) (як-є (((var y) (var x)))) )",
             "1",
         ),
         (
-            "(входить-перевірити? (001 (var x)) (001 (var y)) (001 (((var y) (var z)))) )",
+            "(входить-перевірити? (як-є (var x)) (як-є (var y)) (як-є (((var y) (var z)))) )",
             "0",
         ),
     ] {
