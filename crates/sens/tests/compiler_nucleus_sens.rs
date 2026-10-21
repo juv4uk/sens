@@ -234,6 +234,33 @@ const COMPILER_PROGRAM_LIST_D1_LAW: &str =
 const COMPILER_PROGRAM_LIST_D1_MUTANT: &str =
     include_str!("../../../tests/semantic/compiler-program-list-d1-mutant.lisp");
 
+/// Обидва D1-значення створює сам виконуваний компіляторний Lisp.
+/// Жодних host-булевих значень або незв'язаних «так/ні».
+#[test]
+fn compiler_nucleus_exposes_real_d1_yes_no_without_surface_aliases() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("active core");
+    let nucleus = parse_mixed_exact_domain(NUCLEUS).expect("compiler Lisp parses");
+    eval_parsed_expressions(&nucleus, &mut session).expect("compiler Lisp loads");
+
+    for (source, expected) in [
+        ("(істина-компілятора (як-є ()))", true),
+        ("(хиба-компілятора (як-є ()))", false),
+        ("(кінець-списку-компілятора? (як-є ()))", true),
+        ("(кінець-списку-компілятора? (як-є (пара)))", false),
+    ] {
+        let forms = parse_mixed_exact_domain(source).expect("exact Ukrainian D1 call");
+        let value = eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|e| panic!("SENS D1 evaluation of {source} failed: {e}"))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "Compiler must return the ratified D1 bit: {source} -> {value}"
+        );
+    }
+}
+
 /// Чотири точні D1-вердикти обчислює двійковий SENS, а не Rust.
 #[test]
 fn compiler_program_list_fail_closed_is_sens_owned() {
