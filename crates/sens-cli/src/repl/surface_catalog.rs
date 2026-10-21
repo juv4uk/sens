@@ -1,5 +1,6 @@
 use sens::syntax::Expr;
 use sens::{ExprKind, parse};
+use std::sync::OnceLock;
 
 const HUMAN_SURFACES: [&str; 4] = ["ук", "укр", "en", "san"];
 const FIXED_SURFACES: [&str; 6] = ["ук", "укр", "san", "en", "LISP", "sym"];
@@ -51,7 +52,19 @@ fn normalize_surface(surface: &str) -> &str {
 
 // The REPL is the human-projection exception: Rust reads these Lisp tables
 // only to render/resolve UI names; they do not enter the binary backend.
-fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
+// A table is an immutable, build-embedded projection. Parsing all eleven
+// tables on every invoked head makes large executable .lisp programs needlessly slow.
+static SURFACE_ENTRIES: OnceLock<Result<Vec<SurfaceEntry>, String>> = OnceLock::new();
+
+fn registry_entries() -> Result<&'static [SurfaceEntry], String> {
+    SURFACE_ENTRIES
+        .get_or_init(load_registry_entries)
+        .as_ref()
+        .map(Vec::as_slice)
+        .map_err(Clone::clone)
+}
+
+fn load_registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     let mut entries = Vec::new();
     for width in 1u8..=11 {
         let source = domain_table_source(width)
@@ -316,12 +329,12 @@ fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
 
 pub(crate) fn render_status() -> Result<String, String> {
     let entries = registry_entries()?;
-    let denominator = public_denominator(&entries);
-    let uk = counts_for(&entries, "ук");
-    let en = counts_for(&entries, "en");
-    let ukr = counts_for(&entries, "укр");
-    let san = counts_for(&entries, "san");
-    let lisp = counts_for(&entries, "LISP");
+    let denominator = public_denominator(entries);
+    let uk = counts_for(entries, "ук");
+    let en = counts_for(entries, "en");
+    let ukr = counts_for(entries, "укр");
+    let san = counts_for(entries, "san");
+    let lisp = counts_for(entries, "LISP");
     let symbolic = entries
         .iter()
         .filter(|entry| {
@@ -368,7 +381,7 @@ pub(crate) fn render_names(surface: &str) -> Result<String, String> {
     if surface == "core" {
         let mut output = format!(
             "core: exact domain identities D1–D11 · {}\n",
-            public_denominator(&entries)
+            public_denominator(entries)
         );
         for (index, entry) in entries.iter().enumerate() {
             if index > 0 {
@@ -382,7 +395,7 @@ pub(crate) fn render_names(surface: &str) -> Result<String, String> {
     }
 
     let surface = normalize_surface(surface);
-    let counts = counts_for(&entries, surface);
+    let counts = counts_for(entries, surface);
     let mut output = format!(
         "surface {surface}: present {} · empty {} · total {}\n  ",
         counts.present,
@@ -390,7 +403,7 @@ pub(crate) fn render_names(surface: &str) -> Result<String, String> {
         entries.len()
     );
     let mut first = true;
-    for entry in &entries {
+    for entry in entries {
         let Some(slot) = surface_name(entry, surface) else {
             continue;
         };
@@ -412,7 +425,7 @@ pub(crate) fn render_names(surface: &str) -> Result<String, String> {
 
 pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, String> {
     let entries = registry_entries()?;
-    let matches = find_entries(&entries, requested);
+    let matches = find_entries(entries, requested);
     if matches.is_empty() {
         return Ok(format!(
             "«{requested}» не знайдено серед координат таблиць D1–D11; викличність з цього каталогу не випливає."
@@ -470,9 +483,9 @@ mod tests {
             43,
             "D11 remains the ratified sparse 43-row test vocabulary"
         );
-        assert_eq!(find_entries(&entries, "D3:010")[0].identity, "D3:010");
+        assert_eq!(find_entries(entries, "D3:010")[0].identity, "D3:010");
         assert!(
-            find_entries(&entries, "010").is_empty(),
+            find_entries(entries, "010").is_empty(),
             "bits alone are not global identity"
         );
     }
@@ -480,7 +493,7 @@ mod tests {
     #[test]
     fn all_projection_columns_come_from_domain_tables() {
         let entries = registry_entries().expect("numeric registry");
-        let entry = find_entries(&entries, "D3:010")[0];
+        let entry = find_entries(entries, "D3:010")[0];
         assert_eq!(
             surface_name(entry, "ук").and_then(|item| item.name.as_deref()),
             Some("атом?")
@@ -554,7 +567,7 @@ mod tests {
     #[test]
     fn projection_spelling_resolves_only_when_unique() {
         let entries = registry_entries().expect("domain registry");
-        let candidates = find_entries(&entries, "так");
+        let candidates = find_entries(entries, "так");
         let output = render_name("ук", "так").expect("ambiguity is user-visible");
         assert_eq!(candidates.len(), 1);
         assert!(output.starts_with("identity: D1:1\n"));
