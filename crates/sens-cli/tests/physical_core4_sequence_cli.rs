@@ -595,6 +595,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-chunk-pairs-general",
         "lib/list-interpose-general",
         "lib/list-alternating-split-four",
+        "lib/list-alternating-split-general",
         "lib/list-replace-fourth",
         "lib/list-swap-middle-four",
         "lib/list-swap-neighbors-four",
