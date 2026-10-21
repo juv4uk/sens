@@ -18,9 +18,9 @@ PEERS = {
 OLD_BINARY_HEAD = re.compile(r"\(\s*[01]{3,10}(?=\s|\))")
 ENCODED_LITERAL = re.compile(r"#(?:d\d+:[01]+|b[01]+|q2:[01]+)")
 JSON_LAWS = (
-    (r'\(\(тотожне\?\s+значення-для-кодування\s+так\)\s+"true"\)', "JSON true"),
-    (r'\(\(тотожне\?\s+значення-для-кодування\s+ні\)\s+"false"\)', "JSON false"),
-    (r'\(\(тотожне\?\s+значення-для-кодування\s+\(як-є\s+\(\)\)\)\s+"null"\)', "JSON null"),
+    ('((тотожне? значення-для-кодування (атом? (як-є ()))) "true")', "JSON true"),
+    ('((тотожне? значення-для-кодування (атом? (сполучити (як-є ()) (як-є ())))) "false")', "JSON false"),
+    ('((тотожне? значення-для-кодування (як-є ())) "null")', "JSON null"),
 )
 
 
@@ -45,10 +45,10 @@ def verify(source: str) -> None:
     if ENCODED_LITERAL.search(source):
         raise AssertionError("Yantra: заборонений текстовий машинний літерал")
 
-    # Структурно відрізняємо D1:так, D1:ні і D3:() — але жодної
+    # Структурно відрізняємо обчислені D1:true/false і D3:() — але жодної
     # Python-імітації результатів JSON-кодека тут немає.
-    for pattern, label in JSON_LAWS:
-        if not re.search(pattern, source):
+    for exact_form, label in JSON_LAWS:
+        if exact_form not in source:
             raise AssertionError(f"Yantra: втрачено чинний закон {label}")
 
     definitions = re.findall(r"(?m)^\s*\(визначити\s+([^\s()]+)", source)
@@ -71,8 +71,8 @@ class YantraUkrProjectionTests(unittest.TestCase):
     def test_negative_wrong_boolean_json_law_is_rejected(self):
         with self.assertRaisesRegex(AssertionError, "JSON false"):
             verify(self.source.replace(
-                '((тотожне? значення-для-кодування ні) "false")',
-                '((тотожне? значення-для-кодування ні) "null")', 1))
+                JSON_LAWS[1][0],
+                JSON_LAWS[1][0].replace('"false"', '"null"'), 1))
 
     def test_negative_encoded_literal_is_rejected(self):
         with self.assertRaisesRegex(AssertionError, "машинний літерал"):
