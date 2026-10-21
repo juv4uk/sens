@@ -538,17 +538,14 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
               ((спостереження-системи-один-для-запитання-допустиме? питання спостереження)
                (як-є valid))
               (так (як-є invalid)))
-            (за-умовою
-              ((менше? (четверте спостереження) (частка 1 2))
-               (як-є low))
-              (так (як-є high)))
+            (четверте спостереження)
             (перше (перше (п'ятий спостереження)))
             (друге (перше (п'ятий спостереження)))))
         "#
     );
     assert_eq!(
         eval_probabilistic_decision(&model_source),
-        "(model-distribution/1 choice-observation/1 valid high source local-model)"
+        "(model-distribution/1 choice-observation/1 valid 9/10 source local-model)"
     );
     let request = fixture.join().expect("fixture server");
     assert!(request.contains("\"top_logprobs\":20"));
