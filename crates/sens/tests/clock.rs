@@ -333,13 +333,13 @@ fn internet_time_timestamp_interpretation_is_language_owned() {
 
     assert_eq!(
         eval_program(
-            "(дати-календарне-значення-схваленому-часу (список (як-є accepted) \"clock.example\" 946684800 42))",
+            "(дати-календарне-значення-схваленому-часу (список (як-є accepted) \"clock.example\" 946684800 123456789))",
             &mut session,
         )
         .unwrap()
         .value
         .to_string(),
-        "(accepted \"clock.example\" (utc 2000 1 1 0 0 0 42))"
+        "(accepted \"clock.example\" (utc 2000 1 1 0 0 0 123456789))"
     );
     assert_eq!(
         eval_program(
