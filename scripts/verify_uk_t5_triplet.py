@@ -255,8 +255,11 @@ def project_current_uk(source: str) -> list[str]:
     visible = three_pass.migrate_file(
         source, resolver, text7, source_surface="укр"
     )
+    # passthrough-head — це НЕ виклик, а запис даних (ключ ISA/інвентаря):
+    # його латиниця лишається за політикою репо. Відкидаємо лише справді
+    # історичні великолітерні Lisp-імена (pass3-lisp15) та сирі двійкові
+    # голови (already-exact).
     if (resolver.counts["pass3-lisp15"]
-            or resolver.counts["passthrough-head"]
             or resolver.counts["already-exact"]):
         raise ProjectionBlocked("non-ukrainian, historical or unknown source head")
     return visible.split()
