@@ -251,13 +251,13 @@ jobs:
           python3 -m unittest tests.test_core1_third_domain_canary tests.test_core1_fourth_domain_canary -v
 
       - name: "Український Lisp-парсер — D5 результат і негативний SENS-свідок"
-        if: steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true'
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' }}
         timeout-minutes: 5
         shell: bash
         run: cargo test --locked -p sens --lib український_парсер_виконує_точний_дріб_та_відхиляє_ділення_на_нуль -- --nocapture
 
       - name: "SENS Yantra/Core4 — реальні D1 позитивні й негативні класифікації"
-        if: steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true'
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' }}
         timeout-minutes: 10
         shell: bash
         run: |
@@ -267,7 +267,7 @@ jobs:
           cargo test --locked -p sens --test yantra yantra_json_class_membership_is_a_checked_d3_triple -- --exact --nocapture
 
       - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
-        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
+        if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
         timeout-minutes: 20
         shell: bash
         run: |
@@ -366,7 +366,7 @@ jobs:
         if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
-        if: steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true'
+        if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
         timeout-minutes: 10
         shell: bash
         run: |
@@ -391,7 +391,7 @@ jobs:
           cargo test --locked -p sens --test translation_boundary -- --nocapture
 
       - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
-        if: steps.changed-t5m-lisp.outputs.has_files == 'true'
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
         timeout-minutes: 15
         shell: bash
         run: |
