@@ -34,12 +34,19 @@ scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 snapshot="$(sha256sum "$source_file" | cut -d' ' -f1)"
 staged="$scratch/program.sens"
-staged_view="$scratch/view"
+staged_view="$scratch/program"
 # SENS власноруч створює слова, Zig єдиний пакує T5M.
 timeout 45s "$binary" --t5m-mint "$source_file" "$staged"
 test -s "$staged"
 timeout 45s "$reader" view "$staged" > "$staged_view"
 test -s "$staged_view"
+# Відновити рівно ті самі слова та байти через справжній Zig/T5M.
+# Гарантія фізичного обернення не підміняє SENS-парне виконання нижче.
+if ! timeout 45s "$reader" verify-view "$staged" > "$scratch/inverse.out" 2> "$scratch/inverse.err"; then
+  cat "$scratch/inverse.err" >&2
+  echo "T5M_REPAIR_VIEW_ROUNDTRIP_FAILED path=$source_file" >&2
+  exit 2
+fi
 if ! timeout 45s "$binary" --t5m-pair "$source_file" "$staged" > "$scratch/out" 2> "$scratch/err"; then
   cat "$scratch/err" >&2
   echo "T5M_REPAIR_REAL_EVAL_FAILED path=$source_file" >&2
