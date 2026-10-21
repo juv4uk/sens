@@ -41,7 +41,10 @@ def parse_forms(source: str) -> tuple:
         offset += 1
         return tuple(result)
 
-    return tuple(expression() for _ in iter(int, 1) if offset < len(items))
+    forms = []
+    while offset < len(items):
+        forms.append(expression())
+    return tuple(forms)
 
 
 def definitions(forms: tuple) -> dict[str, tuple]:
