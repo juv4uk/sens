@@ -144,11 +144,16 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/install-zig
-        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:'))) }}
+        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+
+      - name: "LISP-TIER — фактичне виконання українського Lisp"
+        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
+        timeout-minutes: 12
+        run: cargo test --locked -p sens-cli --test cli український_скрипт_відбирає_саме_запитаний_рівень -- --exact --nocapture
 
       # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
+        if: ${{ github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:')) }}
       - name: "BENCH-T5M — Zig, x86-64 ASM, Rust"
         if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
         timeout-minutes: 10
