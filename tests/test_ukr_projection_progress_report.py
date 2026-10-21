@@ -48,6 +48,16 @@ class FileTree(unittest.TestCase):
 
 
 class WholeFileMetricTests(FileTree):
+    def test_nested_agent_worktree_does_not_distort_main_repository_percentage(self):
+        root = self.tree({
+            "lib/так.lisp": "(визначити відповідь так)\n",
+            ".worktrees/інша-гілка/lib/legacy.lisp": "(define answer yes)\n",
+        })
+        result = report.measure(root)
+        self.assertEqual(result.total_lisp_files, 1)
+        self.assertEqual(result.fully_ukrainian_files, 1)
+        self.assertEqual(result.percent, 100.0)
+
     def test_every_character_in_comments_and_strings_is_checked(self):
         root = self.tree({
             "lib/повністю.lisp": '(визначити річ "текст")\n; Примітка\n',

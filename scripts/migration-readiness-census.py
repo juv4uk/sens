@@ -189,12 +189,20 @@ def build_report() -> dict:
                                           "NONPROGRAM_COMMENT_ONLY")
             and row["status"]["auto"] == "would-write"
         ]
+        reviewed_paths = set(reviewed)
+        archived_rows = [row for row in queue_rows
+                         if row["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"]
         actionable_rows = [
             row for row in queue_rows
             if row["source_scope"] not in ("ARCHIVED_BENCHMARK_NONPROGRAM",
                                           "NONPROGRAM_DATA_REVIEWED",
+                                          "NONPROGRAM_DATA_REVIEWED",
                                           "NONPROGRAM_COMMENT_ONLY")
         ]
+        not_program_rows = [row for row in queue_rows
+                            if row["status"]["auto"] == "not-program"
+                            and row["path"] not in reviewed_paths
+                            and row["source_scope"] != "ARCHIVED_BENCHMARK_NONPROGRAM"]
         actionable_queues = collections.Counter(row["queue"] for row in actionable_rows)
         if len(actionable_rows) + len(reviewed) + sum(
                 row["source_scope"] in ("ARCHIVED_BENCHMARK_NONPROGRAM",
@@ -219,6 +227,7 @@ def build_report() -> dict:
         summary = auto["summary"]
         reasons = collections.Counter(
             classify(row.get("reason", "")) for row in auto["files"]
+            if row.get("status") == "blocked"
         )
         result = {
             "schema": "sens-t5-migration-readiness/v2",

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Read-only inventory of unpaired Lisp candidates against current D1–D11.
+"""Read-only inventory of unpaired Lisp candidates against current D1–D10.
 
-D1–D10 exact-width residents do not imply callable mechanisms; D11 is a
-proposal catalogue, never automatic executable admission. Zig owns physical
-T5M, SENS owns the reader and evaluation laws. A dry-run proves neither
-native semantics nor a release candidate and never publishes physical bytes.
+D1–D10 exact-width residents do not imply callable mechanisms. D11 and later
+domains are future work; this inventory neither defines nor rejects them.
+Zig owns physical T5M, SENS owns the reader and evaluation laws. A dry-run
+proves neither native semantics nor a release candidate and never publishes
+physical bytes.
 """
 from __future__ import annotations
 
@@ -37,7 +38,7 @@ ARGS = [
 EMPTY_ACTIONS = {
     "w8-provenance": "Pin original source Git blob and prove legacy SID8 vs ratified current D8 before an explicit --source-era retry.",
     "host-effect": "Prove host I/O/effect semantics and independent old/current observable parity; do not guess PRINT mappings.",
-    "unmapped-function": "Resolve exact callable identity in ratified D1–D10; unresolved candidates go to the D11 proposal catalogue, not executable T5M. Unknown stays BLOCKED.",
+    "unmapped-function": "Resolve exact callable identity in ratified D1–D10; unresolved candidates remain pending the future D11+ domain work, not executable T5M. Unknown stays BLOCKED.",
     "d2-or-domain-data": "Inspect non-binary token and classify executable vs schema/archive/typed D2-as-data before any conversion.",
     "lexical-binding": "Prove lambda/define variable binding and call-head scope; keep symbolic locals blocked without a law.",
     "numeric-law": "Prove exact-width numeric representation and operations before emitting any words.",
@@ -423,7 +424,7 @@ def build_report(root: Path = ROOT) -> dict:
                 "physical_outputs_created": 0,
             },
             "source_era": "auto",
-            "authority": "current D1–D10 exact-width laws, D11 test-only catalogue, Zig/T5M physical preview; native SENS semantic admission NOT_VERIFIED",
+            "authority": "current D1–D10 exact-width laws; D11+ future-domain semantics are not inferred here; Zig/T5M physical preview; native SENS semantic admission NOT_VERIFIED",
             "already_paired_sources_excluded": excluded,
             "reviewed_nonprogram_sources": sorted(
                 classified.values(), key=lambda item: item["path"]),
@@ -443,7 +444,7 @@ def build_report(root: Path = ROOT) -> dict:
             "unpaired_empty_sample": blocked_sources[:20],
             "required_evidence": [
                 "prove original file is an executable SENS program, not an archive/catalogue",
-                "prove exact D1–D10 identity and widths, historical W8 ≠ D8, D11 noncallability and host/IO effects",
+                "prove exact current D1–D10 identity and widths, historical W8 ≠ D8, and host/IO effects; do not infer future D11+ semantics",
                 "after source-law admission, mint same-stem physical T5M using Zig only; preserve original .lisp and canonical bit view",
                 "prove actual SENS reader/eval program parity, typed ingress/EOF/error negatives, plus Zig T5M/F3C bit parity and digests; no Rust semantic fallback",
                 "require hosted exact-head CI, Cargo sens-cli --features zig-transport, and separately verified native SENS witnesses before review or release",

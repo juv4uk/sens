@@ -37,6 +37,14 @@ class AllLispTripletCensusTests(unittest.TestCase):
             target.read_text(encoding="ascii")
         ))
 
+    def test_nested_agent_worktree_is_not_part_of_repository_file_census(self):
+        self.put("lib/головний.lisp", "()\n")
+        self.put(".worktrees/інша-гілка/lib/чужий-знімок.lisp", "()\n")
+        report = scan(self.root)
+        self.assertEqual(report["total_lisp_files"], 1)
+        self.assertEqual(report["potential_program_files"], 1)
+        self.assertEqual(report["potential_program_missing_sens"], 1)
+
     def test_comment_only_lisp_has_no_machine_program_to_reverse(self):
         self.put("lib/опис.lisp", "; Український опис\n; Без програми\n")
         self.put("lib/порожній.lisp", "  \n\t\n")

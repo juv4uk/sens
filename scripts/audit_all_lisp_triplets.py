@@ -85,7 +85,8 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         raise ValueError("limit має бути невід'ємним")
     root = root.resolve()
     sources = sorted(
-        (p for p in root.rglob("*.lisp") if ".git" not in p.relative_to(root).parts),
+        (p for p in root.rglob("*.lisp")
+         if not ({".git", ".worktrees"} & set(p.relative_to(root).parts))),
         key=lambda p: p.relative_to(root).as_posix(),
     )
     reviewed_pins = reviewed_nonprogram_pins(root)

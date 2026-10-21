@@ -51,6 +51,13 @@ class AuditT5PairsTests(unittest.TestCase):
         self.assertTrue(result["empty_is_not_certification"])
         self.assertEqual(result["summary"]["admitted_executable_semantics"], None)
 
+    def test_untracked_inventory_does_not_cross_into_nested_worktree(self):
+        self.pair("main/програма", "()\n", ["000"])
+        self.pair(".worktrees/інша-гілка/старий-знімок", "()\n", ["000"])
+        result = self.audit()
+        self.assertEqual(len(result["files"]), 1)
+        self.assertEqual(result["files"][0]["source"], "main/програма.lisp")
+
     def test_paired_binary_projection_exact_width_is_verified(self):
         self.pair("examples/demo", "10 01\n", ["10", "01"])
         result = self.audit(strict=True)

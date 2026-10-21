@@ -5,7 +5,8 @@ Interpret historical spellings through current owner-authored projections;
 legacy eight-bit tokens never become current D8 identities by byte matching.
 Passes 2–3 preserve exact current domain identities for known source heads.
 This migration does not certify runtime callability: function execution for
-D1–D10 is a separate implementation decision. D11 remains test-only data.
+D1–D10 is a separate implementation concern. D11 and later domains are future
+work and are not inferred, populated, or reclassified as test-only by this tool.
 
 Rules derived from current SENS contract and later owner decisions:
 - () is D3:000; nonempty list structure uses D2 10/00/11/01
@@ -36,7 +37,7 @@ Rules derived from current SENS contract and later owner decisions:
 
 Chronology for migration audit: D7 projection retirement 5aafc1e8
 (13 Oct 2026); numeric TEXT→D7 owner corrections 54078adb/629b077c
-(14 Oct 2026); D11 test-only noncallable guard 7a48037b (14 Oct).
+(14 Oct 2026); future D11+ admission remains outside this migration (7a48037b, 14 Oct).
 The above notes describe implementation, not a second semantic contract.
 """
 from __future__ import annotations
@@ -68,7 +69,7 @@ import migration_publish_pair
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_EXTS = {".lisp"}
-SKIP_DIRS = {".git","target","node_modules","vendor","dist","build",".venv","venv","__pycache__"}
+SKIP_DIRS = {".git", ".worktrees", "target", "node_modules", "vendor", "dist", "build", ".venv", "venv", "__pycache__"}
 
 D2_SEP="00"
 D2_CLOSE="01"
@@ -1878,7 +1879,7 @@ def main():
             "language": ("D1–24+ frame; T5M physical subset: D1–D10 plus exact D24+ numeric words" if args.codec == "t5m"
                          else "currently supported D1..D9 exact-width 0/1 words"),
             "domain_frame": "D1–24+; exact domain laws come from language-contract.lisp",
-            "identity_migration_subset": "exact D1-D10 identities only where current projections uniquely resolve them; runtime execution is not certified here; D11 remains test-only",
+            "identity_migration_subset": "exact current D1-D10 identities only where current projections uniquely resolve them; runtime execution is not certified here; D11+ future semantics are not inferred",
             "transport_separator": "logical trit 2 strictly between words",
             "file_eof": "physical byte length; no terminal 22",
             "padding": "T5M: zero through four final trits 2; T5: zero through four final trits 2",

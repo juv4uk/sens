@@ -166,6 +166,7 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
                     width in (2, 7, 8, 9, 10)
                     or (width == 3 and n == 0)
                 )
+
                 if blocked_width:
                     with self.subTest(width=width, index=n):
                         with self.assertRaises(mod.MigrationError):
@@ -181,6 +182,18 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
         # Raw D9/D10 coordinate tokens stay blocked: the name/projection,
         # not width alone, supplies current domain identity.
         self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
+
+    def test_directory_scan_does_not_import_nested_agent_worktree_sources(self):
+        with tempfile.TemporaryDirectory(prefix="sens-source-scope-") as td:
+            root = Path(td)
+            (root / "основний.lisp").write_text("()\n", encoding="utf-8")
+            nested = root / ".worktrees" / "інша-гілка"
+            nested.mkdir(parents=True)
+            (nested / "чужий-знімок.lisp").write_text("()\n", encoding="utf-8")
+            self.assertEqual(
+                [path.relative_to(root).as_posix() for path in mod.source_files(root)],
+                ["основний.lisp"],
+            )
 
     def test_raw_d8_stays_sid8_ambiguous_and_bridge_is_rejected(self):
         for word in ("00001111", "00010110", "00100010"):
@@ -214,6 +227,15 @@ class ThreePassMigrationTests(unittest.TestCase):
     def migrate(self,source):
         resolver=mod.Resolver(self.my,self.upper)
         return mod.migrate_file(source,resolver,self.text7),resolver
+
+    def test_repl_core_uses_ratified_ukr_d9_string_predicate_projection(self):
+        source = (ROOT / "lib/repl-core.lisp").read_text(encoding="utf-8")
+        self.assertNotIn("текст?", source)
+        self.assertIn("рядок?", source)
+        projection, _ = self.migrate('(рядок? "x")')
+        self.assertEqual(projection.split()[1], "110100110")
+        with self.assertRaisesRegex(mod.MigrationError, "legacy-unmapped"):
+            self.migrate('(текст? "x")')
 
     def test_ukrainian_apostrophe_is_identifier_data_not_a_quote(self):
         # lib/forward.lisp actually uses *робоча-пам'ять*; splitting the

@@ -22,7 +22,8 @@ sys.modules[spec.name] = census
 spec.loader.exec_module(census)
 
 
-def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None, archived_auto=False):
+def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None, archived_auto=False,
+                       not_program_sources=()):
     """Mock the sole current AUTO scan using real present source names."""
     observed = []
     calls = []
@@ -44,14 +45,20 @@ def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None, archived_au
             selected = [second]
         if archived_auto and era == "auto":
             selected = [archive]
-        rows = [
-            {"path": path, "status": "would-write" if path in selected else "blocked",
-             "reason": None if path in selected else
-                f"ambiguous W8 executable head 00001001: {era}"}
-            for path in ((first, second, archive) if archived_auto else (first, second))
-        ]
+        rows = []
+        for path in ((first, second, archive) if archived_auto else (first, second)):
+            if path in not_program_sources:
+                status, reason = (
+                    "not-program", "NONPROGRAM_COMMENT_ONLY layer=source"
+                )
+            elif path in selected:
+                status, reason = "would-write", None
+            else:
+                status, reason = "blocked", f"ambiguous W8 executable head 00001001: {era}"
+            rows.append({"path": path, "status": status, "reason": reason})
         blocked = sum(row["status"] == "blocked" for row in rows)
-        ready = len(rows) - blocked
+        ready = sum(row["status"] == "would-write" for row in rows)
+        not_program = sum(row["status"] == "not-program" for row in rows)
         state = {
             "schema": "sens-three-pass-t5-migration/v3",
             "authority": {"foundation_sha256": "mock-ratified-sha256"},
@@ -61,6 +68,7 @@ def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None, archived_au
                 "files_written": 0,
                 "files_would_write": ready,
                 "files_blocked": blocked,
+                "files_not_program": not_program,
             },
             "skipped_paired_paths": ["tests/fixtures/core1-domain-canary/second.lisp"],
             "files": rows,
@@ -214,6 +222,19 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertEqual(set(report["per_era_summary"]), {"auto"})
         self.assertEqual(report["migrator_summary"]["files_written"], 0)
         self.assertTrue(report["gate"]["pass"])
+
+    def test_nonprogram_rows_are_counted_but_not_reported_as_migration_blockers(self):
+        source = "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
+        _, fn = fake_migrator_call(not_program_sources=(source,))
+        with patch.object(census.subprocess, "run", side_effect=fn):
+            report = census.build_report()
+        row = next(item for item in report["candidate_rows"] if item["path"] == source)
+        self.assertEqual(row["status"], {"auto": "not-program"})
+        self.assertEqual(row["queue"], "nonprogram-no-executable-artifact")
+        self.assertTrue(report["gate"]["pass"])
+        self.assertEqual(report["source_scope"]["comment_only_not_executable"], 1)
+        self.assertEqual(report["source_scope"]["active_or_unknown_originals"], 1)
+        self.assertEqual(sum(report["actionable_executable_unknown_queues"].values()), 1)
 
     def test_historical_only_candidate_cannot_influence_current_auto_scan(self):
         source = "tests/fixtures/core1-third-domain-canary/third.lisp"
