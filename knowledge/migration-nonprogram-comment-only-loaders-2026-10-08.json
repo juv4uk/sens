@@ -1,5 +1,5 @@
 {
-  "schema": "sens-migration-nonprogram-manifest/1",
+  "schema": "sens-migration-nonprogram-manifest-1",
   "generated_from_main": "c08325f95791ed2b9bf3c6ce15e2627acd46d5e6",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",

@@ -49,7 +49,7 @@ def reviewed_nonprogram_pins(root: Path) -> dict[str, tuple[str, str]]:
         except (OSError, UnicodeError, ValueError):
             continue
         rows = data.get("entries")
-        if (data.get("schema") != "sens-migration-nonprogram-manifest/1"
+        if (data.get("schema") != "sens-migration-nonprogram-manifest-1"
                 or data.get("issue") != 4460
                 or data.get("automatic_sens_companion") is not False
                 or not isinstance(rows, list) or len(rows) != count):

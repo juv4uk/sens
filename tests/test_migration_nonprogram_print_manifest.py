@@ -14,7 +14,7 @@ def git_blob_sha1(data: bytes) -> str:
 class MigrationNonProgramPrintManifest(unittest.TestCase):
     def test_manifest_has_exact_75_baseline_print_paths(self):
         data = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(data["schema"], "sens-migration-nonprogram-manifest/1")
+        self.assertEqual(data["schema"], "sens-migration-nonprogram-manifest-1")
         self.assertEqual(data["classification"], "benchmark-recording-nonprogram")
         self.assertFalse(data["automatic_sens_companion"])
 

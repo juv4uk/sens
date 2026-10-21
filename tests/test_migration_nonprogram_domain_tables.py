@@ -26,7 +26,7 @@ def resident_codes(source: str, width: int) -> list[str]:
 class DomainTableNotExecutableTest(unittest.TestCase):
     def test_current_d1_d11_data_classification_is_exact_and_immutable(self):
         m = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(m["schema"], "sens-migration-nonprogram-manifest/1")
+        self.assertEqual(m["schema"], "sens-migration-nonprogram-manifest-1")
         self.assertEqual(m["issue"], 4460)
         self.assertEqual(m["classification"], "lisp-data-nonprogram")
         self.assertIs(m["automatic_sens_companion"], False)

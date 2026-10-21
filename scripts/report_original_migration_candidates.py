@@ -225,7 +225,7 @@ def load_nonprogram_classification(root: Path, *, selected_paths: set[str] | Non
         if not manifest.is_file() or manifest.is_symlink():
             raise ValueError(f"unsafe nonprogram manifest: {name}")
         record = json.loads(manifest.read_text(encoding="utf-8"))
-        if (record.get("schema") != "sens-migration-nonprogram-manifest/1"
+        if (record.get("schema") != "sens-migration-nonprogram-manifest-1"
                 or record.get("automatic_sens_companion") is not False
                 or record.get("issue") != 4460):
             raise ValueError(f"nonprogram authority mismatch: {name}")

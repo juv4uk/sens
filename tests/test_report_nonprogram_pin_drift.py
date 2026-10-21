@@ -34,7 +34,7 @@ class PinDriftTests(unittest.TestCase):
 
     def write_manifest(self, sha):
         self.manifest_path.write_text(json.dumps({
-            "schema": "sens-migration-nonprogram-manifest/1",
+            "schema": "sens-migration-nonprogram-manifest-1",
             "issue": 4460,
             "automatic_sens_companion": False,
             "entries": [{"path": "lib/профіль.lisp", "git_blob_sha1": sha}],

@@ -1514,7 +1514,7 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
             record = json.loads(contents.decode("utf-8"))
         except (UnicodeError, OSError, ValueError) as exc:
             raise SensT5Error(f"NONPROGRAM_MANIFEST_INVALID layer=encode {name}: {exc}") from exc
-        if (record.get("schema") != "sens-migration-nonprogram-manifest/1"
+        if (record.get("schema") != "sens-migration-nonprogram-manifest-1"
                 or record.get("issue") != 4460
                 or record.get("automatic_sens_companion") is not False
                 or not isinstance(record.get("entries"), list)

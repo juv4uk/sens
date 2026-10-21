@@ -10,7 +10,7 @@ MANIFEST = ROOT / "knowledge/migration-nonprogram-schema-manifest-2026-10-08.jso
 class MigrationNonProgramSchemaManifest(unittest.TestCase):
     def test_manifest_is_bounded_and_sources_stay_declarative(self):
         data = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(data["schema"], "sens-migration-nonprogram-manifest/1")
+        self.assertEqual(data["schema"], "sens-migration-nonprogram-manifest-1")
         self.assertEqual(data["classification"], "lisp-data-nonprogram")
         self.assertFalse(data["automatic_sens_companion"])
         entries = data["entries"]

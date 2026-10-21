@@ -1,5 +1,5 @@
 {
-  "schema": "sens-migration-nonprogram-manifest/1",
+  "schema": "sens-migration-nonprogram-manifest-1",
   "generated_from_main": "bc1f50374196139f3f59555030cb42838c101fa5",
   "issue": 4458,
   "classification": "benchmark-recording-nonprogram",

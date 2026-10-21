@@ -46,7 +46,7 @@ def first_record_head(source: str) -> str:
 class KnowledgeRecordSources(unittest.TestCase):
     def test_all_pinned_originals_are_data_not_executable_programs(self):
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(manifest["schema"], "sens-migration-nonprogram-manifest/1")
+        self.assertEqual(manifest["schema"], "sens-migration-nonprogram-manifest-1")
         self.assertEqual(manifest["issue"], 4460)
         self.assertEqual(manifest["classification"], "lisp-data-nonprogram")
         self.assertIs(manifest["automatic_sens_companion"], False)

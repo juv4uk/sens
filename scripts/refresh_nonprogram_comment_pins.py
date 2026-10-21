@@ -81,7 +81,7 @@ def refresh(root: Path, manifests: list[str], *, apply: bool = False) -> dict:
         before = file.read_bytes()
         record = json.loads(before.decode("utf-8", errors="strict"))
         entries = record.get("entries")
-        if (record.get("schema") != "sens-migration-nonprogram-manifest/1"
+        if (record.get("schema") != "sens-migration-nonprogram-manifest-1"
                 or record.get("automatic_sens_companion") is not False
                 or record.get("issue") != 4460
                 or not isinstance(entries, list) or len(entries) != choices[name]):

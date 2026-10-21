@@ -36,7 +36,7 @@ def scan(root: Path, manifests=NONPROGRAM_MANIFESTS, *, limit: int = 10) -> dict
         if not manifest.is_file() or manifest.is_symlink():
             raise ValueError("missing/unsafe manifest: " + manifest_name)
         payload = json.loads(manifest.read_text(encoding="utf-8"))
-        if (payload.get("schema") != "sens-migration-nonprogram-manifest/1"
+        if (payload.get("schema") != "sens-migration-nonprogram-manifest-1"
                 or payload.get("automatic_sens_companion") is not False
                 or payload.get("issue") != 4460):
             raise ValueError("invalid reviewed manifest authority: " + manifest_name)

@@ -1,5 +1,5 @@
 {
-  "schema": "sens-migration-nonprogram-manifest/1",
+  "schema": "sens-migration-nonprogram-manifest-1",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
   "authority": "research/classification; not executable SENS or domain law",
