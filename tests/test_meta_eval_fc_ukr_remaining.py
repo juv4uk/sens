@@ -157,6 +157,22 @@ class MetaFirstClassUkrRemaining(unittest.TestCase):
         self.assertIn("(функція (вираз оточення)", self.current)
         self.assertNotIn("(функція (expr ctx)", self.current)
 
+    def test_executable_default_conditions_use_real_d1_and_not_anonymous_d5(self):
+        # Це структурний свідок, не семантичний Python oracle:
+        # справжні обчислення й один біт мутанта виконує SENS.
+        active = "\n".join(line.split(";", 1)[0] for line in self.current.splitlines())
+        self.assertEqual(active.count("((атом? (як-є ()))"), 13)
+        self.assertEqual(active.count("((атом? значення) (атом? (як-є (()))) )"), 2)
+        self.assertNotIn("(так ", active)
+        self.assertNotIn(" ні)", active)
+        self.assertNotIn("((функція ()", active)
+        self.assertIn("(нехай-послідовно", active)
+        # Старий біт голови мутаційно повертає нечинний виклик;
+        # його забороняємо, а не змінюємо runtime-значення у Python.
+        mutant = active.replace("((атом? (як-є ()))", "(так", 1)
+        self.assertIn("(так ", mutant)
+        self.assertNotEqual(mutant, active)
+
     def test_wrong_surface_does_not_satisfy_current_projection(self):
         mutant = self.current.replace("(як-є менше?)", "(як-є помилкова-назва?)", 1)
         self.assertNotEqual(mutant, self.current)
