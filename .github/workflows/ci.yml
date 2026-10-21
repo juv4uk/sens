@@ -309,48 +309,11 @@ jobs:
           set -euo pipefail
           cargo build --locked -p sens-cli --bin sens
           binary="$PWD/target/debug/sens"
-          while IFS= read -r file; do
-            [[ -n "$file" ]] || continue
-            # .lisp — людське джерело, НЕ фізичні байти T5M.
-            # Експортуємо лише в тимчасовий каталог; оригінал не переписуємо.
-            output="$RUNNER_TEMP/sens-current-t5m/$(dirname "$file")"
-            name="$(basename "${file%.lisp}")"
-            mkdir -p "$output"
-            physical="$output/$name.sens"
-            report="$output/$name.migration.json"
-            set +e
-            python3 scripts/migrate-three-pass.py "$file" \
-              --out "$output" --report "$report" --codec t5m --source-surface укр
-            conversion_status=$?
-            set -e
-            if ((conversion_status != 0)); then
-              if [[ -s "$report" ]]; then
-                python3 -c 'import json,sys; r=json.load(open(sys.argv[1],encoding="utf-8")); print("T5M_MIGRATION_DIAG " + json.dumps({"summary":r.get("summary"),"files":[{"path":x.get("path"),"reason":x.get("reason")} for x in r.get("files",[]) if x.get("status")=="blocked"]},ensure_ascii=False))' "$report"
-              fi
-              echo "::error::T5M_SOURCE_MIGRATION_BLOCKED path=$file status=$conversion_status"
-              exit "$conversion_status"
-            fi
-            if [[ ! -f "$physical" ]]; then
-              echo "::error::T5M_PHYSICAL_MISSING source=$file expected=$physical"
-              exit 1
-            fi
-            stdout="$RUNNER_TEMP/t5m-file.stdout"
-            stderr="$RUNNER_TEMP/t5m-file.stderr"
-            if timeout 45s "$binary" --t5m-file "$file" >"$stdout" 2>"$stderr"; then
-              # CLI --t5m-file читає УКРАЇНСЬКИЙ .lisp і власноруч проводить його через Zig/T5M.\n              # Пара .sens вище — окрема фізична квитанція, не підміна джерела.\n              # DEFINE-only програма може завершитися успішно без текстового
-              # результату; порожній stdout сам по собі не є семантичним RED.
-              result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
-              bytes="$(wc -c < "$stdout")"
-              printf 'T5M_FILE_EXECUTION PASS source=%s physical=%s stdout_bytes=%s result_sha256=%s\n' "$file" "$physical" "$bytes" "$result_sha"
-              printf -- '- PASS — `%s` — Zig T5M → SENS; stdout %s байт; SHA-256: `%s`\n' \
-                "$file" "$bytes" "$result_sha" >> "$GITHUB_STEP_SUMMARY"
-            else
-              status=$?
-              sed 's/^/T5M stderr: /' "$stderr" >&2
-              echo "::error::T5M_FILE_EXECUTION_FAIL source=$file physical=$physical status=$status"
-              exit "$status"
-            fi
-          done < "$RUNNER_TEMP/changed-t5m-lisp.txt"
+          # .lisp — людське джерело, не T5M. Спочатку Zig-мінтинг,
+          # потім точний фізичний .sens у SENS, зі свідками в RUNNER_TEMP.
+          bash scripts/execute_changed_lisp_t5m.sh \
+            "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
+            "$RUNNER_TEMP/changed-t5m-pairs"
 
       # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - name: "BENCH-T5M — Zig, x86-64 ASM, Rust"
@@ -725,6 +688,7 @@ jobs:
           python3 -m unittest tests/test_content_store_ukr_primary_projection.py -v
           python3 -m unittest tests/test_persistent_vector_ukr_primary_projection.py -v
           python3 -m unittest tests/test_machine_encoding_ukr_aliases.py -v
+          python3 -m unittest tests/test_changed_lisp_t5m_route.py -v
           python3 -m unittest tests/test_world_ukr_primary_projection.py -v
           python3 scripts/test-content-store-d1-bitness.py
           # Борг active Latin call heads лишається видимим у звіті й JSON.
