@@ -223,29 +223,31 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
     # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
+  # preload_t5m_binding_sources виконує DEFINE послідовно у SENS;
+  # залежність завжди завантажується РАНІШЕ за користувача.
   elif [[ "$file" == "lib/narrate.lisp" ]]; then
     # Пояснення бере «походження» з живого DEFINE lib/reason.lisp;
     # Reason, у свою чергу, користується визначеннями уніфікації.
     # Обидва джерела лише свідчать завантажувані механізми — не вигадують D9.
-    binding_sources=(--binding-source lib/reason.lisp --binding-source lib/unify.lisp)
+    binding_sources=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp)
   elif [[ "$file" == "lib/result-status.lisp" ]]; then
     # D9 модуль-відомий? та модуль-клаузи-зараз визначено в Knowledge;
     # забезпечити-індекс-міркування й міркувати — у Reason.
     # До перевірки T5M надаємо лише справжні Lisp DEFINE та їхні SHA.
     # Резидент каталогу D9 без DEFINE надалі лишається недопущеним.
-    binding_sources=(--binding-source lib/knowledge.lisp
-                     --binding-source lib/reason.lisp
-                     --binding-source lib/unify.lisp)
+    binding_sources=(--binding-source lib/unify.lisp
+                     --binding-source lib/knowledge.lisp
+                     --binding-source lib/reason.lisp)
   elif [[ "$file" == "lib/translation.lisp" ]]; then
     # Переклад викликає лише реальні визначення: знання/світ та D8
     # класифікацію тексту з Yantra. Каталог D9/D10 сам по собі
     # не надає виконуваності; парний SENS надалі перевіряє семантику.
-    binding_sources=(--binding-source lib/knowledge.lisp
+    binding_sources=(--binding-source lib/unify.lisp
+                     --binding-source lib/knowledge.lisp
+                     --binding-source lib/reason.lisp
                      --binding-source lib/world.lisp
                      --binding-source lib/yantra.lisp
-                     --binding-source lib/result-status.lisp
-                     --binding-source lib/reason.lisp
-                     --binding-source lib/unify.lisp)
+                     --binding-source lib/result-status.lisp)
   elif [[ "$file" == "tests/semantic/d9-world-shape-module-events-laws.lisp" ]]; then
     # Справжні D9 функції означені у SENS World і його Lisp-залежностях.
     # Ті самі п'ять програм завантажує world_ancestor_sens.rs;
