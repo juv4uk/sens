@@ -1637,7 +1637,7 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                        },
         },
         "scripts/generate-rust-function-signatures.lisp": {
-            "blob": "6ac69484413d738ab7142f6c72d7be710138eece",
+            "blob": "e96ccfe425c07df483448e91beac7a16e4a5afa5",
             "counts": {
                        "100": 10,
                        "101": 4,
@@ -1661,8 +1661,8 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                        "001000": 1,
                        "0011": 15,
                        "0010": 11,
-                       "010": 4,
-                       "001": 16,
+                       "010": 15,
+                       "001": 27,
                        "011": 3
                        },
         },
