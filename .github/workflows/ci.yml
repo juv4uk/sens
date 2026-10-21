@@ -1106,6 +1106,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Нативний доказ лише при зміні селекторів/доменної геометрії.
+          changed_source="$(git diff --name-only HEAD^ HEAD)"
+          for law_source in selector_law.rs semantic_registry.rs domain_family_composition_current.rs ci.yml; do
+            if [[ "$changed_source" == *"$law_source"* ]]; then
+              CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --lib eval::selector_law::tests:: -- --nocapture
+              CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test domain_family_composition_current -- --nocapture
+              break
+            fi
+          done
           # Старий Python/T5-запис повністю заблоковано: він не є Zig/T5M.
           python3 -m unittest tests/test_retired_t5_publisher.py -v
           python3 -m unittest tests/test_ukr_default_t5m_contract.py -v
