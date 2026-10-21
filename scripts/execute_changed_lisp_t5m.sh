@@ -248,10 +248,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/world.lisp
                      --binding-source lib/yantra.lisp
                      --binding-source lib/result-status.lisp)
-  elif [[ "$file" == "tests/semantic/d9-world-shape-module-events-laws.lisp" ]]; then
-    # Дев'ять D1-законів використовують лише означення з lib/world.lisp.
-    # Не тягнемо повний Reason із недопущеним тут рядком D7 "|-".
-    # Справжній SENS не дозволить виконати відсутню залежність.
+  elif [[ "$file" == "tests/semantic/d9-world-shape-module-events-laws.lisp" ||
+          "$file" == "tests/semantic/world-exact-arity-witness.lisp" ]]; then
+    # Обидва живі свідки світу викликають DEFINE з lib/world.lisp.
+    # Без цього SENS правильно відхиляє невідомий D7 Text7-символ «світ?».
+    # Не підміняємо виконання хостовим оракулом і не тягнемо весь Reason.
     binding_sources=(--binding-source lib/world.lisp)
   fi
   if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then
