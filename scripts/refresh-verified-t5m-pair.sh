@@ -118,7 +118,7 @@ cleanup_publish() {
     fi
     echo "T5M_REPAIR_INSTALL_FAILED source=$source_file status=$status" >&2
   fi
-  rm -rf -- "$publish_dir"
+  rm -rf -- "$publish_dir" "$scratch"
   exit "$status"
 }
 trap cleanup_publish EXIT
@@ -185,5 +185,5 @@ installed_view=1
 view_stamp="$(stat -c '%d:%i' "$view")"
 cmp "$publish_dir/expected.view" "$view"
 trap - EXIT INT TERM
-rm -rf -- "$publish_dir"
+rm -rf -- "$publish_dir" "$scratch"
 echo "T5M_REPAIR_OK source=$source_file physical=$physical view=$view mode=$mode exact=ZIG_AND_SENS negative=REJECTED semantic_parity=NOT_CERTIFIED release=NOT_CERTIFIED"
