@@ -350,45 +350,144 @@ fn project_repl_surface_expression(
     surface: ReplSurface,
     depth: usize,
 ) -> Result<Expr, String> {
+    project_repl_surface_expression_in_scope(expression, session, surface, depth, &[])
+}
+
+fn project_repl_surface_expression_in_scope(
+    expression: &Expr,
+    session: &Session,
+    surface: ReplSurface,
+    depth: usize,
+    bound: &[std::rc::Rc<str>],
+) -> Result<Expr, String> {
     if depth > 768 {
         return Err("REPL projection lowering exceeds the SENS nesting limit".into());
     }
-    let ExprKind::List(items) = &expression.kind else {
-        return Ok(expression.clone());
-    };
-    if items.is_empty() {
-        return Ok(expression.clone());
-    }
-    if matches!(
-        &items[0].kind,
-        ExprKind::DomainIdentity(identity)
-            if identity.width() == 3 && identity.packed_bits() == 0b001
-    ) || matches!(&items[0].kind, ExprKind::Symbol(name) if matches!(name.as_ref(), "quote" | "як-є" | "'"))
-    {
-        return Ok(expression.clone());
-    }
+    let ExprKind::Symbol(name) = &expression.kind else {
+        if let ExprKind::List(items) = &expression.kind {
+            if items.is_empty() {
+                return Ok(expression.clone());
+            }
+            if matches!(
+                &items[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 3 && identity.packed_bits() == 0b001
+            ) || matches!(&items[0].kind, ExprKind::Symbol(name) if matches!(name.as_ref(), "quote" | "як-є" | "'"))
+            {
+                return Ok(expression.clone());
+            }
 
-    let mut projected = items
-        .iter()
-        .map(|item| project_repl_surface_expression(item, session, surface, depth + 1))
-        .collect::<Result<Vec<_>, _>>()?;
-    if let ExprKind::Symbol(name) = &items[0].kind {
-        // A user binding in the persistent REPL frame shadows a projection
-        // alias, preserving ordinary interactive rebinding behavior.
-        if session.environment.get(name).is_none() {
-            if let Some(identity) = selected_surface_callable(surface, name)? {
-                let arguments = projected.drain(1..).collect::<Vec<_>>();
+            // A projection spelling is only a lookup route. In value position
+            // it lowers to the same exact identity as in call-head position.
+            // Lexical binders and persistent REPL bindings keep their Text7 name.
+            let mut lambda_identity = None;
+            if let ExprKind::Symbol(head) = &items[0].kind {
+                if session.environment.get(head).is_none() {
+                    lambda_identity =
+                        selected_surface_callable(surface, head)?.filter(|identity| {
+                            matches!(
+                                identity,
+                                CoreDomainIdentity::D4(word)
+                                    if word.word().packed_bits() == 0b0010
+                            )
+                        });
+                }
+            }
+            if let Some(identity) = lambda_identity {
+                let mut lambda_bound = bound.to_vec();
+                if let Some(parameters) = items.get(1) {
+                    collect_repl_binders(parameters, &mut lambda_bound);
+                }
+                let mut projected = Vec::with_capacity(items.len());
+                projected.push(Expr {
+                    kind: ExprKind::DomainIdentity(DomainIdentity::from(identity)),
+                    span: items[0].span,
+                });
+                if let Some(parameters) = items.get(1) {
+                    projected.push(parameters.clone());
+                }
+                projected.extend(
+                    items
+                        .iter()
+                        .skip(2)
+                        .map(|item| {
+                            project_repl_surface_expression_in_scope(
+                                item,
+                                session,
+                                surface,
+                                depth + 1,
+                                &lambda_bound,
+                            )
+                        })
+                        .collect::<Result<Vec<_>, _>>()?,
+                );
                 return Ok(Expr {
-                    kind: ExprKind::DomainCall(identity, arguments.into()),
+                    kind: ExprKind::List(projected.into()),
                     span: expression.span,
                 });
             }
+
+            let mut projected = items
+                .iter()
+                .map(|item| {
+                    project_repl_surface_expression_in_scope(
+                        item,
+                        session,
+                        surface,
+                        depth + 1,
+                        bound,
+                    )
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            if let ExprKind::Symbol(head) = &items[0].kind {
+                // A user binding in the persistent REPL frame shadows a projection
+                // alias, preserving ordinary interactive rebinding behavior.
+                if session.environment.get(head).is_none() {
+                    if let Some(identity) = selected_surface_callable(surface, head)? {
+                        let arguments = projected.drain(1..).collect::<Vec<_>>();
+                        return Ok(Expr {
+                            kind: ExprKind::DomainCall(identity, arguments.into()),
+                            span: expression.span,
+                        });
+                    }
+                }
+            }
+            return Ok(Expr {
+                kind: ExprKind::List(projected.into()),
+                span: expression.span,
+            });
+        }
+        return Ok(expression.clone());
+    };
+    if !bound
+        .iter()
+        .any(|candidate| candidate.as_ref() == name.as_ref())
+        && session.environment.get(name).is_none()
+    {
+        if let Some(identity) = selected_surface_callable(surface, name)? {
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(DomainIdentity::from(identity)),
+                span: expression.span,
+            });
         }
     }
-    Ok(Expr {
-        kind: ExprKind::List(projected.into()),
-        span: expression.span,
-    })
+    Ok(expression.clone())
+}
+
+fn collect_repl_binders(expression: &Expr, names: &mut Vec<std::rc::Rc<str>>) {
+    match &expression.kind {
+        ExprKind::Symbol(name) => names.push(name.clone()),
+        ExprKind::List(items) => {
+            for item in items.iter() {
+                collect_repl_binders(item, names);
+            }
+        }
+        ExprKind::Pair(head, tail) => {
+            collect_repl_binders(head, names);
+            collect_repl_binders(tail, names);
+        }
+        _ => {}
+    }
 }
 
 fn exact_t5m_carrier_words(
@@ -1597,6 +1696,45 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
+    fn callable_projection_names_lower_to_the_same_first_class_domain_code() {
+        let session = Session::default();
+        let cases = [
+            (ReplSurface::Ukrainian, "додати"),
+            (ReplSurface::UkrainianFull, "додати"),
+            (ReplSurface::Lisp, "plus"),
+        ];
+        let expected = ExactDomainWord::Identity(DomainIdentity::from(
+            selected_surface_callable(ReplSurface::UkrainianFull, "додати")
+                .expect("Ukrainian full projection")
+                .expect("D5 addition callable"),
+        ));
+
+        for (surface, name) in cases {
+            let words = prepare_t5m_repl_words(name, surface, &session)
+                .unwrap_or_else(|error| panic!("{} value {name:?}: {error}", surface.code()));
+            assert_eq!(words, [expected.clone()], "{} projection", surface.code());
+        }
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn domain_code_is_a_first_class_function_value_through_zig_t5m() {
+        let mut session = Session::default();
+        let result = eval_t5m_repl_line(
+            "((функція (операція) (операція 1 2)) додати)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("D5 function code is passed as a value, restored by Zig T5M, then applied");
+
+        let Value::BinaryNumber(ref number) = result.value else {
+            panic!("the first-class D5 function returns exact D24+");
+        };
+        assert_eq!(number.to_decimal_string(), "3");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
     fn interactive_t5m_does_not_accept_a_name_from_an_unselected_projection() {
         let mut session = Session::default();
         let error = eval_t5m_repl_line("(plus 1 2)", &mut session, ReplSurface::UkrainianFull)
@@ -2132,7 +2270,7 @@ mod tests {
             "Sanskrit exact-byte replay"
         );
         assert!(
-            source.starts_with("; Sanskrit surface"),
+            source.starts_with("; Санскритська проєкція"),
             "expected tracked source"
         );
         assert!(

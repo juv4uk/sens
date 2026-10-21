@@ -54,7 +54,7 @@ fn help_flag_prints_usage() {
     assert!(stdout.contains("Usage: sens [file]"));
     assert!(stdout.contains(".lisp"));
     assert!(stdout.contains(".sens"));
-    assert!(stdout.contains("physical .sens is packed T5"));
+    assert!(stdout.contains("physical .sens is packed T5M"));
     assert!(stdout.contains("--t5m-file"));
     assert!(stdout.contains("--oracle-check <file|->"));
     assert!(stdout.contains("--core=3|4"));

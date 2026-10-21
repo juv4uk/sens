@@ -683,8 +683,8 @@ fn main() {
         if arg == "--help" || arg == "-h" {
             println!("Usage: sens [file]");
             println!("If no file is provided, starts the REPL.");
-            println!("Textual compatibility source: .lisp and historical aliases; physical .sens is packed T5, not UTF-8 Lisp.");
-            println!("  sens program.sens            Run exact physical T5 with pure SENS (no implicit Core4/host effects)");
+            println!("Textual compatibility source: .lisp and historical aliases; physical .sens is packed T5M, not UTF-8 Lisp.");
+            println!("  sens program.sens            Run exact physical T5M with pure SENS (no implicit Core4/host effects)");
             println!("  sens --t5m-file program.lisp Run Ukrainian Lisp source through Zig T5M and execute its SENS words");
             println!("  sens --t5m-mint program.lisp program.sens Mint physical Zig/T5M from the same SENS reader as --t5m-pair");
             println!("  sens-trit open program.sens  Display exact binary words without running");
