@@ -73,7 +73,7 @@ fn t5m_result_retains_proper_and_dotted_d3_pairs_without_host_shortcut() {
         ("(як-є (радіо антена))", "(радіо антена)"),
         ("(як-є (радіо (антена . сигнал)))", "(радіо (антена . сигнал))"),
     ].into_iter().enumerate() {
-        let output = run_source(expression, index + 10);
+        let output = temp_source(expression, index + 10, false);
         assert!(
             output.status.success(),
             "test_id=t5m-result-pair layer=zig-sens input={expression} stderr={}",
