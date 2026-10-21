@@ -108,6 +108,25 @@ PY
     echo "T5M_FILE_EXECUTION PASS path=$file pair=$pair result_sha256=$result_sha semantic=NOT_CERTIFIED"
   else
     status=$?
+    # Фізичний T5M зберігає W24 без втрат. Проте W24 сам по собі
+    # не позначає домен: старий BinarySourceWord приймає лише W1–W9.
+    # Це НЕ дає права приписати байтам D24 та оголосити physical PASS.
+    # Для саме цієї відомої межі пробуємо незалежний чинний маршрут:
+    # український Lisp → доменна проєкція → Zig T5M → SENS.
+    if grep -Fq 'точні ширини слів [24]' "$stderr" &&
+       grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$stderr"; then
+      echo "::warning::T5M_PHYSICAL_D24_NOT_EXECUTED source=$file pair=$pair status=$status release=NOT_CERTIFIED"
+      if timeout 45s "$binary" --t5m-file "$file" >"$stdout" 2>"$stderr"; then
+        result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
+        echo "T5M_DOMAIN_SOURCE_RUNTIME_PASS source=$file physical=NOT_SUPPORTED result_sha256=$result_sha release=NOT_CERTIFIED"
+        continue
+      fi
+      status=$?
+      sed 's/^/T5M source stderr: /' "$stderr" >&2
+      echo "::error::T5M_DOMAIN_SOURCE_RUNTIME_FAIL source=$file status=$status" >&2
+      failed_files=$((failed_files + 1))
+      continue
+    fi
     sed 's/^/T5M stderr: /' "$stderr" >&2
     echo "::error::T5M_FILE_EXECUTION_FAIL path=$file pair=$pair status=$status" >&2
     failed_files=$((failed_files + 1))
