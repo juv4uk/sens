@@ -122,3 +122,15 @@ fn world_module_eight_laws_execute_in_sens() {
     assert_eq!(bad.value.to_string(), "(1 1 0 1 1 1 1 1)",
         "підмінений закон має дати реальний D1:NO, а не PASS");
 }
+
+#[test]
+fn world_module_unknown_name_is_rejected_by_sens_d1() {
+    let mut session = world_session();
+    let query = "(світ-модуль-відомий? (створити-світ (як-є ()) (список (як-є (tell альфа факт-а))) (як-є ())) (як-є бета))";
+    let forms = parse_mixed_exact_domain(query)
+        .expect("чинний український D9 запит повинен читатися точно");
+    let result = eval_parsed_expressions(&forms, &mut session)
+        .expect("сам SENS має повернути D1:NO для невідомого модуля");
+    assert_eq!(result.value.to_string(), "0",
+        "чужий модуль не успадковує світовий журнал іншого модуля");
+}
