@@ -178,17 +178,14 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(result["summary"]["scanned"], 1)
         self.assertEqual(check.call_args.kwargs["selected_paths"], selection)
 
-    def test_exact_sha_pinned_schema_metadata_is_not_executable_source(self):
+    def test_live_function_table_has_no_nonprogram_exemption(self):
         path = "lib/function-table-mechanisms.lisp"
         report = MOD.run(ROOT, False, {path})
+        self.assertEqual(report["summary"]["scanned"], 1)
         self.assertEqual(report["summary"]["admitted_files"], 0)
         self.assertEqual(report["summary"]["blocked_files"], 0)
-        self.assertEqual(report["files"][0]["status"], "nonprogram-data-reviewed")
-        self.assertEqual(report["files"][0]["potential_heads"], 0)
-        self.assertEqual(
-            report["files"][0]["source_git_blob_sha"],
-            "e749d5696205efb335447859388630c493cf8df2",
-        )
+        self.assertEqual(report["files"][0]["status"], "source-era-unproved")
+        self.assertNotIn("source_git_blob_sha", report["files"][0])
 
     def test_template_strings_are_not_old_executable_define_heads(self):
         source = """; (00001011 ignored)\n(0011 code (0010 () "(00001001 inside-string)"))\n(001 quoted (00001001 ignored))\n'(00001001 ignored)\n#| (00001001 blocked-comment) |#\n"""

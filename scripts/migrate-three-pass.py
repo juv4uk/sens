@@ -1399,7 +1399,7 @@ NONPROGRAM_MANIFESTS = (
     ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 11),
     ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
     ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
-    ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
+    ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 20),
     ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
     ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
     ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 14),
@@ -1413,7 +1413,7 @@ NONPROGRAM_MANIFEST_BLOB_SHA = {
     "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "c50c5bb4544d5f99c095ede8f9e7e00247b5e591",
     "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "2c92d4c427155229f07cc50a0dcbad58410b6bb3",
     "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "fb9126852941b96cc271c79dfc6d841e03f1aca5",
-    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "b775db90022f89bf36e11c3802add2ca566b2874",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "5b8da639b2551372acb808d52c45a13b8cb925b5",
     "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "dcf286108ad9dfd1323a57a488c08716c767de64",
     "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "d6151765a7a1d3087774c00f63063136da15a56e",
     "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "b6cce65609c4ba85d2977363872de96071061ffc",
@@ -1444,8 +1444,7 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
             reviewed_lib_cohort = "comment-only-loader"
         elif relative.startswith("lib/machine/isa/"):
             reviewed_lib_cohort = "isa"
-        elif relative in ("lib/function-table-mechanisms.lisp",
-                          "lib/island-math-evidence.lisp"):
+        elif relative == "lib/island-math-evidence.lisp":
             reviewed_lib_cohort = "schema"
         else:
             return  # Виконуваний або ще не класифікований Lisp; не фальшивий STOP.

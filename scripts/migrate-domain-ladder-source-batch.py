@@ -32,9 +32,8 @@ SKIP = ("lib/domains/", "lib/generated/", "lib/surface/", "knowledge/archive/",
 # the active scopes reaches the source-era/parser/evidence classification below;
 # uncertainty is reported with its concrete reason instead of silently skipped.
 
-# Ця декларативна схема вже включена до незалежного SHA-прикріпленого
-# non-program manifest; ніколи не видавати її записи за виклики функцій.
-PINNED_SCHEMA_METADATA = "lib/function-table-mechanisms.lisp"
+# Виконувана таблиця механізмів не підпадає під NONPROGRAM: у ній є живі DEFINE.
+# Проходимо звичайну source-era перевірку, не створюючи виконуваних .sens з повітря.
 
 # The five pinned service/policy sources were migrated only at D4 DEFINE/LAMBDA
 # heads. Their surviving 8-bit D3 COND forms remain HISTORICAL, not current D8.
@@ -301,14 +300,7 @@ def run(root, write=False, selected=None):
     guard = guard_module(root)
     # Повторно використовуємо канонічні Git-blob pins із #4460.
     # Будь-яка зміна навіть одного байта в джерелі залишається BLOCK, а не skip.
-    reviewed = load_nonprogram_classification(root, selected_paths=selected)
-    pinned = reviewed.get(PINNED_SCHEMA_METADATA)
-    # A schema pin is mandatory only when that schema is in the source
-    # selection (or this is a full census). It cannot impose a filename HOLD
-    # on unrelated, independently selected Lisp files.
-    if selected is None or PINNED_SCHEMA_METADATA in selected:
-        if pinned is None or pinned["cohort"] != "schema":
-            raise ValueError("missing independently reviewed schema metadata authority")
+    load_nonprogram_classification(root, selected_paths=selected)
     proc = subprocess.run(["git", "ls-files", "-z", "--", "*.lisp"],
                           cwd=root, check=True, capture_output=True)
     paths = sorted(p.decode() for p in proc.stdout.split(b"\0") if p)
@@ -323,14 +315,6 @@ def run(root, write=False, selected=None):
         file = root / path
         if file.is_symlink():
             report.append({"path": path, "status": "blocked", "reasons": ["symlink"]})
-            continue
-        if path == PINNED_SCHEMA_METADATA:
-            report.append({
-                "path": path, "status": "nonprogram-data-reviewed",
-                "source_git_blob_sha": pinned["source_git_blob_sha"],
-                "potential_heads": 0,
-                "reasons": ["SHA-pinned schema metadata; never executable migration credit"],
-            })
             continue
         original = file.read_text(encoding="utf-8")
         # Raw regexes incorrectly attribute generated strings to historical

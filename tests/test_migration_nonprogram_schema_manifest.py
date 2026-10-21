@@ -14,7 +14,7 @@ class MigrationNonProgramSchemaManifest(unittest.TestCase):
         self.assertEqual(data["classification"], "lisp-data-nonprogram")
         self.assertFalse(data["automatic_sens_companion"])
         entries = data["entries"]
-        self.assertEqual(len(entries), 21)
+        self.assertEqual(len(entries), 20)
 
         for entry in entries:
             rel = pathlib.PurePosixPath(entry["path"])
@@ -47,6 +47,7 @@ class MigrationNonProgramSchemaManifest(unittest.TestCase):
             "lib/core.lisp",
             "lib/core1.lisp",
             "lib/machine/dispatch/native-first.lisp",
+            "lib/function-table-mechanisms.lisp",
         ):
             self.assertNotIn(executable, paths)
 
