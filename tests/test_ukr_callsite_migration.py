@@ -903,6 +903,15 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
                     self.assertIn("(як-є 00000000000)", source)
                     self.assertIn("(як-є 1111111111)", source)
                     self.assertIn("(ключі-без-повторів?", source)
+                    self.assertNotRegex(source, r"\(\s*так(?=\s|\))")
+                    self.assertNotIn("((атом? рядки) так)", source)
+                    for width in range(1, 12):
+                        self.assertIn(
+                            f"(визначити д{width} (завантажити-домен "
+                            f"(символ-у-текст (як-є lib/domains/d{width}.lisp))))",
+                            source,
+                        )
+                        self.assertNotIn(f'"lib/domains/d{width}.lisp"', source)
                     continue
                 restored = self._inverse(source, evidence["edits"])
                 restored = self._restore_prior_domain_logic_calls(path, restored)
