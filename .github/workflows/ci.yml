@@ -161,8 +161,10 @@ jobs:
           base="$BEFORE_SHA"
           if [[ "$EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE_SHA"; fi
           files="$RUNNER_TEMP/changed-t5m-lisp.txt"
+          binaries="$RUNNER_TEMP/changed-t5m-binaries.txt"
           raw="$RUNNER_TEMP/changed-lisp-paths.txt"
           : > "$files"
+          : > "$binaries"
           # Git за замовчуванням екранує кирилицю у шляхах; це приховує
           # виконувані *.lisp з українськими назвами від нативного SENS.
           # Отримуємо буквальні UTF-8 шляхи, не змінюючи мову/семантику.
@@ -178,13 +180,13 @@ jobs:
           # .lisp: перевіряємо повні Git-байти (включно з даними, коментарями,
           # архівом), не лише викличні імена. Старі незмінені файли не чіпаємо.
           python3 scripts/guard_ukr_lisp_keyboard.py --paths-from "$raw" --ref "$GITHUB_SHA"
-          python3 - "$raw" "$files" <<'PY'
+          python3 - "$raw" "$files" "$binaries" <<'PY'
           from pathlib import Path
           import sys
           sys.path.insert(0, "scripts")
           from report_ukr_projection_progress import tokenize_lisp, _contains_source_definitions
 
-          raw, output = map(Path, sys.argv[1:])
+          raw, output, binary_output = map(Path, sys.argv[1:])
           data_paths = ("lib/domains/", "knowledge/", "docs/", "research/", "contracts/")
           selected = []
           for name in raw.read_text(encoding="utf-8").splitlines():
@@ -238,8 +240,18 @@ jobs:
           print(f"T5M_CHANGED_EXECUTABLE_LISP count={len(selected)}")
           for name in selected:
               print(f"T5M_CHANGED_FILE {name}")
+          binary_paths = []
+          for name in selected:
+              binary = Path(name).with_suffix(".sens")
+              if binary.is_file() and not binary.is_symlink() and binary.stat().st_size:
+                  binary_paths.append(binary.as_posix())
+          binary_output.write_text("".join(name + "\n" for name in binary_paths), encoding="utf-8")
+          print(f"T5M_CHANGED_PHYSICAL_SENS count={len(binary_paths)}")
+          for name in binary_paths:
+              print(f"T5M_BINARY_FILE {name}")
           PY
           if [[ -s "$files" ]]; then echo 'has_files=true' >> "$GITHUB_OUTPUT"; else echo 'has_files=false' >> "$GITHUB_OUTPUT"; fi
+          if [[ -s "$binaries" ]]; then echo 'has_binary_files=true' >> "$GITHUB_OUTPUT"; else echo 'has_binary_files=false' >> "$GITHUB_OUTPUT"; fi
 
           # Адресні runtime-тести активуються змінами їхніх залежностей.
           changed_all="$RUNNER_TEMP/changed-core-dependencies.txt"
@@ -392,17 +404,6 @@ jobs:
 
       - uses: ./.github/actions/install-zig
         if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.reason_tests == 'true' || steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:')) || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
-
-      - name: Повна програма — SENS AST → фізичний T5M (обов'язкова перевірка)
-        timeout-minutes: 15
-        shell: bash
-        run: |
-          set -euo pipefail
-          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          timeout 360s cargo build --locked -p sens-cli --bin sens --bin sens-trit
-          timeout 240s cargo test --locked -p sens --example program_size --features benchmark-ast-visits -- --nocapture
-          python3 -m unittest benchmarks/sens-program-size/test_run.py -v
-          python3 benchmarks/sens-program-size/run.py
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -759,7 +760,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo build --locked -p sens-cli --bin sens --bin sens-trit
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           binary="$PWD/target/debug/sens"
           # SENS reader -> Zig T5M -> фізичний SENS reader -> SENS eval.
           # Для виконання мови Python/JSON не потрібні; історичний
@@ -768,6 +769,22 @@ jobs:
             bash scripts/execute_changed_lisp_t5m.sh \
               "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
               "$RUNNER_TEMP/changed-t5m-pairs"
+
+      - name: Бенчмарк змінених фізичних програм SENS
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.has_binary_files == 'true' && steps.t5m_changed_execute.outcome == 'success' }}
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib --features benchmark-ast-visits binary_program_reports_actual_evaluator_dispatches
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --bin sens --features benchmark-ast-visits physical_binary_metrics_come_from_the_sens_evaluator
+          python3 -m unittest benchmarks/sens-program-size/test_run.py -v
+          benchmark_binaries="$RUNNER_TEMP/changed-t5m-pairs/benchmark-binaries.txt"
+          if [[ ! -s "$benchmark_binaries" ]]; then
+            echo "::notice::SENS_BINARY_BENCHMARK_SKIPPED reason=no-changed-committed-binary-passed-standalone-execution"
+            exit 0
+          fi
+          python3 benchmarks/sens-program-size/run.py --binary-list "$benchmark_binaries"
 
       # Фізичні байти від справжнього SENS/Zig зберігаємо як при RED,
       # так і при позитивному виконанні: без GREEN-артефакту не можна

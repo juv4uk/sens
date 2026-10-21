@@ -6,18 +6,18 @@
     "CONFORMANCE",
     "RESEARCH"
   ],
-  "question": "For a fixed exact arithmetic result, how do a direct expression tree and a hand-folded candidate compare in actual evaluator visits, exact words/bits, T5 boundary/padding twos, and physical Zig/T5M bytes?",
-  "claim": "A hand-authored constant-folding pair returns the same verified value and reports AST structure, actual evaluator dispatch visits, exact transported words/bits, T5 framing overhead, and physical T5M bytes. It demonstrates only this fixed-input pair; it does not establish general optimizer quality, speed, transitive library closure, memory, or language superiority.",
+  "question": "For each changed physical SENS binary program, how many executable AST nodes and actual evaluator visits does the SENS binary path traverse, and what exact-word/T5M physical cost does it carry?",
+  "claim": "The benchmark opens and executes the physical .sens binary through Zig/T5M and the SENS evaluator. It reports restored AST nodes, actual evaluator-dispatch visits, exact words/bits, T5 framing/padding twos, physical bytes, and the execution result for binaries linked to programs changed in the push/PR. It does not parse Lisp as the workload and does not claim timing, memory, or automatic optimizer quality.",
   "witness": [
     "benchmarks/sens-program-size/README.md",
     "benchmarks/sens-program-size/run.py",
     "benchmarks/sens-program-size/test_run.py",
-    "crates/sens/examples/program_size.rs",
-    "benchmarks/sens-program-size/fixtures/arithmetic-before.lisp",
-    "benchmarks/sens-program-size/fixtures/arithmetic-constant-folded.lisp"
+    "crates/sens/src/binary_execution.rs",
+    "crates/sens-cli/src/main.rs",
+    ".github/workflows/ci.yml"
   ],
-  "status": "ACTIVE-CURRENT-UKRAINIAN-AST-PATH-AND-PHYSICAL-T5M-PAIR",
-  "generation": "current main, live SENS parser/projection and Zig T5M",
-  "axis": "sens/whole-program-optimization-ast-path-exact-words-physical-t5m-size",
-  "reproduce": "python3 -m unittest benchmarks/sens-program-size/test_run.py -v && python3 benchmarks/sens-program-size/run.py"
+  "status": "ACTIVE-PHYSICAL-SENS-BINARY-PROGRAM-BENCHMARK",
+  "generation": "changed executable .sens programs in push/PR, exact binary SENS evaluator and Zig T5M",
+  "axis": "sens/physical-binary-ast-path-exact-words-and-t5m-cost",
+  "reproduce": "python3 -m unittest benchmarks/sens-program-size/test_run.py -v && python3 benchmarks/sens-program-size/run.py --binary <repository-relative-program.sens>"
 }

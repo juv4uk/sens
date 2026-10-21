@@ -47,6 +47,8 @@ path = "src/bin/lisp-source-guard.rs"
 # The SENS reader/evaluator alone owns semantics and execution admission.
 default = ["zig-transport"]
 zig-transport = ["wsm-guard-core/zig-source"]
+# Opt-in instrumentation for benchmarks of physical binary SENS programs.
+benchmark-ast-visits = ["sens/benchmark-ast-visits"]
 # Explicit legacy comparison: cargo ... --no-default-features (never silent fallback).
 
 [dependencies]

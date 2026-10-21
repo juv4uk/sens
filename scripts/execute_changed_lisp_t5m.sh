@@ -12,6 +12,10 @@ outdir="$3"
 test -x "$binary"
 test -f "$manifest"
 mkdir -p "$outdir"
+# Лише committed `.sens`, що пройшли Zig-пару й самостійне виконання,
+# потрапляють до наступного фізичного бенчмарка.
+benchmark_manifest="$outdir/benchmark-binaries.txt"
+: > "$benchmark_manifest"
 # Нативний SENS/Zig — єдиний типовий маршрут. Невідомий режим
 # НЕ має права непомітно запускати допоміжний Python/JSON мігратор.
 # Історичний preview доступний тільки після явного SENS_NATIVE_T5M=0.
@@ -180,6 +184,9 @@ run_native_t5m_program() {
         return
       fi
       native_standalone_parity_paths["$file"]=1
+      if [[ -f "$committed" && ! -L "$committed" ]] && cmp -s "$physical" "$committed"; then
+        printf '%s\n' "$committed" >> "$benchmark_manifest"
+      fi
       echo "T5M_NATIVE_STANDALONE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
     else
       status=$?

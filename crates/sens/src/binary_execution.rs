@@ -125,6 +125,16 @@ impl PhysicalT5Program {
     pub fn execute(&self, session: &mut Session) -> Result<EvalResult, LanguageError> {
         eval_lowered_expressions(&self.forms, session)
     }
+
+    /// Execute this physical binary AST and report actual evaluator dispatches.
+    /// Available only in the explicitly enabled optimization-benchmark build.
+    #[cfg(feature = "benchmark-ast-visits")]
+    pub fn execute_with_visit_count(
+        &self,
+        session: &mut Session,
+    ) -> Result<(EvalResult, u64), LanguageError> {
+        crate::eval::eval_expressions_with_visit_count(&self.forms, session)
+    }
 }
 
 fn parse_exact_domain_words(words: &[ExactDomainWord]) -> Result<Vec<Expr>, LanguageError> {
@@ -400,6 +410,41 @@ mod exact_t5_cutover_tests {
         };
         assert_eq!(number.numeric_domain_width(), Some(24));
         assert_eq!(number.bits(), "3");
+    }
+
+    #[cfg(feature = "benchmark-ast-visits")]
+    #[test]
+    fn binary_program_reports_actual_evaluator_dispatches() {
+        let identity = |width, bits| {
+            ExactDomainWord::identity(DomainIdentity::from_coordinate(
+                crate::domain_ladder::DomainCoordinate::new(width, bits).unwrap(),
+            ))
+        };
+        let number = |value| {
+            let mut bits = vec![0; 24];
+            bits[23] = 1;
+            if value == 2 {
+                bits[22] = 1;
+                bits[23] = 0;
+            }
+            ExactDomainWord::number(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
+                .unwrap()
+        };
+        let program = PhysicalT5Program::from_exact_domain_words(&[
+            identity(2, 0b10),
+            identity(5, 0b01010),
+            number(1),
+            number(2),
+            identity(2, 0b01),
+        ])
+        .expect("binary D2/D5/D24+ program is admitted by SENS");
+
+        let (result, visits) = program
+            .execute_with_visit_count(&mut Session::bare())
+            .expect("execute exact binary program with instrumentation");
+
+        assert_eq!(result.value.to_string(), "3");
+        assert_eq!(visits, 3, "one D5 call and two binary numeric leaves");
     }
 
     fn physical(source: &str) -> Vec<u8> {

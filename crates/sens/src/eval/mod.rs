@@ -149,7 +149,7 @@ pub fn eval_lowered_expressions(
 /// evaluator. The optional metric is compiled only for the whole-program
 /// optimization benchmark, so ordinary SENS builds carry no counter overhead.
 #[cfg(feature = "benchmark-ast-visits")]
-pub fn eval_expressions_with_visit_count(
+pub(crate) fn eval_expressions_with_visit_count(
     expressions: &[Expr],
     session: &mut Session,
 ) -> Result<(EvalResult, u64), LanguageError> {

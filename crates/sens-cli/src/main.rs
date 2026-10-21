@@ -164,6 +164,20 @@ fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     Some(Ok(path.as_str()))
 }
 
+/// Explicit instrumentation mode: its only input is the physical binary.
+fn physical_t5_benchmark_request(args: &[String]) -> Option<Result<&str, &'static str>> {
+    let position = args
+        .iter()
+        .position(|argument| argument == "--benchmark-physical")?;
+    if position != 1 || args.len() != 3 {
+        return Some(Err("usage: sens --benchmark-physical <program.sens>"));
+    }
+    if std::path::Path::new(&args[2]).extension().and_then(|ext| ext.to_str()) != Some("sens") {
+        return Some(Err("--benchmark-physical accepts only a physical .sens binary"));
+    }
+    Some(Ok(args[2].as_str()))
+}
+
 /// Явно обраний людський .lisp → українська проєкція → Zig T5M →
 /// двійковий SENS → виконання. Це окремо від історичного `sens file.lisp`.
 fn t5m_file_request(args: &[String]) -> Option<Result<&str, &'static str>> {
@@ -336,6 +350,36 @@ fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
         .map_err(|err| format!("current SENS execution rejected: {err}"))
 }
 
+#[cfg(feature = "benchmark-ast-visits")]
+fn count_physical_ast_nodes(expression: &sens::Expr) -> usize {
+    let children = match &expression.kind {
+        sens::ExprKind::List(items)
+        | sens::ExprKind::Call(_, items)
+        | sens::ExprKind::DomainCall(_, items) => items.iter().map(count_physical_ast_nodes).sum(),
+        sens::ExprKind::Pair(head, tail) => {
+            count_physical_ast_nodes(head) + count_physical_ast_nodes(tail)
+        }
+        _ => 0,
+    };
+    1 + children
+}
+
+#[cfg(feature = "benchmark-ast-visits")]
+fn eval_physical_t5_with_benchmark_metrics(
+    bytes: &[u8],
+) -> Result<(sens::EvalResult, usize, u64), String> {
+    let words = decode_physical_t5_words(bytes)?;
+    let program = sens::PhysicalT5Program::from_exact_domain_words(&words)
+        .map_err(|err| format!("exact SENS domain reader rejected: {err}"))?;
+    let ast_nodes = program.forms().iter().map(count_physical_ast_nodes).sum();
+    let mut pure = Session::bare();
+    sens::install_ratified_d5_macro_mechanism(&pure);
+    let (result, eval_visits) = program
+        .execute_with_visit_count(&mut pure)
+        .map_err(|err| format!("current SENS execution rejected: {err}"))?;
+    Ok((result, ast_nodes, eval_visits))
+}
+
 /// Isolated byte carrier. SENS decides how the contents are parsed and executed.
 fn linter_source_zig_only() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
@@ -494,6 +538,37 @@ fn main() {
             }
             Err(error) => {
                 eprintln!("sens: T5M physical pair execution failed: {error}");
+                process::exit(1);
+            }
+        }
+        return;
+    }
+    if let Some(request) = physical_t5_benchmark_request(&raw_args) {
+        #[cfg(feature = "benchmark-ast-visits")]
+        let result = match request {
+            Ok(filename) => fs::read(filename)
+                .map_err(|err| format!("read physical .sens: {err}"))
+                .and_then(|bytes| eval_physical_t5_with_benchmark_metrics(&bytes)),
+            Err(message) => Err(message.to_owned()),
+        };
+        #[cfg(not(feature = "benchmark-ast-visits"))]
+        let result: Result<(sens::EvalResult, usize, u64), String> = match request {
+            Ok(_) => Err("--benchmark-physical requires the benchmark-ast-visits build feature".into()),
+            Err(message) => Err(message.to_owned()),
+        };
+        match result {
+            Ok((result, ast_nodes, eval_visits)) => {
+                for output in result.output {
+                    println!("{output}");
+                }
+                println!("{}", result.value);
+                eprintln!(
+                    "SENS_BINARY_BENCH AST_NODES={ast_nodes} EVAL_VISITS={eval_visits} RESULT={}",
+                    result.value
+                );
+            }
+            Err(error) => {
+                eprintln!("sens: binary benchmark failed: {error}");
                 process::exit(1);
             }
         }
@@ -942,6 +1017,17 @@ fn main() {
 mod core_profile_bootstrap_tests {
     use super::*;
 
+    #[cfg(all(feature = "zig-transport", feature = "benchmark-ast-visits"))]
+    #[test]
+    fn physical_binary_metrics_come_from_the_sens_evaluator() {
+        let (result, ast_nodes, eval_visits) =
+            eval_physical_t5_with_benchmark_metrics(&[0x63, 0x89, 0x06, 0xa1])
+                .expect("physical T5M enters Zig and executes as binary SENS");
+        assert_eq!(result.value.to_string(), "()");
+        assert!(ast_nodes > 0);
+        assert!(eval_visits > 0);
+    }
+
     #[cfg(feature = "zig-transport")]
     #[test]
     fn native_t5m_pair_mint_matches_zig_and_executes_without_python() {
@@ -1088,6 +1174,29 @@ mod core_profile_bootstrap_tests {
             "sens".to_owned(), "--core=4".to_owned(), "program.sens".to_owned(),
         ];
         assert!(matches!(physical_t5_request(&flags), Some(Err(_))));
+    }
+
+    #[test]
+    fn physical_benchmark_accepts_only_an_explicit_sens_binary() {
+        let args = vec![
+            "sens".to_owned(),
+            "--benchmark-physical".to_owned(),
+            "program.sens".to_owned(),
+        ];
+        assert_eq!(physical_t5_benchmark_request(&args), Some(Ok("program.sens")));
+        let textual = vec![
+            "sens".to_owned(),
+            "--benchmark-physical".to_owned(),
+            "program.lisp".to_owned(),
+        ];
+        assert!(matches!(physical_t5_benchmark_request(&textual), Some(Err(_))));
+        let extra = vec![
+            "sens".to_owned(),
+            "--benchmark-physical".to_owned(),
+            "program.sens".to_owned(),
+            "--surface=укр".to_owned(),
+        ];
+        assert!(matches!(physical_t5_benchmark_request(&extra), Some(Err(_))));
     }
 
     #[cfg(feature = "zig-transport")]
