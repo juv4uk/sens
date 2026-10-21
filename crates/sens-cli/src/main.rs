@@ -198,14 +198,39 @@ fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str), &'static str
     Some(Ok((&args[2], &args[3])))
 }
 
+// Явні Lisp-залежності SENS; жодного Python/JSON resolver.
+fn t5m_binding_paths(args: &[String]) -> Result<Vec<&str>, &'static str> {
+    if args.len() < 4 || (args.len() - 4) % 2 != 0 {
+        return Err("expected zero or more --binding-source <source.lisp> pairs");
+    }
+    let mut paths = Vec::new();
+    for pair in args[4..].chunks_exact(2) {
+        if pair[0] != "--binding-source"
+            || std::path::Path::new(&pair[1]).extension().and_then(|ext| ext.to_str())
+                != Some("lisp")
+        {
+            return Err("only --binding-source <source.lisp> is permitted");
+        }
+        paths.push(pair[1].as_str());
+    }
+    Ok(paths)
+}
+
+fn read_t5m_binding_sources(paths: &[&str]) -> Result<Vec<String>, String> {
+    paths.iter().map(|path| {
+        fs::read_to_string(path)
+            .map_err(|error| format!("read SENS binding source {path}: {error}"))
+    }).collect()
+}
+
 /// Створити фізичний T5M та читабельні біти за одним SENS-reader/Zig
 /// roundtrip. Жодних Python-міграторів, JSON-квитанцій чи другого кодека.
-fn t5m_mint_pair_request(args: &[String]) -> Option<Result<(&str, &str), &'static str>> {
+fn t5m_mint_pair_request(args: &[String]) -> Option<Result<(&str, &str, Vec<&str>), &'static str>> {
     if !args.iter().skip(1).any(|part| part == "--t5m-mint-pair") {
         return None;
     }
-    if args.len() != 4 || args[1] != "--t5m-mint-pair" {
-        return Some(Err("usage: sens --t5m-mint-pair <source.lisp> <output.sens>"));
+    if args.len() < 4 || args[1] != "--t5m-mint-pair" {
+        return Some(Err("usage: sens --t5m-mint-pair <source.lisp> <output.sens> [--binding-source <source.lisp> ...]"));
     }
     let source = std::path::Path::new(&args[2]);
     let physical = std::path::Path::new(&args[3]);
@@ -214,7 +239,7 @@ fn t5m_mint_pair_request(args: &[String]) -> Option<Result<(&str, &str), &'stati
     {
         return Some(Err("--t5m-mint-pair requires .lisp and .sens paths"));
     }
-    Some(Ok((&args[2], &args[3])))
+    Some(t5m_binding_paths(args).map(|bindings| (&args[2][..], &args[3][..], bindings)))
 }
 
 /// Нові фізичні файли публікуємо разом або відкидаємо створене нами.
@@ -255,12 +280,12 @@ fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String
 /// Парне виконання дозволяє читати D24+ з реальних байтів Zig T5M,
 /// лише якщо український Lisp свідчить ТОЧНО ту саму доменну послідовність.
 /// Це не дозвіл трактувати довільний W24 за числову ідентичність.
-fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str), &'static str>> {
+fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str, Vec<&str>), &'static str>> {
     if !args.iter().skip(1).any(|item| item == "--t5m-pair") {
         return None;
     }
-    if args.len() != 4 || args[1] != "--t5m-pair" {
-        return Some(Err("usage: sens --t5m-pair <ukrainian-source.lisp> <physical.sens>"));
+    if args.len() < 4 || args[1] != "--t5m-pair" {
+        return Some(Err("usage: sens --t5m-pair <ukrainian-source.lisp> <physical.sens> [--binding-source <source.lisp> ...]"));
     }
     let source = std::path::Path::new(&args[2]);
     let physical = std::path::Path::new(&args[3]);
@@ -269,7 +294,7 @@ fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str), &'static str
     {
         return Some(Err("--t5m-pair requires .lisp source and physical .sens bytes"));
     }
-    Some(Ok((&args[2], &args[3])))
+    Some(t5m_binding_paths(args).map(|bindings| (&args[2][..], &args[3][..], bindings)))
 }
 
 /// One sterile physical ingress: Rust-host bytes -> Zig ABI v2 BE3 ->
@@ -415,16 +440,17 @@ fn main() {
     }
     if let Some(request) = t5m_mint_pair_request(&raw_args) {
         let result = match request {
-            Ok((source_path, physical_path)) => fs::read_to_string(source_path)
+            Ok((source_path, physical_path, binding_paths)) => fs::read_to_string(source_path)
                 .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
                 .and_then(|source| {
+                    let bindings = read_t5m_binding_sources(&binding_paths)?;
                     #[cfg(feature = "zig-transport")]
                     {
-                        repl::mint_t5m_source_pair(&source)
+                        repl::mint_t5m_source_pair_with_bindings(&source, &bindings)
                     }
                     #[cfg(not(feature = "zig-transport"))]
                     {
-                        let _ = source;
+                        let _ = (source, bindings);
                         Err("--t5m-mint-pair requires Zig T5M transport".into())
                     }
                 })
@@ -439,18 +465,19 @@ fn main() {
     }
     if let Some(request) = t5m_pair_request(&raw_args) {
         let result = match request {
-            Ok((source_path, physical_path)) => fs::read_to_string(source_path)
+            Ok((source_path, physical_path, binding_paths)) => fs::read_to_string(source_path)
                 .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
                 .and_then(|source| {
                     let physical = fs::read(physical_path)
                         .map_err(|error| format!("read physical .sens: {error}"))?;
+                    let bindings = read_t5m_binding_sources(&binding_paths)?;
                     #[cfg(feature = "zig-transport")]
                     {
-                        repl::eval_t5m_paired_file(&source, &physical)
+                        repl::eval_t5m_paired_file_with_bindings(&source, &physical, &bindings)
                     }
                     #[cfg(not(feature = "zig-transport"))]
                     {
-                        let _ = (source, physical);
+                        let _ = (source, physical, bindings);
                         Err("--t5m-pair requires the Zig T5M transport corridor".into())
                     }
                 }),
@@ -948,6 +975,24 @@ mod core_profile_bootstrap_tests {
         assert!(write_new_t5m_pair(
             path.to_str().unwrap(), &physical, &view,
         ).is_err(), "cannot overwrite a committed pair");
+        // Дійсне SENS-означення перевіряємо тим самим Zig/T5M.
+        let bindings = vec!["(визначити помічник (функція (аргумент) аргумент))".to_owned()];
+        let source = "(помічник (як-є ()))";
+        let (bound_physical, _) = repl::mint_t5m_source_pair_with_bindings(
+            source, &bindings,
+        ).expect("SENS must resolve a preload-defined function without Python or JSON");
+        repl::eval_t5m_paired_file_with_bindings(source, &bound_physical, &bindings)
+            .expect("the physically paired program runs with native SENS definitions");
+        assert!(repl::eval_t5m_paired_file_with_bindings(
+            "(як-є (()))", &bound_physical, &bindings,
+        ).is_err(), "another source must not reuse the T5M carrier");
+        let args = ["sens", "--t5m-pair", "program.lisp", "program.sens",
+                    "--binding-source", "helper.lisp"]
+            .into_iter().map(str::to_owned).collect::<Vec<_>>();
+        assert_eq!(t5m_pair_request(&args).unwrap().unwrap().2, vec!["helper.lisp"]);
+        let mut invalid = args.clone();
+        invalid[4] = "--python-resolver".into();
+        assert!(t5m_pair_request(&invalid).unwrap().is_err());
         fs::remove_dir_all(&dir).expect("clean test fixtures");
     }
 
