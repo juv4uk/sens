@@ -212,3 +212,14 @@ fn replace_fourth_executes_preservation_and_rejects_corrupted_third() {
         "(друге четвірка)",
     );
 }
+
+
+#[test]
+fn rotate_three_right_executes_exact_d3_without_append_dependency() {
+    execute_with_negative(
+        "lib/rotate-three-right.lisp",
+        include_str!("../../../lib/rotate-three-right.lisp"),
+        "(перше (решта-решти елементи))",
+        "(перше елементи)",
+    );
+}
