@@ -22,9 +22,9 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 167,
+    "total": 169,
     "historical": 15,
-    "library": 152,
+    "library": 154,
     "distinct_families": 25
   },
   "excluded": {
@@ -3748,13 +3748,83 @@
         "native_step_name": "D11 математично визначені селектори — закон, бітність, негативні контролі",
         "native_overall_workflow_release_admission": "NOT_ASSERTED"
       }
+    },
+    {
+      "surface_name": "внутрішній-світ-застосувати-подію",
+      "source_family": "world",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/world.lisp",
+        "original_file": "lib/world.lisp",
+        "blob_sha": "f8f3a0da55b85d3c6a83040d7cf229b0a310c08a",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-внутрішніх-функцій-світу-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "01001101101",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "01001101101",
+        "ukr": "внутрішній-світ-застосувати-подію",
+        "source_file": "lib/world.lisp",
+        "source_blob": "f8f3a0da55b85d3c6a83040d7cf229b0a310c08a",
+        "law": "Подія tell додає третє поле в голову списку клауз; retract вилучає лише перше структурно рівне входження; стороння подія лишає список незмінним.",
+        "native_law_test": "crates/sens/tests/world_ancestor_sens.rs::d11_world_event_and_module_presence_are_native_sens_compositions",
+        "native_test_blob": "144eb386991562e6a1928d37f0b5bb1ab48ea892",
+        "native_test_result": "NATIVE_SENS_CI_PENDING",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Реальне SENS-визначення й окремий позитивний/негативний свідок; історична англійська назва не є доказом тотожності",
+        "historical_spelling_verified_only_as_name": "WORLD-APPLY-EVENT"
+      }
+    },
+    {
+      "surface_name": "внутрішній-світ-модуль-відсутній?",
+      "source_family": "world",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/world.lisp",
+        "original_file": "lib/world.lisp",
+        "blob_sha": "f8f3a0da55b85d3c6a83040d7cf229b0a310c08a",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-внутрішніх-функцій-світу-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "01001111110",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "01001111110",
+        "ukr": "внутрішній-світ-модуль-відсутній?",
+        "source_file": "lib/world.lisp",
+        "source_blob": "f8f3a0da55b85d3c6a83040d7cf229b0a310c08a",
+        "law": "Предикат відсутності модуля обчислює точну D1-істину через ATOM послідовності подій цього модуля; наявний модуль із журналом дає D1-хибу.",
+        "native_law_test": "crates/sens/tests/world_ancestor_sens.rs::d11_world_event_and_module_presence_are_native_sens_compositions",
+        "native_test_blob": "144eb386991562e6a1928d37f0b5bb1ab48ea892",
+        "native_test_result": "NATIVE_SENS_CI_PENDING",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Реальне SENS-визначення й окремий позитивний/негативний свідок; історична англійська назва не є доказом тотожності",
+        "historical_spelling_verified_only_as_name": "world-module-missing?"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 25,
-    "semantic_winners_total": 537,
+    "native_sens_composition_winners": 27,
+    "semantic_winners_total": 539,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
