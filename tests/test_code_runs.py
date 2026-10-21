@@ -171,7 +171,9 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
         self.assertEqual(source.count("(хибне? (переклад-внутрішній-символ? вид))"), 1)
 
     def _assert_alternative_guard(self, source):
-        self.assertIn("((атом? (решта альтернативи)) так)", source)
+        self.assertEqual(source.count("((порожній? (решта альтернативи)) так)"), 1)
+        self.assertEqual(source.count("((атом? (решта альтернативи)) (як-є ()))"), 1)
+        self.assertNotIn("((атом? (решта альтернативи)) так)", source)
 
     def test_ratified_primary_selectors_without_old_aliases(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
@@ -194,9 +196,9 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
 
     def test_wrong_alternative_selector_peer_is_rejected(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
-        correct = "((атом? (решта альтернативи)) так)"
+        correct = "((порожній? (решта альтернативи)) так)"
         self.assertEqual(source.count(correct), 1)
-        mutated = source.replace(correct, "((атом? (перше альтернативи)) так)", 1)
+        mutated = source.replace(correct, "((атом? (решта альтернативи)) так)", 1)
         with self.assertRaises(AssertionError):
             self._assert_alternative_guard(mutated)
 
