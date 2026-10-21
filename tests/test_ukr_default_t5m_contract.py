@@ -58,7 +58,7 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
             "  if (( not_program > 0 )); then", 1
         )[0]
         self.assertIn("::error::T5M_MIGRATION_UNPROVEN", blocked_arm)
-        self.assertIn("failed_files=$((failed_files + 1))", blocked_arm)
+        self.assertIn("mark_file_failed", blocked_arm)
         self.assertIn("continue", blocked_arm)
         self.assertIn("if (( failed_files > 0 )); then\n  exit 2", runner)
 
