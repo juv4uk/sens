@@ -485,9 +485,13 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         )
         self.assertNotIn("#d1:1", active_first)
         self.assertNotIn("#d1:0", active_first)
-        self.assertIn("(так ", active_first)
-        # Поточна ратифікована D1 проєкція: D1:0 = «ні», D1:1 = «так».
-        # Meta-mutual і first-class використовують повну ратифіковану D1-проєкцію.
+        self.assertNotIn("(так ", active_first)
+        self.assertNotIn(" ні)", active_first)
+        self.assertEqual(active_first.count("((атом? (як-є ()))"), 13)
+        self.assertIn("(нехай-послідовно", active_first)
+        self.assertNotIn("((функція ()", active_first)
+        # Чинні D1-результати обчислює SENS через ATOM/QUOTE.
+        # Meta-mutual має окремий маршрут міграції своїх голів.
         d1 = (root / "lib/domains/d1.lisp").read_text(encoding="utf-8")
         self.assertIn("(0 (ук ні) (укр ні)", d1)
         self.assertIn("(1 (ук так) (укр так)", d1)
