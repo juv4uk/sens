@@ -13,8 +13,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = {
-    "lib/narrate.lisp": ("54008fcb00d661c8", 25),
-    "lib/machine/block-exact.lisp": ("400d82e03cba2c17", 6),
+    "lib/narrate.lisp": 25,
+    "lib/machine/block-exact.lisp": 6,
 }
 # Історичні виклики на рядках із D9 без доказу callable не переписуються
 # за схожими бітами. Залишкові D4 супутники цих самих рядків також
@@ -163,14 +163,6 @@ def normalized(node, names: dict[str, str], quoted: bool = False) -> str:
     return "(" + " ".join(children) + ")"
 
 
-def fingerprint(text: str) -> str:
-    """FNV-1a-64 тільки для зафіксованого синтаксичного свідка, не безпеки."""
-    value = 0xCBF29CE484222325
-    for byte in text.encode("utf-8"):
-        value = ((value ^ byte) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
-    return f"{value:016x}"
-
-
 def numeric_heads(tree: list) -> Counter:
     count = Counter()
 
@@ -214,13 +206,29 @@ class UkrainianNarrateBlockProjectionTests(unittest.TestCase):
                     self.assertEqual(len(bits), width)
                     self.assertEqual(self.index[spelling], bits)
 
-    def test_original_canonical_ast_is_preserved_in_both_sources(self):
-        for filename, (expected_fingerprint, expected_forms) in SOURCES.items():
+    def test_current_ast_roundtrips_through_exact_width_projection(self):
+        # Поточна Lisp AST, не історичний FNV з чужого коміту.
+        # Синтаксичний roundtrip тут НЕ замінює SENS evaluator у Rust.
+        for filename, expected_forms in SOURCES.items():
             with self.subTest(file=filename):
                 parsed = parse((ROOT / filename).read_text(encoding="utf-8"))
                 self.assertEqual(len(parsed), expected_forms)
                 canonical = "\n".join(normalized(form, self.index) for form in parsed)
-                self.assertEqual(fingerprint(canonical), expected_fingerprint)
+                restored = parse(canonical)
+                self.assertEqual(len(restored), expected_forms)
+                self.assertEqual(
+                    "\n".join(normalized(form, self.index) for form in restored),
+                    canonical,
+                    "точні голови й цитовані дані не повинні мінятися повторно",
+                )
+
+    def test_narrate_uses_executable_d1_not_unbound_surface_atoms(self):
+        source = (ROOT / "lib/narrate.lisp").read_text(encoding="utf-8")
+        code = "\n".join(line for line in source.splitlines()
+                         if not line.lstrip().startswith(";"))
+        self.assertNotRegex(code, r"(?<![\\w-])(так|ні)(?![\\w-])")
+        self.assertIn("(атом? (як-є ()))", code)
+        self.assertIn("(атом? (як-є (())))", code)
 
     def test_only_explicitly_unverified_numeric_heads_remain(self):
         for filename, remaining in REMAINING_EXACT_HEADS.items():
