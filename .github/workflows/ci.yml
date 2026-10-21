@@ -396,6 +396,27 @@ jobs:
         if: ${{ always() && github.event_name == 'workflow_dispatch' }}
         run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
 
+      - name: Реальне виконання SENS — змінені українські машинні операнди
+        if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+        timeout-minutes: 4
+        shell: bash
+        env:
+          PUSH_BEFORE: ${{ github.event.before }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          base="$PUSH_BEFORE"
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE"; fi
+          if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
+            git fetch --no-tags --depth=1 origin "$base"
+            changed="$(git diff --name-only "$base" HEAD -- lib/machine/operands/x86-64.lisp crates/sens/tests/machine_typed_operands.rs .github/workflows/ci.yml)"
+            if [[ -z "$changed" ]]; then
+              echo "SENS-ОПЕРАНДИ: закони не змінювалися, важкий тест не запускаємо"
+              exit 0
+            fi
+          fi
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_typed_operands -- --nocapture
+
       - name: Оборотність Lisp ↔ точні слова ↔ T5M — позитивні й негативні перевірки
         if: ${{ always() }}
         shell: bash
