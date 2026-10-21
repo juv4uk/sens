@@ -57,7 +57,7 @@ fn completed_unification_queries_report_explicit_outcomes() {
             Err(error) => format!("(error \"{:?}\")", error.kind),
         };
         let verdict = format!(
-            "(witness-status (witness-verdict (quote {}) (quote {})))",
+            "(свідок-статус (свідок-висновок (як-є {}) (як-є {})))",
             row_source, actual
         );
         let status = eval_program(&verdict, &mut session)
