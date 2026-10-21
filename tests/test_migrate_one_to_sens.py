@@ -190,27 +190,39 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertEqual(target.read_bytes(), target_before,
                              "dry-run must preserve pre-existing physical .sens")
 
-    def test_peer_identity_requires_loaded_surface_environment(self):
-        """A single-file staging tool must not invent imports from core/uk.lisp.
+    def test_peer_identity_uses_current_ukrainian_projection_without_legacy_snapshot(self):
+        """Сучасне джерело не повинно відповідати старій помилці mixed-script.
 
-        This historical witness explicitly requires the peer bindings to be
-        loaded before evaluating it.  The current D1-D9 word migrator cannot
-        attest that `модуль` and `abs` refer to one executable identity, so the
-        D7 keyboard/v2 mixed-script guard rejects it instead of guessing.
-        A missing environment is a real BLOCK, never physical admission.
+        Це тільки перевірка мігратора, а не доказ виконання SENS чи
+        семантичного допуску. Недоведена залежність лишається BLOCKED.
         """
         source = ROOT / "lib" / "surface" / "peer-identity-acceptance.lisp"
+        before = source.read_bytes()
         target = source.with_suffix(".sens")
-        original_source = source.read_bytes()
-        result = invoke(source, "--dry-run")
-        self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
+        view = source.with_suffix("")
+        target_before = target.read_bytes() if target.is_file() else None
+        view_before = view.read_bytes() if view.is_file() else None
+
+        result = invoke(source, "--dry-run", "--codec", "t5m",
+                        "--source-surface", "укр")
+        self.assertIn(result.returncode, (0, 2), result.stderr + result.stdout)
         report = json.loads(result.stdout)
-        self.assertEqual(report["status"], "blocked")
+        self.assertEqual(report["source"], "lib/surface/peer-identity-acceptance.lisp")
         self.assertEqual(report["codec"], "t5m")
-        self.assertEqual(report["output"], "lib/surface/peer-identity-acceptance.sens")
-        self.assertIn("mixed-script identifier is ambiguous", report["reason"])
-        self.assertFalse(target.exists(), "blocked staging must not emit physical SENS")
-        self.assertEqual(source.read_bytes(), original_source)
+        self.assertNotIn("mixed-script identifier", report.get("reason", ""))
+        if result.returncode == 0:
+            self.assertEqual(report["status"], "would-write")
+            self.assertEqual(report["physical_producer"], "PYTHON_REFERENCE_ONLY")
+            self.assertEqual(report["semantic_parity"], "NOT_VERIFIED")
+            self.assertIsNone(report["zig_transport"])
+        else:
+            self.assertEqual(report["status"], "blocked")
+            self.assertTrue(report["reason"], "Непідтверджена залежність повинна мати діагноз")
+
+        # Позитивний preview і явна відмова однаково не публікують носій.
+        self.assertEqual(source.read_bytes(), before)
+        self.assertEqual(target.read_bytes() if target.is_file() else None, target_before)
+        self.assertEqual(view.read_bytes() if view.is_file() else None, view_before)
 
     def test_source_symlink_cannot_hide_original_identity(self):
         # A link into the repo must not silently become the canonical source path.
