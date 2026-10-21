@@ -222,6 +222,48 @@ class T5ProgressLedgerTests(unittest.TestCase):
         self.assertIn("lib/orphan.lisp", report["untracked_or_stale_source_paths"])
         self.assertEqual(report["summary"]["independently_oracle_certified_from_these_inputs"], 0)
 
+    def test_bits_backed_sens_fixture_does_not_inflate_lisp_coverage(self):
+        pairs, ready, sources = fixtures()
+        binary = copy.deepcopy(pairs["files"][0])
+        binary.update({
+            "source": "tests/semantic/sample.bits",
+            "sens": "tests/semantic/sample.sens",
+            "source_status": "EXACT_BINARY_SOURCE",
+        })
+        pairs["files"].append(binary)
+        pairs["summary"]["sens_files"] = 2
+        pairs["summary"]["physical_pass"] = 2
+        report = mod.combine(pairs, ready, sources)
+        self.assertEqual(report["status"], "COMPLETE_MECHANICAL_INVENTORY_ONLY")
+        self.assertTrue(report["source_complete"])
+        self.assertEqual(report["summary"]["tracked_lisp_sources"], 3)
+        self.assertEqual(report["summary"]["tracked_physical_sens_pairs"], 1)
+        self.assertEqual(report["summary"]["tracked_binary_source_fixture_pairs"], 1)
+        self.assertEqual(report["summary"]["mechanically_canonical_physical_pairs"], 1)
+        self.assertEqual(report["executable_roundtrip_coverage"]["blocked_or_unverified"], 2)
+        self.assertNotIn("tests/semantic/sample.bits",
+                         {row["source"] for row in report["files"]})
+        self.assertFalse(report["all_executable_lisp_roundtrip_verified"])
+
+    def test_broken_bits_fixture_reports_real_physical_defect(self):
+        pairs, ready, sources = fixtures()
+        binary = copy.deepcopy(pairs["files"][0])
+        binary.update({
+            "source": "tests/semantic/broken.bits",
+            "sens": "tests/semantic/broken.sens",
+            "source_status": "BLOCKED",
+            "physical_status": "BLOCKED",
+        })
+        pairs["files"].append(binary)
+        pairs["summary"]["sens_files"] = 2
+        # The real physical auditor counts only the first pair as PASS.
+        report = mod.combine(pairs, ready, sources)
+        self.assertEqual(report["status"], "BLOCKED_DISCREPANCY")
+        self.assertEqual(report["summary"]["binary_source_fixture_physical_blocked"], 1)
+        self.assertEqual(report["summary"]["tracked_physical_sens_pairs"], 1)
+        self.assertEqual(report["summary"]["mechanically_canonical_physical_pairs"], 1)
+        self.assertEqual(report["summary"]["missing_from_both_audits"], 0)
+
     def test_actual_repo_pair_audit_matches_no_implicit_semantic_credit(self):
         # Fast independent, read-only smoke test using already-installed
         # auditor; a physical pass never asserts oracle approval.
