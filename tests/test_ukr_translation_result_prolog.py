@@ -98,9 +98,18 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
         calls = Counter(t.text for t in audit.candidate_heads(audit.parse(translation)))
         for name in ("порада-рішення-у-світ", "порада-всі-рішення-у-світ"):
             self.assertGreaterEqual(calls[name], 1, name)
-        self.assertGreaterEqual(translation.count(
-            "(створити-світ (як-є ()) *knowledge-journal* (як-є ()))"
+        # Поточний журнал — жива Lisp-функція без кешованого знімка.
+        # Перевірка поверхні не заміняє runtime-свідок SENS.
+        knowledge = (ROOT / "lib/knowledge.lisp").read_text(encoding="utf-8")
+        self.assertIn("(визначити поточний-журнал-знань", knowledge)
+        self.assertIn("(функція () *knowledge-journal*)", knowledge)
+        self.assertEqual(translation.count(
+            "(створити-світ (як-є ()) (поточний-журнал-знань) (як-є ()))"
         ), 2)
+        self.assertNotIn(
+            "(створити-світ (як-є ()) *knowledge-journal* (як-є ()))",
+            translation,
+        )
         for old_en in ("advice-decision", "advice-all-decision"):
             self.assertEqual(calls[old_en], 0)
             rows = self.by_en.get(old_en, [])
