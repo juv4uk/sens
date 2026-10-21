@@ -56,19 +56,21 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertNotRegex(program, r"(?m)^\s*\((?:displayln|defmacro|def|quote|cond)\b")
         self.assertNotIn("defmacro", program)
         self.assertNotIn("`(if", program)
-        # У початковому прикладі 12 фактичних виводів: збережено
-        # як точні позиції друку, а не намальовані тестові результати.
-        self.assertEqual(program.count("(друкувати"), 12)
+        # Усі 12 первісних обчислень тепер є значеннями одного Lisp-списку,
+        # а не неіснуючим host-друком: виконання перевіряє нативний SENS.
+        self.assertIn("(визначити результати-конституції\n  (список", program)
+        self.assertNotIn("(друкувати", program)
         for math in ("(поділити 5 336)", "(поділити 5.0 2)"):
             with self.subTest(math=math):
                 self.assertIn(math, program)
         for quoted in ("constitution", "x", "a", "b", "лісп", "лісп-працює"):
             with self.subTest(quoted=quoted):
                 self.assertIn(f"(як-є {quoted})", program)
-        self.assertIn("((атом? (як-є ())) ні)", program)
+        self.assertIn("((атом? (як-є ())) (як-є ()))", program)
         self.assertNotIn("(так ", program)
         self.assertNotIn("(так\n", program)
-        self.assertIn("(друкувати (як-є лісп-працює))", program)
+        self.assertIn("(як-є лісп-працює)", program)
+        self.assertIn("(перше (решта (решта результати-конституції)))", program)
         # Перевірка не вважає відновлення коментарів умовою оберненості.
         guide = source("racket/README.md")
         self.assertIn("sens-cli --bin sens -- racket/examples/constitution.lisp", guide)
