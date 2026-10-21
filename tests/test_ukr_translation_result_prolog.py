@@ -110,7 +110,7 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
 
     def test_d10_advice_ukrainian_definitions_preserve_exact_identity(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
-        definitions = re.findall(r"(?m)^\\s*\\(визначити\\s+([^\\s()]+)", source)
+        definitions = re.findall(r"(?m)^\s*\(визначити\s+([^\s()]+)", source)
         self.assertEqual(len(definitions), len(set(definitions)), "повторне визначення D10")
         for old_name, (domain, bits) in RATIFIED_D10_DEFINITIONS.items():
             with self.subTest(name=old_name):
