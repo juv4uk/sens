@@ -7,3 +7,4 @@ description = "Host capability layer for sens: filesystem, processes, TCP"
 
 [dependencies]
 sens = { path = "../sens" }
+serde_json = "1"
