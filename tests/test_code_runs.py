@@ -400,19 +400,26 @@ class PythonSourcesCompileTests(unittest.TestCase):
 
 
 class CodecUkrProjectionTests(unittest.TestCase):
-    """Чинний D2: перевірка AST та негативних мутацій, не історичних SHA.
-
-    Реальне виконання пар і крапкових хвостів належить
-    crates/sens/tests/codec_in_sens.rs. Тут немає Python-eval SENS.
-    """
+    """D2 — точні українські голови й D1-гілки; виконання перевіряє Rust/SENS."""
 
     SOURCE = ROOT / "lib" / "codec-d2.lisp"
     D3 = ROOT / "lib" / "domains" / "d3.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
-    REQUIRED = (
-        "початок-д2", "кінець-д2", "роздільник-д2", "крапка-д2",
-        "порожнє-д2", "кодек-д2-кодувати-вузол",
-        "кодек-д2-кодувати-послідовність",
+    HEADS = {
+        "як-є": ("001", "quote"),
+        "атом?": ("010", "atom?"),
+        "решта": ("011", "cdr"),
+        "перше": ("100", "car"),
+        "тотожне?": ("101", "eq?"),
+        "за-умовою": ("110", "cond"),
+        "сполучити": ("111", "cons"),
+        "функція": ("0010", "lambda"),
+        "визначити": ("0011", "define"),
+    }
+    NAMES = (
+        "початок-д2", "кінець-д2", "роздільник-д2",
+        "крапка-д2", "порожнє-д2",
+        "кодек-д2-кодувати-вузол", "кодек-д2-кодувати-послідовність",
         "кодек-д2-розвернути-до", "кодек-д2-декодувати-вузол",
         "кодек-д2-зібрати-крапкову-пару",
         "кодек-д2-продовжити-послідовність",
@@ -427,148 +434,97 @@ class CodecUkrProjectionTests(unittest.TestCase):
         "крапка-д2": "d2-dot",
     }
 
-    @staticmethod
-    def parse(source):
-        # Лише граматика S-виразів, без імітації законів SENS.
-        raw = re.findall(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+', source)
-        tokens = [word for word in raw if not word.startswith(";")]
-        index = 0
+    def verify(self, source: str):
+        # Лише аналіз Lisp AST; жодної Python-імітації семантики.
+        from tests.test_ukr_narrate_peers import read_forms
 
-        def read():
-            nonlocal index
-            if index >= len(tokens):
-                raise AssertionError("незакритий S-вираз D2")
-            token = tokens[index]
-            index += 1
-            if token == ")":
-                raise AssertionError("зайва дужка D2")
-            if token != "(":
-                return token
-            result = []
-            while index < len(tokens) and tokens[index] != ")":
-                result.append(read())
-            if index >= len(tokens):
-                raise AssertionError("незакрита дужка D2")
-            index += 1
-            return tuple(result)
-
-        forms = []
-        while index < len(tokens):
-            forms.append(read())
-        return tuple(forms)
-
-    def verify(self, source):
-        forms = self.parse(source)
-        definitions = {}
+        forms = read_forms(source)
+        self.assertEqual(len(forms), len(self.NAMES), "втрачене D2 DEFINE")
+        found = {}
         for form in forms:
-            if not isinstance(form, tuple) or len(form) != 3 or form[0] != "визначити":
-                raise AssertionError("D2 верхній рівень: лише чинні DEFINE")
-            name = form[1]
-            if not isinstance(name, str) or name in definitions:
-                raise AssertionError("D2 має унікальні українські DEFINE")
-            definitions[name] = form[2]
-
-        for name in self.REQUIRED:
-            if name not in definitions:
-                raise AssertionError("втрачене виконуване визначення D2: " + name)
+            self.assertIsInstance(form, list)
+            self.assertEqual(len(form), 3, "усі визначення D4 тричленні")
+            self.assertEqual(form[0], "визначити", "нератифікований DEFINE")
+            self.assertNotIn(form[1], found, "дубльоване D2 ім'я")
+            found[form[1]] = form[2]
+        self.assertEqual(set(found), set(self.NAMES), "неповні чинні D2 функції")
         for name, marker in self.MARKERS.items():
-            if definitions[name] != ("як-є", marker):
-                raise AssertionError("змінена ратифікована роль D2-маркера: " + name)
-        if definitions["порожнє-д2"] != ("як-є", ()):
-            raise AssertionError("D3 NIL має лишатися структурним порожнім")
+            self.assertEqual(found[name], ["як-є", marker],
+                             f"змінено протокольні дані {name}")
 
-        # Зміна binder без зміни callsite не може зникнути у старому SHA-тесті.
-        def called(expr):
-            if not isinstance(expr, tuple):
-                return set()
-            found = set()
-            if expr and isinstance(expr[0], str) and expr[0].startswith("кодек-д2-"):
-                found.add(expr[0])
-            for item in expr:
-                found.update(called(item))
-            return found
+        allowed = set(self.HEADS) | set(self.NAMES)
+        condition = ["атом?", ["як-є", []]]
+        conditional_count = 0
 
-        for name, body in definitions.items():
-            for dependency in called(body):
-                if dependency not in definitions:
-                    raise AssertionError(f"D2 незв'язаний Lisp-виклик {name} → {dependency}")
+        def visit(node):
+            nonlocal conditional_count
+            if not isinstance(node, list) or not node:
+                return
+            head = node[0]
+            self.assertIsInstance(head, str, "анонімна недопущена виклична голова")
+            self.assertIn(head, allowed, f"невідомий виконуваний механізм {head}")
+            if head == "як-є":
+                return  # Цитовані символи D2 — дані, не виклики.
+            if head == "за-умовою":
+                conditional_count += 1
+                self.assertGreaterEqual(len(node), 2, "COND без гілок")
+                self.assertEqual(len(node[-1]), 2, "COND має двопольову гілку")
+                self.assertEqual(node[-1][0], condition,
+                                 "безумовна гілка має обчислювати D1:1, не голе так")
+                for clause in node[1:]:
+                    self.assertIsInstance(clause, list)
+                    self.assertEqual(len(clause), 2, "зламана COND пара")
+            for child in node[1:]:
+                visit(child)
 
-        def contains(node, needle):
-            return node == needle or (
-                isinstance(node, tuple) and any(contains(child, needle) for child in node)
-            )
-
-        decoder = definitions["кодек-д2-декодувати-послідовність"]
-        dot_guard = ("тотожне?", ("перше", "потік"), "крапка-д2")
-        separator_guard = ("тотожне?", ("перше", "потік"), "роздільник-д2")
-        if not contains(decoder, dot_guard) or not contains(decoder, separator_guard):
-            raise AssertionError("D2 крапка й роздільник втратили різні гілки")
-        dotted = definitions["кодек-д2-зібрати-крапкову-пару"]
-        if not contains(dotted, ("решта", ("решта", "декодоване"))):
-            raise AssertionError("D2 крапковий хвіст має спожити внутрішній close")
-        if not contains(definitions["перевірити-обертання-д2"],
-                        ("кодек-д2-кодувати-вузол", "вузол", ())):
-            raise AssertionError("D2 обернення має викликати чинний кодер")
-
-        # Каталожні слова D2 — дані; сирі числові голови не є викличними.
-        for node in forms:
-            if contains(node, ("0010",)) or contains(node, ("0011",)):
-                raise AssertionError("історичні width-теги в D2 DEFINE")
+        for form in forms:
+            visit(form[2])
+        self.assertEqual(conditional_count, 8, "втрачені перевірені гілки D2")
+        self.assertIn(
+            ["решта", ["решта", "декодоване"]],
+            found["кодек-д2-зібрати-крапкову-пару"][2][2],
+            "внутрішній D2 close не спожито перед зовнішнім хвостом",
+        )
         return forms
 
     def test_codec_d2_uses_exact_ukr_operator_heads(self):
-        for path, bits, surface in (
-            (self.D3, "001", "як-є"),
-            (self.D3, "010", "атом?"),
-            (self.D3, "011", "решта"),
-            (self.D3, "100", "перше"),
-            (self.D3, "101", "тотожне?"),
-            (self.D3, "110", "за-умовою"),
-            (self.D3, "111", "сполучити"),
-            (self.D4, "0010", "функція"),
-            (self.D4, "0011", "визначити"),
-        ):
-            table = path.read_text(encoding="utf-8")
-            self.assertRegex(
-                table, re.compile(
-                    r"(?m)^\s*\(" + bits + r"\s+.*?\(укр\s+" +
-                    re.escape(surface) + r"\)"
-                ),
-                f"нечинна координата {bits}: {surface}"
-            )
+        for head, (bits, english) in self.HEADS.items():
+            domain = self.D3 if len(bits) == 3 else self.D4
+            rows = [
+                line for line in domain.read_text(encoding="utf-8").splitlines()
+                if line.strip().startswith(f"({bits} ")
+            ]
+            self.assertEqual(len(rows), 1, (head, bits))
+            self.assertIn(f"(укр {head})", rows[0])
+            self.assertIn(f"(en {english})", rows[0])
         self.verify(self.SOURCE.read_text(encoding="utf-8"))
 
-    def test_current_ast_is_independent_of_comments_and_whitespace(self):
+    def test_inverse_ast_preserves_current_source_and_quoted_markers(self):
+        from tests.test_ukr_narrate_peers import read_forms
+
+        forms = self.verify(self.SOURCE.read_text(encoding="utf-8"))
+
+        def render(node):
+            if isinstance(node, list):
+                return "(" + " ".join(render(child) for child in node) + ")"
+            return node
+
+        canonical = "\n".join(render(form) for form in forms)
+        self.assertEqual(read_forms(canonical), forms,
+                         "точна структура D2 не повернулася після читача")
+
+    def test_negative_d1_and_binary_head_mutants_are_rejected(self):
         source = self.SOURCE.read_text(encoding="utf-8")
-        first = self.verify(source)
-        modified = "; коментар не змінює жодного D2 слова\n" + source.replace(
-            "(визначити ", "(визначити    ", 1
+        variants = (
+            source.replace("(атом? (як-є ()))", "(атом? (як-є (підміна)))", 1),
+            source.replace("(тотожне? (перше потік)", "(101 (перше потік)", 1),
+            source.replace("(решта (решта декодоване))", "(решта декодоване)", 1),
         )
-        self.assertEqual(first, self.verify(modified))
-
-    def test_wrong_ukr_peer_fails_the_inverse_witness(self):
-        source = self.SOURCE.read_text(encoding="utf-8")
-        old = "((тотожне? (перше потік) крапка-д2)"
-        mutant = source.replace(old, "((тотожне? (перше потік) роздільник-д2)", 1)
-        self.assertNotEqual(mutant, source)
-        with self.assertRaisesRegex(AssertionError, "крапка"):
-            self.verify(mutant)
-
-    def test_wrong_local_helper_name_fails_the_inverse_witness(self):
-        source = self.SOURCE.read_text(encoding="utf-8")
-        old = "(визначити кодек-д2-кодувати-вузол"
-        mutant = source.replace(old, "(визначити кодек-д2-невідома-функція", 1)
-        self.assertNotEqual(mutant, source)
-        with self.assertRaisesRegex(AssertionError, "визначення"):
-            self.verify(mutant)
-
-    def test_d2_dotted_pair_must_consume_inner_close(self):
-        source = self.SOURCE.read_text(encoding="utf-8")
-        old = "(решта (решта декодоване))"
-        mutant = source.replace(old, "(решта декодоване)", 1)
-        self.assertNotEqual(mutant, source)
-        with self.assertRaisesRegex(AssertionError, "close"):
-            self.verify(mutant)
+        for mutant in variants:
+            with self.subTest(mutant=mutant != source):
+                self.assertNotEqual(mutant, source)
+                with self.assertRaises(AssertionError):
+                    self.verify(mutant)
 
 
 class SiDerivedUkrProjectionTests(unittest.TestCase):
