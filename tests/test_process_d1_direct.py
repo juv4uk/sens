@@ -145,8 +145,8 @@ class ProcessDirectD1(unittest.TestCase):
     def test_wrong_peer_and_quoted_data_mutants_rejected(self):
         for broken in (
             self.source.replace("(друге сирий-результат)", "(третє сирий-результат)", 1),
-            self.source.replace("(список\n                  (як-є decoded-process)",
-                                "(сполучити\n                  (як-є decoded-process)", 1),
+            self.source.replace("(список\n            (як-є decoded-process)",
+                                "(сполучити\n            (як-є decoded-process)", 1),
             self.source.replace("(як-є process-result)", "(як-є changed)", 1),
             self.source.replace(NEW, FALSE, 1),
         ):
