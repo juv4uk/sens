@@ -86,7 +86,7 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
     // Справжній SENS: лише подія з трьома полями може підтверджувати
     // існування модуля й потрапляти до журналу.
     let malformed_events =
-        "(як-є ((tell alpha x зайве) (tell alpha y . хибний-хвіст) (tell beta b)))";
+        "(як-є ((tell alpha x зайве) (tell alpha y . хибний-хвіст) (tell (alpha) x) ((tell) alpha y) (tell beta b)))";
     let falsely_known = eval_program(
         &format!("(журнал-містить-записи-модуля? (як-є alpha) {malformed_events})"),
         &mut session,
@@ -94,7 +94,7 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
     assert_eq!(falsely_known, no, "неправильна арність не доводить існування модуля");
 
     let mixed_events =
-        "(як-є ((tell alpha x зайве) (tell alpha y . хибний-хвіст) (tell alpha запис)))";
+        "(як-є ((tell alpha x зайве) (tell alpha y . хибний-хвіст) (tell (alpha) x) ((tell) alpha y) (tell alpha запис)))";
     let selected = eval_program(
         &format!("(додати-події-журналу-модуля (як-є alpha) {mixed_events} (як-є ()))"),
         &mut session,
