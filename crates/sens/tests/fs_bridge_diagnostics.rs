@@ -58,6 +58,28 @@ fn filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage() {
 }
 
 #[test]
+fn filesystem_root_recovery_rejects_compound_stage_before_d3_eq() {
+    let mut s = session();
+    // Справжній SENS evaluator, не статична перевірка тексту.
+    // Навіть root-pointer усередині пари не стає атомарним етапом.
+    for invalid in ["(root-pointer)", "(root-pointer journal)", "(root-pointer . journal)"] {
+        let source = format!(
+            "(відновити-кореневий-пакет-файлової-системи (як-є previous) (як-є candidate) (як-є {invalid}))"
+        );
+        let result = eval_program(&source, &mut s)
+            .unwrap_or_else(|e| panic!(
+                "test_id=fs-root-stage layer=SENS input={source} expected=(recovered previous) error={e:?}"
+            ));
+        assert_eq!(
+            result.value.to_string(),
+            "(recovered previous)",
+            "test_id=fs-root-stage layer=SENS input={source} expected=(recovered previous) actual={}",
+            result.value
+        );
+    }
+}
+
+#[test]
 fn journal_event_fields_are_retrieved_from_a_real_alist() {
     let mut s = session();
     for (field, expected) in [("format","wsm-fs-event"), ("op","future-op")] {
