@@ -131,3 +131,84 @@ fn insert_second_executes_insertion_and_rejects_duplicate_first() {
         "(сполучити (перше елементи) (решта елементи))",
     );
 }
+
+
+#[test]
+fn swap_neighbors_four_executes_involution_and_rejects_duplicate_first() {
+    execute_with_negative(
+        "lib/list-swap-neighbors-four.lisp",
+        include_str!("../../../lib/list-swap-neighbors-four.lisp"),
+        "(друге четвірка)",
+        "(перше четвірка)",
+    );
+}
+
+#[test]
+fn swap_middle_four_executes_involution_and_rejects_duplicate_second() {
+    execute_with_negative(
+        "lib/list-swap-middle-four.lisp",
+        include_str!("../../../lib/list-swap-middle-four.lisp"),
+        "(перше (решта-решти четвірка))",
+        "(друге четвірка)",
+    );
+}
+
+#[test]
+fn reverse_four_executes_double_inverse_and_rejects_wrong_first() {
+    execute_with_negative(
+        "lib/list-reverse-four.lisp",
+        include_str!("../../../lib/list-reverse-four.lisp"),
+        "(перше (решта (решта (решта елементи))))",
+        "(перше елементи)",
+    );
+}
+
+#[test]
+fn halfturn_four_executes_double_inverse_and_rejects_wrong_first() {
+    execute_with_negative(
+        "lib/list-halfturn-four.lisp",
+        include_str!("../../../lib/list-halfturn-four.lisp"),
+        "(перше (решта (решта елементи)))",
+        "(перше елементи)",
+    );
+}
+
+#[test]
+fn rotate_five_by_two_executes_inverse_and_rejects_identity() {
+    execute_with_negative(
+        "lib/list-rotate-five-by-two.lisp",
+        include_str!("../../../lib/list-rotate-five-by-two.lisp"),
+        "(список (перше (решта (решта елементи)))",
+        "(список (перше елементи)",
+    );
+}
+
+#[test]
+fn rotate_four_left_executes_fourfold_inverse_and_rejects_identity() {
+    execute_with_negative(
+        "lib/rotate-four-left.lisp",
+        include_str!("../../../lib/rotate-four-left.lisp"),
+        "(друге елементи)",
+        "(перше елементи)",
+    );
+}
+
+#[test]
+fn rotate_four_right_executes_fourfold_inverse_and_rejects_identity() {
+    execute_with_negative(
+        "lib/rotate-four-right.lisp",
+        include_str!("../../../lib/rotate-four-right.lisp"),
+        "(друге (решта-решти елементи))",
+        "(перше елементи)",
+    );
+}
+
+#[test]
+fn replace_fourth_executes_preservation_and_rejects_corrupted_third() {
+    execute_with_negative(
+        "lib/list-replace-fourth.lisp",
+        include_str!("../../../lib/list-replace-fourth.lisp"),
+        "(третє четвірка)",
+        "(друге четвірка)",
+    );
+}
