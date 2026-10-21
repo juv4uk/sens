@@ -100,9 +100,13 @@ def check(source: str):
         ["тотожне?", "голова", ["як-є", "not?"]],
         ["тотожне?", "голова", ["як-є", "not"]],
     )
-    if len(branches) != 3 or [part[0] for part in branches[:2]] != list(expected_heads):
-        raise ValueError("зміна протокольних not/not? маркерів")
-    if [part[1] for part in branches] != [
+    # Жоден D3 EQ не має отримувати складену голову. Це перевірка
+    # захисту форми, не Python-симуляція поведінки SENS.
+    if len(branches) != 4 or branches[0] != [
+        ["хибне?", ["атом?", "голова"]], ["атом?", ["як-є", ["стан"]]]
+    ] or [part[0] for part in branches[1:3]] != list(expected_heads):
+        raise ValueError("втрачено D3 atom-guard або протокольні not/not? маркери")
+    if [part[1] for part in branches[1:]] != [
         ["атом?", ["як-є", []]],
         ["атом?", ["як-є", []]],
         ["атом?", ["як-є", ["стан"]]],
@@ -180,6 +184,10 @@ class RecoverKnowledge(unittest.TestCase):
         source = PATH.read_text(encoding="utf-8")
         self.assertEqual(len(check(source)), 3)
         mutations = [
+            source.replace(
+                "((хибне? (атом? голова)) (атом? (як-є (стан))))",
+                "((хибне? (атом? голова)) (атом? (як-є ())))", 1,
+            ),
             source.replace(
                 "((тотожне? голова (як-є not?)) (атом? (як-є ())))",
                 "((тотожне? голова (як-є вигадане-заперечення)) (атом? (як-є ())))",
