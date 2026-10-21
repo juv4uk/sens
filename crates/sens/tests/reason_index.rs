@@ -46,6 +46,29 @@ fn indexed_bucket_preserves_source_rule_order_exactly() {
 }
 
 #[test]
+fn malformed_bucket_does_not_hide_later_valid_sens_rules() {
+    // Виконання самого lib/reason.lisp через нативний reader/eval SENS.
+    // Пошкоджена комірка перед правильним кошиком не приховує правило.
+    let mut s = session();
+    for (input, expected) in [
+        (
+            "(міркування-пошук-кошика (як-є p) (як-є (() (p first))))",
+            "(p first)",
+        ),
+        (
+            "(міркування-пошук-кошика (як-є p) (як-є (((bad key) orphan) (q other) (p second))))",
+            "(p second)",
+        ),
+        (
+            "(міркування-пошук-кошика (як-є missing) (як-є (() (p first))))",
+            "()",
+        ),
+    ] {
+        assert_eq!(eval(&mut s, input), expected, "неповний кошик: {input}");
+    }
+}
+
+#[test]
 fn variable_goal_falls_back_to_every_rule() {
     let mut s = session();
     // Довжина як некваліфіковане число нині не є D24+ арифметикою.
