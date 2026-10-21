@@ -316,6 +316,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
             "поміняти-кожну-пару",
             "вилучити-перше-входження",
             "взяти-через-один",
+        "list-stable-difference-general",
+        "list-swap-adjacent-pairs",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -362,6 +364,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "взяти-через-один"
                 | "вилучити-перше-входження"
                 | "list-unique-stable"
+                | "list-stable-difference-general"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
