@@ -131,3 +131,49 @@ fn nil_returning_validators_use_d4_null_not_d4_not() {
             "виконувана бібліотека втратила потрібну перевірку D3 NIL: {guard}");
     }
 }
+
+#[test]
+fn quantity_symbol_guard_executes_real_sens_and_rejects_non_symbols() {
+    // Завантажуємо рівно чинне Lisp-визначення, а не Python-емуляцію D9.
+    let start = SOURCE.find("(визначити науковий-внутрішній-символ?")
+        .expect("потрібен виконуваний D1-закон символу");
+    let end = SOURCE[start..].find("\n(визначити науковий-список-правильний?")
+        .map(|i| start + i).expect("завершення D1-закону");
+    let current = &SOURCE[start..end];
+    let key = "(тотожне? значення (текст-у-символ (значення-у-текст значення)))";
+    assert!(current.contains(key), "закон має точно відрізняти символ від інших атомів");
+    for name in ["(символ? (друге значення))",
+                 "(символ? (науковий-шостий значення))"] {
+        assert!(!SOURCE.contains(name), "старий невиконуваний D9 виклик: {name}");
+    }
+
+    let launch = |source: &str| {
+        let mut session = Session::default();
+        load_core_library(&mut session).expect("живий SENS Core");
+        eval_parsed_expressions(&parse(source).expect("чинний Lisp"), &mut session)
+            .expect("справжнє SENS DEFINE");
+        session
+    };
+    let mut real = launch(current);
+    let mutant = current.replacen(key, "(атом? значення)", 1);
+    assert_ne!(mutant, current);
+    let mut altered = launch(&mutant);
+
+    for (case, expression, expected) in [
+        ("uk-symbol", "(науковий-внутрішній-символ? (як-є метр))", true),
+        ("protocol-symbol", "(науковий-внутрішній-символ? (як-є dimension/1))", true),
+        ("nil", "(науковий-внутрішній-символ? (як-є ()))", false),
+        ("pair", "(науковий-внутрішній-символ? (як-є (метр)))", false),
+        ("d1-value", "(науковий-внутрішній-символ? (атом? (як-є ())))", false),
+    ] {
+        let actual = eval_program(expression, &mut real)
+            .unwrap_or_else(|err| panic!("test_id=quantity-symbol case={case} input={expression} error={err}")).value;
+        assert_eq!(actual.as_predicate_bit(), Some(expected),
+            "test_id=quantity-symbol layer=real-SENS case={case} input={expression} expected=D1:{expected} actual={actual}");
+    }
+    let probe = "(науковий-внутрішній-символ? (атом? (як-є ())))";
+    let broken = eval_program(probe, &mut altered)
+        .expect("старе ATOM-only правило має дати неправильну відповідь").value;
+    assert_eq!(broken.as_predicate_bit(), Some(true),
+        "test_id=quantity-symbol-mutant expected=D1:YES actual={broken}");
+}
