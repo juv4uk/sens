@@ -104,10 +104,11 @@ class SelectedOriginalT5(unittest.TestCase):
         self.assertIn("source changed", state["reason"])
         self.assertFalse(list(self.output.rglob("*.sens")))
 
-    def test_unknown_original_dynamic_binding_blocks(self):
+    def test_unproven_original_inspection_is_syntax_only_and_never_publishes(self):
         code, state = self.call(LEGACY_UNPROVEN, inspect=True)
-        self.assertEqual((code, state["status"]), (2, "BLOCKED"))
-        self.assertTrue(state["reason"])
+        self.assertEqual((code, state["status"]), (0, "SYNTAX_ONLY_UNVERIFIED"))
+        self.assertEqual(state["oracle"], "NOT_VERIFIED")
+        self.assertEqual(state["files_written"], 0)
         self.assertFalse(list(self.output.rglob("*.sens")))
 
     def test_unverified_oracle_never_writes(self):
