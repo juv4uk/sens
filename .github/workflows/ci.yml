@@ -831,6 +831,7 @@ jobs:
           # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
           if grep -Eq '^(lib/time\.lisp|crates/sens/tests/time_host_surface\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test time_host_surface ntp_mode_and_stratum_execute_exact_d1_and_reject_lists -- --exact --nocapture
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test timezone_raw raw_timezone_declarations_are_interpreted_by_lisp -- --exact --nocapture
           fi
           # Тільки змінений механізм: реальні позитивні та негативні SENS-випадки.
           # Python тут перевіряє форму, а не заміняє роботу виконавця SENS.
