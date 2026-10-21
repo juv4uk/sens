@@ -3661,13 +3661,16 @@
         "law": "Зберегти порядок елементів префікса, рекурсивно сполучивши його з продовженням без мутації; порожній префікс повертає продовження.",
         "native_law_test": "crates/sens/tests/codec_in_sens.rs::d11_кодек_д2_три_допоміжні_закони_у_sens",
         "native_test_blob": "63586f0bf980a00eca34eebceb518a057932a945",
-        "native_test_result": "NATIVE_SENS_CI_RUNNING",
+        "native_test_result": "NATIVE_SENS_PASS_6_DISTINCT_CASES",
         "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39691996498",
         "semantic_defined": true,
         "direct_d11_opcode_verified": false,
         "new_primitive": false,
         "not_a_research_placeholder": true,
-        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен"
+        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен",
+        "native_step_conclusion": "success",
+        "native_step_name": "D11 математично визначені селектори — закон, бітність, негативні контролі",
+        "native_overall_workflow_release_admission": "NOT_ASSERTED"
       }
     },
     {
@@ -3696,13 +3699,16 @@
         "law": "Декодувати один D2-вузол, повернувши пару (значення . залишок потоку); правильний список і крапкова пара не зливаються.",
         "native_law_test": "crates/sens/tests/codec_in_sens.rs::d11_кодек_д2_три_допоміжні_закони_у_sens",
         "native_test_blob": "63586f0bf980a00eca34eebceb518a057932a945",
-        "native_test_result": "NATIVE_SENS_CI_RUNNING",
+        "native_test_result": "NATIVE_SENS_PASS_6_DISTINCT_CASES",
         "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39691996498",
         "semantic_defined": true,
         "direct_d11_opcode_verified": false,
         "new_primitive": false,
         "not_a_research_placeholder": true,
-        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен"
+        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен",
+        "native_step_conclusion": "success",
+        "native_step_name": "D11 математично визначені селектори — закон, бітність, негативні контролі",
+        "native_overall_workflow_release_admission": "NOT_ASSERTED"
       }
     },
     {
@@ -3731,13 +3737,16 @@
         "law": "Повернути лише перший декодований об’єкт потоку, не плутаючи його із залишком; правильна та крапкова структури залишаються відмінними.",
         "native_law_test": "crates/sens/tests/codec_in_sens.rs::d11_кодек_д2_три_допоміжні_закони_у_sens",
         "native_test_blob": "63586f0bf980a00eca34eebceb518a057932a945",
-        "native_test_result": "NATIVE_SENS_CI_RUNNING",
+        "native_test_result": "NATIVE_SENS_PASS_6_DISTINCT_CASES",
         "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39691996498",
         "semantic_defined": true,
         "direct_d11_opcode_verified": false,
         "new_primitive": false,
         "not_a_research_placeholder": true,
-        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен"
+        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен",
+        "native_step_conclusion": "success",
+        "native_step_name": "D11 математично визначені селектори — закон, бітність, негативні контролі",
+        "native_overall_workflow_release_admission": "NOT_ASSERTED"
       }
     }
   ],
