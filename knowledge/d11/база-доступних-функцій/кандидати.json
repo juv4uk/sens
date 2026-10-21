@@ -22,9 +22,9 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 159,
+    "total": 160,
     "historical": 15,
-    "library": 144,
+    "library": 145,
     "distinct_families": 25
   },
   "excluded": {
@@ -3412,13 +3412,49 @@
       "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false
+    },
+    {
+      "surface_name": "розв'язати-один-раз",
+      "source_family": "logic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/unify.lisp",
+        "original_file": "lib/unify.lisp",
+        "blob_sha": "49d378952892fcdfab4c815e993c2989b0ab736d",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-уніфікації-20261020-чатгпт.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00110000011",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00110000011",
+        "ukr": "розв'язати-один-раз",
+        "source_file": "lib/unify.lisp",
+        "source_blob": "49d378952892fcdfab4c815e993c2989b0ab736d",
+        "law": "Однокрокове розіменування змінної: повернути безпосередньо зв'язаний терм; не виконувати транзитивного проходження. Незв'язана змінна й звичайний атом залишаються незмінними.",
+        "native_law_test": "crates/sens/tests/d11_unify_once.rs::d11_розвязати_один_раз_не_підмінює_рекурсивне_проходження",
+        "native_test_blob": "e9d0dae46bc61591fc1f6cb26e52845dd7bd0160",
+        "native_test_result": "NATIVE_SENS_PASS_4_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39686922869",
+        "native_step_result": "SUCCESS_WHILE_UNRELATED_CI_STEPS_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Живе lib/unify.lisp, позитивний зв'язаний випадок, рекурсивний антиприклад, атом і незв'язана змінна"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 15,
-    "semantic_winners_total": 527,
+    "native_sens_composition_winners": 16,
+    "semantic_winners_total": 528,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,

@@ -169,9 +169,11 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
                     winner.get("semantic_defined") is True and
                     winner.get("new_primitive") is False and
                     winner.get("direct_d11_opcode_verified") is False and
-                    winner.get("source_file") == "lib/persistent-vector.lisp" and
-                    winner.get("native_law_test") ==
-                    "crates/sens/tests/persistent_vector.rs::d11_пятнадцять_визначених_переможців_виконує_sens",
+                    winner.get("source_file") in {"lib/persistent-vector.lisp", "lib/unify.lisp"} and
+                    winner.get("native_law_test") in {
+                        "crates/sens/tests/persistent_vector.rs::d11_пятнадцять_визначених_переможців_виконує_sens",
+                        "crates/sens/tests/d11_unify_once.rs::d11_розвязати_один_раз_не_підмінює_рекурсивне_проходження",
+                    },
                     "WINNER_LAW", f"row {index}: missing real SENS-defined winner law")
         kind, family = item.get("source_kind"), item.get("source_family")
         require(kind in kinds and isinstance(family, str) and bool(family),
@@ -191,27 +193,34 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
     require(base.get("counts") == actual, "CATALOG_COUNTS", f"counts declared={base.get('counts')} actual={actual}")
     require(base.get("current_d11", {}).get("occupied") == 43, "D11_CATALOG_SCOPE", "D11 test census mismatch")
     expect_winners = base.get("winners_20261022", {})
-    require(selected_winners == 15 and len(winner_positions) == 15 and
-            expect_winners.get("native_sens_composition_winners") == 15 and
+    require(selected_winners == 16 and len(winner_positions) == 16 and
+            expect_winners.get("native_sens_composition_winners") == 16 and
             expect_winners.get("mathematically_derived_selectors") == 512 and
-            expect_winners.get("semantic_winners_total") == 527,
-            "WINNER_COUNT", "D11 needs exactly 512 selector-law + 15 live SENS-library winners")
+            expect_winners.get("semantic_winners_total") == 528,
+            "WINNER_COUNT", "D11 needs 512 selector-law + 16 live SENS-library winners")
     if source_files:
-        source_text = (root / "lib/persistent-vector.lisp").read_text(encoding="utf-8")
-        proof_text = (root / "crates/sens/tests/persistent_vector.rs").read_text(encoding="utf-8")
-        require("fn d11_пятнадцять_визначених_переможців_виконує_sens()" in proof_text,
-                "WINNER_NATIVE_TEST", "real SENS witness test is absent")
         for item in rows:
             winner = item.get("winner_20261022")
             if winner is None:
                 continue
             source_head = winner["ukr"]
+            source_rel = Path(winner["source_file"])
+            require(not source_rel.is_absolute() and ".." not in source_rel.parts,
+                    "WINNER_SOURCE", f"invalid source path {source_rel}")
+            source_text = (root / source_rel).read_text(encoding="utf-8")
             require(f"(визначити {source_head}" in source_text,
                     "WINNER_SOURCE", f"missing actual SENS function {source_head}")
+            test_rel, sep, function = winner["native_law_test"].partition("::")
+            require(sep == "::" and test_rel.startswith("crates/sens/tests/") and
+                    ".." not in Path(test_rel).parts,
+                    "WINNER_NATIVE_TEST", f"invalid native SENS test {test_rel}")
+            proof_text = (root / test_rel).read_text(encoding="utf-8")
+            require(f"fn {function}()" in proof_text,
+                    "WINNER_NATIVE_TEST", f"missing real SENS witness {function}")
         map_path = root / "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv"
         selected = [line.split("\t") for line in map_path.read_text(encoding="utf-8").splitlines()
                     if "\tWINNER_DEFINED_SENS_COMPOSITION\t" in line]
-        require(len(selected) == 15 and
+        require(len(selected) == 16 and
                 {row[0] for row in selected} == winner_positions,
                 "WINNER_PLACEMENT", "winner addresses must agree with existing D11 geometric map")
     # A source snapshot is historical evidence, NOT a veto if modern authority evolves.
@@ -220,7 +229,7 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
             "D10_CATALOG_PIN", "candidate exclusion was not made against owner-pinned D10")
     return {
         "test_id": "D11_AVAILABLE_FUNCTIONS_CANDIDATE_INVENTORY", "layer": "registry",
-        "status": "MECHANICAL_PASS", "semantic_status": "15_LIBRARY_WINNERS_SENS_LAW_512_DERIVED_SELECTORS",
+        "status": "MECHANICAL_PASS", "semantic_status": "16_LIBRARY_WINNERS_SENS_LAW_512_DERIVED_SELECTORS",
         "target": "D11", "bit_width": 11, "capacity": 2048,
         "candidates": actual, "winner_compositions": selected_winners, "derived_selectors": 512,
         "defined_functions_total": 527, "d10_owner_pinned": 1024, "d11_testing_only": 43,
