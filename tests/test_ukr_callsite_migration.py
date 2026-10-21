@@ -940,6 +940,26 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
                             source,
                         )
                     continue
+                if path == "scripts/check-domain-logic-laws.lisp":
+                    # Сучасний виконавчий D3-скрипт має власні виправлення
+                    # COND/D9 і не повинен відновлювати SHA старого джерела.
+                    # Однак законні парні клаузи та виконувані українські
+                    # D3/D9/D8 голови мусять лишитися на місці.
+                    mod.parse(source)
+                    self.assertIn(
+                        "(результат-перевірки (як-є ()))", source
+                    )
+                    self.assertIn(
+                        "((атом? (як-є ())) (помилка-закону-доменної-логіки назва-закону))",
+                        source,
+                    )
+                    self.assertIn(
+                        '(читати-всі (читати-файл "lib/domains/d1.lisp"))',
+                        source,
+                    )
+                    self.assertIn('(друкувати "DOMAIN-LOGIC-LAWS:', source)
+                    self.assertNotIn("(110101001 (110110111", source)
+                    continue
                 restored = self._inverse(source, evidence["edits"])
                 restored = self._restore_prior_domain_logic_calls(path, restored)
                 self.assertEqual(self._blob_sha(restored), evidence["sha"])
