@@ -162,4 +162,5 @@
    (як-є ()))
   ((атом? (як-є ())) (помилка-ширини-домену-негативна)))
 
-(друкувати "DOMAIN-BITNESS-LAWS: PASS D1..D10 capacity; D11 sparse=43; D3 unique exact-width addresses; fixed-capacity interior-duplicate mutant rejected by SENS")
+; Статус є цитованим SENS-атомом, не сирим String у T5M reader.
+(друкувати (як-є domain-bitness-laws-pass))
