@@ -5,32 +5,55 @@ permissions:
   contents: read
 jobs:
   canonical-one-file:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/install-zig
-      - name: Перевірити справжню Zig/T5M однофайлову міграцію
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Зібрати справжній SENS-reader і Zig/T5M-transport
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Український Lisp → SENS → Zig/T5M → зворотний перегляд → реальне виконання
+        shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s tests -p 'test_migrate_one_to_sens.py' -v
-      - name: Перевірити фізичний T5M і читабельні біти без публікації
-        run: |
-          set -euo pipefail
-          python3 scripts/migrate-one-to-sens.py \
-            tests/fixtures/migration-d1-cond-cohort/branch.lisp \
-            --codec t5m --source-surface укр --dry-run > /tmp/one-file-t5-report.json
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          r=json.loads(Path("/tmp/one-file-t5-report.json").read_text())
-          assert r["status"]=="would-write", r
-          assert r["bytes"] > 0 and r["bytes"] % 3 == 0, r
-          assert r["semantic_parity"]=="NOT_VERIFIED", r
-          print(json.dumps({k:r[k] for k in ("status","source","bytes","physical_sha256","semantic_parity")},sort_keys=True))
-          PY
-      - name: Publish traceable preview report
+          source="lib/list-split-first-occurrence-general.lisp"
+          committed="lib/list-split-first-occurrence-general.sens"
+          committed_view="lib/list-split-first-occurrence-general"
+          out="$RUNNER_TEMP/one-file-native"
+          mkdir -p "$out"
+          physical="$out/програма.sens"
+          view="$out/програма"
+          target/debug/sens --t5m-mint "$source" "$physical" >"$out/mint.stdout" 2>"$out/mint.stderr"
+          test -s "$physical"
+          test ! -s "$out/mint.stderr"
+          target/debug/sens-trit open "$physical" >"$view"
+          target/debug/sens-trit verify-view "$physical" >"$out/inverse.stdout" 2>"$out/inverse.stderr"
+          grep -F 'T5M_VIEW_ROUNDTRIP_PASS' "$out/inverse.stdout"
+          test ! -s "$out/inverse.stderr"
+          cmp "$physical" "$committed"
+          cmp "$view" "$committed_view"
+          target/debug/sens --t5m-pair "$source" "$physical" >"$out/paired.stdout" 2>"$out/paired.stderr"
+          target/debug/sens "$physical" >"$out/standalone.stdout" 2>"$out/standalone.stderr"
+          cmp "$out/paired.stdout" "$out/standalone.stdout"
+          test "$(cat "$out/paired.stdout")" = 1
+          test ! -s "$out/paired.stderr"
+          test ! -s "$out/standalone.stderr"
+          # Справжній негатив: чужа фізична пара не може видати PASS.
+          if target/debug/sens --t5m-pair \
+            lib/list-split-last-occurrence-general.lisp "$physical" \
+            >"$out/wrong-source.stdout" 2>"$out/wrong-source.stderr"; then
+            echo "::error::Чужа українська програма прийняла фізичні байти іншої програми"
+            exit 1
+          fi
+          grep -F 'T5M_PHYSICAL_PAIR_MISMATCH' "$out/wrong-source.stderr"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+          echo "ONE_FILE_NATIVE_T5M_PASS source=$source physical=ZIG_VERIFIED paired=1 standalone=1 negative=REJECTED"
+      - name: Зберегти нативні байти та докази, не підмінювати їх JSON
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: one-file-canonical-T5M-preview
-          path: /tmp/one-file-t5-report.json
+          name: one-file-native-T5M-proof
+          path: ${{ runner.temp }}/one-file-native/
+          if-no-files-found: warn
