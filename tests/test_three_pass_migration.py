@@ -140,7 +140,7 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
 
 
 class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
-    """D1–D10 exact coordinate census plus source-derived callable gates."""
+    """Domain identities stay separate from named source projections/calls."""
 
     def test_every_ratified_width_stays_exact_and_noncallable_domains_block(self):
         from domain_tables import read_domain_table
@@ -161,16 +161,10 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
                 self.assertNotIn(ident, seen)
                 seen.add(ident)
                 tok = mod.Tok("ATOM", bits, 0)
-                # Domain presence is NOT proof of callable admission.
-                # D8 is owner-ratified as a domain, but its residents do not
-                # become executable merely because eight-bit coordinates exist.
-                d9_admitted = width == 9 and bits in resolver.d9_callable_bits
-                d10_admitted = width == 10 and bits in resolver.d10_callable_bits
+                # Bare machine words do not supply a named current projection.
                 blocked_width = (
-                    width in (2, 7, 8)
-                    or (width == 10 and not d10_admitted)
+                    width in (2, 7, 8, 9, 10)
                     or (width == 3 and n == 0)
-                    or (width == 9 and not d9_admitted)
                 )
                 if blocked_width:
                     with self.subTest(width=width, index=n):
@@ -184,13 +178,14 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
                     admitted += 1
         self.assertEqual(len(seen), 2046)  # 2^1 + ... + 2^10
         self.assertEqual(admitted + rejected, 2046)
-        # D7 stays data-only; D9/D10 admission follows concrete mechanisms.
+        # Raw D9/D10 coordinate tokens stay blocked: the name/projection,
+        # not width alone, supplies current domain identity.
         self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
 
-    def test_d8_residency_is_not_callable_and_sid8_bridge_stays_rejected(self):
+    def test_raw_d8_stays_sid8_ambiguous_and_bridge_is_rejected(self):
         for word in ("00001111", "00010110", "00100010"):
             with self.subTest(word=word), self.assertRaisesRegex(
-                mod.MigrationError, "no verified callable mechanism"
+                mod.MigrationError, "ambiguous eight-bit SID8/Sens8-or-D8"
             ):
                 mod.Resolver({}, {}).head(mod.Tok("ATOM", word, 0))
         with self.assertRaisesRegex(mod.MigrationError, "unratified SID8 bridge"):
@@ -365,7 +360,20 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertIn("11101101", out.split())
         self.assertEqual(resolver.counts["pass2-my-lisp"],1)
 
-    def test_d10_core4_defined_functions_are_callable_but_unmapped_d10_is_not(self):
+    def test_ukrainian_d8_projection_maps_identity_without_execution_admission(self):
+        from domain_tables import read_domain_table
+        rows = read_domain_table(ROOT / "lib/domains/d8.lisp")
+        candidate = next(
+            row for row in rows
+            if row.bits not in mod.CORE_OPERATION_D8
+            and row.uk
+            and self.my.get(row.uk) == (row.bits, "D8")
+        )
+        resolver = mod.Resolver(self.my, self.upper)
+        words, _origin = resolver.head(mod.Tok("ATOM", candidate.uk, 0))
+        self.assertEqual(words, [candidate.bits])
+
+    def test_d10_names_preserve_projection_identity_without_execution_admission(self):
         foundation = mod.load_foundation(
             ROOT / "knowledge/d1-d11-foundation.json"
         )
@@ -385,15 +393,17 @@ class ThreePassMigrationTests(unittest.TestCase):
             with self.subTest(spelling=spelling):
                 words, _origin = resolver.head(mod.Tok("ATOM", spelling, 0))
                 self.assertEqual(words, [bits])
-                exact, _origin = resolver.head(mod.Tok("ATOM", bits, 0))
-                self.assertEqual(exact, [bits])
+                with self.assertRaisesRegex(
+                    mod.MigrationError, r"D10 .*потрібна названа чинна проєкція"
+                ):
+                    resolver.head(mod.Tok("ATOM", bits, 0))
         for spelling in ("0000000000", "1111111111"):
             with self.subTest(spelling=spelling), self.assertRaisesRegex(
-                mod.MigrationError, r"D10 .*немає визначення callable-функції в Core4"
+                mod.MigrationError, r"D10 .*потрібна названа чинна проєкція"
             ):
                 # A bit word belongs to the physical/domain view, not a
-                # human Lisp call head. Exercise the exact-domain gate
-                # directly instead of smuggling it into source text.
+                # named Ukrainian source projection. Width alone does not
+                # resolve domain identity.
                 resolver.head(mod.Tok("ATOM", spelling, 0))
 
     def test_pass3_lisp15_car(self):
@@ -406,33 +416,38 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 01010 00 "))
         self.assertEqual(resolver.counts["pass3-lisp15"],1)
 
-    def test_string_literal_never_collapses_into_empty(self):
-        for datum in ('"alpha"', '"beta"', '""'):
-            with self.subTest(datum=datum):
-                with self.assertRaisesRegex(mod.MigrationError, "STRING_LITERAL_UNADMITTED"):
-                    self.migrate(f"(сполучити {datum})\n")
+    def test_quoted_strings_are_distinct_d7_text_data(self):
+        alpha, _ = self.migrate('(сполучити "alpha")\n')
+        beta, _ = self.migrate('(сполучити "beta")\n')
+        self.assertNotEqual(alpha, beta)
+        for encoded in (alpha, beta):
+            words = encoded.split()
+            self.assertIn(mod.D2_OPEN, words)
+            self.assertIn(mod.D2_CLOSE, words)
+            self.assertTrue(all(set(word) <= {"0", "1"} for word in words))
 
     def test_sid8_bridge_cannot_authorize_any_executable_head(self):
         with self.assertRaisesRegex(mod.MigrationError, "unratified SID8 bridge"):
             mod.Resolver(self.my, self.upper,
                          bridge_by_sid={"01001011": ("D9", "110101001")})
 
-    def test_named_d9_resident_cannot_become_callable(self):
-        resolver = mod.Resolver({"unproved-d9": ("110101001", "D9")}, {})
-        with self.assertRaisesRegex(mod.MigrationError, "no verified callable mechanism"):
-            mod.migrate_file("(unproved-d9 x)\n", resolver, self.text7)
+    def test_named_d9_identity_migrates_without_claiming_runtime_execution(self):
+        identity = self.my["уніфікувати"]
+        self.assertEqual(identity, ("101010000", "D9"))
+        resolver = mod.Resolver(self.my, self.upper)
+        words, _origin = resolver.head(mod.Tok("ATOM", "уніфікувати", 0))
+        self.assertEqual(words, ["101010000"])
+        self.assertEqual(resolver.counts["pass2-my-lisp"], 1)
 
-    def test_core4_defined_d9_functions_migrate_by_exact_callable_identity(self):
+    def test_core4_defined_d9_functions_migrate_by_exact_domain_identity(self):
         resolver = mod.Resolver(self.my, self.upper)
         for spelling in ("додати-нові",):
             with self.subTest(spelling=spelling):
                 words, _origin = resolver.head(mod.Tok("ATOM", spelling, 0))
                 self.assertEqual(words, ["001000101"])
-        words, _origin = resolver.head(mod.Tok("ATOM", "001000101", 0))
-        self.assertEqual(words, ["001000101"])
         projection = mod.migrate_file("(додати-нові x)\n", resolver, self.text7)
         self.assertTrue(projection.startswith("10 001000101 00 "))
-        with self.assertRaisesRegex(mod.MigrationError, "D9 .*callability"):
+        with self.assertRaisesRegex(mod.MigrationError, "D9 .*потрібна названа чинна проєкція"):
             resolver.head(mod.Tok("ATOM", "111111111", 0))
 
     def test_comments_disappear(self):
@@ -466,7 +481,7 @@ class ThreePassMigrationTests(unittest.TestCase):
             ):
                 self.migrate(f"({number} x)\n")
 
-    def test_d7_d9_heads_without_callable_proof_are_blocked(self):
+    def test_d7_data_and_unnamed_d9_bits_are_not_projected_as_call_heads(self):
         # Numeric-looking source atoms are decimal D24+ data. Test physical
         # domain coordinates at the resolver boundary, not as Lisp source.
         resolver = mod.Resolver(self.my, self.upper)
@@ -479,28 +494,30 @@ class ThreePassMigrationTests(unittest.TestCase):
         for word in ("111111111",):
             with self.subTest(domain="D9", word=word):
                 with self.assertRaisesRegex(
-                    mod.MigrationError, "відсутній доказ допущеного механізму"
+                    mod.MigrationError, "D9 .*потрібна названа чинна проєкція"
                 ):
                     resolver.head(mod.Tok("ATOM", word, 0))
 
-    def test_d9_full_residency_is_data_not_implicit_callability(self):
-        # D9 residency is not blanket callability: only the Core4-bound slice
-        # has exact mechanisms; every other one of the 512 remains blocked.
+    def test_d9_ukrainian_projections_preserve_all_exact_identities(self):
+        # Named current projections identify D9 words; this does not certify
+        # that the corresponding runtime function has been implemented.
+        from domain_tables import read_domain_table
         foundation = mod.load_foundation(FOUNDATION)
         residents = set(foundation["domains"]["D9"]["residents"])
         self.assertEqual(len(residents), 512)
         resolver = mod.Resolver(self.my, self.upper, d9_residents=residents)
-        for word in residents:
-            with self.subTest(word=word):
-                if word in resolver.d9_callable_bits:
-                    self.assertEqual(
-                        resolver.head(mod.Tok("ATOM", word, 0))[0], [word]
-                    )
-                else:
-                    with self.assertRaisesRegex(
-                        mod.MigrationError, "відсутній доказ допущеного механізму"
-                    ):
-                        resolver.head(mod.Tok("ATOM", word, 0))
+        rows = read_domain_table(ROOT / "lib/domains/d9.lisp")
+        covered = set()
+        for row in rows:
+            for spelling in (row.uk, row.ukr):
+                if spelling and self.my.get(spelling) == (row.bits, "D9"):
+                    with self.subTest(spelling=spelling):
+                        self.assertEqual(
+                            resolver.head(mod.Tok("ATOM", spelling, 0))[0],
+                            [row.bits],
+                        )
+                    covered.add(row.bits)
+        self.assertEqual(covered, residents)
 
     def test_decimal_digit_sequences_in_lisp_data_are_not_domain_addresses(self):
         # Human Lisp numbers are decimal D24+ values; their spelling length
@@ -1179,12 +1196,12 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertNotRegex(source, r"\(\s*[01]{2,}\s")
 
         for name in (
-            "machine-block",
-            "machine-block-empty",
-            "machine-block-one",
-            "machine-block-append",
-            "machine-block-concat",
-            "machine-block-forms",
+            "машинний-блок",
+            "порожній-машинний-блок",
+            "блок-з-однієї-форми",
+            "додати-форму-до-блоку",
+            "поєднати-машинні-блоки",
+            "форми-машинного-блоку",
         ):
             frame=mod.frame_text7(
                 mod.text7_encode(name,self.text7,mod.Tok("ATOM",name,0)),
@@ -1193,7 +1210,7 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertIn(
                 " ".join(frame),
                 projection,
-                f"missing canonical global Text7 frame for {name}",
+                f"missing exact current binding frame for {name}",
             )
 
         forms_frame=mod.frame_text7(

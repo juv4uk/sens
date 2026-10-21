@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """Three-pass source migration: historical recognition into CURRENT exact domains.
 
-Interpret all historical spellings and eight-bit tokens through audited
-provenance; they are never themselves a current domain or call law.
-Pass 2: current admitted source surfaces -> corresponding exact-domain words.
-Pass 3: historical Lisp 1–1.5 names -> admitted current callable resident.
-Within the D1–11 inventory, callability follows concrete Core4 definitions
-and admitted lower-domain mechanisms, not a blanket D10 ban. D11 remains
-test-only data and never enters the callable map.
+Interpret historical spellings through current owner-authored projections;
+legacy eight-bit tokens never become current D8 identities by byte matching.
+Passes 2–3 preserve exact current domain identities for known source heads.
+This migration does not certify runtime callability: function execution for
+D1–D10 is a separate implementation decision. D11 remains test-only data.
 
 Rules derived from current SENS contract and later owner decisions:
 - () is D3:000; nonempty list structure uses D2 10/00/11/01
@@ -239,8 +237,8 @@ def tokenize(source: str, *, source_surface="default") -> list[Tok]:
                 decimal_comma = (
                     source_surface in ("ук", "укр")
                     and i > start and i + 1 < n
-                    and source[i - 1].isascii() and source[i - 1].isdigit()
-                    and source[i + 1].isascii() and source[i + 1].isdigit()
+                    and source[i - 1].isdecimal()
+                    and source[i + 1].isdecimal()
                 )
                 if not decimal_comma:
                     break
@@ -429,37 +427,24 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                 if name not in my:
                     my[name]=unique
 
-    # D8 residency is not wholesale callability. Import only the exact five
-    # D8 identities currently admitted by DomainIdentity::core_operation,
-    # using their owner-authored D8 surface rows as source-name provenance.
+    # Human Ukrainian D8/D9/D10 projections resolve to exact identities even
+    # when their runtime call mechanisms are not yet specified. This pass only
+    # preserves the identity; it does not certify execution. Raw eight-bit
+    # spellings remain ambiguous with retired SID8 and are handled separately.
     from domain_tables import read_domain_table
-    d8_path = REPO_ROOT / "lib" / "domains" / "d8.lisp"
-    for row in read_domain_table(d8_path):
-        if row.bits not in CORE_OPERATION_D8:
-            continue
-        ident = (row.bits, "D8")
-        for name in (row.uk, row.ukr, row.san, row.en):
-            if not name:
-                continue
-            previous = my.get(name)
-            if previous is None:
-                my[name] = ident
-            elif previous != ident:
-                my[name] = None
-        if row.lisp:
-            previous = residents.get(row.lisp.upper())
-            if previous is None or previous == ident:
-                residents[row.lisp.upper()] = ident
-            else:
-                residents[row.lisp.upper()] = None
-
-    # D9 has a large ratified resident table, but only coordinates with an
-    # actual Core4 callable definition (or one of the exact Rust mechanisms)
-    # are migration-callable. Name/identity evidence comes from the canonical
-    # D9 table; callable evidence is derived from evaluated-shape definitions
-    # in the active Core4 source, matching bind_language_definition's slots.
-    d9_callable = core4_d9_callable_rows()
     unique_surfaces = quoted_ladder_surfaces()
+    for width in (8, 9, 10):
+        for row in read_domain_table(REPO_ROOT / "lib" / "domains" / f"d{width}.lisp"):
+            ident = (row.bits, f"D{width}")
+            for name in (row.uk, row.ukr):
+                if not name or unique_surfaces.get(name) != frozenset({(f"D{width}", row.bits)}):
+                    continue
+                my[name] = ident
+
+    # Additional D9 spellings may be retained from Core4 source only when
+    # they resolve uniquely to the same ratified identity. This is projection
+    # compatibility, not evidence that the D9 value is executable.
+    d9_callable = core4_d9_callable_rows()
     for bits, row in d9_callable.items():
         ident = (bits, "D9")
         for name in (row.uk, row.ukr, row.san, row.en, row.lisp, row.sym):
@@ -472,9 +457,8 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                 # historical surface aliases without importing сід8 evidence.
                 my[name] = ident
 
-    # Core4-defined D10 names are callable through their actual language
-    # definitions. Keep admission source-derived: a D10 coordinate without a
-    # matching definition remains non-callable.
+    # Preserve any uniquely mapped Core4 D10 spelling as the same identity;
+    # execution admission is deliberately outside this migration step.
     for bits, row in core4_d10_defined_rows().items():
         ident = (bits, "D10")
         for name in (row.uk, row.ukr, row.san, row.en, row.lisp, row.sym):
@@ -696,20 +680,15 @@ class Resolver:
                     tok,
                 )
             if width == 9:
-                if t in self.d9_callable_bits:
-                    self.counts["already-exact"] += 1
-                    return [t], "already-exact"
-                # Contract 11.9: ratified residency is not callable mechanism.
                 raise MigrationError(
-                    f"D9 {t}: відсутній доказ допущеного механізму виклику; "
-                    "ратифікована резидентність не є callability",
+                    f"D9 {t}: потрібна названа чинна проєкція; сама ширина не задає identity",
                     tok,
                 )
             if width == 10:
-                if t in self.d10_callable_bits:
-                    self.counts["already-exact"] += 1
-                    return [t], "already-exact"
-                raise MigrationError(f"D10 {t}: немає визначення callable-функції в Core4", tok)
+                raise MigrationError(
+                    f"D10 {t}: потрібна названа чинна проєкція; сама ширина не задає identity",
+                    tok,
+                )
             if width > 10:
                 raise MigrationError(
                     f"unqualified {width}-bit call head has no admitted domain mechanism",
@@ -731,7 +710,17 @@ class Resolver:
                 "укр projection, never map by matching bytes", tok,
             )
 
-        # Source-defined global callables shadow human builtin surfaces.
+        # Known Ukrainian D8–D10 projections retain their exact domain
+        # identity even when a source binding with the same spelling exists.
+        # This is transport/lowering identity only, not execution admission.
+        ident = self.my.get(t)
+        if (isinstance(ident, tuple) and len(ident) >= 2
+                and ident[1] in ("D8", "D9", "D10")
+                and len(ident[0]) == int(ident[1][1:])):
+            self.counts["pass2-my-lisp"] += 1
+            return [ident[0]], "pass2-my-lisp"
+
+        # Other source-defined global callables shadow human builtin surfaces.
         # Exact binary identities above remain authoritative: only a name
         # that appeared as a proven global DEFINE target takes this route.
         # Resolve it before pass-2/pass-3 surface mappings; otherwise
@@ -750,17 +739,16 @@ class Resolver:
                     "in the D1–24+ domain frame; residency does not imply callability",
                     tok,
                 )
-            admitted = (
+            identified = (
                 ident[1] in ("D3", "D4", "D5", "D6")
                 and len(ident[0]) == int(ident[1][1:])
-            ) or (ident[1] == "D8" and (ident[0] in CORE_OPERATION_D8 or ident[0] in self.d8_callable_bits)) or (
-                ident[1] == "D9" and ident[0] in self.d9_callable_bits
             ) or (
-                ident[1] == "D10" and ident[0] in self.d10_callable_bits
+                ident[1] in ("D8", "D9", "D10")
+                and len(ident[0]) == int(ident[1][1:])
             )
-            if not admitted:
+            if not identified:
                 raise MigrationError(
-                    f"{ident[1]} {ident[0]}: no verified callable mechanism for {t!r}", tok
+                    f"{ident[1]} {ident[0]}: no exact current domain identity for {t!r}", tok
                 )
             self.counts["pass2-my-lisp"]+=1
             return [ident[0]],"pass2-my-lisp"
@@ -774,17 +762,16 @@ class Resolver:
                     "in the D1–24+ domain frame; residency does not imply callability",
                     tok,
                 )
-            admitted = (
+            identified = (
                 ident[1] in ("D3", "D4", "D5", "D6")
                 and len(ident[0]) == int(ident[1][1:])
-            ) or (ident[1] == "D8" and (ident[0] in CORE_OPERATION_D8 or ident[0] in self.d8_callable_bits)) or (
-                ident[1] == "D9" and ident[0] in self.d9_callable_bits
             ) or (
-                ident[1] == "D10" and ident[0] in self.d10_callable_bits
+                ident[1] in ("D8", "D9", "D10")
+                and len(ident[0]) == int(ident[1][1:])
             )
-            if not admitted:
+            if not identified:
                 raise MigrationError(
-                    f"{ident[1]} {ident[0]}: no verified callable mechanism for {t!r}", tok
+                    f"{ident[1]} {ident[0]}: no exact current domain identity for {t!r}", tok
                 )
             self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
@@ -1595,7 +1582,7 @@ def migrate_file(source: str,resolver,text7,*,codec="t5m",source_surface="defaul
                 if ch.isdecimal() and ch not in "0123456789":
                     raise MigrationError(
                         f"non-keyboard decimal digit U+{ord(ch):04X} in Ukrainian Lisp atom",
-                        Tok("ATOM", ch, tok.pos + offset),
+                        Tok("ATOM", ch, tok.offset + offset),
                     )
     forms=Parser(tokens).parse_program()
     # A caller can identify an actually loaded Lisp dependency. Its DEFINE
@@ -1846,7 +1833,7 @@ def main():
             "language": ("D1–24+ frame; T5M physical subset: D1–D10 plus exact D24+ numeric words" if args.codec == "t5m"
                          else "currently supported D1..D9 exact-width 0/1 words"),
             "domain_frame": "D1–24+; exact domain laws come from language-contract.lisp",
-            "callable_migration_subset": "D3-D6, admitted D8 mechanisms, and exact D9/D10 identities backed by Core4 callable definitions; D11 remains test-only",
+            "identity_migration_subset": "exact D1-D10 identities only where current projections uniquely resolve them; runtime execution is not certified here; D11 remains test-only",
             "transport_separator": "logical trit 2 strictly between words",
             "file_eof": "physical byte length; no terminal 22",
             "padding": "T5M: zero through four final trits 2; T5: zero through four final trits 2",
@@ -1856,15 +1843,15 @@ def main():
         },
         "passes": {
             "1": "retired historical SID8 bridge: no executable mapping",
-            "2": "my-lisp / current admitted name -> exact current domain",
-            "3": "Lisp-I/1.5 head -> proven callable identity (D3-D6, admitted D8, concrete Core4-bound D9/D10); D11 remains test-only",
+            "2": "current source projection -> exact current domain identity; execution is separate",
+            "3": "historical Lisp-I/1.5 spelling -> current exact identity when uniquely resolved; execution is separate",
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
         "migration_complete": False,  # batch transport never certifies semantic migration
         "physical_batch_complete": written > 0 and blocked == 0 and not args.dry_run,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
-        "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; under the D1–24+ frame, width alone grants neither identity nor callability; this migration requires a named current identity and an admitted call mechanism",
+        "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; under the D1–24+ frame, width alone grants no identity; this migration requires a named current projection, while runtime execution remains separate",
         "source_policy": ("input .lisp never rewritten; paired .sens + view refreshed only after explicit --refresh-existing and pinned Zig parity" if args.refresh_existing else "input .lisp never rewritten; existing .sens never overwritten"),
         "explicit_preloaded_binding_sources": binding_receipts,
         "mode": ("dry-run" if args.dry_run else "refresh-existing-zig-minted" if args.refresh_existing else "write-new-only-zig-minted"),

@@ -192,9 +192,9 @@ class SelectedOriginalT5(unittest.TestCase):
                 "(01001000 000)\n", ambiguous_head, text7,
                 source_surface="укр", codec="t5")
 
-    def test_preloaded_lisp_closure_is_not_fabricated_d9_callability(self):
-        # Доказ DEFINE походить із чинного завантаженого Lisp-файла,
-        # а не з ратифікованості координати D9 без механізму.
+    def test_preloaded_lisp_d9_name_keeps_identity_without_execution_claim(self):
+        # The current Ukrainian projection fixes identity. Loading the source
+        # definition is relevant to later execution, not to this migration.
         migration = app.load_migrator()
         foundation = migration.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
         my, upper, _retired = migration.build_three_pass_maps(
@@ -208,9 +208,10 @@ class SelectedOriginalT5(unittest.TestCase):
             foundation, ROOT / "knowledge/d7-keyboard-v2-ratified.json")
         program = "(модуль-відомий? (як-є зоря))\n"
         without = migration.Resolver(my, upper)
-        with self.assertRaisesRegex(migration.MigrationError, "101010010"):
-            migration.migrate_file(
-                program, without, text7, codec="t5m", source_surface="укр")
+        without_words = migration.migrate_file(
+            program, without, text7, codec="t5m", source_surface="укр")
+        self.assertIn("101010010", without_words.split())
+        self.assertEqual(without.counts["pass4-text7-global"], 0)
         imported_source = (ROOT / "lib/knowledge.lisp").read_text(encoding="utf-8")
         forms = migration.Parser(migration.tokenize(
             migration.strip_comments(imported_source),
@@ -225,13 +226,12 @@ class SelectedOriginalT5(unittest.TestCase):
             program, with_preload, text7, codec="t5m", source_surface="укр",
             imported_bindings=imported,
         )
-        self.assertNotIn("101010010", words.split())
-        self.assertEqual(with_preload.counts["pass4-text7-global"], 1)
-        self.assertTrue(words.startswith("10 10 "), words)
+        self.assertIn("101010010", words.split())
+        self.assertEqual(with_preload.counts["pass4-text7-global"], 0)
+        self.assertEqual(words, without_words)
 
-    def test_reason_imports_real_unification_definition_not_a_fabricated_d9_call(self):
-        # Це лише перевірка точного зіставлення DEFINE -> T5M, не
-        # Python-імітація виконання SENS. Виконання лишається в CI/CLI.
+    def test_reason_keeps_unification_as_d9_identity_not_d7_text(self):
+        # Migration emits exact identity only; it makes no runtime-execution claim.
         migration = app.load_migrator()
         foundation = migration.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
         my, upper, _retired = migration.build_three_pass_maps(
@@ -244,11 +244,12 @@ class SelectedOriginalT5(unittest.TestCase):
         text7 = migration.build_text7(
             foundation, ROOT / "knowledge/d7-keyboard-v2-ratified.json")
         program = "(уніфікувати (як-є a) (як-є a) (як-є ()))\n"
-        with self.assertRaisesRegex(migration.MigrationError, "101010000"):
-            migration.migrate_file(
-                program, migration.Resolver(my, upper), text7,
-                codec="t5m", source_surface="укр",
-            )
+        without = migration.Resolver(my, upper)
+        words_without = migration.migrate_file(
+            program, without, text7, codec="t5m", source_surface="укр",
+        )
+        self.assertIn("101010000", words_without.split())
+        self.assertEqual(without.counts["pass4-text7-global"], 0)
         source = (ROOT / "lib/unify.lisp").read_text(encoding="utf-8")
         forms = migration.Parser(migration.tokenize(
             migration.strip_comments(source), source_surface="укр"
@@ -262,8 +263,9 @@ class SelectedOriginalT5(unittest.TestCase):
             program, resolver, text7, codec="t5m",
             source_surface="укр", imported_bindings=binding,
         )
-        self.assertNotIn("101010000", words.split())
-        self.assertEqual(resolver.counts["pass4-text7-global"], 1)
+        self.assertIn("101010000", words.split())
+        self.assertEqual(resolver.counts["pass4-text7-global"], 0)
+        self.assertEqual(words, words_without)
         runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
         self.assertIn('binding_sources=(--binding-source lib/unify.lisp)', runner)
         self.assertIn('"${binding_sources[@]}"', runner)
