@@ -303,6 +303,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-drop-last-general",
         "list-append-general",
         "list-collapse-adjacent",
+        "list-common-prefix-general",
         "list-unique-stable",
         "розділити-до-першого-входження",
         "list-interleave-two-pairs",
@@ -356,6 +357,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-drop-last-general"
                 | "list-append-general"
                 | "list-collapse-adjacent"
+                | "list-common-prefix-general"
                 | "розділити-до-першого-входження"
                 | "вилучити-перше-входження"
                 | "list-unique-stable"
