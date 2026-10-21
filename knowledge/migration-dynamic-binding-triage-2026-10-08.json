@@ -4,24 +4,24 @@
   "issue": "https://github.com/juv4uk/sens/issues/4461",
   "coordination": "https://github.com/juv4uk/sens/issues/4449",
   "authority": "read-only research classification; NOT ratified successor mapping or admitted .sens",
-  "policy": "Preserve every source .lisp; no same-stem physical T5 .sens until full exact-domain/binding oracle parity; never infer identity from historical 8-bit heads, text, or numeric value",
+  "policy": "Current Ukrainian Lisp may be fixed by hand; every source change gets a current Git blob pin and native positive/negative execution witness. Do not mint same-stem .sens without exact Zig/T5M and independent semantic parity; never restore historical SID8.",
   "status": "BLOCKED_UNPROVEN_BINDING",
   "files": [
     {
       "path": "benchmarks/arithmetic.lisp",
-      "git_blob_sha": "a064a8e81fa759e064ffa7f1f2c6c7b309dea29a",
+      "git_blob_sha": "040a31c05f946a796413094612f668879a6a0a3b",
       "kind": "dynamic local callable and numeric benchmark",
       "proof_lines": {
-        "local_definition": 2,
-        "bound_parameter": 3,
-        "numeric_expression": 4,
-        "call": 5
+        "local_definition": 6,
+        "bound_parameter": 7,
+        "numeric_expression": 9,
+        "call": 13
       },
       "exact_fragments": [
-        "(0011 polynomial",
-        "(0010 (x)",
-        "(01010 (10110 x x) (10110 3 x) 7)",
-        "(polynomial 123)"
+        "(визначити поліном",
+        "(функція (значення)",
+        "(помножити значення значення)",
+        "(поліном 123)"
       ],
       "blocks": [
         "local callable polynomial has no demonstrated exact-domain binder/call path",
@@ -36,21 +36,21 @@
     },
     {
       "path": "benchmarks/closures.lisp",
-      "git_blob_sha": "c51e02b48f59720dfda76c38a1d2e1d96ff227bf",
+      "git_blob_sha": "fd10e23a0542f3f425abaf3f355688cdf712532d",
       "kind": "curried closure capturing bound left",
       "proof_lines": {
-        "local_definition": 2,
-        "outer_lambda": 3,
-        "inner_lambda": 4,
-        "captured_pair": 5,
-        "application": 6
+        "local_definition": 4,
+        "outer_lambda": 5,
+        "inner_lambda": 6,
+        "captured_pair": 7,
+        "application": 9
       },
       "exact_fragments": [
-        "(0011 make-pair",
-        "(0010 (left)",
-        "(0010 (right)",
-        "(111 left (111 right (001 ()))",
-        "((make-pair (001 radio)) (001 antenna))"
+        "(визначити створити-пару",
+        "(функція (ліве)",
+        "(функція (праве)",
+        "(сполучити ліве (сполучити праве (як-є ())))",
+        "((створити-пару (як-є радіо)) (як-є антена))"
       ],
       "blocks": [
         "closure captures outer left while applying inner right; no verified D6 closure environment parity",
@@ -65,26 +65,27 @@
     },
     {
       "path": "benchmarks/recursion.lisp",
-      "git_blob_sha": "5126ebefe8db733bfab727b4122a1c4926a14410",
+      "git_blob_sha": "42388a3067021f35b1cbb0bc239c7b044fa1f51d",
       "kind": "recursive local callable with historical conditional and list numerals",
       "proof_lines": {
-        "local_definition": 2,
-        "binder": 3,
-        "conditional": 4,
-        "recursive_call": 6,
-        "entry": 7
+        "local_definition": 5,
+        "binder": 6,
+        "conditional": 7,
+        "recursive_call": 10,
+        "entry": 12
       },
       "exact_fragments": [
-        "(0011 walk",
-        "(0010 (values)",
-        "(110",
-        "((010 values) (001 done))",
-        "(walk (001 ("
+        "(визначити обійти",
+        "(функція (значення)",
+        "((порожній? значення) (як-є завершено))",
+        "((атом? значення) (як-є помилка-не-список))",
+        "(обійти (як-є (1 2 3",
+        "((хибне? (атом? значення)) (обійти (решта значення)))"
       ],
       "blocks": [
-        "recursive binding walk and lexical value scope lack admitted exact-domain proof",
-        "the two-field D3 COND shape is present, but the guard/fallback still needs current D1 predicate behavior and frozen interpreter-oracle parity",
-        "the numeric-list payload 1..20 is unqualified and is not automatically a ratified D1-D9 numeric/symbol sequence"
+        "Current SENS native evaluation must confirm list completion and explicit malformed-atom result; static source shape alone is not a runtime proof",
+        "Historical-to-current binding and exact T5M physical program parity are not independently certified",
+        "The quoted 1..20 input is data; its exact typed-numeric/symbol carrier is not inferred from decimal spelling"
       ],
       "required_evidence": [
         "bounded recursion/current D1 conditional oracle counterexamples and positives",
@@ -93,5 +94,5 @@
       ]
     }
   ],
-  "next_step": "Source-pin refresh after reviewed D3/domain-ladder projections (2026-10-12): the three active benchmark files now match the exact source blobs recorded here. This only refreshes provenance and line/fragment witnesses; status remains BLOCKED_UNPROVEN_BINDING. Independently prove binder, numeric, symbol and current-D1 semantics before a new PR authorizes same-stem physical .sens; otherwise keep BLOCK. This ledger does not change the earlier 491/0 denominator."
+  "next_step": "Точні SHA трьох чинних українських Lisp-бенчмарків оновлені; новий SENS runtime-тест для рекурсії та замикання не є історичним оракулом або дозволом фізично публікувати .sens. Потрібен окремий типізований Zig/T5M плюс історичне/чинне спостереження; статус залишається BLOCKED_UNPROVEN_BINDING."
 }
