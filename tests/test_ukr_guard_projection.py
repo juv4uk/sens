@@ -156,8 +156,13 @@ class GuardProjectionTests(unittest.TestCase):
         self.assertIn("(when ecosystem-local-or-component-owned)", self.text)
         self.assertIn("(verify citations-and-access-date)", self.text)
         self.assertNotIn("#d1:", self.text)
-        self.assertGreater(len(re.findall(r"\bтак\b", self.text)), 20)
-        self.assertGreater(len(re.findall(r"\bні\b", self.text)), 5)
+        # Словникові імена D1 існують у таблиці, але не є
+        # незв'язаними виконуваними змінними українського Guard.
+        code = "\n".join(line for line in self.text.splitlines()
+                         if not line.lstrip().startswith(";"))
+        self.assertNotRegex(code, r"(?<![\w-])(так|ні)(?![\w-])")
+        self.assertGreaterEqual(code.count("(атом? (як-є ()))"), 20)
+        self.assertGreaterEqual(code.count("(атом? (як-є (())))"), 5)
         d1 = (ROOT / "lib/domains/d1.lisp").read_text(encoding="utf-8")
         self.assertIn("(0 (ук ні) (укр ні)", d1)
         self.assertIn("(1 (ук так) (укр так)", d1)
