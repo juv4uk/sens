@@ -800,6 +800,21 @@ mod core_profile_bootstrap_tests {
     }
 
     #[test]
+    fn t5m_source_mode_requires_ukrainian_lisp_not_physical_bytes() {
+        let admitted = vec!["sens".to_owned(), "--t5m-file".to_owned(), "програма.lisp".to_owned()];
+        assert_eq!(t5m_file_request(&admitted), Some(Ok("програма.lisp")));
+        for invalid in ["програма.sens", "програма.lisp.sens", "програма"] {
+            let args = vec!["sens".to_owned(), "--t5m-file".to_owned(), invalid.to_owned()];
+            assert!(
+                matches!(t5m_file_request(&args), Some(Err(_))),
+                "physical/untyped file must not enter textual Lisp parser: {invalid}"
+            );
+        }
+        let incomplete = vec!["sens".to_owned(), "--t5m-file".to_owned()];
+        assert!(matches!(t5m_file_request(&incomplete), Some(Err(_))));
+    }
+
+    #[test]
     fn explicit_physical_t5_is_a_pure_binary_entrypoint_not_an_alias() {
         let arguments = vec!["sens".to_owned(), "program.sens".to_owned()];
         assert_eq!(physical_t5_request(&arguments), Some(Ok("program.sens")));
