@@ -44,6 +44,28 @@ class PersistentVectorUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertNotRegex(source, r"(?m)^\(визначити\s+vec[->]")
         self.assertNotRegex(source, r"\(\s*[01]{9}(?:\s|\))")
 
+    def test_core4_does_not_restore_mixed_keyboard_alias_definitions(self):
+        # D7 identifiers are not an English/Cyrillic mixture. These historical
+        # aliases duplicate already-defined Ukrainian closures and never
+        # represent a distinct ratified call mechanism.
+        core = (ROOT / "lib/core4.lisp").read_text(encoding="utf-8")
+        names = re.findall(r"(?m)^\(визначити\s+([^\s()]+)", core)
+        mixed = [
+            name for name in names
+            if re.search(r"[A-Za-z]", name)
+            and re.search(r"[\u0400-\u052F]", name)
+        ]
+        self.assertEqual(mixed, [], f"D7 змішані виконавчі аліаси: {mixed}")
+        self.assertIn("(визначити вектор-н-тий елемент-списку-за-індексом)", core)
+        self.assertIn("(визначити кліпс-змінна-терм", core)
+
+    def test_d9_import_script_uses_canonical_ukrainian_resident(self):
+        source = (ROOT / "scripts/apply-d9-map-vec-list-batch.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('("мапа-отримати", "вектор-н-тий")', source)
+        self.assertNotIn('"вектор-n-тий"', source)
+
     def test_calls_of_vector_are_ukrainian(self):
         source = SOURCE.read_text(encoding="utf-8")
         self.assertIn("(визначити вектор-з-список", source)

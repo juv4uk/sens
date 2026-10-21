@@ -9,7 +9,7 @@ root = Path(__file__).resolve().parents[1]
 core = root / "lib/core4.lisp"
 batch = root / "research/d9-map-vec-list-batch-2026-10-17.lisp"
 text = core.read_text(encoding="utf-8")
-if all(re.search(rf"\((?:0011|визначити)\s+{name}(?=\s|\))", text) for name in ("мапа-отримати", "вектор-n-тий")):
+if all(re.search(rf"\((?:0011|визначити)\s+{name}(?=\s|\))", text) for name in ("мапа-отримати", "вектор-н-тий")):
     print("ALREADY_APPLIED")
     raise SystemExit(0)
 body = batch.read_text(encoding="utf-8")
