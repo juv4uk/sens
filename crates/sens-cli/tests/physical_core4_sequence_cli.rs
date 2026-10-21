@@ -277,6 +277,7 @@ impl Drop for SourceTriplet {
 fn verify_unpaired_ukrainian_libs_natively() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     for stem in [
+        "d1-direct-values",
         "pair-replace-first",
         "pair-replace-rest",
         "поміняти-перші-два",
