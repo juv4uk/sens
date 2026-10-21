@@ -332,6 +332,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "rotate-four-right"
                 | "list-delete-second"
                 | "list-insert-second"
+                | "list-drop-last-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
