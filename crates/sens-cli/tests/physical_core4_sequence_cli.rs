@@ -301,6 +301,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-halfturn-six",
         "list-reverse-general",
         "list-drop-last-general",
+        "list-append-general",
         "list-interleave-two-pairs",
 
 
@@ -347,6 +348,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-halfturn-four"
                 | "list-zip-general"
                 | "list-drop-last-general"
+                | "list-append-general"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
@@ -583,6 +585,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/rotate-four-left",
         "lib/rotate-four-right",
         "lib/list-reverse-general",
+        "lib/list-append-general",
         "lib/pair-zip-unzip-two",
         "lib/list-zip-general",
         "lib/list-chunk-pairs-general",
