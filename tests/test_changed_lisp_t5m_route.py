@@ -342,8 +342,11 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             binary = root / "record-sens-ingress"
             binary.write_text(
                 "#!/bin/sh\nprintf '%s\\n' \"$*\" >> invoked.marker\n"
+                "if [ \"$1\" = --t5m-mint ]; then\n"
+                "  printf '\\\\002' > \"$3\"\n  exit 0\nfi\n"
                 "if [ \"$1\" = --t5m-pair ] && [ -e fail-paired ]; then\n"
-                "  echo paired rejected >&2\n  exit 19\nfi\n"
+                "  case \"$3\" in *sens-authority.sens) printf 'stub transport only\\n'; exit 0;; esac\n"
+                "  echo T5M_PHYSICAL_PAIR_MISMATCH >&2\n  exit 19\nfi\n"
                 "if [ \"$1\" = --t5m-pair ] && [ -e alter-paired ]; then\n"
                 "  printf 'different paired result\\n'\n  exit 0\nfi\n"
                 "printf 'stub transport only\\n'\n",
@@ -365,7 +368,10 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             failed = subprocess.run(cmd, cwd=root, capture_output=True, text=True, timeout=20)
             self.assertEqual(failed.returncode, 2, failed.stdout + failed.stderr)
             self.assertIn("T5M_PAIRED_SOURCE_EXECUTION_FAIL", failed.stderr)
+            self.assertIn("T5M_INDEPENDENT_PROJECTION_DIVERGENCE", failed.stderr)
             self.assertIn("status=19", failed.stderr)
+            self.assertIn("--t5m-mint module.lisp", (root / "invoked.marker").read_text())
+            self.assertTrue(any((root / "evidence").rglob("sens-authority.sens")))
             self.assertIn("files_checked=1 files_failed=1", failed.stdout)
             self.assertNotIn("T5M_FILE_EXECUTION PASS", failed.stdout)
             calls = (root / "invoked.marker").read_text(encoding="utf-8")
