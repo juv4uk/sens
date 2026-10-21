@@ -75,7 +75,11 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             )
             binary.chmod(0o755)
             opener = root / "sens-trit"
-            opener.write_text("#!/bin/sh\nprintf '10 001 01\\n'\n", encoding="utf-8")
+            opener.write_text(
+                "#!/bin/sh\n"
+                "if [ \"$1\" = verify-view ] && [ -f reject-view ]; then\n"
+                "  echo 'noncanonical view' >&2; exit 31; fi\n"
+                "printf '10 001 01\\n'\n", encoding="utf-8")
             opener.chmod(0o755)
             environment = dict(os.environ, SENS_NATIVE_T5M="1",
                                SENS_T5M_OPEN=str(opener))
@@ -95,6 +99,16 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertNotIn("T5M_MIGRATION_NO_REPORT", default.stderr)
             self.assertNotIn("T5M_MIGRATION_NO_REPORT", ok.stderr)
             self.assertTrue(list((root / "evidence").glob("*/module.sens")))
+            (root / "reject-view").touch()
+            invalid_inverse = subprocess.run(
+                cmd, cwd=root, env=environment, capture_output=True,
+                text=True, timeout=20,
+            )
+            self.assertEqual(invalid_inverse.returncode, 2,
+                             invalid_inverse.stdout + invalid_inverse.stderr)
+            self.assertIn("T5M_NATIVE_VIEW_ROUNDTRIP_FAILED", invalid_inverse.stderr)
+            self.assertIn("files_checked=1 files_failed=1", invalid_inverse.stdout)
+            (root / "reject-view").unlink()
             (root / "reject-pair").touch()
             red = subprocess.run(cmd, cwd=root, env=environment,
                                  capture_output=True, text=True, timeout=20)
@@ -128,6 +142,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn('"$binary" --t5m-mint "$file" "$physical"', source)
         self.assertIn('"$binary" --t5m-pair "$file" "$physical"', source)
         self.assertIn('"$native_open" open "$physical"', source)
+        self.assertIn('"$native_open" verify-view "$physical"', source)
         # Опційний Python-мігратор не може передувати SENS у робочому CI.
         self.assertLess(source.index('    run_native_t5m_program\n    continue'),
                         source.index('scripts/migrate-three-pass.py'))
