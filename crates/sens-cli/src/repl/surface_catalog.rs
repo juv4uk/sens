@@ -1,5 +1,6 @@
 use sens::syntax::Expr;
 use sens::{ExprKind, parse};
+use std::collections::HashMap;
 use std::sync::OnceLock;
 
 const HUMAN_SURFACES: [&str; 4] = ["ук", "укр", "en", "san"];
@@ -190,6 +191,55 @@ fn find_entries<'a>(entries: &'a [SurfaceEntry], requested: &str) -> Vec<&'a Sur
         .collect()
 }
 
+// Repeated lookups during a real T5M mint must be constant-time even for large
+// Lisp libraries; every entry remains owned by the exact Dn coordinate.
+static SURFACE_INDEX: OnceLock<Result<HashMap<(String, String), Option<String>>, String>> = OnceLock::new();
+static UKR_INDEX: OnceLock<Result<HashMap<String, String>, String>> = OnceLock::new();
+
+fn surface_index() -> Result<&'static HashMap<(String, String), Option<String>>, String> {
+    SURFACE_INDEX
+        .get_or_init(|| {
+            let mut index = HashMap::new();
+            for entry in registry_entries()? {
+                for name in &entry.names {
+                    if let Some(spelling) = name.name.as_ref() {
+                        let key = (name.surface.clone(), spelling.clone());
+                        // Keep ambiguous names uncallable; do not assign arbitrary
+                        // priority to one of two distinct exact domains.
+                        match index.entry(key) {
+                            std::collections::hash_map::Entry::Vacant(slot) => {
+                                slot.insert(Some(entry.identity.clone()));
+                            }
+                            std::collections::hash_map::Entry::Occupied(mut slot) => {
+                                *slot.get_mut() = None;
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(index)
+        })
+        .as_ref()
+        .map_err(Clone::clone)
+}
+
+fn ukr_index() -> Result<&'static HashMap<String, String>, String> {
+    UKR_INDEX
+        .get_or_init(|| {
+            let mut index = HashMap::new();
+            for entry in registry_entries()? {
+                if let Some(name) = surface_name(entry, "укр")
+                    .and_then(|name| name.name.as_ref())
+                {
+                    index.insert(entry.identity.clone(), name.clone());
+                }
+            }
+            Ok(index)
+        })
+        .as_ref()
+        .map_err(Clone::clone)
+}
+
 /// Resolve a spelling only in the selected projection column. Ambiguous names
 /// fail closed; the returned coordinate is still only a table projection, not
 /// proof that the resident is callable.
@@ -197,26 +247,13 @@ pub(super) fn identity_for_surface_name(
     surface: &str,
     requested: &str,
 ) -> Result<Option<String>, String> {
-    let entries = registry_entries()?;
-    let mut matches = entries.iter().filter(|entry| {
-        surface_name(entry, surface).and_then(|name| name.name.as_deref()) == Some(requested)
-    });
-    let Some(entry) = matches.next() else {
-        return Ok(None);
-    };
-    if matches.next().is_some() {
-        return Ok(None);
-    }
-    Ok(Some(entry.identity.clone()))
+    let key = (normalize_surface(surface).to_owned(), requested.to_owned());
+    Ok(surface_index()?.get(&key).cloned().flatten())
 }
 
 /// Return the full Ukrainian spelling paired with one exact table identity.
 pub(super) fn ukr_name_for_identity(identity: &str) -> Result<Option<String>, String> {
-    let entries = registry_entries()?;
-    let Some(entry) = entries.iter().find(|entry| entry.identity == identity) else {
-        return Ok(None);
-    };
-    Ok(surface_name(entry, "укр").and_then(|name| name.name.clone()))
+    Ok(ukr_index()?.get(identity).cloned())
 }
 
 fn rendered_name(surface: Option<&SurfaceName>) -> String {
