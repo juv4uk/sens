@@ -739,9 +739,9 @@ pub fn eval_core_library_source(
 /// binding-list arguments are evaluated. No D6 law or Rust implementation is
 /// added here, and an existing non-macro slot is a hard error.
 fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), LanguageError> {
-    for (uk_surface, compatibility_surface, expected_bits) in [
-        ("нехай", "let", 0b001000u16),
-        ("нехай*", "let*", 0b001001u16),
+    for (uk_surface, full_ukr_surface, expected_bits) in [
+        ("нехай", "нехай", 0b001000u16),
+        ("нехай*", "нехай-послідовно", 0b001001u16),
     ] {
         let identity = semantic_registry::exact_uk_callable_for_source_head(uk_surface)
             .filter(|identity| identity.width() == 6 && identity.packed_bits() == expected_bits)
@@ -753,15 +753,17 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
                 )
             })?;
 
+        // Core4 owns the macro through its *full Ukrainian* definition.
+        // Do not resurrect retired English bindings just to find this value.
         let implementation = session
             .environment
-            .get(compatibility_surface)
+            .get(full_ukr_surface)
             .or_else(|| session.environment.get(uk_surface))
             .filter(|value| matches!(value, Value::Macro(_)))
             .ok_or_else(|| {
                 LanguageError::new(
                     ErrorKind::InvalidForm,
-                    format!("Lisp-owned {compatibility_surface} macro is not installed"),
+                    format!("Lisp-owned {full_ukr_surface} macro is not installed"),
                     Span::default(),
                 )
             })?;
@@ -779,7 +781,7 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
             None => {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
-                    format!("could not bind Lisp-owned {compatibility_surface} to exact D6"),
+                    format!("could not bind Lisp-owned {full_ukr_surface} to exact D6"),
                     Span::default(),
                 ));
             }
