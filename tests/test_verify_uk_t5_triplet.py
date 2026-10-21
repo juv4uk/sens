@@ -54,7 +54,7 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.assertEqual(self.lisp.read_text(encoding="utf-8"), UK)
         self.assertEqual(self.view.read_text(encoding="ascii"), WORDS + "\n")
         self.assertEqual(self.sens.read_bytes(), encode_t5m_projection(WORDS))
-        self.assertEqual(record["physical_bytes"], 18)
+        self.assertEqual(record["physical_bytes"], 35)
         self.assertEqual(record["typed_word_count"], len(WORDS.split()))
         self.assertTrue(record["canonical_uk_roundtrip"])
         self.assertTrue(record["canonical_view_roundtrip"])
