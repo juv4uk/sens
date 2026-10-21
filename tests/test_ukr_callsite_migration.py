@@ -486,6 +486,7 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         self.assertNotIn("#d1:1", active_first)
         self.assertNotIn("#d1:0", active_first)
         self.assertNotIn("(так ", active_first)
+        self.assertNotIn(" так)", active_first)
         self.assertNotIn(" ні)", active_first)
         self.assertEqual(active_first.count("((атом? (як-є ()))"), 13)
         self.assertIn("(нехай-послідовно", active_first)
