@@ -244,7 +244,7 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "auto") -> dict:
+def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "t5m") -> dict:
     """Read-only proof of *program identity*, not original .lisp byte restoration."""
     if lisp.suffix != ".lisp" or sens != lisp.with_suffix(".sens") or view != lisp.with_suffix(""):
         raise ProjectionBlocked("all three inputs must be exact same-stem paths")
@@ -302,7 +302,7 @@ def verify(lisp: Path, sens: Path, view: Path, *, codec: str = "auto") -> dict:
     return {
         "schema": SCHEMA,
         "status": "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION",
-        "scope": "D1 predicates / D3 exact-call syntax / D4 CAAR of proved nested nil CONS / D2",
+        "scope": "D1 predicates / D2 frames / D3 exact-call syntax / four D4 selectors of proven nested CONS",
         "source": str(lisp),
         "sens": str(sens),
         "view": str(view),
