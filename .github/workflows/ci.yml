@@ -796,9 +796,12 @@ jobs:
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test native_first_d1_cutover -- --nocapture
           fi
           # Чинний D2 Lisp: справжній SENS і чинний негативний AST.
-          if grep -Eq '^(lib/codec-d2\.lisp|crates/sens/tests/codec_in_sens\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed"; then
+          # Окрім D2 eval, перевіряємо фізичну пару поточним Zig і SENS.
+          # Пара без однойменного перегляду чи byte-exact джерела не є GO.
+          if grep -Eq '^(lib/codec-d2(\.lisp|\.sens)?|crates/sens/tests/codec_in_sens\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed"; then
             python3 -m unittest tests.test_code_runs.CodecUkrProjectionTests -v
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo run --locked -p sens-cli --bin sens -- --t5m-pair lib/codec-d2.lisp lib/codec-d2.sens
           fi
           # World: точні D1:1/0 SENS та негативний D8-свідок.
           if grep -Eq '^(lib/world\.lisp|crates/sens/tests/fs_bridge_diagnostics\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
