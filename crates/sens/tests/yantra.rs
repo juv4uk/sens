@@ -61,6 +61,30 @@ fn transport_failure_becomes_blocked_result_with_evidence() {
 
 
 #[test]
+fn yantra_json_class_membership_is_a_checked_d3_triple() {
+    // Виконується справжнім SENS: неповний або зайвий D3 список
+    // не повинен передаватися в ТРЕТЄ/​CDR як повноцінний свідок.
+    let mut session = agent_session();
+    for (datum, expected) in [
+        ("(як-є ())", false),
+        ("(як-є (class-membership))", false),
+        ("(як-є (class-membership string))", false),
+        ("(як-є (class-membership string member))", true),
+        ("(як-є (class-membership string nonmember))", false),
+        ("(як-є (class-membership string member extra))", false),
+    ] {
+        let source = format!("(рядкове-членство-формат-обміну-даними? {datum})");
+        let answer = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS відхилив перевірку D3 {source}: {error}"));
+        assert_eq!(
+            answer.value.as_predicate_bit(),
+            Some(expected),
+            "Свідок D3 має бути повною трійкою перед доступом до третього поля: {source}",
+        );
+    }
+}
+
+#[test]
 fn yantra_json_string_classifier_yields_d1_condition_from_structured_witness() {
     // Чинний Core4 класифікує рядок трійкою даних, а не булевим D1.
     // Справжній SENS JSON-кодер має сам порівняти членство у класі.
