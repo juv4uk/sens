@@ -86,6 +86,53 @@ fn decode_order_tail(bytes: &[u8]) -> Option<OrderTail> {
 }
 
 #[test]
+fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
+    // Беремо точне чинне українське DEFINE з репозиторію, не створюємо
+    // Python-імітації чи другий код закону. D5 вирішує порядок у SENS.
+    let source = fs::read_to_string(
+        repo_root().join("lib/machine/encoding/coverage-generator.lisp"),
+    )
+    .expect("поточне українське джерело генератора");
+    let marker = "(визначити покриття-кодувальника-числа-рівні?";
+    let start = source.find(marker).expect("визначення числового D5-закону");
+    let end = source[start..]
+        .find("\n(визначити покриття-кодувальника-кількість-збігається?")
+        .map(|offset| start + offset)
+        .expect("наступне українське визначення");
+    let definition = &source[start..end];
+    assert!(!definition.contains("(тотожне?"),
+        "D3 EQ не є математичною рівністю");
+
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("канонічний SENS Core4");
+    eval_program(definition, &mut session)
+        .expect("справжній SENS визначає функцію порівняння");
+    for (left, right, expected) in [
+        ("0", "0", true),
+        ("1", "1", true),
+        ("7", "7", true),
+        ("0", "1", false),
+        ("2", "1", false),
+        ("-3", "-3", true),
+        ("-3", "2", false),
+        ("2", "-3", false),
+    ] {
+        let call = format!(
+            "(покриття-кодувальника-числа-рівні? {left} {right})"
+        );
+        let parsed = parse(&call).expect("український Lisp-запит");
+        let exact = sens::source_projection::project_ukr_decimal_integer_literals(
+            &parsed, &call
+        ).expect("точна D24+ числова проєкція");
+        let actual = sens::eval_parsed_expressions(&exact, &mut session)
+            .unwrap_or_else(|error| panic!("SENS D24+ {call}: {error}"))
+            .value;
+        assert_eq!(actual.as_predicate_bit(), Some(expected),
+            "SENS D1 predicate: {call}");
+    }
+}
+
+#[test]
 fn current_order_surfaces_lower_to_exact_d5_identities() {
     for (source, expected_bits) in [("(менше? 2 3)", 0b11010), ("(більше? 3 2)", 0b11011)] {
         let lowered = lower_program(&parse(source).expect("current D5 order source"));
