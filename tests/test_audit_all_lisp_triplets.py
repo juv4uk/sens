@@ -78,6 +78,14 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertTrue(result["all_bounded_reverse_verified"])
         self.assertFalse(result["semantic_runtime_proven"])
         self.assertFalse(result["release_ready"])
+        # Фізичний .sens для коментарів не може замаскуватися
+        # зеленим підсумком перевірки іншої справжньої програми.
+        self.put("lib/пояснення.sens", b"not-an-executable-program")
+        invalid = scan(self.root, verify_bounded=True)
+        self.assertEqual(invalid["bounded_verified"], 1)
+        self.assertEqual(invalid["comment_only_with_physical"], 1)
+        self.assertFalse(invalid["all_bounded_reverse_verified"])
+        self.assertIn("необґрунтований", str(invalid["blocked_sample"]))
 
     def test_nested_block_comments_are_not_machine_programs(self):
         # Лексичні #| ... |# не створюють виконуваних слів D2/T5M.
