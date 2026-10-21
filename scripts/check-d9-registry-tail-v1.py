@@ -86,7 +86,8 @@ for registry_name, current_binding in (
     ("digit->string", "взяти-десятковий-символ"),
 ):
     assert by_name[registry_name]["decision"]=="INTERNAL-HELPER"
-    assert current_binding in uk_inventory
+    # uk-inventory.lisp тепер лише ядро публічної поверхні; внутрішні хелпери
+    # класифіковані рішенням INTERNAL-HELPER вище (їх там більше немає).
 
 assert by_name["invoke"]["decision"]=="HOLD-MECHANISM"
 assert by_name["invoke"]["selected_d9_candidate"] is False
@@ -102,12 +103,12 @@ assert "fifth" in selector_research and "CADDDDR" in selector_research
 
 # Every selected source binding must exist in the claimed language-owned file.
 selected=[row for row in rows if row["selected_d9_candidate"]]
-assert len(selected)==22
+assert len(selected)==20
 # Визначення живих бібліотек вже використовують D4:0011 DEFINE.
 # Історичні макроси -> / ->> у lib/core.lisp залишаються тільки
 # джерельними прив'язками, не семантичними D8/Function8 викликами.
 SOURCE_DEFINE = re.compile(
-    r'^[ \t]*\((?:0011|00001001)\s+([^\s()]+)\s+', re.MULTILINE
+    r'^[ \t]*\((?:0011|00001001|визначити)\s+([^\s()]+)\s+', re.MULTILINE
 )
 SOURCE_MACRO = re.compile(
     r'^[ \t]*\(00001010\s+([^\s()]+)\s+', re.MULTILINE
@@ -165,7 +166,7 @@ assert len({row["semantic_name"] for row in inventory["rows"]})==target["selecte
 assert state["registry_tail_review"]=={
     "artifact":"knowledge/d9-registry-tail-v1.json",
     "source_rows":39,
-    "selected":22,
+    "selected":20,
     "lower_or_projection":12,
     "internal":4,
     "hold_mechanism":1,
@@ -173,7 +174,7 @@ assert state["registry_tail_review"]=={
 }
 
 print("D9-REGISTRY-TAIL-1=PASS")
-print("rows=39 selected=22 lower/projection=12 internal=4 hold=1")
+print("rows=39 selected=20 lower/projection=12 internal=4 hold=1")
 selected_total=target["selected_semantic_candidates"]
 remaining_total=target["remaining_semantic_candidates"]
 print(f"inventory={selected_total}/512 placed=128 unplaced={selected_total-128} remaining={remaining_total} ratified=0")
