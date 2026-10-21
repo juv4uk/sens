@@ -1283,7 +1283,7 @@ fn український_лінтер_повертає_точні_резуль�
 
 #[cfg(feature = "zig-transport")]
 #[test]
-fn t5m_repair_uses_sens_mint_and_executes_real_physical_pair() {
+fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
     use std::{fs, path::Path};
     let repo = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
     let dir = std::env::temp_dir().join(format!(
