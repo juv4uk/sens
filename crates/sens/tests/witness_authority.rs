@@ -258,7 +258,7 @@ fn transport_island_compat_document(session: &mut Session) {
 
     let form = &forms[0];
     let exact_form_source = &source[form.span.start..form.span.end];
-    let transport = format!("(визначити island-compat-document (як-є {exact_form_source}))");
+    let transport = format!("(визначити документ-сумісності-островів (як-є {exact_form_source}))");
     eval_program(&transport, session)
         .expect("host observer must be able to transport island contract bytes into Lisp data");
 }
@@ -281,7 +281,7 @@ fn transport_life_1_document(session: &mut Session) {
 
     let form = &forms[0];
     let exact_form_source = &source[form.span.start..form.span.end];
-    let transport = format!("(визначити life-1-document (як-є {exact_form_source}))");
+    let transport = format!("(визначити документ-договору-життя-1 (як-є {exact_form_source}))");
     eval_program(&transport, session)
         .expect("host observer must transport LIFE-1 contract bytes into Lisp data");
 }
@@ -304,7 +304,7 @@ fn transport_life_substrate_parity_document(session: &mut Session) {
     let form = &forms[0];
     let exact_form_source = &source[form.span.start..form.span.end];
     let transport = format!(
-        "(визначити life-substrate-parity-document (як-є {exact_form_source}))"
+        "(визначити документ-паритету-основи-життя (як-є {exact_form_source}))"
     );
     eval_program(&transport, session)
         .expect("host observer must transport #809 contract bytes into Lisp data");
