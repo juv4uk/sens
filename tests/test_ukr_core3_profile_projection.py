@@ -15,7 +15,7 @@ PROJECTIONS = (
     ("010", "атом?", 8),
     ("101", "тотожне?", 6),
     ("100", "перше", 1),
-    ("001", "як-є", 28),
+    ("001", "як-є", 32),
 )
 RAW_HEADS = re.compile(re.escape("(") + r"(?:001000|0011|0010|0100|010|101|100|110|001)(?=\s)")
 
@@ -73,6 +73,9 @@ class Core3ProfileUkrProjection(unittest.TestCase):
             with self.subTest(bits=bits):
                 self.assertEqual(source.count("(" + name), count)
                 self.assertEqual(visible.count("(" + name), count)
+        self.assertNotIn('(завантажити-файл "', visible,
+                         "D7 file paths must be quoted symbols before text I/O")
+        self.assertEqual(visible.count("(символ-у-текст (як-є lib/"), 4)
         self.assertEqual(visible.count("(нехай "), 1,
                          "D6 LET must use its full ratified Ukrainian surface")
 
