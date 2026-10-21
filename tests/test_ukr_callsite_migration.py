@@ -603,8 +603,9 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
     PINNED = {
   "scripts/check-domain-logic-laws.lisp": {
     # Відновлений зріз включає чинні українські описи законів у самому .lisp.
+    # Після чинного D1-ремонту COND success не повертає історичне голе `так`.
     # Після перейменування схемного теґа domain-table/1 → domain-table-1.
-    "sha": "3af822dcbf05c3dbfbd35dddaa26fc4e52722184",
+    "sha": "ec069bfbf8e87bd6d3b2c2c79f8644d37d7fc649",
     "edits": [
       [
         826,
