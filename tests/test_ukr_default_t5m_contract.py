@@ -37,6 +37,12 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         self.assertIn('if timeout 45s "$binary" "$pair"', runner)
         self.assertNotIn('--t5m-file "$pair"', runner)
         self.assertIn('T5M_COMMITTED_PAIR_DRIFT', runner)
+        # Супутній двійковий перегляд звіряється з фізичною парою;
+        # сам збіг .sens без перегляду не доводить повної трійки.
+        self.assertIn('T5M_MINTED_VIEW_MISSING', runner)
+        self.assertIn('T5M_COMMITTED_VIEW_MISSING', runner)
+        self.assertIn('T5M_COMMITTED_VIEW_DRIFT', runner)
+        self.assertIn('cmp -s "$staged_view" "$committed_view"', runner)
         self.assertIn('T5M_FILE_EXECUTION_FAIL', runner)
         cli = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
         self.assertIn('fs::read_to_string(filename)', cli)

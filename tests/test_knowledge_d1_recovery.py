@@ -1,79 +1,160 @@
 #!/usr/bin/env python3
-"""Knowledge D1 recovery: exact three functions from the complete historical Git cohort."""
+"""Структурний контроль чинних українських D1/D3/D4 законів знань.
+
+Історичні Git blob, англійські DEFINE й #d1-літерали не є релізним
+контрактом. Ця перевірка не імітує виконання SENS: його виконують
+crates/sens/tests/knowledge_journal_d3_ukr.rs та knowledge_d1_recovery.rs.
+"""
 from pathlib import Path
-import hashlib
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 PATH = ROOT / "lib/knowledge.lisp"
-HISTORIC_PARTIAL_BLOB = "2aa92c2888a5260497912bab1a0876812fbe40b9"
-MARKER = ";; Exact D1 recovery from f6f1f1b3d1c234a5fcc1b98e585f1d3a91ea553d."
-NAMES = ("knowledge-not-head?", "knowledge-clauses-valid?", "knowledge-package-field")
+NAMES = (
+    "голова-твердження-знань-заперечена?",
+    "клаузи-бази-знань-коректні?",
+    "отримати-поле-пакета-знань",
+)
+LEGACY_HEADS = (
+    "knowledge-not-head?",
+    "knowledge-clauses-valid?",
+    "knowledge-package-field",
+)
+TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|;[^\n]*|\(|\)|[^\s()";]+')
 
 
-def git_blob(text: str) -> str:
-    raw = text.encode("utf-8")
-    return hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
+def parse(source: str):
+    tokens = [
+        match.group() for match in TOKEN.finditer(source)
+        if not match.group().startswith(";")
+    ]
+    position = 0
+
+    def expression():
+        nonlocal position
+        if position >= len(tokens):
+            raise ValueError("незакрита форма")
+        word = tokens[position]
+        position += 1
+        if word == ")":
+            raise ValueError("зайва закривальна дужка")
+        if word != "(":
+            return word
+        items = []
+        while position < len(tokens) and tokens[position] != ")":
+            items.append(expression())
+        if position >= len(tokens):
+            raise ValueError("незакрита дужка")
+        position += 1
+        return items
+
+    forms = []
+    while position < len(tokens):
+        forms.append(expression())
+    return forms
 
 
-def parse(text: str):
-    tokens = (m.group(0) for m in re.finditer(
-        r'"(?:\\.|[^"\\])*"|;[^\n]*|\(|\)|[^\s()";]+', text))
-    stack = [[]]
-    for token in tokens:
-        if token.startswith(";"):
+def active_ukrainian_definitions(source: str):
+    forms = parse(source)
+    definitions = {}
+    for form in forms:
+        if not isinstance(form, list) or len(form) < 2 or form[0] != "визначити":
             continue
-        if token == "(":
-            child = []
-            stack[-1].append(child)
-            stack.append(child)
-        elif token == ")":
-            if len(stack) == 1:
-                raise ValueError("unbalanced closing")
-            stack.pop()
-        else:
-            stack[-1].append(token)
-    if len(stack) != 1:
-        raise ValueError("unterminated form")
-    return stack[0]
+        name = form[1]
+        if not isinstance(name, str):
+            raise ValueError("некоректне ім'я визначення")
+        if name in definitions:
+            raise ValueError("повторне визначення " + name)
+        definitions[name] = form
+
+    if any(name in definitions for name in LEGACY_HEADS):
+        raise ValueError("англійська спадкова DEFINE знову стала виконуваною")
+    if any(name not in definitions for name in NAMES):
+        raise ValueError("втрачене українське визначення")
+    if re.search(r"(?<![\w])#(?:d\d+:|b[01]|q2:)", source):
+        # Коментарі та рядки не є виконуваним кодом — скануємо лише
+        # токени програми. Історичні пояснення залишаються дозволені.
+        executable = "\n".join(
+            line.split(";", 1)[0] for line in source.splitlines()
+        )
+        if re.search(r"#(?:d\d+:|b[01]|q2:)", executable):
+            raise ValueError("застарілий числовий source-літерал")
+    return {name: definitions[name] for name in NAMES}
 
 
 def check(source: str):
-    if source.count(MARKER) != 1:
-        raise ValueError("missing immutable triad recovery boundary")
-    before, extra = source.split("\n" + MARKER, 1)
-    if git_blob(before) != HISTORIC_PARTIAL_BLOB:
-        raise ValueError("previous 20 live functions were modified without proof")
-    roots = parse(MARKER + extra)
-    if len(roots) != 3:
-        raise ValueError("recovery must add exactly three definitions")
-    if tuple(x[1] for x in roots) != NAMES:
-        raise ValueError("restored names/order drift")
-    if any(root[0] != "0011" or root[2][0] != "0010" for root in roots):
-        raise ValueError("D4 DEFINE/LAMBDA width drift")
-    allowed = {"0011":4, "0010":4, "110":3, "101":3, "010":3, "0101":4,
-               "100":3, "011":3, "001":3}
-    def scan(node):
-        if not isinstance(node, list):
-            return
-        if node and node[0] == "110":
-            if any(not isinstance(b, list) or len(b) != 2 for b in node[1:]):
-                raise ValueError("not two-field canonical D3 COND")
-        for item in node:
-            if isinstance(item, str) and item.startswith("#d1:") and item not in {"#d1:0", "#d1:1"}:
-                raise ValueError("invalid direct D1 width")
-            scan(item)
-    for root in roots:
-        scan(root)
-    if extra.count("#d1:1") != 6 or extra.count("#d1:0") != 3:
-        raise ValueError("D1 6-YES/3-NO census drift")
-    return roots
+    definitions = active_ukrainian_definitions(source)
+    head, clauses, field = (definitions[name] for name in NAMES)
+
+    if head[2][:2] != ["функція", ["голова"]]:
+        raise ValueError("змінено сигнатуру запереченої голови")
+    if head[2][2][0] != "за-умовою":
+        raise ValueError("змінено D1 умовний закон голови")
+    branches = head[2][2][1:]
+    expected_heads = (
+        ["тотожне?", "голова", ["як-є", "not?"]],
+        ["тотожне?", "голова", ["як-є", "not"]],
+    )
+    if len(branches) != 3 or [part[0] for part in branches[:2]] != list(expected_heads):
+        raise ValueError("зміна протокольних not/not? маркерів")
+    if [part[1] for part in branches] != [
+        ["атом?", ["як-є", []]],
+        ["атом?", ["як-є", []]],
+        ["атом?", ["як-є", ["стан"]]],
+    ]:
+        raise ValueError("зміна справжніх D1 відповідей голови")
+
+    if clauses[2][:2] != ["функція", ["клаузи"]]:
+        raise ValueError("змінено сигнатуру списку клауз")
+    if clauses[2][2][0] != "за-умовою":
+        raise ValueError("змінено D3 обхід клауз")
+    rows = clauses[2][2][1:]
+    if len(rows) != 4 or rows[0] != [
+        ["порожній?", "клаузи"], ["атом?", ["як-є", []]]
+    ] or rows[1] != [
+        ["атом?", "клаузи"], ["атом?", ["як-є", ["стан"]]]
+    ] or rows[2] != [
+        ["клауза-бази-знань-коректна?", ["перше", "клаузи"]],
+        ["клаузи-бази-знань-коректні?", ["решта", "клаузи"]],
+    ] or rows[3] != [
+        ["атом?", ["як-є", []]], ["атом?", ["як-є", ["стан"]]]
+    ]:
+        raise ValueError("зміна рекурсії, D1 або відмови для списку клауз")
+
+    if field[2][:2] != ["функція", ["назва", "пакет"]]:
+        raise ValueError("змінено сигнатуру пакета")
+    if field[2][2] != [
+        "за-умовою",
+        [["атом?", "пакет"], ["як-є", []]],
+        [["тотожне?", "назва", ["перше-першого", "пакет"]],
+         ["решта-першого", "пакет"]],
+        [["атом?", ["як-є", []]],
+         ["отримати-поле-пакета-знань", "назва", ["решта", "пакет"]]],
+    ]:
+        raise ValueError("зміна D4 селекторів або рекурсії поля пакета")
+
+    for definition in (head, clauses, field):
+        if len(definition) != 3:
+            raise ValueError("неправильна D4 DEFINE")
+        for expr in walk(definition):
+            if isinstance(expr, list) and expr and expr[0] == "за-умовою":
+                if any(not isinstance(branch, list) or len(branch) != 2
+                       for branch in expr[1:]):
+                    raise ValueError("не двопольова D3 COND")
+    return definitions
+
+
+def walk(node):
+    if isinstance(node, list):
+        yield node
+        for child in node:
+            yield from walk(child)
 
 
 class RecoverKnowledge(unittest.TestCase):
-    def test_immutable_preexisting_content_and_three_full_d1_forms(self):
-        self.assertEqual(len(check(PATH.read_text(encoding="utf-8"))), 3)
+    def test_current_ukrainian_d1_d3_d4_laws(self):
+        self.assertEqual(set(check(PATH.read_text(encoding="utf-8"))), set(NAMES))
 
     def test_exact_width_for_every_ratified_coordinate_d1_d10(self):
         total = 0
@@ -88,24 +169,22 @@ class RecoverKnowledge(unittest.TestCase):
             total += len(coords)
         self.assertEqual(total, 2046)
 
-    def test_bit_cost_of_three_direct_predicates(self):
-        roots = check(PATH.read_text(encoding="utf-8"))
-        self.assertEqual(len(roots), 3)
-        # Seven direct D1 outputs plus two direct guard tests; no ATOM/NOT
-        # constructor needed. These are semantic W1 values, not source bytes.
-        self.assertEqual(6 + 3, 9)
-        print("KNOWLEDGE-D1: 9 one-bit predicate value sites; physical T5 unmeasured")
-
-    def test_mutations_fail_closed(self):
-        s = PATH.read_text(encoding="utf-8")
-        for corrupted in (
-            s.replace("#d1:0", "0", 1),
-            s.replace("#d1:1", "1", 1),
-            s.replace("((010 package) (001 ()))", "((010 package) #d1:0)", 1),
-            s.replace("(0011 knowledge-package-field", "(0010 knowledge-package-field", 1),
-        ):
+    def test_bad_mutations_rejected_without_historical_git_pin(self):
+        source = PATH.read_text(encoding="utf-8")
+        self.assertEqual(len(check(source)), 3)
+        mutations = [
+            source.replace("(як-є not?)", "(як-є вигадане-заперечення)", 1),
+            source.replace("(клаузи-бази-знань-коректні? (решта клаузи))",
+                           "(клаузи-бази-знань-коректні? (перше клаузи))", 1),
+            source.replace("(перше-першого пакет)", "(перше пакет)", 1),
+            source.replace("(атом? (як-є (стан)))",
+                           "(атом? (як-є ()))", 1),
+            source + "\n(визначити knowledge-not-head? голова-твердження-знань-заперечена?)\n",
+        ]
+        for changed in mutations:
+            self.assertNotEqual(changed, source)
             with self.assertRaises(ValueError):
-                check(corrupted)
+                check(changed)
 
 
 if __name__ == "__main__":

@@ -60,8 +60,8 @@ jobs:
               cargo test --locked -p sens --test yantra yantra_message_and_tool_accessors_execute_with_ukrainian_bindings -- --nocapture
               cargo test --locked -p sens --test yantra yantra_tool_call_encoding_uses_exact_d10_ukrainian_function -- --nocapture
               cargo test --locked -p sens --test guard
-          # Реальний SENS macro/DEFINE: 10 розгортань D4, не Python-оракул.
-          cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
+              # Реальний SENS macro/DEFINE: 10 розгортань D4, не Python-оракул.
+              cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
               cargo test --locked -p sens --lib source_projection::tests:: -- --nocapture
               cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
               cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection

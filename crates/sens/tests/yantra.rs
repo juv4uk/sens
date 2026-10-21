@@ -61,6 +61,25 @@ fn transport_failure_becomes_blocked_result_with_evidence() {
 
 
 #[test]
+fn yantra_json_d1_boolean_values_are_distinct() {
+    // Справжній SENS обчислює D1:так, D1:ні та порожній D3 як різні
+    // об'єкти; Rust лише порівнює отримані значення.
+    let mut session = agent_session();
+    let source = r#"(список
+      (кодувати-значення-формат-обміну-даними так)
+      (кодувати-значення-формат-обміну-даними ні)
+      (кодувати-значення-формат-обміну-даними (як-є ())))"#;
+    let expected = r#"(список "true" "false" "null")"#;
+    let actual = eval_program(source, &mut session)
+        .expect("SENS повинен кодувати всі три точні значення")
+        .value.to_string();
+    let oracle = eval_program(expected, &mut session)
+        .expect("SENS повинен обчислити незалежну очікувану структуру")
+        .value.to_string();
+    assert_eq!(actual, oracle, "D1:NO не можна зливати з D3:EMPTY");
+}
+
+#[test]
 fn yantra_json_object_predicate_is_actual_d1_behavior() {
     // Не симуляція JSON у Rust: завантажуємо повний lib/yantra.lisp
     // тим самим SENS evaluator, що й інші інтеграційні свідки.

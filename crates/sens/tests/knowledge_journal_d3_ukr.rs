@@ -88,4 +88,34 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
     ).expect("SENS знаходить модуль після пошкоджених подій")
      .value.to_string();
     assert_eq!(recovered, yes, "неповна подія не приховує наступне правильне свідчення");
+
+    // Справжній SENS не повинен обчислювати Д4 «третє» на короткій події.
+    // Залишаємо існуючі клаузи без зміни на кожному зіпсованому вході.
+    let clauses = "(як-є (залишити))";
+    let original = eval_program(clauses, &mut session)
+        .expect("чинні клаузи")
+        .value.to_string();
+    for malformed in [
+        "(як-є ())",
+        "(як-є tell)",
+        "(як-є (tell))",
+        "(як-є (tell alpha))",
+        "(як-є (retract alpha))",
+    ] {
+        let expression = format!("(застосувати-одну-подію-журналу {clauses} {malformed})");
+        let actual = eval_program(&expression, &mut session)
+            .expect("пошкоджена подія не читає відсутнє третє поле")
+            .value.to_string();
+        assert_eq!(actual, original, "подія {malformed} пошкодила чинні клаузи");
+    }
+    // Позитивний свідок: правильна трійка tell додає факт через Д3 сполучити.
+    let added = eval_program(
+        "(застосувати-одну-подію-журналу (як-є (залишити)) (як-є (tell alpha запис)))",
+        &mut session,
+    ).expect("правильна подія tell виконується у SENS")
+     .value.to_string();
+    let expected_added = eval_program("(як-є (запис залишити))", &mut session)
+        .expect("очікувані клаузи")
+        .value.to_string();
+    assert_eq!(added, expected_added, "перевірка неповних подій не змінює закон tell");
 }
