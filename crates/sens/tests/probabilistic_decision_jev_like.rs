@@ -293,7 +293,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                   question
                   (quote ((billing 3/4) (technical 1/4)))
                   1/4
-                  (quote ((source synthetic)))))
+                  (quote ((source synthetic))))))
           (result-status (pd-choice-auto-policy observation 2/3)))
     "#;
     assert_eq!(eval_probabilistic_decision(forged_confidence), "invalid");
@@ -307,7 +307,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                 (pd-choice-observe
                   question
                   (quote ((billing 3/4) (technical 1/4)))
-                  (quote ((source synthetic)))))
+                  (quote ((source synthetic))))))
           (result-status (pd-choice-auto-policy observation 3/2)))
     "#;
     assert_eq!(eval_probabilistic_decision(invalid_threshold), "invalid");
