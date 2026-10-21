@@ -101,8 +101,9 @@ class WholeFileMetricTests(FileTree):
         # Новий executable у тій самій теці НЕ можна приховувати.
         root = self.tree({
             "lib/machine/isa/avx.lisp":
-                "; апаратний опис\\n(isa-catalogue/1 (extension AVX) "
-                "(instructions (instruction VADDPS)))\\n".replace("\\n", "\n"),
+                "; апаратний опис\\n"
+                "(isa-catalogue/1 (extension AVX) "
+                "(instructions (instruction VADDPS)))\\n",
             "lib/machine/isa/реальна.lisp":
                 "(визначити обчислити (функція (аргумент) (атом? аргумент)))\n",
             "lib/machine/isa/старе.lisp":
