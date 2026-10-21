@@ -66,7 +66,7 @@ fn guard_real_ukrainian_lisp_witness_requires_no_commit_freeze() {
 #[test]
 fn guard_keeps_decision_and_evidence_status_separate() {
     let value = eval_guard(
-        r#"(make-guard-finding
+        r#"(створити-захист-висновок
               (quote warn) (quote confirmed) (quote swarm/tasks)
               (quote auto-sync-disabled) (quote tasks-materialized)
               (quote tasks-not-materialized) (quote stale-projection)
@@ -80,21 +80,21 @@ fn guard_keeps_decision_and_evidence_status_separate() {
 #[test]
 fn guard_verifies_sync_and_drift_without_freezing_commits() {
     let ready = eval_guard(
-        r#"(guard-sync-window (quote open) (quote completed) (quote recorded)
+        r#"(захист-синхронізувати-вікно (quote open) (quote completed) (quote recorded)
              (quote (git sync drift-log)))"#,
     );
     assert!(ready.contains("(decision allow)"), "{ready}");
     assert!(ready.contains("continue-independent-commits"), "{ready}");
 
     let incomplete = eval_guard(
-        r#"(guard-sync-window (quote open) (quote pending) (quote recorded)
+        r#"(захист-синхронізувати-вікно (quote open) (quote pending) (quote recorded)
              (quote (git sync)))"#,
     );
     assert!(incomplete.contains("(decision warn)"), "{incomplete}");
     assert!(incomplete.contains("complete-sync-and-preserve-logs"), "{incomplete}");
 
     let missing_drift = eval_guard(
-        r#"(guard-sync-window (quote open) (quote completed) (quote missing)
+        r#"(захист-синхронізувати-вікно (quote open) (quote completed) (quote missing)
              (quote (git sync)))"#,
     );
     assert!(missing_drift.contains("(decision warn)"), "{missing_drift}");
@@ -104,7 +104,7 @@ fn guard_verifies_sync_and_drift_without_freezing_commits() {
 #[test]
 fn missing_evidence_is_unknown_not_reject() {
     let value = eval_guard(
-        r#"(guard-unknown (quote swarm/peer) (quote peer-journal-unreadable) (quote inspect-peer))"#,
+        r#"(захист-невідоме (quote swarm/peer) (quote peer-journal-unreadable) (quote inspect-peer))"#,
     );
     assert!(value.contains("(decision unknown)"));
     assert!(value.contains("(evidence-status unresolved)"));
@@ -116,7 +116,7 @@ fn missing_evidence_is_unknown_not_reject() {
 #[test]
 fn oracle_and_observation_agreement_allows() {
     let value = eval_guard(
-        r#"(guard-compare (quote arithmetic) (quote 3/10) (quote 3/10) (quote (oracle runtime)))"#,
+        r#"(захист-порівняти (quote arithmetic) (quote 3/10) (quote 3/10) (quote (oracle runtime)))"#,
     );
     assert!(value.contains("(decision allow)"));
     assert!(value.contains("(evidence-status confirmed)"));
@@ -125,7 +125,7 @@ fn oracle_and_observation_agreement_allows() {
 #[test]
 fn disagreement_warns_and_preserves_both_values() {
     let value = eval_guard(
-        r#"(guard-compare (quote task-state) (quote ready) (quote missing) (quote (tasks.lisp journal)))"#,
+        r#"(захист-порівняти (quote task-state) (quote ready) (quote missing) (quote (tasks.lisp journal)))"#,
     );
     assert!(value.contains("(decision warn)"));
     assert!(value.contains("(expected ready observed missing)"));
@@ -218,8 +218,8 @@ fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
              (guard-reference-all (як-є demo) (список слабке сильне))
              (список слабке сильне))
            (список
-             (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список слабке сильне)))
-             (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список сильне слабке)))))
+             (захист-еталон-поле (як-є summary) (guard-reference-find (як-є demo) (список слабке сильне)))
+             (захист-еталон-поле (як-є summary) (guard-reference-find (як-є demo) (список сильне слабке)))))
           ((атом? (як-є ())) (як-є ())))
     "#;
     let value = eval_guard_ukr(source);
@@ -271,7 +271,7 @@ fn unknown_script_routes_instead_of_guessing() {
 #[test]
 fn guard_compare_reuses_exact_structural_equality_for_nested_states() {
     let same = eval_guard(
-        r#"(guard-compare
+        r#"(захист-порівняти
               (quote build)
               (quote ((revision abc123) (status ready)))
               (quote ((revision abc123) (status ready)))
@@ -283,7 +283,7 @@ fn guard_compare_reuses_exact_structural_equality_for_nested_states() {
     );
 
     let drift = eval_guard(
-        r#"(guard-compare
+        r#"(захист-порівняти
               (quote build)
               (quote ((revision abc123) (status ready)))
               (quote ((revision abc123) (status blocked)))

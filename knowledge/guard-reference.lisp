@@ -980,7 +980,7 @@
        (список (як-є tool-missing)
          (список (як-є name) назва)
          (список (як-є decision) (як-є unknown))
-         (список (як-є unknown-routes) (guard-unknown-routes))))
+         (список (як-є unknown-routes) (захист-невідоме-маршрути))))
       ((атом? (як-є ())) інструмент))))
 
 (визначити гвардія-сценарій
@@ -1081,7 +1081,7 @@
          (список (як-є decision) (як-є unknown))
          (список (як-є evidence-status) (як-є unresolved))
          (список (як-є guidance) (як-є choose-unknown-route))
-         (список (як-є unknown-routes) (guard-unknown-routes))))
+         (список (як-є unknown-routes) (захист-невідоме-маршрути))))
       ((атом? (як-є ())) посилання))))
 
 (визначити гвардія-довідка
@@ -1128,7 +1128,7 @@
           (список (як-є not-found)
             (список (як-є query) назва)
             (список (як-є decision) (як-є unknown))
-            (список (як-є unknown-routes) (guard-unknown-routes))))
+            (список (як-є unknown-routes) (захист-невідоме-маршрути))))
          ((атом? (як-є ()))
           (список (як-є result)
             (список (як-є type) (як-є reference-topic))
