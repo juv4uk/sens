@@ -464,6 +464,8 @@ jobs:
           python3 -m unittest tests/test_ukr_projection_progress_report.py -v
           # Після правки lib/linter.lisp: перевірити повну українську проєкцію й досяжність лексичних гілок.
           python3 -m unittest tests/test_linter_domain_head_cutover.py -v
+          # Актуальна Lisp AST-поверхня; старі fingerprint/SID8 не є еталоном.
+          python3 -m unittest tests/test_ukr_tcp_island_projection.py -v
           python3 -m unittest tests/test_migrate_english_predicates_question_mark.py -v
           python3 -m unittest tests/test_migrate_active_lib_exact_driver.py -v
           python3 -m unittest tests/test_ukr_result_status_projection.py -v
