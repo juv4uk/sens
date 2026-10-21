@@ -92,6 +92,9 @@ class WordParser:
         if token in ("001", "010", "011", "100", "101", "110", "111",
                      "0110", "0111", "1000", "1001"):
             return ("head", token)
+        # Точне D24+ числове слово: ширина кратна 24 (доповнення до двох).
+        if len(token) >= 24 and len(token) % 24 == 0:
+            return ("number", token)
         raise ProjectionBlocked(f"outside bounded D1/D3 callable or data law: {token!r}")
 
     def parse(self):
@@ -144,6 +147,11 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str],
     kind = node[0]
     if kind == "empty":
         return "()"
+    if kind == "number":
+        width = len(node[1]); value = int(node[1], 2)
+        if value >= (1 << (width - 1)):
+            value -= (1 << width)
+        return str(value)
     if kind == "predicate":
         return d1[node[1]]
     if kind != "list":
