@@ -100,6 +100,15 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             # Після справжнього вилучення застарілого фізичного носія
             # дані лишаються даними: нема фальшивого виконання і RED.
             (root / "module.sens").unlink()
+            # Осиротілий extensionless перегляд теж належить видалити:
+            # DATA не перетворюється на колишній executable через старий артефакт.
+            (root / "module").write_text("stale bits\\n", encoding="utf-8")
+            orphan = subprocess.run(command, cwd=root, capture_output=True, text=True)
+            self.assertEqual(orphan.returncode, 2, orphan.stdout + orphan.stderr)
+            self.assertIn("T5M_NONPROGRAM_STALE_PAIR", orphan.stderr)
+            self.assertIn("view=./module", orphan.stderr)
+            self.assertFalse((root / "executed.marker").exists())
+            (root / "module").unlink()
             cleaned = subprocess.run(command, cwd=root, capture_output=True, text=True)
             self.assertEqual(cleaned.returncode, 0, cleaned.stdout + cleaned.stderr)
             self.assertIn("T5M_NOT_PROGRAM path=module.lisp", cleaned.stdout)
@@ -210,6 +219,21 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                     self.assertIn("release=NOT_CERTIFIED", result.stdout)
                     self.assertIn("module.sens", (root / "executed.marker").read_text())
                     self.assertNotIn("--t5m-file", (root / "executed.marker").read_text())
+
+            # .sens немає, але перегляд залишився: відмова без пропуску
+            # виконання нової фізичної Zig-пари через production runner.
+            pair.unlink()
+            view.write_text("осиротілі біти\\n", encoding="utf-8")
+            (root / "executed.marker").unlink(missing_ok=True)
+            result = subprocess.run(
+                ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"],
+                cwd=root, capture_output=True, text=True, timeout=20,
+            )
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertIn("T5M_ORPHAN_VIEW", result.stderr)
+            self.assertIn("files_failed=1", result.stdout)
+            self.assertIn("T5M_FILE_EXECUTION PASS", result.stdout)
+            self.assertIn("module.sens", (root / "executed.marker").read_text())
 
     def test_shell_parses(self):
         import subprocess
