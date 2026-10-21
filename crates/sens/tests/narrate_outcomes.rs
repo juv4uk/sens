@@ -34,6 +34,28 @@ fn eval_outcome_narration(source: &str) -> String {
         .value
         .to_string()
 }
+// Виконує саме нові іменовані визначення lib/narrate.lisp у SENS;
+// структурний огляд Python не є заміною цих позитивних / негативних даних.
+#[test]
+fn current_named_narration_helpers_execute_without_anonymous_d5_value_call() {
+    for (source, expected) in [
+        (
+            "(пояснити-мету-з-передумовами (як-є (planet earth)) (як-є ()))",
+            "(earth is a planet)",
+        ),
+        (
+            "(пояснити-мету-з-передумовами (як-є (owns alice book)) (як-є ()))",
+            "(alice owns book)",
+        ),
+        (
+            "(пояснити-результат-із-полів (як-є (planet earth)) (як-є ()))",
+            "(proved (planet earth) without-proof-result)",
+        ),
+    ] {
+        assert_eq!(eval_outcome_narration(source), expected, "живий SENS: {source}");
+    }
+}
+
 #[test]
 fn proved_outcome_keeps_the_ground_answer_and_real_premise() {
     let source = r#"
