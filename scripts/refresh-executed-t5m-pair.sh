@@ -30,10 +30,28 @@ fi
 source_hash="$(sha256sum "$source_file" | cut -d' ' -f1)"
 dir="$(mktemp -d)"
 trap 'rm -rf "$dir"' EXIT
-python3 scripts/migrate-three-pass.py "$source_file" \
-  --out "$dir" --report "$dir/receipt.json" --codec t5m \
-  --source-surface укр --refresh-existing "${binding_args[@]}"
-python3 - "$dir/receipt.json" <<'PY'
+name="$(basename "${source_file%.lisp}")"
+pair="$dir/$name.sens"
+view="$dir/$name"
+
+if (( ${#binding_args[@]} == 0 )); then
+  # Чинний маршрут: SENS-reader → Zig T5M → обидва фізичні файли.
+  # У цьому шляху немає Python чи JSON, і немає окремого кодера.
+  if ! timeout 60s "$binary" --t5m-mint-pair "$source_file" "$pair" \
+    >"$dir/mint.stdout" 2>"$dir/mint.stderr"; then
+    cat "$dir/mint.stderr" >&2
+    echo 'ПОМИЛКА: T5M_NATIVE_MINT_PAIR_FAILED' >&2
+    exit 2
+  fi
+  producer=SENS_ZIG_NATIVE
+else
+  # Тимчасова сумісність з явними додатковими DEFINE: не зупиняємо
+  # чинні міграції, доки native reader не одержить preload source API.
+  # Це лише допоміжний resolver; парна семантика завжди належить SENS.
+  python3 scripts/migrate-three-pass.py "$source_file" \
+    --out "$dir" --report "$dir/receipt.json" --codec t5m \
+    --source-surface укр --refresh-existing "${binding_args[@]}"
+  python3 - "$dir/receipt.json" <<'PY'
 import json, sys
 with open(sys.argv[1], encoding='utf-8') as stream:
     report = json.load(stream)
@@ -44,9 +62,8 @@ if not (summary['files_written'] == 1 and summary['files_blocked'] == 0
         and report['physical_producer'] == 'PINNED_ZIG_T5M_CARRY'):
     raise SystemExit('ПОМИЛКА: Zig/T5M не підтвердив фізичну пару')
 PY
-name="$(basename "${source_file%.lisp}")"
-pair="$dir/$name.sens"
-view="$dir/$name"
+  producer=ZIG_WITH_EXPLICIT_BINDINGS
+fi
 if [[ ! -s "$pair" || ! -s "$view" || -L "$pair" || -L "$view" ]]; then
   echo 'ПОМИЛКА: немає обох звичайних файлів свіжої фізичної пари' >&2
   exit 2
@@ -81,18 +98,36 @@ for target in "$committed_pair" "$committed_view"; do
     exit 2
   fi
 done
-# Файлова транзакція з відкатом обох файлів; жодної семантики Python.
-python3 - "$committed_pair" "$pair" "$committed_view" "$view" <<'PY'
-from pathlib import Path
-import sys
-sys.path.insert(0, "scripts")
-from migration_publish_pair import replace_pair
-dest_pair, stage_pair, dest_view, stage_view = (Path(p) for p in sys.argv[1:])
-try:
-    replace_pair(dest_pair, stage_pair.read_bytes(), dest_view, stage_view.read_bytes())
-except (OSError, ValueError) as exc:
-    raise SystemExit(f"T5M_REFRESH_INSTALL_FAILED: {exc}") from exc
-PY
+# Публікація — лише файлові операції Bash, без Python/JSON.
+# Стадіюємо файли поруч із цілями; якщо друга заміна не відбулася,
+# повертаємо точні попередні байти обох файлів.
+stage_pair="$(mktemp "${committed_pair}.sens-stage.XXXXXX")"
+stage_view="$(mktemp "${committed_view}.view-stage.XXXXXX")"
+trap 'rm -rf "$dir"; rm -f "$stage_pair" "$stage_view"' EXIT
+cp "$pair" "$stage_pair"
+cp "$view" "$stage_view"
+if [[ -f "$committed_pair" ]]; then
+  cp -p "$committed_pair" "$dir/previous.sens"
+  had_pair=1
+else
+  had_pair=0
+fi
+if [[ -f "$committed_view" ]]; then
+  cp -p "$committed_view" "$dir/previous.view"
+  had_view=1
+else
+  had_view=0
+fi
+if ! mv -f "$stage_pair" "$committed_pair"; then
+  echo 'ПОМИЛКА: T5M_PAIR_INSTALL_FAILED; наявну пару не змінено' >&2
+  exit 2
+fi
+if ! mv -f "$stage_view" "$committed_view"; then
+  if (( had_pair )); then cp -p "$dir/previous.sens" "$committed_pair"; else rm -f "$committed_pair"; fi
+  if (( had_view )); then cp -p "$dir/previous.view" "$committed_view"; else rm -f "$committed_view"; fi
+  echo 'ПОМИЛКА: T5M_VIEW_INSTALL_FAILED; відновлено попередню пару' >&2
+  exit 2
+fi
 cmp "$pair" "$committed_pair"
 cmp "$view" "$committed_view"
-printf 'T5M_REFRESHED source=%s mode=%s physical=ZIG_VERIFIED executed=SENS semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' "$source_file" "$mode"
+printf 'T5M_REFRESHED source=%s mode=%s physical=%s executed=SENS semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' "$source_file" "$mode" "$producer"
