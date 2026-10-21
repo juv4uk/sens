@@ -30,7 +30,7 @@
     },
     {
       "path": "tests/fixtures/linter.lisp",
-      "git_blob_sha1": "6c9448703ed56d331eb716a02f89f03b75cc3de4"
+      "git_blob_sha1": "fbaeb9623beea5a47b58865111a38f50dd53ff50"
     },
     {
       "path": "tests/fixtures/macro-conformance.lisp",
@@ -96,6 +96,13 @@
       "current_git_blob_sha1": "51c0d38f29ba24bd4d1cf4c3de5f20866f9f204f",
       "reviewed_commit": "3905d8f69b7b13003ade764005f6573ba438fcd0",
       "reason": "Після українізації перевірено, що всі 7 верхньорівневі записи досі мають форму (expr . quoted-source), а не виконуваний Lisp. Оновлено лише SHA походження. Вкладені вирази залишаються separate-unproven; жодного SENS/T5M runtime чи release допуску."
+    },
+    {
+      "path": "tests/fixtures/linter.lisp",
+      "previous_git_blob_sha1": "6c9448703ed56d331eb716a02f89f03b75cc3de4",
+      "current_git_blob_sha1": "fbaeb9623beea5a47b58865111a38f50dd53ff50",
+      "reviewed_commit": "0220c4428878187db82de5f017700b217d6500ff",
+      "reason": "Пофайлово перевірено 33 верхньорівневі Lisp-записи (expr/expected), включно з трьома новими цитованими тестами складності. Це дані лінтера, не виконувана SENS-програма. Вкладені вирази залишаються separate-unproven; .sens чи runtime admission не створено."
     }
   ]
 }
