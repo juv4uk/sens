@@ -72,6 +72,10 @@ fn x86_exact_integer_wire_checks_return_typed_d1() {
     for (source, expected) in [
         ("(машина-допуск-точне-ціле? 7)", true),
         ("(машина-допуск-точне-ціле? -7)", true),
+        ("(машина-допуск-точне-ціле? 0)", true),
+        ("(машина-допуск-точне-ціле? 7/2)", false),
+        ("(машина-допуск-точне-ціле? \"7\")", false),
+        ("(машина-допуск-точне-ціле? (як-є ()))", false),
         ("(машина-допуск-точне-ціле? (00000001 not-an-integer))", false),
     ] {
         let result = eval_program(source, &mut session)
