@@ -616,6 +616,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/pair-zip-unzip-two",
         "lib/list-zip-general",
         "lib/list-chunk-pairs-general",
+        "lib/list-chunk-triplets-general",
         "lib/list-interpose-general",
         "lib/list-all-slices-ends-general",
         "lib/list-atom-sequence-equal-general",
