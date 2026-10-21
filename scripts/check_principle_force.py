@@ -39,7 +39,7 @@ def check(root: Path) -> list[str]:
     conf = (root / data["conformance"]).read_text(encoding="utf-8")
 
     doc_principles = {int(m) for m in re.findall(r"(?m)^\*\*(\d)\.\s", doc)}
-    const_principles = {int(m) for m in re.findall(r"\(001 principle\)\s*(\d)", const)}
+    const_principles = {int(m) for m in re.findall(r"\(як-є principle\)\s*(\d)", const)}
     for n in PRINCIPLE_RANGE:
         if n not in doc_principles:
             problems.append(f"principle {n} is not declared in {data['principles_doc']}")
