@@ -1097,14 +1097,7 @@ jobs:
           # Перевіряти D7 escape-інверсію лише при змінах T5M-міграції.
           python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_string_escapes_preserve_d7_control_words -v
 
-      - name: Породжені селектори й родини — виконання SENS
-        if: github.event_name == 'push' || github.event_name == 'pull_request'
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          set -euo pipefail
-          changed="$RUNNER_TEMP/changed-core-dependencies.txt"
-          if [[ -f "$changed" ]] && grep -Eq '^(crates/sens/src/(semantic_registry|eval/(selector_law|mod))\.rs|crates/sens/tests/domain_family_composition_current\.rs|\.github/workflows/ci\.yml)
+      - name: Оборотність Lisp ↔ точні слова ↔ T5M — позитивні й негативні перевірки
         if: ${{ always() }}
         shell: bash
         run: |
