@@ -422,6 +422,22 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertIn(mod.D2_CLOSE, words)
             self.assertTrue(all(set(word) <= {"0", "1"} for word in words))
 
+    def test_string_escapes_preserve_d7_control_words(self):
+        # Source lowering follows the SENS reader rather than silently
+        # replacing \n, \t or \r with the printable n, t or r glyph.
+        for escape, scalar, exact_word in (
+            (r"\n", "\n", "0001010"),
+            (r"\t", "\t", "0001001"),
+            (r"\r", "\r", "0001101"),
+        ):
+            with self.subTest(escape=escape):
+                escaped, _ = self.migrate('(сполучити "a' + escape + 'b")')
+                literal_control, _ = self.migrate('(сполучити "a' + scalar + 'b")')
+                wrong_printable, _ = self.migrate('(сполучити "a' + escape[-1] + 'b")')
+                self.assertEqual(escaped, literal_control)
+                self.assertNotEqual(escaped, wrong_printable)
+                self.assertIn(exact_word, escaped.split())
+
     def test_sid8_bridge_cannot_authorize_any_executable_head(self):
         with self.assertRaisesRegex(mod.MigrationError, "unratified SID8 bridge"):
             mod.Resolver(self.my, self.upper,

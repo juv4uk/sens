@@ -1194,8 +1194,15 @@ def encode_string(node: String, text7):
     raw = node.tok.text
     if raw.startswith('"') and raw.endswith('"') and len(raw) >= 2:
         raw = raw[1:-1]
-    # Розекранувати \" та \\ до справжніх символів (токенізатор зберігає як є).
-    value = re.sub(r"\\(.)", r"\1", raw)
+    # SENS reader maps \n/\t/\r to control scalars, not letters n/t/r.
+    # Preserve all other escaped characters using the reader's fallback.
+    # Literal substitution r"\1" used to silently corrupt Lisp string data.
+    escapes = {"n": "\n", "t": "\t", "r": "\r"}
+    value = re.sub(
+        r"\\([\s\S])",
+        lambda match: escapes.get(match.group(1), match.group(1)),
+        raw,
+    )
     cells = text7_encode(value, text7, node.tok)
     return frame_text7(cells, node.tok)
 
