@@ -42,6 +42,19 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         self.assertIn('fs::read_to_string(filename)', cli)
         self.assertIn('fs::read(filename)', cli)
 
+    def test_changed_executable_lisp_migration_failure_is_not_green(self):
+        # Не видавати пропущене виконання за успішний CI: це борг, а не PASS.
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("  if (( blocked > 0 )); then", runner)
+        blocked_arm = runner.split("  if (( blocked > 0 )); then", 1)[1].split(
+            "  if (( not_program > 0 )); then", 1
+        )[0]
+        self.assertIn("::error::T5M_MIGRATION_UNPROVEN", blocked_arm)
+        self.assertIn("exit 2", blocked_arm)
+        self.assertNotIn("continue", blocked_arm)
+
     def test_default_ukr_preserves_program_identity_not_source_comments(self):
         with tempfile.TemporaryDirectory(prefix="sens-ukr-t5m-default-") as temp:
             base = Path(temp)

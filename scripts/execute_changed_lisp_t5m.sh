@@ -49,8 +49,8 @@ PY
     exit "$code"
   fi
   if (( blocked > 0 )); then
-    echo "::warning::T5M_MIGRATION_UNPROVEN path=$file blocked=$blocked semantic=NOT_CERTIFIED"
-    continue
+    echo "::error::T5M_MIGRATION_UNPROVEN path=$file blocked=$blocked semantic=NOT_CERTIFIED" >&2
+    exit 2
   fi
   if (( not_program > 0 )); then
     echo "T5M_NOT_PROGRAM path=$file"
