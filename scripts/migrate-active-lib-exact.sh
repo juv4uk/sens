@@ -56,7 +56,19 @@ echo "active authored lib: ${#active[@]} files (${#lang[@]} language, ${#ordinar
 offenders=()
 check_group() {
   local flag="$1"; shift; local -a group=("$@"); (( ${#group[@]} )) || return 0
-  local out f line; out="$("${TOOL[@]}" --check $flag "${group[@]}" 2>&1 || true)"
+  local -a check_flag=()
+  [[ -z "$flag" ]] || check_flag=("$flag")
+  local out f line rc
+  # A scanner that prints apparently clean rows but exits RED did not
+  # certify anything. Propagate the tool error, never mask it with || true.
+  if out="$("${TOOL[@]}" --check "${check_flag[@]}" "${group[@]}" 2>&1)"; then
+    :
+  else
+    rc=$?
+    echo "SOURCE_SCAN_ERROR: scanner exit=$rc mode=${flag:-ordinary}; not certified" >&2
+    printf '%s\n' "$out" >&2
+    return "$rc"
+  fi
   for f in "${group[@]}"; do
     line="$(grep -F "$f: convertible=" <<<"$out" | head -1 || true)"
     if [[ -z "$line" ]]; then echo "  ?? no verdict for $f"; offenders+=("$f:$flag")
