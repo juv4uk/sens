@@ -832,6 +832,39 @@ fn український_скрипт_відбирає_саме_запитан�
             assert_eq!(result.trim(), "()", "непорожній третій рівень: {result}");
         }
     }
+    // Додаткова реальна перевірка оболонки друку: файл SENS, а не
+    // імітація його побічних ефектів у Rust/Python.
+    let print_start = source
+        .find("(визначити надрукувати-відповідні\\n")
+        .expect("українська Lisp-оболонка друку");
+    let print_end = source[print_start..]
+        .find("\\n\\n(надрукувати-відповідні\\n")
+        .map(|index| print_start + index)
+        .expect("кінець оболонки друку");
+    let printer = &source[print_start..print_end];
+    for (level, expected, forbidden) in [
+        ("1", "зоря", "телескоп"),
+        ("2", "телескоп", "зоря"),
+    ] {
+        let code = format!(
+            "{selector}\\n{printer}\\n(надрукувати-відповідні (відібрати-приклади-за-рівнем (як-є (((expr . зоря) (tier . 1)) ((expr . телескоп) (tier . 2)))) {level}))\\n"
+        );
+        let path = std::env::temp_dir().join(format!(
+            "sens-ukr-tier-print-{level}-{}.lisp", std::process::id()
+        ));
+        std::fs::write(&path, code).expect("виконувана Lisp-оболонка");
+        let output = sens().arg(&path).output().expect("виклик SENS CLI");
+        let _ = std::fs::remove_file(&path);
+        assert!(
+            output.status.success(),
+            "SENS не виконав друк рівня {level}: stderr={} stdout={}",
+            String::from_utf8_lossy(&output.stderr),
+            String::from_utf8_lossy(&output.stdout),
+        );
+        let actual = String::from_utf8_lossy(&output.stdout);
+        assert!(actual.contains(expected), "не надруковано {expected}: {actual}");
+        assert!(!actual.contains(forbidden), "надруковано чужий рівень {forbidden}: {actual}");
+    }
     // Жодного фальшивого статусу GO для файлового виконання.
     let full = sens()
         .args(["scripts/fixtures-for-tier.lisp", "1"])
