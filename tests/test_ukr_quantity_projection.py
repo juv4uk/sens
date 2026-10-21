@@ -97,6 +97,14 @@ def verify(source: str) -> dict[str, tuple]:
         raise AssertionError("втрачено D1 закон символу через реальні D8 механізми")
     if source.count("(науковий-внутрішній-символ? ") != 3:
         raise AssertionError("три перевірки полів мають застосовувати чинний SENS закон")
+    # D8 WRITE не серіалізує D1, тому обидва бітові значення
+    # обов'язково відхиляються до точного текстового маршруту.
+    for d1_guard in (
+        "((тотожне? значення (атом? (як-є ()))) (хибне? (атом? (як-є ()))))",
+        "((тотожне? значення (хибне? (атом? (як-є ()))))",
+    ):
+        if source.count(d1_guard) != 1:
+            raise AssertionError("D1 предикат перед D8 WRITE не відхилено: " + d1_guard)
     if "(тотожне? залишок 0)" in source:
         raise AssertionError("D3 EQ не є числовою рівністю D24+")
     # D1-предикати не порівнюємо із D3 NIL через EQ.
@@ -150,6 +158,16 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
                 "(атом? значення)", 1),
         ):
             with self.assertRaises(AssertionError):
+                verify(broken)
+
+    def test_predicate_bits_are_rejected_before_d8_writer(self):
+        verify(self.source)
+        for guarded in (
+            "((тотожне? значення (атом? (як-є ()))) (хибне? (атом? (як-є ()))))",
+            "((тотожне? значення (хибне? (атом? (як-є ()))))",
+        ):
+            broken = self.source.replace(guarded, "; видалений захист D1", 1)
+            with self.assertRaisesRegex(AssertionError, "D1 предикат"):
                 verify(broken)
 
     def test_current_ukrainian_library_has_unique_live_definitions(self):
