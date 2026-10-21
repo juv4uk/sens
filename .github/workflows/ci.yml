@@ -580,7 +580,10 @@ jobs:
       - name: "Reason: нативний SENS перевіряє пошук після пошкодженого кошика"
         if: ${{ always() && (steps.changed-t5m-lisp.outputs.reason_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:'))) }}
         shell: bash
-        run: cargo test --locked -p sens --test reason_index malformed_bucket_does_not_hide_later_valid_sens_rules -- --exact --nocapture
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens --test reason_index malformed_bucket_does_not_hide_later_valid_sens_rules -- --exact --nocapture
+          cargo test --locked -p sens --test reason_index proof_mapper_calls_lexically_bound_sens_closure_not_d5_function_identity -- --exact --nocapture
 
       - name: SI — перевірити чинний український Lisp і точні D24+ аргументи
         if: ${{ always() }}
