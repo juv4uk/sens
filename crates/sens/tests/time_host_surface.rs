@@ -134,6 +134,35 @@ fn eval_exact_time_source(
 }
 
 #[test]
+fn ntp_mode_and_stratum_execute_exact_d1_and_reject_lists() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("основа часу");
+    load_time_library(&mut session).expect("чинні часові Lisp-закони");
+    for (source, expected) in [
+        ("(інтернет-час-режим-припустимий? 4)", true),
+        ("(інтернет-час-режим-припустимий? 5)", true),
+        ("(інтернет-час-режим-припустимий? 3)", false),
+        ("(інтернет-час-режим-припустимий? 6)", false),
+        ("(інтернет-час-режим-припустимий? (як-є (4)))", false),
+        ("(інтернет-час-рівень-припустимий? 1)", true),
+        ("(інтернет-час-рівень-припустимий? 15)", true),
+        ("(інтернет-час-рівень-припустимий? 0)", false),
+        ("(інтернет-час-рівень-припустимий? 16)", false),
+        ("(інтернет-час-рівень-припустимий? (як-є (1)))", false),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=ntp-d1 layer=SENS input={source} error={error}"
+            ))
+            .value;
+        assert_eq!(
+            result.as_predicate_bit(), Some(expected),
+            "test_id=ntp-d1 layer=SENS input={source} expected=D1:{expected} actual={result}"
+        );
+    }
+}
+
+#[test]
 fn time_predicates_use_exact_d1_literals_and_keep_boundary_laws() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("Core functions");
