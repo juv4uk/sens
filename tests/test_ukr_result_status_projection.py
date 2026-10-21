@@ -73,8 +73,12 @@ class ResultStatusProjectionTests(unittest.TestCase):
         self.assertFalse(heads, f"legacy numeric executable heads: {sorted(heads)}")
         self.assertFalse(heads & (native | set(D9_PROVEN) | set(D9_CALL_SURFACES)))
         self.assertNotRegex(code, r"(?<![\w:#])[01](?![01\w])")
-        self.assertIn("так", code)
-        self.assertIn("ні", code)
+        # Вся виконувана D1 істинність — обчислені предикати SENS;
+        # застарілі незв’язані слова не мають з'являтися в коді.
+        self.assertNotRegex(code, r"(?<![\\w-])так(?![\\w-])")
+        self.assertNotRegex(code, r"(?<![\\w-])ні(?![\\w-])")
+        self.assertIn("(атом? (як-є ()))", code)
+        self.assertIn("(атом? (сполучити (як-є ()) (як-є ())))", code)
 
     def test_d9_surfaces_are_exact_ukr_without_claiming_callability(self):
         code = source_code(SOURCE)
