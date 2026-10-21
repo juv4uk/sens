@@ -178,12 +178,18 @@ jobs:
           output="$RUNNER_TEMP/sens-live-pairs"
           mkdir -p "$output"
           for name in epistemic result-status; do
+            # Визначення модуля вже живуть у reason/knowledge Lisp.
+            # Їхній D9 resident НЕ означає вбудований викличний механізм.
+            bindings=()
+            if [[ "$name" == "result-status" ]]; then
+              bindings=(--binding-source lib/reason.lisp --binding-source lib/knowledge.lisp)
+            fi
             dest="$output/$name"
             mkdir -p "$dest"
             set +e
             python3 scripts/migrate-three-pass.py "lib/$name.lisp" \
               --out "$dest" --report "$dest/MIGRATION-REPORT.json" \
-              --codec t5m --source-surface укр
+              --codec t5m --source-surface укр "${bindings[@]}"
             code=$?
             set -e
             if [[ ! -s "$dest/MIGRATION-REPORT.json" ]]; then
@@ -519,6 +525,8 @@ jobs:
           python3 -m unittest tests/test_linter_domain_head_cutover.py -v
           python3 -m unittest tests/test_migrate_english_predicates_question_mark.py -v
           python3 -m unittest tests/test_migrate_active_lib_exact_driver.py -v
+          # Живий імпорт DEFINE не наділяє координату D9 машинною викличністю.
+          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_preloaded_lisp_closure_is_not_fabricated_d9_callability -v
           python3 -m unittest tests/test_ukr_result_status_projection.py -v
           python3 -m unittest tests/test_result_status_d1_bitness_current.py -v
           # Повні D9/D10 українські джерела без англомовних DEFINE-дублів.
