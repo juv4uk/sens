@@ -211,6 +211,14 @@ jobs:
           if grep -Eq '^(benchmarks/parser\.lisp|crates/sens/src/source_projection\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'parser_benchmark_tests=true' >> "$GITHUB_OUTPUT"
           fi
+          # Зміна чинної Lisp-семантики має запускати SENS, не лише source audit.
+          if grep -Eq '^(lib/translation\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
+          fi
+          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/tests/cli\.rs|scripts/execute_changed_lisp_t5m\.sh|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
+          fi
+
           # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -218,7 +226,7 @@ jobs:
           fi
 
       - uses: ./.github/actions/install-zig
-        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -314,15 +322,31 @@ jobs:
           retention-days: 1
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
-        if: steps.changed-t5m-lisp.outputs.has_files == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true'
         timeout-minutes: 10
         shell: bash
         run: |
           set -euo pipefail
           cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
+
+      - name: "Українські D9 селектори й негативні мутації"
+        if: steps.changed-t5m-lisp.outputs.translation_tests == 'true'
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.test_code_runs.TranslationSelectorsUkrProjectionTests -v
+
+      - name: "SENS runtime перекладу: позитивні й негативні свідки"
+        if: steps.changed-t5m-lisp.outputs.translation_tests == 'true'
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens --test translation_boundary -- --nocapture
 
       - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
         if: steps.changed-t5m-lisp.outputs.has_files == 'true'
