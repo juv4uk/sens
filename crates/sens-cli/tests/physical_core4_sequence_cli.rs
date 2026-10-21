@@ -311,6 +311,9 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "car-car-nested-pair-atom",
         "cdr-car-inner-tail-eq",
         "cond-two-false-structural-guards",
+        "d4-cddr-third-atom",
+        "d4-cdar-dotted-tail-atom",
+        "d4-append-associative-third",
 
 ] {
         let triple = SourceTriplet::mint(name);
