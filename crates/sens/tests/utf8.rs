@@ -89,6 +89,33 @@ fn utf8_pinned_reader_explicitly_admits_decimal_constants_as_d24() {
 }
 
 #[test]
+fn utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols() {
+    // Positive and negative witnesses execute through the current SENS
+    // runtime. Rust observes typed results; it does not implement UTF-8 laws.
+    let source = include_str!("../../../lib/utf8.lisp");
+    for line in source.lines().filter(|line| !line.trim_start().starts_with(';')) {
+        assert!(!line.trim_end().ends_with(" так)"), "bare truth in executable Lisp: {line}");
+        assert!(!line.trim_end().ends_with(" ні)"), "bare false in executable Lisp: {line}");
+    }
+    for (program, expected) in [
+        ("(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 128 128 191)", "1"),
+        ("(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 192 128 191)", "0"),
+        ("(це-байт-продовження-кодування-юнікод-8? 128)", "1"),
+        ("(це-байт-продовження-кодування-юнікод-8? 127)", "0"),
+        ("(це-допустимий-байт-кодування-юнікод-8? 255)", "1"),
+        ("(це-допустимий-байт-кодування-юнікод-8? 256)", "0"),
+        ("(усі-елементи-є-байтами-кодування-юнікод-8? (quote ()))", "1"),
+        ("(усі-елементи-є-байтами-кодування-юнікод-8? (quote (65 256)))", "0"),
+        ("(наявні-два-байти-продовження-кодування-юнікод-8? 128 191)", "1"),
+        ("(наявні-два-байти-продовження-кодування-юнікод-8? 128 65)", "0"),
+    ] {
+        let actual = eval(program);
+        assert_eq!(actual, expected,
+            "test_id=utf8-d1 layer=SENS input={program} expected={expected} actual={actual}");
+    }
+}
+
+#[test]
 fn utf8_decodes_ascii_exactly() {
     assert_eq!(eval("(utf8-decode (quote (65 66 67)))"), "(decoded (65 66 67))");
 }
