@@ -196,7 +196,7 @@ fn verify_ukrainian_compiler_heads(source: &str) -> Result<(), String> {
         || source.contains("(0011 ")
         || source.contains("(0010 ")
     {
-        return Err("expected 51 canonical Ukrainian compiler definitions and lambdas".into());
+        return Err("expected matching Ukrainian compiler definitions and lambdas".into());
     }
     let forms = sens::parse_mixed_exact_domain(source)
         .map_err(|error| format!("exact source parser BLOCKED: {error}"))?;
