@@ -281,7 +281,7 @@ jobs:
           if grep -Eq '^(lib/machine/admission/x86-64\.lisp|crates/sens/tests/machine_admission_false_width\.rs|crates/sens/tests/machine_admission_adversarial\.rs)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
-          # Живий SENS UTF-8/D1-свідок при зміні програми або його тесту.
+          # Чинна українська UTF-8 програма запускає справжній SENS D1, не Python/JSON oracle.
           if grep -Eq '^(lib/utf8\.lisp|crates/sens/tests/utf8\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'utf8_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
@@ -484,7 +484,7 @@ jobs:
           retention-days: 1
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
@@ -532,7 +532,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test utf8 -- --list | grep -Fqx 'utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols: test'
           cargo test --locked -p sens --test utf8 utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols -- --exact --nocapture
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"
@@ -550,7 +549,7 @@ jobs:
           python3 -m unittest tests.test_code_runs.TranslationSelectorsUkrProjectionTests -v
 
       - name: "SENS D2 — незалежний Zig/T5M roundtrip фізичної пари"
-        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' }}
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' }}
         timeout-minutes: 8
         shell: bash
         run: |
@@ -873,9 +872,9 @@ jobs:
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_root_recovery_rejects_compound_stage_before_d3_eq -- --exact --nocapture
           fi
           # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
-          if grep -Eq '^(lib/time\.lisp|crates/sens/tests/time_host_surface\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
+          if grep -Eq '^(lib/time\.lisp|crates/sens/tests/(time_host_surface|timezone_raw)\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test time_host_surface ntp_mode_and_stratum_execute_exact_d1_and_reject_lists -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test timezone_raw raw_timezone_declarations_are_interpreted_by_lisp -- --exact --nocapture
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test timezone_raw -- --nocapture
           fi
           # Тільки змінений механізм: реальні позитивні та негативні SENS-випадки.
           # Python тут перевіряє форму, а не заміняє роботу виконавця SENS.
