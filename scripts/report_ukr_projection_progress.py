@@ -322,6 +322,12 @@ def _projection_reasons(source: str) -> list[str]:
                     formal_value = _atom_value(formal)
                     if formal_value and LATIN_IDENTIFIER.search(formal_value):
                         add(formal.token, "англомовний локальний параметр", formal_value)
+            elif isinstance(formals, LispAtom):
+                # Lisp allows a single bare rest parameter: (функція args ...).
+                # This is a binding, not quoted data or an ignorable value.
+                formal_value = _atom_value(formals)
+                if formal_value and LATIN_IDENTIFIER.search(formal_value):
+                    add(formals.token, "англомовний локальний параметр", formal_value)
             for child in node.items[2:]:
                 visit(child)
             return

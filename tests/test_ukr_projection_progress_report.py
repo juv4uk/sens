@@ -110,6 +110,25 @@ class WholeFileMetricTests(FileTree):
         self.assertIn("англомовне посилання на значення", reasons["lib/аргумент.lisp"])
         self.assertNotIn("lib/цитата.lisp", reasons)
 
+    def test_variadic_function_binder_must_be_ukrainian(self):
+        # Голий параметр функції прив'язує решту аргументів.
+        # Коментарі та цитовані імена не змінюють виконуваний контракт.
+        root = self.tree({
+            "lib/старий.lisp":
+                "(визначити зібрати (функція rest-args rest-args))\n",
+            "lib/чинний.lisp":
+                "(визначити зібрати (функція решта-аргументів решта-аргументів))\n",
+            "lib/цитата.lisp":
+                "(визначити назви (як-є (функція rest-args rest-args)))\n",
+        })
+        state = report.measure_source_projection(root)
+        self.assertEqual(state.total_source_files, 3)
+        self.assertEqual(state.fully_projected_source_files, 2)
+        reasons = {x.path: x.reason for x in state.pending}
+        self.assertIn("англомовний локальний параметр", reasons["lib/старий.lisp"])
+        self.assertNotIn("lib/чинний.lisp", reasons)
+        self.assertNotIn("lib/цитата.lisp")
+
     def test_primary_projection_report_is_separate_from_keyboard_completion(self):
         root = self.tree({
             "lib/код.lisp": '(визначити сума (функція (значення) (додати значення 1)))\n',
