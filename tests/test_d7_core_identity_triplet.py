@@ -23,9 +23,14 @@ def frame(parts: list[list[str]]) -> list[str]:
 
 class D7CoreIdentityTriplet(unittest.TestCase):
     def test_three_carriers_contain_exact_d7_code(self):
-        source = "(0011 identity (0010 (value) value))\n"
-        self.assertIn(source.strip(), (ROOT / "lib/core.lisp").read_text(encoding="utf-8"))
-        self.assertEqual((OUT / "source.lisp").read_text(encoding="utf-8"), source)
+        # Чинна укр-реальність: джерело — ратифікована укр-голова визначити
+        # з D7-кодованим іменем, а не історична двійкова форма
+        # (0011 identity (0010 (value) value)). Канонічна тотожність
+        # тотожність/значення живе в lib/core.lisp окремо.
+        source = (OUT / "source.lisp").read_text(encoding="utf-8")
+        self.assertTrue(source.startswith("(визначити "), source)
+        self.assertIn("(визначити тотожність (функція (значення) значення))",
+                      (ROOT / "lib/core.lisp").read_text(encoding="utf-8"))
         d7 = json.loads((ROOT / "knowledge/d7-keyboard-v2-ratified.json").read_text(encoding="utf-8"))
         self.assertEqual((d7["schema"], d7["width"], d7["occupancy"]),
                          ("sens.d7.keyboard/v2", 7, 128))
