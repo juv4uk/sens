@@ -585,6 +585,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-reverse-general",
         "lib/pair-zip-unzip-two",
         "lib/list-zip-general",
+        "lib/list-chunk-pairs-general",
         "lib/list-alternating-split-four",
         "lib/list-replace-fourth",
         "lib/list-swap-middle-four",
