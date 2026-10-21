@@ -376,11 +376,16 @@ fn utf8_direct_d1_self_verdict_and_one_bit_mutant() {
         );
     }
 
-    let mutant_source = UTF8_D1_LAW.replacen("#d1:0", "#d1:1", 1);
-    assert_eq!(mutant_source.len(), UTF8_D1_LAW.len(), "one bit, no frame drift");
-    let mutations = UTF8_D1_LAW.bytes().zip(mutant_source.bytes())
-        .filter(|(before, after)| before != after).count();
-    assert_eq!(mutations, 1, "the mutant must change only one D1 bit");
+    // Чинне укр-джерело не містить історичних #d1: літералів.
+    // Міняємо один семантичний D1:YES/NO у справжній програмі SENS,
+    // не порівнюємо довжину UTF-8 проєкцій із різними літерами.
+    let original = "(як-є не-список)) ні) так)";
+    let flipped = "(як-є не-список)) так) так)";
+    assert_eq!(
+        UTF8_D1_LAW.matches(original).count(), 1,
+        "має існувати рівно один чинний D1-свідок для мутації"
+    );
+    let mutant_source = UTF8_D1_LAW.replacen(original, flipped, 1);
     let mutant = sens::parse_mixed_exact_domain_utf8_source(
         "lib/utf8.lisp", &mutant_source,
     ).expect("one-bit mutant remains valid SENS source");
