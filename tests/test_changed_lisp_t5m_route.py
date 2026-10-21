@@ -69,6 +69,29 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertNotIn('T5M_FILE_EXECUTION PASS', branch)
         self.assertIn('failed_files=$((failed_files + 1))', source[paired_fail:])
 
+    def test_text7_binding_needs_real_paired_execution_and_stays_red_on_failure(self):
+        # Це тест оркестрації Bash, не Python-емуляція семантики SENS.
+        # Сам точний транспорт, reader і eval виконує лише виклик "$binary".
+        source = RUNNER.read_text(encoding="utf-8")
+        marker = source.index("T5M_STANDALONE_D7_NEEDS_SOURCE_AUTHORITY")
+        before = source.rfind("if grep -Fq 'unknown Text7 binding:'", 0, marker)
+        paired = source.index('timeout 45s "$binary" --t5m-pair "$file" "$pair"', marker)
+        passed = source.index("T5M_PHYSICAL_PAIRED_D7_PASS", paired)
+        failed = source.index("T5M_PHYSICAL_PAIRED_D7_FAIL", passed)
+        self.assertGreaterEqual(before, 0)
+        self.assertLess(before, marker)
+        self.assertLess(marker, paired)
+        self.assertLess(paired, passed)
+        self.assertLess(passed, failed)
+        branch = source[paired:failed]
+        self.assertIn("physical=ZIG_VERIFIED", branch)
+        self.assertIn("semantic=NOT_CERTIFIED", branch)
+        self.assertIn("release=NOT_CERTIFIED", branch)
+        self.assertIn("status=$?", branch)
+        # Прозора відмова не перетворюється на успіх і не глушить RED.
+        self.assertIn('failed_files=$((failed_files + 1))', source[failed:failed+160])
+        self.assertIn('if (( failed_files > 0 )); then\\n  exit 2', source)
+
     def test_nonprogram_cannot_hide_obsolete_committed_sens(self):
         # Перевірка самого Bash-маршруту на синтетичному звіті мігратора:
         # тут НЕ виконується і НЕ підмінюється обчислювач SENS.
