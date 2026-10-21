@@ -360,6 +360,13 @@ pub const FS_LIBRARY_SOURCE: &str = include_str!("../../../lib/fs.lisp");
 /// Embedders that deliberately construct a custom/bare `Environment` must use
 /// this function before evaluating source that depends on the macro-definition
 /// surface. `Environment::root()` therefore remains the minimal kernel.
+/// Увімкнути лише ратифікований механізм D5:00011 MACRO.
+/// Не завантажує текстові бібліотеки, Core4 чи сторонні можливості.
+/// Потрібний самодостатній фізичній програмі SENS, яка визначає макроси.
+pub fn install_ratified_d5_macro_mechanism(session: &Session) {
+    eval::install_macro_substrate(&session.environment);
+}
+
 pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval::install_macro_substrate(&session.environment);
     let expressions = parse_mixed_exact_domain(MACRO_LIBRARY_SOURCE)?;
