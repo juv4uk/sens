@@ -22,6 +22,22 @@ fn execute(session: &mut Session, source: &str) -> String {
         .to_string()
 }
 
+// D1-свідок: непорожній список не може потрапити у незв'язану
+// текстову гілку «так/ні». Порівнюємо із результатом реального SENS.
+#[test]
+fn core_empty_predicate_returns_exact_d1_for_nil_atom_and_pair() {
+    let mut session = core_session();
+    let yes = execute(&mut session, "(атом? (як-є ()))");
+    let no = execute(&mut session, "(атом? (сполучити (як-є ()) (як-є ())))");
+    for (source, expected) in [
+        ("(порожній? (як-є ()))", yes.as_str()),
+        ("(порожній? (як-є атом))", no.as_str()),
+        ("(порожній? (як-є (весна літо)))", no.as_str()),
+    ] {
+        assert_eq!(execute(&mut session, source), expected, "{source}");
+    }
+}
+
 #[test]
 fn core_peer_lookup_returns_first_matching_group_or_empty() {
     let mut session = core_session();
