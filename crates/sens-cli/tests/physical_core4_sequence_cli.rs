@@ -173,3 +173,121 @@ fn corrupt_physical_t5m_is_rejected_before_sens_evaluation() {
         "corrupt T5M cannot reach SENS evaluation"
     );
 }
+
+
+struct SourceTriplet {
+    source: PathBuf,
+    physical: PathBuf,
+    view: PathBuf,
+}
+impl SourceTriplet {
+    fn mint(name: &str) -> Self {
+        let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .join(format!("tests/semantic/native-t5/{name}.lisp"));
+        assert!(source.is_file(), "actual Ukrainian SENS source missing: {name}");
+        let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
+        let physical = std::env::temp_dir().join(format!(
+            "sens-live-ukr-{name}-{}-{id}.sens", std::process::id()
+        ));
+        let view = physical.with_extension("");
+        assert!(!physical.exists() && !view.exists(), "test must not overwrite files");
+
+        // The SENS source reader resolves exact domain words; Zig alone
+        // manufactures the physical T5M carrier and its canonical bit view.
+        let minted = Command::new(env!("CARGO_BIN_EXE_sens"))
+            .args(["--t5m-mint-pair"])
+            .arg(&source)
+            .arg(&physical)
+            .output()
+            .expect("execute current SENS/Zig mint");
+        assert!(minted.status.success(), "{name}: native SENS mint: {}", error(&minted));
+        assert!(physical.is_file() && view.is_file(), "{name}: both physical files");
+
+        let checked = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+            .arg("verify-view")
+            .arg(&physical)
+            .output()
+            .expect("Zig physically verifies its own bytes and view");
+        assert!(checked.status.success(), "{name}: {}", error(&checked));
+        let opened = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+            .arg("open")
+            .arg(&physical)
+            .output()
+            .expect("Zig physical reader");
+        assert!(opened.status.success(), "{name}: {}", error(&opened));
+        assert_eq!(
+            observed(&opened),
+            fs::read_to_string(&view).expect("current exact-bit view"),
+            "{name}: exact Zig/T5M source -> view inverse",
+        );
+        Self { source, physical, view }
+    }
+    fn run_sens(&self, paired: bool) -> Output {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_sens"));
+        if paired {
+            command.arg("--t5m-pair").arg(&self.source);
+        }
+        command.arg(&self.physical).output().expect("run native SENS")
+    }
+}
+impl Drop for SourceTriplet {
+    fn drop(&mut self) {
+        let _ = fs::remove_file(&self.physical);
+        let _ = fs::remove_file(&self.view);
+    }
+}
+
+#[test]
+fn ukrainian_d3_eight_existing_files_mint_verify_and_execute() {
+    // All eight are existing executable Ukrainian .lisp programs, not
+    // static metadata or mock examples; SENS evaluates each physical program.
+    let mut first: Option<SourceTriplet> = None;
+    for name in [
+        "atom-empty",
+        "atom-pair",
+        "eq-reflexive",
+        "eq-distinct",
+        "car-cons",
+        "cdr-cons",
+        "cond-short-circuit",
+        "nested-cons-atom",
+    ] {
+        let triple = SourceTriplet::mint(name);
+        let paired = triple.run_sens(true);
+        assert!(paired.status.success(), "{name}: paired SENS: {}", error(&paired));
+        assert_eq!(observed(&paired).trim(), "1", "{name}: exact D1 witness");
+
+        let standalone = triple.run_sens(false);
+        assert!(
+            standalone.status.success(),
+            "{name}: independent standalone SENS: {}",
+            error(&standalone)
+        );
+        assert_eq!(
+            observed(&standalone),
+            observed(&paired),
+            "{name}: Ukrainian .lisp and physical .sens differ in live execution"
+        );
+
+        if name == "atom-empty" {
+            first = Some(triple);
+        } else if name == "atom-pair" {
+            // A perfectly valid T5M carrier for a DIFFERENT current
+            // Ukrainian program cannot pass source↔physical admission.
+            let other = first.as_ref().expect("first source-minted pair");
+            let wrong = Command::new(env!("CARGO_BIN_EXE_sens"))
+                .arg("--t5m-pair")
+                .arg(&other.source)
+                .arg(&triple.physical)
+                .output()
+                .expect("execute wrong-source negative witness");
+            assert!(!wrong.status.success(), "wrong peer must be rejected");
+            assert!(
+                error(&wrong).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+                "expected exact width/bits mismatch, got: {}",
+                error(&wrong)
+            );
+        }
+    }
+}
