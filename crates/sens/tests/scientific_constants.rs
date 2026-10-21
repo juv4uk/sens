@@ -161,3 +161,49 @@ fn si_source_does_not_reintroduce_a_second_literal_authority_for_numeric_views()
         assert!(si_defines(si, derived), "missing derived SI numeric view: {derived}");
     }
 }
+
+#[test]
+fn d11_si_три_закони_запису_значення_та_одиниці() {
+    // Три агентські пропозиції вже мають справжні закони у lib/si.lisp.
+    // D11 лише розміщує їх як композиції; жодного нового примітива немає.
+    let mut session = Session::default();
+    for library in [
+        include_str!("../../../lib/core.lisp"),
+        include_str!("../../../lib/quantity.lisp"),
+        include_str!("../../../lib/si.lisp"),
+    ] {
+        eval_ukr(library, &mut session)
+            .expect("завантажити чинні бібліотечні закони SENS");
+    }
+    eval_ukr(
+        r#"
+        (визначити д11-сі-перше
+          (сі:створити-запис-константи
+            (як-є перше-вимірювання) 17
+            (як-є (unit-1 (dimension-1 metre 1)))))
+        (визначити д11-сі-друге
+          (сі:створити-запис-константи
+            (як-є друге-вимірювання) 19
+            (як-є (unit-1 (dimension-1 second -1)))))
+        "#,
+        &mut session,
+    ).expect("два відмінні правильні записи створює SENS");
+
+    for (case, source, expected) in [
+        ("конструктор-а", "(науковий-константа-ім'я д11-сі-перше)", "перше-вимірювання"),
+        ("конструктор-б", "(науковий-константа-ім'я д11-сі-друге)", "друге-вимірювання"),
+        ("значення-а", "(сі:значення-константи д11-сі-перше)", "17"),
+        ("значення-б", "(сі:значення-константи д11-сі-друге)", "19"),
+        ("одиниця-а", "(сі:одиниця-константи д11-сі-перше)", "(unit-1 (dimension-1 metre 1))"),
+        ("одиниця-б", "(сі:одиниця-константи д11-сі-друге)", "(unit-1 (dimension-1 second -1))"),
+    ] {
+        let observed = eval_ukr(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=D11-SI-{case} layer=SENS source={source} error={error}"))
+            .value
+            .to_string();
+        assert_eq!(
+            observed, expected,
+            "test_id=D11-SI-{case} layer=SENS input={source} expected={expected} actual={observed}"
+        );
+    }
+}
