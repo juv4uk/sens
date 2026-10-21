@@ -36,18 +36,32 @@ snapshot="$(sha256sum "$source_file" | cut -d' ' -f1)"
 staged="$scratch/program.sens"
 staged_view="$scratch/view"
 # SENS власноруч створює слова, Zig єдиний пакує T5M.
-"$binary" --t5m-mint "$source_file" "$staged"
+timeout 45s "$binary" --t5m-mint "$source_file" "$staged"
 test -s "$staged"
-"$reader" view "$staged" > "$staged_view"
+timeout 45s "$reader" view "$staged" > "$staged_view"
 test -s "$staged_view"
-if ! "$binary" --t5m-pair "$source_file" "$staged" > "$scratch/out" 2> "$scratch/err"; then
+if ! timeout 45s "$binary" --t5m-pair "$source_file" "$staged" > "$scratch/out" 2> "$scratch/err"; then
   cat "$scratch/err" >&2
   echo "T5M_REPAIR_REAL_EVAL_FAILED path=$source_file" >&2
   exit 2
 fi
+# Якщо голий фізичний носій також виконується, звіряємо справжні
+# результати SENS, а не тільки код виходу та правильність пакування.
+# Для D7/D24+ standalone може ще не мати контексту джерельних зв'язувань;
+# це НЕ забороняє реальний парний шлях і НЕ означає semantic GO.
+mode=paired-only
+if timeout 45s "$binary" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
+  if ! cmp -s "$scratch/out" "$scratch/standalone.out"; then
+    echo "T5M_REPAIR_EXECUTION_DIVERGENCE source=$source_file paired_sha256=$(sha256sum "$scratch/out" | cut -d' ' -f1) standalone_sha256=$(sha256sum "$scratch/standalone.out" | cut -d' ' -f1)" >&2
+    exit 2
+  fi
+  mode=paired-and-standalone
+else
+  echo "T5M_REPAIR_STANDALONE_UNSUPPORTED source=$source_file; paired SENS execution verified, standalone not certified" >&2
+fi
 # Негативна перевірка проводить іншу програму через той самий SENS.
 { cat "$source_file"; printf '\n(як-є ())\n'; } > "$scratch/mutant.lisp"
-if "$binary" --t5m-pair "$scratch/mutant.lisp" "$staged" > "$scratch/no" 2> "$scratch/no.err"; then
+if timeout 45s "$binary" --t5m-pair "$scratch/mutant.lisp" "$staged" > "$scratch/no" 2> "$scratch/no.err"; then
   echo "T5M_REPAIR_MUTANT_WAS_ACCEPTED path=$source_file" >&2
   exit 2
 fi
@@ -80,4 +94,4 @@ except (OSError, ValueError) as exc:
 PY
 cmp "$staged" "$physical"
 cmp "$staged_view" "$view"
-echo "T5M_REPAIR_OK source=$source_file physical=$physical view=$view exact=ZIG_AND_SENS negative=REJECTED semantic_parity=NOT_CERTIFIED release=NOT_CERTIFIED"
+echo "T5M_REPAIR_OK source=$source_file physical=$physical view=$view mode=$mode exact=ZIG_AND_SENS negative=REJECTED semantic_parity=NOT_CERTIFIED release=NOT_CERTIFIED"
