@@ -208,9 +208,14 @@ jobs:
           if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_journal_d3_ukr\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'knowledge_tests=true' >> "$GITHUB_OUTPUT"
           fi
+          # Кожен адресний Rust-свідок нижче проходить build.rs, який
+          # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
+          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: ./.github/actions/install-zig
-        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:') || startsWith(github.event.head_commit.message, 'SI:'))) }}
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}

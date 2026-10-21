@@ -1050,6 +1050,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertIn("MIGRATE-LIB-TRIPLETS:", condition)
         self.assertIn("BENCH-T5M:", condition)
         self.assertIn("github.event_name == 'push'", condition)
+        self.assertIn("steps.changed-t5m-lisp.outputs.needs_zig == 'true'", condition)
         self.assertIn("ONE-SHOT — фізичні T5M-пари", guards)
 
 
