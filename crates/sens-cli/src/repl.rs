@@ -634,7 +634,13 @@ fn prepare_t5m_repl_words(
         return Err("T5M_REPL_EMPTY: no SENS form".into());
     }
     let mut words = Vec::new();
-    for expression in &expressions {
+    for (index, expression) in expressions.iter().enumerate() {
+        // Поточний мігратор ставить D2:00 між формами одного Lisp-файла.
+        // Парний Zig/T5M маршрут мусить відновлювати ТОЧНО ті ж слова,
+        // інакше 30 форм дають хибне розходження на 29 роздільників.
+        if index > 0 {
+            words.push(ExactDomainWord::Identity(t5m_domain_identity(2, 0b00)?));
+        }
         append_t5m_expression(expression, t5m_surface_layout(surface), &mut words, 0)?;
     }
     Ok(words)
@@ -1304,6 +1310,35 @@ mod tests {
         sens::load_core_library(&mut session).expect("core bootstrap");
         sens::load_time_library(&mut session).expect("time bootstrap");
         ReplState::new(session, ReplSurface::Core, false).expect("REPL state")
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn two_top_level_forms_have_exact_d2_separator_and_execute_after_zig_t5m() {
+        let session = Session::default();
+        let line = "(атом? (як-є ()))";
+        let single = prepare_t5m_repl_words(
+            line, ReplSurface::UkrainianFull, &session,
+        ).expect("одна виконувана D1 форма");
+        let source = format!("{line}\n{line}");
+        let combined = prepare_t5m_repl_words(
+            &source, ReplSurface::UkrainianFull, &session,
+        ).expect("дві форми з точним D2:00");
+        assert_eq!(combined.len(), single.len() * 2 + 1);
+        assert_eq!(combined[..single.len()], single);
+        assert_eq!(
+            combined[single.len()],
+            ExactDomainWord::Identity(t5m_domain_identity(2, 0b00).unwrap())
+        );
+        assert_eq!(combined[single.len()+1..], single);
+        let restored = t5m_roundtrip_words(&combined)
+            .expect("Zig/T5M має зберегти D2 роздільник і всі слова");
+        let program = PhysicalT5Program::from_exact_domain_words(&restored)
+            .expect("SENS має прочитати дві фізичні форми");
+        let mut runtime = Session::default();
+        let result = program.execute(&mut runtime)
+            .expect("справжній SENS має виконати обидві форми");
+        assert_eq!(result.value.as_predicate_bit(), Some(true));
     }
 
     #[cfg(feature = "zig-transport")]
