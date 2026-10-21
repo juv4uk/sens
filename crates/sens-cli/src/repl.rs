@@ -221,8 +221,12 @@ fn append_t5m_expression_context(
             }
             words.push(control(0b01)?);
         }
-        ExprKind::Number(..) => {
-            return Err("T5M requires exact source projection to D24+ before transport".into());
+        ExprKind::Number(value) => {
+            // Усередині QUOTE числовий вузол може залишитися у людському AST.
+            // Точне зниження до D24+ вже існує для звичайних числових джерел;
+            // використовуємо його ж, без текстового W7 або host-арифметики.
+            let exact = exact_integer_source_word(&value.to_string())?;
+            append_t5m_expression_context(&exact, layout, words, depth + 1, quoted_data)?;
         }
         ExprKind::Rational(value) => {
             let spelling = value.to_string();
@@ -1300,6 +1304,23 @@ mod tests {
         sens::load_core_library(&mut session).expect("core bootstrap");
         sens::load_time_library(&mut session).expect("time bootstrap");
         ReplState::new(session, ReplSurface::Core, false).expect("REPL state")
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn quoted_integer_in_t5m_source_preserves_exact_d24_word() {
+        let session = Session::default();
+        let words = prepare_t5m_repl_words(
+            "(як-є (7))", ReplSurface::UkrainianFull, &session,
+        )
+        .expect("quoted decimal must lower to the same exact D24 as ordinary source");
+        assert!(words.iter().any(|word| matches!(word,
+            ExactDomainWord::Number(number)
+                if number.numeric_domain_width() == Some(24)
+                    && number.to_decimal_string() == "7"
+        )), "the quoted number must remain exact D24, not become W7 text");
+        let restored = t5m_roundtrip_words(&words).expect("Zig must carry the exact word");
+        assert_eq!(restored.len(), words.len());
     }
 
     #[cfg(feature = "zig-transport")]
