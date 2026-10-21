@@ -43,8 +43,11 @@ class ExactDomainMigrationTests(unittest.TestCase):
         # actual dotted-tail inputs and checks the named failure.
         source = read("lib/bridge/prolog-to-datalog.lisp")
         self.assertIn("(визначити пролог-значення-правильний-список?", source)
-        self.assertIn("((порожній? значення) так)", source)
-        self.assertIn("((атом? значення) ні)", source)
+        self.assertIn("((порожній? значення) (атом? (як-є ())))", source)
+        self.assertIn("((атом? значення) (атом? (як-є (()))))", source)
+        self.assertNotIn("((порожній? значення) так)", source)
+        self.assertNotIn("((атом? значення) ні)", source)
+        self.assertNotIn("(так ", source)
         self.assertIn(
             "(пролог-значення-правильний-список? (решта значення))", source
         )
