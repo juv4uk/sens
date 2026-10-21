@@ -331,7 +331,7 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
              (noul-question (pd-question-noul (quote urgent)))
              (score-question (pd-question-score (quote severity) (quote (low medium high))))
              (questions (list choice-question noul-question score-question))
-             (request (system-one-запит state questions))
+             (request (запит-системи-один state questions))
              (answers
                (list
                  (pd-choice-observe choice-question
@@ -342,14 +342,14 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
                  (pd-score-observe score-question
                    (quote ((low 1/4) (medium 1/2) (high 1/4)))
                    (quote ((source synthetic) (question severity)))))
-             (response (system-one-відповідь request answers)))
+             (response (відповідь-системи-один request answers)))
         (list
           (за-умовою
             ((перевірити-запит-системи-один? request) (як-є valid))
             (так (як-є invalid)))
           (довжина (третє request))
           (за-умовою
-            ((system-one-відповідь-допустима? response request) (як-є valid))
+            ((відповідь-системи-один-допустима? response request) (як-є valid))
             (так (як-є invalid)))))
     "#;
     assert_eq!(
@@ -362,24 +362,24 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
              (choice-question (pd-question-choice (quote route) (quote (billing technical))))
              (noul-question (pd-question-noul (quote urgent)))
              (questions (list choice-question noul-question))
-             (request (system-one-запит state questions))
+             (request (запит-системи-один state questions))
              (choice-answer (pd-choice-observe choice-question
                (quote ((billing 3/4) (technical 1/4)))
                (quote ((source synthetic))))
              (noul-answer (pd-noul-observe noul-question 2/3
                (quote ((source synthetic)))))
-             (missing (system-one-відповідь request (list choice-answer)))
-             (duplicate (system-one-відповідь request (list choice-answer choice-answer)))
+             (missing (відповідь-системи-один request (list choice-answer)))
+             (duplicate (відповідь-системи-один request (list choice-answer choice-answer)))
              (duplicate-question-request
-               (system-one-запит state
+               (запит-системи-один state
                  (list choice-question
                        (pd-question-noul (quote route))))))
         (list
           (за-умовою
-            ((system-one-відповідь-допустима? missing request) (як-є valid))
+            ((відповідь-системи-один-допустима? missing request) (як-є valid))
             (так (як-є invalid)))
           (за-умовою
-            ((system-one-відповідь-допустима? duplicate request) (як-є valid))
+            ((відповідь-системи-один-допустима? duplicate request) (як-є valid))
             (так (як-є invalid)))
           (за-умовою
             ((перевірити-запит-системи-один? duplicate-question-request) (як-є valid))
