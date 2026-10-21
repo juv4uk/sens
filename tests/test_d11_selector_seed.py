@@ -29,24 +29,29 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
             MOD.validate_documents(docs)
         self.assertEqual(caught.exception.test_id, test_id)
 
-    def test_current_selector_seed_is_exactly_512_candidates_not_residents(self):
+    def test_current_selector_seed_is_exactly_512_deriveds_not_residents(self):
         report = MOD.validate_documents(self.documents)
         self.assertEqual(report["status"], "MECHANICAL_PASS")
-        self.assertEqual(report["semantic_status"], "NOT_VERIFIED")
-        self.assertEqual(report["candidate_count"], 512)
+        self.assertEqual(report["semantic_status"], "DERIVED_BY_COMPOSITION")
+        self.assertEqual(report["derived_count"], 512)
+        self.assertEqual(report["derived_status"], "MATHEMATICALLY_DERIVED_SELECTOR_FUNCTIONS")
+        self.assertEqual(self.documents["seed"]["law"]["derived_by_law"], True)
+        self.assertEqual(self.documents["seed"]["accounting"]["d11_mathematically_defined_selectors"], 512)
+        self.assertEqual(self.documents["seed"]["accounting"]["selector_derived_coordinates"], 512)
+        self.assertEqual(self.documents["seed"]["accounting"]["derived_selectors_without_direct_opcode_admission"], 512)
         self.assertEqual(report["selector_parents"], 256)
         self.assertEqual(report["unique_coordinates"], 512)
         self.assertEqual(report["unique_names"], 512)
         self.assertEqual(report["testing_only_rows"], 43)
-        self.assertEqual(report["candidate_testing_coordinate_collisions"], 0)
-        self.assertEqual(report["candidate_testing_name_collisions"], 0)
+        self.assertEqual(report["derived_testing_coordinate_collisions"], 0)
+        self.assertEqual(report["derived_testing_name_collisions"], 0)
         self.assertEqual(report["callable_admissions_added"], 0)
         self.assertEqual(report["ratified_residents_added"], 0)
 
     def test_historical_pin_drift_is_reported_after_all_parents_are_revalidated(self):
         report = MOD.validate_documents(self.documents)
         self.assertFalse(report["historical_pin_matches_current"])
-        self.assertIn("all 256 candidate parents revalidated", report["source_pin_note"])
+        self.assertIn("all 256 derived parents revalidated", report["source_pin_note"])
 
     def test_canonical_d11_table_stays_the_43_row_testing_vocabulary(self):
         report = MOD.validate_documents(self.documents)
@@ -54,20 +59,29 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         self.assertEqual(self.documents["seed"]["accounting"]["new_ratified_residents"], 0)
         self.assertEqual(self.documents["seed"]["accounting"]["callable"], 0)
 
-    def test_rejects_truncated_ten_bit_candidate(self):
+    def test_rejects_attempt_to_make_derived_a_research_derived_or_new_primitive(self):
+        docs = self.changed()
+        docs["seed"]["law"]["derived_by_law"] = False
+        self.assert_rejected(docs, "DERIVED_LAW")
+
+        docs = self.changed()
+        docs["seed"]["law"]["opcode_admission"] = "ALLOW_NEW_DIRECT_OPCODE"
+        self.assert_rejected(docs, "OPCODE_ADMISSION")
+
+    def test_rejects_truncated_ten_bit_derived(self):
         docs = self.changed()
         docs["seed"]["rows"][0][0] = docs["seed"]["rows"][0][0][:-1]
-        self.assert_rejected(docs, "CANDIDATE_WIDTH")
+        self.assert_rejected(docs, "DERIVED_WIDTH")
 
-    def test_rejects_duplicate_candidate_coordinate(self):
+    def test_rejects_duplicate_derived_coordinate(self):
         docs = self.changed()
         docs["seed"]["rows"][1][0] = docs["seed"]["rows"][0][0]
-        self.assert_rejected(docs, "CANDIDATE_DUP_COORD")
+        self.assert_rejected(docs, "DERIVED_DUP_COORD")
 
-    def test_rejects_duplicate_candidate_name(self):
+    def test_rejects_duplicate_derived_name(self):
         docs = self.changed()
         docs["seed"]["rows"][1][1] = docs["seed"]["rows"][0][1]
-        self.assert_rejected(docs, "CANDIDATE_DUP_NAME")
+        self.assert_rejected(docs, "DERIVED_DUP_NAME")
 
     def test_rejects_collision_with_ratified_d11_testing_coordinate(self):
         docs = self.changed()
@@ -83,18 +97,18 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         docs = self.changed()
         bits, name = docs["seed"]["rows"][0]
         docs["seed"]["rows"][0][1] = "NOT-A-SELECTOR-NAME"
-        self.assert_rejected(docs, "CANDIDATE_NAME_DERIVATION")
+        self.assert_rejected(docs, "DERIVED_NAME_DERIVATION")
 
-    def test_rejects_candidate_without_a_current_d10_selector_parent(self):
+    def test_rejects_derived_without_a_current_d10_selector_parent(self):
         docs = self.changed()
         bits, name = docs["seed"]["rows"][0]
         docs["seed"]["rows"][0][0] = "11111111111"
-        self.assert_rejected(docs, "CANDIDATE_PARENT")
+        self.assert_rejected(docs, "DERIVED_PARENT")
 
     def test_rejects_accidental_d11_ratification_or_callability(self):
         docs = self.changed()
         docs["seed"]["status"] = "RATIFIED"
-        self.assert_rejected(docs, "NOT_RESEARCH_ONLY")
+        self.assert_rejected(docs, "NOT_MATHEMATICAL_DERIVATION")
 
         docs = self.changed()
         docs["seed"]["accounting"]["callable"] = 512
@@ -103,7 +117,7 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
     def test_rejects_missing_child_pair(self):
         docs = self.changed()
         docs["seed"]["rows"].pop()
-        self.assert_rejected(docs, "CANDIDATE_COUNT")
+        self.assert_rejected(docs, "DERIVED_COUNT")
 
 
 if __name__ == "__main__":
