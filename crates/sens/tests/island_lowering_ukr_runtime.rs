@@ -1,21 +1,27 @@
 //! Справжній SENS-eval: обрізане повідомлення маршруту не дістає D6 четверте.
 //! Ця перевірка не є T5M-атестацією всього корпуса й не використовує Python.
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_parsed_expressions, load_core_library, parse_mixed_exact_domain, Session};
 const ISLAND: &str = include_str!("../../../lib/island-lowering.lisp");
 
 fn session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session)
         .expect("штатний bootstrap SENS має встановити виконавчі закони");
-    eval_program(ISLAND, &mut session)
+    let parsed = parse_mixed_exact_domain(ISLAND)
+        .expect("український текст островів має розбиратися точним SENS reader");
+    eval_parsed_expressions(&parsed, &mut session)
         .expect("поточні визначення островів мають виконатися у SENS");
     session
 }
 
+fn evaluated(s: &mut Session, source: &str) -> Result<sens::Value, sens::LanguageError> {
+    let parsed = parse_mixed_exact_domain(source)?;
+    Ok(eval_parsed_expressions(&parsed, s)?.value)
+}
+
 fn observed(s: &mut Session, source: &str) -> String {
-    eval_program(source, s)
+    evaluated(s, source)
         .unwrap_or_else(|error| panic!("SENS має виконати {source}: {error:?}"))
-        .value
         .to_string()
 }
 
@@ -29,18 +35,16 @@ fn d3_guard_checks_the_fourth_field_before_the_d6_selector() {
         "(як-є (mechanism-selected id common-lisp))",
         "(як-є (mechanism-selected . хвіст))",
     ] {
-        let value = eval_program(
-            &format!("(острів-є-четверте-поле? {source})"), &mut s
-        ).expect("D3/CAR/CDR structural negative proof").value;
+        let value = evaluated(&mut s, &format!("(острів-є-четверте-поле? {source})"))
+            .expect("D3/CAR/CDR structural negative proof");
         assert_eq!(value.as_predicate_bit(), Some(false), "{source}");
     }
     for source in [
         "(як-є (mechanism-selected id common-lisp bounded-exact-add))",
         "(як-є (mechanism-selected id common-lisp (невідомий-механізм)))",
     ] {
-        let value = eval_program(
-            &format!("(острів-є-четверте-поле? {source})"), &mut s
-        ).expect("D3 structural positive proof").value;
+        let value = evaluated(&mut s, &format!("(острів-є-четверте-поле? {source})"))
+            .expect("D3 structural positive proof");
         assert_eq!(value.as_predicate_bit(), Some(true), "{source}");
     }
 }
