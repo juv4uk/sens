@@ -155,7 +155,13 @@ fn quantity_symbol_guard_executes_real_sens_and_rejects_non_symbols() {
         session
     };
     let mut real = launch(current);
-    let mutant = current.replacen(key, "(атом? значення)", 1);
+    // Негативний мутант змінює тільки відповідь на D1:1.
+    // Після появи D1-охорон стара заміна D8-тіла вже не була мутантом:
+    // захист правильно відхиляв D1 до цього тіла.
+    let true_guard = "((тотожне? значення (атом? (як-є ()))) (хибне? (атом? (як-є ()))))";
+    let bad_guard = "((тотожне? значення (атом? (як-є ()))) (атом? (як-є ())))";
+    assert_eq!(current.matches(true_guard).count(), 1);
+    let mutant = current.replacen(true_guard, bad_guard, 1);
     assert_ne!(mutant, current);
     let mut altered = launch(&mutant);
 
