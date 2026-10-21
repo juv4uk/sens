@@ -284,6 +284,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "вставити-посеред-пари",
         "розділити-четвірку-на-пари",
         "pair-zip-unzip-two",
+        "list-swap-neighbors-four",
+        "list-swap-middle-four",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
