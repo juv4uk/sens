@@ -37,6 +37,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     failed_files=$((failed_files + 1))
     continue
   fi
+  report_status=0
   outcome="$(python3 - "$report" <<'PY'
 import json, sys
 with open(sys.argv[1], encoding="utf-8") as stream:
@@ -47,7 +48,12 @@ for row in report["files"]:
         print("T5M_MIGRATION_DEBT path=" + row["path"] + " reason=" + row["reason"], file=sys.stderr)
 print(summary["files_written"], summary["files_blocked"], summary["files_not_program"])
 PY
-)"
+)" || report_status=$?
+  if (( report_status != 0 )); then
+    echo "::error::T5M_MIGRATION_REPORT_INVALID path=$file status=$report_status" >&2
+    failed_files=$((failed_files + 1))
+    continue
+  fi
   read -r written blocked not_program <<< "$outcome"
   if (( code > 2 )); then
     echo "::error::T5M_MIGRATION_INTERNAL_FAILURE path=$file status=$code" >&2
