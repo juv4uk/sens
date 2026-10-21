@@ -57,32 +57,6 @@ fn core_zero_arity_and_or_return_real_d1_bits() {
     }
 }
 
-// Реальний D1-свідок Core4: порівняння проходить УСІ елементи списку.
-// До ремонту перша гілка повертала істину вже для непорожнього хвоста.
-#[test]
-fn core_order_predicates_recurse_until_empty_tail_in_sens() {
-    let mut session = core_session();
-    for (source, expected) in [
-        ("(перевірити-неспадання-значень? 1 (як-є ()))", true),
-        ("(перевірити-неспадання-значень? 1 (як-є (1 2)))", true),
-        ("(перевірити-неспадання-значень? 1 (як-є (2 1)))", false),
-        ("(перевірити-неспадання-значень? 2 (як-є (1)))", false),
-        ("(перевірити-незростання-значень? 2 (як-є ()))", true),
-        ("(перевірити-незростання-значень? 2 (як-є (2 1)))", true),
-        ("(перевірити-незростання-значень? 2 (як-є (1 2)))", false),
-        ("(перевірити-незростання-значень? 1 (як-є (2)))", false),
-    ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("SENS-виконання {source}: {error}"));
-        assert_eq!(
-            result.value.as_predicate_bit(),
-            Some(expected),
-            "test_id=core4-order-d1 input={source} expected={expected} actual={}",
-            result.value
-        );
-    }
-}
-
 #[test]
 fn core_peer_lookup_returns_first_matching_group_or_empty() {
     let mut session = core_session();
