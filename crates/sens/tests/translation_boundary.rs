@@ -10,7 +10,10 @@ fn eval_translation(source: &str) -> String {
     // текст-у-символ; повторне ручне читання лише core.lisp його не встановлює.
     sens::load_core_library(&mut session)
         .expect("штатний Core4 SENS потрібний бібліотеці перекладу");
+    // Core4 забезпечує точний виконавець, але активне українське core.lisp
+    // визначає D1 так/ні й похідні замикання для Forward. Це не legacy boot.
     for (path, library) in [
+        ("lib/core.lisp", include_str!("../../../lib/core.lisp")),
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
         ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
