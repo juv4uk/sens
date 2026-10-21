@@ -35,9 +35,13 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         self.assertIn('SENS_NATIVE_T5M_INVALID', runner)
         self.assertIn('run_native_t5m_program', runner)
         self.assertIn('if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then', runner)
-        self.assertIn('"$binary" --t5m-mint "$file" "$physical"', runner)
+        self.assertIn('mint_flag=--t5m-mint', runner)
+        self.assertIn('mint_flag=--t5m-mint-pair', runner)
+        self.assertIn('"$binary" "$mint_flag" "$file" "$physical" "${binding_sources[@]}"', runner)
         self.assertIn('"$native_open" open "$physical"', runner)
-        self.assertIn('"$binary" --t5m-pair "$file" "$physical"', runner)
+        self.assertIn('"$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}"', runner)
+        self.assertLess(runner.index('  binding_sources=()'),
+                        runner.index('    run_native_t5m_program\n    continue'))
         # Історичний режим не видалений, але він не є типовим входом.
         self.assertIn('python3 scripts/migrate-three-pass.py "$file"', runner)
         self.assertIn('--codec t5m --source-surface укр', runner)
