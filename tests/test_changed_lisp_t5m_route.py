@@ -88,6 +88,8 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                                 capture_output=True, text=True, timeout=20)
             self.assertEqual(ok.returncode, 0, ok.stdout + ok.stderr)
             self.assertIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", ok.stdout)
+            self.assertIn("native_view_roundtrip=1 native_paired_executed=1 native_standalone_parity=1", ok.stdout)
+            self.assertIn("scope=changed_manifest semantic=NOT_CERTIFIED", ok.stdout)
             # При невстановленому SENS_NATIVE_T5M справжнім типовим шляхом
             # лишається той самий native SENS, без виклику Python/JSON.
             default_env = dict(environment)
@@ -107,6 +109,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertEqual(invalid_inverse.returncode, 2,
                              invalid_inverse.stdout + invalid_inverse.stderr)
             self.assertIn("T5M_NATIVE_VIEW_ROUNDTRIP_FAILED", invalid_inverse.stderr)
+            self.assertIn("native_view_roundtrip=0 native_paired_executed=0 native_standalone_parity=0", invalid_inverse.stdout)
             self.assertIn("files_checked=1 files_failed=1", invalid_inverse.stdout)
             (root / "reject-view").unlink()
             (root / "reject-pair").touch()
@@ -114,6 +117,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                                  capture_output=True, text=True, timeout=20)
             self.assertEqual(red.returncode, 2, red.stdout + red.stderr)
             self.assertIn("T5M_NATIVE_PAIRED_EXECUTION_FAIL", red.stderr)
+            self.assertIn("native_view_roundtrip=1 native_paired_executed=0 native_standalone_parity=0", red.stdout)
             self.assertIn("files_checked=1 files_failed=1", red.stdout)
             self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", red.stdout)
             # Лише Bash-контрольний потік: не Python-оракул семантики.
@@ -123,6 +127,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                                         capture_output=True, text=True, timeout=20)
             self.assertEqual(unexpected.returncode, 2, unexpected.stdout + unexpected.stderr)
             self.assertIn("T5M_NATIVE_STANDALONE_UNEXPECTED_FAIL", unexpected.stderr)
+            self.assertIn("native_view_roundtrip=1 native_paired_executed=1 native_standalone_parity=0", unexpected.stdout)
             self.assertIn("files_checked=1 files_failed=1", unexpected.stdout)
             self.assertNotIn("T5M_NATIVE_PAIRED_ONLY", unexpected.stdout)
 
@@ -132,6 +137,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                                  capture_output=True, text=True, timeout=20)
             self.assertEqual(d24.returncode, 0, d24.stdout + d24.stderr)
             self.assertIn("T5M_NATIVE_PAIRED_ONLY", d24.stdout)
+            self.assertIn("native_view_roundtrip=1 native_paired_executed=1 native_standalone_parity=0", d24.stdout)
             self.assertIn("release=NOT_CERTIFIED", d24.stdout)
 
     def test_native_sens_mint_is_primary_ci_path_and_python_is_optional_tooling(self):
