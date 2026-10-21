@@ -267,6 +267,7 @@ fn d8_selector_uk_index() -> &'static HashMap<String, DomainIdentity> {
 
 /// Exact inverse test/support for the owner D9/D10 selector table.
 /// These are metadata-only spelling peers, not another runtime body.
+#[cfg(test)]
 pub(crate) fn selector_ukr_for_exact(identity: DomainIdentity) -> Option<&'static str> {
     match identity {
         DomainIdentity::D9(word) => D9_DEFINITION_BINDINGS.iter()
