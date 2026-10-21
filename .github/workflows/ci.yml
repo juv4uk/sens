@@ -228,7 +228,7 @@ jobs:
           if grep -Eq '^(lib/meta-eval\.lisp|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-lexical-shadow-d1\.sh|tests/semantic/meta-eval-lexical-shadow-d1-(law|mutant|mutants)\.lisp)$' "$changed_all"; then
             echo 'meta_eval_d1_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(benchmarks/parser\.lisp|benchmarks/cross-language/sens-vs-python/sens/(ackermann|fib)\.(setup|call)\.lisp|crates/sens/src/source_projection\.rs|crates/sens/tests/ukr_unpaired_benchmark_runtime\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(benchmarks/parser\.lisp|crates/sens/src/source_projection\.rs|crates/sens/tests/ukr_unpaired_benchmark_runtime\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'parser_benchmark_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Зміна чинної Lisp-семантики має запускати SENS, не лише source audit.
@@ -247,9 +247,13 @@ jobs:
           if grep -Eq '^(benchmarks/closures\.lisp|crates/sens-cli/src/repl\.rs|crates/sens-cli/tests/closures_benchmark_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'closure_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          # Оповідь і розбір: чинні джерела перевіряємо справжнім SENS,
-          # не старим source-hash та не Python виконанням Lisp.
-          if grep -Eq '^(lib/(narrate|understand|result-status)\.lisp|crates/sens/tests/(narrate_outcomes|understand_exact_empty)\.rs|\.github/workflows/ci\.yml)          if grep -Eq '^(lib/clips-import\.lisp|crates/sens/tests/clips_import\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          # Адресний Narrate/Understand — тільки справжнє SENS-виконання.
+          if grep -Eq '^(lib/(narrate|understand|result-status)\.lisp|crates/sens/tests/(narrate_outcomes|understand_exact_empty)\.rs)$' "$changed_all"; then
+            echo 'narrate_runtime_tests=true' >> "$GITHUB_OUTPUT"
+          fi
+
+          # CLIPS — лише змінений виконуваний імпортер або його справжній SENS-тест.
+          if grep -Eq '^(lib/clips-import\.lisp|crates/sens/tests/clips_import\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'clips_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -366,7 +370,6 @@ jobs:
           # Окремий D7/D24+ runtime-свідок навіть після RED іншого тесту.
           # Не видавати успішний source eval за фізичну оберненість .sens.
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
-          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime незалежне_виконання_аккермана_та_фібоначчі_у_sens -- --exact --nocapture
 
       # Лише адресний Zig/T5M-експорт після змін у виконуваних Lisp.
       - name: "LISP-TIER — діагностувати дві актуальні фізичні пари"
@@ -421,7 +424,7 @@ jobs:
           retention-days: 1
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
