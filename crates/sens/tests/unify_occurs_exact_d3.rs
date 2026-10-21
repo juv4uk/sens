@@ -77,3 +77,18 @@ fn variable_is_exact_proper_two_cell_d3_list() {
         assert_eq!(observed(&mut s, &query), expected, "{query}");
     }
 }
+
+#[test]
+fn unifier_d1_fallback_is_evaluated_by_sens() {
+    // Реальне SENS обчислення, не Python/JSON і не статична перевірка тексту.
+    // Обидва результати D1 повинні походити з викликаних предикатів.
+    let mut s = session();
+    for (source, expected) in [
+        ("(уніфікація-рівні? (як-є (a b)) (як-є (a c)))", "0"),
+        ("(уніфікація-рівні? (як-є (a b)) (як-є (a b)))", "1"),
+        ("(підстановка-позначає-невдачу? (як-є ()))", "0"),
+        ("(підстановка-позначає-невдачу? (як-є fail))", "1"),
+    ] {
+        assert_eq!(observed(&mut s, source), expected, "{source}");
+    }
+}
