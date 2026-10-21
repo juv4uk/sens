@@ -152,6 +152,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Чинний український Lisp-читач: пряме виконання повних і
+          # неповних речень у SENS, до незалежних інших свідків.
+          cargo test --locked -p sens --test understand_exact_empty -- --nocapture
           # Незалежний обмежений runtime-свідок D3/D6 до інтерпретації рівнів.
           cargo test --locked -p sens --test island_lowering_ukr_runtime -- --nocapture
           # Український D24+ обчислювач: позитивний закон і негативний мутант.
@@ -162,8 +165,6 @@ jobs:
           # Реальне SENS виконання українських D1/D3 правил:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
           cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
-          # Виконання чинного Lisp-читача, зокрема відмов на коротких реченнях.
-          cargo test --locked -p sens --test understand_exact_empty -- --nocapture
           cargo test --locked -p sens --test result_status -- --nocapture
 
       # Лише адресний Zig/T5M-експорт після змін у виконуваних Lisp.
