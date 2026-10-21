@@ -192,19 +192,20 @@ if (( had_pair )); then
   mv -fT -- "$publish_dir/new.sens" "$committed_pair"
 else
   ln -- "$publish_dir/new.sens" "$committed_pair"
-  rm -- "$publish_dir/new.sens"
 fi
+# Позначити новий inode нашим ДО очищення stage; помилка rm теж відкотиться.
 installed_pair=1
 pair_stamp="$(stat -c '%d:%i' "$committed_pair")"
+if (( ! had_pair )); then rm -- "$publish_dir/new.sens"; fi
 cmp "$publish_dir/expected.sens" "$committed_pair"
 if (( had_view )); then
   mv -fT -- "$publish_dir/new.view" "$committed_view"
 else
   ln -- "$publish_dir/new.view" "$committed_view"
-  rm -- "$publish_dir/new.view"
 fi
 installed_view=1
 view_stamp="$(stat -c '%d:%i' "$committed_view")"
+if (( ! had_view )); then rm -- "$publish_dir/new.view"; fi
 cmp "$publish_dir/expected.view" "$committed_view"
 trap - EXIT INT TERM
 rm -rf -- "$publish_dir" "$dir"
