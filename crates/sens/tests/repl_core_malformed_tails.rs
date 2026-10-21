@@ -79,3 +79,39 @@ fn repl_named_catalog_lookups_execute_without_d5_value_calls() {
         );
     }
 }
+
+#[test]
+fn repl_projection_round_trip_uses_named_ukrainian_sens_calls() {
+    // Ширина D4 перевіряється самою мовою, не сторонньою таблицею.
+    // Один запис каталогу покриває пряме ім'я, інверсію і чужий домен.
+    let mut session = repl_session();
+    let catalogue = "(як-є ((д4 (domain-table/1 (\"0010\" (укр функція) (ук фк)))))";
+    for (call, expected) in [
+        (
+            "(репл-код-із-каталогу (як-є функція) (як-є укр) (як-є д4)",
+            "\"0010\"",
+        ),
+        (
+            "(репл-код-із-каталогу (як-є функція) (як-є укр) (як-є д5)",
+            "()",
+        ),
+        (
+            "(репл-проєктувати-ім'я (як-є функція) (як-є укр) (як-є д4) (як-є ук)",
+            "фк",
+        ),
+        (
+            "(репл-проєктувати-ім'я (як-є відсутня) (як-є укр) (як-є д4) (як-є ук)",
+            "()",
+        ),
+    ] {
+        let source = format!("{call} {catalogue})");
+        let result = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS D4 projection failed on {source}: {error:?}"))
+            .value;
+        assert_eq!(
+            result.to_string(),
+            expected,
+            "test_id=repl-d4-inverse layer=SENS input={source} expected={expected} actual={result}"
+        );
+    }
+}
