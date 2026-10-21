@@ -599,6 +599,7 @@ jobs:
           set -euo pipefail
           cargo test --locked -p sens --test reason_index malformed_bucket_does_not_hide_later_valid_sens_rules -- --exact --nocapture
           cargo test --locked -p sens --test reason_index proof_mapper_calls_lexically_bound_sens_closure_not_d5_function_identity -- --exact --nocapture
+          cargo test --locked -p sens --test reason_index reason_index_d1_verdicts_from_real_predicates -- --exact --nocapture
 
       - name: SI — перевірити чинний український Lisp і точні D24+ аргументи
         if: ${{ always() }}
