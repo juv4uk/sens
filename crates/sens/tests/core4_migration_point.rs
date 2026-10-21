@@ -250,3 +250,26 @@ fn core4_ukrainian_d10_find_leaf_evaluates_real_predicate_with_d1() {
             "test_id=d10-find-leaf-sens layer=SENS input={source} expected={expected} actual={}", result.value);
     }
 }
+
+#[test]
+fn core4_ukrainian_d10_mappend_and_one_level_flatten_execute_in_sens() {
+    // Мовні D10 MAPPEND/FLATTEN: порядок, порожній вхід,
+    // рівно один рівень вкладеності та fail-closed атомарний вхід.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        ("(відобразити-й-додати (функція (x) (список x)) (як-є (а б в)))", "(а б в)"),
+        ("(відобразити-й-додати (функція (x) (список x)) (як-є ()))", "()"),
+        ("(сплющити (як-є ((а б) (в г))))", "(а б в г)"),
+        ("(сплющити (як-є (((а б) в))) )", "((а б) в)"),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=d10-mappend-sens layer=SENS input={source} error={error}"));
+        assert_eq!(result.value.to_string(), expected,
+            "test_id=d10-mappend-sens layer=SENS input={source} expected={expected} actual={}", result.value);
+    }
+    let invalid = "(відобразити-й-додати (функція (x) (список x)) (як-є а))";
+    let error = eval_program(invalid, &mut session)
+        .expect_err("test_id=d10-mappend-invalid layer=SENS atom must fail closed");
+    assert_eq!(error.kind, sens::ErrorKind::Type,
+        "test_id=d10-mappend-invalid layer=SENS input={invalid} expected=Type actual={error:?}");
+}
