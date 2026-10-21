@@ -877,9 +877,15 @@ mod core_profile_bootstrap_tests {
         assert_eq!(widths, [2, 3, 2, 3, 2]);
         assert_eq!(bits, [2, 1, 0, 0, 1]);
         assert!(sens::parse_canonical_word_sequence(&words).is_ok());
+        // Не обмежуємося успіхом декодера: саме фізичні байти мають
+        // пройти SENS D2 reader та справжнє виконання D3 QUOTE.
+        let executed = eval_physical_t5(&physical)
+            .expect("physical .sens must execute through the SENS reader/evaluator");
+        assert_eq!(executed.value.to_string(), "()");
         // Malformed physical data must fail before even attempting D2 admission.
         for invalid in [&[0xf3][..], &[0xf2][..], &[0, 0][..]] {
             assert!(decode_physical_t5_words(invalid).is_err(), "invalid {invalid:?}");
+            assert!(eval_physical_t5(invalid).is_err(), "invalid carrier executed: {invalid:?}");
         }
     }
 
