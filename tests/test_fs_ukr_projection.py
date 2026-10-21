@@ -86,6 +86,12 @@ def old_identity(node):
 
 
 def verify(source: str) -> None:
+    # Забороняємо старі прямі двійкові викличні голови навіть там,
+    # де історичний receipt навмисно зіставляє їхню тотожність.
+    executable = "\n".join(line for line in source.splitlines()
+                           if not line.lstrip().startswith(";"))
+    if re.search(r"\([01]{3,9}(?=\s|\))", executable):
+        raise AssertionError("FS: старий двійковий викличний голов замість укр проєкції")
     forms = parse(source)
     if [old_identity(form) for form in forms] != parse(EXACT_LAW):
         raise AssertionError("FS: порушено початковий D1/D3/D4 закон, арність або I/O")
@@ -144,7 +150,7 @@ class FsUkrProjectionTests(unittest.TestCase):
         for literal in ("(визначити читати-файл", "(визначити записати-файл",
                         "(читати-сирий-текст-файла шлях)",
                         "(записати-байти-файла шлях (кодування-юнікод-8-кодувати-рядок текст))"):
-            self.assertIn(literal, self.source)
+            self.assertIn(literal, re.sub(r"\s+", " ", self.source))
         executable = "\\n".join(line for line in self.source.splitlines()
                                  if not line.lstrip().startswith(";"))
         self.assertNotIn("(read-file-utf8-raw ", executable)
