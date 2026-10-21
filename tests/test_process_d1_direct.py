@@ -11,8 +11,9 @@ EXACT_HEADS = {"001": "як-є", "011": "решта", "100": "перше",
                "1110": "список", "10011": "третє"}
 ROOT = Path(__file__).resolve().parents[1]
 FILE = ROOT / "lib/process.lisp"
-OLD = "(010 (001 ()))"
-NEW = "(так"
+OLD = "(так"
+NEW = "(атом? (як-є ()))"
+FALSE = "(атом? (як-є (())))"
 
 
 def ast(source: str):
@@ -50,14 +51,14 @@ def domain_count():
 
 
 def audit(source: str):
-    if source.count(NEW) != 5 or OLD in source or "#d1:1" in source:
-        raise ValueError("five D1 W1 direct constants required")
+    if source.count(NEW) != 5 or OLD in source or "#d1:" in source or "((функція" in source:
+        raise ValueError("потрібні пʼять виконуваних D1:YES та іменовані D4 механізми")
     # SHA усього файла не фіксуємо: чинна українська реалізація може оновлюватися.
     # Походження змін контролює Git, структуру умов — цей аудит.
     # Here we guard only exact D1 source and D3 two-branch structure.
     parsed = ast(source)
-    if len(parsed) != 8 or sum(1 for form in parsed if isinstance(form,list) and form and form[0] == "визначити") != 7:
-        raise ValueError("seven process definitions plus quoted trailing data must remain")
+    if len(parsed) != 10 or sum(1 for form in parsed if isinstance(form,list) and form and form[0] == "визначити") != 9:
+        raise ValueError("девʼять чинних процесних DEFINE і цитований кінцевий результат")
     def visit(node):
         if not isinstance(node, list):
             return
@@ -75,8 +76,9 @@ def audit(source: str):
                          ["функція", ["сирий-результат"], ["друге", "сирий-результат"]]]
     if definitions.get("отримати-сирий-код-виходу-процесу") != expected_raw_exit:
         raise ValueError("порушено точний селектор вихідного коду")
-    for name in ("процес-результат-текст", "процес-запустити-текст",
-                 "процес-публічний-вихід-код", "процес-запустити"):
+    for name in ("процес-скласти-декодований", "процес-результат-текст",
+                 "процес-запустити-текст", "процес-публічний-вихід-код",
+                 "процес-розгорнути-публічний-результат", "процес-запустити"):
         if name not in definitions:
             raise ValueError(f"бракує визначеного D9 виклику {name}")
     for datum in ("(як-є process-result)", "(як-є rejected)",
@@ -96,7 +98,7 @@ class ProcessDirectD1(unittest.TestCase):
     def test_exact_d1_controls_and_cond_arity(self):
         current_bytes = audit(self.source)
         print(f"PROCESS D1: UTF-8 bytes {current_bytes}; "
-              "five exact D1 values and two-part D3 COND structure retained")
+              "five real SENS D1 predicates and two-part D3 COND clauses retained")
 
     def test_exact_domain_addresses_all_2046(self):
         self.assertEqual(domain_count(), 2046)
@@ -116,7 +118,7 @@ class ProcessDirectD1(unittest.TestCase):
             self.source.replace(NEW, "(1", 1),
             self.source.replace(NEW, "(0", 1),
             self.source.replace(NEW, "(як-є ())", 1),
-            self.source.replace(NEW, "(ні", 1),
+            self.source.replace(NEW, FALSE, 1),
         ):
             with self.assertRaises(ValueError):
                 audit(corrupted)
@@ -135,7 +137,9 @@ class ProcessDirectD1(unittest.TestCase):
                            ("001010001", "процес-публічний-вихід-код"),
                            ("110101111", "процес-запустити")):
             self.assertRegex(d9, rf"(?m)^\s*\({bits}\s+.*\(укр {re.escape(name)}\)")
-        self.assertEqual(self.source.count("(так"), 5)
+        self.assertEqual(self.source.count(NEW), 5)
+        self.assertNotIn("((функція", self.source)
+        self.assertNotRegex(self.source, r"(?<![\w-])(?:так|ні)(?![\w-])")
         self.assertNotIn("#d1:1", self.source)
 
     def test_wrong_peer_and_quoted_data_mutants_rejected(self):
@@ -144,7 +148,7 @@ class ProcessDirectD1(unittest.TestCase):
             self.source.replace("(список\n                  (як-є decoded-process)",
                                 "(сполучити\n                  (як-є decoded-process)", 1),
             self.source.replace("(як-є process-result)", "(як-є changed)", 1),
-            self.source.replace("(так", "(ні", 1),
+            self.source.replace(NEW, FALSE, 1),
         ):
             self.assertNotEqual(broken, self.source, "мутація має змінювати чинний код")
             with self.assertRaises(ValueError):
