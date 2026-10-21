@@ -1,14 +1,12 @@
 //! Справжній SENS-eval: обрізане повідомлення маршруту не дістає D6 четверте.
 //! Ця перевірка не є T5M-атестацією всього корпуса й не використовує Python.
-use sens::{eval_core_library_source, eval_program, Session};
-
-const CORE: &str = include_str!("../../../lib/core.lisp");
+use sens::{eval_program, load_core_library, Session};
 const ISLAND: &str = include_str!("../../../lib/island-lowering.lisp");
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_core_library_source(CORE, &mut session)
-        .expect("чинне українське ядро SENS повинно завантажитись");
+    load_core_library(&mut session)
+        .expect("штатний bootstrap SENS має встановити виконавчі закони");
     eval_program(ISLAND, &mut session)
         .expect("поточні визначення островів мають виконатися у SENS");
     session
