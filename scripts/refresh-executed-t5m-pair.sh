@@ -32,7 +32,7 @@ dir="$(mktemp -d)"
 trap 'rm -rf "$dir"' EXIT
 python3 scripts/migrate-three-pass.py "$source_file" \
   --out "$dir" --report "$dir/receipt.json" --codec t5m \
-  --source-surface укр "${binding_args[@]}"
+  --source-surface укр --refresh-existing "${binding_args[@]}"
 python3 - "$dir/receipt.json" <<'PY'
 import json, sys
 with open(sys.argv[1], encoding='utf-8') as stream:
@@ -40,7 +40,7 @@ with open(sys.argv[1], encoding='utf-8') as stream:
 summary = report['summary']
 if not (summary['files_written'] == 1 and summary['files_blocked'] == 0
         and summary['files_not_program'] == 0 and len(report['files']) == 1
-        and report['files'][0]['status'] == 'written'
+        and report['files'][0]['status'] == 'refreshed'
         and report['physical_producer'] == 'PINNED_ZIG_T5M_CARRY'):
     raise SystemExit('ПОМИЛКА: Zig/T5M не підтвердив фізичну пару')
 PY
@@ -51,15 +51,23 @@ if [[ ! -s "$pair" || ! -s "$view" || -L "$pair" || -L "$view" ]]; then
   echo 'ПОМИЛКА: немає обох звичайних файлів свіжої фізичної пари' >&2
   exit 2
 fi
-# Повноцінний запуск, а не Python-імітація SENS-eval.
-if "$binary" "$pair" >"$dir/eval.stdout" 2>"$dir/eval.stderr"; then
-  mode=standalone
-elif "$binary" --t5m-pair "$source_file" "$pair" >"$dir/eval.stdout" 2>"$dir/eval.stderr"; then
-  mode=paired
-else
-  cat "$dir/eval.stderr" >&2
-  echo 'ПОМИЛКА: справжній SENS не виконав жоден перевірений маршрут; пару не змінено' >&2
+# Парний вхід обов'язковий: Zig звіряє саме джерело з фізичним T5M,
+# а SENS його виконує. Standalone може бути непідтриманим для D7/D24+,
+# але сам по собі не доводить оберненості джерела.
+if ! "$binary" --t5m-pair "$source_file" "$pair" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
+  cat "$dir/paired.stderr" >&2
+  echo 'ПОМИЛКА: T5M_PAIRED_SOURCE_EXECUTION_FAIL; пару не змінено' >&2
   exit 2
+fi
+mode=paired
+# Коли standalone також виконується, зіставляємо дійсні результати
+# обох SENS-входів побайтно, не host-оракулом і не лише exit=0.
+if "$binary" "$pair" >"$dir/standalone.stdout" 2>"$dir/standalone.stderr"; then
+  if ! cmp -s "$dir/standalone.stdout" "$dir/paired.stdout"; then
+    echo "ПОМИЛКА: T5M_PAIRED_RESULT_MISMATCH standalone_sha256=$(sha256sum "$dir/standalone.stdout" | cut -d' ' -f1) paired_sha256=$(sha256sum "$dir/paired.stdout" | cut -d' ' -f1); пару не змінено" >&2
+    exit 2
+  fi
+  mode=paired-and-standalone
 fi
 if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
   echo 'ПОМИЛКА: вихідний Lisp змінився під час перевірки; пару не змінено' >&2
@@ -73,8 +81,18 @@ for target in "$committed_pair" "$committed_view"; do
     exit 2
   fi
 done
-cp "$pair" "$committed_pair"
-cp "$view" "$committed_view"
+# Файлова транзакція з відкатом обох файлів; жодної семантики Python.
+python3 - "$committed_pair" "$pair" "$committed_view" "$view" <<'PY'
+from pathlib import Path
+import sys
+sys.path.insert(0, "scripts")
+from migration_publish_pair import replace_pair
+dest_pair, stage_pair, dest_view, stage_view = (Path(p) for p in sys.argv[1:])
+try:
+    replace_pair(dest_pair, stage_pair.read_bytes(), dest_view, stage_view.read_bytes())
+except (OSError, ValueError) as exc:
+    raise SystemExit(f"T5M_REFRESH_INSTALL_FAILED: {exc}") from exc
+PY
 cmp "$pair" "$committed_pair"
 cmp "$view" "$committed_view"
 printf 'T5M_REFRESHED source=%s mode=%s physical=ZIG_VERIFIED executed=SENS semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' "$source_file" "$mode"
