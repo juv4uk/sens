@@ -214,8 +214,22 @@ PY
         continue
       fi
     fi
-    sed 's/^/T5M stderr: /' "$stderr" >&2
-    echo "::error::T5M_FILE_EXECUTION_FAIL path=$file pair=$pair status=$status" >&2
+    # Замість розпізнавати всі майбутні помилки за старими повідомленнями,
+    # перевіряємо чинний парний вхід. Zig звіряє фізичні слова з джерелом,
+    # а справжній SENS виконує результат; жодної Python-семантики.
+    # Розходження чи невдача SENS лишаються червоними з обома діагнозами.
+    standalone_status=$status
+    cp "$stderr" "$dir/standalone.stderr"
+    if timeout 45s "$binary" --t5m-pair "$file" "$pair" >"$stdout" 2>"$stderr"; then
+      result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
+      echo "T5M_PHYSICAL_PAIRED_GENERIC_PASS source=$file pair=$pair physical=ZIG_VERIFIED result_sha256=$result_sha semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+      continue
+    else
+      status=$?
+    fi
+    sed 's/^/T5M standalone stderr: /' "$dir/standalone.stderr" >&2
+    sed 's/^/T5M paired stderr: /' "$stderr" >&2
+    echo "::error::T5M_FILE_EXECUTION_FAIL path=$file pair=$pair standalone_status=$standalone_status paired_status=$status" >&2
     mark_file_failed
     continue
   fi
