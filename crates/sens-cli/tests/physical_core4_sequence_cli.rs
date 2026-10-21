@@ -276,7 +276,14 @@ impl Drop for SourceTriplet {
 // Український Lisp є джерелом; exact-слова читає SENS, T5M пакує Zig.
 fn verify_unpaired_ukrainian_libs_natively() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    for stem in ["pair-replace-first", "pair-replace-rest", "поміняти-перші-два"] {
+    for stem in [
+        "pair-replace-first",
+        "pair-replace-rest",
+        "поміняти-перші-два",
+        "вилучити-середнє-з-трійки",
+        "вставити-посеред-пари",
+        "розділити-четвірку-на-пари",
+    ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
         let sequence = UNIQUE.fetch_add(1, Ordering::Relaxed);
@@ -297,6 +304,27 @@ fn verify_unpaired_ukrainian_libs_natively() {
             "test_id=ukr-lib-mint source={stem} stderr={}", error(&minted)
         );
         assert!(physical.is_file() && view.is_file(), "{stem}: створено фізичну пару");
+        // Оборотні трійки нових прикладів мають бути тотожні байт-в-байт
+        // реальному пакуванню Zig, а не лише текстовому звіту.
+        if matches!(
+            stem,
+            "вилучити-середнє-з-трійки"
+                | "вставити-посеред-пари"
+                | "розділити-четвірку-на-пари"
+        ) {
+            let committed_physical = root.join("lib").join(format!("{stem}.sens"));
+            let committed_view = root.join("lib").join(stem);
+            assert_eq!(
+                fs::read(&physical).expect("згенеровані T5M байти"),
+                fs::read(&committed_physical).expect("збережені T5M байти"),
+                "test_id=ukr-lib-physical-parity source={stem}"
+            );
+            assert_eq!(
+                fs::read(&view).expect("згенеровані точні слова"),
+                fs::read(&committed_view).expect("збережені точні слова"),
+                "test_id=ukr-lib-exact-parity source={stem}"
+            );
+        }
         let verify = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
             .arg("verify-view")
             .arg(&physical)
