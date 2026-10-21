@@ -67,6 +67,15 @@ PY
     continue
   fi
   if (( not_program > 0 )); then
+    # Джерело вже не є програмою. Стара однойменна .sens, якщо лишилася,
+    # не може тихо вважатися правильною: це колишній виконуваний артефакт,
+    # якого нове джерело вже не визначає. Не зачіпаємо чужі файли.
+    stale_pair="$(dirname "$file")/$(basename "$file" .lisp).sens"
+    if [[ -e "$stale_pair" || -L "$stale_pair" ]]; then
+      echo "::error::T5M_NONPROGRAM_STALE_PAIR source=$file companion=$stale_pair action=remove-obsolete-pair-or-restore-source" >&2
+      failed_files=$((failed_files + 1))
+      continue
+    fi
     echo "T5M_NOT_PROGRAM path=$file"
     continue
   fi
