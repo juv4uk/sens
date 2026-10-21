@@ -233,7 +233,10 @@ def main() -> None:
     )
     forecast = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(forecast)
-    forecast_words = set(forecast.selector_words(8))
+    # The map is HISTORICAL (Lisp 1.5 §4.3, donor roots 101/110). The live
+    # generator now uses #3202 roots (011/100), so the independent witness for
+    # a historical map must be its donor-root forecast, not the current one.
+    forecast_words = set(forecast.stale_d8_selector_words_2934())
     map_words = {row["coordinate"] for row in selector_rows}
     require(
         forecast_words == map_words,
