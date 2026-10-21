@@ -171,9 +171,11 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
         self.assertEqual(source.count("(хибне? (переклад-внутрішній-символ? вид))"), 1)
 
     def _assert_alternative_guard(self, source):
-        self.assertEqual(source.count("((порожній? (решта альтернативи)) так)"), 1)
+        # Чинна D1 істина обчислюється в SENS; літерал так не є обов’язковим.
+        # Негативний мутант атом? не може підміняти перевірку порожнього хвоста.
+        self.assertEqual(source.count("((порожній? (решта альтернативи)) (атом? (як-є ())))"), 1)
         self.assertEqual(source.count("((атом? (решта альтернативи)) (як-є ()))"), 1)
-        self.assertNotIn("((атом? (решта альтернативи)) так)", source)
+        self.assertNotIn("((атом? (решта альтернативи)) (атом? (як-є ())))", source)
 
     def test_ratified_primary_selectors_without_old_aliases(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
@@ -192,7 +194,7 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
         self.assertEqual(source.count("(хибне? (переклад-рівно-п'ять-полів?"), 2)
         # Класифікаційна трійка — дані, а не булевий D1 результат.
         self.assertIn("(третє (класифікувати-рядкове-значення", source)
-        self.assertIn("(як-є member))\n          так)", source)
+        self.assertIn("(як-є member))\n          (атом? (як-є ())))", source)
         self.assertNotIn(
             "((класифікувати-рядкове-значення (переклад-джерело пропозиція))",
             source,
@@ -214,9 +216,9 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
 
     def test_wrong_alternative_selector_peer_is_rejected(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
-        correct = "((порожній? (решта альтернативи)) так)"
+        correct = "((порожній? (решта альтернативи)) (атом? (як-є ())))"
         self.assertEqual(source.count(correct), 1)
-        mutated = source.replace(correct, "((атом? (решта альтернативи)) так)", 1)
+        mutated = source.replace(correct, "((атом? (решта альтернативи)) (атом? (як-є ())))", 1)
         with self.assertRaises(AssertionError):
             self._assert_alternative_guard(mutated)
 
