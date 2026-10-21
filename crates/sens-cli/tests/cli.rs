@@ -539,7 +539,7 @@ fn t5m_file_mode_executes_current_result_status_d1_predicates() {
     )).expect("current Ukrainian result-status Lisp");
     let start = source.find("(визначити результат-є-правильним-списком?")
         .expect("current exact SENS definition");
-    let end = source[start..].find("\\n; Історичний заперечний")
+    let end = source[start..].find("\n; Історичний заперечний")
         .map(|offset| start + offset)
         .expect("end of SENS predicate");
     let definition = &source[start..end];
@@ -552,7 +552,7 @@ fn t5m_file_mode_executes_current_result_status_d1_predicates() {
         let file = std::env::temp_dir().join(format!(
             "sens-result-d1-live-{}-{index}.lisp", std::process::id()
         ));
-        std::fs::write(&file, format!("{definition}\\n{expression}\\n"))
+        std::fs::write(&file, format!("{definition}\n{expression}\n"))
             .expect("real SENS program");
         let output = sens()
             .args(["--t5m-file", file.to_str().expect("UTF-8 path")])
