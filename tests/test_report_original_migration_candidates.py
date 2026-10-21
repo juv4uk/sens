@@ -341,7 +341,7 @@ class OriginalCandidateTests(unittest.TestCase):
         f = self.root / "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
         f.parent.mkdir(parents=True)
         f.write_text(json.dumps({
-            "schema": "sens-migration-nonprogram-manifest/1",
+            "schema": "sens-migration-nonprogram-manifest-1",
             "issue": 4460,
             "automatic_sens_companion": False,
             "entries": [{
@@ -383,9 +383,7 @@ class OriginalCandidateTests(unittest.TestCase):
         manifest = self.root / "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
         manifest.parent.mkdir(parents=True)
         payload = {
-            "schema": mod.NONPROGRAM_SCHEMA_BY_MANIFEST[
-                "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
-            ],
+            "schema": "sens-migration-nonprogram-manifest-1",
             "issue": 4460,
             "automatic_sens_companion": False,
             "entries": entries,

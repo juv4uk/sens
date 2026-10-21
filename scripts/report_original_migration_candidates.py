@@ -193,15 +193,6 @@ NONPROGRAM_MANIFESTS = (
     ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
     ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 14),
 )
-NONPROGRAM_SCHEMA_BY_MANIFEST = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "sens-migration-nonprogram-manifest/1",
-    "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "sens-migration-nonprogram-manifest-1",
-    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "sens-migration-nonprogram-manifest/1",
-    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "sens-migration-nonprogram-manifest-1",
-    "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "sens-migration-nonprogram-manifest-1",
-    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "sens-migration-nonprogram-manifest-1",
-    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "sens-migration-nonprogram-manifest/1",
-}
 
 
 def _checked_nonprogram_entry(root: Path, path: str, expected_sha: str) -> dict:
@@ -252,7 +243,7 @@ def load_nonprogram_classification(root: Path, *, selected_paths: set[str] | Non
         if not manifest.is_file() or manifest.is_symlink():
             raise ValueError(f"unsafe nonprogram manifest: {name}")
         record = json.loads(manifest.read_text(encoding="utf-8"))
-        if (record.get("schema") != NONPROGRAM_SCHEMA_BY_MANIFEST[name]
+        if (record.get("schema") != "sens-migration-nonprogram-manifest-1"
                 or record.get("automatic_sens_companion") is not False
                 or record.get("issue") != 4460):
             raise ValueError(f"nonprogram authority mismatch: {name}")
