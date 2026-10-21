@@ -144,6 +144,12 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
             "(визначити паспорт-механізмів-функцій\n  (як-є", metadata
         )
         self.assertIn("(rows", metadata)
+        # У цитованому паспорті дані, а не арифметична форма X/1.
+        # D7 вистачає для назви діапазону; Unicode-еліпсис не потрібний.
+        self.assertIn("(schema function-table-mechanisms-1)", metadata)
+        self.assertIn('(authority "D1-D10")', metadata)
+        self.assertNotIn("function-table-mechanisms/1", metadata)
+        self.assertNotIn("…", metadata)
         code = uncommented(self.source)
         self.assertRegex(
             code,

@@ -11,8 +11,8 @@
 ; Перша форма створює значення таблиці, не викликаючи schema чи rows.
 (визначити паспорт-механізмів-функцій
   (як-є
-    ((schema function-table-mechanisms/1)
-     (authority "lib/domains/d1.lisp…d10.lisp")
+    ((schema function-table-mechanisms-1)
+     (authority "D1-D10")
      (rows
        (як-є evaluator quote-form)
        (атом? evaluator atom-primitive)
