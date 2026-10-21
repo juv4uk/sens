@@ -412,6 +412,15 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         life_source = (root / "lib/life-1-scheduler.lisp").read_text(encoding="utf-8")
         self.assertIn("(як-є (scheduler-selection none))", life_source)
         self.assertIn("(як-є producer)", life_source)
+        # До вже виконуваних SENS-свідків LIFE-1 додається структурний
+        # негатив: подвійний анонімний D5 value-call більше не дозволений.
+        self.assertNotIn("((функція ", life_source)
+        for helper in (
+            "життя-поле-запису-продовжити",
+            "життя-поле-запису-рядок",
+            "життя-поле-запису-рядки",
+        ):
+            self.assertIn(f"(визначити {helper}", life_source)
         # Мапа вже перейшла на обчислювані D1 гілки, голого так немає.
         self.assertEqual(map_source.count("((атом? (як-є ()))"), 2)
         self.assertNotIn("(так", map_source)
