@@ -116,7 +116,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         # законі. Сирий String literal не має чинного T5M REPL projection.
         # Після нормального форматування Lisp перенос рядків між
         # викличними вузлами не змінює їхньої тотожності.
-        normalized = re.sub(r"\\s+", " ", uncommented(self.source))
+        normalized = re.sub(r"\s+", " ", uncommented(self.source))
         for path in ("lib/surface/semantic-registry.lisp",
                      "lib/function-table-mechanisms.lisp"):
             with self.subTest(path=path):
