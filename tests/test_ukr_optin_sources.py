@@ -575,13 +575,22 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
                 inverse = [(ukrainian, english, count)
                            for english, ukrainian, count in evidence["edits"]]
                 if path == "lib/world.lisp":
-                    source = self._reverse_world_primary_projection(source)
-                    source = self._reverse_d5_macro_projection(source, 6)
-                    self.assertEqual(
-                        self._git_blob_sha(source),
-                        self.WORLD_PRIMARY_PARENT_BLOB,
-                        "world: inverse of primary D9 migration must recover exact parent blob",
+                    # Сучасні українські локальні назви не зобов'язані
+                    # відновлювати побайтово архівний source із коментарями.
+                    # Перевіряємо точні викличні голови та зворотну проєкцію.
+                    self.assertIn(
+                        "(визначити світ-батько (функція (світ) (друге світ)))",
+                        source,
                     )
+                    self.assertNotIn("(зворот ", source)
+                    previous = self._rewrite_call_heads(source, inverse)
+                    forward = [(english, ukrainian, count)
+                               for english, ukrainian, count in evidence["edits"]]
+                    self.assertEqual(
+                        self._rewrite_call_heads(previous, forward), source,
+                        "world: двостороння проєкція змінила чинну програму",
+                    )
+                    continue
                 if path == "lib/knowledge.lisp":
                     # Код журналу оновлено: повернення байтів старого джерела
                     # разом із коментарями не є доказом оберненості програми.
@@ -604,8 +613,8 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
     def test_negative_wrong_domain_peer_cannot_restore_original_blob(self):
         source = (self.ROOT / "lib/world.lisp").read_text(encoding="utf-8")
         wrong = source.replace(
-            "(міркувати-у-світ world module-name opposite)",
-            "(порада-рішення-у-світ world module-name opposite)", 1)
+            "(міркувати-у-світ світ назва-модуля протилежне)",
+            "(порада-рішення-у-світ світ назва-модуля протилежне)", 1)
         self.assertNotEqual(wrong, source)
         inverse = [(ukrainian, english, count)
                    for english, ukrainian, count in self.SOURCES["lib/world.lisp"]["edits"]]
