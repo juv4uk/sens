@@ -1,7 +1,7 @@
 use sens::{eval_parsed_expressions, parse, Environment, Session, Value};
 use std::env;
 use std::fs;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::process;
 use std::rc::Rc;
 mod lsp_entry;
@@ -198,6 +198,51 @@ fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str), &'static str
     Some(Ok((&args[2], &args[3])))
 }
 
+/// Створити фізичний T5M та читабельні біти за одним SENS-reader/Zig
+/// roundtrip. Жодних Python-міграторів, JSON-квитанцій чи другого кодека.
+fn t5m_mint_pair_request(args: &[String]) -> Option<Result<(&str, &str), &'static str>> {
+    if !args.iter().skip(1).any(|part| part == "--t5m-mint-pair") {
+        return None;
+    }
+    if args.len() != 4 || args[1] != "--t5m-mint-pair" {
+        return Some(Err("usage: sens --t5m-mint-pair <source.lisp> <output.sens>"));
+    }
+    let source = std::path::Path::new(&args[2]);
+    let physical = std::path::Path::new(&args[3]);
+    if source.extension().and_then(|ext| ext.to_str()) != Some("lisp")
+        || physical.extension().and_then(|ext| ext.to_str()) != Some("sens")
+    {
+        return Some(Err("--t5m-mint-pair requires .lisp and .sens paths"));
+    }
+    Some(Ok((&args[2], &args[3])))
+}
+
+/// Нові фізичні файли публікуємо разом або відкидаємо створене нами.
+/// Публікація в існуючі tracked-файли робиться окремо після SENS-eval.
+fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String> {
+    let physical = std::path::Path::new(path);
+    let readable = physical.with_extension("");
+    let mut binary = fs::OpenOptions::new()
+        .write(true).create_new(true).open(physical)
+        .map_err(|error| format!("T5M_PAIR_CARRIER_CREATE: {error}"))?;
+    if let Err(error) = binary.write_all(bytes).and_then(|_| binary.sync_all()) {
+        drop(binary);
+        let _ = fs::remove_file(physical);
+        return Err(format!("T5M_PAIR_CARRIER_WRITE: {error}"));
+    }
+    drop(binary);
+    let result = fs::OpenOptions::new()
+        .write(true).create_new(true).open(&readable)
+        .and_then(|mut file| file.write_all(view.as_bytes()).and_then(|_| file.sync_all()));
+    if let Err(error) = result {
+        // Не залишаємо напівстворену пару; ніколи не переписуємо
+        // сторонній однойменний view-файл чи фізичний носій.
+        let _ = fs::remove_file(physical);
+        return Err(format!("T5M_PAIR_VIEW_WRITE: {error}"));
+    }
+    Ok(())
+}
+
 /// Парне виконання дозволяє читати D24+ з реальних байтів Zig T5M,
 /// лише якщо український Lisp свідчить ТОЧНО ту саму доменну послідовність.
 /// Це не дозвіл трактувати довільний W24 за числову ідентичність.
@@ -355,6 +400,30 @@ fn main() {
         };
         if let Err(error) = result {
             eprintln!("sens: T5M mint failed: {error}");
+            process::exit(1);
+        }
+        return;
+    }
+    if let Some(request) = t5m_mint_pair_request(&raw_args) {
+        let result = match request {
+            Ok((source_path, physical_path)) => fs::read_to_string(source_path)
+                .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
+                .and_then(|source| {
+                    #[cfg(feature = "zig-transport")]
+                    {
+                        repl::mint_t5m_source_pair(&source)
+                    }
+                    #[cfg(not(feature = "zig-transport"))]
+                    {
+                        let _ = source;
+                        Err("--t5m-mint-pair requires Zig T5M transport".into())
+                    }
+                })
+                .and_then(|(bytes, view)| write_new_t5m_pair(physical_path, &bytes, &view)),
+            Err(message) => Err(message.to_owned()),
+        };
+        if let Err(error) = result {
+            eprintln!("sens: T5M pair mint failed: {error}");
             process::exit(1);
         }
         return;
