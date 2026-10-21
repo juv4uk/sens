@@ -202,13 +202,8 @@ jobs:
               if name == "tests/fixtures/conformance-transition-witness.lisp":
                   print(f"T5M_TRANSITION_DATA_FIXTURE path={name} runtime=witness_authority release=NOT_CERTIFIED")
                   continue
-              # WORLD D9 — залежний виконуваний SENS-свідок: його функції
-              # визначає lib/world.lisp, тому голий CLI без завантаження
-              # WORLD не має права видавати фальшивий standalone RED.
-              # Нижче реальний SENS-eval обов'язково перевіряє сам закон.
-              if name == "tests/semantic/d9-world-shape-module-events-laws.lisp":
-                  print(f"T5M_DEPENDENT_WORLD_FIXTURE path={name} native=world_ancestor_sens release=NOT_CERTIFIED")
-                  continue
+              # WORLD D9 зі SENS Lisp-зв'язуваннями тепер виконується
+              # через нативний mint-pair у execute_changed_lisp_t5m.sh.
               if name in {
                   "tests/semantic/meta-eval-graph-d1-law.lisp",
                   "tests/semantic/meta-eval-graph-d1-mutant.lisp",
