@@ -183,15 +183,15 @@ fn append_t5m_expression_context(
             // правильним списком без жодної помилки. Не проголошуємо
             // таку зміну структури оборотною: атомний текстовий носій
             // мусить бути доведений окремо, а не вигаданий у Rust.
-            if quoted_data {
-                if let ExprKind::Symbol(name) = &tail.kind {
-                    if sens::semantic_registry_export::admitted_core_domain_for_surface(name)
-                        .is_none()
-                    {
-                        return Err(format!(
-                            "T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC symbol={name:?}:                              D7 glyph-list cannot replace a dotted-pair atom"
-                        ));
-                    }
+            if let ExprKind::Symbol(name) = &tail.kind {
+                // Цитата не змінює структури: W7/D7 glyph-list не є
+                // атомом хвоста ані в даних, ані в звичайній формі.
+                if sens::semantic_registry_export::admitted_core_domain_for_surface(name)
+                    .is_none()
+                {
+                    return Err(format!(
+                        "T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC symbol={name:?}: D7 glyph-list cannot replace a dotted-pair atom"
+                    ));
                 }
             }
             words.push(control(0b10)?);
@@ -1738,6 +1738,55 @@ mod tests {
             for (before, after) in words.iter().zip(roundtrip.iter()) {
                 assert_eq!(format!("{before:?}"), format!("{after:?}"));
             }
+        }
+    }
+
+    #[test]
+    fn t5m_dotted_pair_rejects_non_atomic_d7_tail_in_both_contexts() {
+        // Для нецитованої пари діяло те саме неатомне D7 lowering,
+        // проте перевірка досі спрацьовувала тільки всередині QUOTE.
+        let nil = || Expr {
+            kind: ExprKind::DomainIdentity(t5m_domain_identity(3, 0).unwrap()),
+            span: Default::default(),
+        };
+        let pair = |tail: Expr| Expr {
+            kind: ExprKind::Pair(
+                std::rc::Rc::new(nil()),
+                std::rc::Rc::new(tail),
+            ),
+            span: Default::default(),
+        };
+        for quoted_data in [false, true] {
+            let symbol_tail = pair(Expr {
+                kind: ExprKind::Symbol("хвіст".into()),
+                span: Default::default(),
+            });
+            let mut invalid = Vec::new();
+            let error = append_t5m_expression_context(
+                &symbol_tail,
+                sens::Text7Layout::Uk,
+                &mut invalid,
+                0,
+                quoted_data,
+            )
+            .expect_err("D7 glyph-list must not replace an atomic dotted tail");
+            assert!(error.starts_with("T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC"), "{error}");
+
+            let exact_tail = pair(nil());
+            let mut valid = Vec::new();
+            append_t5m_expression_context(
+                &exact_tail,
+                sens::Text7Layout::Uk,
+                &mut valid,
+                0,
+                quoted_data,
+            )
+            .expect("a domain-qualified atomic dotted tail stays structural");
+            assert!(valid.iter().any(|word| matches!(
+                word,
+                ExactDomainWord::Identity(identity)
+                    if identity.width() == 2 && identity.packed_bits() == 0b11
+            )));
         }
     }
 
