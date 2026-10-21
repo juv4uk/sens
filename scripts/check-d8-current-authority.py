@@ -53,13 +53,13 @@ assert "(distinct-residents . #d256)" in contract
 assert "(current-domains . (D1 D2 D3 D4 D5 D6 D7 D8 D9))" in foundation_contract
 
 assert "(minor . 9)" in lang
-assert "Contract 11.8" in lang
+assert "Контракт 11.8" in lang
 assert "Core.D8 is OWNER-RATIFIED 256/256 under #3960" in lang
-assert "D8  full compact 256/256" in current
+assert "D8  full compact — exact 8-bit keys (256/256)" in current
 
 # Residency and callability remain separate. Ratification must not silently
 # turn every D8 resident into a generic callable mechanism.
-assert "Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None" in domain_identity
+assert "Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D10(_) => None" in domain_identity
 assert "D8 так само OWNER-RATIFIED #3960" in domain_identity
 
 print("D8-CURRENT-AUTHORITY: PASS")

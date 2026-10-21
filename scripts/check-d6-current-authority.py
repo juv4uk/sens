@@ -32,7 +32,7 @@ for bits,name in d["residents"].items():
     assert f"(D6:{bits} {name})" in contract,(bits,name)
 
 assert "(minor . 9)" in lang
-assert "; Contract 11.9 —" in lang
+assert "; Контракт 11.9 —" in lang
 assert "#3393" in lang
 assert "D6  full compact — exact 6-bit keys (64/64)" in current
 assert "D7  v2 keyboard text/data — exact 7-bit keys (128/128)" in current
