@@ -559,6 +559,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/rotate-three-right",
         "lib/rotate-four-left",
         "lib/rotate-four-right",
+        "lib/list-reverse-general",
         "lib/pair-zip-unzip-two",
         "lib/list-alternating-split-four",
         "lib/list-replace-fourth",
