@@ -3,6 +3,8 @@ import pathlib
 import importlib.util
 import subprocess
 import sys
+import tempfile
+from unittest.mock import patch
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -110,6 +112,22 @@ class NumericDomains(unittest.TestCase):
             [f"{number:07b}" for number in range(128)],
         )
         self.assertTrue(all(row.lisp is None for row in rows))
+
+    def test_current_d7_gate_rejects_retired_keyboard_glyph_and_preserves_real_source(self):
+        # Mutate only a temporary human-view table. A historical v1 glyph
+        # must not replace owner-ratified v2 at W7:0000000.
+        original = (ROOT / "lib/domains/d7.lisp").read_text(encoding="utf-8")
+        old = "(0000000 (ук ()) (укр ()) (san ()) (en ())"
+        retired = "(0000000 (ук ()) (укр ()) (san क) (en k)"
+        self.assertEqual(original.count(old), 1)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "d7.lisp"
+            path.write_text(original.replace(old, retired, 1), encoding="utf-8")
+            with patch.object(DOMAIN_GATE, "D7_TABLE", path):
+                with self.assertRaisesRegex(SystemExit, "D7:0000000.*glyph"):
+                    DOMAIN_GATE.validate_d7()
+        # Normal authority remains usable after the negative fixture.
+        self.assertEqual(len(DOMAIN_GATE.validate_d7()), 128)
 
     def test_full_domain_gate_accepts_current_ukrainian_selector_names(self):
         result = subprocess.run(
