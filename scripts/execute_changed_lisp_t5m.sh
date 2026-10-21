@@ -128,8 +128,10 @@ PY
         result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
         echo "T5M_DOMAIN_SOURCE_RUNTIME_PASS source=$file physical=NOT_SUPPORTED result_sha256=$result_sha release=NOT_CERTIFIED"
         continue
+      else
+        # Код береться з реального невдалого SENS, не з порожнього if.
+        status=$?
       fi
-      status=$?
       sed 's/^/T5M source stderr: /' "$stderr" >&2
       echo "::error::T5M_DOMAIN_SOURCE_RUNTIME_FAIL source=$file status=$status" >&2
       failed_files=$((failed_files + 1))
