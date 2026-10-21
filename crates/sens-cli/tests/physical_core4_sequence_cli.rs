@@ -254,8 +254,8 @@ impl Drop for SourceTriplet {
 }
 
 #[test]
-fn ukrainian_d3_twenty_existing_files_mint_verify_and_execute() {
-    // Eighteen real executable Ukrainian .lisp programs; the stable test
+fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
+    // Executable Ukrainian D3/D4 .lisp programs; the stable test
     // name is retained for the existing exact-target CI invocation, not
     // static metadata or mock examples; SENS evaluates each physical program.
     let mut first: Option<SourceTriplet> = None;
@@ -280,6 +280,9 @@ fn ukrainian_d3_twenty_existing_files_mint_verify_and_execute() {
         "cdr-twice-car-third-symbol",
         "cdr-after-car-nested-pair",
         "eq-inner-car-cdr-atom",
+        "d4-list-one-symbol",
+        "d4-append-second-symbol",
+        "d4-null-not-cons",
     ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
