@@ -21,8 +21,6 @@ SPEC.loader.exec_module(audit)
 # українське ім'я завжди читаємо з чинної таблиці, не дублюємо реєстр.
 EXPECTED = {
     "lib/translation.lisp": {
-        "advice-all-decision": ("D10", "0001111010", 1),
-        "advice-decision": ("D10", "0001111101", 1),
         "knowledge-clause-valid?": ("D10", "0010000000", 1),
         "knowledge-clauses-valid?": ("D10", "0010001000", 1),
         "knowledge-goal-valid?": ("D10", "0010010101", 1),
@@ -85,6 +83,23 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
                         self.assertIsNone(re.search(r"[A-Za-z]", row.ukr))
                         self.assertEqual(calls[name], 0, f'old Latin executable head remains: {name}')
                         self.assertGreaterEqual(calls[row.ukr], minimum)
+
+    def test_advice_is_decided_by_current_world_mechanism(self):
+        # D10-координати залишаються ратифікованими даними, але самі
+        # не доводять викличність. Справжній SENS-свідок — translation_boundary.rs.
+        translation = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
+        calls = Counter(t.text for t in audit.candidate_heads(audit.parse(translation)))
+        for name in ("порада-рішення-у-світ", "порада-всі-рішення-у-світ"):
+            self.assertGreaterEqual(calls[name], 1, name)
+        self.assertGreaterEqual(translation.count(
+            "(створити-світ (як-є ()) *knowledge-journal* (як-є ()))"
+        ), 2)
+        for old_en in ("advice-decision", "advice-all-decision"):
+            self.assertEqual(calls[old_en], 0)
+            rows = self.by_en.get(old_en, [])
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(calls[rows[0].ukr], 0,
+                             "D10 word does not prove runtime callability")
 
     def test_quoted_data_and_definition_names_remain_distinct(self):
         translation = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
