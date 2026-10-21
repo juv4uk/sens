@@ -277,6 +277,12 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
 
+          # Фізичне оновлення D2 запускає парний Zig/SENS незалежно від інших RED.
+          if grep -Eq '^(lib/codec-d2(\.lisp|\.sens)?|crates/sens/tests/codec_in_sens\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'codec_d2_tests=true' >> "$GITHUB_OUTPUT"
+            echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: ./.github/actions/install-zig
         if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.reason_tests == 'true' || steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:')) || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
@@ -445,7 +451,7 @@ jobs:
           retention-days: 1
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
@@ -473,6 +479,16 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests.test_code_runs.TranslationSelectorsUkrProjectionTests -v
+
+      - name: "SENS D2 — незалежний Zig/T5M roundtrip фізичної пари"
+        if: \${{ !cancelled() && steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' }}
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.test_code_runs.CodecUkrProjectionTests -v
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo run --locked -p sens-cli --bin sens -- --t5m-pair lib/codec-d2.lisp lib/codec-d2.sens
 
       - name: "SENS runtime перекладу: позитивні й негативні свідки"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.translation_tests == 'true' }}
@@ -799,14 +815,6 @@ jobs:
           # Живий SENS-свідок: іменована пара замість недопущеного D5 FUNCTION.
           if grep -Eq '^(lib/machine/dispatch/native-first\.lisp|crates/sens/tests/native_first_d1_cutover\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test native_first_d1_cutover -- --nocapture
-          fi
-          # Чинний D2 Lisp: справжній SENS і чинний негативний AST.
-          # Окрім D2 eval, перевіряємо фізичну пару поточним Zig і SENS.
-          # Пара без однойменного перегляду чи byte-exact джерела не є GO.
-          if grep -Eq '^(lib/codec-d2(\.lisp|\.sens)?|crates/sens/tests/codec_in_sens\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed"; then
-            python3 -m unittest tests.test_code_runs.CodecUkrProjectionTests -v
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo run --locked -p sens-cli --bin sens -- --t5m-pair lib/codec-d2.lisp lib/codec-d2.sens
           fi
       - name: Реальний SENS — точна двопольова форма правил виведення
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
