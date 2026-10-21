@@ -903,6 +903,10 @@ jobs:
           if grep -Eq '^(lib/machine/operands/x86-64\.lisp|crates/sens/tests/machine_typed_operands\.rs)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_typed_operands -- --nocapture
           fi
+          # Живий SENS-D1: змінений Lisp машинних ефектів та його негативний свідок.
+          if grep -Eq '^(lib/machine/effects/u64\.lisp|crates/sens/tests/machine_effect_d5_arithmetic_projection\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_effect_d5_arithmetic_projection machine_effect_shape_predicates_use_live_exact_d1_not_legacy_true_false -- --exact --nocapture
+          fi
           if grep -Eq '^(lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_exact_domain_cpu current_d5_plus_selects_x86_add_without_legacy_sid_join -- --exact --nocapture
           fi
