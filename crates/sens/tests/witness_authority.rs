@@ -574,7 +574,7 @@ fn island_compat_semantics_are_owned_by_lisp_not_kernel_adapters() {
     transport_island_compat_document(&mut session);
     load_island_compat_witness(&mut session);
 
-    let verdict = eval_program("(island-compat-witness)", &mut session)
+    let verdict = eval_program("(свідок-сумісності-островів)", &mut session)
         .expect("Lisp-owned island compatibility witness must execute")
         .value
         .to_string();
@@ -592,7 +592,7 @@ fn life_1_liveness_semantics_are_owned_by_lisp_data() {
     transport_life_1_document(&mut session);
     load_life_1_contract_witness(&mut session);
 
-    let verdict = eval_program("(life-1-contract-witness)", &mut session)
+    let verdict = eval_program("(свідок-договору-життя-1)", &mut session)
         .expect("Lisp-owned LIFE-1 contract witness must execute")
         .value
         .to_string();
