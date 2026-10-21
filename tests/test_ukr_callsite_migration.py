@@ -1499,13 +1499,12 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
                     source,
                 )
                 self.assertNotIn(f'"lib/domains/d{width}.lisp"', source)
-        # Чинний читач перевіряє не лише історичні сім таблиць, а весь D1–D10.
+        # Нові шляхи D7 — цитовані символи, не недопущені рядкові літерали.
+        # Перевірку завантаження всіх десяти доменів виконано вище.
+        # Не дублюємо історичний (завантажити-домен "lib/domains/…"),
+        # бо він суперечить фактичному SENS Text7 ingress.
         for width, count in ((7, 128), (9, 512), (10, 1024)):
-            with self.subTest(domain=f"D{width}"):
-                self.assertIn(
-                    f'(визначити д{width} (завантажити-домен "lib/domains/d{width}.lisp"))',
-                    source,
-                )
+            with self.subTest(domain=f"D{width}", assertion="точна таблиця"):
                 expected_key = "0" * width
                 self.assertIn(
                     f'(перевірити-розширений-домен? д{width} {count} "{expected_key}")',
