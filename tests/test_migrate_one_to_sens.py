@@ -153,6 +153,53 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertEqual(view.read_bytes(), view_after)
         self.assertEqual(PROVEN.read_bytes(), source_before)
 
+    def test_batch_zig_t5m_refresh_existing_pair_preserves_exact_words(self):
+        # Реальний pinned Zig + той самий мігратор, не Python-симуляція.
+        source_before = PROVEN.read_bytes()
+        with tempfile.TemporaryDirectory(prefix="sens-batch-t5m-refresh-") as td:
+            out = Path(td)
+            carrier, view = out / "branch.sens", out / "branch"
+            report_path = out / "batch-report.json"
+            stale_carrier, stale_view = b"stale T5M", b"stale spaced view\\n"
+            carrier.write_bytes(stale_carrier)
+            view.write_bytes(stale_view)
+            command = [
+                sys.executable, str(ROOT / "scripts/migrate-three-pass.py"),
+                str(PROVEN), "--out", str(out), "--report", str(report_path),
+                "--codec", "t5m", "--source-surface", "ук",
+            ]
+
+            denied = subprocess.run(
+                command, cwd=ROOT, capture_output=True, text=True
+            )
+            self.assertEqual(denied.returncode, 2, denied.stderr + denied.stdout)
+            self.assertEqual(carrier.read_bytes(), stale_carrier)
+            self.assertEqual(view.read_bytes(), stale_view)
+
+            updated = subprocess.run(
+                command + ["--refresh-existing"], cwd=ROOT,
+                capture_output=True, text=True
+            )
+            self.assertEqual(updated.returncode, 0, updated.stderr + updated.stdout)
+            receipt = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(receipt["mode"], "refresh-existing-zig-minted")
+            self.assertEqual(receipt["summary"]["files_written"], 1)
+            self.assertEqual(receipt["summary"]["files_blocked"], 0)
+            self.assertEqual(receipt["files"][0]["status"], "refreshed")
+            self.assertIsInstance(receipt["files"][0]["zig_transport"], dict)
+            physical = carrier.read_bytes()
+            words = decode_t5m_bytes(physical)
+            self.assertTrue(words)
+            self.assertEqual(
+                physical, encode_t5m_projection(" ".join(words) + "\\n")
+            )
+            self.assertEqual(
+                view.read_bytes(), (" ".join(words) + "\\n").encode("ascii")
+            )
+            self.assertNotEqual(physical, stale_carrier)
+            self.assertNotEqual(view.read_bytes(), stale_view)
+        self.assertEqual(PROVEN.read_bytes(), source_before)
+
     def test_unknown_ukrainian_identifiers_are_not_encoded_as_fake_calls(self):
         # A genuinely unknown Ukrainian head must fail closed, never become a
         # fake call or unstructured text. The former fixture
