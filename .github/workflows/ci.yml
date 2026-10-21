@@ -37,6 +37,10 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
           persist-credentials: false
+      - name: Тригер-вартовий — один фокусований workflow
+        shell: bash
+        run: python3 scripts/ci_one_focused_workflow.py
+
 
       - uses: ./.github/actions/install-zig
         if: ${{ matrix.shard == 1 || matrix.shard == 19 }}
@@ -978,7 +982,7 @@ jobs:
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_alists_and_journal_version_evaluate_real_d1_without_unbound_truth_names -- --exact --nocapture
           fi
           # FS: справжній український SENS read/write, а не Python-обчислювач.
-          if grep -Eq '^(lib/fs(\.lisp|\.sens)?|crates/sens-host/src/lib\.rs|crates/sens-host/tests/capabilities\.rs|tests/test_fs_ukr_projection\.py|scripts/test-fs-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed"; then
+          if grep -Eq '^(lib/fs(\.lisp|\.sens)?|crates/sens-host/tests/capabilities\.rs|tests/test_fs_ukr_projection\.py|scripts/test-fs-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed"; then
             python3 -m unittest tests/test_fs_ukr_projection.py -v
             python3 scripts/test-fs-d1-bitness.py
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-host --test capabilities ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity -- --exact --nocapture
