@@ -49,6 +49,11 @@ is_language_definition_file() { [[ "$1" =~ ^lib/core[^/]*\.lisp$ ]]; }
 active=()
 while IFS= read -r f; do is_explicit_non_implementation "$f" || active+=("$f"); done \
   < <(find lib -type f -name '*.lisp' | sed 's|^\./||' | LC_ALL=C sort)
+# Порожній або втрачений корпус не є чистою міграцією.
+if (( ${#active[@]} == 0 )); then
+  echo "SOURCE_SCAN_ERROR: no active executable Lisp sources; empty scan cannot certify" >&2
+  exit 1
+fi
 lang=(); ordinary=()
 for f in "${active[@]}"; do if is_language_definition_file "$f"; then lang+=("$f"); else ordinary+=("$f"); fi; done
 echo "active authored lib: ${#active[@]} files (${#lang[@]} language, ${#ordinary[@]} ordinary)"

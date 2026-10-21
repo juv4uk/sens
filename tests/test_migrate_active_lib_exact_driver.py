@@ -77,6 +77,16 @@ class ActiveLibDriverTests(unittest.TestCase):
         self.assertFalse(self.log.exists())
         self.assertNotIn("MIGRATION_COMPLETE", run.stdout)
 
+    def test_empty_library_cannot_report_clean_scan(self):
+        # Відсутній корпус не повинен перетворюватися на фальшивий зелений висновок.
+        for name in ("first", "second"):
+            (self.root / f"lib/{name}.lisp").unlink()
+        run = self.run_driver("--check")
+        self.assertNotEqual(run.returncode, 0, run.stdout + run.stderr)
+        self.assertIn("SOURCE_SCAN_ERROR: no active executable Lisp sources", run.stderr)
+        self.assertNotIn("EXACT_SOURCE_SCAN_PASS", run.stdout)
+        self.assertFalse(self.log.exists())
+
     def test_scanner_nonzero_cannot_be_reported_as_green(self):
         # A truncated/crashed native tool can print convertible=0 before
         # exiting with a failure. A green-looking row is not a clean scan.
