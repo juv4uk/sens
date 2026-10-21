@@ -144,8 +144,14 @@ fn append_t5m_expression(
             words.push(control(0b01)?);
         }
         ExprKind::Symbol(name) => {
-            let text = sens::encode_text7(name, layout)
-                .map_err(|error| format!("T5M identifier projection: {error}"))?;
+            // Вказуємо точний атом і позицію: одне «byte 0» без назви
+            // приховує дефект конкретного Lisp-джерела.
+            let text = sens::encode_text7(name, layout).map_err(|error| {
+                format!(
+                    "T5M identifier projection: symbol={name:?} source_byte={}: {error}",
+                    expression.span.start
+                )
+            })?;
             words.push(control(0b10)?);
             for cell in text.cells() {
                 words.push(ExactDomainWord::Identity(t5m_domain_identity(
@@ -1349,6 +1355,29 @@ mod tests {
 
         let error = restore_t5m_words(&expected, &altered).expect_err("bit drift fails closed");
         assert!(error.starts_with("T5M_WORD_MISMATCH index=0"), "{error}");
+    }
+
+    #[test]
+    fn t5m_uk_projection_reports_the_exact_unmappable_protocol_atom() {
+        let forms = sens::parse_mixed_exact_domain("(як-є reason-index/1)")
+            .expect("старий протокольний атом лишається вихідними даними Lisp");
+        let mut words = Vec::new();
+        let error = append_t5m_expression(
+            &forms[0], sens::Text7Layout::Uk, &mut words, 0
+        ).expect_err("латинський атом не має української D7 v2-проєкції");
+        assert!(error.contains("symbol=\\"reason-index/1\\""), "{error}");
+        assert!(error.contains("source_byte="), "{error}");
+        assert!(error.contains("Uk has no current D7 v2 glyph"), "{error}");
+    }
+
+    #[test]
+    fn t5m_uk_projection_accepts_a_reversible_ukrainian_atom() {
+        let forms = sens::parse_mixed_exact_domain("(як-є слово)")
+            .expect("чинна українська поверхня розбирається");
+        let mut words = Vec::new();
+        append_t5m_expression(&forms[0], sens::Text7Layout::Uk, &mut words, 0)
+            .expect("українські дані D7 v2 кодуються точними словами");
+        assert!(!words.is_empty(), "позитивний свідок має мати фізичні слова");
     }
 
     #[test]
