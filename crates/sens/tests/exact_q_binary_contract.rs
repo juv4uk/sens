@@ -83,7 +83,7 @@ fn runtime_comparisons_match_lisp_owned_exact_q_results() {
     for row in &rows {
         let runtime_actual = actual(row, &mut session);
         let program = format!(
-            "(witness-status (witness-verdict (quote {}) (quote {})))",
+            "(свідок-статус (свідок-висновок (як-є {}) (як-є {})))",
             row.source, runtime_actual
         );
         let status = eval_program(&program, &mut session)
