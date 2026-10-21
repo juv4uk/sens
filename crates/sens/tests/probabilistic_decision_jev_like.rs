@@ -3,13 +3,10 @@
 //! These tests exercise only the contract/data layer. There is no model call,
 //! provider identity, new SID, or Rust Value variant.
 
-use sens::{exact_domain_fraction_parts, eval_program, load_core_library, BinaryNumber, Session};
+use sens::{eval_program, load_core_library, Session};
 use std::{io::{Read, Write}, net::TcpListener, thread, time::Duration};
 
-fn eval_probabilistic_decision_with_setup(
-    source: &str,
-    setup: impl FnOnce(&mut Session),
-) -> String {
+fn eval_probabilistic_decision(source: &str) -> String {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library should load");
     eval_program(
@@ -32,25 +29,10 @@ fn eval_probabilistic_decision_with_setup(
         &mut session,
     )
     .expect("typed System One contract should load");
-    setup(&mut session);
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
         .to_string()
-}
-
-fn eval_probabilistic_decision(source: &str) -> String {
-    eval_probabilistic_decision_with_setup(source, |_| {})
-}
-
-fn d48_positive_word(value: u64) -> BinaryNumber {
-    const WIDTH: usize = 48;
-    assert!(value < (1_u64 << (WIDTH - 1)), "value must fit positive D48");
-    let bits: Vec<u8> = (0..WIDTH)
-        .rev()
-        .map(|shift| ((value >> shift) & 1) as u8)
-        .collect();
-    BinaryNumber::from_numeric_domain_bits(WIDTH, &bits).expect("exact positive D48 word")
 }
 
 #[test]
@@ -556,23 +538,20 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
               ((спостереження-системи-один-для-запитання-допустиме? питання спостереження)
                (як-є valid))
               (так (як-є invalid)))
+            ; Обидві ймовірності — дійсні однодоменні D48 з відповіді моделі.
+            ; Штучний поріг, уведений хостом, не є доказом закону SENS.
             (за-умовою
-              ((менше? (четверте спостереження) decision-threshold)
-               (як-є below-threshold))
-              (так (як-є above-threshold)))
+              ((менше? (друге (друге (друге сире)))
+                       (друге (перше (друге сире))))
+               (як-є найбільша-ймовірність-перша))
+              (так (як-є невірний-порядок)))
             (перше (перше (п'ятий спостереження)))
             (друге (перше (п'ятий спостереження)))))
         "#
     );
     assert_eq!(
-        eval_probabilistic_decision_with_setup(&model_source, |session| {
-            let one = d48_positive_word(1);
-            let two = d48_positive_word(2);
-            let half = exact_domain_fraction_parts(false, &one, &two)
-                .expect("same-D48 exact threshold");
-            session.environment.define("decision-threshold", half);
-        }),
-        "(model-distribution/1 choice-observation/1 valid above-threshold source local-model)"
+        eval_probabilistic_decision(&model_source),
+        "(model-distribution/1 choice-observation/1 valid найбільша-ймовірність-перша source local-model)"
     );
     let request = fixture.join().expect("fixture server");
     assert!(request.contains("\"top_logprobs\":20"));
