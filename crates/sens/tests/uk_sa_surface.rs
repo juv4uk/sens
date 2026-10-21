@@ -31,7 +31,7 @@
 //!   one of those SA spellings (viyoga/guṇana/haraṇa/hīna?/adhika?/sama?)
 //!   against their UK/symbolic peers.
 
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session};
 
 fn load_surface_prerequisites(session: &mut Session) {
     for source in [
@@ -184,11 +184,11 @@ fn uk_acceptance_program_passes() {
 #[test]
 fn peer_identity_acceptance_program_passes() {
     let mut s = uk_session();
-    let r = eval_program(
-        include_str!("../../../lib/surface/peer-identity-acceptance.lisp"),
-        &mut s,
-    )
-    .expect("Ukrainian D1/D3/D24+ acceptance program should evaluate");
+    let source = include_str!("../../../lib/surface/peer-identity-acceptance.lisp");
+    let parsed = parse_mixed_exact_domain(source)
+        .expect("чинний український D1/D24+ читач має приймати програму");
+    let r = eval_parsed_expressions(&parsed, &mut s)
+        .expect("Ukrainian D1/D3/D24+ acceptance program should evaluate");
     assert_eq!(r.value.to_string(), "успіх");
 }
 
@@ -201,7 +201,9 @@ fn peer_identity_acceptance_wrong_abs_expectation_is_detected() {
     assert_eq!(source.matches(correct).count(), 1, "втрачено точний свідок");
     let mutant = source.replacen(correct, "(однакове-число? (модуль (відняти 0 7)) 8)", 1);
     let mut s = uk_session();
-    let r = eval_program(&mutant, &mut s)
+    let parsed = parse_mixed_exact_domain(&mutant)
+        .expect("негативний мутант повинен зберігати чинний D1/D24+ синтаксис");
+    let r = eval_parsed_expressions(&parsed, &mut s)
         .expect("mutant must execute in actual SENS evaluator");
     assert_eq!(r.value.to_string(), "помилка-модуль");
 }
