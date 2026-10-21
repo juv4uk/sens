@@ -481,7 +481,7 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     // Failure-only stage inventory for Contract 11.8 callability diagnosis.
     // These probes report but never turn a failed stage into a passing test.
     for (name, source) in [
-        ("wire-denominator-zero", "(машина-допуск-знаменник-одиниця? \"0/1\")"),
+        ("d6-integer-zero", "(ціле? 0)"),
         ("ge-lower-zero", "(не-менше? 0 -128)"),
         ("ge-normalize-zero", "(тотожне? (не-менше? 0 -128) 1)"),
         ("le-upper-zero", "(не-більше? 0 127)"),
