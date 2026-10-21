@@ -239,21 +239,45 @@ fn expect_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageError>
         match current {
             Value::Nil => return Ok(bytes),
             Value::Pair(head, tail) => {
-                let Value::Number(number, _) = **head else {
-                    return Err(LanguageError::new(
-                        ErrorKind::Type,
-                        "записати-байти-файла expects a list of integers 0-255 · записати-байти-файла ochikuie spysok tsilykh chysel 0-255 · записати-байти-файла erwartet eine Liste von Ganzzahlen 0-255",
-                        span,
-                    ));
+                // SENS arithmetic now returns exactly qualified D24+ numbers.
+                // The FS host transports raw bytes only: decode 0..255 at
+                // this I/O boundary, never turn decimal host values into the
+                // normative numeric identity and never accept negative bits.
+                let byte = match &**head {
+                    Value::Number(number, _)
+                        if number.is_finite()
+                            && number.fract() == 0.0
+                            && (0.0..=255.0).contains(number) =>
+                    {
+                        *number as u8
+                    }
+                    Value::BinaryNumber(number) if number.numeric_domain_width().is_some() => {
+                        let bits = number.as_bits();
+                        if bits.len() > 8 && bits[..bits.len() - 8].iter().any(|&bit| bit != 0) {
+                            return Err(LanguageError::new(
+                                ErrorKind::Type,
+                                "записати-байти-файла expects each element to be an integer between 0 and 255 · записати-байти-файла ochikuie, shchob kozhen element buv tsilym chyslom vid 0 do 255 · записати-байти-файла erwartet, dass jedes Element eine Ganzzahl zwischen 0 und 255 ist",
+                                span,
+                            ));
+                        }
+                        bits.iter().fold(0u8, |byte, &bit| (byte << 1) | bit)
+                    }
+                    Value::Number(_, _) | Value::BinaryNumber(_) => {
+                        return Err(LanguageError::new(
+                            ErrorKind::Type,
+                            "записати-байти-файла expects each element to be an integer between 0 and 255 · записати-байти-файла ochikuie, shchob kozhen element buv tsilym chyslom vid 0 do 255 · записати-байти-файла erwartet, dass jedes Element eine Ganzzahl zwischen 0 und 255 ist",
+                            span,
+                        ))
+                    }
+                    _ => {
+                        return Err(LanguageError::new(
+                            ErrorKind::Type,
+                            "записати-байти-файла expects a list of integers 0-255 · записати-байти-файла ochikuie spysok tsilykh chysel 0-255 · записати-байти-файла erwartet eine Liste von Ganzzahlen 0-255",
+                            span,
+                        ))
+                    }
                 };
-                if number.fract() != 0.0 || !(0.0..=255.0).contains(&number) {
-                    return Err(LanguageError::new(
-                        ErrorKind::Type,
-                        "записати-байти-файла expects each element to be an integer between 0 and 255 · записати-байти-файла ochikuie, shchob kozhen element buv tsilym chyslom vid 0 do 255 · записати-байти-файла erwartet, dass jedes Element eine Ganzzahl zwischen 0 und 255 ist",
-                        span,
-                    ));
-                }
-                bytes.push(number as u8);
+                bytes.push(byte);
                 current = tail;
             }
             _ => {
@@ -709,6 +733,36 @@ mod install_tests {
 
         assert_eq!(error.kind, ErrorKind::Type);
         assert_eq!(error.span, argument_span);
+    }
+
+    #[test]
+    fn fs_raw_byte_bridge_accepts_only_exact_bounded_d24_numbers() {
+        fn d24(value: u32) -> Value {
+            let bits = (0..24)
+                .rev()
+                .map(|shift| ((value >> shift) & 1) as u8)
+                .collect::<Vec<_>>();
+            Value::BinaryNumber(
+                sens::BinaryNumber::from_numeric_domain_bits(24, &bits)
+                    .expect("exact D24 number"),
+            )
+        }
+
+        let span = Span::default();
+        let valid = Value::list([d24(0), d24(128), d24(255)]);
+        assert_eq!(
+            super::expect_byte_list(&valid, span).expect("physical 0..255 byte transport"),
+            [0, 128, 255],
+        );
+        for invalid in [
+            Value::list([d24(256)]),
+            Value::list([d24((1 << 24) - 1)]),
+            Value::list([Value::String("255".into())]),
+        ] {
+            let err = super::expect_byte_list(&invalid, span)
+                .expect_err("FS bridge must reject non-byte numeric identities");
+            assert_eq!(err.kind, ErrorKind::Type);
+        }
     }
 
     #[test]
