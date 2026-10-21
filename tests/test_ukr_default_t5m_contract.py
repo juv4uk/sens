@@ -64,6 +64,34 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         self.assertIn('fs::read_to_string(filename)', cli)
         self.assertIn('fs::read(filename)', cli)
 
+    def test_native_binding_sources_load_lisp_dependencies_before_consumers(self):
+        # SENS читає й виконує --binding-source у заданому порядку,
+        # не через Python/JSON resolver. Зворотний порядок ламав
+        # Reason до появи української DEFINE уніфікувати.
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
+        expected = (
+            'binding_sources=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp)',
+            'binding_sources=(--binding-source lib/unify.lisp\\n'
+            '                     --binding-source lib/knowledge.lisp\\n'
+            '                     --binding-source lib/reason.lisp)',
+            'binding_sources=(--binding-source lib/unify.lisp\\n'
+            '                     --binding-source lib/knowledge.lisp\\n'
+            '                     --binding-source lib/reason.lisp\\n'
+            '                     --binding-source lib/world.lisp\\n'
+            '                     --binding-source lib/yantra.lisp\\n'
+            '                     --binding-source lib/result-status.lisp)',
+        )
+        for sequence in expected:
+            with self.subTest(sequence=sequence):
+                self.assertIn(sequence, runner)
+        self.assertIn('mint_flag=--t5m-mint-pair', runner)
+        self.assertIn('"$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}"', runner)
+        # Негатив: старий порядок користувача перед визначенням не приймаємо.
+        self.assertNotIn(
+            'binding_sources=(--binding-source lib/reason.lisp --binding-source lib/unify.lisp)',
+            runner,
+        )
+
     def test_changed_executable_lisp_migration_failure_is_not_green(self):
         # Не видавати пропущене виконання за успішний CI: це борг, а не PASS.
         runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
