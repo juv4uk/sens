@@ -69,3 +69,62 @@ fn d5_d6_owner_pairs_follow_their_own_local_laws() {
             "test_id=other-domain-family layer=SENS law={law} lhs={left} rhs={right}");
     }
 }
+
+#[test]
+fn d8_do_while_product_two_axes_are_observable_in_native_sens() {
+    // Ратифікований інваріант: 11001111 — стоп на істині, повернути стан.
+    // Інший новий кут 11001101 — продовжувати на істині й застосувати результат.
+    // Зміна останніх двох бітів тут — локальний добуток Д6 DO/WHILE,
+    // а НЕ загальний зміст бітів для всіх інших доменів.
+    let d8 = include_str!("../../../lib/domains/d8.lisp");
+    for row in [
+        "(11001101 (ук доки-істина+застосувати) (укр продовжувати-поки-істина-й-застосувати-результат)",
+        "(11001111 (ук зупинити-на-істині+стан) (укр зупинити-коли-істина-й-повернути-стан)",
+    ] {
+        assert!(d8.contains(row), "test_id=d8-loop-product layer=owner-map missing={row}");
+    }
+
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("current SENS Core4 language");
+    // Identical initial state, same P(x)=empty?(x), step(x)=CDR(x).
+    // Four product corners have pairwise different observable outputs.
+    let cases = [
+        (
+            "продовжувати-на-істині+стан / D6:110011",
+            "(поки порожній? решта (як-є (а б)))",
+            "(як-є (а б))",
+        ),
+        (
+            "продовжувати-на-істині+результат / D8:11001101",
+            "(продовжувати-поки-істина-й-застосувати-результат порожній? решта (функція (стан) (сполучити (як-є мітка) стан)) (як-є (а б)))",
+            "(як-є (мітка а б))",
+        ),
+        (
+            "зупиняти-на-істині+стан / D8:11001111",
+            "(зупинити-коли-істина-й-повернути-стан порожній? решта (як-є (а б)))",
+            "(як-є ())",
+        ),
+        (
+            "зупиняти-на-істині+результат / D6:110010",
+            "(робити решта порожній? (функція (стан) (сполучити (як-є мітка) стан)) (як-є (а б)))",
+            "(як-є (мітка))",
+        ),
+    ];
+    let mut actuals = Vec::new();
+    for (law, source, expected_source) in cases {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|err| panic!("test_id=d8-loop-product law={law} input={source} error={err}")).value;
+        let expected = eval_program(expected_source, &mut session)
+            .unwrap_or_else(|err| panic!("test_id=d8-loop-product expected={expected_source} error={err}")).value;
+        assert_eq!(actual, expected,
+            "test_id=d8-loop-product layer=SENS law={law} expected={expected_source} actual={source}");
+        assert!(actuals.iter().all(|prior| prior != &actual),
+            "test_id=d8-loop-product layer=SENS distinct-corners law={law}");
+        actuals.push(actual);
+    }
+
+    // Д1 предикат, що повертає список, не перетворюється на істину хостом.
+    let invalid = "(зупинити-коли-істина-й-повернути-стан (функція (стан) (як-є ())) решта (як-є (а)))";
+    assert!(eval_program(invalid, &mut session).is_err(),
+        "test_id=d8-loop-product layer=SENS expected=D1-type-rejection actual=accepted");
+}
