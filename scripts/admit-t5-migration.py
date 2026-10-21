@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Proof-gated publisher for ONE real historical Lisp -> physical T5 SENS pair.
+"""Історичний інспектор T5/SID8 — без публікації фізичних файлів.
 
-This tool does NOT infer SENS meaning: the owner-ratified three-pass migrator
-and codec do that. A separate, source-pinned oracle test must succeed before
-a binary output can be published. For D8/current-era ambiguities, BLOCK.
+Колишній видавець використовував застарілі D1–D9, --source-era=legacy та
+Python/T5. Ці докази не допускають програм у чинний SENS 11.9.
+Публікуйте нові .sens лише через Zig/T5M у migrate-one-to-sens.py або
+migrate-t5-batch.py; для семантичного допуску потрібен незалежний SENS-eval.
+Збережено перевірку старих маніфестів як історичного походження, не закону.
 """
 from __future__ import annotations
 
@@ -298,6 +300,14 @@ def admit(root: Path, mirror: Path, manifest: dict, reader: Path, write: bool) -
         raise Blocked("DESTINATION: symlink mirror forbidden")
     if not target.resolve().is_relative_to(mirror):
         raise Blocked("DESTINATION: mirror escape")
+
+    # Колишній T5-публікатор не повинен знову створювати .sens навіть
+    # за успішних історичних свідків. Жодного глобального HOLD — потрібний
+    # чинний маршрут Zig/T5M, а не відродження SID8.
+    raise Blocked(
+        "LEGACY_T5_PUBLICATION_DISABLED: historical T5/SID8 is read-only; "
+        "use scripts/migrate-one-to-sens.py (Zig/T5M) and real SENS evaluation"
+    )
 
     with tempfile.TemporaryDirectory(prefix="sens-t5-proof-") as tmp:
         work = Path(tmp)
