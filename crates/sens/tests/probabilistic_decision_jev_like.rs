@@ -339,6 +339,17 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
         );
     }
 
+    // Точний негативний D24 свідок із самого SENS: старий дріб не
+    // дістає арифметичного допуску, навіть коли інший операнд є D24.
+    // Не послаблюємо арифметику для того, щоб "позеленів" System One.
+    let mut numeric_session = Session::default();
+    let bad = eval_program("(додати 1/2 1)", &mut numeric_session)
+        .expect_err("SENS має відхилити unqualified Rational + D24");
+    assert!(
+        bad.message.contains("actual_kind=unqualified-rational"),
+        "test_id=system-one-numeric-domain-red layer=actual-SENS expected=unqualified-rational actual={bad}"
+    );
+
     let valid_batch = r#"
       (нехай-послідовно ((state (як-є ((message "double charge") (locale uk))))
              (choice-question (запитання-вибору-системи-один
