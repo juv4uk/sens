@@ -29,8 +29,20 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
             encoding="utf-8"
         )
+        # Нормативний шлях — SENS reader + Zig; Python є тільки
+        # необов'язковим явно вибраним історичним preview.
+        self.assertIn('case "${SENS_NATIVE_T5M:-1}" in', runner)
+        self.assertIn('SENS_NATIVE_T5M_INVALID', runner)
+        self.assertIn('run_native_t5m_program', runner)
+        self.assertIn('if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then', runner)
+        self.assertIn('"$binary" --t5m-mint "$file" "$physical"', runner)
+        self.assertIn('"$native_open" open "$physical"', runner)
+        self.assertIn('"$binary" --t5m-pair "$file" "$physical"', runner)
+        # Історичний режим не видалений, але він не є типовим входом.
         self.assertIn('python3 scripts/migrate-three-pass.py "$file"', runner)
         self.assertIn('--codec t5m --source-surface укр', runner)
+        self.assertLess(runner.index('    run_native_t5m_program'),
+                        runner.index('python3 scripts/migrate-three-pass.py'))
         self.assertIn('pair="$dir/$(basename "$file" .lisp).sens"', runner)
         # --t5m-file читає текстовий Lisp (read_to_string); для створеного
         # фізичного T5M слід викликати окремий .sens ingress, без цього прапорця.
