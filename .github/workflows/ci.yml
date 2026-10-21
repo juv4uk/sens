@@ -884,7 +884,7 @@ jobs:
           python3 -m unittest tests/test_ukrainian_domain_projection_migration.py -v
           python3 -m unittest tests/test_core_ukr_primary_projection.py -v
 
-      - name: D11 селекторні кандидати — точна бітність, похідність і негативні контролі
+      - name: D11 математично визначені селектори — закон, бітність, негативні контролі
         if: ${{ always() }}
         run: |
           set -euo pipefail
