@@ -51,7 +51,7 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(accepted knowledge-accepted (1) (1))"
+        "(accepted knowledge-accepted 1 1)"
     );
 }
 
@@ -71,7 +71,7 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
           (результат-стан
             (міркувати-у-спостерігати (як-є corpus) (як-є (human socrates)))))
     "#;
-    assert_eq!(eval_translation(source), "(() (1) proved)");
+    assert_eq!(eval_translation(source), "(() 1 proved)");
 }
 
 #[test]
@@ -94,7 +94,7 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(ambiguous translator-ambiguous 1 (1) ())"
+        "(ambiguous translator-ambiguous 1 1 ())"
     );
 }
 
@@ -117,7 +117,7 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected invalid-candidate 1 (1) ())"
+        "(rejected invalid-candidate 1 1 ())"
     );
 }
 
@@ -140,7 +140,7 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected translator-rejected 1 (1) ())"
+        "(rejected translator-rejected 1 1 ())"
     );
 }
 
@@ -162,7 +162,7 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected knowledge-conflict (1) ())"
+        "(rejected knowledge-conflict 1 ())"
     );
 }
 
@@ -183,7 +183,7 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
           (результат-стан
             (міркувати-у-спостерігати (як-є corpus) (переклад-вміст proposal))))
     "#;
-    assert_eq!(eval_translation(source), "(accepted query () (1) blocked)");
+    assert_eq!(eval_translation(source), "(accepted query () 1 blocked)");
 }
 
 #[test]
