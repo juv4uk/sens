@@ -370,6 +370,15 @@ class UnderstandExactD3Witness(unittest.TestCase):
         bad_d1[0][2][2][-1][0] = "ні"
         with self.assertRaisesRegex(AssertionError, "точний D1:YES"):
             verify_unchanged_laws(normalize_current_source_forms(bad_d1))
+        # Справжній однобітний семантичний мутант: ATOM(QUOTE NIL)
+        # дає D1:YES, а ATOM(QUOTE (NIL)) мусить дати D1:NO.
+        # Перевіряємо саме дерево SENS, не буквальне слово «так».
+        bad_false = deepcopy(self.source_forms)
+        fallback_condition = bad_false[0][2][2][-1][0]
+        self.assertEqual(fallback_condition, ["атом?", ["як-є", []]])
+        fallback_condition[1][1] = [[]]
+        with self.assertRaisesRegex(AssertionError, "точний D1:YES"):
+            verify_unchanged_laws(normalize_current_source_forms(bad_false))
         bad_legacy = deepcopy(self.source_forms)
         bad_legacy[0][0] = "0011"
         with self.assertRaisesRegex(AssertionError, "старий виконавчий"):
