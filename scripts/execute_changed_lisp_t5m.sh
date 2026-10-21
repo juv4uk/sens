@@ -109,6 +109,17 @@ run_native_t5m_program() {
     mark_file_failed
     return
   fi
+  # Байтове обернення Zig T5M та канонічного бітового перегляду D24+.
+  if timeout 45s "$native_open" verify-view "$physical" \
+      >"$dir/native-inverse.stdout" 2>"$dir/native-inverse.stderr"; then
+    :
+  else
+    status=$?
+    sed 's/^/SENS physical inverse: /' "$dir/native-inverse.stderr" >&2
+    echo "::error::T5M_NATIVE_VIEW_ROUNDTRIP_FAILED source=$file status=$status" >&2
+    mark_file_failed
+    return
+  fi
   if [[ -e "$committed" || -L "$committed" ]]; then
     if [[ ! -f "$committed" || -L "$committed" ]]; then
       echo "::error::T5M_COMMITTED_PAIR_NOT_REGULAR source=$file companion=$committed" >&2
