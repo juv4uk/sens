@@ -391,10 +391,33 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
             ((відповідь-системи-один-допустима? response request) (як-є valid))
             (так (як-є invalid)))))
     "#;
-    assert_eq!(
-        eval_probabilistic_decision(valid_batch),
-        "(valid 3 valid)"
-    );
+    let actual_batch = eval_probabilistic_decision(valid_batch);
+    if actual_batch != "(valid 3 valid)" {
+        // Лише при RED запускаємо додаткову діагностику тим самим SENS.
+        // Це не host-oracle: кожен D1 результат повертає виконаний Lisp.
+        let diagnostic = valid_batch.replace(
+            "          (довжина (третє request))",
+            r#"(список
+                (запитання-системи-один-допустиме? choice-question)
+                (запитання-системи-один-допустиме? noul-question)
+                (запитання-системи-один-допустиме? score-question)
+                (спостереження-системи-один-для-запитання-допустиме?
+                  choice-question (перше answers))
+                (спостереження-системи-один-для-запитання-допустиме?
+                  noul-question (друге answers))
+                (спостереження-системи-один-для-запитання-допустиме?
+                  score-question (третє answers))
+                (список-спостережень-системи-один-допустимий?
+                  questions answers (як-є ()))
+                (усі-запитання-системи-один-відповіли? questions answers)
+                (допустимий-розподіл? (як-є (yes no)) (третє (друге answers))))"#,
+        );
+        let witnesses = eval_probabilistic_decision(&diagnostic);
+        panic!(
+            "REGRESSION id=system-one-typed-D24 layer=real-SENS expected=(valid 3 valid) actual={actual_batch} diagnostic_D1={witnesses}"
+        );
+    }
+    assert_eq!(actual_batch, "(valid 3 valid)");
 
     let invalid_batches = r#"
       (нехай-послідовно ((state (як-є ((message "double charge"))))
