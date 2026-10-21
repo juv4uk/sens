@@ -37,3 +37,28 @@ fn closure_capture_has_native_parity() {
     assert_eq!(native(expr), expected);
     assert_eq!(meta(expr), expected);
 }
+
+#[test]
+fn mutual_group_closure_d1_is_computed_by_sens_not_bare_truth_names() {
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("ядро SENS");
+    sens::load_meta_evaluator_library(&mut session).expect("живий метаобчислювач");
+    let program = include_str!("../../../lib/meta-eval-mutual.lisp");
+    let forms = parse_mixed_exact_domain(program).expect("поточна укр проєкція");
+    eval_parsed_expressions(&forms, &mut session)
+        .expect("завантажити групові Lisp-визначення через SENS");
+
+    for (source, expected) in [
+        ("(це-замикання-рекурсивної-групи? (як-є ()))", false),
+        ("(це-замикання-рекурсивної-групи? (як-є (ordinary-closure a)))", false),
+        ("(це-замикання-рекурсивної-групи? (як-є (recursive-group-closure a)))", true),
+        ("(визначення-лямбди-на-верхньому-рівні? (як-є ()))", false),
+        ("(визначення-лямбди-на-верхньому-рівні? (як-є (unknown a b)))", false),
+    ] {
+        let forms = parse_mixed_exact_domain(source).expect("D3/D1 форма");
+        let verdict = eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=meta-mutual-d1 source={source} actual={error}"))
+            .value;
+        assert_eq!(verdict.as_predicate_bit(), Some(expected), "{source}");
+    }
+}
