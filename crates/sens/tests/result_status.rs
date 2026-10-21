@@ -161,6 +161,25 @@ fn ukrainian_status_predicate_rejects_composite_head_as_d1_no() {
 }
 
 #[test]
+fn позначений_результат_вимагає_правильного_списку_не_крапкової_пари() {
+    // Виконує справжній SENS. Зовнішній Rust тільки читає однобітний D1.
+    for (source, expected) in [
+        ("(результат-позначений? (як-є (proved твердження ())))", true),
+        ("(результат-позначений? (як-є (proved (поле . значення) ())))", true),
+        ("(результат-позначений? (як-є (proved . зіпсований-хвіст)))", false),
+        ("(результат-позначений? (як-є (proved твердження . зіпсований-хвіст)))", false),
+        ("(результат-позначений? (як-є (невідома-мітка дані)))", false),
+    ] {
+        let actual = eval_result_status_value(source);
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "SENS має повернути точне D1 для {source}: {actual}",
+        );
+    }
+}
+
+#[test]
 fn result_status_predicates_are_exact_d1_bits() {
     for (source, expected) in [
         ("(результат-позначений? (створити-невідоме (quote x)))", true),
