@@ -290,6 +290,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "rotate-four-right",
         "list-swap-neighbors-four",
         "list-swap-middle-four",
+        "list-replace-fourth",
+        "list-swap-ends-five",
+        "замінити-третій-в-четвірці",
+        "поміняти-другий-і-третій",
         "list-swap-ends-five",
         "list-swap-inner-five",
     ] {
