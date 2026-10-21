@@ -127,22 +127,22 @@ PY
     # Фізичний T5M зберігає W24 без втрат. Проте W24 сам по собі
     # не позначає домен: старий BinarySourceWord приймає лише W1–W9.
     # Це НЕ дає права приписати байтам D24 та оголосити physical PASS.
-    # Для саме цієї відомої межі пробуємо незалежний чинний маршрут:
-    # український Lisp → доменна проєкція → Zig T5M → SENS.
+    # Для W24 використовуємо точний парний маршрут: джерело лише
+    # посвідчує домен, Zig декодує наданий .sens, SENS перевіряє кожний біт.
     if grep -Fq 'точні ширини слів [24]' "$stderr" &&
        grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$stderr"; then
       physical_not_supported=$((physical_not_supported + 1))
-      echo "::warning::T5M_PHYSICAL_D24_NOT_EXECUTED source=$file pair=$pair status=$status release=NOT_CERTIFIED"
-      if timeout 45s "$binary" --t5m-file "$file" >"$stdout" 2>"$stderr"; then
+      echo "::notice::T5M_STANDALONE_D24_NOT_SUPPORTED source=$file pair=$pair status=$status"
+      if timeout 45s "$binary" --t5m-pair "$file" "$pair" >"$stdout" 2>"$stderr"; then
         result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
-        echo "T5M_DOMAIN_SOURCE_RUNTIME_PASS source=$file physical=NOT_SUPPORTED result_sha256=$result_sha release=NOT_CERTIFIED"
+        echo "T5M_PHYSICAL_PAIRED_D24_PASS source=$file pair=$pair physical=ZIG_VERIFIED result_sha256=$result_sha semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
         continue
       else
         # Код береться з реального невдалого SENS, не з порожнього if.
         status=$?
       fi
-      sed 's/^/T5M source stderr: /' "$stderr" >&2
-      echo "::error::T5M_DOMAIN_SOURCE_RUNTIME_FAIL source=$file status=$status" >&2
+      sed 's/^/T5M paired stderr: /' "$stderr" >&2
+      echo "::error::T5M_PHYSICAL_PAIRED_D24_FAIL source=$file pair=$pair status=$status" >&2
       failed_files=$((failed_files + 1))
       continue
     fi
