@@ -18,6 +18,7 @@ import tempfile
 from audit_t5_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode, SKIP_DIRS)
 from sens_t5_codec import typed_sha256
 from report_ukr_projection_progress import tokenize_lisp
+from audit_all_lisp_triplets import git_blob_sha, reviewed_nonprogram_pins
 
 SCHEMA = "sens-t5-triplet-inventory/v1"
 GOLDEN = "tests/fixtures/migration-d1-cond-cohort/branch.sens"
@@ -188,8 +189,21 @@ def inspect(root: Path, *, include_untracked: bool = False,
     ]
     # Усі .lisp залишаються в історичному знаменнику, але інертні
     # коментарі не стають недоведеними виконуваними SENS-програмами.
+    # Точно SHA-затверджені джерела даних не є виконуваними програмами.
+    # Пошкоджений маніфест, дрейф blob або симлінк не дають звільнення.
+    reviewed = reviewed_nonprogram_pins(root)
+
+    def is_reviewed_nonprogram(name: str) -> bool:
+        pin = reviewed.get(name)
+        relative = Path(name)
+        path = root / relative
+        return bool(pin and no_link_ancestors(root, relative)
+                    and path.is_file() and not path.is_symlink()
+                    and git_blob_sha(path.read_bytes()) == pin[0])
+
     unpaired_nonprogram = [
-        name for name in unpaired_sources if is_comment_only_lisp(root, name)
+        name for name in unpaired_sources
+        if is_comment_only_lisp(root, name) or is_reviewed_nonprogram(name)
     ]
     nonprogram = set(unpaired_nonprogram)
     unpaired_programs = [name for name in unpaired_sources if name not in nonprogram]
