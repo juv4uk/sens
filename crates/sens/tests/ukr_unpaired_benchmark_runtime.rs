@@ -25,6 +25,23 @@ fn рекурсія_не_приймає_непорожній_атом_за_за�
 }
 
 #[test]
+fn заперечення_повертає_точний_d1_без_невизначених_так_ні() {
+    let mut сеанс = Session::default();
+    load_core_library(&mut сеанс).expect("ядро повинно завантажитися");
+    for (вираз, очікуване) in [
+        ("(хибне? (атом? (як-є ())))", false),
+        ("(хибне? (атом? (сполучити (як-є ()) (як-є ()))))", true),
+    ] {
+        let результат = eval_program(вираз, &mut сеанс)
+            .unwrap_or_else(|помилка| panic!("test_id=d1-not source={вираз} actual={помилка}"));
+        assert_eq!(результат.value.as_predicate_bit(), Some(очікуване),
+                   "test_id=d1-not source={вираз} expected={очікуване}");
+    }
+    assert!(eval_program("(хибне? (як-є ()))", &mut сеанс).is_err(),
+            "test_id=d1-not-type expected=fail-closed for structural nil");
+}
+
+#[test]
 fn замикання_зберігає_обидва_лексичні_зв_язування() {
     let mut сеанс = Session::default();
     load_core_library(&mut сеанс).expect("завантаження ядра SENS");
