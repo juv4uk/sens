@@ -3,7 +3,7 @@
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
   "authority": "research/classification; not executable SENS or domain law",
-  "source_head_commit": "78454f3ba2a2b937adc3425c13692a679a2d4bc1",
+  "source_head_commit": "46ede2e1825cf132caa15d00217c8641f1028a3a",
   "reason": "fixed immutable knowledge audit, metadata, source-lineage and phoneme registry records; no executable DEFINE/LAMBDA or PRINT source permitted",
   "automatic_sens_companion": false,
   "admitted_as_executable": 0,
@@ -20,12 +20,12 @@
     },
     {
       "path": "knowledge/core4-predicate-record-inventory.lisp",
-      "git_blob_sha1": "15e45242227208c80619b9b2c76c13e8b09eaa6a",
+      "git_blob_sha1": "1e7ad79dabd15fa8322a583919530ae98be91816",
       "record_head": "core4-predicate-record-inventory-2"
     },
     {
       "path": "knowledge/function-table-sculpt-audit.lisp",
-      "git_blob_sha1": "d79860436474ae0b08744256b18de77cdddc25fe",
+      "git_blob_sha1": "02c6879a33241b1126c43f3c902d31b6eb94287a",
       "record_head": "function-table-sculpt-audit-1"
     },
     {
@@ -55,7 +55,7 @@
     },
     {
       "path": "knowledge/semantic-lineage-core-v1.lisp",
-      "git_blob_sha1": "89cba624494295ab9673c9e985d4e96bf159b6e1",
+      "git_blob_sha1": "c0feb271de0c60f83e3ba7ce6d44040e445b89cf",
       "record_head": "semantic-lineage-1"
     },
     {
@@ -65,7 +65,7 @@
     },
     {
       "path": "knowledge/sens-primary.lisp",
-      "git_blob_sha1": "00f986961e4620186057921e0042d14e2134e46b",
+      "git_blob_sha1": "1d91443fa81fb651cfc40864d787b9102dfbaaee",
       "record_head": "sens-primary-2"
     },
     {
@@ -75,7 +75,7 @@
     },
     {
       "path": "knowledge/structure-not-ontology-inventory.lisp",
-      "git_blob_sha1": "3dc44595ffef6448b836d06fa4a9a09d835c2012",
+      "git_blob_sha1": "e0dc5d7a489cfc19011698c50684ee022d339e13",
       "record_head": "structure-not-ontology-1"
     }
   ]
