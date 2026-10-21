@@ -323,6 +323,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-common-suffix-general",
         "list-chunk-triplets-general",
         "list-stable-difference-general",
+        "list-unzip-pairs-general",
+        "list-palindrome-atoms-general",
+        "list-multiset-difference-general",
+        "list-atom-sequence-equal-general",
+        "list-split-last-occurrence-general",
         "list-swap-adjacent-pairs",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
@@ -377,6 +382,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "вилучити-перше-входження"
                 | "list-unique-stable"
                 | "list-stable-difference-general"
+                | "list-unzip-pairs-general"
+                | "list-palindrome-atoms-general"
+                | "list-multiset-difference-general"
+                | "list-atom-sequence-equal-general"
+                | "list-split-last-occurrence-general"
                 | "list-swap-adjacent-pairs"
                 | "замінити-третій-в-четвірці"
         ) {
