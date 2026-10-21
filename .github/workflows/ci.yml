@@ -800,6 +800,7 @@ jobs:
           python3 -m unittest tests/test_migrate_active_lib_exact_driver.py -v
           # Живий імпорт DEFINE не наділяє координату D9 машинною викличністю.
           python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_preloaded_lisp_closure_is_not_fabricated_d9_callability -v
+          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_reason_imports_real_unification_definition_not_a_fabricated_d9_call -v
           python3 -m unittest tests/test_ukr_result_status_projection.py -v
           python3 -m unittest tests/test_result_status_d1_bitness_current.py -v
           # Повні D9/D10 українські джерела без англомовних DEFINE-дублів.
