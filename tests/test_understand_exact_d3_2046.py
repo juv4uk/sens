@@ -201,6 +201,18 @@ def verify_unchanged_laws(forms):
             if not clauses or clauses[0] != [["010", "words"], ["001", []]]:
                 raise AssertionError("непорожній CAR до точного D3 ATOM")
             lam[2].pop(1)
+            if name in ("understand", "understand-query"):
+                # Перевірка актуальних D3 захистів короткого списку.
+                # Із копії AST їх прибираємо тільки при звірці
+                # законів для повних програм, не у виконуваному Lisp.
+                guards = (
+                    [["010", ["011", "words"]], ["001", []]],
+                    [["010", ["011", ["011", "words"]]], ["001", []]],
+                )
+                for guard in guards:
+                    if len(lam[2]) < 2 or lam[2][1] != guard:
+                        raise AssertionError("неповний список має D3-захист до селекторів")
+                    lam[2].pop(1)
             # Historical frozen hash predates exact D1. The original
             # tautological ATOM(empty) is reconstructed for digest ONLY;
             # executable source must be the current ratified D1:YES.
@@ -367,6 +379,15 @@ class UnderstandExactD3Witness(unittest.TestCase):
         mutated[0][2][2].pop(1)
         with self.assertRaisesRegex(AssertionError, "непорожній CAR"):
             verify_unchanged_laws(mutated)
+
+    def test_negative_missing_short_word_list_guard(self):
+        for name in ("understand", "understand-query"):
+            with self.subTest(function=name):
+                mutated = deepcopy(self.forms)
+                definition = next(form for form in mutated if form[1] == name)
+                definition[2][2].pop(2)
+                with self.assertRaisesRegex(AssertionError, "неповний список має D3-захист"):
+                    verify_unchanged_laws(mutated)
 
     def test_negative_legacy_8bit_or_wrong_d1_result(self):
         for bad in ["00000101", "1"]:
