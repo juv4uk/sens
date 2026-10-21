@@ -38,6 +38,15 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
         .value.to_string();
     assert_eq!(actual, expected, "порушено порядок або відбір");
 
+    // Неповні записи пропускаємо; SENS сам доводить збереження порядку.
+    let incomplete = "(як-є (самотня-подія (tell) () (tell alpha a) (tell beta b) (tell alpha c)))";
+    let filtered = eval_program(
+        &format!("(додати-події-журналу-модуля (як-є alpha) {incomplete} (як-є ()))"),
+        &mut session,
+    ).expect("неповні події не ламають справжній SENS-eval")
+     .value.to_string();
+    assert_eq!(filtered, expected, "неповні події не змінюють коректні alpha-записи");
+
     let absent = eval_program(
         &format!("(додати-події-журналу-модуля (як-є gamma) {journal} (як-є ()))"),
         &mut session,
