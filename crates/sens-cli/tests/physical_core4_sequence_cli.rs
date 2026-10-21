@@ -307,6 +307,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-not-not-null-empty",
         "d4-append-empty-left",
         "d4-append-empty-left-law",
+        "d4-append-three-associative-third-law",
         "d4-append-two-lists-order",        "cdr-cdr-two-element-tail",
         "car-car-nested-pair-atom",
         "cdr-car-inner-tail-eq",
