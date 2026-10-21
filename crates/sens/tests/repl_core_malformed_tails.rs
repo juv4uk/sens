@@ -85,7 +85,7 @@ fn repl_projection_round_trip_uses_named_ukrainian_sens_calls() {
     // Ширина D4 перевіряється самою мовою, не сторонньою таблицею.
     // Один запис каталогу покриває пряме ім'я, інверсію і чужий домен.
     let mut session = repl_session();
-    let catalogue = "(як-є ((д4 (domain-table/1 (\"0010\" (укр функція) (ук фк)))))";
+    let catalogue = "(як-є ((д4 (domain-table/1 (\"0010\" (укр функція) (ук фк))))))";
     for (call, expected) in [
         (
             "(репл-код-із-каталогу (як-є функція) (як-є укр) (як-є д4)",
