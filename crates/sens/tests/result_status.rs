@@ -187,7 +187,12 @@ fn result_status_predicates_are_exact_d1_bits() {
         ("(результат-є-правильним-списком? (quote (a b)))", true),
         ("(результат-є-правильним-списком? (quote (a . b)))", false),
         ("(результат-не-є-головою-правила? (quote not?))", true),
+        ("(результат-не-є-головою-правила? (quote not))", true),
         ("(результат-не-є-головою-правила? (quote other))", false),
+        // D3 EQ не можна застосовувати до складених даних: це точна
+        // негативна відповідь D1, а не помилка або host truthiness.
+        ("(результат-не-є-головою-правила? (quote (not? (a))))", false),
+        ("(результат-не-є-головою-правила? (quote ((not?) a)))", false),
     ] {
         let value = eval_result_status_value(source);
         assert_eq!(
