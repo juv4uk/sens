@@ -825,6 +825,8 @@ jobs:
           # Поточний Lisp-закон фіксації FS: справжні D1:1/0, без host truth.
           if grep -Eq '^(lib/lisp-fs\.lisp|crates/sens/tests/fs_bridge_diagnostics\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage -- --exact --nocapture
+            # Та сама поточна SENS-семантика для кореневого пакета: тільки атомний D3 EQ.
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_root_recovery_rejects_compound_stage_before_d3_eq -- --exact --nocapture
           fi
           # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
           if grep -Eq '^(lib/time\.lisp|crates/sens/tests/time_host_surface\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
