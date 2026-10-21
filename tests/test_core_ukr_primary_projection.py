@@ -65,7 +65,9 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         for quoted in ("constitution", "x", "a", "b", "лісп", "лісп-працює"):
             with self.subTest(quoted=quoted):
                 self.assertIn(f"(як-є {quoted})", program)
-        self.assertIn("(так ні)", program)
+        self.assertIn("((атом? (як-є ())) ні)", program)
+        self.assertNotIn("(так ", program)
+        self.assertNotIn("(так\n", program)
         self.assertIn("(друкувати (як-є лісп-працює))", program)
         # Перевірка не вважає відновлення коментарів умовою оберненості.
         guide = source("racket/README.md")
@@ -185,7 +187,9 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertIn("(визначити готовність-ядра-ракет", racket_core)
             self.assertIn("(визначити двійковий-опис", racket_core)
             self.assertIn("(значення ні)", racket_core)
-            self.assertIn("(так так)", racket_core)
+            self.assertIn("((атом? (як-є ())) так)", racket_core)
+            self.assertNotIn("(так ", racket_core)
+            self.assertNotIn("(так\n", racket_core)
             self.assertNotRegex(racket_core, r"\(визначити\s+[A-Za-z]")
             self.assertNotRegex(racket_core, r"\(t(?:\s|\))")
             self.assertNotIn("(визначити cadddr", racket_core)
