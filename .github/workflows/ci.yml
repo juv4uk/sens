@@ -772,12 +772,8 @@ jobs:
           if grep -Eq '^(lib/machine/dispatch/native-first\.lisp|crates/sens/tests/native_first_d1_cutover\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test native_first_d1_cutover -- --nocapture
           fi
-          # Чинний D2 Lisp: реальний SENS-декодер для вкладених і крапкових пар.
-          # Запуск тільки за зміною конкретного джерела, тесту або цього CI.
-          if grep -Eq '^(lib/codec-d2\.lisp|crates/sens/tests/codec_in_sens\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)
-          fi
-      - name: Реальний SENS — точна двопольова форма правил виведення
- "$changed"; then
+          # Чинний D2 Lisp: справжній SENS і чинний негативний AST.
+          if grep -Eq '^(lib/codec-d2\.lisp|crates/sens/tests/codec_in_sens\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed"; then
             python3 -m unittest tests.test_code_runs.CodecUkrProjectionTests -v
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
           fi
