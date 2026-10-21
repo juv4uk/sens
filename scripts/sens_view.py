@@ -19,7 +19,7 @@ parser, domain table or semantic oracle. Fail-closed.
 Usage:
   sens_view.py emit  <file.sens> [--out OUT]   # write the view
   sens_view.py check <file.sens>               # verify view == parse(.sens)
-  sens_view.py parse <view-file> [--out OUT.sens]
+  sens_view.py parse <view-file> [--out OUT.sens]  # старий запис заборонено; тільки Zig/T5M
 """
 from __future__ import annotations
 
@@ -87,13 +87,13 @@ def main() -> int:
         return 0 if ok else 1
 
     if ns.cmd == "parse":
-        words = words_from_view(pathlib.Path(ns.view).read_text(encoding="utf-8"))
-        data = C.encode_t5m_projection(" ".join(words) + "\n")
-        out = pathlib.Path(ns.out) if ns.out else pathlib.Path(ns.view).with_name(pathlib.Path(ns.view).name + ".sens")
-        with out.open("xb") as target:
-            target.write(data)
-        print(f"wrote .sens {out} ({len(data)} bytes)")
-        return 0
+        # Відновлення слів дозволене як перевірка, але Python більше
+        # не карбує фізичний .sens. Фізичну пару створює Zig/T5M,
+        # а доказ виконання належить SENS.
+        words_from_view(pathlib.Path(ns.view).read_text(encoding="utf-8"))
+        print("LEGACY_PYTHON_T5M_PUBLICATION_DISABLED: "
+              "use migrate-one-to-sens.py with pinned Zig/T5M", file=sys.stderr)
+        return 2
 
     return 2
 
