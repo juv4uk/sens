@@ -6,7 +6,7 @@ CI_GLUE_NO_SEMANTICS: this Python file never establishes a SENS logical PASS.
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/meta-eval-mutual.lisp has no bare host truthiness (t / T / NIL)
-  2. A named Ukrainian D1:YES outcome is present; raw #d1: tokens are absent
+  2. A computed SENS D1:YES outcome is present; bare truth heads and #d1: are absent
   3. Key surface present (recursive-group closure / group-eval / eval-program-with-groups)
   4. Reuses existing MetaEval helpers under current Ukrainian names
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MUT = ROOT / "lib" / "meta-eval-mutual.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(так"
+D1_TRUE = "(атом? (як-є ()))"
 REQUIRED = (
     "це-замикання-рекурсивної-групи?",
     "обчислити-групу-мета",
@@ -52,7 +52,9 @@ def check_mutual() -> list[str]:
         errs.append(f"meta-eval-mutual: host truthiness {m.group()!r} at offset {m.start()}")
     active = "\n".join(line.split(";", 1)[0] for line in text.splitlines())
     if D1_TRUE not in active:
-        errs.append("meta-eval-mutual: named D1:YES outcome missing (mechanical)")
+        errs.append("meta-eval-mutual: обчислюваний D1:YES через SENS ATOM(QUOTE NIL) відсутній")
+    if re.search(r"\(\s*(?:так|ні)(?=\s|\))", active):
+        errs.append("meta-eval-mutual: викличне голе так/ні замість SENS D1")
     if "#d1:" in active:
         errs.append("meta-eval-mutual: raw/typed one-bit literal remains in executable source")
     for fn in REQUIRED:
