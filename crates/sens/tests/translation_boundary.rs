@@ -210,6 +210,34 @@ fn malformed_protocol_envelope_is_named_before_semantic_admission() {
 }
 
 #[test]
+fn translation_envelopes_reject_missing_and_excess_fields_in_live_sens() {
+    // Вкладене D3 EQ повертає D1:NO, а НЕ D3:EMPTY.
+    // Неправильну кількість полів має відкинути сама SENS-бібліотека.
+    for proposal in [
+        "(translation/1 candidate query \"текст\")",
+        "(translation/1 candidate query \"текст\" (мета) зайве)",
+    ] {
+        let source = format!(
+            "(переклад-перевірка-код (переклад-перевірка (як-є корпус) (як-є {proposal})))"
+        );
+        assert_eq!(
+            eval_translation(&source),
+            "invalid-translation",
+            "SENS accepted malformed translation envelope: {proposal}"
+        );
+    }
+}
+
+#[test]
+fn translation_review_rejects_extra_field_in_live_sens() {
+    let source = r#"
+        (запис-огляду-перекладу-коректний?
+          (як-є (translation-review/1 accepted query (пропозиція) (деталь) зайве)))
+    "#;
+    assert_eq!(eval_translation(source), "()");
+}
+
+#[test]
 fn versioned_translation_corpus_is_data_only_and_contains_all_b4_modes() {
     let corpus = include_str!("../../../tests/fixtures/translation-corpus-v1.lisp");
     let forms = parse(corpus).expect("translation corpus must remain parseable data");
