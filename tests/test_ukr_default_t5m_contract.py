@@ -71,14 +71,14 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
         expected = (
             'binding_sources=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp)',
-            'binding_sources=(--binding-source lib/unify.lisp\\n'
-            '                     --binding-source lib/knowledge.lisp\\n'
+            'binding_sources=(--binding-source lib/unify.lisp\n'
+            '                     --binding-source lib/knowledge.lisp\n'
             '                     --binding-source lib/reason.lisp)',
-            'binding_sources=(--binding-source lib/unify.lisp\\n'
-            '                     --binding-source lib/knowledge.lisp\\n'
-            '                     --binding-source lib/reason.lisp\\n'
-            '                     --binding-source lib/world.lisp\\n'
-            '                     --binding-source lib/yantra.lisp\\n'
+            'binding_sources=(--binding-source lib/unify.lisp\n'
+            '                     --binding-source lib/knowledge.lisp\n'
+            '                     --binding-source lib/reason.lisp\n'
+            '                     --binding-source lib/world.lisp\n'
+            '                     --binding-source lib/yantra.lisp\n'
             '                     --binding-source lib/result-status.lisp)',
         )
         for sequence in expected:
