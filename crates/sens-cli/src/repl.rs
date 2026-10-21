@@ -1353,6 +1353,15 @@ fn render_repl_ast(
     Ok(lines.join("\n"))
 }
 
+fn render_repl_ast_and_eval(
+    source: &str,
+    state: &mut ReplState,
+) -> Result<(String, Result<sens::EvalResult, String>), String> {
+    let preview = render_repl_ast(source, state.surface, &state.session)?;
+    let execution = eval_t5m_repl_line(source, &mut state.session, state.surface);
+    Ok((preview, execution))
+}
+
 fn render_repl_ast_node(source: &str, expression: &Expr, depth: usize, lines: &mut Vec<String>) {
     let indent = "  ".repeat(depth);
     let excerpt = source
@@ -1414,6 +1423,7 @@ pub(crate) fn history_path() -> Option<PathBuf> {
 
 fn print_surface_help() {
     println!("Показати дерево розбору без виконання: :розбір <форма>");
+    println!("Показати дерево й виконати форму: :розбір-виконати <форма>");
     println!("Поверхні: :мова ук | укр | en | sa | LISP | core");
     println!("Технічний alias: :surface ук | укр | en | sa | LISP | core");
     println!("Каталог поточної людської поверхні: :імена / :names");
@@ -1496,6 +1506,39 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
         }
         ":допомога" | ":help" => {
             print_surface_help();
+            true
+        }
+        ":розбір-виконати" => {
+            let source = line
+                .trim_start()
+                .strip_prefix(command)
+                .unwrap_or("")
+                .trim_start();
+            if source.is_empty() {
+                eprintln!("Використання: :розбір-виконати <форма>");
+            } else {
+                match render_repl_ast_and_eval(source, state) {
+                    Ok((preview, execution)) => {
+                        println!("{preview}");
+                        match execution {
+                            Ok(result) => {
+                                for out in result.output {
+                                    println!("{out}");
+                                }
+                                println!(
+                                    "{}",
+                                    render_repl_reply(
+                                        &result.value,
+                                        state.surface.presentation()
+                                    )
+                                );
+                            }
+                            Err(error) => eprintln!("Помилка виконання SENS:\n{error}"),
+                        }
+                    }
+                    Err(error) => eprintln!("Помилка перегляду SENS:\n{error}"),
+                }
+            }
             true
         }
         ":розбір" => {
@@ -1655,6 +1698,66 @@ mod tests {
         assert!(error.contains("line/riadok/Zeile 1:"), "{error}");
         assert!(error.contains(invalid), "{error}");
         assert!(error.contains('^'), "{error}");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn repl_parse_preview_does_not_define_bindings() {
+        let mut session = Session::default();
+        render_repl_ast(
+            "(визначити відповідь 40)",
+            ReplSurface::UkrainianFull,
+            &session,
+        )
+        .expect("перегляд має перевірити форму без виконання");
+
+        let error = eval_t5m_repl_line(
+            "відповідь",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect_err("простий перегляд не має створювати прив'язку");
+        assert!(error.contains("unknown symbol") || error.contains("not callable"), "{error}");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn repl_parse_and_execute_shows_tree_and_keeps_session_binding() {
+        let mut session = Session::default();
+        let base_environment = session.environment.clone();
+        let user_environment = base_environment.child();
+        session.environment = user_environment.clone();
+        let mut state = ReplState {
+            session,
+            base_environment,
+            user_environment,
+            surface: ReplSurface::UkrainianFull,
+            sens_loop: false,
+        };
+        let (preview, result) = render_repl_ast_and_eval(
+            "(визначити відповідь 40)",
+            &mut state,
+        )
+        .expect("команда має показати дерево й виконати форму");
+
+        assert!(preview.contains("T5M Zig roundtrip"), "{preview}");
+        assert!(preview.contains("визначити"), "{preview}");
+        let result = result.expect("виконання форми має завершитися успішно");
+        let Value::BinaryNumber(ref number) = result.value else {
+            panic!("визначення має повернути точне число");
+        };
+        assert_eq!(number.to_decimal_string(), "40");
+
+        let next = eval_t5m_repl_line(
+            "(додати відповідь 2)",
+            &mut state.session,
+            state.surface,
+        )
+        .expect("виконана прив'язка має лишитися в поточній сесії");
+        let Value::BinaryNumber(ref number) = next.value else {
+            panic!("наступне обчислення має повернути точне число");
+        };
+        assert_eq!(number.to_decimal_string(), "42");
     }
 
     #[test]
