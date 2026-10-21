@@ -36,36 +36,15 @@ name="$(basename "${source_file%.lisp}")"
 pair="$dir/$name.sens"
 view="$dir/$name"
 
-if (( ${#binding_args[@]} == 0 )); then
-  # Чинний маршрут: SENS-reader → Zig T5M → обидва фізичні файли.
-  # У цьому шляху немає Python чи JSON, і немає окремого кодера.
-  if ! timeout 60s "$binary" --t5m-mint-pair "$source_file" "$pair" \
-    >"$dir/mint.stdout" 2>"$dir/mint.stderr"; then
-    cat "$dir/mint.stderr" >&2
-    echo 'ПОМИЛКА: T5M_NATIVE_MINT_PAIR_FAILED' >&2
-    exit 2
-  fi
-  producer=SENS_ZIG_NATIVE
-else
-  # Тимчасова сумісність з явними додатковими DEFINE: не зупиняємо
-  # чинні міграції, доки native reader не одержить preload source API.
-  # Це лише допоміжний resolver; парна семантика завжди належить SENS.
-  python3 scripts/migrate-three-pass.py "$source_file" \
-    --out "$dir" --report "$dir/receipt.json" --codec t5m \
-    --source-surface укр --refresh-existing "${binding_args[@]}"
-  python3 - "$dir/receipt.json" <<'PY'
-import json, sys
-with open(sys.argv[1], encoding='utf-8') as stream:
-    report = json.load(stream)
-summary = report['summary']
-if not (summary['files_written'] == 1 and summary['files_blocked'] == 0
-        and summary['files_not_program'] == 0 and len(report['files']) == 1
-        and report['files'][0]['status'] == 'refreshed'
-        and report['physical_producer'] == 'PINNED_ZIG_T5M_CARRY'):
-    raise SystemExit('ПОМИЛКА: Zig/T5M не підтвердив фізичну пару')
-PY
-  producer=ZIG_WITH_EXPLICIT_BINDINGS
+# Одна SENS-сесія виконує визначення --binding-source і саму програму.
+# Zig пакує готові слова; Python/JSON у цьому маршруті відсутні.
+if ! timeout 60s "$binary" --t5m-mint-pair "$source_file" "$pair" "${binding_args[@]}" \
+  >"$dir/mint.stdout" 2>"$dir/mint.stderr"; then
+  cat "$dir/mint.stderr" >&2
+  echo 'ПОМИЛКА: T5M_NATIVE_MINT_PAIR_FAILED' >&2
+  exit 2
 fi
+producer=SENS_ZIG_NATIVE
 if [[ ! -s "$pair" || ! -s "$view" || -L "$pair" || -L "$view" ]]; then
   echo 'ПОМИЛКА: немає обох звичайних файлів свіжої фізичної пари' >&2
   exit 2
@@ -80,7 +59,7 @@ fi
 # Парний вхід обов'язковий: Zig звіряє саме джерело з фізичним T5M,
 # а SENS його виконує. Standalone може бути непідтриманим для D7/D24+,
 # але сам по собі не доводить оберненості джерела.
-if ! timeout 45s "$binary" --t5m-pair "$source_file" "$pair" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
+if ! timeout 45s "$binary" --t5m-pair "$source_file" "$pair" "${binding_args[@]}" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
   cat "$dir/paired.stderr" >&2
   echo 'ПОМИЛКА: T5M_PAIRED_SOURCE_EXECUTION_FAIL; пару не змінено' >&2
   exit 2
