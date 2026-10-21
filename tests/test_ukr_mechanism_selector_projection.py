@@ -132,6 +132,25 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
                        "mechanism-selector-registry-rows", "mechanism-selector-routes"):
             self.assertNotIn(f"(визначити {legacy} ", self.source)
 
+    def test_mechanism_table_source_reads_quoted_payload_not_define_ast(self):
+        # Лише reader-форма, не Python-імітація SENS.
+        metadata = (ROOT / "lib/function-table-mechanisms.lisp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "(визначити паспорт-механізмів-функцій\n  (як-є", metadata
+        )
+        self.assertIn("(rows", metadata)
+        code = uncommented(self.source)
+        self.assertRegex(
+            code,
+            r"\(визначити\s+метадані-вибору-механізму"
+            r"\s+\(друге\s+\(третє\s+\(перше\s+\(читати-всі",
+        )
+        self.assertNotIn(
+            "(визначити метадані-вибору-механізму\n  (перше", code
+        )
+
     def test_exact_d1_registry_predicate_not_old_textual_boolean(self):
         code = uncommented(self.source)
         true_d1 = "(атом? (як-є ()))"
