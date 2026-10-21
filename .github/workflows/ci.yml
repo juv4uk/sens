@@ -592,7 +592,7 @@ jobs:
           cargo test --locked -p sens --test knowledge_journal_d3_ukr -- --nocapture
           cargo test --locked -p sens --test knowledge_d1_recovery -- --nocapture
 
-      - name: "Reason: нативний SENS перевіряє пошук після пошкодженого кошика"
+      - name: "Reason: SENS перевіряє індекс і лексичне застосування функцій"
         if: ${{ always() && (steps.changed-t5m-lisp.outputs.reason_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:'))) }}
         shell: bash
         run: |
