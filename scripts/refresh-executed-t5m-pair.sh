@@ -42,7 +42,7 @@ view="$dir/$name"
 # --t5m-mint-pair призначено для SENS DEFINE із --binding-source.
 # Великий Lisp не повинен помилково ставати RED через 60-секундний timeout.
 source_bytes=$(wc -c < "$source_file")
-native_timeout=45s
+native_timeout=60s
 if (( source_bytes >= 262144 )); then
   native_timeout=180s
 fi
@@ -53,7 +53,7 @@ fi
 if ! timeout "$native_timeout" "$binary" "$mint_flag" "$source_file" "$pair" "${binding_args[@]}" \
   >"$dir/mint.stdout" 2>"$dir/mint.stderr"; then
   cat "$dir/mint.stderr" >&2
-  echo 'ПОМИЛКА: T5M_NATIVE_MINT_PAIR_FAILED' >&2
+  echo "ПОМИЛКА: T5M_NATIVE_MINT_FAILED mode=$mint_flag source=$source_file timeout=$native_timeout" >&2
   exit 2
 fi
 producer=SENS_ZIG_NATIVE
@@ -61,7 +61,7 @@ if [[ ! -s "$pair" || -L "$pair" ]]; then
   echo 'ПОМИЛКА: SENS/Zig не створив звичайний непорожній фізичний T5M-файл' >&2
   exit 2
 fi
-# --t5m-mint-pair створює лише фізичні байти .sens, не бітовий перегляд.
+# Обидва нативні mint-маршрути створюють лише байти .sens, не бітовий перегляд.
 # Перегляд відкриває той самий нативний Zig/T5M reader; Python не бере участі.
 if ! timeout "$native_timeout" "$reader" open "$pair" >"$view" 2>"$dir/view.stderr"; then
   cat "$dir/view.stderr" >&2
