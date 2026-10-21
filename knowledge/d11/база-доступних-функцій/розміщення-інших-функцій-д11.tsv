@@ -193,7 +193,9 @@
 00101111000	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-xor-bits		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	Покомпонентний XOR над правильно типізованими D1 бітами.				ні	ні
 00101111010	RESEARCH_ONLY_NOT_RATIFIED	0010	island-lowering-add-payload		компілятор-кодек	3	lib/island-lowering.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00101111100	RESEARCH_ONLY_NOT_RATIFIED	0010	utf8-decode-onto		компілятор-кодек	3	lib/utf8.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101111101	WINNER_DEFINED_SENS_COMPOSITION	0010	кодувати-структуру-д2	кодувати-структуру-д2	компілятор-кодек	3	lib/codec-d2.lisp	Структурний D2-потік зберігає маркери відкриття, розділення, завершення і крапки у властивому порядку; не плутає proper- та dotted-list.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00101111110	RESEARCH_ONLY_NOT_RATIFIED	0010	utf8-encode-string-onto		компілятор-кодек	3	lib/utf8.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101111111	WINNER_DEFINED_SENS_COMPOSITION	0010	перевірити-обертання-д2	перевірити-обертання-д2	компілятор-кодек	3	lib/codec-d2.lisp	Декодування власного D2-потоку повертає початкову SENS-структуру, включно з вкладеними та крапковими парами.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00110000001	RESEARCH_ONLY_NOT_RATIFIED	0011	OCCURS-CHECK		логіка-правила-докази	2	lib/unify.lisp	Walk змінної перевіряє її входження в терм.				ні	ні
 00110000011	WINNER_DEFINED_SENS_COMPOSITION	0011	розв'язати-один-раз	розв'язати-один-раз	логіка-правила-докази	1	lib/unify.lisp	Однокрокове розіменування; на відміну від пройти не обходить рекурсивно.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00110000101	RESEARCH_ONLY_NOT_RATIFIED	0011	APPLY-SUBST-WALKED		логіка-правила-докази	3	lib/unify.lisp	Recursive walk замінює змінні в усіх парах.				ні	ні
