@@ -65,30 +65,6 @@ class CurrentTranslationD1Tests(unittest.TestCase):
         )
         self.assertEqual(guard.check_translation_text(example), [])
 
-    def test_external_journal_exception_is_value_only(self):
-        self.assertIn("(визначити *knowledge-journal*", (
-            ROOT / "lib/knowledge.lisp"
-        ).read_text(encoding="utf-8"))
-        renamed = self.source.replace(
-            "*knowledge-journal*", "*unknown-journal*", 1
-        )
-        self.assertNotEqual(renamed, self.source)
-        self.assertTrue(any(
-            "англомовне посилання на значення" in reason
-            and "*unknown-journal*" in reason
-            for reason in guard.check_translation_text(renamed)
-        ))
-        english_call = self.source + "\n(визначити свідок (knowledge-journal))\n"
-        self.assertTrue(any(
-            "англомовна виклична голова" in reason
-            for reason in guard.check_translation_text(english_call)
-        ))
-        illegal_define = self.source + "\n(визначити *knowledge-journal* (як-є ()))\n"
-        self.assertTrue(any(
-            "англомовна назва визначення" in reason
-            for reason in guard.check_translation_text(illegal_define)
-        ))
-
     def test_legacy_live_journal_reference_is_rejected(self):
         self.assertEqual(self.source.count("(поточний-журнал-знань)"), 2)
         outdated = self.source.replace(

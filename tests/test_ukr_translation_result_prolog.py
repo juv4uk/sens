@@ -107,7 +107,7 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
             "(створити-світ (як-є ()) (поточний-журнал-знань) (як-є ()))"
         ), 2)
         self.assertNotIn(
-            "(створити-світ (як-є ()) *knowledge-journal* (як-є ()))",
+            "(створити-світ (як-є ()) (поточний-журнал-знань) (як-є ()))",
             translation,
         )
         for old_en in ("advice-decision", "advice-all-decision"):

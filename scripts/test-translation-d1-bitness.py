@@ -35,11 +35,9 @@ def check_translation_text(source: str) -> list[str]:
     errors: list[str] = []
     try:
         roots = parse_lisp_tokens(tokenize_lisp(source))
-        # Дійсний зовнішній стан knowledge.lisp: тільки читання значення,
-        # не англійський DEFINE, параметр чи виклична голова.
-        errors.extend(_projection_reasons(
-            source, external_value_symbols=frozenset({"*knowledge-journal*"})
-        ))
+        # Використовуємо український виклик поточний-журнал-знань.
+        # Жодних винятків для старого глобального латинського символу.
+        errors.extend(_projection_reasons(source))
     except ValueError as exc:
         return [f"некоректна структура Lisp: {exc}"]
 
