@@ -3,6 +3,7 @@
 
 use std::fs;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 use sens::{
     eval_program, load_core_library, load_meta_evaluator_library, parse, Expr, ExprKind, Session,
@@ -249,18 +250,88 @@ fn load_witness_library(session: &mut Session) {
 fn transport_island_compat_document(session: &mut Session) {
     let source = fs::read_to_string(repo_file("contracts/island-compat-contract.lisp"))
         .expect("#749 requires the Lisp-owned island compatibility contract");
-    let forms = parse(&source).expect("island-compat-contract.lisp must be readable Lisp data");
+    let mut forms = parse(&source).expect("island-compat-contract.lisp must be readable Lisp data");
     assert_eq!(
         forms.len(),
         1,
         "#749 island compatibility contract must remain one self-contained Lisp data document"
     );
 
-    let form = &forms[0];
-    let exact_form_source = &source[form.span.start..form.span.end];
-    let transport = format!("(визначити документ-сумісності-островів (як-є {exact_form_source}))");
-    eval_program(&transport, session)
-        .expect("host observer must be able to transport island contract bytes into Lisp data");
+    fn project_result_count_fields(expression: &Expr, source: &str) -> Expr {
+        match &expression.kind {
+            ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(name) if name.as_ref() == "result-count") => {
+                let projected = match value.kind {
+                    ExprKind::Number(..) | ExprKind::Rational(_) => {
+                        sens::source_projection::project_ukr_decimal_integer_literals(
+                            &[value.as_ref().clone()],
+                            source,
+                        )
+                        .expect("result-count decimal must project to exact D24+")
+                        .into_iter()
+                        .next()
+                        .expect("one result-count value")
+                    }
+                    _ => value.as_ref().clone(),
+                };
+                if matches!(value.kind, ExprKind::Number(..) | ExprKind::Rational(_)) {
+                    assert!(
+                        matches!(
+                            &projected.kind,
+                            ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24)
+                        ),
+                        "decimal result-count must cross the explicit D24+ projection"
+                    );
+                }
+                Expr {
+                    kind: ExprKind::Pair(key.clone(), Rc::new(projected)),
+                    span: expression.span,
+                }
+            }
+            ExprKind::Pair(car, cdr) => Expr {
+                kind: ExprKind::Pair(
+                    Rc::new(project_result_count_fields(car, source)),
+                    Rc::new(project_result_count_fields(cdr, source)),
+                ),
+                span: expression.span,
+            },
+            ExprKind::List(items) => Expr {
+                kind: ExprKind::List(
+                    items
+                        .iter()
+                        .map(|item| project_result_count_fields(item, source))
+                        .collect::<Vec<_>>()
+                        .into(),
+                ),
+                span: expression.span,
+            },
+            _ => expression.clone(),
+        }
+    }
+
+    let projected_contract = project_result_count_fields(&forms[0], &source);
+    let mut binding = parse("(визначити документ-сумісності-островів (як-є ()))")
+        .expect("contract data binding template");
+    let definition = binding.pop().expect("one binding template");
+    let ExprKind::List(definition_parts) = &definition.kind else {
+        panic!("binding template must be a list")
+    };
+    let mut definition_parts = definition_parts.to_vec();
+    let ExprKind::List(quote_parts) = &definition_parts[2].kind else {
+        panic!("contract binding must quote its value")
+    };
+    let mut quote_parts = quote_parts.to_vec();
+    quote_parts[1] = projected_contract;
+    definition_parts[2] = Expr {
+        kind: ExprKind::List(quote_parts.into()),
+        span: definition_parts[2].span,
+    };
+    let definition = Expr {
+        kind: ExprKind::List(definition_parts.into()),
+        span: definition.span,
+    };
+    forms[0] = definition;
+    sens::eval_parsed_expressions(&forms, session)
+        .expect("host observer must explicitly project numeric count data before transport");
 }
 
 fn load_island_compat_witness(session: &mut Session) {
