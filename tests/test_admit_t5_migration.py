@@ -56,25 +56,18 @@ def fixture_manifest() -> dict:
 
 
 class T5ProofPublisherTests(unittest.TestCase):
-    def test_uses_current_ratified_d1_d9_authority_like_batch(self):
-        foundation_path = gate.ARTIFACTS["foundation"]
-        self.assertEqual(foundation_path, "knowledge/d1-d9-foundation.json")
-        authority = json.loads((ROOT / foundation_path).read_text(encoding="utf-8"))
-        self.assertEqual(authority["status"], "owner-ratified")
-        self.assertEqual(authority["current_domains"],
-                         [f"D{i}" for i in range(1, 10)])
-        self.assertEqual(authority["schema"],
-                         "d1-d9-foundation-ratification/v1")
-        # The public preview and proof-gated publisher must not silently
-        # choose different ratified semantic registries for the same file.
-        batch_source = (ROOT / "scripts/migrate-t5-batch.py").read_text(encoding="utf-8")
-        self.assertIn('"foundation": ROOT / "knowledge/d1-d9-foundation.json"',
-                      batch_source)
-        # This proof publisher takes only historical-legacy manifests;
-        # the W8 era is explicit, never inherited from the migrator default.
-        publisher_source = SCRIPT.read_text(encoding="utf-8")
-        self.assertIn('command.extend(["--source-era", "legacy"',
-                      publisher_source)
+    def test_current_zig_t5m_is_independent_of_historical_t5_manifests(self):
+        # Історична база не є чинною основою для публікації.
+        self.assertEqual(gate.ARTIFACTS["foundation"], "knowledge/d1-d9-foundation.json")
+        current = json.loads(
+            (ROOT / "knowledge/d1-d11-foundation.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(current["current_domains"], [f"D{i}" for i in range(1, 12)])
+        batch = (ROOT / "scripts/migrate-t5-batch.py").read_text(encoding="utf-8")
+        self.assertIn('"foundation": ROOT / "knowledge/d1-d11-foundation.json"', batch)
+        publisher = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("LEGACY_T5_PUBLICATION_DISABLED", publisher)
+        self.assertIn("migrate-one-to-sens.py", publisher)
 
     def test_git_source_blob_is_real_git_identity(self):
         source = (ROOT / SOURCE).read_bytes()
@@ -249,14 +242,17 @@ class T5ProofPublisherTests(unittest.TestCase):
                 gate.admit(ROOT, output, proof, READER, write=True)
             self.assertFalse(output.exists())
 
-    def test_tampered_physical_sha_blocks_before_publish(self):
+    def test_historical_physical_sha_cannot_grant_new_publication(self):
         proof = fixture_manifest()
         proof["expected_physical_sha256"] = "0" * 64
         with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "mirror"
-            with self.assertRaisesRegex(gate.Blocked, "PHYSICAL"):
-                gate.admit(ROOT, output, proof, READER, write=True)
-            self.assertFalse((output / Path(SOURCE).with_suffix(".sens")).exists())
+            base = Path(directory)
+            reader = base / "reader"
+            reader.write_bytes(b"only-a-test-stub")
+            mirror = base / "mirror"
+            with self.assertRaisesRegex(gate.Blocked, "LEGACY_T5_PUBLICATION_DISABLED"):
+                gate.admit(ROOT, mirror, proof, reader, write=True)
+            self.assertFalse(mirror.exists())
 
     def test_unapproved_oracle_is_failure_not_an_exception_to_skip(self):
         proof = fixture_manifest()
@@ -267,28 +263,19 @@ class T5ProofPublisherTests(unittest.TestCase):
                 gate.admit(ROOT, output, proof, READER, write=True)
             self.assertFalse((output / Path(SOURCE).with_suffix(".sens")).exists())
 
-    def test_real_legacy_to_physical_t5_oracle_and_no_clobber(self):
-        self.assertTrue(READER.is_file(), "build the genuine sens-trit reader first")
+    def test_valid_historical_t5_can_only_be_inspected_not_published(self):
         proof = fixture_manifest()
         with tempfile.TemporaryDirectory() as directory:
-            mirror = Path(directory) / "mirror"
-            expected = (ROOT / PHYSICAL).read_bytes()
-            preview = gate.admit(ROOT, mirror, proof, READER, write=False)
-            self.assertEqual(preview["status"], "VERIFIED_NOT_WRITTEN")
-            self.assertEqual(preview["physical_bytes"], len(expected))
-            self.assertEqual(preview["observable_parity"], "NOT_VERIFIED_FIXTURE_CANARY")
-            self.assertFalse(preview["original_executable_parity"])
-            self.assertFalse(preview["release_admitted"])
-            self.assertFalse((mirror / Path(PHYSICAL)).exists())
-            actual = gate.admit(ROOT, mirror, proof, READER, write=True)
-            self.assertEqual(actual["status"], "WRITTEN")
-            self.assertEqual(len(actual["oracle_witnesses_pinned"]), 2)
-            self.assertEqual(actual["semantic_review"], "NAMED_TESTS_PASSED_OWNER_REVIEW_REQUIRED")
-            self.assertEqual((mirror / PHYSICAL).read_bytes(), expected)
-            self.assertEqual((ROOT / PHYSICAL).read_bytes(), expected)
-            with self.assertRaisesRegex(gate.Blocked, "existing"):
-                gate.admit(ROOT, mirror, proof, READER, write=True)
-            self.assertEqual((mirror / PHYSICAL).read_bytes(), expected)
+            base = Path(directory)
+            reader = base / "reader"
+            reader.write_bytes(b"only-a-test-stub")
+            mirror = base / "mirror"
+            for write in (False, True):
+                with self.subTest(write=write):
+                    with self.assertRaisesRegex(gate.Blocked,
+                                                "LEGACY_T5_PUBLICATION_DISABLED"):
+                        gate.admit(ROOT, mirror, proof, reader, write=write)
+            self.assertFalse(mirror.exists())
 
     def test_cli_emits_structured_block_report(self):
         with tempfile.TemporaryDirectory() as directory:
