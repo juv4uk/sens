@@ -44,6 +44,27 @@
                    (semantic-id 12)))
             (як-є trigger))
           (як-є (projection-ready prolog-to-datalog)))
+        ; Негативні записи теж обчислює SENS, а не тестовий хост.
+        (життя--рівні?
+          (життя-поле-запису
+            (як-є (pending-invocation (producer)))
+            (як-є producer))
+          (як-є absent))
+        (життя--рівні?
+          (життя-поле-запису
+            (як-є (pending-invocation (producer datalog extra)))
+            (як-є producer))
+          (як-є absent))
+        (життя--рівні?
+          (життя-поле-запису
+            (як-є (pending-invocation (producer datalog . extra)))
+            (як-є producer))
+          (як-є absent))
+        (життя--рівні?
+          (життя-поле-запису
+            (як-є (pending-invocation (producer datalog)))
+            (як-є producer))
+          (як-є datalog))
         (тотожне? (життя-проєкція-готова?
             (як-є (pending-invocation
                    (producer datalog)
