@@ -1115,7 +1115,12 @@ jobs:
         run: |
           set -euo pipefail
           # Нативний доказ лише при зміні селекторів/доменної геометрії.
-          changed_source="$(git diff --name-only HEAD^ HEAD)"
+          # Використовуємо вже обчислений exact-SHA список змінених файлів.
+          # Checkout depth=1 не містить HEAD^; повторний git diff помилково давав RED.
+          changed_source=""
+          if [[ -f "$RUNNER_TEMP/changed-core-dependencies.txt" ]]; then
+            changed_source="$(cat "$RUNNER_TEMP/changed-core-dependencies.txt")"
+          fi
           for law_source in selector_law.rs semantic_registry.rs domain_family_composition_current.rs ci.yml; do
             if [[ "$changed_source" == *"$law_source"* ]]; then
               CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --lib eval::selector_law::tests:: -- --nocapture
