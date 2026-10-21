@@ -19,7 +19,10 @@ fn українські_масиви_core1_виконують_перевірку
         env!("CARGO_MANIFEST_DIR"), "/../../lib/core1.lisp"
     ))
     .expect("чинний український Lisp");
-    let mut program = String::new();
+    // Реальна залежність Core1: Д1-істина/хиба надходить із виконуваного
+    // lib/core.lisp, а не з текстових заглушок тесту чи host-bool.
+    let mut program = String::from(include_str!("../../../lib/core.lisp"));
+    program.push('\n');
     for name in [
         "ядро1-створити-помилку",
         "ядро1-зменшити-на-один",
