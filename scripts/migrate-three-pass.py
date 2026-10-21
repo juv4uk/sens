@@ -665,11 +665,16 @@ class Resolver:
             return False
         bits, domain = identity[:2]
         if domain == "D8":
-            return bits in self.d8_callable_bits or bits in CORE_OPERATION_D8
+            # Core4 Lisp DEFINE is a lexical closure, not an I/O opcode.
+            return bits in CORE_OPERATION_D8
         if domain == "D9":
-            return bits in self.d9_callable_bits or bits in CORE_OPERATION_D9
+            # Same for Core4/Reason Lisp closures: D9 is native only when
+            # an actual runtime mechanism is admitted, not a source DEFINE.
+            return bits in CORE_OPERATION_D9
         if domain == "D10":
-            return bits in self.d10_callable_bits
+            # The D10 list is a ratified library vocabulary, not a native
+            # execution table. Functions defined in Lisp use D7 bindings.
+            return False
         return False
 
     def head(self,tok: Tok,text7=None):
