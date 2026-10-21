@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Людський .lisp спершу пакує чинний Zig/T5M, не бінарний декодер.
+# Людський .lisp спершу пакує Zig/T5M; виконується тільки фізичний .sens.
 # Відсутність допущеного механізму лишається явним боргом, не GO.
 set -euo pipefail
 if (( $# != 3 )); then
@@ -76,7 +76,7 @@ PY
   fi
   stdout="$dir/runtime.stdout"
   stderr="$dir/runtime.stderr"
-  if timeout 45s "$binary" --t5m-file "$pair" >"$stdout" 2>"$stderr"; then
+  if timeout 45s "$binary" "$pair" >"$stdout" 2>"$stderr"; then
     result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
     echo "T5M_FILE_EXECUTION PASS path=$file pair=$pair result_sha256=$result_sha semantic=NOT_CERTIFIED"
   else
