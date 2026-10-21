@@ -65,7 +65,7 @@
     },
     {
       "path": "benchmarks/recursion.lisp",
-      "git_blob_sha": "059bc6dd1dbd47c9e5e57761e779f43670b99870",
+      "git_blob_sha": "42388a3067021f35b1cbb0bc239c7b044fa1f51d",
       "kind": "recursive local callable with historical conditional and list numerals",
       "proof_lines": {
         "local_definition": 5,
@@ -79,7 +79,8 @@
         "(функція (значення)",
         "((порожній? значення) (як-є завершено))",
         "((атом? значення) (як-є помилка-не-список))",
-        "(обійти (як-є (1 2 3"
+        "(обійти (як-є (1 2 3",
+        "((хибне? (атом? значення)) (обійти (решта значення)))"
       ],
       "blocks": [
         "Current SENS native evaluation must confirm list completion and explicit malformed-atom result; static source shape alone is not a runtime proof",
