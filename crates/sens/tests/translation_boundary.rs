@@ -72,6 +72,25 @@ fn translation_reads_current_knowledge_journal_in_real_sens() {
 }
 
 #[test]
+fn world_direct_opposite_only_facts_not_unproved_rules() {
+    // Перевіряється справжній SENS reader/eval, а не текстовий сканер:
+    // факт протилежності відхиляється; голова правила з недоведеною
+    // передумовою не стає доказом самої себе.
+    for (clauses, expected) in [
+        ("(((not? (human socrates))))", "conflict"),
+        ("(((not? (human socrates)) (unknown-premise socrates)))", "accepted"),
+    ] {
+        let source = format!(
+            "(визначити світ-для-перевірки \
+               (світ-повідомити-всі (порожній-світ) (як-є corpus) (як-є {clauses}))) \
+             (перше (порада-рішення-у-світ світ-для-перевірки \
+               (як-є corpus) (як-є ((human socrates)))))"
+        );
+        assert_eq!(eval_translation(&source), expected, "SENS clauses: {clauses}");
+    }
+}
+
+#[test]
 fn d10_advice_decisions_are_pure_world_derived_sens_functions() {
     // Відсутню раніше викличність двох ратифікованих D10 функцій
     // доводить тільки їхнє реальне виконання у SENS.
