@@ -123,6 +123,16 @@ class UkrainianLinterProjection(unittest.TestCase):
                 self.assertIn(program, examples)
         self.assertGreaterEqual(examples.count('(expected . "()")'), 2)
 
+    def test_d1_truth_values_do_not_require_unbound_global_names(self):
+        # Синтаксична охорона; справжній вердикт дає SENS CLI.
+        # Рядки в таблиці даних залишаються незмінними.
+        self.assertNotRegex(self.active, r"(?<![\\w-])(?:так|ні)(?![\\w-])")
+        self.assertIn("(атом? (як-є ()))", self.active)
+        self.assertIn("(хибне? (атом? (як-є ())))", self.active)
+        self.assertIn('"так" "ні"', self.text)
+        mutant = self.active.replace("(атом? (як-є ()))", "так", 1)
+        self.assertRegex(mutant, r"(?<![\\w-])так(?![\\w-])")
+
     def test_d1_atom_predicate_does_not_call_multivalued_answer_negation(self):
         # D1: атом? уже повертає однобітний вердикт. Функція
         # відповідь-не очікує СКЛАДЕНУ шкалу, тому перше(атом?) — помилка.
