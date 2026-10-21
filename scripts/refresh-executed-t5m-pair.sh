@@ -113,6 +113,20 @@ else
     exit 2
   fi
 fi
+# Негативний свідок через СПРАВЖНІЙ SENS: змінена програма не може
+# прийматися як той самий фізичний T5M. Лише точна причина mismatch.
+{ cat "$source_file"; printf "\n(як-є ())\n"; } > "$dir/mutant.lisp"
+if timeout "$native_timeout" "$binary" --t5m-pair "$dir/mutant.lisp" "$pair" "${binding_args[@]}" \
+    >"$dir/mutant.stdout" 2>"$dir/mutant.stderr"; then
+  echo "ПОМИЛКА: T5M_REFRESH_MUTANT_ACCEPTED source=$source_file" >&2
+  exit 2
+fi
+if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH' "$dir/mutant.stderr"; then
+  cat "$dir/mutant.stderr" >&2
+  echo "ПОМИЛКА: T5M_REFRESH_MUTANT_WRONG_FAILURE source=$source_file" >&2
+  exit 2
+fi
+echo "T5M_REFRESH_MUTANT_REJECTED source=$source_file reason=T5M_PHYSICAL_PAIR_MISMATCH"
 if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
   echo 'ПОМИЛКА: вихідний Lisp змінився під час перевірки; пару не змінено' >&2
   exit 2
