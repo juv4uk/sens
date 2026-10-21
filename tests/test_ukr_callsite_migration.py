@@ -1422,6 +1422,14 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
         self.assertNotEqual(wrong, code)
         self.assertNotIn("((атом? комірки) " + d1_false + ")", wrong)
 
+    def test_domain_capacity_unary_seed_has_no_numeric_transport(self):
+        # Статичний guard: реальне виконання законів лишається за SENS.
+        source = (self.ROOT / "scripts/check-domain-bitness-laws.lisp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("(визначити свідок1 (як-є (())))", source)
+        self.assertNotIn("(визначити свідок1 (як-є (0)))", source)
+
     def test_tier_selector_preserves_current_d3_d9_operators(self):
         source = (self.ROOT / "scripts/fixtures-for-tier.lisp").read_text(encoding="utf-8")
         mod.parse(source)
