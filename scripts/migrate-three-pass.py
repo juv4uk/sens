@@ -1420,7 +1420,29 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
         return  # User-controlled external corpus has no reviewed classification.
     except OSError as exc:
         raise SensT5Error(f"NONPROGRAM_SOURCE_UNREADABLE layer=encode {exc}") from exc
+
+    # Не перевіряємо сім незалежних маніфестів для КОЖНОЇ програми.
+    # Інакше дрейф одного опису даних помилково блокує весь lib/ навіть
+    # тоді, коли жодний файл із відповідного набору не міг бути входом.
+    # Перелік охоплення є явною межею: нові класи не-програм потребують
+    # окремого owner-reviewed оновлення, а не автоматичного виключення.
+    reviewed_lib_cohort = None
+    if relative.startswith("lib/"):
+        if re.fullmatch(r"lib/domains/d(?:[1-9]|10|11)\\.lisp", relative):
+            reviewed_lib_cohort = "domain-table"
+        elif relative in ("lib/core2.lisp", "lib/surface/ukr.lisp"):
+            reviewed_lib_cohort = "comment-only-loader"
+        elif relative.startswith("lib/machine/isa/"):
+            reviewed_lib_cohort = "isa"
+        elif relative in ("lib/function-table-mechanisms.lisp",
+                          "lib/island-math-evidence.lisp"):
+            reviewed_lib_cohort = "schema"
+        else:
+            return  # Виконуваний або ще не класифікований Lisp; не фальшивий STOP.
+
     for cohort, name, expected_count in NONPROGRAM_MANIFESTS:
+        if reviewed_lib_cohort is not None and cohort != reviewed_lib_cohort:
+            continue
         manifest = root / name
         if not manifest.is_file() or manifest.is_symlink():
             raise SensT5Error(f"NONPROGRAM_MANIFEST_UNAVAILABLE layer=encode {name}")
