@@ -32,6 +32,7 @@ HIGH = {
     "110101001": ("читати-всі", 4),
     "110110111": ("читати-файл", 3),
     "01010": ("додати", 2),
+    "11010": ("менше?", 2),
     "001001": ("нехай-послідовно", 3),
     "001000": ("нехай", 3),
 }
@@ -144,6 +145,9 @@ def verify(text):
         raise AssertionError("залишилися сирі числові викличні голови: " + str(binary))
     # Пряме атомне порівняння D3, а не заміна його на конструктор CONS.
     witnesses = (
+        "(визначити покриття-кодувальника-числа-рівні?",
+        "((менше? ліве праве) (атом? (як-є (стан))))",
+        "((менше? праве ліве) (атом? (як-є (стан))))",
         "(визначити покриття-кодувальника-тотожні-атоми?",
         "(тотожне? ліве-значення праве-значення)",
         "(покриття-кодувальника-тотожні-структури? (перше ліве-значення) (перше праве-значення))",
@@ -192,6 +196,23 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
         self.assertNotEqual(broken, self.text)
         with self.assertRaisesRegex(AssertionError, "зміна"):
             verify(broken)
+
+    def test_d24_counts_use_strict_d5_order_not_d3_identity(self):
+        # Статична перевірка канонічних викличних голів, не Python-eval.
+        self.assertIn(
+            "(покриття-кодувальника-числа-рівні? покриття-кодувальника-кількість-сиріт 0)",
+            self.text,
+        )
+        self.assertNotIn("(тотожне? двійкова-кількість", self.text)
+        self.assertNotIn("(тотожне? покриття-кодувальника-кількість-сиріт 0)", self.text)
+        for old, new in (
+            ("(менше? ліве праве)", "(тотожне? ліве праве)"),
+            ("(менше? праве ліве)", "(тотожне? праве ліве)"),
+        ):
+            broken = self.text.replace(old, new, 1)
+            self.assertNotEqual(broken, self.text)
+            with self.assertRaisesRegex(AssertionError, "Lisp-закону"):
+                verify(broken)
 
     def test_wrong_quoted_data_fails(self):
         broken = self.text.replace(
