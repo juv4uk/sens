@@ -90,6 +90,17 @@ def verify(source: str) -> dict[str, tuple]:
         raise AssertionError("застарілий текстовий тег домену")
     if "(тотожне? залишок 0)" in source:
         raise AssertionError("D3 EQ не є числовою рівністю D24+")
+    # D1-предикати не порівнюємо із D3 NIL через EQ.
+    # Це перевірка форми; значення має обчислити живий SENS.
+    for guard in (
+        "(хибне? (величина? (третє значення)))",
+        "(хибне? (науковий-константа-стан-чинний? (четверте значення)))",
+        "(хибне? (науковий-константа-вид-чинний? (п'ятий значення)))",
+        "(хибне? (наука-джерело? (науковий-сьомий значення)))",
+        "(хибне? (науковий-константа? константа))",
+    ):
+        if source.count(guard) != 1:
+            raise AssertionError("нечинна D1 перевірка поля наукової константи: " + guard)
     length = scope["науковий-список-довжина-дорівнює?"]
     if not all(
         phrase in source for phrase in (
@@ -133,6 +144,16 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
         self.assertNotEqual(modified, self.source)
         with self.assertRaisesRegex(AssertionError, "D1"):
             verify(modified)
+
+    def test_old_d1_predicate_to_d3_nil_comparison_rejected(self):
+        # Негативна мутація без підміни SENS-обчислювача Python.
+        current = "(хибне? (величина? (третє значення)))"
+        legacy = "(тотожне? (величина? (третє значення)) (як-є ()))"
+        self.assertEqual(self.source.count(current), 1)
+        mutated = self.source.replace(current, legacy, 1)
+        self.assertNotEqual(mutated, self.source)
+        with self.assertRaisesRegex(AssertionError, "D1 перевірка поля"):
+            verify(mutated)
 
     def test_duplicate_ukrainian_definition_rejected(self):
         mutant = self.source + "\n(визначити науковий-список-правильний? (як-є ()))\n"
