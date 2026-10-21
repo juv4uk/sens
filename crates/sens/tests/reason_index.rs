@@ -26,6 +26,33 @@ fn eval(session: &mut Session, source: &str) -> String {
         .to_string()
 }
 
+
+#[test]
+fn reason_index_d1_verdicts_from_real_predicates() {
+    // Виконується нативний reader/eval SENS з lib/reason.lisp.
+    // Значення мають бути саме D1-бітами, не цитованими 'так'/'ні'.
+    let mut s = session();
+    for (expression, expected) in [
+        ("(індекс-міркування? (як-є (reason-index/1 indexed () ())))", true),
+        ("(індекс-міркування? (як-є (reason-index/1 linear () ())))", true),
+        ("(індекс-міркування? (як-є (other-index indexed () ())))", false),
+        ("(індекс-міркування? (як-є ((complex-head) indexed () ())))", false),
+        ("(індекс-міркування? (як-є ()))", false),
+        ("(міркування-змінний-терм? (як-є (var x)))", true),
+        ("(міркування-змінний-терм? (як-є (p x)))", false),
+        ("(міркування-змінний-терм? (як-є ()))", false),
+        ("(міркування-змінний-терм? (як-є (x)))", false),
+    ] {
+        let result = eval_program(expression, &mut s)
+            .unwrap_or_else(|error| panic!("SENS D1 недоступний: {expression}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "функція повинна повернути обчислений D1: {expression}",
+        );
+    }
+}
+
 #[test]
 fn proof_mapper_calls_lexically_bound_sens_closure_not_d5_function_identity() {
     // Це живе виконання SENS, не структурний Python-оракул:
