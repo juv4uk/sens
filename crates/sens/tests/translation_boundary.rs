@@ -235,6 +235,22 @@ fn malformed_protocol_envelope_is_named_before_semantic_admission() {
 }
 
 #[test]
+fn translation_source_classification_requires_d1_member() {
+    // Класифікатор повертає (class-membership string member/nonmember):
+    // це дані, а D3 COND має отримати тільки точний D1 предикат.
+    let valid = r#"
+        (структура-обгортки-перекладу-коректна?
+          (як-є (translation/1 candidate query "текст" (metallic plato))))
+    "#;
+    let invalid = r#"
+        (структура-обгортки-перекладу-коректна?
+          (як-є (translation/1 candidate query (не-текст) (metallic plato))))
+    "#;
+    assert_eq!(eval_translation(valid), "1", "SENS: рядкове джерело");
+    assert_eq!(eval_translation(invalid), "()", "SENS: нестрокове джерело");
+}
+
+#[test]
 fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
     // Чинний D8 текстовий шлях визначає символ, не ширший D3 ATOM.
     let mut session = Session::default();
