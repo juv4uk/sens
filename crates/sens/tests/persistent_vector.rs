@@ -163,3 +163,63 @@ fn d11_поворот_зберігає_inorder_та_старе_дерево() {
     "#;
     assert_eq!(eval_vec(source), "(1 2 (10 20) (10 20) 2)");
 }
+
+#[test]
+fn d11_пятнадцять_визначених_переможців_виконує_sens() {
+    // Один чинний Lisp-закон на функцію, дві протилежні перевірки.
+    // Семантику обчислює Session/eval_program самого SENS.
+    // Координати D11 є адресами визначених композицій; Rust не визначає нових примітивів.
+    let leaf = "(вектор-створити-збалансований-вузол 1 10 (як-є ()) (як-є ()))";
+    let leaf2 = "(вектор-створити-збалансований-вузол 2 20 (як-є ()) (як-є ()))";
+    let right = format!("(вектор-створити-збалансований-вузол 1 10 (як-є ()) {leaf2})");
+    let left = format!("(вектор-створити-збалансований-вузол 2 20 {leaf} (як-є ()))");
+    let heavy = format!(
+        "(вектор-створити-збалансований-вузол 1 10 (як-є ()) \
+            (вектор-створити-збалансований-вузол 2 20 (як-є ()) \
+                (вектор-створити-збалансований-вузол 3 30 (як-є ()) (як-є ()))))"
+    );
+
+    // Усі 15 назв походять із реально виконуваного lib/persistent-vector.lisp.
+    // Негативна сторона окремо ловить неправильне поле, гілку, знак, висоту або порядок.
+    let checks: [(&str, String, &str, String, &str); 15] = [
+        ("VMAKE-BALANCED-NODE", leaf.into(), "(1 10 1 () ())",
+            leaf2.into(), "(2 20 1 () ())"),
+        ("VNODE-INDEX", format!("(вектор-вузол-індекс {leaf})"), "1",
+            format!("(вектор-вузол-індекс {leaf2})"), "2"),
+        ("VNODE-VALUE", format!("(вектор-вузол-значення {leaf})"), "10",
+            format!("(вектор-вузол-значення {leaf2})"), "20"),
+        ("VNODE-HEIGHT", format!("(вектор-вузол-висота {leaf})"), "1",
+            format!("(вектор-вузол-висота {right})"), "2"),
+        ("VNODE-LEFT", format!("(вектор-вузол-ліве-піддерево {left})"), "(1 10 1 () ())",
+            format!("(вектор-вузол-ліве-піддерево {right})"), "()"),
+        ("VNODE-RIGHT", format!("(вектор-вузол-праве-піддерево {right})"), "(2 20 1 () ())",
+            format!("(вектор-вузол-праве-піддерево {left})"), "()"),
+        ("VHEIGHT-OF", "(вектор-висота-піддерева (як-є ()))".into(), "0",
+            format!("(вектор-висота-піддерева {right})"), "2"),
+        ("VBALANCE-FACTOR", format!("(вектор-коефіцієнт-балансу {left})"), "1",
+            format!("(вектор-коефіцієнт-балансу {right})"), "-1"),
+        ("VBALANCE", format!("(вектор-вузол-індекс (вектор-збалансувати {heavy}))"), "2",
+            format!("(вектор-вузол-індекс (вектор-збалансувати {leaf}))"), "1"),
+        ("VROTATE-LEFT", format!("(вектор-вузол-індекс (вектор-повернути-ліворуч {right}))"), "2",
+            format!("(вектор-вузол-індекс {right})"), "1"),
+        ("VROTATE-RIGHT", format!("(вектор-вузол-індекс (вектор-повернути-праворуч {left}))"), "1",
+            format!("(вектор-вузол-індекс {left})"), "2"),
+        ("VEC-TREE", format!("(отримати-дерево-вектора (сполучити 1 {leaf}))"), "(1 10 1 () ())",
+            "(отримати-дерево-вектора (сполучити 0 (як-є ())))".into(), "()"),
+        ("VTREE->LIST", format!("(перетворити-дерево-вектора-на-список {right})"), "(10 20)",
+            "(перетворити-дерево-вектора-на-список (як-є ()))".into(), "()"),
+        ("VTREE-GET", format!("(отримати-з-дерева-вектора 1 {leaf})"), "(10)",
+            format!("(отримати-з-дерева-вектора 2 {leaf})"), "()"),
+        ("VTREE-INSERT", "(вставити-в-дерево-вектора 2 7 (як-є ()))".into(), "(2 7 1 () ())",
+            format!("(вставити-в-дерево-вектора 1 9 {leaf})"), "(1 9 1 () ())"),
+    ];
+    for (name, positive_source, positive_expected, negative_source, negative_expected) in checks {
+        let positive = eval_vec(&positive_source);
+        assert_eq!(positive, positive_expected,
+            "test_id=D11-WINNER-{name}-POS layer=SENS input={positive_source} expected={positive_expected} actual={positive}");
+        let negative = eval_vec(&negative_source);
+        assert_eq!(negative, negative_expected,
+            "test_id=D11-WINNER-{name}-NEG layer=SENS input={negative_source} expected={negative_expected} actual={negative}");
+        assert_ne!(positive, negative, "test_id=D11-WINNER-{name}-DISTINCT");
+    }
+}
