@@ -210,6 +210,64 @@ fn malformed_protocol_envelope_is_named_before_semantic_admission() {
 }
 
 #[test]
+fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
+    // Чинний D8 текстовий шлях визначає символ, не ширший D3 ATOM.
+    let mut session = Session::default();
+    for library in [
+        include_str!("../../../lib/core.lisp"),
+        include_str!("../../../lib/unify.lisp"),
+        include_str!("../../../lib/reason.lisp"),
+        include_str!("../../../lib/forward.lisp"),
+        include_str!("../../../lib/knowledge.lisp"),
+        include_str!("../../../lib/result-status.lisp"),
+        include_str!("../../../lib/translation.lisp"),
+    ] {
+        eval_program(library, &mut session).expect("чинна бібліотека SENS");
+    }
+    for (expression, expected) in [
+        ("(як-є candidate)", true),
+        ("\"candidate\"", false),
+        ("7", false),
+        ("(як-є ())", false),
+        ("(як-є (candidate))", false),
+    ] {
+        let source = format!("(переклад-внутрішній-символ? {expression})");
+        let actual = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}")).value;
+        assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
+    }
+}
+
+#[test]
+fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
+    let mut session = Session::default();
+    for library in [
+        include_str!("../../../lib/core.lisp"),
+        include_str!("../../../lib/unify.lisp"),
+        include_str!("../../../lib/reason.lisp"),
+        include_str!("../../../lib/forward.lisp"),
+        include_str!("../../../lib/knowledge.lisp"),
+        include_str!("../../../lib/result-status.lisp"),
+        include_str!("../../../lib/translation.lisp"),
+    ] {
+        eval_program(library, &mut session).expect("чинна бібліотека SENS");
+    }
+    for (value, expected) in [
+        ("(а б в г ґ)", true),
+        ("(а б в г)", false),
+        ("(а б в г ґ д)", false),
+        ("()", false),
+        ("а", false),
+        ("(а б в г . ґ)", false),
+    ] {
+        let source = format!("(переклад-рівно-п'ять-полів? (як-є {value}))");
+        let actual = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}")).value;
+        assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
+    }
+}
+
+#[test]
 fn translation_envelopes_reject_missing_and_excess_fields_in_live_sens() {
     // Вкладене D3 EQ повертає D1:NO, а НЕ D3:EMPTY.
     // Неправильну кількість полів має відкинути сама SENS-бібліотека.
