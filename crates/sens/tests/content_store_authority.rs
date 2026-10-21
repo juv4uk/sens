@@ -41,8 +41,8 @@ fn content_store_mechanism_keeps_deterministic_images_and_distinct_history_entri
 
     let root_image = r#"
         (let* ((value (quote (lambda (x) x)))
-               (fs (car (fs-write (fs-empty) "code" value))))
-          (fs-serialize-root fs))
+               (fs (car (фс-записати (фс-порожній) "code" value))))
+          (фс-серіалізувати-корінь fs))
     "#;
     eprintln!("CONTENT-STORE-PROBE: root_a BEGIN");
     let root_a = observe(&mut session, root_image);
@@ -55,7 +55,7 @@ fn content_store_mechanism_keeps_deterministic_images_and_distinct_history_entri
         "repeating the same root serialization must preserve the exact image"
     );
 
-    let object_image = "(fs-serialize-object (quote (lambda (x) x)))";
+    let object_image = "(фс-серіалізувати-об'єкт (quote (lambda (x) x)))";
     eprintln!("CONTENT-STORE-PROBE: object_a BEGIN");
     let object_a = observe(&mut session, object_image);
     eprintln!("CONTENT-STORE-PROBE: object_a END => {object_a}");

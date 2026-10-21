@@ -82,13 +82,13 @@ fn main() {
         }
     }
     let root = eval_program(
-        &format!("(fs-deserialize-root {})", string_literal(records[0])),
+        &format!("(фс-десеріалізувати-корінь {})", string_literal(records[0])),
         &mut session,
     )
     .unwrap()
     .value;
     let _object = eval_program(
-        &format!("(fs-deserialize-object {})", string_literal(records[1])),
+        &format!("(фс-десеріалізувати-об'єкт {})", string_literal(records[1])),
         &mut session,
     )
     .unwrap()
@@ -103,7 +103,7 @@ fn main() {
         std::process::exit(1);
     }
     let expr = format!(
-        "(fs-reconstruct-root (quote {}) (list (quote {})))",
+        "(фс-відновити-корінь (quote {}) (list (quote {})))",
         records[0], records[1]
     );
     let rebuilt = eval_program(&expr, &mut session).unwrap().value;

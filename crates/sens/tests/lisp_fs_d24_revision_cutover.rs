@@ -60,8 +60,8 @@ fn revision_of(snapshot: Value) -> Value {
 #[test]
 fn all_three_fs_increment_sites_have_exact_d6_heads() {
     let source = include_str!("../../../lib/lisp-fs.lisp");
-    assert_eq!(source.matches("(001110 (fs-revision fs))").count(), 3);
-    assert!(!source.contains("(01010 1 (fs-revision fs))"));
+    assert_eq!(source.matches("(001110 (фс-ревізія fs))").count(), 3);
+    assert!(!source.contains("(01010 1 (фс-ревізія fs))"));
 }
 
 #[test]
@@ -94,7 +94,7 @@ fn fs_unbind_preserves_qualified_d24_and_d48_revisions() {
             "snapshot",
             list(vec![Value::Nil, Value::Nil, dnumber(width, false)]),
         );
-        let outcome = eval_program("(fs-unbind snapshot \"absent\")", &mut session)
+        let outcome = eval_program("(фс-розв'язати snapshot \"absent\")", &mut session)
             .expect("D6 ADD1 повинен приймати ревізію D24+");
         assert_eq!(
             revision_of(outcome.value),
@@ -111,7 +111,7 @@ fn fs_unbind_rejects_unqualified_revision() {
         "snapshot",
         list(vec![Value::Nil, Value::Nil, Value::BinaryNumber(BinaryNumber::one())]),
     );
-    let error = eval_program("(fs-unbind snapshot \"absent\")", &mut session)
+    let error = eval_program("(фс-розв'язати snapshot \"absent\")", &mut session)
         .expect_err("невідомий домен числа не можна припускати");
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(error.message.contains("D24+"), "{error}");

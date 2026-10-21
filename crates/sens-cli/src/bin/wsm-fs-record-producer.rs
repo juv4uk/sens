@@ -83,17 +83,17 @@ fn main() {
 
     let program = r#"
       (let* ((value (quote (hello world)))
-             (written (fs-write (fs-empty) "code" value))
+             (written (фс-записати (фс-порожній) "code" value))
              (fs (car written))
-             (root (fs-root-package fs))
-             (object (fs-object-package value))
-             (rebuilt (fs-reconstruct-root root (list object))))
+             (root (фс-корінь-пакет fs))
+             (object (фс-об'єкт-пакет value))
+             (rebuilt (фс-відновити-корінь root (list object))))
         (cond
           ((not? (eq? (car rebuilt) (quote accepted)))
            (quote reconstruction-rejected))
-          ((not? (equal? (second (fs-read (second rebuilt) "code")) value))
+          ((not? (equal? (second (фс-читати (second rebuilt) "code")) value))
            (quote reconstruction-mismatch))
-          (t (list (fs-serialize-root fs) (fs-serialize-object value)))))
+          (t (list (фс-серіалізувати-корінь fs) (фс-серіалізувати-об'єкт value)))))
     "#;
     let result = match eval_program(program, &mut session) {
         Ok(result) => result,

@@ -59,20 +59,20 @@ fn lisp_fs_keeps_old_snapshot_and_reads_new_bindings() {
     assert_eq!(
         eval_store(
             r#"
-            (let ((empty (fs-empty)))
-              (let ((first-write (fs-write empty "notes/today" (quote (hello world)))))
+            (let ((empty (фс-порожній)))
+              (let ((first-write (фс-записати empty "notes/today" (quote (hello world)))))
                 (let ((old (car first-write))
-                      (second-write (fs-write (car first-write)
+                      (second-write (фс-записати (car first-write)
                                               "notes/tomorrow"
                                               (quote (hello again)))))
                   (let ((new (car second-write)))
                     (list
-                      (fs-read old "notes/today")
-                      (fs-read old "notes/tomorrow")
-                      (fs-read new "notes/today")
-                      (fs-read new "notes/tomorrow")
-                      (fs-revision old)
-                      (fs-revision new))))))
+                      (фс-читати old "notes/today")
+                      (фс-читати old "notes/tomorrow")
+                      (фс-читати new "notes/today")
+                      (фс-читати new "notes/tomorrow")
+                      (фс-ревізія old)
+                      (фс-ревізія new))))))
             "#
         ),
         "((found (hello world) \"(hello world)\") (not-found \"notes/tomorrow\") (found (hello world) \"(hello world)\") (found (hello again) \"(hello again)\") 1 2)"
@@ -85,13 +85,13 @@ fn lisp_fs_deduplicates_equal_objects_but_keeps_explicit_missing_status() {
     assert_eq!(
         eval_store(
             r#"
-            (let ((empty (fs-empty)))
-              (let ((a (fs-write empty "a" (quote ()))))
-                (let ((b (fs-write (car a) "b" (quote ()))))
+            (let ((empty (фс-порожній)))
+              (let ((a (фс-записати empty "a" (quote ()))))
+                (let ((b (фс-записати (car a) "b" (quote ()))))
                   (list
-                    (content-store-size (fs-objects (car b)))
-                    (fs-contains? (car b) "a")
-                    (fs-read (car b) "missing")))))
+                    (content-store-size (фс-об'єкти (car b)))
+                    (фс-містить? (car b) "a")
+                    (фс-читати (car b) "missing")))))
             "#
         ),
         "(1 1 (not-found \"missing\"))"
@@ -111,14 +111,14 @@ fn lisp_fs_overwrite_is_a_new_revision_and_old_value_remains_in_old_root() {
     assert_eq!(
         eval_store(
             r#"
-            (let ((empty (fs-empty)))
-              (let ((a (fs-write empty "same" (quote old))))
-                (let ((b (fs-write (car a) "same" (quote new))))
+            (let ((empty (фс-порожній)))
+              (let ((a (фс-записати empty "same" (quote old))))
+                (let ((b (фс-записати (car a) "same" (quote new))))
                   (list
-                    (fs-read (car a) "same")
-                    (fs-read (car b) "same")
-                    (fs-revision (car a))
-                    (fs-revision (car b))))))
+                    (фс-читати (car a) "same")
+                    (фс-читати (car b) "same")
+                    (фс-ревізія (car a))
+                    (фс-ревізія (car b))))))
             "#
         ),
         "((found old \"old\") (found new \"new\") 1 2)"
@@ -130,16 +130,16 @@ fn lisp_fs_empty_name_is_literal_and_unknown_object_address_is_not_found() {
     assert_eq!(
         eval_store(
             r#"
-            (let ((empty (fs-empty)))
-              (let ((written (fs-write empty "" (quote value))))
+            (let ((empty (фс-порожній)))
+              (let ((written (фс-записати empty "" (quote value))))
                 (let ((malformed
-                        (list (fs-objects (car written))
+                        (list (фс-об'єкти (car written))
                               (мапа-вставити "ghost" "missing-address" мапа-порожній)
                               9)))
                   (list
-                    (fs-read (car written) "")
-                    (fs-read malformed "ghost")
-                    (fs-read malformed "absent")))))
+                    (фс-читати (car written) "")
+                    (фс-читати malformed "ghost")
+                    (фс-читати malformed "absent")))))
             "#
         ),
         "((found value \"value\") (not-found \"ghost\") (not-found \"absent\"))"
@@ -151,17 +151,17 @@ fn lisp_fs_object_envelope_round_trips_and_rejects_bad_metadata() {
     assert_eq!(
         eval_store(
             r#"
-            (let ((encoded (fs-serialize-object (quote (hello world)))))
+            (let ((encoded (фс-серіалізувати-об'єкт (quote (hello world)))))
               (list
                 encoded
-                (fs-deserialize-object encoded)
-                (fs-object-package-decision
+                (фс-десеріалізувати-об'єкт encoded)
+                (рішення-щодо-пакета-об'єкта-файлової-системи
                   (list
                     (cons (quote format) (quote wsm-fs-object))
                     (cons (quote version) (quote (9 9)))
                     (cons (quote address) "wrong")
                     (cons (quote value) (quote (hello world)))))
-                (fs-object-package-decision
+                (рішення-щодо-пакета-об'єкта-файлової-системи
                   (list
                     (cons (quote format) (quote wsm-fs-object))
                     (cons (quote version) (quote (0 1)))
@@ -178,8 +178,8 @@ fn lisp_fs_root_envelope_round_trips_bindings_revision_and_addresses() {
     assert_eq!(
         eval_store(
             r#"
-            (let* ((fs (car (fs-write (fs-empty) "notes/today" (quote (hello world)))))
-                   (encoded (fs-serialize-root fs))
+            (let* ((fs (car (фс-записати (фс-порожній) "notes/today" (quote (hello world)))))
+                   (encoded (фс-серіалізувати-корінь fs))
                    (bad
                      (list
                        (cons (quote format) (quote wsm-fs-root))
@@ -188,8 +188,8 @@ fn lisp_fs_root_envelope_round_trips_bindings_revision_and_addresses() {
                        (cons (quote bindings) (quote ()))
                        (cons (quote objects) (quote ())))))
               (list encoded
-                    (car (fs-root-package-decision (read encoded)))
-                    (car (fs-root-package-decision bad))))
+                    (car (рішення-щодо-кореневого-пакета-файлової-системи (read encoded)))
+                    (car (рішення-щодо-кореневого-пакета-файлової-системи bad))))
             "#
         ),
         "(\"((format . wsm-fs-root) (version #q2:0/1 #q2:1/1) (revision . #q2:1/1) (bindings (\\\"notes/today\\\" . \\\"(hello world)\\\")) (objects \\\"(hello world)\\\"))\" accepted rejected)"
@@ -202,15 +202,15 @@ fn lisp_fs_reconstructs_immutable_root_from_valid_envelopes() {
         eval_store(
             r#"
             (let* ((value (quote (hello world)))
-                   (written (fs-write (fs-empty) "notes/today" value))
+                   (written (фс-записати (фс-порожній) "notes/today" value))
                    (fs (car written))
-                   (root (fs-root-package fs))
-                   (object (fs-object-package value))
-                   (rebuilt (fs-reconstruct-root root (list object))))
+                   (root (фс-корінь-пакет fs))
+                   (object (фс-об'єкт-пакет value))
+                   (rebuilt (фс-відновити-корінь root (list object))))
               (list
                 (car rebuilt)
-                (fs-read (second rebuilt) "notes/today")
-                (fs-revision (second rebuilt))))
+                (фс-читати (second rebuilt) "notes/today")
+                (фс-ревізія (second rebuilt))))
             "#
         ),
         "(accepted (found (hello world) \"(hello world)\") 1)"
@@ -222,9 +222,9 @@ fn lisp_fs_reconstruction_rejects_missing_referenced_object() {
     assert_eq!(
         eval_store(
             r#"
-            (let* ((written (fs-write (fs-empty) "notes/today" (quote value)))
-                   (root (fs-root-package (car written))))
-              (fs-reconstruct-root root (quote ())))
+            (let* ((written (фс-записати (фс-порожній) "notes/today" (quote value)))
+                   (root (фс-корінь-пакет (car written))))
+              (фс-відновити-корінь root (quote ())))
             "#
         ),
         "(rejected missing-object)"
@@ -236,18 +236,18 @@ fn lisp_fs_journal_replay_matches_direct_construction() {
     assert_eq!(
         eval_store(
             r#"
-            (let* ((empty (fs-empty))
-                   (event (fs-journal-write-event "notes/today" (quote (hello world))))
-                   (journal (fs-journal-append (quote ()) event))
-                   (direct (car (fs-write empty "notes/today" (quote (hello world)))))
+            (let* ((empty (фс-порожній))
+                   (event (фс-журнал-записати-подія "notes/today" (quote (hello world))))
+                   (journal (фс-журнал-додати (quote ()) event))
+                   (direct (car (фс-записати empty "notes/today" (quote (hello world)))))
                    (with-commit
-                     (fs-journal-append journal (fs-journal-root-commit-event
-                                                  (fs-root-package direct))))
-                   (replayed (fs-journal-replay with-commit)))
+                     (фс-журнал-додати journal (фс-журнал-корінь-коміт-подія
+                                                  (фс-корінь-пакет direct))))
+                   (replayed (фс-журнал-повторити with-commit)))
               (list
                 (car replayed)
-                (fs-read (second replayed) "notes/today")
-                (fs-revision (second replayed))))
+                (фс-читати (second replayed) "notes/today")
+                (фс-ревізія (second replayed))))
             "#
         ),
         "(accepted (found (hello world) \"(hello world)\") 1)"
@@ -261,13 +261,13 @@ fn lisp_fs_journal_serialization_round_trips_into_the_same_snapshot() {
             r#"
             (let* ((journal
                      (list
-                       (fs-journal-write-event "notes/today" (quote (hello world)))))
-                   (encoded (fs-serialize-journal journal))
-                   (replayed (fs-deserialize-journal encoded)))
+                       (фс-журнал-записати-подія "notes/today" (quote (hello world)))))
+                   (encoded (фс-серіалізувати-журнал journal))
+                   (replayed (фс-десеріалізувати-журнал encoded)))
               (list
                 encoded
                 (car replayed)
-                (fs-read (second replayed) "notes/today")))
+                (фс-читати (second replayed) "notes/today")))
             "#
         ),
         "(\"(((format . wsm-fs-event) (version #q2:0/1 #q2:1/1) (op . write) (name . \\\"notes/today\\\") (value hello world)))\" accepted (found (hello world) \"(hello world)\"))"
@@ -280,10 +280,10 @@ fn lisp_fs_journal_replay_rejects_unknown_and_truncated_events() {
         eval_store(
             r#"
             (list
-              (fs-journal-replay
+              (фс-журнал-повторити
                 (list
-                  (fs-journal-event (quote future-op) (quote ()))) )
-              (fs-journal-replay (list (quote ()))) )
+                  (фс-журнал-подія (quote future-op) (quote ()))) )
+              (фс-журнал-повторити (list (quote ()))) )
             "#
         ),
         "((rejected unknown-event) (rejected invalid-event))"
@@ -295,7 +295,7 @@ fn lisp_fs_journal_replay_rejects_structurally_incomplete_events() {
     assert_eq!(
         eval_store(
             r#"
-            (fs-journal-replay
+            (фс-журнал-повторити
               (list
                 (list
                   (cons (quote format) (quote wsm-fs-event))
@@ -313,12 +313,12 @@ fn lisp_fs_recovery_keeps_old_root_until_root_pointer_commit() {
     assert_eq!(
         eval_store(
             r#"
-            (let* ((old (fs-empty))
-                   (new (car (fs-write old "notes/today" (quote value)))))
+            (let* ((old (фс-порожній))
+                   (new (car (фс-записати old "notes/today" (quote value)))))
               (list
-                (fs-recover-commit old new (quote objects))
-                (fs-recover-commit old new (quote journal))
-                (fs-recover-commit old new (quote root-pointer))))
+                (відновити-завершену-фіксацію-файлової-системи old new (quote objects))
+                (відновити-завершену-фіксацію-файлової-системи old new (quote journal))
+                (відновити-завершену-фіксацію-файлової-системи old new (quote root-pointer))))
             "#
         ),
         "((recovered (() () 0)) (recovered (() () 0)) (recovered ((\"value\" value 1 () ()) (\"notes/today\" \"value\" 1 () ()) 1)))"
@@ -328,7 +328,7 @@ fn lisp_fs_recovery_keeps_old_root_until_root_pointer_commit() {
 #[test]
 fn lisp_fs_recovery_rejects_unknown_commit_stage() {
     assert_eq!(
-        eval_store("(fs-recover-commit (fs-empty) (fs-empty) (quote upload))"),
+        eval_store("(відновити-завершену-фіксацію-файлової-системи (фс-порожній) (фс-порожній) (quote upload))"),
         "(rejected unknown-commit-stage)"
     );
 }
@@ -338,7 +338,7 @@ fn lisp_fs_recovery_keeps_old_root_when_candidate_root_is_corrupt() {
     assert_eq!(
         eval_store(
             r#"
-            (let* ((old (fs-root-package (fs-empty)))
+            (let* ((old (фс-корінь-пакет (фс-порожній)))
                    (corrupt
                      (list
                        (cons (quote format) (quote wsm-fs-root))
@@ -346,7 +346,7 @@ fn lisp_fs_recovery_keeps_old_root_when_candidate_root_is_corrupt() {
                        (cons (quote revision) 2)
                        (cons (quote bindings) (quote ()))
                        (cons (quote objects) (quote broken)))))
-              (fs-recover-root-package old corrupt (quote root-pointer)))
+              (відновити-кореневий-пакет-файлової-системи old corrupt (quote root-pointer)))
             "#
         ),
         "(recovered ((format . wsm-fs-root) (version 0 1) (revision . 0) (bindings) (objects)) rejected-candidate)"
@@ -356,11 +356,11 @@ fn lisp_fs_recovery_keeps_old_root_when_candidate_root_is_corrupt() {
 #[test]
 fn lisp_fs_partial_object_and_journal_bytes_fail_closed() {
     let object_error = eval_store_error(
-        r#"(fs-deserialize-object "((format . wsm-fs-object) (version 0 1) (value")"#,
+        r#"(фс-десеріалізувати-об'єкт "((format . wsm-fs-object) (version 0 1) (value")"#,
     );
     assert!(!object_error.is_empty(), "{object_error}");
     let journal_error = eval_store_error(
-        r#"(fs-deserialize-journal "((format . wsm-fs-event) (version 0 1) (op . write)")"#,
+        r#"(фс-десеріалізувати-журнал "((format . wsm-fs-event) (version 0 1) (op . write)")"#,
     );
     assert!(!journal_error.is_empty(), "{journal_error}");
 }
@@ -370,9 +370,9 @@ fn lisp_fs_replay_rejects_after_valid_prefix_without_returning_partial_state() {
     assert_eq!(
         eval_store(
             r#"
-            (fs-journal-replay
+            (фс-журнал-повторити
               (list
-                (fs-journal-write-event "ok" (quote value))
+                (фс-журнал-записати-подія "ok" (quote value))
                 (quote malformed-event)))
             "#
         ),
@@ -386,16 +386,16 @@ fn lisp_fs_reconstruction_rejects_after_valid_object_without_partial_snapshot() 
         eval_store(
             r#"
             (let* ((value (quote value))
-                   (written (fs-write (fs-empty) "ok" value))
-                   (root (fs-root-package (car written)))
-                   (valid (fs-object-package value))
+                   (written (фс-записати (фс-порожній) "ok" value))
+                   (root (фс-корінь-пакет (car written)))
+                   (valid (фс-об'єкт-пакет value))
                    (invalid
                      (list
                        (cons (quote format) (quote wsm-fs-object))
                        (cons (quote version) (quote (0 1)))
                        (cons (quote address) "wrong")
                        (cons (quote value) (quote other)))))
-              (fs-reconstruct-root root (list valid invalid)))
+              (фс-відновити-корінь root (list valid invalid)))
             "#
         ),
         "(rejected address-mismatch)"

@@ -61,11 +61,11 @@ fn filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage() {
 fn journal_event_fields_are_retrieved_from_a_real_alist() {
     let mut s = session();
     for (field, expected) in [("format","wsm-fs-event"), ("op","future-op")] {
-        let source = format!("(fs-package-field (quote {field}) (fs-journal-event (quote future-op) (quote ())))");
+        let source = format!("(фс-пакет-поле (quote {field}) (фс-журнал-подія (quote future-op) (quote ())))");
         assert_eq!(observe(&mut s, &source), expected, "assoc field {field}");
     }
     assert_eq!(
-        observe(&mut s, "(fs-package-field (quote missing) (fs-journal-event (quote future-op) (quote ())))"),
+        observe(&mut s, "(фс-пакет-поле (quote missing) (фс-журнал-подія (quote future-op) (quote ())))"),
         "()",
         "unknown envelope keys remain absent, never synthesized"
     );
@@ -75,12 +75,12 @@ fn journal_event_fields_are_retrieved_from_a_real_alist() {
 fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
     let mut session = session();
     assert_eq!(
-        observe(&mut session, "(car (fs-object-package-decision (fs-object-package (quote hello))))"),
+        observe(&mut session, "(car (рішення-щодо-пакета-об'єкта-файлової-системи (фс-об'єкт-пакет (quote hello))))"),
         "accepted",
         "a canonical object envelope must be valid without foreign EQUAL semantics"
     );
     assert_eq!(
-        observe(&mut session, "(fs-object-addresses (внутрішня-мапа-список (внутрішня-мапа-вставити \"one\" (quote payload) map-empty)))"),
+        observe(&mut session, "(фс-об'єкт-адреси (внутрішня-мапа-список (внутрішня-мапа-вставити \"one\" (quote payload) map-empty)))"),
         "(\"one\")",
         "AVL dotted entries must project a proper key list"
     );
@@ -92,8 +92,8 @@ fn content_store_membership_is_an_exact_d1_bit_not_structural_one() {
     for (source, expected) in [
         ("(content-store-contains? (content-store-put (empty-content-store) (quote star)) (знання-вміст-адреса (quote star)))", true),
         ("(content-store-contains? (empty-content-store) (знання-вміст-адреса (quote star)))", false),
-        ("(fs-contains? (car (fs-write (fs-empty) \"x\" (quote star))) \"x\")", true),
-        ("(fs-contains? (fs-empty) \"x\")", false),
+        ("(фс-містить? (car (фс-записати (фс-порожній) \"x\" (quote star))) \"x\")", true),
+        ("(фс-містить? (фс-порожній) \"x\")", false),
     ] {
         let output = eval_program(source, &mut session)
             .unwrap_or_else(|e| panic!("store D1 witness {source}: {e:?}"))
@@ -144,7 +144,7 @@ fn world_dedup_two_equal_world_contents_share_one_key() {
 #[test]
 fn object_package_fold_consumes_every_valid_package() {
     let mut session = session();
-    let source = "(let ((decision (fs-build-object-store (list (fs-object-package (quote first)) (fs-object-package (quote second))) (empty-content-store)))) (list (car decision) (content-store-size (second decision))))";
+    let source = "(let ((decision (фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote first)) (фс-об'єкт-пакет (quote second))) (empty-content-store)))) (list (car decision) (content-store-size (second decision))))";
     assert_eq!(observe(&mut session, source), "(accepted 2)",
         "nonempty packages may not be accepted without insertion");
 }
@@ -152,22 +152,22 @@ fn object_package_fold_consumes_every_valid_package() {
 #[test]
 fn object_package_fold_rejects_invalid_second_package_without_partial_success() {
     let mut session = session();
-    let source = "(fs-build-object-store (list (fs-object-package (quote first)) (list (cons (quote format) (quote wsm-fs-object)) (cons (quote version) (quote (0 1))) (cons (quote address) \"incorrect\") (cons (quote value) (quote second)))) (empty-content-store))";
+    let source = "(фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote first)) (list (cons (quote format) (quote wsm-fs-object)) (cons (quote version) (quote (0 1))) (cons (quote address) \"incorrect\") (cons (quote value) (quote second)))) (empty-content-store))";
     assert_eq!(observe(&mut session, source), "(rejected address-mismatch)");
 }
 
 #[test]
 fn object_package_fold_rejects_an_improper_tail() {
     let mut session = session();
-    let source = "(fs-build-object-store (cons (fs-object-package (quote first)) (quote broken-tail)) (empty-content-store))";
+    let source = "(фс-побудувати-об'єкт-сховище (cons (фс-об'єкт-пакет (quote first)) (quote broken-tail)) (empty-content-store))";
     assert_eq!(observe(&mut session, source), "(rejected invalid-object-packages)");
 }
 
 #[test]
 fn referenced_root_can_project_its_real_object_and_binding_lists() {
     let mut session = session();
-    let prefix = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)))";
-    let source = format!("{prefix} (list (fs-package-field (quote objects) root) (fs-package-field (quote bindings) root)))");
+    let prefix = "(let* ((value (quote (hello world))) (written (фс-записати (фс-порожній) \"notes/today\" value)) (fs (car written)) (root (фс-корінь-пакет fs)))";
+    let source = format!("{prefix} (list (фс-пакет-поле (quote objects) root) (фс-пакет-поле (quote bindings) root)))");
     assert_eq!(
         observe(&mut session, &source),
         "((\"(hello world)\") ((\"notes/today\" . \"(hello world)\")))"
@@ -177,8 +177,8 @@ fn referenced_root_can_project_its_real_object_and_binding_lists() {
 #[test]
 fn referenced_root_has_both_address_lists_in_its_supplied_store() {
     let mut session = session();
-    let prefix = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)))";
-    let source = format!("{prefix} (list (fs-all-addresses-present? (fs-package-field (quote objects) root) (fs-objects fs)) (fs-binding-addresses-present? (fs-package-field (quote bindings) root) (fs-objects fs))))");
+    let prefix = "(let* ((value (quote (hello world))) (written (фс-записати (фс-порожній) \"notes/today\" value)) (fs (car written)) (root (фс-корінь-пакет fs)))";
+    let source = format!("{prefix} (list (усі-адреси-об'єктів-файлової-системи-наявні? (фс-пакет-поле (quote objects) root) (фс-об'єкти fs)) (усі-адреси-зв'язувань-у-файловій-системі-наявні? (фс-пакет-поле (quote bindings) root) (фс-об'єкти fs))))");
     let result = eval_program(&source, &mut session)
         .unwrap_or_else(|e| panic!("referenced root D1 validators {source}: {e:?}")).value.to_string();
     assert_eq!(result, "(1 1)");
@@ -187,19 +187,19 @@ fn referenced_root_has_both_address_lists_in_its_supplied_store() {
 #[test]
 fn referenced_root_rebuilds_its_binding_map_without_nil_tail_access() {
     let mut session = session();
-    let source = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (root (fs-root-package (car written)))) (внутрішня-мапа-отримати \"notes/today\" (fs-bindings-from-list (fs-package-field (quote bindings) root) map-empty)))";
+    let source = "(let* ((value (quote (hello world))) (written (фс-записати (фс-порожній) \"notes/today\" value)) (root (фс-корінь-пакет (car written)))) (внутрішня-мапа-отримати \"notes/today\" (фс-зв'язки-з-список (фс-пакет-поле (quote bindings) root) map-empty)))";
     assert_eq!(observe(&mut session, source), "(\"(hello world)\")");
 }
 
 #[test]
 fn referenced_root_decisions_isolate_the_rejected_stage() {
     let mut session = session();
-    let prefix = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)) (object (fs-object-package value)))";
+    let prefix = "(let* ((value (quote (hello world))) (written (фс-записати (фс-порожній) \"notes/today\" value)) (fs (car written)) (root (фс-корінь-пакет fs)) (object (фс-об'єкт-пакет value)))";
     let cases = [
-        ("(fs-root-package-decision root)", "accepted"),
-        ("(fs-object-package-decision object)", "accepted"),
-        ("(fs-build-object-store (list object) (empty-content-store))", "accepted"),
-        ("(fs-reconstruct-root root (list object))", "accepted"),
+        ("(рішення-щодо-кореневого-пакета-файлової-системи root)", "accepted"),
+        ("(рішення-щодо-пакета-об'єкта-файлової-системи object)", "accepted"),
+        ("(фс-побудувати-об'єкт-сховище (list object) (empty-content-store))", "accepted"),
+        ("(фс-відновити-корінь root (list object))", "accepted"),
     ];
     for (form, expected_tag) in cases {
         let expression = format!("{prefix} (car {form}))");
@@ -211,7 +211,7 @@ fn referenced_root_decisions_isolate_the_rejected_stage() {
 #[test]
 fn referenced_root_rebuild_is_a_separate_atomic_witness() {
     let mut session = session();
-    let source = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)) (object (fs-object-package value))) (car (fs-reconstruct-root root (list object))))";
+    let source = "(let* ((value (quote (hello world))) (written (фс-записати (фс-порожній) \"notes/today\" value)) (fs (car written)) (root (фс-корінь-пакет fs)) (object (фс-об'єкт-пакет value))) (car (фс-відновити-корінь root (list object))))";
     assert_eq!(observe(&mut session, source), "accepted");
 }
 
@@ -220,13 +220,13 @@ fn one_object_store_has_a_bounded_reconstruction_witness() {
     let mut session = session();
     assert_eq!(
         observe(&mut session,
-            "(car (fs-build-object-store (list (fs-object-package (quote hello))) (empty-content-store)))"),
+            "(car (фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote hello))) (empty-content-store)))"),
         "accepted",
         "one canonical object envelope should enter the immutable content store"
     );
     assert_eq!(
         observe(&mut session,
-            "(car (fs-reconstruct-root (fs-root-package (fs-empty)) (list (fs-object-package (quote hello)))))"),
+            "(car (фс-відновити-корінь (фс-корінь-пакет (фс-порожній)) (list (фс-об'єкт-пакет (quote hello)))))"),
         "accepted",
         "an unreferenced but valid object must not corrupt an otherwise empty root"
     );
@@ -236,7 +236,7 @@ fn one_object_store_has_a_bounded_reconstruction_witness() {
 fn empty_root_can_be_reconstructed_without_object_packages() {
     let mut session = session();
     assert_eq!(
-        observe(&mut session, "(car (fs-reconstruct-root (fs-root-package (fs-empty)) (quote ())))"),
+        observe(&mut session, "(car (фс-відновити-корінь (фс-корінь-пакет (фс-порожній)) (quote ())))"),
         "accepted",
         "an empty root has no missing-address proof obligation"
     );
@@ -246,11 +246,11 @@ fn empty_root_can_be_reconstructed_without_object_packages() {
 fn referenced_address_checks_are_d1_and_fail_closed() {
     let mut session = session();
     for (source, expected) in [
-        ("(fs-all-addresses-present? (quote ()) (empty-content-store))", true),
-        ("(fs-all-addresses-present? (quote missing) (empty-content-store))", false),
-        ("(fs-all-addresses-present? (quote (missing)) (empty-content-store))", false),
-        ("(fs-binding-addresses-present? (quote ()) (empty-content-store))", true),
-        ("(fs-binding-addresses-present? (quote ((a . missing))) (empty-content-store))", false),
+        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote ()) (empty-content-store))", true),
+        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote missing) (empty-content-store))", false),
+        ("(усі-адреси-об'єктів-файлової-системи-наявні? (quote (missing)) (empty-content-store))", false),
+        ("(усі-адреси-зв'язувань-у-файловій-системі-наявні? (quote ()) (empty-content-store))", true),
+        ("(усі-адреси-зв'язувань-у-файловій-системі-наявні? (quote ((a . missing))) (empty-content-store))", false),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|e| panic!("D1 address validation {source}: {e:?}"))
@@ -373,12 +373,12 @@ fn root_commit_equality_is_structural_and_d1_only() {
 fn root_envelope_accepts_its_own_schema_without_object_only_fields() {
     let mut session = session();
     assert_eq!(
-        observe(&mut session, "(car (fs-root-package-decision (fs-root-package (fs-empty))))"),
+        observe(&mut session, "(car (рішення-щодо-кореневого-пакета-файлової-системи (фс-корінь-пакет (фс-порожній))))"),
         "accepted",
         "root metadata consists of format/version/revision/bindings/objects, not an address/value pair"
     );
     assert_eq!(
-        observe(&mut session, "(fs-package-field (quote address) (fs-root-package (fs-empty)))"),
+        observe(&mut session, "(фс-пакет-поле (quote address) (фс-корінь-пакет (фс-порожній)))"),
         "()",
         "the absent object address remains absent in a root envelope"
     );
@@ -388,7 +388,7 @@ fn root_envelope_accepts_its_own_schema_without_object_only_fields() {
 fn empty_object_store_uses_an_admitted_two_argument_lisp_closure() {
     let mut s = session();
     assert_eq!(
-        observe(&mut s, "(fs-build-object-store (quote ()) (empty-content-store))"),
+        observe(&mut s, "(фс-побудувати-об'єкт-сховище (quote ()) (empty-content-store))"),
         "(accepted ())",
         "nested reconstruction must not shadow the two-argument closure"
     );
@@ -402,7 +402,7 @@ fn derived_macro_binds_list_values_as_one_variable() {
         "4"
     );
     assert_eq!(
-        observe(&mut s, "(нехай-похідне ((x (fs-build-object-store (quote ()) (empty-content-store)))) (car x))"),
+        observe(&mut s, "(нехай-похідне ((x (фс-побудувати-об'єкт-сховище (quote ()) (empty-content-store)))) (car x))"),
         "accepted"
     );
 }
