@@ -330,6 +330,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-split-last-occurrence-general",
         "list-swap-adjacent-pairs",
         "list-contiguous-sublist-atoms-general",
+        "list-duplicate-reversible",
+        "list-has-adjacent-equal-atoms",
+        "list-rotate-five-by-two",
+        "list-tree-mirror-general",
+        "list-unique-last-stable",
         "list-replace-last-occurrence-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
@@ -392,6 +397,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-swap-adjacent-pairs"
                 | "list-contiguous-sublist-atoms-general"
                 | "list-replace-last-occurrence-general"
+                | "list-duplicate-reversible"
+                | "list-has-adjacent-equal-atoms"
+                | "list-rotate-five-by-two"
+                | "list-tree-mirror-general"
+                | "list-unique-last-stable"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
