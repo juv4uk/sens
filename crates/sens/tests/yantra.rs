@@ -89,6 +89,38 @@ fn yantra_json_string_classifier_yields_d1_condition_from_structured_witness() {
     // Чинний Core4 класифікує рядок трійкою даних, а не булевим D1.
     // Справжній SENS JSON-кодер має сам порівняти членство у класі.
     let mut session = agent_session();
+    // Чинний Core4 повинен повернути трійку й для рядка, й для
+    // не-рядка; SENS сам обчислює обидві сторони доказу.
+    for (source, oracle) in [
+        (
+            "(класифікувати-рядкове-значення 23)",
+            "(як-є (class-membership string nonmember))",
+        ),
+        (
+            "(класифікувати-рядкове-значення \"зоря\")",
+            "(як-є (class-membership string member))",
+        ),
+        (
+            "(класифікувати-непорожність-рядка 23)",
+            "(як-є (class-membership string nonmember))",
+        ),
+        (
+            "(класифікувати-непорожність-рядка \"зоря\")",
+            "(як-є (class-membership string nonempty-member))",
+        ),
+        (
+            "(класифікувати-непорожність-рядка \"\")",
+            "(як-є (class-membership string member))",
+        ),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS classification {source}: {error}"))
+            .value;
+        let expected = eval_program(oracle, &mut session)
+            .unwrap_or_else(|error| panic!("SENS oracle {oracle}: {error}"))
+            .value;
+        assert_eq!(actual, expected, "класифікатор не може повертати хибну або неповну трійку");
+    }
     for (expression, oracle) in [
         (
             "(кодувати-значення-формат-обміну-даними \"зоря\")",
