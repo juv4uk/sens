@@ -79,4 +79,13 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
         &mut session,
     ).expect("неповна подія не повинна ламати SENS").value.to_string();
     assert_eq!(missing, no, "неповна подія не є свідком модуля");
+
+    // Пошкоджені події не можуть приховувати правильний запис,
+    // який зустрічається далі. Перевірка проходить через справжній SENS.
+    let recovered = eval_program(
+        "(журнал-містить-записи-модуля? (як-є alpha) (як-є (самотня-подія (tell) (tell beta b) (tell alpha a))))",
+        &mut session,
+    ).expect("SENS знаходить модуль після пошкоджених подій")
+     .value.to_string();
+    assert_eq!(recovered, yes, "неповна подія не приховує наступне правильне свідчення");
 }
