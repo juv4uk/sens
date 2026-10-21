@@ -62,6 +62,12 @@ fn reasoning_d3_d9_projections_replay_frozen_bounded_behavior() {
         ("(запустити-правило (як-є ((fact a) (derived a))) (як-є (fact a)))", "(derived a)"),
         ("(запустити-правило (як-є ((fact a) (derived a))) (як-є (fact b)))", "no-match"),
         ("(запустити-правило-на-факти (як-є ((fact a) (derived a))) (як-є ()))", "()"),
+        // Власне D3-правило має рівно два поля; пошкоджені структури
+        // не повинні читатися як CAR/CDR атома чи тихо втрачати хвіст.
+        ("(запустити-правило (як-є ()) (як-є (fact a)))", "no-match"),
+        ("(запустити-правило (як-є ((fact a))) (як-є (fact a)))", "no-match"),
+        ("(запустити-правило (як-є ((fact a) . incomplete)) (як-є (fact a)))", "no-match"),
+        ("(запустити-правило (як-є ((fact a) (derived a) third)) (як-є (fact a)))", "no-match"),
     ] {
         assert_eq!(observed(program), expected, "current reasoning behavior changed: {program}");
     }
