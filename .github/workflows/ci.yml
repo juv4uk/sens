@@ -225,7 +225,7 @@ jobs:
             echo 'reason_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Guard і механізми: перевірка D1 запускає справжній SENS.
-          if grep -Eq '^(lib/(guard|mechanism-selector)\.lisp|crates/sens/tests/guard\.rs|tests/test_ukr_(guard|mechanism_selector)_projection\.py|scripts/test-guard-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/(guard|mechanism-selector)\.lisp|knowledge/guard-reference\.lisp|crates/sens/tests/guard\.rs|tests/test_ukr_(guard|mechanism_selector)_projection\.py|scripts/test-guard-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'guard_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
