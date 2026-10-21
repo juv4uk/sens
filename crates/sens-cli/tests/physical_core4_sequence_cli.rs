@@ -323,6 +323,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
             "вилучити-середнє-з-трійки"
                 | "вставити-посеред-пари"
                 | "розділити-четвірку-на-пари"
+                | "list-swap-ends-five"
+                | "list-swap-inner-five"
                 | "rotate-four-left"
                 | "rotate-four-right"
                 | "list-delete-second"
