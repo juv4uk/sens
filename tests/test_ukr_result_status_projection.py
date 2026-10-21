@@ -75,8 +75,8 @@ class ResultStatusProjectionTests(unittest.TestCase):
         self.assertNotRegex(code, r"(?<![\w:#])[01](?![01\w])")
         # Вся виконувана D1 істинність — обчислені предикати SENS;
         # застарілі незв’язані слова не мають з'являтися в коді.
-        self.assertNotRegex(code, r"(?<![\\w-])так(?![\\w-])")
-        self.assertNotRegex(code, r"(?<![\\w-])ні(?![\\w-])")
+        self.assertNotRegex(code, r"(?<![\w-])так(?![\w-])")
+        self.assertNotRegex(code, r"(?<![\w-])ні(?![\w-])")
         self.assertIn("(атом? (як-є ()))", code)
         self.assertIn("(атом? (сполучити (як-є ()) (як-є ())))", code)
 
