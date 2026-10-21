@@ -302,7 +302,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
         if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
-      - name: Контроль T5M CLI: позитивна й негативні фізичні межі
+      - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: steps.changed-t5m-lisp.outputs.has_files == 'true'
         timeout-minutes: 10
         shell: bash
