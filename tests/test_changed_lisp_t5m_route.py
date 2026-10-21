@@ -549,6 +549,18 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             calls = (root / "invoked.marker").read_text(encoding="utf-8")
             self.assertIn("--t5m-pair module.lisp", calls)
 
+    def test_export_catalog_is_verified_as_data_not_fake_executable_lisp(self):
+        # Реальний cml-export виконує producer parity; schema-теги en/sa
+        # не перетворюються на D7:укр викличні імена.
+        ci = CI.read_text(encoding="utf-8")
+        self.assertIn('if name == "mylisp-cml-export.lisp":', ci)
+        self.assertIn("T5M_NONPROGRAM_EXPORT", ci)
+        self.assertIn("cml_export_tests=true", ci)
+        self.assertIn(
+            "cargo test --locked -p sens-cli --bin cml-export "
+            "committed_artifact_matches_producer_output", ci,
+        )
+
     def test_shell_parses(self):
         import subprocess
         subprocess.run(['bash', '-n', str(RUNNER)], check=True)
