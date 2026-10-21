@@ -215,7 +215,9 @@ class SelectedOriginalT5(unittest.TestCase):
             migration.strip_comments(imported_source),
             source_surface="укр",
         )).parse_program()
-        imported = migration.collect_global_bindings(forms)
+        imported = migration.collect_global_bindings(
+            forms, migration.Resolver(my, upper)
+        )
         self.assertIn("модуль-відомий?", {name for name, _ in imported})
         with_preload = migration.Resolver(my, upper)
         words = migration.migrate_file(
