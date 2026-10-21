@@ -246,6 +246,19 @@ class UkrainianMechanismCheckerProjectionTests(unittest.TestCase):
                 self.assertEqual(repaired, historical)
 
 
+    def test_mechanism_checker_uses_computed_d1_instead_of_unbound_legacy_truth(self):
+        # Перевіряємо тільки структуру; runtime-оракул належить SENS.
+        source = (ROOT / "scripts/check-function-table-mechanisms.lisp").read_text(encoding="utf-8")
+        self.assertNotIn("(так ", source)
+        self.assertEqual(source.count("((атом? (як-є ()))"), 19)
+        # yes/no залишаються лише цитованими назвами стану.
+        self.assertIn("(як-є yes)", source)
+        self.assertIn("(як-є no)", source)
+        # Негативний мутант знову має містити незв'язану стару голову.
+        mutant = source.replace("((атом? (як-є ()))", "(так", 1)
+        self.assertIn("(так ", mutant)
+        self.assertNotEqual(mutant, source)
+
     def test_island_only_d1_direct_and_negative_numeric_mutant(self):
         path = "scripts/check-island-math-evidence.lisp"
         current = (ROOT / path).read_text(encoding="utf-8")
