@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 from pathlib import Path
 import shutil
 import subprocess
@@ -74,6 +75,17 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.view.write_text("0\n", encoding="ascii")
         with self.assertRaisesRegex(mod.ProjectionBlocked, "view"):
             mod.verify(self.lisp, self.sens, self.view, codec="t5m")
+
+    def test_programmatic_verifier_defaults_to_t5m_not_legacy_auto(self):
+        # CLI і Python-виклики мають один чинний фізичний режим.
+        # Історичні t5/auto перевіряються лише за явним запитом.
+        signature = inspect.signature(mod.verify)
+        self.assertEqual(signature.parameters["codec"].default, "t5m")
+        self.sens.write_bytes(encode_t5m_projection(WORDS))
+        receipt = mod.verify(self.lisp, self.sens, self.view)
+        self.assertEqual(receipt["physical_codec"], "t5m")
+        self.assertTrue(receipt["program_identity_roundtrip"])
+        self.assertFalse(receipt["runtime_oracle_admitted_by_this_audit"])
 
     def test_exact_ratified_uk_surfaces_from_domain_tables(self):
         self.assertEqual(mod.uk_surface(1), {"0": "ні", "1": "так"})
