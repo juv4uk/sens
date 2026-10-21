@@ -84,7 +84,13 @@ run_native_t5m_program() {
   local committed="$(dirname "$file")/$(basename "$file" .lisp).sens"
   local committed_view="${committed%.sens}"
   local status=0
-  if timeout 45s "$binary" --t5m-mint "$file" "$physical" \
+  # Для модулів з DEFINE-залежностями використовуємо новий SENS CLI.
+  # Mint і парна перевірка відбуваються з однаковими binding-source.
+  local mint_flag=--t5m-mint
+  if (( ${#binding_sources[@]} != 0 )); then
+    mint_flag=--t5m-mint-pair
+  fi
+  if timeout 45s "$binary" "$mint_flag" "$file" "$physical" "${binding_sources[@]}" \
       >"$dir/native-mint.stdout" 2>"$dir/native-mint.stderr"; then
     if [[ ! -s "$physical" ]]; then
       echo "::error::T5M_NATIVE_MINT_EMPTY source=$file" >&2
@@ -149,7 +155,7 @@ run_native_t5m_program() {
   fi
 
   # Критичний доказ — реальне парне виконання фізичних Zig-байтів.
-  if timeout 45s "$binary" --t5m-pair "$file" "$physical" \
+  if timeout 45s "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
       >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
     native_paired_executed_paths["$file"]=1
     if timeout 45s "$binary" "$physical" \
@@ -210,11 +216,6 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   mkdir -p "$dir"
   report="$dir/migration.json"
   echo "T5M_CHANGED_SOURCE path=$file"
-  if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then
-    run_native_t5m_program
-    continue
-  fi
-  code=0
   binding_sources=()
   # Механізм D9 «уніфікувати» справді визначено в lib/unify.lisp.
   # Це точне джерело завантажуваного DEFINE, не дозвіл викликати
@@ -246,6 +247,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/reason.lisp
                      --binding-source lib/unify.lisp)
   fi
+  if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then
+    run_native_t5m_program
+    continue
+  fi
+  code=0
   python3 scripts/migrate-three-pass.py "$file" \
     --out "$dir" --report "$report" --codec t5m --source-surface укр "${binding_sources[@]}" \
     >"$dir/migration.log" 2>&1 || code=$?
