@@ -36,6 +36,27 @@ fn core_empty_predicate_returns_exact_d1_for_nil_atom_and_pair() {
     }
 }
 
+// Порожні логічні макроси мають повернути точний D1, не символ з цитати.
+#[test]
+fn core_zero_arity_and_or_return_real_d1_bits() {
+    let mut session = Session::default();
+    sens::eval_core_library_source(
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("чинне українське ядро повинне виконуватися в SENS");
+    for (source, expected) in [("(та)", true), ("(або)", false)] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS відхилив {source}: {error}"))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "Порожній логічний макрос не може повернути цитований символ: {source}",
+        );
+    }
+}
+
 #[test]
 fn core_peer_lookup_returns_first_matching_group_or_empty() {
     let mut session = core_session();
