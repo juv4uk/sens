@@ -165,6 +165,8 @@ class MetaFirstClassUkrRemaining(unittest.TestCase):
         self.assertEqual(active.count("((атом? значення) (атом? (як-є (()))) )"), 2)
         self.assertNotIn("(так ", active)
         self.assertNotIn(" ні)", active)
+        self.assertNotIn(" так)", active)
+        self.assertIn("((атом? (решта аргументи)) (атом? (як-є ())))", active)
         self.assertNotIn("((функція ()", active)
         self.assertIn("(нехай-послідовно", active)
         # Старий біт голови мутаційно повертає нечинний виклик;
