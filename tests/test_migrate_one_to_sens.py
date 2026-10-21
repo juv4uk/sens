@@ -160,7 +160,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             out = Path(td)
             carrier, view = out / "branch.sens", out / "branch"
             report_path = out / "batch-report.json"
-            stale_carrier, stale_view = b"stale T5M", b"stale spaced view\\n"
+            stale_carrier, stale_view = b"stale T5M", b"stale spaced view\n"
             carrier.write_bytes(stale_carrier)
             view.write_bytes(stale_view)
             command = [
@@ -191,10 +191,10 @@ class CanonicalOneFileMigration(unittest.TestCase):
             words = decode_t5m_bytes(physical)
             self.assertTrue(words)
             self.assertEqual(
-                physical, encode_t5m_projection(" ".join(words) + "\\n")
+                physical, encode_t5m_projection(" ".join(words) + "\n")
             )
             self.assertEqual(
-                view.read_bytes(), (" ".join(words) + "\\n").encode("ascii")
+                view.read_bytes(), (" ".join(words) + "\n").encode("ascii")
             )
             self.assertNotEqual(physical, stale_carrier)
             self.assertNotEqual(view.read_bytes(), stale_view)
