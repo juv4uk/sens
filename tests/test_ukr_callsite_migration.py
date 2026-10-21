@@ -1489,6 +1489,16 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
             self._undo_exact_heads(wrong)
         self.assertIn('"00000000"', source)
         self.assertIn("(довжина (рядки-домену д8))", source)
+        # Фізичні шляхи ВСІХ десяти таблиць — точні цитовані D7 дані.
+        # Сирий String у читачі T5M не має допущеної проєкції;
+        # структурна перевірка доповнює (але не заміняє) реальний SENS runtime.
+        for width in range(1, 11):
+            with self.subTest(path_domain=f"D{width}"):
+                self.assertIn(
+                    f'(визначити д{width} (завантажити-домен (символ-у-текст (як-є lib/domains/d{width}.lisp))))',
+                    source,
+                )
+                self.assertNotIn(f'"lib/domains/d{width}.lisp"', source)
         # Чинний читач перевіряє не лише історичні сім таблиць, а весь D1–D10.
         for width, count in ((7, 128), (9, 512), (10, 1024)):
             with self.subTest(domain=f"D{width}"):
