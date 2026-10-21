@@ -172,8 +172,14 @@ fn physical_t5_benchmark_request(args: &[String]) -> Option<Result<&str, &'stati
     if position != 1 || args.len() != 3 {
         return Some(Err("usage: sens --benchmark-physical <program.sens>"));
     }
-    if std::path::Path::new(&args[2]).extension().and_then(|ext| ext.to_str()) != Some("sens") {
-        return Some(Err("--benchmark-physical accepts only a physical .sens binary"));
+    if std::path::Path::new(&args[2])
+        .extension()
+        .and_then(|ext| ext.to_str())
+        != Some("sens")
+    {
+        return Some(Err(
+            "--benchmark-physical accepts only a physical .sens binary",
+        ));
     }
     Some(Ok(args[2].as_str()))
 }
@@ -553,7 +559,9 @@ fn main() {
         };
         #[cfg(not(feature = "benchmark-ast-visits"))]
         let result: Result<(sens::EvalResult, usize, u64), String> = match request {
-            Ok(_) => Err("--benchmark-physical requires the benchmark-ast-visits build feature".into()),
+            Ok(_) => {
+                Err("--benchmark-physical requires the benchmark-ast-visits build feature".into())
+            }
             Err(message) => Err(message.to_owned()),
         };
         match result {
@@ -1183,20 +1191,29 @@ mod core_profile_bootstrap_tests {
             "--benchmark-physical".to_owned(),
             "program.sens".to_owned(),
         ];
-        assert_eq!(physical_t5_benchmark_request(&args), Some(Ok("program.sens")));
+        assert_eq!(
+            physical_t5_benchmark_request(&args),
+            Some(Ok("program.sens"))
+        );
         let textual = vec![
             "sens".to_owned(),
             "--benchmark-physical".to_owned(),
             "program.lisp".to_owned(),
         ];
-        assert!(matches!(physical_t5_benchmark_request(&textual), Some(Err(_))));
+        assert!(matches!(
+            physical_t5_benchmark_request(&textual),
+            Some(Err(_))
+        ));
         let extra = vec![
             "sens".to_owned(),
             "--benchmark-physical".to_owned(),
             "program.sens".to_owned(),
             "--surface=укр".to_owned(),
         ];
-        assert!(matches!(physical_t5_benchmark_request(&extra), Some(Err(_))));
+        assert!(matches!(
+            physical_t5_benchmark_request(&extra),
+            Some(Err(_))
+        ));
     }
 
     #[cfg(feature = "zig-transport")]
