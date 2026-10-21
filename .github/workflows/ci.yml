@@ -193,6 +193,11 @@ jobs:
               # Їхню семантику (D1:1 і мутант D1:0) обов'язково виконує
               # нижче core_postcore_ukr із завантаженою бібліотекою.
               # Самостійний CLI без цих зв'язувань давав хибний RED.
+              # Генерований CML-export є протокольними даними, а не
+              # виконуваним Lisp; en/sa поля не є D7:укр-головами.
+              if name == "mylisp-cml-export.lisp":
+                  print(f"T5M_NONPROGRAM_EXPORT path={name} witness=cml-export-producer")
+                  continue
               if name in {
                   "tests/semantic/meta-eval-graph-d1-law.lisp",
                   "tests/semantic/meta-eval-graph-d1-mutant.lisp",
@@ -213,6 +218,10 @@ jobs:
             git diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" > "$changed_all"
           else
             git diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" > "$changed_all"
+          fi
+          # Факт відповідності генератора даним перевіряється виконанням.
+          if grep -Eq '^(mylisp-cml-export[.]lisp|crates/sens-cli/src/bin/cml-export[.]rs)$' "$changed_all"; then
+            echo 'cml_export_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|tests/test_core1_(third|fourth)_domain_canary\.py|tests/fixtures/core1-(third|fourth)-domain-canary/.*|crates/sens-cli/tests/core1_array_bounds_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'core1_tests=true' >> "$GITHUB_OUTPUT"
@@ -578,6 +587,14 @@ jobs:
         run: |
           set -euo pipefail
           cargo test --locked -p sens --test translation_boundary -- --nocapture
+
+      - name: CML export — реальна відповідність джерела генератору
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.cml_export_tests == 'true' }}
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 180s cargo test --locked -p sens-cli --bin cml-export committed_artifact_matches_producer_output -- --nocapture
 
       - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
         id: t5m_changed_execute
