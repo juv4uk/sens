@@ -442,6 +442,54 @@ fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
     assert_eq!(observed, expected, "Точні SENS D24+ свідки: арифметика, листки, рекурсія");
 }
 
+/// Справжня пара: .sens читається Zig, а домен D24 задано незмінним
+/// українським .lisp. Пошкоджені байти й підмінене джерело не виконуються.
+#[cfg(feature = "zig-transport")]
+#[test]
+fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
+    use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
+    let make = |width: usize, bits: u64| {
+        ExactT5Word::new(width, (0..width).rev().map(|shift| ((bits >> shift) & 1) as u8).collect())
+            .expect("canonical exact-width source word")
+    };
+    // D2 (  / D5:01010 ADD / D24:1 / D24:2 / D2 ).
+    let words = vec![make(2, 2), make(5, 0b01010), make(24, 1), make(24, 2), make(2, 1)];
+    let physical = encode_t5_exact_words(&words).expect("Zig exact T5M");
+    let dir = std::env::temp_dir().join(format!("sens-physical-pair-d24-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).expect("isolated pair");
+    let source = dir.join("обчислення.lisp");
+    let packed = dir.join("обчислення.sens");
+    std::fs::write(&source, "(додати 1 2)\n").expect("source");
+    std::fs::write(&packed, &physical).expect("physical");
+
+    let evaluate = || sens()
+        .args(["--t5m-pair", source.to_str().unwrap(), packed.to_str().unwrap()])
+        .output()
+        .expect("live paired SENS");
+    let result = evaluate();
+    assert!(result.status.success(), "paired SENS failed: {}",
+        String::from_utf8_lossy(&result.stderr));
+    assert_eq!(String::from_utf8_lossy(&result.stdout).trim(), "3");
+
+    let mut altered = words.clone();
+    altered[3] = make(24, 3);
+    std::fs::write(&packed, encode_t5_exact_words(&altered).unwrap())
+        .expect("mutated physical carrier");
+    let negative = evaluate();
+    assert!(!negative.status.success(), "mutated physical bytes were executed");
+    assert!(String::from_utf8_lossy(&negative.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "mutated carrier mismatch not reported: {}", String::from_utf8_lossy(&negative.stderr));
+
+    std::fs::write(&packed, &physical).expect("restore real carrier");
+    std::fs::write(&source, "(додати 1 4)\n").expect("mutated human source");
+    let negative = evaluate();
+    assert!(!negative.status.success(), "changed human source was executed");
+    assert!(String::from_utf8_lossy(&negative.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "changed source mismatch not reported: {}", String::from_utf8_lossy(&negative.stderr));
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
 #[test]
 fn t5m_file_mode_executes_the_changed_ukrainian_source_through_the_physical_route() {
     let path = std::env::temp_dir().join(format!("sens-cli-t5m-file-{}.lisp", std::process::id()));
