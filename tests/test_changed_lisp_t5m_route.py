@@ -41,6 +41,26 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                 self.assertIn('failed_files=$((failed_files + 1))', arm)
         self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
 
+    def test_w24_uses_explicit_domain_source_runtime_without_fake_physical_pass(self):
+        # Це контроль маршрутів, а не Python-обчислення Lisp.
+        source = RUNNER.read_text(encoding="utf-8")
+        physical = source.index('if timeout 45s "$binary" "$pair"')
+        marker = source.index("T5M_PHYSICAL_D24_NOT_EXECUTED", physical)
+        source_runtime = source.index('timeout 45s "$binary" --t5m-file "$file"', marker)
+        source_pass = source.index("T5M_DOMAIN_SOURCE_RUNTIME_PASS", source_runtime)
+        source_fail = source.index("T5M_DOMAIN_SOURCE_RUNTIME_FAIL", source_pass)
+        self.assertLess(physical, marker)
+        self.assertLess(marker, source_runtime)
+        self.assertLess(source_runtime, source_pass)
+        self.assertLess(source_pass, source_fail)
+        branch = source[marker:source_fail]
+        self.assertIn('точні ширини слів [24]', source)
+        self.assertIn('адаптер BinarySourceWord приймає лише W1–W9', source)
+        self.assertIn('physical=NOT_SUPPORTED', branch)
+        self.assertIn('release=NOT_CERTIFIED', branch)
+        self.assertNotIn('T5M_FILE_EXECUTION PASS', branch)
+        self.assertIn('failed_files=$((failed_files + 1))', source[source_fail:])
+
     def test_shell_parses(self):
         import subprocess
         subprocess.run(['bash', '-n', str(RUNNER)], check=True)
