@@ -341,6 +341,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-tree-mirror-general",
         "list-unique-last-stable",
         "list-replace-last-occurrence-general",
+        "list-drop-while-atom-general",
+        "list-take-while-atom-general",
+        "list-interpose-general",
+        "list-last-occurrence-suffix",
+        "list-split-first-occurrence-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -412,6 +417,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-rotate-five-by-two"
                 | "list-tree-mirror-general"
                 | "list-unique-last-stable"
+                | "list-drop-while-atom-general"
+                | "list-take-while-atom-general"
+                | "list-interpose-general"
+                | "list-last-occurrence-suffix"
+                | "list-split-first-occurrence-general"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
