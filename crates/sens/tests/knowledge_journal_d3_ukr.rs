@@ -83,6 +83,27 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
     ).expect("неповна подія не повинна ламати SENS").value.to_string();
     assert_eq!(missing, no, "неповна подія не є свідком модуля");
 
+    // Справжній SENS: лише подія з трьома полями може підтверджувати
+    // існування модуля й потрапляти до журналу.
+    let malformed_events =
+        "(як-є ((tell alpha x зайве) (tell alpha y . хибний-хвіст) (tell beta b)))";
+    let falsely_known = eval_program(
+        &format!("(журнал-містить-записи-модуля? (як-є alpha) {malformed_events})"),
+        &mut session,
+    ).expect("пошкоджені записи не засвідчують модуль").value.to_string();
+    assert_eq!(falsely_known, no, "неправильна арність не доводить існування модуля");
+
+    let mixed_events =
+        "(як-є ((tell alpha x зайве) (tell alpha y . хибний-хвіст) (tell alpha запис)))";
+    let selected = eval_program(
+        &format!("(додати-події-журналу-модуля (як-є alpha) {mixed_events} (як-є ()))"),
+        &mut session,
+    ).expect("справжній SENS пропускає зайві поля, зберігає правильну подію")
+     .value.to_string();
+    let valid_only = eval_program("(як-є ((tell alpha запис)))", &mut session)
+        .expect("канонічна трійка").value.to_string();
+    assert_eq!(selected, valid_only, "зіпсована подія не входить до журналу");
+
     // Пошкоджені події не можуть приховувати правильний запис,
     // який зустрічається далі. Перевірка проходить через справжній SENS.
     let recovered = eval_program(
