@@ -237,6 +237,22 @@ pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::Dom
 }
 
 
+/// Exact inverse test/support for the owner D9/D10 selector table.
+/// These are metadata-only spelling peers, not another runtime body.
+pub(crate) fn selector_ukr_for_exact(identity: DomainIdentity) -> Option<&'static str> {
+    match identity {
+        DomainIdentity::D9(word) => D9_DEFINITION_BINDINGS.iter()
+            .find(|row| row.bits == word.word().packed_bits()
+                && matches!(row.bits >> 6, 0b011 | 0b100))
+            .and_then(|row| (row.names.len() == 5).then(|| row.names[1])),
+        DomainIdentity::D10(word) => D10_DEFINITION_BINDINGS.iter()
+            .find(|row| row.bits == word.packed_bits()
+                && matches!(row.bits >> 7, 0b011 | 0b100))
+            .and_then(|row| (row.names.len() == 5).then(|| row.names[1])),
+        _ => None,
+    }
+}
+
 /// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
 ///
 /// This MUST NOT be used to reinterpret historical CoreDomainIdentity calls. Its only
