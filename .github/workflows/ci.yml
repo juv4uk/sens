@@ -774,6 +774,11 @@ jobs:
           set -euo pipefail
           changed="$RUNNER_TEMP/changed-core-dependencies.txt"
           test -f "$changed"
+          # World: точні D1:1/0 SENS та негативний D8-свідок.
+          if grep -Eq '^(lib/world\.lisp|crates/sens/tests/fs_bridge_diagnostics\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_module_name_symbol_law_is_d1_and_rejects_non_symbols -- --exact --nocapture
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_d1_symbol_guard_must_precede_d8_write -- --exact --nocapture
+          fi
           # Тільки змінений механізм: реальні позитивні та негативні SENS-випадки.
           # Python тут перевіряє форму, а не заміняє роботу виконавця SENS.
           if grep -Eq '^(lib/machine/capability-axis\.lisp|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|\.github/workflows/ci\.yml)$' "$changed"; then
@@ -802,11 +807,6 @@ jobs:
             python3 -m unittest tests.test_code_runs.CodecUkrProjectionTests -v
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo run --locked -p sens-cli --bin sens -- --t5m-pair lib/codec-d2.lisp lib/codec-d2.sens
-          fi
-          # World: точні D1:1/0 SENS та негативний D8-свідок.
-          if grep -Eq '^(lib/world\.lisp|crates/sens/tests/fs_bridge_diagnostics\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_module_name_symbol_law_is_d1_and_rejects_non_symbols -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_d1_symbol_guard_must_precede_d8_write -- --exact --nocapture
           fi
       - name: Реальний SENS — точна двопольова форма правил виведення
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
