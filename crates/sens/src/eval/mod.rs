@@ -60,6 +60,51 @@ pub(crate) fn runtime_codepoint_to_string(
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, CoreDomainIdentity, Span, Value};
 use crate::canonical_reader::text7_binding_key;
 
+#[cfg(feature = "benchmark-ast-visits")]
+std::thread_local! {
+    static EVAL_AST_VISITS: std::cell::Cell<Option<u64>> = const {
+        std::cell::Cell::new(None)
+    };
+}
+
+#[cfg(feature = "benchmark-ast-visits")]
+struct EvalVisitScope {
+    parent: Option<u64>,
+}
+
+#[cfg(feature = "benchmark-ast-visits")]
+impl EvalVisitScope {
+    fn start() -> Self {
+        let parent = EVAL_AST_VISITS.with(|visits| visits.replace(Some(0)));
+        Self { parent }
+    }
+
+    fn finish(self) -> u64 {
+        EVAL_AST_VISITS.with(std::cell::Cell::get).unwrap_or(0)
+    }
+}
+
+#[cfg(feature = "benchmark-ast-visits")]
+impl Drop for EvalVisitScope {
+    fn drop(&mut self) {
+        EVAL_AST_VISITS.with(|visits| {
+            let measured = visits.replace(self.parent).unwrap_or(0);
+            if let Some(parent) = self.parent {
+                visits.set(Some(parent.saturating_add(measured)));
+            }
+        });
+    }
+}
+
+#[cfg(feature = "benchmark-ast-visits")]
+fn record_eval_ast_visit() {
+    EVAL_AST_VISITS.with(|visits| {
+        if let Some(count) = visits.get() {
+            visits.set(Some(count.saturating_add(1)));
+        }
+    });
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
     pub value: Value,
@@ -98,6 +143,20 @@ pub fn eval_lowered_expressions(
         value,
         output: session.environment.output_snapshot(),
     })
+}
+
+/// Execute expressions while counting AST nodes actually dispatched by the
+/// evaluator. The optional metric is compiled only for the whole-program
+/// optimization benchmark, so ordinary SENS builds carry no counter overhead.
+#[cfg(feature = "benchmark-ast-visits")]
+pub fn eval_expressions_with_visit_count(
+    expressions: &[Expr],
+    session: &mut Session,
+) -> Result<(EvalResult, u64), LanguageError> {
+    let scope = EvalVisitScope::start();
+    let result = eval_lowered_expressions(expressions, session);
+    let visits = scope.finish();
+    result.map(|result| (result, visits))
 }
 
 pub fn eval_parsed_expressions_incremental(
@@ -286,6 +345,9 @@ pub(crate) fn evaluate_step(
     expression: &Expr,
     environment: &Environment,
 ) -> Result<EvalStep, LanguageError> {
+    #[cfg(feature = "benchmark-ast-visits")]
+    record_eval_ast_visit();
+
     match &expression.kind {
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),

@@ -6,17 +6,18 @@
     "CONFORMANCE",
     "RESEARCH"
   ],
-  "question": "What are the full-file SENS AST node counts, exact transported words/bits, and actual physical Zig/T5M bytes for a small executable Ukrainian program, with paired source/T5M execution?",
-  "claim": "One fixture gives current-source structural/physical-size accounting and source-to-T5M execution parity only. It does not measure speed, transitive library closure, memory, or language superiority.",
+  "question": "For a fixed exact arithmetic result, how do a direct expression tree and a hand-folded candidate compare in actual evaluator visits, exact words/bits, T5 boundary/padding twos, and physical Zig/T5M bytes?",
+  "claim": "A hand-authored constant-folding pair returns the same verified value and reports AST structure, actual evaluator dispatch visits, exact transported words/bits, T5 framing overhead, and physical T5M bytes. It demonstrates only this fixed-input pair; it does not establish general optimizer quality, speed, transitive library closure, memory, or language superiority.",
   "witness": [
     "benchmarks/sens-program-size/README.md",
     "benchmarks/sens-program-size/run.py",
     "benchmarks/sens-program-size/test_run.py",
     "crates/sens/examples/program_size.rs",
-    "benchmarks/sens-program-size/fixtures/decimal-arithmetic.lisp"
+    "benchmarks/sens-program-size/fixtures/arithmetic-before.lisp",
+    "benchmarks/sens-program-size/fixtures/arithmetic-constant-folded.lisp"
   ],
-  "status": "ACTIVE-CURRENT-UKRAINIAN-AST-AND-PHYSICAL-T5M-SMOKE",
+  "status": "ACTIVE-CURRENT-UKRAINIAN-AST-PATH-AND-PHYSICAL-T5M-PAIR",
   "generation": "current main, live SENS parser/projection and Zig T5M",
-  "axis": "sens/full-source-ast-exact-words-physical-t5m-size",
+  "axis": "sens/whole-program-optimization-ast-path-exact-words-physical-t5m-size",
   "reproduce": "python3 -m unittest benchmarks/sens-program-size/test_run.py -v && python3 benchmarks/sens-program-size/run.py"
 }

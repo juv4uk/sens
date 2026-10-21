@@ -282,6 +282,8 @@ pub use eval::{
     eval_lowered_expressions, eval_parsed_expressions, eval_parsed_expressions_incremental,
     eval_exact_domain_program, eval_program, evaluate as eval_expr, EvalResult,
 };
+#[cfg(feature = "benchmark-ast-visits")]
+pub use eval::eval_expressions_with_visit_count;
 pub use eval::lower::lower_program;
 pub use parser::{parse, parse_exact_domain_source};
 pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};

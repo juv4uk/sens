@@ -10,6 +10,7 @@ path = "src/lib.rs"
 
 [features]
 default = []
+benchmark-ast-visits = []
 
 [dev-dependencies]
 # Tests may opt into the explicit host capability crate, while the shipped

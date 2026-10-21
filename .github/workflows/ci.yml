@@ -392,7 +392,7 @@ jobs:
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           timeout 360s cargo build --locked -p sens-cli --bin sens --bin sens-trit
-          timeout 240s cargo test --locked -p sens --example program_size -- --nocapture
+          timeout 240s cargo test --locked -p sens --example program_size --features benchmark-ast-visits -- --nocapture
           python3 -m unittest benchmarks/sens-program-size/test_run.py -v
           python3 benchmarks/sens-program-size/run.py
 

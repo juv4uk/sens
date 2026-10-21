@@ -28,11 +28,16 @@ fn run() -> Result<(), String> {
     let projected = source_projection::project_ukr_decimal_integer_literals(&parsed, &source)
         .map_err(|error| format!("SENS decimal projection: {error:?}"))?;
     let lowered = sens::lower_program(&projected);
+    let (lowered_execution, lowered_eval_visits) =
+        sens::eval_expressions_with_visit_count(&lowered, &mut sens::Session::bare())
+            .map_err(|error| format!("SENS lowered-AST execution: {error}"))?;
 
     println!("FORMS={}", projected.len());
     println!("SOURCE_BYTES={}", source.len());
     println!("AST_NODES={}", count_program(&projected));
     println!("LOWERED_AST_NODES={}", count_program(&lowered));
+    println!("EVAL_VISITS={lowered_eval_visits}");
+    println!("RESULT={}", lowered_execution.value);
     Ok(())
 }
 
@@ -62,5 +67,20 @@ mod tests {
             .expect("project decimals into exact SENS numeric words");
         assert_eq!(count_program(&parsed), count_program(&projected));
         assert_eq!(projected.len(), 2);
+    }
+
+    #[test]
+    fn reports_real_evaluator_visits_for_lowered_program() {
+        let source = "(додати 1 (помножити 2 3))";
+        let parsed = parse(source).expect("nested Ukrainian arithmetic source");
+        let projected = source_projection::project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("project exact decimal values");
+        let lowered = sens::lower_program(&projected);
+        let (lowered_result, lowered_visits) =
+            sens::eval_expressions_with_visit_count(&lowered, &mut sens::Session::bare())
+                .expect("evaluate lowered program with visit counter");
+
+        assert_eq!(lowered_result.value.to_string(), "7");
+        assert_eq!(lowered_visits, 5, "outer call + nested call + three values");
     }
 }
