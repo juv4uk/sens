@@ -154,6 +154,18 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
             "(визначити метадані-вибору-механізму\n  (перше", code
         )
 
+    def test_function_table_fallbacks_use_sens_d1_not_bare_yes(self):
+        # Лише перевірка виконуваного джерела; це не Python-оракул SENS.
+        metadata = (ROOT / "lib/function-table-mechanisms.lisp").read_text(
+            encoding="utf-8"
+        )
+        code = uncommented(metadata)
+        self.assertIn("(визначити зібрати-механізми-функції", code)
+        self.assertIn("(визначити механізми-функції", code)
+        self.assertNotRegex(code, r"\(\s*так(?=\s|\))")
+        self.assertNotRegex(code, r"\(\s*ні(?=\s|\))")
+        self.assertEqual(code.count("((атом? (як-є ()))"), 2)
+
     def test_exact_d1_registry_predicate_not_old_textual_boolean(self):
         code = uncommented(self.source)
         true_d1 = "(атом? (як-є ()))"
