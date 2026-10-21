@@ -67,6 +67,41 @@ fn write_file_then_read_file_round_trips_the_same_content() {
     std::fs::remove_file(&path).ok();
 }
 
+// Українська зовнішня проєкція входить у справжній SENS-eval, а не в
+// Python-перевірку імен. Іменований Lisp-читач зберігає I/O та D1-відмови.
+#[test]
+fn ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity() {
+    let path = std::env::temp_dir().join(format!(
+        "sens-ukr-fs-{}-roundtrip.txt",
+        std::process::id()
+    ));
+    let path_str = path
+        .to_str()
+        .expect("temporary FS path must be valid UTF-8")
+        .replace('\\', "/");
+    let mut session = capability_session();
+    let content = "сенс";
+
+    let written = eval_program(
+        &format!(r#"(записати-файл "{path_str}" "{content}")"#),
+        &mut session,
+    )
+    .expect("українська функція записати-файл повинна виконатися у SENS");
+    assert_eq!(written.value, Value::String(content.into()));
+
+    let read = eval_program(
+        &format!(r#"(читати-файл "{path_str}")"#),
+        &mut session,
+    )
+    .expect("іменоване українське читати-файл повинно виконатися у SENS");
+    assert_eq!(read.value, Value::String(content.into()));
+
+    let error = eval_program("(читати-файл)", &mut session)
+        .expect_err("помилкова арність української SENS-функції не може стати успіхом");
+    assert_eq!(error.kind, ErrorKind::Arity);
+    std::fs::remove_file(path).ok();
+}
+
 #[test]
 fn write_file_overwrites_rather_than_appends() {
     let path = std::env::temp_dir().join("sens-write-file-overwrite.txt");
