@@ -110,14 +110,14 @@ fn existing_arithmetic_results_remain_mathematical_values() {
             .unwrap_or_else(|error| panic!("mathematical result {} failed: {error}", row.expr));
         let actual = format!("(value \"{}\")", escape_lisp_string(&result.value.to_string()));
         let program = format!(
-            "(witness-pass? (witness-verdict (quote {}) (quote {})))",
+            "(свідок-проходить? (свідок-висновок (як-є {}) (як-є {})))",
             row.source, actual
         );
         let verdict = eval_program(&program, &mut session)
             .unwrap_or_else(|error| panic!("Lisp verdict failed for {}: {error}", row.expr))
             .value
             .to_string();
-        assert_eq!(verdict, "t", "#225 Lisp witness rejected {} as a mathematical value", row.expr);
+        assert_eq!(verdict, "1", "#225 Lisp witness rejected {} as a mathematical value", row.expr);
     }
 }
 
