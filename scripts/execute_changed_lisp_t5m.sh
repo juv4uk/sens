@@ -154,8 +154,12 @@ PY
     # Це НЕ дає права приписати байтам D24 та оголосити physical PASS.
     # Для W24+ використовуємо точний парний маршрут: джерело лише
     # посвідчує домен, Zig декодує наданий .sens, SENS перевіряє кожний біт.
-    if grep -Fq 'Фізичне T5M-декодування зберегло точні ширини слів' "$stderr" &&
-       grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$stderr"; then
+    # Новий SENS називає цю межу без згадок старого BinarySourceWord.
+    # Обидва точні діагностичні варіанти запускають ОДИН парний маршрут:
+    # невідомі/семантичні помилки не маскуємо і не перетворюємо на PASS.
+    if { grep -Fq 'Фізичне T5M-декодування зберегло точні ширини слів' "$stderr" &&
+         grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$stderr"; } ||
+       grep -Fq 'T5M requires exact source projection to D24+ before transport' "$stderr"; then
       physical_not_supported=$((physical_not_supported + 1))
       echo "::notice::T5M_STANDALONE_D24_NOT_SUPPORTED source=$file pair=$pair status=$status"
       if timeout 45s "$binary" --t5m-pair "$file" "$pair" >"$stdout" 2>"$stderr"; then
