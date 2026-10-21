@@ -564,7 +564,9 @@ fn dispatch_domain_call(
     // language-owned closure bound to the same resident (for compatibility
     // callers) shadow its ratified arithmetic law. All other D5 definitions
     // retain the ordinary language-defined fast path below.
-    if !d5_arithmetic::has_mechanism(identity) {
+    if !d5_arithmetic::has_mechanism(identity)
+        && !selector_law::is_selector(identity.into())
+    {
         if let Some(bound) = environment.domain_code_slot(identity) {
             match &bound {
                 Value::Macro(closure) => {

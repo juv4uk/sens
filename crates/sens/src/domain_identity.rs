@@ -114,9 +114,9 @@ impl DomainIdentity {
     /// D6:001111 SUB1 та D6:111110 INTEGERP (точне D24+ -> D1).
     /// Інші D6 residents лишаються fail-closed; residency не дорівнює mechanism.
     /// D8 так само OWNER-RATIFIED #3960.
-    /// D9 OWNER-RATIFIED #4008. Лише шість реалізованих string-механізмів
-    /// допускаються як exact D9 Core-operation identity; інша residency
-    /// залишається fail-closed.
+    /// D9 OWNER-RATIFIED #4008: direct string mechanisms and the proven
+    /// CAR/CDR selector family are callable. Unrelated residents fail closed.
+    /// D7 is text data, not a selector rung.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
