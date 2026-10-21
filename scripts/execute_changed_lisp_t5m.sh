@@ -177,6 +177,39 @@ PY
     mark_file_failed
     continue
   fi
+  # SENS-owned reader is the source-of-truth for this exact Ukrainian Lisp.
+  # Compare its Zig/T5M bytes with the separate migrator. On drift, do NOT
+  # rewrite the committed pair or call either candidate release-admitted.
+  # Keep both physical candidates in this run's evidence for manual repair.
+  native_pair="$dir/sens-reader.sens"
+  if timeout 45s "$binary" --t5m-mint "$file" "$native_pair" \
+      >"$dir/sens-reader-mint.stdout" 2>"$dir/sens-reader-mint.stderr"; then
+    if [[ ! -s "$native_pair" ]]; then
+      echo "::error::T5M_SENS_READER_MINT_EMPTY source=$file" >&2
+      mark_file_failed
+    elif cmp -s "$pair" "$native_pair"; then
+      echo "T5M_MIGRATOR_SENS_READER_PARITY PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED"
+    else
+      echo "::error::T5M_MIGRATOR_SENS_READER_DRIFT source=$file migrator=$pair sens_reader=$native_pair action=fix-source-projection release=NOT_CERTIFIED" >&2
+      mark_file_failed
+      # The new SENS-owned pair can reveal the next real executable defect,
+      # but cannot silently replace the independent, disagreeing projection.
+      if timeout 45s "$binary" --t5m-pair "$file" "$native_pair" \
+          >"$dir/sens-reader-paired.stdout" 2>"$dir/sens-reader-paired.stderr"; then
+        echo "T5M_SENS_READER_PAIRED_EXECUTION PASS source=$file physical=ZIG_VERIFIED migrator=DRIFT release=NOT_CERTIFIED"
+      else
+        native_status=$?
+        sed 's/^/T5M SENS reader paired stderr: /' "$dir/sens-reader-paired.stderr" >&2
+        echo "::error::T5M_SENS_READER_PAIRED_EXECUTION_FAIL source=$file status=$native_status release=NOT_CERTIFIED" >&2
+      fi
+    fi
+  else
+    native_status=$?
+    sed 's/^/T5M SENS reader mint stderr: /' "$dir/sens-reader-mint.stderr" >&2
+    # Do not classify a failed SENS mint as another kind of successful proof.
+    echo "::error::T5M_SENS_READER_MINT_FAILED source=$file status=$native_status release=NOT_CERTIFIED" >&2
+    mark_file_failed
+  fi
   committed="$(dirname "$file")/$(basename "$file" .lisp).sens"
   staged_view="${pair%.sens}"
   committed_view="${committed%.sens}"
