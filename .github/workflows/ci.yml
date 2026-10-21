@@ -146,10 +146,18 @@ jobs:
       - uses: ./.github/actions/install-zig
         if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
-      - name: "LISP-TIER — фактичне виконання українського Lisp"
+      - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
         if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
-        timeout-minutes: 12
-        run: cargo test --locked -p sens-cli --test cli український_скрипт_відбирає_саме_запитаний_рівень -- --exact --nocapture
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Чинний SENS CLI: не підміняємо обчислення друком ефектів.
+          cargo test --locked -p sens-cli --test cli український_скрипт_відбирає_саме_запитаний_рівень -- --exact --nocapture
+          # Реальне SENS виконання українських D1/D3 правил:
+          # коректні двопольові посилання, крапкові хвости, статуси міркування.
+          cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
+          cargo test --locked -p sens --test result_status -- --nocapture
 
       # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - uses: dtolnay/rust-toolchain@1.99.0
