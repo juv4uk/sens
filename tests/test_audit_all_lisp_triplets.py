@@ -239,10 +239,20 @@ class AllLispTripletCensusTests(unittest.TestCase):
         )
         report = scan(self.root, verify_bounded=True)
         self.assertEqual(report["ukrainian_keyboard"], 0)
+        self.assertEqual(report["program_style_warnings"], 1)
+        self.assertEqual(report["blocked_count"], 0, report["blocked_sample"])
         self.assertEqual(report["bounded_verified"], 1, report["blocked_sample"])
         self.assertTrue(report["all_bounded_reverse_verified"])
         self.assertFalse(report["semantic_runtime_proven"])
         self.assertFalse(report["release_ready"])
+
+    def test_live_latin_call_is_a_real_source_defect_not_comment_style(self):
+        self.put("lib/проба.lisp", "; harmless English note\n(визначити проба (old-call так))\n")
+        report = scan(self.root)
+        self.assertEqual(report["program_style_warnings"], 0)
+        self.assertIn("виконувана Lisp-проєкція", str(report["blocked_sample"]))
+        self.assertIn("old-call", str(report["blocked_sample"]))
+        self.assertEqual(report["potential_program_missing_sens"], 1)
 
     def test_current_t5m_triplet_is_counted_only_after_real_reverse_proof(self):
         from sens_t5_codec import encode_t5m_projection

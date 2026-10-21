@@ -15,7 +15,7 @@ import json
 from pathlib import Path
 import sys
 
-from report_ukr_projection_progress import examine_file, tokenize_lisp
+from report_ukr_projection_progress import examine_file, examine_source_projection, tokenize_lisp
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "sens-all-lisp-reversibility-census/v1"
@@ -155,6 +155,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
                   unapproved_nonprogram_physical=0, nonprogram_style_warnings=0,
                   potential_program_files=0, potential_program_missing_sens=0,
                   comment_only_style_warnings=0,
+                  program_style_warnings=0,
                   bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
     blocked: list[dict[str, str]] = []
 
@@ -186,7 +187,16 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             # а НЕ семантичний блокер: виконуваного коду тут немає.
             counts["comment_only_style_warnings"] += 1
         else:
-            reject(relative, "не повністю українська розкладка: " + keyboard_problem)
+            # Коментарі та цитовані протокольні дані не є викличним кодом.
+            # Стиль усього файла лишається в обліку, але не дає
+            # фальшивого BLOCK для справжнього Lisp/T5M-свідка.
+            # На відміну від стилю, неукраїнські виконувані імена та
+            # пошкоджена Lisp-структура залишаються конкретним дефектом.
+            source_problem = examine_source_projection(source)
+            if source_problem is None:
+                counts["program_style_warnings"] += 1
+            else:
+                reject(relative, "виконувана Lisp-проєкція: " + source_problem)
         binary_disguised = misnamed_binary_d2(source)
         if binary_disguised:
             counts["misnamed_binary_lisp"] += 1
