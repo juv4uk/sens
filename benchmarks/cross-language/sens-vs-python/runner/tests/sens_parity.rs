@@ -35,6 +35,44 @@ fn current_sens_fib_returns_expected_d24_result() {
 }
 
 #[test]
+fn numeric_base_cases_are_executed_by_sens_not_d3_eq() {
+    // Обчислює реальний SENS. D24+ умови виконуються D5 «менше?»,
+    // а не D3 «тотожне?» над математичними значеннями.
+    for (setup, witnesses) in [
+        (
+            "fib.setup.lisp",
+            vec![
+                ("(фібоначчі 0)", "0"),
+                ("(фібоначчі 1)", "1"),
+                ("(фібоначчі 2)", "1"),
+                ("(фібоначчі 3)", "2"),
+            ],
+        ),
+        (
+            "ackermann.setup.lisp",
+            vec![
+                ("(аккерман 0 3)", "4"),
+                ("(аккерман 1 0)", "2"),
+            ],
+        ),
+        (
+            "binary-trees.setup.lisp",
+            vec![
+                ("(створити-дерево 0)", "листок"),
+                ("(повторити-дерева 0 0 0)", "0"),
+            ],
+        ),
+    ] {
+        let mut evaluator = session();
+        evaluate_source(&mut evaluator, &source(setup));
+        for (call, expected) in witnesses {
+            let value = evaluate_source(&mut evaluator, call);
+            assert_eq!(value.to_string(), expected, "{setup}: {call}");
+        }
+    }
+}
+
+#[test]
 fn current_sens_ackermann_returns_expected_d24_result() {
     let mut session = session();
     evaluate_source(&mut session, &source("ackermann.setup.lisp"));
