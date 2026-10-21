@@ -16,11 +16,11 @@ fn core_quotient_and_mod_return_numeric_values_for_nonzero_divisors() {
     load_core_library(&mut session).unwrap();
 
     for (source, expected) in [
-        ("(largest-chunk 10 3 3 1)", "(6 . 2)"),
-        ("(quotient 10 3)", "3"),
-        ("(quotient 1 3)", "0"),
-        ("(mod 10 3)", "1"),
-        ("(mod 0 7)", "0"),
+        ("(знайти-найбільший-блок-частки 10 3 3 1)", "(6 . 2)"),
+        ("(частка 10 3)", "3"),
+        ("(частка 1 3)", "0"),
+        ("(модульна-остача 10 3)", "1"),
+        ("(модульна-остача 0 7)", "0"),
     ] {
         assert_eq!(
             eval_program(source, &mut session)
@@ -48,12 +48,12 @@ fn assert_raw_host_primitive(surface: &str) {
 #[test]
 fn utc_now_returns_utc_calendar_with_nanosecond_field() {
     let mut session = time_session();
-    let value = eval_program("(utc-now)", &mut session)
+    let value = eval_program("(узгоджений-час-зараз)", &mut session)
         .unwrap()
         .value
         .to_string();
     let fields: Vec<&str> = value.trim_matches(['(', ')']).split_whitespace().collect();
-    assert_eq!(fields.len(), 8, "utc-now shape: {value}");
+    assert_eq!(fields.len(), 8, "узгоджений-час-зараз shape: {value}");
     assert_eq!(fields[0], "utc");
     let month: i64 = fields[2].parse().unwrap();
     let day: i64 = fields[3].parse().unwrap();
@@ -74,21 +74,21 @@ fn utc_calendar_conversion_is_language_owned() {
     let mut session = time_session();
 
     assert_eq!(
-        eval_program("(utc-from-unix 0 0)", &mut session)
+        eval_program("(узгоджений-час-з-юнікс 0 0)", &mut session)
             .unwrap()
             .value
             .to_string(),
         "(utc 1970 1 1 0 0 0 0)"
     );
     assert_eq!(
-        eval_program("(utc-from-unix 946684800 123456789)", &mut session)
+        eval_program("(узгоджений-час-з-юнікс 946684800 123456789)", &mut session)
             .unwrap()
             .value
             .to_string(),
         "(utc 2000 1 1 0 0 0 123456789)"
     );
     assert_eq!(
-        eval_program("(utc-from-unix 1709164800 0)", &mut session)
+        eval_program("(узгоджений-час-з-юнікс 1709164800 0)", &mut session)
             .unwrap()
             .value
             .to_string(),
@@ -102,7 +102,7 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
 
     assert_eq!(
         eval_program(
-            "(unix-time-observation->utc (quote (unix-time 946684800 42)))",
+            "(юнікс-час-спостереження-узгоджений-час (як-є (unix-time 946684800 42)))",
             &mut session,
         )
         .unwrap()
@@ -112,7 +112,7 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
     );
     assert_eq!(
         eval_program(
-            "(unix-time-observation->utc (quote (not-unix-time 946684800 42)))",
+            "(юнікс-час-спостереження-узгоджений-час (як-є (not-unix-time 946684800 42)))",
             &mut session,
         )
         .unwrap()
@@ -127,19 +127,19 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
-    let utc_sid = semantic_registry_export::semantic_id_for_admitted_surface("utc-now")
-        .expect("utc-now must remain admitted by sr/2");
+    let utc_sid = semantic_registry_export::semantic_id_for_admitted_surface("узгоджений-час-зараз")
+        .expect("узгоджений-час-зараз must remain admitted by sr/2");
     assert_eq!(
-        session.environment.get("utc-now"),
+        session.environment.get("узгоджений-час-зараз"),
         None,
         "Core4 must not install a lexical placeholder before the time layer"
     );
     assert_eq!(
-        semantic_registry_export::semantic_id_for_admitted_surface("utc-now"),
+        semantic_registry_export::semantic_id_for_admitted_surface("узгоджений-час-зараз"),
         Some(utc_sid),
         "surface admission still resolves to the exact SENS function"
     );
-    let error = eval_program("(utc-now)", &mut session)
+    let error = eval_program("(узгоджений-час-зараз)", &mut session)
         .expect_err("unadmitted SID must fail closed before time library loads");
     assert_eq!(error.kind, ErrorKind::Type);
     assert_raw_host_primitive("unix-time-now");
@@ -147,17 +147,17 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
     load_time_library(&mut session).unwrap();
 
     assert!(matches!(
-        session.environment.get("utc-now"),
+        session.environment.get("узгоджений-час-зараз"),
         Some(Value::Closure(_))
     ));
     assert_raw_host_primitive("unix-time-now");
 
-    let value = eval_program("(utc-now)", &mut session)
+    let value = eval_program("(узгоджений-час-зараз)", &mut session)
         .unwrap()
         .value
         .to_string();
     let fields: Vec<&str> = value.trim_matches(['(', ')']).split_whitespace().collect();
-    assert_eq!(fields.len(), 8, "language-owned utc-now shape: {value}");
+    assert_eq!(fields.len(), 8, "language-owned узгоджений-час-зараз shape: {value}");
     assert_eq!(fields[0], "utc");
 }
 
@@ -167,7 +167,7 @@ fn ntp_field_interpretation_is_language_owned() {
 
     assert_eq!(
         eval_program(
-            "(internet-time-fields->observation \"clock.example\" 4 1 2208988800 0)",
+            "(тлумачити-поля-відповіді-часу \"clock.example\" 4 1 2208988800 0)",
             &mut session,
         )
         .unwrap()
@@ -177,7 +177,7 @@ fn ntp_field_interpretation_is_language_owned() {
     );
     assert_eq!(
         eval_program(
-            "(internet-time-fields->observation \"clock.example\" 5 15 2208988801 2147483648)",
+            "(тлумачити-поля-відповіді-часу \"clock.example\" 5 15 2208988801 2147483648)",
             &mut session,
         )
         .unwrap()
@@ -187,7 +187,7 @@ fn ntp_field_interpretation_is_language_owned() {
     );
     assert_eq!(
         eval_program(
-            "(internet-time-fields->observation \"clock.example\" 3 1 2208988800 0)",
+            "(тлумачити-поля-відповіді-часу \"clock.example\" 3 1 2208988800 0)",
             &mut session,
         )
         .unwrap()
@@ -197,7 +197,7 @@ fn ntp_field_interpretation_is_language_owned() {
     );
     assert_eq!(
         eval_program(
-            "(internet-time-fields->observation \"clock.example\" 4 0 2208988800 0)",
+            "(тлумачити-поля-відповіді-часу \"clock.example\" 4 0 2208988800 0)",
             &mut session,
         )
         .unwrap()
@@ -207,7 +207,7 @@ fn ntp_field_interpretation_is_language_owned() {
     );
     assert_eq!(
         eval_program(
-            "(internet-time-fields->observation \"clock.example\" 4 1 2208988799 0)",
+            "(тлумачити-поля-відповіді-часу \"clock.example\" 4 1 2208988799 0)",
             &mut session,
         )
         .unwrap()
@@ -223,7 +223,7 @@ fn raw_ntp_observation_boundary_is_interpreted_by_lisp() {
 
     assert_eq!(
         eval_program(
-            "(internet-time-raw->observation (quote (ntp-fields \"clock.example\" 4 1 2208988801 2147483648)))",
+            "(перетворити-сирі-дані-часу-на-спостереження (як-є (ntp-fields \"clock.example\" 4 1 2208988801 2147483648)))",
             &mut session,
         )
         .unwrap()
@@ -233,7 +233,7 @@ fn raw_ntp_observation_boundary_is_interpreted_by_lisp() {
     );
     assert_eq!(
         eval_program(
-            "(internet-time-raw->observation (quote (ntp-fields \"clock.example\" 3 1 2208988800 0)))",
+            "(перетворити-сирі-дані-часу-на-спостереження (як-є (ntp-fields \"clock.example\" 3 1 2208988800 0)))",
             &mut session,
         )
         .unwrap()
@@ -243,7 +243,7 @@ fn raw_ntp_observation_boundary_is_interpreted_by_lisp() {
     );
     assert_eq!(
         eval_program(
-            "(internet-time-raw->observation (quote (rejected receive-failed)))",
+            "(перетворити-сирі-дані-часу-на-спостереження (як-є (rejected receive-failed)))",
             &mut session,
         )
         .unwrap()
@@ -259,20 +259,20 @@ fn internet_time_sync_is_language_owned_after_time_library_loads() {
     load_core_library(&mut session).unwrap();
 
     let internet_time_sid =
-        semantic_registry_export::semantic_id_for_admitted_surface("internet-time-sync")
-            .expect("internet-time-sync must remain admitted by sr/2");
+        semantic_registry_export::semantic_id_for_admitted_surface("інтернет-час-синхронізувати")
+            .expect("інтернет-час-синхронізувати must remain admitted by sr/2");
     assert_eq!(
-        session.environment.get("internet-time-sync"),
+        session.environment.get("інтернет-час-синхронізувати"),
         None,
         "Core4 must not install a lexical placeholder before the time layer"
     );
     assert_eq!(
-        semantic_registry_export::semantic_id_for_admitted_surface("internet-time-sync"),
+        semantic_registry_export::semantic_id_for_admitted_surface("інтернет-час-синхронізувати"),
         Some(internet_time_sid),
         "surface admission still resolves to the exact SENS function"
     );
     let error = eval_program(
-        "(internet-time-sync \"clock.example\" 1)",
+        "(інтернет-час-синхронізувати \"clock.example\" 1)",
         &mut session,
     )
     .expect_err("unadmitted SID must fail closed before time library loads");
@@ -282,7 +282,7 @@ fn internet_time_sync_is_language_owned_after_time_library_loads() {
     load_time_library(&mut session).unwrap();
 
     assert!(matches!(
-        session.environment.get("internet-time-sync"),
+        session.environment.get("інтернет-час-синхронізувати"),
         Some(Value::Closure(_))
     ));
     assert_raw_host_primitive("ntp-query-raw");
@@ -294,7 +294,7 @@ fn internet_time_timestamp_interpretation_is_language_owned() {
 
     assert_eq!(
         eval_program(
-            "(internet-time-observation->utc (quote (accepted \"clock.example\" 946684800 42)))",
+            "(дати-календарне-значення-схваленому-часу (як-є (accepted \"clock.example\" 946684800 42)))",
             &mut session,
         )
         .unwrap()
@@ -304,7 +304,7 @@ fn internet_time_timestamp_interpretation_is_language_owned() {
     );
     assert_eq!(
         eval_program(
-            "(internet-time-observation->utc (quote (rejected receive-failed)))",
+            "(дати-календарне-значення-схваленому-часу (як-є (rejected receive-failed)))",
             &mut session,
         )
         .unwrap()
@@ -319,28 +319,28 @@ fn mono_ms_is_derived_from_nanoseconds_in_lisp() {
     let mut session = time_session();
 
     assert_eq!(
-        eval_program("(milliseconds-from-nanoseconds 0)", &mut session)
+        eval_program("(мілісекунди-з-наносекунди 0)", &mut session)
             .unwrap()
             .value
             .to_string(),
         "0"
     );
     assert_eq!(
-        eval_program("(milliseconds-from-nanoseconds 999999)", &mut session)
+        eval_program("(мілісекунди-з-наносекунди 999999)", &mut session)
             .unwrap()
             .value
             .to_string(),
         "0"
     );
     assert_eq!(
-        eval_program("(milliseconds-from-nanoseconds 1000000)", &mut session)
+        eval_program("(мілісекунди-з-наносекунди 1000000)", &mut session)
             .unwrap()
             .value
             .to_string(),
         "1"
     );
     assert_eq!(
-        eval_program("(milliseconds-from-nanoseconds 1999999)", &mut session)
+        eval_program("(мілісекунди-з-наносекунди 1999999)", &mut session)
             .unwrap()
             .value
             .to_string(),
@@ -353,7 +353,7 @@ fn mono_ms_binding_is_owned_by_lisp_after_time_library_loads() {
     let session = time_session();
 
     assert!(matches!(
-        session.environment.get("mono-ms"),
+        session.environment.get("монотонний-мс"),
         Some(Value::Closure(_))
     ));
     assert_raw_host_primitive("mono-ns");
@@ -365,7 +365,7 @@ fn timezone_declaration_policy_is_language_owned() {
 
     assert_eq!(
         eval_program(
-            "(timezone-declarations->observation \"Europe/Kyiv\" \"Etc/UTC\")",
+            "(обрати-достовірне-джерело-часового-поясу \"Europe/Kyiv\" \"Etc/UTC\")",
             &mut session,
         )
         .unwrap()
@@ -375,7 +375,7 @@ fn timezone_declaration_policy_is_language_owned() {
     );
     assert_eq!(
         eval_program(
-            "(timezone-declarations->observation (quote ()) \"Europe/Kyiv\")",
+            "(обрати-достовірне-джерело-часового-поясу (як-є ()) \"Europe/Kyiv\")",
             &mut session,
         )
         .unwrap()
@@ -385,7 +385,7 @@ fn timezone_declaration_policy_is_language_owned() {
     );
     assert_eq!(
         eval_program(
-            "(timezone-declarations->observation \"\" \"Europe/Kyiv\")",
+            "(обрати-достовірне-джерело-часового-поясу \"\" \"Europe/Kyiv\")",
             &mut session,
         )
         .unwrap()
@@ -395,7 +395,7 @@ fn timezone_declaration_policy_is_language_owned() {
     );
     assert_eq!(
         eval_program(
-            "(timezone-declarations->observation (quote ()) (quote ()))",
+            "(обрати-достовірне-джерело-часового-поясу (як-є ()) (як-є ()))",
             &mut session,
         )
         .unwrap()
@@ -408,14 +408,14 @@ fn timezone_declaration_policy_is_language_owned() {
 #[test]
 fn timezone_detection_is_explicit_and_ntp_requires_host_string() {
     let mut session = time_session();
-    let timezone = eval_program("(timezone-detect)", &mut session)
+    let timezone = eval_program("(часовий-пояс-визначити)", &mut session)
         .unwrap()
         .value
         .to_string();
     assert!(timezone.starts_with("(detected ") || timezone.starts_with("(unknown "));
-    assert!(eval_program("(internet-time-sync 123 100)", &mut session).is_err());
+    assert!(eval_program("(інтернет-час-синхронізувати 123 100)", &mut session).is_err());
     assert_eq!(
-        eval_program("(timezone-config \"Europe/Kyiv\" 7200)", &mut session)
+        eval_program("(створити-перевірене-значення-поясу \"Europe/Kyiv\" 7200)", &mut session)
             .unwrap()
             .value
             .to_string(),
@@ -423,7 +423,7 @@ fn timezone_detection_is_explicit_and_ntp_requires_host_string() {
     );
 
     assert_eq!(
-        eval_program("(timezone-config 123 7200)", &mut session)
+        eval_program("(створити-перевірене-значення-поясу 123 7200)", &mut session)
             .unwrap()
             .value
             .to_string(),
