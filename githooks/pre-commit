@@ -6,4 +6,5 @@
 set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
+python3 "$repo_root/scripts/guard_ukr_lisp_keyboard.py" --staged
 "$repo_root/scripts/check-bilingual-docs"

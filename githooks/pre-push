@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Відхилити push із неукраїнськими символами у змінених .lisp
+# (включно з коментарями, цитованими даними і файлами архіву).
+set -euo pipefail
+repo_root="$(git rev-parse --show-toplevel)"
+python3 "$repo_root/scripts/guard_ukr_lisp_keyboard.py" --pre-push

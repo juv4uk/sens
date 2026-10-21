@@ -6,5 +6,5 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 git config core.hooksPath githooks
-chmod +x githooks/pre-commit githooks/commit-msg scripts/check-bilingual-docs
-echo "Готово: core.hooksPath -> githooks (pre-commit і commit-msg активовані)"
+chmod +x githooks/pre-commit githooks/pre-push githooks/commit-msg scripts/check-bilingual-docs
+echo "Готово: core.hooksPath -> githooks (pre-commit, pre-push і commit-msg активовані)"

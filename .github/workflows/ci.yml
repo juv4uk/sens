@@ -174,6 +174,10 @@ jobs:
           else
             git -c core.quotePath=false diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' > "$raw"
           fi
+          # Заборона push/PR із будь-яким неукраїнським символом у зміненому
+          # .lisp: перевіряємо повні Git-байти (включно з даними, коментарями,
+          # архівом), не лише викличні імена. Старі незмінені файли не чіпаємо.
+          python3 scripts/guard_ukr_lisp_keyboard.py --paths-from "$raw" --ref "$GITHUB_SHA"
           python3 - "$raw" "$files" <<'PY'
           from pathlib import Path
           import sys
@@ -1240,6 +1244,7 @@ jobs:
           # Актуальна Lisp AST-поверхня; старі fingerprint/SID8 не є еталоном.
           python3 -m unittest tests/test_ukr_tcp_island_projection.py -v
           python3 -m unittest tests/test_ukr_projection_progress_report.py -v
+          python3 -m unittest tests/test_guard_ukr_lisp_keyboard.py -v
           # Після правки lib/linter.lisp: перевірити повну українську проєкцію й досяжність лексичних гілок.
           python3 -m unittest tests/test_linter_domain_head_cutover.py -v
           python3 -m unittest tests/test_migrate_english_predicates_question_mark.py -v
