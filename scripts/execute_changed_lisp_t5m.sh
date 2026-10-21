@@ -249,14 +249,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/yantra.lisp
                      --binding-source lib/result-status.lisp)
   elif [[ "$file" == "tests/semantic/d9-world-shape-module-events-laws.lisp" ]]; then
-    # Справжні D9 функції означені у SENS World і його Lisp-залежностях.
-    # Ті самі п'ять програм завантажує world_ancestor_sens.rs;
-    # без них голий T5M фізично зворотний, але не може виконати WORLD.
-    binding_sources=(--binding-source lib/unify.lisp
-                     --binding-source lib/reason.lisp
-                     --binding-source lib/forward.lisp
-                     --binding-source lib/knowledge.lisp
-                     --binding-source lib/world.lisp)
+    # Дев'ять D1-законів використовують лише означення з lib/world.lisp.
+    # Не тягнемо повний Reason із недопущеним тут рядком D7 "|-".
+    # Справжній SENS не дозволить виконати відсутню залежність.
+    binding_sources=(--binding-source lib/world.lisp)
   fi
   if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then
     run_native_t5m_program
