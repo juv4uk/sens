@@ -44,6 +44,10 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                 "if [ \"$1\" = --t5m-mint ]; then printf 'physical' > \"$3\"; exit 0; fi\n"
                 "if [ \"$1\" = --t5m-pair ] && [ -f reject-pair ]; then\n"
                 "  echo 'real paired failure' >&2; exit 19; fi\n"
+                "if [ -f reject-standalone ] && [ \"$1\" != --t5m-pair ]; then\n"
+                "  echo 'unexpected standalone panic' >&2; exit 23; fi\n"
+                "if [ -f reject-d24 ] && [ \"$1\" != --t5m-pair ]; then\n"
+                "  echo 'T5M requires exact source projection to D24+ before transport' >&2; exit 3; fi\n"
                 "printf 'SENS_RESULT\\n'\n",
                 encoding="utf-8",
             )
@@ -76,6 +80,25 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertIn("T5M_NATIVE_PAIRED_EXECUTION_FAIL", red.stderr)
             self.assertIn("files_checked=1 files_failed=1", red.stdout)
             self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", red.stdout)
+            # Тест лише exit/status оркестрації: не Python-eval семантики.
+            (root / "reject-pair").unlink()
+            (root / "reject-standalone").touch()
+            unexpected = subprocess.run(cmd, cwd=root, env=environment,
+                                        capture_output=True, text=True, timeout=20)
+            self.assertEqual(unexpected.returncode, 2, unexpected.stdout + unexpected.stderr)
+            self.assertIn("T5M_NATIVE_STANDALONE_UNEXPECTED_FAIL", unexpected.stderr)
+            self.assertIn("files_checked=1 files_failed=1", unexpected.stdout)
+            self.assertNotIn("T5M_NATIVE_PAIRED_ONLY", unexpected.stdout)
+
+            # Тільки іменована межа D24+ із успішним paired є відомою,
+            # але вона не дає право стверджувати повну сертифікацію.
+            (root / "reject-standalone").unlink()
+            (root / "reject-d24").touch()
+            d24 = subprocess.run(cmd, cwd=root, env=environment,
+                                 capture_output=True, text=True, timeout=20)
+            self.assertEqual(d24.returncode, 0, d24.stdout + d24.stderr)
+            self.assertIn("T5M_NATIVE_PAIRED_ONLY", d24.stdout)
+            self.assertIn("release=NOT_CERTIFIED", d24.stdout)
 
     def test_native_sens_mint_is_primary_ci_path_and_python_is_optional_tooling(self):
         source = RUNNER.read_text(encoding="utf-8")
