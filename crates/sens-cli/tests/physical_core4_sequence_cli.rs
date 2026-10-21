@@ -303,6 +303,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-drop-last-general",
         "list-append-general",
         "list-unique-stable",
+        "розділити-до-першого-входження",
         "list-interleave-two-pairs",
 
 
