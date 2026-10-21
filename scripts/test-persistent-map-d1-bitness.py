@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: persistent-map D1 + domain bitness.
+"""Джерельний контроль живої української мапи та точних ключів D1–D10.
 
-Axiom: the binary key width IS the domain address.
-Checks:
-  1. lib/persistent-map.lisp has no bare host truthiness (t / T / NIL)
-  2. No host-shaped COND else (010 ()) — only exact D1:1 (010 (001 ()))
-  3. Surface: map-insert, map-get, map-contains?, map-empty, map->list
-  4. Ukrainian aliases point at the same closures
-  5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
-
-Run:
-    python3 scripts/test-persistent-map-d1-bitness.py
+Це НЕ evaluator: позитивні й негативні обчислення виконують справжні SENS
+crates/sens/tests/persistent_map.rs та d9_map_lisp_facade.rs.
+Не повертати старі двійкові голови, host truthiness чи англійські виклики.
 """
 from __future__ import annotations
 
@@ -22,17 +15,20 @@ ROOT = Path(__file__).resolve().parents[1]
 PM = ROOT / "lib" / "persistent-map.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-HOST_ELSE = "(010 ())"
-D1_TRUE = "(010 (001 ()))"
+RAW_BINARY_HEAD = re.compile(r"\\([01]{3,10}(?=\\s|\\))")
+BARE_TRUTH = re.compile(r"\\((?:так|ні)(?=\\s|\\))")
+D1_TRUE = "((атом? (як-є ()))"
 REQUIRED = (
-    "map-empty",
-    "map-insert",
-    "map-get",
-    "map-contains?",
-    "map->list",
+    "мапа-порожній",
+    "мапа-вставити",
+    "мапа-отримати",
+    "мапа-містить?",
+    "мапа-список",
     "внутрішня-мапа-вставити",
     "внутрішня-мапа-отримати",
     "внутрішня-мапа-містить",
+    "внутрішня-мапа-список",
+    "внутрішня-мапа-порожній",
 )
 
 
@@ -47,15 +43,16 @@ def check_pm() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"persistent-map: host truthiness {m.group()!r} at offset {m.start()}")
-    # Host-shaped else without nested ()
-    if HOST_ELSE in text and D1_TRUE not in text:
-        errs.append("persistent-map: host-shaped (010 ()) without exact D1:1")
-    # Prefer exact D1 present
-    if D1_TRUE not in text:
-        errs.append("persistent-map: exact D1:1 form (010 (001 ())) missing")
+    code = "\\n".join(line.split(";", 1)[0] for line in text.splitlines())
+    if RAW_BINARY_HEAD.search(code):
+        errs.append("persistent-map: machine-encoded call-head found in human .lisp")
+    if BARE_TRUTH.search(code):
+        errs.append("persistent-map: uncomputed (так/ні) predicate call")
+    if code.count(D1_TRUE) != 2:
+        errs.append("persistent-map: expected exactly two executable D3→D1 fallbacks")
     for fn in REQUIRED:
-        if fn not in text:
-            errs.append(f"persistent-map: required surface missing: {fn}")
+        if len(re.findall(r"(?m)^\\(визначити\\s+" + re.escape(fn) + r"(?=\\s|\\))", code)) != 1:
+            errs.append(f"persistent-map: missing or duplicated Ukrainian DEFINE: {fn}")
     return errs
 
 
@@ -88,7 +85,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("PERSISTENT-MAP: PASS — exact D1 fallbacks, D3 EQ, Ukrainian aliases")
+    print("PERSISTENT-MAP SOURCE: PASS — два D3→D1 fallbacks, чинні українські DEFINE; SENS runtime перевіряється окремо")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
