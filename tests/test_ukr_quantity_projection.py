@@ -93,14 +93,14 @@ def verify(source: str) -> dict[str, tuple]:
     # D1-предикати не порівнюємо із D3 NIL через EQ.
     # Це перевірка форми; значення має обчислити живий SENS.
     for guard in (
-        "(хибне? (величина? (третє значення)))",
-        "(хибне? (науковий-константа-стан-чинний? (четверте значення)))",
-        "(хибне? (науковий-константа-вид-чинний? (п'ятий значення)))",
-        "(хибне? (наука-джерело? (науковий-сьомий значення)))",
-        "(хибне? (науковий-константа? константа))",
+        "(порожній? (величина? (третє значення)))",
+        "(порожній? (науковий-константа-стан-чинний? (четверте значення)))",
+        "(порожній? (науковий-константа-вид-чинний? (п'ятий значення)))",
+        "(порожній? (наука-джерело? (науковий-сьомий значення)))",
+        "(порожній? (науковий-константа? константа))",
     ):
         if source.count(guard) != 1:
-            raise AssertionError("нечинна D1 перевірка поля наукової константи: " + guard)
+            raise AssertionError("нечинна перевірка D3 NIL поля наукової константи: " + guard)
     if source.count("(сполучити схема-одиниці-виміру розмірності)") != 1:
         raise AssertionError("конструктор одиниці більше не зберігає обернену структуру")
     length = scope["науковий-список-довжина-дорівнює?"]
@@ -147,14 +147,14 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "D1"):
             verify(modified)
 
-    def test_old_d1_predicate_to_d3_nil_comparison_rejected(self):
-        # Негативна мутація без підміни SENS-обчислювача Python.
-        current = "(хибне? (величина? (третє значення)))"
-        legacy = "(тотожне? (величина? (третє значення)) (як-є ()))"
+    def test_nil_guard_does_not_apply_d1_not_to_structural_empty(self):
+        # NOT вимагає D1, а недопущений валідатор повертає D3 NIL.
+        current = "(порожній? (величина? (третє значення)))"
+        legacy = "(хибне? (величина? (третє значення)))"
         self.assertEqual(self.source.count(current), 1)
         mutated = self.source.replace(current, legacy, 1)
         self.assertNotEqual(mutated, self.source)
-        with self.assertRaisesRegex(AssertionError, "D1 перевірка поля"):
+        with self.assertRaisesRegex(AssertionError, "D3 NIL поля"):
             verify(mutated)
 
     def test_unit_constructor_shape_and_old_nested_list_mutation(self):
