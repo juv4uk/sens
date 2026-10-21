@@ -356,35 +356,45 @@ fn t5m_file_mode_rejects_malformed_ukrainian_source() {
 
 #[test]
 fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
-    // Без Python-eval: оригінальні Lisp-визначення, D24+ й SENS T5M.
+    // Живе виконання SENS: розрізнити помилку арифметики, листка,
+    // рекурсивного створення дерева та його підрахунку.
     let source = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/../../benchmarks/cross-language/sens-vs-python/sens/binary-trees.setup.lisp"
     ))
-    .expect("справжній український Lisp-бенчмарк");
-    let path = std::env::temp_dir().join(format!(
-        "sens-real-binary-trees-d24-{}.lisp", std::process::id()
-    ));
-    std::fs::write(
-        &path,
-        format!("{source}\n(перевірити-дерево (створити-дерево 2))\n"),
-    )
-    .expect("точна програма D24+");
-    let output = sens()
-        .args(["--t5m-file", path.to_str().expect("тимчасове ім'я UTF-8")])
-        .output()
-        .expect("реальний SENS CLI з Zig T5M");
-    let _ = std::fs::remove_file(&path);
-    assert!(
-        output.status.success(),
-        "SENS T5M не виконав дерево D24+: {}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    assert_eq!(
-        String::from_utf8_lossy(&output.stdout).trim(),
-        "7",
-        "Два рівні дерева містять сім перевірюваних вузлів"
-    );
+    .expect("дійсний український D24+ Lisp-бенчмарк");
+    let cases = [
+        ("(додати 1 (додати 3 3))", "7"),
+        ("(перевірити-дерево (як-є листок))", "1"),
+        ("(перевірити-дерево (сполучити (як-є листок) (як-є листок)))", "3"),
+        ("(перевірити-дерево (створити-дерево 0))", "1"),
+        ("(перевірити-дерево (створити-дерево 1))", "3"),
+        ("(перевірити-дерево (створити-дерево 2))", "7"),
+    ];
+    let mut observed = Vec::new();
+    for (index, (expression, _expected)) in cases.iter().enumerate() {
+        let path = std::env::temp_dir().join(format!(
+            "sens-real-binary-trees-d24-{}-{index}.lisp", std::process::id()
+        ));
+        std::fs::write(&path, format!("{source}\n{expression}\n"))
+            .expect("точна D24+ програма");
+        let output = sens()
+            .args(["--t5m-file", path.to_str().expect("UTF-8 шлях")])
+            .output()
+            .expect("справжній SENS CLI через Zig T5M");
+        let _ = std::fs::remove_file(&path);
+        assert!(
+            output.status.success(),
+            "SENS не виконав {expression}: stderr={}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        observed.push((*expression, String::from_utf8_lossy(&output.stdout).trim().to_string()));
+    }
+    let expected: Vec<(&str, String)> = cases
+        .iter()
+        .map(|(expression, value)| (*expression, (*value).to_string()))
+        .collect();
+    assert_eq!(observed, expected, "Точні SENS D24+ свідки: арифметика, листки, рекурсія");
 }
 
 #[test]
