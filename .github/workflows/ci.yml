@@ -178,10 +178,10 @@ jobs:
           from pathlib import Path
           import sys
           sys.path.insert(0, "scripts")
-          from report_ukr_projection_progress import tokenize_lisp
+          from report_ukr_projection_progress import tokenize_lisp, _contains_source_definitions
 
           raw, output = map(Path, sys.argv[1:])
-          data_paths = ("lib/domains/", "lib/surface/", "knowledge/", "docs/", "research/", "contracts/")
+          data_paths = ("lib/domains/", "knowledge/", "docs/", "research/", "contracts/")
           selected = []
           for name in raw.read_text(encoding="utf-8").splitlines():
               # Новий/змінений фізичний T5M — теж зміна виконуваного
@@ -193,6 +193,12 @@ jobs:
                   continue
               path = Path(name)
               if not path.is_file() or path.is_symlink():
+                  continue
+              # Surface is not uniformly metadata: Ukrainian DEFINE files are
+              # executable programs and MUST reach native SENS/Zig T5M, while
+              # projection tables remain nonprogram data.
+              if name.startswith("lib/surface/") and not _contains_source_definitions(path):
+                  print(f"T5M_NONPROGRAM_SURFACE path={name}")
                   continue
               try:
                   source = path.read_text(encoding="utf-8")

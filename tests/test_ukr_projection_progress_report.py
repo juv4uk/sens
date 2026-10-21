@@ -396,6 +396,19 @@ class CurrentRepositoryTests(unittest.TestCase):
         self.assertGreaterEqual(progress.percent, 0)
         self.assertLessEqual(progress.percent, 100)
 
+    def test_ci_selects_surface_definitions_for_real_sens_execution(self):
+        # An entire excluded directory hid active Ukrainian Lisp functions from
+        # native T5M execution. This protects the changed-file integration,
+        # not a Python substitute for SENS semantic tests.
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        selection = workflow.split('id: changed-t5m-lisp', 1)[1].split('          PY', 1)[0]
+        self.assertIn('from report_ukr_projection_progress import tokenize_lisp, _contains_source_definitions',
+                      selection)
+        self.assertIn('name.startswith("lib/surface/") and not _contains_source_definitions(path)',
+                      selection)
+        self.assertNotIn('"lib/surface/", "knowledge/"', selection)
+        self.assertIn('T5M_CHANGED_FILE', selection)
+
     def test_keyboard_contract_matches_ratified_projection_guard(self):
         from tests.test_ukrainian_domain_projection_rules import (
             UKRAINIAN_KEYBOARD_OUTPUTS,
