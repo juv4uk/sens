@@ -132,14 +132,14 @@ class UkrainianLinterProjection(unittest.TestCase):
             "зібрати-вільні-змінні-з-рекурсивного-зв'язування",
         ):
             with self.subTest(name=name):
-                start = self.active.index("(визначити " + name + "\\n")
+                start = self.active.index("(визначити " + name + "\n")
                 next_definition = self.active.find("(визначити ", start + 1)
                 body = self.active[start:next_definition if next_definition >= 0 else None]
                 self.assertNotIn("((хибне? (атом? (решта дерево)))", body)
                 self.assertNotIn("((хибне? (атом? (решта (решта дерево))))", body)
                 self.assertIn("((атом? (решта дерево))", body)
                 self.assertIn("((атом? (решта (решта дерево)))", body)
-                self.assertIn("(так\\n       (нехай ((привязки", body)
+                self.assertIn("(так\n       (нехай ((привязки", body)
         # Дійсні приклади з очікуваними результатами належать SENS.
         fixture = (ROOT / "tests/fixtures/linter.lisp").read_text(encoding="utf-8")
         self.assertIn("(нехай-послідовно ((x 1) (y x)) (додати x y z))", fixture)
