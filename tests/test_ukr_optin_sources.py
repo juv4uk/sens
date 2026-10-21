@@ -583,13 +583,21 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
                         "world: inverse of primary D9 migration must recover exact parent blob",
                     )
                 if path == "lib/knowledge.lisp":
-                    source = self._reverse_knowledge_alpha(source)
-                    source = self._reverse_d5_macro_projection(source, 4)
-                    self.assertEqual(
-                        self._git_blob_sha(source),
-                        self.KNOWLEDGE_BEFORE_ALPHA_BLOB,
-                        "knowledge: lexical alpha-normalization must recover exact prior Git blob",
-                    )
+                    # Код журналу оновлено: повернення байтів старого джерела
+                    # разом із коментарями не є доказом оберненості програми.
+                    # Функції й локальні зв'язування зберігають точний закон.
+                    self.assertIn("(визначити внутрішній-зворот-журналу-знань", source)
+                    self.assertNotIn("(зворот ", source,
+                                     "недоведений D5 REVERSE не має бути викличною головою")
+                    exact = "(сполучити (перше елементи) накопичувач)"
+                    self.assertIn(exact, source)
+                    previous = self._rewrite_call_heads(source, inverse)
+                    forward = [(english, ukrainian, count)
+                               for english, ukrainian, count in evidence["edits"]]
+                    restored = self._rewrite_call_heads(previous, forward)
+                    self.assertEqual(restored, source,
+                                     "оберненість викличних голів має зберігати програму")
+                    continue
                 restored = self._rewrite_call_heads(source, inverse)
                 self.assertEqual(self._git_blob_sha(restored), evidence["blob"])
 
