@@ -657,6 +657,21 @@ class Resolver:
             for name, tok in bindings
         }
 
+    def _has_concrete_callable(self, identity):
+        # Резидентність D8–D10 не є допуском виклику. Зберігаємо
+        # точний код лише для функцій із реальною core/runtime реалізацією;
+        # інші імена передаються як контекстні D7 identifiers.
+        if not isinstance(identity, tuple) or len(identity) < 2:
+            return False
+        bits, domain = identity[:2]
+        if domain == "D8":
+            return bits in self.d8_callable_bits or bits in CORE_OPERATION_D8
+        if domain == "D9":
+            return bits in self.d9_callable_bits or bits in CORE_OPERATION_D9
+        if domain == "D10":
+            return bits in self.d10_callable_bits
+        return False
+
     def head(self,tok: Tok,text7=None):
         t=tok.text
         # Domain identity is (exact width, exact bits), never a flat сід8
@@ -710,13 +725,10 @@ class Resolver:
                 "укр projection, never map by matching bytes", tok,
             )
 
-        # Known Ukrainian D8–D10 projections retain their exact domain
-        # identity even when a source binding with the same spelling exists.
-        # This is transport/lowering identity only, not execution admission.
+        # Тільки ДОВЕДЕНА викличність D8–D10 отримує код голови.
+        # Присутність у 256/512/1024 ратифікованих рядках не є механізмом.
         ident = self.my.get(t)
-        if (isinstance(ident, tuple) and len(ident) >= 2
-                and ident[1] in ("D8", "D9", "D10")
-                and len(ident[0]) == int(ident[1][1:])):
+        if self._has_concrete_callable(ident):
             self.counts["pass2-my-lisp"] += 1
             return [ident[0]], "pass2-my-lisp"
 
@@ -733,6 +745,18 @@ class Resolver:
         # the old registry but lacking a current resident is a empty.
         if t in self.my:
             ident=self.my[t]
+            if (isinstance(ident, tuple) and len(ident) >= 2
+                    and ident[1] in ("D8", "D9", "D10")
+                    and not self._has_concrete_callable(ident)):
+                # Ratified NAME of a Lisp closure, not a native D9 opcode.
+                # Preserve its source binding by an exact D7 identifier.
+                if text7 is None:
+                    raise MigrationError(
+                        f"{ident[1]} resident {t!r} has no callable mechanism; "
+                        "contextual D7 projection required", tok,
+                    )
+                self.counts["pass4-text7-global"] += 1
+                return encode_text7_identifier(t, text7, tok), "d7-resident-head"
             if ident is None:
                 raise MigrationError(
                     f"legacy-unmapped my-lisp function {t!r}: no proven callable identity "
@@ -756,6 +780,16 @@ class Resolver:
         # Pass 3: historical LISP I / Lisp 1.5 UPPERCASE names.
         if t==t.upper() and t in self.upper:
             ident=self.upper[t]
+            if (isinstance(ident, tuple) and len(ident) >= 2
+                    and ident[1] in ("D8", "D9", "D10")
+                    and not self._has_concrete_callable(ident)):
+                if text7 is None:
+                    raise MigrationError(
+                        f"{ident[1]} resident {t!r} has no callable mechanism; "
+                        "contextual D7 projection required", tok,
+                    )
+                self.counts["pass4-text7-global"] += 1
+                return encode_text7_identifier(t, text7, tok), "d7-resident-head"
             if ident is None:
                 raise MigrationError(
                     f"legacy-unmapped Lisp 1-1.5 function {t}: no proven callable identity "

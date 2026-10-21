@@ -360,23 +360,24 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertIn("11101101", out.split())
         self.assertEqual(resolver.counts["pass2-my-lisp"],1)
 
-    def test_ukrainian_d8_projection_maps_identity_without_execution_admission(self):
+    def test_ukrainian_d8_resident_without_mechanism_keeps_d7_call_name(self):
         from domain_tables import read_domain_table
-        rows = read_domain_table(ROOT / "lib/domains/d8.lisp")
-        candidate = next(
-            row for row in rows
-            if row.bits not in mod.CORE_OPERATION_D8
-            and row.uk
-            and self.my.get(row.uk) == (row.bits, "D8")
-        )
         resolver = mod.Resolver(self.my, self.upper)
-        words, _origin = resolver.head(mod.Tok("ATOM", candidate.uk, 0))
-        self.assertEqual(words, [candidate.bits])
-
-    def test_d10_names_preserve_projection_identity_without_execution_admission(self):
-        foundation = mod.load_foundation(
-            ROOT / "knowledge/d1-d11-foundation.json"
+        candidate = next(
+            row for row in read_domain_table(ROOT / "lib/domains/d8.lisp")
+            if row.bits not in mod.CORE_OPERATION_D8
+            and row.bits not in resolver.d8_callable_bits
+            and row.uk and self.my.get(row.uk) == (row.bits, "D8")
         )
+        words, origin = resolver.head(mod.Tok("ATOM", candidate.uk, 0), self.text7)
+        self.assertEqual(words[0], "10")
+        self.assertEqual(words[-1], "01")
+        self.assertNotIn(candidate.bits, words)
+        self.assertEqual(origin, "d7-resident-head")
+        self.assertEqual(self.my[candidate.uk], (candidate.bits, "D8"))
+
+    def test_d10_resident_names_keep_identity_but_not_unproved_callability(self):
+        foundation = mod.load_foundation(FOUNDATION)
         my, upper, _bridge = mod.build_three_pass_maps(
             foundation, DOMAIN_SURFACES, SEMANTIC_GENERATED,
             SEMANTIC_REGISTRY, NECESSARY,
@@ -388,23 +389,19 @@ class ThreePassMigrationTests(unittest.TestCase):
             "асоціація-тотожність": "0001011001",
         }
         for spelling, bits in expected.items():
-            self.assertEqual(my.get(spelling), (bits, "D10"))
-        for spelling, bits in expected.items():
             with self.subTest(spelling=spelling):
-                words, _origin = resolver.head(mod.Tok("ATOM", spelling, 0))
-                self.assertEqual(words, [bits])
+                self.assertEqual(my.get(spelling), (bits, "D10"))
+                self.assertNotIn(bits, resolver.d10_callable_bits,
+                                 "не можна вигадувати допуск D10 із каталогу")
+                words, origin = resolver.head(mod.Tok("ATOM", spelling, 0), text7)
+                self.assertEqual(origin, "d7-resident-head")
+                self.assertEqual(words[0], "10")
+                self.assertEqual(words[-1], "01")
+                self.assertNotIn(bits, words)
                 with self.assertRaisesRegex(
                     mod.MigrationError, r"D10 .*потрібна названа чинна проєкція"
                 ):
                     resolver.head(mod.Tok("ATOM", bits, 0))
-        for spelling in ("0000000000", "1111111111"):
-            with self.subTest(spelling=spelling), self.assertRaisesRegex(
-                mod.MigrationError, r"D10 .*потрібна названа чинна проєкція"
-            ):
-                # A bit word belongs to the physical/domain view, not a
-                # named Ukrainian source projection. Width alone does not
-                # resolve domain identity.
-                resolver.head(mod.Tok("ATOM", spelling, 0))
 
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
@@ -431,13 +428,19 @@ class ThreePassMigrationTests(unittest.TestCase):
             mod.Resolver(self.my, self.upper,
                          bridge_by_sid={"01001011": ("D9", "110101001")})
 
-    def test_named_d9_identity_migrates_without_claiming_runtime_execution(self):
+    def test_d9_unifier_resident_is_not_implicitly_executable(self):
         identity = self.my["уніфікувати"]
         self.assertEqual(identity, ("101010000", "D9"))
         resolver = mod.Resolver(self.my, self.upper)
-        words, _origin = resolver.head(mod.Tok("ATOM", "уніфікувати", 0))
-        self.assertEqual(words, ["101010000"])
-        self.assertEqual(resolver.counts["pass2-my-lisp"], 1)
+        self.assertNotIn(identity[0], resolver.d9_callable_bits,
+                         "unify Lisp definition != Core4 native D9 opcode")
+        words, origin = resolver.head(
+            mod.Tok("ATOM", "уніфікувати", 0), self.text7,
+        )
+        self.assertEqual(origin, "d7-resident-head")
+        self.assertEqual(words[0], "10")
+        self.assertNotIn(identity[0], words)
+        self.assertEqual(words[-1], "01")
 
     def test_core4_defined_d9_functions_migrate_by_exact_domain_identity(self):
         resolver = mod.Resolver(self.my, self.upper)
@@ -498,26 +501,38 @@ class ThreePassMigrationTests(unittest.TestCase):
                 ):
                     resolver.head(mod.Tok("ATOM", word, 0))
 
-    def test_d9_ukrainian_projections_preserve_all_exact_identities(self):
-        # Named current projections identify D9 words; this does not certify
-        # that the corresponding runtime function has been implemented.
+    def test_d9_ukrainian_projection_keeps_all_residents_as_identity_not_admission(self):
         from domain_tables import read_domain_table
         foundation = mod.load_foundation(FOUNDATION)
         residents = set(foundation["domains"]["D9"]["residents"])
         self.assertEqual(len(residents), 512)
-        resolver = mod.Resolver(self.my, self.upper, d9_residents=residents)
         rows = read_domain_table(ROOT / "lib/domains/d9.lisp")
-        covered = set()
-        for row in rows:
-            for spelling in (row.uk, row.ukr):
-                if spelling and self.my.get(spelling) == (row.bits, "D9"):
-                    with self.subTest(spelling=spelling):
-                        self.assertEqual(
-                            resolver.head(mod.Tok("ATOM", spelling, 0))[0],
-                            [row.bits],
-                        )
-                    covered.add(row.bits)
+        covered = {
+            row.bits for row in rows
+            if (row.uk and self.my.get(row.uk) == (row.bits, "D9"))
+            or (row.ukr and self.my.get(row.ukr) == (row.bits, "D9"))
+        }
         self.assertEqual(covered, residents)
+        # The domain table is still an authority for quoted data and
+        # surface lookup, but never a free callable D9 mechanism.
+        resolver = mod.Resolver(self.my, self.upper, d9_residents=residents)
+        self.assertNotIn("000100001", resolver.d9_callable_bits)
+        for spelling, bits in [("порожній-вміст-сховище", "000100001")]:
+            with self.subTest(spelling=spelling):
+                self.assertEqual(self.my[spelling], (bits, "D9"))
+                words, origin = resolver.head(
+                    mod.Tok("ATOM", spelling, 0), self.text7,
+                )
+                self.assertEqual(origin, "d7-resident-head")
+                self.assertEqual(words[0], "10")
+                self.assertEqual(words[-1], "01")
+                self.assertNotIn(bits, words)
+        # A real Core4-defined D9 function still uses its exact call code.
+        admitted, origin = resolver.head(
+            mod.Tok("ATOM", "додати-нові", 0), self.text7,
+        )
+        self.assertEqual(admitted, ["001000101"])
+        self.assertEqual(origin, "pass2-my-lisp")
 
     def test_decimal_digit_sequences_in_lisp_data_are_not_domain_addresses(self):
         # Human Lisp numbers are decimal D24+ values; their spelling length
