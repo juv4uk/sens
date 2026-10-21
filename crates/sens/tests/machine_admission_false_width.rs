@@ -30,11 +30,16 @@ fn shorter_quoted_singleton_preserves_observable_d1_no() {
 
 #[test]
 fn admission_source_has_exactly_27_short_inert_payloads_and_no_old_d8_sentinel() {
-    assert_eq!(SOURCE.matches("(010 (001 (000)))").count(), 27);
+    assert_eq!(SOURCE.matches("(атом? (як-є (000)))").count(), 27,
+        "усі 27 відмов тепер явно обчислюють D1:NO у SENS");
+    assert!(!SOURCE.contains("(010 (001 (000)))"),
+        "неповернений старий бітовий call head у виконуваному Lisp");
     assert!(!SOURCE.contains("(00000000)"),
         "історична восьмибітна позначка не повинна повертатися");
-    assert!(SOURCE.contains("(11110100 value)"),
-        "справжня окрема D8-функція не повинна змінитися");
+    assert!(SOURCE.contains("(значення-у-текст значення)"),
+        "реальний український D8 WRITE-TO-STRING мусить залишитися виконуваним");
+    assert!(!SOURCE.contains("(11110100 value)"),
+        "застарілу D8 викличну голову не можна повертати замість поверхні");
 
     let expressions = parse_mixed_exact_domain_machine_source(PATH, SOURCE)
         .expect("увесь admission-файл має проходити суворий машинний reader");
