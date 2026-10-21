@@ -18,6 +18,11 @@ fn eval_probabilistic_decision(source: &str) -> String {
         &mut session,
     )
     .expect("probabilistic decision layer should load");
+    eval_program(
+        include_str!("../../../research/probabilistic-decision-auto-choice-20261021.lisp"),
+        &mut session,
+    )
+    .expect("automatic choice policy should load");
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
