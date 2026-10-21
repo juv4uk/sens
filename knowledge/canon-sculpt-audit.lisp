@@ -15,7 +15,7 @@
 
   (candidate
     (identity CANON_EMPTY_LIST)
-    (surface ()))
+    (surface ())
     (category ground-value)
     (observable-laws
       (ground-object)
