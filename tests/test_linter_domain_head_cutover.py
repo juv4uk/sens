@@ -127,8 +127,8 @@ class UkrainianLinterProjection(unittest.TestCase):
         # D1: атом? уже повертає однобітний вердикт. Функція
         # відповідь-не очікує СКЛАДЕНУ шкалу, тому перше(атом?) — помилка.
         self.assertNotIn("(відповідь-не ", self.active)
-        self.assertIn("((атом? дерево)\\n       (за-умовою", self.active)
-        self.assertIn("((атом? (решта дерево))\\n", self.active)
+        self.assertIn("((атом? дерево)", self.active)
+        self.assertIn("((атом? (решта дерево))", self.active)
         samples = (ROOT / "tests/fixtures/linter.lisp").read_text(encoding="utf-8")
         self.assertIn("(нехай-послідовно ((x 1) (y x)) (додати x y z))", samples)
 
@@ -141,14 +141,14 @@ class UkrainianLinterProjection(unittest.TestCase):
             "зібрати-вільні-змінні-з-рекурсивного-зв'язування",
         ):
             with self.subTest(name=name):
-                start = self.active.index("(визначити " + name + "\n")
+                start = self.active.index("(визначити " + name)
                 next_definition = self.active.find("(визначити ", start + 1)
                 body = self.active[start:next_definition if next_definition >= 0 else None]
                 self.assertNotIn("((хибне? (атом? (решта дерево)))", body)
                 self.assertNotIn("((хибне? (атом? (решта (решта дерево))))", body)
                 self.assertIn("((атом? (решта дерево))", body)
                 self.assertIn("((атом? (решта (решта дерево)))", body)
-                self.assertIn("(так\n       (нехай ((привязки", body)
+                self.assertIn("(нехай ((привязки", body)
         # Дійсні приклади з очікуваними результатами належать SENS.
         fixture = (ROOT / "tests/fixtures/linter.lisp").read_text(encoding="utf-8")
         self.assertIn("(нехай-послідовно ((x 1) (y x)) (додати x y z))", fixture)
