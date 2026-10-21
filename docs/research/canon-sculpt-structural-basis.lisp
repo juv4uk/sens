@@ -78,7 +78,7 @@
     (restricted-basis PRIM_QUOTE PRIM_EQ PRIM_CONS PRIM_CAR PRIM_CDR PRIM_COND lambda)
     (required-domain empty-list pair atom)
     (obstruction
-      "car/cdr are partial and fail on non-pairs; eq is atom-only and fails on pairs; the basis has no error-catching or representation-tag observer declared lower than atom."))
+      "car/cdr are partial and fail on non-pairs; eq is atom-only and fails on pairs; the basis has no error-catching or representation-tag observer declared lower than atom.")
     (claim-under-test
       "A total three-way structural classifier cannot be obtained from only partial destructors plus atom-only identity without another safe structural discriminator."))
 
@@ -89,7 +89,7 @@
     (inputs runtime-left runtime-right)
     (required-result pair-containing-both-runtime-inputs)
     (obstruction
-      "quote can provide only source-static structure; observers can only inspect existing values; lambda can package values as a closure but that value is not a pair under current observable structural laws."))
+      "quote can provide only source-static structure; observers can only inspect existing values; lambda can package values as a closure but that value is not a pair under current observable structural laws.")
     (claim-under-test
       "Without a pair constructor or a stronger aggregate constructor, the restricted basis cannot create a fresh pair from arbitrary evaluated runtime values."))
 
