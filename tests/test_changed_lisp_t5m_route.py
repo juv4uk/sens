@@ -155,6 +155,62 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                     else:
                         committed.rmdir()
 
+    def test_stale_regular_companion_still_executes_fresh_physical_t5m(self):
+        # Лише транспортний shell-свідок, НЕ Python-імітація семантики SENS.
+        # Застаріла наявна пара лишає CI червоним, але не ховає реальний
+        # результат наступного запуску свіжого фізичного файлу.
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-stale-live-") as td:
+            root = Path(td)
+            (root / "scripts").mkdir()
+            (root / "module.lisp").write_text("(як-є ())\\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\\n", encoding="utf-8")
+            (root / "scripts/migrate-three-pass.py").write_text(
+                "import json, pathlib, sys\\n"
+                "source = pathlib.Path(sys.argv[1])\\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\\n"
+                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\\n"
+                "out.mkdir(parents=True, exist_ok=True)\\n"
+                "(out / (source.stem + '.sens')).write_bytes(b'\\\\x01')\\n"
+                "(out / source.stem).write_text('10 001 00 000 01\\\\n')\\n"
+                "report.write_text(json.dumps({'summary': {'files_written': 1, "
+                "'files_blocked': 0, 'files_not_program': 0}, 'files': []}))\\n",
+                encoding="utf-8",
+            )
+            binary = root / "record-physical-ingress"
+            binary.write_text(
+                "#!/bin/sh\\nprintf '%s\\\\n' \"$1\" >> executed.marker\\n"
+                "printf 'transport stub only\\\\n'\\n",
+                encoding="utf-8",
+            )
+            binary.chmod(0o755)
+            pair = root / "module.sens"
+            view = root / "module"
+            for kind, expected_error in [
+                ("pair", "T5M_COMMITTED_PAIR_DRIFT"),
+                ("view", "T5M_COMMITTED_VIEW_DRIFT"),
+                ("missing-view", "T5M_COMMITTED_VIEW_MISSING"),
+            ]:
+                with self.subTest(kind=kind):
+                    pair.write_bytes(b"\\x02" if kind == "pair" else b"\\x01")
+                    if kind == "missing-view":
+                        view.unlink(missing_ok=True)
+                    else:
+                        view.write_text(
+                            "застарілий перегляд\\n" if kind == "view"
+                            else "10 001 00 000 01\\n", encoding="utf-8",
+                        )
+                    (root / "executed.marker").unlink(missing_ok=True)
+                    result = subprocess.run(
+                        ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"],
+                        cwd=root, capture_output=True, text=True, timeout=20,
+                    )
+                    self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                    self.assertIn(expected_error, result.stderr)
+                    self.assertIn("T5M_FILE_EXECUTION PASS", result.stdout)
+                    self.assertIn("release=NOT_CERTIFIED", result.stdout)
+                    self.assertIn("module.sens", (root / "executed.marker").read_text())
+                    self.assertNotIn("--t5m-file", (root / "executed.marker").read_text())
+
     def test_shell_parses(self):
         import subprocess
         subprocess.run(['bash', '-n', str(RUNNER)], check=True)
