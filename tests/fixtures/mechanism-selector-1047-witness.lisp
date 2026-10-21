@@ -25,9 +25,9 @@
                     маршрут-відсутній
                     (список (як-є mechanism-unavailable) 255 (як-є evaluator)))
                   (як-є (mechanism-selector-1047 (status pass))))
-                 (так (як-є (mechanism-selector-1047 (status fail))))))
-              (так (як-є (mechanism-selector-1047 (status fail))))))
-           (так (як-є (mechanism-selector-1047 (status fail))))))
-        (так (як-є (mechanism-selector-1047 (status fail))))))))
+                 ((атом? (як-є ())) (як-є (mechanism-selector-1047 (status fail))))))
+              ((атом? (як-є ())) (як-є (mechanism-selector-1047 (status fail))))))
+           ((атом? (як-є ())) (як-є (mechanism-selector-1047 (status fail))))))
+        ((атом? (як-є ())) (як-є (mechanism-selector-1047 (status fail))))))))
 
 (свідок-вибору-механізму-1047)
