@@ -45,8 +45,19 @@ if ! timeout 60s "$binary" --t5m-mint-pair "$source_file" "$pair" "${binding_arg
   exit 2
 fi
 producer=SENS_ZIG_NATIVE
-if [[ ! -s "$pair" || ! -s "$view" || -L "$pair" || -L "$view" ]]; then
-  echo 'ПОМИЛКА: немає обох звичайних файлів свіжої фізичної пари' >&2
+if [[ ! -s "$pair" || -L "$pair" ]]; then
+  echo 'ПОМИЛКА: SENS/Zig не створив звичайний непорожній фізичний T5M-файл' >&2
+  exit 2
+fi
+# --t5m-mint-pair створює лише фізичні байти .sens, не бітовий перегляд.
+# Перегляд відкриває той самий нативний Zig/T5M reader; Python не бере участі.
+if ! timeout 45s "$reader" open "$pair" >"$view" 2>"$dir/view.stderr"; then
+  cat "$dir/view.stderr" >&2
+  echo 'ПОМИЛКА: T5M_NATIVE_VIEW_OPEN_FAILED; пару не змінено' >&2
+  exit 2
+fi
+if [[ ! -s "$view" || -L "$view" ]]; then
+  echo 'ПОМИЛКА: Zig/T5M не створив звичайний непорожній бітовий перегляд' >&2
   exit 2
 fi
 # Без справжнього Zig decode/encode і точного same-stem бітового перегляду
