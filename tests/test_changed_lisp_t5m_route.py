@@ -43,6 +43,45 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                 self.assertIn('failed_files=$((failed_files + 1))', arm)
         self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
 
+    def test_committed_drift_reports_red_but_still_attempts_new_pair(self):
+        # Тільки shell control flow: підмінний процес фіксує виклик,
+        # НЕ перевіряє семантику SENS і не сертифікує програму.
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-drift-flow-") as td:
+            root = Path(td)
+            (root / "scripts").mkdir()
+            (root / "test.lisp").write_text("(як-є (дані))\n", encoding="utf-8")
+            (root / "test.sens").write_bytes(b"old")
+            (root / "test").write_text("old", encoding="utf-8")
+            (root / "changed.txt").write_text("test.lisp\n", encoding="utf-8")
+            (root / "scripts/migrate-three-pass.py").write_text(
+                "import json, pathlib, sys\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\n"
+                "out.mkdir(parents=True, exist_ok=True)\n"
+                "(out / 'test.sens').write_bytes(b'new')\n"
+                "(out / 'test').write_text('new', encoding='utf-8')\n"
+                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\n"
+                "report.write_text(json.dumps({'summary': {'files_written': 1, "
+                "'files_blocked': 0, 'files_not_program': 0}, 'files': []}))\n",
+                encoding="utf-8",
+            )
+            spy = root / "record-invocation"
+            spy.write_text(
+                "#!/bin/sh\nprintf 'called\\n' > invoked.marker\nexit 0\n",
+                encoding="utf-8",
+            )
+            spy.chmod(0o755)
+            outcome = subprocess.run(
+                ["bash", str(RUNNER), str(spy), "changed.txt", "evidence"],
+                cwd=root, capture_output=True, text=True, timeout=15,
+            )
+            self.assertEqual(outcome.returncode, 2, outcome.stdout + outcome.stderr)
+            self.assertTrue((root / "invoked.marker").exists())
+            self.assertIn("T5M_COMMITTED_PAIR_DRIFT", outcome.stderr)
+            self.assertIn("T5M_COMMITTED_VIEW_DRIFT", outcome.stderr)
+            self.assertIn("T5M_DIAGNOSTICS_CONTINUE", outcome.stdout)
+            self.assertIn("committed_drift=1 semantic=NOT_CERTIFIED", outcome.stdout)
+            self.assertIn("files_checked=1 files_failed=1", outcome.stdout)
+
     def test_w24_is_executed_only_from_a_verified_physical_pair(self):
         # Структурний свідок маршруту; реальне SENS-eval перевіряє Rust CLI.
         source = RUNNER.read_text(encoding="utf-8")

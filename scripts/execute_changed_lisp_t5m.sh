@@ -98,9 +98,11 @@ PY
     failed_files=$((failed_files + 1))
     continue
   fi
+  # Звичайна розбіжність опублікованої пари — RED, але не причина
+  # приховувати фактичне SENS-виконання нової фізичної Zig/T5M пари.
+  committed_drift=0
   if [[ -e "$committed" || -L "$committed" ]]; then
-    # Опублікований носій повинен бути звичайним файлом, не symlink,
-    # каталогом чи іншим об'єктом, що імітує фізичну T5M-пару.
+    # Небезпечний носій не читаємо: symlink, каталог, інший тип файлу.
     if [[ ! -f "$committed" || -L "$committed" ]]; then
       echo "::error::T5M_COMMITTED_PAIR_NOT_REGULAR source=$file companion=$committed" >&2
       failed_files=$((failed_files + 1))
@@ -108,27 +110,27 @@ PY
     fi
     if ! cmp -s "$pair" "$committed"; then
       echo "::error::T5M_COMMITTED_PAIR_DRIFT source=$file companion=$committed" >&2
-      failed_files=$((failed_files + 1))
-      continue
+      committed_drift=1
     fi
     if [[ ! -f "$committed_view" || -L "$committed_view" ]]; then
       echo "::error::T5M_COMMITTED_VIEW_MISSING source=$file expected=$committed_view" >&2
-      failed_files=$((failed_files + 1))
-      continue
-    fi
-    if ! cmp -s "$staged_view" "$committed_view"; then
+      committed_drift=1
+    elif ! cmp -s "$staged_view" "$committed_view"; then
       echo "::error::T5M_COMMITTED_VIEW_DRIFT source=$file companion=$committed_view" >&2
-      failed_files=$((failed_files + 1))
-      continue
+      committed_drift=1
     fi
   else
     echo "::notice::T5M_PAIR_NOT_COMMITTED path=$file release=NOT_CERTIFIED"
+  fi
+  if (( committed_drift > 0 )); then
+    failed_files=$((failed_files + 1))
+    echo "::warning::T5M_DIAGNOSTICS_CONTINUE source=$file pair=$pair committed=DRIFT release=NOT_CERTIFIED"
   fi
   stdout="$dir/runtime.stdout"
   stderr="$dir/runtime.stderr"
   if timeout 45s "$binary" "$pair" >"$stdout" 2>"$stderr"; then
     result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
-    echo "T5M_FILE_EXECUTION PASS path=$file pair=$pair result_sha256=$result_sha semantic=NOT_CERTIFIED"
+    echo "T5M_FILE_EXECUTION PASS path=$file pair=$pair result_sha256=$result_sha committed_drift=$committed_drift semantic=NOT_CERTIFIED"
   else
     status=$?
     # Фізичний T5M зберігає W24 без втрат. Проте W24 сам по собі
@@ -150,12 +152,12 @@ PY
       fi
       sed 's/^/T5M paired stderr: /' "$stderr" >&2
       echo "::error::T5M_PHYSICAL_PAIRED_D24_FAIL source=$file pair=$pair status=$status" >&2
-      failed_files=$((failed_files + 1))
+      if (( committed_drift == 0 )); then failed_files=$((failed_files + 1)); fi
       continue
     fi
     sed 's/^/T5M stderr: /' "$stderr" >&2
     echo "::error::T5M_FILE_EXECUTION_FAIL path=$file pair=$pair status=$status" >&2
-    failed_files=$((failed_files + 1))
+    if (( committed_drift == 0 )); then failed_files=$((failed_files + 1)); fi
     continue
   fi
 done < "$manifest"
