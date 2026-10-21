@@ -139,6 +139,38 @@ fn an_ordinary_value_is_not_a_tagged_result() {
 }
 
 #[test]
+fn український_символ_результату_виконується_через_d1_а_не_недопущений_d9() {
+    // Вхідні значення оцінює сам SENS: не Rust-перевірка типів.
+    // Кожне значення має той самий D1 закон, що й публічна перевірка цілі.
+    for (case, source, expected) in [
+        ("символ", "(результат-внутрішній-символ? (як-є планета))", true),
+        ("порожнє", "(результат-внутрішній-символ? (як-є ()))", false),
+        ("пара", "(результат-внутрішній-символ? (як-є (планета земля)))", false),
+        ("число", "(результат-внутрішній-символ? 42)", false),
+        ("ціль", "(результат-ціль? (як-є (планета земля)))", true),
+        ("складена-голова", "(результат-ціль? (як-є ((планета) земля)))", false),
+        ("числова-голова", "(результат-ціль? (як-є (42 земля)))", false),
+    ] {
+        let value = eval_result_status_value(source);
+        assert_eq!(
+            value.as_predicate_bit(), Some(expected),
+            "test_id=result-status-symbol-d1 case={case} layer=real-SENS input={source} expected=D1:{expected} actual={value}"
+        );
+    }
+    for (source, expected) in [
+        ("(міркувати-у-спостерігати (як-є ()) (як-є (планета земля)))",
+         "(invalid invalid-module ())"),
+        ("(міркувати-у-спостерігати 42 (як-є (планета земля)))",
+         "(invalid invalid-module 42)"),
+    ] {
+        assert_eq!(
+            eval_result_status(source), expected,
+            "test_id=result-status-module-symbol-d1 layer=real-SENS input={source}"
+        );
+    }
+}
+
+#[test]
 fn ukrainian_status_predicate_rejects_composite_head_as_d1_no() {
     let source = "(результат-позначений? (як-є ((вкладений-тег) значення)))";
     let actual = eval_result_status_value(source);
