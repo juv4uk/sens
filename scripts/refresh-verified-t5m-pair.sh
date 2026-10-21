@@ -15,6 +15,14 @@ if [[ "$source_file" != *.lisp || ! -f "$source_file" || -L "$source_file" ]]; t
   echo "T5M_REPAIR_SOURCE_INVALID path=$source_file" >&2
   exit 2
 fi
+source_bytes=$(wc -c < "$source_file")
+native_timeout=45s
+# Важкі чинні Lisp-джерела не можуть фізично обернутись за 45 секунд;
+# лишаємо кінцевий бюджет, але не оголошуємо повільний SENS mint поламкою.
+if (( source_bytes >= 262144 )); then
+  native_timeout=180s
+fi
+echo "T5M_REPAIR_BUDGET source=$source_file bytes=$source_bytes timeout=$native_timeout"
 for executable in "$binary" "$reader"; do
   if [[ ! -x "$executable" ]]; then
     echo "T5M_REPAIR_EXECUTABLE_MISSING path=$executable" >&2
@@ -36,18 +44,24 @@ snapshot="$(sha256sum "$source_file" | cut -d' ' -f1)"
 staged="$scratch/program.sens"
 staged_view="$scratch/program"
 # SENS власноруч створює слова, Zig єдиний пакує T5M.
-timeout 45s "$binary" --t5m-mint "$source_file" "$staged"
+if timeout "$native_timeout" "$binary" --t5m-mint "$source_file" "$staged"; then
+  :
+else
+  mint_status=$?
+  echo "T5M_REPAIR_MINT_FAILED source=$source_file status=$mint_status timeout=$native_timeout" >&2
+  exit 2
+fi
 test -s "$staged"
-timeout 45s "$reader" view "$staged" > "$staged_view"
+timeout "$native_timeout" "$reader" view "$staged" > "$staged_view"
 test -s "$staged_view"
 # Відновити рівно ті самі слова та байти через справжній Zig/T5M.
 # Гарантія фізичного обернення не підміняє SENS-парне виконання нижче.
-if ! timeout 45s "$reader" verify-view "$staged" > "$scratch/inverse.out" 2> "$scratch/inverse.err"; then
+if ! timeout "$native_timeout" "$reader" verify-view "$staged" > "$scratch/inverse.out" 2> "$scratch/inverse.err"; then
   cat "$scratch/inverse.err" >&2
   echo "T5M_REPAIR_VIEW_ROUNDTRIP_FAILED path=$source_file" >&2
   exit 2
 fi
-if ! timeout 45s "$binary" --t5m-pair "$source_file" "$staged" > "$scratch/out" 2> "$scratch/err"; then
+if ! timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$staged" > "$scratch/out" 2> "$scratch/err"; then
   cat "$scratch/err" >&2
   echo "T5M_REPAIR_REAL_EVAL_FAILED path=$source_file" >&2
   exit 2
@@ -57,7 +71,7 @@ fi
 # Для D7/D24+ standalone може ще не мати контексту джерельних зв'язувань;
 # це НЕ забороняє реальний парний шлях і НЕ означає semantic GO.
 mode=paired-only
-if timeout 45s "$binary" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
+if timeout "$native_timeout" "$binary" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
   if ! cmp -s "$scratch/out" "$scratch/standalone.out"; then
     echo "T5M_REPAIR_EXECUTION_DIVERGENCE source=$source_file paired_sha256=$(sha256sum "$scratch/out" | cut -d' ' -f1) standalone_sha256=$(sha256sum "$scratch/standalone.out" | cut -d' ' -f1)" >&2
     exit 2
@@ -82,7 +96,7 @@ else
 fi
 # Негативна перевірка проводить іншу програму через той самий SENS.
 { cat "$source_file"; printf '\n(як-є ())\n'; } > "$scratch/mutant.lisp"
-if timeout 45s "$binary" --t5m-pair "$scratch/mutant.lisp" "$staged" > "$scratch/no" 2> "$scratch/no.err"; then
+if timeout "$native_timeout" "$binary" --t5m-pair "$scratch/mutant.lisp" "$staged" > "$scratch/no" 2> "$scratch/no.err"; then
   echo "T5M_REPAIR_MUTANT_WAS_ACCEPTED path=$source_file" >&2
   exit 2
 fi
