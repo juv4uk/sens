@@ -60,13 +60,13 @@ def check_si_derived() -> list[str]:
             errs.append(f"si-derived: required surface missing: {fn}")
     # Справжні числові токени у виконуваних формах не можна
     # підміняти бездоменним десятковим значенням. Коментарі не є кодом.
-    executable = "\\n".join(
+    executable = "\n".join(
         line.split(";", 1)[0] for line in text.splitlines()
     )
-    if re.search(r"(?<![\\w:])2(?=[\\s)])", executable):
+    if re.search(r"(?<![\w:])2(?=[\s)])", executable):
         errs.append("si-derived: RAW_NUMERIC_OPERAND_D24: знайдено сирий множник 2")
     expected_double = (
-        "(визначити сі:подвоєний-заряд\\n"
+        "(визначити сі:подвоєний-заряд\n"
         "  (додати сі:елементарний-заряд сі:елементарний-заряд))"
     )
     if expected_double not in executable:
