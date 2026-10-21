@@ -385,15 +385,17 @@ impl Parser<'_> {
         }
         let token = &self.source[start..self.cursor];
 
-        // Обидва джерельні читачі мусять бачити ратифіковані українські Д1
-        // «ні»/«так» як ті самі точні 1-бітні значення. Інакше сумісний
-        // eval_program втрачає Д1 і робить «так» невідомим символом.
-        // Джерело істини — чинна таблиця Д1, не host Bool/Number або W8.
-        if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(token) {
-            return Ok(Expr {
-                kind: ExprKind::DomainIdentity(identity),
-                span: Span { start, end: self.cursor },
-            });
+        // У точному Д1-читачі ратифіковані «ні»/«так» є бітовими
+        // значеннями. Сумісний Lisp reader зберігає їх як лексичні Symbol:
+        // Core4 містить локальні параметри «так»/«ні» і не може втрачати binder.
+        // У eval сумісного джерела незв'язане ім'я проєктується на точний Д1.
+        if self.mode == ReaderMode::ExactDomain {
+            if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(token) {
+                return Ok(Expr {
+                    kind: ExprKind::DomainIdentity(identity),
+                    span: Span { start, end: self.cursor },
+                });
+            }
         }
 
         // A lone `.` outside a dotted pair is not an expression (#1696).
@@ -712,35 +714,38 @@ mod tests {
     }
 
     #[test]
-    fn ukrainian_d1_values_are_exact_in_both_text_readers_and_real_sens_eval() {
-        // Д1 належить ратифікованій драбині, а не історичному режиму
-        // виконання; українське написання не повинно залежати від читача.
+    fn exact_d1_values_and_lexical_compatibility_names_are_both_preserved() {
+        // У точному джерелі Д1 — значення; у сумісному reader ті ж
+        // видимі слова можуть бути іменами локальних параметрів Core4.
+        // Сам eval сумісного Lisp розрізняє їх за наявністю binding.
         for (surface, bits) in [("ні", 0), ("так", 1)] {
-            for forms in [
-                parse(surface).expect("сумісний читач бачить чинний Д1"),
-                parse_exact_domain_source(surface).expect("точний читач бачить Д1"),
-            ] {
-                assert!(matches!(
-                    forms.as_slice(),
-                    [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
-                        if identity.width() == 1 && identity.packed_bits() == bits
-                ), "Д1:{bits} втрачено в українській проєкції {surface}");
-            }
+            let exact = parse_exact_domain_source(surface)
+                .expect("поточний читач Д1");
+            assert!(matches!(
+                exact.as_slice(),
+                [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
+                    if identity.width() == 1 && identity.packed_bits() == bits
+            ));
+            let lexical = parse(surface).expect("сумісний лексичний читач");
+            assert!(matches!(
+                lexical.as_slice(),
+                [Expr { kind: ExprKind::Symbol(symbol), .. }] if symbol.as_ref() == surface
+            ), "не перетворювати Core4 локальні параметри на незмінний Д1");
+
             let mut session = crate::Session::default();
             let actual = crate::eval_program(surface, &mut session)
-                .unwrap_or_else(|error| panic!("виконання живим SENS Д1:{bits}: {error}"));
+                .unwrap_or_else(|error| panic!("живий SENS Д1:{bits}: {error}"));
             assert_eq!(actual.value.as_predicate_bit(), Some(bits == 1),
-                "Д1:{bits} не може бути host bool або невідомим символом");
+                "не ототожнювати D1 з Number/host Bool/структурним ()");
         }
 
-        // Сусідні старі цифрові літерали не отримують тотожності Д1.
-        for non_d1 in ["0", "1", "()"] {
-            let forms = parse(non_d1).expect("сумісна граматика допускає дані");
+        for data in ["0", "1", "()"] {
+            let forms = parse(data).expect("старе джерело допускає число або список");
             assert!(!matches!(
                 forms.as_slice(),
                 [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
                     if identity.width() == 1
-            ), "заборонено відгадувати Д1 за виглядом {non_d1}");
+            ), "числа чи () не набувають Д1 за виглядом: {data}");
         }
     }
 
