@@ -16,6 +16,7 @@ mod native_exec;
 #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
 mod platform;
 mod process_raw;
+mod system_one_model;
 
 /// Сире спостереження монотонного лічильника ОС, без часової семантики в Rust.
 ///
@@ -709,6 +710,12 @@ pub fn install() {
     register_capability("tcp-write-raw", evaluate_tcp_write_raw);
     register_capability("протокол-передавання-сирий-запис", evaluate_tcp_write_raw);
     register_evaluated_capability("tcp-close", 1, evaluate_tcp_close);
+    // Механізм повертає лише розподіл і походження; рішення належить SENS.
+    register_evaluated_capability(
+        "модельний-розподіл-вибору-сире",
+        5,
+        system_one_model::evaluate_choice_distribution,
+    );
     #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
     register_capability(
         "native-call-u64-raw",
