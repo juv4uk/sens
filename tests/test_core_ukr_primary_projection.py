@@ -60,7 +60,7 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         # а не неіснуючим host-друком: виконання перевіряє нативний SENS.
         self.assertIn("(визначити результати-конституції\n  (список", program)
         self.assertNotIn("(друкувати", program)
-        for math in ("(поділити 5 336)", "(поділити 5.0 2)"):
+        for math in ("(частка 5 336)", "(частка 5.0 2)"):
             with self.subTest(math=math):
                 self.assertIn(math, program)
         for quoted in ("constitution", "x", "a", "b", "лісп", "лісп-працює"):
