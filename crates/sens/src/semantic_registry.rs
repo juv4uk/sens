@@ -233,9 +233,37 @@ pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::Dom
             return Some(DomainIdentity::D10(crate::DomainD10::new(row.bits).unwrap()));
         }
     }
-    None
+    d8_selector_uk_index().get(name).copied()
 }
 
+/// D8 has 64 proved selector addresses. Their human names are projected
+/// from the CAR/CDR path, not stored as manually written functions.
+fn d8_selector_uk_index() -> &'static HashMap<String, DomainIdentity> {
+    static INDEX: OnceLock<HashMap<String, DomainIdentity>> = OnceLock::new();
+    INDEX.get_or_init(|| {
+        let mut names = HashMap::new();
+        for (root, initial, full) in [
+            (0b011u8, "р", "решта"), (0b100u8, "п", "перше")
+        ] {
+            for suffix in 0..(1u8 << 5) {
+                let bits = (root << 5) | suffix;
+                let id = DomainIdentity::D8(
+                    crate::CoreD8::from_word(crate::Bit8::new(bits).unwrap()));
+                let mut short = initial.to_owned();
+                let mut long = full.to_owned();
+                for shift in (0..5).rev() {
+                    let rest = (suffix >> shift) & 1 == 1;
+                    short.push('-');
+                    short.push(if rest { 'р' } else { 'п' });
+                    long.push_str(if rest { "-від-решта" } else { "-від-перше" });
+                }
+                names.insert(short, id);
+                names.insert(long, id);
+            }
+        }
+        names
+    })
+}
 
 /// Exact inverse test/support for the owner D9/D10 selector table.
 /// These are metadata-only spelling peers, not another runtime body.
