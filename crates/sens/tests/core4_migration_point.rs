@@ -111,3 +111,30 @@ fn core4_d6_sublis_prioritizes_complete_tree_before_descending() {
         assert_eq!(actual, expected, "D6 exact SUBLIS whole-tree precedence: {source}");
     }
 }
+
+#[test]
+fn core4_ukrainian_structural_equality_executes_both_d1_bits() {
+    // Реальний SENS Core4: ні символи «так»/«ні» без прив'язки,
+    // ні host-рівність не підміняють мовний закон.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        ("(однакові? (як-є (а б)) (як-є (а б)))", true),
+        ("(однакові? (як-є (а б)) (як-є (а в)))", false),
+        ("(однакові? (як-є ()) (як-є ()))", true),
+        ("(однакові? (як-є ()) (як-є (а)))", false),
+        ("(однакові? (як-є (а)) (як-є ()))", false),
+        ("(однакові? (як-є а) (як-є (а)))", false),
+        ("(однакові? (як-є (а)) (як-є (а б)))", false),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=core4-equal-exec layer=SENS input={source} error={error}"
+            ));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id=core4-equal-exec layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
+    }
+}
