@@ -1069,6 +1069,7 @@ jobs:
           if grep -Eq '^(lib/world\.lisp|tests/semantic/d9-world-shape-module-events-laws\.lisp|crates/sens/tests/world_ancestor_sens\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test world_ancestor_sens world_module_ten_laws_execute_in_sens -- --exact --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test world_ancestor_sens d11_world_remove_first_native_law_and_mutant -- --exact --nocapture
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test world_ancestor_sens d11_world_event_and_module_presence_are_native_sens_compositions -- --exact --nocapture
           fi
           if grep -Eq '^(lib/world\.lisp|crates/sens/tests/fs_bridge_diagnostics\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_module_name_symbol_law_is_d1_and_rejects_non_symbols -- --exact --nocapture
