@@ -423,8 +423,19 @@ fn restore_t5m_words(
     restored: &[crate::zig_transport::ExactT5Word],
 ) -> Result<Vec<ExactDomainWord>, String> {
     if expected.len() != restored.len() {
+        // Замість двох лічильників показуємо перше точне слово, на якому
+        // Zig T5M втратив, вставив або змінив координату. Це діагностика
+        // реального RED, не новий релізний бар'єр і не fallback.
+        let carrier = exact_t5m_carrier_words(expected)?;
+        let first_mismatch_index = carrier
+            .iter()
+            .zip(restored)
+            .position(|(left, right)| {
+                left.width != right.width || left.bits != right.bits
+            })
+            .unwrap_or_else(|| expected.len().min(restored.len()));
         return Err(format!(
-            "T5M_WORD_MISMATCH expected={} restored={}",
+            "T5M_WORD_MISMATCH expected={} restored={} first_mismatch_index={first_mismatch_index}",
             expected.len(),
             restored.len()
         ));
@@ -1335,6 +1346,21 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn t5m_length_divergence_reports_first_changed_exact_word() {
+        let expected = [1u16, 2, 3]
+            .into_iter()
+            .map(|bits| {
+                ExactDomainWord::Identity(t5m_domain_identity(3, bits).unwrap())
+            })
+            .collect::<Vec<_>>();
+        let mut restored = exact_t5m_carrier_words(&expected).unwrap();
+        restored.remove(1);
+        let error = restore_t5m_words(&expected, &restored).unwrap_err();
+        assert!(error.contains("expected=3 restored=2"), "{error}");
+        assert!(error.contains("first_mismatch_index=1"), "{error}");
+    }
 
     fn core_state() -> ReplState {
         let mut session = Session::bare();
