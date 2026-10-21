@@ -59,6 +59,13 @@ EXPECTED = {
     },
 }
 
+# У цьому джерелі D10 рішення є DEFINE, але не внутрішніми call-site.
+# Перевіряємо справжні визначення, не вигадуємо кількість викликів.
+DEFINED_ONLY = {
+    "advice-all-decision": ("D10", "0001111010"),
+    "advice-decision": ("D10", "0001111101"),
+}
+
 class UkrainianCorpusProjectionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -100,6 +107,19 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
             self.assertEqual(len(rows), 1)
             self.assertEqual(calls[rows[0].ukr], 0,
                              "D10 word does not prove runtime callability")
+
+    def test_d10_advice_ukrainian_definitions_preserve_exact_identity(self):
+        source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
+        definitions = re.findall(r"(?m)^\\s*\\(визначити\\s+([^\\s()]+)", source)
+        self.assertEqual(len(definitions), len(set(definitions)), "повторне визначення D10")
+        for old_name, (domain, bits) in DEFINED_ONLY.items():
+            with self.subTest(name=old_name):
+                rows = self.by_en.get(old_name, [])
+                self.assertEqual(len(rows), 1, "растифіковане D10 ім'я має бути однозначним")
+                row = rows[0]
+                self.assertEqual((row.domain, row.bits), (domain, bits))
+                self.assertIn(row.ukr, definitions, "відсутнє чинне українське DEFINE D10")
+                self.assertNotIn(old_name, definitions, "не повертати англомовне DEFINE")
 
     def test_quoted_data_and_definition_names_remain_distinct(self):
         translation = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
