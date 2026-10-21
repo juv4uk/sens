@@ -312,7 +312,7 @@ mod exact_t5_cutover_tests {
             panic!("D5 addition of two D24 values returns an exact D24 number");
         };
         assert_eq!(number.numeric_domain_width(), Some(24));
-        assert_eq!(number.to_decimal_string(), "3");
+        assert_eq!(number.bits(), "3");
     }
 
     fn physical(source: &str) -> Vec<u8> {
