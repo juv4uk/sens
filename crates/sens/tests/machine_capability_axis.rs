@@ -12,12 +12,20 @@ fn repo_root() -> PathBuf {
         .to_path_buf()
 }
 
+/// Джерельні десяткові числа — лише людська проєкція точних D24+ слів.
+/// Виконує справжній SENS; цитовані протокольні дані лишаються недоторканими.
+fn eval_axis_program(source: &str, session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
+    let parsed = parse(source)?;
+    let exact = sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)?;
+    sens::eval_parsed_expressions(&exact, session)
+}
+
 fn session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must load");
     let source = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis source");
-    eval_program(&source, &mut session).expect("capability axis must load");
+    eval_axis_program(&source, &mut session).expect("capability axis must load");
     session
 }
 
@@ -36,7 +44,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     assert_eq!((car_identity.width(), car_identity.packed_bits()), (3, 0b100));
 
     let mut s = session();
-    let add = eval_program(
+    let add = eval_axis_program(
         &format!(
             "(спроможності-для-домену {} {})",
             add_identity.width(),
@@ -49,7 +57,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     .to_string();
     assert_eq!(add, "((integer-add bounded-u32-inputs u64-result))");
 
-    let car = eval_program(
+    let car = eval_axis_program(
         &format!(
             "(спроможності-для-домену {} {})",
             car_identity.width(),
@@ -62,7 +70,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     .to_string();
     assert_eq!(car, "((pair-field-load head bounded-u64))");
 
-    let quoted_shadow = eval_program(
+    let quoted_shadow = eval_axis_program(
         r#"(спроможності-для-домену 5 "01010")"#,
         &mut s,
     )
@@ -91,7 +99,7 @@ fn numeric_coordinates_match_the_current_quoted_d24_source_in_real_sens() {
         ("(можливість-знайти-рядок-домену 5 10 вісь-спроможностей-машини-версія-3)",
             "(5 10 ((integer-add bounded-u32-inputs u64-result)))"),
     ] {
-        let actual = eval_program(source, &mut s)
+        let actual = eval_axis_program(source, &mut s)
             .unwrap_or_else(|error| panic!("SENS numeric coordinate source={source} error={error}"))
             .value.to_string();
         assert_eq!(actual, expected, "SENS numeric coordinate source={source}");
@@ -103,14 +111,14 @@ fn packed_bits_do_not_cross_domain_widths() {
     let mut s = session();
 
     assert_eq!(
-        eval_program("(спроможності-для-домену 5 10)", &mut s)
+        eval_axis_program("(спроможності-для-домену 5 10)", &mut s)
             .expect("D5:01010 PLUS")
             .value
             .to_string(),
         "((integer-add bounded-u32-inputs u64-result))"
     );
     assert_eq!(
-        eval_program("(спроможності-для-домену 4 10)", &mut s)
+        eval_axis_program("(спроможності-для-домену 4 10)", &mut s)
             .expect("D4:1010 LOOKUP must not inherit PLUS")
             .value
             .to_string(),
@@ -118,14 +126,14 @@ fn packed_bits_do_not_cross_domain_widths() {
     );
 
     assert_eq!(
-        eval_program("(спроможності-для-домену 5 11)", &mut s)
+        eval_axis_program("(спроможності-для-домену 5 11)", &mut s)
             .expect("D5:01011 DIFFERENCE")
             .value
             .to_string(),
         "((integer-subtract bounded-u64 no-underflow))"
     );
     assert_eq!(
-        eval_program("(спроможності-для-домену 4 11)", &mut s)
+        eval_axis_program("(спроможності-для-домену 4 11)", &mut s)
             .expect("D4:1011 BIND must not inherit DIFFERENCE")
             .value
             .to_string(),
@@ -133,14 +141,14 @@ fn packed_bits_do_not_cross_domain_widths() {
     );
 
     assert_eq!(
-        eval_program("(спроможності-для-домену 5 8)", &mut s)
+        eval_axis_program("(спроможності-для-домену 5 8)", &mut s)
             .expect("D5:01000 ZEROP")
             .value
             .to_string(),
         "((integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary))"
     );
     assert_eq!(
-        eval_program("(спроможності-для-домену 4 8)", &mut s)
+        eval_axis_program("(спроможності-для-домену 4 8)", &mut s)
             .expect("D4:1000 CAAR must not inherit ZEROP")
             .value
             .to_string(),
@@ -149,28 +157,28 @@ fn packed_bits_do_not_cross_domain_widths() {
 
 
     assert_eq!(
-        eval_program("(спроможності-для-домену 6 14)", &mut s)
+        eval_axis_program("(спроможності-для-домену 6 14)", &mut s)
             .expect("D6:001110 ADD1")
             .value
             .to_string(),
         "((integer-increment bounded-u64 no-overflow))"
     );
     assert_eq!(
-        eval_program("(спроможності-для-домену 5 14)", &mut s)
+        eval_axis_program("(спроможності-для-домену 5 14)", &mut s)
             .expect("D5:01110 selector must not inherit D6 ADD1")
             .value
             .to_string(),
         "()"
     );
     assert_eq!(
-        eval_program("(спроможності-для-домену 6 15)", &mut s)
+        eval_axis_program("(спроможності-для-домену 6 15)", &mut s)
             .expect("D6:001111 SUB1")
             .value
             .to_string(),
         "((integer-decrement bounded-u64 no-underflow))"
     );
     assert_eq!(
-        eval_program("(спроможності-для-домену 5 15)", &mut s)
+        eval_axis_program("(спроможності-для-домену 5 15)", &mut s)
             .expect("D5:01111 selector must not inherit D6 SUB1")
             .value
             .to_string(),
@@ -199,7 +207,7 @@ fn machine_capability_shapes_use_real_sens_d1_truth_and_falsehood() {
             "(за-умовою ({predicate} (як-є допустимо)) \
              ((атом? (як-є ())) (як-є відхилено)))"
         );
-        let actual = eval_program(&code, &mut s)
+        let actual = eval_axis_program(&code, &mut s)
             .unwrap_or_else(|e| panic!("SENS не виконав {predicate}: {e}"))
             .value
             .to_string();
@@ -254,14 +262,14 @@ fn unsupported_targets_are_explicitly_unwitnessed() {
 
     for target in ["arm64", "risc-v", "fpga"] {
         let expression = format!("(статус-свідка-цілі-машини (як-є {target}))");
-        let value = eval_program(&expression, &mut s)
+        let value = eval_axis_program(&expression, &mut s)
             .expect("target status lookup")
             .value
             .to_string();
         assert_eq!(value, "absent");
     }
 
-    let x86 = eval_program(
+    let x86 = eval_axis_program(
         "(статус-свідка-цілі-машини (як-є x86-64))",
         &mut s,
     )
