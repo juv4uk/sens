@@ -156,11 +156,11 @@ fn parse_exact_domain_words(words: &[ExactDomainWord]) -> Result<Vec<Expr>, Lang
         let word = words
             .get(index)
             .ok_or_else(|| error("expected an exact SENS domain word", index))?;
-        if depth > 768 {
+        if depth > 128 {
             return Err(error("exact D2 nesting exceeds AST depth limit", index));
         }
         if d2(word, OPEN) {
-            return parse_list(words, cursor, depth + 1);
+            return parse_list(words, cursor, depth);
         }
         if matches!(word, ExactDomainWord::Identity(D2(_))) {
             return Err(error(
@@ -300,6 +300,60 @@ pub fn eval_t5_program(
 mod exact_t5_cutover_tests {
     use super::*;
     use crate::{encode_ternary_words, parse_binary_source_words, ExprKind};
+
+    // Д2 має один закон вкладеності у текстовому та відновленому
+    // з Zig/T5M exact-domain readers. Жодного другого parser-ліміту.
+    #[test]
+    fn д2_фізичний_і_канонічний_читачі_збігаються_для_всіх_чотирьох_маркерів() {
+        fn physical_read(source: &str) -> Result<Vec<Expr>, LanguageError> {
+            let words = parse_binary_source_words(source)
+                .expect("valid exact-width words")
+                .into_iter()
+                .map(|token| ExactDomainWord::identity(
+                    DomainIdentity::from_source_word(token.word)
+                ))
+                .collect::<Vec<_>>();
+            parse_exact_domain_words(&words)
+        }
+
+        for source in [
+            "10 01",
+            "10 001 00 100 01",
+            "10 100 11 111 01",
+            "10 100 00 111 11 000 01",
+            "10 10 100 11 111 01 00 000 01",
+            "00 10 100 00 111 01 00",
+        ] {
+            let canonical = crate::parse_canonical_binary(source)
+                .expect("exact D2 canonical read");
+            let physical = physical_read(source)
+                .expect("same exact D2 structure after T5M restoration");
+            assert_eq!(physical.len(), canonical.len(), "{source}");
+            for (left, right) in physical.iter().zip(canonical.iter()) {
+                assert_eq!(format!("{:?}", left.kind), format!("{:?}", right.kind),
+                    "D2 AST mismatch: {source}");
+            }
+        }
+        for source in [
+            "01", "11", "10 11 100 01", "10 100 11 01",
+            "10 100 11 111 00 000 01", "10 100 00 01 01",
+            "10 100", "10 100 11 111",
+        ] {
+            assert!(crate::parse_canonical_binary(source).is_err(),
+                "canonical reader cannot admit malformed D2: {source}");
+            assert!(physical_read(source).is_err(),
+                "Zig-restored reader cannot admit malformed D2: {source}");
+        }
+
+        for depth in [1usize, 16, 64, 128, 130] {
+            let source = format!("{}001{}", "10 ".repeat(depth), " 01".repeat(depth));
+            let canonical = crate::parse_canonical_binary(&source);
+            let physical = physical_read(&source);
+            assert_eq!(canonical.is_ok(), physical.is_ok(),
+                "D2 nesting policy diverged at depth={depth}");
+            assert_eq!(physical.is_ok(), depth <= 128);
+        }
+    }
 
     #[test]
     fn zig_restored_exact_t5m_d24_words_execute_as_binary_sens() {
