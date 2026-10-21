@@ -4,6 +4,7 @@
 //! provider identity, new SID, or Rust Value variant.
 
 use sens::{eval_program, load_core_library, Session};
+use std::{io::{Read, Write}, net::TcpListener, thread, time::Duration};
 
 fn eval_probabilistic_decision(source: &str) -> String {
     let mut session = Session::default();
@@ -466,4 +467,92 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
         eval_probabilistic_decision(invalid_batches),
         "(invalid invalid invalid)"
     );
+
+    // Перевіряємо зовнішній механізм на фіктивній локальній моделі.
+    // Адаптер повертає розподіл і походження; рішення залишається за SENS.
+    let listener = TcpListener::bind(("127.0.0.1", 0)).expect("bind loopback fixture");
+    let port = listener.local_addr().expect("fixture address").port();
+    let fixture = thread::spawn(move || {
+        let (mut stream, _) = listener.accept().expect("accept model request");
+        stream
+            .set_read_timeout(Some(Duration::from_secs(5)))
+            .expect("set fixture read timeout");
+        let mut request = Vec::new();
+        let mut chunk = [0_u8; 4096];
+        loop {
+            let received = stream.read(&mut chunk).expect("read HTTP request");
+            assert!(received > 0, "client closed before complete HTTP request");
+            request.extend_from_slice(&chunk[..received]);
+            if let Some(header_end) = request.windows(4).position(|w| w == b"\r\n\r\n") {
+                let headers = String::from_utf8_lossy(&request[..header_end]);
+                let length: usize = headers
+                    .lines()
+                    .find_map(|line| {
+                        let (name, value) = line.split_once(':')?;
+                        name.eq_ignore_ascii_case("content-length")
+                            .then(|| value.trim().parse().ok())
+                            .flatten()
+                    })
+                    .expect("Content-Length");
+                if request.len() >= header_end + 4 + length {
+                    request.truncate(header_end + 4 + length);
+                    break;
+                }
+            }
+        }
+        let payload = r#"{"choices":[{"logprobs":{"content":[{"top_logprobs":[{"token":"A","logprob":0.0},{"token":"B","logprob":-2.1972245773362196}]}]}}]}"#;
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            payload.len(),
+            payload
+        );
+        stream.write_all(response.as_bytes()).expect("write fixture response");
+        String::from_utf8(request).expect("request is UTF-8 JSON")
+    });
+
+    sens_host::install();
+    let endpoint = format!("http://127.0.0.1:{port}/v1/chat/completions");
+    let model_source = format!(
+        r#"
+        (нехай-послідовно
+          ((питання
+             (запитання-вибору-системи-один
+               (як-є маршрут)
+               "Оберіть команду для обробки звернення."
+               (як-є ((оплата "Платіж, рахунок або повернення коштів")
+                       (технічне "Помилка програми або обладнання")))))
+           (сире
+             (модельний-розподіл-вибору-сире
+               "{endpoint}"
+               "fixture-model"
+               "З мене двічі списали кошти за одну покупку."
+               (третє питання)
+               (четверте питання)))
+           (спостереження
+             (спостерегти-вибір-системи-один
+               питання (друге сире) (третє сире))))
+          (список
+            (перше сире)
+            (перше спостереження)
+            (за-умовою
+              ((спостереження-системи-один-для-запитання-допустиме? питання спостереження)
+               (як-є valid))
+              (так (як-є invalid)))
+            (за-умовою
+              ((менше? (четверте спостереження) (частка 1 2))
+               (як-є low))
+              (так (як-є high)))
+            (перше (перше (п'ятий спостереження)))
+            (друге (перше (п'ятий спостереження)))))
+        "#
+    );
+    assert_eq!(
+        eval_probabilistic_decision(&model_source),
+        "(model-distribution/1 choice-observation/1 valid high source local-model)"
+    );
+    let request = fixture.join().expect("fixture server");
+    assert!(request.contains("\"top_logprobs\":20"));
+    assert!(request.contains("\"structured_outputs\":"));
+    assert!(request.contains("\"fixture-model\""));
+
 }
