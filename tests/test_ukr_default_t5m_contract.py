@@ -83,8 +83,12 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         self.assertIn(
             "physical_not_supported=$((physical_not_supported + 1))", runner
         )
+        # Новий журнал рахує три різні факти, не лише D24 unsupported.
         self.assertIn(
-            "physical_not_supported=%s release=NOT_CERTIFIED", runner
+            "physical_not_supported=%s native_view_roundtrip=%s "
+            "native_paired_executed=%s native_standalone_parity=%s "
+            "scope=changed_manifest semantic=NOT_CERTIFIED release=NOT_CERTIFIED",
+            runner,
         )
         self.assertIn(
             "T5M_PHYSICAL_PAIRED_D24_PASS source=$file pair=$pair physical=ZIG_VERIFIED",
