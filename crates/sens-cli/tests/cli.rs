@@ -835,10 +835,10 @@ fn український_скрипт_відбирає_саме_запитан�
     // Додаткова реальна перевірка оболонки друку: файл SENS, а не
     // імітація його побічних ефектів у Rust/Python.
     let print_start = source
-        .find("(визначити надрукувати-відповідні\\n")
+        .find("(визначити надрукувати-відповідні\n")
         .expect("українська Lisp-оболонка друку");
     let print_end = source[print_start..]
-        .find("\\n\\n(надрукувати-відповідні\\n")
+        .find("\n\n(надрукувати-відповідні\n")
         .map(|index| print_start + index)
         .expect("кінець оболонки друку");
     let printer = &source[print_start..print_end];
@@ -847,7 +847,7 @@ fn український_скрипт_відбирає_саме_запитан�
         ("2", "телескоп", "зоря"),
     ] {
         let code = format!(
-            "{selector}\\n{printer}\\n(надрукувати-відповідні (відібрати-приклади-за-рівнем (як-є (((expr . зоря) (tier . 1)) ((expr . телескоп) (tier . 2)))) {level}))\\n"
+            "{selector}\n{printer}\n(надрукувати-відповідні (відібрати-приклади-за-рівнем (як-є (((expr . зоря) (tier . 1)) ((expr . телескоп) (tier . 2)))) {level}))\n"
         );
         let path = std::env::temp_dir().join(format!(
             "sens-ukr-tier-print-{level}-{}.lisp", std::process::id()
