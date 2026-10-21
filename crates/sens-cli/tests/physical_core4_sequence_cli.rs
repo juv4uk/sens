@@ -330,6 +330,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-split-last-occurrence-general",
         "list-swap-adjacent-pairs",
         "list-contiguous-sublist-atoms-general",
+        "list-replace-last-occurrence-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -389,6 +390,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-atom-sequence-equal-general"
                 | "list-split-last-occurrence-general"
                 | "list-swap-adjacent-pairs"
+                | "list-replace-last-occurrence-general"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
