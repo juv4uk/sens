@@ -38,7 +38,19 @@ view="$dir/$name"
 
 # Одна SENS-сесія виконує визначення --binding-source і саму програму.
 # Zig пакує готові слова; Python/JSON у цьому маршруті відсутні.
-if ! timeout 60s "$binary" --t5m-mint-pair "$source_file" "$pair" "${binding_args[@]}" \
+# За відсутності зовнішніх визначень працює нативний --t5m-mint;
+# --t5m-mint-pair призначено для SENS DEFINE із --binding-source.
+# Великий Lisp не повинен помилково ставати RED через 60-секундний timeout.
+source_bytes=$(wc -c < "$source_file")
+native_timeout=45s
+if (( source_bytes >= 262144 )); then
+  native_timeout=180s
+fi
+mint_flag=--t5m-mint
+if (( ${#binding_args[@]} != 0 )); then
+  mint_flag=--t5m-mint-pair
+fi
+if ! timeout "$native_timeout" "$binary" "$mint_flag" "$source_file" "$pair" "${binding_args[@]}" \
   >"$dir/mint.stdout" 2>"$dir/mint.stderr"; then
   cat "$dir/mint.stderr" >&2
   echo 'ПОМИЛКА: T5M_NATIVE_MINT_PAIR_FAILED' >&2
@@ -51,7 +63,7 @@ if [[ ! -s "$pair" || -L "$pair" ]]; then
 fi
 # --t5m-mint-pair створює лише фізичні байти .sens, не бітовий перегляд.
 # Перегляд відкриває той самий нативний Zig/T5M reader; Python не бере участі.
-if ! timeout 45s "$reader" open "$pair" >"$view" 2>"$dir/view.stderr"; then
+if ! timeout "$native_timeout" "$reader" open "$pair" >"$view" 2>"$dir/view.stderr"; then
   cat "$dir/view.stderr" >&2
   echo 'ПОМИЛКА: T5M_NATIVE_VIEW_OPEN_FAILED; пару не змінено' >&2
   exit 2
@@ -62,7 +74,7 @@ if [[ ! -s "$view" || -L "$view" ]]; then
 fi
 # Без справжнього Zig decode/encode і точного same-stem бітового перегляду
 # фізичний носій не може бути опублікований навіть при успішному eval.
-if ! timeout 45s "$reader" verify-view "$pair" >"$dir/inverse.stdout" 2>"$dir/inverse.stderr"; then
+if ! timeout "$native_timeout" "$reader" verify-view "$pair" >"$dir/inverse.stdout" 2>"$dir/inverse.stderr"; then
   cat "$dir/inverse.stderr" >&2
   echo "ПОМИЛКА: T5M_REFRESH_VIEW_ROUNDTRIP_FAILED source=$source_file; пару не змінено" >&2
   exit 2
@@ -70,7 +82,7 @@ fi
 # Парний вхід обов'язковий: Zig звіряє саме джерело з фізичним T5M,
 # а SENS його виконує. Standalone може бути непідтриманим для D7/D24+,
 # але сам по собі не доводить оберненості джерела.
-if ! timeout 45s "$binary" --t5m-pair "$source_file" "$pair" "${binding_args[@]}" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
+if ! timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$pair" "${binding_args[@]}" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
   cat "$dir/paired.stderr" >&2
   echo 'ПОМИЛКА: T5M_PAIRED_SOURCE_EXECUTION_FAIL; пару не змінено' >&2
   exit 2
@@ -78,7 +90,7 @@ fi
 mode=paired
 # Коли standalone також виконується, зіставляємо дійсні результати
 # обох SENS-входів побайтно, не host-оракулом і не лише exit=0.
-if timeout 45s "$binary" "$pair" >"$dir/standalone.stdout" 2>"$dir/standalone.stderr"; then
+if timeout "$native_timeout" "$binary" "$pair" >"$dir/standalone.stdout" 2>"$dir/standalone.stderr"; then
   if ! cmp -s "$dir/standalone.stdout" "$dir/paired.stdout"; then
     echo "ПОМИЛКА: T5M_PAIRED_RESULT_MISMATCH standalone_sha256=$(sha256sum "$dir/standalone.stdout" | cut -d' ' -f1) paired_sha256=$(sha256sum "$dir/paired.stdout" | cut -d' ' -f1); пару не змінено" >&2
     exit 2
