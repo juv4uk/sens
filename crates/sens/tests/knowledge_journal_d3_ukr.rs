@@ -104,6 +104,12 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
         "(як-є (tell))",
         "(як-є (tell alpha))",
         "(як-є (retract alpha))",
+        // Подія з трьома полями не може приховувати четверте або
+        // неправильний крапковий хвіст: це не канонічний журнал.
+        "(як-є (tell alpha запис зайве))",
+        "(як-є (tell alpha запис . пошкоджений-хвіст))",
+        "(як-є (retract alpha запис зайве))",
+        "(як-є (retract alpha запис . пошкоджений-хвіст))",
     ] {
         let expression = format!("(застосувати-одну-подію-журналу {clauses} {malformed})");
         let actual = eval_program(&expression, &mut session)
