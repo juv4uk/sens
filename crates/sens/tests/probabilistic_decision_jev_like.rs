@@ -23,6 +23,11 @@ fn eval_probabilistic_decision(source: &str) -> String {
         &mut session,
     )
     .expect("automatic choice policy should load");
+    eval_program(
+        include_str!("../../../research/probabilistic-decision-system-one-20261022.lisp"),
+        &mut session,
+    )
+    .expect("typed System One contract should load");
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
@@ -316,4 +321,72 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
           (result-status (правило-автоматичного-вибору observation 3/2)))
     "#;
     assert_eq!(eval_probabilistic_decision(invalid_threshold), "invalid");
+}
+
+#[test]
+fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
+    let valid_batch = r#"
+      (let* ((state (quote ((message "double charge") (locale uk))))
+             (choice-question (pd-question-choice (quote route) (quote (billing technical))))
+             (noul-question (pd-question-noul (quote urgent)))
+             (score-question (pd-question-score (quote severity) (quote (low medium high))))
+             (questions (list choice-question noul-question score-question))
+             (request (system-one-запит state questions))
+             (answers
+               (list
+                 (pd-choice-observe choice-question
+                   (quote ((billing 3/4) (technical 1/4)))
+                   (quote ((source synthetic) (question route))))
+                 (pd-noul-observe noul-question 2/3
+                   (quote ((source synthetic) (question urgent))))
+                 (pd-score-observe score-question
+                   (quote ((low 1/4) (medium 1/2) (high 1/4)))
+                   (quote ((source synthetic) (question severity)))))
+             (response (system-one-відповідь request answers)))
+        (list
+          (за-умовою
+            ((перевірити-запит-системи-один? request) (як-є valid))
+            (так (як-є invalid)))
+          (довжина (третє request))
+          (за-умовою
+            ((system-one-відповідь-допустима? response) (як-є valid))
+            (так (як-є invalid)))))
+    "#;
+    assert_eq!(
+        eval_probabilistic_decision(valid_batch),
+        "(valid 3 valid)"
+    );
+
+    let invalid_batches = r#"
+      (let* ((state (quote ((message "double charge"))))
+             (choice-question (pd-question-choice (quote route) (quote (billing technical))))
+             (noul-question (pd-question-noul (quote urgent)))
+             (questions (list choice-question noul-question))
+             (request (system-one-запит state questions))
+             (choice-answer (pd-choice-observe choice-question
+               (quote ((billing 3/4) (technical 1/4)))
+               (quote ((source synthetic))))
+             (noul-answer (pd-noul-observe noul-question 2/3
+               (quote ((source synthetic)))))
+             (missing (system-one-відповідь request (list choice-answer)))
+             (duplicate (system-one-відповідь request (list choice-answer choice-answer)))
+             (duplicate-question-request
+               (system-one-запит state
+                 (list choice-question
+                       (pd-noul-question (quote route))))))
+        (list
+          (за-умовою
+            ((system-one-відповідь-допустима? missing) (як-є valid))
+            (так (як-є invalid)))
+          (за-умовою
+            ((system-one-відповідь-допустима? duplicate) (як-є valid))
+            (так (як-є invalid)))
+          (за-умовою
+            ((перевірити-запит-системи-один? duplicate-question-request) (як-є valid))
+            (так (як-є invalid)))))
+    "#;
+    assert_eq!(
+        eval_probabilistic_decision(invalid_batches),
+        "(invalid invalid invalid)"
+    );
 }
