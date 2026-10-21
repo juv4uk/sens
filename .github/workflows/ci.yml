@@ -534,13 +534,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo build --locked -p sens-cli --bin sens
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit
           binary="$PWD/target/debug/sens"
-          # .lisp — людське джерело, не T5M. Спочатку Zig-мінтинг,
-          # потім точний фізичний .sens у SENS, зі свідками в RUNNER_TEMP.
-          bash scripts/execute_changed_lisp_t5m.sh \
-            "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
-            "$RUNNER_TEMP/changed-t5m-pairs"
+          # SENS reader -> Zig T5M -> фізичний SENS reader -> SENS eval.
+          # Для виконання мови Python/JSON не потрібні; історичний
+          # Python-мігратор тестується окремо лише як допоміжний інструмент.
+          SENS_NATIVE_T5M=1 SENS_T5M_OPEN="$PWD/target/debug/sens-trit" \
+            bash scripts/execute_changed_lisp_t5m.sh \
+              "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
+              "$RUNNER_TEMP/changed-t5m-pairs"
 
       # Свіжі Zig-байти зберігаємо тільки коли CI знайшов розходження,
       # щоб фізичну пару можна було виправити, не копіюючи host-імітацію.
