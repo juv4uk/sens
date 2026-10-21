@@ -1374,6 +1374,35 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
+    fn native_sens_mint_and_pair_execute_without_python_or_json_oracle() {
+        // Один живий SENS reader є владою для обох маршрутів.
+        // Python preview і JSON-маніфест сюди не потрапляють.
+        let source = "(атом? (як-є ()))";
+        let physical = mint_t5m_source_file(source)
+            .expect("SENS має видати фізичний Zig/T5M носій");
+        assert!(!physical.is_empty());
+
+        let from_source = eval_t5m_source_file(source)
+            .expect("SENS оцінює точну українську форму після Zig");
+        let from_pair = eval_t5m_paired_file(source, &physical)
+            .expect("SENS виконує ті самі фізичні слова, не Python-міграцію");
+        assert_eq!(from_source.value.as_predicate_bit(), Some(true));
+        assert_eq!(from_pair.value.as_predicate_bit(), Some(true));
+
+        // Підміна людського джерела за тих самих фізичних байтів є RED.
+        let substituted = "(атом? (як-є (())))";
+        let error = eval_t5m_paired_file(substituted, &physical)
+            .expect_err("джерело і фізичні слова мусять збігатися побітово");
+        assert!(error.contains("T5M_PHYSICAL_PAIR_MISMATCH"), "{error}");
+
+        let mut altered = physical;
+        altered[0] ^= 1;
+        assert!(eval_t5m_paired_file(source, &altered).is_err(),
+            "пошкоджений фізичний носій не повинен виконатися");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
     fn quoted_integer_in_t5m_source_preserves_exact_d24_word() {
         let session = Session::default();
         let words = prepare_t5m_repl_words(
