@@ -228,6 +228,45 @@ class SelectedOriginalT5(unittest.TestCase):
         self.assertEqual(with_preload.counts["pass4-text7-global"], 1)
         self.assertTrue(words.startswith("10 10 "), words)
 
+    def test_reason_imports_real_unification_definition_not_a_fabricated_d9_call(self):
+        # Це лише перевірка точного зіставлення DEFINE -> T5M, не
+        # Python-імітація виконання SENS. Виконання лишається в CI/CLI.
+        migration = app.load_migrator()
+        foundation = migration.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
+        my, upper, _retired = migration.build_three_pass_maps(
+            foundation,
+            ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
+            ROOT / "crates/sens/src/semantic_registry_generated.rs",
+            ROOT / "crates/sens/src/semantic_registry.rs",
+            ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
+        )
+        text7 = migration.build_text7(
+            foundation, ROOT / "knowledge/d7-keyboard-v2-ratified.json")
+        program = "(уніфікувати (як-є a) (як-є a) (як-є ()))\n"
+        with self.assertRaisesRegex(migration.MigrationError, "101010000"):
+            migration.migrate_file(
+                program, migration.Resolver(my, upper), text7,
+                codec="t5m", source_surface="укр",
+            )
+        source = (ROOT / "lib/unify.lisp").read_text(encoding="utf-8")
+        forms = migration.Parser(migration.tokenize(
+            migration.strip_comments(source), source_surface="укр"
+        )).parse_program()
+        binding = migration.collect_global_bindings(
+            forms, migration.Resolver(my, upper)
+        )
+        self.assertIn("уніфікувати", {name for name, _ in binding})
+        resolver = migration.Resolver(my, upper)
+        words = migration.migrate_file(
+            program, resolver, text7, codec="t5m",
+            source_surface="укр", imported_bindings=binding,
+        )
+        self.assertNotIn("101010000", words.split())
+        self.assertEqual(resolver.counts["pass4-text7-global"], 1)
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
+        self.assertIn('binding_sources=(--binding-source lib/unify.lisp)', runner)
+        self.assertIn('"${binding_sources[@]}"', runner)
+
     def test_real_unpaired_original_files_are_audited_not_converted(self):
         # These are tracked old files, not fabricated canaries or newly authored
         # snapshots. They include local binding, Text7 and machine-data issues.
