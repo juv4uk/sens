@@ -202,6 +202,42 @@ fn meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens() {
     }
 }
 
+// Шістнадцять окремих семантичних результатів від живого SENS.
+// Неперевірений статичний Python-збіг не може задовольнити цей тест.
+#[test]
+fn meta_eval_lexical_eight_laws_and_eight_mutants_execute_in_sens() {
+    fn forms(source: &str) -> Vec<&str> {
+        source.lines()
+            .map(str::trim)
+            .filter(|line| !line.is_empty() && !line.starts_with(';'))
+            .collect()
+    }
+    let laws = forms(include_str!("../../../tests/semantic/meta-eval-lexical-shadow-d1-law.lisp"));
+    let mutants = forms(include_str!("../../../tests/semantic/meta-eval-lexical-shadow-d1-mutants.lisp"));
+    let first = forms(include_str!("../../../tests/semantic/meta-eval-lexical-shadow-d1-mutant.lisp"));
+    assert_eq!((laws.len(), mutants.len(), first.len()), (8, 8, 8));
+    assert_eq!(first[0], mutants[0]);
+    assert_eq!(&first[1..], &laws[1..]);
+    let mut session = core_session();
+    sens::load_meta_evaluator_library(&mut session)
+        .expect("живе українське визначення MetaEval");
+    for (index, (law, mutant)) in laws.iter().zip(mutants.iter()).enumerate() {
+        for (case, source, expected) in [("закон", *law, true), ("мутант", *mutant, false)] {
+            let result = eval_program(source, &mut session)
+                .unwrap_or_else(|error| panic!(
+                    "test_id=meta-eval-lexical-shadow-d1 case={} role={case} SENS: {error}",
+                    index + 1
+                ));
+            assert_eq!(
+                result.value.as_predicate_bit(),
+                Some(expected),
+                "test_id=meta-eval-lexical-shadow-d1 case={} role={case} input={source}",
+                index + 1
+            );
+        }
+    }
+}
+
 // D10:0101100100: запускається справжній метаобчислювач SENS,
 // а не Python/Rust реалізація семантики тіл LAMBDA.
 #[test]
