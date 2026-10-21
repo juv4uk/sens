@@ -197,6 +197,17 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
             "((класифікувати-рядкове-значення (переклад-джерело пропозиція))",
             source,
         )
+        # Умови D3 COND не приймають D3 NIL як D1 false:
+        # лише явно перевірений результат D1:1 відкриває гілку.
+        for call in (
+            "вміст-кандидата-перекладу-коректний? вид (перше альтернативи)",
+            "опис-неоднозначності-перекладу-коректний?",
+            "переклад-допустимий? огляд",
+            "переклад-доказ-вартий? огляд",
+        ):
+            self.assertIn("(тотожне? (" + call, source)
+        self.assertNotIn("((переклад-допустимий? огляд)", source)
+        self.assertNotIn("((переклад-доказ-вартий? огляд)", source)
         self.assertNotIn("(довжина пропозиція)", source)
         self.assertNotIn("(довжина огляд)", source)
         self.assertNotIn("(символ? стан)", source)
