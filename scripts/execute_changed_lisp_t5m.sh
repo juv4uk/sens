@@ -84,13 +84,24 @@ run_native_t5m_program() {
   local committed="$(dirname "$file")/$(basename "$file" .lisp).sens"
   local committed_view="${committed%.sens}"
   local status=0
+  local source_bytes native_timeout
+  source_bytes=$(wc -c < "$file")
+  native_timeout=45s
+  # Реальне core4.lisp має ~0,5 MiB: 45s перериває SENS mint
+  # раніше від результату (CI status=124), не доводячи помилки джерела.
+  # Ліміт лишається кінцевим; лише велике джерело дістає час на
+  # справжній SENS reader → Zig/T5M → обернення → виконання.
+  if (( source_bytes >= 262144 )); then
+    native_timeout=180s
+  fi
+  echo "T5M_NATIVE_BUDGET source=$file bytes=$source_bytes timeout=$native_timeout"
   # Для модулів з DEFINE-залежностями використовуємо новий SENS CLI.
   # Mint і парна перевірка відбуваються з однаковими binding-source.
   local mint_flag=--t5m-mint
   if (( ${#binding_sources[@]} != 0 )); then
     mint_flag=--t5m-mint-pair
   fi
-  if timeout 45s "$binary" "$mint_flag" "$file" "$physical" "${binding_sources[@]}" \
+  if timeout "$native_timeout" "$binary" "$mint_flag" "$file" "$physical" "${binding_sources[@]}" \
       >"$dir/native-mint.stdout" 2>"$dir/native-mint.stderr"; then
     if [[ ! -s "$physical" ]]; then
       echo "::error::T5M_NATIVE_MINT_EMPTY source=$file" >&2
@@ -99,6 +110,9 @@ run_native_t5m_program() {
     fi
   else
     status=$?
+    if (( status == 124 )); then
+      echo "::error::T5M_NATIVE_MINT_TIMEOUT source=$file bytes=$source_bytes timeout=$native_timeout" >&2
+    fi
     sed 's/^/SENS native mint: /' "$dir/native-mint.stderr" >&2
     echo "::error::T5M_NATIVE_MINT_FAILED source=$file status=$status release=NOT_CERTIFIED" >&2
     mark_file_failed
@@ -107,7 +121,7 @@ run_native_t5m_program() {
 
   # Той самий Zig-носій відкривається незалежним фізичним reader.
   # Це точний бітовий перегляд, не повторний парсинг Python/JSON.
-  if timeout 45s "$native_open" open "$physical" >"$view" 2>"$dir/native-view.stderr"; then
+  if timeout "$native_timeout" "$native_open" open "$physical" >"$view" 2>"$dir/native-view.stderr"; then
     if [[ ! -s "$view" ]]; then
       echo "::error::T5M_NATIVE_VIEW_EMPTY source=$file" >&2
       mark_file_failed
@@ -121,7 +135,7 @@ run_native_t5m_program() {
     return
   fi
   # Байтове обернення Zig T5M та канонічного бітового перегляду D24+.
-  if timeout 45s "$native_open" verify-view "$physical" \
+  if timeout "$native_timeout" "$native_open" verify-view "$physical" \
       >"$dir/native-inverse.stdout" 2>"$dir/native-inverse.stderr"; then
     :
   else
@@ -155,10 +169,10 @@ run_native_t5m_program() {
   fi
 
   # Критичний доказ — реальне парне виконання фізичних Zig-байтів.
-  if timeout 45s "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
+  if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
       >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
     native_paired_executed_paths["$file"]=1
-    if timeout 45s "$binary" "$physical" \
+    if timeout "$native_timeout" "$binary" "$physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       if ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
         echo "::error::T5M_NATIVE_EXECUTION_OUTPUT_DRIFT source=$file" >&2
