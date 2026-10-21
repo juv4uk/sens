@@ -58,9 +58,9 @@
     }
   },
   "current_authority_snapshot": {
-    "d1_d9_foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d1_d9_foundation_blob_sha": "bed8c18752384c86e582f61f6c497686009e551b",
     "d10_inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
-    "d3_table_blob_sha": "55b837d05a5772a65c89c6c0d5a8305d2db34256",
+    "d3_table_blob_sha": "00a5ab5dbb89e364e31e47cbae5199e978a8d775",
     "d10_selected": 625,
     "d10_ratified": 0
   },
