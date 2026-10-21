@@ -151,6 +151,35 @@ fn core_sublis_and_maplist_execute_in_sens_without_host_oracle() {
 }
 
 
+// Живий SENS-метаобчислювач: атомарні мітки даних і справжні
+// складені замикання мають повертати біт D1, не Lisp-символ "так"/"ні".
+#[test]
+fn meta_eval_predicates_are_actual_d1_bits() {
+    let mut session = core_session();
+    sens::load_meta_evaluator_library(&mut session)
+        .expect("чинний український MetaEval має виконуватися в SENS");
+    let cases = [
+        ("(це-макрос? (як-є приклад))", false),
+        ("(це-макрос? (як-є (macro приклад)))", true),
+        ("(це-замикання? (як-є приклад))", false),
+        ("(це-замикання? (як-є (closure приклад)))", true),
+        ("(це-рекурсивне-замикання? (як-є приклад))", false),
+        ("(це-рекурсивне-замикання? (як-є (recursive-closure приклад)))", true),
+        ("(лямбда-має-параметр-залишку? (як-є ()))", false),
+        ("(лямбда-має-параметр-залишку? (як-є (x y)))", false),
+        ("(лямбда-має-параметр-залишку? (як-є залишок))", true),
+    ];
+    for (source, expected) in cases {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS-виконання {source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "meta-eval повинен повернути саме D1: {source}",
+        );
+    }
+}
+
 // D10:0101100100: запускається справжній метаобчислювач SENS,
 // а не Python/Rust реалізація семантики тіл LAMBDA.
 #[test]
