@@ -2,7 +2,7 @@
 //! The translator may propose versioned Lisp data; only Lisp validation and
 //! the existing advice boundary decide whether knowledge is admissible.
 
-use sens::{eval_program, parse, Session};
+use sens::{eval_parsed_expressions, parse, parse_mixed_exact_domain, Session};
 
 fn eval_translation(source: &str) -> String {
     let mut session = Session::default();
@@ -15,9 +15,16 @@ fn eval_translation(source: &str) -> String {
         include_str!("../../../lib/result-status.lisp"),
         include_str!("../../../lib/translation.lisp"),
     ] {
-        eval_program(library, &mut session).unwrap();
+        let forms = parse_mixed_exact_domain(library)
+            .expect("чинний доменний SENS reader");
+        eval_parsed_expressions(&forms, &mut session)
+            .expect("чинна бібліотека виконується SENS");
     }
-    eval_program(source, &mut session)
+    eval_parsed_expressions(
+        &parse_mixed_exact_domain(source)
+            .unwrap_or_else(|error| panic!("чинний D1–D10 reader: {error}; source: {source}")),
+        &mut session,
+    )
         .unwrap_or_else(|e| panic!("translation evaluation failed: {e}\nsource: {source}"))
         .value
         .to_string()
@@ -222,7 +229,10 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
         include_str!("../../../lib/result-status.lisp"),
         include_str!("../../../lib/translation.lisp"),
     ] {
-        eval_program(library, &mut session).expect("чинна бібліотека SENS");
+        let forms = parse_mixed_exact_domain(library)
+            .expect("чинний доменний SENS reader");
+        eval_parsed_expressions(&forms, &mut session)
+            .expect("чинна бібліотека SENS");
     }
     for (expression, expected) in [
         ("(як-є candidate)", true),
@@ -232,7 +242,11 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
         ("(як-є (candidate))", false),
     ] {
         let source = format!("(переклад-внутрішній-символ? {expression})");
-        let actual = eval_program(&source, &mut session)
+        let actual = eval_parsed_expressions(
+            &parse_mixed_exact_domain(&source)
+                .unwrap_or_else(|error| panic!("{source}: {error}")),
+            &mut session,
+        )
             .unwrap_or_else(|error| panic!("{source}: {error}")).value;
         assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
     }
@@ -250,7 +264,10 @@ fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
         include_str!("../../../lib/result-status.lisp"),
         include_str!("../../../lib/translation.lisp"),
     ] {
-        eval_program(library, &mut session).expect("чинна бібліотека SENS");
+        let forms = parse_mixed_exact_domain(library)
+            .expect("чинний доменний SENS reader");
+        eval_parsed_expressions(&forms, &mut session)
+            .expect("чинна бібліотека SENS");
     }
     for (value, expected) in [
         ("(а б в г ґ)", true),
@@ -261,7 +278,11 @@ fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
         ("(а б в г . ґ)", false),
     ] {
         let source = format!("(переклад-рівно-п'ять-полів? (як-є {value}))");
-        let actual = eval_program(&source, &mut session)
+        let actual = eval_parsed_expressions(
+            &parse_mixed_exact_domain(&source)
+                .unwrap_or_else(|error| panic!("{source}: {error}")),
+            &mut session,
+        )
             .unwrap_or_else(|error| panic!("{source}: {error}")).value;
         assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
     }
