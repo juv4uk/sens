@@ -774,12 +774,12 @@ jobs:
           fi
           # Чинний D2 Lisp: реальний SENS-декодер для вкладених і крапкових пар.
           # Запуск тільки за зміною конкретного джерела, тесту або цього CI.
-          if grep -Eq '^(lib/codec-d2\.lisp|crates/sens/tests/codec_in_sens\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
+          if grep -Eq '^(lib/codec-d2\.lisp|crates/sens/tests/codec_in_sens\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)
           fi
-          # D10 міст: справжня SENS-семантика без D5 value-call.
-          if grep -Eq '^(lib/bridge/prolog-to-datalog\.lisp|crates/sens/tests/prolog_bridge_current_d4\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test prolog_bridge_current_d4 -- --nocapture
+      - name: Реальний SENS — точна двопольова форма правил виведення
+ "$changed"; then
+            python3 -m unittest tests.test_code_runs.CodecUkrProjectionTests -v
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
           fi
       - name: Реальний SENS — точна двопольова форма правил виведення
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
