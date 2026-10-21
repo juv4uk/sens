@@ -635,6 +635,10 @@ jobs:
           python3 -m unittest tests/test_contract_lisp_data_structure.py -v
           # Точні D6/D8 виклики: цитовані біти й коментарі — дані, не псевдовиклики.
           python3 -m unittest tests/test_sid8_broad_source_cutover.py -v
+          # Структурний доказ збереження українських D3/D4 законів, у т.ч.
+          # негативний мутант прямого D9 селектора четвертого слова.
+          # Це не заміняє фактичний SENS-eval у LISP-TIER.
+          python3 -m unittest tests/test_understand_exact_d3_2046.py -v
           python3 -m unittest tests/test_ukr_narrate_peers.py -v
           python3 -m unittest tests/test_ukr_lib_peers.py -v
           python3 -m unittest tests/test_ukr_verify_repo_domain_calls.py -v
