@@ -100,6 +100,28 @@ fn typed_native_operands_use_named_sens_execution_not_anonymous_d5_value_call() 
 }
 
 #[test]
+fn typed_native_operands_reject_short_long_and_dotted_shapes_before_lowering() {
+    // Справжній Lisp/SENS: malformed типи не досягають lowering і
+    // не набувають допустимості лише через текстове ім'я u64-imm.
+    let mut s = session();
+    for (left, right) in [
+        ("(u64-imm)", "(u64-imm 2)"),
+        ("(u64-imm 1)", "(u64-imm)"),
+        ("(u64-imm 1 зайве)", "(u64-imm 2)"),
+        ("(u64-imm 1)", "(u64-imm 2 зайве)"),
+        ("(u64-imm 1 . хвіст)", "(u64-imm 2)"),
+        ("(u64-imm 1)", "(u64-imm 2 . хвіст)"),
+    ] {
+        let program = format!(
+            "(нативний-план-пари-типізовані-операнди (як-є джерело) (як-є {left}) (як-є {right}))"
+        );
+        let answer = eval(&mut s, &program)
+            .unwrap_or_else(|error| panic!("SENS відхиляє неповний операнд: {program}: {error}"));
+        assert_eq!(answer.to_string(), "(evaluator-fallback джерело)", "{program}");
+    }
+}
+
+#[test]
 fn no_coercion_from_empty_list_or_numeric_one_into_d1() {
     let mut s = session();
     for source in ["(хибне? (як-є ()))", "(хибне? 1)"] {
