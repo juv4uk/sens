@@ -14,6 +14,7 @@ test -f "$manifest"
 mkdir -p "$outdir"
 failed_files=0
 checked_files=0
+physical_not_supported=0
 while IFS= read -r file || [[ -n "$file" ]]; do
   [[ -n "$file" ]] || continue
   checked_files=$((checked_files + 1))
@@ -121,6 +122,7 @@ PY
     # український Lisp → доменна проєкція → Zig T5M → SENS.
     if grep -Fq 'точні ширини слів [24]' "$stderr" &&
        grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$stderr"; then
+      physical_not_supported=$((physical_not_supported + 1))
       echo "::warning::T5M_PHYSICAL_D24_NOT_EXECUTED source=$file pair=$pair status=$status release=NOT_CERTIFIED"
       if timeout 45s "$binary" --t5m-file "$file" >"$stdout" 2>"$stderr"; then
         result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
@@ -139,7 +141,8 @@ PY
     continue
   fi
 done < "$manifest"
-printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s release=NOT_CERTIFIED\n' "$checked_files" "$failed_files"
+printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s physical_not_supported=%s release=NOT_CERTIFIED\n' \
+  "$checked_files" "$failed_files" "$physical_not_supported"
 if (( failed_files > 0 )); then
   exit 2
 fi
