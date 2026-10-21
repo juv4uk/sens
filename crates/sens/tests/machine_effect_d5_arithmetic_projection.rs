@@ -290,6 +290,26 @@ fn memory_operand_three_fields_are_checked_before_acceptance() {
 }
 
 #[test]
+fn machine_effect_shape_predicates_use_live_exact_d1_not_legacy_true_false() {
+    // Позитивні й негативні свідки обчислює справжній SENS evaluator.
+    // «так»/«ні» без зв'язування більше не можуть маскувати D1-семантику.
+    let mut session = machine_session();
+    for (source, expected) in [
+        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))", true),
+        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-mul 2 3)))", false),
+        ("(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-sub 5 3)))", true),
+        ("(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-add 5 3)))", false),
+        ("(машинний-ефект-форма-множення-64? (як-є (bounded-u64-mul 4 6)))", true),
+        ("(машинний-ефект-форма-множення-64? (як-є ()))", false),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|err| panic!("{source}: {err}"))
+            .value;
+        assert_eq!(value.as_predicate_bit(), Some(expected), "{source}");
+    }
+}
+
+#[test]
 fn bounded_effect_source_keeps_exact_d1_controls() {
     // #5360: застаріла масова міграція не має повертати числове 1 чи історичне t у D3 COND.
     let text = read("lib/machine/effects/u64.lisp");
