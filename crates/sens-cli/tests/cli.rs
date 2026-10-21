@@ -530,6 +530,42 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
     assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "(())");
 }
 
+/// Структурна перевірка не є семантичним свідком: беремо саме визначення
+/// з поточного lib/result-status.lisp та запускаємо його живим Zig/SENS.
+#[test]
+fn t5m_file_mode_executes_current_result_status_d1_predicates() {
+    let source = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"), "/../../lib/result-status.lisp"
+    )).expect("current Ukrainian result-status Lisp");
+    let start = source.find("(визначити результат-є-правильним-списком?")
+        .expect("current exact SENS definition");
+    let end = source[start..].find("\\n; Історичний заперечний")
+        .map(|offset| start + offset)
+        .expect("end of SENS predicate");
+    let definition = &source[start..end];
+    let cases = [
+        ("(результат-є-правильним-списком? (як-є ()))", "1"),
+        ("(результат-є-правильним-списком? (сполучити (як-є ()) (як-є ())))", "1"),
+        ("(результат-є-правильним-списком? (сполучити (як-є ()) (атом? (як-є ()))))", "0"),
+    ];
+    for (index, (expression, expected)) in cases.iter().enumerate() {
+        let file = std::env::temp_dir().join(format!(
+            "sens-result-d1-live-{}-{index}.lisp", std::process::id()
+        ));
+        std::fs::write(&file, format!("{definition}\\n{expression}\\n"))
+            .expect("real SENS program");
+        let output = sens()
+            .args(["--t5m-file", file.to_str().expect("UTF-8 path")])
+            .output()
+            .expect("real Zig T5M / SENS");
+        let _ = std::fs::remove_file(file);
+        assert!(output.status.success(),
+            "SENS D1 {expression}: {}", String::from_utf8_lossy(&output.stderr));
+        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), *expected,
+            "SENS D1 predicate {expression}");
+    }
+}
+
 #[test]
 fn t5m_file_mode_executes_the_changed_ukrainian_source_through_the_physical_route() {
     let path = std::env::temp_dir().join(format!("sens-cli-t5m-file-{}.lisp", std::process::id()));
