@@ -1322,6 +1322,73 @@ fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
     }
 }
 
+fn render_repl_ast(source: &str) -> Result<String, String> {
+    let forms = sens::parse_mixed_exact_domain(source).map_err(|error| error.render(source))?;
+    if forms.is_empty() {
+        return Ok("Порожній ввід — форм для показу немає.".into());
+    }
+
+    let mut lines = Vec::new();
+    for (index, form) in forms.iter().enumerate() {
+        lines.push(format!("Форма {}", index + 1));
+        render_repl_ast_node(source, form, 1, &mut lines);
+    }
+    Ok(lines.join("\n"))
+}
+
+fn render_repl_ast_node(source: &str, expression: &Expr, depth: usize, lines: &mut Vec<String>) {
+    let indent = "  ".repeat(depth);
+    let excerpt = source
+        .get(expression.span.start..expression.span.end)
+        .unwrap_or("");
+    match &expression.kind {
+        ExprKind::List(items) => {
+            lines.push(format!("{indent}Список ({} елементів)", items.len()));
+            for item in items.iter() {
+                render_repl_ast_node(source, item, depth + 1, lines);
+            }
+        }
+        ExprKind::Pair(head, tail) => {
+            lines.push(format!("{indent}Пара"));
+            render_repl_ast_node(source, head, depth + 1, lines);
+            render_repl_ast_node(source, tail, depth + 1, lines);
+        }
+        ExprKind::Call(identity, arguments) => {
+            lines.push(format!(
+                "{indent}Виклик резидента {identity:?} ({} аргументів)",
+                arguments.len()
+            ));
+            for argument in arguments.iter() {
+                render_repl_ast_node(source, argument, depth + 1, lines);
+            }
+        }
+        ExprKind::DomainCall(identity, arguments) => {
+            lines.push(format!(
+                "{indent}Доменний виклик {identity:?} ({} аргументів)",
+                arguments.len()
+            ));
+            for argument in arguments.iter() {
+                render_repl_ast_node(source, argument, depth + 1, lines);
+            }
+        }
+        ExprKind::Number(..) => lines.push(format!("{indent}Число: {excerpt}")),
+        ExprKind::Rational(..) => lines.push(format!("{indent}Дріб: {excerpt}")),
+        ExprKind::BinaryNumber(..) => lines.push(format!("{indent}Двійкове число: {excerpt}")),
+        ExprKind::NumericBuffer(..) => lines.push(format!("{indent}Числовий буфер: {excerpt}")),
+        ExprKind::Sid(identity) => {
+            lines.push(format!("{indent}Історична identity {identity:?}: {excerpt}"));
+        }
+        ExprKind::DomainIdentity(identity) => {
+            lines.push(format!("{indent}Доменна identity {identity:?}: {excerpt}"));
+        }
+        ExprKind::String(..) => lines.push(format!("{indent}Рядок: {excerpt}")),
+        ExprKind::Symbol(..) => lines.push(format!("{indent}Символ: {excerpt}")),
+        ExprKind::Local { depth, index } => {
+            lines.push(format!("{indent}Локальний слот: depth={depth}, index={index}"));
+        }
+    }
+}
+
 /// `~/.sens-history`, якщо home directory доступний.
 pub(crate) fn history_path() -> Option<PathBuf> {
     let home = env::var_os("HOME").or_else(|| env::var_os("USERPROFILE"))?;
@@ -1329,6 +1396,7 @@ pub(crate) fn history_path() -> Option<PathBuf> {
 }
 
 fn print_surface_help() {
+    println!("Показати дерево розбору без виконання: :розбір <форма>");
     println!("Поверхні: :мова ук | укр | en | sa | LISP | core");
     println!("Технічний alias: :surface ук | укр | en | sa | LISP | core");
     println!("Каталог поточної людської поверхні: :імена / :names");
@@ -1411,6 +1479,22 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
         }
         ":допомога" | ":help" => {
             print_surface_help();
+            true
+        }
+        ":розбір" => {
+            let source = line
+                .trim_start()
+                .strip_prefix(command)
+                .unwrap_or("")
+                .trim_start();
+            if source.is_empty() {
+                eprintln!("Використання: :розбір <форма>");
+            } else {
+                match render_repl_ast(source) {
+                    Ok(output) => println!("{output}"),
+                    Err(error) => eprintln!("Помилка розбору SENS:\n{error}"),
+                }
+            }
             true
         }
         _ => false,
@@ -1533,6 +1617,23 @@ mod tests {
             "мама",
             "unrelated error"
         ));
+    }
+
+    #[test]
+    fn repl_parse_preview_renders_nested_ast_and_source_syntax_errors() {
+        let source = "(атом? (як-є ()))";
+        let rendered = render_repl_ast(source).expect("валідна форма має показати AST");
+
+        assert!(rendered.contains("Форма 1"), "{rendered}");
+        assert!(rendered.contains("Список"), "{rendered}");
+        assert!(rendered.contains("Доменна identity"), "{rendered}");
+        assert!(rendered.contains("атом?"), "{rendered}");
+
+        let invalid = "(атом?";
+        let error = render_repl_ast(invalid).expect_err("незакрита форма має показати помилку");
+        assert!(error.contains("line/riadok/Zeile 1:"), "{error}");
+        assert!(error.contains(invalid), "{error}");
+        assert!(error.contains('^'), "{error}");
     }
 
     #[test]
