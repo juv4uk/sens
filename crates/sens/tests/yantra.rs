@@ -347,6 +347,43 @@ fn yantra_blocked_transport_is_not_a_completed_answer() {
 }
 
 #[test]
+fn yantra_named_json_readers_preserve_present_missing_and_empty_values_in_live_sens() {
+    // Справжній SENS виконує іменовані Lisp-функції після заміни
+    // D5 value-call. Очікування також обчислюємо SENS, а не Python/Rust.
+    let mut session = agent_session();
+    for (source, oracle) in [
+        (
+            "(знайти-значення-за-ключем (як-є ключ) (як-є ((ключ . значення))))",
+            "(як-є значення)",
+        ),
+        (
+            "(знайти-значення-за-ключем (як-є відсутній) (як-є ((ключ . значення))))",
+            "(як-є ())",
+        ),
+        (
+            "(зміст-повідомлення-формат-обміну-даними (список (сполучити \"content\" \"сонце\")))",
+            "\"сонце\"",
+        ),
+        (
+            "(зміст-повідомлення-формат-обміну-даними (як-є ()))",
+            "\"\"",
+        ),
+        (
+            "(повідомлення-з-формат-обміну-даними (список (сполучити \"role\" \"user\") (сполучити \"content\" \"сонце\")))",
+            "(список (сполучити (як-є роль) \"user\") (сполучити (як-є зміст) \"сонце\"))",
+        ),
+    ] {
+        let observed = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS не виконав {source}: {error}"))
+            .value;
+        let expected = eval_program(oracle, &mut session)
+            .unwrap_or_else(|error| panic!("SENS не обчислив oracle {oracle}: {error}"))
+            .value;
+        assert_eq!(observed, expected, "Yantra JSON: {source}");
+    }
+}
+
+#[test]
 fn yantra_missing_json_key_is_safe_and_empty() {
     let mut session = agent_session();
     let actual = eval_program(
