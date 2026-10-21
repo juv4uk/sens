@@ -297,7 +297,7 @@ jobs:
           if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Лише змінені T5M інструменти одержують адресний Zig-свідок.
@@ -619,6 +619,23 @@ jobs:
           fi
           test "$(sha256sum "$repair_dir/current.sens" | cut -d' ' -f1)" = "$repaired_sha"
           cmp "$repair_dir/readback" "$repair_dir/current"
+          # Фізичний publisher перевіряється реальним SENS/Zig, без Python/JSON.
+          bash -n scripts/refresh-executed-t5m-pair.sh
+          executed_source="tests/fixtures/.native-t5m-executed-$"
+          trap 'rm -rf "$repair_dir"; rm -f "${executed_source}.lisp" "${executed_source}.sens" "$executed_source"' EXIT
+          printf '(атом? (як-є ()))\n' > "${executed_source}.lisp"
+          bash scripts/refresh-executed-t5m-pair.sh "${executed_source}.lisp" "$PWD/target/debug/sens"
+          test -s "${executed_source}.sens"
+          test -s "$executed_source"
+          "$PWD/target/debug/sens-trit" verify-view "${executed_source}.sens"
+          executed_sha="$(sha256sum "${executed_source}.sens" | cut -d' ' -f1)"
+          printf '(невідома-функція ())\n' > "${executed_source}.lisp"
+          if bash scripts/refresh-executed-t5m-pair.sh "${executed_source}.lisp" "$PWD/target/debug/sens"; then
+            echo "::error::T5M_EXECUTED_REFRESH_BAD_SOURCE_ACCEPTED" >&2
+            exit 1
+          fi
+          test "$(sha256sum "${executed_source}.sens" | cut -d' ' -f1)" = "$executed_sha"
+          echo "T5M_EXECUTED_REFRESH_LIVE_SENS PASS: native mint, paired execution, Zig inverse, negative no-clobber"
           echo "T5M_REPAIR_LIVE_SENS PASS: native mint, pair, replacement, inverse view, negative"
 
       - name: "UTF-8 — справжнє SENS D1 виконання після зміни Lisp"
