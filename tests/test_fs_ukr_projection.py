@@ -23,9 +23,9 @@ EXACT_LAW = """
   (0010 (path)
     ((0010 (decoded)
       (110
-        ((101 (100 decoded) (001 decoded))
+        ((успішно-декодовано? decoded)
          (1001 decoded))
-        (#d1:1
+        ((010 (001 ()))
          decoded)))
      (read-file-utf8-raw path))))
 (0011 write-file
@@ -34,7 +34,7 @@ EXACT_LAW = """
 """
 
 REQUIRED = {
-    "001": "як-є", "100": "перше", "101": "тотожне?",
+    "001": "як-є", "010": "атом?", "100": "перше", "101": "тотожне?",
     "110": "за-умовою", "1001": "друге", "1110": "список",
     "0010": "функція", "0011": "визначити",
 }
@@ -71,10 +71,6 @@ def parse(source: str):
 
 def old_identity(node):
     if not isinstance(node, list):
-        if node == "так":
-            return "#d1:1"
-        if node == "ознака-успішного-декодування":
-            return ["001", "decoded"]
         return {"шлях": "path", "декодоване": "decoded", "текст": "text",
                 "читати-файл": "read-file", "записати-файл": "write-file",
                 "читати-сирий-текст-файла": "read-file-utf8-raw",
@@ -137,7 +133,8 @@ class FsUkrProjectionTests(unittest.TestCase):
         self.assertNotIn("#d1:1", code)
         self.assertEqual(code.count("(визначити "), 2)
         self.assertEqual(code.count("(функція "), 3)
-        self.assertIn("(так", code)
+        self.assertIn("((атом? (як-є ()))", code)
+        self.assertNotIn("(так", code)
 
     def test_host_io_boundary_and_public_ukr_names(self):
         for literal in ("(визначити читати-файл", "(визначити записати-файл",
@@ -152,8 +149,8 @@ class FsUkrProjectionTests(unittest.TestCase):
 
     def test_negative_wrong_operation_or_d1_semantics(self):
         for changed in (
-            self.source.replace("(тотожне?", "(сполучити", 1),
-            self.source.replace("(так", "(ні", 1),
+            self.source.replace("(успішно-декодовано?", "(атом?", 1),
+            self.source.replace("(атом? (як-є ()))", "(атом? (як-є (())))", 1),
             self.source.replace("(визначити читати-файл", "(функція читати-файл", 1),
             self.source.replace("читати-сирий-текст-файла", "читати-файл-байти", 1),
         ):
@@ -172,7 +169,7 @@ class FsUkrProjectionTests(unittest.TestCase):
 
     def test_negative_wrong_domain_word_or_malformed_file(self):
         with self.assertRaises(AssertionError):
-            verify(self.source.replace("(перше", "(00000101", 1))
+            verify(self.source.replace("(друге", "(1001", 1))
         with self.assertRaises(ValueError):
             parse("(визначити читати-файл (функція (шлях)")
 
