@@ -15,19 +15,45 @@ MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
 
 class UkrainianT5MDefaultContract(unittest.TestCase):
     def test_ci_never_treats_human_lisp_as_physical_t5m(self):
-        # Це контракт маршруту, а НЕ Python-підміна семантики SENS.
+        # Структурний guard чинного шляху: .lisp -> Zig T5M -> фізичний
+        # .sens -> справжній binary SENS. Це НЕ семантичний Python-оракул.
         workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         start = workflow.index(
             "      - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS"
         )
         end = workflow.index("      # Одноразове вимірювання T5M", start)
         execution = workflow[start:end]
-        self.assertIn('python3 scripts/migrate-three-pass.py "$file"', execution)
-        self.assertIn('--codec t5m --source-surface укр', execution)
-        self.assertIn('"$binary" --t5m-file "$physical"', execution)
-        self.assertNotIn('"$binary" --t5m-file "$file"', execution)
-        self.assertIn('T5M_SOURCE_MIGRATION_BLOCKED', execution)
-        self.assertNotIn('T5M_FILE_EXECUTION_EMPTY_RESULT', execution)
+        self.assertIn("bash scripts/execute_changed_lisp_t5m.sh", execution)
+        self.assertIn('"$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt"', execution)
+
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('python3 scripts/migrate-three-pass.py "$file"', runner)
+        self.assertIn('--codec t5m --source-surface укр', runner)
+        self.assertIn('pair="$dir/$(basename "$file" .lisp).sens"', runner)
+        # --t5m-file читає текстовий Lisp (read_to_string); для створеного
+        # фізичного T5M слід викликати окремий .sens ingress, без цього прапорця.
+        self.assertIn('if timeout 45s "$binary" "$pair"', runner)
+        self.assertNotIn('--t5m-file "$pair"', runner)
+        self.assertIn('T5M_COMMITTED_PAIR_DRIFT', runner)
+        self.assertIn('T5M_FILE_EXECUTION_FAIL', runner)
+        cli = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
+        self.assertIn('fs::read_to_string(filename)', cli)
+        self.assertIn('fs::read(filename)', cli)
+
+    def test_changed_executable_lisp_migration_failure_is_not_green(self):
+        # Не видавати пропущене виконання за успішний CI: це борг, а не PASS.
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("  if (( blocked > 0 )); then", runner)
+        blocked_arm = runner.split("  if (( blocked > 0 )); then", 1)[1].split(
+            "  if (( not_program > 0 )); then", 1
+        )[0]
+        self.assertIn("::error::T5M_MIGRATION_UNPROVEN", blocked_arm)
+        self.assertIn("exit 2", blocked_arm)
+        self.assertNotIn("continue", blocked_arm)
 
     def test_default_ukr_preserves_program_identity_not_source_comments(self):
         with tempfile.TemporaryDirectory(prefix="sens-ukr-t5m-default-") as temp:

@@ -171,6 +171,11 @@ fn t5m_file_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     if position != 1 || args.len() != 3 {
         return Some(Err("usage: sens --t5m-file <ukrainian-source.lisp>"));
     }
+    // Фізичні .sens — це байти T5M, не людський Lisp навіть у режимі
+    // --t5m-file. Не дозволяємо обійти двійковий reader текстовим шляхом.
+    if std::path::Path::new(&args[2]).extension().and_then(|ext| ext.to_str()) != Some("lisp") {
+        return Some(Err("--t5m-file accepts only .lisp sources; run physical .sens through the binary entry point"));
+    }
     Some(Ok(args[2].as_str()))
 }
 
@@ -795,6 +800,21 @@ mod core_profile_bootstrap_tests {
     }
 
     #[test]
+    fn t5m_source_mode_requires_ukrainian_lisp_not_physical_bytes() {
+        let admitted = vec!["sens".to_owned(), "--t5m-file".to_owned(), "програма.lisp".to_owned()];
+        assert_eq!(t5m_file_request(&admitted), Some(Ok("програма.lisp")));
+        for invalid in ["програма.sens", "програма.lisp.sens", "програма"] {
+            let args = vec!["sens".to_owned(), "--t5m-file".to_owned(), invalid.to_owned()];
+            assert!(
+                matches!(t5m_file_request(&args), Some(Err(_))),
+                "physical/untyped file must not enter textual Lisp parser: {invalid}"
+            );
+        }
+        let incomplete = vec!["sens".to_owned(), "--t5m-file".to_owned()];
+        assert!(matches!(t5m_file_request(&incomplete), Some(Err(_))));
+    }
+
+    #[test]
     fn explicit_physical_t5_is_a_pure_binary_entrypoint_not_an_alias() {
         let arguments = vec!["sens".to_owned(), "program.sens".to_owned()];
         assert_eq!(physical_t5_request(&arguments), Some(Ok("program.sens")));
@@ -857,9 +877,15 @@ mod core_profile_bootstrap_tests {
         assert_eq!(widths, [2, 3, 2, 3, 2]);
         assert_eq!(bits, [2, 1, 0, 0, 1]);
         assert!(sens::parse_canonical_word_sequence(&words).is_ok());
+        // Не обмежуємося успіхом декодера: саме фізичні байти мають
+        // пройти SENS D2 reader та справжнє виконання D3 QUOTE.
+        let executed = eval_physical_t5(&physical)
+            .expect("physical .sens must execute through the SENS reader/evaluator");
+        assert_eq!(executed.value.to_string(), "()");
         // Malformed physical data must fail before even attempting D2 admission.
         for invalid in [&[0xf3][..], &[0xf2][..], &[0, 0][..]] {
             assert!(decode_physical_t5_words(invalid).is_err(), "invalid {invalid:?}");
+            assert!(eval_physical_t5(invalid).is_err(), "invalid carrier executed: {invalid:?}");
         }
     }
 

@@ -207,7 +207,15 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             if not file.is_file():
                 raise ValueError("physical .sens is not a regular file")
             if not source.is_file():
-                raise ValueError("missing same-stem .lisp source")
+                # A same-stem .bits is the documented binary source of the
+                # canonical physical form (tests/semantic/README.md): a
+                # .bits-backed .sens is not a "missing source" case.
+                bits = root / rel.with_suffix(".bits")
+                if bits.is_file() and not bits.is_symlink():
+                    source = bits
+                    row["source"] = rel.with_suffix(".bits").as_posix()
+                else:
+                    raise ValueError("missing same-stem .lisp source")
             data = file.read_bytes()
             source_bytes = source.read_bytes()
             try:

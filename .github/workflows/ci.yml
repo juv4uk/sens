@@ -215,7 +215,7 @@ jobs:
           fi
 
       - uses: ./.github/actions/install-zig
-        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:') || startsWith(github.event.head_commit.message, 'SI:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -232,6 +232,7 @@ jobs:
           cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
           # Український D24+ обчислювач: позитивний закон і негативний мутант.
           cargo test --locked -p sens --test uk_sa_surface peer_identity_acceptance_ -- --nocapture
+          cargo test --locked -p sens --test unify_occurs_exact_d3 variable_is_exact_proper_two_cell_d3_list -- --exact --nocapture
           # Спершу справжній SENS-eval українського читача:
           # неповні речення та позитивні D3/D4/D9 свідки.
           # Вузький живий D3/D4-свідок перевіряємо першим: сторонній RED
@@ -305,6 +306,14 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@1.99.0
         if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+
+      - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
+        if: steps.changed-t5m-lisp.outputs.has_files == 'true'
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
 
       - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
         if: steps.changed-t5m-lisp.outputs.has_files == 'true'

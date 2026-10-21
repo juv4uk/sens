@@ -57,3 +57,23 @@ fn occurs_check_follows_one_existing_substitution_before_testing_reference() {
         assert_eq!(observed(&mut session, source), expected, "{source}");
     }
 }
+
+#[test]
+fn variable_is_exact_proper_two_cell_d3_list() {
+    // SENS, не Python: неправильний крапковий хвіст і зайве поле
+    // не стають успішною змінною для уніфікації.
+    let mut s = session();
+    for (literal, expected) in [
+        ("(var x)", "1"),
+        ("(var)", "0"),
+        ("(var . x)", "0"),
+        ("(var x . y)", "0"),
+        ("(var x y)", "0"),
+        ("((var x) y)", "0"),
+        ("var", "0"),
+        ("(f x)", "0"),
+    ] {
+        let query = format!("(змінна? (як-є {literal}))");
+        assert_eq!(observed(&mut s, &query), expected, "{query}");
+    }
+}
