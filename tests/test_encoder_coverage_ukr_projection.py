@@ -179,8 +179,8 @@ def verify(text):
             raise AssertionError("зміна ратифікованої проєкції: " + bits)
     # Простий лексичний контроль, НЕ host-виконання SENS:
     # не допускаємо незв'язані так/ні у виконавчих полях.
-    live = re.sub(r';[^\\n]*|"(?:\\\\.|[^"\\\\])*"', " ", text)
-    if re.search(r"(?<![\\w?-])(?:так|ні)(?![\\w?-])", live):
+    live = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"', " ", text)
+    if re.search(r"(?<![\w?-])(?:так|ні)(?![\w?-])", live):
         raise AssertionError("незв'язане D1 так/ні в генераторі")
     heads = list(call_heads(text))
     if not heads:
