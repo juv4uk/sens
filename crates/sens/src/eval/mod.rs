@@ -633,6 +633,23 @@ fn dispatch_call(
         return special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value);
     }
 
+    // One mathematically admitted selector family needs no D10 DEFINE for
+    // each word. Resolve only a *unique owner-ratified Ukrainian head*, then
+    // apply the exact CAR/CDR composition; no English/SID8/JSON shortcut.
+    if let Some(identity) = head_name
+        .and_then(crate::semantic_registry::exact_uk_callable_for_source_head)
+        .filter(|id| matches!(id, crate::DomainIdentity::D10(_))
+            && selector_law::is_selector(*id))
+    {
+        let mut values = Vec::with_capacity(arguments.len());
+        for argument in arguments {
+            values.push(evaluate(argument, environment)?);
+        }
+        return selector_law::invoke(identity, &values, span)
+            .expect("unique ratified D10 selector head")
+            .map(EvalStep::Value);
+    }
+
     if let Some(name) = head_name {
         if let Some(result) =
             capabilities::dispatch_capability(name, arguments, environment, span)

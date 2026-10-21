@@ -173,6 +173,27 @@ mod tests {
     }
 
     #[test]
+    fn one_d10_ukrainian_head_executes_without_a_handwritten_definition() {
+        // Eight nested CONS pairs; the ratified D10:1000000000 selector
+        // is CAR applied eight times. Source spelling comes only from the
+        // canonical `укр` projection of its exact domain coordinate.
+        let identity = identity(10, 0b1000000000);
+        let name = crate::semantic_registry::surface_for_domain_identity(identity, "ukr")
+            .expect("ratified D10 selector has an Ukrainian projection");
+        let mut nested = "(як-є атом?)".to_owned();
+        for _ in 0..8 {
+            nested = format!("(сполучити {nested} (як-є ()))");
+        }
+        let mut session = crate::Session::default();
+        let actual = crate::eval_program(&format!("({name} {nested})"), &mut session)
+            .expect("SENS must execute a generated D10 CAR chain");
+        let mut oracle = crate::Session::default();
+        let expected = crate::eval_program("(як-є атом?)", &mut oracle)
+            .expect("ratified D3 quoted atom");
+        assert_eq!(actual.value, expected.value);
+    }
+
+    #[test]
     fn boundary_rejects_d7_nonselector_and_unsupported_arity() {
         // D7:1000000 must never be treated as an extension of D3 CAR.
         assert!(decode(DomainIdentity::D7(crate::D7DataWord::from_word(
