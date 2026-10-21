@@ -22,9 +22,9 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 164,
+    "total": 167,
     "historical": 15,
-    "library": 149,
+    "library": 152,
     "distinct_families": 25
   },
   "excluded": {
@@ -3634,13 +3634,118 @@
         "not_a_research_placeholder": true,
         "selection_basis": "Чинна SENS-композиція, підтверджений закон і два різні наукові записи в SENS"
       }
+    },
+    {
+      "surface_name": "кодек-д2-додати-префікс",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/codec-d2.lisp",
+        "original_file": "lib/codec-d2.lisp",
+        "blob_sha": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-кодека-д2-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00101110101",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00101110101",
+        "ukr": "кодек-д2-додати-префікс",
+        "source_file": "lib/codec-d2.lisp",
+        "source_blob": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "law": "Зберегти порядок елементів префікса, рекурсивно сполучивши його з продовженням без мутації; порожній префікс повертає продовження.",
+        "native_law_test": "crates/sens/tests/codec_in_sens.rs::d11_кодек_д2_три_допоміжні_закони_у_sens",
+        "native_test_blob": "63586f0bf980a00eca34eebceb518a057932a945",
+        "native_test_result": "NATIVE_SENS_CI_RUNNING",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39691996498",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен"
+      }
+    },
+    {
+      "surface_name": "кодек-д2-декодувати-вузол",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/codec-d2.lisp",
+        "original_file": "lib/codec-d2.lisp",
+        "blob_sha": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-кодека-д2-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00101111001",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00101111001",
+        "ukr": "кодек-д2-декодувати-вузол",
+        "source_file": "lib/codec-d2.lisp",
+        "source_blob": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "law": "Декодувати один D2-вузол, повернувши пару (значення . залишок потоку); правильний список і крапкова пара не зливаються.",
+        "native_law_test": "crates/sens/tests/codec_in_sens.rs::d11_кодек_д2_три_допоміжні_закони_у_sens",
+        "native_test_blob": "63586f0bf980a00eca34eebceb518a057932a945",
+        "native_test_result": "NATIVE_SENS_CI_RUNNING",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39691996498",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен"
+      }
+    },
+    {
+      "surface_name": "кодек-д2-перший-декодований",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/codec-d2.lisp",
+        "original_file": "lib/codec-d2.lisp",
+        "blob_sha": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-кодека-д2-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00101111011",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00101111011",
+        "ukr": "кодек-д2-перший-декодований",
+        "source_file": "lib/codec-d2.lisp",
+        "source_blob": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "law": "Повернути лише перший декодований об’єкт потоку, не плутаючи його із залишком; правильна та крапкова структури залишаються відмінними.",
+        "native_law_test": "crates/sens/tests/codec_in_sens.rs::d11_кодек_д2_три_допоміжні_закони_у_sens",
+        "native_test_blob": "63586f0bf980a00eca34eebceb518a057932a945",
+        "native_test_result": "NATIVE_SENS_CI_RUNNING",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39691996498",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинна SENS-функція, агентське підтвердження, відповідний закон, позитивна та негативна SENS-перевірка; окремий примітив не потрібен"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 22,
-    "semantic_winners_total": 534,
+    "native_sens_composition_winners": 25,
+    "semantic_winners_total": 537,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
