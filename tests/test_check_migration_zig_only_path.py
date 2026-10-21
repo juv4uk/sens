@@ -347,6 +347,36 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
         ):
             migrator.zig_mint_verified_t5(projection, reference, binary, bridge)
 
+    def test_unrelated_review_manifest_drift_does_not_block_executable_lisp(self):
+        # Перевіряємо механізм міграції, не симулюємо семантику SENS.
+        spec = importlib.util.spec_from_file_location(
+            "three_pass_scoped_nonprogram", ROOT / "scripts/migrate-three-pass.py"
+        )
+        assert spec is not None and spec.loader is not None
+        migrator = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = migrator
+        spec.loader.exec_module(migrator)
+
+        with tempfile.TemporaryDirectory() as temp:
+            sandbox = Path(temp)
+            (sandbox / "lib/domains").mkdir(parents=True)
+            # Жодного маніфесту в sandbox: програма не має залежати від
+            # перевірки чужих маніфестів даних, їхнього SHA чи дати.
+            live = sandbox / "lib/програма.lisp"
+            live.write_text("(визначити відповідь (як-є так))\\n", encoding="utf-8")
+            self.assertIsNone(
+                migrator.reject_reviewed_nonprogram_source(live, sandbox)
+            )
+
+            # А от файл із визнаного не-виконуваного набору не може
+            # обходити відсутню маніфестну авторизацію.
+            domain = sandbox / "lib/domains/d4.lisp"
+            domain.write_text("(непрограма)\\n", encoding="utf-8")
+            with self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_MANIFEST_UNAVAILABLE"
+            ):
+                migrator.reject_reviewed_nonprogram_source(domain, sandbox)
+
     def test_reviewed_nonprogram_never_mints_and_source_drift_is_not_ignored(self):
         """One positive / negative / mutated-source witness for issue #4460."""
         import json
