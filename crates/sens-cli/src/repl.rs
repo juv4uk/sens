@@ -550,6 +550,16 @@ fn eval_t5m_repl_line(
     Ok(result)
 }
 
+/// Виконати повний файл української Lisp-проєкції тим самим фізичним
+/// шляхом, що й один крок REPL: точні слова → Zig T5M roundtrip → SENS.
+/// Сесія навмисно без host-capabilities; цей режим є runtime-свідком, а не
+/// способом запускати довільні системні дії з CI.
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_source_file(source: &str) -> Result<sens::EvalResult, String> {
+    let mut session = Session::default();
+    eval_t5m_repl_line(source, &mut session, ReplSurface::UkrainianFull)
+}
+
 /// Initialise the SENS loop from `repl-core` (`репл-почати`).
 fn init_sens_loop(session: &mut Session) -> Result<(), String> {
     if session.environment.get("репл-крок").is_none() {

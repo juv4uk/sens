@@ -143,8 +143,60 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Визначити змінені виконувані Lisp-файли для T5M
+        id: changed-t5m-lisp
+        if: github.event_name != 'workflow_dispatch'
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          base="$BEFORE_SHA"
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE_SHA"; fi
+          files="$RUNNER_TEMP/changed-t5m-lisp.txt"
+          raw="$RUNNER_TEMP/changed-lisp-paths.txt"
+          : > "$files"
+          if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
+            if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+              timeout 60s git fetch --no-tags --depth=1 origin "$base"
+            fi
+            git diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' > "$raw"
+          else
+            git diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' > "$raw"
+          fi
+          python3 - "$raw" "$files" <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "scripts")
+          from report_ukr_projection_progress import tokenize_lisp
+
+          raw, output = map(Path, sys.argv[1:])
+          data_paths = ("lib/domains/", "lib/surface/", "knowledge/", "docs/", "research/", "contracts/")
+          selected = []
+          for name in raw.read_text(encoding="utf-8").splitlines():
+              if not name.endswith(".lisp") or name.startswith(data_paths) or name == "language-contract.lisp":
+                  continue
+              path = Path(name)
+              if not path.is_file() or path.is_symlink():
+                  continue
+              try:
+                  source = path.read_text(encoding="utf-8")
+                  if not tokenize_lisp(source):
+                      continue  # comment-only source is not an executable program
+              except (OSError, UnicodeError, ValueError):
+                  pass  # malformed changed source is still sent to the real parser and must fail there
+              selected.append(name)
+          output.write_text("".join(name + "\n" for name in selected), encoding="utf-8")
+          print(f"T5M_CHANGED_EXECUTABLE_LISP count={len(selected)}")
+          for name in selected:
+              print(f"T5M_CHANGED_FILE {name}")
+          PY
+          if [[ -s "$files" ]]; then echo 'has_files=true' >> "$GITHUB_OUTPUT"; else echo 'has_files=false' >> "$GITHUB_OUTPUT"; fi
+
       - uses: ./.github/actions/install-zig
-        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
         if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -220,9 +272,39 @@ jobs:
           if-no-files-found: warn
           retention-days: 1
 
-      # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:')) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+
+      - name: Виконати кожне змінене виконуване джерело через Zig T5M і SENS
+        if: steps.changed-t5m-lisp.outputs.has_files == 'true'
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked -p sens-cli --bin sens
+          binary="$PWD/target/debug/sens"
+          while IFS= read -r file; do
+            [[ -n "$file" ]] || continue
+            stdout="$RUNNER_TEMP/t5m-file.stdout"
+            stderr="$RUNNER_TEMP/t5m-file.stderr"
+            if timeout 45s "$binary" --t5m-file "$file" >"$stdout" 2>"$stderr"; then
+              if [[ ! -s "$stdout" ]]; then
+                echo "::error::T5M_FILE_EXECUTION_EMPTY_RESULT path=$file"
+                exit 1
+              fi
+              result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
+              printf 'T5M_FILE_EXECUTION PASS path=%s result_sha256=%s\n' "$file" "$result_sha"
+              printf -- '- PASS — `%s` — результат не порожній, SHA-256: `%s`\n' \
+                "$file" "$result_sha" >> "$GITHUB_STEP_SUMMARY"
+            else
+              status=$?
+              sed 's/^/T5M stderr: /' "$stderr" >&2
+              echo "::error::T5M_FILE_EXECUTION_FAIL path=$file status=$status"
+              exit "$status"
+            fi
+          done < "$RUNNER_TEMP/changed-t5m-lisp.txt"
+
+      # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
       - name: "BENCH-T5M — Zig, x86-64 ASM, Rust"
         if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
         timeout-minutes: 10

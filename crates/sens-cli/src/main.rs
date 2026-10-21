@@ -164,6 +164,16 @@ fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     Some(Ok(path.as_str()))
 }
 
+/// Явно обраний людський .lisp → українська проєкція → Zig T5M →
+/// двійковий SENS → виконання. Це окремо від історичного `sens file.lisp`.
+fn t5m_file_request(args: &[String]) -> Option<Result<&str, &'static str>> {
+    let position = args.iter().position(|argument| argument == "--t5m-file")?;
+    if position != 1 || args.len() != 3 {
+        return Some(Err("usage: sens --t5m-file <ukrainian-source.lisp>"));
+    }
+    Some(Ok(args[2].as_str()))
+}
+
 /// One sterile physical ingress: Rust-host bytes -> Zig ABI v2 BE3 ->
 /// exact-width SENS words. No Rust-side T5 fallback is permitted for .sens.
 fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
@@ -244,6 +254,37 @@ fn main() {
     // This reports the actual Cargo-compiled executable's pinned version.
     if raw_args.len() == 2 && matches!(raw_args[1].as_str(), "--version" | "-V" | "-v") {
         println!("sens {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
+    if let Some(request) = t5m_file_request(&raw_args) {
+        let result = match request {
+            Ok(filename) => fs::read_to_string(filename)
+                .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
+                .and_then(|source| {
+                    #[cfg(feature = "zig-transport")]
+                    {
+                        repl::eval_t5m_source_file(&source)
+                    }
+                    #[cfg(not(feature = "zig-transport"))]
+                    {
+                        let _ = source;
+                        Err("--t5m-file requires the Zig T5M transport corridor".into())
+                    }
+                }),
+            Err(message) => Err(message.to_owned()),
+        };
+        match result {
+            Ok(result) => {
+                for output in result.output {
+                    println!("{output}");
+                }
+                println!("{}", result.value);
+            }
+            Err(error) => {
+                eprintln!("sens: T5M file execution failed: {error}");
+                process::exit(1);
+            }
+        }
         return;
     }
     if let Some(request) = physical_t5_request(&raw_args) {
@@ -432,6 +473,7 @@ fn main() {
             println!("If no file is provided, starts the REPL.");
             println!("Textual compatibility source: .lisp and historical aliases; physical .sens is packed T5, not UTF-8 Lisp.");
             println!("  sens program.sens            Run exact physical T5 with pure SENS (no implicit Core4/host effects)");
+            println!("  sens --t5m-file program.lisp Run Ukrainian Lisp source through Zig T5M and execute its SENS words");
             println!("  sens-trit open program.sens  Display exact binary words without running");
             println!("\nOptions:");
             println!("  lsp                          Run the Language Server (LSP over stdio)");

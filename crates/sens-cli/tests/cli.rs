@@ -64,6 +64,7 @@ fn help_flag_prints_usage() {
     assert!(stdout.contains(".lisp"));
     assert!(stdout.contains(".sens"));
     assert!(stdout.contains("physical .sens is packed T5"));
+    assert!(stdout.contains("--t5m-file"));
     assert!(stdout.contains("--oracle-check <file|->"));
     assert!(stdout.contains("--core=3|4"));
 }
@@ -312,6 +313,25 @@ fn sens_binary_rejects_text_disguised_as_physical_t5() {
             || diagnostic.contains("current SENS execution"),
         "missing physical-binary rejection diagnostic: {diagnostic}"
     );
+}
+
+#[test]
+fn t5m_file_mode_executes_the_changed_ukrainian_source_through_the_physical_route() {
+    let path = std::env::temp_dir().join(format!("sens-cli-t5m-file-{}.lisp", std::process::id()));
+    std::fs::write(&path, "(додати 20 22)\n").expect("write T5M source fixture");
+
+    let output = sens()
+        .args(["--t5m-file", path.to_str().expect("UTF-8 temp path")])
+        .output()
+        .expect("T5M file mode should run");
+    let _ = std::fs::remove_file(&path);
+
+    assert!(
+        output.status.success(),
+        "T5M file execution failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "42");
 }
 
 #[test]
