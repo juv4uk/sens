@@ -281,7 +281,7 @@ jobs:
             echo 'closure_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Пролог → Даталог: реальний SENS D1/D4 після зміни Lisp чи тесту.
-          if grep -Eq '^(lib/bridge/prolog-to-datalog\\.lisp|crates/sens/tests/prolog_bridge_current_d4\\.rs)$' "$changed_all"; then
+          if grep -Eq '^(lib/bridge/prolog-to-datalog\\.lisp|crates/sens/tests/prolog_bridge_current_d4\\.rs|\\.github/workflows/ci\\.yml)$' "$changed_all"; then
             echo 'prolog_bridge_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
