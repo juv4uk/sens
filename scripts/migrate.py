@@ -29,10 +29,10 @@ def command(args: argparse.Namespace) -> list[str]:
             cmd.append("--zig-codec")
         return cmd
     if args.action == "view":
-        # Reuse this legacy route's canonical physical T5 decoder; no second implementation.
-        # This command never creates physical .sens or edits .lisp.
+        # Чинний .sens використовує T5M, не неявний історичний T5.
+        # Цей режим лише перевіряє/готує view; семантику визначає SENS.
         cmd = [sys.executable, str(SCRIPTS / "sens_spaced_view.py"),
-               "--root", str(ROOT), "--sens", args.sens]
+               "--root", str(ROOT), "--sens", args.sens, "--codec", "t5m"]
         if args.verify:
             cmd.append("--verify")
         else:
