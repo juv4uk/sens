@@ -190,6 +190,13 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
         self.assertIn("(визначити переклад-рівно-п'ять-полів?", source)
         self.assertIn("(текст-у-символ (значення-у-текст значення))", source)
         self.assertEqual(source.count("(хибне? (переклад-рівно-п'ять-полів?"), 2)
+        # Класифікаційна трійка — дані, а не булевий D1 результат.
+        self.assertIn("(третє (класифікувати-рядкове-значення", source)
+        self.assertIn("(як-є member))\n          так)", source)
+        self.assertNotIn(
+            "((класифікувати-рядкове-значення (переклад-джерело пропозиція))",
+            source,
+        )
         self.assertNotIn("(довжина пропозиція)", source)
         self.assertNotIn("(довжина огляд)", source)
         self.assertNotIn("(символ? стан)", source)
