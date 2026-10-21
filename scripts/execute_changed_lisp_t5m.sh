@@ -13,6 +13,15 @@ test -x "$binary"
 test -f "$manifest"
 mkdir -p "$outdir"
 failed_files=0
+# Одне джерело може мати кілька реальних порушень (байти, перегляд,
+# виконання). Звітуємо всі, але files_failed рахує саме файли.
+declare -A failed_file_paths=()
+mark_file_failed() {
+  if [[ -z "${failed_file_paths[$file]+present}" ]]; then
+    failed_file_paths["$file"]=1
+    failed_files=$((failed_files + 1))
+  fi
+}
 checked_files=0
 physical_not_supported=0
 while IFS= read -r file || [[ -n "$file" ]]; do
@@ -20,7 +29,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   checked_files=$((checked_files + 1))
   if [[ "$file" != *.lisp || ! -f "$file" || -L "$file" ]]; then
     echo "::error::T5M_CHANGED_SOURCE_INVALID path=$file" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
   id="$(printf '%s' "$file" | sha256sum | cut -c1-16)"
@@ -48,7 +57,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   if [[ ! -s "$report" ]]; then
     cat "$dir/migration.log" >&2
     echo "::error::T5M_MIGRATION_NO_REPORT path=$file status=$code" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
   report_status=0
@@ -65,18 +74,18 @@ PY
 )" || report_status=$?
   if (( report_status != 0 )); then
     echo "::error::T5M_MIGRATION_REPORT_INVALID path=$file status=$report_status" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
   read -r written blocked not_program <<< "$outcome"
   if (( code > 2 )); then
     echo "::error::T5M_MIGRATION_INTERNAL_FAILURE path=$file status=$code" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
   if (( blocked > 0 )); then
     echo "::error::T5M_MIGRATION_UNPROVEN path=$file blocked=$blocked semantic=NOT_CERTIFIED" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
   if (( not_program > 0 )); then
@@ -89,7 +98,7 @@ PY
     # Перевіряємо і dangling symlink, не лише звичайний файл.
     if [[ -e "$stale_pair" || -L "$stale_pair" || -e "$stale_view" || -L "$stale_view" ]]; then
       echo "::error::T5M_NONPROGRAM_STALE_PAIR source=$file companion=$stale_pair view=$stale_view action=remove-obsolete-pair-and-view-or-restore-source" >&2
-      failed_files=$((failed_files + 1))
+      mark_file_failed
       continue
     fi
     echo "T5M_NOT_PROGRAM path=$file"
@@ -97,13 +106,13 @@ PY
   fi
   if (( code != 0 || written != 1 )); then
     echo "::error::T5M_MIGRATION_INCONSISTENT path=$file status=$code written=$written" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
   pair="$dir/$(basename "$file" .lisp).sens"
   if [[ ! -s "$pair" ]]; then
     echo "::error::T5M_MINTED_PAIR_MISSING path=$file" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
   committed="$(dirname "$file")/$(basename "$file" .lisp).sens"
@@ -111,7 +120,7 @@ PY
   committed_view="${committed%.sens}"
   if [[ ! -f "$staged_view" || -L "$staged_view" ]]; then
     echo "::error::T5M_MINTED_VIEW_MISSING source=$file expected=$staged_view" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
   if [[ -e "$committed" || -L "$committed" ]]; then
@@ -119,7 +128,7 @@ PY
     # каталогом чи іншим об'єктом, що імітує фізичну T5M-пару.
     if [[ ! -f "$committed" || -L "$committed" ]]; then
       echo "::error::T5M_COMMITTED_PAIR_NOT_REGULAR source=$file companion=$committed" >&2
-      failed_files=$((failed_files + 1))
+      mark_file_failed
       continue
     fi
     # Застаріла регулярна пара — це реальний борг на виправлення,
@@ -127,21 +136,21 @@ PY
     # CI лишається червоним, проте реальний SENS показує наступну помилку.
     if ! cmp -s "$pair" "$committed"; then
       echo "::error::T5M_COMMITTED_PAIR_DRIFT source=$file companion=$committed action=refresh-pair" >&2
-      failed_files=$((failed_files + 1))
+      mark_file_failed
     fi
     if [[ ! -f "$committed_view" || -L "$committed_view" ]]; then
       echo "::error::T5M_COMMITTED_VIEW_MISSING source=$file expected=$committed_view action=refresh-view" >&2
-      failed_files=$((failed_files + 1))
+      mark_file_failed
     elif ! cmp -s "$staged_view" "$committed_view"; then
       echo "::error::T5M_COMMITTED_VIEW_DRIFT source=$file companion=$committed_view action=refresh-view" >&2
-      failed_files=$((failed_files + 1))
+      mark_file_failed
     fi
   else
     # Без фізичного .sens однойменний перегляд не може засвідчувати пару.
     # Не зупиняємо новий SENS-виклик: покажемо його результат попри борг.
     if [[ -e "$committed_view" || -L "$committed_view" ]]; then
       echo "::error::T5M_ORPHAN_VIEW source=$file view=$committed_view companion=$committed action=refresh-complete-pair" >&2
-      failed_files=$((failed_files + 1))
+      mark_file_failed
     else
       echo "::notice::T5M_PAIR_NOT_COMMITTED path=$file release=NOT_CERTIFIED"
     fi
@@ -176,7 +185,7 @@ PY
       fi
       sed 's/^/T5M paired stderr: /' "$stderr" >&2
       echo "::error::T5M_PHYSICAL_PAIRED_D24_FAIL source=$file pair=$pair status=$status" >&2
-      failed_files=$((failed_files + 1))
+      mark_file_failed
       continue
     fi
     # Нове T5M D7: виконуване людське ім'я може мати лише Text7
@@ -193,13 +202,13 @@ PY
         status=$?
         sed 's/^/T5M paired D7 stderr: /' "$stderr" >&2
         echo "::error::T5M_PHYSICAL_PAIRED_D7_FAIL source=$file pair=$pair status=$status"
-        failed_files=$((failed_files + 1))
+        mark_file_failed
         continue
       fi
     fi
     sed 's/^/T5M stderr: /' "$stderr" >&2
     echo "::error::T5M_FILE_EXECUTION_FAIL path=$file pair=$pair status=$status" >&2
-    failed_files=$((failed_files + 1))
+    mark_file_failed
     continue
   fi
 done < "$manifest"
