@@ -316,6 +316,45 @@ fn sens_binary_rejects_text_disguised_as_physical_t5() {
 }
 
 #[test]
+fn t5m_file_mode_does_not_reinterpret_physical_sens_as_textual_lisp() {
+    // Якщо фізичний .sens містить випадково читабельний текст, він все одно
+    // мусить пройти лише двійковий reader, а не --t5m-file.
+    let path = std::env::temp_dir().join(format!(
+        "sens-cli-t5m-no-text-fallback-{}.sens",
+        std::process::id()
+    ));
+    std::fs::write(&path, "(додати 20 22)\n").expect("write disguised physical fixture");
+    let output = sens()
+        .args(["--t5m-file", path.to_str().expect("UTF-8 temp path")])
+        .output()
+        .expect("T5M CLI must reject disguised physical source");
+    let _ = std::fs::remove_file(&path);
+
+    assert!(!output.status.success(), "physical .sens bypassed its binary reader");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("--t5m-file accepts only .lisp sources"), "{stderr}");
+    assert!(!String::from_utf8_lossy(&output.stdout).contains("42"));
+}
+
+#[test]
+fn t5m_file_mode_rejects_malformed_ukrainian_source() {
+    let path = std::env::temp_dir().join(format!(
+        "sens-cli-t5m-malformed-{}.lisp",
+        std::process::id()
+    ));
+    std::fs::write(&path, "(додати 20 22").expect("write incomplete source");
+    let output = sens()
+        .args(["--t5m-file", path.to_str().expect("UTF-8 temp path")])
+        .output()
+        .expect("T5M CLI must report malformed source");
+    let _ = std::fs::remove_file(&path);
+
+    assert!(!output.status.success(), "malformed source was admitted");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("T5M file execution failed"), "{stderr}");
+}
+
+#[test]
 fn t5m_file_mode_executes_the_changed_ukrainian_source_through_the_physical_route() {
     let path = std::env::temp_dir().join(format!("sens-cli-t5m-file-{}.lisp", std::process::id()));
     std::fs::write(&path, "(додати 20 22)\n").expect("write T5M source fixture");
