@@ -198,6 +198,27 @@ fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str), &'static str
     Some(Ok((&args[2], &args[3])))
 }
 
+/// Фізичний T5M -> точний бітовий перегляд, без Python/JSON.
+/// Джерело посвідчує ідентичність, Zig посвідчує фактичні байти.
+fn t5m_view_request(args: &[String]) -> Option<Result<(&str, &str, &str), &'static str>> {
+    if !args.iter().skip(1).any(|part| part == "--t5m-view") {
+        return None;
+    }
+    if args.len() != 5 || args[1] != "--t5m-view" {
+        return Some(Err("usage: sens --t5m-view <source.lisp> <physical.sens> <output-view>"));
+    }
+    let source = std::path::Path::new(&args[2]);
+    let physical = std::path::Path::new(&args[3]);
+    if source.extension().and_then(|ext| ext.to_str()) != Some("lisp")
+        || physical.extension().and_then(|ext| ext.to_str()) != Some("sens")
+        || args[4] == args[2]
+        || args[4] == args[3]
+    {
+        return Some(Err("--t5m-view requires .lisp, .sens, and a distinct output"));
+    }
+    Some(Ok((&args[2], &args[3], &args[4])))
+}
+
 /// Парне виконання дозволяє читати D24+ з реальних байтів Zig T5M,
 /// лише якщо український Lisp свідчить ТОЧНО ту саму доменну послідовність.
 /// Це не дозвіл трактувати довільний W24 за числову ідентичність.
@@ -355,6 +376,33 @@ fn main() {
         };
         if let Err(error) = result {
             eprintln!("sens: T5M mint failed: {error}");
+            process::exit(1);
+        }
+        return;
+    }
+    if let Some(request) = t5m_view_request(&raw_args) {
+        let result = match request {
+            Ok((source_path, physical_path, view_path)) => fs::read_to_string(source_path)
+                .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
+                .and_then(|source| {
+                    let physical = fs::read(physical_path)
+                        .map_err(|error| format!("read physical Zig T5M: {error}"))?;
+                    #[cfg(feature = "zig-transport")]
+                    {
+                        repl::view_t5m_source_file(&source, &physical)
+                    }
+                    #[cfg(not(feature = "zig-transport"))]
+                    {
+                        let _ = (source, physical);
+                        Err("--t5m-view requires the Zig T5M transport corridor".into())
+                    }
+                })
+                .and_then(|view| fs::write(view_path, view)
+                    .map_err(|error| format!("write exact T5M view: {error}"))),
+            Err(message) => Err(message.to_owned()),
+        };
+        if let Err(error) = result {
+            eprintln!("sens: T5M view failed: {error}");
             process::exit(1);
         }
         return;
