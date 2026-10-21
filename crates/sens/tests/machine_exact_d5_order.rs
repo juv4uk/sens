@@ -260,11 +260,11 @@ fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
             .value.to_string();
         assert_eq!(actual, expected, "байт зміщення: {call}");
     }
-    assert_eq!(
-        eval_program("(машина-байт-восьмибітного-зсуву (як-є ()))", &mut session)
-            .expect("SENS відхиляє нецілий операнд").value.to_string(),
-        "()"
-    );
+    let rejection = eval_program(
+        "(машина-байт-восьмибітного-зсуву (як-є ()))", &mut session,
+    ).expect_err("нечисловий () має викликати точну помилку D24+");
+    assert!(rejection.message.contains("math requires explicit D24+ operands"),
+        "структура () не є неявним математичним числом: {rejection}");
 
 }
 
