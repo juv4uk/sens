@@ -180,6 +180,28 @@ fn meta_eval_predicates_are_actual_d1_bits() {
     }
 }
 
+// Виконуємо оригінальні українські Lisp-свідки графа, не Python таблицю
+// й не лише перевірку текстових токенів. Мутант мусить дати D1:0.
+#[test]
+fn meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens() {
+    for (name, source, expected) in [
+        ("закон", include_str!("../../../tests/semantic/meta-eval-graph-d1-law.lisp"), true),
+        ("мутант", include_str!("../../../tests/semantic/meta-eval-graph-d1-mutant.lisp"), false),
+    ] {
+        let mut session = core_session();
+        sens::load_meta_evaluator_library(&mut session)
+            .expect("MetaEval має завантажитися у справжній SENS");
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|err| panic!("test_id=meta-eval-graph-d1 case={name} actual=execution-error: {err}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id=meta-eval-graph-d1 case={name} expected={expected} actual={}",
+            result.value,
+        );
+    }
+}
+
 // D10:0101100100: запускається справжній метаобчислювач SENS,
 // а не Python/Rust реалізація семантики тіл LAMBDA.
 #[test]
