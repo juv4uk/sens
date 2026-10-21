@@ -192,6 +192,23 @@ def verify_unchanged_laws(forms):
             raise AssertionError("невідома/дубльована функція")
         names.add(name)
         original = deepcopy(form)
+        if name in ("understand-universal", "understand-query-relation"):
+            # Перевіряємо чинні захисні гілки SENS; лише в копії AST
+            # знімаємо їх для історичного закону на повних даних.
+            lam = original[2]
+            cond = lam[2]
+            guards = (
+                [["010", "words"], ["001", []]],
+                [["010", ["011", "words"]], ["001", []]],
+                [["010", ["011", ["011", "words"]]], ["001", []]],
+                [["010", ["011", ["011", ["011", "words"]]]], ["001", []]],
+            )
+            if (not isinstance(cond, list) or cond[0] != "110"
+                    or tuple(cond[1:5]) != guards
+                    or len(cond) != 6
+                    or cond[5][0] != "#d1:1"):
+                raise AssertionError("захист четвертого слова має точний D3 закон")
+            lam[2] = cond[5][1]
         if name in GUARDED:
             lam = original[2]
             if not (isinstance(lam, list) and lam[0] == "0010"
@@ -373,6 +390,15 @@ class UnderstandExactD3Witness(unittest.TestCase):
         verify_unchanged_laws(self.forms)
         self.assertEqual(len(GUARDED), 3)
         self.assertEqual(3 * (len("010") + len("001")), 18)
+
+    def test_negative_missing_fourth_word_guard(self):
+        for name in ("understand-universal", "understand-query-relation"):
+            with self.subTest(function=name):
+                mutated = deepcopy(self.forms)
+                definition = next(form for form in mutated if form[1] == name)
+                definition[2][2].pop(4)
+                with self.assertRaisesRegex(AssertionError, "захист четвертого слова"):
+                    verify_unchanged_laws(mutated)
 
     def test_negative_missing_guard(self):
         mutated = deepcopy(self.forms)
