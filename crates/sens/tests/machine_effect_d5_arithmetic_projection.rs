@@ -110,6 +110,38 @@ fn lowered_identity(source: &str) -> (usize, u16) {
 }
 
 #[test]
+fn machine_effect_exact_numeric_coordinates_return_only_real_d1() {
+    // Чинний Lisp порівнює математичні координати D5, а не D3 EQ атомів.
+    // Немає Python-оракула: виконується справжня функція SENS.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ратифіковане ядро");
+    load_lisp_file("lib/machine/lowering/semantic-effects.lisp", &mut session);
+
+    for (width, bits, expected_width, expected_bits, expected) in [
+        (5, 10, 5, 10, true),
+        (5, 11, 5, 11, true),
+        (5, 22, 5, 22, true),
+        (4, 10, 5, 10, false),
+        (6, 10, 5, 10, false),
+        (5, 9, 5, 10, false),
+        (5, 12, 5, 11, false),
+        (5, 22, 6, 22, false),
+    ] {
+        let source = format!(
+            "(машинний-ефект-збігається-поточний-домен? {width} {bits} {expected_width} {expected_bits})"
+        );
+        let actual = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "порівняння D5 координат має повертати лише справжні D1 біти: {source}"
+        );
+    }
+}
+
+#[test]
 fn exact_d5_identity_selects_target_neutral_add_sub_mul_effects() {
     let cases = [
         ("PLUS", "(додати 2 3)", 2u64, 3u64, "(bounded-u64-add 2 3)"),
