@@ -354,3 +354,32 @@ fn derived_macro_binds_list_values_as_one_variable() {
         "accepted"
     );
 }
+
+#[test]
+fn journal_module_probe_fail_closed_on_malformed_event() {
+    // Це справжній виконавець SENS із чинним lib/knowledge.lisp.
+    // Атом, одноелементна форма та крапковий хвіст не мають
+    // другого поля: D4 «друге» у цих випадках заборонене.
+    let mut s = session();
+    for (journal, expected) in [
+        ("()", false),
+        ("(tell)", false),
+        ("((tell))", false),
+        ("((tell . зіпсоване))", false),
+        ("(зіпсоване)", false),
+        ("((tell чужий факт))", false),
+        ("((tell чужий факт) (tell зоря факт))", true),
+        ("((tell зоря факт))", true),
+    ] {
+        let code = format!(
+            "(журнал-містить-записи-модуля? (quote зоря) (quote {journal}))"
+        );
+        let actual = eval_program(&code, &mut s)
+            .unwrap_or_else(|error| panic!("SENS не виконав {code}: {error:?}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(), Some(expected),
+            "хибне або недоведене членство модуля: {journal}"
+        );
+    }
+}

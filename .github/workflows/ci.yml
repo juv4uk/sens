@@ -218,6 +218,7 @@ jobs:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
           cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime -- --nocapture
+          cargo test --locked -p sens --test fs_bridge_diagnostics journal_module_probe_fail_closed_on_malformed_event -- --exact --nocapture
           cargo test --locked -p sens --test result_status -- --nocapture
 
       # Лише адресний Zig/T5M-експорт після змін у виконуваних Lisp.
