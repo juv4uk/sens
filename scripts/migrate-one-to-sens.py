@@ -117,6 +117,8 @@ def main() -> int:
                         help="refresh an existing same-stem .sens + extensionless view pair")
     parser.add_argument("--codec", choices=("t5m", "t5"), default="t5m")
     parser.add_argument("--source-surface", choices=("default", "ук", "укр"), default="укр")
+    parser.add_argument("--binding-source", action="append", type=Path, default=[],
+                        help="явно завантажений Lisp-файл, що визначає зовнішні замикання")
     args = parser.parse_args()
     # Історичний T5 — лише діагностика. Нові фізичні .sens
     # створюються тільки через сучасний Zig/T5M.
@@ -158,6 +160,8 @@ def main() -> int:
         command = [sys.executable, str(MIGRATOR), str(source),
                    "--out", str(stage), "--report", str(report_path),
                    "--codec", args.codec, "--source-surface", args.source_surface]
+        for binding_source in args.binding_source:
+            command.extend(["--binding-source", str(binding_source)])
         if args.dry_run:
             command.append("--dry-run")
         process = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
