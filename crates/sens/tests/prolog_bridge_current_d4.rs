@@ -42,3 +42,59 @@ fn d4_bridge_rejects_missing_source_and_malformed_observation() {
         "(projection-failure malformed-observation)",
     );
 }
+
+#[test]
+fn d4_bridge_d1_field_shape_rejects_truncated_extra_and_dotted_rows() {
+    // Нативний SENS оцінює чинне Lisp-визначення, Rust лише зіставляє D1.
+    let mut state = session();
+    for (row, expected) in [
+        ("(source-ref observation-42)", "1"),
+        ("(source-ref)", "0"),
+        ("(source-ref observation-42 extra)", "0"),
+        ("(source-ref observation-42 . extra)", "0"),
+        ("(variable ancestor)", "1"),
+        ("(variable)", "0"),
+        ("(variable ancestor extra)", "0"),
+    ] {
+        let program = format!("(пролог-рядок-рівно-одне-значення? (як-є {row}))");
+        assert_eq!(
+            eval(&program, &mut state),
+            expected,
+            "test_id=prolog-d1-row-shape layer=real-SENS input={row}",
+        );
+    }
+}
+
+#[test]
+fn d4_bridge_returns_named_errors_for_incomplete_or_surplus_fields() {
+    let mut state = session();
+    for (fields, expected) in [
+        ("(source-ref) (variable ancestor) (values bob)", "(projection-failure malformed-source-ref)"),
+        ("(source-ref observation-42 extra) (variable ancestor) (values bob)", "(projection-failure malformed-source-ref)"),
+        ("(source-ref observation-42) (variable) (values bob)", "(projection-failure malformed-variable-role)"),
+        ("(source-ref observation-42) (variable ancestor extra) (values bob)", "(projection-failure malformed-variable-role)"),
+    ] {
+        let program = format!(
+            "(перетворити-підстановки-пролог-на-факти-даталог (як-є (prolog-substitution-observation {fields})))"
+        );
+        assert_eq!(
+            eval(&program, &mut state),
+            expected,
+            "test_id=prolog-named-error layer=real-SENS input={fields}",
+        );
+    }
+}
+
+#[test]
+fn d4_bridge_keeps_empty_values_as_valid_empty_facts() {
+    let mut state = session();
+    let actual = eval(
+        "(перетворити-підстановки-пролог-на-факти-даталог (як-є (prolog-substitution-observation (source-ref observation-42) (variable ancestor) (values))))",
+        &mut state,
+    );
+    assert_eq!(
+        actual,
+        "(projection-result (projection prolog-substitutions-to-datalog-facts) (source-ref observation-42) (facts ()))",
+        "test_id=prolog-zero-facts layer=real-SENS: порожні факти допустимі",
+    );
+}
