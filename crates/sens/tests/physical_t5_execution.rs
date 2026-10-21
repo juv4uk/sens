@@ -154,12 +154,12 @@ fn sens_zero_physical_cond_rejects_wrong_domain_and_three_field_clause() {
 fn d3_semantics_are_executed_and_decided_by_binary_sens() {
     let fixtures: [(&str, &[u8], bool); 2] = [
         (
-            include_str!("../../../tests/fixtures/semantic/d3-selftest.lisp"),
+            include_str!("../../../tests/fixtures/semantic/d3-selftest.bits"),
             include_bytes!("../../../tests/fixtures/semantic/d3-selftest.sens"),
             true,
         ),
         (
-            include_str!("../../../tests/fixtures/semantic/d3-selftest-negative.lisp"),
+            include_str!("../../../tests/fixtures/semantic/d3-selftest-negative.bits"),
             include_bytes!("../../../tests/fixtures/semantic/d3-selftest-negative.sens"),
             false,
         ),
