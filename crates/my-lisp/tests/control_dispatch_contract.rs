@@ -91,7 +91,7 @@ fn actual(row: &Row, session: &mut Session) -> String {
 
 fn assert_lisp_verdict(session: &mut Session, row: &Row, actual: &str) {
     let program = format!(
-        "(witness-pass? (witness-verdict (quote {}) (quote {})))",
+        "(свідок-проходить? (свідок-висновок (як-є {}) (як-є {})))",
         row.source, actual
     );
     let verdict = eval_program(&program, session)
@@ -99,7 +99,7 @@ fn assert_lisp_verdict(session: &mut Session, row: &Row, actual: &str) {
         .value
         .to_string();
     assert_eq!(
-        verdict, "t",
+        verdict, "1",
         "Lisp-owned #217 witness rejected runtime actual for {} (expected={:?}, error={:?}, actual={actual})",
         row.expr, row.expected, row.error
     );
