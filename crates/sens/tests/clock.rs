@@ -108,10 +108,12 @@ fn utc_calendar_conversion_is_language_owned() {
 #[test]
 fn raw_unix_clock_observation_is_interpreted_by_lisp() {
     let mut session = time_session();
+    // Числа у quoted-даних не мають D24+; будуємо виконуваний список
+    // з точних числових значень, а не арифметику над legacy-number.
 
     assert_eq!(
         eval_program(
-            "(юнікс-час-спостереження-узгоджений-час (як-є (unix-time 946684800 42)))",
+            "(юнікс-час-спостереження-узгоджений-час (список (як-є unix-time) 946684800 42))",
             &mut session,
         )
         .unwrap()
@@ -121,7 +123,7 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
     );
     assert_eq!(
         eval_program(
-            "(юнікс-час-спостереження-узгоджений-час (як-є (not-unix-time 946684800 42)))",
+            "(юнікс-час-спостереження-узгоджений-час (список (як-є not-unix-time) 946684800 42))",
             &mut session,
         )
         .unwrap()
@@ -129,6 +131,12 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
         .to_string(),
         "(rejected invalid-unix-time-observation)"
     );
+    let legacy = eval_program(
+        "(юнікс-час-спостереження-узгоджений-час (як-є (unix-time 946684800 42)))",
+        &mut session,
+    )
+    .expect_err("quoted legacy-number не може стати математичним D24+");
+    assert_eq!(legacy.kind, ErrorKind::Type);
 }
 
 #[test]
@@ -232,7 +240,7 @@ fn raw_ntp_observation_boundary_is_interpreted_by_lisp() {
 
     assert_eq!(
         eval_program(
-            "(перетворити-сирі-дані-часу-на-спостереження (як-є (ntp-fields \"clock.example\" 4 1 2208988801 2147483648)))",
+            "(перетворити-сирі-дані-часу-на-спостереження (список (як-є ntp-fields) \"clock.example\" 4 1 2208988801 2147483648))",
             &mut session,
         )
         .unwrap()
@@ -242,7 +250,7 @@ fn raw_ntp_observation_boundary_is_interpreted_by_lisp() {
     );
     assert_eq!(
         eval_program(
-            "(перетворити-сирі-дані-часу-на-спостереження (як-є (ntp-fields \"clock.example\" 3 1 2208988800 0)))",
+            "(перетворити-сирі-дані-часу-на-спостереження (список (як-є ntp-fields) \"clock.example\" 3 1 2208988800 0))",
             &mut session,
         )
         .unwrap()
@@ -303,7 +311,7 @@ fn internet_time_timestamp_interpretation_is_language_owned() {
 
     assert_eq!(
         eval_program(
-            "(дати-календарне-значення-схваленому-часу (як-є (accepted \"clock.example\" 946684800 42)))",
+            "(дати-календарне-значення-схваленому-часу (список (як-є accepted) \"clock.example\" 946684800 42))",
             &mut session,
         )
         .unwrap()
