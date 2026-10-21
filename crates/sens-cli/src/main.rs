@@ -1014,7 +1014,7 @@ mod core_profile_bootstrap_tests {
             panic!("очікувано один виклик D5");
         };
         let digits: Vec<_> = items.iter().filter_map(|item| match &item.kind {
-            sens::ExprKind::BinaryNumber(number) => Some(number.to_decimal_string()),
+            sens::ExprKind::BinaryNumber(number) => Some(number.to_decimal_string()), // projection-human
             _ => None,
         }).collect();
         assert_eq!(digits, ["-2", "5"]);
