@@ -152,3 +152,57 @@ fn repl_uses_exact_d9_stringp_not_historical_text_alias() {
         );
     }
 }
+
+#[test]
+fn d11_four_repl_library_laws_run_inside_sens() {
+    // Four already defined lib/repl-core.lisp functions — SENS evaluates
+    // both sides of each compositional law, including a distinct countercase.
+    let mut session = repl_session();
+    let laws = [
+        (
+            "репл-форма-функція",
+            "(репл-форма-функція (як-є (арг)) (як-є (перше арг)))",
+            "(як-є (функція (арг) (перше арг)))",
+            "(репл-форма-функція (як-є (арг)) (як-є (решта арг)))",
+        ),
+        (
+            "репл-крок",
+            "(репл-крок (як-є (визначити нова (як-є альфа))) (репл-почати (як-є ())))",
+            "(обчислити-форму-та-оновити-оточення (як-є (визначити нова (як-є альфа))) (перше (репл-почати (як-є ()))))",
+            "(репл-крок (як-є (визначити нова (як-є бета))) (репл-почати (як-є ())))",
+        ),
+        (
+            "репл-визначити",
+            "(репл-визначити (як-є нова) (як-є (як-є альфа)) (репл-почати (як-є ())))",
+            "(репл-крок (як-є (визначити нова (як-є альфа))) (репл-почати (як-є ())))",
+            "(репл-визначити (як-є нова) (як-є (як-є бета)) (репл-почати (як-є ())))",
+        ),
+        (
+            "репл-визначити-функцію",
+            "(репл-визначити-функцію (як-є обчислювач) (як-є (арг)) (як-є (перше арг)) (репл-почати (як-є ())))",
+            "(репл-визначити (як-є обчислювач) (репл-форма-функція (як-є (арг)) (як-є (перше арг))) (репл-почати (як-є ())))",
+            "(репл-визначити-функцію (як-є обчислювач) (як-є (арг)) (як-є (решта арг)) (репл-почати (як-є ())))",
+        ),
+    ];
+    for (name, actual_source, law_source, different_source) in laws {
+        let evaluate = |src: &str, session: &mut Session| {
+            eval_program(src, session)
+                .unwrap_or_else(|error| panic!(
+                    "test_id=D11-REPL-{name} layer=SENS input={src} error={error}"
+                ))
+                .value
+                .to_string()
+        };
+        let actual = evaluate(actual_source, &mut session);
+        let expected = evaluate(law_source, &mut session);
+        assert_eq!(
+            actual, expected,
+            "test_id=D11-REPL-{name}-LAW expected={expected} actual={actual}"
+        );
+        let changed = evaluate(different_source, &mut session);
+        assert_ne!(
+            actual, changed,
+            "test_id=D11-REPL-{name}-NEG actual={actual} mutated={changed}"
+        );
+    }
+}
