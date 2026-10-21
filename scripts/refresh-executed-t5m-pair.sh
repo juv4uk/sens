@@ -248,6 +248,13 @@ installed_view=1
 view_stamp="$(stat -c '%d:%i' "$committed_view")"
 if (( ! had_view )); then rm -- "$publish_dir/new.view"; fi
 cmp "$publish_dir/expected.view" "$committed_view"
+# Джерело може змінитися під час двох rename навіть після попередньої
+# SHA-перевірки. Не оголошувати застарілу T5M-пару успішною публікацією.
+# При розходженні чинний EXIT trap відкотить лише наші власні inode.
+if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
+  echo "ПОМИЛКА: джерело змінилося під час публікації T5M; відкотити пару: $source_file" >&2
+  exit 2
+fi
 trap - EXIT INT TERM
 rm -rf -- "$publish_dir" "$dir"
 printf 'T5M_REFRESHED source=%s mode=%s physical=%s executed=SENS semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' "$source_file" "$mode" "$producer"
