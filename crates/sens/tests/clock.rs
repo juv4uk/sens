@@ -55,6 +55,29 @@ fn assert_raw_host_primitive(surface: &str) {
 }
 
 #[test]
+fn d48_integer_quotient_and_mod_stay_in_the_operand_domain() {
+    let mut session = Session::default();
+    load_core_library(&mut session).unwrap();
+
+    // Дільник обчислюється як D48, а не як окремий D24-літерал.
+    let denominator = "(додати 65536 (відняти 1000000000 1000000000))";
+    for (operator, expected) in [
+        ("частка-через-подвоєння", "65535"),
+        ("модульна-остача", "65535"),
+    ] {
+        let source = format!("({operator} 4294967295 {denominator})");
+        let actual = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value
+            .to_string();
+        assert_eq!(actual, expected, "{source}");
+    }
+    let mixed = eval_program("(частка-через-подвоєння 4294967295 65536)", &mut session)
+        .expect_err("D48/D24 must not be coerced implicitly");
+    assert_eq!(mixed.kind, ErrorKind::Type);
+}
+
+#[test]
 fn utc_now_returns_utc_calendar_with_nanosecond_field() {
     let mut session = time_session();
     let value = eval_program("(узгоджений-час-зараз)", &mut session)
