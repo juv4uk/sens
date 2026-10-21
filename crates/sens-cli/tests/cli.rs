@@ -452,8 +452,11 @@ fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
         ExactT5Word::new(width, (0..width).rev().map(|shift| ((bits >> shift) & 1) as u8).collect())
             .expect("canonical exact-width source word")
     };
-    // D2 (  / D5:01010 ADD / D24:1 / D24:2 / D2 ).
-    let words = vec![make(2, 2), make(5, 0b01010), make(24, 1), make(24, 2), make(2, 1)];
+    // Канонічний D2: OPEN, ADD, SEP, D24:1, SEP, D24:2, CLOSE.
+    let words = vec![
+        make(2, 2), make(5, 0b01010), make(2, 0), make(24, 1),
+        make(2, 0), make(24, 2), make(2, 1),
+    ];
     let physical = encode_t5_exact_words(&words).expect("Zig exact T5M");
     let dir = std::env::temp_dir().join(format!("sens-physical-pair-d24-{}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("isolated pair");
@@ -472,7 +475,7 @@ fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
     assert_eq!(String::from_utf8_lossy(&result.stdout).trim(), "3");
 
     let mut altered = words.clone();
-    altered[3] = make(24, 3);
+    altered[5] = make(24, 3);
     std::fs::write(&packed, encode_t5_exact_words(&altered).unwrap())
         .expect("mutated physical carrier");
     let negative = evaluate();
@@ -503,11 +506,13 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
         ).expect("ratified exact word")
     };
     // (сполучити (як-є ()) (як-є ())) має D3 CONS 111, QUOTE 001,
-    // NIL 000 та структурні D2 OPEN=10 / CLOSE=01.
+    // NIL 000 та D2 OPEN=10 / SEP=00 / CLOSE=01.
+    // Роздільники входять у фізичну оберненість і не є примхою тесту.
     let words = vec![
-        make(2, 0b10), make(3, 0b111),
-        make(2, 0b10), make(3, 0b001), make(3, 0), make(2, 0b01),
-        make(2, 0b10), make(3, 0b001), make(3, 0), make(2, 0b01),
+        make(2, 0b10), make(3, 0b111), make(2, 0),
+        make(2, 0b10), make(3, 0b001), make(2, 0), make(3, 0), make(2, 0b01),
+        make(2, 0),
+        make(2, 0b10), make(3, 0b001), make(2, 0), make(3, 0), make(2, 0b01),
         make(2, 0b01),
     ];
     let bytes = encode_t5_exact_words(&words).expect("Zig T5M physical");
