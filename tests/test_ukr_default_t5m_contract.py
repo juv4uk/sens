@@ -75,21 +75,21 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
             "physical_not_supported=%s release=NOT_CERTIFIED", runner
         )
         self.assertIn(
-            "T5M_DOMAIN_SOURCE_RUNTIME_PASS source=$file physical=NOT_SUPPORTED",
+            "T5M_PHYSICAL_PAIRED_D24_PASS source=$file pair=$pair physical=ZIG_VERIFIED",
             runner,
         )
-        self.assertIn("T5M_PHYSICAL_D24_NOT_EXECUTED", runner)
+        self.assertIn("T5M_STANDALONE_D24_NOT_SUPPORTED", runner)
 
-    def test_failed_d24_fallback_keeps_real_sens_exit_status(self):
+    def test_failed_d24_pair_keeps_real_sens_exit_status(self):
         # Shell-механізм: несправний SENS з кодом 37 не стає status=0
-        # після завершення if без else. Це перевірка транспорту, не семантики.
+        # після завершення if без else. Реальні байти залишаються обов’язковими.
         runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
             encoding="utf-8"
         )
-        beginning = 'if timeout 45s "$binary" --t5m-file "$file"'
+        beginning = 'if timeout 45s "$binary" --t5m-pair "$file" "$pair"'
         self.assertIn(beginning, runner)
         fallback = runner.split(beginning, 1)[1].split(
-            "T5M_DOMAIN_SOURCE_RUNTIME_FAIL", 1
+            "T5M_PHYSICAL_PAIRED_D24_FAIL", 1
         )[0]
         self.assertIn("      else\n        # Код береться з реального невдалого SENS", fallback)
         self.assertIn("        status=$?\n      fi", fallback)
