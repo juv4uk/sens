@@ -341,3 +341,25 @@ fn core4_ukrainian_rassoc_union_execute_true_d1_branches_in_sens() {
         );
     }
 }
+
+#[test]
+fn core4_ukrainian_answer_algebra_executes_both_sides_of_distinctions() {
+    // Закони визначає SENS: тут виконується справжній evaluator.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        ("(відповідь-і (як-є (0)) (як-є (1)))", "(0)"),
+        ("(відповідь-і (як-є (1)) (як-є (0)))", "(0)"),
+        ("(відповідь-і (як-є (0 0)) (як-є (0)))", "(0)"),
+        ("(відповідь-і (як-є (1)) (як-є (1 1)))", "(1 1)"),
+        ("(відповідь-послабити (як-є (1)))", "(1 1)"),
+        ("(відповідь-послабити (як-є (1 1 1 1 1 1 1)))", "()"),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=core4-answer-algebra layer=SENS input={source} error={error}"));
+        assert_eq!(
+            result.value.to_string(), expected,
+            "test_id=core4-answer-algebra layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
+    }
+}
