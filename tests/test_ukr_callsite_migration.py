@@ -1405,6 +1405,22 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
         self.assertNotEqual(mutated, code)
         self.assertEqual(mutated.count(істина), 1)
         self.assertIn(хиба, mutated)
+        # Два D1:1 та негативні гілки — справжні D3 ATOM,
+        # не цитовані числові слова, які лише схожі на результати.
+        d1_false = "(атом? (як-є (())))"
+        d1_true = "(атом? (як-є ()))"
+        self.assertIn("((атом? комірки) " + d1_false + ")", code)
+        self.assertIn("(тотожне? (однакова-ємність? рядки ємність) " + d1_true + ")", code)
+        self.assertIn("((тотожне? ключ (перше (перше рядки))) " + d1_false + ")", code)
+        self.assertIn("(тотожне? (ключі-без-повторів? д3-дубль-усередині) " + d1_false + ")", code)
+        self.assertNotIn("((атом? комірки) (як-є 0))", code)
+        self.assertNotIn("(однакова-ємність? рядки ємність) (як-є 1)", code)
+        # Негативний мутант повертає D1:YES при вичерпаній ємності.
+        # Контроль структури не підміняє SENS runtime.
+        wrong = code.replace("((атом? комірки) " + d1_false + ")",
+                             "((атом? комірки) " + d1_true + ")", 1)
+        self.assertNotEqual(wrong, code)
+        self.assertNotIn("((атом? комірки) " + d1_false + ")", wrong)
 
     def test_tier_selector_preserves_current_d3_d9_operators(self):
         source = (self.ROOT / "scripts/fixtures-for-tier.lisp").read_text(encoding="utf-8")
