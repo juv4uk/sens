@@ -477,3 +477,45 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class NativeSENST5MRouteTests(unittest.TestCase):
+    """Оркестрація без Python/JSON; семантичний свідок живе в sens-cli/Zig."""
+
+    def test_native_route_is_the_current_ci_and_requires_zig(self):
+        ci = CI.read_text(encoding="utf-8")
+        self.assertIn("cargo build --locked -p sens-cli --features zig-transport --bin sens", ci)
+        self.assertIn("bash scripts/execute_changed_lisp_t5m_native.sh", ci)
+        self.assertNotIn("bash scripts/execute_changed_lisp_t5m.sh \\", ci)
+
+    def test_native_route_uses_sens_for_mint_inverse_and_paired_execution(self):
+        script = (ROOT / "scripts/execute_changed_lisp_t5m_native.sh").read_text(encoding="utf-8")
+        self.assertNotIn("python3", script)
+        self.assertNotIn("migrate-three-pass.py", script)
+        self.assertNotIn("jq ", script)
+        for fragment in (
+            '"$binary" --t5m-mint "$file" "$pair"',
+            '"$binary" --t5m-view "$file" "$pair" "$view"',
+            '"$binary" --t5m-pair "$file" "$pair"',
+            'SENS_NATIVE_VIEW_OR_INVERSE_FAILED',
+            'SENS_NATIVE_PAIRED_FAILED',
+            'SENS_NATIVE_RESULT_MISMATCH',
+            'SENS_NATIVE_COMMITTED_DRIFT',
+            'semantic=NOT_CERTIFIED',
+            'release=NOT_CERTIFIED',
+            'if (( failed_files > 0 )); then',
+        ):
+            with self.subTest(fragment=fragment):
+                self.assertIn(fragment, script)
+        self.assertLess(script.index('--t5m-mint'), script.index('--t5m-view'))
+        self.assertLess(script.index('--t5m-view'), script.index('--t5m-pair'))
+
+    def test_sens_cli_view_verifies_the_same_zig_words(self):
+        main = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
+        repl = (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
+        self.assertIn('fn t5m_view_request(', main)
+        self.assertIn('repl::view_t5m_source_file(&source, &physical)', main)
+        self.assertIn('crate::zig_transport::decode_t5_exact_words(physical)', repl)
+        self.assertIn('restore_t5m_words(&expected, &actual)', repl)
+        self.assertIn('if canonical != physical', repl)
+        self.assertIn('native_t5m_view_roundtrips_actual_zig_bytes_and_rejects_other_source', repl)
+
