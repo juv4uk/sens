@@ -1,8 +1,7 @@
-"""Core3 checker COND cutover: pinned source and two-field D1-bit law."""
+"""Чинні D3/D1 закони SENS: джерельні свідки та негативні мутації."""
 import importlib.util
 from pathlib import Path
 import re
-import subprocess
 import sys
 import unittest
 
@@ -69,33 +68,44 @@ class Core3SourceCutover(unittest.TestCase):
 
 
 class Core4ObserverSourceCutover(unittest.TestCase):
-    CASES = {
-        "scripts/check-core4-predicate-answer-scale.lisp":
-            ("cbc2f3e50b28b7d78b52453c7434e9319095efd1", "pas"),
-        "experiments/core4-predicate-answer-carrier-matrix.lisp":
-            ("84bfc7effc2d378fad201a568763ca1401fe0fb7", "cam"),
-    }
+    # Джерела змінюються разом із мовою: історичний Git blob НЕ є оракулом.
+    # Зіставляємо поточну українську D3/D1 форму та два негативні мутанти.
+    CASES = (
+        ("scripts/check-core4-predicate-answer-scale.lisp",
+         "core4-predicate-answer-scale-ok",
+         "core4-predicate-answer-scale-mismatch"),
+        ("experiments/core4-predicate-answer-carrier-matrix.lisp",
+         "core4-answer-carrier-matrix-ok",
+         "core4-answer-carrier-matrix-mismatch"),
+    )
 
-    def test_two_observers_have_pinned_bit_predicate_and_literal_d1_fallback(self):
-        for path, (blob, prefix) in self.CASES.items():
+    def test_current_two_field_d1_and_negative_mutants(self):
+        for path, success, failure in self.CASES:
             with self.subTest(path=path):
-                original = subprocess.run(
-                    ["git", "cat-file", "blob", blob], cwd=ROOT,
-                    capture_output=True, check=True
-                ).stdout.decode("utf-8")
-                first = (
-                    f"((11110111 {prefix}-observed {prefix}-expected)\n"
-                    "   (1)\n"
-                )
-                second = "((11110111 1 1) 1\n"
-                self.assertEqual(original.count(first), 1)
-                self.assertEqual(original.count(second), 1)
-                expected = (original.replace(first, first.replace("   (1)\n", ""))
-                            .replace(second, "((010 (001 ()))\n"))
                 current = (ROOT / path).read_text(encoding="utf-8")
-                self.assertEqual(current, expected)
+                predicate = "((атом? (як-є ()))"
+                self.assertEqual(current.count(predicate), 1)
+                self.assertEqual(current.count("(за-умовою"), 1)
+                self.assertIn("(як-є (" + success + "))", current)
+                self.assertIn("(як-є " + failure + ")", current)
+                self.assertNotIn("(так ", current)
                 self.assertEqual(mod.scan_lisp(current, path), [],
-                                 "two-field D3 with exact D1 branch bits")
+                                 "поточна двопольова D3 COND, обчислювана істина D1")
+
+                host_truth = current.replace(predicate, "(t", 1)
+                self.assertIn(
+                    "COND_HOST_TRUTH",
+                    {finding.rule for finding in mod.scan_lisp(host_truth, path)},
+                    "старий host-t повинен бути знайдений, не підтверджений",
+                )
+                malformed = current.replace(
+                    predicate, predicate + " (як-є зайве)", 1,
+                )
+                self.assertIn(
+                    "COND_NOT_TWO_FIELDS",
+                    {finding.rule for finding in mod.scan_lisp(malformed, path)},
+                    "трипольова D3 COND не може пройти позитивним свідком",
+                )
 
 
 if __name__ == "__main__":
