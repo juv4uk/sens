@@ -1496,8 +1496,9 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
                     f'(визначити д{width} (завантажити-домен "lib/domains/d{width}.lisp"))',
                     source,
                 )
+                expected_key = "0" * width
                 self.assertIn(
-                    f'(перевірити-розширений-домен? д{width} {count} "{'0'*width}")',
+                    f'(перевірити-розширений-домен? д{width} {count} "{expected_key}")',
                     source,
                 )
         self.assertIn("PASS files=10 rows=2046 widths=1..10", source)
