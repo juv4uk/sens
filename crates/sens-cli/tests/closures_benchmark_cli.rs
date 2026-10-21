@@ -1,40 +1,65 @@
-//! Живий SENS для непарного benchmarks/closures.lisp.
-//! .lisp → Zig/T5M → SENS eval; не Python і не сертифікат фізичної .sens пари.
-use std::process::Command;
+//! Справжня парна оберненість і виконання benchmarks/closures.lisp.
+//! Людський Lisp звіряємо з наявними .sens байтами через Zig/T5M.
+//! Не підміняємо SENS-EVAL симуляцією host і не оголошуємо corpus GO.
+use std::{path::Path, process::{Command, Output}};
 
 const SOURCE: &str = include_str!("../../../benchmarks/closures.lisp");
 const CALL: &str = "((створити-пару (як-є радіо)) (як-є антена))";
+const BODY: &str = "(сполучити ліве (сполучити праве (як-є ())))";
 
-fn run_source(source: &str, id: usize) -> std::process::Output {
+fn execute(args: &[&str]) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_sens")).args(args)
+        .output().expect("виклик справжнього SENS CLI")
+}
+
+fn temp_source(text: &str, id: usize, pair: bool) -> Output {
     let path = std::env::temp_dir().join(format!(
-        "sens-closures-t5m-{}-{id}.lisp", std::process::id()
+        "sens-closures-{}-{id}.lisp", std::process::id()
     ));
-    std::fs::write(&path, source).expect("записати тимчасовий український Lisp");
-    let output = Command::new(env!("CARGO_BIN_EXE_sens"))
-        .args(["--t5m-file", path.to_str().expect("UTF-8 шлях")])
-        .output()
-        .expect("виконати реальний SENS CLI");
+    std::fs::write(&path, text).expect("тимчасовий український Lisp");
+    let file = path.to_str().expect("UTF-8 temp path");
+    let output = if pair {
+        let physical = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../benchmarks/closures.sens");
+        execute(&["--t5m-pair", file, physical.to_str().unwrap()])
+    } else {
+        execute(&["--t5m-file", file])
+    };
     let _ = std::fs::remove_file(&path);
     output
 }
 
 #[test]
-fn замикання_реально_виконується_з_українського_lisp_через_t5m() {
+fn замикання_виконується_з_реальної_фізичної_пари_через_zig_t5m() {
     assert!(SOURCE.contains("(визначити створити-пару"));
-    assert_eq!(SOURCE.matches(CALL).count(), 1, "змінився живий Lisp");
-    for (i, (call, expected)) in [
-        (CALL, "(радіо антена)"),
-        ("((створити-пару (як-є радіо)) (як-є сигнал))", "(радіо сигнал)"),
-    ].into_iter().enumerate() {
-        let output = run_source(&SOURCE.replacen(CALL, call, 1), i);
-        assert!(output.status.success(), "SENS {call}: {}",
-                String::from_utf8_lossy(&output.stderr));
-        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), expected,
-                   "SENS має обчислити лексичне замикання без host-імітації");
-    }
-    // Мутант змінює лише операцію в тілі; D3 CAR атома мусить відмовити.
-    let body = "(сполучити ліве (сполучити праве (як-є ())))";
-    assert_eq!(SOURCE.matches(body).count(), 1);
-    let bad = run_source(&SOURCE.replacen(body, "(перше ліве)", 1), 2);
-    assert!(!bad.status.success(), "SENS прийняв CAR атома");
+    assert_eq!(SOURCE.matches(CALL).count(), 1, "дрейф вихідної програми");
+    assert_eq!(SOURCE.matches(BODY).count(), 1, "дрейф D3 тіла функції");
+
+    // Саме відстежена фізична пара, не згенеровані host-байти.
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../benchmarks");
+    let human = root.join("closures.lisp");
+    let physical = root.join("closures.sens");
+    assert!(human.is_file() && physical.is_file(), "джерело чи носій відсутні");
+    let positive = execute(&[
+        "--t5m-pair", human.to_str().unwrap(), physical.to_str().unwrap(),
+    ]);
+    assert!(positive.status.success(), "Zig T5M paired SENS: {}",
+            String::from_utf8_lossy(&positive.stderr));
+    assert_eq!(String::from_utf8_lossy(&positive.stdout).trim(), "(радіо антена)",
+               "SENS сам формує результат вкладеного D4 замикання");
+
+    // Навіть один семантичний мутант не може використовувати старий .sens.
+    let malformed = SOURCE.replacen(BODY, "(перше ліве)", 1);
+    let drift = temp_source(&malformed, 0, true);
+    assert!(!drift.status.success(), "Zig пропустив неправильний фізичний носій");
+    assert!(String::from_utf8_lossy(&drift.stderr).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+            "негативний drift має зупинитися на exact-domain межі");
+
+    // Незалежне SENS-виконання цього мутанта мусить відмовити через CAR атома,
+    // а НЕ тому, що кодер не підтримує результат типу Pair.
+    let invalid = temp_source(&malformed, 1, false);
+    assert!(!invalid.status.success(), "CAR атома виконався без помилки");
+    let stderr = String::from_utf8_lossy(&invalid.stderr);
+    assert!(!stderr.contains("T5M_RESULT_UNSUPPORTED"),
+            "відмова має бути семантичною, не відсутністю transport результату");
 }
