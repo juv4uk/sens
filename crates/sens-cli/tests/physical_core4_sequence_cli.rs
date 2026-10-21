@@ -356,6 +356,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-append-general"
                 | "list-collapse-adjacent"
                 | "розділити-до-першого-входження"
+                | "вилучити-перше-входження"
                 | "list-unique-stable"
                 | "замінити-третій-в-четвірці"
         ) {
