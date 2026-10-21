@@ -309,6 +309,10 @@ jobs:
           if grep -Eq '^(crates/sens/tests/d11_unify_once[.]rs|lib/unify[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'd11_unify_once_tests=true' >> "$GITHUB_OUTPUT"
           fi
+          # Три функції D11 SI виконуються бібліотечними законами, не host-oracle.
+          if grep -Eq '^(crates/sens/tests/scientific_constants[.]rs|lib/si[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
+            echo 'd11_si_law_tests=true' >> "$GITHUB_OUTPUT"
+          fi
           # Лише змінені T5M інструменти одержують адресний Zig-свідок.
           if grep -Eq '^(scripts/migrate-three-pass\.py|scripts/migration_publish_pair\.py|tests/test_migrate_one_to_sens\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'migration_refresh_tests=true' >> "$GITHUB_OUTPUT"
@@ -899,6 +903,9 @@ jobs:
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_runtime_tests }}" == "true" ]]; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --test physical_core4_sequence_cli d11_selector_suffix_law_runs_in_native_sens -- --exact --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test persistent_vector d11_ -- --nocapture
+          fi
+          if [[ "${{ steps.changed-t5m-lisp.outputs.d11_si_law_tests }}" == "true" ]]; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test scientific_constants d11_si_ -- --nocapture
           fi
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_unify_once_tests }}" == "true" ]]; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test d11_unify_once -- --nocapture
