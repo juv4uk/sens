@@ -1322,13 +1322,30 @@ fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
     }
 }
 
-fn render_repl_ast(source: &str) -> Result<String, String> {
+fn render_repl_ast(
+    source: &str,
+    surface: ReplSurface,
+    session: &Session,
+) -> Result<String, String> {
     let forms = sens::parse_mixed_exact_domain(source).map_err(|error| error.render(source))?;
     if forms.is_empty() {
         return Ok("Порожній ввід — форм для показу немає.".into());
     }
 
+    // Перегляд проходить той самий шлях вибраної поверхні → точних слів →
+    // Zig/T5M, що й оцінювання, але зупиняється до допуску та виконання SENS.
+    // Початкове дерево показуємо лише після безвтратної перевірки слів.
+    let words = prepare_t5m_repl_words(source, surface, session)?;
+    let restored = t5m_roundtrip_words(&words)?;
+    if restored != words {
+        return Err("T5M_REPL_PREVIEW_MISMATCH: restored words differ".into());
+    }
+
     let mut lines = Vec::new();
+    lines.push(format!(
+        "T5M Zig roundtrip: {} точних слів; виконання не запускалося.",
+        restored.len()
+    ));
     for (index, form) in forms.iter().enumerate() {
         lines.push(format!("Форма {}", index + 1));
         render_repl_ast_node(source, form, 1, &mut lines);
@@ -1490,7 +1507,7 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
             if source.is_empty() {
                 eprintln!("Використання: :розбір <форма>");
             } else {
-                match render_repl_ast(source) {
+                match render_repl_ast(source, state.surface, &state.session) {
                     Ok(output) => println!("{output}"),
                     Err(error) => eprintln!("Помилка розбору SENS:\n{error}"),
                 }
@@ -1622,15 +1639,19 @@ mod tests {
     #[test]
     fn repl_parse_preview_renders_nested_ast_and_source_syntax_errors() {
         let source = "(атом? (як-є ()))";
-        let rendered = render_repl_ast(source).expect("валідна форма має показати AST");
+        let session = Session::default();
+        let rendered = render_repl_ast(source, ReplSurface::UkrainianFull, &session)
+            .expect("валідна форма має пройти T5M і показати AST");
 
+        assert!(rendered.contains("T5M Zig roundtrip"), "{rendered}");
         assert!(rendered.contains("Форма 1"), "{rendered}");
         assert!(rendered.contains("Список"), "{rendered}");
         assert!(rendered.contains("Доменна identity"), "{rendered}");
         assert!(rendered.contains("атом?"), "{rendered}");
 
         let invalid = "(атом?";
-        let error = render_repl_ast(invalid).expect_err("незакрита форма має показати помилку");
+        let error = render_repl_ast(invalid, ReplSurface::UkrainianFull, &session)
+            .expect_err("незакрита форма має показати помилку");
         assert!(error.contains("line/riadok/Zeile 1:"), "{error}");
         assert!(error.contains(invalid), "{error}");
         assert!(error.contains('^'), "{error}");
