@@ -316,6 +316,17 @@ mod exact_t5_cutover_tests {
             parse_exact_domain_words(&words)
         }
 
+        fn shape(expr: &Expr) -> String {
+            match &expr.kind {
+                ExprKind::List(items) => format!("({})",
+                    items.iter().map(shape).collect::<Vec<_>>().join(" ")),
+                ExprKind::Pair(head, tail) => format!("({} . {})", shape(head), shape(tail)),
+                ExprKind::DomainIdentity(word) =>
+                    format!("D{}:{}", word.width(), word.packed_bits()),
+                other => format!("{other:?}"),
+            }
+        }
+
         for source in [
             "10 01",
             "10 001 00 100 01",
@@ -330,7 +341,7 @@ mod exact_t5_cutover_tests {
                 .expect("same exact D2 structure after T5M restoration");
             assert_eq!(physical.len(), canonical.len(), "{source}");
             for (left, right) in physical.iter().zip(canonical.iter()) {
-                assert_eq!(format!("{:?}", left.kind), format!("{:?}", right.kind),
+                assert_eq!(shape(left), shape(right),
                     "D2 AST mismatch: {source}");
             }
         }
