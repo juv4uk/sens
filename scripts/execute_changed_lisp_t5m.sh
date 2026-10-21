@@ -58,6 +58,16 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/knowledge.lisp
                      --binding-source lib/reason.lisp
                      --binding-source lib/unify.lisp)
+  elif [[ "$file" == "lib/translation.lisp" ]]; then
+    # Переклад викликає лише реальні визначення: знання/світ та D8
+    # класифікацію тексту з Yantra. Каталог D9/D10 сам по собі
+    # не надає виконуваності; парний SENS надалі перевіряє семантику.
+    binding_sources=(--binding-source lib/knowledge.lisp
+                     --binding-source lib/world.lisp
+                     --binding-source lib/yantra.lisp
+                     --binding-source lib/result-status.lisp
+                     --binding-source lib/reason.lisp
+                     --binding-source lib/unify.lisp)
   fi
   python3 scripts/migrate-three-pass.py "$file" \
     --out "$dir" --report "$report" --codec t5m --source-surface укр "${binding_sources[@]}" \
