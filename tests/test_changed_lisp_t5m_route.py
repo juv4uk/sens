@@ -82,6 +82,21 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertIn("committed_drift=1 semantic=NOT_CERTIFIED", outcome.stdout)
             self.assertIn("files_checked=1 files_failed=1", outcome.stdout)
 
+            # Друга незалежна межа: .sens вже тотожний, але опубліковане
+            # символьне подання відсутнє. Нова пара все одно перевіряється.
+            (root / "test.sens").write_bytes(b"new")
+            (root / "test").unlink()
+            (root / "invoked.marker").unlink()
+            missing_view = subprocess.run(
+                ["bash", str(RUNNER), str(spy), "changed.txt", "evidence-missing-view"],
+                cwd=root, capture_output=True, text=True, timeout=15,
+            )
+            self.assertEqual(missing_view.returncode, 2, missing_view.stdout + missing_view.stderr)
+            self.assertIn("T5M_COMMITTED_VIEW_MISSING", missing_view.stderr)
+            self.assertTrue((root / "invoked.marker").exists())
+            self.assertIn("T5M_DIAGNOSTICS_CONTINUE", missing_view.stdout)
+            self.assertIn("files_checked=1 files_failed=1", missing_view.stdout)
+
     def test_w24_is_executed_only_from_a_verified_physical_pair(self):
         # Структурний свідок маршруту; реальне SENS-eval перевіряє Rust CLI.
         source = RUNNER.read_text(encoding="utf-8")
