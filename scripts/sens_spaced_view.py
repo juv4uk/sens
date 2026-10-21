@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Канонічний людський перегляд T5: фізичний .sens <-> слова 0/1.
+"""Канонічний перегляд T5M: фізичний .sens <-> точні слова 0/1.
 
 Це НЕ новий семантичний reader і НЕ доказ українського .lisp oracle.
-Використовується лише чинний scripts/sens_t5_codec.py. #4694.
+T5M є типовим; T5 — лише явна історична сумісність.
+Інструмент не пакує нових .sens: фізичні байти створює Zig. #4694.
 """
 from __future__ import annotations
 
@@ -28,7 +29,7 @@ class ViewError(ValueError):
     """Блокувальна помилка: невірне джерело, шлях або неканонічний перегляд."""
 
 
-def parse_view(blob: bytes, *, codec: str = "t5") -> list[str]:
+def parse_view(blob: bytes, *, codec: str = "t5m") -> list[str]:
     """Точні слова, один пробіл і LF. D24+ у T5M не обрізаємо до D9."""
     if codec not in ("t5", "t5m"):
         raise ViewError("unknown physical codec; choose t5m or explicit legacy t5")
@@ -38,7 +39,7 @@ def parse_view(blob: bytes, *, codec: str = "t5") -> list[str]:
     return [item.decode("ascii") for item in blob[:-1].split(b" ")]
 
 
-def render_view(words: list[str], *, codec: str = "t5") -> bytes:
+def render_view(words: list[str], *, codec: str = "t5m") -> bytes:
     """Не виводити текстового транспортного трита 2 чи ширинних префіксів."""
     if not words:
         raise ViewError("cannot render empty word sequence")
@@ -136,7 +137,7 @@ def verify_actual_rust_d2(reader: Path, source: Path, canonical_view: bytes) -> 
 
 def check_or_stage(root: Path, relative: str, *, stage: Path | None = None,
                    preview: bool = False, reader: Path | None = None,
-                   codec: str = "t5") -> dict:
+                   codec: str = "t5m") -> dict:
     rel = _relative_sens(relative)
     source = _source_path(root, rel)
     lisp_name, lisp_bytes = _source_lisp(source)
@@ -213,8 +214,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--sens", required=True, help="one explicit relative file.sens; no bulk scan")
-    parser.add_argument("--codec", choices=("t5m", "t5"), default="t5",
-                        help="t5m: current physical carrier; t5: legacy explicit route")
+    parser.add_argument("--codec", choices=("t5m", "t5"), default="t5m",
+                        help="t5m: current physical carrier (default); t5: explicit legacy route")
     commands = parser.add_mutually_exclusive_group(required=True)
     commands.add_argument("--verify", action="store_true", help="read-only check committed triple")
     commands.add_argument("--stage", type=Path, help="existing OUTSIDE-repo staging directory; no overwrite")
