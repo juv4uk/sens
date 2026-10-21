@@ -62,6 +62,16 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     mark_file_failed
     continue
   fi
+  # Відхиляємо підставлений фізичний носій ДО мігратора й будь-якого
+  # виконання. Симлінк (навіть dangling), каталог або FIFO не є .sens.
+  # Інакше перевірка після mint дозволяє непотрібні сторонні дії.
+  committed_input="$(dirname "$file")/$(basename "$file" .lisp).sens"
+  if [[ -e "$committed_input" || -L "$committed_input" ]] &&
+     [[ ! -f "$committed_input" || -L "$committed_input" ]]; then
+    echo "::error::T5M_COMMITTED_PAIR_NOT_REGULAR source=$file companion=$committed_input" >&2
+    mark_file_failed
+    continue
+  fi
   id="$(printf '%s' "$file" | sha256sum | cut -c1-16)"
   dir="$outdir/$id"
   mkdir -p "$dir"
