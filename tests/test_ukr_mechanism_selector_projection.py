@@ -126,14 +126,21 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
 
     def test_exact_d1_registry_predicate_not_old_textual_boolean(self):
         code = uncommented(self.source)
-        self.assertIn("((атом? рядки) ні)", code)
-        self.assertIn("((тотожне? ідентичність (перше (перше рядки))) так)", code)
+        true_d1 = "(атом? (як-є ()))"
+        false_d1 = "(атом? (як-є (())))"
+        self.assertIn("((атом? рядки) " + false_d1 + ")", code)
+        self.assertIn(
+            "((тотожне? ідентичність (перше (перше рядки))) "
+            + true_d1 + ")", code,
+        )
+        self.assertNotRegex(code, r"(?<![\w-])(?:так|ні)(?![\w-])")
         self.assertNotIn("(як-є yes)", code)
         self.assertNotIn("(як-є no)", code)
         self.assertRegex(
             code,
             r"\(реєстр-містить-ідентичність\?\s+"
-            r"ідентичність\s+рядки-реєстру-механізму\)\s+ні\)",
+            r"ідентичність\s+рядки-реєстру-механізму\)\s+"
+            + re.escape(false_d1) + r"\)",
         )
 
     def test_only_balanced_source_parentheses_outside_strings_and_comments(self):
