@@ -165,6 +165,7 @@ jobs:
           # Реальне SENS виконання українських D1/D3 правил:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
           cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
+          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime -- --nocapture
           cargo test --locked -p sens --test result_status -- --nocapture
 
       # Лише адресний Zig/T5M-експорт після змін у виконуваних Lisp.
@@ -458,7 +459,8 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE"; fi
           if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
             git fetch --no-tags --depth=1 origin "$base"
-            changed="$(git diff --name-only "$base" HEAD -- lib/machine/operands/x86-64.lisp crates/sens/tests/machine_typed_operands.rs .github/workflows/ci.yml)"
+            # Незалежні правки CI не є змінами машинних операндів.
+            changed="$(git diff --name-only "$base" HEAD -- lib/machine/operands/x86-64.lisp crates/sens/tests/machine_typed_operands.rs)"
             if [[ -z "$changed" ]]; then
               echo "SENS-ОПЕРАНДИ: закони не змінювалися, важкий тест не запускаємо"
               exit 0
