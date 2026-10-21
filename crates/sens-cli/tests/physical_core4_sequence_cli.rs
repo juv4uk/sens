@@ -326,6 +326,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-unzip-pairs-general",
         "list-palindrome-atoms-general",
         "list-multiset-difference-general",
+        "list-stable-union-general",
+        "list-cartesian-product-general",
+        "list-neighbor-windows-general",
+        "list-remove-all-atoms-general",
+        "list-stable-intersection-general",
         "list-atom-sequence-equal-general",
         "list-split-last-occurrence-general",
         "list-swap-adjacent-pairs",
@@ -392,6 +397,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-unzip-pairs-general"
                 | "list-palindrome-atoms-general"
                 | "list-multiset-difference-general"
+                | "list-stable-union-general"
+                | "list-cartesian-product-general"
+                | "list-neighbor-windows-general"
+                | "list-remove-all-atoms-general"
+                | "list-stable-intersection-general"
                 | "list-atom-sequence-equal-general"
                 | "list-split-last-occurrence-general"
                 | "list-swap-adjacent-pairs"
