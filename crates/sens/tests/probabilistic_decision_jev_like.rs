@@ -410,6 +410,16 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
                 (список-спостережень-системи-один-допустимий?
                   questions answers (як-є ()))
                 (усі-запитання-системи-один-відповіли? questions answers)
+                ; Точні причини, чому агрегований список міг бути відхилений:
+                (рішення-містить? (друге (перше answers)) questions)
+                (рішення-містить? (друге (перше (решта answers))) questions)
+                (рішення-містить? (друге (перше (решта (решта answers)))) questions)
+                (рішення-містить? (друге (друге (перше answers)))
+                  (список (друге choice-question) (друге noul-question) (друге score-question)))
+                (рішення-містить? (друге (друге (перше (решта answers)))
+                  (список (друге choice-question) (друге noul-question) (друге score-question)))
+                (рішення-містить? (друге (друге (перше (решта (решта answers))))
+                  (список (друге choice-question) (друге noul-question) (друге score-question)))
                 (допустимий-розподіл? (як-є (yes no)) (третє (друге answers))))"#,
         );
         let witnesses = eval_probabilistic_decision(&diagnostic);
