@@ -384,6 +384,25 @@ fn yantra_named_json_readers_preserve_present_missing_and_empty_values_in_live_s
 }
 
 #[test]
+fn yantra_model_transport_failure_and_empty_response_are_blocked_in_real_sens() {
+    // Сам виконавець SENS перевіряє два негативні результати; ні HTTP,
+    // ні Rust/Python не вирішують, чи це успішна відповідь помічника.
+    let mut session = agent_session();
+    for source in [
+        "(перше (янтра-обробити-транспортний-результат (список 7 \"\" \"відмова\")))",
+        "(перше (янтра-перевірити-одержане-повідомлення (як-є ())))",
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS transport guard {source}: {error}"))
+            .value;
+        let expected = eval_program("(як-є заблоковано)", &mut session)
+            .expect("чинний SENS мусить читати заблокований стан")
+            .value;
+        assert_eq!(actual, expected, "відмову/порожню відповідь не можна вважати успіхом: {source}");
+    }
+}
+
+#[test]
 fn yantra_missing_json_key_is_safe_and_empty() {
     let mut session = agent_session();
     let actual = eval_program(
