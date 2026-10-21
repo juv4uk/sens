@@ -48,6 +48,30 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertIn(current, generator)
         self.assertNotIn("my-lisp-cli --bin my-lisp", document)
 
+    def test_constitution_example_is_current_sens_not_host_racket(self):
+        # Перевірка вихідних форм і незмінності цитованих даних.
+        # Справжній SENS runtime/ T5M-зворотність — окремий доказ.
+        program = source("racket/examples/constitution.lisp")
+        self.assertFalse(program.startswith("#lang "))
+        self.assertNotRegex(program, r"(?m)^\s*\((?:displayln|defmacro|def|quote|cond)\b")
+        self.assertNotIn("defmacro", program)
+        self.assertNotIn("`(if", program)
+        # У початковому прикладі 12 фактичних виводів: збережено
+        # як точні позиції друку, а не намальовані тестові результати.
+        self.assertEqual(program.count("(друкувати"), 12)
+        for math in ("(поділити 5 336)", "(поділити 5.0 2)"):
+            with self.subTest(math=math):
+                self.assertIn(math, program)
+        for quoted in ("constitution", "x", "a", "b", "лісп", "лісп-працює"):
+            with self.subTest(quoted=quoted):
+                self.assertIn(f"(як-є {quoted})", program)
+        self.assertIn("(так ні)", program)
+        self.assertIn("(друкувати (як-є лісп-працює))", program)
+        # Перевірка не вважає відновлення коментарів умовою оберненості.
+        guide = source("racket/README.md")
+        self.assertIn("sens-cli --bin sens -- racket/examples/constitution.lisp", guide)
+        self.assertNotIn("racket examples/constitution.lisp", guide)
+
     def test_core_sources_follow_full_ukrainian_projection_without_changing_domain_identity(self):
         core = source("lib/core.lisp")
         core4 = source("lib/core4.lisp")
