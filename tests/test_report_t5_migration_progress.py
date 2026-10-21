@@ -275,7 +275,9 @@ class T5ProgressLedgerTests(unittest.TestCase):
         self.assertIsNone(report["summary"]["admitted_executable_semantics"])
         for row in report["files"]:
             self.assertTrue(row["sens"].endswith(".sens"))
-            self.assertTrue(row["source"].endswith(".lisp"))
+            # The physical auditor also accepts exact .bits-backed fixtures.
+            # Their existence never proves an unpaired executable .lisp.
+            self.assertTrue(row["source"].endswith((".lisp", ".bits")))
 
 
 if __name__ == "__main__":
