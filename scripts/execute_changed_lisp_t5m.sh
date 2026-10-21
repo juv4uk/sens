@@ -34,9 +34,13 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   # Це точне джерело завантажуваного DEFINE, не дозвіл викликати
   # кожного резидента D9 без реалізації.
   if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
-    # Forward звертається до визначеного SENS-функцією «уніфікувати»,
-    # так само як Reason; перевіряємо реальний DEFINE, не лише D9-каталог.
+    # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
+  elif [[ "$file" == "lib/narrate.lisp" ]]; then
+    # Пояснення бере «походження» з живого DEFINE lib/reason.lisp;
+    # Reason, у свою чергу, користується визначеннями уніфікації.
+    # Обидва джерела лише свідчать завантажувані механізми — не вигадують D9.
+    binding_sources=(--binding-source lib/reason.lisp --binding-source lib/unify.lisp)
   fi
   python3 scripts/migrate-three-pass.py "$file" \
     --out "$dir" --report "$report" --codec t5m --source-surface укр "${binding_sources[@]}" \
