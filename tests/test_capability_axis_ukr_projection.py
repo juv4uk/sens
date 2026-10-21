@@ -1,8 +1,9 @@
 """Regression for the current exact-domain machine capability projection.
 
-Active source must use ratified Ukrainian D3/D4 call heads and D1 YES as the
-surface value `так`. Historical SID8 spellings remain in Git history only;
-actual lookup/evaluation behavior is covered by crates/sens/tests/machine_capability_axis.rs.
+This is a source-only guard for ratified Ukrainian heads; D1 truth must
+be computed by SENS, never accepted as an unbound `так` atom.
+Numeric domain coordinates are constructed as D24+ values, not quoted
+decimal data. The Rust integration tests prove actual SENS execution.
 """
 from __future__ import annotations
 
@@ -69,6 +70,15 @@ class CapabilityAxisUkrProjectionTests(unittest.TestCase):
         for surface in ("визначити", "функція", "як-є", "за-умовою",
                         "атом?", "тотожне?", "перше", "решта"):
             self.assertRegex(source, r"[(]" + re.escape(surface) + r"(?=\s)")
+
+    def test_exact_numeric_coordinates_are_constructed_not_quoted(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        self.assertIn("(список 5 10 (як-є ((integer-add", source)
+        self.assertIn("(визначити можливість-числові-координати-рівні?", source)
+        self.assertIn("(менше? ліве праве)", source)
+        self.assertIn("(менше? праве ліве)", source)
+        self.assertNotIn("(однакові? ширина-домену", source)
+        self.assertNotIn("(однакові? біти-домену", source)
 
     def test_d1_verdicts_are_executed_predicates_not_unbound_names(self):
         source = SOURCE.read_text(encoding="utf-8")
