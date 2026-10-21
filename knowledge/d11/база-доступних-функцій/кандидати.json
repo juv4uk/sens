@@ -3296,13 +3296,19 @@
         "law": "Вилучає тільки перший структурно рівний елемент; відсутній елемент лишає список, атомарна або порожня послідовність дає ().",
         "native_law_test": "crates/sens/tests/world_ancestor_sens.rs::d11_world_remove_first_native_law_and_mutant",
         "native_test_blob": "1a9344d6e08b3bc4378beabcc7daf4cef25ed2a4",
-        "native_test_run_status": "ADDED_NOT_YET_ASSERTED_CI_PASS",
+        "native_test_run_status": "NATIVE_SENS_PASS",
         "previous_SENS_witness": "tests/semantic/world-exact-arity-witness.lisp",
         "semantic_defined": true,
         "direct_d11_opcode_verified": false,
         "new_primitive": false,
         "selection_basis": "Зайняти дослідне місце з точним історичним донором, живою українською функцією та нативним D1-свідком; не створювати дубль",
-        "not_a_research_placeholder": true
+        "not_a_research_placeholder": true,
+        "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39688959055",
+        "native_ci_job": 119530054486,
+        "native_ci_exact_test": "test d11_world_remove_first_native_law_and_mutant ... ok",
+        "native_assertions": 5,
+        "negative_mutant": "D1:0 confirmed",
+        "native_ci_scope": "TARGETED_TEST_PASSED_WORKFLOW_FAILED_OTHER_STEPS"
       }
     },
     {
