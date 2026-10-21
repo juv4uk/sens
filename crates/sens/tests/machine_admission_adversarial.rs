@@ -82,15 +82,15 @@ fn x86_exact_integer_wire_checks_return_typed_d1() {
     ] {
         let result = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"));
-        // На невідповідності — реальний SENS D8 wire, D9 prefix/scan, D1.
+        // На невідповідності — реальні SENS D6/D24+ і D1, без текстового wire.
         // Жодної паралельної семантики чи Python/JSON-оракула.
         let diagnosis = if result.value.as_predicate_bit() != Some(expected) {
             [
-                "(значення-у-текст 7)",
-                "(рядок-префікс? \"#q2:\" (значення-у-текст 7))",
-                "(машина-допуск-знаменник-одиниця? (значення-у-текст 7))",
-                "(рядок-префікс? \"1\" \"1\")",
-                "(рядок-порожній? \"\")",
+                "(ціле? 7)",
+                "(ціле? -7)",
+                "(ціле? 7/2)",
+                "(ціле? \"7\")",
+                "(машина-допуск-точне-ціле? 7)",
             ]
             .into_iter()
             .map(|probe| {

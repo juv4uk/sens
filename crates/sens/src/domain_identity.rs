@@ -110,8 +110,8 @@ impl DomainIdentity {
     /// семантичної residency.
     ///
     /// D3/D4/D5 мають admitted Core-operation projection. D6 є OWNER-RATIFIED
-    /// 64/64 під #3393, але callable projection тут точковий: лише D6:001110
-    /// ADD1 і D6:001111 SUB1 admitted під #3394 як LOWER_DOMAIN_COMPOSITION.
+    /// 64/64 під #3393; окремі чинні механізми — D6:001110 ADD1,
+    /// D6:001111 SUB1 та D6:111110 INTEGERP (точне D24+ -> D1).
     /// Інші D6 residents лишаються fail-closed; residency не дорівнює mechanism.
     /// D8 так само OWNER-RATIFIED #3960.
     /// D9 OWNER-RATIFIED #4008. Лише п'ять реалізованих string-механізмів
@@ -123,7 +123,7 @@ impl DomainIdentity {
             Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
             Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
             Self::D6(value)
-                if matches!(value.word().packed_bits(), 0b001110 | 0b001111) =>
+                if matches!(value.word().packed_bits(), 0b001110 | 0b001111 | 0b111110) =>
             {
                 Some(CoreDomainIdentity::D6(value))
             }

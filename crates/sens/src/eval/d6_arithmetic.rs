@@ -28,8 +28,25 @@ pub(super) fn invoke(
     };
 
     let bits = word.word().packed_bits();
-    if !matches!(bits, 0b001110 | 0b001111) {
+    if !matches!(bits, 0b001110 | 0b001111 | 0b111110) {
         return None;
+    }
+
+    // D6:111110 INTEGERP читає тільки явний D24+ числовий тип.
+    // RATIO(p,1) канонічно стає BinaryNumber, а дріб — NumericComposition.
+    // Ні #q2, ні D8 wire, ні Unicode не визначають математичну істину.
+    if bits == 0b111110 {
+        if args.len() != 1 {
+            return Some(Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!("{identity}: D6 INTEGERP expects 1 argument; received {}", args.len()),
+                span,
+            )));
+        }
+        return Some(Ok(Value::predicate_bit(matches!(
+            &args[0],
+            Value::BinaryNumber(number) if number.numeric_domain_width().is_some()
+        ))));
     }
 
     if args.len() != 1 {
@@ -134,6 +151,33 @@ mod tests {
         assert_eq!(
             invoke(add1, &[negative], &env, Span::default()).unwrap().unwrap(),
             d24(0),
+        );
+    }
+
+    #[test]
+    fn integerp_uses_exact_d24_identity_not_historical_q2_text() {
+        let env = Environment::root();
+        let integerp = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b111110).unwrap(),
+        ));
+        let fraction = crate::domain_numeric::compute("/", &d24(7), &d24(2))
+            .expect("D5 yields an exact noninteger fraction");
+        assert!(matches!(fraction, Value::NumericComposition(_)));
+        for (input, expected) in [
+            (d24(7), true), (d24(-7), true), (d24(0), true),
+            (fraction, false),
+            (Value::String(std::rc::Rc::from("7")), false),
+            (Value::String(std::rc::Rc::from("#q2:111/1")), false),
+            (Value::Nil, false),
+            (Value::Rational(crate::Rational::integer(7)), false),
+        ] {
+            let output = invoke(integerp, &[input], &env, Span::default())
+                .expect("D6 INTEGERP resident").expect("D6 INTEGERP executes");
+            assert_eq!(output.as_predicate_bit(), Some(expected));
+        }
+        assert_eq!(
+            invoke(integerp, &[], &env, Span::default()).unwrap().unwrap_err().kind,
+            ErrorKind::Arity
         );
     }
 

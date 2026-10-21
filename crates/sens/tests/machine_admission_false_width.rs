@@ -29,31 +29,32 @@ fn shorter_quoted_singleton_preserves_observable_d1_no() {
 }
 
 #[test]
-fn admission_source_uses_current_d1_no_and_d8_integer_checks_without_old_sentinel() {
-    // Після вилучення застарілого helper знаменника лишилося 26 D1:NO:
-    // одна стара відмова більше не існує, а не вважається успіхом.
-    assert_eq!(SOURCE.matches("(атом? (як-є (000)))").count(), 26,
+fn admission_source_uses_current_d1_no_and_d6_integer_checks_without_old_sentinel() {
+    // Старі текстові помічники видалено, але явні D1:NO залишилися.
+    assert_eq!(SOURCE.matches("(атом? (як-є (000)))").count(), 22,
         "поточні гілки відмови повинні повертати точний D1:NO у SENS");
-    assert!(SOURCE.contains("(визначити машина-допуск-знаменник-одиниця?"));
+    assert!(!SOURCE.contains("(визначити машина-допуск-знаменник-одиниця?"));
     assert!(!SOURCE.contains("(визначити машина-допуск-цифра?"));
     assert!(!SOURCE.contains("(визначити машина-допуск-цифри?"));
     assert!(!SOURCE.contains("(010 (001 (000)))"),
         "неповернений старий бітовий call head у виконуваному Lisp");
     assert!(!SOURCE.contains("(00000000)"),
         "історична восьмибітна позначка не повинна повертатися");
-    assert!(SOURCE.contains("(значення-у-текст значення)"),
-        "реальний український D8 WRITE-TO-STRING мусить залишитися виконуваним");
+    assert!(SOURCE.contains("(ціле? значення)"),
+        "ратифікований D6 INTEGERP має перевіряти точне D24+ число");
+    assert!(!SOURCE.contains("(значення-у-текст значення)"),
+        "застарілий D8 writer не визначає цілочисельність");
     assert!(!SOURCE.contains("(11110100 value)"),
         "застарілу D8 викличну голову не можна повертати замість поверхні");
 
     let expressions = parse_mixed_exact_domain_machine_source(PATH, SOURCE)
         .expect("увесь admission-файл має проходити суворий машинний reader");
-    assert_eq!(expressions.len(), 19, "чинні D4 помічники: точний wire-знаменник замість двох застарілих десяткових розпізнавачів");
-    // Чинний D8 подає числове wire-представлення, не людське десяткове "7".
-    assert!(SOURCE.contains("(визначити машина-допуск-знаменник-одиниця?"));
+    assert_eq!(expressions.len(), 17, "видалено два застарілі текстові помічники");
+    // D6 працює з точним числом, а не історичним текстовим #q2.
+    assert!(!SOURCE.contains("(визначити машина-допуск-знаменник-одиниця?"));
     assert!(!SOURCE.contains("(визначити машина-допуск-цифра?"));
     assert!(!SOURCE.contains("(визначити машина-допуск-цифри?"));
-    assert!(SOURCE.contains("(визначити машина-допуск-текст-точне-ціле?"));
+    assert!(!SOURCE.contains("(визначити машина-допуск-текст-точне-ціле?"));
     assert!(!SOURCE.contains("((функція"),
         "невикличні анонімні D5 value-call не мають повертатися в допуск");
     for definition in &expressions {
