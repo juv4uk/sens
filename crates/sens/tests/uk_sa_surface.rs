@@ -31,7 +31,7 @@
 //!   one of those SA spellings (viyoga/guṇana/haraṇa/hīna?/adhika?/sama?)
 //!   against their UK/symbolic peers.
 
-use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, lower_program, parse_mixed_exact_domain, Session};
 
 fn load_surface_prerequisites(session: &mut Session) {
     for source in [
@@ -187,7 +187,9 @@ fn peer_identity_acceptance_program_passes() {
     let source = include_str!("../../../lib/surface/peer-identity-acceptance.lisp");
     let parsed = parse_mixed_exact_domain(source)
         .expect("чинний український D1/D24+ читач має приймати програму");
-    let r = eval_parsed_expressions(&parsed, &mut s)
+    // Поточні «так»/«ні» — канонічні D1, а не host-змінні.
+    let lowered = lower_program(&parsed);
+    let r = eval_parsed_expressions(&lowered, &mut s)
         .expect("Ukrainian D1/D3/D24+ acceptance program should evaluate");
     assert_eq!(r.value.to_string(), "успіх");
 }
@@ -203,7 +205,9 @@ fn peer_identity_acceptance_wrong_abs_expectation_is_detected() {
     let mut s = uk_session();
     let parsed = parse_mixed_exact_domain(&mutant)
         .expect("негативний мутант повинен зберігати чинний D1/D24+ синтаксис");
-    let r = eval_parsed_expressions(&parsed, &mut s)
+    // Поточні «так»/«ні» — канонічні D1, а не host-змінні.
+    let lowered = lower_program(&parsed);
+    let r = eval_parsed_expressions(&lowered, &mut s)
         .expect("mutant must execute in actual SENS evaluator");
     assert_eq!(r.value.to_string(), "помилка-модуль");
 }
