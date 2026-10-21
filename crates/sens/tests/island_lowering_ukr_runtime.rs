@@ -1,6 +1,6 @@
 //! Справжній SENS-eval: обрізане повідомлення маршруту не дістає D6 четверте.
 //! Ця перевірка не є T5M-атестацією всього корпуса й не використовує Python.
-use sens::{eval_parsed_expressions, load_core_library, parse_mixed_exact_domain, Session};
+use sens::{eval_parsed_expressions, load_core_library, lower_program, parse_mixed_exact_domain, Session};
 const ISLAND: &str = include_str!("../../../lib/island-lowering.lisp");
 
 fn session() -> Session {
@@ -9,14 +9,18 @@ fn session() -> Session {
         .expect("штатний bootstrap SENS має встановити виконавчі закони");
     let parsed = parse_mixed_exact_domain(ISLAND)
         .expect("український текст островів має розбиратися точним SENS reader");
-    eval_parsed_expressions(&parsed, &mut session)
+    // Ратифіковані українські «так» й «ні» мають власні біти D1.
+    // Без точного зниження тест шукав би їх як незв'язані змінні.
+    let lowered = lower_program(&parsed);
+    eval_parsed_expressions(&lowered, &mut session)
         .expect("поточні визначення островів мають виконатися у SENS");
     session
 }
 
 fn evaluated(s: &mut Session, source: &str) -> Result<sens::Value, sens::LanguageError> {
     let parsed = parse_mixed_exact_domain(source)?;
-    Ok(eval_parsed_expressions(&parsed, s)?.value)
+    let lowered = lower_program(&parsed);
+    Ok(eval_parsed_expressions(&lowered, s)?.value)
 }
 
 fn observed(s: &mut Session, source: &str) -> String {
