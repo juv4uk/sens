@@ -42,3 +42,46 @@ fn d4_bridge_rejects_missing_source_and_malformed_observation() {
         "(projection-failure malformed-observation)",
     );
 }
+
+#[test]
+fn d4_bridge_refuses_truncated_and_ambiguous_protocol_fields() {
+    let mut s = session();
+    // SENS виконує справжні DEFINE з lib/bridge/prolog-to-datalog.lisp.
+    // Синтетичні протокольні записи лише вхідні дані, не Rust-оракул.
+    for (case, fields, expected) in [
+        (
+            "source-no-value",
+            "(source-ref) (variable ancestor) (values bob)",
+            "(projection-failure missing-source-ref)",
+        ),
+        (
+            "source-extra-value",
+            "(source-ref observation-42 duplicate) (variable ancestor) (values bob)",
+            "(projection-failure malformed-source-ref)",
+        ),
+        (
+            "variable-no-role",
+            "(source-ref observation-42) (variable) (values bob)",
+            "(projection-failure missing-variable-role)",
+        ),
+        (
+            "variable-extra-role",
+            "(source-ref observation-42) (variable ancestor duplicate) (values bob)",
+            "(projection-failure malformed-variable-role)",
+        ),
+        (
+            "values-dotted-tail",
+            "(source-ref observation-42) (variable ancestor) (values bob . dave)",
+            "(projection-failure malformed-values)",
+        ),
+    ] {
+        let source = format!(
+            "(перетворити-підстановки-пролог-на-факти-даталог (як-є (prolog-substitution-observation {fields})))"
+        );
+        let actual = eval(&source, &mut s);
+        assert_eq!(
+            actual, expected,
+            "test_id=prolog-datalog-shape layer=SENS-eval case={case} input={source} expected={expected} actual={actual}"
+        );
+    }
+}
