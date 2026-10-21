@@ -98,7 +98,14 @@ PY
     failed_files=$((failed_files + 1))
     continue
   fi
-  if [[ -f "$committed" ]]; then
+  if [[ -e "$committed" || -L "$committed" ]]; then
+    # Опублікований носій повинен бути звичайним файлом, не symlink,
+    # каталогом чи іншим об'єктом, що імітує фізичну T5M-пару.
+    if [[ ! -f "$committed" || -L "$committed" ]]; then
+      echo "::error::T5M_COMMITTED_PAIR_NOT_REGULAR source=$file companion=$committed" >&2
+      failed_files=$((failed_files + 1))
+      continue
+    fi
     if ! cmp -s "$pair" "$committed"; then
       echo "::error::T5M_COMMITTED_PAIR_DRIFT source=$file companion=$committed" >&2
       failed_files=$((failed_files + 1))
