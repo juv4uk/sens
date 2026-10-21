@@ -324,6 +324,8 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-cadr-from-cons-tail",
         "d4-append-three-order",
         "d4-not-eq-distinct-symbols",
+        "d4-cdar-cadr-independent-head-tail",
+        "d4-null-not-double-inversion",
 ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
