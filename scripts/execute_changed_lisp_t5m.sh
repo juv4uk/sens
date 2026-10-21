@@ -188,7 +188,14 @@ PY
     standalone_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
     if timeout 45s "$binary" --t5m-pair "$file" "$pair" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
       paired_sha="$(sha256sum "$dir/paired.stdout" | cut -d ' ' -f 1)"
-      echo "T5M_FILE_EXECUTION PASS path=$file pair=$pair standalone_sha256=$standalone_sha paired_sha256=$paired_sha physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+      # Успішні коди завершення ще не доводять однакове виконання.
+      # Порівнюємо фактичний вивід двох SENS-входів без host-оракула.
+      if cmp -s "$stdout" "$dir/paired.stdout"; then
+        echo "T5M_FILE_EXECUTION PASS path=$file pair=$pair standalone_sha256=$standalone_sha paired_sha256=$paired_sha physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+      else
+        echo "::error::T5M_PAIRED_RESULT_MISMATCH path=$file pair=$pair standalone_sha256=$standalone_sha paired_sha256=$paired_sha semantic=NOT_CERTIFIED" >&2
+        mark_file_failed
+      fi
     else
       status=$?
       sed 's/^/T5M paired stderr: /' "$dir/paired.stderr" >&2

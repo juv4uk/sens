@@ -344,6 +344,8 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                 "#!/bin/sh\nprintf '%s\\n' \"$*\" >> invoked.marker\n"
                 "if [ \"$1\" = --t5m-pair ] && [ -e fail-paired ]; then\n"
                 "  echo paired rejected >&2\n  exit 19\nfi\n"
+                "if [ \"$1\" = --t5m-pair ] && [ -e alter-paired ]; then\n"
+                "  printf 'different paired result\\n'\n  exit 0\nfi\n"
                 "printf 'stub transport only\\n'\n",
                 encoding="utf-8",
             )
@@ -366,6 +368,21 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertIn("status=19", failed.stderr)
             self.assertIn("files_checked=1 files_failed=1", failed.stdout)
             self.assertNotIn("T5M_FILE_EXECUTION PASS", failed.stdout)
+            calls = (root / "invoked.marker").read_text(encoding="utf-8")
+            self.assertIn("--t5m-pair module.lisp", calls)
+
+            # Обидва SENS-входи можуть повернути exit=0, але різні результати.
+            # Це є реальна розбіжність, а не підстава друкувати PASS.
+            (root / "fail-paired").unlink()
+            (root / "alter-paired").touch()
+            (root / "invoked.marker").unlink()
+            mismatch = subprocess.run(cmd, cwd=root, capture_output=True, text=True, timeout=20)
+            self.assertEqual(mismatch.returncode, 2, mismatch.stdout + mismatch.stderr)
+            self.assertIn("T5M_PAIRED_RESULT_MISMATCH", mismatch.stderr)
+            self.assertIn("standalone_sha256=", mismatch.stderr)
+            self.assertIn("paired_sha256=", mismatch.stderr)
+            self.assertIn("files_checked=1 files_failed=1", mismatch.stdout)
+            self.assertNotIn("T5M_FILE_EXECUTION PASS", mismatch.stdout)
             calls = (root / "invoked.marker").read_text(encoding="utf-8")
             self.assertIn("--t5m-pair module.lisp", calls)
 
