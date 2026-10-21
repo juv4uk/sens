@@ -47,10 +47,14 @@ fn admission_source_uses_current_d1_no_and_d8_integer_checks_without_old_sentine
 
     let expressions = parse_mixed_exact_domain_machine_source(PATH, SOURCE)
         .expect("увесь admission-файл має проходити суворий машинний reader");
-    assert_eq!(expressions.len(), 20, "чинні D4 помічники зберігають усі механізми допуску");
-    // Тепер чинний D8 подає 7 як "7", а не історичний #q2:7/1.
+    assert_eq!(expressions.len(), 21, "новий іменований D4 перевіряє /1; усі машинні механізми допуску збережено");
+    // Чинний D8 WRITE дає точний #q2:111/1, не десятковий "7".
     assert!(SOURCE.contains("(визначити машина-допуск-цифра?"));
     assert!(SOURCE.contains("(визначити машина-допуск-цифри?"));
+    assert!(SOURCE.contains("(визначити машина-допуск-цифри-хвіст?"),
+        "іменований SENS D4 перевіряє ненульовий чисельник і точний знаменник /1");
+    assert!(SOURCE.contains("(рядок-префікс? \"#q2:\" машинне-значення)"),
+        "канонічний wire D8, не вигаданий десятковий текст");
     assert!(SOURCE.contains("(визначити машина-допуск-текст-точне-ціле?"));
     assert!(!SOURCE.contains("((функція"),
         "невикличні анонімні D5 value-call не мають повертатися в допуск");
