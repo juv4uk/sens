@@ -776,9 +776,16 @@ pub(crate) fn eval_t5m_paired_file_with_bindings(
     // Не відхиляємо справжні результати SENS (списки, пари) лише
     // через те, що кодер зворотного представлення результатів їх не знає.
     // Це не засвідчує оберненість виходу; release=NOT_CERTIFIED.
+    // PhysicalT5Program spans index decoded D2/T5M WORDS, not source UTF-8
+    // bytes. Rendering those indices against the original Lisp falsely
+    // highlights unrelated text (often the first comment) and misdirects
+    // repair. SENS still owns the actual verdict; report exact word offsets.
     program
         .execute(&mut session)
-        .map_err(|error| format!("SENS paired evaluator: {}", error.render(source)))
+        .map_err(|error| format!(
+            "SENS paired evaluator: {} (kind={:?}, physical_word_span={}..{}; source_utf8_span=NOT_ASSERTED)",
+            error.message, error.kind, error.span.start, error.span.end,
+        ))
 }
 
 fn eval_t5m_repl_line(
