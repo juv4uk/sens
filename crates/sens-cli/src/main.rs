@@ -209,6 +209,9 @@ fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
     // needed nor authorized for this capability-free physical route.
     // Textual .lisp and the explicit sens-trit eval-core4 remain unchanged.
     let mut pure = Session::bare();
+    // D5:00011 MACRO вже має ратифікований вузький механізм SENS.
+    // Не завантажуємо жодного текстового Core або host-можливостей.
+    sens::install_ratified_d5_macro_mechanism(&pure);
     eval_parsed_expressions(&forms, &mut pure)
         .map_err(|err| format!("current SENS execution rejected: {err}"))
 }
