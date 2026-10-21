@@ -243,6 +243,31 @@ class BoundedUkTripletTests(unittest.TestCase):
                     self.verify()
         self.lisp.write_bytes(original)
 
+    def test_english_heads_rejected_only_when_executable_not_quoted_data(self):
+        # AST reader sees quote context; Python does not evaluate SENS.
+        source = "(за-умовою (так (як-є (CAR payload))) (ні (CAR ())))"
+        tokens = mod.three_pass.tokenize(
+            mod.three_pass.strip_comments(source), source_surface="укр"
+        )
+        ast = mod.three_pass.Parser(tokens).parse_program()
+        self.assertEqual(len(ast), 1)
+        # A real unquoted English head must still be rejected.
+        with self.assertRaisesRegex(mod.ProjectionBlocked, "Latin executable head"):
+            mod.project_current_uk(source)
+        quoted_source = "(як-є (CAR payload))"
+        # The remaining migrator may reject unsupported quoted data for a
+        # separate exact-domain reason; never reject it as an English CALL.
+        try:
+            mod.project_current_uk(quoted_source)
+        except (mod.ProjectionBlocked, mod.three_pass.MigrationError) as err:
+            self.assertNotIn("Latin executable head", str(err))
+        for plain in ("(CAR ())", "(COND (так ні))", "(QUOTE ())"):
+            with self.subTest(plain=plain):
+                with self.assertRaisesRegex(
+                    mod.ProjectionBlocked, "Latin executable head"
+                ):
+                    mod.project_current_uk(plain)
+
     def test_physical_t5_corruption_and_noncanonical_tail_block(self):
         source = self.sens.read_bytes()
         for candidate in (
