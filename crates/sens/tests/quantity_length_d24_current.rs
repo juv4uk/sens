@@ -57,3 +57,58 @@ fn quantity_length_d24_uses_real_sens_d1_and_rejects_malformed_tails() {
             "test_id=quantity-length layer=SENS input={call} expected=D1:{expected} actual={value}");
     }
 }
+
+fn unit_definition(name: &str) -> &'static str {
+    let marker = format!("(визначити {name}");
+    let begin = LIB.find(&marker).expect("визначення одиниці з чинного Lisp");
+    let end = LIB[begin..].find("\n(визначити ")
+        .map(|offset| begin + offset).unwrap_or(LIB.len());
+    &LIB[begin..end]
+}
+
+fn prepare_unit_session(source: &str) -> Session {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("чинний SENS Core");
+    evaluate(&mut session, source);
+    session
+}
+
+#[test]
+fn quantity_unit_constructor_selector_roundtrips_in_real_sens() {
+    let current = [
+        unit_definition("схема-одиниці-виміру"),
+        unit_definition("створити-одиниця"),
+        unit_definition("одиниця-розмірності"),
+    ].join("\n");
+
+    let old = "(список схема-одиниці-виміру розмірності)";
+    let new = "(сполучити схема-одиниці-виміру розмірності)";
+    assert!(current.contains(new), "чинний конструктор мусить зберігати плоскі виміри");
+    let mutant = current.replacen(new, old, 1);
+    assert_ne!(current, mutant);
+
+    let mut correct = prepare_unit_session(&current);
+    let mut legacy = prepare_unit_session(&mutant);
+    for (dimensions, expected_record) in [
+        ("()", "(unit/1)"),
+        ("(метр)", "(unit/1 метр)"),
+        ("(метр секунда)", "(unit/1 метр секунда)"),
+    ] {
+        let roundtrip = format!(
+            "(однакові? (одиниця-розмірності (створити-одиниця (як-є {dimensions}))) (як-є {dimensions}))"
+        );
+        let full_record = format!(
+            "(однакові? (створити-одиниця (як-є {dimensions})) (як-є {expected_record}))"
+        );
+        let actual = evaluate(&mut correct, &roundtrip);
+        assert_eq!(actual.as_predicate_bit(), Some(true),
+            "test_id=quantity-unit-roundtrip input={roundtrip} expected=D1:YES actual={actual}");
+        let actual_record = evaluate(&mut correct, &full_record);
+        assert_eq!(actual_record.as_predicate_bit(), Some(true),
+            "test_id=quantity-unit-record input={full_record} expected=D1:YES actual={actual_record}");
+        // Порожній випадок у старого конструктора теж неправильний: (unit/1 ()).
+        let wrong = evaluate(&mut legacy, &roundtrip);
+        assert_eq!(wrong.as_predicate_bit(), Some(false),
+            "test_id=quantity-unit-mutant input={roundtrip} expected=D1:NO actual={wrong}");
+    }
+}
