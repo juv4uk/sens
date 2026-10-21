@@ -14,6 +14,31 @@ MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
 
 
 class UkrainianT5MDefaultContract(unittest.TestCase):
+    def test_utf8_named_lisp_is_discovered_by_real_git_diff(self):
+        # Git quoting hid Ukrainian .lisp paths from the active SENS/Zig CI
+        # manifest; run actual Git instead of simulating filename parsing.
+        ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        self.assertIn("git -c core.quotePath=false diff --name-only", ci)
+        self.assertIn("git -c core.quotePath=false diff-tree --no-commit-id", ci)
+        with tempfile.TemporaryDirectory(prefix="sens-ukr-git-path-") as temporary:
+            checkout = Path(temporary)
+            subprocess.run(["git", "init", "-q"], cwd=checkout, check=True)
+            subprocess.run(
+                ["git", "-c", "user.name=SENS", "-c", "user.email=sens@example.invalid",
+                 "commit", "--allow-empty", "-q", "-m", "empty"],
+                cwd=checkout, check=True,
+            )
+            source = checkout / "lib" / "поміняти-перші-два.lisp"
+            source.parent.mkdir()
+            source.write_text("(як-є ())\n", encoding="utf-8")
+            subprocess.run(["git", "add", "--", str(source.relative_to(checkout))],
+                           cwd=checkout, check=True)
+            unescaped = subprocess.check_output(
+                ["git", "-c", "core.quotePath=false", "diff",
+                 "--cached", "--name-only"], cwd=checkout, text=True,
+            ).splitlines()
+            self.assertEqual(unescaped, ["lib/поміняти-перші-два.lisp"])
+
     def test_ci_never_treats_human_lisp_as_physical_t5m(self):
         # Структурний guard чинного шляху: .lisp -> Zig T5M -> фізичний
         # .sens -> справжній binary SENS. Це НЕ семантичний Python-оракул.
