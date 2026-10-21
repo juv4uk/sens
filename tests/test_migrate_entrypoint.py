@@ -50,7 +50,8 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
         source = "tests/fixtures/migration-d4-selector-cohort/caar.sens"
         verify = migrate.command(p.parse_args(["view", "--sens", source, "--verify"]))
         self.assertEqual(Path(verify[1]).name, "sens_spaced_view.py")
-        self.assertEqual(verify[-3:], ["--sens", source, "--verify"])
+        self.assertEqual(verify[-3:], ["--codec", "t5m", "--verify"])
+        self.assertIn(source, verify)
         self.assertNotIn("--write", verify)
         stage = migrate.command(p.parse_args([
             "view", "--sens", source, "--stage", "/tmp/sens-review-stage"]))
@@ -91,6 +92,32 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
         self.assertEqual(
             migrate.main(["view", "--sens", "../escape.sens", "--verify"]), 2
         )
+
+    def test_current_t5m_view_keeps_d24_width_and_rejects_stale_bits(self):
+        # Лише фізична оберненість T5M, не SENS-eval і не релізний oracle.
+        from scripts.sens_t5_codec import encode_t5m_projection
+
+        words = "101010101010101010101010 10 0111"
+        canonical = words + "\n"
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-view-source-") as td:
+            root = Path(td)
+            (root / "wide.lisp").write_text("(як-є ())\n", encoding="utf-8")
+            (root / "wide.sens").write_bytes(encode_t5m_projection(words))
+            view = root / "wide"
+            view.write_text(canonical, encoding="ascii")
+
+            with mock.patch.object(migrate, "ROOT", root):
+                args = ["view", "--sens", "wide.sens", "--verify"]
+                self.assertEqual(migrate.main(args), 0)
+                view.write_text("101010101010101010101011 10 0111\n", encoding="ascii")
+                self.assertEqual(migrate.main(args), 2)
+                view.write_text(canonical, encoding="ascii")
+                with tempfile.TemporaryDirectory(prefix="sens-t5m-view-stage-") as stage:
+                    self.assertEqual(migrate.main([
+                        "view", "--sens", "wide.sens", "--stage", stage
+                    ]), 0)
+                    self.assertEqual((Path(stage) / "wide").read_bytes(),
+                                     canonical.encode("ascii"))
 
     def test_admit_requires_all_independent_evidence_and_write_is_explicit(self):
         p = migrate.parser()
