@@ -225,14 +225,15 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                 ("pair", "T5M_COMMITTED_PAIR_DRIFT"),
                 ("view", "T5M_COMMITTED_VIEW_DRIFT"),
                 ("missing-view", "T5M_COMMITTED_VIEW_MISSING"),
+                ("pair-and-view", "T5M_COMMITTED_PAIR_DRIFT"),
             ]:
                 with self.subTest(kind=kind):
-                    pair.write_bytes(b"\x02" if kind == "pair" else b"\x01")
+                    pair.write_bytes(b"\x02" if kind in ("pair", "pair-and-view") else b"\x01")
                     if kind == "missing-view":
                         view.unlink(missing_ok=True)
                     else:
                         view.write_text(
-                            "застарілий перегляд\n" if kind == "view"
+                            "застарілий перегляд\n" if kind in ("view", "pair-and-view")
                             else "10 001 00 000 01\n", encoding="utf-8",
                         )
                     (root / "executed.marker").unlink(missing_ok=True)
@@ -242,6 +243,11 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                     )
                     self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
                     self.assertIn(expected_error, result.stderr)
+                    if kind == "pair-and-view":
+                        self.assertIn("T5M_COMMITTED_VIEW_DRIFT", result.stderr)
+                    # У файлі може бути два дефекти; files_failed рахує
+                    # джерела, а не кількість надрукованих помилок.
+                    self.assertIn("files_checked=1 files_failed=1", result.stdout)
                     self.assertIn("T5M_FILE_EXECUTION PASS", result.stdout)
                     self.assertIn("release=NOT_CERTIFIED", result.stdout)
                     self.assertIn("module.sens", (root / "executed.marker").read_text())
