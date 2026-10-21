@@ -459,6 +459,11 @@ LIVE_REPAIRS = (
     ("((однакові? 0 0) (сполучити", "(так (сполучити", 1),
     ("(так ознака-порожнього)", "(так ні)", 1),
     ("(перше (перше база))) позначка-так)", "(перше (перше база))) так)", 1),
+    ("(визначити ознака-порожнього (як-є ()))",
+     "; Обидві гілки походять із точних D1-предикатів SENS, не з host truthiness.\n"
+     "(визначити так (атом? (як-є ())))\n"
+     "(визначити ні (хибне? так))", 1),
+    ("((атом? база) ознака-порожнього)", "((атом? база) ні)", 1),
 )
 
 
@@ -547,7 +552,9 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
         self.assertEqual(git_blob(original), PRE_RENAME_BLOB)
         actual = SOURCE.read_text(encoding="utf-8")
         self.assertEqual(apply_live_repairs(manually_renamed_code(original)), actual)
-        self.assertIn("(визначити ознака-порожнього (як-є ()))", actual)
+        self.assertIn("(визначити так (атом? (як-є ())))", actual)
+        self.assertIn("(визначити ні (хибне? так))", actual)
+        self.assertNotIn("ознака-порожнього", actual)
         self.assertIn("(головна (перше *argv*)", actual)
         self.assertNotIn("(визначити nil-marker", actual)
 
@@ -558,6 +565,8 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
         self.assertIn("(рядок-перший (зріз-від рядок позиція))", source)
         self.assertIn("((містить-підрядок? \" \" (рядок-перший (зріз-від рядок позиція))) \"\")", source)
         self.assertIn("(так ні)", source)
+        self.assertIn("((атом? база) ні)", source)
+        self.assertNotIn("((атом? база) ознака-порожнього)", source)
         self.assertIn("(перше (перше база))) так)", source)
         self.assertNotIn("позначка-так", source)
         self.assertNotIn("((однакові? 0 0)", source)
