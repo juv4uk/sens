@@ -1,4 +1,4 @@
-//! Незалежний точковий виконавчий свідок п'яти D4 NOT над точним D1 EQ.
+//! Незалежний SENS-свідок п'яти обчислених D1 істин через D3 ATOM/QUOTE.
 //! Працює без процесу ОС та UTF-8/D24+ бібліотеки.
 use sens::{
     eval_parsed_expressions, parse_mixed_exact_domain_process_tcp_source,
@@ -12,16 +12,16 @@ fn visit(expr: &Expr, found: &mut usize) {
     if let ExprKind::List(items) = &expr.kind {
         if let Some(head) = items.first() {
             if let ExprKind::DomainIdentity(code) = head.kind {
-                if code.width() == 4 && code.packed_bits() == 0b0100 {
-                    assert_eq!(items.len(), 2, "D4:0100 NOT needs one D1 operand");
+                if code.width() == 3 && code.packed_bits() == 0b010 {
+                    assert_eq!(items.len(), 2, "D3:010 ATOM takes one operand");
                     let ExprKind::List(inner) = &items[1].kind else {
-                        panic!("NOT must consume the D3 EQ expression");
+                        panic!("D3 ATOM must consume quoted D3 NIL");
                     };
-                    let ExprKind::DomainIdentity(eq) = inner[0].kind else {
-                        panic!("EQ must be exact D3 identity");
+                    let ExprKind::DomainIdentity(quote) = inner[0].kind else {
+                        panic!("D3 QUOTE must remain an exact identity");
                     };
-                    assert_eq!((eq.width(), eq.packed_bits()), (3, 0b101));
-                    assert_eq!(inner.len(), 3, "EQ must have two arguments");
+                    assert_eq!((quote.width(), quote.packed_bits()), (3, 0b001));
+                    assert_eq!(inner.len(), 2, "QUOTE takes exactly one D3 value");
                     *found += 1;
                 }
             }
@@ -33,15 +33,19 @@ fn visit(expr: &Expr, found: &mut usize) {
 }
 
 #[test]
-fn five_live_process_negations_are_real_d4_d3_domains() {
+fn five_live_process_truth_branches_use_real_d3_atom_quote() {
     let parsed = parse_mixed_exact_domain_process_tcp_source(PATH, SOURCE)
-        .expect("must read process.lisp through its approved exact-domain loader");
+        .expect("process source must pass the exact path-bound reader");
     let mut count = 0;
     for form in &parsed {
         visit(form, &mut count);
     }
-    assert_eq!(count, 5, "all five process negations must become exact D4");
-    assert!(!SOURCE.contains("(тотожне?"), "no human EQ-to-NO alias may survive");
+    assert_eq!(count, 5, "all five D1 branch values must be computed by SENS");
+    assert_eq!(SOURCE.matches("(атом? (як-є ()))").count(), 5);
+    assert_eq!(SOURCE.matches("(тотожне?").count(), 3,
+               "do not silently remove the three strict D3 comparisons");
+    assert!(!SOURCE.contains("((функція"),
+            "anonymous D5 value-call is not an admitted mechanism");
 }
 
 fn eval_exact(source: &str) -> Result<sens::Value, sens::LanguageError> {
