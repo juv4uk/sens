@@ -638,8 +638,10 @@ fn dispatch_call(
     // apply the exact CAR/CDR composition; no English/SID8/JSON shortcut.
     if let Some(identity) = head_name
         .and_then(crate::semantic_registry::exact_uk_callable_for_source_head)
-        .filter(|id| matches!(id, crate::DomainIdentity::D10(_))
-            && selector_law::is_selector(*id))
+        .filter(|id| matches!(
+            id, crate::DomainIdentity::D8(_) | crate::DomainIdentity::D9(_)
+                | crate::DomainIdentity::D10(_)
+        ) && selector_law::is_selector(*id))
     {
         let mut values = Vec::with_capacity(arguments.len());
         for argument in arguments {
