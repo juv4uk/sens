@@ -156,30 +156,30 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                         committed.rmdir()
 
     def test_stale_regular_companion_still_executes_fresh_physical_t5m(self):
-        # Лише транспортний shell-свідок, НЕ Python-імітація семантики SENS.
-        # Застаріла наявна пара лишає CI червоним, але не ховає реальний
-        # результат наступного запуску свіжого фізичного файлу.
+        # Це лише тест маршрутизації: stub тут не виконує семантику SENS.
+        # Старий фізичний супутник лишає RED, але свіжий Zig-кандидат
+        # усе одно доходить до реального SENS-входу в production script.
         with tempfile.TemporaryDirectory(prefix="sens-t5m-stale-live-") as td:
             root = Path(td)
             (root / "scripts").mkdir()
-            (root / "module.lisp").write_text("(як-є ())\\n", encoding="utf-8")
-            (root / "changed.txt").write_text("module.lisp\\n", encoding="utf-8")
+            (root / "module.lisp").write_text("(як-є ())\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\n", encoding="utf-8")
             (root / "scripts/migrate-three-pass.py").write_text(
-                "import json, pathlib, sys\\n"
-                "source = pathlib.Path(sys.argv[1])\\n"
-                "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\\n"
-                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\\n"
-                "out.mkdir(parents=True, exist_ok=True)\\n"
-                "(out / (source.stem + '.sens')).write_bytes(b'\\\\x01')\\n"
-                "(out / source.stem).write_text('10 001 00 000 01\\\\n')\\n"
+                "import json, pathlib, sys\n"
+                "source = pathlib.Path(sys.argv[1])\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\n"
+                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\n"
+                "out.mkdir(parents=True, exist_ok=True)\n"
+                "(out / (source.stem + '.sens')).write_bytes(b'\\x01')\n"
+                "(out / source.stem).write_text('10 001 00 000 01\\n')\n"
                 "report.write_text(json.dumps({'summary': {'files_written': 1, "
-                "'files_blocked': 0, 'files_not_program': 0}, 'files': []}))\\n",
+                "'files_blocked': 0, 'files_not_program': 0}, 'files': []}))\n",
                 encoding="utf-8",
             )
             binary = root / "record-physical-ingress"
             binary.write_text(
-                "#!/bin/sh\\nprintf '%s\\\\n' \"$1\" >> executed.marker\\n"
-                "printf 'transport stub only\\\\n'\\n",
+                "#!/bin/sh\nprintf '%s\\n' \"$1\" >> executed.marker\n"
+                "printf 'transport stub only\\n'\n",
                 encoding="utf-8",
             )
             binary.chmod(0o755)
@@ -191,13 +191,13 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                 ("missing-view", "T5M_COMMITTED_VIEW_MISSING"),
             ]:
                 with self.subTest(kind=kind):
-                    pair.write_bytes(b"\\x02" if kind == "pair" else b"\\x01")
+                    pair.write_bytes(b"\x02" if kind == "pair" else b"\x01")
                     if kind == "missing-view":
                         view.unlink(missing_ok=True)
                     else:
                         view.write_text(
-                            "застарілий перегляд\\n" if kind == "view"
-                            else "10 001 00 000 01\\n", encoding="utf-8",
+                            "застарілий перегляд\n" if kind == "view"
+                            else "10 001 00 000 01\n", encoding="utf-8",
                         )
                     (root / "executed.marker").unlink(missing_ok=True)
                     result = subprocess.run(
