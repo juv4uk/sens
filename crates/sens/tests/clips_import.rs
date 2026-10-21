@@ -17,14 +17,15 @@
 
 use sens::{
     eval_parsed_expressions, eval_core_library_source, eval_pinned_reasoning_source,
-    eval_program, parse_mixed_exact_domain, Session,
+    eval_program, load_core_library, parse_mixed_exact_domain, Session,
 };
 
 fn eval_import(source: &str) -> String {
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session,
-    )
-    .expect("test_id=clips-defrule-d4-split: exact-domain Core must load");
+    // CLIPS використовує мовну функцію символ? з Core4. Часткове core.lisp
+    // завантаження давало unknown symbol, а не помилку самого CLIPS.
+    load_core_library(&mut session)
+        .expect("test_id=clips-defrule-d4-split: чинний повний SENS Core4");
     for (path, library) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
