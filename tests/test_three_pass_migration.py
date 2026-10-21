@@ -277,6 +277,29 @@ class ThreePassMigrationTests(unittest.TestCase):
             mod.encode_lambda_params(binder("()"), self.text7),
             [mod.D3_EMPTY],
         )
+        # Справжні головні Lisp-джерела використовують саме variadic.
+        # Їх не можна переписувати на (функція (аргументи) ...).
+        for source_name, parameter in (
+            ("lib/core.lisp", "аргументи"),
+            ("lib/core4.lisp", "аргументи-функції"),
+        ):
+            with self.subTest(source=source_name):
+                source = (ROOT / source_name).read_text(encoding="utf-8")
+                program = f"(визначити список (функція {parameter} {parameter}))"
+                self.assertIn(program, source)
+                projection, _ = self.migrate(program)
+                words = projection.split()
+                binder_words = mod.encode_text7_identifier(
+                    parameter, self.text7, mod.Tok("ATOM", parameter, 0),
+                )
+                # Точна D4 форма бере Text7-атом параметра як є,
+                # а не створює нову D2-обгортку одноаргументної функції.
+                self.assertIn(
+                    ["0010", mod.D2_SEP, *binder_words, mod.D2_SEP],
+                    [words[i:i + len(binder_words) + 3]
+                     for i in range(len(words) - len(binder_words) - 2)],
+                )
+
 
         # Один машинний Lisp-атом із апострофом не має перетворитися
         # на два вузли та оператор QUOTE у параметрах реальної програми.
