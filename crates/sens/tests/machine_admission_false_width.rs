@@ -29,9 +29,13 @@ fn shorter_quoted_singleton_preserves_observable_d1_no() {
 }
 
 #[test]
-fn admission_source_has_exactly_27_short_inert_payloads_and_no_old_d8_sentinel() {
-    assert_eq!(SOURCE.matches("(атом? (як-є (000)))").count(), 27,
-        "усі 27 відмов тепер явно обчислюють D1:NO у SENS");
+fn admission_source_uses_current_d1_no_and_d8_integer_checks_without_old_sentinel() {
+    // Після вилучення застарілого helper знаменника лишилося 26 D1:NO:
+    // одна стара відмова більше не існує, а не вважається успіхом.
+    assert_eq!(SOURCE.matches("(атом? (як-є (000)))").count(), 26,
+        "поточні гілки відмови повинні повертати точний D1:NO у SENS");
+    assert!(SOURCE.contains("(визначити машина-допуск-цифра?"));
+    assert!(SOURCE.contains("(визначити машина-допуск-цифри?"));
     assert!(!SOURCE.contains("(010 (001 (000)))"),
         "неповернений старий бітовий call head у виконуваному Lisp");
     assert!(!SOURCE.contains("(00000000)"),
