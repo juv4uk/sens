@@ -31,12 +31,12 @@ fn empty_success_and_real_failure_are_distinct_data() {
     let mut session = session();
     assert_eq!(
         observe(&mut session,
-            "(спостерігати-уніфікацію (001 radio) (001 radio) (001 ()))"),
+            "(спостерігати-уніфікацію (як-є radio) (як-є radio) (як-є ()))"),
         "(unified ())"
     );
     assert_eq!(
         observe(&mut session,
-            "(спостерігати-уніфікацію (001 radio) (001 antenna) (001 ()))"),
+            "(спостерігати-уніфікацію (як-є radio) (як-є antenna) (як-є ()))"),
         "(unification-failure radio antenna ())"
     );
 }
@@ -45,13 +45,13 @@ fn empty_success_and_real_failure_are_distinct_data() {
 fn helper_distinguishes_fail_atom_other_atom_and_compound_substitution() {
     let mut session = session();
     for (source, expected) in [
-        ("(уніфікація-спостереження-стан (001 fail) (001 radio) (001 antenna) (001 ()))",
+        ("(уніфікація-спостереження-стан (як-є fail) (як-є radio) (як-є antenna) (як-є ()))",
          "(unification-failure radio antenna ())"),
-        ("(уніфікація-спостереження-стан (001 ()) (001 radio) (001 radio) (001 ()))",
+        ("(уніфікація-спостереження-стан (як-є ()) (як-є radio) (як-є radio) (як-є ()))",
          "(unified ())"),
-        ("(уніфікація-спостереження-стан (001 ready) (001 radio) (001 radio) (001 ()))",
+        ("(уніфікація-спостереження-стан (як-є ready) (як-є radio) (як-є radio) (як-є ()))",
          "(unified ready)"),
-        ("(уніфікація-спостереження-стан (001 ((x . radio))) (001 radio) (001 radio) (001 ()))",
+        ("(уніфікація-спостереження-стан (як-є ((x . radio))) (як-є radio) (як-є radio) (як-є ()))",
          "(unified ((x . radio)))"),
     ] {
         assert_eq!(observe(&mut session, source), expected, "{source}");
