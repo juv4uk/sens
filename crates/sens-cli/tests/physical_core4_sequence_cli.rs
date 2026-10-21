@@ -597,6 +597,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-reverse-general",
         "lib/list-append-general",
         "lib/list-collapse-adjacent",
+        "lib/list-remove-first-atom",
         "lib/pair-zip-unzip-two",
         "lib/list-zip-general",
         "lib/list-chunk-pairs-general",
