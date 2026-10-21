@@ -223,7 +223,18 @@ def tokenize(source: str, *, source_surface="default") -> list[Tok]:
             out.append(Tok("STRING",source[start:i],start))
             continue
         start=i
-        while i<n and (not source[i].isspace()) and source[i] not in ("(", ")", "'", '"', "`"):
+        while i<n and (not source[i].isspace()) and source[i] not in ("(", ")", '"', "`"):
+            # Apostrophe inside a Ukrainian identifier is a real D7 glyph,
+            # not the Lisp QUOTE operator. Preserve the exact spelling:
+            # *робоча-пам'ять* and ім'я are single source atoms. A leading
+            # apostrophe or one before punctuation still starts QUOTE.
+            if source[i] == "'":
+                if not (
+                    i > start and i + 1 < n
+                    and source[i - 1].isalpha()
+                    and source[i + 1].isalpha()
+                ):
+                    break
             if source[i] == ",":
                 decimal_comma = (
                     source_surface in ("ук", "укр")
