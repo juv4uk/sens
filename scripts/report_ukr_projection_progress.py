@@ -269,8 +269,13 @@ def _atom_value(node: object) -> str | None:
     return node.token.value if isinstance(node, LispAtom) else None
 
 
-def _projection_reasons(source: str) -> list[str]:
-    """Find every English callable, binder or DEFINE alias; exclude quoted data."""
+def _projection_reasons(
+    source: str, *, external_value_symbols: frozenset[str] = frozenset()
+) -> list[str]:
+    """Reject English code; allow only explicitly known external value references.
+
+    An exception never authorizes English call heads, DEFINE names or binders.
+    """
     forms = parse_lisp_tokens(tokenize_lisp(source))
     reasons: list[str] = []
 
@@ -283,7 +288,8 @@ def _projection_reasons(source: str) -> list[str]:
         if isinstance(node, LispAtom):
             # Вільний ідентифікатор у тілі є виконуваним посиланням,
             # навіть якщо він не стоїть на місці викличної голови.
-            if LATIN_IDENTIFIER.search(node.token.value):
+            if (LATIN_IDENTIFIER.search(node.token.value)
+                    and node.token.value not in external_value_symbols):
                 add(node.token, "англомовне посилання на значення", node.token.value)
             return
         if not isinstance(node, LispForm) or not node.items:
