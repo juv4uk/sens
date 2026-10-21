@@ -60,8 +60,8 @@ fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
 fn content_store_membership_is_an_exact_d1_bit_not_structural_one() {
     let mut session = session();
     for (source, expected) in [
-        ("(content-store-contains? (content-store-put (empty-content-store) (quote star)) (knowledge-content-address (quote star)))", true),
-        ("(content-store-contains? (empty-content-store) (knowledge-content-address (quote star)))", false),
+        ("(content-store-contains? (content-store-put (empty-content-store) (quote star)) (знання-вміст-адреса (quote star)))", true),
+        ("(content-store-contains? (empty-content-store) (знання-вміст-адреса (quote star)))", false),
         ("(fs-contains? (car (fs-write (fs-empty) \"x\" (quote star))) \"x\")", true),
         ("(fs-contains? (fs-empty) \"x\")", false),
     ] {
