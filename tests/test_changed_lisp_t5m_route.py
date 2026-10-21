@@ -58,6 +58,10 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         branch = source[marker:paired_fail]
         self.assertIn('Фізичне T5M-декодування зберегло точні ширини слів', source)
         self.assertIn('адаптер BinarySourceWord приймає лише W1–W9', source)
+        # Новий SENS більше не зобов'язаний друкувати текст старого
+        # адаптера W1–W9. На обидва точні D24 повідомлення спробуємо
+        # реально парний Zig/SENS-вхід, не видаючи саму спробу за PASS.
+        self.assertIn('T5M requires exact source projection to D24+ before transport', source)
         self.assertIn('physical=ZIG_VERIFIED', branch)
         self.assertIn('semantic=NOT_CERTIFIED', branch)
         self.assertIn('release=NOT_CERTIFIED', branch)
