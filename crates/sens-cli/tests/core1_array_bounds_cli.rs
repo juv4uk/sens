@@ -21,7 +21,10 @@ fn українські_масиви_core1_виконують_перевірку
     .expect("чинний український Lisp");
     // Реальна залежність Core1: Д1-істина/хиба надходить із виконуваного
     // lib/core.lisp, а не з текстових заглушок тесту чи host-bool.
-    let mut program = String::from(include_str!("../../../lib/core.lisp"));
+    let mut program = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"), "/../../lib/core.lisp"
+    ))
+    .expect("реальний lib/core.lisp через транспорт, не Rust include_str!");
     program.push('\n');
     for name in [
         "ядро1-створити-помилку",
