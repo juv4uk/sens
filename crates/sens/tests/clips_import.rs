@@ -49,6 +49,30 @@ fn eval_import(source: &str) -> String {
 }
 
 #[test]
+fn clips_text_data_uses_current_sens_d7_d8_d9_without_legacy_string_literals() {
+    // Поточне lib/clips-import.lisp, не історичний Lisp-тест чи host-імітація.
+    const LIB: &str = include_str!("../../../lib/clips-import.lisp");
+    assert!(LIB.contains("(рядок-порожній? рядок)"));
+    assert!(LIB.contains("(символ-у-текст (як-є :))"));
+    assert!(LIB.contains("(символ-у-текст (як-є ?_))"));
+    assert!(!LIB.contains("(тотожне? рядок \"\""));
+    assert!(!LIB.contains("(рядок-перший \"?_\")"));
+
+    for (case, expression, expected) in [
+        ("empty", "(кліпс-рядок-порожній? \"\")", "1"),
+        ("not-empty", "(кліпс-рядок-порожній? \"р\")", "0"),
+        ("question", "(кліпс-символ-починається-з-питальника? (як-є ?x))", "1"),
+        ("other-atom", "(кліпс-символ-починається-з-питальника? (як-є x))", "0"),
+        ("colons", "(кліпс-рядок-починається-з-подвійної-двокрапки? \"::x\")", "1"),
+        ("one-colon", "(кліпс-рядок-починається-з-подвійної-двокрапки? \":x\")", "0"),
+    ] {
+        let actual = eval_import(expression);
+        assert_eq!(actual, expected,
+            "test_id=clips-t5m-string-cutover layer=real-SENS case={case} input={expression} expected=D1:{expected} actual={actual}");
+    }
+}
+
+#[test]
 fn clips_double_colon_prefix_is_an_exact_d1_total_predicate() {
     // The SENS library, not Rust, computes all predicates. One removed ':'
     // is the negative witness. Failure must be D1:NO, never the NIL datum.
