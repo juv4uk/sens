@@ -67,7 +67,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn('release=NOT_CERTIFIED', branch)
         self.assertNotIn('--t5m-file "$file"', branch)
         self.assertNotIn('T5M_FILE_EXECUTION PASS', branch)
-        self.assertIn('failed_files=$((failed_files + 1))', source[paired_fail:])
+        self.assertIn('mark_file_failed', source[paired_fail:])
 
     def test_text7_binding_needs_real_paired_execution_and_stays_red_on_failure(self):
         # Це тест оркестрації Bash, не Python-емуляція семантики SENS.
@@ -89,7 +89,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn("release=NOT_CERTIFIED", branch)
         self.assertIn("status=$?", branch)
         # Прозора відмова не перетворюється на успіх і не глушить RED.
-        self.assertIn('failed_files=$((failed_files + 1))', source[failed:failed+160])
+        self.assertIn('mark_file_failed', source[failed:failed+160])
         self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
 
     def test_nonprogram_cannot_hide_obsolete_committed_sens(self):
