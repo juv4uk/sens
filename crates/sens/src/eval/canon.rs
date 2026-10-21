@@ -285,6 +285,7 @@ enum D9StringPrimitiveKind {
     Rest,
     Prefix,
     First,
+    StringP,
 }
 
 fn d9_string_primitive_kind(identity: crate::DomainIdentity) -> Option<D9StringPrimitiveKind> {
@@ -297,11 +298,12 @@ fn d9_string_primitive_kind(identity: crate::DomainIdentity) -> Option<D9StringP
         0b110011101 => Some(D9StringPrimitiveKind::Rest),
         0b110101010 => Some(D9StringPrimitiveKind::Prefix),
         0b110101011 => Some(D9StringPrimitiveKind::First),
+        0b110100110 => Some(D9StringPrimitiveKind::StringP),
         _ => None,
     }
 }
 
-/// True only for the five explicit D9 value mechanisms required by the
+/// True only for the six ratified D9 value mechanisms required by the
 /// machine-admission wire checker. This is deliberately outside
 /// CoreDomainIdentity: D9 identity remains universal-domain identity, not Core.
 pub(crate) fn has_d9_string_mechanism(identity: crate::DomainIdentity) -> bool {
@@ -323,7 +325,8 @@ pub(crate) fn invoke_d9_string_mechanism(
             D9StringPrimitiveKind::Append => 2,
             D9StringPrimitiveKind::Empty
             | D9StringPrimitiveKind::Rest
-            | D9StringPrimitiveKind::First => 1,
+            | D9StringPrimitiveKind::First
+            | D9StringPrimitiveKind::StringP => 1,
             D9StringPrimitiveKind::Prefix => 2,
         };
         if args.len() != expected {
@@ -349,8 +352,11 @@ pub(crate) fn invoke_d9_string_mechanism(
             D9StringPrimitiveKind::First => {
                 super::builtins::string_first(args, environment, span)?
             }
+            D9StringPrimitiveKind::StringP => {
+                Value::predicate_bit(matches!(&args[0], Value::String(_)))
+            }
         };
-        if matches!(kind, D9StringPrimitiveKind::Empty | D9StringPrimitiveKind::Prefix)
+        if matches!(kind, D9StringPrimitiveKind::Empty | D9StringPrimitiveKind::Prefix | D9StringPrimitiveKind::StringP)
             && value.as_predicate_bit().is_none()
         {
             return Err(LanguageError::new(
