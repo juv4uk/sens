@@ -56,7 +56,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertLess(paired_runtime, paired_pass)
         self.assertLess(paired_pass, paired_fail)
         branch = source[marker:paired_fail]
-        self.assertIn('точні ширини слів [24]', source)
+        self.assertIn('Фізичне T5M-декодування зберегло точні ширини слів', source)
         self.assertIn('адаптер BinarySourceWord приймає лише W1–W9', source)
         self.assertIn('physical=ZIG_VERIFIED', branch)
         self.assertIn('semantic=NOT_CERTIFIED', branch)
