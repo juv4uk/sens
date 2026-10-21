@@ -195,13 +195,13 @@ fn ntp_field_interpretation_is_language_owned() {
 
     assert_eq!(
         eval_program(
-            "(тлумачити-поля-відповіді-часу \"clock.example\" 4 1 2208988800 (відняти 1000000000 1000000000))",
+            "(тлумачити-поля-відповіді-часу \"clock.example\" 4 1 2208988800 1073741824)",
             &mut session,
         )
         .unwrap()
         .value
         .to_string(),
-        "(accepted \"clock.example\" 0 0)"
+        "(accepted \"clock.example\" 0 250000000)"
     );
     assert_eq!(
         eval_program(
