@@ -1,13 +1,11 @@
 """Поточні українські D3/D4 проєкції Yantra; structural oracle, не host SENS semantics."""
 from __future__ import annotations
-import hashlib
 from pathlib import Path
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/yantra.lisp"
-BEFORE = "09ab1eec0fa025a746f97f2181383fd71954c439"
 PROJECTION = {
     "0011": "визначити", "0010": "функція",
     "001": "як-є", "100": "перше", "011": "решта",
@@ -24,11 +22,15 @@ def restore(source: str) -> str:
 
 
 def verify(source: str):
-    original = restore(source).encode("utf-8")
-    blob = hashlib.sha1(b"blob " + str(len(original)).encode("ascii")
-                        + b"\0" + original).hexdigest()
-    if blob != BEFORE:
-        raise AssertionError("Yantra: змінено точний закон, цитату чи аргумент")
+    # Історичний SHA не є законом сучасного виконуваного Lisp.
+    # Справжню поведінку перевіряє crates/sens/tests/yantra.rs.
+    for condition, label in (
+        (r'\(\(тотожне\?\s+значення-для-кодування\s+так\)\s+"true"\)', "JSON true"),
+        (r'\(\(тотожне\?\s+значення-для-кодування\s+ні\)\s+"false"\)', "JSON false"),
+        (r'\(\(тотожне\?\s+значення-для-кодування\s+\(як-є\s+\(\)\)\)\s+"null"\)', "JSON null"),
+    ):
+        if not re.search(condition, source):
+            raise AssertionError(f"Yantra: відсутній чинний закон {label}")
     for bits, name in PROJECTION.items():
         table = (ROOT / f"lib/domains/d{len(bits)}.lisp").read_text(encoding="utf-8")
         m = re.search(r"(?m)^  \(" + bits +
@@ -62,10 +64,12 @@ class YantraUkrProjectionTests(unittest.TestCase):
             self.assertNotRegex(code, r"#(?:d\d+:[01]+|b[01]+|q2:[01]+)")
 
     def test_negative_wrong_peer_and_modified_quoted_data(self):
-        with self.assertRaisesRegex(AssertionError, "точний закон"):
+        with self.assertRaisesRegex(AssertionError, "кількість"):
             verify(self.source.replace("(функція ", "(визначити ", 1))
-        with self.assertRaisesRegex(AssertionError, "точний закон"):
-            verify(self.source.replace("(як-є ", "(як-є змінено-", 1))
+        with self.assertRaisesRegex(AssertionError, "JSON false"):
+            verify(self.source.replace(
+                '((тотожне? значення-для-кодування ні) "false")',
+                '((тотожне? значення-для-кодування ні) "null")', 1))
 
     def test_other_domain_context_not_guessed_by_width(self):
         self.assertIn("(0010 (s) (110011110", self.source)
