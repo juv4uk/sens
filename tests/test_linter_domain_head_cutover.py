@@ -123,6 +123,15 @@ class UkrainianLinterProjection(unittest.TestCase):
                 self.assertIn(program, examples)
         self.assertGreaterEqual(examples.count('(expected . "()")'), 2)
 
+    def test_d1_atom_predicate_does_not_call_multivalued_answer_negation(self):
+        # D1: атом? уже повертає однобітний вердикт. Функція
+        # відповідь-не очікує СКЛАДЕНУ шкалу, тому перше(атом?) — помилка.
+        self.assertNotIn("(відповідь-не ", self.active)
+        self.assertIn("((атом? дерево)\\n       (за-умовою", self.active)
+        self.assertIn("((атом? (решта дерево))\\n", self.active)
+        samples = (ROOT / "tests/fixtures/linter.lisp").read_text(encoding="utf-8")
+        self.assertIn("(нехай-послідовно ((x 1) (y x)) (додати x y z))", samples)
+
     def test_lexical_scope_branches_reachable_for_let_star_and_letrec(self):
         # Це перевірка досяжності мовних гілок, НЕ Python-емуляція SENS.
         # Для повної (голова зв'язування тіло) перші два стани atom?/not
