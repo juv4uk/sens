@@ -197,3 +197,37 @@ fn core4_ukrainian_member_executes_positive_negative_and_recursive_d1() {
         );
     }
 }
+
+#[test]
+fn core4_ukrainian_d10_mklist_preserves_empty_atom_and_existing_pair() {
+    // D10 MKLIST лишається SENS-визначенням; 3 гілки виконуються в SENS.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        ("(утворити-список (як-є ()))", "()"),
+        ("(утворити-список (як-є а))", "(а)"),
+        ("(утворити-список (як-є (а б)))", "(а б)"),
+        ("(утворити-список (сполучити (як-є а) (як-є б)))", "(а . б)"),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=d10-mklist-sens layer=SENS input={source} error={error}"));
+        assert_eq!(result.value.to_string(), expected,
+            "test_id=d10-mklist-sens layer=SENS input={source} expected={expected} actual={}", result.value);
+    }
+}
+
+#[test]
+fn core4_ukrainian_d10_listp_returns_exact_d1_for_nil_atom_and_cons() {
+    // D10 LISTP відмінний від PROPER-LIST: крапкова CONS-пара теж є парою.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        ("(список? (як-є ()))", true),
+        ("(список? (як-є а))", false),
+        ("(список? (як-є (а б)))", true),
+        ("(список? (сполучити (як-є а) (як-є б)))", true),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=d10-listp-sens layer=SENS input={source} error={error}"));
+        assert_eq!(result.value.as_predicate_bit(), Some(expected),
+            "test_id=d10-listp-sens layer=SENS input={source} expected={expected} actual={}", result.value);
+    }
+}
