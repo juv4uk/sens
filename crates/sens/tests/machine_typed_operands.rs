@@ -44,6 +44,29 @@ fn eval_value(source: &str, session: &mut Session) -> String {
 }
 
 #[test]
+fn machine_numeric_integer_is_evaluated_without_text_wire() {
+    // Реальна математична семантика SENS (D24+), а не формат #q2:
+    // числовий транспорт write-to-string для D24 не має права бути оракулом.
+    let mut session = machine_session();
+    for (source, expected) in [
+        ("(машинний-операнд-точне-ціле? 42)", true),
+        ("(машинний-операнд-точне-ціле? -8)", true),
+        ("(машинний-операнд-точне-ціле? 18446744073709551615)", true),
+        ("(машинний-операнд-точне-ціле? 1/2)", false),
+        ("(машинний-операнд-точне-ціле? -1/2)", false),
+    ] {
+        let evaluated = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=machine-integer-D24 source={source} error={error}"));
+        assert_eq!(
+            evaluated.value.as_predicate_bit(),
+            Some(expected),
+            "test_id=machine-integer-D24 source={source} expected={expected} actual={}",
+            evaluated.value
+        );
+    }
+}
+
+#[test]
 fn typed_operands_are_explicit_lisp_machine_data() {
     let mut session = machine_session();
 
