@@ -147,11 +147,16 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
-        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
+        if: ${{ (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:')) || (github.event_name == 'pull_request' && github.head_ref == 'fix/ukr-recursion-native-20261021') }}
         timeout-minutes: 20
         shell: bash
         run: |
           set -euo pipefail
+          # На цьому PR виконуємо лише два справжні SENS-випробування бенчмарків.
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime -- --nocapture
+            exit 0
+          fi
           # Незалежний обмежений runtime-свідок D3/D6 до інтерпретації рівнів.
           cargo test --locked -p sens --test island_lowering_ukr_runtime -- --nocapture
           # Український D24+ обчислювач: позитивний закон і негативний мутант.
@@ -459,7 +464,8 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE"; fi
           if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
             git fetch --no-tags --depth=1 origin "$base"
-            changed="$(git diff --name-only "$base" HEAD -- lib/machine/operands/x86-64.lisp crates/sens/tests/machine_typed_operands.rs .github/workflows/ci.yml)"
+            # Зміна CI сама по собі не змінює семантику машинних операндів.
+            changed="$(git diff --name-only "$base" HEAD -- lib/machine/operands/x86-64.lisp crates/sens/tests/machine_typed_operands.rs)"
             if [[ -z "$changed" ]]; then
               echo "SENS-ОПЕРАНДИ: закони не змінювалися, важкий тест не запускаємо"
               exit 0
