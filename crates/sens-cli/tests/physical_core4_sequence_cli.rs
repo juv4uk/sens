@@ -221,6 +221,21 @@ impl SourceTriplet {
             fs::read_to_string(&view).expect("current exact-bit view"),
             "{name}: exact Zig/T5M source -> view inverse",
         );
+
+        // A freshly mintable source is not enough: the checked-in
+        // same-stem binary/view must be byte-identical to live Zig output.
+        let committed = source.with_extension("sens");
+        let committed_view = source.with_extension("");
+        assert_eq!(
+            fs::read(&committed).expect("committed physical T5M companion"),
+            fs::read(&physical).expect("newly minted Zig T5M bytes"),
+            "{name}: checked-in .sens is stale relative to executable Ukrainian .lisp",
+        );
+        assert_eq!(
+            fs::read(&committed_view).expect("committed exact-bit companion"),
+            fs::read(&view).expect("newly minted exact-bit view"),
+            "{name}: checked-in exact-bit view is stale",
+        );
         Self { source, physical, view }
     }
     fn run_sens(&self, paired: bool) -> Output {
