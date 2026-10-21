@@ -139,6 +139,36 @@ fn utf8_decodes_valid_bytes_to_a_runtime_string_without_lossy_host_policy() {
 }
 
 #[test]
+fn utf8_named_boundary_helper_executes_in_sens_not_anonymous_value_call() {
+    // D7 keyboard identities stay in W7. Only externally supplied UTF-8
+    // byte sequences use this separate adapter, with no host-side oracle.
+    let source = include_str!("../../../lib/utf8.lisp");
+    assert!(source.contains("(визначити кодування-юнікод-8-результат-у-рядок"));
+    assert!(!source.contains("((функція (розкодоване)"));
+
+    for (program, expected) in [
+        (
+            "(кодування-юнікод-8-декодувати-рядок (як-є (65 66 67)))",
+            "(decoded \"ABC\")",
+        ),
+        (
+            "(кодування-юнікод-8-декодувати-рядок (як-є (192 128)))",
+            "(rejected invalid-utf8)",
+        ),
+        (
+            "(кодування-юнікод-8-декодувати-рядок (як-є (65 256)))",
+            "(rejected invalid-byte)",
+        ),
+    ] {
+        let actual = eval(program);
+        assert_eq!(
+            actual, expected,
+            "test_id=utf8-external-boundary layer=SENS input={program} expected={expected} actual={actual}"
+        );
+    }
+}
+
+#[test]
 fn utf8_encodes_runtime_strings_to_exact_wire_bytes() {
     assert_eq!(eval("(utf8-encode-string \"ABC\")"), "(65 66 67)");
     assert_eq!(
