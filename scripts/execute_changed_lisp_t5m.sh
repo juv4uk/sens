@@ -66,9 +66,23 @@ PY
     exit 1
   fi
   committed="$(dirname "$file")/$(basename "$file" .lisp).sens"
+  staged_view="${pair%.sens}"
+  committed_view="${committed%.sens}"
+  if [[ ! -f "$staged_view" || -L "$staged_view" ]]; then
+    echo "::error::T5M_MINTED_VIEW_MISSING source=$file expected=$staged_view" >&2
+    exit 1
+  fi
   if [[ -f "$committed" ]]; then
     if ! cmp -s "$pair" "$committed"; then
       echo "::error::T5M_COMMITTED_PAIR_DRIFT source=$file companion=$committed" >&2
+      exit 1
+    fi
+    if [[ ! -f "$committed_view" || -L "$committed_view" ]]; then
+      echo "::error::T5M_COMMITTED_VIEW_MISSING source=$file expected=$committed_view" >&2
+      exit 1
+    fi
+    if ! cmp -s "$staged_view" "$committed_view"; then
+      echo "::error::T5M_COMMITTED_VIEW_DRIFT source=$file companion=$committed_view" >&2
       exit 1
     fi
   else
