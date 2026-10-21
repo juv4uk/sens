@@ -602,6 +602,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-append-general",
         "lib/list-collapse-adjacent",
         "lib/list-adjacent-runs-general",
+        "lib/list-neighbor-windows-general",
         "lib/list-common-prefix-general",
         "lib/list-split-first-occurrence-general",
         "lib/list-remove-first-atom",
