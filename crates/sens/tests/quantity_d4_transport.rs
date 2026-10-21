@@ -14,7 +14,10 @@ const MUTANT: &str = include_str!("../../../tests/semantic/quantity-d4-bind-muta
 #[test]
 fn quantity_d4_binary_sens_owns_the_semantic_verdict() {
     // Mechanical integrity of the one-file source migration.
-    assert!(SOURCE.contains("((0010 (name)"));
+    // Чинний виконуваний Lisp має українські DEFINE, а не історичний
+    // текстовий D4-літерал. Бінарні PROOF/MUTANT нижче — окремі SENS-закони.
+    assert!(SOURCE.contains("(визначити науковий-константа-клаузи"));
+    assert!(!SOURCE.contains("((0010 (name)"));
     assert!(!SOURCE.contains("(001000 ((name"));
     for bits in [PROOF, MUTANT] {
         assert!(bits.bytes().all(|b| matches!(b, b'0' | b'1' | b' ' | b'\r' | b'\n' | b'\t')),
