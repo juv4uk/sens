@@ -343,6 +343,7 @@ jobs:
         run: |
           set -euo pipefail
           cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
+          cargo test --locked -p sens-cli --test cli t5m_physical_pair_d24_executes_and_rejects_mutants -- --exact --nocapture
 
       - name: "Українські D9 селектори й негативні мутації"
         if: steps.changed-t5m-lisp.outputs.translation_tests == 'true'
