@@ -68,8 +68,11 @@ def check(root: Path) -> list[str]:
     for pattern in PRODUCTION_GLOBS:
         for path in sorted(root.glob(pattern)):
             rel = path.relative_to(root).as_posix()
-            # tests and examples are not the shipped Rust path
-            if "/tests/" in f"/{rel}" or "/examples/" in f"/{rel}":
+            # tests and examples are not the shipped Rust path; nor is
+            # `src/staged-out/**`, which no `mod` declares and nothing
+            # references -- it is a frozen staging copy, never compiled.
+            if ("/tests/" in f"/{rel}" or "/examples/" in f"/{rel}"
+                    or "/staged-out/" in f"/{rel}"):
                 continue
             scanned += 1
             raw = path.read_text(encoding="utf-8", errors="replace")
