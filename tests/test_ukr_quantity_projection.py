@@ -65,6 +65,7 @@ def verify(source: str) -> dict[str, tuple]:
     forms = parse_forms(source)
     scope = definitions(forms)
     for required in (
+        "науковий-внутрішній-символ?",
         "науковий-список-правильний?",
         "науковий-список-довжина-дорівнює?",
         "створити-розмірність",
@@ -89,6 +90,13 @@ def verify(source: str) -> dict[str, tuple]:
         raise AssertionError("незв'язані так/ні замість виконуваного D1")
     if any(token.startswith(("#d1:", "#d3:", "#d24:", "#sid8:")) for token in lexical):
         raise AssertionError("застарілий текстовий тег домену")
+    if "(символ? " in source:
+        raise AssertionError("недопущений D9 symbol? не має виконуваного механізму")
+    symbol_law = "(тотожне? значення (текст-у-символ (значення-у-текст значення)))"
+    if source.count(symbol_law) != 1:
+        raise AssertionError("втрачено D1 закон символу через реальні D8 механізми")
+    if source.count("(науковий-внутрішній-символ? ") != 3:
+        raise AssertionError("три перевірки полів мають застосовувати чинний SENS закон")
     if "(тотожне? залишок 0)" in source:
         raise AssertionError("D3 EQ не є числовою рівністю D24+")
     # D1-предикати не порівнюємо із D3 NIL через EQ.
@@ -130,6 +138,19 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
+
+    def test_symbol_guards_use_current_sens_mechanism_not_unbound_d9(self):
+        verify(self.source)
+        current = "(науковий-внутрішній-символ? (друге значення))"
+        self.assertIn(current, self.source)
+        for broken in (
+            self.source.replace(current, "(символ? (друге значення))", 1),
+            self.source.replace(
+                "(тотожне? значення (текст-у-символ (значення-у-текст значення)))",
+                "(атом? значення)", 1),
+        ):
+            with self.assertRaises(AssertionError):
+                verify(broken)
 
     def test_current_ukrainian_library_has_unique_live_definitions(self):
         scope = verify(self.source)
