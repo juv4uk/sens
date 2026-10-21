@@ -44,17 +44,17 @@ fn choice_observation_keeps_probability_confidence_and_provenance() {
               (observation
                 (pd-choice-observe
                   question
-                  (quote ((billing 3/4) (technical 1/4)))
+                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic) (revision 1))))))
           (list
             (pd-observation-confidence observation)
             (pd-observation-provenance observation)
-            (second (pd-choice-policy observation (quote billing) 2/3))))
+            (second (pd-choice-policy observation (quote billing) (частка 2 3)))))
     "#;
 
     assert_eq!(
         eval_probabilistic_decision(source),
-        r#"(3/4 ((source synthetic) (revision 1)) accept)"#
+        r#"((частка 3 4) ((source synthetic) (revision 1)) accept)"#
     );
 }
 
@@ -68,7 +68,7 @@ fn invalid_choice_distribution_fails_closed_when_not_normalized() {
           (result-status
             (pd-choice-observe
               question
-              (quote ((billing 2/3) (technical 1/4)))
+              (list (list (quote billing) (частка 2 3)) (list (quote technical) (частка 1 4)))
               (quote ((source malformed))))))
     "#;
 
@@ -82,11 +82,11 @@ fn noul_policy_is_explicit_threshold_control_not_truthiness() {
               (observation
                 (pd-noul-observe
                   question
-                  3/4
+                  (частка 3 4)
                   (quote ((source synthetic))))))
           (list
-            (second (pd-noul-policy observation 2/3))
-            (second (pd-noul-policy observation 4/5))
+            (second (pd-noul-policy observation (частка 2 3)))
+            (second (pd-noul-policy observation (частка 4 5)))
             (pd-observation-confidence observation)))
     "#;
 
@@ -103,7 +103,7 @@ fn score_observation_uses_the_same_typed_distribution_contract() {
               (observation
                 (pd-score-observe
                   question
-                  (quote ((low 1/4) (medium 1/2) (high 1/4)))
+                  (list (list (quote low) (частка 1 4)) (list (quote medium) (частка 1 2)) (list (quote high) (частка 1 4)))
                   (quote ((source synthetic))))))
           (list
             (car observation)
@@ -125,14 +125,14 @@ fn independent_questions_do_not_invent_joint_consistency() {
                   (pd-question-choice
                     (quote route)
                     (quote (billing technical)))
-                  (quote ((billing 3/4) (technical 1/4)))
+                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source a)))))
               (right
                 (pd-choice-observe
                   (pd-question-choice
                     (quote route-2)
                     (quote (billing technical)))
-                  (quote ((billing 1/4) (technical 3/4)))
+                  (list (list (quote billing) (частка 1 4)) (list (quote technical) (частка 3 4)))
                   (quote ((source b))))))
           (car (pd-two-question-consistency left right (quote independent))))
     "#;
@@ -148,14 +148,14 @@ fn declared_agreement_with_different_distributions_is_disputed() {
                   (pd-question-choice
                     (quote route)
                     (quote (billing technical)))
-                  (quote ((billing 3/4) (technical 1/4)))
+                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source a)))))
               (right
                 (pd-choice-observe
                   (pd-question-choice
                     (quote route)
                     (quote (billing technical)))
-                  (quote ((billing 1/4) (technical 3/4)))
+                  (list (list (quote billing) (частка 1 4)) (list (quote technical) (частка 3 4)))
                   (quote ((source b))))))
           (result-status
             (pd-two-question-consistency left right (quote agree))))
@@ -171,10 +171,10 @@ fn noul_policy_rejects_out_of_domain_threshold() {
               (observation
                 (pd-noul-observe
                   question
-                  3/4
+                  (частка 3 4)
                   (quote ((source synthetic))))))
           (result-status
-            (pd-noul-policy observation 3/2)))
+            (pd-noul-policy observation (частка 3 2))))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "invalid");
@@ -190,10 +190,10 @@ fn choice_policy_rejects_out_of_domain_threshold() {
               (observation
                 (pd-choice-observe
                   question
-                  (quote ((billing 3/4) (technical 1/4)))
+                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic))))))
           (result-status
-            (pd-choice-policy observation (quote billing) 3/2)))
+            (pd-choice-policy observation (quote billing) (частка 3 2))))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "invalid");
@@ -236,9 +236,9 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
               (observation
                 (pd-choice-observe
                   question
-                  (quote ((billing 3/4) (technical 1/4)))
+                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic) (revision 1)))))
-              (decision (правило-автоматичного-вибору observation 2/3)))
+              (decision (правило-автоматичного-вибору observation (частка 2 3))))
           (list
             (second decision)
             (second (fourth decision))
@@ -257,9 +257,9 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
               (observation
                 (pd-choice-observe
                   question
-                  (quote ((billing 1/2) (technical 1/2)))
+                  (list (list (quote billing) (частка 1 2)) (list (quote technical) (частка 1 2)))
                   (quote ((source synthetic) (case tied)))))
-              (decision (правило-автоматичного-вибору observation 1/2)))
+              (decision (правило-автоматичного-вибору observation (частка 1 2))))
           (list
             (second decision)
             (second (fourth decision))
@@ -278,9 +278,9 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
               (observation
                 (pd-choice-observe
                   question
-                  (quote ((billing 3/4) (technical 1/4)))
+                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic)))))
-              (decision (правило-автоматичного-вибору observation 4/5)))
+              (decision (правило-автоматичного-вибору observation (частка 4 5))))
           (list
             (second decision)
             (second (fourth decision))
@@ -301,10 +301,10 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                 (list
                   (quote choice-observation/1)
                   question
-                  (quote ((billing 3/4) (technical 1/4)))
-                  1/4
+                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
+                  (частка 1 4)
                   (quote ((source synthetic))))))
-          (result-status (правило-автоматичного-вибору observation 2/3)))
+          (result-status (правило-автоматичного-вибору observation (частка 2 3))))
     "#;
     assert_eq!(eval_probabilistic_decision(forged_confidence), "invalid");
 
@@ -316,9 +316,9 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
               (observation
                 (pd-choice-observe
                   question
-                  (quote ((billing 3/4) (technical 1/4)))
+                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
                   (quote ((source synthetic))))))
-          (result-status (правило-автоматичного-вибору observation 3/2)))
+          (result-status (правило-автоматичного-вибору observation (частка 3 2))))
     "#;
     assert_eq!(eval_probabilistic_decision(invalid_threshold), "invalid");
 }
