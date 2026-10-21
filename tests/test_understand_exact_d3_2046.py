@@ -206,7 +206,7 @@ def verify_unchanged_laws(forms):
             if (not isinstance(cond, list) or cond[0] != "110"
                     or tuple(cond[1:5]) != guards
                     or len(cond) != 6
-                    or cond[5][0] != "#d1:1"):
+                    or cond[5][0] != ["010", ["001", []]]):
                 raise AssertionError("захист четвертого слова має точний D3 закон")
             lam[2] = cond[5][1]
         if name in GUARDED:
@@ -230,13 +230,14 @@ def verify_unchanged_laws(forms):
                     if len(lam[2]) < 2 or lam[2][1] != guard:
                         raise AssertionError("неповний список має D3-захист до селекторів")
                     lam[2].pop(1)
-            # Historical frozen hash predates exact D1. The original
-            # tautological ATOM(empty) is reconstructed for digest ONLY;
-            # executable source must be the current ratified D1:YES.
+            # Поточний D1:YES ОБЧИСЛЮЄТЬСЯ SENS: D3 ATOM(D3 QUOTE NIL).
+            # Історичний frozen AST уже містив цей самий закон, тому
+            # його не можна замінювати текстовим #d1 чи host-булевим.
             fallback = lam[2][-1]
-            if not (isinstance(fallback, list) and fallback[0] == "#d1:1"):
+            if not (isinstance(fallback, list)
+                    and len(fallback) == 2
+                    and fallback[0] == ["010", ["001", []]]):
                 raise AssertionError("відсутній точний D1:YES у COND")
-            fallback[0] = ["010", ["001", []]]
         if name in LET_REDUCED:
             # Незалежна beta-редукція історичного D6 LET з frozen main:
             # обидва binding-вирази чисті та кожен параметр вжито лише раз.
