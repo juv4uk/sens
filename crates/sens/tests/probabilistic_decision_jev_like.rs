@@ -352,7 +352,7 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
                    (quote ((source synthetic) (question urgent))))
                  (спостерегти-шкалу-системи-один score-question
                    (quote ((low 1/4) (medium 1/2) (high 1/4)))
-                   (quote ((source synthetic) (question severity)))))
+                   (quote ((source synthetic) (question severity))))))
              (response (відповідь-системи-один request answers)))
         (list
           (за-умовою
@@ -382,15 +382,13 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
              (request (запит-системи-один state questions))
              (choice-answer (спостерегти-вибір-системи-один choice-question
                (quote ((billing 3/4) (technical 1/4)))
-               (quote ((source synthetic))))
-             (noul-answer (pd-noul-observe noul-question 2/3
                (quote ((source synthetic)))))
              (missing (відповідь-системи-один request (list choice-answer)))
              (duplicate (відповідь-системи-один request (list choice-answer choice-answer)))
              (duplicate-question-request
                (запит-системи-один state
                  (list choice-question
-                       (pd-question-noul (quote route))))))
+                       (запитання-так-ні-системи-один (quote route) "Does this request require urgent handling?")))))
         (list
           (за-умовою
             ((відповідь-системи-один-допустима? missing request) (як-є valid))
