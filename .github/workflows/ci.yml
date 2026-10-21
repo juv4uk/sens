@@ -618,6 +618,7 @@ jobs:
         run: |
           set -euo pipefail
           cargo test --locked -p sens --test utf8 utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols -- --exact --nocapture
+          cargo test --locked -p sens --test utf8 utf8_integer_quotient_and_remainder_execute_in_sens_with_d1_branch -- --exact --nocapture
           cargo test --locked -p sens --test utf8 utf8_direct_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"
