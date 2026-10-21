@@ -257,6 +257,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # JSON через чинний Core4: D8 class-membership має бути D1 умовою.
+          cargo test --locked -p sens --test yantra yantra_json_string_classifier_yields_d1_condition_from_structured_witness -- --exact --nocapture
           # Живий математичний D24+ приклад: не достатньо самої DEFINE.
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program -- --exact --nocapture
           # Чинний benchmarks/arithmetic.lisp: D24+ результат і негативний нечисловий аргумент.
