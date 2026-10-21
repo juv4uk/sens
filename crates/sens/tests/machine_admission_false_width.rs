@@ -44,7 +44,9 @@ fn admission_source_has_exactly_27_short_inert_payloads_and_no_old_d8_sentinel()
     let expressions = parse_mixed_exact_domain_machine_source(PATH, SOURCE)
         .expect("увесь admission-файл має проходити суворий машинний reader");
     assert_eq!(expressions.len(), 20, "чинні D4 помічники зберігають усі механізми допуску");
-    assert!(SOURCE.contains("(визначити машина-допуск-знаменник-залишок-одиниця?"));
+    // Тепер чинний D8 подає 7 як "7", а не історичний #q2:7/1.
+    assert!(SOURCE.contains("(визначити машина-допуск-цифра?"));
+    assert!(SOURCE.contains("(визначити машина-допуск-цифри?"));
     assert!(SOURCE.contains("(визначити машина-допуск-текст-точне-ціле?"));
     assert!(!SOURCE.contains("((функція"),
         "невикличні анонімні D5 value-call не мають повертатися в допуск");
