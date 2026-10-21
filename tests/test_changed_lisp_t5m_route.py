@@ -219,6 +219,43 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertIn("files_checked=1 files_failed=1", result.stdout)
             self.assertFalse((root / "executed.marker").exists())
 
+    def test_invalid_json_counters_never_become_bash_success(self):
+        # Суто перевірка звіту мігратора, без Python-емуляції SENS.
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-invalid-counters-") as td:
+            root = Path(td)
+            (root / "scripts").mkdir()
+            (root / "module.lisp").write_text("(як-є ())\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\n", encoding="utf-8")
+            binary = root / "must-not-run-sens"
+            binary.write_text("#!/bin/sh\nprintf invoked > executed.marker\nexit 0\n",
+                              encoding="utf-8")
+            binary.chmod(0o755)
+            for name, counters in (
+                ("negative", {"files_written": 1, "files_blocked": -1,
+                              "files_not_program": 1}),
+                ("boolean", {"files_written": True, "files_blocked": 0,
+                             "files_not_program": 0}),
+                ("fraction", {"files_written": 1.0, "files_blocked": 0,
+                              "files_not_program": 0}),
+            ):
+                with self.subTest(name=name):
+                    (root / "scripts/migrate-three-pass.py").write_text(
+                        "import json, pathlib, sys\n"
+                        "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\n"
+                        "report.write_text(json.dumps({'summary': " +
+                        repr(counters) + ", 'files': []}))\n",
+                        encoding="utf-8",
+                    )
+                    (root / "executed.marker").unlink(missing_ok=True)
+                    result = subprocess.run(
+                        ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"],
+                        cwd=root, capture_output=True, text=True, timeout=20,
+                    )
+                    self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                    self.assertIn("T5M_MIGRATION_REPORT_INVALID", result.stderr)
+                    self.assertIn("files_checked=1 files_failed=1", result.stdout)
+                    self.assertFalse((root / "executed.marker").exists())
+
     def test_committed_physical_pair_must_be_regular_not_symlink_or_directory(self):
         # Перевіряємо лише shell-межу перевірки пар, не Python-SENS
         # evaluator. Обидва шкідливі об'єкти відхиляються до runtime.

@@ -124,6 +124,12 @@ import json, sys
 with open(sys.argv[1], encoding="utf-8") as stream:
     report = json.load(stream)
 summary = report["summary"]
+# Типово некоректний JSON-лічильник не можна віддавати арифметиці Bash.
+# bool є підкласом int у Python, але true не є кількістю файлів.
+for key in ("files_written", "files_blocked", "files_not_program"):
+    count = summary[key]
+    if type(count) is not int or count < 0:
+        raise ValueError("invalid migration counter: " + key)
 for row in report["files"]:
     if row["status"] == "blocked":
         print("T5M_MIGRATION_DEBT path=" + row["path"] + " reason=" + row["reason"], file=sys.stderr)
