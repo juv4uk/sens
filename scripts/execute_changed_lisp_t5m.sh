@@ -144,10 +144,20 @@ run_native_t5m_program() {
       echo "T5M_NATIVE_STANDALONE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
     else
       status=$?
-      # Деякі точні D24+ / D7 значення виконуються тільки з явною
-      # джерельною ідентичністю: це не сертифікація standalone.
-      sed 's/^/SENS standalone notice: /' "$dir/native-standalone.stderr" >&2
-      echo "::notice::T5M_NATIVE_PAIRED_ONLY source=$file standalone_status=$status physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+      # Лише названі відмови фізичного reader D24+/D7 допускають
+      # paired-only. Panic, тайм-аути й невідомі збої — справжній RED.
+      if (( status != 124 && status != 137 )) &&
+         { grep -Fq 'T5M requires exact source projection to D24+ before transport' "$dir/native-standalone.stderr" ||
+           grep -Fq 'unknown Text7 binding:' "$dir/native-standalone.stderr" ||
+           { grep -Fq 'Фізичне T5M-декодування зберегло точні ширини слів' "$dir/native-standalone.stderr" &&
+             grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$dir/native-standalone.stderr"; }; }; then
+        sed 's/^/SENS paired-only known limit: /' "$dir/native-standalone.stderr" >&2
+        echo "::notice::T5M_NATIVE_PAIRED_ONLY source=$file standalone_status=$status physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+      else
+        sed 's/^/SENS standalone unexpected error: /' "$dir/native-standalone.stderr" >&2
+        echo "::error::T5M_NATIVE_STANDALONE_UNEXPECTED_FAIL source=$file status=$status physical=NOT_CERTIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED" >&2
+        mark_file_failed
+      fi
     fi
   else
     status=$?
