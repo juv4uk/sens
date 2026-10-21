@@ -105,6 +105,56 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertIn("T5M_NOT_PROGRAM path=module.lisp", cleaned.stdout)
             self.assertFalse((root / "executed.marker").exists())
 
+    def test_committed_physical_pair_must_be_regular_not_symlink_or_directory(self):
+        # Перевіряємо лише shell-межу перевірки пар, не Python-SENS
+        # evaluator. Обидва шкідливі об'єкти відхиляються до runtime.
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-nonregular-pair-") as td:
+            root = Path(td)
+            (root / "scripts").mkdir()
+            (root / "module.lisp").write_text("(як-є ())\\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\\n", encoding="utf-8")
+            (root / "module").write_text("10 001 00 000 01\\n", encoding="utf-8")
+            (root / "real.sens").write_bytes(b"synthetic-pair")
+            migrator = root / "scripts/migrate-three-pass.py"
+            migrator.write_text(
+                "import json, pathlib, sys\\n"
+                "source = pathlib.Path(sys.argv[1])\\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\\n"
+                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\\n"
+                "out.mkdir(parents=True, exist_ok=True)\\n"
+                "(out / (source.stem + '.sens')).write_bytes(b'synthetic-pair')\\n"
+                "(out / source.stem).write_text('10 001 00 000 01\\\\n')\\n"
+                "report.write_text(json.dumps({'summary': {'files_written': 1, "
+                "'files_blocked': 0, 'files_not_program': 0}, 'files': []}))\\n",
+                encoding="utf-8",
+            )
+            binary = root / "must-not-run-sens"
+            binary.write_text(
+                "#!/bin/sh\\nprintf invoked > executed.marker\\nexit 0\\n",
+                encoding="utf-8",
+            )
+            binary.chmod(0o755)
+            command = ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"]
+            committed = root / "module.sens"
+            for fixture in ("symlink", "directory"):
+                with self.subTest(fixture=fixture):
+                    if fixture == "symlink":
+                        committed.symlink_to(root / "real.sens")
+                    else:
+                        committed.mkdir()
+                    result = subprocess.run(
+                        command, cwd=root, capture_output=True, text=True,
+                        timeout=20,
+                    )
+                    self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                    self.assertIn("T5M_COMMITTED_PAIR_NOT_REGULAR", result.stderr)
+                    self.assertIn("files_failed=1", result.stdout)
+                    self.assertFalse((root / "executed.marker").exists())
+                    if fixture == "symlink":
+                        committed.unlink()
+                    else:
+                        committed.rmdir()
+
     def test_shell_parses(self):
         import subprocess
         subprocess.run(['bash', '-n', str(RUNNER)], check=True)
