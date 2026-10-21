@@ -298,6 +298,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-swap-inner-five",
         "list-reverse-four",
         "list-halfturn-four",
+        "list-halfturn-six",
         "list-reverse-general",
         "list-drop-last-general",
         "list-interleave-two-pairs",
