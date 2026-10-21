@@ -63,9 +63,15 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         for math in ("(частка 5 336)", "(частка 5.0 2)"):
             with self.subTest(math=math):
                 self.assertIn(math, program)
-        for quoted in ("constitution", "x", "a", "b", "лісп", "лісп-працює"):
+        for quoted in ("constitution", "a", "лісп", "лісп-працює"):
             with self.subTest(quoted=quoted):
                 self.assertIn(f"(як-є {quoted})", program)
+        self.assertIn("(як-є (x))", program)
+        self.assertIn("(як-є (a b))", program)
+        self.assertIn("(як-є (b))", program)
+        # Цитовані D7-слова — дані, а D3 EQ приймає тільки атоми.
+        self.assertIn("(тотожне? (як-є атом?) (як-є тотожне?))", program)
+        self.assertNotIn("(тотожне? (як-є a)", program)
         self.assertIn("((атом? (як-є ())) (як-є ()))", program)
         self.assertNotIn("(так ", program)
         self.assertNotIn("(так\n", program)
