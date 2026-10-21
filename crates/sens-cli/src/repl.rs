@@ -1365,7 +1365,7 @@ mod tests {
         let error = append_t5m_expression(
             &forms[0], sens::Text7Layout::Uk, &mut words, 0
         ).expect_err("латинський атом не має української D7 v2-проєкції");
-        assert!(error.contains("symbol=\\"reason-index/1\\""), "{error}");
+        assert!(error.contains("symbol=\"reason-index/1\""), "{error}");
         assert!(error.contains("source_byte="), "{error}");
         assert!(error.contains("Uk has no current D7 v2 glyph"), "{error}");
     }
