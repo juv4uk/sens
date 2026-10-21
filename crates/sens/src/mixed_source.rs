@@ -1542,7 +1542,7 @@ mod tests {
         let ExprKind::List(items) = expression.kind else {
             panic!("expected list");
         };
-        assert!(matches!(&items[2].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.to_decimal_string() == "100"), "ordinary decimal data is an exact D24+ value");
+        assert!(matches!(&items[2].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "000000000000000001100100"), "ordinary decimal data is an exact D24+ value");
     }
 
     #[test]
@@ -1762,7 +1762,7 @@ mod tests {
             if quoted || quote_head { return; }
 
             if matches!(&items[0].kind, ExprKind::Number(value, _) if *value == 100.0)
-                || matches!(&items[0].kind, ExprKind::BinaryNumber(number) if number.to_decimal_string() == "100")
+                || matches!(&items[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100")
             {
                 let start = expression.span.start as usize;
                 let end = expression.span.end as usize;
@@ -1823,7 +1823,7 @@ mod tests {
         let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else { panic!("COND"); };
         let ExprKind::List(ordinary_clause) = &ordinary_cond[1].kind else { panic!("clause"); };
         let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else { panic!("test"); };
-        assert!(matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.to_decimal_string() == "100"),
+        assert!(matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
             "ordinary reader remains backward-compatible and keeps 0100 numeric inside opaque W8 wrappers");
 
         let mixed = only(
@@ -1863,7 +1863,7 @@ mod tests {
             }
             if spelling == Some("0100")
                 && (matches!(&head.kind, ExprKind::Number(value, _) if *value == 100.0)
-                    || matches!(&head.kind, ExprKind::BinaryNumber(number) if number.to_decimal_string() == "100"))
+                    || matches!(&head.kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"))
             {
                 let start = expression.span.start as usize;
                 let end = expression.span.end as usize;
@@ -1903,7 +1903,7 @@ mod tests {
         let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else { panic!("COND"); };
         let ExprKind::List(ordinary_clause) = &ordinary_cond[1].kind else { panic!("clause"); };
         let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else { panic!("test"); };
-        assert!(matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.to_decimal_string() == "100"),
+        assert!(matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
             "the ordinary mixed reader leaves legacy wrappers opaque");
 
         let machine = only(
@@ -1941,7 +1941,7 @@ mod tests {
         let ExprKind::List(ordinary_call) = &definition_body(&ordinary).kind else {
             panic!("ordinary executable body");
         };
-        assert!(matches!(&ordinary_call[0].kind, ExprKind::BinaryNumber(number) if number.to_decimal_string() == "100"),
+        assert!(matches!(&ordinary_call[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
             "ordinary bridge keeps legacy W8 containers opaque");
 
         let machine = only(
@@ -1981,7 +1981,7 @@ mod tests {
         let ExprKind::List(data_call) = &definition_body(&number_data).kind else {
             panic!("data call");
         };
-        assert!(matches!(&data_call[1].kind, ExprKind::BinaryNumber(number) if number.to_decimal_string() == "100"),
+        assert!(matches!(&data_call[1].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
             "non-head decimal data remains unchanged");
     }
 
@@ -2113,7 +2113,7 @@ mod tests {
         let ExprKind::List(ordinary_call) = &ordinary.kind else { panic!("outer application"); };
         let ExprKind::List(ordinary_lambda) = &ordinary_call[0].kind else { panic!("lambda head"); };
         let ExprKind::List(ordinary_body) = &ordinary_lambda[2].kind else { panic!("lambda body"); };
-        assert!(matches!(&ordinary_body[0].kind, ExprKind::BinaryNumber(number) if number.to_decimal_string() == "100"),
+        assert!(matches!(&ordinary_body[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
             "ordinary mixed source must not opt into machine-source lifting");
 
         let machine = only(
@@ -2126,7 +2126,7 @@ mod tests {
         assert!(matches!(&body[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b100),
             "nested executable CAR must be an exact D3 identity");
-        assert!(matches!(&call[1].kind, ExprKind::BinaryNumber(number) if number.to_decimal_string() == "7"),
+        assert!(matches!(&call[1].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000000000111"),
             "numeric call arguments remain data");
     }
 
