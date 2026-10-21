@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (backend | encode path.lisp | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | encode-e1 path.sens | eval-e1 path.e1 | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (backend | encode path.bits | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | encode-e1 path.sens | eval-e1 path.e1 | verify path.bits | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 // Compiled only in the official Zig-transport build. Rust validates SENS
 // program syntax; Zig owns all physical wire bytes for these commands.
@@ -57,10 +57,25 @@ fn encode_f3_carrier(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
 }
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
-    if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
-        return Err("expected a .lisp companion path".into());
+    // Exact-bit source is .bits. Historical test inputs may still use .lisp;
+    // both must retain the same exact-width D2 words, not host Lisp semantics.
+    match path.extension().and_then(|ext| ext.to_str()) {
+        Some("bits" | "lisp") => Ok(path.with_extension("sens")),
+        _ => Err("expected .bits exact-word or legacy .lisp companion path".into()),
     }
-    Ok(path.with_extension("sens"))
+}
+
+#[cfg(test)]
+#[test]
+fn exact_bit_view_maps_to_its_existing_sens_physical_companion() {
+    let bits = Path::new("tests/semantic/x86-lowering-d1-law.bits");
+    let legacy = Path::new("tests/fixtures/migration-quote-cohort/quote-legacy.lisp");
+    assert_eq!(sibling_sens(bits).unwrap().as_path(),
+               Path::new("tests/semantic/x86-lowering-d1-law.sens"));
+    assert_eq!(sibling_sens(legacy).unwrap().as_path(),
+               Path::new("tests/fixtures/migration-quote-cohort/quote-legacy.sens"));
+    assert!(sibling_sens(Path::new("fake.txt")).is_err());
+    assert!(sibling_sens(Path::new("unnamed")).is_err());
 }
 
 /// Physical T5 is decoded in Zig for normal CLI builds. Structural D2
@@ -420,7 +435,7 @@ fn execute() -> Result<(), String> {
         }
         "encode" => {
             let sens_path = sibling_sens(path)?;
-            let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
+            let projection = fs::read_to_string(path).map_err(|e| format!("read binary source .bits/.lisp: {e}"))?;
             // SENS validates exact words and D2; Zig alone packs default T5M bytes.
             // No optional Rust physical encoder exists on this CLI route.
             #[cfg(feature = "zig-transport")]
@@ -557,7 +572,7 @@ fn execute() -> Result<(), String> {
         }
         "verify" => {
             let sens_path = sibling_sens(path)?;
-            let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
+            let projection = fs::read_to_string(path).map_err(|e| format!("read binary source .bits/.lisp: {e}"))?;
             let bytes = fs::read(&sens_path).map_err(|e| format!("read .sens: {e}"))?;
             verify_companion(&projection, &bytes)
         }

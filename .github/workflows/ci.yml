@@ -219,7 +219,7 @@ jobs:
           if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/tests/cli\.rs|scripts/execute_changed_lisp_t5m\.sh|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/cli\.rs|scripts/execute_changed_lisp_t5m\.sh|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -373,6 +373,7 @@ jobs:
           set -euo pipefail
           cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
           cargo test --locked -p sens-cli --test cli t5m_physical_pair_ -- --nocapture
+          cargo test --locked -p sens-cli --bin sens-trit exact_bit_view_maps_to_its_existing_sens_physical_companion -- --exact --nocapture
 
       - name: "Українські D9 селектори й негативні мутації"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.translation_tests == 'true' }}
