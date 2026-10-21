@@ -102,10 +102,10 @@ fn world_module_eight_laws_execute_in_sens() {
     let mut session = world_session();
     let forms = parse_mixed_exact_domain(WORLD_MODULE_LAWS)
         .expect("український файл восьми D9 законів повинен читатися");
-    assert_eq!(forms.len(), 1, "одна виконувана форма, вісім незалежних D1 результатів");
+    assert_eq!(forms.len(), 1, "одна виконувана форма, дев’ять незалежних D1 результатів");
     let actual = eval_parsed_expressions(&forms, &mut session)
         .expect("SENS мусить реально виконати українську програму");
-    assert_eq!(actual.value.to_string(), "(1 1 1 1 1 1 1 1)",
+    assert_eq!(actual.value.to_string(), "(1 1 1 1 1 1 1 1 1)",
         "реальні D1 відповіді SENS по всіх восьми законах");
 
     // Один неправдивий світ не можна перетворити на успіх зміною
@@ -119,7 +119,7 @@ fn world_module_eight_laws_execute_in_sens() {
         .expect("мутант лишається синтаксично точним SENS");
     let bad = eval_parsed_expressions(&mutant_forms, &mut world_session())
         .expect("SENS обчислює також відмінний негативний свідок");
-    assert_eq!(bad.value.to_string(), "(1 1 0 1 1 1 1 1)",
+    assert_eq!(bad.value.to_string(), "(1 1 0 1 1 1 1 1 1)",
         "підмінений закон має дати реальний D1:NO, а не PASS");
 }
 
