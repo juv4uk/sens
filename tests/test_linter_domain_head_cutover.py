@@ -129,6 +129,9 @@ class UkrainianLinterProjection(unittest.TestCase):
         self.assertNotIn("(відповідь-не ", self.active)
         self.assertIn("((атом? дерево)", self.active)
         self.assertIn("((атом? (решта дерево))", self.active)
+        # Синглтон (голова) не дає права викликати CDR на порожньому хвості.
+        self.assertIn("((тотожне? (решта дерево) (як-є ()))", self.active)
+        self.assertNotIn("((атом? (решта (решта дерево)))", self.active)
         samples = (ROOT / "tests/fixtures/linter.lisp").read_text(encoding="utf-8")
         self.assertIn("(нехай-послідовно ((x 1) (y x)) (додати x y z))", samples)
 
