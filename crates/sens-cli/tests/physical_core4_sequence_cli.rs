@@ -295,6 +295,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-swap-ends-five",
         "поміняти-другий-і-третій",
         "list-swap-inner-five",
+        "list-reverse-four",
+        "list-halfturn-four",
         "list-reverse-general",
         "list-drop-last-general",
         "list-interleave-two-pairs",
@@ -333,6 +335,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "rotate-four-right"
                 | "list-delete-second"
                 | "list-insert-second"
+                | "list-reverse-four"
+                | "list-halfturn-four"
                 | "list-drop-last-general"
                 | "замінити-третій-в-четвірці"
         ) {
