@@ -6,20 +6,20 @@
 ;
 ; Versioned shapes:
 ;
-;   (dimension-1 BASE EXPONENT)
-;   (unit-1 DIMENSION...)
-;   (quantity-1 VALUE UNIT)
-;   (science-source-1 AUTHORITY EDITION)
-;   (scientific-constant-1 NAME QUANTITY STATUS KIND SYSTEM SOURCE)
+;   (dimension/1 BASE EXPONENT)
+;   (unit/1 DIMENSION...)
+;   (quantity/1 VALUE UNIT)
+;   (science-source/1 AUTHORITY EDITION)
+;   (scientific-constant/1 NAME QUANTITY STATUS KIND SYSTEM SOURCE)
 ;
 ; A dimension is a named Lisp term rather than an anonymous pair so the same
 ; finite data can pass through Advice Taker's existing knowledge grammar.
 
-(00001001 *dimension-schema* (00000001 dimension-1))
-(00001001 *unit-schema* (00000001 unit-1))
-(00001001 *quantity-schema* (00000001 quantity-1))
-(00001001 *science-source-schema* (00000001 science-source-1))
-(00001001 *scientific-constant-schema* (00000001 scientific-constant-1))
+(00001001 *dimension-schema* (00000001 dimension/1))
+(00001001 *unit-schema* (00000001 unit/1))
+(00001001 *quantity-schema* (00000001 quantity/1))
+(00001001 *science-source-schema* (00000001 science-source/1))
+(00001001 *scientific-constant-schema* (00000001 scientific-constant/1))
 
 (00001001 science-proper-list?
   (00001000 (x)

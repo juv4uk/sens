@@ -9,10 +9,10 @@
 ; distinct predicates so an adversarial unique-predicate corpus cannot turn
 ; index construction into an unbounded O(N^2) walk.
 
-(00001011 *reason-index-schema* (00000001 reason-index-1))
+(00001011 *reason-index-schema* (00000001 reason-index/1))
 (00001011 *reason-index-max-predicates* 64)
 
-; Shape: (reason-index-1 indexed|linear ORIGINAL-RULES BUCKETS)
+; Shape: (reason-index/1 indexed|linear ORIGINAL-RULES BUCKETS)
 ; A bucket is (PREDICATE RULE...), with rules restored to original order.
 (00001011 reason-index-mode second)
 (00001011 reason-index-rules third)
@@ -167,7 +167,7 @@
                   (t (00000110 entry))))))))))))
 
 ; Public `reason` accepts either the historical rule list or an already-built
-; finite `reason-index-1`. Plain callers are unchanged; repeated-query callers
+; finite `reason-index/1`. Plain callers are unchanged; repeated-query callers
 ; may explicitly retain an immutable index snapshot and avoid rebuilding it.
 ; There is no hidden cache or invalidation: an index continues to describe the
 ; exact rule list captured when it was constructed.
@@ -194,7 +194,7 @@
            (00000100 (00000101 results) acc))))))
 
 ; Tail-recursive rule scan. `all-rules` may be a plain historical rule list or
-; a B5 reason-index-1. We normalize it once here; recursive body goals then
+; a B5 reason-index/1. We normalize it once here; recursive body goals then
 ; reuse the same finite index instead of rebuilding it at every depth.
 (00001011 prove-goal
   (00001000 (goal rules bindings all-rules depth)
