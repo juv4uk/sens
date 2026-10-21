@@ -25,7 +25,7 @@ fn d4_bridge_projects_three_real_facts_and_keeps_protocol_identity() {
     );
     assert_eq!(
         got,
-        "(projection-result (projection prolog-substitutions-to-datalog-facts)          (source-ref observation-42) (facts ((ancestor bob) (ancestor dave) (ancestor carol))))",
+        "(projection-result (projection prolog-substitutions-to-datalog-facts) (source-ref observation-42) (facts ((ancestor bob) (ancestor dave) (ancestor carol))))",
         "D10 проєкція належить SENS, а не host"
     );
 }
