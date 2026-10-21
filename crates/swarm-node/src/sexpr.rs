@@ -1,4 +1,4 @@
-//! Minimal sexpr reader/writer for the `swarm/1` wire protocol.
+//! Minimal sexpr reader/writer for the `swarm-1` wire protocol.
 //! Deliberately separate from `sens`'s own reader: this dialect never
 //! needs numbers-as-values, macros, or evaluation — just atoms, strings,
 //! and nested lists, line-framed exactly like the existing `:9999` protocol.
@@ -150,7 +150,7 @@ mod tests {
 
     #[test]
     fn round_trips_nested_form() {
-        let text = r#"(peer-hello (protocol swarm/1) (node cml-1) (epoch 17) (project cml))"#;
+        let text = r#"(peer-hello (protocol swarm-1) (node cml-1) (epoch 17) (project cml))"#;
         let parsed = parse(text).unwrap();
         assert_eq!(parsed.head(), Some("peer-hello"));
         assert_eq!(parsed.field_atom("node"), Some("cml-1"));

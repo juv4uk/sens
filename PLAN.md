@@ -116,7 +116,7 @@ Evidence: `narrate_outcomes.rs`, `advice_corpus.rs`, CI #1020/#1030.
 - ✅ committed `core4.lisp.fasl` перевіряється exact source hash;
 - ✅ semantic changes trigger WASM browser workflow;
 - ✅ Chrome + Firefox пройшли після trigger expansion;
-- ✅ Guard Rust boundary перевіряє exact `guard/1` structure, не rendered substring;
+- ✅ Guard Rust boundary перевіряє exact `guard-1` structure, не rendered substring;
 - ✅ nested `(decision allow)` spoof відхиляється;
 - ✅ reasoning/narration sections у `FUNCTIONS.md` оновлені;
 - ✅ documentation regression рахує live `(def ...)` імена для цих двох модулів.

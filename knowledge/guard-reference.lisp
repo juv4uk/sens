@@ -1076,7 +1076,7 @@
     (за-умовою
       ((порожній? посилання)
        (список (як-є reference-missing)
-         (список (як-є schema) (як-є guard/1))
+         (список (як-є schema) (як-є guard-1))
          (список (як-є topic) тема)
          (список (як-є decision) (як-є unknown))
          (список (як-є evidence-status) (як-є unresolved))

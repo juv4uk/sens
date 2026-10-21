@@ -492,7 +492,7 @@ fn rejects_duplicate_node_id_claim_from_a_second_connection() {
         .unwrap();
     writeln!(
         spoof,
-        "(peer-hello (protocol swarm/1) (node node-b) (epoch 0) (project spoof) (listen-port 0))"
+        "(peer-hello (protocol swarm-1) (node node-b) (epoch 0) (project spoof) (listen-port 0))"
     )
     .unwrap();
     let mut reply = String::new();
@@ -1438,7 +1438,7 @@ fn hand_speak_peer_hello_and_keep_connected(
     };
     writeln!(
         stream,
-        "(peer-hello (protocol swarm/1) (node {node_id}) (epoch 0) (project itest) (listen-port {listen_port}){advertise_field})"
+        "(peer-hello (protocol swarm-1) (node {node_id}) (epoch 0) (project itest) (listen-port {listen_port}){advertise_field})"
     )
     .unwrap();
     let mut reader = BufReader::new(stream);

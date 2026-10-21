@@ -6,7 +6,7 @@
 ; в СЕНС без прихованого повернення семантичних рішень у код хоста.
 
 (
-  (schema . compiler-bootstrap-boundary/1)
+  (schema . compiler-bootstrap-boundary-1)
   (status . current-implementation-contract)
   (issue . #3805)
   (parent . #3759)

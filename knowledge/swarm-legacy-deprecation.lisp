@@ -1,5 +1,5 @@
 ; Машинозчитуваний запис про виведені з ужитку операції координації API :9999.
-; Повноваження координації належать swarm-node :910x / swarm/1.
+; Повноваження координації належать swarm-node :910x / swarm-1.
 ; Колишню координаційну поверхню my-lisp :9999 фізично вилучено.
 ; Операції нижче — лише історичні дані перенесення, без маршруту виклику.
 
@@ -10,7 +10,7 @@
      (physical-status . removed)
      (semantic-plane . my-lisp-9999)
      (coordination-authority . swarm-node)
-     (coordination-protocol . swarm/1)
+     (coordination-protocol . swarm-1)
      (legacy-operations .
        (hello
         heartbeat

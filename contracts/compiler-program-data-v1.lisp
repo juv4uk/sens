@@ -7,7 +7,7 @@
 ; ролей і доказів визначають лише виконувані закони СЕНС.
 
 (
-  (schema . compiler-program-data/1)
+  (schema . compiler-program-data-1)
   (issue . #3838)
   (parent . #3837)
   (transport . sens-syntax-wire-1)

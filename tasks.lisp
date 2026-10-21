@@ -873,7 +873,7 @@
     (origin . my-lisp)
     (description . "Define the first executable Guard knowledge vocabulary in WSM. Keep decision and evidence status separate; UNKNOWN must remain a useful result. Reuse the language runtime instead of creating a second rule engine.")
     (done . nil)
-    (context . "done 2026-08-31: lib/guard.wsm adds schema guard/1, allow/warn/reject/unknown decisions, confirmed/partial/unresolved/broken evidence statuses, unknown-on-missing-evidence, and Oracle-vs-observation comparison; targeted Rust tests added.")))
+    (context . "done 2026-08-31: lib/guard.wsm adds schema guard-1, allow/warn/reject/unknown decisions, confirmed/partial/unresolved/broken evidence statuses, unknown-on-missing-evidence, and Oracle-vs-observation comparison; targeted Rust tests added.")))
 
   ("WSM-ORACLE-RESULT-ENVELOPE-O1" . (
     (priority . 9.4)

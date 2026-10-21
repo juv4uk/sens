@@ -17,7 +17,7 @@ const LAW_PROJECTION: &str =
 #[test]
 fn boundary_inventory_names_current_ownership() {
     for required in [
-        "compiler-bootstrap-boundary/1",
+        "compiler-bootstrap-boundary-1",
         "domain_identity_shape_mechanism",
         "compiler_execution_role_from_sens",
         "differential-reference-only",

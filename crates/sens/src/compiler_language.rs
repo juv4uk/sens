@@ -802,12 +802,12 @@ pub fn verify_compiler_program_artifact_from_sens(
             "compiler program artifact must start with a schema symbol",
         ));
     };
-    if schema.as_ref() == "compiler-compilation-error/1" {
+    if schema.as_ref() == "compiler-compilation-error-1" {
         return Err(invalid_projection(
-            "compiler-compilation-error/1 cannot enter executable lowering",
+            "compiler-compilation-error-1 cannot enter executable lowering",
         ));
     }
-    if schema.as_ref() != "compiler-compilation-artifact/1" {
+    if schema.as_ref() != "compiler-compilation-artifact-1" {
         return Err(invalid_projection(format!(
             "unknown compiler program artifact schema: {schema}"
         )));
@@ -1221,7 +1221,7 @@ mod tests {
         ] {
             let repeated = Value::Symbol(Rc::from(field));
             let artifact = Value::list([
-                Value::Symbol(Rc::from("compiler-compilation-artifact/1")),
+                Value::Symbol(Rc::from("compiler-compilation-artifact-1")),
                 Value::list([repeated.clone(), Value::Nil]),
                 Value::list([repeated, Value::Nil]),
             ]);
@@ -1239,7 +1239,7 @@ mod tests {
         }
 
         let unknown = Value::list([
-            Value::Symbol(Rc::from("compiler-compilation-artifact/1")),
+            Value::Symbol(Rc::from("compiler-compilation-artifact-1")),
             Value::list([Value::Symbol(Rc::from("unknown-backend")), Value::Nil]),
         ]);
         assert!(
@@ -1391,7 +1391,7 @@ mod tests {
         let rows = list_values(&artifact);
         assert!(matches!(
             rows.first(),
-            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-artifact/1"
+            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-artifact-1"
         ));
         assert!(matches!(
             field_value(&artifact, "program-wire-sha256"),
@@ -1501,7 +1501,7 @@ mod tests {
         let rows = list_values(&artifact);
         assert!(matches!(
             rows.first(),
-            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-error/1"
+            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-error-1"
         ));
         assert!(matches!(
             field_value(&artifact, "program-wire-sha256"),

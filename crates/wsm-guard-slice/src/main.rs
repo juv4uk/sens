@@ -67,7 +67,7 @@ fn evaluate(policy: &str, event: &Event) -> Result<String, String> {
 
 fn adapter_error(reason: &str) -> String {
     format!(
-        "(guard-adapter-result (schema guard-adapter/1) (decision unknown) (evidence-status unresolved) (error {reason}))"
+        "(guard-adapter-result (schema guard-adapter-1) (decision unknown) (evidence-status unresolved) (error {reason}))"
     )
 }
 
@@ -92,7 +92,7 @@ fn process_line(path: &Path, line: &str) -> String {
         })
         .unwrap_or_else(|reason| adapter_error(&reason.replace([' ', ':'], "-")));
     format!(
-        "(guard-slice (schema guard-slice/1) (latency-micros {}) (result {finding}))",
+        "(guard-slice (schema guard-slice-1) (latency-micros {}) (result {finding}))",
         started.elapsed().as_micros()
     )
 }
@@ -157,7 +157,7 @@ mod tests {
         )
         .unwrap();
         assert!(result.contains("(decision allow)"));
-        assert!(result.contains("(schema guard/1)"));
+        assert!(result.contains("(schema guard-1)"));
     }
 
     #[test]

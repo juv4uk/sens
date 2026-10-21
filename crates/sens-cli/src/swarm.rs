@@ -1,7 +1,7 @@
 //! swarm.rs — the CLI-owned semantic TCP/oracle transport.
 //! :9999 is intentionally semantic-only: request framing, eval/parse/diagnose,
 //! contract-version and related oracle operations. Agent coordination lives in
-//! swarm-node (:910x, swarm/1) and has no state or dispatch path in this module.
+//! swarm-node (:910x, swarm-1) and has no state or dispatch path in this module.
 
 use sens::{
     eval_parsed_expressions, eval_parsed_expressions_incremental, parse, Environment, ErrorKind,

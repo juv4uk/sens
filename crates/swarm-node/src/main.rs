@@ -870,7 +870,7 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
             &mut stream,
             &Sexp::list(vec![
                 Sexp::atom("peer-hello"),
-                Sexp::list(vec![Sexp::atom("protocol"), Sexp::atom("swarm/1")]),
+                Sexp::list(vec![Sexp::atom("protocol"), Sexp::atom("swarm-1")]),
                 Sexp::list(vec![Sexp::atom("node"), Sexp::atom(&node.identity.node_id)]),
                 Sexp::list(vec![
                     Sexp::atom("epoch"),
@@ -977,7 +977,7 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
                             Sexp::atom("swarm-id"),
                             Sexp::atom("sens-ecosystem"),
                         ]),
-                        Sexp::list(vec![Sexp::atom("protocol"), Sexp::atom("swarm/1")]),
+                        Sexp::list(vec![Sexp::atom("protocol"), Sexp::atom("swarm-1")]),
                         Sexp::list(vec![
                             Sexp::atom("listen-port"),
                             Sexp::atom(node.listen_port.to_string()),

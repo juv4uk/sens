@@ -1107,7 +1107,7 @@ A separate, parallel coordination effort (Codex as primary agent, OpenCode as re
 
 `lib/guard.lisp` + `knowledge/guard-reference.lisp` are the current executable/reference-bureau surfaces in this repo. Older M0 planning documents remain historical process evidence; do not let a dated “implementation not started” note override current Guard code/tests.
 
-Guard decision semantics are Lisp-owned. The Rust boundary validates the exact `guard/1` protocol shape before a host trusts it. Host authorization (filesystem/TCP/process scopes) remains an embedding boundary and must not be self-grantable by the constrained Lisp program.
+Guard decision semantics are Lisp-owned. The Rust boundary validates the exact `guard-1` protocol shape before a host trusts it. Host authorization (filesystem/TCP/process scopes) remains an embedding boundary and must not be self-grantable by the constrained Lisp program.
 
 ## NLP / Embeddings tooling (2026-08-22 snapshot)
 

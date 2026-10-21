@@ -1,5 +1,5 @@
 {
-  "protocol": "sens-islands-manifest/1",
+  "protocol": "sens-islands-manifest-1",
   "release_note": "Self-bootstrap prepares independent runtimes; it never admits semantics.",
   "profiles": [
     {

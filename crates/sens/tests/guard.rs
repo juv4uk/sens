@@ -74,7 +74,7 @@ fn guard_keeps_decision_and_evidence_status_separate() {
     );
     assert!(value.contains("(decision warn)"));
     assert!(value.contains("(evidence-status confirmed)"));
-    assert!(value.contains("(schema guard/1)"));
+    assert!(value.contains("(schema guard-1)"));
 }
 
 #[test]

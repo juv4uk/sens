@@ -118,7 +118,7 @@ fn symbol(value: &Value) -> Option<&str> {
 
 /// Guard's Rust boundary validates structure, never rendered substrings.
 /// A valid finding is exactly:
-/// `(guard-finding (schema guard/1) (decision ...) ... (unknown-routes ...))`.
+/// `(guard-finding (schema guard-1) (decision ...) ... (unknown-routes ...))`.
 fn valid_guard_finding(value: &Value) -> bool {
     let Some(items) = proper_list(value) else {
         return false;
@@ -152,7 +152,7 @@ fn valid_guard_finding(value: &Value) -> bool {
         values.push(pair[1]);
     }
 
-    if symbol(values[0]) != Some("guard/1") {
+    if symbol(values[0]) != Some("guard-1") {
         return false;
     }
 
@@ -170,7 +170,7 @@ fn valid_guard_finding(value: &Value) -> bool {
 }
 
 /// Load CORE + GUARD + policy, evaluate one call, and accept only an exact
-/// guard/1 value. The rendered string is returned only after structure has
+/// guard-1 value. The rendered string is returned only after structure has
 /// been validated.
 pub fn evaluate(policy: &str, call: &str) -> Result<String, String> {
     let mut session = load_session()?;
@@ -225,7 +225,7 @@ mod tests {
         )
         .unwrap();
         assert!(result.contains("(decision allow)"));
-        assert!(result.contains("(schema guard/1)"));
+        assert!(result.contains("(schema guard-1)"));
     }
 
     #[test]
@@ -262,7 +262,7 @@ mod tests {
             (lambda (kind subject evidence)
               (quote
                 (guard-finding
-                  (schema guard/999)
+                  (schema guard-999)
                   (decision allow)
                   (evidence-status confirmed)
                   (subject docs)

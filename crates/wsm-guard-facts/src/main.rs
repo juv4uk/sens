@@ -220,7 +220,7 @@ fn evaluate(policy: &str, fact: &Fact) -> Result<String, String> {
 
 fn adapter_error(reason: &str) -> String {
     format!(
-        "(guard-facts (schema guard-facts/1) (decision unknown) (evidence-status unresolved) (error {reason}))"
+        "(guard-facts (schema guard-facts-1) (decision unknown) (evidence-status unresolved) (error {reason}))"
     )
 }
 
@@ -245,7 +245,7 @@ fn process_line(path: &Path, line: &str) -> String {
         })
         .unwrap_or_else(|reason| adapter_error(&reason.replace([' ', ':'], "-")));
     format!(
-        "(guard-facts (schema guard-facts/1) (latency-micros {}) (result {finding}))",
+        "(guard-facts (schema guard-facts-1) (latency-micros {}) (result {finding}))",
         started.elapsed().as_micros()
     )
 }
@@ -309,7 +309,7 @@ mod tests {
         };
         let result = evaluate(FACT_POLICY, &fact).unwrap();
         assert!(result.contains("(decision allow)"), "{result}");
-        assert!(result.contains("(schema guard/1)"), "{result}");
+        assert!(result.contains("(schema guard-1)"), "{result}");
 
         let dirty = Fact {
             source: "git".into(),

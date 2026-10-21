@@ -134,7 +134,7 @@ fn compiler_nucleus_uses_ukrainian_callable_heads() {
         );
     }
     // Versioned schema symbols remain data, not executable call heads.
-    assert!(ДЖЕРЕЛО.contains("(як-є compiler-compilation-artifact/1)"));
-    assert!(ДЖЕРЕЛО.contains("(як-є compiler-compilation-error/1)"));
+    assert!(ДЖЕРЕЛО.contains("(як-є compiler-compilation-artifact-1)"));
+    assert!(ДЖЕРЕЛО.contains("(як-є compiler-compilation-error-1)"));
     assert!(ДЖЕРЕЛО.contains("(як-є compiler-program-rejected)"));
 }

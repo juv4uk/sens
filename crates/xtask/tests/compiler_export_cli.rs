@@ -112,7 +112,7 @@ fn compiler_export_artifact_mode_wraps_the_canonical_request_without_target_poli
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert_eq!(stdout.matches("(compilation-artifact").count(), 1);
-    assert!(stdout.contains("(schema . compiler-compilation-artifact/1)"));
+    assert!(stdout.contains("(schema . compiler-compilation-artifact-1)"));
     assert!(stdout.contains("(semantic-request . (compiler-semantic-request"));
     assert!(stdout.contains("(semantic-request-sha256 . \""));
     assert!(stdout.contains("(artifact-status . canonical-backend-neutral)"));

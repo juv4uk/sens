@@ -687,7 +687,7 @@
     (за-умовою
       ((компілятор-результат-успішний? результат-компіляції)
        (сполучити
-         (як-є compiler-compilation-artifact/1)
+         (як-є compiler-compilation-artifact-1)
          (сполучити
            (поле-артефакту-компілятора
              (як-є artifact-kind)
@@ -719,7 +719,7 @@
                        ())))))))))
       ((істина-компілятора ())
        (сполучити
-         (як-є compiler-compilation-error/1)
+         (як-є compiler-compilation-error-1)
          (сполучити
            (поле-артефакту-компілятора
              (як-є program-wire-sha256)

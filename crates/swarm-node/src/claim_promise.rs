@@ -139,7 +139,7 @@ impl ClaimPromiseStore {
     }
 
     fn encode(promises: &BTreeMap<String, Promise>) -> String {
-        let mut items = vec![Sexp::atom("claim-promises/1")];
+        let mut items = vec![Sexp::atom("claim-promises-1")];
         items.extend(promises.iter().map(|(task, promise)| {
             Sexp::list(vec![
                 Sexp::atom("promise"),
@@ -187,7 +187,7 @@ impl ClaimPromiseStore {
                 path.display()
             )));
         };
-        if !matches!(items.first(), Some(Sexp::Atom(head)) if head == "claim-promises/1") {
+        if !matches!(items.first(), Some(Sexp::Atom(head)) if head == "claim-promises-1") {
             return Err(invalid_data(format!(
                 "invalid claim promise store {}: unsupported or missing version",
                 path.display()
@@ -333,7 +333,7 @@ mod tests {
         let dir = test_dir("corrupt");
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("claim-promises.lisp");
-        let before = b"(claim-promises/1 (promise (task \"T\") (generation 1)";
+        let before = b"(claim-promises-1 (promise (task \"T\") (generation 1)";
         fs::write(&path, before).unwrap();
 
         let error = ClaimPromiseStore::open(&dir)
@@ -353,7 +353,7 @@ mod tests {
 
         fs::write(
             dir.join("claim-promises.lisp.tmp"),
-            "(claim-promises/1 (promise",
+            "(claim-promises-1 (promise",
         )
         .unwrap();
 

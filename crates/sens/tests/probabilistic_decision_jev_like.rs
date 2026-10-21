@@ -127,7 +127,7 @@ fn independent_questions_do_not_invent_joint_consistency() {
           (car (pd-two-question-consistency left right (quote independent))))
     "#;
 
-    assert_eq!(eval_probabilistic_decision(source), "decision-relation/1");
+    assert_eq!(eval_probabilistic_decision(source), "decision-relation-1");
 }
 
 #[test]

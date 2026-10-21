@@ -157,7 +157,7 @@ fn render_request(
 fn render_artifact(fixture_id: &str, semantic_request: &str) -> String {
     let semantic_request_sha256 = sha256_hex(semantic_request.as_bytes());
     format!(
-        "(compilation-artifact\n           (schema . compiler-compilation-artifact/1)\n           (fixture-id . \"{fixture_id}\")\n           (semantic-request-sha256 . \"{semantic_request_sha256}\")\n           (semantic-request . {semantic_request})\n           (required-capabilities . ())\n           (artifact-status . canonical-backend-neutral))"
+        "(compilation-artifact\n           (schema . compiler-compilation-artifact-1)\n           (fixture-id . \"{fixture_id}\")\n           (semantic-request-sha256 . \"{semantic_request_sha256}\")\n           (semantic-request . {semantic_request})\n           (required-capabilities . ())\n           (artifact-status . canonical-backend-neutral))"
     )
 }
 
@@ -226,7 +226,7 @@ mod tests {
         let artifact = render_artifact("atom", &request);
         let request_digest = sha256_hex(request.as_bytes());
 
-        assert!(artifact.contains("(schema . compiler-compilation-artifact/1)"));
+        assert!(artifact.contains("(schema . compiler-compilation-artifact-1)"));
         assert!(artifact.contains(&format!("(semantic-request-sha256 . \"{request_digest}\")")));
         assert!(artifact.contains(&format!("(semantic-request . {request})")));
         assert!(artifact.contains("(artifact-status . canonical-backend-neutral)"));

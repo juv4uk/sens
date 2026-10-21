@@ -70,7 +70,7 @@ fn validate(candidate: &Candidate) -> Result<(), String> {
 
 fn render(candidate: &Candidate, recorded_at: u64) -> String {
     format!(
-        "(reference-candidate (schema guard-reference-candidate/1) (status pending-review) (recorded-at-unix {recorded_at}) (route {}) (topic {}) (question {}) (answer {}) (source {}) (evidence {}))",
+        "(reference-candidate (schema guard-reference-candidate-1) (status pending-review) (recorded-at-unix {recorded_at}) (route {}) (topic {}) (question {}) (answer {}) (source {}) (evidence {}))",
         candidate.route,
         sexpr_string(&candidate.topic),
         sexpr_string(&candidate.question),
@@ -121,7 +121,7 @@ fn validate_review(review: &Review) -> Result<(), String> {
 
 fn render_review(review: &Review, reviewed_at: u64) -> String {
     format!(
-        "(reference-candidate-review (schema guard-reference-candidate-review/1) (topic {}) (recorded-at-unix {}) (status {}) (reviewed-at-unix {reviewed_at}) (reviewer {}) (note {}))",
+        "(reference-candidate-review (schema guard-reference-candidate-review-1) (topic {}) (recorded-at-unix {}) (status {}) (reviewed-at-unix {reviewed_at}) (reviewer {}) (note {}))",
         sexpr_string(&review.topic),
         review.recorded_at_unix,
         review.status,

@@ -88,7 +88,7 @@ fn artifact_schema(value: &Value) -> Result<&str, String> {
         return Err("SENS compiler artifact must start with a schema symbol".into());
     };
     match schema.as_ref() {
-        "compiler-compilation-artifact/1" | "compiler-compilation-error/1" => {
+        "compiler-compilation-artifact-1" | "compiler-compilation-error-1" => {
             Ok(schema.as_ref())
         }
         other => Err(format!("SENS compiler returned unknown artifact schema: {other}")),
@@ -107,7 +107,7 @@ fn compile_program_data(
     let artifact = compiler_program_artifact_from_sens(program, program_wire_sha256, sens_revision)
         .map_err(|error| format!("SENS compiler invocation failed: {error}"))?;
     let schema = artifact_schema(&artifact)?;
-    let accepted = schema == "compiler-compilation-artifact/1";
+    let accepted = schema == "compiler-compilation-artifact-1";
     let canonical_bytes = compiler_evidence_canonical_bytes(&artifact)
         .map_err(|error| format!("cannot encode SENS artifact as canonical evidence bytes: {error}"))?;
 
@@ -359,7 +359,7 @@ pub fn run_triplet(
     let (artifact, accepted) = compile_t5m_triplet_bytes(&lisp, &physical, &view, &revision)?;
     write_output(output, &artifact)?;
     if !accepted {
-        eprintln!("SENS compiler rejected the triplet program; canonical compiler-compilation-error/1 artifact emitted");
+        eprintln!("SENS compiler rejected the triplet program; canonical compiler-compilation-error-1 artifact emitted");
     }
     Ok(accepted)
 }
@@ -383,7 +383,7 @@ pub fn run(repo_root: &str, options: RunOptions) -> Result<bool, String> {
     write_output(options.output.as_deref(), &artifact)?;
 
     if !accepted {
-        eprintln!("SENS compiler rejected the program; canonical compiler-compilation-error/1 artifact emitted");
+        eprintln!("SENS compiler rejected the program; canonical compiler-compilation-error-1 artifact emitted");
     }
     Ok(accepted)
 }
@@ -455,7 +455,7 @@ mod tests {
 
         let artifact = compiler_evidence_from_canonical_bytes(&first)
             .expect("canonical evidence bytes decode");
-        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact/1");
+        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact-1");
         let verified = verify_compiler_program_artifact_from_sens(
             &artifact,
             &sha256_hex(&input),
@@ -513,7 +513,7 @@ mod tests {
         assert!(!accepted);
         let artifact = compiler_evidence_from_canonical_bytes(&bytes)
             .expect("error artifact is canonical");
-        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-error/1");
+        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-error-1");
     }
 
     #[test]
@@ -535,7 +535,7 @@ mod tests {
         assert!(accepted);
         let artifact = compiler_evidence_from_canonical_bytes(&bytes)
             .expect("canonical compiler evidence");
-        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact/1");
+        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact-1");
         let parsed_view = parse_canonical_binary(
             std::str::from_utf8(view).expect("ASCII canonical view"),
         ).expect("parse compiled view");

@@ -19,7 +19,7 @@ fn identity_expr(identity: DomainIdentity) -> Expr {
 #[test]
 fn contract_reuses_existing_wire_and_forbids_semantic_host_work() {
     for required in [
-        "compiler-program-data/1",
+        "compiler-program-data-1",
         "sens-syntax-wire-1",
         "domain-width-preserved . required",
         "same-payload-different-domain . distinct",

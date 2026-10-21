@@ -667,7 +667,7 @@ mod tests {
         assert_eq!(exact_quote_count(form), 22, "eleven field/value atoms in two branches");
 
         let quoted_symbols = [
-            "reference-missing", "schema", "guard-reference/1",
+            "reference-missing", "schema", "guard-reference-1",
             "topic", "decision", "unknown", "evidence-status",
             "unresolved", "guidance", "choose-unknown-route", "unknown-routes",
         ];

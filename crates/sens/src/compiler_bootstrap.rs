@@ -334,7 +334,7 @@ mod tests {
                 .into_iter()
                 .map(Value::DomainIdentity)
                 .chain([
-                    Value::Symbol(Rc::from("compiler-compilation-artifact/1")),
+                    Value::Symbol(Rc::from("compiler-compilation-artifact-1")),
                     Value::String(Rc::from("точні-bytes")),
                 ]),
         );
