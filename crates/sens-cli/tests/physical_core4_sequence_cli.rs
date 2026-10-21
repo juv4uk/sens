@@ -283,7 +283,9 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-list-one-symbol",
         "d4-append-second-symbol",
         "d4-null-not-cons",
-    ] {
+            "cdr-dotted-tail-domain-identity",
+        "cons-two-projections-joint-domain-identity",
+] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
         assert!(paired.status.success(), "{name}: paired SENS: {}", error(&paired));
