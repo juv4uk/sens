@@ -517,7 +517,7 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
     std::fs::create_dir_all(&root).expect("isolated files");
     let lisp = root.join("список.lisp");
     let physical = root.join("список.sens");
-    std::fs::write(&lisp, "(сполучити (як-є ()) (як-є ()))\\n")
+    std::fs::write(&lisp, "(сполучити (як-є ()) (як-є ()))\n")
         .expect("Lisp source");
     std::fs::write(&physical, bytes).expect("physical SENS");
     let output = sens()
