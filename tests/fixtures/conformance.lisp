@@ -1,11 +1,11 @@
 ; conformance — чинний договір, українська проєкція.
 ; SID8/Latin call-heads retired. expr на як-є / атом? / тотожне? / перше / решта / сполучити / за-умовою / функція.
 
-((expr . "(як-є radio)") (expected . "radio") (tier . 1) (axioms . (G3)) (role . "constitutive"))
+((expr . "(як-є radio)") (expected . "radio") (tier . 1) (axioms . (G3 G6)) (role . "constitutive") (note . "спостережувана поведінка — підстава конформності (G6)"))
 ((expr . "(атом? (як-є radio))") (expected . "1") (tier . 1) (axioms . (G2)) (role . "constitutive"))
-((expr . "(атом? (як-є ()))") (expected . "1") (tier . 1) (axioms . (G2)) (role . "constitutive"))
+((expr . "(атом? (як-є ()))") (expected . "1") (tier . 1) (axioms . (G2 G8)) (note . "структурне () — атом, не predicate FALSE (G8: ортогональність предикат/структура)") (role . "constitutive"))
 ((expr . "(атом? (як-є (radio antenna)))") (expected . "0") (tier . 1) (axioms . (G2)) (role . "constitutive"))
-((expr . "(тотожне? (як-є radio) (як-є radio))") (expected . "1") (tier . 1) (axioms . (G1)) (role . "constitutive"))
+((expr . "(тотожне? (як-є radio) (як-є radio))") (expected . "1") (tier . 1) (axioms . (G1 G7)) (note . "той самий вираз -> те саме значення (G7)") (role . "constitutive"))
 ((expr . "(тотожне? (як-є radio) (як-є antenna))") (expected . "0") (tier . 1) (axioms . (G1)) (role . "constitutive"))
 ((expr . "(перше (як-є (radio antenna)))") (expected . "radio") (tier . 1) (axioms . (G2)) (role . "constitutive"))
 ((expr . "(решта (як-є (radio antenna)))") (expected . "(antenna)") (tier . 1) (axioms . (G2)) (role . "constitutive"))
@@ -14,7 +14,7 @@
 ((expr . "(+ (/ 1 3) (/ 1 3))") (expected . "2/3") (tier . 2) (axioms . (S1)))
 ((expr . "(- 1 (/ 1 3))") (expected . "2/3") (tier . 2) (axioms . (S1)))
 ((expr . "(* (/ 2 3) (/ 9 4))") (expected . "3/2") (tier . 2) (axioms . (S1)))
-((expr . "(/ 1 0)") (error . "DivisionByZero") (tier . 2) (axioms . (S2)))
+((expr . "(/ 1 0)") (error . "DivisionByZero") (tier . 2) (axioms . (S2 S3)) (note . "іменована помилка, не мовчазне переозначення (S3)"))
 ((expr . "(функція (x))") (error . "Arity") (tier . 2) (axioms . (S2)))
 ((expr . "(як-є a b)") (error . "Arity") (tier . 1) (axioms . (S2)) (role . "constitutive"))
 ((expr . "(сполучити 1)") (error . "Arity") (tier . 1) (axioms . (S2)) (role . "constitutive"))
@@ -28,7 +28,7 @@
 ((expr . "(приєднати (як-є (radio)) (як-є (antenna signal)))") (expected . "(radio antenna signal)") (tier . 3) (axioms . (G5)))
 ((expr . "(відобразити (функція (x) (+ x 1)) (як-є (1 2 3)))") (expected . "(2 3 4)") (tier . 3) (axioms . (G5)))
 ((expr . "(відсіяти (функція (x) (тотожне? x 2)) (як-є (1 2 3 2)))") (expected . "(2 2)") (tier . 3) (axioms . (G5)))
-((expr . "(згорнути (функція (acc x) (+ acc x)) 0 (як-є (1 2 3 4)))") (expected . "10") (tier . 3) (axioms . (G5)))
+((expr . "(згорнути (функція (acc x) (+ acc x)) 0 (як-є (1 2 3 4)))") (expected . "10") (tier . 3) (axioms . (G5 G4)) (note . "вища форма вирощена з ядра (G4)"))
 ((expr . "(< 1 2 3)") (expected . "t") (tier . 2))
 ((expr . "(= 1 1 1)") (expected . "t") (tier . 2))
 ((expr . "(тотожне? 3 3)") (expected . "1") (tier . 1) (axioms . (G1)) (role . "constitutive"))
