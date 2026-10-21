@@ -20,11 +20,11 @@
     "foundation_blob_sha": "ab8dece771527c76e66a34f70e6f066e8be194c5",
     "match": "case-insensitive exact historical source spelling only"
   },
-  "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
+  "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 162,
+    "total": 164,
     "historical": 15,
-    "library": 147,
+    "library": 149,
     "distinct_families": 25
   },
   "excluded": {
@@ -3350,15 +3350,34 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/si.lisp",
-        "blob_sha": "d7a04fcd0ec52d48d8c961894ec35b024660293f",
-        "snapshot_not_live_proof": false
+        "blob_sha": "f0fb33883eeebe9c6447c8407092a46f4b79b818",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-точних-фізичних-констант-20261020.json"
       },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00011011011",
       "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00011011011",
+        "ukr": "сі:створити-запис-константи",
+        "source_file": "lib/si.lisp",
+        "source_blob": "f0fb33883eeebe9c6447c8407092a46f4b79b818",
+        "law": "Конструктор точно зберігає ім'я, D24+ значення та структуру одиниці.",
+        "native_law_test": "crates/sens/tests/scientific_constants.rs::d11_si_три_закони_запису_значення_та_одиниці",
+        "native_test_blob": "5e2900ce2ad73e8425f17e8fa44b9789dc8c8761",
+        "native_test_result": "NATIVE_SENS_PASS_6_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39690596986",
+        "native_step_result": "SUCCESS_WITH_UNRELATED_CI_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинна SENS-композиція, підтверджений закон і два різні наукові записи в SENS"
+      }
     },
     {
       "surface_name": "ядро3-маршрут",
@@ -3543,13 +3562,85 @@
         "not_a_research_placeholder": true,
         "selection_basis": "Реальне бібліотечне тіло, незалежне SENS-виконання кодека та точні приклади різних структур"
       }
+    },
+    {
+      "surface_name": "сі:значення-константи",
+      "source_family": "si",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/si.lisp",
+        "original_file": "lib/si.lisp",
+        "blob_sha": "f0fb33883eeebe9c6447c8407092a46f4b79b818",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-точних-фізичних-констант-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00011011100",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00011011100",
+        "ukr": "сі:значення-константи",
+        "source_file": "lib/si.lisp",
+        "source_blob": "f0fb33883eeebe9c6447c8407092a46f4b79b818",
+        "law": "Значення — другий елемент вкладеної кількості; запис не змінюється.",
+        "native_law_test": "crates/sens/tests/scientific_constants.rs::d11_si_три_закони_запису_значення_та_одиниці",
+        "native_test_blob": "5e2900ce2ad73e8425f17e8fa44b9789dc8c8761",
+        "native_test_result": "NATIVE_SENS_PASS_6_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39690596986",
+        "native_step_result": "SUCCESS_WITH_UNRELATED_CI_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинна SENS-композиція, підтверджений закон і два різні наукові записи в SENS"
+      }
+    },
+    {
+      "surface_name": "сі:одиниця-константи",
+      "source_family": "si",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/si.lisp",
+        "original_file": "lib/si.lisp",
+        "blob_sha": "f0fb33883eeebe9c6447c8407092a46f4b79b818",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-точних-фізичних-констант-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00011011110",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00011011110",
+        "ukr": "сі:одиниця-константи",
+        "source_file": "lib/si.lisp",
+        "source_blob": "f0fb33883eeebe9c6447c8407092a46f4b79b818",
+        "law": "Одиниця — третій елемент вкладеної кількості; число не змінюється.",
+        "native_law_test": "crates/sens/tests/scientific_constants.rs::d11_si_три_закони_запису_значення_та_одиниці",
+        "native_test_blob": "5e2900ce2ad73e8425f17e8fa44b9789dc8c8761",
+        "native_test_result": "NATIVE_SENS_PASS_6_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39690596986",
+        "native_step_result": "SUCCESS_WITH_UNRELATED_CI_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинна SENS-композиція, підтверджений закон і два різні наукові записи в SENS"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 19,
-    "semantic_winners_total": 531,
+    "native_sens_composition_winners": 22,
+    "semantic_winners_total": 534,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,

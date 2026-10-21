@@ -119,7 +119,10 @@
 00011010110	RESEARCH_ONLY_NOT_RATIFIED	0001	цілочисельна-частка-з-блоку	цілочисельна-частка-з-блоку	структури-числові-похідні	2	lib/core4.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00011011000	RESEARCH_ONLY_NOT_RATIFIED	0001	SCIENCE-PROPER-LIST?		структури-числові-похідні	1	lib/quantity.lisp	Визначити правильний nil-terminated D3 список.				ні	ні
 00011011010	RESEARCH_ONLY_NOT_RATIFIED	0001	SCIENCE-SEVENTH		структури-числові-похідні	2	lib/quantity.lisp	Проєктувати сьомий член правильного списку через CAR/CDR.				ні	ні
+00011011011	WINNER_DEFINED_SENS_COMPOSITION	0001	сі:створити-запис-константи	сі:створити-запис-константи	структури-числові-похідні	0	lib/si.lisp	Конструктор точно зберігає ім'я, D24+ значення та структуру одиниці.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
+00011011100	WINNER_DEFINED_SENS_COMPOSITION	0001	сі:значення-константи	сі:значення-константи	структури-числові-похідні	1	lib/si.lisp	Значення — другий елемент вкладеної кількості; запис не змінюється.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00011011101	RESEARCH_ONLY_NOT_RATIFIED	0001	SCIENCE-SIXTH		структури-числові-похідні	2	lib/quantity.lisp	Проєктувати шостий член правильного списку через CAR/CDR.				ні	ні
+00011011110	WINNER_DEFINED_SENS_COMPOSITION	0001	сі:одиниця-константи	сі:одиниця-константи	структури-числові-похідні	1	lib/si.lisp	Одиниця — третій елемент вкладеної кількості; число не змінюється.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00011011111	RESEARCH_ONLY_NOT_RATIFIED	0001	my-postcore-binding-status		структури-числові-похідні	0	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00011100001	RESEARCH_ONLY_NOT_RATIFIED	0001	my-postcore-build-definitions		структури-числові-похідні	0	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00011100011	RESEARCH_ONLY_NOT_RATIFIED	0001	nonempty-string-membership-helper		структури-числові-похідні	0	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
@@ -138,7 +141,6 @@
 00100000001	RESEARCH_ONLY_NOT_RATIFIED	0010	GET-THRESHOLD		компілятор-кодек	1	lib/linter.lisp	Лінтер повертає встановлений поріг або явний default.				ні	ні
 00100000011	RESEARCH_ONLY_NOT_RATIFIED	0010	EFFECTFUL-PRIMITIVES		компілятор-кодек	2	lib/linter.lisp	Перелік effectful операцій є політичними даними лінтера, не новим примітивом.				ні	ні
 00100000101	RESEARCH_ONLY_NOT_RATIFIED	0010	LINT-MAX2		компілятор-кодек	2	lib/linter.lisp	Порівняти два сумісні явно математичні значення.				ні	ні
-00100000111	RESEARCH_ONLY_NOT_RATIFIED	0010	сі:створити-запис-константи	сі:створити-запис-константи	компілятор-кодек	0	lib/si.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00100001001	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-law-empty-bits		компілятор-кодек	0	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00100001011	RESEARCH_ONLY_NOT_RATIFIED	0010	компілятор-перший-дочірній-елемент-закону-д4	компілятор-перший-дочірній-елемент-закону-д4	компілятор-кодек	1	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00100001110	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-program-list		компілятор-кодек	1	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
