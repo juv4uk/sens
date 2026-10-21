@@ -41,27 +41,23 @@ fn admitted_encoder_session() -> Session {
 
 
 #[test]
-fn binary_u3_machine_field_projection_is_explicit_total_and_fail_closed() {
+fn exact_d24_u3_machine_field_projection_is_total_and_fail_closed() {
     let mut session = encoder_session();
     for (source, expected) in [
-        ("#b0", "0"),
-        ("#b1", "1"),
-        ("#b10", "2"),
-        ("#b11", "3"),
-        ("#b100", "4"),
-        ("#b101", "5"),
-        ("#b110", "6"),
-        ("#b111", "7"),
+        ("-1", "()"), ("0", "0"), ("1", "1"), ("2", "2"),
+        ("3", "3"), ("4", "4"), ("5", "5"), ("6", "6"),
+        ("7", "7"), ("8", "()"),
     ] {
         let form = format!("(x86-project-bin3-to-mechanism-u3 {source})");
-        assert_eq!(eval_bytes(&form, &mut session), expected, "form: {form}");
+        let parsed = sens::parse(&form).expect("український Lisp");
+        let exact = sens::source_projection::project_ukr_decimal_integer_literals(
+            &parsed, &form,
+        ).expect("reader надає D24+ операнди");
+        let actual = eval_parsed_expressions(&exact, &mut session)
+            .unwrap_or_else(|error| panic!("SENS x86 u3 {form}: {error}"))
+            .value.to_string();
+        assert_eq!(actual, expected, "form: {form}");
     }
-
-    assert_eq!(
-        eval_bytes("(x86-project-bin3-to-mechanism-u3 #b1000)", &mut session),
-        "()",
-        "u3 projection must fail closed outside 0..7"
-    );
 }
 
 #[test]
