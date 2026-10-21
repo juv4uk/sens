@@ -106,20 +106,19 @@ PY
       failed_files=$((failed_files + 1))
       continue
     fi
+    # Застаріла регулярна пара — це реальний борг на виправлення,
+    # але НЕ причина пропускати запуск щойно створеного Zig T5M.
+    # CI лишається червоним, проте реальний SENS показує наступну помилку.
     if ! cmp -s "$pair" "$committed"; then
-      echo "::error::T5M_COMMITTED_PAIR_DRIFT source=$file companion=$committed" >&2
+      echo "::error::T5M_COMMITTED_PAIR_DRIFT source=$file companion=$committed action=refresh-pair" >&2
       failed_files=$((failed_files + 1))
-      continue
     fi
     if [[ ! -f "$committed_view" || -L "$committed_view" ]]; then
-      echo "::error::T5M_COMMITTED_VIEW_MISSING source=$file expected=$committed_view" >&2
+      echo "::error::T5M_COMMITTED_VIEW_MISSING source=$file expected=$committed_view action=refresh-view" >&2
       failed_files=$((failed_files + 1))
-      continue
-    fi
-    if ! cmp -s "$staged_view" "$committed_view"; then
-      echo "::error::T5M_COMMITTED_VIEW_DRIFT source=$file companion=$committed_view" >&2
+    elif ! cmp -s "$staged_view" "$committed_view"; then
+      echo "::error::T5M_COMMITTED_VIEW_DRIFT source=$file companion=$committed_view action=refresh-view" >&2
       failed_files=$((failed_files + 1))
-      continue
     fi
   else
     echo "::notice::T5M_PAIR_NOT_COMMITTED path=$file release=NOT_CERTIFIED"
