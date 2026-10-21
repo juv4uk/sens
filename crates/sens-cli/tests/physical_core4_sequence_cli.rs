@@ -346,6 +346,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-insert-second"
                 | "list-reverse-four"
                 | "list-halfturn-four"
+                | "list-halfturn-six"
                 | "list-zip-general"
                 | "list-drop-last-general"
                 | "list-append-general"
