@@ -208,6 +208,9 @@ jobs:
           cargo test --locked -p sens --test uk_sa_surface peer_identity_acceptance_ -- --nocapture
           # Спершу справжній SENS-eval українського читача:
           # неповні речення та позитивні D3/D4/D9 свідки.
+          # Вузький живий D3/D4-свідок перевіряємо першим: сторонній RED
+          # не може приховати його власне фактичне виконання.
+          cargo test --locked -p sens --test fs_bridge_diagnostics journal_module_probe_fail_closed_on_malformed_event -- --exact --nocapture
           cargo test --locked -p sens --test understand_exact_empty -- --nocapture
           # Незалежний обмежений runtime-свідок D3/D6 до інтерпретації рівнів.
           cargo test --locked -p sens --test island_lowering_ukr_runtime -- --nocapture
@@ -222,7 +225,6 @@ jobs:
           # Живі українські D4 замикання перед D9, потім справжній SENS D1.
           cargo test --locked -p sens --test ukr_string_surface_aliases_runtime -- --nocapture
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime -- --nocapture
-          cargo test --locked -p sens --test fs_bridge_diagnostics journal_module_probe_fail_closed_on_malformed_event -- --exact --nocapture
           cargo test --locked -p sens --test result_status -- --nocapture
 
       # Лише адресний Zig/T5M-експорт після змін у виконуваних Lisp.
