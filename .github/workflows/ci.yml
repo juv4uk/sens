@@ -459,6 +459,13 @@ jobs:
           python3 scripts/check_d11_selector_seed.py
           python3 scripts/audit_ukrainian_domain_projections.py
 
+      - name: Знання — виконання українського D3-журналу та оберненість викличних голів
+        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Знання:') }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.test_ukr_optin_sources.WorldKnowledgeUkrProjectionBatchTests -v
+          cargo test --locked -p sens --test knowledge_journal_d3_ukr -- --nocapture
+
       - name: SI — перевірити чинний український Lisp і точні D24+ аргументи
         if: ${{ always() }}
         run: |
