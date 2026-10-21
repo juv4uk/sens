@@ -1,100 +1,87 @@
-//! Focused executable parity of strict D1 status/kind answers.
-//! Only two arithmetic-independent definitions are loaded, never suppressing D24+ failures.
-use sens::{
-    eval_parsed_expressions, parse_mixed_exact_domain, Session, Value,
-};
-const SRC: &str = include_str!("../../../lib/quantity.lisp");
+//! Чинні D1/D3 перевірки української бібліотеки наукових констант.
+//! Тестує справжній SENS; не закріплює старі англійські DEFINE, #d1 або SID8.
+use sens::{eval_parsed_expressions, eval_program, load_core_library, parse, Session, Value};
 
-const STATUS: &[&str] = &["exact-by-definition", "exact-derived", "measured"];
-const KIND: &[&str] = &[
-    "physical-defining", "physical-derived", "physical-measured", "mathematical"
-];
+const SOURCE: &str = include_str!("../../../lib/quantity.lisp");
 
-fn admitted_slice(current: bool) -> String {
-    let begin = SRC.find("(0011 scientific-constant-status-valid?")
-        .expect("current status definition");
-    let end = SRC.find("(0011 make-scientific-constant")
-        .expect("next unrelated definition");
-    let scope = SRC[begin..end].to_owned();
-    if current {
-        scope
-    } else {
-        scope.replace("#d1:1", "(010 (001 ()))")
-    }
+fn admitted_source() -> &'static str {
+    let from = SOURCE.find("(визначити науковий-константа-стан-чинний?")
+        .expect("чинна українська функція стану");
+    let to = SOURCE[from..].find("\n(визначити створити-науковий-константа")
+        .map(|i| from + i).expect("наступна функція після двох предикатів");
+    &SOURCE[from..to]
 }
 
-fn evaluator(source: &str) -> Session {
-    let forms = parse_mixed_exact_domain(source).expect("two D3/D4 definitions");
-    assert_eq!(forms.len(), 2);
+fn setup(source: &str) -> Session {
     let mut session = Session::default();
-    eval_parsed_expressions(&forms, &mut session).expect("definitions accepted");
+    load_core_library(&mut session).expect("чинний Core4 SENS");
+    let parsed = parse(source).expect("українські DEFINE");
+    assert_eq!(parsed.len(), 2, "два чинні SENS-предикати");
+    eval_parsed_expressions(&parsed, &mut session).expect("SENS DEFINE працює");
     session
 }
 
-fn run(session: &mut Session, function: &str, argument: &str) -> Value {
-    let source = format!("({function} (001 {argument}))");
-    let expr = parse_mixed_exact_domain(&source).expect("D3 QUOTE argument");
-    eval_parsed_expressions(&expr, session)
-        .unwrap_or_else(|err| panic!("{source}: {err:?}"))
+fn run(session: &mut Session, function: &str, data: &str) -> Value {
+    let call = format!("({function} (як-є {data}))");
+    eval_program(&call, session)
+        .unwrap_or_else(|error| panic!("SENS test_id=quantity-D1 input={call} error={error}"))
         .value
 }
 
 #[test]
-fn seven_admitted_status_kind_answers_are_exact_one_bit_yes() {
-    let mut current = evaluator(&admitted_slice(true));
-    let mut old = evaluator(&admitted_slice(false));
-    for (func, options) in [
-        ("scientific-constant-status-valid?", STATUS),
-        ("scientific-constant-kind-valid?", KIND)
+fn current_ukrainian_status_kind_truth_is_exact_d1_not_legacy_t() {
+    let source = admitted_source();
+    assert!(!source.contains("(так"), "голе T не є D1-предикатом SENS");
+    assert!(!source.contains("#d1:"), "історичний тег не є канонічним законом");
+    let mut session = setup(source);
+    for (function, valid, invalid) in [
+        (
+            "науковий-константа-стан-чинний?",
+            &["exact-by-definition", "measured"][..],
+            &["unknown", "exact-derived", "physical-defining"][..],
+        ),
+        (
+            "науковий-константа-вид-чинний?",
+            &["physical-defining", "physical-derived"][..],
+            &["unknown", "mathematical", "measured"][..],
+        ),
     ] {
-        for option in options {
-            let new_result = run(&mut current, func, option);
-            let old_result = run(&mut old, func, option);
-            assert_eq!(new_result.as_predicate_bit(), Some(true), "{func}/{option}");
-            assert_eq!(new_result, old_result);
+        for candidate in valid {
+            let got = run(&mut session, function, candidate);
+            assert_eq!(got.as_predicate_bit(), Some(true),
+                "SENS D1:YES {function}/{candidate} actual={got}");
+        }
+        for candidate in invalid {
+            let got = run(&mut session, function, candidate);
+            assert!(matches!(got, Value::Nil),
+                "відсутній допуск є D3 NIL, не вигаданий D1:NO: {function}/{candidate}: {got}");
+            assert_eq!(got.as_predicate_bit(), None);
         }
     }
 }
 
 #[test]
-fn disallowed_statuses_preserve_no_match_as_structural_empty() {
-    // COND exhaustion is D3:EMPTY per the current contract, not D1:NO.
-    let mut current = evaluator(&admitted_slice(true));
-    let mut old = evaluator(&admitted_slice(false));
-    for (func, options) in [
-        ("scientific-constant-status-valid?", &["unknown", "physical-defining"][..]),
-        ("scientific-constant-kind-valid?", &["unknown", "measured"][..]),
-    ] {
-        for option in options {
-            let new_result = run(&mut current, func, option);
-            let old_result = run(&mut old, func, option);
-            assert!(matches!(new_result, Value::Nil), "{func}/{option}: no-match D3 empty");
-            assert_eq!(new_result.as_predicate_bit(), None);
-            assert_eq!(new_result, old_result);
-        }
-    }
+fn mutated_status_law_changes_a_real_sens_result() {
+    let source = admitted_source();
+    let witness = "(тотожне? стан (як-є measured))";
+    assert!(source.contains(witness), "чинний закон measured");
+    let mutant = source.replacen(witness, "(тотожне? стан (як-є unknown))", 1);
+    let mut real = setup(source);
+    let mut altered = setup(&mutant);
+    let name = "науковий-константа-стан-чинний?";
+    assert_eq!(run(&mut real, name, "measured").as_predicate_bit(), Some(true));
+    assert!(matches!(run(&mut altered, name, "measured"), Value::Nil));
+    assert!(matches!(run(&mut real, name, "unknown"), Value::Nil));
+    assert_eq!(run(&mut altered, name, "unknown").as_predicate_bit(), Some(true));
 }
 
 #[test]
-fn d1_direct_words_and_empty_are_distinct_in_same_reader() {
-    let mut session = Session::default();
-    for (source, expected) in [("#d1:0", false), ("#d1:1", true)] {
-        let parsed = parse_mixed_exact_domain(source).unwrap();
-        let value = eval_parsed_expressions(&parsed, &mut session).unwrap().value;
-        assert_eq!(value.as_predicate_bit(), Some(expected));
-    }
-    let parsed = parse_mixed_exact_domain("(001 ())").unwrap();
-    let value = eval_parsed_expressions(&parsed, &mut session).unwrap().value;
-    assert!(matches!(value, Value::Nil));
-    assert_eq!(value.as_predicate_bit(), None);
-}
-
-#[test]
-fn cond_short_circuit_does_not_evaluate_unsupported_branch() {
-    let source = "(110 (#d1:1 (001 chosen)) (#d1:1 (unknown-unreachable)))";
-    let parsed = parse_mixed_exact_domain(source).expect("D3 COND");
-    let output = eval_parsed_expressions(&parsed, &mut Session::default())
-        .expect("only first selected branch evaluated")
-        .value;
-    assert_eq!(output.to_string(), "chosen");
+fn d1_false_and_d3_nil_are_distinct_in_sens() {
+    let mut session = setup(admitted_source());
+    let no = eval_program("(хибне? (атом? (як-є ())))", &mut session)
+        .expect("SENS computes exact D1 false").value;
+    let absent = run(&mut session, "науковий-константа-вид-чинний?", "unknown");
+    assert_eq!(no.as_predicate_bit(), Some(false));
+    assert!(matches!(absent, Value::Nil));
+    assert_eq!(absent.as_predicate_bit(), None);
 }
