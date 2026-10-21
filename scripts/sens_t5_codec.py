@@ -157,7 +157,7 @@ def parse_t5m_words(source: str) -> list[str]:
 def encode_t5m_projection(source: str) -> bytes:
     """Reference default T5M: rank five trits in base 3 into one byte."""
     words = parse_t5m_words(source)
-    trits = [int(trit) for trit in "2".join(words)]
+    trits = [ord(trit) - 48 for trit in "2".join(words)]
     trits.extend([2] * (-len(trits) % 5))
     if len(trits) // 5 > MAX_FILE_BYTES:
         raise SensT5Error("physical T5M file exceeds size limit")
