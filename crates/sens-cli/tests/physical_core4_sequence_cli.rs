@@ -286,6 +286,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "pair-zip-unzip-two",
         "list-delete-second",
         "list-insert-second",
+        "rotate-four-left",
+        "rotate-four-right",
         "list-swap-neighbors-four",
         "list-swap-middle-four",
         "list-replace-fourth",
@@ -322,6 +324,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
             "вилучити-середнє-з-трійки"
                 | "вставити-посеред-пари"
                 | "розділити-четвірку-на-пари"
+                | "rotate-four-left"
+                | "rotate-four-right"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
