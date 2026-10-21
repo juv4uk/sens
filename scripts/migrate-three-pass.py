@@ -1456,13 +1456,13 @@ NONPROGRAM_MANIFESTS = (
 # Старі SHA до українізації не мають блокувати кожну виконувану програму.
 # Вміст, схема, кількість і кожен власний source-blob усе ще перевіряються.
 NONPROGRAM_MANIFEST_BLOB_SHA = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "c50c5bb4544d5f99c095ede8f9e7e00247b5e591",
-    "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "2c92d4c427155229f07cc50a0dcbad58410b6bb3",
-    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "fb9126852941b96cc271c79dfc6d841e03f1aca5",
-    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "5b8da639b2551372acb808d52c45a13b8cb925b5",
-    "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "dcf286108ad9dfd1323a57a488c08716c767de64",
-    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "d6151765a7a1d3087774c00f63063136da15a56e",
-    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "b6cce65609c4ba85d2977363872de96071061ffc",
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "83b30fbc4e4de39251362a06d50ecb45dc864dae",
+    "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "e258a854fb4abab0070c3f7585b96b6acdfcbfb7",
+    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "a7da5c8da60315d68f83ce46966707155f99a41e",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "e0c02e073c70574474944356e18fdf9e400c84ad",
+    "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "413c9dee025bb56b9fd346701e46d7ae4fb9ea89",
+    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "eada8ed4643006e7c71da5ea66a162c4bee9fa00",
+    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "7adee99a921a4b503d6f68f3cbd6be6aa183c0a7",
 }
 
 
