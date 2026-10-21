@@ -253,6 +253,26 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
 }
 
 #[test]
+fn empty_or_atomic_observation_returns_named_failure_not_host_error() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    load_bridge(&mut session);
+
+    // Positive execution of the negative inputs: reader and evaluator must
+    // return named data, never rely on Rust to replace an evaluator error.
+    for observation in ["(як-є ())", "(як-є непридатне)"] {
+        let program = format!(
+            "(перетворити-підстановки-пролог-на-факти-даталог {observation})"
+        );
+        let actual = eval_program(&program, &mut session)
+            .unwrap_or_else(|error| panic!("SENS program must execute: {program}: {error}"))
+            .value
+            .to_string();
+        assert_eq!(actual, "(projection-failure malformed-observation)");
+    }
+}
+
+#[test]
 fn malformed_projection_input_is_named_failure_not_false() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
