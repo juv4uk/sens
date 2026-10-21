@@ -491,6 +491,7 @@ jobs:
           set -euo pipefail
           python3 -m unittest tests.test_ukr_optin_sources.WorldKnowledgeUkrProjectionBatchTests -v
           cargo test --locked -p sens --test knowledge_journal_d3_ukr -- --nocapture
+          cargo test --locked -p sens --test knowledge_d1_recovery -- --nocapture
 
       - name: SI — перевірити чинний український Lisp і точні D24+ аргументи
         if: ${{ always() }}

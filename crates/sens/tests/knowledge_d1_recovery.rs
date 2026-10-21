@@ -90,6 +90,39 @@ fn malformed_package_rows_are_skipped_before_d4_caar() {
 }
 
 #[test]
+fn opposite_knowledge_head_checks_atom_and_malformed_tail() {
+    // Справжнє виконання SENS: D3 CAR/CDR не можна викликати на атомі.
+    // Для кожного випадку очікуване значення також обчислює SENS.
+    let mut s = session();
+    for (source, oracle) in [
+        (
+            "(отримати-протилежну-голову-твердження-знання (як-є сонце))",
+            "(список (як-є not?) (як-є сонце))",
+        ),
+        (
+            "(отримати-протилежну-голову-твердження-знання (як-є (not сонце)))",
+            "(як-є сонце)",
+        ),
+        (
+            "(отримати-протилежну-голову-твердження-знання (як-є (not? сонце)))",
+            "(як-є сонце)",
+        ),
+        (
+            "(отримати-протилежну-голову-твердження-знання (як-є (not)))",
+            "(список (як-є not?) (як-є (not)))",
+        ),
+        (
+            "(отримати-протилежну-голову-твердження-знання (як-є (not сонце зайве)))",
+            "(список (як-є not?) (як-є (not сонце зайве)))",
+        ),
+    ] {
+        let actual = eval(&mut s, source);
+        let expected = eval(&mut s, oracle);
+        assert_eq!(actual.to_string(), expected.to_string(), "{source}");
+    }
+}
+
+#[test]
 fn ukrainian_clause_validation_is_exact_d1() {
     let mut s = session();
     for (code, expected) in [
