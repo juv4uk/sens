@@ -264,6 +264,7 @@ jobs:
           set -euo pipefail
           cargo test --locked -p sens --test yantra yantra_json_string_classifier_yields_d1_condition_from_structured_witness -- --exact --nocapture
           cargo test --locked -p sens --test yantra yantra_json_d1_boolean_values_are_distinct -- --exact --nocapture
+          cargo test --locked -p sens --test yantra yantra_json_class_membership_is_a_checked_d3_triple -- --exact --nocapture
 
       - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
         if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
