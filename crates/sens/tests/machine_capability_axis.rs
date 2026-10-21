@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use sens::semantic_registry_export::semantic_id_for_admitted_surface;
-use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
+use sens::{load_core_library, lower_program, parse, ExprKind, Session};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
