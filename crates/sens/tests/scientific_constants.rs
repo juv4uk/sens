@@ -47,14 +47,14 @@ fn eval_science_knowledge(source: &str) -> String {
 fn speed_of_light_record_keeps_value_unit_status_kind_system_and_source() {
     let source = r#"
         (list
-          (scientific-constant-name сі:визначальна-швидкість-світла)
-          (scientific-constant-value сі:визначальна-швидкість-світла)
-          (unit-dimensions
-            (scientific-constant-unit сі:визначальна-швидкість-світла))
-          (scientific-constant-status сі:визначальна-швидкість-світла)
-          (scientific-constant-kind сі:визначальна-швидкість-світла)
-          (scientific-constant-system сі:визначальна-швидкість-світла)
-          (scientific-constant-source сі:визначальна-швидкість-світла))
+          (науковий-константа-ім'я сі:визначальна-швидкість-світла)
+          (науковий-константа-значення сі:визначальна-швидкість-світла)
+          (одиниця-розмірності
+            (науковий-константа-одиниця сі:визначальна-швидкість-світла))
+          (науковий-константа-стан сі:визначальна-швидкість-світла)
+          (науковий-константа-вид сі:визначальна-швидкість-світла)
+          (науковий-константа-система сі:визначальна-швидкість-світла)
+          (науковий-константа-джерело сі:визначальна-швидкість-світла))
     "#;
     assert_eq!(
         eval_science(source),
@@ -96,7 +96,7 @@ fn advice_taker_can_reason_about_an_admitted_scientific_constant() {
               (dimension/1 second -1))))
         (def admission
           (advise-all science
-            (scientific-constant->clauses сі:визначальна-швидкість-світла)))
+            (науковий-константа-клаузи сі:визначальна-швидкість-світла)))
         (list
           (car admission)
           (результат-стан
@@ -121,7 +121,7 @@ fn advice_taker_can_reason_about_an_admitted_scientific_constant() {
 #[test]
 fn malformed_constant_cannot_project_into_knowledge() {
     let source = r#"
-        (scientific-constant->clauses
+        (науковий-константа-клаузи
           (quote (scientific-constant/1 broken)))
     "#;
     assert_eq!(eval_science(source), "()");
