@@ -127,9 +127,9 @@ PY
     # Фізичний T5M зберігає W24 без втрат. Проте W24 сам по собі
     # не позначає домен: старий BinarySourceWord приймає лише W1–W9.
     # Це НЕ дає права приписати байтам D24 та оголосити physical PASS.
-    # Для W24 використовуємо точний парний маршрут: джерело лише
+    # Для W24+ використовуємо точний парний маршрут: джерело лише
     # посвідчує домен, Zig декодує наданий .sens, SENS перевіряє кожний біт.
-    if grep -Fq 'точні ширини слів [24]' "$stderr" &&
+    if grep -Fq 'Фізичне T5M-декодування зберегло точні ширини слів' "$stderr" &&
        grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$stderr"; then
       physical_not_supported=$((physical_not_supported + 1))
       echo "::notice::T5M_STANDALONE_D24_NOT_SUPPORTED source=$file pair=$pair status=$status"
