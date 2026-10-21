@@ -37,6 +37,26 @@ fn ukrainian_negation_heads_preserve_exact_d1() {
 }
 
 #[test]
+fn knowledge_opposite_head_guards_malformed_negation() {
+    // Справжній SENS-eval: CAR/CADR дозволені лише на правильній парі.
+    let mut s = session();
+    for (head, expected) in [
+        ("(not radio)", "radio"),
+        ("(not? (signal antenna))", "(signal antenna)"),
+        ("(signal antenna)", "(not? (signal antenna))"),
+        ("radio", "(not? radio)"),
+        ("(not)", "(not? (not))"),
+        ("(not radio antenna)", "(not? (not radio antenna))"),
+    ] {
+        let query = format!(
+            "(отримати-протилежну-голову-твердження-знання (як-є {head}))"
+        );
+        let actual = eval(&mut s, &query);
+        assert_eq!(actual.to_string(), expected, "{query}");
+    }
+}
+
+#[test]
 fn package_field_returns_data_and_missing_field_is_d3_empty() {
     let mut s = session();
     let found = eval(&mut s,
