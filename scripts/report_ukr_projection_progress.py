@@ -357,8 +357,28 @@ def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
             relative.startswith(prefix) for prefix in NONPROGRAM_LIB_PATHS
         ):
             excluded += 1
-        else:
-            selected.append(path)
+            continue
+
+        # ISA-каталог — дані про процесор, НЕ виконуваний Lisp.
+        # Не додаємо його латинські mnemonic/extension поля до боргу
+        # українських викликів. Доводимо саме AST-формою документа, а не
+        # сліпо виключаємо цілий каталог: DEFINE та зіпсовані файли
+        # повинні залишатися в аудиті.
+        if relative.startswith("lib/machine/isa/"):
+            try:
+                forms = parse_lisp_tokens(tokenize_lisp(
+                    path.read_text(encoding="utf-8")
+                ))
+            except (OSError, UnicodeError, ValueError):
+                selected.append(path)
+                continue
+            if (len(forms) == 1
+                and isinstance(forms[0], LispForm)
+                and bool(forms[0].items)
+                and _atom_value(forms[0].items[0]) == "isa-catalogue/1"):
+                excluded += 1
+                continue
+        selected.append(path)
     return selected, excluded
 
 
