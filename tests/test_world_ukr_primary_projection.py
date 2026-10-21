@@ -8,8 +8,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PATH = ROOT / "lib" / "world.lisp"
 D9_PATH = ROOT / "lib" / "domains" / "d9.lisp"
-# Межу визначає перший реальний сумісний аліас, а не змінний коментар у Lisp.
-ALIAS_MARKER = "(визначити advise-all-world порадити-всі-світ)"
 
 RESIDENTS = {
     "111100001": ("створити-світ", "make-world"),
@@ -56,8 +54,7 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
 
     def test_full_ukr_names_are_primary_definitions(self):
         source, _ = read_sources()
-        self.assertIn(ALIAS_MARKER, source)
-        primary = source.split(ALIAS_MARKER, 1)[0]
+        primary = source
         for bits, (ukr, _english) in RESIDENTS.items():
             with self.subTest(bits=bits, name=ukr):
                 self.assertRegex(
@@ -65,14 +62,25 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
                     rf"(?m)^\(визначити\s+{re.escape(ukr)}\s+\(функція\b",
                 )
 
-    def test_english_names_are_compatibility_aliases(self):
+    def test_english_surfaces_are_d9_data_not_lisp_definitions(self):
+        source, d9 = read_sources()
+        for bits, (ukr, english) in RESIDENTS.items():
+            with self.subTest(bits=bits, name=english):
+                self.assertNotRegex(
+                    source,
+                    rf"(?m)^\(визначити\s+{re.escape(english)}(?=\s|\))",
+                )
+                self.assertIn(f"(укр {ukr})", d9)
+                self.assertIn(f"(en {english})", d9)
+
+    def test_no_stale_world_alias_tail_blocks_t5m(self):
         source, _ = read_sources()
-        aliases = source.split(ALIAS_MARKER, 1)[1]
-        for _bits, (ukr, english) in RESIDENTS.items():
-            with self.subTest(name=english):
-                self.assertRegex(
-                    aliases,
-                    rf"(?m)^\(визначити\s+{re.escape(english)}\s+{re.escape(ukr)}\)\s*$",
+        self.assertIn("(визначити порадити-всі-світ", source)
+        for legacy in ("advise-all-world", "world-at-depth", "world-branch-diff",
+                       "defmodule", "import-knowledge-package"):
+            with self.subTest(name=legacy):
+                self.assertNotRegex(
+                    source, rf"(?m)^\(визначити\s+{re.escape(legacy)}(?=\s|\))",
                 )
 
     def test_missing_module_uses_only_ukrainian_binding_and_witness(self):
@@ -108,7 +116,7 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
 
     def test_world_operations_compose_through_ukr_primary_names(self):
         source, _ = read_sources()
-        primary = source.split(ALIAS_MARKER, 1)[0]
+        primary = source
         primary_code = "\n".join(
             line for line in primary.splitlines()
             if not line.lstrip().startswith(";")
@@ -129,7 +137,7 @@ class WorldUkrPrimaryProjectionTests(unittest.TestCase):
     def test_no_raw_binary_heads_or_unratified_helper_renames(self):
         source, _ = read_sources()
         self.assertNotRegex(source, r"\(\s*[01]{9}(?:\s|\))")
-        primary = source.split(ALIAS_MARKER, 1)[0]
+        primary = source
         for helper in (
             "світ?",
             "внутрішній-світ-прибрати-перше",
