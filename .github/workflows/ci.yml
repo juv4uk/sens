@@ -188,6 +188,17 @@ jobs:
                       continue  # comment-only source is not an executable program
               except (OSError, UnicodeError, ValueError):
                   pass  # malformed changed source is still sent to the real parser and must fail there
+              # MetaEval-графові law/mutant — залежні SENS-вирази, а не
+              # окремі програми: вони звертаються до визначень meta-eval.
+              # Їхню семантику (D1:1 і мутант D1:0) обов'язково виконує
+              # нижче core_postcore_ukr із завантаженою бібліотекою.
+              # Самостійний CLI без цих зв'язувань давав хибний RED.
+              if name in {
+                  "tests/semantic/meta-eval-graph-d1-law.lisp",
+                  "tests/semantic/meta-eval-graph-d1-mutant.lisp",
+              }:
+                  print(f"T5M_DEPENDENT_META_EVAL_FIXTURE path={name} runtime=core_postcore_ukr release=NOT_CERTIFIED")
+                  continue
               selected.append(name)
           output.write_text("".join(name + "\n" for name in selected), encoding="utf-8")
           print(f"T5M_CHANGED_EXECUTABLE_LISP count={len(selected)}")
