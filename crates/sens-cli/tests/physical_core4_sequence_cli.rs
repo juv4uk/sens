@@ -307,6 +307,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "pair-zip-unzip-three",
 
         "виключне-або-д1",
+            "поміняти-кожну-пару",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
