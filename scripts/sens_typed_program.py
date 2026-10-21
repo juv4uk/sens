@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Типізована доменна програма -> фізичний .sens (через кодек репо).
+"""Історичний типізований перегляд, тільки діагностика; Zig/T5M карбує .sens.
 
 Машина читає програму НЕ як текст і не як телеграфний wire-запис, а як
 послідовність ЯВНО типізованих доменних слів: кожне слово несе свій домен
@@ -16,7 +16,7 @@ Wire-запис ("10 1000 00 ...", слова через пробіл) -- то �
 машинною формою.
 
 Використання:
-    python3 scripts/sens_typed_program.py emit <program.typed> <out.sens>
+    python3 scripts/sens_typed_program.py emit <program.typed> <out.sens>  # заборонено; Zig/T5M
     python3 scripts/sens_typed_program.py wire <out.sens>       # телеграфний запис
     python3 scripts/sens_typed_program.py selftest              # caar == фікстура
 """
@@ -88,10 +88,14 @@ def main() -> int:
     sub.add_parser("selftest")
     a = ap.parse_args()
     if a.cmd == "emit":
-        pathlib.Path(a.out).write_bytes(emit(pathlib.Path(a.typed)))
-        print(f"записано {a.out}")
+        # Застарілий Python-кодек може бути лише еталонною перевіркою:
+        # він не є власником фізичних файлів сучасної мови.
+        print("LEGACY_PYTHON_T5M_PUBLICATION_DISABLED: "
+              "use migrate-one-to-sens.py and pinned Zig/T5M", file=sys.stderr)
+        return 2
     elif a.cmd == "wire":
-        print(" ".join(C.decode_bytes(pathlib.Path(a.sens).read_bytes())))
+        # Чинний фізичний носій — T5M, а не історичний T5.
+        print(" ".join(C.decode_t5m_bytes(pathlib.Path(a.sens).read_bytes())))
     else:
         selftest()
     return 0
