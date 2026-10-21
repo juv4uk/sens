@@ -535,6 +535,52 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
     assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "(())");
 }
 
+/// Фізичний SENS-свідок того, що цитований protocol label «world»
+/// читається як D7 ASCII-дані, а не як неіснуючий український glyph.
+#[cfg(feature = "zig-transport")]
+#[test]
+fn t5m_physical_pair_quoted_world_is_ascii_data_not_ukrainian_call() {
+    use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
+    let word = |width: usize, bits: u64| ExactT5Word::new(
+        width, (0..width).rev().map(|shift| ((bits >> shift) & 1) as u8).collect(),
+    ).expect("exact ratified word");
+    // (D3 QUOTE <D7 EN world>), із D2 OPEN / SEP / CLOSE.
+    let mut words = vec![word(2, 2), word(3, 1), word(2, 0), word(2, 2)];
+    for (index, glyph) in b"world".iter().enumerate() {
+        if index != 0 { words.push(word(2, 0)); }
+        words.push(word(7, u64::from(*glyph)));
+    }
+    words.push(word(2, 1));
+    words.push(word(2, 1));
+
+    let root = std::env::temp_dir().join(format!(
+        "sens-quoted-protocol-world-{}", std::process::id()
+    ));
+    std::fs::create_dir_all(&root).expect("isolated real pair");
+    let lisp = root.join("цитата.lisp");
+    let physical = root.join("цитата.sens");
+    std::fs::write(&lisp, "(як-є world)\n").expect("Ukrainian Lisp");
+    std::fs::write(&physical, encode_t5_exact_words(&words).unwrap()).expect("Zig T5M");
+    let evaluate = || sens()
+        .args(["--t5m-pair", lisp.to_str().unwrap(), physical.to_str().unwrap()])
+        .output().expect("real SENS evaluator");
+
+    let positive = evaluate();
+    assert!(positive.status.success(), "цитоване world не виконано SENS: {}",
+        String::from_utf8_lossy(&positive.stderr));
+    assert_eq!(String::from_utf8_lossy(&positive.stdout).trim(), "world");
+
+    // Відрізнити загублену цитату і підмінене D7 ім'я.
+    let mut altered = words.clone();
+    altered[3] = word(2, 1); // неправильна D2 межа перед текстом
+    std::fs::write(&physical, encode_t5_exact_words(&altered).unwrap())
+        .expect("physical mutant");
+    let negative = evaluate();
+    assert!(!negative.status.success(), "пошкоджений T5M пройшов у SENS");
+
+    let _ = std::fs::remove_dir_all(root);
+}
+
 /// Структурна перевірка не є семантичним свідком: беремо саме визначення
 /// з поточного lib/result-status.lisp та запускаємо його живим Zig/SENS.
 #[test]
