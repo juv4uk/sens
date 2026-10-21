@@ -69,21 +69,21 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="sens-t5m-stale-pair-") as td:
             root = Path(td)
             (root / "scripts").mkdir()
-            (root / "module.lisp").write_text("; це більше не програма\\n", encoding="utf-8")
-            (root / "changed.txt").write_text("module.lisp\\n", encoding="utf-8")
-            (root / "module.sens").write_bytes(b"\\x01")
+            (root / "module.lisp").write_text("; це більше не програма\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\n", encoding="utf-8")
+            (root / "module.sens").write_bytes(b"\x01")
             migrator = root / "scripts/migrate-three-pass.py"
             migrator.write_text(
-                "import json, pathlib, sys\\n"
-                "out = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\\n"
-                "out.parent.mkdir(parents=True, exist_ok=True)\\n"
+                "import json, pathlib, sys\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\n"
+                "out.parent.mkdir(parents=True, exist_ok=True)\n"
                 "out.write_text(json.dumps({'summary': {'files_written': 0, "
-                "'files_blocked': 0, 'files_not_program': 1}, 'files': []}))\\n",
+                "'files_blocked': 0, 'files_not_program': 1}, 'files': []}))\n",
                 encoding="utf-8",
             )
             binary = root / "never-call-sens"
             binary.write_text(
-                "#!/bin/sh\\necho invoked > executed.marker\\nexit 99\\n",
+                "#!/bin/sh\necho invoked > executed.marker\nexit 99\n",
                 encoding="utf-8",
             )
             binary.chmod(0o755)
