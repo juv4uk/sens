@@ -123,6 +123,33 @@ class UkrainianLinterProjection(unittest.TestCase):
                 self.assertIn(program, examples)
         self.assertGreaterEqual(examples.count('(expected . "()")'), 2)
 
+    def test_quoted_cond_is_not_live_complexity(self):
+        # Виконувана формула з lib/linter.lisp, а не Python-eval.
+        start = self.active.index("(визначити аналіз-складність")
+        end = self.active.index("(визначити лінтер-примітиви-з-ефектами", start)
+        body = self.active[start:end]
+        self.assertIn(
+            "(тотожне? (аналіз-форма-голова дерево) (як-є як-є))",
+            body,
+        )
+        self.assertIn(
+            "(тотожне? (аналіз-форма-голова дерево) (як-є quote))",
+            body,
+        )
+        self.assertLess(body.index("(як-є як-є)"), body.index("(як-є за-умовою)"))
+        self.assertNotIn(" так)", body)
+        self.assertNotIn(" ні)", body)
+        witness = (ROOT / "tests/fixtures/linter.lisp").read_text(
+            encoding="utf-8"
+        )
+        for expression in (
+            "(аналіз-складність (як-є (як-є (за-умовою",
+            "(аналіз-складність (як-є (quote (за-умовою",
+            "(аналіз-складність (як-є (список (як-є (за-умовою",
+        ):
+            with self.subTest(expression=expression):
+                self.assertIn(expression, witness)
+
     def test_d1_truth_values_do_not_require_unbound_global_names(self):
         # Синтаксична охорона; справжній вердикт дає SENS CLI.
         # Рядки в таблиці даних залишаються незмінними.
