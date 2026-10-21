@@ -545,6 +545,8 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/d4-second-two-tails-law",
         "lib/rotate-three-right",
         "lib/pair-zip-unzip-two",
+        "lib/list-alternating-split-four",
+        "lib/list-replace-fourth",
         "lib/reverse-three",
         "lib/interleave-pairs",
         // Реальні українські DEFINE/LAMBDA: дві взаємодоповнювальні
