@@ -93,7 +93,7 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
 
       - name: Required full workspace test (same tagged SHA)
-        run: cargo test --locked --workspace
+        run: cargo test --locked --workspace --no-fail-fast
 
       - name: Required full workspace Clippy (same tagged SHA)
         run: cargo clippy --locked --workspace --all-targets -- -D warnings

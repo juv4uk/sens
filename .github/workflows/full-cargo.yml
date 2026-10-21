@@ -28,10 +28,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "FULL_CARGO_MANUAL commit=$GITHUB_SHA command=cargo test --workspace --all-targets --locked"
+          echo "FULL_CARGO_MANUAL commit=$GITHUB_SHA command=cargo test --workspace --all-targets --locked --no-fail-fast"
           python3 scripts/ci_failure_contract.py run \
             --test-id full-cargo-workspace-all-targets \
             --layer transport \
             --fixture Cargo.toml \
             --report-file "$RUNNER_TEMP/sens-full-cargo-red.jsonl" \
-            -- cargo test --workspace --all-targets --locked
+            -- cargo test --workspace --all-targets --locked --no-fail-fast

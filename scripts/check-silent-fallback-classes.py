@@ -38,7 +38,9 @@ import os
 import re
 import sys
 
-SKIP_DIRS = {".git", "target", "node_modules", "vendor", "dist", "build"}
+# domain-archive тримає історичні копії чужого коду (prNNNN/source/**) -- це
+# не живий код проєкту, тож скан живого коду його не враховує.
+SKIP_DIRS = {".git", "target", "node_modules", "vendor", "dist", "build", "domain-archive"}
 
 HUMAN_SERIALIZER = re.compile(r"render|serial|wire|canonical|encode|to_string|display", re.I)
 FLAG_NAME = re.compile(r"(flag|present|is_|has_|active|admitted|enabled)", re.I)

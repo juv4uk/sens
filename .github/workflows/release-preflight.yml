@@ -164,7 +164,7 @@ jobs:
         run: cargo test --locked -p sens-cli --test islands_release_asset
 
       - name: Full workspace tests (pre-tag, exact SHA)
-        run: cargo test --locked --workspace
+        run: cargo test --locked --workspace --no-fail-fast
 
       - name: Full workspace Clippy (pre-tag, exact SHA)
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
