@@ -238,6 +238,12 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/unify.lisp
                      --binding-source lib/knowledge.lisp
                      --binding-source lib/reason.lisp)
+  elif [[ "$file" == "tests/fixtures/mechanism-selector-1047-witness.lisp" ]]; then
+    # Іменовані SENS DEFINE механізмів походять із мовних бібліотек,
+    # а не з вигаданих D9/D10 resident callables чи host-функцій.
+    # Передувати залежностям повинен реєстр українських проєкцій.
+    binding_sources=(--binding-source lib/surface/semantic-registry-api.lisp
+                     --binding-source lib/mechanism-selector.lisp)
   elif [[ "$file" == "lib/translation.lisp" ]]; then
     # Переклад викликає лише реальні визначення: знання/світ та D8
     # класифікацію тексту з Yantra. Каталог D9/D10 сам по собі
