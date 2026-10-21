@@ -278,6 +278,18 @@ class ThreePassMigrationTests(unittest.TestCase):
             [mod.D3_EMPTY],
         )
 
+        # Один машинний Lisp-атом із апострофом не має перетворитися
+        # на два вузли та оператор QUOTE у параметрах реальної програми.
+        observed = mod.tokenize("(функція (ім'я) ім'я)")
+        self.assertEqual(
+            [(tok.kind, tok.text) for tok in observed if tok.kind == "ATOM"],
+            [("ATOM", "функція"), ("ATOM", "ім'я"), ("ATOM", "ім'я")],
+        )
+        self.assertEqual(
+            [(tok.kind, tok.text) for tok in mod.tokenize("'ім'я")],
+            [("QUOTE", "'"), ("ATOM", "ім'я")],
+        )
+
     def test_full_d4_lambda_keeps_variadic_and_dotted_semantics(self):
         samples = (
             "(функція аргументи аргументи)",
