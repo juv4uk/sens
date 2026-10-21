@@ -1,11 +1,11 @@
 {
   "schema": "sens.d11.selector-seed/v1",
-  "status": "RESEARCH_ONLY_NOT_RATIFIED",
+  "status": "MATHEMATICALLY_DERIVED_SELECTOR_FUNCTIONS",
   "date": "2026-10-16",
   "domain": "D11",
   "width": 11,
   "capacity": 2048,
-  "owner_decision": "PENDING",
+  "owner_decision": "MATHEMATICAL_DERIVATION_CONFIRMED_NOT_NEW_PRIMITIVE",
   "source": {
     "main_sha": "c49a660f8d51af76272434f504461a6c75fe25a2",
     "parent_domain": "D10",
@@ -18,23 +18,24 @@
   },
   "law": {
     "name": "selector-suffix-extension",
-    "statement_uk": "Для кожного ратифікованого восьмикрокового селектора D10 p утворити два дев'ятикрокових кандидати D11 p0 і p1. Нуль додає A перед R; одиниця додає D перед R. Застосування нового кроку відбувається до батьківського селектора: p0(x)=p(CAR(x)), p1(x)=p(CDR(x)).",
+    "statement_uk": "Для кожного визначеного ратифікованого восьмикрокового селектора D10 p математично існують рівно дві дев'ятикрокові похідні функції D11: p0(x)=p(CAR(x)), p1(x)=p(CDR(x)). Нуль додає A перед R; одиниця додає D перед R. Це композиції чинних функцій, а не нові кандидати на незалежні закони.",
     "basis": "D3 CAR/CDR and previously proved selector-generator; D10 parents owner-ratified",
-    "coordinate_rule": "11-bit candidate = 10-bit D10 selector coordinate || one bit",
+    "coordinate_rule": "11-bit derived selector = 10-bit D10 parent selector coordinate || one bit",
     "non_selector_parents": "NO_EXTENSION",
-    "candidate_only": true,
     "lisp_owned_composition_source": "tests/fixtures/d11-selector-law-witness.lisp",
-    "left_11bit_candidate": "01100000000",
-    "right_11bit_candidate": "01100000001",
     "example_parent_10bit": "0110000000",
     "positive_law_uk": "Для довільного вже допущеного селектора-батька p: p0(x)=p(CAR(x)); p1(x)=p(CDR(x)). Дві незалежні композиції перевіряються D3-кодом без D11 call head.",
     "negative_law_uk": "Асиметричні конс-пари дозволяють відрізнити p0(x) від p1(x) та викрити перестановку бітів суфікса.",
     "evidence_status": "LISP_SOURCE_PLUS_STATIC_STRUCTURAL_CHECK; REPRESENTATIVE_NATIVE_SENS_LAW_PASS",
-    "candidate_gate": "NO_RATIFICATION_NO_D11_CALLABILITY_NO_ZIG_T5_ADMISSION"
+    "derived_by_law": true,
+    "independent_new_primitive_laws": 0,
+    "universal_derivation": "forall ratified selector p in D10: derived_0(x)=p(CAR(x)); derived_1(x)=p(CDR(x))",
+    "left_11bit_derived": "01100000000",
+    "right_11bit_derived": "01100000001",
+    "opcode_admission": "DERIVED_SEMANTICS_DEFINED_NO_SEPARATE_DIRECT_D11_OPCODE_YET; NO_NEW_PRIMITIVE; NO_ZIG_T5_DIRECT_OPCODE_ADMISSION"
   },
   "accounting": {
     "d10_selector_parents": 256,
-    "d11_selector_candidates": 512,
     "unique_11bit_coordinates": 512,
     "unique_names": 512,
     "d11_existing_testing_only": 43,
@@ -42,16 +43,17 @@
     "test_name_collisions": 0,
     "callable": 0,
     "zig_t5_admitted": 0,
-    "unallocated_coordinates_after_testing": 2005,
-    "unproposed_coordinates_after_testing_and_selector_research": 1493,
-    "selector_candidate_coordinates_reserved": 0,
-    "selector_candidates_not_callable": 512,
-    "new_ratified_residents": 0
+    "new_ratified_residents": 0,
+    "d11_mathematically_defined_selectors": 512,
+    "coordinates_outside_testing_vocabulary": 2005,
+    "coordinates_outside_testing_and_derived_selectors": 1493,
+    "selector_derived_coordinates": 512,
+    "derived_selectors_without_direct_opcode_admission": 512
   },
   "verification": {
-    "positive": "All 512 exact 11-bit words have unique names and no overlap with ratified 43 test coordinates.",
+    "positive": "512 exact 11-bit selector coordinates and names follow uniquely from 256 D10 parents and D3 CAR/CDR; all are defined compositions, not proposals.",
     "negative": "A 10-bit truncated coordinate is rejected by exact-width invariant.",
-    "semantics": "ONE_REPRESENTATIVE_D10_PARENT_AND_BOTH_D11_DERIVATIONS_PROVED_BY_NATIVE_SENS; all 512 D11 candidate opcodes remain unratified and noncallable.",
+    "semantics": "UNIVERSAL_MATHEMATICAL_DERIVATION_FROM_D3_CAR_CDR_AND_D10_SELECTOR_LADDER; representative native SENS test proves both branches and two negative mutants; direct opcode execution of all 512 not yet asserted.",
     "hosted_ci": "ONE_NATIVE_SENS_TEST_PASSED_IN_FAILED_WORKFLOW_RUN_39679874500; other steps red.",
     "representative_native_sens": {
       "status": "REPRESENTATIVE_NATIVE_SENS_LAW_PASS",
@@ -69,7 +71,9 @@
       "all_512_individually_executed": false,
       "owner_ratification": false,
       "callability_added": 0
-    }
+    },
+    "mathematical_status": "ALL_512_DERIVED_FUNCTIONS_DEFINED",
+    "direct_opcode_status": "NOT_ADMITTED_AS_NEW_PRIMITIVES"
   },
   "rows": [
     [
