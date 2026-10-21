@@ -32,10 +32,11 @@ class StageTwoProjectionsTests(unittest.TestCase):
         for width in range(1, 11):
             with self.subTest(width=width):
                 self.assertIsNotNone(pair.BITS.fullmatch("0" * width))
-        for width in (11, 12, 16, 23):
+        # 25, 32 і 49 біт не утворюють нового числового домену.
+        for width in (11, 12, 16, 23, 25, 32, 47, 49, 95, 97, 191, 193):
             with self.subTest(rejected_width=width):
                 self.assertIsNone(pair.BITS.fullmatch("0" * width))
-        for width in (24, 48, 96):
+        for width in (24, 48, 96, 192):
             with self.subTest(math_width=width):
                 self.assertIsNotNone(pair.BITS.fullmatch("0" * width))
         self.assertIsNone(pair.BITS.fullmatch("0" * 24 + "2"))

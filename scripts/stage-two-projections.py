@@ -26,10 +26,27 @@ from verify_uk_t5_triplet import (  # noqa: E402
     ProjectionBlocked, canonical_uk_from_words, project_current_uk, three_pass,
 )
 
-# Розпізнаємо лише дозволені ширини слів: D1–D10 та математичні D24+.
-# D11 є каталогом пропозицій, не виконавчою тотожністю.
-# Це лексична межа, не доказ домену, механізму чи семантики.
-BITS = re.compile(r"(?:[01]{1,10}|[01]{24,})\Z")
+# D11 — каталог пропозицій, а не виконуваний код. Відкидаємо також
+# довільні "D24+" бітності (25, 32, 49...), яких власник не ратифікував.
+# Список числових ширин читаємо з єдиного чинного джерела, не дублюємо.
+def _current_word_pattern() -> re.Pattern[str]:
+    policy = json.loads(
+        (ROOT / "knowledge/number-width-ratified.json").read_text(encoding="utf-8")
+    )
+    widths = policy.get("ratified_prefix_bits")
+    if (policy.get("status") != "owner-ratified"
+            or not isinstance(widths, list)
+            or widths[:3] != [24, 48, 96]
+            or any(type(width) is not int or width <= 10 for width in widths)
+            or any(next_width != width * 2
+                   for width, next_width in zip(widths, widths[1:]))):
+        raise ProjectionBlocked("Числова драбина D24+ не відповідає чинній ратифікації")
+    choices = "|".join(f"[01]{{{width}}}" for width in widths)
+    # Це тільки лексична межа: ширина не доводить функцію чи семантику.
+    return re.compile(rf"(?:[01]{{1,10}}|{choices})\Z")
+
+
+BITS = _current_word_pattern()
 
 
 def digest(data: bytes) -> str:
