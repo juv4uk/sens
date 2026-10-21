@@ -86,10 +86,17 @@ fn typed_native_operands_use_named_sens_execution_not_anonymous_d5_value_call() 
         let result = eval(&mut s, source).expect("іменована функція SENS повинна виконатися");
         assert_eq!(result.to_string(), "(evaluator-fallback джерело)", "{source}");
     }
-    // Негативний свідок: історична анонімна голова не допущена.
-    let error = eval(&mut s, "((функція (значення) значення) (як-є джерело))")
-        .expect_err("не можна повернути нератифікований D5 value-call");
-    assert!(error.message.contains("00001"), "{error}");
+    // Справжнє лексичне замикання викликається як значення функції.
+    // Це НЕ виклик кодового об'єкта D5 FUNCTION як нібито примітива:
+    // D5 створює замикання, а виконується його допустиме тіло.
+    let lexical = eval(&mut s, "((функція (значення) значення) (як-є джерело))")
+        .expect("SENS виконує лексичне замикання");
+    assert_eq!(lexical.to_string(), "джерело");
+    // Негативний мутант: те саме замикання не надає CAR права
+    // застосовувати селектор пари до атома.
+    let error = eval(&mut s, "((функція (значення) (перше значення)) (як-є джерело))")
+        .expect_err("SENS D3 CAR відхиляє атом");
+    assert_eq!(error.kind, ErrorKind::Type);
 }
 
 #[test]
