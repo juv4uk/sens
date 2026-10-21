@@ -325,6 +325,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "розділити-четвірку-на-пари"
                 | "rotate-four-left"
                 | "rotate-four-right"
+                | "list-delete-second"
+                | "list-insert-second"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
