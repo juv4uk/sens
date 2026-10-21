@@ -15,7 +15,7 @@ SOURCE = ROOT / "lib/mechanism-selector.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
 D5 = ROOT / "lib/domains/d5.lisp"
 REPLACEMENTS = (
-    ("0011", "визначити", "define", "DEFINE", 8),
+    ("0011", "визначити", "define", "DEFINE", 10),
     ("0010", "функція", "lambda", "LAMBDA", 6),
 )
 LOCAL_RENAMES = (
@@ -102,8 +102,8 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
             "(функція (назва секції)",
             "(функція (ідентичність рядки)",
             "(функція (ідентичність виконавець рядки)",
-            "(функція (рядок)",
-            "(функція (маршрут)",
+            "(функція (рядок ідентичність виконавець рядки)",
+            "(функція (маршрут ідентичність виконавець)",
             "(функція (ідентичність виконавець)",
         ):
             self.assertIn(signature, code)
@@ -184,6 +184,20 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
             r"ідентичність\s+рядки-реєстру-механізму\)\s+"
             + re.escape(false_d1) + r"\)",
         )
+
+    def test_named_helpers_execute_without_unadmitted_d5_value_calls(self):
+        code = uncommented(self.source)
+        self.assertNotIn("((функція", code,
+                         "D5 LAMBDA не є окремо допущеним викличним value-call")
+        for name in ("механізм-зіставити-маршрут", "механізм-оформити-вибір"):
+            self.assertEqual(
+                len(re.findall(rf"\(визначити\s+{re.escape(name)}(?=\s)", code)), 1
+            )
+        self.assertIn(
+            "(механізм-зіставити-маршрут\n"
+            "         (перше рядки) ідентичність виконавець рядки)", code
+        )
+        self.assertIn("(механізм-оформити-вибір\n", code)
 
     def test_only_balanced_source_parentheses_outside_strings_and_comments(self):
         code = uncommented(self.source)
