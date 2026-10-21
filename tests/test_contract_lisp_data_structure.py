@@ -69,6 +69,26 @@ class ContractLispDataStructure(unittest.TestCase):
             ["audit-law", "audit-law", "audit-law"],
         )
 
+    def test_research_canon_audit_retains_eight_candidates_and_four_laws(self):
+        form = only_form("docs/research/canon-sculpt-audit.lisp")
+        self.assertEqual(head(form), "canon-sculpt-audit")
+        candidates = [v for v in form.values[1:] if head(v) == "candidate"]
+        self.assertEqual(len(candidates), 8)
+        self.assertTrue(all("identity" in [head(field) for field in v.values[1:]]
+                            for v in candidates))
+        self.assertEqual(len([v for v in form.values[1:] if head(v) == "audit-law"]), 4)
+
+    def test_structural_hypotheses_keep_obstruction_and_claim(self):
+        form = only_form("docs/research/canon-sculpt-structural-basis.lisp")
+        self.assertEqual(head(form), "canon-sculpt-structural-basis")
+        hypotheses = [v for v in form.values[1:] if head(v) == "hypothesis"]
+        self.assertEqual(len(hypotheses), 5)
+        for hypothesis in hypotheses:
+            fields = [head(v) for v in hypothesis.values[1:]]
+            self.assertIn("candidate", fields)
+            self.assertIn("claim-under-test", fields)
+        self.assertEqual(head(form.values[-1]), "falsification-plan")
+
     def test_old_parenthesis_defects_are_actual_parser_failures(self):
         for name, original, damaged in (
             (
@@ -85,6 +105,16 @@ class ContractLispDataStructure(unittest.TestCase):
                 "knowledge/canon-sculpt-audit.lisp",
                 "(identity CANON_EMPTY_LIST)\n    (surface ())",
                 "(identity CANON_EMPTY_LIST)\n    (surface ()))",
+            ),
+            (
+                "docs/research/canon-sculpt-audit.lisp",
+                'not sculpture.")',
+                'not sculpture."))',
+            ),
+            (
+                "docs/research/canon-sculpt-structural-basis.lisp",
+                'lower than atom.")',
+                'lower than atom."))',
             ),
         ):
             with self.subTest(name=name):
