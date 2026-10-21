@@ -70,6 +70,7 @@ def verify(source: str) -> dict[str, tuple]:
         "створити-розмірність",
         "розмірність?",
         "одиниця-виміру?",
+        "науковий-всі-розмірності-коректні?",
         "величина?",
         "наука-джерело?",
         "науковий-константа-стан-чинний?",
@@ -103,6 +104,11 @@ def verify(source: str) -> dict[str, tuple]:
             raise AssertionError("нечинна перевірка D3 NIL поля наукової константи: " + guard)
     if source.count("(сполучити схема-одиниці-виміру розмірності)") != 1:
         raise AssertionError("конструктор одиниці більше не зберігає обернену структуру")
+    # Тільки структурний guard; семантичний доказ належить живому SENS.
+    if source.count("(науковий-всі-розмірності-коректні? (решта значення))") != 1:
+        raise AssertionError("одиниця виміру не перевіряє кожну розмірність")
+    if source.count("(порожній? (розмірність? (перше розмірності)))") != 1:
+        raise AssertionError("розмірності одиниці не проходять чинний Lisp-предикат")
     length = scope["науковий-список-довжина-дорівнює?"]
     if not all(
         phrase in source for phrase in (
@@ -165,6 +171,14 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
         mutated = self.source.replace(current, obsolete, 1)
         with self.assertRaisesRegex(AssertionError, "конструктор одиниці"):
             verify(mutated)
+
+    def test_unit_requires_real_dimension_predicate_not_just_proper_list(self):
+        current = "(науковий-всі-розмірності-коректні? (решта значення))"
+        obsolete = "(науковий-список-правильний? (решта значення))"
+        self.assertEqual(self.source.count(current), 1)
+        wrong = self.source.replace(current, obsolete, 1)
+        with self.assertRaisesRegex(AssertionError, "кожну розмірність"):
+            verify(wrong)
 
     def test_duplicate_ukrainian_definition_rejected(self):
         mutant = self.source + "\n(визначити науковий-список-правильний? (як-є ()))\n"
