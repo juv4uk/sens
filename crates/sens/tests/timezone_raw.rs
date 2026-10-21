@@ -8,40 +8,27 @@ fn time_session() -> Session {
 }
 
 #[test]
-fn exact_d3_time_source_repairs_preexisting_w8_cons_arity_error() {
-    let input = "(timezone-raw->observation (quote (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))";
-    let current_input = "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))";
-    fn observe(input: &str, migrated: bool) -> Result<String, String> {
-        let mut session = Session::default();
-        load_core_library(&mut session).map_err(|e| e.to_string())?;
-        if migrated {
-            load_time_library(&mut session).map_err(|e| e.to_string())?;
-        } else {
-            eval_program(include_str!("../../../tests/fixtures/time-d3-before.lisp"), &mut session)
-                .map_err(|e| e.to_string())?;
-        }
-        eval_program(input, &mut session)
-            .map(|x| x.value.to_string())
-            .map_err(|e| e.to_string())
-    }
+fn current_d3_time_observation_and_cons_arity_are_executed_by_sens() {
+    let mut session = time_session();
 
-    // Preserve the frozen pre-migration W8 error as evidence; never rewrite the fixture
-    // to pretend this pre-existing arity defect was absent.
-    let baseline = observe(input, false);
-    match baseline {
-        Err(error) => assert!(
-            error.contains("expected 2 arguments; received 3"),
-            "frozen W8 witness changed for an unexpected reason: {error}"
-        ),
-        Ok(value) => panic!("frozen W8 source unexpectedly changed behavior: {value}"),
-    }
+    // Чинний Lisp/укр виконує спостереження; застарілий англійський
+    // псевдонім не повертаємо в мовну таблицю чи runtime.
+    let observed = eval_program(
+        "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))",
+        &mut session,
+    )
+    .expect("SENS виконує українське визначення часової бібліотеки");
+    assert_eq!(observed.value.to_string(), "(detected \"Europe/Kyiv\" TZ)");
 
-    // The current Lisp-owned implementation must repair the arity defect and retain
-    // the public observation shape without a host-side fallback.
-    assert_eq!(
-        observe(current_input, true),
-        Ok("(detected \"Europe/Kyiv\" TZ)".to_string()),
-        "current exact-D3 time source must construct the observation via binary D3 CONS"
+    // Замість старого W8/fixture — живий негативний закон D3 CONS.
+    let error = eval_program(
+        "(сполучити (як-є а) (як-є б) (як-є в))",
+        &mut session,
+    )
+    .expect_err("D3 CONS повинен відхилити третій аргумент");
+    assert!(
+        error.to_string().contains("expected 2 arguments; received 3"),
+        "D3 CONS повернув неочікувану помилку: {error}"
     );
 }
 
