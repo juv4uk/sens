@@ -81,6 +81,14 @@ fn ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity() {
         .replace('\\', "/");
     let mut session = capability_session();
     let content = "сенс";
+    // Діагноз реального виходу SENS-кодека до сирого FS-коридору.
+    // Це не хостовий oracle: нижче той самий Lisp-write все одно мусить виконатись.
+    let encoded = eval_program(
+        &format!(r#"(кодування-юнікод-8-кодувати-рядок "{content}")"#),
+        &mut session,
+    )
+    .expect("чинний SENS utf8 кодек повинен виконатися");
+    eprintln!("FS_SENS_ENCODED_BYTES actual={:?}", encoded.value);
 
     let written = eval_program(
         &format!(r#"(записати-файл "{path_str}" "{content}")"#),
