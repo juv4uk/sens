@@ -12,6 +12,10 @@ outdir="$3"
 test -x "$binary"
 test -f "$manifest"
 mkdir -p "$outdir"
+if [[ "${SENS_NATIVE_T5M:-0}" == 1 ]]; then
+  native_open="${SENS_T5M_OPEN:-$(dirname "$binary")/sens-trit}"
+  test -x "$native_open" || { echo "::error::SENS_NATIVE_VIEW_READER_MISSING path=$native_open" >&2; exit 2; }
+fi
 failed_files=0
 # Одне джерело може мати кілька реальних порушень (байти, перегляд,
 # виконання). Звітуємо всі, але files_failed рахує саме файли.
@@ -52,6 +56,93 @@ diagnose_sens_authority_mint() {
     echo "::error::T5M_SENS_AUTHORITY_EXECUTION_FAILED source=$file authority=$authority" >&2
   fi
 }
+# Основний CI-шлях: точні слова належать SENS reader, байти — Zig.
+# Не читаємо JSON, не викликаємо Python, не проголошуємо байти семантикою.
+# Старий незалежний Python-мігратор лишається лише інструментом порівняння
+# та для його окремих регресійних тестів, а не обов'язковим входом SENS.
+run_native_t5m_program() {
+  local physical="$dir/$(basename "$file" .lisp).sens"
+  local view="${physical%.sens}"
+  local committed="$(dirname "$file")/$(basename "$file" .lisp).sens"
+  local committed_view="${committed%.sens}"
+  local status=0
+  if timeout 45s "$binary" --t5m-mint "$file" "$physical" \
+      >"$dir/native-mint.stdout" 2>"$dir/native-mint.stderr"; then
+    if [[ ! -s "$physical" ]]; then
+      echo "::error::T5M_NATIVE_MINT_EMPTY source=$file" >&2
+      mark_file_failed
+      return
+    fi
+  else
+    status=$?
+    sed 's/^/SENS native mint: /' "$dir/native-mint.stderr" >&2
+    echo "::error::T5M_NATIVE_MINT_FAILED source=$file status=$status release=NOT_CERTIFIED" >&2
+    mark_file_failed
+    return
+  fi
+
+  # Той самий Zig-носій відкривається незалежним фізичним reader.
+  # Це точний бітовий перегляд, не повторний парсинг Python/JSON.
+  if timeout 45s "$native_open" open "$physical" >"$view" 2>"$dir/native-view.stderr"; then
+    if [[ ! -s "$view" ]]; then
+      echo "::error::T5M_NATIVE_VIEW_EMPTY source=$file" >&2
+      mark_file_failed
+      return
+    fi
+  else
+    status=$?
+    sed 's/^/SENS physical view: /' "$dir/native-view.stderr" >&2
+    echo "::error::T5M_NATIVE_VIEW_FAILED source=$file status=$status" >&2
+    mark_file_failed
+    return
+  fi
+  if [[ -e "$committed" || -L "$committed" ]]; then
+    if [[ ! -f "$committed" || -L "$committed" ]]; then
+      echo "::error::T5M_COMMITTED_PAIR_NOT_REGULAR source=$file companion=$committed" >&2
+      mark_file_failed
+    elif ! cmp -s "$physical" "$committed"; then
+      echo "::error::T5M_COMMITTED_PAIR_DRIFT source=$file companion=$committed action=refresh-via-sens-zig" >&2
+      mark_file_failed
+    fi
+    if [[ ! -f "$committed_view" || -L "$committed_view" ]]; then
+      echo "::error::T5M_COMMITTED_VIEW_MISSING source=$file companion=$committed_view" >&2
+      mark_file_failed
+    elif ! cmp -s "$view" "$committed_view"; then
+      echo "::error::T5M_COMMITTED_VIEW_DRIFT source=$file companion=$committed_view action=refresh-via-sens-zig" >&2
+      mark_file_failed
+    fi
+  elif [[ -e "$committed_view" || -L "$committed_view" ]]; then
+    echo "::error::T5M_ORPHAN_VIEW source=$file view=$committed_view" >&2
+    mark_file_failed
+  else
+    echo "::notice::T5M_NATIVE_NOT_COMMITTED source=$file release=NOT_CERTIFIED"
+  fi
+
+  # Критичний доказ — реальне парне виконання фізичних Zig-байтів.
+  if timeout 45s "$binary" --t5m-pair "$file" "$physical" \
+      >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
+    if timeout 45s "$binary" "$physical" \
+        >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
+      if ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
+        echo "::error::T5M_NATIVE_EXECUTION_OUTPUT_DRIFT source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      echo "T5M_NATIVE_STANDALONE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+    else
+      status=$?
+      # Деякі точні D24+ / D7 значення виконуються тільки з явною
+      # джерельною ідентичністю: це не сертифікація standalone.
+      sed 's/^/SENS standalone notice: /' "$dir/native-standalone.stderr" >&2
+      echo "::notice::T5M_NATIVE_PAIRED_ONLY source=$file standalone_status=$status physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+    fi
+  else
+    status=$?
+    sed 's/^/SENS native paired: /' "$dir/native-paired.stderr" >&2
+    echo "::error::T5M_NATIVE_PAIRED_EXECUTION_FAIL source=$file status=$status release=NOT_CERTIFIED" >&2
+    mark_file_failed
+  fi
+}
 checked_files=0
 physical_not_supported=0
 while IFS= read -r file || [[ -n "$file" ]]; do
@@ -77,6 +168,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   mkdir -p "$dir"
   report="$dir/migration.json"
   echo "T5M_CHANGED_SOURCE path=$file"
+  if [[ "${SENS_NATIVE_T5M:-0}" == 1 ]]; then
+    run_native_t5m_program
+    continue
+  fi
   code=0
   binding_sources=()
   # Механізм D9 «уніфікувати» справді визначено в lib/unify.lisp.
