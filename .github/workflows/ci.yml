@@ -1117,7 +1117,7 @@ jobs:
           set -euo pipefail
           # Дві вже наявні українські Lisp-композиції: реальне SENS-виконання
           # та негативні мутації в тій самій чинній CI, без Python-oracle.
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test ukr_four_list_native_runtime -- --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test ukr_four_list_native_runtime --test ukr_rotate_inverse_native_runtime -- --nocapture
           # Нативний доказ лише при зміні селекторів/доменної геометрії.
           # Використовуємо вже обчислений exact-SHA список змінених файлів.
           # Checkout depth=1 не містить HEAD^; повторний git diff помилково давав RED.
