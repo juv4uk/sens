@@ -1392,12 +1392,16 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
         for obsolete in ("(load ", "(quote ", "(cond ", "(lambda ",
                          "(define ", "(0011 ", "(0010 "):
             self.assertNotIn(obsolete, code)
-        self.assertEqual(code.count("((атом? рядки) так)"), 2)
-        self.assertNotIn("((атом? рядки) (атом? (як-є ())))", code)
-        mutated = code.replace("((атом? рядки) так)",
-                               "((атом? рядки) (атом? (як-є ())))", 1)
+        # Два закони порожнього хвоста повертають справжній D1:1,
+        # а не історичне текстове «так». Негативний mutant міняє біт на D1:0.
+        істина = "((атом? рядки) (атом? (як-є ())))"
+        хиба = "((атом? рядки) (атом? (як-є (()))))"
+        self.assertEqual(code.count(істина), 2)
+        self.assertNotIn("((атом? рядки) так)", code)
+        mutated = code.replace(істина, хиба, 1)
         self.assertNotEqual(mutated, code)
-        self.assertEqual(mutated.count("((атом? рядки) так)"), 1)
+        self.assertEqual(mutated.count(істина), 1)
+        self.assertIn(хиба, mutated)
 
     def test_tier_selector_preserves_current_d3_d9_operators(self):
         source = (self.ROOT / "scripts/fixtures-for-tier.lisp").read_text(encoding="utf-8")
