@@ -173,8 +173,18 @@ PY
   stdout="$dir/runtime.stdout"
   stderr="$dir/runtime.stderr"
   if timeout 45s "$binary" "$pair" >"$stdout" 2>"$stderr"; then
-    result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
-    echo "T5M_FILE_EXECUTION PASS path=$file pair=$pair result_sha256=$result_sha semantic=NOT_CERTIFIED"
+    # Успішне виконання фізичних байтів не доводить їхню відповідність
+    # актуальному Lisp. Парний SENS-вхід мусить відбутися також на PASS.
+    standalone_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
+    if timeout 45s "$binary" --t5m-pair "$file" "$pair" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
+      paired_sha="$(sha256sum "$dir/paired.stdout" | cut -d ' ' -f 1)"
+      echo "T5M_FILE_EXECUTION PASS path=$file pair=$pair standalone_sha256=$standalone_sha paired_sha256=$paired_sha physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+    else
+      status=$?
+      sed 's/^/T5M paired stderr: /' "$dir/paired.stderr" >&2
+      echo "::error::T5M_PAIRED_SOURCE_EXECUTION_FAIL path=$file pair=$pair status=$status" >&2
+      mark_file_failed
+    fi
   else
     status=$?
     # Фізичний T5M зберігає W24 без втрат. Проте W24 сам по собі

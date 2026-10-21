@@ -318,6 +318,57 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertIn("T5M_FILE_EXECUTION PASS", result.stdout)
             self.assertIn("module.sens", (root / "executed.marker").read_text())
 
+
+    def test_standalone_pass_requires_real_paired_invocation(self):
+        # Тільки контроль маршруту Bash: stub фіксує виклики, не виконує SENS.
+        # У production обидва входи викликають справжній бінарник.
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-paired-pass-") as td:
+            root = Path(td)
+            (root / "scripts").mkdir()
+            (root / "module.lisp").write_text("(як-є ())\\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\\n", encoding="utf-8")
+            (root / "scripts/migrate-three-pass.py").write_text(
+                "import json, pathlib, sys\\n"
+                "source = pathlib.Path(sys.argv[1])\\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\\n"
+                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\\n"
+                "out.mkdir(parents=True, exist_ok=True)\\n"
+                "(out / (source.stem + '.sens')).write_bytes(b'\\\\x01')\\n"
+                "(out / source.stem).write_text('10 001 00 000 01\\\\n')\\n"
+                "report.write_text(json.dumps({'summary': {'files_written': 1, "
+                "'files_blocked': 0, 'files_not_program': 0}, 'files': []}))\\n",
+                encoding="utf-8",
+            )
+            binary = root / "record-sens-ingress"
+            binary.write_text(
+                "#!/bin/sh\\nprintf '%s\\\\n' \\"$*\\" >> invoked.marker\\n"
+                "if [ \\"$1\\" = --t5m-pair ] && [ -e fail-paired ]; then\\n"
+                "  echo paired rejected >&2\\n  exit 19\\nfi\\n"
+                "printf 'stub transport only\\\\n'\\n",
+                encoding="utf-8",
+            )
+            binary.chmod(0o755)
+            cmd = ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"]
+            # Успіх обох входів потрібен навіть коли прямий .sens уже виконався.
+            passed = subprocess.run(cmd, cwd=root, capture_output=True, text=True, timeout=20)
+            self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
+            self.assertIn("T5M_FILE_EXECUTION PASS", passed.stdout)
+            self.assertIn("physical=ZIG_VERIFIED", passed.stdout)
+            calls = (root / "invoked.marker").read_text(encoding="utf-8")
+            self.assertIn("--t5m-pair module.lisp", calls)
+            self.assertIn("module.sens", calls)
+            # Невдале джерельне зіставлення не може успадкувати прямий PASS.
+            (root / "fail-paired").touch()
+            (root / "invoked.marker").unlink()
+            failed = subprocess.run(cmd, cwd=root, capture_output=True, text=True, timeout=20)
+            self.assertEqual(failed.returncode, 2, failed.stdout + failed.stderr)
+            self.assertIn("T5M_PAIRED_SOURCE_EXECUTION_FAIL", failed.stderr)
+            self.assertIn("status=19", failed.stderr)
+            self.assertIn("files_checked=1 files_failed=1", failed.stdout)
+            self.assertNotIn("T5M_FILE_EXECUTION PASS", failed.stdout)
+            calls = (root / "invoked.marker").read_text(encoding="utf-8")
+            self.assertIn("--t5m-pair module.lisp", calls)
+
     def test_shell_parses(self):
         import subprocess
         subprocess.run(['bash', '-n', str(RUNNER)], check=True)
