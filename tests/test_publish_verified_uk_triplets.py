@@ -100,6 +100,29 @@ class SafeTripletPublisher(unittest.TestCase):
             self.assertFalse(report.exists())
             self.assertEqual((ROOT / self.REL1).read_bytes(), source)
 
+    def test_zig_reference_divergence_cannot_publish(self):
+        # Незалежний еталон не дає Zig повернути іншу програму під тим же ім'ям.
+        # Фізичні файли, включно з першим .sens, ще не створені.
+        with tempfile.TemporaryDirectory() as td:
+            mirror = Path(td) / "mirror"
+            report = Path(td) / "report.json"
+            with mock.patch(
+                "publish_verified_uk_triplets.zig_codec_bridge.build_transport",
+                return_value=Path(td) / "verified-transport",
+            ), mock.patch(
+                "publish_verified_uk_triplets.zig_codec_bridge.carry_t5",
+                return_value=b"\\xff",
+            ), mock.patch(
+                "publish_verified_uk_triplets.zig_codec_bridge.verify_t5",
+                return_value={"zig_binary_sha256": "a" * 64},
+            ):
+                with self.assertRaisesRegex(
+                    ProjectionBlocked, "ZIG_T5M_REFERENCE_PARITY_MISMATCH"
+                ):
+                    export(ROOT, mirror, report, [self.REL1], write=True)
+            self.assertFalse(mirror.exists())
+            self.assertFalse(report.exists())
+
     def test_preview_is_reference_only_without_zig_mint(self):
         with tempfile.TemporaryDirectory() as td:
             with mock.patch(
