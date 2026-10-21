@@ -22,9 +22,9 @@
   },
   "gate": "No D11 coordinate, callable authority, or domain ratification is assigned by this catalogue. Behavioral dedup and owner decision remain separate; helper names remain available research, not primitive slots.",
   "counts": {
-    "total": 160,
+    "total": 162,
     "historical": 15,
-    "library": 145,
+    "library": 147,
     "distinct_families": 25
   },
   "excluded": {
@@ -3448,13 +3448,85 @@
         "not_a_research_placeholder": true,
         "selection_basis": "Живе lib/unify.lisp, позитивний зв'язаний випадок, рекурсивний антиприклад, атом і незв'язана змінна"
       }
+    },
+    {
+      "surface_name": "кодувати-структуру-д2",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/codec-d2.lisp",
+        "original_file": "lib/codec-d2.lisp",
+        "blob_sha": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-структурного-кодека-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00101111101",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00101111101",
+        "ukr": "кодувати-структуру-д2",
+        "source_file": "lib/codec-d2.lisp",
+        "source_blob": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "law": "Структурний D2-потік зберігає маркери відкриття, розділення, завершення і крапки у властивому порядку; не плутає proper- та dotted-list.",
+        "native_law_test": "crates/sens/tests/codec_in_sens.rs::codec_emits_exact_t5_d2_order",
+        "native_test_blob": "a446b7f9d3929491b987f29a41827ae90ed02c4d",
+        "native_test_result": "NATIVE_SENS_PASS_CODEC_THREE_TESTS",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39686922869",
+        "native_step_result": "SUCCESS_WHILE_OTHER_CI_STEPS_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Реальне бібліотечне тіло, незалежне SENS-виконання кодека та точні приклади різних структур"
+      }
+    },
+    {
+      "surface_name": "перевірити-обертання-д2",
+      "source_family": "tooling",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/codec-d2.lisp",
+        "original_file": "lib/codec-d2.lisp",
+        "blob_sha": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "snapshot_not_live_proof": false,
+        "agent_proposal": "knowledge/d11/база-доступних-функцій/пропозиції-структурного-кодека-20261020.json"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00101111111",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00101111111",
+        "ukr": "перевірити-обертання-д2",
+        "source_file": "lib/codec-d2.lisp",
+        "source_blob": "9511a0a986775c59efd253bd38aedf273c59f4a8",
+        "law": "Декодування власного D2-потоку повертає початкову SENS-структуру, включно з вкладеними та крапковими парами.",
+        "native_law_test": "crates/sens/tests/codec_in_sens.rs::codec_round_trips_every_shape",
+        "native_test_blob": "a446b7f9d3929491b987f29a41827ae90ed02c4d",
+        "native_test_result": "NATIVE_SENS_PASS_CODEC_THREE_TESTS",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39686922869",
+        "native_step_result": "SUCCESS_WHILE_OTHER_CI_STEPS_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Реальне бібліотечне тіло, незалежне SENS-виконання кодека та точні приклади різних структур"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 16,
-    "semantic_winners_total": 528,
+    "native_sens_composition_winners": 18,
+    "semantic_winners_total": 530,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
