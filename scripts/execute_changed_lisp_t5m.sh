@@ -22,6 +22,36 @@ mark_file_failed() {
     failed_files=$((failed_files + 1))
   fi
 }
+# На справжній розбіжності source ↔ Python minted T5M залучаємо
+# чинний SENS reader як незалежне джерело точних слів. Він користується
+# тим самим Zig codec, що й --t5m-pair. Помилку не приховуємо:
+# обидва фізичні файли лишаються в evidence для адресного ремонту.
+diagnose_sens_authority_mint() {
+  local paired_error="$1"
+  grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH' "$paired_error" || return 0
+  local authority="$dir/sens-authority.sens"
+  if ! timeout 45s "$binary" --t5m-mint "$file" "$authority" \
+       >"$dir/sens-authority.mint.stdout" 2>"$dir/sens-authority.mint.stderr"; then
+    sed 's/^/T5M SENS mint stderr: /' "$dir/sens-authority.mint.stderr" >&2
+    echo "::error::T5M_SENS_AUTHORITY_MINT_FAILED source=$file action=repair-source-law" >&2
+    return 0
+  fi
+  if [[ ! -s "$authority" ]]; then
+    echo "::error::T5M_SENS_AUTHORITY_MINT_EMPTY source=$file" >&2
+    return 0
+  fi
+  if timeout 45s "$binary" --t5m-pair "$file" "$authority" \
+       >"$dir/sens-authority.paired.stdout" 2>"$dir/sens-authority.paired.stderr"; then
+    if cmp -s "$pair" "$authority"; then
+      echo "T5M_SENS_AUTHORITY_MATCH source=$file exact=ZIG_AND_SENS"
+    else
+      echo "::error::T5M_INDEPENDENT_PROJECTION_DIVERGENCE source=$file migrated=$pair authority=$authority action=repair-migrator-or-source physical=NOT_CERTIFIED" >&2
+    fi
+  else
+    sed 's/^/T5M SENS authority stderr: /' "$dir/sens-authority.paired.stderr" >&2
+    echo "::error::T5M_SENS_AUTHORITY_EXECUTION_FAILED source=$file authority=$authority" >&2
+  fi
+}
 checked_files=0
 physical_not_supported=0
 while IFS= read -r file || [[ -n "$file" ]]; do
@@ -199,6 +229,7 @@ PY
     else
       status=$?
       sed 's/^/T5M paired stderr: /' "$dir/paired.stderr" >&2
+      diagnose_sens_authority_mint "$dir/paired.stderr"
       echo "::error::T5M_PAIRED_SOURCE_EXECUTION_FAIL path=$file pair=$pair status=$status" >&2
       mark_file_failed
     fi
@@ -226,6 +257,7 @@ PY
         status=$?
       fi
       sed 's/^/T5M paired stderr: /' "$stderr" >&2
+      diagnose_sens_authority_mint "$stderr"
       echo "::error::T5M_PHYSICAL_PAIRED_D24_FAIL source=$file pair=$pair status=$status" >&2
       mark_file_failed
       continue
@@ -243,6 +275,7 @@ PY
       else
         status=$?
         sed 's/^/T5M paired D7 stderr: /' "$stderr" >&2
+        diagnose_sens_authority_mint "$stderr"
         echo "::error::T5M_PHYSICAL_PAIRED_D7_FAIL source=$file pair=$pair status=$status"
         mark_file_failed
         continue
@@ -263,6 +296,7 @@ PY
     fi
     sed 's/^/T5M standalone stderr: /' "$dir/standalone.stderr" >&2
     sed 's/^/T5M paired stderr: /' "$stderr" >&2
+    diagnose_sens_authority_mint "$stderr"
     echo "::error::T5M_FILE_EXECUTION_FAIL path=$file pair=$pair standalone_status=$standalone_status paired_status=$status" >&2
     mark_file_failed
     continue
