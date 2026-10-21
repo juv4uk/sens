@@ -29,7 +29,13 @@ fn eval(s: &mut Session, code: &str) -> Value {
 #[test]
 fn ukrainian_negation_heads_preserve_exact_d1() {
     let mut s = session();
-    for (head, expected) in [("not", true), ("not?", true), ("plain", false)] {
+    for (head, expected) in [
+        ("not", true), ("not?", true), ("plain", false),
+        // Складена форма — не атомний протокольний маркер not/not?.
+        ("(not? (radio))", false),
+        ("((not?) radio)", false),
+        ("()", false),
+    ] {
         let code = format!("(голова-твердження-знань-заперечена? (як-є {head}))");
         let answer = eval(&mut s, &code);
         assert_eq!(answer.as_predicate_bit(), Some(expected), "{code}: {answer}");
@@ -47,6 +53,8 @@ fn knowledge_opposite_head_guards_malformed_negation() {
         ("radio", "(not? radio)"),
         ("(not)", "(not? (not))"),
         ("(not radio antenna)", "(not? (not radio antenna))"),
+        ("((not?) radio)", "(not? ((not?) radio))"),
+        ("((nested) signal)", "(not? ((nested) signal))"),
     ] {
         let query = format!(
             "(отримати-протилежну-голову-твердження-знання (як-є {head}))"
@@ -114,6 +122,10 @@ fn opposite_knowledge_head_checks_atom_and_malformed_tail() {
         (
             "(отримати-протилежну-голову-твердження-знання (як-є (not сонце зайве)))",
             "(список (як-є not?) (як-є (not сонце зайве)))",
+        ),
+        (
+            "(отримати-протилежну-голову-твердження-знання (як-є ((not?) сонце)))",
+            "(список (як-є not?) (як-є ((not?) сонце)))",
         ),
     ] {
         let actual = eval(&mut s, source);
