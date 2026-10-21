@@ -1152,16 +1152,19 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
 
 
 def encode_string(node: String, text7):
-    """Fail closed; arbitrary source strings cannot be replaced by D3 EMPTY.
+    """Рядок у лапках — це D7-текст (чинна ратифікована клавіатура v2).
 
-    String values require a separately admitted, reversible datum encoding.
-    A T5 roundtrip alone cannot detect loss of source content.
+    Кожен символ стає своїм 7-бітним кодом D7, загорнутим у D2-каркас.
+    Це та сама машинерія, що й для ідентифікаторів (text7_encode+frame_text7),
+    тож зворотність точна: слова -> символи -> рядок.
     """
-    raise MigrationError(
-        "STRING_LITERAL_UNADMITTED: reversible string datum representation "
-        "is required; must not replace arbitrary strings with D3 EMPTY",
-        node.tok,
-    )
+    raw = node.tok.text
+    if raw.startswith('"') and raw.endswith('"') and len(raw) >= 2:
+        raw = raw[1:-1]
+    # Розекранувати \" та \\ до справжніх символів (токенізатор зберігає як є).
+    value = re.sub(r"\\(.)", r"\1", raw)
+    cells = text7_encode(value, text7, node.tok)
+    return frame_text7(cells, node.tok)
 
 def encode_clause(node,resolver,text7,lexical_env=()):
     """COND clause is structural; nested executable expressions retain scope."""
