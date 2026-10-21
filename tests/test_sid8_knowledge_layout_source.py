@@ -30,14 +30,14 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
         d3 = (ROOT / "lib/domains/d3.lisp").read_text()
         d4 = (ROOT / "lib/domains/d4.lisp").read_text()
 
-        self.assertRegex(d3, r"(?m)^\\s*\\(001\\s+\\(ук як-є\\)\\s+\\(укр як-є\\)")
-        self.assertRegex(d4, r"(?m)^\\s*\\(0011\\s+\\(ук визначити\\)\\s+\\(укр визначити\\)")
+        self.assertRegex(d3, r"(?m)^\s*\(001\s+\(ук як-є\)\s+\(укр як-є\)")
+        self.assertRegex(d4, r"(?m)^\s*\(0011\s+\(ук визначити\)\s+\(укр визначити\)")
         for expression in (
             "(визначити машинна-пара-байти-комірки 16)",
             "(визначити машинна-пара-зсув-першого 0)",
             "(визначити машинна-пара-зсув-решти 8)",
             "(визначити машинна-пара-розклад",
-            "(як-є\\n",
+            "(як-є\n",
             "(перше (offset-bytes 0)",
             "(решта (offset-bytes 8)",
             "(arena-argument-register rdi)",
@@ -46,8 +46,8 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
             with self.subTest(expression=expression):
                 self.assertIn(expression, source)
         self.assertEqual(source.count("(визначити "), 4)
-        self.assertEqual(source.count("(як-є\\n"), 1)
-        self.assertNotRegex(source, r"\\((?:0011|001|00001001)(?=\\s|\\))")
+        self.assertEqual(source.count("(як-є\n"), 1)
+        self.assertNotRegex(source, r"\((?:0011|001|00001001)(?=\s|\))")
         for legacy in ("x86-pair-cell-bytes", "x86-pair-car-offset",
                        "x86-pair-cdr-offset", "x86-pair-layout"):
             self.assertNotIn("(визначити " + legacy + " ", source)
