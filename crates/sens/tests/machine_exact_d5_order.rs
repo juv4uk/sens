@@ -181,52 +181,55 @@ fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
     // реальне застосування до байтових регістрових полів x86.
     x86_register_field_bits_use_real_d5_numeric_comparison();
 
-    // Повна таблиця signed disp8 має виконуватись мовним D5, а не
-    // D3 EQ між математичними D24+ числами. Це справжній SENS eval.
+    // Справжнє SENS-обчислення одного D24+ закону замість
+    // 256 числових D3 EQ. Rust лише запускає чинний Lisp.
     let encoder = fs::read_to_string(
         repo_root().join("lib/machine/encoding/x86-64.lisp"),
     ).expect("поточний кодер зміщення x86");
-    let helper_start = encoder.find("(визначити машина-числа-рівні?")
-        .expect("наявний D5 закон числової рівності");
-    let helper_end = encoder[helper_start + 1..].find("\n(визначити ")
-        .map(|offset| helper_start + 1 + offset)
-        .expect("межа D5 визначення");
-    let table_start = encoder.find("(визначити машина-байт-восьмибітного-зсуву")
-        .expect("дійсна таблиця signed disp8");
-    let table_end = encoder[table_start + 1..].find("\n(визначити ")
-        .map(|offset| table_start + 1 + offset)
-        .expect("межа таблиці signed disp8");
-    let table = &encoder[table_start..table_end];
-    assert_eq!(
-        table.matches("(машина-числа-рівні? зміщення ").count(), 256,
-        "всі 256 випадків скінченної таблиці повинні використовувати D5"
-    );
-    assert!(!table.contains("(тотожне? зміщення "),
-        "D3 EQ не є математичною рівністю D24+");
-    let definitions = format!("{}\n{}", &encoder[helper_start..helper_end], table);
-    let parsed = parse(&definitions).expect("дві українські SENS функції");
+    let start = encoder.find("(визначити машина-байт-восьмибітного-зсуву")
+        .expect("дійсний закон signed disp8");
+    let end = encoder[start + 1..].find("\n(визначити ")
+        .map(|offset| start + 1 + offset)
+        .expect("межа закону disp8");
+    let definition = &encoder[start..end];
+    for required in [
+        "(ціле? зміщення)", "(менше? зміщення -128)",
+        "(більше? зміщення 127)", "(менше? зміщення 0)",
+        "(додати зміщення 256)",
+    ] {
+        assert!(definition.contains(required), "мовний закон SENS: {required}");
+    }
+    assert!(!definition.contains("(тотожне? зміщення "),
+        "D3 EQ не є математичною D24+ рівністю");
+
+    let parsed = parse(definition).expect("українська SENS функція");
     let exact = sens::source_projection::project_ukr_decimal_integer_literals(
-        &parsed, &definitions,
-    ).expect("точна числова D24+ проєкція");
+        &parsed, definition,
+    ).expect("точна D24+ проєкція");
     let mut session = Session::default();
     load_core_library(&mut session).expect("канонічний Core4");
     sens::eval_parsed_expressions(&exact, &mut session)
-        .expect("справжні SENS D5 визначення");
+        .expect("визначити SENS функцію disp8");
     for (input, expected) in [
         ("-129", "()"), ("-128", "128"), ("-1", "255"),
         ("0", "0"), ("1", "1"), ("127", "127"), ("128", "()"),
     ] {
         let call = format!("(машина-байт-восьмибітного-зсуву {input})");
-        let parsed = parse(&call).expect("виклик української функції");
+        let parsed = parse(&call).expect("український виклик");
         let exact = sens::source_projection::project_ukr_decimal_integer_literals(
             &parsed, &call,
         ).expect("точний математичний операнд");
         let actual = sens::eval_parsed_expressions(&exact, &mut session)
             .unwrap_or_else(|error| panic!("SENS {call}: {error}"))
             .value.to_string();
-        assert_eq!(actual, expected, "числовий disp8: {call}");
+        assert_eq!(actual, expected, "байт зміщення: {call}");
     }
-}
+    assert_eq!(
+        eval_program("(машина-байт-восьмибітного-зсуву (як-є ()))", &mut session)
+            .expect("SENS відхиляє нецілий операнд").value.to_string(),
+        "()"
+    );
+
 }
 
 #[test]
