@@ -327,7 +327,7 @@ fn bounded_effect_source_keeps_exact_d1_controls() {
             line
         );
     }
-    for legacy in ["(00000010 (як-є ()))", "(00000011 ", "(00100010 "] {
+    for legacy in ["(00000010 ", "(00000011 ", "(00100010 "] {
         assert!(!source.contains(legacy), "Стара машинна виклична голова: {legacy}");
     }
 
