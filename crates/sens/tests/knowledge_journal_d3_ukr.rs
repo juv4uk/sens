@@ -16,8 +16,15 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
         include_str!("../../../lib/core.lisp"),
         &mut session,
     ).expect("виконуваний Core SENS має бути завантажений до бібліотеки знань");
-    eval_program(&source[start..end], &mut session)
-        .expect("SENS повинен завантажити український D3-код");
+    // Власний читач SENS задає exact D1 істину й чинні коди.
+    // Звичайне текстове eval_program не є тим самим маршрутом для
+    // українських доменних голів (зокрема безумовного «так»).
+    let parsed = sens::parse_mixed_exact_domain_reasoning_source(
+        "lib/knowledge.lisp",
+        &source[start..end],
+    ).expect("читач D1–D11 має розібрати програму");
+    sens::eval_parsed_expressions(&parsed, &mut session)
+        .expect("SENS повинен виконати точні D3 визначення");
 
     let journal = "(як-є ((tell alpha a) (tell beta b) (tell alpha c)))";
     let call = format!(
