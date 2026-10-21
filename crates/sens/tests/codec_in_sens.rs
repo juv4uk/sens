@@ -1,6 +1,10 @@
-//! Компактний кодек, написаний SENS-ом, у ТОЧНОМУ D2-порядку T5 (lib/codec-d2.lisp).
-//! Маркери: a=open, c=sep, b=close, d=dot (1:1 до слів 10/00/01/11).
-use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session};
+//! SENS-бібліотека відображення структури D2 + незалежний exact-domain свідок.
+//! d2-open/d2-sep/d2-close/d2-dot усередині Lisp — цитовані мітки ДАНИХ,
+//! не D2 машинні слова. Справжня структура належить точним W2: 10/00/01/11.
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, parse_binary_source_words,
+    parse_mixed_exact_domain, PhysicalT5Program, Session, Value,
+};
 
 fn codec_session() -> Session {
     let mut session = Session::default();
@@ -15,7 +19,7 @@ fn eval(source: &str, session: &mut Session) -> String {
 }
 
 #[test]
-fn codec_emits_exact_t5_d2_order() {
+fn codec_emits_symbolic_d2_order_but_not_machine_words() {
     let mut s = codec_session();
     // README: (CAR (CONS () ())) -> 10 100 00 10 111 00 000 00 000 01 01
     assert_eq!(
@@ -67,5 +71,49 @@ fn codec_round_trips_every_shape() {
         let got = eval(&format!("(перевірити-обертання-д2 (quote {src}))"), &mut s);
         let want = eval(&format!("(quote {src})"), &mut s);
         assert_eq!(got, want, "round-trip for {src}");
+    }
+}
+
+#[test]
+fn exact_d2_quote_of_dotted_pair_executes_without_text7_marker_proxies() {
+    // Canonical D2 machine source: OPEN, D3 QUOTE, SEP,
+    // OPEN, D3 CAR, DOT, D3 CONS, CLOSE, CLOSE.
+    // This is executable exact-domain input, not a quoted d2-open symbol.
+    let exact = "10 001 00 10 100 11 111 01 01";
+    let words = parse_binary_source_words(exact)
+        .expect("only exact-width binary words")
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    let program = PhysicalT5Program::from_exact_words(&words)
+        .expect("all four D2 markers interpreted as structure");
+    assert_eq!(program.form_count(), 1);
+    let result = program.execute(&mut Session::default())
+        .expect("real SENS QUOTE executes dotted D2 pair");
+    let Value::Pair(head, tail) = result.value else {
+        panic!("D2:11 must produce a dotted SENS pair, not a proxy list");
+    };
+    let Value::DomainIdentity(head) = head.as_ref() else {
+        panic!("D3:100 must preserve exact identity");
+    };
+    let Value::DomainIdentity(tail) = tail.as_ref() else {
+        panic!("D3:111 must preserve exact identity");
+    };
+    assert_eq!((head.width(), head.packed_bits()), (3, 0b100));
+    assert_eq!((tail.width(), tail.packed_bits()), (3, 0b111));
+
+    // Negative forms must be rejected by the SAME exact reader used after
+    // Zig/T5M: never reinterpret a stray D2 marker as D7 text or Lisp data.
+    for bad in [
+        "11", "01", "10 11 100 01", "10 100 11 01",
+        "10 100 11 111 00 000 01", "10 100",
+    ] {
+        let words = parse_binary_source_words(bad)
+            .expect("well-formed exact words; wrong structural grammar")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        assert!(PhysicalT5Program::from_exact_words(&words).is_err(),
+            "malformed D2 admitted as SENS data: {bad}");
     }
 }
