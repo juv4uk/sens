@@ -1427,7 +1427,7 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
         (5, "11011", "більше?", 1),
         (6, "000100", "елемент-списку-за-індексом", 1),
         (8, "11110100", "значення-у-текст", 1),
-        (8, "11110111", "однакові?", 7),
+        (8, "11110111", "однакові?", 8),
         (9, "110101001", "читати-всі", 1),
         (9, "110110111", "читати-файл", 1),
     )
@@ -1489,6 +1489,19 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
             self._undo_exact_heads(wrong)
         self.assertIn('"00000000"', source)
         self.assertIn("(довжина (рядки-домену д8))", source)
+        # Чинний читач перевіряє не лише історичні сім таблиць, а весь D1–D10.
+        for width, count in ((7, 128), (9, 512), (10, 1024)):
+            with self.subTest(domain=f"D{width}"):
+                self.assertIn(
+                    f'(визначити д{width} (завантажити-домен "lib/domains/d{width}.lisp"))',
+                    source,
+                )
+                self.assertIn(
+                    f'(перевірити-розширений-домен? д{width} {count} "{'0'*width}")',
+                    source,
+                )
+        self.assertIn("PASS files=10 rows=2046 widths=1..10", source)
+        self.assertNotIn("PASS files=7 rows=382", source)
 
 
 class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
