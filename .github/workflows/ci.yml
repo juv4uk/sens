@@ -280,6 +280,11 @@ jobs:
           if grep -Eq '^(benchmarks/closures\.lisp|crates/sens-cli/src/repl\.rs|crates/sens-cli/tests/closures_benchmark_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'closure_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
+          # Пролог → Даталог: реальний SENS D1/D4 після зміни Lisp чи тесту.
+          if grep -Eq '^(lib/bridge/prolog-to-datalog\\.lisp|crates/sens/tests/prolog_bridge_current_d4\\.rs)$' "$changed_all"; then
+            echo 'prolog_bridge_tests=true' >> "$GITHUB_OUTPUT"
+            echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+          fi
           # Адресний Narrate/Understand — тільки справжнє SENS-виконання.
           if grep -Eq '^(lib/(narrate|understand|result-status)\.lisp|crates/sens/tests/(narrate_outcomes|understand_exact_empty|result_status)\.rs)$' "$changed_all"; then
             echo 'narrate_runtime_tests=true' >> "$GITHUB_OUTPUT"
@@ -337,6 +342,15 @@ jobs:
         timeout-minutes: 5
         shell: bash
         run: cargo test --locked -p sens --lib український_парсер_виконує_точний_дріб_та_відхиляє_ділення_на_нуль -- --nocapture
+
+      - name: "Prolog/Datalog — реальний SENS D1/D4 свідок"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.prolog_bridge_tests == 'true' }}
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens --test prolog_bridge_current_d4 -- --list | grep -Fqx 'd4_bridge_d1_field_shape_rejects_truncated_extra_and_dotted_rows: test'
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test prolog_bridge_current_d4 -- --nocapture
 
       - name: "SENS Narrate/Understand — виконання чинних Lisp-предикатів D1/D3"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' }}
@@ -517,7 +531,7 @@ jobs:
           retention-days: 1
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.prolog_bridge_tests == 'true' || steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
