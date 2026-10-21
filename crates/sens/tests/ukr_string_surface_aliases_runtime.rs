@@ -1,6 +1,6 @@
 //! Українські текстові назви визначаються в SENS до встановлення D9.
- //! Реальне виконання, не Python-оракул і не побайтовий тест коментарів.
-use sens::{eval_parsed_expressions, load_core_library, parse_mixed_exact_domain, Session};
+//! Реальне виконання, не Python-оракул і не побайтовий тест коментарів.
+use sens::{Session, eval_parsed_expressions, load_core_library, parse_mixed_exact_domain};
 
 const SOURCE: &str = include_str!("../../../lib/string-surface-aliases.lisp");
 
@@ -22,23 +22,31 @@ fn українські_текстові_замикання_завантажую
     eval_parsed_expressions(&definitions, &mut session)
         .expect("визначення замикань не повинні вимагати ранній D9");
 
-    // Справжня SENS-реєстрація усіх п'яти замикань, не повторена перевірка
+    // Справжня SENS-реєстрація чотирьох текстових замикань, не повторена перевірка
     // текстових регулярних виразів у Python.
     for name in [
-        "зчепити", "текст-порожній?", "перший-символ-тексту",
-        "решта-символів-тексту", "порожнє?",
+        "зчепити",
+        "текст-порожній?",
+        "перший-символ-тексту",
+        "решта-символів-тексту",
     ] {
         assert!(
             matches!(session.environment.get(name), Some(sens::Value::Closure(_))),
             "виконуване українське замикання не встановлено: {name}"
         );
     }
+    assert!(
+        session.environment.get("порожнє?").is_none(),
+        "порожнє? — peer-проєкція D4:0101, не окреме замикання, яке може рекурсивно викликати той самий резидент"
+    );
 
     // Тільки після цього встановлюємо штатний SENS Core4.
     load_core_library(&mut session).expect("штатне ядро визначає виконавчі закони");
     for (expression, expected) in [
         ("(порожнє? (як-є ()))", true),
+        ("(порожній? (як-є ()))", true),
         ("(порожнє? (як-є (елемент)))", false),
+        ("(порожній? (як-є (елемент)))", false),
     ] {
         let value = eval_ukr(expression, &mut session);
         assert_eq!(value.as_predicate_bit(), Some(expected), "{expression}");
