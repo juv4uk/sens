@@ -857,7 +857,9 @@ jobs:
           python3 scripts/test-si-derived-d1-bitness.py
 
       - name: SI — реальне обчислення похідних констант у SENS
-        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'SI:') }}
+        # Незалежний native-verdict потрібен навіть коли T5M-mint іншого файла
+        # повернув RED: не підмінювати execution мовчазним skipped.
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'SI:') }}
         run: |
           set -euo pipefail
           cargo test --locked -p sens --test si_names -- --nocapture
