@@ -148,7 +148,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         # D7 вистачає для назви діапазону; Unicode-еліпсис не потрібний.
         self.assertIn("(schema function-table-mechanisms-1)", metadata)
         self.assertIn("(authority д1-д10)", metadata)
-        self.assertNotRegex(metadata, r'(?m)^\\s*\\(authority\\s+"')
+        self.assertNotIn('(authority "', metadata)
         self.assertNotIn("function-table-mechanisms/1", metadata)
         self.assertNotIn("…", metadata)
         code = uncommented(self.source)
