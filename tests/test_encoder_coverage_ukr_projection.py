@@ -121,10 +121,20 @@ def verify(text):
     for bits, (name, _historical_count) in {**EXPECTED, **HIGH}.items():
         if authority.get(bits) != name:
             raise AssertionError("зміна ратифікованої проєкції: " + bits)
-    # Простий лексичний контроль, НЕ host-виконання SENS:
-    # не допускаємо незв'язані так/ні у виконавчих полях.
-    live = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"', " ", text)
-    if re.search(r"(?<![\w?-])(?:так|ні)(?![\w?-])", live):
+    # Зміст QUOTE — дані, не виконавчі атоми. Лексичний пошук
+    # хибно забороняв (як-є так) і рядки з D1-мітками.
+    # Ця перевірка лише структурна: семантику виконує SENS.
+    def unbound_d1(node):
+        if node[0] == "atom":
+            return node[1] in ("так", "ні")
+        if node[0] == "quoted" or node[0] != "list":
+            return False
+        items = node[1]
+        if items and items[0][0] == "atom" and items[0][1] == "як-є":
+            return False
+        return any(unbound_d1(item) for item in items)
+
+    if any(unbound_d1(form) for form in parse(text)):
         raise AssertionError("незв'язане D1 так/ні в генераторі")
     heads = list(call_heads(text))
     if not heads:
@@ -227,6 +237,13 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
             "(сполучити ліве-значення праве-значення)", 1,
         )
         self.assertNotEqual(original, tuple(tree(form) for form in parse(changed)))
+
+    def test_quoted_d1_tags_are_data_not_unbound_expressions(self):
+        # Позитивне й негативне свідчення AST, не Python-eval Lisp.
+        verify(self.text + "\n(як-є (так ні))\n")
+        broken = self.text + "\n(визначити проба так)\n"
+        with self.assertRaisesRegex(AssertionError, "D1"):
+            verify(broken)
 
     def test_unbalanced_source_is_rejected(self):
         with self.assertRaisesRegex(AssertionError, "незакр"):
