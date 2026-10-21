@@ -273,6 +273,27 @@ fn empty_or_atomic_observation_returns_named_failure_not_host_error() {
 }
 
 #[test]
+fn improper_prolog_values_do_not_disappear_from_datalog_projection() {
+    // The SENS evaluator executes the real Ukrainian Lisp bridge.
+    // A dotted tail must never be silently discarded and reported as success.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    load_bridge(&mut session);
+
+    for values in ["(values bob . truncated)", "(values . broken)"] {
+        let program = format!(
+            "(перетворити-підстановки-пролог-на-факти-даталог              (як-є (prolog-substitution-observation                (source-ref observation-42)                (variable ancestor) {values})))"
+        );
+        let actual = eval_program(&program, &mut session)
+            .unwrap_or_else(|error| panic!("SENS bridge failed to execute: {program}: {error}"))
+            .value
+            .to_string();
+        assert_eq!(actual, "(projection-failure malformed-values)",
+            "improper tail must fail closed: {program}");
+    }
+}
+
+#[test]
 fn malformed_projection_input_is_named_failure_not_false() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
