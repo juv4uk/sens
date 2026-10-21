@@ -298,6 +298,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-swap-inner-five",
         "list-reverse-general",
         "list-drop-last-general",
+        "list-interleave-two-pairs",
+        "pair-zip-unzip-three",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
