@@ -144,12 +144,10 @@ fn domain_tables(root: &Path, out: &mut String) {
         let Expr::List(root_form) = &forms[0] else {
             panic!("{relative}: expected root list")
         };
-        // The ratified D3/D8 source blobs retain their original /1 tag.
-        // Both spellings encode the same table shape; never rewrite frozen data.
-        let schema = symbol(&root_form[0], &relative);
-        assert!(
-            matches!(schema, "domain-table-1" | "domain-table/1"),
-            "{relative}: unsupported table schema {schema}"
+        assert_eq!(
+            symbol(&root_form[0], &relative),
+            "domain-table-1",
+            "{relative}: unsupported table schema"
         );
         let mut count = 0usize;
         let mut coordinates = HashSet::new();
