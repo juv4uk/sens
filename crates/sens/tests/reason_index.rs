@@ -27,6 +27,25 @@ fn eval(session: &mut Session, source: &str) -> String {
 }
 
 #[test]
+fn proof_mapper_calls_lexically_bound_sens_closure_not_d5_function_identity() {
+    // Це живе виконання SENS, не структурний Python-оракул:
+    // назва параметра в зіставити-докази не може затіняти D5:00001.
+    let mut s = session();
+    assert_eq!(
+        eval(&mut s,
+             "(зіставити-докази (функція (значення) (перше значення)) (як-є ((one a) (two b))))"),
+        "(one two)",
+        "кожен елемент має пройти справжній виклик локального замикання SENS"
+    );
+    assert_eq!(
+        eval(&mut s,
+             "(зіставити-докази (функція (значення) (перше значення)) (як-є ()))"),
+        "()",
+        "порожні дані не можуть створювати вигадані докази"
+    );
+}
+
+#[test]
 fn indexed_bucket_preserves_source_rule_order_exactly() {
     let mut s = session();
     let source = r#"
