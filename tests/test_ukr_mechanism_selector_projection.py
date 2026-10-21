@@ -114,12 +114,15 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
     def test_registry_and_symbolic_sid_values_still_present(self):
         # Шлях є цитованими D7-даними; D8 повертає String у джерельному
         # законі. Сирий String literal не має чинного T5M REPL projection.
+        # Після нормального форматування Lisp перенос рядків між
+        # викличними вузлами не змінює їхньої тотожності.
+        normalized = re.sub(r"\\s+", " ", uncommented(self.source))
         for path in ("lib/surface/semantic-registry.lisp",
                      "lib/function-table-mechanisms.lisp"):
             with self.subTest(path=path):
                 self.assertIn(
                     f"(читати-файл (символ-у-текст (як-є {path})))",
-                    self.source,
+                    normalized,
                 )
                 self.assertNotIn(f'"{path}"', self.source)
         for token in ("(як-є rows)",
