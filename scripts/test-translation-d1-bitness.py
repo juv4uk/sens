@@ -81,10 +81,10 @@ def check_translation_text(source: str) -> list[str]:
     for required in PRIMARY:
         if definitions.count(required) != 1:
             errors.append(f"відсутнє єдине українське визначення: {required}")
-    # Український модуль не зобов’язаний мати обидва D1-літерали:
-    # відсутність явного «ні» не дає права змінювати умовні закони.
-    if "так" not in set(active_atoms):
-        errors.append("чинний D1-літерал так відсутній")
+    # Чинний SENS сам обчислює точні D1-предикати: українська
+    # програма не мусить містити текстовий атом «так» чи «ні».
+    # Тут лише структура/назви; D1:1/0 і відмову D3 NIL доводить
+    # справжній SENS-виконавець у translation_boundary.rs.
     for atom in active_atoms:
         if atom in {"t", "T", "NIL"}:
             errors.append(f"стара істинність хоста: {atom}")
