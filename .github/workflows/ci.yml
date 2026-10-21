@@ -534,11 +534,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo build --locked -p sens-cli --bin sens
+          # Без Python/JSON: SENS reader визначає домен; Zig пакує і розпаковує.
+          # Окремий SENS --t5m-view доводить байтову оберненість.
+          # Жоден D24+ чи парний runtime RED не перетворюється на GREEN.
+          bash -n scripts/execute_changed_lisp_t5m_native.sh
+          cargo build --locked -p sens-cli --features zig-transport --bin sens
           binary="$PWD/target/debug/sens"
-          # .lisp — людське джерело, не T5M. Спочатку Zig-мінтинг,
-          # потім точний фізичний .sens у SENS, зі свідками в RUNNER_TEMP.
-          bash scripts/execute_changed_lisp_t5m.sh \
+          bash scripts/execute_changed_lisp_t5m_native.sh \
             "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
             "$RUNNER_TEMP/changed-t5m-pairs"
 
