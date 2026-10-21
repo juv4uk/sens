@@ -352,6 +352,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/d3-pair-laws",
         "lib/rotate-left",
         "lib/pair-swap",
+        "lib/rotate-three-right",
     ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
