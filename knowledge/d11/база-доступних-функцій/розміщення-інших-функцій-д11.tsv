@@ -251,7 +251,7 @@
 01001010000	RESEARCH_ONLY_NOT_RATIFIED	0100	WRITE-KNOWLEDGE-PACKAGE		знання-світ-епістеміка	4	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 01001010110	RESEARCH_ONLY_NOT_RATIFIED	0100	EPISTEMIC--ALL-REQUIRED-PRESENT?		знання-світ-епістеміка	2	lib/epistemic.lisp	Кожний необхідний доказ має підтверджене джерело у фактичному списку.				ні	ні
 01001011011	RESEARCH_ONLY_NOT_RATIFIED	0100	EPISTEMIC--CLAIM-REF?		знання-світ-епістеміка	2	lib/epistemic.lisp	Посилання на claim має визначений структурний tag і обов'язкові поля.				ні	ні
-01001100001	RESEARCH_ONLY_NOT_RATIFIED	0100	WORLD-REMOVE-FIRST		знання-світ-епістеміка	1	lib/world.lisp	Вилучити лише перше входження збереженням решти.				ні	ні
+01001100001	WINNER_DEFINED_SENS_COMPOSITION	0100	внутрішній-світ-прибрати-перше	внутрішній-світ-прибрати-перше	знання-світ-епістеміка	1	lib/world.lisp	Вилучає рівно перший структурно тотожний елемент; хвіст, включно з пізнішими збігами, зберігає порядок.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 01001100110	RESEARCH_ONLY_NOT_RATIFIED	0100	LEGACY-WORLD-TRANSITION-EXPANSION		знання-світ-епістеміка	2	lib/world.lisp	Історичну форму переходу атрибутувати source event/status.				ні	ні
 01001101100	RESEARCH_ONLY_NOT_RATIFIED	0100	WORLD-APPLY-EVENT		знання-світ-епістеміка	4	lib/world.lisp	Породити нову world-version через event із незмінністю старої.				ні	ні
 01001110010	RESEARCH_ONLY_NOT_RATIFIED	0100	STRIP-ARTICLE		знання-світ-епістеміка	2	lib/understand.lisp	Прибирати визначений артикль як повний D7 токен.				ні	ні

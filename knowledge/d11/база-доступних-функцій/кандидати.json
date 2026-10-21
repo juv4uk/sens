@@ -3281,12 +3281,29 @@
         "original_file": "lib/world.lisp",
         "snapshot_not_live_proof": true
       },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "01001100001",
       "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "01001100001",
+        "ukr": "внутрішній-світ-прибрати-перше",
+        "source_file": "lib/world.lisp",
+        "source_blob": "f8f3a0da55b85d3c6a83040d7cf229b0a310c08a",
+        "law": "Вилучає тільки перший структурно рівний елемент; відсутній елемент лишає список, атомарна або порожня послідовність дає ().",
+        "native_law_test": "crates/sens/tests/world_ancestor_sens.rs::d11_world_remove_first_native_law_and_mutant",
+        "native_test_blob": "1a9344d6e08b3bc4378beabcc7daf4cef25ed2a4",
+        "native_test_run_status": "ADDED_NOT_YET_ASSERTED_CI_PASS",
+        "previous_SENS_witness": "tests/semantic/world-exact-arity-witness.lisp",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "selection_basis": "Зайняти дослідне місце з точним історичним донором, живою українською функцією та нативним D1-свідком; не створювати дубль",
+        "not_a_research_placeholder": true
+      }
     },
     {
       "surface_name": "WRITE-KNOWLEDGE-PACKAGE",
@@ -3525,8 +3542,8 @@
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 18,
-    "semantic_winners_total": 530,
+    "native_sens_composition_winners": 19,
+    "semantic_winners_total": 531,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
