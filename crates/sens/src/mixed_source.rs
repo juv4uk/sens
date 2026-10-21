@@ -243,12 +243,13 @@ fn parse_mixed_pinned_d8_io(source: &str) -> Result<Vec<Expr>, LanguageError> {
 /// compatible while approved exact D9 mechanisms are lifted from their
 /// Ukrainian projection. D9 residency alone never grants callability.
 fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
-    const UKRAINIAN_D9_MECHANISMS: [&str; 5] = [
+    const UKRAINIAN_D9_MECHANISMS: [&str; 6] = [
         "рядок-додати",
         "рядок-порожній?",
         "рядок-решта",
         "рядок-префікс?",
         "рядок-перший",
+        "рядок?",
     ];
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(ErrorKind::Parse, "pinned D9 reasoning source exceeds structure depth", expression.span));
