@@ -6,8 +6,11 @@ use sens::{eval_parsed_expressions, parse, parse_mixed_exact_domain, Session};
 
 fn eval_translation(source: &str) -> String {
     let mut session = Session::default();
+    // Повна бібліотека D1–D10 має штатний Core4 bootstrap для D8
+    // текст-у-символ; повторне ручне читання лише core.lisp його не встановлює.
+    sens::load_core_library(&mut session)
+        .expect("штатний Core4 SENS потрібний бібліотеці перекладу");
     for library in [
-        include_str!("../../../lib/core.lisp"),
         include_str!("../../../lib/unify.lisp"),
         include_str!("../../../lib/reason.lisp"),
         include_str!("../../../lib/forward.lisp"),
