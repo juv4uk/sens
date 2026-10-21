@@ -951,8 +951,8 @@ jobs:
           python3 -m unittest tests/test_migrate_english_predicates_question_mark.py -v
           python3 -m unittest tests/test_migrate_active_lib_exact_driver.py -v
           # Живий імпорт DEFINE не наділяє координату D9 машинною викличністю.
-          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_preloaded_lisp_d9_name_keeps_identity_without_execution_claim -v
-          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_reason_keeps_unification_as_d9_identity_not_d7_text -v
+          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_preloaded_lisp_d9_resident_keeps_d7_identifier_without_callability -v
+          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_reason_keeps_unification_as_lexical_d7_not_unadmitted_d9_call -v
           python3 -m unittest tests/test_ukr_result_status_projection.py -v
           python3 -m unittest tests/test_result_status_d1_bitness_current.py -v
           # Повні D9/D10 українські джерела без англомовних DEFINE-дублів.
