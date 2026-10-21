@@ -198,6 +198,97 @@ mod tests {
         assert_eq!(actual.value, expected.value);
     }
 
+
+    #[test]
+    fn ukrainian_selector_names_agree_with_ratified_tables() {
+        // Both directions are checked against the *current* Lisp authority.
+        // The table, rather than a Rust list of 448 definitions, owns names.
+        let tables = [
+            (8usize, include_str!("../../../../lib/domains/d8.lisp")),
+            (9usize, include_str!("../../../../lib/domains/d9.lisp")),
+            (10usize, include_str!("../../../../lib/domains/d10.lisp")),
+        ];
+        let mut witnessed = 0;
+        for (width, table) in tables {
+            for (root, prefix, ukrainian) in [
+                (0b011u16, "р", "решта"),
+                (0b100u16, "п", "перше"),
+            ] {
+                for suffix in 0..(1u16 << (width - 3)) {
+                    let bits = (root << (width - 3)) | suffix;
+                    let exact = identity(width, bits);
+                    let mut small = prefix.to_owned();
+                    let mut full = ukrainian.to_owned();
+                    for shift in (0..width - 3).rev() {
+                        let tail = (suffix >> shift) & 1 == 1;
+                        small.push('-');
+                        small.push(if tail { 'р' } else { 'п' });
+                        full.push_str(if tail { "-від-решта" } else { "-від-перше" });
+                    }
+                    let owner_row = format!("({bits:0width$b} (ук {small}) (укр {full})");
+                    assert!(table.contains(&owner_row), "D{width} missing owner row: {owner_row}");
+                    for name in [small, full] {
+                        assert_eq!(
+                            crate::semantic_registry::exact_uk_callable_for_source_head(&name),
+                            Some(exact), "D{width} source inverse: {name}"
+                        );
+                    }
+                    witnessed += 1;
+                }
+            }
+        }
+        assert_eq!(witnessed, 448);
+        assert!(crate::semantic_registry::exact_uk_callable_for_source_head(
+            "caaaaaaaar"
+        ).is_none(), "English spelling cannot be promoted to Ukrainian source");
+    }
+
+    #[test]
+    fn d8_d9_d10_ukrainian_heads_run_as_real_sens_calls() {
+        // The source is executed by the SENS reader/evaluator and its D3
+        // CONS law, not by a host-only tree oracle.
+        for width in [8usize, 9, 10] {
+            for (root, suffix) in [(0b100u16, 0u16), (0b011, 0b101101)] {
+                let suffix = suffix & ((1u16 << (width - 3)) - 1);
+                let bits = (root << (width - 3)) | suffix;
+                let exact = identity(width, bits);
+                let mut name = if root == 0b100 {
+                    String::from("перше")
+                } else {
+                    String::from("решта")
+                };
+                for shift in (0..width - 3).rev() {
+                    name.push_str(if (suffix >> shift) & 1 == 1 {
+                        "-від-решта"
+                    } else {
+                        "-від-перше"
+                    });
+                }
+                let operations = (0..width - 3)
+                    .map(|shift| (suffix >> shift) & 1 == 1)
+                    .chain(std::iter::once(root == 0b011))
+                    .collect::<Vec<_>>();
+                let mut tree = String::from("(як-є ціль)");
+                for rest in operations.iter().rev() {
+                    tree = if *rest {
+                        format!("(сполучити (як-є інше) {tree})")
+                    } else {
+                        format!("(сполучити {tree} (як-є інше))")
+                    };
+                }
+                assert_eq!(
+                    crate::semantic_registry::exact_uk_callable_for_source_head(&name),
+                    Some(exact)
+                );
+                let program = format!("({name} {tree})");
+                let value = crate::eval_program(&program, &mut crate::Session::default())
+                    .unwrap_or_else(|error| panic!("D{width}:{bits:b} {program}: {error}")).value;
+                assert_eq!(value, Value::Symbol("ціль".into()),
+                    "D{width} selector {name} must execute");
+            }
+        }
+    }
+
     #[test]
     fn boundary_rejects_d7_nonselector_and_unsupported_arity() {
         // D7:1000000 must never be treated as an extension of D3 CAR.
