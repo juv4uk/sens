@@ -513,11 +513,11 @@ fn roundtrip_repl_result(value: Value) -> Result<Value, String> {
     Ok(output)
 }
 
-fn prepare_t5m_repl_program(
+fn prepare_t5m_repl_words(
     line: &str,
     surface: ReplSurface,
     session: &Session,
-) -> Result<PhysicalT5Program, String> {
+) -> Result<Vec<ExactDomainWord>, String> {
     let parsed = sens::parse_mixed_exact_domain(line).map_err(|error| error.render(line))?;
     let expressions = parsed
         .iter()
@@ -530,10 +530,46 @@ fn prepare_t5m_repl_program(
     for expression in &expressions {
         append_t5m_expression(expression, t5m_surface_layout(surface), &mut words, 0)?;
     }
+    Ok(words)
+}
+
+fn prepare_t5m_repl_program(
+    line: &str,
+    surface: ReplSurface,
+    session: &Session,
+) -> Result<PhysicalT5Program, String> {
+    let words = prepare_t5m_repl_words(line, surface, session)?;
     let restored = t5m_roundtrip_words(&words)?;
+    PhysicalT5Program::from_exact_domain_words(&restored)
+        .map_err(|error| format!("SENS binary reader: {error:?}"))
+}
+
+/// Явно парний фізичний шлях: .lisp НАДАЄ перевірену доменну ідентичність,
+/// Zig відновлює справжні байти .sens. Повний збіг усіх ширин і бітів
+/// обов'язковий до SENS D2 та виконання. Однакова ширина НЕ є доказом домену.
+/// На відміну від --t5m-file, виконується саме наданий фізичний носій.
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_paired_file(source: &str, physical: &[u8]) -> Result<sens::EvalResult, String> {
+    let mut session = Session::default();
+    let expected = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)?;
+    let actual = crate::zig_transport::decode_t5_exact_words(physical)?;
+    let restored = restore_t5m_words(&expected, &actual)
+        .map_err(|error| format!("T5M_PHYSICAL_PAIR_MISMATCH: {error}"))?;
+    // Fail closed on noncanonical physical encoding: no equal-looking alternate
+    // byte sequence may be executed as the committed source's transport.
+    let encoded = crate::zig_transport::encode_t5_exact_words(&actual)?;
+    if encoded != physical {
+        return Err("T5M_PHYSICAL_PAIR_MISMATCH: noncanonical T5M bytes".into());
+    }
     let program = PhysicalT5Program::from_exact_domain_words(&restored)
-        .map_err(|error| format!("SENS binary reader: {error:?}"))?;
-    Ok(program)
+        .map_err(|error| format!("SENS paired binary reader: {error:?}"))?;
+    let mut result = program
+        .execute(&mut session)
+        .map_err(|error| format!("SENS paired evaluator: {}", error.render(source)))?;
+    if !matches!(&result.value, Value::Closure(_)) {
+        result.value = roundtrip_repl_result(result.value)?;
+    }
+    Ok(result)
 }
 
 fn eval_t5m_repl_line(
