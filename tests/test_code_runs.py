@@ -167,8 +167,8 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
     def _assert_symbol_guards(self, source):
         # Окремі валідатори пропозиції та її огляду мусять мати
         # перевірку символу: втрата будь-якої — регресія.
-        self.assertEqual(source.count("(хибне? (символ? стан))"), 2)
-        self.assertEqual(source.count("(хибне? (символ? вид))"), 1)
+        self.assertEqual(source.count("(хибне? (переклад-внутрішній-символ? стан))"), 2)
+        self.assertEqual(source.count("(хибне? (переклад-внутрішній-символ? вид))"), 1)
 
     def _assert_alternative_guard(self, source):
         self.assertIn("((атом? (решта альтернативи)) так)", source)
@@ -182,6 +182,16 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
 
         self.assertEqual(_law_no_literals(source, "lib/translation.lisp"), [])
 
+    def test_symbol_and_field_shape_use_current_lisp_mechanisms(self):
+        source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
+        self.assertIn("(визначити переклад-внутрішній-символ?", source)
+        self.assertIn("(визначити переклад-рівно-п'ять-полів?", source)
+        self.assertIn("(текст-у-символ (значення-у-текст значення))", source)
+        self.assertEqual(source.count("(хибне? (переклад-рівно-п'ять-полів?"), 2)
+        self.assertNotIn("(довжина пропозиція)", source)
+        self.assertNotIn("(довжина огляд)", source)
+        self.assertNotIn("(символ? стан)", source)
+
     def test_wrong_alternative_selector_peer_is_rejected(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
         correct = "((атом? (решта альтернативи)) так)"
@@ -193,7 +203,7 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
     def test_wrong_validator_peer_is_rejected(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
         self._assert_symbol_guards(source)
-        mutated = source.replace("(символ? стан)", "(атом? стан)", 1)
+        mutated = source.replace("(переклад-внутрішній-символ? стан)", "(атом? стан)", 1)
         with self.assertRaises(AssertionError):
             self._assert_symbol_guards(mutated)
 
