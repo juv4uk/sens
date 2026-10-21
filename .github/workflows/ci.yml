@@ -229,6 +229,11 @@ jobs:
             echo 'guard_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
+          # LIFE-1: при зміні семантики планувальника виконуємо SENS.
+          if grep -Eq '^(lib/life-1-scheduler\.lisp|crates/sens/tests/life_1_scheduler\.rs|tests/fixtures/life-1-exact-d3-semantic\.lisp|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'life_runtime_tests=true' >> "$GITHUB_OUTPUT"
+            echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+          fi
           # Метаобчислювач перевіряється живим SENS після зміни бібліотеки чи свідка.
           if grep -Eq '^(lib/meta-eval\.lisp|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-lexical-shadow-d1\.sh|tests/semantic/meta-eval-lexical-shadow-d1-(law|mutant|mutants)\.lisp)$' "$changed_all"; then
             echo 'meta_eval_d1_tests=true' >> "$GITHUB_OUTPUT"
@@ -314,6 +319,14 @@ jobs:
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test narrate_outcomes --test understand_exact_empty -- --nocapture
           # Справжній D1 для символу/NIL/пари/D24 замість каталожного D9.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test result_status український_символ_результату_виконується_через_d1_а_не_недопущений_d9 -- --exact --nocapture
+
+      - name: "LIFE-1 — живі позитивні й негативні SENS D1 свідки"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.life_runtime_tests == 'true' }}
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test life_1_scheduler -- --nocapture
 
       - name: "Guard/Mechanism D1 — живе SENS та чинні джерельні закони"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' }}
