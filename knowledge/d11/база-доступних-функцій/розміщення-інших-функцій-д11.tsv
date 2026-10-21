@@ -1,0 +1,577 @@
+# D11 — дослідне розміщення наявних функцій за законами/родинами D1–D10.
+# Координата дослідження НЕ Є ратифікацією, резервуванням, callability, фізичним admission або виконуваним кодом.
+# Точний D11 тест 00000000000..00000101010 (43 записи) збережений; 512 селекторів посідають 01100000000..10011111111.
+# Записи зі статусом ВЖЕ_НИЖЧИЙ_ДОМЕН або ЗАМІНЕНИЙ_D9 не отримують нового дослідного D11-слота.
+дослідна_адреса_д11	статус_слота	блок_адрес	назва_з_джерела	повна_укр_відомої_реалізації	семантична_родина	етап	джерело	доказ_закону_або_гіпотеза	нижчий_домен	нижчий_код	нижча_назва	викличність_д11	ратифікація_д11
+00000101011	RESEARCH_ONLY_NOT_RATIFIED	0000	MY-EVAL-LIST		обчислення-рефлексія	1	lib/meta-eval.lisp	Аргументи обчислюються в порядку форми та формують proper-list.				ні	ні
+00000101100	RESEARCH_ONLY_NOT_RATIFIED	0000	MY-MACRO?		обчислення-рефлексія	2	lib/meta-eval.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000101101	RESEARCH_ONLY_NOT_RATIFIED	0000	MY-APPLY		обчислення-рефлексія	4	lib/meta-eval.lisp	Closure викликається з правильними параметрами й env.				ні	ні
+00000101110	RESEARCH_ONLY_NOT_RATIFIED	0000	MY-EVAL		обчислення-рефлексія	4	lib/meta-eval.lisp	SENS-обчислювач читає форму в явно переданому середовищі.				ні	ні
+00000110000	RESEARCH_ONLY_NOT_RATIFIED	0000	MY-EVAL-BODY		обчислення-рефлексія	4	lib/meta-eval.lisp	Послідовно обчислювати форми в коректному lexical SENS env.				ні	ні
+00000110001	RESEARCH_ONLY_NOT_RATIFIED	0000	MY-EVAL-COND		обчислення-рефлексія	4	lib/meta-eval.lisp	Перша D1-істинна гілка виконується, пізніші не оцінюються.				ні	ні
+00000110010	RESEARCH_ONLY_NOT_RATIFIED	0000	першокласне-порівняти-послідовність	першокласне-порівняти-послідовність	обчислення-рефлексія	1	lib/meta-eval-first-class.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000110011	RESEARCH_ONLY_NOT_RATIFIED	0000	ім'я-форми-визначити-макрос?	ім'я-форми-визначити-макрос?	обчислення-рефлексія	0	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000110100	RESEARCH_ONLY_NOT_RATIFIED	0000	ім'я-форми-визначити?	ім'я-форми-визначити?	обчислення-рефлексія	0	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000110101	RESEARCH_ONLY_NOT_RATIFIED	0000	побудувати-граф-залежностей-за-іменами	побудувати-граф-залежностей-за-іменами	обчислення-рефлексія	0	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000110110	RESEARCH_ONLY_NOT_RATIFIED	0000	my-build-group-env-onto		обчислення-рефлексія	0	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000111000	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-bind-params		обчислення-рефлексія	0	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000111001	RESEARCH_ONLY_NOT_RATIFIED	0000	значення-спільного-кадру	значення-спільного-кадру	обчислення-рефлексія	1	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000111010	RESEARCH_ONLY_NOT_RATIFIED	0000	останнє-ім'я-визначення-лямбди	останнє-ім'я-визначення-лямбди	обчислення-рефлексія	1	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000111011	RESEARCH_ONLY_NOT_RATIFIED	0000	порівняти-два-значення-мета	порівняти-два-значення-мета	обчислення-рефлексія	1	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000111100	RESEARCH_ONLY_NOT_RATIFIED	0000	шосте-значення-групи	шосте-значення-групи	обчислення-рефлексія	1	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000111101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-eval-first-class		обчислення-рефлексія	1	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000111110	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-eval-list		обчислення-рефлексія	1	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00000111111	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-eval-list		обчислення-рефлексія	1	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001000001	RESEARCH_ONLY_NOT_RATIFIED	0000	my-lambda-list-error-pairs		обчислення-рефлексія	1	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001000010	RESEARCH_ONLY_NOT_RATIFIED	0000	власний-примітив	власний-примітив	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001000011	RESEARCH_ONLY_NOT_RATIFIED	0000	встановити-зв'язування-групи-в-оточення	встановити-зв'язування-групи-в-оточення	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001000100	RESEARCH_ONLY_NOT_RATIFIED	0000	досяжність-залежностей-графа?	досяжність-залежностей-графа?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001000101	RESEARCH_ONLY_NOT_RATIFIED	0000	забезпечити-спільний-кадр	забезпечити-спільний-кадр	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001000110	RESEARCH_ONLY_NOT_RATIFIED	0000	залежності-графа	залежності-графа	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001000111	RESEARCH_ONLY_NOT_RATIFIED	0000	замінити-спільний-кадр	замінити-спільний-кадр	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001001001	RESEARCH_ONLY_NOT_RATIFIED	0000	застосувати-примітив-мета	застосувати-примітив-мета	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001001010	RESEARCH_ONLY_NOT_RATIFIED	0000	зв'язування-спільного-кадру?	зв'язування-спільного-кадру?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001001011	RESEARCH_ONLY_NOT_RATIFIED	0000	ім'я-форми-за-умовою?	ім'я-форми-за-умовою?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001001100	RESEARCH_ONLY_NOT_RATIFIED	0000	ім'я-форми-лямбда?	ім'я-форми-лямбда?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001001101	RESEARCH_ONLY_NOT_RATIFIED	0000	ім'я-форми-як-є?	ім'я-форми-як-є?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001001110	RESEARCH_ONLY_NOT_RATIFIED	0000	імена-визначень-лямбди	імена-визначень-лямбди	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001001111	RESEARCH_ONLY_NOT_RATIFIED	0000	канонічна-виклична-тотожність?	канонічна-виклична-тотожність?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001010000	RESEARCH_ONLY_NOT_RATIFIED	0000	канонічна-ідентичність	канонічна-ідентичність	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001010010	RESEARCH_ONLY_NOT_RATIFIED	0000	канонічне-ім'я-форми?	канонічне-ім'я-форми?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001010011	RESEARCH_ONLY_NOT_RATIFIED	0000	має-перехідну-гілку-за-умовою?	має-перехідну-гілку-за-умовою?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001010100	RESEARCH_ONLY_NOT_RATIFIED	0000	маркер-невдалого-результату	маркер-невдалого-результату	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001010101	RESEARCH_ONLY_NOT_RATIFIED	0000	маркер-успішного-результату	маркер-успішного-результату	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001010110	RESEARCH_ONLY_NOT_RATIFIED	0000	оточення-має-спільний-кадр?	оточення-має-спільний-кадр?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001010111	RESEARCH_ONLY_NOT_RATIFIED	0000	помилка-арності-мета	помилка-арності-мета	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001011000	RESEARCH_ONLY_NOT_RATIFIED	0000	помилка-групи-визначень-лямбди	помилка-групи-визначень-лямбди	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001011010	RESEARCH_ONLY_NOT_RATIFIED	0000	помилка-незмінності-канонічного-імені	помилка-незмінності-канонічного-імені	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001011011	RESEARCH_ONLY_NOT_RATIFIED	0000	помилка-форми-лямбди	помилка-форми-лямбди	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001011100	RESEARCH_ONLY_NOT_RATIFIED	0000	режим-результату-за-умовою	режим-результату-за-умовою	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001011101	RESEARCH_ONLY_NOT_RATIFIED	0000	результат-за-умовою	результат-за-умовою	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001011110	RESEARCH_ONLY_NOT_RATIFIED	0000	результат-застосування-функції-мета	результат-застосування-функції-мета	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001011111	RESEARCH_ONLY_NOT_RATIFIED	0000	типове-зв'язування-імені	типове-зв'язування-імені	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001100000	RESEARCH_ONLY_NOT_RATIFIED	0000	тотожність-відповідає-поверхні?	тотожність-відповідає-поверхні?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001100001	RESEARCH_ONLY_NOT_RATIFIED	0000	це-примітив?	це-примітив?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001100011	RESEARCH_ONLY_NOT_RATIFIED	0000	my-def-compat-name?		обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001100100	RESEARCH_ONLY_NOT_RATIFIED	0000	my-definition-name?		обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001100101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-drop-lambda-def-group		обчислення-рефлексія	2	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001100110	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-closure?		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001100111	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-compare-chain		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001101000	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-env-lookup		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001101001	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-primitive		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001101011	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-primitive?		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001101100	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-root-env		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001101101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-sixth		обчислення-рефлексія	2	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001101110	RESEARCH_ONLY_NOT_RATIFIED	0000	my-symbol-member?		обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001101111	RESEARCH_ONLY_NOT_RATIFIED	0000	my-take-lambda-def-group		обчислення-рефлексія	2	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001110000	RESEARCH_ONLY_NOT_RATIFIED	0000	обчислити-компоненти-лямбди	обчислити-компоненти-лямбди	обчислення-рефлексія	4	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001110001	RESEARCH_ONLY_NOT_RATIFIED	0000	my-apply-group-closure		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001110010	RESEARCH_ONLY_NOT_RATIFIED	0000	my-eval-program-with-groups		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001110100	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-apply		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001110101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-apply-primitive		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001110110	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-eval		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001110111	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-eval-body		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001111000	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-eval-cond		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001111001	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-apply		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001111010	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-apply-owned		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001111100	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-eval		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001111101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-eval-body		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001111110	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-eval-cond		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001111111	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-eval-top-form		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010000001	RESEARCH_ONLY_NOT_RATIFIED	0001	MAKE-BALANCED-NODE		структури-числові-похідні	0	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010000011	RESEARCH_ONLY_NOT_RATIFIED	0001	HEIGHT-OF		структури-числові-похідні	1	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010000101	RESEARCH_ONLY_NOT_RATIFIED	0001	NODE-HEIGHT		структури-числові-похідні	1	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010000111	RESEARCH_ONLY_NOT_RATIFIED	0001	NODE-KEY		структури-числові-похідні	1	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010001010	RESEARCH_ONLY_NOT_RATIFIED	0001	NODE-LEFT		структури-числові-похідні	1	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010001100	RESEARCH_ONLY_NOT_RATIFIED	0001	NODE-RIGHT		структури-числові-похідні	1	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010001110	RESEARCH_ONLY_NOT_RATIFIED	0001	NODE-VALUE		структури-числові-похідні	1	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010010000	RESEARCH_ONLY_NOT_RATIFIED	0001	ROTATE-LEFT		структури-числові-похідні	1	lib/persistent-map.lisp	Історична AVL-функція відсутня у поточному lib/persistent-map.lisp.				ні	ні
+00010010011	RESEARCH_ONLY_NOT_RATIFIED	0001	ROTATE-RIGHT		структури-числові-похідні	1	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010010101	RESEARCH_ONLY_NOT_RATIFIED	0001	MAX2		структури-числові-похідні	2	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010010111	RESEARCH_ONLY_NOT_RATIFIED	0001	BALANCE		структури-числові-похідні	3	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010011001	RESEARCH_ONLY_NOT_RATIFIED	0001	BALANCE-FACTOR		структури-числові-похідні	3	lib/persistent-map.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00010011100	RESEARCH_ONLY_NOT_RATIFIED	0001	VMAKE-BALANCED-NODE	вектор-створити-збалансований-вузол	структури-числові-похідні	0	lib/persistent-vector.lisp	Новий вузол має висоту, узгоджену з висотами дітей.				ні	ні
+00010011110	RESEARCH_ONLY_NOT_RATIFIED	0001	VEC-FROM-LIST-ONTO		структури-числові-похідні	1	lib/persistent-vector.lisp	Елементи додаються до персистентного вектора у вихідному порядку.				ні	ні
+00010100000	RESEARCH_ONLY_NOT_RATIFIED	0001	VHEIGHT-OF	вектор-висота-піддерева	структури-числові-похідні	1	lib/persistent-vector.lisp	Висота має точну математичну кваліфікацію D24.				ні	ні
+00010100010	RESEARCH_ONLY_NOT_RATIFIED	0001	VNODE-HEIGHT	вектор-вузол-висота	структури-числові-похідні	1	lib/persistent-vector.lisp	Повернути поле висоти з коректного вузла.				ні	ні
+00010100101	RESEARCH_ONLY_NOT_RATIFIED	0001	VNODE-INDEX	вектор-вузол-індекс	структури-числові-похідні	1	lib/persistent-vector.lisp	Повернути індекс, не змінюючи значення вузла.				ні	ні
+00010100111	RESEARCH_ONLY_NOT_RATIFIED	0001	VNODE-LEFT	вектор-вузол-ліве-піддерево	структури-числові-похідні	1	lib/persistent-vector.lisp	Повернути ліву дитину зі структурного вузла.				ні	ні
+00010101001	RESEARCH_ONLY_NOT_RATIFIED	0001	VNODE-RIGHT	вектор-вузол-праве-піддерево	структури-числові-похідні	1	lib/persistent-vector.lisp	Повернути праву дитину зі структурного вузла.				ні	ні
+00010101011	RESEARCH_ONLY_NOT_RATIFIED	0001	VNODE-VALUE	вектор-вузол-значення	структури-числові-похідні	1	lib/persistent-vector.lisp	Повернути поле значення незалежно від поля індексу.				ні	ні
+00010101110	RESEARCH_ONLY_NOT_RATIFIED	0001	VROTATE-LEFT	вектор-повернути-ліворуч	структури-числові-похідні	1	lib/persistent-vector.lisp	Ротація вліво зберігає inorder та старе дерево.				ні	ні
+00010110000	RESEARCH_ONLY_NOT_RATIFIED	0001	VROTATE-RIGHT	вектор-повернути-праворуч	структури-числові-похідні	1	lib/persistent-vector.lisp	Ротація вправо зберігає inorder та старе дерево.				ні	ні
+00010110010	RESEARCH_ONLY_NOT_RATIFIED	0001	VTREE->LIST	перетворити-дерево-вектора-на-список	структури-числові-похідні	1	lib/persistent-vector.lisp	Inorder обхід повертає список вузлів у впорядкованому вигляді.				ні	ні
+00010110100	RESEARCH_ONLY_NOT_RATIFIED	0001	VTREE-GET	отримати-з-дерева-вектора	структури-числові-похідні	1	lib/persistent-vector.lisp	Пошук повертає правильне value чи явну відсутність.				ні	ні
+00010110111	RESEARCH_ONLY_NOT_RATIFIED	0001	VEC-TREE	отримати-дерево-вектора	структури-числові-похідні	2	lib/persistent-vector.lisp	Проєктувати деревне поле правильно типізованого вектора.				ні	ні
+00010111001	RESEARCH_ONLY_NOT_RATIFIED	0001	VMAX2		структури-числові-похідні	2	lib/persistent-vector.lisp	Вибрати більшу кваліфіковану висоту.				ні	ні
+00010111011	RESEARCH_ONLY_NOT_RATIFIED	0001	VBALANCE	вектор-збалансувати	структури-числові-похідні	3	lib/persistent-vector.lisp	Persistent AVL дерево після балансування зберігає стару версію.				ні	ні
+00010111101	RESEARCH_ONLY_NOT_RATIFIED	0001	VBALANCE-FACTOR	вектор-коефіцієнт-балансу	структури-числові-похідні	3	lib/persistent-vector.lisp	Баланс є D24 різницею висот лівого і правого піддерев.				ні	ні
+00011000000	RESEARCH_ONLY_NOT_RATIFIED	0001	VTREE-INSERT	вставити-в-дерево-вектора	структури-числові-похідні	3	lib/persistent-vector.lisp	Persistent AVL вставка не змінює старе дерево.				ні	ні
+00011000010	RESEARCH_ONLY_NOT_RATIFIED	0001	SECOND		структури-числові-похідні	1	lib/core.lisp	Другий елемент є CAR(CDR(x)).				ні	ні
+00011000100	RESEARCH_ONLY_NOT_RATIFIED	0001	DIGIT->STRING		структури-числові-похідні	2	lib/core.lisp	Кваліфіковану цифру відобразити у D7 знак без зміни ідентичності числа.				ні	ні
+00011000110	RESEARCH_ONLY_NOT_RATIFIED	0001	FOURTH		структури-числові-похідні	2	lib/core.lisp	Четвертий елемент є CAR після трьох CDR правильного списку.				ні	ні
+00011001000	RESEARCH_ONLY_NOT_RATIFIED	0001	ISQRT-STEP		структури-числові-похідні	2	lib/core.lisp	Крок кореня належить D24+ exact numeric carrier.				ні	ні
+00011001011	RESEARCH_ONLY_NOT_RATIFIED	0001	LARGEST-CHUNK		структури-числові-похідні	2	lib/core.lisp	Найбільший числовий шматок для рендерингу відбирається в межах кваліфікованої основи.				ні	ні
+00011001101	RESEARCH_ONLY_NOT_RATIFIED	0001	NONDECREASING-FROM?		структури-числові-похідні	2	lib/core.lisp	Кожні два сусідні кваліфіковані числа задовольняють a≤b.				ні	ні
+00011001111	RESEARCH_ONLY_NOT_RATIFIED	0001	NONINCREASING-FROM?		структури-числові-похідні	2	lib/core.lisp	Кожні два сусідні кваліфіковані числа задовольняють a≥b.				ні	ні
+00011010001	RESEARCH_ONLY_NOT_RATIFIED	0001	SQRT-ITER		структури-числові-похідні	2	lib/core.lisp	Наступна оцінка кореня обчислюється лише над D24+ числом.				ні	ні
+00011010100	RESEARCH_ONLY_NOT_RATIFIED	0001	THIRD		структури-числові-похідні	2	lib/core.lisp	Третій елемент є CAR(CDR(CDR(x))).				ні	ні
+00011010110	RESEARCH_ONLY_NOT_RATIFIED	0001	цілочисельна-частка-з-блоку	цілочисельна-частка-з-блоку	структури-числові-похідні	2	lib/core4.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011011000	RESEARCH_ONLY_NOT_RATIFIED	0001	SCIENCE-PROPER-LIST?		структури-числові-похідні	1	lib/quantity.lisp	Визначити правильний nil-terminated D3 список.				ні	ні
+00011011010	RESEARCH_ONLY_NOT_RATIFIED	0001	SCIENCE-SEVENTH		структури-числові-похідні	2	lib/quantity.lisp	Проєктувати сьомий член правильного списку через CAR/CDR.				ні	ні
+00011011101	RESEARCH_ONLY_NOT_RATIFIED	0001	SCIENCE-SIXTH		структури-числові-похідні	2	lib/quantity.lisp	Проєктувати шостий член правильного списку через CAR/CDR.				ні	ні
+00011011111	RESEARCH_ONLY_NOT_RATIFIED	0001	my-postcore-binding-status		структури-числові-похідні	0	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011100001	RESEARCH_ONLY_NOT_RATIFIED	0001	my-postcore-build-definitions		структури-числові-похідні	0	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011100011	RESEARCH_ONLY_NOT_RATIFIED	0001	nonempty-string-membership-helper		структури-числові-похідні	0	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011100110	RESEARCH_ONLY_NOT_RATIFIED	0001	core4-let-values		структури-числові-похідні	1	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011101000	RESEARCH_ONLY_NOT_RATIFIED	0001	science-list-length-equals?		структури-числові-похідні	1	lib/quantity.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011101010	RESEARCH_ONLY_NOT_RATIFIED	0001	core4-let-parameters		структури-числові-похідні	2	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011101100	RESEARCH_ONLY_NOT_RATIFIED	0001	my-postcore-materialize-stable-peers		структури-числові-похідні	2	lib/core4.lisp:macro	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011101111	RESEARCH_ONLY_NOT_RATIFIED	0001	my-postcore-missing-peers		структури-числові-похідні	2	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011110001	RESEARCH_ONLY_NOT_RATIFIED	0001	my-postcore-peer-group		структури-числові-похідні	2	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011110011	RESEARCH_ONLY_NOT_RATIFIED	0001	my-postcore-stable-peer-projection		структури-числові-похідні	2	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011110101	RESEARCH_ONLY_NOT_RATIFIED	0001	string-membership-helper		структури-числові-похідні	2	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011111000	RESEARCH_ONLY_NOT_RATIFIED	0001	string-order-helper		структури-числові-похідні	2	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011111010	RESEARCH_ONLY_NOT_RATIFIED	0001	sublis-pair		структури-числові-похідні	2	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00011111100	RESEARCH_ONLY_NOT_RATIFIED	0001	truthy?		структури-числові-похідні	2	lib/core4.lisp:function	Compatibility truthiness не підміняє D1 predicate.				ні	ні
+00011111110	RESEARCH_ONLY_NOT_RATIFIED	0001	apply-quote-args		структури-числові-похідні	4	lib/core4.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100000001	RESEARCH_ONLY_NOT_RATIFIED	0010	GET-THRESHOLD		компілятор-кодек	1	lib/linter.lisp	Лінтер повертає встановлений поріг або явний default.				ні	ні
+00100000011	RESEARCH_ONLY_NOT_RATIFIED	0010	EFFECTFUL-PRIMITIVES		компілятор-кодек	2	lib/linter.lisp	Перелік effectful операцій є політичними даними лінтера, не новим примітивом.				ні	ні
+00100000101	RESEARCH_ONLY_NOT_RATIFIED	0010	LINT-MAX2		компілятор-кодек	2	lib/linter.lisp	Порівняти два сумісні явно математичні значення.				ні	ні
+00100000111	RESEARCH_ONLY_NOT_RATIFIED	0010	сі:створити-запис-константи	сі:створити-запис-константи	компілятор-кодек	0	lib/si.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100001001	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-law-empty-bits		компілятор-кодек	0	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100001011	RESEARCH_ONLY_NOT_RATIFIED	0010	компілятор-перший-дочірній-елемент-закону-д4	компілятор-перший-дочірній-елемент-закону-д4	компілятор-кодек	1	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100001110	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-program-list		компілятор-кодек	1	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100010000	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-program-node		компілятор-кодек	1	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100010010	RESEARCH_ONLY_NOT_RATIFIED	0010	компілятор-дочірні-елементи-закону-д4	компілятор-дочірні-елементи-закону-д4	компілятор-кодек	2	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100010100	RESEARCH_ONLY_NOT_RATIFIED	0010	компілятор-другий-дочірній-елемент-закону-д4	компілятор-другий-дочірній-елемент-закону-д4	компілятор-кодек	2	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100010110	RESEARCH_ONLY_NOT_RATIFIED	0010	компілятор-роль-основи-д4	компілятор-роль-основи-д4	компілятор-кодек	2	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100011000	RESEARCH_ONLY_NOT_RATIFIED	0010	компілятор-роль-основи-д4-за-бітами	компілятор-роль-основи-д4-за-бітами	компілятор-кодек	2	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100011011	RESEARCH_ONLY_NOT_RATIFIED	0010	компілятор-ширина-закону-д4	компілятор-ширина-закону-д4	компілятор-кодек	2	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100011101	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-bits-equal		компілятор-кодек	2	lib/compiler-nucleus.lisp:function	Exact-bit-list порівнюється структурною D3 рекурсією.				ні	ні
+00100011111	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-cond-clauses-valid		компілятор-кодек	2	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100100001	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-role-shape-valid		компілятор-кодек	2	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100100011	RESEARCH_ONLY_NOT_RATIFIED	0010	island-lower-binary		компілятор-кодек	2	lib/island-lowering.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100100101	RESEARCH_ONLY_NOT_RATIFIED	0010	island-lowering-append4		компілятор-кодек	2	lib/island-lowering.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100101000	RESEARCH_ONLY_NOT_RATIFIED	0010	lint-short-head		компілятор-кодек	2	lib/linter.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100101010	RESEARCH_ONLY_NOT_RATIFIED	0010	unicode-scalars->string-onto		компілятор-кодек	2	lib/utf8.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100101100	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-append		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100101110	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-artifact-field		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100110000	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-artifact-from-result		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100110010	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-at-least-two		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100110101	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-bit-xor		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100110111	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-compile-program		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100111001	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-compile-program-artifact		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100111011	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-domain-children		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00100111101	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-domain-result		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101000000	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-exactly-one		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101000010	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-exactly-two		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101000100	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-false		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101000110	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-law-l5-atom-bits		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101001000	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-law-l5-cond-bits		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101001010	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-law-l5-head-bits		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101001101	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-law-l5-spine		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101001111	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-law-width		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101010001	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-law-xor-mask		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101010011	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-lowering-role-from-l1-l5		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101010101	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-lowering-role-from-l1-l5-bits		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101010111	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-lowering-role-from-laws		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101011010	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-merge-results		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101011100	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-request-from-l1-l5		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101011110	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-request-from-laws		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101100000	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-request-from-role		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101100010	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-request-role		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101100100	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-result-fail		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101100111	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-result-ok		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101101001	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-result-requests		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101101011	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-result-success		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101101101	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-role-from-l1-l5		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101101111	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-role-from-l1-l5-bits		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101110001	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-shape-bits		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101110100	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-shape-width		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101110110	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-true		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101111000	RESEARCH_ONLY_NOT_RATIFIED	0010	compiler-xor-bits		компілятор-кодек	3	lib/compiler-nucleus.lisp:function	Покомпонентний XOR над правильно типізованими D1 бітами.				ні	ні
+00101111010	RESEARCH_ONLY_NOT_RATIFIED	0010	island-lowering-add-payload		компілятор-кодек	3	lib/island-lowering.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101111100	RESEARCH_ONLY_NOT_RATIFIED	0010	utf8-decode-onto		компілятор-кодек	3	lib/utf8.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00101111110	RESEARCH_ONLY_NOT_RATIFIED	0010	utf8-encode-string-onto		компілятор-кодек	3	lib/utf8.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00110000001	RESEARCH_ONLY_NOT_RATIFIED	0011	OCCURS-CHECK		логіка-правила-докази	2	lib/unify.lisp	Walk змінної перевіряє її входження в терм.				ні	ні
+00110000101	RESEARCH_ONLY_NOT_RATIFIED	0011	APPLY-SUBST-WALKED		логіка-правила-докази	3	lib/unify.lisp	Recursive walk замінює змінні в усіх парах.				ні	ні
+00110001000	RESEARCH_ONLY_NOT_RATIFIED	0011	EXTEND-SUBST		логіка-правила-докази	3	lib/unify.lisp	Новий binding додається на початок alist.				ні	ні
+00110001100	RESEARCH_ONLY_NOT_RATIFIED	0011	FIND-ENTRY		логіка-правила-докази	2	lib/forward.lisp	Знайти запис JTMS за ключем у списку.				ні	ні
+00110001111	RESEARCH_ONLY_NOT_RATIFIED	0011	MAP-APPLY-HEAD		логіка-правила-докази	3	lib/forward.lisp	Застосувати head-функцію до кожного елемента без перестановки.				ні	ні
+00110010011	RESEARCH_ONLY_NOT_RATIFIED	0011	MAP-APPLY-HEAD-JTMS		логіка-правила-докази	3	lib/forward.lisp	Відобразити JTMS елементи без втрати dependency refs.				ні	ні
+00110010110	RESEARCH_ONLY_NOT_RATIFIED	0011	CLIPS-STRING-EMPTY?		логіка-правила-докази	0	lib/clips-import.lisp	Перевірити порожній текстовий носій D7.				ні	ні
+00110011001	RESEARCH_ONLY_NOT_RATIFIED	0011	CLIPS-SLOT-VALUE-OF		логіка-правила-докази	1	lib/clips-import.lisp	Вибрати іменований slot із визначеного шаблону CLIPS.				ні	ні
+00110011101	RESEARCH_ONLY_NOT_RATIFIED	0011	CLIPS-CONS-EACH-ONTO		логіка-правила-докази	2	lib/clips-import.lisp	Додати усі конвертовані елементи до накопичувача без втрати порядку.				ні	ні
+00110100000	RESEARCH_ONLY_NOT_RATIFIED	0011	CLIPS-FACTS->CLAUSES-ONTO		логіка-правила-докази	2	lib/clips-import.lisp	Перекласти кожен валідний факт у SENS clause форму.				ні	ні
+00110100100	RESEARCH_ONLY_NOT_RATIFIED	0011	CLIPS-STRING-AFTER-LAST-DOUBLE-COLON		логіка-правила-докази	2	lib/clips-import.lisp	Повернути суфікс після останнього подвійного роздільника CLIPS.				ні	ні
+00110100111	RESEARCH_ONLY_NOT_RATIFIED	0011	CLIPS-STRING-STARTS-WITH-DOUBLE-COLON?		логіка-правила-докази	2	lib/clips-import.lisp	Перевірити префікс подвійної двокрапки в рядку.				ні	ні
+00110101011	RESEARCH_ONLY_NOT_RATIFIED	0011	CLIPS-SYMBOL-STARTS-WITH-?		логіка-правила-докази	2	lib/clips-import.lisp	Перевірити CLIPS змінний символ за ? у D7 поверхні.				ні	ні
+00110101110	RESEARCH_ONLY_NOT_RATIFIED	0011	CLIPS-IMPORT-FORMS-ONTO		логіка-правила-докази	4	lib/clips-import.lisp	Послідовно перетворити підтримувані CLIPS форми у SENS accumulator.				ні	ні
+00110110010	RESEARCH_ONLY_NOT_RATIFIED	0011	COUNT-USAGE-LIST		логіка-правила-докази	1	lib/reason.lisp	Скласти кількість usage events лише у D24 числовому домені.				ні	ні
+00110110101	RESEARCH_ONLY_NOT_RATIFIED	0011	EXPLAIN-PROOF-LIST		логіка-правила-докази	1	lib/reason.lisp	Скласти пояснення для всіх доказових вузлів із збереженням порядку.				ні	ні
+00110111001	RESEARCH_ONLY_NOT_RATIFIED	0011	EXPLAIN-PROOF-NODE		логіка-правила-докази	1	lib/reason.lisp	Вивести факт разом із відповідними джерелами й переходами.				ні	ні
+00110111100	RESEARCH_ONLY_NOT_RATIFIED	0011	PROVENANCE-LIST		логіка-правила-докази	1	lib/reason.lisp	Зібрати всі source refs без втрат і дублювання поза законом.				ні	ні
+00111000000	RESEARCH_ONLY_NOT_RATIFIED	0011	MAP-PROOFS		логіка-правила-докази	2	lib/reason.lisp	Застосувати функцію до кожного proof node без зміни вихідної структури.				ні	ні
+00111000011	RESEARCH_ONLY_NOT_RATIFIED	0011	PRINT-INDENT		логіка-правила-докази	2	lib/reason.lisp	Відступ у людському звіті не змінює семантику proof.				ні	ні
+00111000110	RESEARCH_ONLY_NOT_RATIFIED	0011	ADD-USAGE		логіка-правила-докази	3	lib/reason.lisp	Додати usage факт зі збереженням старого provenance.				ні	ні
+00111001010	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index-build-scan		логіка-правила-докази	0	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111001101	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-make-index		логіка-правила-докази	0	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111010001	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-ensure-index		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111010100	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index-add-reversed		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111011000	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index-buckets		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111011011	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index-candidates		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111011111	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index-linear		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111100010	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index-mode		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111100110	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index-normalize-buckets		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111101001	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index-rules		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111101100	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-index?		логіка-правила-докази	1	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111110000	RESEARCH_ONLY_NOT_RATIFIED	0011	prove-goal-accumulate		логіка-правила-докази	2	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111110011	RESEARCH_ONLY_NOT_RATIFIED	0011	prove-goal-scan		логіка-правила-докази	2	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111110111	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-rule-predicate		логіка-правила-докази	2	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111111010	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-term-predicate		логіка-правила-докази	2	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111111110	RESEARCH_ONLY_NOT_RATIFIED	0011	unify-observe		логіка-правила-докази	2	lib/unify-observe.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01000000010	RESEARCH_ONLY_NOT_RATIFIED	0100	TCP-READ-FRAME		знання-світ-епістеміка	1	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01000001000	RESEARCH_ONLY_NOT_RATIFIED	0100	TCP-READ-TO-EOF		знання-світ-епістеміка	1	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01000001101	RESEARCH_ONLY_NOT_RATIFIED	0100	ACCEPT-KNOWLEDGE-EXCHANGE		знання-світ-епістеміка	2	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01000010011	RESEARCH_ONLY_NOT_RATIFIED	0100	EXCHANGE-KNOWLEDGE-PACKAGE		знання-світ-епістеміка	2	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01000011001	RESEARCH_ONLY_NOT_RATIFIED	0100	RECORD-USAGE!		знання-світ-епістеміка	2	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01000011110	RESEARCH_ONLY_NOT_RATIFIED	0100	STRING-THROUGH-LINE		знання-світ-епістеміка	2	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01000100100	RESEARCH_ONLY_NOT_RATIFIED	0100	USAGE-OF		знання-світ-епістеміка	2	lib/knowledge.lisp	Уживання відновлюються лише з наявного provenance журналу.				ні	ні
+01000101001	RESEARCH_ONLY_NOT_RATIFIED	0100	ADVISE		знання-світ-епістеміка	4	lib/knowledge.lisp	Функція ADVISE має чинне Lisp визначення у lib/world.lisp, а не у старому lib/knowledge.lisp; її контракт має доводитись нативним world-спостереженням.				ні	ні
+01000101111	RESEARCH_ONLY_NOT_RATIFIED	0100	ADVISE-ALL		знання-світ-епістеміка	4	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01000110100	RESEARCH_ONLY_NOT_RATIFIED	0100	IMPORT-KNOWLEDGE-FILE		знання-світ-епістеміка	4	lib/knowledge.lisp	Розділити host читання файла та SENS перевірку вмісту.				ні	ні
+01000111010	RESEARCH_ONLY_NOT_RATIFIED	0100	IMPORT-KNOWLEDGE-PACKAGE		знання-світ-епістеміка	4	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01001000000	RESEARCH_ONLY_NOT_RATIFIED	0100	LOAD-KNOWLEDGE		знання-світ-епістеміка	4	lib/knowledge.lisp	Завантажувати лише пакет із перевіреним походженням і версією.				ні	ні
+01001000101	RESEARCH_ONLY_NOT_RATIFIED	0100	RECEIVE-KNOWLEDGE-PACKAGE		знання-світ-епістеміка	4	lib/knowledge.lisp	Перевірити source та version до внесення пакета у світ.				ні	ні
+01001001011	RESEARCH_ONLY_NOT_RATIFIED	0100	SEND-KNOWLEDGE-PACKAGE		знання-світ-епістеміка	4	lib/knowledge.lisp	Серіалізувати версійний пакет і передати його через зовнішній transport.				ні	ні
+01001010000	RESEARCH_ONLY_NOT_RATIFIED	0100	WRITE-KNOWLEDGE-PACKAGE		знання-світ-епістеміка	4	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01001010110	RESEARCH_ONLY_NOT_RATIFIED	0100	EPISTEMIC--ALL-REQUIRED-PRESENT?		знання-світ-епістеміка	2	lib/epistemic.lisp	Кожний необхідний доказ має підтверджене джерело у фактичному списку.				ні	ні
+01001011011	RESEARCH_ONLY_NOT_RATIFIED	0100	EPISTEMIC--CLAIM-REF?		знання-світ-епістеміка	2	lib/epistemic.lisp	Посилання на claim має визначений структурний tag і обов'язкові поля.				ні	ні
+01001100001	RESEARCH_ONLY_NOT_RATIFIED	0100	WORLD-REMOVE-FIRST		знання-світ-епістеміка	1	lib/world.lisp	Вилучити лише перше входження збереженням решти.				ні	ні
+01001100110	RESEARCH_ONLY_NOT_RATIFIED	0100	LEGACY-WORLD-TRANSITION-EXPANSION		знання-світ-епістеміка	2	lib/world.lisp	Історичну форму переходу атрибутувати source event/status.				ні	ні
+01001101100	RESEARCH_ONLY_NOT_RATIFIED	0100	WORLD-APPLY-EVENT		знання-світ-епістеміка	4	lib/world.lisp	Породити нову world-version через event із незмінністю старої.				ні	ні
+01001110010	RESEARCH_ONLY_NOT_RATIFIED	0100	STRIP-ARTICLE		знання-світ-епістеміка	2	lib/understand.lisp	Прибирати визначений артикль як повний D7 токен.				ні	ні
+01001110111	RESEARCH_ONLY_NOT_RATIFIED	0100	NARRATE-OUTCOME-ARITY?		знання-світ-епістеміка	2	lib/narrate.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01001111101	RESEARCH_ONLY_NOT_RATIFIED	0100	world-module-missing?		знання-світ-епістеміка	2	lib/world.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010000000	RESEARCH_ONLY_NOT_RATIFIED	0101	вибрати-механізм	вибрати-механізм	виконавці-агенти-механізми	4	lib/mechanism-selector.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010000010	RESEARCH_ONLY_NOT_RATIFIED	0101	ядро3-маршрут	ядро3-маршрут	виконавці-агенти-механізми	2	lib/core3.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010000100	RESEARCH_ONLY_NOT_RATIFIED	0101	ядро3-стан-профілю	ядро3-стан-профілю	виконавці-агенти-механізми	2	lib/core3.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010000101	RESEARCH_ONLY_NOT_RATIFIED	0101	CORE3-ROUTE		виконавці-агенти-механізми	2	lib/core3.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010000111	RESEARCH_ONLY_NOT_RATIFIED	0101	ядро3-додати-маршрути	ядро3-додати-маршрути	виконавці-агенти-механізми	3	lib/core3.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010001001	RESEARCH_ONLY_NOT_RATIFIED	0101	CORE3-ADD-ROUTES		виконавці-агенти-механізми	3	lib/core3.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010001010	RESEARCH_ONLY_NOT_RATIFIED	0101	ALIST-REF		виконавці-агенти-механізми	1	lib/yantra.lisp	Читати ключ з асоціативного списку без небезпечного CDR NIL.				ні	ні
+01010001100	RESEARCH_ONLY_NOT_RATIFIED	0101	COUNT-WITH-ROLE		виконавці-агенти-механізми	1	lib/yantra.lisp	Порахувати повідомлення обраної ролі із D24-qualified підсумком.				ні	ні
+01010001110	RESEARCH_ONLY_NOT_RATIFIED	0101	ID-IN-LIST?		виконавці-агенти-механізми	1	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010010000	RESEARCH_ONLY_NOT_RATIFIED	0101	APPEND-TOOL-RESULTS		виконавці-агенти-механізми	2	lib/yantra.lisp	Зв'язати результати інструментів із відповідними call IDs.				ні	ні
+01010010001	RESEARCH_ONLY_NOT_RATIFIED	0101	BASH-TOOL-SCHEMA		виконавці-агенти-механізми	2	lib/yantra.lisp	Схема інструмента є даними, не дозволом host execution.				ні	ні
+01010010011	RESEARCH_ONLY_NOT_RATIFIED	0101	CLAIM-MARKERS		виконавці-агенти-механізми	2	lib/yantra.lisp	Описані маркери є проєкцією статусу, а не Core інструкцією.				ні	ні
+01010010101	RESEARCH_ONLY_NOT_RATIFIED	0101	COLLECT-TRAILING-TOOLS		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010010110	RESEARCH_ONLY_NOT_RATIFIED	0101	HTTP-POST-JSON		виконавці-агенти-механізми	2	lib/yantra.lisp	Lisp передає вимогу host transport і приймає типізований результат.				ні	ні
+01010011000	RESEARCH_ONLY_NOT_RATIFIED	0101	HTTP-TRANSPORT-BODY		виконавці-агенти-механізми	2	lib/yantra.lisp	Повернути поле body транспортного трійника як дані.				ні	ні
+01010011010	RESEARCH_ONLY_NOT_RATIFIED	0101	HTTP-TRANSPORT-EXIT		виконавці-агенти-механізми	2	lib/yantra.lisp	Повернути поле exit transport трійника.				ні	ні
+01010011011	RESEARCH_ONLY_NOT_RATIFIED	0101	HTTP-TRANSPORT-STDERR		виконавці-агенти-механізми	2	lib/yantra.lisp	Повернути поле stderr окремо від stdout.				ні	ні
+01010011101	RESEARCH_ONLY_NOT_RATIFIED	0101	INVALID-COMPLETION-NUDGE		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010011111	RESEARCH_ONLY_NOT_RATIFIED	0101	JSON->MESSAGE		виконавці-агенти-механізми	2	lib/yantra.lisp	Декодувати перевірену JSON структуру в typed message record.				ні	ні
+01010100000	RESEARCH_ONLY_NOT_RATIFIED	0101	JSON->TOOL-CALL		виконавці-агенти-механізми	2	lib/yantra.lisp	Декодувати tool-call id/name/args як дані.				ні	ні
+01010100010	RESEARCH_ONLY_NOT_RATIFIED	0101	JSON-ESCAPE-ONTO		виконавці-агенти-механізми	2	lib/yantra.lisp	Символи зберігаються з escaping у вихідному накопичувачі.				ні	ні
+01010100100	RESEARCH_ONLY_NOT_RATIFIED	0101	MARKERS-CONTAINED?		виконавці-агенти-механізми	2	lib/yantra.lisp	Перевірити маркери за цілими токенами в даних.				ні	ні
+01010100101	RESEARCH_ONLY_NOT_RATIFIED	0101	MAX-TURNS		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010100111	RESEARCH_ONLY_NOT_RATIFIED	0101	MSG-CALL-IDS		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010101001	RESEARCH_ONLY_NOT_RATIFIED	0101	MSG-CONTENT		виконавці-агенти-механізми	2	lib/yantra.lisp	Проєктувати content без зміни role і tool calls.				ні	ні
+01010101010	RESEARCH_ONLY_NOT_RATIFIED	0101	MSG-ROLE		виконавці-агенти-механізми	2	lib/yantra.lisp	Проєктувати поле ролі з перевіреного повідомлення.				ні	ні
+01010101100	RESEARCH_ONLY_NOT_RATIFIED	0101	MSG-TOOL-CALL-ID		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010101110	RESEARCH_ONLY_NOT_RATIFIED	0101	MSG-TOOL-CALLS		виконавці-агенти-механізми	2	lib/yantra.lisp	Проєктувати список викликів з повідомлення.				ні	ні
+01010110000	RESEARCH_ONLY_NOT_RATIFIED	0101	OLLAMA-COMPLETE		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010110001	RESEARCH_ONLY_NOT_RATIFIED	0101	OLLAMA-MODEL		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010110011	RESEARCH_ONLY_NOT_RATIFIED	0101	OLLAMA-URL		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010110101	RESEARCH_ONLY_NOT_RATIFIED	0101	RESULT-ANSWER		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010110110	RESEARCH_ONLY_NOT_RATIFIED	0101	RESULT-EPISTEMIC-STATUS		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010111000	RESEARCH_ONLY_NOT_RATIFIED	0101	RESULT-MESSAGES		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010111010	RESEARCH_ONLY_NOT_RATIFIED	0101	RESULT-TURN		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010111011	RESEARCH_ONLY_NOT_RATIFIED	0101	STRCAT		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010111101	RESEARCH_ONLY_NOT_RATIFIED	0101	STRCAT-ONTO		виконавці-агенти-механізми	2	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01010111111	RESEARCH_ONLY_NOT_RATIFIED	0101	TC-ARGUMENTS		виконавці-агенти-механізми	2	lib/yantra.lisp	Проєктувати аргументи tool call як дані.				ні	ні
+01011000000	RESEARCH_ONLY_NOT_RATIFIED	0101	TC-ID		виконавці-агенти-механізми	2	lib/yantra.lisp	Проєктувати tool-call ID із typed record.				ні	ні
+01011000010	RESEARCH_ONLY_NOT_RATIFIED	0101	TC-NAME		виконавці-агенти-механізми	2	lib/yantra.lisp	Проєктувати назву інструмента без права виконання.				ні	ні
+01011000100	RESEARCH_ONLY_NOT_RATIFIED	0101	JSON-ENCODE		виконавці-агенти-механізми	3	lib/yantra.lisp	Кодувати valid Lisp дані у JSON за правилами escaping.				ні	ні
+01011000101	RESEARCH_ONLY_NOT_RATIFIED	0101	JSON-ENCODE-ARRAY-ITEMS		виконавці-агенти-механізми	3	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011000111	RESEARCH_ONLY_NOT_RATIFIED	0101	JSON-ENCODE-KEY		виконавці-агенти-механізми	3	lib/yantra.lisp	Ключ JSON об'єкта є коректно escaped string.				ні	ні
+01011001001	RESEARCH_ONLY_NOT_RATIFIED	0101	JSON-ENCODE-OBJECT-ENTRIES		виконавці-агенти-механізми	3	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011001010	RESEARCH_ONLY_NOT_RATIFIED	0101	AGENT-LOOP		виконавці-агенти-механізми	4	lib/yantra.lisp	Lisp-owned workflow розрізняє completion і blocked tool reply.				ні	ні
+01011001100	RESEARCH_ONLY_NOT_RATIFIED	0101	DISPATCH-TOOL		виконавці-агенти-механізми	4	lib/yantra.lisp	Вибрати дозволений інструмент за точною назвою та policy.				ні	ні
+01011001110	RESEARCH_ONLY_NOT_RATIFIED	0101	EXECUTE-BASH		виконавці-агенти-механізми	4	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011010000	RESEARCH_ONLY_NOT_RATIFIED	0101	EXECUTE-TOOL-CALL		виконавці-агенти-механізми	4	lib/yantra.lisp	Тільки транспорт виконує дозволену дію і повертає структурований статус.				ні	ні
+01011010001	RESEARCH_ONLY_NOT_RATIFIED	0101	RUN-AGENT		виконавці-агенти-механізми	4	lib/yantra.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011010011	RESEARCH_ONLY_NOT_RATIFIED	0101	fs-bindings-without		виконавці-агенти-механізми	0	lib/lisp-fs.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011010101	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-projection-ready?		виконавці-агенти-механізми	1	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011010110	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-select-ready		виконавці-агенти-механізми	1	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011011000	RESEARCH_ONLY_NOT_RATIFIED	0101	fs-commit-stage?		виконавці-агенти-механізми	2	lib/lisp-fs.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011011010	RESEARCH_ONLY_NOT_RATIFIED	0101	fs-d1-no?		виконавці-агенти-механізми	2	lib/lisp-fs.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011011011	RESEARCH_ONLY_NOT_RATIFIED	0101	fs-journal-replay-event		виконавці-агенти-механізми	2	lib/lisp-fs.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011011101	RESEARCH_ONLY_NOT_RATIFIED	0101	fs-journal-replay-onto		виконавці-агенти-механізми	2	lib/lisp-fs.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011011111	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-dedup-pending		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011100000	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-field		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011100010	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-invocation-key		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011100100	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-key-present?		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011100101	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-pending		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011100111	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-projection-match?		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011101001	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-quiescence		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011101010	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-quiescence-state		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011101100	RESEARCH_ONLY_NOT_RATIFIED	0101	life-scheduler-state		виконавці-агенти-механізми	2	lib/life-1-scheduler.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011101110	RESEARCH_ONLY_NOT_RATIFIED	0101	mechanism-select		виконавці-агенти-механізми	2	lib/mechanism-selector.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011110000	RESEARCH_ONLY_NOT_RATIFIED	0101	mechanism-selector-find-route		виконавці-агенти-механізми	2	lib/mechanism-selector.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011110001	RESEARCH_ONLY_NOT_RATIFIED	0101	mechanism-selector-find-section		виконавці-агенти-механізми	2	lib/mechanism-selector.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011110011	RESEARCH_ONLY_NOT_RATIFIED	0101	mechanism-selector-metadata		виконавці-агенти-механізми	2	lib/mechanism-selector.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011110101	RESEARCH_ONLY_NOT_RATIFIED	0101	mechanism-selector-registry		виконавці-агенти-механізми	2	lib/mechanism-selector.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011110110	RESEARCH_ONLY_NOT_RATIFIED	0101	mechanism-selector-registry-has-sid?		виконавці-агенти-механізми	2	lib/mechanism-selector.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011111000	RESEARCH_ONLY_NOT_RATIFIED	0101	mechanism-selector-registry-rows		виконавці-агенти-механізми	2	lib/mechanism-selector.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011111010	RESEARCH_ONLY_NOT_RATIFIED	0101	mechanism-selector-routes		виконавці-агенти-механізми	2	lib/mechanism-selector.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011111011	RESEARCH_ONLY_NOT_RATIFIED	0101	process-raw-exit-code		виконавці-агенти-механізми	2	lib/process.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011111101	RESEARCH_ONLY_NOT_RATIFIED	0101	process-raw-stderr-bytes		виконавці-агенти-механізми	2	lib/process.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+01011111111	RESEARCH_ONLY_NOT_RATIFIED	0101	process-raw-stdout-bytes		виконавці-агенти-механізми	2	lib/process.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10100000011	RESEARCH_ONLY_NOT_RATIFIED	1010	NCONC		спеціальні-історичні-донори	2	docs/research/2344-post-d4-historical-ledger.uk.md	Деструктивно змінити CDR останнього cons першого списку, зберігши alias.				ні	ні
+10100001011	RESEARCH_ONLY_NOT_RATIFIED	1010	NREVERSE		спеціальні-історичні-донори	2	docs/research/2344-post-d4-historical-ledger.uk.md	Розвернути список через повторне використання старих cons-клітин.				ні	ні
+10100010010	RESEARCH_ONLY_NOT_RATIFIED	1010	RECORD-CONSTRUCTOR		спеціальні-історичні-донори	0	docs/research/d10-historical-gap-audit-20261009.uk.md	Конструктор створює свіжий запис заданого RTD.				ні	ні
+10100011010	RESEARCH_ONLY_NOT_RATIFIED	1010	RECORD-CONSTRUCTOR-DESCRIPTOR		спеціальні-історичні-донори	0	docs/research/d10-historical-gap-audit-20261009.uk.md	RCD з'єднує RTD, parent descriptor та protocol.				ні	ні
+10100100001	RESEARCH_ONLY_NOT_RATIFIED	1010	SHARED-INITIALIZE		спеціальні-історичні-донори	0	docs/research/d10-historical-gap-audit-20261009.uk.md	Initargs заповнюють дозволені слоти в належному порядку.				ні	ні
+10100101001	RESEARCH_ONLY_NOT_RATIFIED	1010	DIRECT-SLOT-DEFINITION-CLASS		спеціальні-історичні-донори	1	docs/research/d10-historical-gap-audit-20261009.uk.md	Метаклас визначає клас прямого слота до узгодження спадкування.				ні	ні
+10100110000	RESEARCH_ONLY_NOT_RATIFIED	1010	EFFECTIVE-SLOT-DEFINITION-CLASS		спеціальні-історичні-донори	1	docs/research/d10-historical-gap-audit-20261009.uk.md	Ефективний клас слота враховує inherited definitions.				ні	ні
+10100111000	RESEARCH_ONLY_NOT_RATIFIED	1010	SLOT-VALUE-USING-CLASS		спеціальні-історичні-донори	1	docs/research/d10-historical-gap-audit-20261009.uk.md	Читання слота виконується через метакласовий dispatch.				ні	ні
+10101000000	RESEARCH_ONLY_NOT_RATIFIED	1010	COMPUTE-APPLICABLE-METHODS		спеціальні-історичні-донори	2	docs/research/d10-historical-gap-audit-20261009.uk.md	Методи вибираються за спеціалізаторами аргументів і precedence.				ні	ні
+10101000111	RESEARCH_ONLY_NOT_RATIFIED	1010	ENSURE-CLASS		спеціальні-історичні-донори	2	docs/research/d10-historical-gap-audit-20261009.uk.md	Клас створюється або оновлюється у control world.				ні	ні
+10101001111	RESEARCH_ONLY_NOT_RATIFIED	1010	FINALIZE-INHERITANCE		спеціальні-історичні-донори	2	docs/research/d10-historical-gap-audit-20261009.uk.md	Фіналізація обчислює class precedence та effective slots.				ні	ні
+10101010110	RESEARCH_ONLY_NOT_RATIFIED	1010	RECORD-TYPE-DESCRIPTOR		спеціальні-історичні-донори	2	docs/research/d10-historical-gap-audit-20261009.uk.md	RTD тримає поля, parent, mutability та nominal/generative identity.				ні	ні
+10101011110	RESEARCH_ONLY_NOT_RATIFIED	1010	WITH-SYNTAX		спеціальні-історичні-донори	2	docs/research/d10-historical-gap-audit-20261009.uk.md	Syntax binding зберігає lexical identity й hygiene.				ні	ні
+10101100101	RESEARCH_ONLY_NOT_RATIFIED	1010	SSTATUS		спеціальні-історичні-донори	2	docs/research/d10-historical-maclisp-v2.uk.md	Зміна дозволеного host-параметра має читатися через STATUS.				ні	ні
+10101101101	RESEARCH_ONLY_NOT_RATIFIED	1010	STATUS		спеціальні-історичні-донори	2	docs/research/d10-historical-maclisp-v2.uk.md	Спостереження host-параметра має типізовані ключі.				ні	ні
+10101110100	RESEARCH_ONLY_NOT_RATIFIED	1010	ACTIVE-VALUE-GET		спеціальні-історичні-донори	1	research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json	Вкладене читання активного значення застосовує GET-обробники від внутрішнього до зовнішнього; за відсутності GET повертає вже розв'язаний localState.				ні	ні
+10101111100	RESEARCH_ONLY_NOT_RATIFIED	1010	ACTIVE-VALUE-PUT		спеціальні-історичні-донори	1	research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json	Вкладений запис активного значення викликає зовнішній PUT-обробник першим і входить у внутрішній лише за явного делегування; за відсутності PUT оновлює лише локальний стан.				ні	ні
+10110000000	RESEARCH_ONLY_NOT_RATIFIED	1011	CHARCOUNT		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1160	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110000001	RESEARCH_ONLY_NOT_RATIFIED	1011	CL-EVAL		історичний-консолідований-донор	4	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1177	Будь-яке обчислення форми має відбуватись під семантикою SENS; цей донор є лише дослідницьким свідченням зовнішнього host-eval.				ні	ні
+10110000010	RESEARCH_ONLY_NOT_RATIFIED	1011	CLEARBUFF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1255	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110000011	RESEARCH_ONLY_NOT_RATIFIED	1011	CODEPOINT->STRING		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1272	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110000100	RESEARCH_ONLY_NOT_RATIFIED	1011	COLLECTION		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1325	Заявлене збирання елементів: визначити порядок обходу, кратність і тип результату в оригінальному джерелі.				ні	ні
+10110000101	RESEARCH_ONLY_NOT_RATIFIED	1011	COMMON		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1358	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110000110	RESEARCH_ONLY_NOT_RATIFIED	1011	CONC		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1410	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110000111	RESEARCH_ONLY_NOT_RATIFIED	1011	CONCAT		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1427	Об'єднання послідовностей має зберігати їхній порядок і межі елементів без втрати.				ні	ні
+10110001000	RESEARCH_ONLY_NOT_RATIFIED	1011	CONJ		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1443	Поведінка залежить від типу колекції: для списку можна додати голову, для вектора — кінець.				ні	ні
+10110001001	RESEARCH_ONLY_NOT_RATIFIED	1011	CONNECTED-COMPONENTS?		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1459	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110001010	RESEARCH_ONLY_NOT_RATIFIED	1011	CONTAINS?		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1492	Наявність ключа перевіряється незалежно від його значення; повертається точний D1 біт.				ні	ні
+10110001011	RESEARCH_ONLY_NOT_RATIFIED	1011	COPY		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1530	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110001100	RESEARCH_ONLY_NOT_RATIFIED	1011	CSET		історичний-консолідований-донор	3	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1618	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110001101	RESEARCH_ONLY_NOT_RATIFIED	1011	CSETQ		історичний-консолідований-донор	3	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1635	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110001110	RESEARCH_ONLY_NOT_RATIFIED	1011	CURCHAR		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1652	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110001111	RESEARCH_ONLY_NOT_RATIFIED	1011	DEFLIST		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1769	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110010000	RESEARCH_ONLY_NOT_RATIFIED	1011	DEFMACRO		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1786	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110010001	RESEARCH_ONLY_NOT_RATIFIED	1011	DELTA-NU-CS		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1856	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110010010	RESEARCH_ONLY_NOT_RATIFIED	1011	DERIVE-LAKARA		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1873	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110010011	RESEARCH_ONLY_NOT_RATIFIED	1011	DETRANSLIT-LATYNKA		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1890	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110010100	RESEARCH_ONLY_NOT_RATIFIED	1011	DEVICE-DESCRIPTOR		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1907	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110010101	RESEARCH_ONLY_NOT_RATIFIED	1011	DUMP		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1924	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110010110	RESEARCH_ONLY_NOT_RATIFIED	1011	DWIM		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1941	Контекстна евристика виправлення форми потребує визначеної політики.				ні	ні
+10110010111	RESEARCH_ONLY_NOT_RATIFIED	1011	ECLIPTIC-TO-EQUATORIAL		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2005	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110011000	RESEARCH_ONLY_NOT_RATIFIED	1011	EFFACE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2022	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110011001	RESEARCH_ONLY_NOT_RATIFIED	1011	ENDREAD		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2039	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110011010	RESEARCH_ONLY_NOT_RATIFIED	1011	ENERGY-OF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2056	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110011011	RESEARCH_ONLY_NOT_RATIFIED	1011	ERROR1		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2213	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110011100	RESEARCH_ONLY_NOT_RATIFIED	1011	EVALUATE-POSITION		історичний-консолідований-донор	4	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2247	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110011101	RESEARCH_ONLY_NOT_RATIFIED	1011	EXCISE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2281	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110011110	RESEARCH_ONLY_NOT_RATIFIED	1011	FACT		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2298	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110100000	RESEARCH_ONLY_NOT_RATIFIED	1011	FALSE?		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2333	Перевірка саме кваліфікованого біта D1:NO без змішування зі структурним NIL.				ні	ні
+10110100001	RESEARCH_ONLY_NOT_RATIFIED	1011	FIRST		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2414	Голова непорожнього списку зберігає ідентичність першого елемента.				ні	ні
+10110100010	RESEARCH_ONLY_NOT_RATIFIED	1011	FLAG		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2447	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110100011	RESEARCH_ONLY_NOT_RATIFIED	1011	GENERATE-EXPANSION		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2601	Встановити джерельну різницю між генератором expansion та одноразовим MACROEXPAND-1.				ні	ні
+10110100100	RESEARCH_ONLY_NOT_RATIFIED	1011	GUNA-OF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2730	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110100101	RESEARCH_ONLY_NOT_RATIFIED	1011	HELIOCENTRIC-POSITION		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2951	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110100110	RESEARCH_ONLY_NOT_RATIFIED	1011	INVOKE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3066	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110100111	RESEARCH_ONLY_NOT_RATIFIED	1011	IO-PORT-READ		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3118	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110101000	RESEARCH_ONLY_NOT_RATIFIED	1011	IO-PORT-WRITE		історичний-консолідований-донор	4	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3135	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110101001	RESEARCH_ONLY_NOT_RATIFIED	1011	JULIAN-DATE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3203	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110101010	RESEARCH_ONLY_NOT_RATIFIED	1011	K-CD		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3237	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110101011	RESEARCH_ONLY_NOT_RATIFIED	1011	LAP		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3254	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110101100	RESEARCH_ONLY_NOT_RATIFIED	1011	LEMMATIZE-UK		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3326	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110101101	RESEARCH_ONLY_NOT_RATIFIED	1011	LOAD		історичний-консолідований-донор	4	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3376	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110101110	RESEARCH_ONLY_NOT_RATIFIED	1011	MASTERSCOPE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3761	Дослідити package-owned query call graph та зв'язок редактора структур Interlisp-D як зовнішній інструмент.				ні	ні
+10110101111	RESEARCH_ONLY_NOT_RATIFIED	1011	MCTS-BACKPROPAGATE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3800	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110110000	RESEARCH_ONLY_NOT_RATIFIED	1011	MEMORY-MAP-OF		історичний-консолідований-донор	3	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3851	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110110001	RESEARCH_ONLY_NOT_RATIFIED	1011	MKNAM		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3945	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110110010	RESEARCH_ONLY_NOT_RATIFIED	1011	N-A		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4002	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110110011	RESEARCH_ONLY_NOT_RATIFIED	1011	NAKSHATRA-OF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4019	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110110100	RESEARCH_ONLY_NOT_RATIFIED	1011	NEIGHBORS-OF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4053	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110110101	RESEARCH_ONLY_NOT_RATIFIED	1011	NEW-ENTRIES		історичний-консолідований-донор	0	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4070	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110110110	RESEARCH_ONLY_NOT_RATIFIED	1011	NIL?		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4087	Перевіряється точна структурна порожнеча, результатом є D1 PredicateBit.				ні	ні
+10110110111	RESEARCH_ONLY_NOT_RATIFIED	1011	NUMBER?		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4181	Числовість є лише явно типізованою властивістю математичного носія.				ні	ні
+10110111000	RESEARCH_ONLY_NOT_RATIFIED	1011	NUMOB		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4197	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110111001	RESEARCH_ONLY_NOT_RATIFIED	1011	OBARRAY		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4214	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110111010	RESEARCH_ONLY_NOT_RATIFIED	1011	OPCHAR		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4265	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110111011	RESEARCH_ONLY_NOT_RATIFIED	1011	OPDEFINE		історичний-консолідований-донор	0	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4282	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110111100	RESEARCH_ONLY_NOT_RATIFIED	1011	ORBITAL-ELEMENTS		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4316	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110111101	RESEARCH_ONLY_NOT_RATIFIED	1011	PACK		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4333	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110111110	RESEARCH_ONLY_NOT_RATIFIED	1011	PENDULUM-PERIOD		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4385	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10110111111	RESEARCH_ONLY_NOT_RATIFIED	1011	PENDULUM-STEP		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4419	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111000000	RESEARCH_ONLY_NOT_RATIFIED	1011	PGN-PARSE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4453	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111000001	RESEARCH_ONLY_NOT_RATIFIED	1011	PLANET-LONGITUDE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4487	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111000010	RESEARCH_ONLY_NOT_RATIFIED	1011	PNAME-VIEW		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4504	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111000011	RESEARCH_ONLY_NOT_RATIFIED	1011	PR-STR		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4538	Повинна повернути D7-рядок, який можна без втрати лапок та escaping прочитати назад.				ні	ні
+10111000100	RESEARCH_ONLY_NOT_RATIFIED	1011	PRATYAHARA-MEMBERS		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4554	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111000101	RESEARCH_ONLY_NOT_RATIFIED	1011	PRINTLN		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4622	Людський друк має завершити рівно один рядок з очікуваною display-проєкцією.				ні	ні
+10111000110	RESEARCH_ONLY_NOT_RATIFIED	1011	PRINTPROP		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4638	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111000111	RESEARCH_ONLY_NOT_RATIFIED	1011	PRN		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4655	Друк читабельної форми має завершитись одним роздільником нового рядка.				ні	ні
+10111001000	RESEARCH_ONLY_NOT_RATIFIED	1011	PROP		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4688	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111001001	RESEARCH_ONLY_NOT_RATIFIED	1011	PUNCH		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4726	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111001010	RESEARCH_ONLY_NOT_RATIFIED	1011	PUNCHDEF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4743	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111001011	RESEARCH_ONLY_NOT_RATIFIED	1011	PUNCHLAP		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4760	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111001100	RESEARCH_ONLY_NOT_RATIFIED	1011	READ-STRING		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4832	Точно один datum із D7-рядка має читатись через власний SENS reader, із явним контролем залишку.				ні	ні
+10111001101	RESEARCH_ONLY_NOT_RATIFIED	1011	READCH		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4848	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111001110	RESEARCH_ONLY_NOT_RATIFIED	1011	READLAP		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4865	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111001111	RESEARCH_ONLY_NOT_RATIFIED	1011	READLINE		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4882	Typed ingress читає рядок з ознакою EOF, межами фрейму та помилкою відновлення.				ні	ні
+10111010000	RESEARCH_ONLY_NOT_RATIFIED	1011	RECLAIM		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4898	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111010001	RESEARCH_ONLY_NOT_RATIFIED	1011	REMFLAG		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4946	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111010010	RESEARCH_ONLY_NOT_RATIFIED	1011	REST		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5118	Повернути хвіст пари без копіювання або зміни її голови.				ні	ні
+10111010011	RESEARCH_ONLY_NOT_RATIFIED	1011	RISE-SET		історичний-консолідований-донор	3	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5151	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111010100	RESEARCH_ONLY_NOT_RATIFIED	1011	SELECT		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5295	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111010101	RESEARCH_ONLY_NOT_RATIFIED	1011	SHORTEST-PATH		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5312	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111010110	RESEARCH_ONLY_NOT_RATIFIED	1011	A-LIST		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:567	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111010111	RESEARCH_ONLY_NOT_RATIFIED	1011	SLURP		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5794	Весь вміст файла має потрапити як дані D7 через явний зовнішній read-result.				ні	ні
+10111011000	RESEARCH_ONLY_NOT_RATIFIED	1011	SPEAK		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5810	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111011001	RESEARCH_ONLY_NOT_RATIFIED	1011	ADD-EDGE		історичний-консолідований-донор	3	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:584	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111011010	RESEARCH_ONLY_NOT_RATIFIED	1011	STARTREAD		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5878	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111011011	RESEARCH_ONLY_NOT_RATIFIED	1011	STEM-UK		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5895	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111011100	RESEARCH_ONLY_NOT_RATIFIED	1011	STR		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5912	Проєктування кількох значень з'єднує символьні подання в порядку аргументів.				ні	ні
+10111011101	RESEARCH_ONLY_NOT_RATIFIED	1011	STRING->CODEPOINT		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5928	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111011110	RESEARCH_ONLY_NOT_RATIFIED	1011	STRING?		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5982	Кваліфікований символьний носій розпізнається без перетворення тексту на code.				ні	ні
+10111100000	RESEARCH_ONLY_NOT_RATIFIED	1011	SUBGRAPH-OF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5998	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111100001	RESEARCH_ONLY_NOT_RATIFIED	1011	SYMBOL		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6015	Створювати символ із валідного D7 написання з визначеною normalisation policy.				ні	ні
+10111100010	RESEARCH_ONLY_NOT_RATIFIED	1011	TABLESPACE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6120	Встановити різницю між кількістю записів та фізичною місткістю hash table в первинному документі.				ні	ні
+10111100011	RESEARCH_ONLY_NOT_RATIFIED	1011	TEMPUS-FUGIT		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6153	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111100100	RESEARCH_ONLY_NOT_RATIFIED	1011	TIME-MS		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6283	Монотонне значення часу допускається лише як явно типізоване зовнішнє спостереження.				ні	ні
+10111100101	RESEARCH_ONLY_NOT_RATIFIED	1011	ADVANCE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:630	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111100110	RESEARCH_ONLY_NOT_RATIFIED	1011	TITHI-OF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6318	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111100111	RESEARCH_ONLY_NOT_RATIFIED	1011	TOKENIZE-UK		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6335	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111101000	RESEARCH_ONLY_NOT_RATIFIED	1011	TRACE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6369	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111101001	RESEARCH_ONLY_NOT_RATIFIED	1011	TRACESET		історичний-консолідований-донор	3	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6386	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111101010	RESEARCH_ONLY_NOT_RATIFIED	1011	TRANSFORMER		історичний-консолідований-донор	3	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6403	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111101011	RESEARCH_ONLY_NOT_RATIFIED	1011	TRANSLIT-LATYNKA		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6420	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111101100	RESEARCH_ONLY_NOT_RATIFIED	1011	TRUE?		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6437	Перевірка саме кваліфікованого біта D1:YES, а не будь-якої truthy форми.				ні	ні
+10111101101	RESEARCH_ONLY_NOT_RATIFIED	1011	UCI-PARSE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6453	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111101110	RESEARCH_ONLY_NOT_RATIFIED	1011	UNCOMMON		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6470	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111101111	RESEARCH_ONLY_NOT_RATIFIED	1011	UNCOUNT		історичний-консолідований-донор	1	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6487	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111110000	RESEARCH_ONLY_NOT_RATIFIED	1011	UNPACK		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6562	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111110001	RESEARCH_ONLY_NOT_RATIFIED	1011	UNSPECIAL		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6579	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111110010	RESEARCH_ONLY_NOT_RATIFIED	1011	UNTRACE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6596	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111110011	RESEARCH_ONLY_NOT_RATIFIED	1011	UNTRACESET		історичний-консолідований-донор	3	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6613	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111110100	RESEARCH_ONLY_NOT_RATIFIED	1011	VEC		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6752	Перетворення послідовності у вектор зберігає порядок і кожен елемент.				ні	ні
+10111110101	RESEARCH_ONLY_NOT_RATIFIED	1011	VRDDHI-OF		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6842	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111110110	RESEARCH_ONLY_NOT_RATIFIED	1011	WHOPPER		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6877	Встановити порядок wrapper навколо комбінованого методу Flavors, зокрема передавання управління наступному методу.				ні	ні
+10111110111	RESEARCH_ONLY_NOT_RATIFIED	1011	WORD-EMBEDDING		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6895	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111111000	RESEARCH_ONLY_NOT_RATIFIED	1011	ALPHA-BETA-SEARCH		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:721	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111111001	RESEARCH_ONLY_NOT_RATIFIED	1011	APVAL		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:788	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111111010	RESEARCH_ONLY_NOT_RATIFIED	1011	ARRAY		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:805	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111111011	RESEARCH_ONLY_NOT_RATIFIED	1011	ASPECT-ANGLE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:822	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111111100	RESEARCH_ONLY_NOT_RATIFIED	1011	ATTRIB		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:889	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111111101	RESEARCH_ONLY_NOT_RATIFIED	1011	AYANAMSA		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:906	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+10111111110	RESEARCH_ONLY_NOT_RATIFIED	1011	BACKQUANTIZE		історичний-консолідований-донор	2	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:923	Заявлена власна функція splice-expansion: спершу знайти первинне джерело точного написання і фазу розгортання.				ні	ні
+10111111111	RESEARCH_ONLY_NOT_RATIFIED	1011	BINDINGS		історичний-консолідований-донор	0	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:956	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000000000	RESEARCH_ONLY_NOT_RATIFIED	1100	FUZZY-TITLE-MATCH		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1193	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000000010	RESEARCH_ONLY_NOT_RATIFIED	1100	GRAPH-LINK-SEARCH		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1212	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000000011	RESEARCH_ONLY_NOT_RATIFIED	1100	SEARCH-API-WRAPPER		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1231	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000000100	RESEARCH_ONLY_NOT_RATIFIED	1100	SEARCH-WEB-ENDPOINT		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1250	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000000110	RESEARCH_ONLY_NOT_RATIFIED	1100	PENDULUM-PHYSICS-PIPELINE		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1326	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000000111	RESEARCH_ONLY_NOT_RATIFIED	1100	EXACT-RATIONAL-PHYSICS-CARRIER		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1343	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000001000	RESEARCH_ONLY_NOT_RATIFIED	1100	BOUNDED-PATH-SEARCH		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1360	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000001010	RESEARCH_ONLY_NOT_RATIFIED	1100	GEOMETRIC-COORDINATE-TRANSFORM		історичні-черги-д10	3	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1377	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000001011	RESEARCH_ONLY_NOT_RATIFIED	1100	CALLSIGN-NORMALIZATION		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1394	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000001100	RESEARCH_ONLY_NOT_RATIFIED	1100	POWER-RANGE-CLASSIFICATION		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1411	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000001110	RESEARCH_ONLY_NOT_RATIFIED	1100	ASTROLOGICAL-CHART-DERIVATION		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1428	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000001111	RESEARCH_ONLY_NOT_RATIFIED	1100	SPEAKER-SEGMENTATION-AND-CLUSTERING		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1445	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000010001	RESEARCH_ONLY_NOT_RATIFIED	1100	TIME-LONGITUDE-POLAR-PROJECTION		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1462	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000010010	RESEARCH_ONLY_NOT_RATIFIED	1100	RATIONAL-TO-MASK-AND-BACK		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1479	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000010011	RESEARCH_ONLY_NOT_RATIFIED	1100	BOUNDED-AUTHORITY-RECIPROCITY		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1496	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000010101	RESEARCH_ONLY_NOT_RATIFIED	1100	MASTERSCOPE-CALL-RELATION		історичні-черги-д10	2	knowledge/d10-historical-candidate-coordinate-queue-v1.json:802	Повернути стабільне відношення викликів із синтаксичного графа з правильним розрізненням зв'язаних та вільних змінних.				ні	ні
+11000010110	RESEARCH_ONLY_NOT_RATIFIED	1100	ALPHALESSP		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3053	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000010111	RESEARCH_ONLY_NOT_RATIFIED	1100	ARRAYCALL		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3077	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000011001	RESEARCH_ONLY_NOT_RATIFIED	1100	ASCII		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3101	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000011010	RESEARCH_ONLY_NOT_RATIFIED	1100	BIGP		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3125	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000011011	RESEARCH_ONLY_NOT_RATIFIED	1100	BROADCAST-STREAM		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3149	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000011101	RESEARCH_ONLY_NOT_RATIFIED	1100	CATENATE		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3197	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000011110	RESEARCH_ONLY_NOT_RATIFIED	1100	CONCATENATED-STREAM		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3269	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000100000	RESEARCH_ONLY_NOT_RATIFIED	1100	DEBUG		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3341	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000100001	RESEARCH_ONLY_NOT_RATIFIED	1100	DEFN		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3389	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000100010	RESEARCH_ONLY_NOT_RATIFIED	1100	DUMPARRAYS		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3437	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000100100	RESEARCH_ONLY_NOT_RATIFIED	1100	ECHO-STREAM		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3461	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000100101	RESEARCH_ONLY_NOT_RATIFIED	1100	FIX		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3725	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000100110	RESEARCH_ONLY_NOT_RATIFIED	1100	GE		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3797	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000101000	RESEARCH_ONLY_NOT_RATIFIED	1100	GET_PNAME		історичні-черги-д10	1	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3821	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000101001	RESEARCH_ONLY_NOT_RATIFIED	1100	GETCHAR		історичні-черги-д10	1	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3845	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000101010	RESEARCH_ONLY_NOT_RATIFIED	1100	GETCHARN		історичні-черги-д10	1	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3869	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000101100	RESEARCH_ONLY_NOT_RATIFIED	1100	GT		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3893	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000101101	RESEARCH_ONLY_NOT_RATIFIED	1100	LE		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3989	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000101110	RESEARCH_ONLY_NOT_RATIFIED	1100	LOADARRAYS		історичні-черги-д10	4	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4061	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000110000	RESEARCH_ONLY_NOT_RATIFIED	1100	LSUBRCALL		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4133	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000110001	RESEARCH_ONLY_NOT_RATIFIED	1100	LT		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4157	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000110011	RESEARCH_ONLY_NOT_RATIFIED	1100	READ-MANY		історичні-черги-д10	1	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4709	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000110100	RESEARCH_ONLY_NOT_RATIFIED	1100	SAMEPNAMEP		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4781	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000110101	RESEARCH_ONLY_NOT_RATIFIED	1100	SET!		історичні-черги-д10	3	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4805	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000110111	RESEARCH_ONLY_NOT_RATIFIED	1100	SIGNP		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4829	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000111000	RESEARCH_ONLY_NOT_RATIFIED	1100	SPIT		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4877	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000111001	RESEARCH_ONLY_NOT_RATIFIED	1100	STREAM		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4901	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000111011	RESEARCH_ONLY_NOT_RATIFIED	1100	STREAM-ERROR		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4949	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000111100	RESEARCH_ONLY_NOT_RATIFIED	1100	STRING-STREAM		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5045	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000111101	RESEARCH_ONLY_NOT_RATIFIED	1100	STRINGLENGTH		історичні-черги-д10	1	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5069	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11000111111	RESEARCH_ONLY_NOT_RATIFIED	1100	SUBRCALL		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5093	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001000000	RESEARCH_ONLY_NOT_RATIFIED	1100	SUBSTR		історичні-черги-д10	3	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5117	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001000010	RESEARCH_ONLY_NOT_RATIFIED	1100	SYNONYM-STREAM		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5141	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001000011	RESEARCH_ONLY_NOT_RATIFIED	1100	SYNONYM-STREAM-SYMBOL		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5165	Повернути символ, що позначає динамічну змінну-ціль у synonym-stream; це не поточний прив'язаний потік.				ні	ні
+11001000100	RESEARCH_ONLY_NOT_RATIFIED	1100	TWO-WAY-STREAM		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5237	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001000110	RESEARCH_ONLY_NOT_RATIFIED	1100	UNQUOTE		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5309	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001000111	RESEARCH_ONLY_NOT_RATIFIED	1100	UNREAD-CHAR		історичні-черги-д10	1	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5333	Повернути щойно прочитаний символ назад у той самий вхідний потік; наступне читання того ж потоку мусить отримати його.				ні	ні
+11001001000	RESEARCH_ONLY_NOT_RATIFIED	1100	WITH-INPUT-FROM-STRING		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5381	Створити обмежену лексичним обсягом вхідну символьну стрічку з D7 рядка для reader-процедури.				ні	ні
+11001001010	RESEARCH_ONLY_NOT_RATIFIED	1100	WITH-OPEN-STREAM		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5405	Виконати Lisp-тіло з наданим відкритим потоком та закрити ресурс при будь-якому виході з динамічного контексту.				ні	ні
+11001001011	RESEARCH_ONLY_NOT_RATIFIED	1100	WITH-OUTPUT-TO-STRING		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5429	Зібрати записані всередині області дії D7 символи в результатний рядок, не пишучи в host stdout.				ні	ні
+11001001100	RESEARCH_ONLY_NOT_RATIFIED	1100	WRITE-CHAR		історичні-черги-д10	4	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5453	Записати один D7-символ у відкритий записуваний потік без зміни його тотожності як даних.				ні	ні
+11001001110	RESEARCH_ONLY_NOT_RATIFIED	1100	WRITE-LINE		історичні-черги-д10	4	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5477	Записати послідовність символів і один визначений термінатор рядка в потік.				ні	ні
+11001001111	RESEARCH_ONLY_NOT_RATIFIED	1100	Y-OR-N-P		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5525	Перетворити дозволену коротку інтерактивну відповідь на точний D1 PredicateBit за окремою граматикою yes/no.				ні	ні
+11001010001	RESEARCH_ONLY_NOT_RATIFIED	1100	YES-OR-NO-P		історичні-черги-д10	2	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5549	Перевірити повнословну інтерактивну yes/no відповідь, явно відмінну від короткої y/n граматики.				ні	ні
+11001010010	RESEARCH_ONLY_NOT_RATIFIED	1100	MODULE-NAME		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:103	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001010011	RESEARCH_ONLY_NOT_RATIFIED	1100	CLAUSES		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:104	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001010101	RESEARCH_ONLY_NOT_RATIFIED	1100	ACCUMULATED		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:110	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001010110	RESEARCH_ONLY_NOT_RATIFIED	1100	TEXT		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:114	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001010111	RESEARCH_ONLY_NOT_RATIFIED	1100	CONNECTION		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:119	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001011001	RESEARCH_ONLY_NOT_RATIFIED	1100	DECISION		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:121	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001011010	RESEARCH_ONLY_NOT_RATIFIED	1100	ITEM		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:125	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001011011	RESEARCH_ONLY_NOT_RATIFIED	1100	HEAD		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:127	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001011101	RESEARCH_ONLY_NOT_RATIFIED	1100	UNKNOWN		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:141	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001011110	RESEARCH_ONLY_NOT_RATIFIED	1100	BECAUSE		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:142	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001100000	RESEARCH_ONLY_NOT_RATIFIED	1100	NO-PROOF-FOUND-FOR		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:143	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001100001	RESEARCH_ONLY_NOT_RATIFIED	1100	OUTCOME		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:144	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001100010	RESEARCH_ONLY_NOT_RATIFIED	1100	VALUE		історичні-черги-д10	1	knowledge/d10-proposal-ledger-symbolic-v3.tsv:146	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001100100	RESEARCH_ONLY_NOT_RATIFIED	1100	BOUND		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:148	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001100101	RESEARCH_ONLY_NOT_RATIFIED	1100	BLOCKED		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:150	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001100110	RESEARCH_ONLY_NOT_RATIFIED	1100	DISPUTED		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:153	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001101000	RESEARCH_ONLY_NOT_RATIFIED	1100	BOTH-SIDES-HAVE-EVIDENCE		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:155	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001101001	RESEARCH_ONLY_NOT_RATIFIED	1100	INVALID		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:157	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001101010	RESEARCH_ONLY_NOT_RATIFIED	1100	PAYLOAD		історичні-черги-д10	4	knowledge/d10-proposal-ledger-symbolic-v3.tsv:160	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001101100	RESEARCH_ONLY_NOT_RATIFIED	1100	EVENT		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:169	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001101101	RESEARCH_ONLY_NOT_RATIFIED	1100	FACTS		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:17	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001101110	RESEARCH_ONLY_NOT_RATIFIED	1100	GOAL		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:179	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001110000	RESEARCH_ONLY_NOT_RATIFIED	1100	CURRENT-DEPTH		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:198	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001110001	RESEARCH_ONLY_NOT_RATIFIED	1100	KNOWLEDGE		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:205	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001110011	RESEARCH_ONLY_NOT_RATIFIED	1100	ACC		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:209	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001110100	RESEARCH_ONLY_NOT_RATIFIED	1100	ARGS		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:212	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001110101	RESEARCH_ONLY_NOT_RATIFIED	1100	ENTRIES		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:215	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001110111	RESEARCH_ONLY_NOT_RATIFIED	1100	ITEMS		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:217	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001111000	RESEARCH_ONLY_NOT_RATIFIED	1100	TCS		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:253	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001111001	RESEARCH_ONLY_NOT_RATIFIED	1100	WITH-REPLY		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:264	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001111011	RESEARCH_ONLY_NOT_RATIFIED	1100	TURN		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:265	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001111100	RESEARCH_ONLY_NOT_RATIFIED	1100	FORMS		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:28	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001111101	RESEARCH_ONLY_NOT_RATIFIED	1100	MODULE-JOURNAL-EVENTS-ONTO		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:92	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+11001111111	RESEARCH_ONLY_NOT_RATIFIED	1100	JOURNAL		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:93	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+	ВЖЕ_НИЖЧИЙ_ДОМЕН	немає	зворот-до	зворот-до	еквівалент-або-заміна	2		ЗАКОН_НЕ_ДОВЕДЕНО	D5	10101	REVERSE-ONTO	ні	ні
+	ВЖЕ_НИЖЧИЙ_ДОМЕН	немає	спарувати	спарувати	еквівалент-або-заміна	2		ЗАКОН_НЕ_ДОВЕДЕНО	D5	11110	PAIRLIS	ні	ні
+	ВЖЕ_НИЖЧИЙ_ДОМЕН	немає	форма-посилається-на-ім'я?	форма-посилається-на-ім'я?	еквівалент-або-заміна	2		ЗАКОН_НЕ_ДОВЕДЕНО	D10	0101100110	MY-FORM-REFERENCES-NAME?	ні	ні
+	ВЖЕ_НИЖЧИЙ_ДОМЕН	немає	MEMBER?		еквівалент-або-заміна	2		MEMBER tail нормалізується до exact D1 predicate.	D5	11101	MEMBER	ні	ні
+	ВЖЕ_НИЖЧИЙ_ДОМЕН	немає	not?		еквівалент-або-заміна	2		ЗАКОН_НЕ_ДОВЕДЕНО	D4	0100	NOT	ні	ні
+	ВЖЕ_НИЖЧИЙ_ДОМЕН	немає	null?		еквівалент-або-заміна	2		ЗАКОН_НЕ_ДОВЕДЕНО	D4	0101	NULL	ні	ні
+	ЗАМІНЕНИЙ_D9	немає	NUMBER->STRING-ONTO		еквівалент-або-заміна	2		Приєднати D7 представлення кваліфікованого числа до накопичувача.	D9	110111001	NUMBER-STRING	ні	ні
+	ВЖЕ_НИЖЧИЙ_ДОМЕН	немає	string<?		еквівалент-або-заміна	2		ЗАКОН_НЕ_ДОВЕДЕНО	D8	10110001	STRING<	ні	ні
