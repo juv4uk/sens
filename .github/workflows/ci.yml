@@ -154,6 +154,7 @@ jobs:
           set -euo pipefail
           # Чинний SENS CLI: не підміняємо обчислення друком ефектів.
           cargo test --locked -p sens-cli --test cli український_скрипт_відбирає_саме_запитаний_рівень -- --exact --nocapture
+          cargo test --locked -p sens-cli --test cli український_лінтер_повертає_точні_результати_без_незвязаних_d1 -- --exact --nocapture
           # Реальне SENS виконання українських D1/D3 правил:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
           cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
