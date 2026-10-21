@@ -1,7 +1,7 @@
 //! Живі українські D3/D4 програми: виконання, а не підрахунок назв чи Python-oracle.
 //! Обидва вихідні Lisp є власними композиціями ратифікованих CAR/CDR/CONS.
 //! Позитив і адресна помилка мутації перевіряються в справжній SENS-сесії.
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_program, Session};
 
 fn execute_with_negative(
     source_name: &str,
@@ -14,8 +14,9 @@ fn execute_with_negative(
         1,
         "test_id=ukr-four-list layer=fixture source={source_name} expected=unique-mutation-site"
     );
+    // D3/D4 та DEFINE/FUNCTION вже є в чинному SENS; повний історичний
+    // Core4 не потрібен для цих самостійних виконуваних програм.
     let mut session = Session::default();
-    load_core_library(&mut session).expect("load SENS Core4");
     let expected = eval_program("(атом? (як-є ()))", &mut session)
         .expect("native D1:так").value;
     let actual = eval_program(source, &mut session)
@@ -31,7 +32,6 @@ fn execute_with_negative(
     // Негатив запускається іншою реальною SENS-сесією, не Rust-інтерпретатором.
     let mutant = source.replacen(original, changed, 1);
     let mut negative_session = Session::default();
-    load_core_library(&mut negative_session).expect("load SENS Core4 for negative");
     match eval_program(&mutant, &mut negative_session) {
         Ok(value) => assert_ne!(
             value.value, expected,
