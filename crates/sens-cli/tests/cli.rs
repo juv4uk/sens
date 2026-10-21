@@ -490,6 +490,46 @@ fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
     let _ = std::fs::remove_dir_all(&dir);
 }
 
+/// Реальний фізичний T5M, який повертає пару. Неповний кодер ВИХОДУ
+/// не має перетворювати успішне виконання SENS на штучну помилку.
+#[cfg(feature = "zig-transport")]
+#[test]
+fn t5m_physical_pair_preserves_sens_cons_result() {
+    use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
+    let make = |width: usize, bits: u64| {
+        ExactT5Word::new(
+            width,
+            (0..width).rev().map(|shift| ((bits >> shift) & 1) as u8).collect(),
+        ).expect("ratified exact word")
+    };
+    // (сполучити (як-є ()) (як-є ())) має D3 CONS 111, QUOTE 001,
+    // NIL 000 та структурні D2 OPEN=10 / CLOSE=01.
+    let words = vec![
+        make(2, 0b10), make(3, 0b111),
+        make(2, 0b10), make(3, 0b001), make(3, 0), make(2, 0b01),
+        make(2, 0b10), make(3, 0b001), make(3, 0), make(2, 0b01),
+        make(2, 0b01),
+    ];
+    let bytes = encode_t5_exact_words(&words).expect("Zig T5M physical");
+    let root = std::env::temp_dir().join(format!(
+        "sens-physical-list-pair-{}", std::process::id()
+    ));
+    std::fs::create_dir_all(&root).expect("isolated files");
+    let lisp = root.join("список.lisp");
+    let physical = root.join("список.sens");
+    std::fs::write(&lisp, "(сполучити (як-є ()) (як-є ()))\\n")
+        .expect("Lisp source");
+    std::fs::write(&physical, bytes).expect("physical SENS");
+    let output = sens()
+        .args(["--t5m-pair", lisp.to_str().unwrap(), physical.to_str().unwrap()])
+        .output()
+        .expect("live physical SENS pair");
+    let _ = std::fs::remove_dir_all(root);
+    assert!(output.status.success(),
+        "SENS physical CONS failed: {}", String::from_utf8_lossy(&output.stderr));
+    assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "(())");
+}
+
 #[test]
 fn t5m_file_mode_executes_the_changed_ukrainian_source_through_the_physical_route() {
     let path = std::env::temp_dir().join(format!("sens-cli-t5m-file-{}.lisp", std::process::id()));
