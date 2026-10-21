@@ -750,6 +750,7 @@ pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
 /// обов'язковий до SENS D2 та виконання. Однакова ширина НЕ є доказом домену.
 /// На відміну від --t5m-file, виконується саме наданий фізичний носій.
 #[cfg(feature = "zig-transport")]
+#[cfg(test)]
 pub(crate) fn eval_t5m_paired_file(source: &str, physical: &[u8]) -> Result<sens::EvalResult, String> {
     eval_t5m_paired_file_with_bindings(source, physical, &[])
 }

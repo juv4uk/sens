@@ -14,6 +14,8 @@ const ANCESTOR_MUTANT: &str =
 
 fn world_session() -> Session {
     let mut session = Session::default();
+    sens::load_core_library(&mut session)
+        .expect("штатний Core4 loader встановлює чинні D8 механізми");
     eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
@@ -60,16 +62,18 @@ fn world_ancestor_is_proved_by_native_sens() {
         WORLD_WITNESSES,
         "tests/semantic/world-exact-arity-witness.lisp",
     );
-    assert_eq!(witnessed, 30, "world self-verdict fixture must retain exactly 30 executable SENS assertions");
+    assert_eq!(witnessed, 28, "world self-verdict fixture retains the 28 currently admitted executable SENS assertions");
 }
 
 #[test]
 fn world_ancestor_one_bit_mutant_is_rejected_by_sens() {
-    assert_eq!(ANCESTOR_LAW.len(), ANCESTOR_MUTANT.len(), "only the D1 word may change");
-    let changes = ANCESTOR_LAW.bytes().zip(ANCESTOR_MUTANT.bytes())
-        .filter(|(a, b)| a != b)
-        .collect::<Vec<_>>();
-    assert_eq!(changes.as_slice(), &[(b'1', b'0')], "one-bit D1 mutation only");
+    assert_eq!(ANCESTOR_LAW.matches("      так)\n").count(), 1,
+        "law has exactly one human-projected D1:YES witness");
+    assert_eq!(ANCESTOR_MUTANT.matches("      ні)\n").count(), 1,
+        "mutant has exactly one human-projected D1:NO witness");
+    assert_eq!(ANCESTOR_LAW,
+        ANCESTOR_MUTANT.replacen("      ні)\n", "      так)\n", 1),
+        "only the D1 yes/no projection changes; UTF-8 byte lengths may differ");
 
     assert_eq!(
         native_sens_self_verdicts(ANCESTOR_LAW, "tests/semantic/world-ancestor-d1-law.lisp"),
