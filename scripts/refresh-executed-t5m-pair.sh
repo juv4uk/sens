@@ -8,6 +8,8 @@ if (( $# < 2 )); then
 fi
 source_file="$1"
 binary="$2"
+# Бінарний T5M-аудитор лежить поряд із чинним SENS CLI, а не в Python.
+reader="$(dirname "$binary")/sens-trit"
 shift 2
 binding_args=("$@")
 if [[ "$source_file" != *.lisp || "$source_file" == /* || "$source_file" == ../* || "$source_file" == */../* ]]; then
@@ -23,7 +25,7 @@ while (( $# )); do
 done
 root="$(git rev-parse --show-toplevel)"
 cd "$root"
-if [[ ! -f "$source_file" || -L "$source_file" || ! -x "$binary" ]]; then
+if [[ ! -f "$source_file" || -L "$source_file" || ! -x "$binary" || ! -x "$reader" ]]; then
   echo 'ПОМИЛКА: джерело або чинний виконуваний SENS недоступні' >&2
   exit 2
 fi
@@ -66,6 +68,13 @@ PY
 fi
 if [[ ! -s "$pair" || ! -s "$view" || -L "$pair" || -L "$view" ]]; then
   echo 'ПОМИЛКА: немає обох звичайних файлів свіжої фізичної пари' >&2
+  exit 2
+fi
+# Без справжнього Zig decode/encode і точного same-stem бітового перегляду
+# фізичний носій не може бути опублікований навіть при успішному eval.
+if ! timeout 45s "$reader" verify-view "$pair" >"$dir/inverse.stdout" 2>"$dir/inverse.stderr"; then
+  cat "$dir/inverse.stderr" >&2
+  echo "ПОМИЛКА: T5M_REFRESH_VIEW_ROUNDTRIP_FAILED source=$source_file; пару не змінено" >&2
   exit 2
 fi
 # Парний вхід обов'язковий: Zig звіряє саме джерело з фізичним T5M,
