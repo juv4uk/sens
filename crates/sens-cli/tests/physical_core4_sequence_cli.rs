@@ -294,7 +294,6 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-swap-ends-five",
         "замінити-третій-в-четвірці",
         "поміняти-другий-і-третій",
-        "list-swap-ends-five",
         "list-swap-inner-five",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
