@@ -169,8 +169,8 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         # повертає цитовані дані; старі SID8-рядки більше не є контрактом.
         self.assertEqual(inventory.count("(визначити інвентар-укр"), 1)
         self.assertIn("(функція ()", inventory)
-        self.assertIn("(як-є (uk-inventory", inventory)
-        self.assertIn("(визначити функція за-умовою тотожне? як-є перше решта список)", inventory)
+        self.assertIn("(сполучити (як-є uk-inventory)", inventory)
+        self.assertIn("(як-є (визначити функція за-умовою тотожне? як-є перше решта список))", inventory)
         self.assertIn("(інвентар-укр)", inventory)
         self.assertNotIn("(визначити uk-inventory", inventory)
         self.assertNotIn("(current-projection ukr)", inventory)
