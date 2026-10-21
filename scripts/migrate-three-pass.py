@@ -858,9 +858,16 @@ def core4_d9_callable_rows():
     """
     from domain_tables import read_domain_table
 
-    core4_path = REPO_ROOT / "lib" / "core4.lisp"
-    source = strip_comments(core4_path.read_text(encoding="utf-8"))
-    forms = Parser(tokenize(source)).parse_program()
+    # Реалізації D9-слотів живуть не лише в core4: міркувати — у lib/reason.lisp.
+    # Механізм викликаності мусить бачити всі завантажувані модулі ядра,
+    # інакше наявна реалізація помилково вважається відсутньою.
+    core4_paths = [REPO_ROOT / "lib" / "core4.lisp", REPO_ROOT / "lib" / "reason.lisp"]
+    forms = []
+    for core4_path in core4_paths:
+        if not core4_path.is_file():
+            continue
+        source = strip_comments(core4_path.read_text(encoding="utf-8"))
+        forms.extend(Parser(tokenize(source)).parse_program())
     callable_names = set()
     aliases = []
     define_heads = {"00001001", "0011", "define", "def", "визначити"}
