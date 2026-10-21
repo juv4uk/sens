@@ -138,3 +138,38 @@ fn world_module_unknown_name_is_rejected_by_sens_d1() {
     assert_eq!(result.value.to_string(), "0",
         "чужий модуль не успадковує світовий журнал іншого модуля");
 }
+
+const D11_REMOVE_FIRST_LAW: &str =
+    include_str!("../../../tests/semantic/d11-world-remove-first-law.lisp");
+
+#[test]
+fn d11_world_remove_first_native_law_and_mutant() {
+    // Закон виконує сам SENS над чинним lib/world.lisp.
+    assert_eq!(
+        native_sens_self_verdicts(
+            D11_REMOVE_FIRST_LAW,
+            "tests/semantic/d11-world-remove-first-law.lisp",
+        ),
+        5,
+        "test_id=D11-WORLD-REMOVE-FIRST-5"
+    );
+
+    // Однобітне негативне твердження: результат із двома вилученими
+    // входженнями має повернути D1:0, а не успіх.
+    let real = "(як-є (б а в)))";
+    let wrong = "(як-є (б в)))";
+    assert_eq!(D11_REMOVE_FIRST_LAW.matches(real).count(), 1,
+        "test_id=D11-WORLD-REMOVE-FIRST-MUTATION-ANCHOR");
+    let mutated = D11_REMOVE_FIRST_LAW.replacen(real, wrong, 1);
+    let forms = parse_mixed_exact_domain(&mutated)
+        .expect("D11 negative world-law fixture remains valid SENS");
+    let mut session = world_session();
+    let first = eval_parsed_expressions(std::slice::from_ref(&forms[0]), &mut session)
+        .expect("D11 mutated world statement runs in SENS");
+    assert_eq!(
+        first.value.as_predicate_bit(),
+        Some(false),
+        "test_id=D11-WORLD-REMOVE-FIRST-MUTANT layer=SENS expected=D1:0 actual={:?}",
+        first.value,
+    );
+}
