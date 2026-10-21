@@ -503,7 +503,7 @@ class SterileZigCorridorTests(unittest.TestCase):
 
         replacements = (
             (
-                "return zig_transport::decode_t5_words(bytes);",
+                "return zig_transport::decode_t5_exact_words(bytes)?",
                 "return sens::decode_ternary_words(bytes).map_err(|e| format!(\"{e:?}\"));",
             ),
             (
@@ -515,7 +515,7 @@ class SterileZigCorridorTests(unittest.TestCase):
                 "let words = sens::decode_ternary_words(bytes).unwrap();",
             ),
             (
-                "sens::parse_canonical_word_sequence(&words)",
+                "sens::PhysicalT5Program::from_exact_domain_words(&words)",
                 "sens::parse_canonical_binary(\"not exact words\")",
             ),
             (
@@ -714,11 +714,11 @@ class SterileZigCorridorTests(unittest.TestCase):
         actual_route = source[start:end]
         mutations = (
             (
-                "zig_transport::decode_t5_words(bytes)?",
+                "zig_transport::decode_t5_exact_words(bytes)?",
                 "sens::decode_ternary_words(bytes).unwrap()",
             ),
             (
-                "sens::PhysicalT5Program::from_exact_words(&words)",
+                "sens::PhysicalT5Program::from_exact_domain_words(&words)",
                 "sens::PhysicalT5Program::decode(bytes).unwrap()",
             ),
             (
@@ -768,7 +768,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         blocked = module["CorridorBlocked"]
         source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
         check(source)  # Positive: the live production Zig return exists.
-        live = "return zig_transport::decode_t5_words(bytes);"
+        live = "return zig_transport::decode_t5_exact_words(bytes)?"
         self.assertIn(live, source)
         mutant = source.replace(
             live,

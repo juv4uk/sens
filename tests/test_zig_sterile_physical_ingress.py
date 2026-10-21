@@ -14,13 +14,13 @@ BRIDGE = ROOT / "crates/sens-cli/src/zig_transport.rs"
 def check_sterile_ingress(main: str, bridge: str) -> None:
     entry = main.split("fn decode_physical_t5_words(", 1)[1].split("\nfn eval_physical_t5(", 1)[0]
     evaluator = main.split("fn eval_physical_t5(", 1)[1].split("\nfn main()", 1)[0]
-    if ("return zig_transport::decode_t5_words(bytes);" not in entry or
+    if ("return zig_transport::decode_t5_exact_words(bytes)?" not in entry or
             '#[cfg(feature = "zig-transport")]' not in entry or
             "no Rust fallback" not in entry or
             "sens::decode_ternary_words(bytes)" in entry):
         raise ValueError("ZIG_CORRIDOR_BYPASS default physical ingress is not exclusively Zig")
     if ("let words = decode_physical_t5_words(bytes)?;" not in evaluator or
-            "sens::parse_canonical_word_sequence(&words)" not in evaluator or
+            "sens::PhysicalT5Program::from_exact_domain_words(&words)" not in evaluator or
             "Session::bare()" not in evaluator):
         raise ValueError("ZIG_CORRIDOR_BYPASS direct typed words do not reach pure SENS")
     if "sens_zig_t5_decode_be3(" not in bridge or "sens_zig_codec_abi_version()" not in bridge:
@@ -28,7 +28,9 @@ def check_sterile_ingress(main: str, bridge: str) -> None:
     # The four ABI boundaries must enforce exact counts (T5) or bounded
     # positive counts (F3C), not merely call Vec::truncate on a return.
     def function(name: str) -> str:
-        anchor = "pub fn " + name + "("
+        # Anchor at the line start so a mirror string inside a test body
+        # (e.g. .split("pub fn encode_f3(")) is never counted as a definition.
+        anchor = "\npub fn " + name + "("
         if bridge.count(anchor) != 1:
             raise ValueError("ZIG_CORRIDOR_BYPASS missing or duplicate " + name)
         tail = bridge.split(anchor, 1)[1]
@@ -45,15 +47,16 @@ def check_sterile_ingress(main: str, bridge: str) -> None:
             or ".filter(|&n| n <= be3.len())" not in decode
             or "written % 3 != 0" not in decode):
         raise ValueError("ZIG_CORRIDOR_BYPASS T5 decode BE3 length unbounded")
-    if ("let written = checked_f3c_output_len(len, bytes.len(), \"F3C pack\")?;" not in pack
-            or "if written >= t5.len()" not in pack):
+    # The F3C bound is now enforced inline (the checked_f3c_output_len helper was
+    # removed): fail closed on non-positive or overreported length before truncate.
+    if ("if len <= 0 || usize::try_from(len).ok().filter(|&n| n < legacy.len() && n <= bytes.len()).is_none()"
+            not in pack):
         raise ValueError("ZIG_CORRIDOR_BYPASS F3C pack length/size not checked")
-    if 'let written = checked_f3c_output_len(len, output.len(), "F3C unpack")?;' not in unpack:
+    if ("if len <= 0 || usize::try_from(len).ok().filter(|&n| n <= output.len()).is_none()"
+            not in unpack):
         raise ValueError("ZIG_CORRIDOR_BYPASS F3C unpack length not checked")
-    helper = bridge.split("fn checked_f3c_output_len(", 1)
-    if (len(helper) != 2 or "usize::try_from(len)" not in helper[1]
-            or "written == 0 || written > capacity" not in helper[1]):
-        raise ValueError("ZIG_CORRIDOR_BYPASS F3C ABI helper accepts invalid length")
+    if "fn checked_f3c_output_len(" in bridge:
+        raise ValueError("ZIG_CORRIDOR_BYPASS retired F3C helper reintroduced")
     if "sens::parse_canonical_word_sequence" in bridge:
         raise ValueError("ZIG_CORRIDOR_BYPASS Zig gained SENS semantic authority")
 
@@ -68,14 +71,14 @@ class SterileRustSensCorridor(unittest.TestCase):
 
     def test_negative_rust_t5_codec_substituted(self):
         bad = self.main.replace(
-            "return zig_transport::decode_t5_words(bytes);",
+            "return zig_transport::decode_t5_exact_words(bytes)?",
             "return sens::decode_ternary_words(bytes).map_err(|e| format!(\"{e:?}\"));", 1)
         with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
             check_sterile_ingress(bad, self.bridge)
 
     def test_negative_hidden_rust_reference_fallback(self):
         bad = self.main.replace(
-            "return zig_transport::decode_t5_words(bytes);",
+            "return zig_transport::decode_t5_exact_words(bytes)?",
             "return zig_transport::decode_t5_words(bytes).or_else(|_| rust_t5(bytes));", 1)
         with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
             check_sterile_ingress(bad, self.bridge)
@@ -89,28 +92,26 @@ class SterileRustSensCorridor(unittest.TestCase):
 
     def test_negative_f3c_pack_accepts_unbounded_abi_length(self):
         bad = self.bridge.replace(
-            'let written = checked_f3c_output_len(len, bytes.len(), "F3C pack")?;',
-            "let written = len as usize;", 1)
+            "usize::try_from(len).ok().filter(|&n| n < legacy.len() && n <= bytes.len()).is_none()",
+            "usize::try_from(len).ok().filter(|&n| n <= bytes.len()).is_none()", 1)
         with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
             check_sterile_ingress(self.main, bad)
 
     def test_negative_f3c_unpack_accepts_unbounded_abi_length(self):
         bad = self.bridge.replace(
-            'let written = checked_f3c_output_len(len, output.len(), "F3C unpack")?;',
-            "let written = len as usize;", 1)
+            "usize::try_from(len).ok().filter(|&n| n <= output.len()).is_none()",
+            "usize::try_from(len).ok().is_some()", 1)
         with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
             check_sterile_ingress(self.main, bad)
 
-    def test_negative_f3c_helper_accepts_overreported_count(self):
-        bad = self.bridge.replace(
-            "written == 0 || written > capacity",
-            "written == 0", 1)
+    def test_negative_f3c_retired_helper_reintroduced(self):
+        bad = self.bridge + "\nfn checked_f3c_output_len("
         with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
             check_sterile_ingress(self.main, bad)
 
     def test_negative_sens_reader_was_removed(self):
         bad = self.main.replace(
-            "sens::parse_canonical_word_sequence(&words)",
+            "sens::PhysicalT5Program::from_exact_domain_words(&words)",
             "sens::parse_canonical_binary(&surface)", 1)
         with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
             check_sterile_ingress(bad, self.bridge)

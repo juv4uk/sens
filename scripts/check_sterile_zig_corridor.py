@@ -244,7 +244,7 @@ def check_main_t5_ingress(source: str) -> None:
     # Require the real return call on the default-feature ingress path.
     active_zig = re.sub(r"/\*.*?\*/|//[^\n]*", "", zig, flags=re.S)
     if not re.search(
-        r"(?m)^\s*return\s+zig_transport::decode_t5_words\s*\(\s*bytes\s*\)\s*;",
+        r"(?m)^\s*return\s+zig_transport::decode_t5_exact_words\s*\(\s*bytes\s*\)\s*\?",
         active_zig,
     ):
         raise CorridorBlocked("sens main default physical .sens lacks live Zig return")
@@ -255,7 +255,9 @@ def check_main_t5_ingress(source: str) -> None:
     eval_route = _route_between(source, "fn eval_physical_t5(", "\nfn main() {")
     if "decode_physical_t5_words(bytes)?" not in eval_route:
         raise CorridorBlocked("sens main eval bypasses Zig physical ingress")
-    if "sens::parse_canonical_word_sequence(&words)" not in eval_route:
+    # The live SENS admission moved to the exact-domain reader, which parses D2
+    # and admits D1-D10/D24+ identities inside SENS -- never a Rust path.
+    if "sens::PhysicalT5Program::from_exact_domain_words(&words)" not in eval_route:
         raise CorridorBlocked("sens main eval must admit exact words via SENS D2")
     entry = _route_between(source, "fn main() {", "\n#[cfg(test)]")
     if "physical_t5_request" not in entry or "eval_physical_t5" not in entry:
@@ -416,8 +418,10 @@ def check_trit_t5_execution(source: str) -> None:
     if (off not in denied or "no Rust fallback" not in denied
             or "let _ = (bytes, bootstrap_core);" not in denied):
         raise CorridorBlocked("sens-trit no-Zig T5 execution must refuse first")
-    if ("zig_transport::decode_t5_words(bytes)?" not in active
-            or "sens::PhysicalT5Program::from_exact_words(&words)" not in active
+    # The live route moved to the exact D24+ words ingress (Zig restores exact
+    # widths; SENS admits exact domain words) -- still Zig-mediated, never Rust.
+    if ("zig_transport::decode_t5_exact_words(bytes)?" not in active
+            or "sens::PhysicalT5Program::from_exact_domain_words(&words)" not in active
             or "program.execute(&mut session)" not in active):
         raise CorridorBlocked("sens-trit T5 execution bypasses Zig or SENS admission")
     if ("sens::PhysicalT5Program::decode(bytes)" in route
