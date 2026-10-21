@@ -62,6 +62,24 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         self.assertIn("continue", blocked_arm)
         self.assertIn("if (( failed_files > 0 )); then\n  exit 2", runner)
 
+    def test_not_supported_d24_physical_is_counted_not_certified(self):
+        # Це guard звітності shell, не Python-імітація SENS семантики.
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("physical_not_supported=0", runner)
+        self.assertIn(
+            "physical_not_supported=$((physical_not_supported + 1))", runner
+        )
+        self.assertIn(
+            "physical_not_supported=%s release=NOT_CERTIFIED", runner
+        )
+        self.assertIn(
+            "T5M_DOMAIN_SOURCE_RUNTIME_PASS source=$file physical=NOT_SUPPORTED",
+            runner,
+        )
+        self.assertIn("T5M_PHYSICAL_D24_NOT_EXECUTED", runner)
+
     def test_default_ukr_preserves_program_identity_not_source_comments(self):
         with tempfile.TemporaryDirectory(prefix="sens-ukr-t5m-default-") as temp:
             base = Path(temp)
