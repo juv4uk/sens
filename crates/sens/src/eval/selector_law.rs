@@ -178,8 +178,13 @@ mod tests {
         // is CAR applied eight times. Source spelling comes only from the
         // canonical `укр` projection of its exact domain coordinate.
         let identity = identity(10, 0b1000000000);
-        let name = crate::semantic_registry::surface_for_domain_identity(identity, "ukr")
+        let name = crate::semantic_registry::selector_ukr_for_exact(identity)
             .expect("ratified D10 selector has an Ukrainian projection");
+        assert_eq!(
+            crate::semantic_registry::exact_uk_callable_for_source_head(name),
+            Some(identity),
+            "the current Ukrainian D10 spelling must invert to its exact coordinate"
+        );
         let mut nested = "(як-є атом?)".to_owned();
         for _ in 0..8 {
             nested = format!("(сполучити {nested} (як-є ()))");
