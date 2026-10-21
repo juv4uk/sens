@@ -171,6 +171,11 @@ fn t5m_file_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     if position != 1 || args.len() != 3 {
         return Some(Err("usage: sens --t5m-file <ukrainian-source.lisp>"));
     }
+    // Фізичні .sens — це байти T5M, не людський Lisp навіть у режимі
+    // --t5m-file. Не дозволяємо обійти двійковий reader текстовим шляхом.
+    if std::path::Path::new(&args[2]).extension().and_then(|ext| ext.to_str()) != Some("lisp") {
+        return Some(Err("--t5m-file accepts only .lisp sources; run physical .sens through the binary entry point"));
+    }
     Some(Ok(args[2].as_str()))
 }
 
