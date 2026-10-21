@@ -49,6 +49,27 @@ fn package_field_returns_data_and_missing_field_is_d3_empty() {
 }
 
 #[test]
+fn malformed_package_rows_are_skipped_before_d4_caar() {
+    // Справжнє SENS-виконання: атом та складний ключ не є D4 CAAR.
+    let mut s = session();
+    for rows in [
+        "(як-є (пошкоджений (author a)))",
+        "(як-є (() (author a)))",
+        "(як-є (((nested k) wrong) (author a)))",
+    ] {
+        let query = format!(
+            "(отримати-поле-пакета-знань (як-є author) {rows})"
+        );
+        let value = eval(&mut s, &query);
+        assert_eq!(value.to_string(), "(a)", "{query}: {value}");
+    }
+    let missing = eval(&mut s,
+        "(отримати-поле-пакета-знань (як-є missing) (як-є (пошкоджений ((nested k) wrong))))"
+    );
+    assert!(matches!(missing, Value::Nil));
+}
+
+#[test]
 fn ukrainian_clause_validation_is_exact_d1() {
     let mut s = session();
     for (code, expected) in [
