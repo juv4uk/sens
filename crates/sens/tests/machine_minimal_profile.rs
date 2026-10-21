@@ -105,11 +105,11 @@ fn structural_car_profile_has_typed_177_atom_projections_for_every_required_fami
             "(mov-r64-imm64 rax 2)",
         ),
         (
-            "(x86-mov-mem64-r64 (x86-mem64-disp8 (quote rdi) x86-pair-car-offset) (quote rax))",
+            "(x86-mov-mem64-r64 (x86-mem64-disp8 (quote rdi) машинна-пара-зсув-першого) (quote rax))",
             "(mov-mem-disp8-r64 rdi 0 rax)",
         ),
         (
-            "(x86-mov-r64-mem64 (quote rax) (x86-mem64-disp8 (quote rdi) x86-pair-car-offset))",
+            "(x86-mov-r64-mem64 (quote rax) (x86-mem64-disp8 (quote rdi) машинна-пара-зсув-першого))",
             "(mov-r64-mem-disp8 rax rdi 0)",
         ),
         ("(x86-ret)", "(ret)"),

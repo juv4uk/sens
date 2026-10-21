@@ -259,12 +259,12 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
     let native_car = eval_program(
-        "(викликати-допущену-машинну-програму (знизити-складену-пару-до-машинних-форм 2 3) x86-pair-cell-bytes)",
+        "(викликати-допущену-машинну-програму (знизити-складену-пару-до-машинних-форм 2 3) машинна-пара-байти-комірки)",
         &mut session,
     )
     .expect("CONS+CAR lowering must pass through admission before host execution");
     let native_cdr = eval_program(
-        "(викликати-допущену-машинну-програму (машина-знизити-решту-пари-64 2 3) x86-pair-cell-bytes)",
+        "(викликати-допущену-машинну-програму (машина-знизити-решту-пари-64 2 3) машинна-пара-байти-комірки)",
         &mut session,
     )
     .expect("CONS+CDR lowering must pass through admission before host execution");
@@ -300,9 +300,9 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
     )
     .expect("x86 pair layout must parse through the exact-domain machine-source reader");
     for required in [
-        "(0011 x86-pair-cell-bytes 16)",
-        "(0011 x86-pair-car-offset 0)",
-        "(0011 x86-pair-cdr-offset 8)",
+        "(визначити машинна-пара-байти-комірки 16)",
+        "(визначити машинна-пара-зсув-першого 0)",
+        "(визначити машинна-пара-зсув-решти 8)",
         "(target x86-64)",
         "(arena-argument-register rdi)",
         "(lifetime native-call)",
@@ -326,9 +326,9 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
         .expect("pair layout authority must evaluate through the exact-domain machine-source reader");
 
     for (name, expected) in [
-        ("x86-pair-cell-bytes", "16"),
-        ("x86-pair-car-offset", "0"),
-        ("x86-pair-cdr-offset", "8"),
+        ("машинна-пара-байти-комірки", "16"),
+        ("машинна-пара-зсув-першого", "0"),
+        ("машинна-пара-зсув-решти", "8"),
     ] {
         let actual = eval_program(name, &mut session)
             .unwrap_or_else(|error| panic!("{name} must be queryable: {error}"))
@@ -442,17 +442,17 @@ fn lisp_owned_pair_memory_addressing_has_exact_rdi_disp8_bytes() {
     load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
 
     let car_load = eval_program(
-        "(x86-encode-mov-r64-mem-disp8 (quote rax) (quote rdi) x86-pair-car-offset)",
+        "(x86-encode-mov-r64-mem-disp8 (quote rax) (quote rdi) машинна-пара-зсув-першого)",
         &mut session,
     )
     .expect("Lisp encoder must encode CAR's [rdi+0] load");
     let cdr_load = eval_program(
-        "(x86-encode-mov-r64-mem-disp8 (quote rax) (quote rdi) x86-pair-cdr-offset)",
+        "(x86-encode-mov-r64-mem-disp8 (quote rax) (quote rdi) машинна-пара-зсув-решти)",
         &mut session,
     )
     .expect("Lisp encoder must encode CDR's [rdi+8] load");
     let car_store = eval_program(
-        "(x86-encode-mov-mem-disp8-r64 (quote rdi) x86-pair-car-offset (quote rax))",
+        "(x86-encode-mov-mem-disp8-r64 (quote rdi) машинна-пара-зсув-першого (quote rax))",
         &mut session,
     )
     .expect("Lisp encoder must encode CONS's [rdi+0] store");
@@ -481,7 +481,7 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     // Failure-only stage inventory for Contract 11.8 callability diagnosis.
     // These probes report but never turn a failed stage into a passing test.
     for (name, source) in [
-        ("d6-integer-zero", "(ціле? 0)"),
+        ("wire-denominator-zero", "(машина-допуск-знаменник-одиниця? \"0/1\")"),
         ("ge-lower-zero", "(не-менше? 0 -128)"),
         ("ge-normalize-zero", "(тотожне? (не-менше? 0 -128) 1)"),
         ("le-upper-zero", "(не-більше? 0 127)"),
@@ -551,12 +551,12 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     }
 
     let native_car = eval_program(
-        "(native-call-u64-raw (машина-кодувати-допущену-програму (знизити-складену-пару-до-машинних-форм 2 3)) x86-pair-cell-bytes)",
+        "(native-call-u64-raw (машина-кодувати-допущену-програму (знизити-складену-пару-до-машинних-форм 2 3)) машинна-пара-байти-комірки)",
         &mut session,
     )
     .expect("Lisp-owned CONS+CAR forms must materialize through admission before raw host execution");
     let native_cdr = eval_program(
-        "(native-call-u64-raw (машина-кодувати-допущену-програму (машина-знизити-решту-пари-64 2 3)) x86-pair-cell-bytes)",
+        "(native-call-u64-raw (машина-кодувати-допущену-програму (машина-знизити-решту-пари-64 2 3)) машинна-пара-байти-комірки)",
         &mut session,
     )
     .expect("Lisp-owned CONS+CDR forms must materialize through admission before raw host execution");
