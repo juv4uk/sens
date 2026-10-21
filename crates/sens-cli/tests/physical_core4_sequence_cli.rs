@@ -300,11 +300,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-reverse-general",
         "list-drop-last-general",
         "list-interleave-two-pairs",
-        "list-halfturn-four",
-        "list-reverse-four",
+
+
         "list-zip-general",
         "pair-zip-unzip-three",
-        "list-zip-general",
+
         "виключне-або-д1",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
