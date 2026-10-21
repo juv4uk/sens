@@ -302,6 +302,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-reverse-general",
         "list-drop-last-general",
         "list-append-general",
+        "list-collapse-adjacent",
         "list-unique-stable",
         "розділити-до-першого-входження",
         "list-interleave-two-pairs",
@@ -353,6 +354,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-zip-general"
                 | "list-drop-last-general"
                 | "list-append-general"
+                | "list-collapse-adjacent"
                 | "розділити-до-першого-входження"
                 | "list-unique-stable"
                 | "замінити-третій-в-четвірці"
@@ -593,6 +595,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/rotate-four-right",
         "lib/list-reverse-general",
         "lib/list-append-general",
+        "lib/list-collapse-adjacent",
         "lib/pair-zip-unzip-two",
         "lib/list-zip-general",
         "lib/list-chunk-pairs-general",
