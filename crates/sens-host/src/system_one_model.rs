@@ -151,7 +151,7 @@ fn parse_loopback_endpoint(endpoint: &str, span: Span) -> Result<LocalEndpoint, 
             span,
         )
     })?;
-    if port == 0 || path_suffix.is_empty() || path_suffix.contains(['\r', '\n', '#', '?']) {
+    if port == 0 || path_suffix.is_empty() || path_suffix.chars().any(|ch| matches!(ch, '\r' | '\n' | '#' | '?')) {
         return Err(fail(
             ErrorKind::InvalidForm,
             "local model endpoint path or port is not canonical",
@@ -205,10 +205,11 @@ fn post_json(
         )
     })?;
 
-    let mut stream = TcpStream::connect_timeout(
-        &("127.0.0.1".parse().expect("valid loopback address"), endpoint.port).into(),
-        CONNECT_TIMEOUT,
-    )
+    let address = std::net::SocketAddr::new(
+        std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST),
+        endpoint.port,
+    );
+    let mut stream = TcpStream::connect_timeout(&address, CONNECT_TIMEOUT)
     .map_err(|error| {
         fail(
             ErrorKind::InvalidForm,
@@ -238,7 +239,7 @@ fn post_json(
         body.len()
     );
     if let Ok(key) = env::var("SENS_SYSTEM_ONE_API_KEY") {
-        if !key.is_empty() && !key.contains(['\r', '\n']) {
+        if !key.is_empty() && !key.contains('\r') && !key.contains('\n') {
             request.push_str(&format!("Authorization: Bearer {key}\r\n"));
         }
     }
@@ -485,7 +486,7 @@ fn exact_distribution(
     Ok(Value::list(entries))
 }
 
-/// Evaluated capability: (model-choice-distribution-raw endpoint model context instruction criteria).
+/// Evaluated capability: (модельний-розподіл-вибору-сире endpoint model context instruction criteria).
 /// It returns (model-distribution/1 distribution provenance), not accept/defer/invalid.
 pub(crate) fn evaluate_choice_distribution(
     arguments: &[(Value, Span)],
