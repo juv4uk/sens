@@ -485,3 +485,35 @@ fn versioned_translation_corpus_is_data_only_and_contains_all_b4_modes() {
         );
     }
 }
+
+
+#[test]
+fn translation_review_evidence_named_sens_functions_execute_positive_and_negative() {
+    // Перевіряємо реальне виконання виправлених Lisp-функцій через SENS:
+    // огляд обчислюється один раз, доказ додається лише при відхиленні.
+    // Анонімний D5 value-call чи Python-підміна семантики тут не застосовуються.
+    for (proposal, expected) in [
+        (
+            r#"(translation/1 candidate query "текст" (metallic plato))"#,
+            "(query 1 ())",
+        ),
+        (
+            r#"(translation/1 rejected clause "текст" unsupported-translation)"#,
+            "(translator-rejected 0 ())",
+        ),
+    ] {
+        let source = format!(
+            "(визначити пара-огляду \\
+               (переклад-перевірка-з-доказ (як-є corpus) (як-є {proposal}) (як-є ()))) \\
+             (список \\
+               (переклад-перевірка-код (перше пара-огляду)) \\
+               (порожній? (друге пара-огляду)) \\
+               (переклад-допустимий? (перше пара-огляду)))"
+        );
+        assert_eq!(
+            eval_translation(&source),
+            expected,
+            "Реальний SENS повинен зберігати рішення і журнал для {proposal}"
+        );
+    }
+}
