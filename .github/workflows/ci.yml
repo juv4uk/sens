@@ -158,6 +158,8 @@ jobs:
           # Реальне SENS виконання українських D1/D3 правил:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
           cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
+          # Виконання чинного Lisp-читача, зокрема відмов на коротких реченнях.
+          cargo test --locked -p sens --test understand_exact_empty -- --nocapture
           cargo test --locked -p sens --test result_status -- --nocapture
           # Справжній SENS-eval, а не Python: безпечне четверте поле маршруту.
           cargo test --locked -p sens --test island_lowering_ukr_runtime -- --nocapture
