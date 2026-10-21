@@ -145,8 +145,12 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         ci = CI.read_text(encoding="utf-8")
         self.assertIn('SENS_NATIVE_T5M=1 SENS_T5M_OPEN=', ci)
         self.assertIn('run_native_t5m_program', source)
-        self.assertIn('"$binary" --t5m-mint "$file" "$physical"', source)
-        self.assertIn('"$binary" --t5m-pair "$file" "$physical"', source)
+        self.assertIn('mint_flag=--t5m-mint', source)
+        self.assertIn('mint_flag=--t5m-mint-pair', source)
+        self.assertIn('"$binary" "$mint_flag" "$file" "$physical" "${binding_sources[@]}"', source)
+        self.assertIn('"$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}"', source)
+        self.assertLess(source.index('  binding_sources=()'),
+                        source.index('    run_native_t5m_program\n    continue'))
         self.assertIn('"$native_open" open "$physical"', source)
         self.assertIn('"$native_open" verify-view "$physical"', source)
         # Опційний Python-мігратор не може передувати SENS у робочому CI.
