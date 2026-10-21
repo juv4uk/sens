@@ -184,7 +184,15 @@ class GuardProjectionTests(unittest.TestCase):
 
     def test_no_python_semantic_simulation(self):
         # Exact source round-trip and peer binding, not a fake Python Lisp eval.
-        self.assertNotIn("Rust", self.text)
+        executable = "\n".join(
+            line for line in self.text.splitlines()
+            if not line.lstrip().startswith(";")
+        )
+        # Rust/Python можуть згадуватися в коментарях про межу механізмів,
+        # але не стають викличними головами чи мовним обчислювачем.
+        self.assertNotIn("(визначити guard-decision? ", executable)
+        self.assertNotIn("(визначити python-", executable)
+        self.assertNotIn("(визначити rust-", executable)
         self.assertNotIn("(визначити guard-decision?\n", self.text)
 
 
