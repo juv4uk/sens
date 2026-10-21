@@ -10,18 +10,27 @@ fn eval_translation(source: &str) -> String {
     // текст-у-символ; повторне ручне читання лише core.lisp його не встановлює.
     sens::load_core_library(&mut session)
         .expect("штатний Core4 SENS потрібний бібліотеці перекладу");
-    for library in [
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
-        include_str!("../../../lib/forward.lisp"),
-        include_str!("../../../lib/knowledge.lisp"),
-        include_str!("../../../lib/result-status.lisp"),
-        include_str!("../../../lib/translation.lisp"),
+    for (path, library) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
+        ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
+        ("lib/translation.lisp", include_str!("../../../lib/translation.lisp")),
     ] {
-        let forms = parse_mixed_exact_domain(library)
-            .expect("чинний доменний SENS reader");
-        eval_parsed_expressions(&forms, &mut session)
-            .expect("чинна бібліотека виконується SENS");
+        if path == "lib/world.lisp" {
+            // World — чинний власник рішення про допустимість поради.
+            // Його історично ширші кодові голови читає точний reader,
+            // а не Python, host-наслідування чи довільний текстовий alias.
+            sens::eval_pinned_reasoning_source(path, library, &mut session)
+                .expect("чинний SENS World повинен завантажитися");
+        } else {
+            let forms = parse_mixed_exact_domain(library)
+                .expect("чинний доменний SENS reader");
+            eval_parsed_expressions(&forms, &mut session)
+                .expect("чинна бібліотека виконується SENS");
+        }
     }
     eval_parsed_expressions(
         &parse_mixed_exact_domain(source)
@@ -31,6 +40,27 @@ fn eval_translation(source: &str) -> String {
         .unwrap_or_else(|e| panic!("translation evaluation failed: {e}\nsource: {source}"))
         .value
         .to_string()
+}
+
+#[test]
+fn d10_advice_decisions_are_pure_world_derived_sens_functions() {
+    // Відсутню раніше викличність двох ратифікованих D10 функцій
+    // доводить тільки їхнє реальне виконання у SENS.
+    let source = r#"
+        (визначити журнал-до *knowledge-journal*)
+        (визначити одиночне-рішення
+          (отримати-рішення-за-порадою (як-є corpus)
+            (як-є ((human socrates)))))
+        (визначити пакетне-рішення
+          (узагальнене-рішення-за-всіма-порадами (як-є corpus)
+            (як-є (((human socrates))))))
+        (список
+          (перше одиночне-рішення)
+          (перше пакетне-рішення)
+          (однакові? журнал-до *knowledge-journal*))
+    "#;
+    assert_eq!(eval_translation(source), "(accepted accepted 1)",
+               "обидва D10 рішення лише читають immutable World");
 }
 
 #[test]
