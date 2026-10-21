@@ -117,6 +117,32 @@ fn ukrainian_machine_register_shapes_return_exact_d1_and_never_trust_extra_field
     }
 }
 
+// Дійсне SENS-виконання: машина повертає строгі D1:1 і D1:0,
+// навіть коли джерело більше не використовує незв'язані так/ні.
+#[test]
+fn machine_operand_predicates_execute_exact_d1_without_legacy_truth_names() {
+    let mut session = machine_session();
+    for (source, expected) in [
+        ("(машинний-операнд-відхилено? (як-є (rejected machine-operand gpr8 rax)))", true),
+        ("(машинний-операнд-відхилено? (як-є (gpr8 al)))", false),
+        ("(назва-машинного-регістра-8? (як-є al))", true),
+        ("(назва-машинного-регістра-8? (як-є rax))", false),
+        ("(машинний-регістр-8? (як-є (gpr8 al)))", true),
+        ("(машинний-регістр-8? (як-є (gpr8 rax)))", false),
+        ("(машинний-регістр-8? (як-є (gpr8 al extra)))", false),
+        ("(машинний-регістр-8? (як-є ()))", false),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|err| panic!("SENS machine operand evaluation failed for {source}: {err}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "machine D1 law returned unexpected value for {source}: {}",
+            result.value
+        );
+    }
+}
+
 #[test]
 fn typed_registers_and_immediates_project_to_existing_176_forms() {
     let mut session = machine_session();
