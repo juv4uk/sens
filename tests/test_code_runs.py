@@ -42,6 +42,7 @@ def _load(name: str, path: Path):
 
 three_pass = _load("sens_three_pass_for_code_runs", SCRIPTS / "migrate-three-pass.py")
 codec = _load("sens_t5_codec_for_code_runs", SCRIPTS / "sens_t5_codec.py")
+physical_audit = _load("sens_physical_audit_for_code_runs", SCRIPTS / "audit_t5_file_pairs.py")
 
 
 def run_entrypoint(*args: str, timeout: int = 120):
@@ -324,25 +325,32 @@ class CodecRunsTests(unittest.TestCase):
     def test_sens_roundtrips_byte_for_byte(self):
         files = sorted((ROOT / "tests" / "semantic").glob("*.sens"))
         self.assertTrue(files, "немає жодного .sens для перевірки")
-        # Explicit fixture routing: transport is not inferred from payload bytes.
-        t5m_files = {"ukr-d24-existing-functions.sens"}
-        self.assertTrue(t5m_files <= {path.name for path in files},
-                        "втрачено фізичний T5M-свідок")
-        for path in files[:40]:
+        # T5M є типовим чинним носієм; історичний T5 лишається окремим
+        # фактом файлу, а не вгадуванням з назви або значення першого байта.
+        # Цей тест перевіряє фізику; семантику мусить виконати SENS.
+        fixture = ROOT / "tests" / "semantic" / "ukr-d24-existing-functions.sens"
+        self.assertIn(fixture, files, "втрачено фізичний T5M-свідок")
+        selected = sorted(set(files[:40]) | {fixture})
+        for path in selected:
             with self.subTest(sens=path.name):
                 data = path.read_bytes()
-                if path.name in t5m_files:
-                    words = codec.decode_t5m_bytes(data)
-                    view = path.with_suffix("").read_text(encoding="utf-8")
-                    self.assertEqual(words, codec.parse_t5m_words(view),
-                                     f"{path.name}: T5M не відповідає точному bit-view")
-                    restored = codec.encode_t5m_projection(" ".join(words))
-                else:
-                    words = codec.decode_bytes(data)
-                    restored = codec.encode_words(words)
+                view_path = path.with_suffix("")
+                view = view_path.read_bytes() if view_path.is_file() else None
+                bits_path = path.with_suffix(".bits")
+                source_words = (codec.parse_words(bits_path.read_text(encoding="utf-8"))
+                                if bits_path.is_file() else None)
+                identified, words = physical_audit.identify_physical(
+                    data, view=view, source_words=source_words)
                 self.assertTrue(words)
-                self.assertEqual(restored, data,
-                                 f"{path.name}: decode→encode не відтворив байти")
+                self.assertEqual(physical_audit.physical_encode(words, identified), data,
+                                 f"{path.name}: фізичний decode→encode не відтворив байти")
+                if view is not None:
+                    expected = (" ".join(words) + "\n").encode("ascii")
+                    self.assertEqual(view, expected,
+                                     f"{path.name}: супровідний bit-view розійшовся")
+                if path == fixture:
+                    self.assertEqual(identified, "t5m",
+                                     "чинний D24-файл не повинен декодуватися як T5")
 
     def test_t5m_fixture_rejects_out_of_range_byte(self):
         path = ROOT / "tests" / "semantic" / "ukr-d24-existing-functions.sens"
