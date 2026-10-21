@@ -1,4 +1,4 @@
-"""Перевірка CI-маршруту: Lisp — текст, --t5m-file читає лише .sens.
+"""Перевірка CI-маршруту: Lisp — текст, фізичний .sens виконується через окремий SENS-вхід.
 
 Статична перевірка контракту без Python-імітації SENS-eval.
 """
@@ -14,10 +14,10 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         source = RUNNER.read_text(encoding="utf-8")
         self.assertIn('scripts/migrate-three-pass.py "$file"', source)
         self.assertIn('--codec t5m --source-surface укр', source)
-        self.assertIn('--t5m-file "$pair"', source)
-        self.assertNotIn('--t5m-file "$file"', source)
+        self.assertIn('"$binary" "$pair"', source)
+        self.assertNotIn('--t5m-file "$pair"', source)
         self.assertLess(source.index('scripts/migrate-three-pass.py'),
-                        source.index('--t5m-file "$pair"'))
+                        source.index('"$binary" "$pair"'))
 
     def test_fail_closed_without_false_release_success(self):
         source = RUNNER.read_text(encoding="utf-8")
