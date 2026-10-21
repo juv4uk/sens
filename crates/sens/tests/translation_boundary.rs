@@ -31,12 +31,12 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
           (quote (translation/1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
-        (def review (translation-review (quote corpus) proposal))
+        (def review (переклад-перевірка (quote corpus) proposal))
         (list
-          (translation-review-status review)
-          (translation-review-code review)
+          (переклад-перевірка-стан review)
+          (переклад-перевірка-код review)
           (equal? before *knowledge-journal*)
-          (equal? (translation-admission-payload review)
+          (equal? (переклад-допуск-вміст review)
                   (quote ((human socrates)))))
     "#;
     assert_eq!(
@@ -52,9 +52,9 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
           (quote (translation/1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
-        (def review (translation-review (quote corpus) proposal))
+        (def review (переклад-перевірка (quote corpus) proposal))
         (def before-known (module-known? (quote corpus)))
-        (def admission (advise corpus (translation-admission-payload review)))
+        (def admission (advise corpus (переклад-допуск-вміст review)))
         (list
           before-known
           (car admission)
@@ -73,14 +73,14 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
                    "Mercury is hot."
                    (((hot mercury-planet))
                     ((hot mercury-element))))))
-        (def review (translation-review (quote corpus) proposal))
-        (def evidence (translation-evidence-next review (quote ())))
+        (def review (переклад-перевірка (quote corpus) proposal))
+        (def evidence (переклад-доказ-наступний review (quote ())))
         (list
-          (translation-review-status review)
-          (translation-review-code review)
+          (переклад-перевірка-стан review)
+          (переклад-перевірка-код review)
           (length evidence)
           (equal? before *knowledge-journal*)
-          (translation-admittable? review))
+          (переклад-допустимий? review))
     "#;
     assert_eq!(
         eval_translation(source),
@@ -96,14 +96,14 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
           (quote (translation/1 candidate clause
                    "Socrates is human."
                    ((human (var))))))
-        (def review (translation-review (quote corpus) proposal))
-        (def evidence (translation-evidence-next review (quote ())))
+        (def review (переклад-перевірка (quote corpus) proposal))
+        (def evidence (переклад-доказ-наступний review (quote ())))
         (list
-          (translation-review-status review)
-          (translation-review-code review)
+          (переклад-перевірка-стан review)
+          (переклад-перевірка-код review)
           (length evidence)
           (equal? before *knowledge-journal*)
-          (translation-admission-payload review))
+          (переклад-допуск-вміст review))
     "#;
     assert_eq!(
         eval_translation(source),
@@ -119,14 +119,14 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
           (quote (translation/1 rejected clause
                    "Colorless green ideas sleep furiously."
                    unsupported-translation)))
-        (def review (translation-review (quote corpus) proposal))
-        (def evidence (translation-evidence-next review (quote ())))
+        (def review (переклад-перевірка (quote corpus) proposal))
+        (def evidence (переклад-доказ-наступний review (quote ())))
         (list
-          (translation-review-status review)
-          (translation-review-code review)
+          (переклад-перевірка-стан review)
+          (переклад-перевірка-код review)
           (length evidence)
           (equal? before *knowledge-journal*)
-          (translation-admission-payload review))
+          (переклад-допуск-вміст review))
     "#;
     assert_eq!(
         eval_translation(source),
@@ -143,12 +143,12 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
           (quote (translation/1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
-        (def review (translation-review (quote corpus) proposal))
+        (def review (переклад-перевірка (quote corpus) proposal))
         (list
-          (translation-review-status review)
-          (translation-review-code review)
+          (переклад-перевірка-стан review)
+          (переклад-перевірка-код review)
           (equal? before *knowledge-journal*)
-          (translation-admission-payload review))
+          (переклад-допуск-вміст review))
     "#;
     assert_eq!(
         eval_translation(source),
@@ -164,14 +164,14 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
           (quote (translation/1 candidate query
                    "Is Plato metallic?"
                    (metallic plato))))
-        (def review (translation-review (quote corpus) proposal))
+        (def review (переклад-перевірка (quote corpus) proposal))
         (list
-          (translation-review-status review)
-          (translation-review-code review)
-          (translation-admission-payload review)
+          (переклад-перевірка-стан review)
+          (переклад-перевірка-код review)
+          (переклад-допуск-вміст review)
           (equal? before *knowledge-journal*)
           (result-status
-            (reason-in-observe (quote corpus) (translation-payload proposal))))
+            (reason-in-observe (quote corpus) (переклад-вміст proposal))))
     "#;
     assert_eq!(eval_translation(source), "(accepted query () (1) blocked)");
 }
@@ -183,11 +183,11 @@ fn one_alternative_is_not_allowed_to_masquerade_as_ambiguity() {
           (quote (translation/1 ambiguous clause
                    "Mercury is hot."
                    (((hot mercury))))))
-        (def review (translation-review (quote corpus) proposal))
+        (def review (переклад-перевірка (quote corpus) proposal))
         (list
-          (translation-review-status review)
-          (translation-review-code review)
-          (translation-admission-payload review))
+          (переклад-перевірка-стан review)
+          (переклад-перевірка-код review)
+          (переклад-допуск-вміст review))
     "#;
     assert_eq!(
         eval_translation(source),
@@ -199,12 +199,12 @@ fn one_alternative_is_not_allowed_to_masquerade_as_ambiguity() {
 fn malformed_protocol_envelope_is_named_before_semantic_admission() {
     let source = r#"
         (def review
-          (translation-review
+          (переклад-перевірка
             (quote corpus)
             (quote (translation/2 candidate clause "text" ((human socrates))))))
         (list
-          (translation-review-status review)
-          (translation-review-code review))
+          (переклад-перевірка-стан review)
+          (переклад-перевірка-код review))
     "#;
     assert_eq!(eval_translation(source), "(rejected invalid-translation)");
 }
