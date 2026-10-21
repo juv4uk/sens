@@ -150,9 +150,15 @@ fn time_predicates_use_exact_d1_literals_and_keep_boundary_laws() {
         ("(internet-time-stratum-valid? 15)", true),
         ("(internet-time-stratum-valid? 0)", false),
         ("(internet-time-stratum-valid? 16)", false),
+        ("(deadline-reached-at? -1 0)", false),
+        ("(deadline-reached-at? 0 0)", true),
+        ("(deadline-reached-at? 1 0)", true),
         ("(deadline-reached-at? 9 10)", false),
         ("(deadline-reached-at? 10 10)", true),
         ("(deadline-reached-at? 11 10)", true),
+        ("(крайній-час-досягнуто-у? 9 10)", false),
+        ("(крайній-час-досягнуто-у? 10 10)", true),
+        ("(крайній-час-досягнуто-у? 11 10)", true),
     ] {
         let value = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
@@ -182,6 +188,12 @@ fn time_predicates_use_exact_d1_literals_and_keep_boundary_laws() {
         "no redundant ATOM(QUOTE empty) truth constructors");
     assert_eq!(code.matches("(101 (001 (0)) (001 (1)))").count(), 0,
         "no redundant EQ(QUOTE 0, QUOTE 1) false constructors");
-    assert_eq!(code.matches("#d1:1").count(), 20);
-    assert_eq!(code.matches("#d1:0").count(), 4);
+    // Текстові теги ширини не належать нинішній українській граматиці.
+    // Виконуваний D1 закон вище перевіряємо за типом, а не підрахунком
+    // застарілих #d1-літералів у файлі.
+    assert!(!code.contains("#d1:"), "застарілий текстовий D1-тег у lib/time.lisp");
+    assert!(
+        code.contains("(хибне? (менше? поточні-нс граничні-нс))"),
+        "точна D24+ межа повинна лишатися у Lisp без D3 EQ чисел"
+    );
 }
