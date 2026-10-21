@@ -1456,9 +1456,9 @@ NONPROGRAM_MANIFESTS = (
 # Старі SHA до українізації не мають блокувати кожну виконувану програму.
 # Вміст, схема, кількість і кожен власний source-blob усе ще перевіряються.
 NONPROGRAM_MANIFEST_BLOB_SHA = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "ff34b581a149d88855ed4f9c21df71d517fd7373",
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "baf7c9811222cfbdc71bf7cf537e0f682b46e8ad",
     "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "e258a854fb4abab0070c3f7585b96b6acdfcbfb7",
-    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "7f3aa9b4b7d33262c5c057cd843d5bde8e4932f4",
+    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "d66fa8f636e47cd00744dc0ed5fa5f2f2c16ccd8",
     "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "72f83eb390f6c5734b2bc0f56a4e850c3d4b6059",
     "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "413c9dee025bb56b9fd346701e46d7ae4fb9ea89",
     "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "e9e6199f1e41e11e18550fa54ca899b2e6518f28",
@@ -1514,7 +1514,7 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
             record = json.loads(contents.decode("utf-8"))
         except (UnicodeError, OSError, ValueError) as exc:
             raise SensT5Error(f"NONPROGRAM_MANIFEST_INVALID layer=encode {name}: {exc}") from exc
-        if (record.get("schema") != "sens-migration-nonprogram-manifest/1"
+        if (record.get("schema") != "sens-migration-nonprogram-manifest-1"
                 or record.get("issue") != 4460
                 or record.get("automatic_sens_companion") is not False
                 or not isinstance(record.get("entries"), list)
