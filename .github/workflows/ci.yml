@@ -37,6 +37,10 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
           persist-credentials: false
+      - name: Тригер-вартовий — один фокусований workflow
+        shell: bash
+        run: python3 scripts/ci_one_focused_workflow.py
+
 
       - uses: ./.github/actions/install-zig
         if: ${{ matrix.shard == 1 || matrix.shard == 19 }}
