@@ -27,6 +27,28 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertLess(script.index('run_native_t5m_program'),
                         script.index('python3 scripts/migrate-three-pass.py'))
 
+    def test_invalid_mode_cannot_fall_back_to_python_or_json(self):
+        # Помилка змінної середовища — реальна відмова ДО будь-якого
+        # запуску виконавця; вона не обирає історичний Python-проєктор.
+        with tempfile.TemporaryDirectory(prefix="sens-mode-fail-closed-") as td:
+            root = Path(td)
+            (root / "one.lisp").write_text("(як-є ())\n", encoding="utf-8")
+            (root / "changed.txt").write_text("one.lisp\n", encoding="utf-8")
+            binary = root / "sens-fake"
+            binary.write_text(
+                "#!/bin/sh\nprintf called > invoked\n", encoding="utf-8"
+            )
+            binary.chmod(0o755)
+            env = dict(os.environ, SENS_NATIVE_T5M="python-by-accident")
+            result = subprocess.run(
+                ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"],
+                cwd=root, env=env, capture_output=True, text=True, timeout=10,
+            )
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertIn("SENS_NATIVE_T5M_INVALID", result.stderr)
+            self.assertFalse((root / "invoked").exists())
+            self.assertFalse(list((root / "evidence").rglob("*.sens")))
+
     def test_native_route_without_python_or_json_and_true_red_propagation(self):
         # Це тест ТІЛЬКИ shell-оркестрації. Семантику виконує CI через
         # реальний sens --t5m-pair, а не цей замінник командного інтерфейсу.
