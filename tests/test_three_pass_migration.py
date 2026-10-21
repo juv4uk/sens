@@ -366,7 +366,6 @@ class ThreePassMigrationTests(unittest.TestCase):
         candidate = next(
             row for row in read_domain_table(ROOT / "lib/domains/d8.lisp")
             if row.bits not in mod.CORE_OPERATION_D8
-            and row.bits not in resolver.d8_callable_bits
             and row.uk and self.my.get(row.uk) == (row.bits, "D8")
         )
         words, origin = resolver.head(mod.Tok("ATOM", candidate.uk, 0), self.text7)
@@ -391,8 +390,8 @@ class ThreePassMigrationTests(unittest.TestCase):
         for spelling, bits in expected.items():
             with self.subTest(spelling=spelling):
                 self.assertEqual(my.get(spelling), (bits, "D10"))
-                self.assertNotIn(bits, resolver.d10_callable_bits,
-                                 "не можна вигадувати допуск D10 із каталогу")
+                self.assertFalse(resolver._has_concrete_callable((bits, "D10")),
+                                 "D10 Lisp DEFINE не є native machine opcode")
                 words, origin = resolver.head(mod.Tok("ATOM", spelling, 0), text7)
                 self.assertEqual(origin, "d7-resident-head")
                 self.assertEqual(words[0], "10")
@@ -442,14 +441,19 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertNotIn(identity[0], words)
         self.assertEqual(words[-1], "01")
 
-    def test_core4_defined_d9_functions_migrate_by_exact_domain_identity(self):
+    def test_core4_defined_d9_closure_preserves_lexical_d7_not_native_opcode(self):
         resolver = mod.Resolver(self.my, self.upper)
-        for spelling in ("додати-нові",):
-            with self.subTest(spelling=spelling):
-                words, _origin = resolver.head(mod.Tok("ATOM", spelling, 0))
-                self.assertEqual(words, ["001000101"])
+        spelling, bits = "додати-нові", "001000101"
+        self.assertEqual(self.my[spelling], (bits, "D9"))
+        self.assertFalse(resolver._has_concrete_callable((bits, "D9")))
+        words, origin = resolver.head(mod.Tok("ATOM", spelling, 0), self.text7)
+        self.assertEqual(origin, "d7-resident-head")
+        self.assertEqual(words[0], "10")
+        self.assertEqual(words[-1], "01")
+        self.assertNotIn(bits, words)
         projection = mod.migrate_file("(додати-нові x)\n", resolver, self.text7)
-        self.assertTrue(projection.startswith("10 001000101 00 "))
+        self.assertNotIn(bits, projection.split())
+        self.assertTrue(projection.startswith("10 10 "))
         with self.assertRaisesRegex(mod.MigrationError, "D9 .*потрібна названа чинна проєкція"):
             resolver.head(mod.Tok("ATOM", "111111111", 0))
 
@@ -516,7 +520,8 @@ class ThreePassMigrationTests(unittest.TestCase):
         # The domain table is still an authority for quoted data and
         # surface lookup, but never a free callable D9 mechanism.
         resolver = mod.Resolver(self.my, self.upper, d9_residents=residents)
-        self.assertNotIn("000100001", resolver.d9_callable_bits)
+        self.assertFalse(resolver._has_concrete_callable(("000100001", "D9")),
+                         "FS closure not a native D9 opcode")
         for spelling, bits in [("порожній-вміст-сховище", "000100001")]:
             with self.subTest(spelling=spelling):
                 self.assertEqual(self.my[spelling], (bits, "D9"))
@@ -527,11 +532,11 @@ class ThreePassMigrationTests(unittest.TestCase):
                 self.assertEqual(words[0], "10")
                 self.assertEqual(words[-1], "01")
                 self.assertNotIn(bits, words)
-        # A real Core4-defined D9 function still uses its exact call code.
+        # An admitted runtime-native D9 string operation retains exact bits.
         admitted, origin = resolver.head(
-            mod.Tok("ATOM", "додати-нові", 0), self.text7,
+            mod.Tok("ATOM", "рядок-перший", 0), self.text7,
         )
-        self.assertEqual(admitted, ["001000101"])
+        self.assertEqual(admitted, ["110101011"])
         self.assertEqual(origin, "pass2-my-lisp")
 
     def test_decimal_digit_sequences_in_lisp_data_are_not_domain_addresses(self):
