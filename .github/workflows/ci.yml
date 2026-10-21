@@ -336,8 +336,8 @@ jobs:
             fi
             stdout="$RUNNER_TEMP/t5m-file.stdout"
             stderr="$RUNNER_TEMP/t5m-file.stderr"
-            if timeout 45s "$binary" --t5m-file "$physical" >"$stdout" 2>"$stderr"; then
-              # DEFINE-only програма може завершитися успішно без текстового
+            if timeout 45s "$binary" --t5m-file "$file" >"$stdout" 2>"$stderr"; then
+              # CLI --t5m-file читає УКРАЇНСЬКИЙ .lisp і власноруч проводить його через Zig/T5M.\n              # Пара .sens вище — окрема фізична квитанція, не підміна джерела.\n              # DEFINE-only програма може завершитися успішно без текстового
               # результату; порожній stdout сам по собі не є семантичним RED.
               result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
               bytes="$(wc -c < "$stdout")"
