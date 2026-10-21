@@ -244,7 +244,7 @@ def validate_runtime_boundary(arithmetic, d6):
         need(end in tail, name + " next boundary missing")
         body = tail.split(end, 1)[0]
         need(body.count("require_math_domain(values, span)?;") == 1, name + " must enforce D24+ admission")
-    need("!domain_numeric::is_domain_value(v)" in arithmetic, "unqualified/functional values must be refused")
+    need("!domain_numeric::is_domain_value(value)" in arithmetic, "unqualified/functional values must be refused")
     # Historical Number/Rational/floating point branches were removed from the
     # mathematical evaluator. Reader and JSON presentation may still retain
     # legacy data, but the Core arithmetic source may not gain a second path.
@@ -272,7 +272,7 @@ def selftest_runtime(arithmetic, d6):
     validate_runtime_boundary(arithmetic, d6)
     for damaged in (
         arithmetic.replace("require_math_domain(values, span)?;", "", 1),
-        arithmetic.replace("!domain_numeric::is_domain_value(v)", "false", 1),
+        arithmetic.replace("!domain_numeric::is_domain_value(value)", "false", 1),
         arithmetic + "\nfn small_rational_fast_path() {}\n",
     ):
         try:

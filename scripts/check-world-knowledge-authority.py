@@ -75,8 +75,10 @@ assert law_canonical.count("(binary-function-number . (D5 10110))") == 2
 assert 'relation . "E = h * nu"' in law_surface
 assert 'relation . "d = c * t"' in law_surface
 
-assert "planck-cesium-energy-shape" in witness
-assert "speed-times-second-distance-shape" in witness
+# Свідок переписано на чинний укр-варіант точної арифметики розмірностей
+# (старі planck/speed-shape форми виведено разом із переписуванням).
+assert "свідок-арифметики-розмірностей" in witness
+assert "quantity-arithmetic (status pass)" in witness
 
 print("WORLD-KNOWLEDGE-AUTHORITY: PASS")
 print("axioms=7 name-erased=yes model-laws=2 function=D5:10110")
