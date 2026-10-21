@@ -1120,25 +1120,28 @@ mod core4_bootstrap_cache_tests {
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
         );
-        // Core4's source has executable exact D3/D4 heads inside the legacy
-        // W8 DEFINE/LAMBDA wrappers. A fallback through the ordinary parser
-        // leaves numeric 100 in a callable slot; the path-bound reader keeps
-        // this established library form executable without regenerating FASL.
-        let result = eval_program("(let ((x 7)) x)", &mut session)
-            .expect("stale-FASL Core4 fallback must execute its language-owned LET");
+        load_process_library(&mut session)
+            .expect("process library must bind its current Ukrainian D6 macros");
+
+        // Core4's Lisp-owned Ukrainian surface must remain executable after
+        // the source fallback; no retired English binding is needed.
+        let result = eval_core_library_source("(нехай ((значення 7)) значення)", &mut session)
+            .expect("fallback must execute the Ukrainian D6 parallel-binding macro");
         assert_eq!(result.value.to_string(), "7");
 
-        // The original callability failure surfaces through let* while the
-        // quantity witness builds successive local bindings. Cover both its
-        // empty base case and dependent non-empty expansion on the same
-        // path-bound exact-domain fallback, without editing quantity laws.
-        let empty_let_star = eval_program("(let* () 11)", &mut session)
-            .expect("empty let* must return its body on Core4 source fallback");
-        assert_eq!(empty_let_star.value.to_string(), "11");
+        // Cover the sequential macro's empty base case and dependent
+        // expansion without changing any quantity laws.
+        let empty_sequential = eval_core_library_source("(нехай-послідовно () 11)", &mut session)
+            .expect("empty sequential bindings must return their body");
+        assert_eq!(empty_sequential.value.to_string(), "11");
 
-        let dependent_let_star = eval_program("(let* ((x 7) (y x)) y)", &mut session)
-            .expect("let* must evaluate bindings sequentially on Core4 source fallback");
-        assert_eq!(dependent_let_star.value.to_string(), "7");
+        let dependent_sequential =
+            eval_core_library_source(
+                "(нехай-послідовно ((перший 7) (другий перший)) другий)",
+                &mut session,
+            )
+                .expect("sequential bindings must see previous values");
+        assert_eq!(dependent_sequential.value.to_string(), "7");
     }
 }
 

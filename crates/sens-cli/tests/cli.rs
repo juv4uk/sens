@@ -922,15 +922,12 @@ fn file_mode_still_errors_on_a_lone_unknown_symbol() {
 
 #[test]
 fn core_lib_is_preloaded_before_running_a_file() {
-    // lib/core.my defines `identity`; if the CLI stopped injecting core.my this
-    // would fail with an "unknown symbol" evaluation error instead of returning 5.
-    // lib/core.my vyznachaie `identity`; yakby CLI perestav vstavliaty core.my, tse b
-    // provalylos pomylkoiu "unknown symbol" zamist povernennia 5.
-    // lib/core.my definiert `identity`; würde die CLI core.my nicht mehr einspeisen,
-    // schlüge dies mit einem "unknown symbol"-Fehler fehl statt 5 zurückzugeben.
+    // The Ukrainian D6 macro is defined by Core4; the file succeeds only when
+    // the CLI has loaded the current core before evaluating user source.
     let dir = std::env::temp_dir();
     let path = dir.join("sens-cli-test-core-lib.lisp");
-    std::fs::write(&path, "(identity 5)").expect("should write temp file");
+    std::fs::write(&path, "(нехай ((значення 5)) значення)")
+        .expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
