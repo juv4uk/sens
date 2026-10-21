@@ -158,6 +158,8 @@ jobs:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
           cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
           cargo test --locked -p sens --test result_status -- --nocapture
+          # Справжній SENS-eval, а не Python: безпечне четверте поле маршруту.
+          cargo test --locked -p sens --test island_lowering_ukr_runtime -- --nocapture
           # Український D24+ обчислювач: позитивний закон і негативний мутант.
           cargo test --locked -p sens --test uk_sa_surface peer_identity_acceptance_ -- --nocapture
 
