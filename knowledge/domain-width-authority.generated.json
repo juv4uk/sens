@@ -47,7 +47,7 @@
         "path": "lib/domains/d3.lisp",
         "key_width": 3,
         "rows": 8,
-        "git_blob_sha1": "049f93dfdfb9afdddd32102ead58e344a5e2b31d"
+        "git_blob_sha1": "00a5ab5dbb89e364e31e47cbae5199e978a8d775"
       }
     },
     "D4": {
@@ -97,7 +97,7 @@
         "path": "lib/domains/d8.lisp",
         "key_width": 8,
         "rows": 256,
-        "git_blob_sha1": "47a8f899e141d4a8b28b4c4bb704ef20f94e8264"
+        "git_blob_sha1": "1f12843275e1f13d3fbc69e101cecd07ae061118"
       }
     },
     "D9": {
