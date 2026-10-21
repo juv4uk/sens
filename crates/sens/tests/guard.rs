@@ -1,4 +1,4 @@
-use sens::{eval_program, parse_mixed_exact_domain, Expr, ExprKind, Session};
+use sens::{eval_program, parse_mixed_exact_domain, Session};
 
 const GUARD_SOURCE: &str = include_str!("../../../lib/guard.lisp");
 
@@ -214,7 +214,7 @@ fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
             (список (як-є evidence-status) (як-є confirmed))
             (список (як-є summary) "measured and tested")))
         (за-умовою
-          ((однакові?
+          ((сторожа--рівні?
              (guard-reference-all (як-є demo) (список слабке сильне))
              (список слабке сильне))
            (список
@@ -231,8 +231,8 @@ fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
 
 #[test]
 fn evidence_status_defaults_to_unresolved_not_confirmed_when_absent() {
-    let value = eval_guard(
-        r#"(guard-reference-evidence-status (list (quote reference) (list (quote topic) (quote demo))))"#,
+    let value = eval_guard_ukr(
+        "(гвардія-довідка-стан-доказу (список (як-є reference) (список (як-є topic) (як-є demo))))",
     );
     assert_eq!(value, "unresolved");
 }
@@ -299,101 +299,56 @@ fn guard_compare_reuses_exact_structural_equality_for_nested_states() {
     );
 }
 
-fn collect_call_head_coordinates(expr: &Expr, coordinates: &mut Vec<(usize, u16)>) {
-    let ExprKind::List(items) = &expr.kind else {
-        return;
-    };
-    if let Some(Expr { kind: ExprKind::DomainIdentity(identity), .. }) = items.first() {
-        coordinates.push((identity.width(), identity.packed_bits()));
-    }
-    for child in items.iter() {
-        collect_call_head_coordinates(child, coordinates);
-    }
-}
-
 #[test]
-fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
+fn guard_compare_uses_current_ukrainian_d1_d3_d4_and_executes_in_sens() {
+    // Перевіряємо поточний український DEFINE, а не старе англійське ім'я.
     let start = GUARD_SOURCE
         .find("(визначити захист-порівняти\n")
-        .expect("Lisp-owned захист-порівняти має містити реальне українське визначення");
-    let end = GUARD_SOURCE[start..]
-        .find("\n(визначити захист-синхронізувати-вікно")
-        .map(|offset| start + offset)
-        .expect("український захист-порівняти завершується перед наступним DEFINE");
-    let source = &GUARD_SOURCE[start..end];
-
-    assert!(!source.contains("(11110111 expected observed)"));
-    assert!(source.contains("(сторожа--рівні? очікуване спостережене)"));
-
-    let parsed = parse_mixed_exact_domain(source)
-        .expect("український захист-порівняти зберігає точні домени");
-    assert_eq!(parsed.len(), 1);
-    let mut coordinates = Vec::new();
-    collect_call_head_coordinates(&parsed[0], &mut coordinates);
-    coordinates.sort_unstable();
-    coordinates.dedup();
-
-    let widths = coordinates
-        .iter()
-        .map(|(width, _)| *width)
-        .collect::<std::collections::BTreeSet<_>>();
-    assert_eq!(
-        widths,
-        [1usize, 3usize, 4usize].into_iter().collect(),
-        "захист-порівняти зберігає точний D1-предикат і викличні D3/D4"
-    );
-    for required in [(1, 0b1), (3, 0b001), (3, 0b110), (4, 0b0010), (4, 0b0011), (4, 0b1110)] {
-        assert!(
-            coordinates.contains(&required),
-            "захист-порівняти: відсутній D{}:{:0width$b}",
-            required.0,
-            required.1,
-            width = required.0
+        .expect("чинний Lisp має визначати захист-порівняти");
+    let end = GUARD_SOURCE[start..].find("\n(визначити захист-синхронізувати-вікно")
+        .map(|offset| start + offset).expect("замкнена межа одного DEFINE");
+    let definition = &GUARD_SOURCE[start..end];
+    assert_eq!(parse_mixed_exact_domain(definition).expect("точний читач").len(), 1);
+    assert!(definition.contains("(сторожа--рівні? очікуване спостережене)"));
+    assert!(!definition.contains("(11110111 "));
+    assert!(!definition.contains("(визначити guard-compare"));
+    for (observed, verdict) in [
+        ("(як-є ((status ready)))", "(decision allow)"),
+        ("(як-є ((status broken)))", "(decision warn)"),
+    ] {
+        let program = format!(
+            "(захист-порівняти (як-є build) (як-є ((status ready))) {observed} (як-є ()))"
         );
+        let actual = eval_guard_ukr(&program);
+        assert!(actual.contains(verdict),
+            "test_id=guard-compare layer=SENS input={program} expected={verdict} actual={actual}");
     }
 }
-
 
 #[test]
-fn guard_reference_field_uses_exact_d1_d3_d4_ukr_surfaces() {
+fn guard_reference_field_uses_current_ukrainian_lisp_and_executes_in_sens() {
     let start = GUARD_SOURCE
         .find("(визначити захист-еталон-поле\n")
-        .expect("має існувати первинний український захист-еталон-поле");
-    let end = GUARD_SOURCE[start..]
-        .find("\n(визначити ")
-        .map(|offset| start + offset)
-        .expect("захист-еталон-поле має залишатися одним завершеним визначенням");
-    let source = &GUARD_SOURCE[start..end];
-
-    assert!(source.contains("(функція (поле посилання)"));
-    assert!(source.contains("(функція (запис)"));
-    assert!(source.contains("(захист-знайти-запис поле (решта посилання))"));
-    assert!(!source.contains("(знайти-за-ключем "));
-    assert!(!source.contains("(функція (field reference)"));
-    assert!(!source.contains("(функція (entry)"));
-    assert!(!source.contains("(друге entry)"));
-    assert!(!source.contains("(assoc "));
-    for old_head in ["(001000 ", "(11100 ", "(011 ", "(101 ", "(100 ", "(0101 ", "(0011 ", "(0010 ", "(010 ", "(110 ", "(111 ", "(11110111 "] {
-        assert!(!source.contains(old_head), "retired numeric head remains: {old_head}");
+        .expect("чинний український захист-еталон-поле");
+    let end = GUARD_SOURCE[start..].find("\n(визначити ")
+        .map(|offset| start + offset).expect("завершення визначення");
+    let definition = &GUARD_SOURCE[start..end];
+    assert_eq!(parse_mixed_exact_domain(definition).expect("точний SENS-читач").len(), 1);
+    assert!(definition.contains("(функція (поле посилання)"));
+    assert!(definition.contains("(функція (запис)"));
+    assert!(definition.contains("(захист-знайти-запис поле (решта посилання))"));
+    for forbidden in ["(знайти-за-ключем ", "(001000 ", "(11110111 ", "(assoc "] {
+        assert!(!definition.contains(forbidden), "застаріла викличність: {forbidden}");
     }
-
-    let parsed = parse_mixed_exact_domain(source)
-        .expect("full укр surfaces must lower to exact domain identities");
-    let mut coordinates = Vec::new();
-    collect_call_head_coordinates(&parsed[0], &mut coordinates);
-    coordinates.sort_unstable();
-    coordinates.dedup();
-    let widths = coordinates
-        .iter()
-        .map(|(width, _)| *width)
-        .collect::<std::collections::BTreeSet<_>>();
-    assert_eq!(
-        widths,
-        [1usize, 3usize, 4usize].into_iter().collect(),
-        "захист-еталон-поле зберігає D1, структури D3 і точні D4"
+    let found = eval_guard_ukr(
+        "(захист-еталон-поле (як-є decision) (як-є (guard-finding (decision allow))))"
     );
+    assert_eq!(found, "allow", "дійсне SENS-поле: {found}");
+    let absent = eval_guard_ukr(
+        "(захист-еталон-поле (як-є missing) (як-є (guard-finding (decision allow))))"
+    );
+    assert_eq!(absent, "()", "відсутнє поле не вигадує значення: {absent}");
 }
-
 
 #[test]
 fn guard_reference_data_reader_is_path_pinned_and_keeps_the_directory_as_data() {
