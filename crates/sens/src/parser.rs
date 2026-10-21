@@ -385,16 +385,15 @@ impl Parser<'_> {
         }
         let token = &self.source[start..self.cursor];
 
-        // Ukrainian human projection of the D1 predicate values. These are
-        // exact one-bit values (`ні`/`так`), not decimal numeric literals and
-        // not callable domain heads.
-        if self.mode == ReaderMode::ExactDomain {
-            if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(token) {
-                return Ok(Expr {
-                    kind: ExprKind::DomainIdentity(identity),
-                    span: Span { start, end: self.cursor },
-                });
-            }
+        // Обидва джерельні читачі мусять бачити ратифіковані українські Д1
+        // «ні»/«так» як ті самі точні 1-бітні значення. Інакше сумісний
+        // eval_program втрачає Д1 і робить «так» невідомим символом.
+        // Джерело істини — чинна таблиця Д1, не host Bool/Number або W8.
+        if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(token) {
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: Span { start, end: self.cursor },
+            });
         }
 
         // A lone `.` outside a dotted pair is not an expression (#1696).
@@ -709,6 +708,39 @@ mod tests {
                 [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
                     if identity.width() == 1 && identity.packed_bits() == bits
             ), "{surface} має бути значенням D1:{bits}, а не символом чи викличною головою");
+        }
+    }
+
+    #[test]
+    fn ukrainian_d1_values_are_exact_in_both_text_readers_and_real_sens_eval() {
+        // Д1 належить ратифікованій драбині, а не історичному режиму
+        // виконання; українське написання не повинно залежати від читача.
+        for (surface, bits) in [("ні", 0), ("так", 1)] {
+            for forms in [
+                parse(surface).expect("сумісний читач бачить чинний Д1"),
+                parse_exact_domain_source(surface).expect("точний читач бачить Д1"),
+            ] {
+                assert!(matches!(
+                    forms.as_slice(),
+                    [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
+                        if identity.width() == 1 && identity.packed_bits() == bits
+                ), "Д1:{bits} втрачено в українській проєкції {surface}");
+            }
+            let mut session = crate::Session::default();
+            let actual = crate::eval_program(surface, &mut session)
+                .unwrap_or_else(|error| panic!("виконання живим SENS Д1:{bits}: {error}"));
+            assert_eq!(actual.value.as_predicate_bit(), Some(bits == 1),
+                "Д1:{bits} не може бути host bool або невідомим символом");
+        }
+
+        // Сусідні старі цифрові літерали не отримують тотожності Д1.
+        for non_d1 in ["0", "1", "()"] {
+            let forms = parse(non_d1).expect("сумісна граматика допускає дані");
+            assert!(!matches!(
+                forms.as_slice(),
+                [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
+                    if identity.width() == 1
+            ), "заборонено відгадувати Д1 за виглядом {non_d1}");
         }
     }
 
