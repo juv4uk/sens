@@ -231,12 +231,21 @@ fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String
         return Err(format!("T5M_PAIR_CARRIER_WRITE: {error}"));
     }
     drop(binary);
-    let result = fs::OpenOptions::new()
+    let mut readable_file = match fs::OpenOptions::new()
         .write(true).create_new(true).open(&readable)
-        .and_then(|mut file| file.write_all(view.as_bytes()).and_then(|_| file.sync_all()));
-    if let Err(error) = result {
-        // Не залишаємо напівстворену пару; ніколи не переписуємо
-        // сторонній однойменний view-файл чи фізичний носій.
+    {
+        Ok(file) => file,
+        Err(error) => {
+            let _ = fs::remove_file(physical);
+            return Err(format!("T5M_PAIR_VIEW_CREATE: {error}"));
+        }
+    };
+    if let Err(error) = readable_file.write_all(view.as_bytes())
+        .and_then(|_| readable_file.sync_all())
+    {
+        drop(readable_file);
+        // Видаляємо лише об'єкти, створені цим викликом.
+        let _ = fs::remove_file(&readable);
         let _ = fs::remove_file(physical);
         return Err(format!("T5M_PAIR_VIEW_WRITE: {error}"));
     }
