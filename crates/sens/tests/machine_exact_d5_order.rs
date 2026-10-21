@@ -85,7 +85,6 @@ fn decode_order_tail(bytes: &[u8]) -> Option<OrderTail> {
     })
 }
 
-#[test]
 fn x86_register_field_bits_use_real_d5_numeric_comparison() {
     // Виконуємо чинні Lisp-визначення через SENS; Rust тут лише runner.
     // D3 EQ залишається для атомів ISA, але не для чисел D24+.
@@ -178,6 +177,9 @@ fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
         assert_eq!(actual.as_predicate_bit(), Some(expected),
             "SENS D1 predicate: {call}");
     }
+    // Уже чинний CI виконує цей тест: разом з D5 законом перевіряємо
+    // реальне застосування до байтових регістрових полів x86.
+    x86_register_field_bits_use_real_d5_numeric_comparison();
 }
 
 #[test]
