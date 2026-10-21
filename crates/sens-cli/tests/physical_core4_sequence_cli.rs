@@ -383,6 +383,75 @@ fn verify_unpaired_ukrainian_libs_natively() {
 }
 
 #[test]
+fn d11_selector_suffix_law_runs_in_native_sens() {
+    // D11 candidate words are not called: the owner-ratified D3 selectors
+    // compose in SENS. One asymmetric positive and two negative mutations.
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let fixture = root.join("tests/fixtures/d11-selector-law-witness.lisp");
+    let original = fs::read_to_string(&fixture).expect("D11 SENS law witness source");
+    let execution = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg(&fixture)
+        .output()
+        .expect("run D11 selector law in native SENS");
+    assert!(
+        execution.status.success(),
+        "test_id=d11-selector-live layer=SENS stderr={}",
+        error(&execution)
+    );
+    assert_eq!(
+        observed(&execution).trim(),
+        "1",
+        "test_id=d11-selector-parent-child expected=D1:1 actual={} stderr={}",
+        observed(&execution),
+        error(&execution)
+    );
+
+    let mutations = [
+        (
+            "wrong-parent-suffix",
+            "(батько (перше вхід))",
+            "(батько (решта вхід))",
+        ),
+        (
+            "indistinguishable-branches",
+            "(селектор-зразок (як-є правильно) (як-є неправильно))",
+            "(селектор-зразок (як-є правильно) (як-є правильно))",
+        ),
+    ];
+    for (label, original_part, changed_part) in mutations {
+        assert!(
+            original.contains(original_part),
+            "test_id=d11-selector-mutation-anchor fixture={} case={label}",
+            fixture.display()
+        );
+        let replaced = original.replacen(original_part, changed_part, 1);
+        let serial = UNIQUE.fetch_add(1, Ordering::Relaxed);
+        let mutant = std::env::temp_dir().join(format!(
+            "sens-d11-selector-mutant-{}-{serial}.lisp",
+            std::process::id()
+        ));
+        fs::write(&mutant, replaced).expect("write temporary D11 law mutant");
+        let negative = Command::new(env!("CARGO_BIN_EXE_sens"))
+            .arg(&mutant)
+            .output()
+            .expect("run negative D11 selector witness in SENS");
+        fs::remove_file(&mutant).expect("delete only owned D11 mutation");
+        assert!(
+            negative.status.success(),
+            "test_id=d11-selector-{label} layer=SENS stderr={}",
+            error(&negative)
+        );
+        assert_eq!(
+            observed(&negative).trim(),
+            "0",
+            "test_id=d11-selector-{label} expected=D1:0 actual={} stderr={}",
+            observed(&negative),
+            error(&negative)
+        );
+    }
+}
+
+#[test]
 fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
     verify_unpaired_ukrainian_libs_natively();
     // Executable Ukrainian D3/D4 .lisp programs; the stable test
