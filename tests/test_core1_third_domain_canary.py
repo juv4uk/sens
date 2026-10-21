@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Existing Core1 C1-THIRD -> one real physical T5 closed specialization, not a new evaluator."""
+"""Поточна українська Core1 THIRD: точні слова, фізичний спадковий свідок і T5M.
+Python перевіряє тільки транспорт; не імітує SENS-eval і не публікує .sens.
+"""
 from __future__ import annotations
 
 import importlib.util
@@ -11,116 +13,97 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 SCRIPT = ROOT / "scripts/migrate-three-pass.py"
 FIXTURE = ROOT / "tests/fixtures/core1-third-domain-canary"
 SOURCE = FIXTURE / "third.lisp"
 PHYSICAL = FIXTURE / "third.sens"
-ARGS = {
-    "foundation": ROOT / "knowledge/d1-d9-foundation.json",
-    "domain_surfaces": ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
-    "semantic_generated": ROOT / "crates/sens/src/semantic_registry_generated.rs",
-    "semantic_registry": ROOT / "crates/sens/src/semantic_registry.rs",
-    "necessary_forms": ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
-    "historical_map": ROOT / "contracts/core1-historical-sid-map.lisp",
-    "text7": ROOT / "crates/sens/src/text7_projection_generated.rs",
-}
+VIEW = FIXTURE / "third"
 EXPECTED_WORDS = "10 100 00 10 011 00 10 011 00 10 111 00 10 001 00 000 01 00 10 111 00 10 001 00 000 01 00 10 111 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01 00 10 001 00 000 01 01 01 01 01 01 01\n"
-
 EXPECTED_BYTES = bytes.fromhex("66386489648967896389068967896389068967896789638906896389068c15a7123b2eb18c35")
 
-spec = importlib.util.spec_from_file_location("c1third_migration", SCRIPT)
+spec = importlib.util.spec_from_file_location("core1_third_current_migration", SCRIPT)
 assert spec and spec.loader
 migration = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = migration
 spec.loader.exec_module(migration)
 
-class C1ThirdDomainCanary(unittest.TestCase):
+
+class Core1ThirdCurrentMigration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        foundation = migration.load_foundation(ARGS["foundation"])
-        cls.legacy, cls.my, cls.upper = migration.build_three_pass_maps(
-            foundation, ARGS["domain_surfaces"], ARGS["semantic_generated"],
-            ARGS["semantic_registry"], ARGS["necessary_forms"], ARGS["historical_map"]
+        root = ROOT
+        foundation = migration.load_foundation(root / "knowledge/d1-d11-foundation.json")
+        cls.my, cls.upper, cls.bridge = migration.build_three_pass_maps(
+            foundation,
+            root / "crates/sens/src/domain_surface_registry_generated.rs",
+            root / "crates/sens/src/semantic_registry_generated.rs",
+            root / "crates/sens/src/semantic_registry.rs",
+            root / "crates/sens/src/eval/necessary_forms_generated.rs",
         )
-        cls.text7 = migration.build_text7(foundation, ARGS["text7"])
-        cls.foundation = foundation
+        cls.keyboard = migration.build_text7(
+            foundation, root / "knowledge/d7-keyboard-v2-ratified.json"
+        )
 
-    def test_existing_core1_third_implementation_is_source_provenance(self):
-        existing = (ROOT / "lib/core1.lisp").read_text(encoding="utf-8")
-        self.assertIn("(00001001 C1-THIRD", existing)
-        c1_third = existing.split("(00001001 C1-THIRD", 1)[1].split("(00001001 C1-FOURTH", 1)[0]
-        self.assertIn("(00000101 (00000110 (00000110 X)))", " ".join(c1_third.split()))
-        self.assertEqual(self.foundation["domains"]["D3"]["residents"]["100"], "CAR")
-        self.assertEqual(self.foundation["domains"]["D3"]["residents"]["011"], "CDR")
-        self.assertEqual(self.foundation["domains"]["D3"]["residents"]["111"], "CONS")
-        self.assertEqual(self.foundation["domains"]["D3"]["residents"]["001"], "QUOTE")
-        self.assertEqual(self.foundation["domains"]["D3"]["residents"]["000"], "EMPTY")
-        for old, current in {"00000101": "100", "00000110": "011",
-                             "00000100": "111", "00000001": "001"}.items():
-            self.assertEqual(self.legacy[old][:2], (current, "D3"))
-        self.assertNotIn("C1-THIRD", SOURCE.read_text())
+    def resolver(self):
+        return migration.Resolver(self.my, self.upper)
 
-    def test_actual_three_pass_and_committed_real_t5(self):
+    def test_ukrainian_source_is_not_sid8_dump(self):
         readable = SOURCE.read_text(encoding="utf-8")
-        # lib/core1.lisp pins these exact-8 heads as historical Core1.
-        # Do not change the global AUTO law: unknown W8 remains BLOCKED.
-        resolver = migration.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
-        projection = migration.migrate_file(readable, resolver, self.text7)
+        self.assertTrue(readable.startswith("(перше (решта"), readable)
+        for name in ("перше", "решта", "сполучити", "як-є"):
+            self.assertIn(name, readable)
+        self.assertNotIn("00000101", readable)
+        self.assertNotIn("C1-THIRD", readable)
+        self.assertIn("(00001001 C1-THIRD",
+                      (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
+        self.assertEqual(self.bridge, {})
+
+    def test_real_ukr_projection_exact_words_and_historical_physical(self):
+        resolver = self.resolver()
+        projection = migration.migrate_file(
+            SOURCE.read_text(encoding="utf-8"), resolver, self.keyboard,
+            codec="t5m", source_surface="укр",
+        )
         self.assertEqual(projection, EXPECTED_WORDS)
-        self.assertEqual(resolver.counts["pass1-sens8"], 12)
         self.assertEqual(resolver.counts["passthrough-head"], 0)
-        payload = PHYSICAL.read_bytes()
-        self.assertEqual(payload, EXPECTED_BYTES)
-        self.assertNotEqual(payload, readable.encode("utf-8"))
-        self.assertEqual(migration.encode_projection(projection), payload)
-        self.assertEqual(migration.decode_bytes(payload), EXPECTED_WORDS.split())
-        # A same-stem extensionless file is permitted ONLY as exact ASCII view.
-        # On older main commits the view may be pending; once present it must
-        # reproduce the exact physical words, never masquerade as .sens.
-        view = FIXTURE / "third"
-        if view.exists() or view.is_symlink():
-            self.assertTrue(view.is_file() and not view.is_symlink())
-            self.assertEqual(view.read_bytes(), EXPECTED_WORDS.encode("ascii"))
-            self.assertNotEqual(view.read_bytes(), payload)
+        self.assertGreater(resolver.counts["pass2-my-lisp"], 0)
+        self.assertEqual(VIEW.read_text(encoding="ascii"), EXPECTED_WORDS)
+        self.assertEqual(PHYSICAL.read_bytes(), EXPECTED_BYTES)
+        # Старий фізичний T5 лише для порівняння: це НЕ сучасний T5M admission.
+        self.assertEqual(migration.decode_bytes(EXPECTED_BYTES), EXPECTED_WORDS.split())
+        self.assertEqual(migration.encode_projection(EXPECTED_WORDS), EXPECTED_BYTES)
 
-    def test_real_mirror_cli_manifest_and_no_clobber(self):
+    def test_current_t5m_dry_run_without_python_minted_sens(self):
         with tempfile.TemporaryDirectory() as tmp:
-            dest = Path(tmp) / "mirror"
-            report = Path(tmp) / "manifest.json"
-            cmd = [
-                sys.executable, str(SCRIPT), str(FIXTURE), "--out", str(dest),
-                *[item for key, path in ARGS.items() for item in
-                  ("--" + key.replace("_", "-"), str(path))],
-                "--report", str(report), "--source-era", "legacy"
-            ]
-            run = subprocess.run(cmd, text=True, capture_output=True)
+            output, report = Path(tmp) / "physical", Path(tmp) / "receipt.json"
+            run = subprocess.run(
+                [sys.executable, str(SCRIPT), str(SOURCE), "--out", str(output),
+                 "--report", str(report), "--dry-run", "--codec", "t5m",
+                 "--source-surface", "укр"],
+                cwd=ROOT, text=True, capture_output=True, timeout=45,
+            )
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
-            manifest = json.loads(report.read_text(encoding="utf-8"))
-            self.assertEqual(manifest["summary"]["files_written"], 1)
-            self.assertEqual(manifest["summary"]["files_blocked"], 0)
-            self.assertEqual((dest / "third.sens").read_bytes(), EXPECTED_BYTES)
-            again = subprocess.run(cmd, text=True, capture_output=True)
-            self.assertEqual(again.returncode, 2, again.stdout + again.stderr)
-            blocked = json.loads(report.read_text(encoding="utf-8"))
-            self.assertEqual(blocked["summary"]["files_blocked"], 1)
-            self.assertEqual((dest / "third.sens").read_bytes(), EXPECTED_BYTES)
-            self.assertTrue(SOURCE.exists())
+            data = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(data["summary"]["files_would_write"], 1, data)
+            self.assertEqual(data["summary"]["files_blocked"], 0, data)
+            self.assertEqual(data["summary"]["files_written"], 0, data)
+            self.assertFalse(output.exists())
+            self.assertIs(data["files"][0]["semantic_admitted"], False)
 
-    def test_auto_w8_remains_blocked_without_historical_source_era(self):
-        readable = SOURCE.read_text(encoding="utf-8")
-        auto = migration.Resolver(self.legacy, self.my, self.upper, source_era="auto")
-        with self.assertRaisesRegex(migration.MigrationError, "ambiguous W8"):
-            migration.migrate_file(readable, auto, self.text7)
+    def test_historical_w8_is_not_modern_callable_d8(self):
+        with self.assertRaisesRegex(migration.MigrationError, "ambiguous eight-bit"):
+            migration.migrate_file(
+                "(00000101 (як-є ()))", self.resolver(), self.keyboard,
+                codec="t5m", source_surface="укр",
+            )
 
-    def test_unratified_and_corrupt_transport_stay_blocked(self):
-        for invalid in (EXPECTED_BYTES + b"\xf2", bytes([243])):
-            with self.assertRaises(migration.SensT5Error):
-                migration.decode_bytes(invalid)
-        with self.assertRaises(migration.SensT5Error):
-            migration.encode_projection("10 100 00 C1-THIRD 01")
-        resolver = migration.Resolver(self.legacy, self.my, self.upper)
-        with self.assertRaises(migration.MigrationError):
-            migration.migrate_file("(00000101 (11110000 ()))", resolver, self.text7)
+    def test_corrupt_old_transport_fails_closed(self):
+        for damaged in (EXPECTED_BYTES + b"\\xf2", bytes([243])):
+            with self.subTest(damaged=damaged.hex()):
+                with self.assertRaises(migration.SensT5Error):
+                    migration.decode_bytes(damaged)
+
 
 if __name__ == "__main__":
     unittest.main()
