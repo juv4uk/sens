@@ -50,11 +50,30 @@ fn українські_масиви_core1_виконують_перевірку
         ));
         std::fs::write(&file, format!("{program}\n{expression}\n"))
             .expect("тимчасовий Lisp-файл");
-        let output = Command::new(env!("CARGO_BIN_EXE_sens"))
+        // Жоден завислий рекурсивний Lisp не повинен займати CI безмежно.
+        // Очікувані значення не змінюємо; timeout друкує конкретний вираз.
+        let mut child = Command::new(env!("CARGO_BIN_EXE_sens"))
             .current_dir(root)
             .arg(&file)
-            .output()
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
             .expect("справжній SENS CLI");
+        let deadline = std::time::Instant::now()
+            + std::time::Duration::from_secs(6);
+        loop {
+            if child.try_wait().expect("стан процесу SENS").is_some() {
+                break;
+            }
+            if std::time::Instant::now() >= deadline {
+                let _ = child.kill();
+                let _ = child.wait();
+                let _ = std::fs::remove_file(&file);
+                panic!("SENS_RUNTIME_TIMEOUT: Core1 case {index} expression={expression}");
+            }
+            std::thread::sleep(std::time::Duration::from_millis(30));
+        }
+        let output = child.wait_with_output().expect("вивід процесу SENS");
         let _ = std::fs::remove_file(&file);
         assert!(
             output.status.success(),
