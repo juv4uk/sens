@@ -384,6 +384,28 @@ fn yantra_named_json_readers_preserve_present_missing_and_empty_values_in_live_s
 }
 
 #[test]
+fn yantra_named_agent_cycle_preserves_blocked_reply_without_tool_execution() {
+    // Позитивний SENS-виклик callback і негативний результат від моделі.
+    // Після заміни трьох вкладених D5 value-call виконання циклу не має
+    // перетворювати заблоковану відповідь на успішну.
+    let mut session = agent_session();
+    let source = r#"
+        (визначити відмовити-у-тесті
+          (функція (повідомлення)
+            (список (як-є заблоковано) "відмова")))
+        (стан-результату
+          (цикл-агента відмовити-у-тесті (як-є ()) 0))
+    "#;
+    let observed = eval_program(source, &mut session)
+        .unwrap_or_else(|error| panic!("SENS цикл агента: {error}"))
+        .value;
+    let expected = eval_program("(як-є заблоковано)", &mut session)
+        .expect("точний D7 символ стану заблоковано")
+        .value;
+    assert_eq!(observed, expected, "заблокований результат не завершує задачу успішно");
+}
+
+#[test]
 fn yantra_model_transport_failure_and_empty_response_are_blocked_in_real_sens() {
     // Сам виконавець SENS перевіряє два негативні результати; ні HTTP,
     // ні Rust/Python не вирішують, чи це успішна відповідь помічника.
