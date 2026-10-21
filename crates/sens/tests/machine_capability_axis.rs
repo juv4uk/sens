@@ -155,6 +155,35 @@ fn packed_bits_do_not_cross_domain_widths() {
     );
 }
 
+
+#[test]
+fn machine_capability_shapes_use_real_sens_d1_truth_and_falsehood() {
+    let mut s = session();
+    // Позитивні й негативні форми перевіряє поточний виконавець SENS,
+    // не Python-симуляція й не порівняння вихідних рядків.
+    let cases = [
+        ("(можливість-правильний-рядок-домену? (як-є (5 10 ((integer-add bounded-u32-inputs u64-result)))))", "допустимо"),
+        ("(можливість-правильний-рядок-домену? (як-є (5 10 ())))", "допустимо"),
+        ("(можливість-правильний-рядок-домену? (як-є (5 10)))", "відхилено"),
+        ("(можливість-правильний-рядок-домену? (як-є (5 10 хибне-поле)))", "відхилено"),
+        ("(можливість-правильний-рядок-цілі? (як-є (x86-64 witnessed)))", "допустимо"),
+        ("(можливість-правильний-рядок-цілі? (як-є (fpga absent)))", "допустимо"),
+        ("(можливість-правильний-рядок-цілі? (як-є (fpga unknown)))", "відхилено"),
+        ("(можливість-правильний-рядок-цілі? (як-є (x86-64 witnessed зайве)))", "відхилено"),
+    ];
+    for (predicate, expected) in cases {
+        let code = format!(
+            "(за-умовою ({predicate} (як-є допустимо)) \
+             ((атом? (як-є ())) (як-є відхилено)))"
+        );
+        let actual = eval_program(&code, &mut s)
+            .unwrap_or_else(|e| panic!("SENS не виконав {predicate}: {e}"))
+            .value
+            .to_string();
+        assert_eq!(actual, expected, "неправильний D1 вердикт: {predicate}");
+    }
+}
+
 #[test]
 fn active_machine_capability_axis_has_no_sid8_lookup() {
     let source = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
