@@ -21,8 +21,8 @@ REQUIRED = (
     "(визначити та (макрос",
     "(визначити або (макрос",
 )
-TRUE_D1 = "((порожній? аргументи) (атом? (як-є ())))"
-FALSE_D1 = "((порожній? аргументи) (атом? (сполучити (як-є ()) (як-є ()))))"
+TRUE_D1 = "((порожній? аргументи) (як-є (атом? (як-є ()))))"
+FALSE_D1 = "((порожній? аргументи) (як-є (атом? (сполучити (як-є ()) (як-є ())))))"
 
 
 def check_current_core_source(source: str) -> None:
@@ -35,7 +35,7 @@ def check_current_core_source(source: str) -> None:
         if expression not in source:
             raise ValueError(f"MISSING_CURRENT_UKR_CORE {expression}")
     if TRUE_D1 not in source or FALSE_D1 not in source:
-        raise ValueError("D1_ZERO_ARITY_MACROS_MUST_RETURN_PREDICATE")
+        raise ValueError("D1_ZERO_ARITY_MACROS_MUST_EXPAND_TO_PREDICATE")
     if "((порожній? аргументи) (як-є так))" in source:
         raise ValueError("QUOTED_TRUE_IS_NOT_D1")
     if "((порожній? аргументи) (як-є ні))" in source:
