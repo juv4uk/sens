@@ -2,15 +2,33 @@
 # Ремонт чинної фізичної пари одним SENS reader та Zig/T5M.
 # Не є семантичним сертифікатом усієї бібліотеки або релізним GO.
 set -euo pipefail
-if (( $# < 1 || $# > 3 )); then
-  echo "usage: bash $0 SOURCE.lisp [SENS_BINARY] [SENS_TRIT_BINARY]" >&2
+if (( $# < 1 )); then
+  echo "usage: bash $0 SOURCE.lisp [SENS_BINARY] [SENS_TRIT_BINARY] [--binding-source SOURCE.lisp ...]" >&2
   exit 2
 fi
 source_file="$1"
+shift
 binary="target/debug/sens"
 reader="target/debug/sens-trit"
-if (( $# >= 2 )); then binary="$2"; fi
-if (( $# == 3 )); then reader="$3"; fi
+if (( $# > 0 )) && [[ "$1" != --binding-source ]]; then
+  binary="$1"
+  shift
+fi
+if (( $# > 0 )) && [[ "$1" != --binding-source ]]; then
+  reader="$1"
+  shift
+fi
+# Залежності — чинні українські DEFINE у SENS, не хостова семантика.
+binding_args=()
+while (( $# > 0 )); do
+  if (( $# < 2 )) || [[ "$1" != --binding-source || "$2" != *.lisp ||
+                         ! -f "$2" || -L "$2" ]]; then
+    echo "T5M_REPAIR_BINDING_SOURCE_INVALID argument=${1:-missing}" >&2
+    exit 2
+  fi
+  binding_args+=(--binding-source "$2")
+  shift 2
+done
 if [[ "$source_file" != *.lisp || ! -f "$source_file" || -L "$source_file" ]]; then
   echo "T5M_REPAIR_SOURCE_INVALID path=$source_file" >&2
   exit 2
@@ -44,7 +62,11 @@ snapshot="$(sha256sum "$source_file" | cut -d' ' -f1)"
 staged="$scratch/program.sens"
 staged_view="$scratch/program"
 # SENS власноруч створює слова, Zig єдиний пакує T5M.
-if timeout "$native_timeout" "$binary" --t5m-mint "$source_file" "$staged"; then
+mint_flag=--t5m-mint
+if (( ${#binding_args[@]} != 0 )); then
+  mint_flag=--t5m-mint-pair
+fi
+if timeout "$native_timeout" "$binary" "$mint_flag" "$source_file" "$staged" "${binding_args[@]}"; then
   :
 else
   mint_status=$?
@@ -61,7 +83,7 @@ if ! timeout "$native_timeout" "$reader" verify-view "$staged" > "$scratch/inver
   echo "T5M_REPAIR_VIEW_ROUNDTRIP_FAILED path=$source_file" >&2
   exit 2
 fi
-if ! timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$staged" > "$scratch/out" 2> "$scratch/err"; then
+if ! timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$staged" "${binding_args[@]}" > "$scratch/out" 2> "$scratch/err"; then
   cat "$scratch/err" >&2
   echo "T5M_REPAIR_REAL_EVAL_FAILED path=$source_file" >&2
   exit 2
@@ -96,7 +118,7 @@ else
 fi
 # Негативна перевірка проводить іншу програму через той самий SENS.
 { cat "$source_file"; printf '\n(як-є ())\n'; } > "$scratch/mutant.lisp"
-if timeout "$native_timeout" "$binary" --t5m-pair "$scratch/mutant.lisp" "$staged" > "$scratch/no" 2> "$scratch/no.err"; then
+if timeout "$native_timeout" "$binary" --t5m-pair "$scratch/mutant.lisp" "$staged" "${binding_args[@]}" > "$scratch/no" 2> "$scratch/no.err"; then
   echo "T5M_REPAIR_MUTANT_WAS_ACCEPTED path=$source_file" >&2
   exit 2
 fi

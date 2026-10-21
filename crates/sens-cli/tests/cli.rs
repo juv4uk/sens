@@ -1386,5 +1386,43 @@ fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
     assert_eq!(fs::read(&physical).unwrap(), new_physical,
         "помилка не має псувати попередню фізичну пару");
 
+    // Дві українські програми: залежність DEFINE і її реальний SENS-споживач.
+    let helper = dir.join("допоміжний.lisp");
+    fs::write(&helper, "(визначити локальний-помічник (функція (значення) значення))\n")
+        .expect("потрібне українське визначення");
+    fs::write(&src, "(локальний-помічник (як-є ()))\n")
+        .expect("користувач DEFINE");
+    let missing_binding = run();
+    assert!(!missing_binding.status.success(), "невідомий виклик не можна вважати виконаним");
+    assert_eq!(fs::read(&physical).unwrap(), new_physical,
+        "невдала пара не повинна псувати попередню T5M");
+    let repaired_binding = Command::new("bash")
+        .arg(&script)
+        .arg(&src)
+        .arg(env!("CARGO_BIN_EXE_sens"))
+        .arg(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("--binding-source")
+        .arg(&helper)
+        .current_dir(repo)
+        .output()
+        .expect("SENS/Zig виконання реальної DEFINE-залежності");
+    assert!(repaired_binding.status.success(),
+        "test_id=t5m-repair-binding-source layer=SENS/Zig stderr={} stdout={}",
+        String::from_utf8_lossy(&repaired_binding.stderr),
+        String::from_utf8_lossy(&repaired_binding.stdout));
+    assert!(String::from_utf8_lossy(&repaired_binding.stdout).contains("T5M_REPAIR_OK"));
+    let paired_with_binding = sens()
+        .arg("--t5m-pair")
+        .arg(&src)
+        .arg(&physical)
+        .arg("--binding-source")
+        .arg(&helper)
+        .output()
+        .expect("живе SENS виконання фізичної пари з DEFINE");
+    assert!(paired_with_binding.status.success(),
+        "test_id=t5m-repair-binding-execute layer=SENS stderr={}",
+        String::from_utf8_lossy(&paired_with_binding.stderr));
+    assert_eq!(String::from_utf8_lossy(&paired_with_binding.stdout).trim(), "()");
+
     let _ = fs::remove_dir_all(&dir);
 }
