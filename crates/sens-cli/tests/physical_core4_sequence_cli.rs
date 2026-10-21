@@ -343,6 +343,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-insert-second"
                 | "list-reverse-four"
                 | "list-halfturn-four"
+                | "list-zip-general"
                 | "list-drop-last-general"
                 | "замінити-третій-в-четвірці"
         ) {
@@ -410,17 +411,6 @@ fn verify_unpaired_ukrainian_libs_natively() {
             "test_id=ukr-lib-mutant source={stem} actual={}",
             error(&mismatch)
         );
-        // Публікуємо лише фактичні байти після повної native-перевірки;
-        // цей журнал дозволяє зафіксувати обернені трійки без Python-кодека.
-        if matches!(stem, "list-halfturn-four" | "list-reverse-four" | "list-zip-general") {
-            let sens_hex = fs::read(&physical)
-                .expect("живі байти Zig/T5M")
-                .iter().map(|byte| format!("{byte:02x}")).collect::<String>();
-            let view_hex = fs::read(&view)
-                .expect("живі точні слова Zig")
-                .iter().map(|byte| format!("{byte:02x}")).collect::<String>();
-            println!("SENS_T5M_NATIVE_MINTED stem={stem} sens_hex={sens_hex} view_hex={view_hex}");
-        }
         fs::remove_dir_all(&scratch).expect("прибрати лише власні тимчасові файли");
         independently_executed.insert(stem);
         println!("SENS_UKR_EXECUTABLE_PASS file=lib/{stem}.lisp exact=Zig/T5M d1=1");
