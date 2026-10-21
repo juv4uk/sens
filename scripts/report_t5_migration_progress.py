@@ -26,8 +26,9 @@ SCHEMA = "sens-t5-migration-progress/v1"
 VALID_SOURCE_STATES = {"blocked", "would-write"}
 
 
-def _source_name(path: object) -> str:
-    if not isinstance(path, str) or not path.endswith(".lisp"):
+def _source_name(path: object, *, allow_bits: bool = False) -> str:
+    endings = (".lisp", ".bits") if allow_bits else (".lisp",)
+    if not isinstance(path, str) or not path.endswith(endings):
         raise ValueError(f"invalid source path: {path!r}")
     # PurePosixPath silently normalizes embedded "//" and "/./"; an audit
     # must reject such aliases rather than treating them as new Git paths.
@@ -64,7 +65,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
 
     pair_entries: dict[str, dict] = {}
     for row in pairs.get("files", []):
-        source = _source_name(row.get("source"))
+        source = _source_name(row.get("source"), allow_bits=True)
         if source in pair_entries:
             raise ValueError(f"duplicate physical source pair: {source}")
         expected = str(PurePosixPath(source).with_suffix(".sens"))
@@ -87,6 +88,13 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
         )):
         raise ValueError("physical-pair source ledger disagrees with audit summary")
 
+    # The physical auditor includes .bits-backed SENS fixtures. They have
+    # exact binary sources, but are NOT untranslated executable .lisp files.
+    # Keep their physical evidence visible without contaminating the Lisp
+    # migration denominator or the migrator's skipped .lisp source set.
+    lisp_pairs = {s: row for s, row in pair_entries.items() if s.endswith(".lisp")}
+    binary_pairs = {s: row for s, row in pair_entries.items() if s.endswith(".bits")}
+
     queue: dict[str, dict] = {}
     for row in readiness.get("candidate_rows", []):
         source = _source_name(row.get("path"))
@@ -108,9 +116,9 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
     skipped = {_source_name(s) for s in readiness.get("skipped_existing_sens_pairs", [])}
     if len(skipped) != len(readiness.get("skipped_existing_sens_pairs", [])):
         raise ValueError("duplicate skipped source in readiness")
-    if skipped != set(pair_entries):
+    if skipped != set(lisp_pairs):
         raise ValueError("the two existing audits disagree about paired .lisp paths")
-    if set(pair_entries) & set(queue):
+    if set(lisp_pairs) & set(queue):
         raise ValueError("an original source cannot be paired AND unpaired")
 
     # A .sens without a tracked same-stem .lisp is an orphan physical
@@ -118,17 +126,17 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
     for tracked in tracked_sources:
         _source_name(tracked)
     orphan_physical_sens = sorted(
-        row["sens"] for source, row in pair_entries.items()
+        row["sens"] for source, row in lisp_pairs.items()
         if source not in tracked_sources
     )
-    represented = set(pair_entries) | set(queue)
+    represented = set(lisp_pairs) | set(queue)
     missing = sorted(tracked_sources - represented)
     unknown = sorted(represented - tracked_sources)
 
     ledger = []
     for source in sorted(represented):
-        if source in pair_entries:
-            p = pair_entries[source]
+        if source in lisp_pairs:
+            p = lisp_pairs[source]
             # Legacy T5 can roundtrip physically but is NOT current T5M.
             # Keep it visible as migration work, never promote it as a
             # canonical current carrier or as native semantic proof.
@@ -190,7 +198,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
     )
     discrepancy = bool(missing or unknown or any(
         r["status"] == "PHYSICAL_T5_PAIR_BLOCKED" for r in ledger
-    ))
+    ) or any(r["physical_status"] == "BLOCKED" for r in binary_pairs.values()))
     return {
         "schema": SCHEMA,
         "status": "BLOCKED_DISCREPANCY" if discrepancy else "COMPLETE_MECHANICAL_INVENTORY_ONLY",
@@ -205,16 +213,22 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
         },
         "summary": {
             "tracked_lisp_sources": len(tracked_sources),
-            "tracked_physical_sens_pairs": len(pair_entries),
+            "tracked_physical_sens_pairs": len(lisp_pairs),
+            "tracked_binary_source_fixture_pairs": len(binary_pairs),
+            "binary_source_fixture_physical_blocked": sum(
+                r["physical_status"] == "BLOCKED" for r in binary_pairs.values()
+            ),
             "unpaired_source_rows": len(queue),
-            "mechanically_canonical_physical_pairs": pair_summary["physical_pass"],
+            "mechanically_canonical_physical_pairs": sum(
+                r["physical_status"] == "PASS" for r in lisp_pairs.values()
+            ),
             "mechanically_canonical_current_t5m_pairs": sum(
                 r["physical_status"] == "PASS" and r.get("physical_codec") == "t5m"
-                for r in pair_entries.values()
+                for r in lisp_pairs.values()
             ),
             "legacy_t5_pairs_requiring_t5m": sum(
                 r["physical_status"] == "PASS" and r.get("physical_codec") == "t5"
-                for r in pair_entries.values()
+                for r in lisp_pairs.values()
             ),
             "independently_oracle_certified_from_these_inputs": 0,
             "status_counts": dict(sorted(counts.items())),
@@ -229,6 +243,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
         "warning": (
             "A physical T5M pair is not an executable-semantic admission; "
             "legacy T5 physical success does not establish current T5M. "
+            ".bits-backed fixtures are counted separately from executable Lisp. "
             "The original .lisp requires an independent canonical D2 parser "
             "and observer/oracle proof, never a filename-only or codec-only pass."
         ),
