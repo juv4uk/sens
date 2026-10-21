@@ -173,3 +173,53 @@ fn d11_world_remove_first_native_law_and_mutant() {
         first.value,
     );
 }
+
+#[test]
+fn d11_world_event_and_module_presence_are_native_sens_compositions() {
+    // WORLD-APPLY-EVENT і WORLD-MODULE-MISSING?: це визначені
+    // бібліотечні закони SENS, не два нові Rust/host-примітиви.
+    let mut session = world_session();
+    for (name, source, expected) in [
+        (
+            "event-tell",
+            "(внутрішня-рівність-версій (внутрішній-світ-застосувати-подію (як-є (старе)) (як-є (tell модуль нове))) (як-є (нове старе)))",
+            true,
+        ),
+        (
+            "event-order-negative",
+            "(внутрішня-рівність-версій (внутрішній-світ-застосувати-подію (як-є (старе)) (як-є (tell модуль нове))) (як-є (старе нове)))",
+            false,
+        ),
+        (
+            "event-retract-first",
+            "(внутрішня-рівність-версій (внутрішній-світ-застосувати-подію (як-є (а б а)) (як-є (retract модуль а))) (як-є (б а)))",
+            true,
+        ),
+        (
+            "event-preserve-unknown",
+            "(внутрішня-рівність-версій (внутрішній-світ-застосувати-подію (як-є (а б)) (як-є (noop модуль а))) (як-є (а б)))",
+            true,
+        ),
+        (
+            "missing-other-module",
+            "(внутрішній-світ-модуль-відсутній? (створити-світ (як-є ()) (список (як-є (tell альфа факт-а))) (як-є ())) (як-є бета))",
+            true,
+        ),
+        (
+            "module-present-negative",
+            "(внутрішній-світ-модуль-відсутній? (створити-світ (як-є ()) (список (як-є (tell альфа факт-а))) (як-є ())) (як-є альфа))",
+            false,
+        ),
+    ] {
+        let expressions = parse_mixed_exact_domain(source)
+            .unwrap_or_else(|error| panic!("test_id=D11-WORLD-{name} layer=reader input={source} actual={error}"));
+        let result = eval_parsed_expressions(&expressions, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=D11-WORLD-{name} layer=SENS input={source} actual={error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id=D11-WORLD-{name} layer=SENS input={source} expected=D1:{expected} actual={:?}",
+            result.value
+        );
+    }
+}
