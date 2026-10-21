@@ -114,7 +114,7 @@ impl DomainIdentity {
     /// D6:001111 SUB1 та D6:111110 INTEGERP (точне D24+ -> D1).
     /// Інші D6 residents лишаються fail-closed; residency не дорівнює mechanism.
     /// D8 так само OWNER-RATIFIED #3960.
-    /// D9 OWNER-RATIFIED #4008. Лише п'ять реалізованих string-механізмів
+    /// D9 OWNER-RATIFIED #4008. Лише шість реалізованих string-механізмів
     /// допускаються як exact D9 Core-operation identity; інша residency
     /// залишається fail-closed.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
@@ -138,7 +138,7 @@ impl DomainIdentity {
             }
             Self::D9(value) if matches!(
                 value.word().packed_bits(),
-                0b110011110 | 0b110011100 | 0b110011101 | 0b110101010 | 0b110101011
+                0b110011110 | 0b110011100 | 0b110011101 | 0b110101010 | 0b110101011 | 0b110100110
             ) => Some(CoreDomainIdentity::D9(value)),
             Self::D9(_) => None,
             Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D10(_) => None,
