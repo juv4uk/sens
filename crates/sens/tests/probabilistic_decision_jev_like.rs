@@ -327,19 +327,30 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
 fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
     let valid_batch = r#"
       (let* ((state (quote ((message "double charge") (locale uk))))
-             (choice-question (pd-question-choice (quote route) (quote (billing technical))))
-             (noul-question (pd-question-noul (quote urgent)))
-             (score-question (pd-question-score (quote severity) (quote (low medium high))))
+             (choice-question (запитання-вибору-системи-один
+               (quote route)
+               "Choose the support team for this request."
+               (quote ((billing "Payment or refund issues")
+                       (technical "Software malfunction")))))
+             (noul-question (запитання-так-ні-системи-один
+               (quote urgent)
+               "Does this request need urgent handling?"))
+             (score-question (запитання-шкали-системи-один
+               (quote severity)
+               "Rate urgency from low to high."
+               (quote ((low "No deadline")
+                       (medium "Needed soon")
+                       (high "Immediate attention")))))
              (questions (list choice-question noul-question score-question))
              (request (запит-системи-один state questions))
              (answers
                (list
-                 (pd-choice-observe choice-question
+                 (спостерегти-вибір-системи-один choice-question
                    (quote ((billing 3/4) (technical 1/4)))
                    (quote ((source synthetic) (question route))))
                  (pd-noul-observe noul-question 2/3
                    (quote ((source synthetic) (question urgent))))
-                 (pd-score-observe score-question
+                 (спостерегти-шкалу-системи-один score-question
                    (quote ((low 1/4) (medium 1/2) (high 1/4)))
                    (quote ((source synthetic) (question severity)))))
              (response (відповідь-системи-один request answers)))
@@ -359,11 +370,17 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
 
     let invalid_batches = r#"
       (let* ((state (quote ((message "double charge"))))
-             (choice-question (pd-question-choice (quote route) (quote (billing technical))))
-             (noul-question (pd-question-noul (quote urgent)))
+             (choice-question (запитання-вибору-системи-один
+               (quote route)
+               "Choose the support team for this request."
+               (quote ((billing "Payment or refund issues")
+                       (technical "Software malfunction")))))
+             (noul-question (запитання-так-ні-системи-один
+               (quote urgent)
+               "Does this request need urgent handling?"))
              (questions (list choice-question noul-question))
              (request (запит-системи-один state questions))
-             (choice-answer (pd-choice-observe choice-question
+             (choice-answer (спостерегти-вибір-системи-один choice-question
                (quote ((billing 3/4) (technical 1/4)))
                (quote ((source synthetic))))
              (noul-answer (pd-noul-observe noul-question 2/3
