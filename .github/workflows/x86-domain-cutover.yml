@@ -23,7 +23,7 @@ jobs:
 
       - name: Двійковий SENS сам перевіряє D1 і мутацію
         run: |
-          cargo run --quiet --locked -p sens-cli --bin sens-trit -- encode tests/semantic/x86-lowering-d1-law.lisp
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- encode tests/semantic/x86-lowering-d1-law.bits
           cargo run --quiet --locked -p sens-cli --bin sens-trit -- eval tests/semantic/x86-lowering-d1-law.sens
-          cargo run --quiet --locked -p sens-cli --bin sens-trit -- encode tests/semantic/x86-lowering-d1-mutant.lisp
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- encode tests/semantic/x86-lowering-d1-mutant.bits
           ! cargo run --quiet --locked -p sens-cli --bin sens-trit -- eval tests/semantic/x86-lowering-d1-mutant.sens
