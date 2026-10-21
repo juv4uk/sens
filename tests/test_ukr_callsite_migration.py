@@ -412,7 +412,9 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         life_source = (root / "lib/life-1-scheduler.lisp").read_text(encoding="utf-8")
         self.assertIn("(як-є (scheduler-selection none))", life_source)
         self.assertIn("(як-є producer)", life_source)
-        self.assertIn("(так", map_source)
+        # Мапа вже перейшла на обчислювані D1 гілки, голого так немає.
+        self.assertEqual(map_source.count("((атом? (як-є ()))"), 2)
+        self.assertNotIn("(так", map_source)
         self.assertNotIn("#d1:0", life_source)
         self.assertIn("(нехай-послідовно ", life_source)
         # Чинний LIFE-1 виводить D1 без голих host-істин.
