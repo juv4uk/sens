@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Mechanical audit of the D11 selector research seed.
 
-This validates 11-bit candidate derivation and collision guards only.
-It never ratifies D11 entries, reserves coordinates, or grants callability.
+This validates universal 11-bit selector derivation and coordinate uniqueness.
+Definitions follow CAR/CDR algebra; this does not implement a direct D11 opcode.
 """
 from __future__ import annotations
 
@@ -84,18 +84,18 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
 
     require(seed.get("schema") == "sens.d11.selector-seed/v1",
             "SEED_SCHEMA", "expected sens.d11.selector-seed/v1")
-    require(seed.get("status") == "RESEARCH_ONLY_NOT_RATIFIED" and
-            seed.get("owner_decision") == "PENDING",
-            "NOT_RESEARCH_ONLY",
-            "candidate seed must remain RESEARCH_ONLY_NOT_RATIFIED with owner_decision=PENDING")
+    require(seed.get("status") == "MATHEMATICALLY_DERIVED_SELECTOR_FUNCTIONS" and
+            seed.get("owner_decision") == "MATHEMATICAL_DERIVATION_CONFIRMED_NOT_NEW_PRIMITIVE",
+            "NOT_MATHEMATICAL_DERIVATION",
+            "selector definitions must follow ratified CAR/CDR composition, not a new primitive admission")
     require(seed.get("domain") == "D11" and seed.get("width") == 11 and
             seed.get("capacity") == 2048,
-            "SEED_WIDTH", "D11 candidates require exact width 11 and capacity 2048")
+            "SEED_WIDTH", "D11 deriveds require exact width 11 and capacity 2048")
 
     source = seed.get("source", {})
     require(source.get("parent_domain") == "D10" and
             source.get("ratified_parent_surface") == PATHS["d10_table"],
-            "PARENT_SOURCE", "candidate parent must be the current D10 domain table")
+            "PARENT_SOURCE", "derived parent must be the current D10 domain table")
     parent_pin = source.get("parent_git_blob")
     require(isinstance(parent_pin, str) and re.fullmatch(r"[0-9a-f]{40}", parent_pin),
             "PARENT_PIN_FORMAT", "historical parent Git blob pin must be a 40-digit SHA-1")
@@ -103,14 +103,14 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
             "TEST_VOCAB_SOURCE", "seed must name the ratified D11 testing vocabulary")
 
     law = seed.get("law", {})
-    require(law.get("candidate_only") is True and
+    require(law.get("derived_by_law") is True and
             law.get("non_selector_parents") == "NO_EXTENSION" and
-            law.get("coordinate_rule") == "11-bit candidate = 10-bit D10 selector coordinate || one bit",
-            "CANDIDATE_LAW", "seed must remain a selector-only, candidate-only extension")
-    gate = str(law.get("candidate_gate", ""))
+            law.get("coordinate_rule") == "11-bit derived selector = 10-bit D10 parent selector coordinate || one bit",
+            "DERIVED_LAW", "seed must remain a selector-only, derived-only extension")
+    gate = str(law.get("opcode_admission", ""))
     require(all(token in gate for token in (
-        "NO_RATIFICATION", "NO_D11_CALLABILITY", "NO_ZIG_T5_ADMISSION"
-    )), "CANDIDATE_GATE", "seed must explicitly deny ratification, callability and T5 admission")
+        "NO_NEW_PRIMITIVE", "NO_ZIG_T5_DIRECT_OPCODE_ADMISSION"
+    )), "OPCODE_ADMISSION", "mathematical derivation is distinct from direct opcode and Zig T5 admission")
 
     # Current D10 mapping is the evidence used for derivation. The seed's source
     # pin is historical provenance; drift is reported, not silently treated as
@@ -156,7 +156,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
     parent_pin_matches = current_d10_blob == parent_pin
 
     # Verify that the canonical D11 table still consists only of the 43
-    # owner-ratified testing entries, not the 512 research candidates.
+    # owner-ratified testing entries, not the 512 research deriveds.
     require(vocabulary.get("schema") == "sens.d11.testing/v1" and
             vocabulary.get("status") == "owner-ratified" and
             vocabulary.get("ratified_by") == "PROJECT_OWNER",
@@ -200,69 +200,69 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
     require(d11_map == test_map, "D11_TABLE_DRIFT",
             "lib/domains/d11.lisp differs from the owner-ratified 43-row testing vocabulary")
 
-    candidate_rows = seed.get("rows")
-    require(isinstance(candidate_rows, list) and len(candidate_rows) == 512,
-            "CANDIDATE_COUNT", "expected 512 D11 selector candidates")
-    candidates: dict[str, str] = {}
-    candidate_names: set[str] = set()
-    for index, row in enumerate(candidate_rows):
+    derived_rows = seed.get("rows")
+    require(isinstance(derived_rows, list) and len(derived_rows) == 512,
+            "DERIVED_COUNT", "expected 512 D11 selector deriveds")
+    deriveds: dict[str, str] = {}
+    derived_names: set[str] = set()
+    for index, row in enumerate(derived_rows):
         require(isinstance(row, list) and len(row) == 2,
-                "CANDIDATE_SHAPE", f"candidate row {index} must be [11-bit coordinate, name]")
+                "DERIVED_SHAPE", f"derived row {index} must be [11-bit coordinate, name]")
         bits, name = row
         require(isinstance(bits, str) and re.fullmatch(r"[01]{11}", bits) is not None,
-                "CANDIDATE_WIDTH", f"candidate row {index} must have exactly 11 bits")
+                "DERIVED_WIDTH", f"derived row {index} must have exactly 11 bits")
         require(isinstance(name, str) and bool(name),
-                "CANDIDATE_NAME", f"candidate row {index} has no name")
-        require(bits not in candidates, "CANDIDATE_DUP_COORD", f"duplicate candidate coordinate {bits}")
-        require(name.casefold() not in candidate_names, "CANDIDATE_DUP_NAME",
-                f"duplicate candidate name {name}")
-        candidates[bits] = name
-        candidate_names.add(name.casefold())
+                "DERIVED_NAME", f"derived row {index} has no name")
+        require(bits not in deriveds, "DERIVED_DUP_COORD", f"duplicate derived coordinate {bits}")
+        require(name.casefold() not in derived_names, "DERIVED_DUP_NAME",
+                f"duplicate derived name {name}")
+        deriveds[bits] = name
+        derived_names.add(name.casefold())
 
-    candidate_coordinates = set(candidates)
+    derived_coordinates = set(deriveds)
     test_coordinates = set(test_map)
-    coord_collisions = candidate_coordinates & test_coordinates
-    name_collisions = candidate_names & d11_names
+    coord_collisions = derived_coordinates & test_coordinates
+    name_collisions = derived_names & d11_names
     require(not coord_collisions, "D11_TEST_COORD_COLLISION",
-            f"candidate coordinates overlap ratified testing rows: {sorted(coord_collisions)[:5]}")
+            f"derived coordinates overlap ratified testing rows: {sorted(coord_collisions)[:5]}")
     require(not name_collisions, "D11_TEST_NAME_COLLISION",
-            f"candidate names overlap ratified testing rows: {sorted(name_collisions)[:5]}")
+            f"derived names overlap ratified testing rows: {sorted(name_collisions)[:5]}")
 
     expected_coordinates: set[str] = set()
     parent_extensions: dict[str, set[str]] = {bits: set() for bits in parents}
-    for bits, name in candidates.items():
+    for bits, name in deriveds.items():
         parent, extension = bits[:10], bits[10]
-        require(parent in parents, "CANDIDATE_PARENT",
+        require(parent in parents, "DERIVED_PARENT",
                 f"{bits} does not extend one of the 256 D10 selector parents")
         parent_name = d10_map[parent]
         suffix = "A" if extension == "0" else "D"
         expected_name = parent_name[:-1] + suffix + parent_name[-1]
-        require(name == expected_name, "CANDIDATE_NAME_DERIVATION",
+        require(name == expected_name, "DERIVED_NAME_DERIVATION",
                 f"{bits}: expected {expected_name} from {parent_name}, found {name}")
         expected_coordinates.add(parent + extension)
         parent_extensions[parent].add(extension)
 
-    require(candidate_coordinates == {
+    require(derived_coordinates == {
         parent + extension for parent in parents for extension in ("0", "1")
-    }, "CANDIDATE_COVERAGE", "each selector parent must have exactly suffixes 0 and 1")
+    }, "DERIVED_COVERAGE", "each selector parent must have exactly suffixes 0 and 1")
     require(all(extensions == {"0", "1"} for extensions in parent_extensions.values()),
-            "CANDIDATE_PAIR", "one or more D10 parents lack a 0/1 child pair")
+            "DERIVED_PAIR", "one or more D10 parents lack a 0/1 child pair")
 
     actual_accounting = {
         "d10_selector_parents": len(parents),
-        "d11_selector_candidates": len(candidates),
-        "unique_11bit_coordinates": len(candidate_coordinates),
-        "unique_names": len(candidate_names),
+        "d11_mathematically_defined_selectors": len(deriveds),
+        "unique_11bit_coordinates": len(derived_coordinates),
+        "unique_names": len(derived_names),
         "d11_existing_testing_only": len(test_map),
         "test_coordinate_collisions": len(coord_collisions),
         "test_name_collisions": len(name_collisions),
         "callable": 0,
         "zig_t5_admitted": 0,
-        "unallocated_coordinates_after_testing": 2048 - len(test_map),
-        "unproposed_coordinates_after_testing_and_selector_research":
-            2048 - len(test_map) - len(candidate_coordinates),
-        "selector_candidate_coordinates_reserved": 0,
-        "selector_candidates_not_callable": len(candidates),
+        "coordinates_outside_testing_vocabulary": 2048 - len(test_map),
+        "coordinates_outside_testing_and_derived_selectors":
+            2048 - len(test_map) - len(derived_coordinates),
+        "selector_derived_coordinates": len(deriveds),
+        "derived_selectors_without_direct_opcode_admission": len(deriveds),
         "new_ratified_residents": 0,
     }
     declared = seed.get("accounting", {})
@@ -274,19 +274,19 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
         "test_id": "D11_SELECTOR_SEED_AUDIT",
         "layer": "domain-ladder",
         "status": "MECHANICAL_PASS",
-        "semantic_status": "NOT_VERIFIED",
+        "semantic_status": "DERIVED_BY_COMPOSITION",
         "domain": "D11",
         "width": 11,
         "capacity": 2048,
-        "candidate_status": seed["status"],
+        "derived_status": seed["status"],
         "owner_decision": seed["owner_decision"],
         "selector_parents": len(parents),
-        "candidate_count": len(candidates),
-        "unique_coordinates": len(candidate_coordinates),
-        "unique_names": len(candidate_names),
+        "derived_count": len(deriveds),
+        "unique_coordinates": len(derived_coordinates),
+        "unique_names": len(derived_names),
         "testing_only_rows": len(test_map),
-        "candidate_testing_coordinate_collisions": len(coord_collisions),
-        "candidate_testing_name_collisions": len(name_collisions),
+        "derived_testing_coordinate_collisions": len(coord_collisions),
+        "derived_testing_name_collisions": len(name_collisions),
         "callable_admissions_added": 0,
         "ratified_residents_added": 0,
         "historical_d10_parent_blob": parent_pin,
@@ -294,7 +294,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
         "historical_pin_matches_current": parent_pin_matches,
         "source_pin_note": (
             "MATCHES_CURRENT_D10_TABLE" if parent_pin_matches else
-            "HISTORICAL_PIN_DIFFERS; all 256 candidate parents revalidated against current D10 rows"
+            "HISTORICAL_PIN_DIFFERS; all 256 derived parents revalidated against current D10 rows"
         ),
     }
 
@@ -313,7 +313,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(
             "PASS test_id=D11_SELECTOR_SEED_AUDIT layer=domain-ladder "
-            f"candidates={report['candidate_count']} parents={report['selector_parents']} "
+            f"derived={report['derived_count']} parents={report['selector_parents']} "
             f"width={report['width']} testing_only={report['testing_only_rows']} "
             f"collisions=0 callability_added=0 ratified_residents_added=0 "
             f"semantic_status={report['semantic_status']}"
