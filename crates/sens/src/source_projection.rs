@@ -501,4 +501,38 @@ mod tests {
         assert!(matches!(&items[1].kind, ExprKind::Symbol(_)));
         assert!(!matches!(&items[2].kind, ExprKind::BinaryNumber(_)));
     }
+
+    #[test]
+    fn український_парсер_виконує_точний_дріб_та_відхиляє_ділення_на_нуль() {
+        // Справжній SENS обчислює весь чинний benchmark-файл, включно з D5,
+        // а не Python чи тестова підміна числової семантики.
+        let source = include_str!("../../../benchmarks/parser.lisp");
+        let parsed = crate::parse(source).expect("читач розуміє весь український Lisp");
+        let projected = project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("кожне десяткове ціле отримує власну D24+ ідентичність");
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("чинне ядро SENS");
+        let result = crate::eval_parsed_expressions(&projected, &mut session)
+            .expect("SENS реально виконує усі вирази benchmark/parser.lisp");
+        let crate::Value::NumericComposition(composition) = &result.value else {
+            panic!("очікується точна D5 дробова композиція SENS")
+        };
+        let (_, numerator, denominator) = composition.as_parts();
+        assert_eq!(numerator.to_unsigned_decimal_string(), "5");
+        assert_eq!(
+            denominator.expect("дробовий знаменник").to_unsigned_decimal_string(),
+            "336"
+        );
+
+        // Негативний закон виконує той самий інтерпретатор SENS.
+        let invalid = "(частка 5 0)";
+        let parsed = crate::parse(invalid).expect("читач не підміняє семантику");
+        let projected = project_ukr_decimal_integer_literals(&parsed, invalid)
+            .expect("нуль також є допустимим цілим операндом D24+");
+        let error = crate::eval_parsed_expressions(&projected, &mut session)
+            .err()
+            .expect("SENS сам забороняє ділення на нуль");
+        assert_eq!(error.kind, ErrorKind::DivisionByZero);
+    }
+
 }
