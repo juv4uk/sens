@@ -115,3 +115,18 @@ fn repl_projection_round_trip_uses_named_ukrainian_sens_calls() {
         );
     }
 }
+
+#[test]
+fn repl_duplicate_name_rejects_ambiguous_d4_code() {
+    // Дві різні чотирибітні координати з однією укр-проєкцією:
+    // SENS не повинен здогадуватися, яку виконувати.
+    let mut session = repl_session();
+    let source = "(репл-код-із-каталогу (як-є функція) (як-є укр) (як-є д4) (як-є ((д4 (domain-table/1 (\"0010\" (укр функція)) (\"0011\" (укр функція)))))))";
+    let result = eval_program(source, &mut session)
+        .unwrap_or_else(|error| panic!("SENS D4 ambiguity witness: {error:?}"))
+        .value;
+    assert_eq!(
+        result.to_string(), "()",
+        "test_id=repl-d4-ambiguous layer=SENS input={source} expected=() actual={result}"
+    );
+}
