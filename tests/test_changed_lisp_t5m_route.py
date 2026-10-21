@@ -27,6 +27,24 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             with self.subTest(receipt=receipt):
                 self.assertIn(receipt, source)
 
+    def test_batch_reports_every_file_without_greenwashing(self):
+        source = RUNNER.read_text(encoding="utf-8")
+        self.assertIn('failed_files=0', source)
+        self.assertIn('checked_files=$((checked_files + 1))', source)
+        self.assertIn('T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s', source)
+        # Кожна адресна відмова має не обривати весь перелік.
+        for receipt in ('T5M_CHANGED_SOURCE_INVALID', 'T5M_MIGRATION_NO_REPORT',
+                        'T5M_MIGRATION_UNPROVEN', 'T5M_COMMITTED_VIEW_DRIFT',
+                        'T5M_FILE_EXECUTION_FAIL'):
+            with self.subTest(receipt=receipt):
+                arm = source.split('::error::' + receipt, 1)[1].split('continue', 1)[0]
+                self.assertIn('failed_files=$((failed_files + 1))', arm)
+        self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
+
+    def test_shell_parses(self):
+        import subprocess
+        subprocess.run(['bash', '-n', str(RUNNER)], check=True)
+
     def test_ci_uses_one_binary_transport_route(self):
         source = CI.read_text(encoding="utf-8")
         self.assertNotIn('--t5m-file "$file"', source)

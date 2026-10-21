@@ -58,8 +58,9 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
             "  if (( not_program > 0 )); then", 1
         )[0]
         self.assertIn("::error::T5M_MIGRATION_UNPROVEN", blocked_arm)
-        self.assertIn("exit 2", blocked_arm)
-        self.assertNotIn("continue", blocked_arm)
+        self.assertIn("failed_files=$((failed_files + 1))", blocked_arm)
+        self.assertIn("continue", blocked_arm)
+        self.assertIn("if (( failed_files > 0 )); then\\n  exit 2", runner)
 
     def test_default_ukr_preserves_program_identity_not_source_comments(self):
         with tempfile.TemporaryDirectory(prefix="sens-ukr-t5m-default-") as temp:

@@ -12,11 +12,15 @@ outdir="$3"
 test -x "$binary"
 test -f "$manifest"
 mkdir -p "$outdir"
+failed_files=0
+checked_files=0
 while IFS= read -r file || [[ -n "$file" ]]; do
   [[ -n "$file" ]] || continue
+  checked_files=$((checked_files + 1))
   if [[ "$file" != *.lisp || ! -f "$file" || -L "$file" ]]; then
     echo "::error::T5M_CHANGED_SOURCE_INVALID path=$file" >&2
-    exit 2
+    failed_files=$((failed_files + 1))
+    continue
   fi
   id="$(printf '%s' "$file" | sha256sum | cut -c1-16)"
   dir="$outdir/$id"
@@ -30,7 +34,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   if [[ ! -s "$report" ]]; then
     cat "$dir/migration.log" >&2
     echo "::error::T5M_MIGRATION_NO_REPORT path=$file status=$code" >&2
-    exit 1
+    failed_files=$((failed_files + 1))
+    continue
   fi
   outcome="$(python3 - "$report" <<'PY'
 import json, sys
@@ -46,11 +51,13 @@ PY
   read -r written blocked not_program <<< "$outcome"
   if (( code > 2 )); then
     echo "::error::T5M_MIGRATION_INTERNAL_FAILURE path=$file status=$code" >&2
-    exit "$code"
+    failed_files=$((failed_files + 1))
+    continue
   fi
   if (( blocked > 0 )); then
     echo "::error::T5M_MIGRATION_UNPROVEN path=$file blocked=$blocked semantic=NOT_CERTIFIED" >&2
-    exit 2
+    failed_files=$((failed_files + 1))
+    continue
   fi
   if (( not_program > 0 )); then
     echo "T5M_NOT_PROGRAM path=$file"
@@ -58,32 +65,38 @@ PY
   fi
   if (( code != 0 || written != 1 )); then
     echo "::error::T5M_MIGRATION_INCONSISTENT path=$file status=$code written=$written" >&2
-    exit 1
+    failed_files=$((failed_files + 1))
+    continue
   fi
   pair="$dir/$(basename "$file" .lisp).sens"
   if [[ ! -s "$pair" ]]; then
     echo "::error::T5M_MINTED_PAIR_MISSING path=$file" >&2
-    exit 1
+    failed_files=$((failed_files + 1))
+    continue
   fi
   committed="$(dirname "$file")/$(basename "$file" .lisp).sens"
   staged_view="${pair%.sens}"
   committed_view="${committed%.sens}"
   if [[ ! -f "$staged_view" || -L "$staged_view" ]]; then
     echo "::error::T5M_MINTED_VIEW_MISSING source=$file expected=$staged_view" >&2
-    exit 1
+    failed_files=$((failed_files + 1))
+    continue
   fi
   if [[ -f "$committed" ]]; then
     if ! cmp -s "$pair" "$committed"; then
       echo "::error::T5M_COMMITTED_PAIR_DRIFT source=$file companion=$committed" >&2
-      exit 1
+      failed_files=$((failed_files + 1))
+      continue
     fi
     if [[ ! -f "$committed_view" || -L "$committed_view" ]]; then
       echo "::error::T5M_COMMITTED_VIEW_MISSING source=$file expected=$committed_view" >&2
-      exit 1
+      failed_files=$((failed_files + 1))
+      continue
     fi
     if ! cmp -s "$staged_view" "$committed_view"; then
       echo "::error::T5M_COMMITTED_VIEW_DRIFT source=$file companion=$committed_view" >&2
-      exit 1
+      failed_files=$((failed_files + 1))
+      continue
     fi
   else
     echo "::notice::T5M_PAIR_NOT_COMMITTED path=$file release=NOT_CERTIFIED"
@@ -97,6 +110,11 @@ PY
     status=$?
     sed 's/^/T5M stderr: /' "$stderr" >&2
     echo "::error::T5M_FILE_EXECUTION_FAIL path=$file pair=$pair status=$status" >&2
-    exit "$status"
+    failed_files=$((failed_files + 1))
+    continue
   fi
 done < "$manifest"
+printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s release=NOT_CERTIFIED\n' "$checked_files" "$failed_files"
+if (( failed_files > 0 )); then
+  exit 2
+fi
