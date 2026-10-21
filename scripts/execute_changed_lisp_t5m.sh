@@ -126,6 +126,13 @@ PY
     continue
   fi
   read -r written blocked not_program <<< "$outcome"
+  # Для одного вхідного Lisp результат є рівно одним із трьох станів.
+  # Подвійний статус written + not-program не може приховати програму.
+  if (( written + blocked + not_program != 1 )); then
+    echo "::error::T5M_MIGRATION_REPORT_COUNTS_INVALID path=$file written=$written blocked=$blocked not_program=$not_program" >&2
+    mark_file_failed
+    continue
+  fi
   if (( code > 2 )); then
     echo "::error::T5M_MIGRATION_INTERNAL_FAILURE path=$file status=$code" >&2
     mark_file_failed

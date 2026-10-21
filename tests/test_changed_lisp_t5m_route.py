@@ -191,6 +191,34 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
             self.assertIn("files_checked=1 files_failed=1", result.stdout)
             self.assertFalse((root / "executed.marker").exists())
 
+    def test_one_source_cannot_claim_both_program_and_data(self):
+        # Лише контроль класифікації оркестратора, не Python-обчислювач SENS.
+        with tempfile.TemporaryDirectory(prefix="sens-t5m-report-counts-") as td:
+            root = Path(td)
+            (root / "scripts").mkdir()
+            (root / "module.lisp").write_text("(як-є ())\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\n", encoding="utf-8")
+            (root / "scripts/migrate-three-pass.py").write_text(
+                "import json, pathlib, sys\n"
+                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\n"
+                "report.write_text(json.dumps({'summary': {'files_written': 1, "
+                "'files_blocked': 0, 'files_not_program': 1}, 'files': []}))\n",
+                encoding="utf-8",
+            )
+            binary = root / "must-not-run-sens"
+            binary.write_text("#!/bin/sh\nprintf invoked > executed.marker\nexit 0\n",
+                              encoding="utf-8")
+            binary.chmod(0o755)
+            result = subprocess.run(
+                ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"],
+                cwd=root, capture_output=True, text=True, timeout=20,
+            )
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertIn("T5M_MIGRATION_REPORT_COUNTS_INVALID", result.stderr)
+            self.assertIn("written=1 blocked=0 not_program=1", result.stderr)
+            self.assertIn("files_checked=1 files_failed=1", result.stdout)
+            self.assertFalse((root / "executed.marker").exists())
+
     def test_committed_physical_pair_must_be_regular_not_symlink_or_directory(self):
         # Перевіряємо лише shell-межу перевірки пар, не Python-SENS
         # evaluator. Обидва шкідливі об'єкти відхиляються до runtime.
