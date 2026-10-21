@@ -1428,7 +1428,7 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
     # окремого owner-reviewed оновлення, а не автоматичного виключення.
     reviewed_lib_cohort = None
     if relative.startswith("lib/"):
-        if re.fullmatch(r"lib/domains/d(?:[1-9]|10|11)\\.lisp", relative):
+        if re.fullmatch(r"lib/domains/d(?:[1-9]|10|11)\.lisp", relative):
             reviewed_lib_cohort = "domain-table"
         elif relative in ("lib/core2.lisp", "lib/surface/ukr.lisp"):
             reviewed_lib_cohort = "comment-only-loader"
