@@ -55,7 +55,10 @@ class Core1FourthCurrentMigration(unittest.TestCase):
             self.assertIn(name, readable)
         self.assertNotIn("00000101", readable)
         self.assertNotIn("C1-FOURTH", readable)
-        self.assertIn("(00001001 C1-FOURTH",
+        # Чинний четвертий елемент компонується з D5/D3, не із SID8.
+        self.assertIn("(визначити ядро1-четвертий-елемент",
+                      (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
+        self.assertIn("(третє (решта значення))",
                       (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
         self.assertEqual(self.bridge, {})
 
