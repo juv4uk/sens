@@ -179,6 +179,26 @@ fn t5m_file_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     Some(Ok(args[2].as_str()))
 }
 
+/// Парне виконання дозволяє читати D24+ з реальних байтів Zig T5M,
+/// лише якщо український Lisp свідчить ТОЧНО ту саму доменну послідовність.
+/// Це не дозвіл трактувати довільний W24 за числову ідентичність.
+fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str), &'static str>> {
+    if !args.iter().skip(1).any(|item| item == "--t5m-pair") {
+        return None;
+    }
+    if args.len() != 4 || args[1] != "--t5m-pair" {
+        return Some(Err("usage: sens --t5m-pair <ukrainian-source.lisp> <physical.sens>"));
+    }
+    let source = std::path::Path::new(&args[2]);
+    let physical = std::path::Path::new(&args[3]);
+    if source.extension().and_then(|part| part.to_str()) != Some("lisp")
+        || physical.extension().and_then(|part| part.to_str()) != Some("sens")
+    {
+        return Some(Err("--t5m-pair requires .lisp source and physical .sens bytes"));
+    }
+    Some(Ok((&args[2], &args[3])))
+}
+
 /// One sterile physical ingress: Rust-host bytes -> Zig ABI v2 BE3 ->
 /// exact-width SENS words. No Rust-side T5 fallback is permitted for .sens.
 fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
@@ -290,6 +310,39 @@ fn main() {
             }
             Err(error) => {
                 eprintln!("sens: T5M file execution failed: {error}");
+                process::exit(1);
+            }
+        }
+        return;
+    }
+    if let Some(request) = t5m_pair_request(&raw_args) {
+        let result = match request {
+            Ok((source_path, physical_path)) => fs::read_to_string(source_path)
+                .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
+                .and_then(|source| {
+                    let physical = fs::read(physical_path)
+                        .map_err(|error| format!("read physical .sens: {error}"))?;
+                    #[cfg(feature = "zig-transport")]
+                    {
+                        repl::eval_t5m_paired_file(&source, &physical)
+                    }
+                    #[cfg(not(feature = "zig-transport"))]
+                    {
+                        let _ = (source, physical);
+                        Err("--t5m-pair requires the Zig T5M transport corridor".into())
+                    }
+                }),
+            Err(message) => Err(message.to_owned()),
+        };
+        match result {
+            Ok(result) => {
+                for output in result.output {
+                    println!("{output}");
+                }
+                println!("{}", result.value);
+            }
+            Err(error) => {
+                eprintln!("sens: T5M physical pair execution failed: {error}");
                 process::exit(1);
             }
         }
