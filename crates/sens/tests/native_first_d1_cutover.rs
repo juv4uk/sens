@@ -165,3 +165,23 @@ fn lexical_shape_callback_preserves_exact_d3_width_and_predicate_bits() {
         }
     }
 }
+
+
+/// Виконуваний український Lisp, а не host-side лексична імітація.
+/// Ратифіковане D1:0 пропускається, позитивний D3 ATOM(QUOTE NIL)
+/// обирає D1:1. Негативний порядок доводить коротке замикання COND.
+#[test]
+fn migrated_ukrainian_cond_file_executes_exact_d1_on_sens() {
+    let source = include_str!("../../../examples/migrated/smoke-cond.lisp");
+    assert!(!source.contains("(так "), "текстове так не має бути викличною головою");
+    let mut session = sens::Session::default();
+    let result = sens::eval_program(source, &mut session)
+        .expect("SENS має виконати фізичне джерело української умовної форми");
+    assert_eq!(result.value.as_predicate_bit(), Some(true));
+
+    let reject = sens::eval_program(
+        "(за-умовою ((атом? (як-є ())) ні) ((атом? (як-є ())) так))",
+        &mut session,
+    ).expect("SENS COND має виконати лише першу істинну гілку");
+    assert_eq!(reject.value.as_predicate_bit(), Some(false));
+}
