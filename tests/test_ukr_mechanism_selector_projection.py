@@ -112,8 +112,16 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertNotIn("(третє route)", code)
 
     def test_registry_and_symbolic_sid_values_still_present(self):
-        self.assertIn('"lib/surface/semantic-registry.lisp"', self.source)
-        self.assertIn('"lib/function-table-mechanisms.lisp"', self.source)
+        # Шлях є цитованими D7-даними; D8 повертає String у джерельному
+        # законі. Сирий String literal не має чинного T5M REPL projection.
+        for path in ("lib/surface/semantic-registry.lisp",
+                     "lib/function-table-mechanisms.lisp"):
+            with self.subTest(path=path):
+                self.assertIn(
+                    f"(читати-файл (символ-у-текст (як-є {path})))",
+                    self.source,
+                )
+                self.assertNotIn(f'"{path}"', self.source)
         for token in ("(як-є rows)",
                       "(як-є mechanism-selected)", "(як-є sid-not-in-function-table)"):
             self.assertIn(token, self.source)
