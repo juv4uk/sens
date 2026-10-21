@@ -290,8 +290,8 @@ class EncoderCoverageLispDiagnosticsTests(unittest.TestCase):
                 for form in forms:
                     # Додатні й від'ємні випадки перевіряємо за токенами,
                     # не за форматуванням багаторядкової Lisp-форми.
-                    tokens = re.findall(r"[()]|[^()\\s]+", form)
-                    expression = r"\\s*".join(re.escape(token) for token in tokens)
+                    tokens = re.findall(r"[()]|[^()\s]+", form)
+                    expression = r"\s*".join(re.escape(token) for token in tokens)
                     self.assertEqual(len(re.findall(expression, text)), 1, (path, form))
                     mutant = re.sub(
                         expression, "(як-є (пошкоджене-повідомлення))", text, count=1
@@ -299,7 +299,14 @@ class EncoderCoverageLispDiagnosticsTests(unittest.TestCase):
                     self.assertNotRegex(mutant, expression)
                 self.assertNotIn('(перше (читати-всі "', text)
                 self.assertEqual(text.count("(читати-всі"), file_readers)
-                self.assertIn("(так", text)
+                # Викличні гілки D1 повертають точні бітові предикати SENS,
+                # а не покладаються на незв'язаний глобальний атом «так».
+                count = 2 if path.endswith("/check-encoder-coverage.lisp") else 1
+                self.assertEqual(text.count("((атом? (як-є ()))"), count)
+                self.assertNotIn("(так", text)
+                mutant = text.replace("((атом? (як-є ()))", "(так", 1)
+                self.assertIn("(так", mutant)
+                self.assertNotEqual(mutant, text)
 
 
 
