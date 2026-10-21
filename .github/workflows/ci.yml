@@ -229,7 +229,7 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
           # Адресний SENS/Zig runtime для непарного Lisp-бенчмарка.
-          if grep -Eq '^(benchmarks/closures\.lisp|crates/sens-cli/tests/closures_benchmark_cli\.rs)$' "$changed_all"; then
+          if grep -Eq '^(benchmarks/closures\.lisp|crates/sens-cli/src/repl\.rs|crates/sens-cli/tests/closures_benchmark_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'closure_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
 
