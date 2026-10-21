@@ -94,10 +94,22 @@ class NumericDomains(unittest.TestCase):
     def test_domain_table_gate_uses_current_d7_rows_not_the_archived_keyboard_map(self):
         rows = DOMAIN_GATE.validate_d7()
         self.assertEqual(len(rows), 128)
+        # D7 v2 is a keyboard/data domain, not the retired Devanagari
+        # syllabary: control W7:0000000 has no printable projection.
         self.assertEqual(
-            (rows[0].bits, rows[0].san, rows[0].en, rows[0].lisp),
-            ("0000000", "क", "k", None),
+            (rows[0].bits, rows[0].ukr, rows[0].san, rows[0].en, rows[0].lisp),
+            ("0000000", None, None, None, None),
         )
+        # Printable cells use current IAST/ASCII keyboard positions.
+        self.assertEqual(
+            (rows[65].bits, rows[65].ukr, rows[65].san, rows[65].en, rows[65].lisp),
+            ("1000001", "Ф", "o", "A", None),
+        )
+        self.assertEqual(
+            [row.bits for row in rows],
+            [f"{number:07b}" for number in range(128)],
+        )
+        self.assertTrue(all(row.lisp is None for row in rows))
 
     def test_full_domain_gate_accepts_current_ukrainian_selector_names(self):
         result = subprocess.run(
