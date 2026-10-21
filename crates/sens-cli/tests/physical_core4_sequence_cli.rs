@@ -316,6 +316,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
             "поміняти-кожну-пару",
             "вилучити-перше-входження",
             "взяти-через-один",
+        "list-subsequence-atoms-general",
+        "list-rotate-inverse-general",
+        "list-middle-even",
+        "list-common-suffix-general",
+        "list-chunk-triplets-general",
         "list-stable-difference-general",
         "list-swap-adjacent-pairs",
     ] {
@@ -360,6 +365,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-append-general"
                 | "list-collapse-adjacent"
                 | "list-common-prefix-general"
+                | "list-chunk-triplets-general"
+                | "list-common-suffix-general"
+                | "list-middle-even"
+                | "list-rotate-inverse-general"
+                | "list-subsequence-atoms-general"
                 | "розділити-до-першого-входження"
                 | "взяти-через-один"
                 | "вилучити-перше-входження"
