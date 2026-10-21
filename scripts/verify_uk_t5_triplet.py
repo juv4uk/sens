@@ -207,12 +207,29 @@ def project_current_uk(source: str) -> list[str]:
     # legacy resolver міг би відобразити їх у той самий машинний код.
     without_comments = three_pass.strip_comments(source)
     tokens = three_pass.tokenize(without_comments, source_surface="укр")
-    # Латинь заборонена лише як ВИКОНУВАНА голова (перший елемент списку).
-    # Ключі даних ISA/свідків лишаються латиницею за політикою репо.
+    # Латинь заборонена як ВИКОНУВАНА голова, але лише коли ім'я справді є
+    # англійським аліасом доменного виклику. Ключі даних ISA/інвентарів
+    # (id/role/path/…) лишаються латиницею за політикою репо — це не виклики.
+    if str(SCRIPTS) not in sys.path:
+        sys.path.insert(0, str(SCRIPTS))
+    from domain_tables import read_domain_table
+    _english_heads = {"T", "NIL", "TRUE", "FALSE"}
+    for _w in (1, 3, 4, 5, 6, 7, 8, 9, 10, 11):
+        _tbl = ROOT / "lib" / "domains" / f"d{_w}.lisp"
+        if not _tbl.is_file():
+            continue
+        try:
+            _rows = read_domain_table(_tbl)
+        except Exception:
+            continue
+        for _row in _rows:
+            if _row.en:
+                _english_heads.add(_row.en.upper())
     previous = None
     for token in tokens:
         if (token.kind == "ATOM" and re.search(r"[A-Za-z]", token.text)
-                and previous is not None and previous.kind == "LP"):
+                and previous is not None and previous.kind == "LP"
+                and token.text.upper() in _english_heads):
             raise ProjectionBlocked("noncanonical Ukrainian source: Latin executable head")
         previous = token
     data = three_pass.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
