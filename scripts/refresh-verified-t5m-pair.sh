@@ -57,7 +57,21 @@ if timeout 45s "$binary" "$staged" > "$scratch/standalone.out" 2> "$scratch/stan
   fi
   mode=paired-and-standalone
 else
-  echo "T5M_REPAIR_STANDALONE_UNSUPPORTED source=$source_file; paired SENS execution verified, standalone not certified" >&2
+  status=$?
+  # Парне виконання не виправдовує довільну аварію незалежного
+  # фізичного виконавця. Відомі межі D7/D24+ допускають лише paired,
+  # а panic, timeout і невідома помилка зупиняють ремонт без запису пари.
+  if (( status != 124 && status != 137 )) &&
+     { grep -Fq 'T5M requires exact source projection to D24+ before transport' "$scratch/standalone.err" ||
+       grep -Fq 'unknown Text7 binding:' "$scratch/standalone.err" ||
+       { grep -Fq 'Фізичне T5M-декодування зберегло точні ширини слів' "$scratch/standalone.err" &&
+         grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$scratch/standalone.err"; }; }; then
+    echo "T5M_REPAIR_STANDALONE_KNOWN_LIMIT source=$source_file status=$status; paired SENS execution verified, standalone not certified" >&2
+  else
+    cat "$scratch/standalone.err" >&2
+    echo "T5M_REPAIR_STANDALONE_UNEXPECTED_FAIL source=$source_file status=$status physical=NOT_CERTIFIED" >&2
+    exit 2
+  fi
 fi
 # Негативна перевірка проводить іншу програму через той самий SENS.
 { cat "$source_file"; printf '\n(як-є ())\n'; } > "$scratch/mutant.lisp"
