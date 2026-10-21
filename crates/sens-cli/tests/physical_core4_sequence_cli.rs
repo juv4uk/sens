@@ -314,6 +314,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "виключне-або-д1",
             "поміняти-кожну-пару",
             "вилучити-перше-входження",
+            "взяти-через-один",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
