@@ -332,6 +332,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-cddr-append-third-exact",
         "d4-null-after-cddr-two",
 
+        "d4-append-nested-pair-preserved",
 ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
