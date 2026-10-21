@@ -101,13 +101,13 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             )
             self.assertNotIn("(визначити pair\n  (функція", core4)
             self.assertNotIn("(визначити pair пара)", core4)
-            self.assertIn("(визначити second друге)", core4)
-            self.assertIn("(визначити third третє)", core4)
+            self.assertNotIn("(визначити second друге)", core4)
+            self.assertNotIn("(визначити third третє)", core4)
             self.assertIn(
                 "(визначити четверте\n"
                 "  (функція (значення-аргументів)\n"
                 "    (третє (решта значення-аргументів))))\n"
-                "(визначити fourth четверте)",
+                "",
                 core4,
             )
             self.assertNotIn("(визначити четверте fourth)", core4)
@@ -143,8 +143,8 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertNotIn("взяти-десятковий-символ", core4)
         self.assertNotIn("number->string-onto", core4)
         self.assertIn("(визначити число-рядок", core4)
-        self.assertIn("(визначити number->string число-рядок)", core4)
-        self.assertLess(core4.index("; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень."), core4.index("(визначити list список)"))
+        self.assertNotIn("(визначити number->string число-рядок)", core4)
+        self.assertNotIn("(визначити list список)", core4)
         live_callers = (
             "lib/yantra.lisp",
             "lib/translation.lisp",
