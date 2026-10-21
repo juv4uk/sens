@@ -325,26 +325,26 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="sens-t5m-paired-pass-") as td:
             root = Path(td)
             (root / "scripts").mkdir()
-            (root / "module.lisp").write_text("(як-є ())\\n", encoding="utf-8")
-            (root / "changed.txt").write_text("module.lisp\\n", encoding="utf-8")
+            (root / "module.lisp").write_text("(як-є ())\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\n", encoding="utf-8")
             (root / "scripts/migrate-three-pass.py").write_text(
-                "import json, pathlib, sys\\n"
-                "source = pathlib.Path(sys.argv[1])\\n"
-                "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\\n"
-                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\\n"
-                "out.mkdir(parents=True, exist_ok=True)\\n"
-                "(out / (source.stem + '.sens')).write_bytes(b'\\\\x01')\\n"
-                "(out / source.stem).write_text('10 001 00 000 01\\\\n')\\n"
+                "import json, pathlib, sys\n"
+                "source = pathlib.Path(sys.argv[1])\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\n"
+                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\n"
+                "out.mkdir(parents=True, exist_ok=True)\n"
+                "(out / (source.stem + '.sens')).write_bytes(b'\\x01')\n"
+                "(out / source.stem).write_text('10 001 00 000 01\\n')\n"
                 "report.write_text(json.dumps({'summary': {'files_written': 1, "
-                "'files_blocked': 0, 'files_not_program': 0}, 'files': []}))\\n",
+                "'files_blocked': 0, 'files_not_program': 0}, 'files': []}))\n",
                 encoding="utf-8",
             )
             binary = root / "record-sens-ingress"
             binary.write_text(
-                "#!/bin/sh\\nprintf '%s\\\\n' \\"$*\\" >> invoked.marker\\n"
-                "if [ \\"$1\\" = --t5m-pair ] && [ -e fail-paired ]; then\\n"
-                "  echo paired rejected >&2\\n  exit 19\\nfi\\n"
-                "printf 'stub transport only\\\\n'\\n",
+                "#!/bin/sh\nprintf '%s\\n' \"$*\" >> invoked.marker\n"
+                "if [ \"$1\" = --t5m-pair ] && [ -e fail-paired ]; then\n"
+                "  echo paired rejected >&2\n  exit 19\nfi\n"
+                "printf 'stub transport only\\n'\n",
                 encoding="utf-8",
             )
             binary.chmod(0o755)
