@@ -481,7 +481,7 @@ jobs:
           python3 -m unittest tests.test_code_runs.TranslationSelectorsUkrProjectionTests -v
 
       - name: "SENS D2 — незалежний Zig/T5M roundtrip фізичної пари"
-        if: \${{ !cancelled() && steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' }}
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' }}
         timeout-minutes: 8
         shell: bash
         run: |
