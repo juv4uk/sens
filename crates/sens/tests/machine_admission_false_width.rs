@@ -34,8 +34,9 @@ fn admission_source_uses_current_d1_no_and_d8_integer_checks_without_old_sentine
     // одна стара відмова більше не існує, а не вважається успіхом.
     assert_eq!(SOURCE.matches("(атом? (як-є (000)))").count(), 26,
         "поточні гілки відмови повинні повертати точний D1:NO у SENS");
-    assert!(SOURCE.contains("(визначити машина-допуск-цифра?"));
-    assert!(SOURCE.contains("(визначити машина-допуск-цифри?"));
+    assert!(SOURCE.contains("(визначити машина-допуск-знаменник-одиниця?"));
+    assert!(!SOURCE.contains("(визначити машина-допуск-цифра?"));
+    assert!(!SOURCE.contains("(визначити машина-допуск-цифри?"));
     assert!(!SOURCE.contains("(010 (001 (000)))"),
         "неповернений старий бітовий call head у виконуваному Lisp");
     assert!(!SOURCE.contains("(00000000)"),
@@ -47,10 +48,11 @@ fn admission_source_uses_current_d1_no_and_d8_integer_checks_without_old_sentine
 
     let expressions = parse_mixed_exact_domain_machine_source(PATH, SOURCE)
         .expect("увесь admission-файл має проходити суворий машинний reader");
-    assert_eq!(expressions.len(), 20, "чинні D4 помічники зберігають усі механізми допуску");
-    // Тепер чинний D8 подає 7 як "7", а не історичний #q2:7/1.
-    assert!(SOURCE.contains("(визначити машина-допуск-цифра?"));
-    assert!(SOURCE.contains("(визначити машина-допуск-цифри?"));
+    assert_eq!(expressions.len(), 19, "чинні D4 помічники: точний wire-знаменник замість двох застарілих десяткових розпізнавачів");
+    // Чинний D8 подає числове wire-представлення, не людське десяткове "7".
+    assert!(SOURCE.contains("(визначити машина-допуск-знаменник-одиниця?"));
+    assert!(!SOURCE.contains("(визначити машина-допуск-цифра?"));
+    assert!(!SOURCE.contains("(визначити машина-допуск-цифри?"));
     assert!(SOURCE.contains("(визначити машина-допуск-текст-точне-ціле?"));
     assert!(!SOURCE.contains("((функція"),
         "невикличні анонімні D5 value-call не мають повертатися в допуск");
