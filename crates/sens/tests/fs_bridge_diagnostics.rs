@@ -101,6 +101,36 @@ fn filesystem_root_recovery_rejects_compound_stage_before_d3_eq() {
 }
 
 #[test]
+fn filesystem_alists_and_journal_version_evaluate_real_d1_without_unbound_truth_names() {
+    // Перевіряємо саме виконання Lisp через SENS: поле з NIL як значенням
+    // присутнє, порожній ключ — не поле, обидві версії — точні D1.
+    let mut s = session();
+    for (source, expected) in [
+        ("(фс-пакет-має-поле? (як-є format) (як-є ((format . ()))) )", true),
+        ("(фс-пакет-має-поле? (як-є missing) (як-є ((format . ()))))", false),
+        ("(фс-пакет-має-поле? (як-є format) (як-є ()))", false),
+        ("(фс-журнал-список-пар? (як-є ()))", true),
+        ("(фс-журнал-список-пар? (як-є ((name . value))))", true),
+        ("(фс-журнал-список-пар? (як-є ((() . value))))", false),
+        ("(фс-версія-журналу-чинна? (як-є (0 1)))", true),
+        ("(фс-версія-журналу-чинна? (як-є (0 1 2)))", false),
+        ("(фс-версія-журналу-чинна? (як-є ()))", false),
+    ] {
+        let value = eval_program(source, &mut s)
+            .unwrap_or_else(|e| panic!(
+                "test_id=fs-journal-d1 layer=SENS input={source} expected={expected} error={e:?}"
+            )).value;
+        assert_eq!(value.as_predicate_bit(), Some(expected),
+            "test_id=fs-journal-d1 layer=SENS input={source} expected=D1:{expected} actual={value}");
+    }
+    // Джерельні мітки (ні 1) — дані протоколу, не D1:NO у COND.
+    assert_eq!(
+        observe(&mut s, "*версія-журналу-фс*"),
+        "(ні 1)"
+    );
+}
+
+#[test]
 fn journal_event_fields_are_retrieved_from_a_real_alist() {
     let mut s = session();
     for (field, expected) in [("format","wsm-fs-event"), ("op","future-op")] {
