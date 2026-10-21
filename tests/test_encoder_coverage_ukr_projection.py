@@ -1,65 +1,16 @@
-"""Перевірки українських викличних голів encoder coverage — не host-оракул SENS.
+"""Перевірки українських викличних голів encoder coverage.
 
-Обернене переведення лише executable D3/D4 heads відновлює оригінальний
-Git blob. Не мігрує дані під QUOTE, D6 LET, D8/D9 чи T5M-кодування.
+Порівнюємо структуру чинної програми та її викличні голови, а не Git blob:
+коментарі й форматування не є семантикою. Це статичний тест джерела,
+а не доказ виконання SENS чи фізичного T5M-переходу.
 """
 from collections import Counter
-import hashlib
 from pathlib import Path
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 PATH = ROOT / "lib/machine/encoding/coverage-generator.lisp"
-ORIGINAL_BLOB = "65f99d80597d047c8a0380b1200f110ecafc7891"
-# Зворотне лише для статичного історичного Git receipt; не runtime alias.
-LOCAL_UKR_NAMES = {
-    "покриття-кодувальника-поєднати-рядки": "encoder-coverage-str+",
-    "покриття-кодувальника-тотожні-атоми?": "encoder-coverage-atom-same?",
-    "покриття-кодувальника-тотожні-структури?": "encoder-coverage-same?",
-    "покриття-кодувальника-порожній-список?": "encoder-coverage-empty?",
-    "покриття-кодувальника-порахувати-до": "encoder-coverage-binary-length-onto",
-    "покриття-кодувальника-кількість-елементів": "encoder-coverage-binary-length",
-    "покриття-кодувальника-кількість-збігається?": "encoder-coverage-count=?",
-    "покриття-кодувальника-усі-підтверджені?": "encoder-coverage-all?",
-    "покриття-кодувальника-тотожні-пари?": "encoder-coverage-pair=?",
-    "покриття-кодувальника-містить-елемент?": "encoder-coverage-member?",
-    "покриття-кодувальника-коло-поєднання": "encoder-coverage-concat-round",
-    "покриття-кодувальника-збалансоване-поєднання": "encoder-coverage-balanced-concat",
-    "покриття-кодувальника-форма-проєкції-допусків": "encoder-coverage-admission-projection-form",
-    "покриття-кодувальника-кількість-голів-проєкції": "encoder-coverage-projection-head-count",
-    "покриття-кодувальника-кількість-часткових": "encoder-coverage-projection-partial-count",
-    "покриття-кодувальника-кількість-сиріт": "encoder-coverage-projection-orphan-count",
-    "покриття-кодувальника-часткові-записи": "encoder-coverage-partials",
-    "покриття-кодувальника-підстава-частковості": "encoder-coverage-partial-reason",
-    "покриття-кодувальника-історична-форма": "encoder-coverage-legacy-form",
-    "покриття-кодувальника-історична-кількість": "encoder-coverage-legacy-count",
-    "покриття-кодувальника-історична-кількість-наступників": "encoder-coverage-legacy-successor-count",
-    "покриття-кодувальника-історичні-пари": "encoder-coverage-legacy-pairs",
-    "покриття-кодувальника-рівні-ключі-рядків?": "encoder-coverage-row-key=?",
-    "покриття-кодувальника-підстава-відсутності": "encoder-coverage-not-yet-reason",
-    "покриття-кодувальника-сформувати-рядок": "encoder-coverage-render-row",
-    "покриття-кодувальника-побудувати-до": "encoder-coverage-build-onto",
-    "покриття-кодувальника-унікальний-індекс?": "encoder-coverage-index-unique?",
-    "покриття-кодувальника-форма-індексу": "encoder-coverage-index-form",
-    "покриття-кодувальника-кількість-індексу": "encoder-coverage-index-count",
-    "покриття-кодувальника-рядки-індексу": "encoder-coverage-index-rows",
-    "покриття-кодувальника-кількість-форм": "encoder-coverage-form-count",
-    "покриття-кодувальника-часткові-коректні?": "encoder-coverage-partials-valid?",
-    "покриття-кодувальника-перевірки-індексу": "encoder-coverage-index-checks",
-    "покриття-кодувальника-індекс-коректний?": "encoder-coverage-index-valid?",
-    "покриття-кодувальника-збігається-збережений-рядок?": "encoder-coverage-committed-row-matches?",
-    "покриття-кодувальника-рядки-проєкції-коректні?": "encoder-coverage-projection-rows-valid?",
-    "покриття-кодувальника-проєкція-коректна?": "encoder-coverage-projection-valid?",
-    "покриття-кодувальника-сформувати-звіт": "encoder-coverage-render",
-}
-
-def historical_local_names(source):
-    for ukrainian, historical in sorted(LOCAL_UKR_NAMES.items(), key=lambda row: -len(row[0])):
-        source = source.replace(ukrainian, historical)
-    # Restore the exact formal only; do not rewrite compounds like рядки-індексу.
-    return re.sub(r"(?<![\w?-])рядки(?![\w?-])", "rows", source)
-
 EXPECTED = {
     "100": ("перше", 36), "101": ("тотожне?", 3),
     "110": ("за-умовою", 28), "111": ("сполучити", 4),
@@ -161,13 +112,6 @@ def ratified():
     return result
 
 
-def git_blob(source):
-    data = source.encode("utf-8")
-    return hashlib.sha1(
-        b"blob " + str(len(data)).encode("ascii") + b"\0" + data
-    ).hexdigest()
-
-
 def verify(text):
     """Точні чинні українські викличні голови й протокол без відтворення Git blob.
 
@@ -261,6 +205,28 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
         self.assertNotEqual(broken, self.text)
         with self.assertRaisesRegex(AssertionError, "зміна"):
             verify(broken)
+
+    def test_comments_and_whitespace_do_not_change_program_tree(self):
+        # Статичний AST без позицій токенів; це НЕ SENS-виконання.
+        def tree(node):
+            if node[0] == "list":
+                return ("list", tuple(tree(child) for child in node[1]))
+            if node[0] == "quoted":
+                return ("quoted", tree(node[1]))
+            return (node[0], node[1])
+
+        original = tuple(tree(form) for form in parse(self.text))
+        decorated = (
+            "; Коментар перед джерелом не є частиною програми\n"
+            + self.text.replace("(визначити ", "(визначити   ", 1)
+            + "\n; Коментар після джерела також не змінює програму\n"
+        )
+        self.assertEqual(original, tuple(tree(form) for form in parse(decorated)))
+        changed = self.text.replace(
+            "(тотожне? ліве-значення праве-значення)",
+            "(сполучити ліве-значення праве-значення)", 1,
+        )
+        self.assertNotEqual(original, tuple(tree(form) for form in parse(changed)))
 
     def test_unbalanced_source_is_rejected(self):
         with self.assertRaisesRegex(AssertionError, "незакр"):
