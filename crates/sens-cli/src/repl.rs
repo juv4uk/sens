@@ -1397,6 +1397,23 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
 mod tests {
     use super::*;
 
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn native_t5m_view_roundtrips_actual_zig_bytes_and_rejects_other_source() {
+        let source = "(як-є ())\n";
+        let physical = mint_t5m_source_file(source).expect("SENS reader -> real Zig T5M");
+        let view = view_t5m_source_file(source, &physical)
+            .expect("Zig decode agrees with every exact source domain word");
+        assert!(!view.trim().is_empty(), "physically minted program cannot vanish");
+        assert!(view.chars().all(|ch| matches!(ch, '0' | '1' | ' ' | '\n')));
+        assert!(view_t5m_source_file("(як-є (000))\n", &physical).is_err(),
+            "physical word mismatch must fail closed, not admit a different Lisp source");
+        let mut damaged = physical.clone();
+        damaged.push(0);
+        assert!(view_t5m_source_file(source, &damaged).is_err(),
+            "noncanonical or trailing T5M bytes cannot mint a trusted view");
+    }
+
     #[test]
     fn t5m_length_divergence_reports_first_changed_exact_word() {
         let expected = [1u16, 2, 3]
