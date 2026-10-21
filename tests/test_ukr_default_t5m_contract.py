@@ -80,6 +80,29 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         )
         self.assertIn("T5M_PHYSICAL_D24_NOT_EXECUTED", runner)
 
+    def test_failed_d24_fallback_keeps_real_sens_exit_status(self):
+        # Shell-механізм: несправний SENS з кодом 37 не стає status=0
+        # після завершення if без else. Це перевірка транспорту, не семантики.
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
+            encoding="utf-8"
+        )
+        beginning = 'if timeout 45s "$binary" --t5m-file "$file"'
+        self.assertIn(beginning, runner)
+        fallback = runner.split(beginning, 1)[1].split(
+            "T5M_DOMAIN_SOURCE_RUNTIME_FAIL", 1
+        )[0]
+        self.assertIn("      else\n        # Код береться з реального невдалого SENS", fallback)
+        self.assertIn("        status=$?\n      fi", fallback)
+        self.assertNotIn("      fi\n      status=$?", fallback)
+        result = subprocess.run(
+            ["bash", "-c",
+             "if bash -c 'exit 37'; then :; else status=$?; fi; "
+             "printf '%s' \"$status\""],
+            capture_output=True, text=True, timeout=5,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "37")
+
     def test_default_ukr_preserves_program_identity_not_source_comments(self):
         with tempfile.TemporaryDirectory(prefix="sens-ukr-t5m-default-") as temp:
             base = Path(temp)
