@@ -133,6 +133,40 @@ fn x86_register_field_bits_use_real_d5_numeric_comparison() {
 }
 
 #[test]
+fn machine_u3_projection_executes_d24_law_without_encoded_literals() {
+    let source = fs::read_to_string(repo_root().join("lib/machine/encoding/x86-64.lisp"))
+        .expect("чинний український кодер x86");
+    let marker = "(визначити машина-проєктувати-три-біти-до-механізму";
+    let start = source.find(marker).expect("закон u3");
+    let end = source[start + 1..].find("\n(визначити ")
+        .map(|offset| start + 1 + offset).expect("наступний SENS закон");
+    let definition = &source[start..end];
+    assert!(!definition.contains("#b1") && !definition.contains("#d0"),
+        "машинна програма не повинна залежати від source-era літералів");
+    let parsed = parse(definition).expect("SENS читає український DEFINE");
+    let exact = sens::source_projection::project_ukr_decimal_integer_literals(
+        &parsed, definition,
+    ).expect("математичні операнди точно належать D24+");
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("справжній Core4");
+    sens::eval_parsed_expressions(&exact, &mut session).expect("справжнє SENS DEFINE");
+    for (input, expected) in [
+        ("-1", "()"), ("0", "0"), ("1", "1"), ("6", "6"),
+        ("7", "7"), ("8", "()"),
+    ] {
+        let call = format!("(машина-проєктувати-три-біти-до-механізму {input})");
+        let parsed = parse(&call).expect("SENS виклик u3");
+        let exact = sens::source_projection::project_ukr_decimal_integer_literals(
+            &parsed, &call,
+        ).expect("точна D24+ проєкція");
+        let actual = sens::eval_parsed_expressions(&exact, &mut session)
+            .unwrap_or_else(|error| panic!("SENS {call}: {error}"))
+            .value.to_string();
+        assert_eq!(actual, expected, "{call}");
+    }
+}
+
+#[test]
 fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
     // Беремо точне чинне українське DEFINE з репозиторію, не створюємо
     // Python-імітації чи другий код закону. D5 вирішує порядок у SENS.
