@@ -1389,6 +1389,9 @@ class LiveDomainAndTierUkrProjectionTests(unittest.TestCase):
                          "(як-є 00000000000)", "(як-є 1111111111)",
                          "(друкувати "):
             self.assertIn(required, code)
+        self.assertIn("(друкувати (як-є domain-bitness-laws-pass))", code)
+        self.assertNotIn('(друкувати "', source)
+        self.assertNotIn('"DOMAIN-BITNESS-LAWS: PASS', source)
         for obsolete in ("(load ", "(quote ", "(cond ", "(lambda ",
                          "(define ", "(0011 ", "(0010 "):
             self.assertNotIn(obsolete, code)
