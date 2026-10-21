@@ -717,3 +717,26 @@ mod active_lib_sens_completion;
 // #1006: exact 10101000 remains denied in Core4 and admitted only via explicit Core3.
 #[path = "raw_invoke_sens_1006.rs"]
 mod raw_invoke_sens_1006;
+
+#[test]
+fn український_скрипт_відбирає_саме_запитаний_рівень() {
+    // Чинний SENS CLI, не сканер тексту: вхідні записи мають (tier . 1).
+    for (level, other) in [("1", "2"), ("2", "1")] {
+        let output = sens()
+            .args(["scripts/fixtures-for-tier.lisp", level])
+            .output()
+            .expect("SENS CLI повинен запускатися");
+        assert!(
+            output.status.success(),
+            "рівень {level}: stderr={} stdout={}",
+            String::from_utf8_lossy(&output.stderr),
+            String::from_utf8_lossy(&output.stdout)
+        );
+        let text = String::from_utf8_lossy(&output.stdout);
+        assert!(text.contains(&format!("(tier . {level})")), "{text}");
+        assert!(
+            !text.contains(&format!("(tier . {other})")),
+            "виведено сторонній рівень {other}: {text}"
+        );
+    }
+}
