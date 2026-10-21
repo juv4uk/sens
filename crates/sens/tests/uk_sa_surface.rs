@@ -180,14 +180,7 @@ fn uk_acceptance_program_passes() {
     );
 }
 
-/// Generic runner for `lib/surface/peer-identity-acceptance.my`
-/// (2026-09-11, added alongside the abs/min/max/min-list/max-list
-/// migration to lib/core.my): this test knows nothing about which
-/// specific peer names are being checked or what their values should
-/// be -- that semantic truth lives entirely in the `.my` file itself,
-/// per the standing principle "semantic truth tests live with the
-/// language; Rust tests only mechanism." Mirrors
-/// `uk_acceptance_program_passes` immediately above.
+/// Виконувана українська програма, не перевірка host-alias.
 #[test]
 fn peer_identity_acceptance_program_passes() {
     let mut s = uk_session();
@@ -195,10 +188,20 @@ fn peer_identity_acceptance_program_passes() {
         include_str!("../../../lib/surface/peer-identity-acceptance.lisp"),
         &mut s,
     )
-    .expect("peer-identity acceptance program should evaluate");
-    assert_eq!(
-        r.value.to_string(),
-        "успіх",
-        "Peer-identity acceptance program must return 'успіх (success)"
-    );
+    .expect("Ukrainian D1/D3/D24+ acceptance program should evaluate");
+    assert_eq!(r.value.to_string(), "успіх");
+}
+
+/// Негативний семантичний свідок: змінена очікувана арифметика
+/// мусить спричинити іменовану помилку, а не формальний PASS.
+#[test]
+fn peer_identity_acceptance_wrong_abs_expectation_is_detected() {
+    let source = include_str!("../../../lib/surface/peer-identity-acceptance.lisp");
+    let correct = "(рівне? (модуль (відняти 0 7)) 7)";
+    assert_eq!(source.matches(correct).count(), 1, "втрачено точний свідок");
+    let mutant = source.replacen(correct, "(рівне? (модуль (відняти 0 7)) 8)", 1);
+    let mut s = uk_session();
+    let r = eval_program(&mutant, &mut s)
+        .expect("mutant must execute in actual SENS evaluator");
+    assert_eq!(r.value.to_string(), "помилка-модуль");
 }
