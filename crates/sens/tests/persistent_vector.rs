@@ -1,6 +1,6 @@
-//! Exercises lib/persistent-vector.my — the AVL-balanced persistent
-//! vector written in sens itself (OPT-PERSISTENT-VECTOR). Loads
-//! lib/core.my (for `second`/`third`/`fourth`/`fifth`/`not`/`append`)
+//! Перевіряє виконуваний lib/persistent-vector.lisp у справжньому SENS.
+//! Не підміняє D1/D4/D5 закони зовнішнім evaluator. Завантажує
+//! lib/core.lisp (for `second`/`third`/`fourth`/`fifth`/`not`/`append`)
 //! and lib/persistent-vector.my into one session, same as a user
 //! loading both from a REPL.
 
@@ -99,4 +99,29 @@ fn vec_nth_over_a_large_vector_returns_correct_values_at_every_index() {
         (list (вектор-кількість big) (check-all 0 4607 big))
     "#;
     assert_eq!(eval_vec(source), "(4607 t)");
+}
+
+#[test]
+fn українські_іменовані_повороти_avl_виконуються_в_sens() {
+    // Позитивні SENS-eval для обох поворотів: не текстовий Python-оракул.
+    // Обидва піддерева створює чинний український Lisp.
+    let лівий = "(вектор-вузол-індекс
+        (вектор-повернути-ліворуч
+          (вектор-створити-збалансований-вузол 1 10 (як-є ())
+            (вектор-створити-збалансований-вузол 2 20 (як-є ()) (як-є ())))))";
+    let правий = "(вектор-вузол-індекс
+        (вектор-повернути-праворуч
+          (вектор-створити-збалансований-вузол 2 20
+            (вектор-створити-збалансований-вузол 1 10 (як-є ()) (як-є ()))
+            (як-є ()))))";
+    assert_eq!(eval_vec(лівий), "2", "лівий поворот має підняти праву дитину");
+    assert_eq!(eval_vec(правий), "1", "правий поворот має підняти ліву дитину");
+    assert_eq!(eval_vec("(вектор-висота-піддерева (як-є ()))"), "0",
+        "порожній вузол має D1-позитивну гілку ATOM");
+    // Негативна гілка того самого D1/COND: непорожній вузол не має висоти 0.
+    assert_eq!(
+        eval_vec("(вектор-висота-піддерева
+           (вектор-створити-збалансований-вузол 1 10 (як-є ()) (як-є ())))"),
+        "1"
+    );
 }
