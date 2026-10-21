@@ -127,7 +127,7 @@ class WholeFileMetricTests(FileTree):
         reasons = {x.path: x.reason for x in state.pending}
         self.assertIn("англомовний локальний параметр", reasons["lib/старий.lisp"])
         self.assertNotIn("lib/чинний.lisp", reasons)
-        self.assertNotIn("lib/цитата.lisp")
+        self.assertNotIn("lib/цитата.lisp", reasons)
 
     def test_primary_projection_report_is_separate_from_keyboard_completion(self):
         root = self.tree({
