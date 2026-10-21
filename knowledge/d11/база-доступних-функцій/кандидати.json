@@ -2755,7 +2755,7 @@
         "mechanism": "виконуване бібліотечне визначення SENS; семантика композиції чинних доменних законів, не новий host-оператор",
         "existing_native_sens_evaluation_test": "crates/sens/tests/persistent_vector.rs",
         "existing_native_test_blob_sha": "4e36527e6d8f5d4f5617cd4c0713b62386d9ec6d",
-        "native_execution_this_change": "NOT_RUN",
+        "native_execution_this_change": "NATIVE_SENS_PASS_AS_TARGETED_TEST",
         "distinct_new_primitive_law": "NOT_ESTABLISHED",
         "coordinate": null,
         "ratified": false,
@@ -2765,8 +2765,13 @@
           "observation": "Реальне eval_program SENS через чинний lib/core.lisp та lib/persistent-vector.lisp",
           "source": "crates/sens/tests/persistent_vector.rs",
           "git_blob": "4e36527e6d8f5d4f5617cd4c0713b62386d9ec6d",
-          "outcome": "RED_ON_LEGACY_DEF_FIXED_NATIVE_RETEST_PENDING",
-          "independent_new_d11_primitive": false
+          "outcome": "NATIVE_SENS_PASS",
+          "independent_new_d11_primitive": false,
+          "ci_run_url": "https://github.com/juv4uk/sens/actions/runs/39680873156",
+          "ci_job_id": 119502705724,
+          "ci_step": "D11 селекторні кандидати — точна бітність, похідність і негативні контролі",
+          "step_conclusion": "success",
+          "overall_workflow_release_admission": "NOT_ASSERTED"
         }
       }
     },
@@ -2889,7 +2894,7 @@
         "mechanism": "виконуване бібліотечне визначення SENS; семантика композиції чинних доменних законів, не новий host-оператор",
         "existing_native_sens_evaluation_test": "crates/sens/tests/persistent_vector.rs",
         "existing_native_test_blob_sha": "4e36527e6d8f5d4f5617cd4c0713b62386d9ec6d",
-        "native_execution_this_change": "NOT_RUN",
+        "native_execution_this_change": "NATIVE_SENS_PASS_AS_TARGETED_TEST",
         "distinct_new_primitive_law": "NOT_ESTABLISHED",
         "coordinate": null,
         "ratified": false,
@@ -2899,8 +2904,13 @@
           "observation": "Реальне eval_program SENS через чинний lib/core.lisp та lib/persistent-vector.lisp",
           "source": "crates/sens/tests/persistent_vector.rs",
           "git_blob": "4e36527e6d8f5d4f5617cd4c0713b62386d9ec6d",
-          "outcome": "RED_ON_LEGACY_DEF_FIXED_NATIVE_RETEST_PENDING",
-          "independent_new_d11_primitive": false
+          "outcome": "NATIVE_SENS_PASS",
+          "independent_new_d11_primitive": false,
+          "ci_run_url": "https://github.com/juv4uk/sens/actions/runs/39680873156",
+          "ci_job_id": 119502705724,
+          "ci_step": "D11 селекторні кандидати — точна бітність, похідність і негативні контролі",
+          "step_conclusion": "success",
+          "overall_workflow_release_admission": "NOT_ASSERTED"
         }
       }
     },
@@ -2939,7 +2949,7 @@
         "mechanism": "виконуване бібліотечне визначення SENS; семантика композиції чинних доменних законів, не новий host-оператор",
         "existing_native_sens_evaluation_test": "crates/sens/tests/persistent_vector.rs",
         "existing_native_test_blob_sha": "4e36527e6d8f5d4f5617cd4c0713b62386d9ec6d",
-        "native_execution_this_change": "NOT_RUN",
+        "native_execution_this_change": "NATIVE_SENS_PASS_AS_TARGETED_TEST",
         "distinct_new_primitive_law": "NOT_ESTABLISHED",
         "coordinate": null,
         "ratified": false,
@@ -2949,8 +2959,13 @@
           "observation": "Реальне eval_program SENS через чинний lib/core.lisp та lib/persistent-vector.lisp",
           "source": "crates/sens/tests/persistent_vector.rs",
           "git_blob": "4e36527e6d8f5d4f5617cd4c0713b62386d9ec6d",
-          "outcome": "RED_ON_LEGACY_DEF_FIXED_NATIVE_RETEST_PENDING",
-          "independent_new_d11_primitive": false
+          "outcome": "NATIVE_SENS_PASS",
+          "independent_new_d11_primitive": false,
+          "ci_run_url": "https://github.com/juv4uk/sens/actions/runs/39680873156",
+          "ci_job_id": 119502705724,
+          "ci_step": "D11 селекторні кандидати — точна бітність, похідність і негативні контролі",
+          "step_conclusion": "success",
+          "overall_workflow_release_admission": "NOT_ASSERTED"
         }
       }
     },
