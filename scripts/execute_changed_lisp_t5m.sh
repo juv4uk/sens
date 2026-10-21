@@ -33,7 +33,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   # Механізм D9 «уніфікувати» справді визначено в lib/unify.lisp.
   # Це точне джерело завантажуваного DEFINE, не дозвіл викликати
   # кожного резидента D9 без реалізації.
-  if [[ "$file" == "lib/reason.lisp" ]]; then
+  if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
+    # Forward звертається до визначеного SENS-функцією «уніфікувати»,
+    # так само як Reason; перевіряємо реальний DEFINE, не лише D9-каталог.
     binding_sources=(--binding-source lib/unify.lisp)
   fi
   python3 scripts/migrate-three-pass.py "$file" \
