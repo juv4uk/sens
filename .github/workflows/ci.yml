@@ -394,6 +394,8 @@ jobs:
           cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
           cargo test --locked -p sens-cli --test cli t5m_physical_pair_ -- --nocapture
           cargo test --locked -p sens-cli --bin sens-trit exact_bit_view_maps_to_its_existing_sens_physical_companion -- --exact --nocapture
+          # Цитоване ціле проходить ту саму D24+ проєкцію, Zig/T5M і обернення.
+          cargo test --locked -p sens-cli --bin sens quoted_integer_in_t5m_source_preserves_exact_d24_word -- --nocapture
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' }}
