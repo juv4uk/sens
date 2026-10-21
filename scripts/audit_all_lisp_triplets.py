@@ -155,6 +155,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
                   unapproved_nonprogram_physical=0, nonprogram_style_warnings=0,
                   potential_program_files=0, potential_program_missing_sens=0,
                   comment_only_style_warnings=0,
+                  comment_only_with_physical=0,
                   program_style_warnings=0,
                   bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
     blocked: list[dict[str, str]] = []
@@ -212,6 +213,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         if comment_only:
             counts["comment_only_nonprogram_lisp"] += 1
             if physical.exists() or physical.is_symlink():
+                counts["comment_only_with_physical"] += 1
                 reject(relative, "файл лише з коментарів має необґрунтований .sens")
             continue
         # Вже схвалена данна/схема/таблиця не є виконуваною формою.
@@ -254,6 +256,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         and counts["undecidable_lisp_files"] == 0
         and counts["reviewed_nonprogram_pin_drift"] == 0
         and counts["unapproved_nonprogram_physical"] == 0
+        and counts["comment_only_with_physical"] == 0
         and verify_bounded
     )
     # Окремий точний показник для поточного T5M. Історичний T5
