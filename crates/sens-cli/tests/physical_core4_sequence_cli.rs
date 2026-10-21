@@ -195,13 +195,18 @@ struct SourceTriplet {
 }
 impl SourceTriplet {
     fn mint(name: &str) -> Self {
+        let relative = if name.starts_with("lib/") {
+            format!("{name}.lisp")
+        } else {
+            format!("tests/semantic/native-t5/{name}.lisp")
+        };
         let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("../..")
-            .join(format!("tests/semantic/native-t5/{name}.lisp"));
+            .join(relative);
         assert!(source.is_file(), "actual Ukrainian SENS source missing: {name}");
         let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
         let physical = std::env::temp_dir().join(format!(
-            "sens-live-ukr-{name}-{}-{id}.sens", std::process::id()
+            "sens-live-ukr-{}-{}-{id}.sens", name.replace('/', "-"), std::process::id()
         ));
         let view = physical.with_extension("");
         assert!(!physical.exists() && !view.exists(), "test must not overwrite files");
@@ -339,7 +344,8 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-null-after-cddr-two",
 
         "d4-append-nested-pair-preserved",
-] {
+        "lib/d3-pair-laws",
+    ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
         assert!(paired.status.success(), "{name}: paired SENS: {}", error(&paired));
