@@ -61,3 +61,50 @@ fn derived_si_constants_execute_through_real_sens() {
         assert_eq!(actual, expected, "неточна похідна константа {name}");
     }
 }
+
+#[test]
+fn derived_si_double_charge_is_evaluated_by_sens_without_numeric_shortcut() {
+    let mut session = Session::default();
+    eval_program(include_str!("../../../lib/si.lisp"), &mut session)
+        .expect("чинні визначальні сталі SI доступні");
+    eval_program(include_str!("../../../lib/si-derived.lisp"), &mut session)
+        .expect("українські похідні сталі завантажуються SENS");
+
+    let double_charge = eval_program("сі:подвоєний-заряд", &mut session)
+        .expect("SENS має визначити подвоєний заряд")
+        .value
+        .to_string();
+    let addition = eval_program(
+        "(додати сі:елементарний-заряд сі:елементарний-заряд)",
+        &mut session,
+    )
+    .expect("SENS має обчислити точне додавання")
+    .value
+    .to_string();
+    assert_eq!(double_charge, addition, "подвоєння втратило точний закон");
+
+    for (symbol, independent_expression) in [
+        (
+            "сі:стала-джозефсона",
+            "(частка (додати сі:елементарний-заряд сі:елементарний-заряд) сі:стала-планка)",
+        ),
+        (
+            "сі:квант-магнітного-потоку",
+            "(частка сі:стала-планка (додати сі:елементарний-заряд сі:елементарний-заряд))",
+        ),
+        (
+            "сі:квант-електричної-провідності",
+            "(частка (помножити (додати сі:елементарний-заряд сі:елементарний-заряд) сі:елементарний-заряд) сі:стала-планка)",
+        ),
+    ] {
+        let actual = eval_program(symbol, &mut session)
+            .unwrap_or_else(|error| panic!("похідна константа {symbol}: {error}"))
+            .value
+            .to_string();
+        let expected = eval_program(independent_expression, &mut session)
+            .unwrap_or_else(|error| panic!("незалежна формула {symbol}: {error}"))
+            .value
+            .to_string();
+        assert_eq!(actual, expected, "втрачено точну семантику {symbol}");
+    }
+}
