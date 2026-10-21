@@ -403,6 +403,33 @@ fn t5m_roundtrip_words(_words: &[ExactDomainWord]) -> Result<Vec<ExactDomainWord
     Err("RUST_ZIG_ONLY: REPL requires the Zig T5M transport; no Rust fallback".into())
 }
 
+// Вихідні D3 пари є даними SENS. Будуємо точний AST, не відновлюємо
+// семантику через display-рядок і не приймаємо host-об'єкти за дані.
+// D2 крапкова пара зберігає як правильні, так і неправильні списки.
+fn exact_t5m_result_data(value: &Value, depth: usize) -> Result<Expr, String> {
+    if depth > 768 {
+        return Err("T5M_RESULT_DEPTH: D3 pair exceeds exact reader limit".into());
+    }
+    let kind = match value {
+        Value::Nil => ExprKind::List(Vec::new().into()),
+        Value::Symbol(symbol) => ExprKind::Symbol(symbol.clone()),
+        Value::Pair(head, tail) => ExprKind::Pair(
+            std::rc::Rc::new(exact_t5m_result_data(head, depth + 1)?),
+            std::rc::Rc::new(exact_t5m_result_data(tail, depth + 1)?),
+        ),
+        Value::BinaryNumber(number) => ExprKind::BinaryNumber(number.clone()),
+        Value::DomainIdentity(identity) if !matches!(identity, DomainIdentity::D2(_)) => {
+            ExprKind::DomainIdentity(*identity)
+        }
+        other => {
+            return Err(format!(
+                "T5M_RESULT_DATA_UNSUPPORTED value={other}: no exact quoted D3 projection"
+            ));
+        }
+    };
+    Ok(Expr { kind, span: Default::default() })
+}
+
 fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
     match value {
         Value::Nil => Ok(vec![ExactDomainWord::Identity(t5m_domain_identity(3, 0)?)]),
@@ -412,6 +439,22 @@ fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
         Value::BinaryNumber(number) => Ok(vec![
             ExactDomainWord::number(number.clone()).map_err(str::to_owned)?,
         ]),
+        Value::Pair(..) => {
+            // Результат проходить власний Zig T5M roundtrip і D3 QUOTE eval,
+            // а не лише перевірку байтів на вході.
+            let quote = sens::semantic_registry_export::admitted_core_domain_for_surface("як-є")
+                .filter(|identity| identity.width() == 3)
+                .ok_or("T5M_RESULT_QUOTE: no admitted D3 QUOTE mechanism")?;
+            let quoted_data = exact_t5m_result_data(value, 0)?;
+            let expression = Expr {
+                kind: ExprKind::DomainCall(quote, vec![quoted_data].into()),
+                span: Default::default(),
+            };
+            let mut words = Vec::new();
+            append_t5m_expression(&expression, sens::Text7Layout::Uk, &mut words, 0)?;
+            Ok(words)
+        }
+
         Value::NumericComposition(composition) => {
             let (negative, numerator, denominator) = composition.as_parts();
             let quotient = exact_d5_surface("частка")?;
