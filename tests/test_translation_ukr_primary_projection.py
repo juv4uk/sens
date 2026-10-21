@@ -51,9 +51,9 @@ class TranslationUkrPrimaryProjectionTests(unittest.TestCase):
             "Активний Lisp не повинен повертати історичні англомовні DEFINE",
         )
         # Цитовані поля зовнішнього протоколу — дані, а не викличні імена.
-        self.assertIn("(як-є translation/1)", source)
-        self.assertIn("(як-є translation-review/1)", source)
-        self.assertIn("(як-є translation-evidence/1)", source)
+        self.assertIn("(як-є translation-1)", source)
+        self.assertIn("(як-є translation-review-1)", source)
+        self.assertIn("(як-є translation-evidence-1)", source)
         self.assertIn("(як-є candidate)", source)
 
     def test_translation_names_match_ratified_d9_d10_projection_and_keep_width(self):
