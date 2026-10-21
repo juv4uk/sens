@@ -101,7 +101,7 @@ def verify(source: str) -> dict[str, tuple]:
     # обов'язково відхиляються до точного текстового маршруту.
     for d1_guard in (
         "((тотожне? значення (атом? (як-є ()))) (хибне? (атом? (як-є ()))))",
-        "((тотожне? значення (хибне? (атом? (як-є ()))))",
+        "((тотожне? значення (хибне? (атом? (як-є ()))))\n       (хибне? (атом? (як-є ()))))",
     ):
         if source.count(d1_guard) != 1:
             raise AssertionError("D1 предикат перед D8 WRITE не відхилено: " + d1_guard)
@@ -164,7 +164,7 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
         verify(self.source)
         for guarded in (
             "((тотожне? значення (атом? (як-є ()))) (хибне? (атом? (як-є ()))))",
-            "((тотожне? значення (хибне? (атом? (як-є ()))))",
+            "((тотожне? значення (хибне? (атом? (як-є ()))))\n       (хибне? (атом? (як-є ()))))",
         ):
             broken = self.source.replace(guarded, "; видалений захист D1", 1)
             with self.assertRaisesRegex(AssertionError, "D1 предикат"):
