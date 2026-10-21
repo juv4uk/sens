@@ -1665,11 +1665,16 @@ def main():
             strip_comments(raw.decode("utf-8")),
             source_surface=args.source_surface,
         )).parse_program()
-        imported_bindings.extend(collect_global_bindings(imported_forms))
+        # Full укр D4 DEFINE is supplied by the ratified surface resolver.
+        # Parsing without it silently reports ZERO bindings from real Lisp.
+        imported_defines = collect_global_bindings(
+            imported_forms, Resolver(my, upper, d9_residents, bridge_by_sid)
+        )
+        imported_bindings.extend(imported_defines)
         binding_receipts.append({
             "path": candidate.relative_to(REPO_ROOT).as_posix(),
             "sha256": hashlib.sha256(raw).hexdigest(),
-            "define_bindings": len(collect_global_bindings(imported_forms)),
+            "define_bindings": len(imported_defines),
         })
     skipped_paired = []
     if args.unpaired_only:
