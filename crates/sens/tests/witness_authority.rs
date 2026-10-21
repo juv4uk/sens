@@ -258,7 +258,7 @@ fn transport_island_compat_document(session: &mut Session) {
 
     let form = &forms[0];
     let exact_form_source = &source[form.span.start..form.span.end];
-    let transport = format!("(def island-compat-document (quote {exact_form_source}))");
+    let transport = format!("(визначити island-compat-document (як-є {exact_form_source}))");
     eval_program(&transport, session)
         .expect("host observer must be able to transport island contract bytes into Lisp data");
 }
@@ -281,7 +281,7 @@ fn transport_life_1_document(session: &mut Session) {
 
     let form = &forms[0];
     let exact_form_source = &source[form.span.start..form.span.end];
-    let transport = format!("(def life-1-document (quote {exact_form_source}))");
+    let transport = format!("(визначити life-1-document (як-є {exact_form_source}))");
     eval_program(&transport, session)
         .expect("host observer must transport LIFE-1 contract bytes into Lisp data");
 }
@@ -304,7 +304,7 @@ fn transport_life_substrate_parity_document(session: &mut Session) {
     let form = &forms[0];
     let exact_form_source = &source[form.span.start..form.span.end];
     let transport = format!(
-        "(def life-substrate-parity-document (quote {exact_form_source}))"
+        "(визначити life-substrate-parity-document (як-є {exact_form_source}))"
     );
     eval_program(&transport, session)
         .expect("host observer must transport #809 contract bytes into Lisp data");
@@ -334,14 +334,14 @@ fn actual_form_from_native(row: &WitnessRow, session: &mut Session) -> String {
 
 fn assert_lisp_owned_verdict_passes(session: &mut Session, row: &WitnessRow, actual: &str) {
     let program = format!(
-        "(witness-pass? (witness-verdict (quote {}) (quote {})))",
+        "(свідок-проходить? (свідок-висновок (як-є {}) (як-є {})))",
         row.source, actual
     );
     let result = eval_program(&program, session)
         .unwrap_or_else(|error| panic!("witness verdict failed for {}: {error}", row.expr));
     assert_eq!(
         result.value.to_string(),
-        "t",
+        "1",
         "Lisp-owned witness verdict rejected actual outcome for {}",
         row.expr
     );
@@ -352,7 +352,7 @@ fn init_meta_session() -> Session {
     load_core_library(&mut session).expect("core library");
     load_meta_evaluator_library(&mut session).expect("meta evaluator");
     load_witness_library(&mut session);
-    eval_program("(def --witness-meta-env-- (quote ()))", &mut session)
+    eval_program("(визначити свідок-мета-середовище (як-є ()))", &mut session)
         .expect("meta environment init");
     session
 }
@@ -361,23 +361,23 @@ fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
     let expr = escape_lisp_string(&row.expr);
     eval_program(
         &format!(
-            "(def --witness-meta-step-- (обчислити-послідовність-форм (read-all \"{expr}\") --witness-meta-env--))"
+            "(визначити свідок-мета-крок (обчислити-послідовність-форм (читати-всі \"{expr}\") свідок-мета-середовище))"
         ),
         session,
     )
     .expect("meta step");
     eval_program(
-        "(def --witness-meta-env-- (car --witness-meta-step--))",
+        "(визначити свідок-мета-середовище (перше свідок-мета-крок))",
         session,
     )
     .expect("thread meta environment");
 
-    let meta_value = eval_program("(cdr --witness-meta-step--)", session)
+    let meta_value = eval_program("(решта свідок-мета-крок)", session)
         .expect("meta value transport")
         .value;
     let presented = escape_lisp_string(&meta_value.to_string());
     let program = format!(
-        "(witness-verdict (quote {}) (witness-meta-outcome-presented (cdr --witness-meta-step--) \"{}\"))",
+        "(свідок-висновок (як-є {}) (свідок-мета-показаний-вихід (решта свідок-мета-крок) \"{}\"))",
         row.source, presented
     );
     eval_program(&program, session)
@@ -554,7 +554,7 @@ fn malformed_witness_fails_closed_as_lisp_data() {
     load_witness_library(&mut session);
 
     let verdict = eval_program(
-        "(witness-verdict (quote ((expr . \"(+ 1 2)\"))) (quote (value \"3\")))",
+        "(свідок-висновок (quote ((expr . \"(+ 1 2)\"))) (quote (value \"3\")))",
         &mut session,
     )
     .expect("malformed witness must return a named data verdict, not crash")
