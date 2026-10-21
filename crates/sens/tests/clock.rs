@@ -195,7 +195,7 @@ fn ntp_field_interpretation_is_language_owned() {
 
     assert_eq!(
         eval_program(
-            "(тлумачити-поля-відповіді-часу \"clock.example\" 4 1 2208988800 0)",
+            "(тлумачити-поля-відповіді-часу \"clock.example\" 4 1 2208988800 (відняти 1000000000 1000000000))",
             &mut session,
         )
         .unwrap()
@@ -212,6 +212,17 @@ fn ntp_field_interpretation_is_language_owned() {
         .value
         .to_string(),
         "(accepted \"clock.example\" 1 500000000)"
+    );
+    // Гранична частка в D48: точне округлення донизу без D96.
+    assert_eq!(
+        eval_program(
+            "(тлумачити-поля-відповіді-часу \"clock.example\" 4 1 2208988801 4294967295)",
+            &mut session,
+        )
+        .unwrap()
+        .value
+        .to_string(),
+        "(accepted \"clock.example\" 1 999999999)"
     );
     assert_eq!(
         eval_program(
