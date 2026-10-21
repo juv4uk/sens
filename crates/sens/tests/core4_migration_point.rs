@@ -139,6 +139,32 @@ fn core4_ukrainian_structural_equality_executes_both_d1_bits() {
     }
 }
 
+// D1-поведінка Core4: порядок перевіряється на ВСЬОМУ хвості, не тільки на першій парі.
+// Нативний SENS evaluator обчислює закон; Rust не імітує жодного порівняння.
+#[test]
+fn core4_ukrainian_order_predicates_recurse_until_empty_tail_in_sens() {
+    let mut session = migrated_core();
+    for (source, expected) in [
+        ("(перевірити-неспадання-значень? 1 (як-є ()))", true),
+        ("(перевірити-неспадання-значень? 1 (як-є (1 2)))", true),
+        ("(перевірити-неспадання-значень? 1 (як-є (2 1)))", false),
+        ("(перевірити-неспадання-значень? 2 (як-є (1)))", false),
+        ("(перевірити-незростання-значень? 2 (як-є ()))", true),
+        ("(перевірити-незростання-значень? 2 (як-є (2 1)))", true),
+        ("(перевірити-незростання-значень? 2 (як-є (1 2)))", false),
+        ("(перевірити-незростання-значень? 1 (як-є (2)))", false),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=core4-order-d1 source={source} error={error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id=core4-order-d1 input={source} expected={expected} actual={}",
+            result.value
+        );
+    }
+}
+
 #[test]
 fn core4_ukrainian_association_search_handles_later_and_missing_keys() {
     // SENS проходить усі гілки: перший ключ, наступний ключ і відсутність.
