@@ -10,6 +10,7 @@ fn time_session() -> Session {
 #[test]
 fn exact_d3_time_source_repairs_preexisting_w8_cons_arity_error() {
     let input = "(timezone-raw->observation (quote (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))";
+    let current_input = "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))";
     fn observe(input: &str, migrated: bool) -> Result<String, String> {
         let mut session = Session::default();
         load_core_library(&mut session).map_err(|e| e.to_string())?;
@@ -38,7 +39,7 @@ fn exact_d3_time_source_repairs_preexisting_w8_cons_arity_error() {
     // The current Lisp-owned implementation must repair the arity defect and retain
     // the public observation shape without a host-side fallback.
     assert_eq!(
-        observe(input, true),
+        observe(current_input, true),
         Ok("(detected \"Europe/Kyiv\" TZ)".to_string()),
         "current exact-D3 time source must construct the observation via binary D3 CONS"
     );
@@ -50,7 +51,7 @@ fn raw_timezone_declarations_are_interpreted_by_lisp() {
 
     assert_eq!(
         eval_program(
-            "(timezone-raw->observation (quote (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))",
+            "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))",
             &mut session,
         )
         .unwrap()
@@ -61,7 +62,7 @@ fn raw_timezone_declarations_are_interpreted_by_lisp() {
 
     assert_eq!(
         eval_program(
-            "(timezone-raw->observation (quote (timezone-declarations () \"Europe/Kyiv\")))",
+            "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations () \"Europe/Kyiv\")))",
             &mut session,
         )
         .unwrap()
@@ -72,7 +73,7 @@ fn raw_timezone_declarations_are_interpreted_by_lisp() {
 
     assert_eq!(
         eval_program(
-            "(timezone-raw->observation (quote (timezone-declarations () ())))",
+            "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations () ())))",
             &mut session,
         )
         .unwrap()
@@ -85,19 +86,19 @@ fn raw_timezone_declarations_are_interpreted_by_lisp() {
     // remain language-owned and D3:110 must stay exactly two-clause.
     for (source, expected) in [
         (
-            "(timezone-raw->observation (quote (timezone-declarations \"\" \"Etc/UTC\")))",
+            "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations \"\" \"Etc/UTC\")))",
             "(detected \"Etc/UTC\" etc-timezone)",
         ),
         (
-            "(timezone-raw->observation (quote (timezone-declarations \"\" \"\")))",
+            "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations \"\" \"\")))",
             "(unknown host-declaration-unavailable)",
         ),
         (
-            "(timezone-raw->observation (quote (timezone-declarations \"Europe/Kyiv\" \"\")))",
+            "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations \"Europe/Kyiv\" \"\")))",
             "(detected \"Europe/Kyiv\" TZ)",
         ),
         (
-            "(timezone-raw->observation (quote (timezone-declarations () \"\")))",
+            "(часовий-пояс-сирий-до-спостереження (як-є (timezone-declarations () \"\")))",
             "(unknown host-declaration-unavailable)",
         ),
     ] {
@@ -113,7 +114,7 @@ fn raw_timezone_declarations_are_interpreted_by_lisp() {
 
     assert_eq!(
         eval_program(
-            "(timezone-raw->observation (quote (not-timezone-declarations () ())))",
+            "(часовий-пояс-сирий-до-спостереження (як-є (not-timezone-declarations () ())))",
             &mut session,
         )
         .unwrap()
