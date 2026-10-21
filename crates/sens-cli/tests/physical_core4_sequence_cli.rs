@@ -604,6 +604,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-adjacent-runs-general",
         "lib/list-common-prefix-general",
         "lib/list-remove-first-atom",
+        "lib/list-remove-last-atom",
         "lib/list-last-occurrence-suffix",
         "lib/pair-zip-unzip-two",
         "lib/list-zip-general",
