@@ -90,7 +90,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn("status=$?", branch)
         # Прозора відмова не перетворюється на успіх і не глушить RED.
         self.assertIn('failed_files=$((failed_files + 1))', source[failed:failed+160])
-        self.assertIn('if (( failed_files > 0 )); then\\n  exit 2', source)
+        self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
 
     def test_nonprogram_cannot_hide_obsolete_committed_sens(self):
         # Перевірка самого Bash-маршруту на синтетичному звіті мігратора:
