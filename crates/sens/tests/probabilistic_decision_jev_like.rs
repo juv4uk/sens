@@ -349,7 +349,7 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
             (так (як-є invalid)))
           (довжина (третє request))
           (за-умовою
-            ((system-one-відповідь-допустима? response) (як-є valid))
+            ((system-one-відповідь-допустима? response request) (як-є valid))
             (так (як-є invalid)))))
     "#;
     assert_eq!(
@@ -373,13 +373,13 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
              (duplicate-question-request
                (system-one-запит state
                  (list choice-question
-                       (pd-noul-question (quote route))))))
+                       (pd-question-noul (quote route))))))
         (list
           (за-умовою
-            ((system-one-відповідь-допустима? missing) (як-є valid))
+            ((system-one-відповідь-допустима? missing request) (як-є valid))
             (так (як-є invalid)))
           (за-умовою
-            ((system-one-відповідь-допустима? duplicate) (як-є valid))
+            ((system-one-відповідь-допустима? duplicate request) (як-є valid))
             (так (як-є invalid)))
           (за-умовою
             ((перевірити-запит-системи-один? duplicate-question-request) (як-є valid))
