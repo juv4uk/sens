@@ -323,6 +323,48 @@ class BoundedUkTripletTests(unittest.TestCase):
                 with self.assertRaises(mod.ProjectionBlocked):
                     mod.canonical_uk_from_words(invalid)
 
+    def test_four_d4_selectors_preserve_program_identity_over_t5m(self):
+        # Чотири селектори Д4 — тільки для доведених вкладених D3 CONS.
+        # Фізична тотожність не видається за доказ виконання SENS.
+        empty = ["10", "001", "00", "000", "01"]
+
+        def pair(left, right):
+            return ["10", "111", "00", *left, "00", *right, "01"]
+
+        inner_left = pair(pair(empty, empty), empty)
+        inner_right = pair(empty, pair(empty, empty))
+        for opcode, name, program_tree in (
+            ("1000", "перше-першого", inner_left),
+            ("0110", "решта-першого", inner_left),
+            ("1001", "друге", inner_right),
+            ("0111", "решта-решти", inner_right),
+        ):
+            words = ["10", opcode, "00", *program_tree, "01"]
+            source = (
+                f"({name} " + mod.canonical_uk_from_words(program_tree).strip() + ")\n"
+            )
+            with self.subTest(opcode=opcode):
+                self.assertEqual(mod.canonical_uk_from_words(words), source)
+                self.assertEqual(mod.project_current_uk(source), words)
+                lisp, sens, view = (
+                    self.dir / "вибірка.lisp",
+                    self.dir / "вибірка.sens",
+                    self.dir / "вибірка",
+                )
+                lisp.write_text(source, encoding="utf-8")
+                sens.write_bytes(encode_t5m_projection(" ".join(words)))
+                view.write_text(" ".join(words) + "\n", encoding="ascii")
+                receipt = mod.verify(lisp, sens, view, codec="t5m")
+                self.assertTrue(receipt["program_identity_roundtrip"])
+                self.assertTrue(receipt["physical_T5M_roundtrip"])
+                self.assertFalse(receipt["runtime_oracle_admitted_by_this_audit"])
+
+                bad_tree = inner_right if opcode in ("1000", "0110") else inner_left
+                with self.assertRaisesRegex(mod.ProjectionBlocked, "proved nested"):
+                    mod.canonical_uk_from_words(["10", opcode, "00", *bad_tree, "01"])
+                with self.assertRaises(mod.ProjectionBlocked):
+                    mod.canonical_uk_from_words(["10", opcode, "00", "000", "01"])
+
     def test_cli_read_only_current_canary(self):
         cmd = [sys.executable, str(SOURCE), "--lisp", str(self.lisp),
                "--sens", str(self.sens), "--view", str(self.view)]

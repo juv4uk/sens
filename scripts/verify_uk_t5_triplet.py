@@ -89,7 +89,8 @@ class WordParser:
             return ("empty",)
         if token in ("0", "1"):
             return ("predicate", token)
-        if token in ("001", "010", "011", "100", "101", "110", "111", "1000"):
+        if token in ("001", "010", "011", "100", "101", "110", "111",
+                     "0110", "0111", "1000", "1001"):
             return ("head", token)
         raise ProjectionBlocked(f"outside bounded D1/D3 callable or data law: {token!r}")
 
@@ -118,13 +119,24 @@ def proved_nil_pair_tree(node) -> bool:
     return False
 
 
-def proved_caar_input(node) -> bool:
-    if node[0] != "list" or len(node[1]) != 3:
+def proved_selector_input(node, opcode: str) -> bool:
+    """Bounded D3 CONS tree proves the intermediate pair exists for a D4 selector.
+
+    This is structural identity, not a universal runtime or Lisp-eval oracle.
+    """
+    if (node[0] != "list" or len(node[1]) != 3
+            or node[1][0] != ("head", "111")
+            or not proved_nil_pair_tree(node)):
         return False
-    head, car, cdr = node[1]
-    return (head == ("head", "111") and car[0] == "list"
-            and len(car[1]) == 3 and car[1][0] == ("head", "111")
-            and proved_nil_pair_tree(car) and proved_nil_pair_tree(cdr))
+    _head, car, cdr = node[1]
+    required = car if opcode in ("1000", "0110") else cdr
+    return (required[0] == "list" and len(required[1]) == 3
+            and required[1][0] == ("head", "111")
+            and proved_nil_pair_tree(required))
+
+
+def proved_caar_input(node) -> bool:
+    return proved_selector_input(node, "1000")
 
 
 def render_uk(node, d1: dict[str, str], d3: dict[str, str],
@@ -140,9 +152,11 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str],
     if not items or items[0][0] != "head":
         raise ProjectionBlocked("unknown callable head or COND clause context")
     opcode = items[0][1]
-    if opcode == "1000":
-        if len(items) != 2 or not proved_caar_input(items[1]):
-            raise ProjectionBlocked("D4 CAAR requires a proved nested CONS pair")
+    if opcode in ("0110", "0111", "1000", "1001"):
+        if len(items) != 2 or not proved_selector_input(items[1], opcode):
+            raise ProjectionBlocked(
+                f"D4 {d4[opcode]} requires a proved nested CONS pair"
+            )
         return "(" + d4[opcode] + " " + render_uk(items[1], d1, d3, d4) + ")"
     # Each admitted spelling comes from the owner's D3 domain table. A
     # callable D3 slot is not permission to invent unproved datum grammar.
