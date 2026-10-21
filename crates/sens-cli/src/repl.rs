@@ -688,7 +688,7 @@ fn prepare_t5m_repl_program(
 /// Це один і той самий reader, що надалі перевіряє --t5m-pair.
 /// Механічний roundtrip не підмінює семантичний SENS oracle.
 #[cfg(feature = "zig-transport")]
-pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
+pub(crate) fn mint_t5m_source_pair(source: &str) -> Result<(Vec<u8>, String), String> {
     let words = prepare_t5m_repl_words(
         source, ReplSurface::UkrainianFull, &Session::default(),
     )?;
@@ -696,7 +696,29 @@ pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
     let physical = crate::zig_transport::encode_t5_exact_words(&carrier)?;
     let restored = crate::zig_transport::decode_t5_exact_words(&physical)?;
     restore_t5m_words(&words, &restored)?;
-    Ok(physical)
+
+    // Читабельний файл не є іншим кодеком: це точні слова, які
+    // щойно відновив Zig. Rust тут тільки записує їхні 0/1 і пробіли.
+    let mut view = String::new();
+    for (index, word) in restored.iter().enumerate() {
+        if index != 0 {
+            view.push(' ');
+        }
+        for bit in &word.bits {
+            match bit {
+                0 => view.push('0'),
+                1 => view.push('1'),
+                _ => return Err("T5M_VIEW_NONBINARY_WORD".into()),
+            }
+        }
+    }
+    view.push('\n');
+    Ok((physical, view))
+}
+
+#[cfg(feature = "zig-transport")]
+pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
+    mint_t5m_source_pair(source).map(|(physical, _)| physical)
 }
 
 /// Явно парний фізичний шлях: .lisp НАДАЄ перевірену доменну ідентичність,
