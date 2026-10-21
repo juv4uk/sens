@@ -371,12 +371,15 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
              (answers
                (список
                  (спостерегти-вибір-системи-один choice-question
-                   (як-є ((billing 3/4) (technical 1/4)))
+                   (список (список (як-є billing) (частка 3 4))
+                           (список (як-є technical) (частка 1 4)))
                    (як-є ((source synthetic) (question route))))
-                 (спостерегти-так-ні noul-question 2/3
+                 (спостерегти-так-ні noul-question (частка 2 3)
                    (як-є ((source synthetic) (question urgent))))
                  (спостерегти-шкалу-системи-один score-question
-                   (як-є ((low 1/4) (medium 1/2) (high 1/4)))
+                   (список (список (як-є low) (частка 1 4))
+                           (список (як-є medium) (частка 1 2))
+                           (список (як-є high) (частка 1 4)))
                    (як-є ((source synthetic) (question severity))))))
              (response (відповідь-системи-один request answers)))
         (список
@@ -406,7 +409,8 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
              (questions (список choice-question noul-question))
              (request (запит-системи-один state questions))
              (choice-answer (спостерегти-вибір-системи-один choice-question
-               (як-є ((billing 3/4) (technical 1/4)))
+               (список (список (як-є billing) (частка 3 4))
+                           (список (як-є technical) (частка 1 4)))
                (як-є ((source synthetic)))))
              (missing (відповідь-системи-один request (список choice-answer)))
              (duplicate (відповідь-системи-один request (список choice-answer choice-answer)))
