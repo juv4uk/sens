@@ -753,6 +753,51 @@ fn український_скрипт_відбирає_саме_запитан�
         let result = String::from_utf8_lossy(&output.stdout);
         assert_eq!(result.trim(), level, "SENS отримав неправильне поле tier: {result}");
     }
+    // Позитивний/негативний виконуваний свідок ЧИСТОГО відбору.
+    // Перевіряємо значення й порядок, а не кількість надрукованих побічних дій.
+    let corpus = "(як-є (((expr . зоря) (tier . 1)) ((expr . телескоп) (tier . 2)) ((expr . обсерваторія) (tier . 1))))";
+    let cases = [
+        (
+            format!("(решта (перше (перше (відібрати-приклади-за-рівнем {corpus} 1))))"),
+            "зоря",
+        ),
+        (
+            format!("(решта (перше (перше (решта (відібрати-приклади-за-рівнем {corpus} 1)))))"),
+            "обсерваторія",
+        ),
+        (
+            format!("(решта (перше (перше (відібрати-приклади-за-рівнем {corpus} 2))))"),
+            "телескоп",
+        ),
+        (
+            format!("(атом? (відібрати-приклади-за-рівнем {corpus} 3))"),
+            "1",
+        ),
+        (
+            format!("(атом? (решта (решта (відібрати-приклади-за-рівнем {corpus} 1))))"),
+            "1",
+        ),
+    ];
+    for (index, (expression, expected)) in cases.into_iter().enumerate() {
+        let code = format!("{selector}\\n{expression}\\n");
+        let path = std::env::temp_dir().join(format!(
+            "sens-ukr-tier-filter-{index}-{}.lisp", std::process::id()
+        ));
+        std::fs::write(&path, code).expect("чиста українська програма");
+        let output = sens().arg(&path).output().expect("SENS CLI виконує програму");
+        let _ = std::fs::remove_file(&path);
+        assert!(
+            output.status.success(),
+            "SENS відбір {index}: stderr={} stdout={}",
+            String::from_utf8_lossy(&output.stderr),
+            String::from_utf8_lossy(&output.stdout)
+        );
+        assert_eq!(
+            String::from_utf8_lossy(&output.stdout).trim(),
+            expected,
+            "SENS змінив порядок/тотожність або пропустив не той рівень"
+        );
+    }
     // Жодного фальшивого статусу GO для файлового виконання.
     let full = sens()
         .args(["scripts/fixtures-for-tier.lisp", "1"])
