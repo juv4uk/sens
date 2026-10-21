@@ -610,6 +610,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-chunk-pairs-general",
         "lib/list-interpose-general",
         "lib/list-all-slices-ends-general",
+        "lib/list-atom-sequence-equal-general",
         "lib/list-rotation-inverse-general",
         "lib/list-alternating-split-four",
         "lib/list-alternating-split-general",
