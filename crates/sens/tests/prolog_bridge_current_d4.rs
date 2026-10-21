@@ -44,6 +44,26 @@ fn d4_bridge_rejects_missing_source_and_malformed_observation() {
 }
 
 #[test]
+fn d4_bridge_rejects_wrong_or_nonatomic_observation_head() {
+    // Справжній SENS виконує негативи. Перенесення тих самих полів під
+    // стороннім заголовком НЕ має створювати трьох фальшивих фактів.
+    let mut state = session();
+    for observation in [
+        "(other-observation (source-ref observation-42) (variable ancestor) (values bob))",
+        "((unadmitted-head) (source-ref observation-42) (variable ancestor) (values bob))",
+    ] {
+        let input = format!(
+            "(перетворити-підстановки-пролог-на-факти-даталог (як-є {observation}))"
+        );
+        assert_eq!(
+            eval(&input, &mut state),
+            "(projection-failure malformed-observation)",
+            "test_id=prolog-exact-observation-head layer=real-SENS input={input}",
+        );
+    }
+}
+
+#[test]
 fn d4_bridge_d1_field_shape_rejects_truncated_extra_and_dotted_rows() {
     // Нативний SENS оцінює чинне Lisp-визначення, Rust лише зіставляє D1.
     let mut state = session();
