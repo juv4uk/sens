@@ -59,9 +59,9 @@ EXPECTED = {
     },
 }
 
-# У цьому джерелі D10 рішення є DEFINE, але не внутрішніми call-site.
-# Перевіряємо справжні визначення, не вигадуємо кількість викликів.
-DEFINED_ONLY = {
+# Ідентичності двох D10 рішень перевіряємо за визначеннями та таблицею.
+# Дійсні call-site перевіряються окремо; виконання — у SENS runtime.
+RATIFIED_D10_DEFINITIONS = {
     "advice-all-decision": ("D10", "0001111010"),
     "advice-decision": ("D10", "0001111101"),
 }
@@ -112,7 +112,7 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
         definitions = re.findall(r"(?m)^\\s*\\(визначити\\s+([^\\s()]+)", source)
         self.assertEqual(len(definitions), len(set(definitions)), "повторне визначення D10")
-        for old_name, (domain, bits) in DEFINED_ONLY.items():
+        for old_name, (domain, bits) in RATIFIED_D10_DEFINITIONS.items():
             with self.subTest(name=old_name):
                 rows = self.by_en.get(old_name, [])
                 self.assertEqual(len(rows), 1, "ратифіковане D10 ім'я має бути однозначним")
