@@ -99,3 +99,27 @@ fn historical_core1_compiler_prelude_is_donor_not_current_nucleus() {
         "current production compiler adapter must not load the historical Core1 prelude"
     );
 }
+
+
+#[test]
+fn core1_historical_prelude_has_executable_ukr_closure_not_english_alias() {
+    use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session};
+
+    // Джерелом істини є саме виконаний SENS, а не Rust/Python-копія NOT.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("test_id=core1-prelude-ukr layer=SENS core");
+    let source = include_str!("../../../lib/core1-compiler-prelude.lisp");
+    let parsed = parse_mixed_exact_domain(source)
+        .expect("test_id=core1-prelude-ukr layer=reader exact D1-D4");
+    eval_parsed_expressions(&parsed, &mut session)
+        .expect("test_id=core1-prelude-ukr layer=SENS exact Ukrainian DEFINE");
+
+    let real = eval_program("(ядро1-історичне-не (атом? (як-є ())))", &mut session)
+        .expect("test_id=core1-prelude-ukr layer=SENS actual invocation");
+    let expected = eval_program("(як-є ())", &mut session)
+        .expect("test_id=core1-prelude-ukr layer=SENS quoted historical result");
+    assert_eq!(real.value, expected.value,
+        "test_id=core1-prelude-ukr layer=SENS input=D1:1 expected=historical empty actual={}", real.value);
+    assert!(!source.lines().any(|line| line.starts_with("(визначити not ")),
+        "test_id=core1-prelude-ukr source no legacy English DEFINE");
+}
