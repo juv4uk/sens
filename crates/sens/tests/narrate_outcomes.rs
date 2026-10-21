@@ -51,6 +51,12 @@ fn current_named_narration_helpers_execute_without_anonymous_d5_value_call() {
             "(пояснити-результат-із-полів (як-є (planet earth)) (як-є ()))",
             "(proved (planet earth) without-proof-result)",
         ),
+        // Негативний свідок: крапковий хвіст не є правильним списком
+        // і не повинен перетворюватися на вигаданий доказ чи речення.
+        (
+            "(пояснити-мету-з-передумовами (як-є (planet . earth)) (як-є ()))",
+            "(planet . earth)",
+        ),
     ] {
         assert_eq!(eval_outcome_narration(source), expected, "живий SENS: {source}");
     }
