@@ -13,7 +13,7 @@ SOURCE = ROOT / "lib/process.lisp"
 EXPECTED = {
     "процес-результат-текст": 1,
     "процес-публічний-вихід-код": 1,
-    "процес-запустити": 1,
+    "процес-розгорнути-публічний-результат": 1,
 }
 
 
@@ -66,7 +66,7 @@ def inspect(source):
         if count:
             found[form[1]] = count
     if found != EXPECTED:
-        raise ValueError(f"три прямі Д3-порівняння порушено: {found}")
+        raise ValueError(f"три чинні Д3-порівняння (включно з D4 helper) порушено: {found}")
     return found
 
 
