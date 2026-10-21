@@ -220,6 +220,63 @@ class ThreePassMigrationTests(unittest.TestCase):
         resolver=mod.Resolver(self.my,self.upper)
         return mod.migrate_file(source,resolver,self.text7),resolver
 
+    def test_lambda_parameter_shape_is_real_program_identity(self):
+        # D4: variadic atom != one-element fixed binder list.
+        # Proper, dotted and empty binders have different machine syntax.
+        def binder(source):
+            return mod.Parser(mod.tokenize(source)).parse_program()[0]
+
+        bare = mod.encode_text7_identifier(
+            "аргументи", self.text7, mod.Tok("ATOM", "аргументи", 0),
+        )
+        first = mod.encode_text7_identifier(
+            "перший", self.text7, mod.Tok("ATOM", "перший", 0),
+        )
+        rest = mod.encode_text7_identifier(
+            "решта", self.text7, mod.Tok("ATOM", "решта", 0),
+        )
+        self.assertEqual(
+            mod.encode_lambda_params(binder("аргументи"), self.text7), bare,
+        )
+        self.assertEqual(
+            mod.encode_lambda_params(binder("(аргументи)"), self.text7),
+            [mod.D2_OPEN, *bare, mod.D2_CLOSE],
+        )
+        self.assertEqual(
+            mod.encode_lambda_params(binder("(перший . решта)"), self.text7),
+            [mod.D2_OPEN, *first, mod.D2_DOT, *rest, mod.D2_CLOSE],
+        )
+        self.assertEqual(
+            mod.encode_lambda_params(binder("(перший решта)"), self.text7),
+            [mod.D2_OPEN, *first, mod.D2_SEP, *rest, mod.D2_CLOSE],
+        )
+        self.assertEqual(
+            mod.encode_lambda_params(binder("()"), self.text7),
+            [mod.D3_EMPTY],
+        )
+
+    def test_full_d4_lambda_keeps_variadic_and_dotted_semantics(self):
+        samples = (
+            "(функція аргументи аргументи)",
+            "(функція (аргументи) аргументи)",
+            "(функція (перший . решта) решта)",
+            "(функція (перший решта) решта)",
+            "(функція () (як-є ()))",
+        )
+        projections = []
+        for source in samples:
+            with self.subTest(source=source):
+                projection, _ = self.migrate(source)
+                words = projection.split()
+                self.assertEqual(words[0], mod.D2_OPEN)
+                self.assertEqual(words[1], "0010")
+                self.assertEqual(words[-1], mod.D2_CLOSE)
+                projections.append(tuple(words))
+        self.assertEqual(len(set(projections)), len(samples))
+        self.assertIn(mod.D2_DOT, projections[2])
+        # The strict parameter list cannot acquire a REST tail implicitly.
+        self.assertNotIn(mod.D2_DOT, projections[3])
+
     def test_migrate_file_defaults_to_t5m(self):
         self.assertEqual(
             inspect.signature(mod.migrate_file).parameters["codec"].default,
