@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/guard.lisp has no bare host truthiness (t / NIL)
-  2. Exact D1:1 form (010 (001 ())) is present as predicate carrier
+  2. Current executable D1 values come from Ukrainian ATOM(QUOTE NIL/non-NIL)
   3. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
 Does not prove runtime callability or T5 physical execution. Run:
@@ -21,7 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 GUARD = ROOT / "lib" / "guard.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
+D1_TRUE = "(атом? (як-є ()))"
+D1_FALSE = "(атом? (як-є (())))"
 
 
 def check_guard() -> list[str]:
@@ -35,8 +36,12 @@ def check_guard() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"guard: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("guard: exact D1:1 form (010 (001 ())) missing")
+    active = "\n".join(line for line in text.splitlines()
+                       if not line.lstrip().startswith(";"))
+    if D1_TRUE not in active or D1_FALSE not in active:
+        errs.append("guard: executable D1 true/false predicate witnesses missing")
+    if re.search(r"(?<![\w-])(?:так|ні)(?![\w-])", active):
+        errs.append("guard: unbound D1 truth name in executable Lisp")
     return errs
 
 
