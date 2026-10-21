@@ -38,6 +38,28 @@ impl ExactDomainWord {
         }
         Ok(Self::Number(number))
     }
+
+    /// Допускає відновлене фізичне слово до чинних ідентичностей SENS.
+    /// D1–D10 — точні координати драбини; числа D24+ належать до окремо
+    /// ратифікованої родини ширин. Інші ширини не відображаються: сама
+    /// ширина не вигадує резидента.
+    pub fn from_physical_width_bits(width: usize, bits: &[u8]) -> Result<Self, String> {
+        if width == 0 || bits.len() != width || bits.iter().any(|&bit| bit > 1) {
+            return Err("physical SENS word must have exact positive width and 0/1 bits".into());
+        }
+        if (1..=10).contains(&width) {
+            let payload = bits.iter().fold(0u16, |value, &bit| (value << 1) | u16::from(bit));
+            let coordinate = crate::domain_ladder::DomainCoordinate::new(width as u8, payload)
+                .ok_or_else(|| "invalid exact D1–D10 coordinate".to_string())?;
+            return Ok(Self::Identity(DomainIdentity::from_coordinate(coordinate)));
+        }
+        if BinaryNumber::is_numeric_domain_width(width) {
+            let number = BinaryNumber::from_numeric_domain_bits(width, bits)
+                .ok_or_else(|| "invalid exact D24+ numeric word".to_string())?;
+            return Self::number(number).map_err(str::to_owned);
+        }
+        Err(format!("no ratified SENS identity for exact word width {width}"))
+    }
 }
 
 /// Canonically validated physical T5 program, stored as the current lowered AST.

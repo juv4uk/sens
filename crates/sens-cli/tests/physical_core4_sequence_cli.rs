@@ -11,6 +11,19 @@ use std::{
 };
 static UNIQUE: AtomicU64 = AtomicU64::new(0);
 
+#[test]
+fn sens_trit_eval_executes_physical_t5m_d24_without_the_source_file() {
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../tests/fixtures/приклад.sens");
+    let output = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("eval")
+        .arg(path)
+        .output()
+        .expect("run explicit SENS T5M evaluator");
+    assert!(output.status.success(), "{}", error(&output));
+    assert_eq!(observed(&output).trim(), "3");
+}
+
 struct PhysicalT5m {
     source: PathBuf,
     path: PathBuf,

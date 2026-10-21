@@ -339,11 +339,14 @@ fn eval_t5_bytes_core4(
     }
     #[cfg(feature = "zig-transport")]
     {
-        // Zig owns only physical width/payload decoding; SENS owns D2,
-        // all execution and any explicitly requested Core4 bootstrap.
-        let words = zig_transport::decode_t5_words(bytes)?;
-        let program = sens::PhysicalT5Program::from_exact_words(&words)
-            .map_err(|e| format!("canonical SENS D2/admission rejected: {e}"))?;
+        // Zig restores exact word widths; SENS maps only ratified D1–D10 and
+        // D24+ identities, parses D2, and owns execution/bootstrap policy.
+        let words = zig_transport::decode_t5_exact_words(bytes)?
+            .into_iter()
+            .map(|word| sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits))
+            .collect::<Result<Vec<_>, _>>()?;
+        let program = sens::PhysicalT5Program::from_exact_domain_words(&words)
+            .map_err(|e| format!("exact SENS domain admission rejected: {e}"))?;
         let mut session = sens::Session::default();
         if bootstrap_core {
             sens::load_core_library(&mut session)
@@ -1175,8 +1178,8 @@ mod eval_tests {
         {
             let zig_branch = route.split("#[cfg(feature = \"zig-transport\")]")
                 .nth(1).expect("Zig ingress block");
-            assert!(zig_branch.contains("zig_transport::decode_t5_words(bytes)"));
-            assert!(zig_branch.contains("sens::PhysicalT5Program::from_exact_words(&words)"));
+            assert!(zig_branch.contains("zig_transport::decode_t5_exact_words(bytes)"));
+            assert!(zig_branch.contains("sens::PhysicalT5Program::from_exact_domain_words(&words)"));
             assert!(!zig_branch.contains("sens::PhysicalT5Program::decode(bytes)"));
         }
         #[cfg(not(feature = "zig-transport"))]

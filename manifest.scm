@@ -7,6 +7,8 @@
          "gcc-toolchain"
          "bash"
          "coreutils"
+         "diffutils"
+         "grep"
          "nss-certs"
          "git"
          "racket")))

@@ -300,6 +300,22 @@ fn sens_binary_executes_physical_t5_without_a_human_name_parser() {
 }
 
 #[test]
+fn sens_binary_executes_t5m_d24_numeric_words_without_the_source_file() {
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../tests/fixtures/приклад.sens"
+    );
+    let output = sens().arg(path).output().expect("canonical SENS CLI");
+
+    assert!(
+        output.status.success(),
+        "physical D24+ T5M was rejected: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "3");
+}
+
+#[test]
 fn sens_binary_rejects_text_disguised_as_physical_t5() {
     let path = std::env::temp_dir().join("sens-cli-physical-no-text-alias.sens");
     std::fs::write(&path, b"(quote ())").expect("write deliberate textual counterfeit");

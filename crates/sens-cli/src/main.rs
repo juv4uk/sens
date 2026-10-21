@@ -297,12 +297,16 @@ fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str, Vec<&str>), &
     Some(t5m_binding_paths(args).map(|bindings| (&args[2][..], &args[3][..], bindings)))
 }
 
-/// One sterile physical ingress: Rust-host bytes -> Zig ABI v2 BE3 ->
-/// exact-width SENS words. No Rust-side T5 fallback is permitted for .sens.
-fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+/// Фізичний вхід: байти -> стерильний Zig ABI v2 -> точні слова SENS.
+/// T5M зберігає ширину слова, доки правила SENS не встановлять D1–D10
+/// або числову родину D24+; обмеження BE3/W1–W9 тут немає.
+fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::ExactDomainWord>, String> {
     #[cfg(feature = "zig-transport")]
     {
-        return zig_transport::decode_t5_words(bytes);
+        return zig_transport::decode_t5_exact_words(bytes)?
+            .into_iter()
+            .map(|word| sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits))
+            .collect();
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -311,17 +315,15 @@ fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>,
     }
 }
 
-/// One pure T5 -> canonical binary D2 -> current evaluator route.
-/// Neither human spellings nor an eight-bit compatibility reader participate.
-/// An explicit binary file never gains ambient host capabilities or Core4.
+/// Єдиний фізичний шлях: T5M -> точні ідентичності SENS -> бінарний evaluator.
+/// Тут немає людських назв чи сумісного восьмибітного читача; фізичний файл
+/// не отримує неявних host-можливостей або Core4.
 fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
-    // Exact-width T5 words feed the canonical D2 reader directly.
-    // No ASCII surface, dense re-packing or duplicate bit-unpacking.
     let words = decode_physical_t5_words(bytes)?;
-    let forms = sens::parse_canonical_word_sequence(&words)
-        .map_err(|err| format!("exact packed binary reader rejected: {err}"))?;
+    let program = sens::PhysicalT5Program::from_exact_domain_words(&words)
+        .map_err(|err| format!("exact SENS domain reader rejected: {err}"))?;
 
-    // The physically typed D1–D9 entry point has no implicit Lisp macro
+    // Фізично типізований шлях D1–D10/D24+ не має неявного Lisp macro
     // surface. Session::default() loads lib/macro.lisp on EVERY invocation;
     // that bootstrap dominates tiny admitted binary programs and is neither
     // needed nor authorized for this capability-free physical route.
@@ -330,7 +332,7 @@ fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
     // D5:00011 MACRO вже має ратифікований вузький механізм SENS.
     // Не завантажуємо жодного текстового Core або host-можливостей.
     sens::install_ratified_d5_macro_mechanism(&pure);
-    eval_parsed_expressions(&forms, &mut pure)
+    program.execute(&mut pure)
         .map_err(|err| format!("current SENS execution rejected: {err}"))
 }
 
@@ -1120,9 +1122,20 @@ mod core_profile_bootstrap_tests {
         let expected: Vec<_> = words.iter()
             .map(|word| (word.width(), word.packed_bits())).collect();
         let observed: Vec<_> = restored.iter()
-            .map(|word| (word.width(), word.packed_bits())).collect();
+            .map(|word| match word {
+                sens::ExactDomainWord::Identity(identity) => {
+                    (identity.width(), identity.packed_bits())
+                }
+                sens::ExactDomainWord::Number(number) => {
+                    let bits = number.exact_numeric_domain_bits().expect("qualified D24+");
+                    let payload = bits.iter().fold(0u16, |value, &bit| {
+                        (value << 1) | u16::from(bit)
+                    });
+                    (bits.len(), payload)
+                }
+            }).collect();
         assert_eq!(observed, expected, "exact-width domain identities survive Zig");
-        assert!(sens::parse_canonical_word_sequence(&restored).is_ok());
+        assert!(sens::PhysicalT5Program::from_exact_domain_words(&restored).is_ok());
         // A malformed physical carrier is rejected before SENS D2 evaluation.
         assert!(decode_physical_t5_words(&[0xf3]).is_err());
     }
@@ -1134,18 +1147,27 @@ mod core_profile_bootstrap_tests {
         // Zig transports [width, MSB, LSB]; SENS alone judges D2 and eval.
         let physical = [0x63, 0x89, 0x06, 0xa1];
         let words = decode_physical_t5_words(&physical).expect("Zig ABI v2 ingress");
-        let widths: Vec<_> = words.iter().copied().map(sens::BinarySourceWord::width).collect();
-        let bits: Vec<_> = words.iter().copied().map(sens::BinarySourceWord::packed_bits).collect();
+        let widths: Vec<_> = words.iter().map(|word| match word {
+            sens::ExactDomainWord::Identity(identity) => identity.width(),
+            sens::ExactDomainWord::Number(number) => number.numeric_domain_width().unwrap(),
+        }).collect();
+        let bits: Vec<_> = words.iter().map(|word| match word {
+            sens::ExactDomainWord::Identity(identity) => identity.packed_bits(),
+            sens::ExactDomainWord::Number(number) => number.exact_numeric_domain_bits().unwrap()
+                .iter().fold(0u16, |value, &bit| (value << 1) | u16::from(bit)),
+        }).collect();
         assert_eq!(widths, [2, 3, 2, 3, 2]);
         assert_eq!(bits, [2, 1, 0, 0, 1]);
-        assert!(sens::parse_canonical_word_sequence(&words).is_ok());
+        assert!(sens::PhysicalT5Program::from_exact_domain_words(&words).is_ok());
         // Не обмежуємося успіхом декодера: саме фізичні байти мають
         // пройти SENS D2 reader та справжнє виконання D3 QUOTE.
         let executed = eval_physical_t5(&physical)
             .expect("physical .sens must execute through the SENS reader/evaluator");
         assert_eq!(executed.value.to_string(), "()");
         // Malformed physical data must fail before even attempting D2 admission.
-        for invalid in [&[0xf3][..], &[0xf2][..], &[0, 0][..]] {
+        // Two zero physical bytes are a valid all-zero T5M stream, not a
+        // malformed carrier. Empty input is the actual third invalid case.
+        for invalid in [&[0xf3][..], &[0xf2][..], &[][..]] {
             assert!(decode_physical_t5_words(invalid).is_err(), "invalid {invalid:?}");
             assert!(eval_physical_t5(invalid).is_err(), "invalid carrier executed: {invalid:?}");
         }
