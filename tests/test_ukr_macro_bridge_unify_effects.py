@@ -38,6 +38,29 @@ class ExactDomainMigrationTests(unittest.TestCase):
         self.assertIn("(як-є projection-result)", source)
         self.assertIn("(як-є missing-source-ref)", source)
 
+    def test_bridge_does_not_discard_improper_prolog_value_tails(self):
+        # Only a structural guard; the separate native SENS test executes
+        # actual dotted-tail inputs and checks the named failure.
+        source = read("lib/bridge/prolog-to-datalog.lisp")
+        self.assertIn("(визначити пролог-значення-правильний-список?", source)
+        self.assertIn("((порожній? значення) так)", source)
+        self.assertIn("((атом? значення) ні)", source)
+        self.assertIn(
+            "(пролог-значення-правильний-список? (решта значення))", source
+        )
+        body = source.split(
+            "(визначити перетворити-підстановки-пролог-на-факти-даталог", 1
+        )[1]
+        self.assertIn(
+            "(пролог-значення-правильний-список? (решта рядок-значень))",
+            body,
+        )
+        self.assertLess(
+            body.index("(як-є (projection-failure malformed-values))"),
+            body.index("(як-є projection-result)"),
+        )
+        self.assertIn("(як-є prolog-substitutions-to-datalog-facts)", body)
+
     def test_bridge_preserves_ratified_d10_peers_and_protocol_data(self):
         source = read("lib/bridge/prolog-to-datalog.lisp")
         d10 = read("lib/domains/d10.lisp")
