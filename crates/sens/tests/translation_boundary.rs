@@ -53,9 +53,10 @@ fn translation_reads_current_knowledge_journal_in_real_sens() {
     // Доказова різниця: до повідомлення журнал порожній, після нього
     // український reader бачить поточну версію; протилежна клауза
     // відхиляється справжнім SENS, а не лексичною перевіркою Python.
+    // Макрос приймає список клауз: (((not? мета))), а не одну ((not? мета)).
     let source = r#"
         (визначити журнал-до (поточний-журнал-знань))
-        (повідомити-знання corpus (як-є ((not? (human socrates)))))
+        (повідомити-знання corpus (як-є (((not? (human socrates))))))
         (список
           (порожній? журнал-до)
           (хибне? (порожній? (поточний-журнал-знань)))
@@ -129,6 +130,8 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
 
 #[test]
 fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
+    // Admission повертає одну клаузу; до журналу передаємо список клауз.
+    // Початкове значення «невідомий модуль» — D1 0, не D3 NIL.
     let source = r#"
         (визначити proposal
           (як-є (translation/1 candidate clause
@@ -136,14 +139,14 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
                    ((human socrates)))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
         (визначити before-known (модуль-відомий? (як-є corpus)))
-        (повідомити-знання corpus (переклад-допуск-вміст review))
+        (повідомити-знання corpus (список (переклад-допуск-вміст review)))
         (список
           before-known
           (модуль-відомий? (як-є corpus))
           (результат-стан
             (міркувати-у-спостерігати (як-є corpus) (як-є (human socrates)))))
     "#;
-    assert_eq!(eval_translation(source), "(() 1 proved)");
+    assert_eq!(eval_translation(source), "(0 1 proved)");
 }
 
 #[test]
@@ -218,8 +221,9 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
 
 #[test]
 fn existing_explicit_opposite_overrules_an_external_candidate() {
+    // Явний заперечний факт має правильну вкладеність списку клауз.
     let source = r#"
-        (повідомити-знання corpus (як-є ((not? (human socrates)))))
+        (повідомити-знання corpus (як-є (((not? (human socrates))))))
         (визначити before *knowledge-journal*)
         (визначити proposal
           (як-є (translation/1 candidate clause
