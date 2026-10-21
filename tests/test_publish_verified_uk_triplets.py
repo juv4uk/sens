@@ -42,6 +42,10 @@ class SafeTripletPublisher(unittest.TestCase):
             res = export(ROOT, target, report, [self.REL1, self.REL2], write=True)
             self.assertEqual(res["summary"]["triplets_written"], 2)
             self.assertTrue(all(row["physical_codec"] == "t5m" for row in res["files"]))
+            self.assertTrue(all(row["physical_authority"] == "zig-attested-t5m"
+                                for row in res["files"]))
+            self.assertTrue(all(len(row["zig_binary_sha256"]) == 64
+                                for row in res["files"]))
             self.assertEqual(res["summary"]["original_executables_oracle_certified"], 0)
             self.assertEqual((target / self.REL1).read_bytes(), original1)
             self.assertEqual((target / self.REL2).read_bytes(), original2)
@@ -77,6 +81,38 @@ class SafeTripletPublisher(unittest.TestCase):
             self.assertEqual(view.read_text(encoding="ascii"), " ".join(words) + "\n")
             self.assertEqual(result["files"][0]["physical_codec"], "t5m")
             self.assertEqual(result["summary"]["original_executables_oracle_certified"], 0)
+
+    def test_zig_unavailable_never_mints_python_reference_as_sens(self):
+        # Навіть якщо незалежний Python-еталон успішно закодував програму,
+        # фізичне видання через інший ніж Zig шлях заборонене.
+        with tempfile.TemporaryDirectory() as td:
+            mirror = Path(td) / "mirror"
+            report = Path(td) / "report.json"
+            source = (ROOT / self.REL1).read_bytes()
+            with mock.patch(
+                "publish_verified_uk_triplets.zig_codec_bridge.build_transport",
+                side_effect=ValueError("ZIG_CODEC_UNAVAILABLE"),
+            ) as build:
+                with self.assertRaisesRegex(ValueError, "ZIG_CODEC_UNAVAILABLE"):
+                    export(ROOT, mirror, report, [self.REL1], write=True)
+            self.assertEqual(build.call_count, 1)
+            self.assertFalse(mirror.exists())
+            self.assertFalse(report.exists())
+            self.assertEqual((ROOT / self.REL1).read_bytes(), source)
+
+    def test_preview_is_reference_only_without_zig_mint(self):
+        with tempfile.TemporaryDirectory() as td:
+            with mock.patch(
+                "publish_verified_uk_triplets.zig_codec_bridge.build_transport",
+                side_effect=AssertionError("preview must not build Zig"),
+            ):
+                preview = export(
+                    ROOT, Path(td) / "mirror", Path(td) / "report.json",
+                    [self.REL1], write=False,
+                )
+            self.assertEqual(preview["summary"]["triplets_written"], 0)
+            self.assertEqual(preview["files"][0]["physical_authority"],
+                             "reference-only-nonpublic")
 
     def test_preview_only_does_not_write_or_fake_semantics(self):
         with tempfile.TemporaryDirectory() as td:
