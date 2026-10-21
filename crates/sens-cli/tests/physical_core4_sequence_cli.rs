@@ -606,6 +606,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-common-prefix-general",
         "lib/list-split-first-occurrence-general",
         "lib/list-flatten-nested-general",
+        "lib/list-cartesian-product-general",
         "lib/list-remove-first-atom",
         "lib/list-remove-all-atoms-general",
         "lib/list-remove-last-atom",
