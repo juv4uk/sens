@@ -28,7 +28,7 @@ FALSE_D1 = "((порожній? аргументи) (атом? (сполучит
 def check_current_core_source(source: str) -> None:
     # Історичні W8-опкоди не можна видавати за чинну функцію.
     # Жодного SHA-піну старого стану: перевіряємо поточне джерело.
-    raw = re.search(r"(?m)^\\s*\\([01]{8}(?=\\s|\\))", source)
+    raw = re.search(r"(?m)^\s*\([01]{8}(?=\s|\))", source)
     if raw:
         raise ValueError("LEGACY_W8_CALL_HEAD")
     for expression in REQUIRED:
@@ -51,8 +51,8 @@ class CoreHelperCutoverTests(unittest.TestCase):
         check_current_core_source(self.src)
 
     def test_no_english_executable_define_heads(self):
-        self.assertNotRegex(self.src, r"(?m)^\\s*\\((?:define|def|0011)\\s+")
-        self.assertNotRegex(self.src, r"(?m)^\\s*\\((?:00011111|00100000)\\s+")
+        self.assertNotRegex(self.src, r"(?m)^\s*\((?:define|def|0011)\s+")
+        self.assertNotRegex(self.src, r"(?m)^\s*\((?:00011111|00100000)\s+")
 
     def test_quoted_d1_mutants_rejected(self):
         for old, bad in (
