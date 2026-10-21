@@ -177,6 +177,11 @@ def verify(text):
     for bits, (name, _historical_count) in {**EXPECTED, **HIGH}.items():
         if authority.get(bits) != name:
             raise AssertionError("зміна ратифікованої проєкції: " + bits)
+    # Простий лексичний контроль, НЕ host-виконання SENS:
+    # не допускаємо незв'язані так/ні у виконавчих полях.
+    live = re.sub(r';[^\\n]*|"(?:\\\\.|[^"\\\\])*"', " ", text)
+    if re.search(r"(?<![\\w?-])(?:так|ні)(?![\\w?-])", live):
+        raise AssertionError("незв'язане D1 так/ні в генераторі")
     heads = list(call_heads(text))
     if not heads:
         raise AssertionError("втрачено викличні голови SENS")
@@ -205,6 +210,15 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.text = PATH.read_text(encoding="utf-8")
+
+    def test_d1_outcomes_execute_as_predicate_expressions_not_unbound_names(self):
+        self.assertGreater(self.text.count("(атом? (як-є ()))"), 20)
+        self.assertGreater(self.text.count("(хибне? (атом? (як-є ())))"), 10)
+        verify(self.text)
+        mutant = self.text.replace("(атом? (як-є ()))", "так", 1)
+        self.assertNotEqual(mutant, self.text)
+        with self.assertRaisesRegex(AssertionError, "D1"):
+            verify(mutant)
 
     def test_current_ukrainian_call_heads_and_exact_d3_law(self):
         # Перевіряємо актуальний AST, а не давній SHA/snapshot.
