@@ -250,7 +250,7 @@ jobs:
           if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/cli\.rs|scripts/execute_changed_lisp_t5m\.sh|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/cli\.rs|scripts/execute_changed_lisp_t5m(_native)?\.sh|tests/test_changed_lisp_t5m_route\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Лише змінені T5M інструменти одержують адресний Zig-свідок.
@@ -543,6 +543,15 @@ jobs:
           bash scripts/execute_changed_lisp_t5m_native.sh \
             "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
             "$RUNNER_TEMP/changed-t5m-pairs"
+
+      - name: "SENS/Zig-native T5M — фізичний roundtrip і негативні межі"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' }}
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/execute_changed_lisp_t5m_native.sh
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --features zig-transport --bin sens native_t5m_view_roundtrips_actual_zig_bytes_and_rejects_other_source -- --nocapture
 
       # Свіжі Zig-байти зберігаємо тільки коли CI знайшов розходження,
       # щоб фізичну пару можна було виправити, не копіюючи host-імітацію.
