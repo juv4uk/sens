@@ -26,7 +26,7 @@ def resident_codes(source: str, width: int) -> list[str]:
 class DomainTableNotExecutableTest(unittest.TestCase):
     def test_current_d1_d11_data_classification_is_exact_and_immutable(self):
         m = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(m["schema"], "sens-migration-nonprogram-manifest-1")
+        self.assertEqual(m["schema"], "sens-migration-nonprogram-manifest/1")
         self.assertEqual(m["issue"], 4460)
         self.assertEqual(m["classification"], "lisp-data-nonprogram")
         self.assertIs(m["automatic_sens_companion"], False)
@@ -56,7 +56,7 @@ class DomainTableNotExecutableTest(unittest.TestCase):
                     if line.strip() and not line.lstrip().startswith(";")
                 ]
                 self.assertTrue(body, path.as_posix())
-                self.assertEqual(body[0], "(domain-table/1")
+                self.assertEqual(body[0], "(domain-table-1")
                 self.assertEqual(body[-1], ")")
                 codes = resident_codes(source, n)
                 self.assertEqual(len(codes), entry["expected_rows"])
@@ -90,7 +90,7 @@ class DomainTableNotExecutableTest(unittest.TestCase):
                 line.strip() for line in source.splitlines()
                 if line.strip() and not line.lstrip().startswith(";")
             ]
-            self.assertEqual(body[0], "(domain-table/1")
+            self.assertEqual(body[0], "(domain-table-1")
             self.assertEqual(body[-1], ")")
             codes = resident_codes(source, 11)
             self.assertEqual(len(codes), 43)

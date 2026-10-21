@@ -36,7 +36,7 @@
 
 (визначити очікувані-відповіді
   (список
-    (як-є core4-predicate-answer-boundary/4)
+    (як-є core4-predicate-answer-boundary-4)
     15
     256
     (як-є orthogonal)

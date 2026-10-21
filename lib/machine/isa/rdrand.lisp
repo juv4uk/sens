@@ -3,7 +3,7 @@
 ; Використання дозволяється лише за підтвердженою ознакою RDRAND у CPUID.
 ; Мнемоніки й структурні поля не перекладаються.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension RDRAND)
   (source intel-sdm/intel-xed)
   (runtime-gate cpuid-rdrand)

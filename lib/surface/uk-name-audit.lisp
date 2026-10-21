@@ -2,7 +2,7 @@
 ; Історичні назви в таблиці — дані зіставлення, не викличні голови СЕНС.
 
 (uk-name-audit
-  (schema uk-name-audit/1)
+  (schema uk-name-audit-1)
   (reviewed-at "2026-09-08")
   (stable-reviewed 140)
   (renamed 42)

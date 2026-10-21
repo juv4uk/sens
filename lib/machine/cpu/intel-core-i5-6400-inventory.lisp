@@ -11,7 +11,7 @@
 ; бо це профіль клієнтської моделі. Для AVX/AVX2 недостатньо
 ; самого CPUID: ОС повинна ввімкнути XSAVE (CR4.OSXSAVE + XGETBV).
 
-(skylake-client-inventory/1
+(skylake-client-inventory-1
   (cpu intel-core-i5-6400)
   (microarchitecture skylake)
   (profile-class client)

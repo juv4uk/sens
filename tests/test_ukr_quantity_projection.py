@@ -238,8 +238,8 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
 
     def test_schema_names_are_quoted_data_not_english_call_heads(self):
         for schema in (
-            "dimension/1", "unit/1", "quantity/1",
-            "science-source/1", "scientific-constant/1",
+            "dimension-1", "unit-1", "quantity-1",
+            "science-source-1", "scientific-constant-1",
         ):
             self.assertIn("(як-є " + schema + ")", self.source)
         verify(self.source)

@@ -97,7 +97,7 @@
 
 (визначити очікування-шкали
   (список
-    (як-є core4-predicate-answer-scale/3)
+    (як-є core4-predicate-answer-scale-3)
     15
     "0^n | 1^n | (), n=1..7"
     (як-є separate-00000000-through-11111111)

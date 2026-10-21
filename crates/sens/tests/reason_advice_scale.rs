@@ -18,7 +18,7 @@
 //! A second diagnostic slice asks several DIFFERENT questions about one
 //! unchanged module. It compares `reason-in-observe` with the public
 //! `reason-observe` entry supplied an explicitly prepared immutable
-//! `reason-index/1`. This is not a cache: the caller owns a finite snapshot and
+//! `reason-index-1`. This is not a cache: the caller owns a finite snapshot and
 //! chooses when to prepare a newer one.
 
 use sens::{eval_program, Session};

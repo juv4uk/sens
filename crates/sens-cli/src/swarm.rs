@@ -326,7 +326,7 @@ fn oracle_result_value(
         Value::Symbol("oracle-result".into()),
         Value::list([
             Value::Symbol("protocol".into()),
-            Value::Symbol("oracle-result/1".into()),
+            Value::Symbol("oracle-result-1".into()),
         ]),
         Value::list([
             Value::Symbol("contract-revision".into()),
@@ -955,7 +955,7 @@ mod oracle_result_tests {
             "oracle-evaluation",
         )
         .to_string();
-        assert!(result.contains("(protocol oracle-result/1)"));
+        assert!(result.contains("(protocol oracle-result-1)"));
         assert!(result.contains("(contract-revision (4 0))"));
         assert!(result.contains("(source-digest \"sha256:"));
         assert!(result.contains("(outcome value)"));

@@ -260,7 +260,7 @@ fn compile_sw1_on_worker(input: &[u8], sens_revision: &str) -> Result<(Vec<u8>, 
     }
 
     let expressions = wire_decode_program(input)
-        .ok_or_else(|| "canonical sens-syntax-wire/1 decode failed: invalid physical wire".to_string())?;
+        .ok_or_else(|| "canonical sens-syntax-wire-1 decode failed: invalid physical wire".to_string())?;
 
     // Decode acceptance alone is not treated as proof of canonicality. The
     // exact wire must survive a decode/encode round-trip byte-for-byte.

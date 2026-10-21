@@ -1,7 +1,7 @@
 ; Інвентар поверхні: чинна колонка — українська; історичні імена лише як дані.
 
 (uk-surface-inventory
-  (schema uk-surface-inventory/1)
+  (schema uk-surface-inventory-1)
   (current-projection ukr)
   (sid8-call-heads retired)
   (public

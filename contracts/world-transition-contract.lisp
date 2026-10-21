@@ -13,7 +13,7 @@
 ; 4. Заборонено приводити всі відповіді переходів до універсальної істини.
 ; Точна предикатна істина й хиба належать D1; форма даних від них відмінна.
 
-(world-transition-contract/1
+(world-transition-contract-1
   ((domain . world-system)
    (universal-truth-forbidden . t)
    (laws .

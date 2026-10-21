@@ -58,7 +58,7 @@ fn speed_of_light_record_keeps_value_unit_status_kind_system_and_source() {
     "#;
     assert_eq!(
         eval_science(source),
-        "(si:speed-of-light 299792458 ((dimension/1 metre 1) (dimension/1 second -1)) exact-by-definition physical-defining si (science-source/1 bipm-si-brochure-9 2019))"
+        "(si:speed-of-light 299792458 ((dimension-1 metre 1) (dimension-1 second -1)) exact-by-definition physical-defining si (science-source-1 bipm-si-brochure-9 2019))"
     );
 }
 
@@ -91,9 +91,9 @@ fn advice_taker_can_reason_about_an_admitted_scientific_constant() {
     let source = r#"
         (def expected-unit
           (quote
-            (unit/1
-              (dimension/1 metre 1)
-              (dimension/1 second -1))))
+            (unit-1
+              (dimension-1 metre 1)
+              (dimension-1 second -1))))
         (def admission
           (advise-all science
             (науковий-константа-клаузи сі:визначальна-швидкість-світла)))
@@ -122,7 +122,7 @@ fn advice_taker_can_reason_about_an_admitted_scientific_constant() {
 fn malformed_constant_cannot_project_into_knowledge() {
     let source = r#"
         (науковий-константа-клаузи
-          (quote (scientific-constant/1 broken)))
+          (quote (scientific-constant-1 broken)))
     "#;
     assert_eq!(eval_science(source), "()");
 }

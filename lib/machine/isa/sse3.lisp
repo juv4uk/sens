@@ -1,7 +1,7 @@
 ; Каталог машинних команд SSE3; лише факти фізичної архітектури.
 ; Назви команд та поля каталогу залишаються протокольними даними.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension SSE3)
   (requires SSE2)
   (source intel-sdm/intel-xed)

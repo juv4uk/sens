@@ -2,7 +2,7 @@
 ; називає курований частково реалізований набір (RET_NEAR, MOV, ADD, OR, AND, SUB, XOR, CMP, TEST, PUSH, POP, INC, DEC, NOT, NEG, JO, JNO, JB, JNB, JZ, JNZ, JBE, JNBE, JS, JNS, JP, JNP, JL, JNL, JLE, JNLE, JMP),
 ; тож власна перехресна перевірка генератора проти того набору задоволена, плюс
 ; один звичайний ще не реалізований ICLASS для контрасту.
-(xed-machine-evidence/1
+(xed-machine-evidence-1
   (pinned-commit "0000000000000000000000000000000000000000")
   (source-digest "sha256:0")
   (form-count 33)

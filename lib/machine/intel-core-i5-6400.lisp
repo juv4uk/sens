@@ -19,7 +19,7 @@
 ;   sequence  — послідовність кількох інструкцій ISA;
 ;   runtime   — потрібні виділення пам'яті, обхід або стан виконавця;
 ;   control   — керувальний потік процесора.
-(machine-profile/1
+(machine-profile-1
   (cpu intel-core-i5-6400)
   (microarchitecture skylake)
   (isa x86-64)

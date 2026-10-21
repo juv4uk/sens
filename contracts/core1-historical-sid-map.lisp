@@ -30,7 +30,7 @@
 ; Таблиця лише зіставляє тотожності та механізми. Подібність написань
 ; НЕ встановлює семантичної рівносильності.
 
-(core1-historical-sid-map/1
+(core1-historical-sid-map-1
   (authority
     (semantic-owner . sens)
     (historical-mechanism-repository . juv4uk/mccarthy-eval)

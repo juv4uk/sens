@@ -7,7 +7,7 @@
 ; Цей документ збережено лише для структурних і текстових
 ; спостережень, які ще не перенесено.
 
-(structural-observation-contract/1
+(structural-observation-contract-1
   ((identity . "1023")
    (surface . symbol?)
    (domain-owner . structural-observation)

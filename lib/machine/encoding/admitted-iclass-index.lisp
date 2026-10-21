@@ -1,7 +1,7 @@
 ; ЗГЕНЕРОВАНО scripts/generate-encoder-coverage-input.py -- не редагувати вручну.
 ; Компактна проєкція свідчень #175: без статусу, опкоду, семантичного ID чи політики.
 
-(x86-admitted-iclass-index/2
+(x86-admitted-iclass-index-2
   (pair-count 1176)
   (пара X86-BASE "AAA")
   (пара X86-BASE "AAD")

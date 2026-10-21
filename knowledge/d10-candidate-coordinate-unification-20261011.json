@@ -12142,7 +12142,7 @@
         "status": "SOURCE-DERIVED-REVIEW-EXAMPLES-NOT-EXECUTED",
         "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
         "source_path": "lib/si.lisp",
-        "law": "Project the exact numeric VALUE field out of a scientific-constant/1 record holding a quantity/1 record; this accessor performs structural CAR/CDR projection only.",
+        "law": "Project the exact numeric VALUE field out of a scientific-constant-1 record holding a quantity-1 record; this accessor performs structural CAR/CDR projection only.",
         "positive": "si:constant-value(si:defining-speed-of-light) = 299792458 (m/s is metadata on the parent record, not in the returned number).",
         "negative": "Returning the whole quantity record, unit metadata, or an inexact floating approximation violates exact value projection; malformed records have no new exception contract here.",
         "core_vs_library": "DERIVED-LIBRARY-ALREADY-EXPRESSIBLE-CAR-CDR",

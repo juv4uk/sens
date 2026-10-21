@@ -1,4 +1,4 @@
-(cml-export/1
+(cml-export-1
   (contract (major 6) (minor 0))
   (digest "0f1e98616d1532a1")
   (forms

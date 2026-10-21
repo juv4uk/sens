@@ -8,7 +8,7 @@
 ; але не визначає значення полів, наведених нижче.
 ;
 ; Зовнішня форма:
-;   (island-compat-contract/1 ENTRY ...)
+;   (island-compat-contract-1 ENTRY ...)
 ;
 ; Принципова відмінність:
 ;   літерал () — це Канон 0 у самій мові;
@@ -16,7 +16,7 @@
 ;   виклику острова, що повернув нуль результатів.
 ;   Протокол не має права неявно ототожнювати ці дві сутності.
 
-(island-compat-contract/1
+(island-compat-contract-1
   ((identity . semantic-id)
    (owner . sens)
    (representation . opaque-u8)

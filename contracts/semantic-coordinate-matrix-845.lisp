@@ -8,7 +8,7 @@
 ; Відсутність свідчень для осі дозволена; її потрібно вказувати
 ; явно, а не заповнювати здогадом.
 
-(semantic-coordinate-matrix/2
+(semantic-coordinate-matrix-2
   (identity-source . "lib/surface/semantic-registry.lisp")
   (math-axis-source . "tests/fixtures/semantic-coordinate-law-axis-v1.lisp")
   (kernel-axis-source . "contracts/sid-kernel-witness-735.lisp")

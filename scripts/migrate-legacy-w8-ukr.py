@@ -177,18 +177,18 @@ def main():
                 original = file.read_bytes()
                 text = original.decode("utf-8")
                 # Це схематичний історичний об'єкт, НЕ Lisp-програма:
-                # (machine-profile/1 (rows (00000010 sequence "...") ...)).
+                # (machine-profile-1 (rows (00000010 sequence "...") ...)).
                 # Числові ключі в rows не є викличними головами.
                 # Стару таблицю залишаємо provenance, не підміняємо D8.
-                if re.search(r"(?m)^\(machine-profile/1(?:\s|$)", text):
+                if re.search(r"(?m)^\(machine-profile-1(?:\s|$)", text):
                     report.append({
                         "file": str(rel),
                         "status": "skipped-nonexecutable",
-                        "reason": "історична machine-profile/1 таблиця, SID8 — ключі даних",
+                        "reason": "історична machine-profile-1 таблиця, SID8 — ключі даних",
                         "sha256_before": hashlib.sha256(original).hexdigest(),
                         "replacements": [], "unresolved": [], "written": False,
                     })
-                    print(f"{rel}: SKIP дані machine-profile/1, не викличний Lisp")
+                    print(f"{rel}: SKIP дані machine-profile-1, не викличний Lisp")
                     continue
                 unknown = []
                 edits = scanner.plan(text, {}, legacy_heads=table, unresolved=unknown)

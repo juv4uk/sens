@@ -20,7 +20,7 @@ class CommentPinsTests(unittest.TestCase):
         subprocess.run(["git", "init", "-q", str(self.root)], check=True)
         self.file = self.root / "lib" / "machine" / "isa" / "adx.lisp"
         self.file.parent.mkdir(parents=True)
-        original = b"; Old English comment\n(isa-catalogue/1 (extension ADX))\n"
+        original = b"; Old English comment\n(isa-catalogue-1 (extension ADX))\n"
         self.file.write_bytes(original)
         self.old = subprocess.run(
             ["git", "-C", str(self.root), "hash-object", "-w", "--stdin"],
@@ -32,18 +32,18 @@ class CommentPinsTests(unittest.TestCase):
         self.temp.cleanup()
 
     def test_comments_and_whitespace_only_are_repin_eligible(self):
-        self.file.write_text("; Українська примітка\n\n(isa-catalogue/1   (extension ADX))\n")
+        self.file.write_text("; Українська примітка\n\n(isa-catalogue-1   (extension ADX))\n")
         self.assertEqual(repin_row(self.root, self.row),
                          (self.old, blob_sha(self.file.read_bytes())))
         self.assertEqual(self.row["git_blob_sha1"], self.old)
 
     def test_protocol_data_changes_fail_closed(self):
-        self.file.write_text("; Українська примітка\n(isa-catalogue/1 (extension AVX))\n")
+        self.file.write_text("; Українська примітка\n(isa-catalogue-1 (extension AVX))\n")
         with self.assertRaisesRegex(ValueError, "ЗМІНА СЕМАНТИКИ АБО ДАНИХ"):
             repin_row(self.root, self.row)
 
     def test_unavailable_old_blob_is_not_automatically_replaced(self):
-        self.file.write_text("; Українська примітка\n(isa-catalogue/1 (extension ADX))\n")
+        self.file.write_text("; Українська примітка\n(isa-catalogue-1 (extension ADX))\n")
         self.row["git_blob_sha1"] = "0" * 40
         with self.assertRaisesRegex(ValueError, "немає попереднього Git blob"):
             repin_row(self.root, self.row)

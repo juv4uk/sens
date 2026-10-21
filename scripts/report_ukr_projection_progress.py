@@ -375,7 +375,7 @@ def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
             if (len(forms) == 1
                 and isinstance(forms[0], LispForm)
                 and bool(forms[0].items)
-                and _atom_value(forms[0].items[0]) == "isa-catalogue/1"):
+                and _atom_value(forms[0].items[0]) == "isa-catalogue-1"):
                 excluded += 1
                 continue
         selected.append(path)

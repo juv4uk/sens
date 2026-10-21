@@ -1,4 +1,4 @@
-(core1-generation-manifest/1
+(core1-generation-manifest-1
   ((generation . s0)
    (role . typed-sid8-historical-physical-seed)
    (repository . juv4uk/mccarthy-eval)

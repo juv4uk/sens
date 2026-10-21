@@ -23,7 +23,7 @@
     "git_blob_sha1": "bdef87fb9523ea7bba023d1ce33ba404f123441a",
     "owner_ratification": "#3272",
     "path": "contracts/d4-bootstrap-ratification.lisp",
-    "schema": "d4-bootstrap-ratification/1",
+    "schema": "d4-bootstrap-ratification-1",
     "sha256": "a4fc8a87fb058c15d1a56ce28eb6c8bff23e64f68846328cc296cadf02f2bd6f"
   },
   "status": "generated-projection-only"

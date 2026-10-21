@@ -90,9 +90,9 @@ fn quantity_unit_constructor_selector_roundtrips_in_real_sens() {
     let mut correct = prepare_unit_session(&current);
     let mut legacy = prepare_unit_session(&mutant);
     for (dimensions, expected_record) in [
-        ("()", "(unit/1)"),
-        ("(метр)", "(unit/1 метр)"),
-        ("(метр секунда)", "(unit/1 метр секунда)"),
+        ("()", "(unit-1)"),
+        ("(метр)", "(unit-1 метр)"),
+        ("(метр секунда)", "(unit-1 метр секунда)"),
     ] {
         let roundtrip = format!(
             "(однакові? (одиниця-розмірності (створити-одиниця (як-є {dimensions}))) (як-є {dimensions}))"
@@ -106,7 +106,7 @@ fn quantity_unit_constructor_selector_roundtrips_in_real_sens() {
         let actual_record = evaluate(&mut correct, &full_record);
         assert_eq!(actual_record.as_predicate_bit(), Some(true),
             "test_id=quantity-unit-record input={full_record} expected=D1:YES actual={actual_record}");
-        // Порожній випадок у старого конструктора теж неправильний: (unit/1 ()).
+        // Порожній випадок у старого конструктора теж неправильний: (unit-1 ()).
         let wrong = evaluate(&mut legacy, &roundtrip);
         assert_eq!(wrong.as_predicate_bit(), Some(false),
             "test_id=quantity-unit-mutant input={roundtrip} expected=D1:NO actual={wrong}");
@@ -116,7 +116,7 @@ fn quantity_unit_constructor_selector_roundtrips_in_real_sens() {
 #[test]
 fn quantity_unit_rejects_non_dimensions_in_real_sens() {
     // Перевіряємо власне SENS-eval, а не Python-скан чи форму тексту.
-    // Коректна одиниця має складатися тільки з записів dimension/1.
+    // Коректна одиниця має складатися тільки з записів dimension-1.
     let current = [
         "схема-розмірності",
         "схема-одиниці-виміру",
@@ -135,8 +135,8 @@ fn quantity_unit_rejects_non_dimensions_in_real_sens() {
         ("(створити-одиниця (як-є ()))", true),
         ("(створити-одиниця (список (створити-розмірність (як-є метр) 1)))", true),
         ("(створити-одиниця (як-є (невідома)))", false),
-        ("(створити-одиниця (як-є ((dimension/1 метр))))", false),
-        ("(створити-одиниця (як-є ((dimension/1 метр 1) . недопустимий-хвіст)))", false),
+        ("(створити-одиниця (як-є ((dimension-1 метр))))", false),
+        ("(створити-одиниця (як-є ((dimension-1 метр 1) . недопустимий-хвіст)))", false),
     ] {
         let input = format!("(одиниця-виміру? {record})");
         let actual = evaluate(&mut session, &input);

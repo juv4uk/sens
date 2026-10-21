@@ -11,7 +11,7 @@
 ; За межами допущеного домену ℚ має виникнути іменована помилка
 ; домену чи типу. Структурне () не є третьою відповіддю предиката.
 
-(exact-q-predicate-contract/2
+(exact-q-predicate-contract-2
   ((domain-owner . exact-q-comparison-predicate)
    (admissibility . all-required-values-exact-rational)
    (result-form . predicate-one-bit)

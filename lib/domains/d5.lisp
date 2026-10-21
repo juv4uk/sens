@@ -5,7 +5,7 @@
 ; Предикати в ук/укр/en закінчуються на ?, у санскритській проєкції — ні.
 ; Відсутню або порожню поверхню позначено ().
 
-(domain-table/1
+(domain-table-1
   (00000 (ук обчислити-як-є) (укр обчислити-як-є) (san svarūpa-vicāraṇa) (en evalquote) (LISP EVALQUOTE) (sym ()))
   (00001 (ук функція-значення) (укр функція-значення) (san phalana-rūpa) (en function) (LISP FUNCTION) (sym ()))
   (00010 (ук необчислений-вираз) (укр необчислений-вираз) (san avicārita-rūpa) (en fexpr) (LISP FEXPR) (sym ()))

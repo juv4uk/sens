@@ -6,7 +6,7 @@
 ; Predicate1 — контекстний результат; структура — поєднання Control2.
 ; Протокольні атоми залишено незмінними як точні дані інвентарю.
 
-(structure-not-ontology/1
+(structure-not-ontology-1
   ((representation . empty-structure)
    (class . structural)
    (projection . control2-open-close)

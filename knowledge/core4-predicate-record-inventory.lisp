@@ -15,7 +15,7 @@
 ; Ядра Core1–Core3 не входять до меж цієї інвентаризації.
 ; Протокольні ключі та бітові рядки збережено буквально.
 ;
-(core4-predicate-record-inventory/2
+(core4-predicate-record-inventory-2
 
   ((profile . core4)
    (status . inventory-only)

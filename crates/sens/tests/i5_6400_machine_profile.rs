@@ -24,7 +24,7 @@ fn legacy_i5_6400_profile_is_provenance_not_current_authority() {
 fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() {
     let current = include_str!("../../../lib/machine/profile/current-domain-x86-64.lisp");
 
-    assert!(current.contains("(machine-domain-profile/2"));
+    assert!(current.contains("(machine-domain-profile-2"));
     assert!(current.contains("(cpu intel-core-i5-6400)"));
     assert!(current.contains("(key-shape width+packed-bits)"));
 

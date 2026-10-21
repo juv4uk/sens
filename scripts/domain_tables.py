@@ -135,7 +135,7 @@ def read_domain_table(path: Path) -> list[DomainTableRow]:
     rows: list[DomainTableRow] = []
     for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         stripped = line.lstrip()
-        if not stripped.startswith("(") or stripped.startswith("(domain-table/1"):
+        if not stripped.startswith("(") or stripped.startswith("(domain-table-1"):
             continue
         match = ROW.match(line)
         if not match:

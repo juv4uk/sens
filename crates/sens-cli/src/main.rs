@@ -699,7 +699,7 @@ fn main() {
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
             );
             println!("  --lint                        Run the linter on the provided file and exit with non-zero if thresholds are exceeded");
-            println!("  --oracle-check <file|->       Parse-only agent preflight; '-' reads stdin and emits oracle-result/1");
+            println!("  --oracle-check <file|->       Parse-only agent preflight; '-' reads stdin and emits oracle-result-1");
             println!("  --oracle-help [tool]          List common agent tools or explain one from the WSM Guard directory");
             println!("  --tcp[=PORT]                 Serve the REPL over TCP on 127.0.0.1 (default port 9999) instead of stdio");
             println!("  --protocol=sexpr              With --tcp: strict (request (id) (op) (source)) / (response ...) envelope, no banner/prompt");

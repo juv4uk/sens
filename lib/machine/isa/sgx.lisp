@@ -2,7 +2,7 @@
 ; Доступність залежить від CPUID, прошивки й керівного середовища ME,
 ; а також від підтримки операційною системою.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension SGX)
   (source intel-sdm/intel-xed)
   (runtime-gate cpuid-sgx+firmware+os-support)

@@ -2835,7 +2835,7 @@
         "status": "falsified",
         "concept_key": "cond-predicate-and-or-children",
         "claim": "Predicate AND/OR are valid immediate local COND children under current two-part COND and PredicateBit semantics.",
-        "scope": "Current answer-contract/2 where exhaustion=() and PredicateBit false=0.",
+        "scope": "Current answer-contract-2 where exhaustion=() and PredicateBit false=0.",
         "minimal_counterexample": "AND(0,0) and AND(0,1) yield () instead of 0; OR(0,0) yields () instead of 0.",
         "evidence_ref": "PR #1986 research/1968-cond-family: scripts/research-1968-cond-family.py; docs/research/1968-cond-family-report.md",
         "remains_open": "Other COND specializations that preserve () != 0 may still exist; #2015 owns that search.",

@@ -6,7 +6,7 @@
 ; Byte SID↔UK мусить точно збігатися зі stable UK-рядками semantic-registry.lisp.
 
 (uk-api-docs
-  (schema uk-api-docs/3)
+  (schema uk-api-docs-3)
   (порахувати 140)
   (kinds (form macro function predicate mutation value))
   (docs

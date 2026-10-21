@@ -8,7 +8,7 @@
 ; Історичні координати Sens8 свідчать лише про походження:
 ; вони не уповноважують розміщення у чинному Д8.
 
-(domain-table/1
+(domain-table-1
   (00000000 (ук символ-за-кодом) (укр символ-за-кодом) (san koda-varṇa) (en code-char) (LISP CODE-CHAR) (sym ()))
   (00000001 (ук для-кожного-елемента) (укр для-кожного-елемента) (san pratyeka-anukrama) (en doseq) (LISP DOSEQ) (sym ()))
   (00000010 (ук завершити-рядок) (укр завершити-рядок) (san paṅkti-samāpana) (en terpri) (LISP TERPRI) (sym ()))

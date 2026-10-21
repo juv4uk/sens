@@ -25,7 +25,7 @@ def head(node: object) -> str | None:
 class ContractLispDataStructure(unittest.TestCase):
     def test_historical_rows_stay_inside_rows_not_in_support_or_rules(self):
         form = only_form("contracts/core1-historical-sid-map.lisp")
-        self.assertEqual(head(form), "core1-historical-sid-map/1")
+        self.assertEqual(head(form), "core1-historical-sid-map-1")
         groups = [head(v) for v in form.values[1:]]
         self.assertEqual(
             groups,
@@ -38,7 +38,7 @@ class ContractLispDataStructure(unittest.TestCase):
 
     def test_unification_contains_both_outcomes_in_one_lisp_contract(self):
         form = only_form("contracts/unification-outcome-contract.lisp")
-        self.assertEqual(head(form), "unification-outcome-contract/1")
+        self.assertEqual(head(form), "unification-outcome-contract-1")
         self.assertEqual(len(form.values), 4, "контракт і три групи даних")
         laws = form.values[2:]
         self.assertTrue(all(isinstance(v, Form) and len(v.values) >= 1 for v in laws))

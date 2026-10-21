@@ -1,6 +1,6 @@
 ; Каталог родини інструкцій SSE4.1. Лише фізичні факти ISA.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension SSE4.1)
   (requires SSSE3)
   (source intel-sdm/intel-xed)

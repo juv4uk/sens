@@ -12,7 +12,7 @@
 ; Назви полів і буквальні значення всередині контракту залишено
 ; незмінними, бо це дані чинної схеми.
 ;
-(core-universal-contract/1
+(core-universal-contract-1
 
   ((scope . core1-core4-universal-foundation)
    (governs . "#1664")

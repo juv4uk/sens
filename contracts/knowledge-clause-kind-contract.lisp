@@ -3,7 +3,7 @@
 ; Структурну форму спостерігають на нижчому рівні; публічну
 ; відповідь домену знань читають споживачі знань.
 
-(knowledge-clause-kind-contract/1
+(knowledge-clause-kind-contract-1
   ((query . is-fact?)
    (input . clause)
    (result-layer . knowledge-domain)

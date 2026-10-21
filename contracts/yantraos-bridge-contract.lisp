@@ -7,7 +7,7 @@
 ;
 ; Це контракт, а не новий семантичний примітив чи загальнодоступний SID.
 
-(yantraos-bridge-contract/1
+(yantraos-bridge-contract-1
   ((envelope
      (required-fields
        (protocol intent action parameters verification provenance approval))

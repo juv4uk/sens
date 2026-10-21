@@ -15,18 +15,18 @@ MANIFEST = ROOT / "knowledge/migration-nonprogram-knowledge-records-2026-10-08.j
 EXPECTED = {
     "knowledge/agent-discoveries.lisp": "agent-discoveries",
     "knowledge/canon-authority-inventory.lisp": "schema",
-    "knowledge/core4-predicate-record-inventory.lisp": "core4-predicate-record-inventory/2",
-    "knowledge/function-table-sculpt-audit.lisp": "function-table-sculpt-audit/1",
+    "knowledge/core4-predicate-record-inventory.lisp": "core4-predicate-record-inventory-2",
+    "knowledge/function-table-sculpt-audit.lisp": "function-table-sculpt-audit-1",
     "knowledge/meta-eval-evidence.lisp": "schema",
     "knowledge/repo-tooling-inventory.lisp": "about",
     "knowledge/sanskrit-cyrillic-audit.lisp": "sanskrit-cyrillic-audit",
     "knowledge/sanskrit-cyrillic-keyboard.lisp": "sanskrit-cyrillic-keyboard",
     "knowledge/sanskrit-cyrillic-phoneme-map.lisp": "sound-unit-registry",
-    "knowledge/semantic-lineage-core-v1.lisp": "semantic-lineage/1",
+    "knowledge/semantic-lineage-core-v1.lisp": "semantic-lineage-1",
     "knowledge/semantic-ownership.lisp": "schema",
-    "knowledge/sens-primary.lisp": "sens-primary/2",
+    "knowledge/sens-primary.lisp": "sens-primary-2",
     "knowledge/silent-fallback-inventory.lisp": "silent-fallback-inventory",
-    "knowledge/structure-not-ontology-inventory.lisp": "structure-not-ontology/1",
+    "knowledge/structure-not-ontology-inventory.lisp": "structure-not-ontology-1",
 }
 
 def source_git_blob_sha(payload: bytes) -> str:
@@ -46,7 +46,7 @@ def first_record_head(source: str) -> str:
 class KnowledgeRecordSources(unittest.TestCase):
     def test_all_pinned_originals_are_data_not_executable_programs(self):
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(manifest["schema"], "sens-migration-nonprogram-manifest-1")
+        self.assertEqual(manifest["schema"], "sens-migration-nonprogram-manifest/1")
         self.assertEqual(manifest["issue"], 4460)
         self.assertEqual(manifest["classification"], "lisp-data-nonprogram")
         self.assertIs(manifest["automatic_sens_companion"], False)

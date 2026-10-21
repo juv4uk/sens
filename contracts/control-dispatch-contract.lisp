@@ -12,7 +12,7 @@
 ; Якщо варіанти вичерпано, результатом є структурне ().
 ; Це дані, а не логічна хиба предиката.
 
-(control-dispatch-contract/2
+(control-dispatch-contract-2
   ((identity . 00000111)
    (domain-owner . control)
    (canonical-clause-shape . (test expression))

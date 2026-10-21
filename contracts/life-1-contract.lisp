@@ -5,12 +5,12 @@
 ; Він не встановлює семантику Prolog, Datalog, CLIPS або Common Lisp.
 ;
 ; Зовнішня форма:
-;   (life-1-contract/1 ENTRY ...)
+;   (life-1-contract-1 ENTRY ...)
 ;
 ; Траса LIFE містить дані про походження та причинність,
 ; а не логічне значення.
 
-(life-1-contract/1
+(life-1-contract-1
   ((identity . life-trace)
    (owner . sens)
    (kind . provenance-observation)

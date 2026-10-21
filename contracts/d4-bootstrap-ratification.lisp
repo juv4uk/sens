@@ -3,7 +3,7 @@
 ; Чинна семантична влада D4 разом із language-contract.lisp.
 
 (
-  (schema . d4-bootstrap-ratification/1)
+  (schema . d4-bootstrap-ratification-1)
   (status . owner-ratified)
   (owner-ratification . #3272)
   (date . "2026-10-04")

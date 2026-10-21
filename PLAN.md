@@ -150,7 +150,7 @@ tcp listen address/port ranges
 Versioned protocol живе в `lib/translation.lisp`:
 
 ```lisp
-(translation/1 candidate|ambiguous|rejected clause|batch|query source payload)
+(translation-1 candidate|ambiguous|rejected clause|batch|query source payload)
 ```
 
 Підтверджена межа:
@@ -181,14 +181,14 @@ CI лишається authority перед сильнішим claim.
 Перший milestone виконаний: існують versioned candidate data, Lisp-owned
 validation/review, accepted/rejected/ambiguous distinction та evidence path.
 Зовнішній provider/LLM adapter, якщо його додавати, повинен лише породжувати
-`translation/1` data і не отримує API прямого запису knowledge state.
+`translation-1` data і не отримує API прямого запису knowledge state.
 
 Нормативний pipeline:
 
 ```text
 external translator
         ↓
-(translation/1 ...) data
+(translation-1 ...) data
         ↓
 translation-review          ← Lisp semantic authority
         ↓
@@ -246,7 +246,7 @@ public/prepared                         3.50x
   parity перед будь-яким timing;
 - ✅ repeated work домінується `reason-make-index`, а не knowledge projection;
 - ✅ public `reason` приймає або historical rules list, або готовий
-  `reason-index/1` без зміни результату;
+  `reason-index-1` без зміни результату;
 - ✅ public `reason-observe` так само приймає rules або готовий index snapshot;
 - ✅ готовий index є явним immutable snapshot: пізніше додані rules не
   з'являються в старому snapshot, але видимі після explicit rebuild;

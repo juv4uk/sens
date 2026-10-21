@@ -204,7 +204,7 @@ where
         // = xqR - 2unq
         // = xqR - uqm
         // = uRR/2 + vR/2 - uRR/2 + ur
-        // = ur + (v/2)R
+        // = ur + (v-2)R
         // ```
         let (v, u) = self._2xq.lo_hi();
         self._2xq = u.widen_mul(self.r) + U::widen_hi(v >> 1);

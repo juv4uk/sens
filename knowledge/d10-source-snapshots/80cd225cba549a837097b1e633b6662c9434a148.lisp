@@ -7,7 +7,7 @@
 ;
 ; Canonical proposal shape:
 ;
-;   (translation/1 STATUS KIND SOURCE PAYLOAD)
+;   (translation-1 STATUS KIND SOURCE PAYLOAD)
 ;
 ; STATUS:
 ;   candidate  - translator proposes one semantic candidate;
@@ -26,15 +26,15 @@
 ;
 ; Review shape:
 ;
-;   (translation-review/1 STATUS CODE PROPOSAL DETAIL)
+;   (translation-review-1 STATUS CODE PROPOSAL DETAIL)
 ;
 ; Review STATUS is accepted | rejected | ambiguous. This vocabulary describes
 ; translation admission only; it is separate from Advice Taker's
 ; proved/unknown/partial/blocked/disputed/invalid reasoning outcomes.
 
-(00001001 *translation-schema* (00000001 translation/1))
-(00001001 *translation-review-schema* (00000001 translation-review/1))
-(00001001 *translation-evidence-schema* (00000001 translation-evidence/1))
+(00001001 *translation-schema* (00000001 translation-1))
+(00001001 *translation-review-schema* (00000001 translation-review-1))
+(00001001 *translation-evidence-schema* (00000001 translation-evidence-1))
 (00001001 *translation-evidence* (00000001 ()))
 
 (00001001 translation-status

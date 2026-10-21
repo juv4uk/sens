@@ -177,7 +177,7 @@
 (за-умовою
   ((репл-закон-команди-проєкції?)
   (за-умовою
-  ((репл-закон-поверхонь? (як-є ((д1 (domain-table/1)) (д2 (domain-table/1)) (д3 (domain-table/1)) (д4 (domain-table/1)) (д5 (domain-table/1)) (д6 (domain-table/1)) (д7 (domain-table/1)) (д8 (domain-table/1)) (д9 (domain-table/1)) (д10 (domain-table/1)))))
+  ((репл-закон-поверхонь? (як-є ((д1 (domain-table-1)) (д2 (domain-table-1)) (д3 (domain-table-1)) (д4 (domain-table-1)) (д5 (domain-table-1)) (д6 (domain-table-1)) (д7 (domain-table-1)) (д8 (domain-table-1)) (д9 (domain-table-1)) (д10 (domain-table-1)))))
    (за-умовою
   ((репл-завершення? (як-є (репл-завершити)))
    (за-умовою

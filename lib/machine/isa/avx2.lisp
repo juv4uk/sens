@@ -1,7 +1,7 @@
 ; Каталог машинних команд AVX2; тільки факти фізичної архітектури.
 ; Виконання залежить від CPUID та стану YMM, дозволеного системою.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension AVX2)
   (requires AVX)
   (source intel-sdm/intel-xed)

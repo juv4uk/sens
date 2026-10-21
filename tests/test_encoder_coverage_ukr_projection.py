@@ -154,7 +154,7 @@ def verify(text):
         "(покриття-кодувальника-тотожні-структури? (решта ліве-значення) (решта праве-значення))",
         "(визначити покриття-кодувальника-збігається-збережений-рядок?",
         "(визначити покриття-кодувальника-сформувати-звіт",
-        "(як-є x86-encoder-coverage/1)",
+        "(як-є x86-encoder-coverage-1)",
         "(як-є coverage)",
         "(як-є status)",
     )
@@ -185,7 +185,7 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
     def test_other_domain_heads_and_quoted_data_untouched(self):
         self.assertIn("(рядок-додати накопичене фрагмент)", self.text)
         self.assertIn("(нехай ", self.text)
-        self.assertIn("(як-є x86-encoder-coverage/1)", self.text)
+        self.assertIn("(як-є x86-encoder-coverage-1)", self.text)
         verify(self.text)
 
     def test_wrong_ukrainian_operator_fails(self):
@@ -216,7 +216,7 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
 
     def test_wrong_quoted_data_fails(self):
         broken = self.text.replace(
-            "(як-є x86-encoder-coverage/1)",
+            "(як-є x86-encoder-coverage-1)",
             "(як-є пошкоджена-проєкція/1)", 1,
         )
         self.assertNotEqual(broken, self.text)

@@ -2,13 +2,13 @@
 ;
 ; Лише-композиційний вид над наявними семантичними ідентичностями, що належать Lisp.
 ; Цей файл НЕ карбує SID і не визначає значення часу виконання.
-; Канонічне джерело ідентичності: lib/surface/semantic-registry.lisp (sr/2).
+; Канонічне джерело ідентичності: lib/surface/semantic-registry.lisp (sr-2).
 ; Наявні влади законів/результатів лишаються:
 ;   #216 бінарний домен exact-Q,
 ;   #218 структурне спостереження / відношення тотожності,
 ;   #217 диспетчеризація контролю за явним результатом.
 ;
-(semantic-mathematical-coordinate/1
+(semantic-mathematical-coordinate-1
   (authority-source . "lib/surface/semantic-registry.lisp")
   (axis . mathematical-law)
   (scope . bounded-first-slice)

@@ -5,7 +5,7 @@
 ; Історична семантика профілів зберігається в історії Git як свідчення
 ; походження, а не як чинне джерело законів мови.
 
-(core-profile-contract/2
+(core-profile-contract-2
   ((identity . authority)
    (owner . sens)
    (semantic-identity-space . shared-binary-domains)

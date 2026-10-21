@@ -167,7 +167,7 @@ fn quantity_symbol_guard_executes_real_sens_and_rejects_non_symbols() {
 
     for (case, expression, expected) in [
         ("uk-symbol", "(науковий-внутрішній-символ? (як-є метр))", true),
-        ("protocol-symbol", "(науковий-внутрішній-символ? (як-є dimension/1))", true),
+        ("protocol-symbol", "(науковий-внутрішній-символ? (як-є dimension-1))", true),
         ("nil", "(науковий-внутрішній-символ? (як-є ()))", false),
         ("pair", "(науковий-внутрішній-символ? (як-є (метр)))", false),
         ("d1-value", "(науковий-внутрішній-символ? (атом? (як-є ())))", false),

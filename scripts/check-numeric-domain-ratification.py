@@ -142,8 +142,8 @@ def validate(policy, ratification, lang):
         need(summed >= (1 << width), "overflow must be detected")
     need(((1 << 24) - 2) + 1 < (1 << 24), "non-overflow example unexpectedly widened")
     for needle in (
-        "(schema . numeric-domains-ratification/1)",
-        "(schema . numeric-d24-signed-extension/1)",
+        "(schema . numeric-domains-ratification-1)",
+        "(schema . numeric-d24-signed-extension-1)",
         "(status . owner-ratified)", "(family . numeric)",
         "(rank . peer-of-D1-D9)", "(first-domain . D24)",
         "(initial-width . #d24)", "(next-width . double)",

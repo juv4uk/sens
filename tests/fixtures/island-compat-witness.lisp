@@ -86,7 +86,7 @@
                 (перевірити-сумісність-островів
                   (як-є missing-kernel) (як-є changes-registry-numbering) (як-є no))))))
       (за-умовою
-        ((тотожне? (схема-сумісності-островів) (як-є island-compat-contract/1))
+        ((тотожне? (схема-сумісності-островів) (як-є island-compat-contract-1))
          (за-умовою
            ((атом? помилка)
             (список (як-є island-compat-witness)

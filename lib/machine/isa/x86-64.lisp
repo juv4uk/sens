@@ -2,7 +2,7 @@
 ; Тут описані лише фізичні форми команд. Назви інструкцій,
 ; поля каталогу та коди машинних операцій лишаються незмінними даними.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension X86-64)
   (requires X86-BASE)
   (source intel-sdm/intel-xed)

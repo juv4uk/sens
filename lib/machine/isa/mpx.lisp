@@ -2,7 +2,7 @@
 ; Доступність залежить від платформи та ОС, навіть якщо процесор
 ; повідомляє про підтримку MPX.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension MPX)
   (source intel-sdm/intel-xed)
   (runtime-gate cpuid-mpx+os-support)

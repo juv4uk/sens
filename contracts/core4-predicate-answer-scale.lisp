@@ -17,7 +17,7 @@
 ; відповідають бітами; старі записи structural-kind / identity-relation /
 ; structural-relation виведено з мови.
 
-(core4-predicate-answer-scale/3
+(core4-predicate-answer-scale-3
 
   ((identity . predicate-answer-domain)
    (profile . core4)

@@ -2,7 +2,7 @@
 ; Рівні D1-D9; не позадоменні рівні зберігання Number24. Точний домен
 ; обов'язковий для тлумачення точного бінарного слова. Числові літерали не потрібні.
 (
-  (schema . numeric-domains-ratification/1)
+  (schema . numeric-domains-ratification-1)
   (status . owner-ratified)
   (owner-ratification . "owner direct decision 2026-10-11")
   (date . "2026-10-11")
@@ -43,7 +43,7 @@
 ; Чинне уточнення власника 2026-10-18. Форму 2026-10-11 вище збережено як
 ; історію; для інтерпретації цілих чисел D24+ цей закон її переважає.
 (
-  (schema . numeric-d24-signed-extension/1)
+  (schema . numeric-d24-signed-extension-1)
   (status . owner-ratified)
   (owner-decision . "2026-10-18: D24+ integers use fixed-width two's complement; fractions retain existing NEG/RATIO composition")
   (scope . "D24, D48, D96, D192, ... exact-width integer words only; D1-D10 unchanged")

@@ -18,7 +18,7 @@
 ; контракту не встановлює багатозначного логічного стану й не дозволяє
 ; загального перетворення довільного значення на логічний тип.
 
-(mathematical-result-taxonomy/1
+(mathematical-result-taxonomy-1
   ((identity . laws)
    (domain-owner . mathematical-result)
    (classification-source . standard-mathematics)

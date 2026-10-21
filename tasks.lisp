@@ -246,7 +246,7 @@
     (capabilities . (my-lisp architecture protocol serialization))
     (origin . owner)
     (depends-on . (POLYGLOT-001-IMPLEMENTATION-PLAN POLYGLOT-002-FOREIGN-VALUE-MODEL))
-    (description . "Phase 1. Design the actual wire format crossing the raw host boundary, independent of Python specifically -- the PoC's line protocol (\"call math sqrt 9\") is feasibility evidence only, not a production proposal. Compare S-expression-based framing (reusing this ecosystem's own sr/1-style schema-tag convention), framed JSON, and a custom versioned binary format. Must account for protocol version, request ID (even before real concurrency), structured errors, exact rational values (never silently downgraded to float, per S1), Unicode, lists/maps/vectors, a documented large/binary-data escape hatch, foreign-object references per POLYGLOT-002's chosen model, malformed/untrusted response handling (fail-closed), and foreign-runtime crash/restart as a distinct named condition. Explicitly do not implement async/concurrent request handling, but do not preclude adding it later.")
+    (description . "Phase 1. Design the actual wire format crossing the raw host boundary, independent of Python specifically -- the PoC's line protocol (\"call math sqrt 9\") is feasibility evidence only, not a production proposal. Compare S-expression-based framing (reusing this ecosystem's own sr-1-style schema-tag convention), framed JSON, and a custom versioned binary format. Must account for protocol version, request ID (even before real concurrency), structured errors, exact rational values (never silently downgraded to float, per S1), Unicode, lists/maps/vectors, a documented large/binary-data escape hatch, foreign-object references per POLYGLOT-002's chosen model, malformed/untrusted response handling (fail-closed), and foreign-runtime crash/restart as a distinct named condition. Explicitly do not implement async/concurrent request handling, but do not preclude adding it later.")
     (acceptance . "A protocol document (e.g. docs/foreign-runtime-wire-protocol-v1.md) lets a reader determine, on paper, the exact bytes for a representative call and its response, without reading Rust source.")
     (out-of-scope . "Real concurrency/async; implementation of the protocol -- that is POLYGLOT-006.")
     (evidence-expected . "Protocol document covering every consideration listed above explicitly, with a chosen wire format and the comparison that led to it.")
@@ -362,7 +362,7 @@
     (capabilities . (my-lisp architecture testing oracle cross-repo))
     (origin . owner)
     (depends-on . ())
-    (description . "Phase 7 (parallel track, independent of the foreign-runtime phases). Generalize docs/BACKEND-NEUTRAL-SEMANTIC-ORACLE-2026-09-11.md's current native-Rust-vs-meta-eval.my pair into a standard result/evidence record shape (mirroring oracle-result/1's schema-tag convention) any backend adapter can implement, so a third/fourth backend attaches to #67's frozen compiler-corpus without a new comparison harness per backend. Explicitly keep naming lib/meta-eval.my as NOT an independent-backend proof (it is interpreted by the same native Rust evaluator it's compared against) -- a real second data point needs a backend that does not share that evaluator.")
+    (description . "Phase 7 (parallel track, independent of the foreign-runtime phases). Generalize docs/BACKEND-NEUTRAL-SEMANTIC-ORACLE-2026-09-11.md's current native-Rust-vs-meta-eval.my pair into a standard result/evidence record shape (mirroring oracle-result-1's schema-tag convention) any backend adapter can implement, so a third/fourth backend attaches to #67's frozen compiler-corpus without a new comparison harness per backend. Explicitly keep naming lib/meta-eval.my as NOT an independent-backend proof (it is interpreted by the same native Rust evaluator it's compared against) -- a real second data point needs a backend that does not share that evaluator.")
     (acceptance . "A documented result/evidence record schema; compiler_corpus_dual_backend.rs-style comparison logic demonstrably reusable for a hypothetical third backend without rewriting its core loop.")
     (out-of-scope . "Implementing a specific third backend adapter -- that is POLYGLOT-014.")
     (evidence-expected . "Schema document; refactored or newly-generalized comparison harness.")
@@ -882,7 +882,7 @@
     (origin . my-lisp)
     (description . "Add a versioned, provenance-bearing Oracle result without breaking legacy eval clients. Separate transport success from evaluator outcome and include contract revision plus source digest.")
     (done . nil)
-    (context . "done 2026-08-31: new oracle-eval op returns oracle-result/1 with contract revision, SHA-256 source digest, implementation revision, value/error outcome, output, evidence class, relation, and provenance. Existing eval is unchanged.")))
+    (context . "done 2026-08-31: new oracle-eval op returns oracle-result-1 with contract revision, SHA-256 source digest, implementation revision, value/error outcome, output, evidence class, relation, and provenance. Existing eval is unchanged.")))
 
   ("WSM-ORACLE-AGENT-SYNTAX-PREFLIGHT-O2" . (
     (priority . 9.6)

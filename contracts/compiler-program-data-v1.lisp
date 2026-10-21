@@ -10,7 +10,7 @@
   (schema . compiler-program-data/1)
   (issue . #3838)
   (parent . #3837)
-  (transport . sens-syntax-wire/1)
+  (transport . sens-syntax-wire-1)
   (wire-magic . "SW\\x01")
 
   (input-stage . current-lowered-program)

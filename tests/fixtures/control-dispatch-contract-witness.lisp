@@ -106,7 +106,7 @@
                            (як-є not-yet-ratified))))))
       (за-умовою
         ((хибне? (тотожне? (перше control-dispatch-document)
-                  (як-є control-dispatch-contract/1)))
+                  (як-є control-dispatch-contract-1)))
          (список (як-є control-dispatch-contract-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail) (як-є schema))))

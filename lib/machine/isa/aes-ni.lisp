@@ -3,7 +3,7 @@
 ; Виконання допускається тільки за підтвердженою ознакою AES у CPUID.
 ; Назви команд і поля залишаються незмінними даними каталогу.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension AES-NI)
   (source intel-sdm/intel-xed)
   (runtime-gate cpuid-aes)

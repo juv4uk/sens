@@ -4,7 +4,7 @@
 ; зберегти один історичний транспортний байт як координату спостереження/ABI,
 ; але ця обгортка явно застаріла і не може стати зворотною владою.
 
-(kernel-abi-transport-boundary/1
+(kernel-abi-transport-boundary-1
   (owner sens)
   (language-identity-type CoreDomainIdentity)
   (shared-abi-type WsmKernelRequest)

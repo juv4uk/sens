@@ -5,7 +5,7 @@
 ; Предикати в ук/укр/en закінчуються на ?, у санскритській проєкції — ні.
 ; Відсутню або порожню поверхню позначено ().
 
-(domain-table/1
+(domain-table-1
   (0000 (ук застосувати) (укр застосувати) (san prayoga) (en apply) (LISP APPLY) (sym "№"))
   (0001 (ук обчислити) (укр обчислити) (san vicāraṇa) (en eval) (LISP EVAL) (sym "!"))
   (0010 (ук функція) (укр функція) (san phalana) (en lambda) (LISP LAMBDA) (sym "/"))

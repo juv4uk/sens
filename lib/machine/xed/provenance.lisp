@@ -14,7 +14,7 @@
 ; вихідний вміст, без ручного обрізання фрагментів.
 ; Лише етап імпорту визначає, які розширення й форми допускати.
 
-(xed-provenance/1
+(xed-provenance-1
   (repository "https://github.com/intelxed/xed.git")
   (pinned-commit "0bcb6237345c5066726dcc08b3d87928df3b5b26")
   (pinned-commit-date "2026-08-24T14:44:12+03:00")

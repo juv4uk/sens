@@ -4,7 +4,7 @@
 ; Порожню успішну підстановку не плутаємо з Каноном 0;
 ; причину невдачі не вигадуємо.
 
-(unification-outcome-contract/1
+(unification-outcome-contract-1
   ((query . спостерігати-уніфікацію)
    (input . (left right substitution))
    (result-forms . ((unified substitution)

@@ -648,7 +648,7 @@ fn semantic_ownership_audit_733_is_well_formed_lisp_inventory() {
     let crate::ExprKind::Symbol(tag) = &items[0].kind else {
         panic!("root form must start with a tag symbol");
     };
-    assert_eq!(&**tag, "semantic-ownership-audit/1");
+    assert_eq!(&**tag, "semantic-ownership-audit-1");
 
     let mut semantic_authority_count = 0;
     let mut semantic_witness_count = 0;
@@ -711,7 +711,7 @@ fn primitive_budget_audit_734_accounts_for_197_ids_under_256_constraint() {
     let crate::ExprKind::Symbol(tag) = &items[0].kind else {
         panic!("root form must start with a tag symbol");
     };
-    assert_eq!(&**tag, "primitive-budget-audit/1");
+    assert_eq!(&**tag, "primitive-budget-audit-1");
 
     let mut total_ids = 0;
     let mut reclaim_candidates = 0;
@@ -799,7 +799,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
     };
     assert!(matches!(
         &map_items[0].kind,
-        ExprKind::Symbol(s) if &**s == "sid-kernel-witness-map/1"
+        ExprKind::Symbol(s) if &**s == "sid-kernel-witness-map-1"
     ));
 
     let mut seen_sids = std::collections::HashSet::new();
@@ -929,7 +929,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
     };
     assert!(matches!(
         &probe_items[0].kind,
-        ExprKind::Symbol(s) if &**s == "opaque-kernel-probe-evidence/1"
+        ExprKind::Symbol(s) if &**s == "opaque-kernel-probe-evidence-1"
     ));
 
     let mut probe_kernels = std::collections::HashSet::new();

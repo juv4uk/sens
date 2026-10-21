@@ -8,7 +8,7 @@
 ; спостереження і походження субстрату. Відсутній механізм Graal — це обмеження
 ; виконання, ніколи не семантична мутація.
 
-(life-substrate-parity/1
+(life-substrate-parity-1
   ((owner . my-lisp)
    (life-contract-source . "contracts/life-1-contract.lisp")
    (expected-evidence-owner . lisp)

@@ -146,7 +146,7 @@ fn is_operational_doctrine_data(rel: &str, text: &str) -> bool {
         && text.lines().take(8).any(|line| {
             line.trim() == "; Status: operational doctrine (not language-contract authority)."
         })
-        && text.lines().take(20).any(|line| line.trim() == "(sens-primary/2")
+        && text.lines().take(20).any(|line| line.trim() == "(sens-primary-2")
 }
 
 fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static str {

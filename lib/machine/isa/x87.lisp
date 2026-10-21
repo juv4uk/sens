@@ -1,7 +1,7 @@
 ; Каталог машинних команд x87 для обчислень із рухомою комою.
 ; Це фізичні факти набору команд, не закони математики SENS.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension X87)
   (source intel-sdm/intel-xed)
   (coverage seed)

@@ -76,7 +76,7 @@ class WholeFileMetricTests(FileTree):
         root = self.tree({
             "lib/ок.lisp": '(визначити сума (функція (значення) (додати значення 1)))\n'
                             '; English comment is not executable\n'
-                            '(визначити схема (як-є dimension/1))\n',
+                            '(визначити схема (як-є dimension-1))\n',
             "lib/alias.lisp": '; opt-in повна укр-поверхня\n(визначити old-name нова-назва)\n',
             "lib/not-ok.lisp": '(визначити сума (функція (x) (add x 1)))\n',
             "lib/raw.lisp": '(101 x)\n',
@@ -102,7 +102,7 @@ class WholeFileMetricTests(FileTree):
         root = self.tree({
             "lib/machine/isa/avx.lisp":
                 "; апаратний опис\n"
-                "(isa-catalogue/1 (extension AVX) "
+                "(isa-catalogue-1 (extension AVX) "
                 "(instructions (instruction VADDPS)))\n",
             "lib/machine/isa/реальна.lisp":
                 "(визначити обчислити (функція (аргумент) (атом? аргумент)))\n",

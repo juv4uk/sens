@@ -267,7 +267,7 @@ diff --git a/tests/b.lisp b/tests/b.lisp
             )
             domain = root / "lib/domains/d5.lisp"
             domain.parent.mkdir(parents=True)
-            domain.write_text("(domain-table/1\n)\n", encoding="utf-8")
+            domain.write_text("(domain-table-1\n)\n", encoding="utf-8")
             subprocess.run(["git", "-C", str(root), "add", "lib/domains/d5.lisp"], check=True)
             subprocess.run(["git", "-C", str(root), "commit", "-qm", "base"], check=True)
             base_sha = subprocess.run(
@@ -279,7 +279,7 @@ diff --git a/tests/b.lisp b/tests/b.lisp
                 '  (11010 (ук менше?) (укр менше?) (san hīna) '
                 '(en lessp?) (LISP LESSP) (sym "менше?"))\n'
             )
-            domain.write_text("(domain-table/1\n" + row + ")\n", encoding="utf-8")
+            domain.write_text("(domain-table-1\n" + row + ")\n", encoding="utf-8")
             subprocess.run(["git", "-C", str(root), "add", "lib/domains/d5.lisp"], check=True)
             subprocess.run(["git", "-C", str(root), "commit", "-qm", "domain row"], check=True)
 

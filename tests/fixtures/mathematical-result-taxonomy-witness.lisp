@@ -98,7 +98,7 @@
                             (як-є forbidden))))))
       (за-умовою
         ((хибне? (тотожне? (перше mathematical-result-taxonomy-document)
-                  (як-є mathematical-result-taxonomy/1)))
+                  (як-є mathematical-result-taxonomy-1)))
          (список (як-є mathematical-result-taxonomy-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail) (як-є schema))))

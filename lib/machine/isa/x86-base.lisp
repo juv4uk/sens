@@ -2,7 +2,7 @@
 ; Джерело технічних відомостей: Intel SDM та Intel XED.
 ; Жоден рядок не створює семантичної тотожності мови.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension X86-BASE)
   (architecture x86)
   (source intel-sdm/intel-xed)

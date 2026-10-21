@@ -10,7 +10,7 @@ fn timezone_detect_public_binding_is_language_owned_over_raw_declarations() {
 
     let timezone_sid =
         semantic_registry_export::semantic_id_for_admitted_surface("timezone-detect")
-            .expect("timezone-detect must remain admitted by sr/2");
+            .expect("timezone-detect must remain admitted by sr-2");
     assert_eq!(
         session.environment.get("timezone-detect"),
         None,

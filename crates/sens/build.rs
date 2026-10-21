@@ -146,7 +146,7 @@ fn domain_tables(root: &Path, out: &mut String) {
         };
         assert_eq!(
             symbol(&root_form[0], &relative),
-            "domain-table/1",
+            "domain-table-1",
             "{relative}: unsupported table schema"
         );
         let mut count = 0usize;

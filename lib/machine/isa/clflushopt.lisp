@@ -2,7 +2,7 @@
 ; Містить лише фізичні факти ISA, не мовні закони СЕНС.
 ; Назви апаратних можливостей та полів залишаються незмінними.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension CLFLUSHOPT)
   (source intel-sdm/intel-xed)
   (runtime-gate cpuid-clflushopt)

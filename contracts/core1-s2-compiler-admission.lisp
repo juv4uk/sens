@@ -1,5 +1,5 @@
-(core1-s2-compiler-admission/2
-  (supersedes . core1-s2-compiler-admission/1)
+(core1-s2-compiler-admission-2
+  (supersedes . core1-s2-compiler-admission-1)
 
   ((source . compiler-seed)
    (repository . juv4uk/wsm-my-lisp)

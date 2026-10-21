@@ -75,7 +75,7 @@ fn render_export() -> String {
     let digest = fnv1a_hex(forms_block.as_bytes());
 
     format!(
-        "(cml-export/1\n  (contract (major 6) (minor 0))\n  (digest \"{digest}\")\n  (forms\n{forms_block}))\n"
+        "(cml-export-1\n  (contract (major 6) (minor 0))\n  (digest \"{digest}\")\n  (forms\n{forms_block}))\n"
     )
 }
 

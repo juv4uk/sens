@@ -165,8 +165,8 @@ def check_contract(fail):
         fail(f"{CONTRACT}: not a sectioned contract")
         return {}
     head = forms[0][0]
-    if str(head) != "core-universal-contract/1":
-        fail(f"{CONTRACT}: unexpected head {head!r} (want core-universal-contract/1)")
+    if str(head) != "core-universal-contract-1":
+        fail(f"{CONTRACT}: unexpected head {head!r} (want core-universal-contract-1)")
 
     sections = {}
     for node in forms[0][1:]:

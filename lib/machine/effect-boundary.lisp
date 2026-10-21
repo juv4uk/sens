@@ -8,7 +8,7 @@
 ; Форми конкретної платформи є наступною проєкцією: вони можуть
 ; відмовити у виконанні, не змінюючи самого мовного закону.
 
-(machine-effect-boundary/1
+(machine-effect-boundary-1
   (role target-neutral-machine-mechanism)
   (semantic-authority upstream-only)
   (semantic-input language-contract.lisp+ratified-domain-laws)

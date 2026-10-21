@@ -308,7 +308,7 @@ class OriginalCandidateTests(unittest.TestCase):
     def test_data_manifest_rejects_source_drift_and_existing_physical_sens(self):
         p = self.root / "lib/machine/isa/sample.lisp"
         p.parent.mkdir(parents=True)
-        p.write_text("(isa-catalogue/1)\n", encoding="utf-8")
+        p.write_text("(isa-catalogue-1)\n", encoding="utf-8")
         hash1 = mod.git_blob_sha(p)
         entry = mod._checked_nonprogram_entry(
             self.root, "lib/machine/isa/sample.lisp", hash1)
@@ -329,7 +329,7 @@ class OriginalCandidateTests(unittest.TestCase):
         f = self.root / "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
         f.parent.mkdir(parents=True)
         f.write_text(json.dumps({
-            "schema": "sens-migration-nonprogram-manifest-1",
+            "schema": "sens-migration-nonprogram-manifest/1",
             "issue": 4460,
             "automatic_sens_companion": False,
             "entries": [{
@@ -373,7 +373,7 @@ class OriginalCandidateTests(unittest.TestCase):
         manifest = self.root / "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
         manifest.parent.mkdir(parents=True)
         payload = {
-            "schema": "sens-migration-nonprogram-manifest-1",
+            "schema": "sens-migration-nonprogram-manifest/1",
             "issue": 4460,
             "automatic_sens_companion": False,
             "entries": entries,

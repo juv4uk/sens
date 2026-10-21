@@ -4,7 +4,7 @@
 ; Жорстке обмеження бюджету: <= 256 ідентичностей (00000000..11111111)
 ; Облікований базис: 197 ідентичностей (0..196), лишається 59 вільних слотів.
 ;
-(primitive-budget-audit/1
+(primitive-budget-audit-1
   ((sid . 00000000) (name . "empty-list") (category . primitive-essential) (derivable? . no) (reclaim-candidate? . no) (rationale . "Canon 0 ground object"))
   ((sid . 00000001) (name . "quote") (category . primitive-essential) (derivable? . no) (reclaim-candidate? . no) (rationale . "McCarthy 7 constitutive primitive"))
   ((sid . 00000010) (name . "atom") (category . primitive-essential) (derivable? . no) (reclaim-candidate? . no) (rationale . "McCarthy 7 constitutive primitive"))

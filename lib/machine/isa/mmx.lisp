@@ -3,7 +3,7 @@
 ; MMX зберігається для сумісності з архітектурою процесора i5-6400.
 ; Імена інструкцій та ключі записів — точні дані ISA, не виклики Lisp.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension MMX)
   (source intel-sdm/intel-xed)
   (coverage seed)

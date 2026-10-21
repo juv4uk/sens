@@ -4,7 +4,7 @@
 ; Можливості, залежні від стану процесу, перевіряються під час
 ; виконання через CPUID, XGETBV та підтримку операційної системи.
 
-(cpu-profile/1
+(cpu-profile-1
   (cpu intel-core-i5-6400)
   (microarchitecture skylake)
   (isa x86-64)

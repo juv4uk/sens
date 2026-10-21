@@ -118,7 +118,7 @@
                 (спостереження-очікувати "1026" (як-є control-dispatch) (як-є explicit-result-equality))))))
       (за-умовою
         ((хибне? (тотожне? (перше structural-observation-document)
-                  (як-є structural-observation-contract/1)))
+                  (як-є structural-observation-contract-1)))
          (список (як-є structural-observation-contract-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail) (як-є schema))))

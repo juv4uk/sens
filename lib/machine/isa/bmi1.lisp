@@ -2,7 +2,7 @@
 ; Точні поля VEX звіряються з XED, доки кодувальник Lisp
 ; не допустить конкретну форму з перевіреною відповідністю.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension BMI1)
   (source intel-sdm/intel-xed)
   (runtime-gate cpuid-bmi1)

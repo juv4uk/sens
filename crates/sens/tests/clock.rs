@@ -128,7 +128,7 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
     load_core_library(&mut session).unwrap();
 
     let utc_sid = semantic_registry_export::semantic_id_for_admitted_surface("узгоджений-час-зараз")
-        .expect("узгоджений-час-зараз must remain admitted by sr/2");
+        .expect("узгоджений-час-зараз must remain admitted by sr-2");
     assert_eq!(
         session.environment.get("узгоджений-час-зараз"),
         None,
@@ -260,7 +260,7 @@ fn internet_time_sync_is_language_owned_after_time_library_loads() {
 
     let internet_time_sid =
         semantic_registry_export::semantic_id_for_admitted_surface("інтернет-час-синхронізувати")
-            .expect("інтернет-час-синхронізувати must remain admitted by sr/2");
+            .expect("інтернет-час-синхронізувати must remain admitted by sr-2");
     assert_eq!(
         session.environment.get("інтернет-час-синхронізувати"),
         None,

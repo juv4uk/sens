@@ -5,7 +5,7 @@
 ; Предикати в ук/укр/en закінчуються на ?, у санскритській проєкції — ні.
 ; Відсутню або порожню поверхню позначено ().
 
-(domain-table/1
+(domain-table-1
   (000000 (ук довжина) (укр довжина) (san pramāṇa) (en length) (LISP LENGTH) (sym "№д"))
   (000001 (ук довжина-до) (укр довжина-до) (san pramāṇa-saṅkalana) (en length-onto) (LISP LENGTH-ONTO) (sym "№д+"))
   (000010 (ук найменше-у-списку) (укр найменше-у-списку) (san śreṇī-alpatara) (en min-list) (LISP MIN-LIST) (sym "-м"))

@@ -8,7 +8,7 @@
 ; Зовнішні засоби можуть передавати та перевіряти її виконання,
 ; але не мають права змінювати напрям семантичної влади.
 
-(machine-authority-boundary/1
+(machine-authority-boundary-1
   (semantic-authority language-contract.lisp+ratified-domain-laws)
   (machine-root lib/machine)
   (public-api-excluded-root lib/machine)

@@ -83,8 +83,8 @@ def decode_string(raw: str) -> str:
 
 def parse_docs_index() -> list[DocRow]:
     source = DOCS_INDEX.read_text(encoding="utf-8")
-    if "(schema uk-api-docs/3)" not in source:
-        raise SystemExit("uk-docs.lisp must use schema uk-api-docs/3 before generation")
+    if "(schema uk-api-docs-3)" not in source:
+        raise SystemExit("uk-docs.lisp must use schema uk-api-docs-3 before generation")
 
     rows: list[DocRow] = []
     for line in source.splitlines():

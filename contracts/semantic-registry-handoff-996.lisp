@@ -4,7 +4,7 @@
 ; споживачі (як-от cml і wsm-my-lisp) мусять закріпити й перевірити канонічний
 ; реєстр, що належить Lisp, перш ніж понижувати чи спостерігати його.
 
-(semantic-registry-handoff-contract/1
+(semantic-registry-handoff-contract-1
   (authority "lib/surface/semantic-registry.lisp")
   (authority-owner sens)
   (identity-domain bare-sid-8)

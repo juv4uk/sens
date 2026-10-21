@@ -6,7 +6,7 @@
 ;
 ; Це запис контракту, а не нова семантична тотожність.
 
-(early-sid-lowering-contract/1
+(early-sid-lowering-contract-1
   ((resolution
      (owner sens)
      (source canonical-semantic-registry)

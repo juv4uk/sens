@@ -65,8 +65,8 @@ fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
         let root = forms
             .first()
             .and_then(expr_list)
-            .ok_or_else(|| format!("D{width}: очікувався корінь domain-table/1"))?;
-        if root.first().and_then(expr_symbol) != Some("domain-table/1") {
+            .ok_or_else(|| format!("D{width}: очікувався корінь domain-table-1"))?;
+        if root.first().and_then(expr_symbol) != Some("domain-table-1") {
             return Err(format!("D{width}: невідомий формат таблиці"));
         }
         for row in root.iter().skip(1) {

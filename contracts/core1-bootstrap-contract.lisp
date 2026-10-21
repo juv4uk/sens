@@ -1,7 +1,7 @@
 ; #1132 — Контракт початкового завантаження першого ядра.
 ; Дані контракту; історичні назви лишаються як дані, не call-heads.
 
-(core1-bootstrap-contract/1
+(core1-bootstrap-contract-1
   ((identity . authority)
    (owner . sens)
    (profile . core1)

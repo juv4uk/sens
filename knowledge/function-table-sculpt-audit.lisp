@@ -3,7 +3,7 @@
 ; Історичний #734 замінено там, де чинна виконувана реалізація розходиться.
 ; вилучення бекенд-реалізації != пониження статусу примітива != повернення/видалення SID.
 
-(function-table-sculpt-audit/1
+(function-table-sculpt-audit-1
   (issue 1118)
   (as-of "2026-09-21")
   (registry "lib/surface/semantic-registry.lisp")

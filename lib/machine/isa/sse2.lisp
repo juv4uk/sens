@@ -2,7 +2,7 @@
 ; Містить тільки факти фізичного набору команд, не семантику SENS.
 ; Поля та мнемоніки збережено як машинно-читані дані ISA.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension SSE2)
   (requires SSE)
   (source intel-sdm/intel-xed)

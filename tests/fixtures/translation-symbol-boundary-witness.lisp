@@ -14,12 +14,12 @@
   (функція ()
     (нехай ((відмова-символом
              (як-є
-               (translation/1 rejected clause
+               (translation-1 rejected clause
                  "Colorless green ideas sleep furiously."
                  unsupported-translation)))
            (відмова-не-символом
              (як-є
-               (translation/1 rejected clause
+               (translation-1 rejected clause
                  "Colorless green ideas sleep furiously."
                  42)))
            (огляд-неправильного-модуля
@@ -31,12 +31,12 @@
            (огляд-несимвольного-стану
              (переклад-перевірка
                (як-є corpus)
-               (як-є (translation/1 42 clause
+               (як-є (translation-1 42 clause
                        "Socrates is human." ((human socrates))))))
            (огляд-несимвольного-виду
              (переклад-перевірка
                (як-є corpus)
-               (як-є (translation/1 candidate 42
+               (як-є (translation-1 candidate 42
                        "Socrates is human." ((human socrates)))))))
       (список
         (список

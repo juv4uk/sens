@@ -5,7 +5,7 @@
 ; владам відповідних доменів, щоб не створювати другої скопійованої координатної таблиці.
 
 (
-  (schema . d1-d5-foundation-ratification/1)
+  (schema . d1-d5-foundation-ratification-1)
   (status . superseded-by-#3393)
   (owner-ratification . #3331)
   (date . "2026-10-05")

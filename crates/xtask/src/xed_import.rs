@@ -313,7 +313,7 @@ pub fn render(forms: &[XedForm], pinned_commit: &str) -> String {
     out.push_str(
         "; This is external technical evidence, not semantic authority (#150).\n\n",
     );
-    out.push_str("(xed-machine-evidence/1\n");
+    out.push_str("(xed-machine-evidence-1\n");
     out.push_str(&format!("  (pinned-commit \"{pinned_commit}\")\n"));
     out.push_str(&format!("  (source-digest \"sha256:{digest}\")\n"));
     // Counts are human-facing numeric metadata: print decimal D24+ quantities.

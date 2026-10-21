@@ -32,7 +32,7 @@ fn lisp_owned_coordinate_contract_is_well_formed_and_registry_backed() {
     let forms = parse(&source).expect("#834 coordinate contract must parse");
     assert_eq!(forms.len(), 1);
     let ExprKind::List(top) = &forms[0].kind else { panic!("#834 top form must be a list"); };
-    assert!(matches!(&top[0].kind, ExprKind::Symbol(s) if &**s == "semantic-mathematical-coordinate/1"));
+    assert!(matches!(&top[0].kind, ExprKind::Symbol(s) if &**s == "semantic-mathematical-coordinate-1"));
 
     let rows = top
         .iter()
@@ -57,7 +57,7 @@ fn lisp_owned_coordinate_contract_is_well_formed_and_registry_backed() {
         assert!(seen.insert(sid.to_string()), "duplicate #834 SID {sid}");
         assert!(
             registry.contains(&format!("(\"{}\" ", sid)),
-            "#834 SID {sid} must come from canonical sr/2 registry"
+            "#834 SID {sid} must come from canonical sr-2 registry"
         );
         let witness = pair_string(items, "witness").expect("#834 witness path");
         assert!(repo_file(witness).is_file(), "missing #834 witness {witness}");

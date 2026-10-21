@@ -8,7 +8,7 @@
 ; ширина є обов'язковою частиною тотожності. Семантика не
 ; виводиться з історичного байта сід8 або людської назви.
 
-(machine-domain-profile/2
+(machine-domain-profile-2
   (target x86-64)
   (cpu intel-core-i5-6400)
   (key-shape width+packed-bits)

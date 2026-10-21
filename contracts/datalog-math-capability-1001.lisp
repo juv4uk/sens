@@ -5,7 +5,7 @@
 ; Семантична тотожність операції походить лише зі спільного 8-бітового SID.
 ; Байти корисного навантаження несуть лише аргументи; текст оператора заборонений як ідентичність.
 
-(datalog-math-capability/2
+(datalog-math-capability-2
   ((kernel . wsm-datalog-kernel)
    (numeric-domain . signed-i64)
    (expression-evaluator . native)

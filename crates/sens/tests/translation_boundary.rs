@@ -130,7 +130,7 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
     let source = r#"
         (визначити before *knowledge-journal*)
         (визначити proposal
-          (як-є (translation/1 candidate clause
+          (як-є (translation-1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
@@ -153,7 +153,7 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
     // Початкове значення «невідомий модуль» — D1 0, не D3 NIL.
     let source = r#"
         (визначити proposal
-          (як-є (translation/1 candidate clause
+          (як-є (translation-1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
@@ -173,7 +173,7 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
     let source = r#"
         (визначити before *knowledge-journal*)
         (визначити proposal
-          (як-є (translation/1 ambiguous clause
+          (як-є (translation-1 ambiguous clause
                    "Mercury is hot."
                    (((hot mercury-planet))
                     ((hot mercury-element))))))
@@ -197,7 +197,7 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
     let source = r#"
         (визначити before *knowledge-journal*)
         (визначити proposal
-          (як-є (translation/1 candidate clause
+          (як-є (translation-1 candidate clause
                    "Socrates is human."
                    ((human (var))))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
@@ -220,7 +220,7 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
     let source = r#"
         (визначити before *knowledge-journal*)
         (визначити proposal
-          (як-є (translation/1 rejected clause
+          (як-є (translation-1 rejected clause
                    "Colorless green ideas sleep furiously."
                    unsupported-translation)))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
@@ -245,7 +245,7 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
         (повідомити-знання corpus (як-є (((not? (human socrates))))))
         (визначити before *knowledge-journal*)
         (визначити proposal
-          (як-є (translation/1 candidate clause
+          (як-є (translation-1 candidate clause
                    "Socrates is human."
                    ((human socrates)))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
@@ -266,7 +266,7 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
     let source = r#"
         (визначити before *knowledge-journal*)
         (визначити proposal
-          (як-є (translation/1 candidate query
+          (як-є (translation-1 candidate query
                    "Is Plato metallic?"
                    (metallic plato))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
@@ -300,7 +300,7 @@ fn translation_alternatives_reject_improper_d3_tail_in_live_sens() {
 fn one_alternative_is_not_allowed_to_masquerade_as_ambiguity() {
     let source = r#"
         (визначити proposal
-          (як-є (translation/1 ambiguous clause
+          (як-є (translation-1 ambiguous clause
                    "Mercury is hot."
                    (((hot mercury))))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
@@ -321,7 +321,7 @@ fn malformed_protocol_envelope_is_named_before_semantic_admission() {
         (визначити review
           (переклад-перевірка
             (як-є corpus)
-            (як-є (translation/2 candidate clause "text" ((human socrates))))))
+            (як-є (translation-2 candidate clause "text" ((human socrates))))))
         (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review))
@@ -335,11 +335,11 @@ fn translation_source_classification_requires_d1_member() {
     // це дані, а D3 COND має отримати тільки точний D1 предикат.
     let valid = r#"
         (структура-обгортки-перекладу-коректна?
-          (як-є (translation/1 candidate query "текст" (metallic plato))))
+          (як-є (translation-1 candidate query "текст" (metallic plato))))
     "#;
     let invalid = r#"
         (структура-обгортки-перекладу-коректна?
-          (як-є (translation/1 candidate query (не-текст) (metallic plato))))
+          (як-є (translation-1 candidate query (не-текст) (metallic plato))))
     "#;
     assert_eq!(eval_translation(valid), "1", "SENS: рядкове джерело");
     assert_eq!(eval_translation(invalid), "()", "SENS: нестрокове джерело");
@@ -425,8 +425,8 @@ fn translation_envelopes_reject_missing_and_excess_fields_in_live_sens() {
     // Вкладене D3 EQ повертає D1:NO, а НЕ D3:EMPTY.
     // Неправильну кількість полів має відкинути сама SENS-бібліотека.
     for proposal in [
-        "(translation/1 candidate query \"текст\")",
-        "(translation/1 candidate query \"текст\" (мета) зайве)",
+        "(translation-1 candidate query \"текст\")",
+        "(translation-1 candidate query \"текст\" (мета) зайве)",
     ] {
         let source = format!(
             "(переклад-перевірка-код (переклад-перевірка (як-є корпус) (як-є {proposal})))"
@@ -443,7 +443,7 @@ fn translation_envelopes_reject_missing_and_excess_fields_in_live_sens() {
 fn translation_review_rejects_extra_field_in_live_sens() {
     let source = r#"
         (запис-огляду-перекладу-коректний?
-          (як-є (translation-review/1 accepted query (пропозиція) (деталь) зайве)))
+          (як-є (translation-review-1 accepted query (пропозиція) (деталь) зайве)))
     "#;
     assert_eq!(eval_translation(source), "()");
 }
@@ -454,10 +454,10 @@ fn versioned_translation_corpus_is_data_only_and_contains_all_b4_modes() {
     let forms = parse(corpus).expect("translation corpus must remain parseable data");
     assert_eq!(forms.len(), 1, "corpus must be one versioned data value");
 
-    assert!(corpus.contains("(translation-corpus/1"));
+    assert!(corpus.contains("(translation-corpus-1"));
     let case_count = corpus
         .lines()
-        .filter(|line| line.trim_start().starts_with("(translation-case/1"))
+        .filter(|line| line.trim_start().starts_with("(translation-case-1"))
         .count();
     assert_eq!(case_count, 6);
 
@@ -494,11 +494,11 @@ fn translation_review_evidence_named_sens_functions_execute_positive_and_negativ
     // Анонімний D5 value-call чи Python-підміна семантики тут не застосовуються.
     for (proposal, expected) in [
         (
-            r#"(translation/1 candidate query "текст" (metallic plato))"#,
+            r#"(translation-1 candidate query "текст" (metallic plato))"#,
             "(query 1 ())",
         ),
         (
-            r#"(translation/1 rejected clause "текст" unsupported-translation)"#,
+            r#"(translation-1 rejected clause "текст" unsupported-translation)"#,
             "(translator-rejected 0 ())",
         ),
     ] {

@@ -2,7 +2,7 @@
 ; Виконання AVX дозволене лише після перевірки CPUID.OSXSAVE
 ; і стану регістрів, прочитаного через XGETBV.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension AVX)
   (requires SSE4.2)
   (source intel-sdm/intel-xed)

@@ -24,7 +24,7 @@ def write_fixture_repo(root: Path) -> Path:
     (root / "lib" / "domains").mkdir(parents=True)
     for domain in range(1, 11):
         path = root / "lib" / "domains" / f"d{domain}.lisp"
-        lines = ["(domain-table/1"]
+        lines = ["(domain-table-1"]
         for value in range(1 << domain):
             bits = format(value, f"0{domain}b")
             en = f"D{domain}-CELL-{bits}"

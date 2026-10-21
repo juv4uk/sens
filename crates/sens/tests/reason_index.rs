@@ -33,8 +33,8 @@ fn reason_index_d1_verdicts_from_real_predicates() {
     // Значення мають бути саме D1-бітами, не цитованими 'так'/'ні'.
     let mut s = session();
     for (expression, expected) in [
-        ("(індекс-міркування? (як-є (reason-index/1 indexed () ())))", true),
-        ("(індекс-міркування? (як-є (reason-index/1 linear () ())))", true),
+        ("(індекс-міркування? (як-є (reason-index-1 indexed () ())))", true),
+        ("(індекс-міркування? (як-є (reason-index-1 linear () ())))", true),
         ("(індекс-міркування? (як-є (other-index indexed () ())))", false),
         ("(індекс-міркування? (як-є ((complex-head) indexed () ())))", false),
         ("(індекс-міркування? (як-є ()))", false),
@@ -190,7 +190,7 @@ fn binary_sens_migration_witness_checks_atom_eq_and_domain_boundaries() {
     for (source, expected) in [
         ("(індекс-міркування? (як-є ()))", false),
         ("(індекс-міркування? (як-є ((складена-голова) запис)))", false),
-        ("(індекс-міркування? (як-є (reason-index/1 indexed ())))", true),
+        ("(індекс-міркування? (як-є (reason-index-1 indexed ())))", true),
     ] {
         let result = eval_program(source, &mut s)
             .unwrap_or_else(|error| panic!("реальна перевірка індекс-міркування?: {error}; джерело: {source}"));
@@ -285,9 +285,9 @@ fn reason_index_builder_diagnostic_first_failing_stage() {
         ("(додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ()))", "((p ((p a))))"),
         ("(упорядкувати-кошики-індексу-міркування (додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ())))", "((p ((p a))))"),
         ("(сканувати-індекс-міркування (як-є ()) (як-є ()) (як-є ()) *паливо-індексу-міркування*)",
-         "(reason-index/1 indexed () ())"),
+         "(reason-index-1 indexed () ())"),
         ("(побудувати-індекс-міркування (як-є (((p a)))))",
-         "(reason-index/1 indexed (((p a))) ((p ((p a)))))"),
+         "(reason-index-1 indexed (((p a))) ((p ((p a)))))"),
     ];
     for (probe, expected) in probes {
         assert_eq!(eval(&mut s, probe), expected, "first failing index stage: {probe}");

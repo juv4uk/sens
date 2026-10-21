@@ -278,7 +278,7 @@ pub fn render(entries: &[CoverageEntry]) -> String {
     out.push_str("; admitted by #175 appears here exactly once: `partial` names a real Lisp\n");
     out.push_str("; encoder covering at least one of its forms, `not-yet-implemented` is an\n");
     out.push_str("; explicit, justified gap. There is no third, silent outcome (#176).\n\n");
-    out.push_str("(x86-encoder-coverage/1\n");
+    out.push_str("(x86-encoder-coverage-1\n");
     out.push_str(&format!("  (form-count {})\n", entries.len()));
     out.push_str(&format!("  (partial-count {partial_count})\n"));
     for entry in entries {

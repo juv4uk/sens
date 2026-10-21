@@ -16,7 +16,7 @@
 ;   адаптувати
 ;   відкинути
 
-(life-2-pattern-catalog/1
+(life-2-pattern-catalog-1
   ((concern . runtime-availability)
    (precedent . poplog)
    (decision . borrow)

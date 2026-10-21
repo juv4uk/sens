@@ -1,7 +1,7 @@
 ; Каталог машинних команд SSSE3; лише факти фізичної архітектури.
 ; Мнемоніки та поля залишаються точними даними ISA.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension SSSE3)
   (requires SSE3)
   (source intel-sdm/intel-xed)

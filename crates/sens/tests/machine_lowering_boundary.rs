@@ -76,7 +76,7 @@ fn x86_base_catalogue_is_lisp_data_independent_of_semantic_ids() {
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
 
     sens::parse(&source).expect("x86 base ISA catalogue must be valid sens data");
-    assert!(source.contains("(isa-catalogue/1"));
+    assert!(source.contains("(isa-catalogue-1"));
     assert!(source.contains("(extension X86-BASE"));
     for mnemonic in ["MOV", "ADD", "RET"] {
         assert!(

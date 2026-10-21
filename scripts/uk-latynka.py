@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Оборотна ASCII-латинка для українського тексту.
 
-`uk-latynka/1` призначена не для видавничої транслітерації, а для випадків,
+`uk-latynka-1` призначена не для видавничої транслітерації, а для випадків,
 коли український коментар треба зберегти в середовищі, що вимагає 1-байтового
 ASCII. Кодування є точним і оборотним навіть для змішаного тексту з латинськими
 ідентифікаторами, URL та іншими Unicode-символами.
@@ -71,11 +71,11 @@ DECODE = {code: letter for letter, code in ENCODE.items()}
 
 
 class LatynkaError(ValueError):
-    """Помилка пошкодженого або неканонічного `uk-latynka/1` тексту."""
+    """Помилка пошкодженого або неканонічного `uk-latynka-1` тексту."""
 
 
 def encode(text: str) -> str:
-    """Перетворити довільний Unicode-текст на точний ASCII `uk-latynka/1`."""
+    """Перетворити довільний Unicode-текст на точний ASCII `uk-latynka-1`."""
 
     out: list[str] = []
     ukrainian_run: list[str] = []
@@ -104,7 +104,7 @@ def encode(text: str) -> str:
     flush_run()
     encoded = "".join(out)
     if not encoded.isascii():
-        raise AssertionError("uk-latynka/1 encode має повертати лише ASCII")
+        raise AssertionError("uk-latynka-1 encode має повертати лише ASCII")
     return encoded
 
 
@@ -132,7 +132,7 @@ def _decode_ukrainian_run(payload: str) -> str:
 
 
 def decode(text: str) -> str:
-    """Відновити початковий Unicode-текст з `uk-latynka/1`."""
+    """Відновити початковий Unicode-текст з `uk-latynka-1`."""
 
     result: list[str] = []
     index = 0
@@ -218,21 +218,21 @@ def read_input(path: str) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Оборотна українська ASCII-латинка uk-latynka/1")
+    parser = argparse.ArgumentParser(description="Оборотна українська ASCII-латинка uk-latynka-1")
     parser.add_argument("mode", choices=("encode", "decode", "self-test"))
     parser.add_argument("path", nargs="?", default="-")
     args = parser.parse_args()
 
     if args.mode == "self-test":
         self_test()
-        print("uk-latynka/1: PASS")
+        print("uk-latynka-1: PASS")
         return 0
 
     source = read_input(args.path)
     try:
         output = encode(source) if args.mode == "encode" else decode(source)
     except LatynkaError as error:
-        print(f"uk-latynka/1: ERROR: {error}", file=sys.stderr)
+        print(f"uk-latynka-1: ERROR: {error}", file=sys.stderr)
         return 2
 
     sys.stdout.write(output)

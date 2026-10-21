@@ -23,32 +23,32 @@
                         (однакові?
                           енергія
                           (як-є
-                            (quantity/1
+                            (quantity-1
                               121822045942277331/20000000000000000000000000000000000000000
-                              (unit/1
-                                (dimension/1 kilogram 1)
-                                (dimension/1 metre 2)
-                                (dimension/1 second -2)))))
+                              (unit-1
+                                (dimension-1 kilogram 1)
+                                (dimension-1 metre 2)
+                                (dimension-1 second -2)))))
                         (як-є (1)))
                       (список
                         (як-є speed-times-second-distance-shape)
                         (однакові?
                           відстань
                           (як-є
-                            (quantity/1
+                            (quantity-1
                               299792458
-                              (unit/1 (dimension/1 metre 1)))))
+                              (unit-1 (dimension-1 metre 1)))))
                         (як-є (1)))
                       (список
                         (як-є recovered-speed-shape)
                         (однакові?
                           відновлена-швидкість
                           (як-є
-                            (quantity/1
+                            (quantity-1
                               299792458
-                              (unit/1
-                                (dimension/1 metre 1)
-                                (dimension/1 second -1)))))
+                              (unit-1
+                                (dimension-1 metre 1)
+                                (dimension-1 second -1)))))
                         (як-є (1)))
                       (список
                         (як-є quotient-inverse)
@@ -62,13 +62,13 @@
                         (як-є string-name-does-not-project)
                         (науковий-константа-клаузи
                           (як-є
-                            (scientific-constant/1 "not-a-symbol"
-                              (quantity/1 299792458
-                                (unit/1
-                                  (dimension/1 metre 1)
-                                  (dimension/1 second -1)))
+                            (scientific-constant-1 "not-a-symbol"
+                              (quantity-1 299792458
+                                (unit-1
+                                  (dimension-1 metre 1)
+                                  (dimension-1 second -1)))
                               exact-by-definition physical-defining si
-                              (science-source/1 bipm-si-brochure-9 2019))))
+                              (science-source-1 bipm-si-brochure-9 2019))))
                         (як-є ()))))
               (величина-частка відстань одна-секунда)))
             (величина-добуток швидкість одна-секунда)))

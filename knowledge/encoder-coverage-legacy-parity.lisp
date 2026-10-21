@@ -2,7 +2,7 @@
 ; Він фіксує останню 32-рядкову часткову проєкцію Rust і доводить, що кожна
 ; застаріла часткова пара зберігається в похідній 122-парній проєкції, що належить Lisp.
 
-(encoder-coverage-legacy-parity/1
+(encoder-coverage-legacy-parity-1
   (legacy-pair-count #b100000)
   (successor-pair-count #b1111010)
   (legacy X86-BASE "ADD")

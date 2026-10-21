@@ -3,7 +3,7 @@
 ; Pinned XED commit: 0bcb6237345c5066726dcc08b3d87928df3b5b26
 ; Це зовнішнє технічне свідчення, не семантична влада (#150).
 
-(xed-machine-evidence/1
+(xed-machine-evidence-1
   (pinned-commit "0bcb6237345c5066726dcc08b3d87928df3b5b26")
   (source-digest "sha256:a1ba2df05efeed958d4c639764b68066037d6ed930e3ad878e5fb8dacc283d98")
   (form-count 1176)

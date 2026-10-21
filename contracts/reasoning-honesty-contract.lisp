@@ -1,7 +1,7 @@
 ; #219/#244 — контракт чесності міркування, власність Lisp.
 ; Чисті дані: міркування може спеціалізувати лише те, що справді встановлює.
 
-(reasoning-honesty-contract/1
+(reasoning-honesty-contract-1
   ((law . no-proof-is-not-negation)
    (observed . no-proof)
    (forbidden-specialization . proved-not)

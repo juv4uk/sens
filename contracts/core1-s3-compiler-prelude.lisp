@@ -4,7 +4,7 @@
 ; бібліотеки та напрямок семантичних повноважень, який компілятор CML
 ; зобов'язаний зберігати під час компіляції.
 
-(core1-s3-compiler-prelude/1
+(core1-s3-compiler-prelude-1
   ((profile . core1)
    (law-base-pin . "5a99136bf7a2e9ab5792bdc945ad53c3774802cd")
    (law-source . "lib/core1.lisp")

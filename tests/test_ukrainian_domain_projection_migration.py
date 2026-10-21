@@ -39,7 +39,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
             value = row(bits, "()" if width == 7 else "так",
                         "()" if width == 7 else "так")
             (self.root / f"lib/domains/d{width}.lisp").write_text(
-                "(domain-table/1\n" + value + ")\n", encoding="utf-8"
+                "(domain-table-1\n" + value + ")\n", encoding="utf-8"
             )
         table = [{"bits": format(i, "07b"), "uk": chr(i) if i < 32 or i == 127 else "а"}
                  for i in range(128)]
@@ -49,7 +49,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
         )
         self.d9 = self.root / "lib/domains/d9.lisp"
         self.d9.write_text(
-            "(domain-table/1\n" + row("000000000", "json-розібрати") + ")\n",
+            "(domain-table-1\n" + row("000000000", "json-розібрати") + ")\n",
             encoding="utf-8"
         )
         self.mapping = self.root / "authority.json"
@@ -146,7 +146,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
 
     def test_stale_manifest_refuses_other_value(self):
         self.d9.write_text(
-            "(domain-table/1\n" + row("000000000", "неочікуване-зовнішнє") + ")\n",
+            "(domain-table-1\n" + row("000000000", "неочікуване-зовнішнє") + ")\n",
             encoding="utf-8"
         )
         before = self.d9.read_bytes()
@@ -157,7 +157,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
     def test_d7_uses_only_exact_ratified_bits(self):
         d7 = self.root / "lib/domains/d7.lisp"
         d7.write_text(
-            "(domain-table/1\n"
+            "(domain-table-1\n"
             + row("0000000", "()", "()")
             + row("1101101", '"&"', '"&"').replace("(sym ())", '(sym "&")')
             + ")\n", encoding="utf-8"
@@ -181,7 +181,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
         """A bare Ukrainian letter is the canonical D7 source spelling."""
         d7 = self.root / "lib/domains/d7.lisp"
         d7.write_text(
-            "(domain-table/1\n"
+            "(domain-table-1\n"
             + row("0000000", "()", "()")
             + row("0101100", "б", "б").replace("(sym ())", "(sym б)")
             + ")\n",
@@ -203,7 +203,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
     def test_d7_apply_refuses_entire_batch_before_d9_write(self):
         d7 = self.root / "lib/domains/d7.lisp"
         d7.write_text(
-            "(domain-table/1\n"
+            "(domain-table-1\n"
             + row("0000000", "()", "()")
             + row("1101101", '"&"', '"&"')
             + ")\n", encoding="utf-8"
@@ -226,7 +226,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
     def test_valid_but_different_d7_glyph_requires_review(self):
         d7 = self.root / "lib/domains/d7.lisp"
         d7.write_text(
-            "(domain-table/1\n" + row("0000000", "()", "()")
+            "(domain-table-1\n" + row("0000000", "()", "()")
             + row("1101101", "а", "а").replace("(sym ())", "(sym а)")
             + ")\n", encoding="utf-8"
         )

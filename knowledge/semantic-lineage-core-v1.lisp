@@ -13,7 +13,7 @@
 ; Кожен рядок прив'язано до свідчень. «unresolved» означає, що проєкт
 ; не має права вважати поточний вигляд реалізації остаточним мовним законом.
 
-(semantic-lineage/1
+(semantic-lineage-1
   (issue 1113)
   (as-of "2026-09-23")
   (authority "lib/surface/semantic-registry.lisp")

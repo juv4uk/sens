@@ -903,8 +903,8 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
         """Відновити пінований зріз після окремо перевірених міграцій D3/D9 та D8."""
         if path != "scripts/check-domain-logic-laws.lisp":
             return source
-        new_schema = '  (тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp"))) (як-є domain-table/1)))'
-        old_schema = '  (101 (100 (110101001 (110110111 "lib/domains/d1.lisp"))) (001 domain-table/1)))'
+        new_schema = '  (тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp"))) (як-є domain-table-1)))'
+        old_schema = '  (101 (100 (110101001 (110110111 "lib/domains/d1.lisp"))) (001 domain-table-1)))'
         if source.count(new_schema) != 1:
             raise AssertionError("Точна D3/D9 форма read-file-schema не збігається")
         source = source.replace(new_schema, old_schema, 1)

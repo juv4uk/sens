@@ -1,5 +1,5 @@
 {
-  "schema": "sens-migration-nonprogram-manifest-1",
+  "schema": "sens-migration-nonprogram-manifest/1",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
   "authority": "research/classification; not executable SENS or domain law",
@@ -21,12 +21,12 @@
     {
       "path": "knowledge/core4-predicate-record-inventory.lisp",
       "git_blob_sha1": "15e45242227208c80619b9b2c76c13e8b09eaa6a",
-      "record_head": "core4-predicate-record-inventory/2"
+      "record_head": "core4-predicate-record-inventory-2"
     },
     {
       "path": "knowledge/function-table-sculpt-audit.lisp",
       "git_blob_sha1": "d79860436474ae0b08744256b18de77cdddc25fe",
-      "record_head": "function-table-sculpt-audit/1"
+      "record_head": "function-table-sculpt-audit-1"
     },
     {
       "path": "knowledge/meta-eval-evidence.lisp",
@@ -56,7 +56,7 @@
     {
       "path": "knowledge/semantic-lineage-core-v1.lisp",
       "git_blob_sha1": "89cba624494295ab9673c9e985d4e96bf159b6e1",
-      "record_head": "semantic-lineage/1"
+      "record_head": "semantic-lineage-1"
     },
     {
       "path": "knowledge/semantic-ownership.lisp",
@@ -66,7 +66,7 @@
     {
       "path": "knowledge/sens-primary.lisp",
       "git_blob_sha1": "00f986961e4620186057921e0042d14e2134e46b",
-      "record_head": "sens-primary/2"
+      "record_head": "sens-primary-2"
     },
     {
       "path": "knowledge/silent-fallback-inventory.lisp",
@@ -76,7 +76,7 @@
     {
       "path": "knowledge/structure-not-ontology-inventory.lisp",
       "git_blob_sha1": "3dc44595ffef6448b836d06fa4a9a09d835c2012",
-      "record_head": "structure-not-ontology/1"
+      "record_head": "structure-not-ontology-1"
     }
   ]
 }

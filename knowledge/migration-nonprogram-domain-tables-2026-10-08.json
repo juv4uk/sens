@@ -1,10 +1,10 @@
 {
-  "schema": "sens-migration-nonprogram-manifest-1",
+  "schema": "sens-migration-nonprogram-manifest/1",
   "generated_from_main": "67c1b0c8302f72d044aab68f31cd7dba8481928b",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
   "cohort": "ratified D1-D10 human-readable domain definition tables plus the D11 testing-only vocabulary table",
-  "reason": "domain-table/1 rows declare authoritative exact-width identities and surfaces; D1-D10 are domain tables and D11 is only the ratified testing vocabulary. These are DATA, not executable SENS programs.",
+  "reason": "domain-table-1 rows declare authoritative exact-width identities and surfaces; D1-D10 are domain tables and D11 is only the ratified testing vocabulary. These are DATA, not executable SENS programs.",
   "automatic_sens_companion": false,
   "not_executable_programs": true,
   "not_physical_migration_credit": true,

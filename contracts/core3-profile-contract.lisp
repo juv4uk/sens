@@ -17,7 +17,7 @@
 ; Контрактні поля, ідентифікатори, хеші та позначки станів є
 ; історичними даними. Не використовувати їх як нові викличні голови.
 
-(core3-profile-contract/1
+(core3-profile-contract-1
   ((identity . authority)
    (owner . sens)
    (profile . core3)

@@ -4,7 +4,7 @@
 ; Точні карти резидентів делеговано поточним владам відповідних доменів.
 
 (
-  (schema . d1-d7-foundation-ratification/1)
+  (schema . d1-d7-foundation-ratification-1)
   (status . owner-ratified)
   (owner-ratification . #3572)
   (date . "2026-10-05")

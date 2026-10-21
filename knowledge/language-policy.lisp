@@ -32,7 +32,7 @@
      (owner-phrase-all-my-repos . all-owner-authored-repositories)
      (authorship-authority . ../ecosystem/docs/policy/REPOSITORIES-LICENSE-AUDIT.md)
      (code-comments . ukrainian-utf8)
-     (transliteration-contract . uk-latynka/1)
+     (transliteration-contract . uk-latynka-1)
      (transliterator . scripts/uk-latynka.py)
      (transliteration-role . auxiliary-interoperability-tool)
      (rules .

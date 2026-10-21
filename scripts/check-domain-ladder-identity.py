@@ -418,7 +418,7 @@ def self_test() -> None:
         raise ValueError("historical C comment must not be interpreted as code")
 
     # Absent / duplicate / out-of-domain / missing-reserved proof inputs fail.
-    toy = {n: "(domain-table/1\n" + "".join(
+    toy = {n: "(domain-table-1\n" + "".join(
         f" ({i:0{n}b} (ук тест))\n"
         for i in range(1 << n)
     ) + ")\n" for n in EXPECTED}

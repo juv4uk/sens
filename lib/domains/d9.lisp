@@ -7,7 +7,7 @@
 ; Людська назва не означає належності до ядра чи допуску виклику (#4033).
 ; Дев'ятибітний носій Rust для виконання — окрема справа #4038.
 
-(domain-table/1
+(domain-table-1
   (000000000 (ук захист-доказ-стан?) (укр захист-доказ-стан?) (san rakṣā-pramāṇa-avasthā) (en guard-evidence-status?) (LISP GUARD-EVIDENCE-STATUS?) (sym ()))
   (000000001 (ук пояснити-відповідь) (укр пояснити-відповідь) (san varṇana-uttara) (en narrate-answer) (LISP NARRATE-ANSWER) (sym ()))
   (000000010 (ук переклад-допуск-вміст) (укр переклад-допуск-вміст) (san anuvāda-praveśa-viṣaya) (en translation-admission-payload) (LISP TRANSLATION-ADMISSION-PAYLOAD) (sym ()))

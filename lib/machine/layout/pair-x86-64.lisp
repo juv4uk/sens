@@ -12,7 +12,7 @@
 
 (визначити машинна-пара-розклад
   (як-є
-    (machine-pair-layout/1
+    (machine-pair-layout-1
       (target x86-64)
       (word-bits 64)
       (cell-bytes 16)

@@ -11,7 +11,7 @@
 ; не створює восьмибітної функції СЕНС. Так само восьмибітний
 ; код функції не може неявно перетворитися на порожню структуру.
 
-(core4-predicate-answer-boundary/4
+(core4-predicate-answer-boundary-4
 
   ((profile . core4)
    (scope . predicate-answer-space)

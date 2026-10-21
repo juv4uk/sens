@@ -1,7 +1,7 @@
 ; Каталог машинних команд FMA3; лише фізичні факти ISA.
 ; Для виконання потрібні стан регістрів AVX та ознака FMA в CPUID.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension FMA3)
   (requires AVX)
   (source intel-sdm/intel-xed)

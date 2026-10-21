@@ -3,7 +3,7 @@
 ; Доступність складових стану перевіряють операційна система
 ; та виконавець; каталог не встановлює мовних законів СЕНС.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension XSAVE)
   (source intel-sdm/intel-xed)
   (runtime-gate cpuid-xsave)

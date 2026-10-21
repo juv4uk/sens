@@ -999,9 +999,9 @@
 {"page":38,"branch":"sens/bare-bits-machine","sha":"d4dda61064ff25c4f6ad85e54e598ba87743a987","protected":false}
 {"page":38,"branch":"sens/bare-bits-rest","sha":"d13126f8476ed96238f41e17ea7dfec9f98e5e78","protected":false}
 {"page":38,"branch":"sens/bare-bits-uk-docs","sha":"7a41fd91d4c81a9761807b8c8984e41e9f445e1d","protected":false}
-{"page":39,"branch":"sens-primary/1590-axioms-doctrine","sha":"1dd40143e8686d1c731cd4895483e36e654f77c7","protected":false}
-{"page":39,"branch":"sens-primary/1590-binary-transport-note","sha":"48d25685a9136bb03cc86b656dbebb79d0acf64f","protected":false}
-{"page":39,"branch":"sens-primary/1590-m8-lower-admitted","sha":"da6186ab2aff25376b7d27cf04fb93c9fadd0fcb","protected":false}
+{"page":39,"branch":"sens-primary-1590-axioms-doctrine","sha":"1dd40143e8686d1c731cd4895483e36e654f77c7","protected":false}
+{"page":39,"branch":"sens-primary-1590-binary-transport-note","sha":"48d25685a9136bb03cc86b656dbebb79d0acf64f","protected":false}
+{"page":39,"branch":"sens-primary-1590-m8-lower-admitted","sha":"da6186ab2aff25376b7d27cf04fb93c9fadd0fcb","protected":false}
 {"page":39,"branch":"silicon-full-census-4086-v2","sha":"25b2e097177ba054945fc610963f261d2932c100","protected":false}
 {"page":39,"branch":"silicon-full-census-4086","sha":"97a9c65d8ebe9b6938f72a9b70b8f18682c545b3","protected":false}
 {"page":39,"branch":"silicon-popcnt-tzcnt-4086","sha":"9171d47a494d3b658d4c40c5a2deb155971d2cbf","protected":false}

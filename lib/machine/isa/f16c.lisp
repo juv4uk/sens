@@ -1,7 +1,7 @@
 ; Каталог машинних команд F16C для перетворення чисел половинної точності.
 ; Збережено лише фізичні характеристики набору команд.
 
-(isa-catalogue/1
+(isa-catalogue-1
   (extension F16C)
   (requires AVX)
   (source intel-sdm/intel-xed)

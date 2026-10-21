@@ -26,7 +26,7 @@
 ; Актуальну семантику та назви перевіряти за ратифікованими D1–D10.
 
 (uk-sa-coverage
-  (schema uk-sa-coverage/3)
+  (schema uk-sa-coverage-3)
 
   ;; ── Canon 0+7 ──────────────────────────────────────────────
   (entry (canon quote як-є svarūpa stable stable "AS 1.1.68 svam rūpam"))

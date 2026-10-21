@@ -3,7 +3,7 @@
 ; Часткова пара означає, що принаймні одна структурована допущена форма відображається на ICLASS;
 ; це НЕ стверджує, що кожна форма операнда/адресації XED реалізована.
 
-(x86-admission-iclass-projection/1
+(x86-admission-iclass-projection-1
   (admission-head-count 190)
   (partial-pair-count 126)
   (orphan-count 0)
