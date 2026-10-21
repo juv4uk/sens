@@ -302,6 +302,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-reverse-general",
         "list-drop-last-general",
         "list-append-general",
+        "list-unique-stable",
         "list-interleave-two-pairs",
 
 
@@ -350,6 +351,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-zip-general"
                 | "list-drop-last-general"
                 | "list-append-general"
+                | "list-unique-stable"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
