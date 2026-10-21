@@ -53,13 +53,13 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
                         "T5M_COMMITTED_VIEW_DRIFT"):
             self.assertIn(receipt, checks)
         # Жодне з трьох розходжень не перескакує через фізичний SENS.
-        self.assertNotIn("continue", checks.lower())
+        self.assertNotIn("\n      continue\n", checks)
         self.assertIn("committed_drift=1", checks)
         self.assertIn("failed_files=$((failed_files + 1))", checks)
         self.assertIn("T5M_DIAGNOSTICS_CONTINUE", checks)
         self.assertIn("committed_drift=$committed_drift semantic=NOT_CERTIFIED",
                       source[execution:])
-        self.assertIn("if (( failed_files > 0 )); then\\n  exit 2", source)
+        self.assertIn("if (( failed_files > 0 )); then\n  exit 2", source)
 
     def test_w24_uses_explicit_domain_source_runtime_without_fake_physical_pass(self):
         # Це контроль маршрутів, а не Python-обчислення Lisp.
