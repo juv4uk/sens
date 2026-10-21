@@ -197,9 +197,9 @@ fn peer_identity_acceptance_program_passes() {
 #[test]
 fn peer_identity_acceptance_wrong_abs_expectation_is_detected() {
     let source = include_str!("../../../lib/surface/peer-identity-acceptance.lisp");
-    let correct = "(рівне? (модуль (відняти 0 7)) 7)";
+    let correct = "(однакове-число? (модуль (відняти 0 7)) 7)";
     assert_eq!(source.matches(correct).count(), 1, "втрачено точний свідок");
-    let mutant = source.replacen(correct, "(рівне? (модуль (відняти 0 7)) 8)", 1);
+    let mutant = source.replacen(correct, "(однакове-число? (модуль (відняти 0 7)) 8)", 1);
     let mut s = uk_session();
     let r = eval_program(&mutant, &mut s)
         .expect("mutant must execute in actual SENS evaluator");
