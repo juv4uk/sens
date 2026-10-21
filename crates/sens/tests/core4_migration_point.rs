@@ -273,3 +273,39 @@ fn core4_ukrainian_d10_mappend_and_one_level_flatten_execute_in_sens() {
     assert_eq!(error.kind, sens::ErrorKind::Type,
         "test_id=d10-mappend-invalid layer=SENS input={invalid} expected=Type actual={error:?}");
 }
+
+#[test]
+fn core4_ukrainian_rassoc_union_execute_true_d1_branches_in_sens() {
+    // SENS виконує реальні D3 CAR/CDR, рекурсію та D1 COND.
+    // Ніяка семантика не обчислюється у тестовому Rust-спостерігачі.
+    let mut session = migrated_core();
+    for (source, expected) in [
+        (
+            "(знайти-за-значенням (як-є б) (як-є ((а . б) (в . г))))",
+            "(а . б)",
+        ),
+        (
+            "(знайти-за-значенням (як-є г) (як-є ((а . б) (в . г))))",
+            "(в . г)",
+        ),
+        (
+            "(знайти-за-значенням (як-є д) (як-є ((а . б) (в . г))))",
+            "()",
+        ),
+        ("(знайти-за-значенням (як-є а) (як-є ()))", "()"),
+        ("(об'єднання (як-є (а б)) (як-є (б в)))", "(а б в)"),
+        ("(об'єднання (як-є (а б)) (як-є (а б)))", "(а б)"),
+        ("(об'єднання (як-є ()) (як-є (б в)))", "(б в)"),
+        ("(об'єднання (як-є (а)) (як-є (а)))", "(а)"),
+    ] {
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=core4-ukr-rassoc-union layer=SENS input={source} error={error}")
+        });
+        assert_eq!(
+            result.value.to_string(),
+            expected,
+            "test_id=core4-ukr-rassoc-union layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
+    }
+}
