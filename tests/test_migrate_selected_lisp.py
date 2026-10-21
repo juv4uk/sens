@@ -192,9 +192,9 @@ class SelectedOriginalT5(unittest.TestCase):
                 "(01001000 000)\n", ambiguous_head, text7,
                 source_surface="укр", codec="t5")
 
-    def test_preloaded_lisp_d9_name_keeps_identity_without_execution_claim(self):
-        # The current Ukrainian projection fixes identity. Loading the source
-        # definition is relevant to later execution, not to this migration.
+    def test_preloaded_lisp_d9_resident_keeps_d7_identifier_without_callability(self):
+        # The D9 table fixes identity but does not create a native call mechanism.
+        # The current SENS reader preserves the lexical function as D7 words.
         migration = app.load_migrator()
         foundation = migration.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
         my, upper, _retired = migration.build_three_pass_maps(
@@ -210,8 +210,10 @@ class SelectedOriginalT5(unittest.TestCase):
         without = migration.Resolver(my, upper)
         without_words = migration.migrate_file(
             program, without, text7, codec="t5m", source_surface="укр")
-        self.assertIn("101010010", without_words.split())
-        self.assertEqual(without.counts["pass4-text7-global"], 0)
+        self.assertEqual(my["модуль-відомий?"], ("101010010", "D9"))
+        self.assertNotIn("101010010", without_words.split())
+        self.assertEqual(without_words.split()[1], "10")
+        self.assertEqual(without.counts["pass4-text7-global"], 1)
         imported_source = (ROOT / "lib/knowledge.lisp").read_text(encoding="utf-8")
         forms = migration.Parser(migration.tokenize(
             migration.strip_comments(imported_source),
@@ -226,12 +228,13 @@ class SelectedOriginalT5(unittest.TestCase):
             program, with_preload, text7, codec="t5m", source_surface="укр",
             imported_bindings=imported,
         )
-        self.assertIn("101010010", words.split())
-        self.assertEqual(with_preload.counts["pass4-text7-global"], 0)
+        self.assertNotIn("101010010", words.split())
+        self.assertEqual(with_preload.counts["pass4-text7-global"], 1)
         self.assertEqual(words, without_words)
 
-    def test_reason_keeps_unification_as_d9_identity_not_d7_text(self):
-        # Migration emits exact identity only; it makes no runtime-execution claim.
+    def test_reason_keeps_unification_as_lexical_d7_not_unadmitted_d9_call(self):
+        # D9 ratification is retained, but native callability is not inferred.
+        # The actual Lisp definition is resolved as contextual D7 by SENS.
         migration = app.load_migrator()
         foundation = migration.load_foundation(ROOT / "knowledge/d1-d11-foundation.json")
         my, upper, _retired = migration.build_three_pass_maps(
@@ -248,8 +251,10 @@ class SelectedOriginalT5(unittest.TestCase):
         words_without = migration.migrate_file(
             program, without, text7, codec="t5m", source_surface="укр",
         )
-        self.assertIn("101010000", words_without.split())
-        self.assertEqual(without.counts["pass4-text7-global"], 0)
+        self.assertEqual(my["уніфікувати"], ("101010000", "D9"))
+        self.assertNotIn("101010000", words_without.split())
+        self.assertEqual(words_without.split()[1], "10")
+        self.assertEqual(without.counts["pass4-text7-global"], 1)
         source = (ROOT / "lib/unify.lisp").read_text(encoding="utf-8")
         forms = migration.Parser(migration.tokenize(
             migration.strip_comments(source), source_surface="укр"
@@ -263,8 +268,8 @@ class SelectedOriginalT5(unittest.TestCase):
             program, resolver, text7, codec="t5m",
             source_surface="укр", imported_bindings=binding,
         )
-        self.assertIn("101010000", words.split())
-        self.assertEqual(resolver.counts["pass4-text7-global"], 0)
+        self.assertNotIn("101010000", words.split())
+        self.assertEqual(resolver.counts["pass4-text7-global"], 1)
         self.assertEqual(words, words_without)
         runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
         self.assertIn('binding_sources=(--binding-source lib/unify.lisp)', runner)
