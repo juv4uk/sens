@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PM = ROOT / "lib" / "persistent-map.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-RAW_BINARY_HEAD = re.compile(r"\\([01]{3,10}(?=\\s|\\))")
-BARE_TRUTH = re.compile(r"\\((?:так|ні)(?=\\s|\\))")
+RAW_BINARY_HEAD = re.compile(r"\([01]{3,10}(?=\s|\))")
+BARE_TRUTH = re.compile(r"\((?:так|ні)(?=\s|\))")
 D1_TRUE = "((атом? (як-є ()))"
 REQUIRED = (
     "мапа-порожній",
@@ -43,7 +43,7 @@ def check_pm() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"persistent-map: host truthiness {m.group()!r} at offset {m.start()}")
-    code = "\\n".join(line.split(";", 1)[0] for line in text.splitlines())
+    code = "\n".join(line.split(";", 1)[0] for line in text.splitlines())
     if RAW_BINARY_HEAD.search(code):
         errs.append("persistent-map: machine-encoded call-head found in human .lisp")
     if BARE_TRUTH.search(code):
@@ -51,7 +51,7 @@ def check_pm() -> list[str]:
     if code.count(D1_TRUE) != 2:
         errs.append("persistent-map: expected exactly two executable D3→D1 fallbacks")
     for fn in REQUIRED:
-        if len(re.findall(r"(?m)^\\(визначити\\s+" + re.escape(fn) + r"(?=\\s|\\))", code)) != 1:
+        if len(re.findall(r"(?m)^\(визначити\s+" + re.escape(fn) + r"(?=\s|\))", code)) != 1:
             errs.append(f"persistent-map: missing or duplicated Ukrainian DEFINE: {fn}")
     return errs
 
