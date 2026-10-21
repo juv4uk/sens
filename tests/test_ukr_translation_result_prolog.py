@@ -105,8 +105,8 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
             self.assertEqual(calls[old_en], 0)
             rows = self.by_en.get(old_en, [])
             self.assertEqual(len(rows), 1)
-            self.assertEqual(calls[rows[0].ukr], 0,
-                             "D10 word does not prove runtime callability")
+            self.assertGreaterEqual(calls[rows[0].ukr], 1,
+                                    "український D10 виклик у програмі має зберігатися; runtime перевіряє SENS")
 
     def test_d10_advice_ukrainian_definitions_preserve_exact_identity(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
@@ -115,7 +115,7 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
         for old_name, (domain, bits) in DEFINED_ONLY.items():
             with self.subTest(name=old_name):
                 rows = self.by_en.get(old_name, [])
-                self.assertEqual(len(rows), 1, "растифіковане D10 ім'я має бути однозначним")
+                self.assertEqual(len(rows), 1, "ратифіковане D10 ім'я має бути однозначним")
                 row = rows[0]
                 self.assertEqual((row.domain, row.bits), (domain, bits))
                 self.assertIn(row.ukr, definitions, "відсутнє чинне українське DEFINE D10")
