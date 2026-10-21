@@ -224,6 +224,11 @@ jobs:
           if grep -Eq '^(lib/reason\.lisp|crates/sens/tests/reason_index\.rs)$' "$changed_all"; then
             echo 'reason_tests=true' >> "$GITHUB_OUTPUT"
           fi
+          # Guard і механізми: перевірка D1 запускає справжній SENS.
+          if grep -Eq '^(lib/(guard|mechanism-selector)\.lisp|crates/sens/tests/guard\.rs|tests/test_ukr_(guard|mechanism_selector)_projection\.py|scripts/test-guard-d1-bitness\.py)$' "$changed_all"; then
+            echo 'guard_runtime_tests=true' >> "$GITHUB_OUTPUT"
+            echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+          fi
           # Метаобчислювач перевіряється живим SENS після зміни бібліотеки чи свідка.
           if grep -Eq '^(lib/meta-eval\.lisp|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-lexical-shadow-d1\.sh|tests/semantic/meta-eval-lexical-shadow-d1-(law|mutant|mutants)\.lisp)$' "$changed_all"; then
             echo 'meta_eval_d1_tests=true' >> "$GITHUB_OUTPUT"
@@ -304,6 +309,15 @@ jobs:
           # Справжній D1 для символу/NIL/пари/D24 замість каталожного D9.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test result_status український_символ_результату_виконується_через_d1_а_не_недопущений_d9 -- --exact --nocapture
 
+      - name: "Guard/Mechanism D1 — живе SENS та чинні джерельні закони"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' }}
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.test_ukr_guard_projection tests.test_ukr_mechanism_selector_projection -v
+          python3 scripts/test-guard-d1-bitness.py
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test guard -- --nocapture
       - name: "SENS CLIPS — реальне D6 виконання, поділ правил і негативний випадок"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' }}
         timeout-minutes: 7
@@ -431,7 +445,7 @@ jobs:
           retention-days: 1
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
