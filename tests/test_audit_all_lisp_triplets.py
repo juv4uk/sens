@@ -65,11 +65,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
     def test_proven_program_not_blocked_by_separate_comment_only_profile(self):
         # Істина про програму не залежить від відсутності .sens у файлі
         # без виконуваних форм; звичайний текст не потребує машинного коду.
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        fixture = ROOT / "tests/semantic/native-t5"
         source = self.root / "lib/branch.lisp"
         source.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
-            shutil.copyfile(fixture / ("branch" + suffix),
+            shutil.copyfile(fixture / ("cond-short-circuit" + suffix),
                             source.with_suffix(suffix))
         self.make_current_t5m(source.with_suffix(""))
         from sens_t5_codec import encode_t5m_projection
@@ -219,11 +219,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertIn("T5 mismatch", str(summary["blocked_sample"]))
 
     def test_real_bounded_triplet_is_not_a_release_certificate(self):
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        fixture = ROOT / "tests/semantic/native-t5"
         for suffix in (".lisp", ".sens", ""):
             target = self.root / "lib" / ("branch" + suffix)
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(fixture / ("branch" + suffix), target)
+            shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target)
         self.make_current_t5m(self.root / "lib/branch")
         from sens_t5_codec import encode_t5m_projection
         target = self.root / "lib" / "branch"
@@ -240,11 +240,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(summary["release_ready"])
 
     def test_comments_outside_keyboard_are_style_only_not_program_changes(self):
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        fixture = ROOT / "tests/semantic/native-t5"
         target = self.root / "lib" / "branch"
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
-            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+            shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target.with_suffix(suffix))
         self.make_current_t5m(target)
         source = target.with_suffix(".lisp")
         source.write_text("; inert historical comment ٢\n" +
@@ -272,11 +272,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
 
     def test_current_t5m_triplet_is_counted_only_after_real_reverse_proof(self):
         from sens_t5_codec import encode_t5m_projection
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        fixture = ROOT / "tests/semantic/native-t5"
         target = self.root / "lib" / "branch"
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
-            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+            shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target.with_suffix(suffix))
         words = target.read_text(encoding="ascii")
         target.with_suffix(".sens").write_bytes(encode_t5m_projection(words))
         evidence = scan(self.root, verify_bounded=True)
@@ -293,11 +293,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
     def test_legacy_t5_cannot_certify_the_current_corpus(self):
         # Старі фізичні T5-байти не означають сучасний T5M-доказ.
         from verify_uk_t5_triplet import verify
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        fixture = ROOT / "tests/semantic/native-t5"
         target = self.root / "lib/branch"
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
-            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+            shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target.with_suffix(suffix))
         # Чинний T5-кодек, не невизначена історична послідовність байтів.
         from sens_t5_codec import encode_words
         target.with_suffix(".sens").write_bytes(
@@ -322,11 +322,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
     def test_t5m_receipt_cannot_claim_legacy_t5_roundtrip_as_well(self):
         from sens_t5_codec import encode_t5m_projection
         from verify_uk_t5_triplet import verify
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        fixture = ROOT / "tests/semantic/native-t5"
         target = self.root / "lib" / "branch"
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
-            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+            shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target.with_suffix(suffix))
         target.with_suffix(".sens").write_bytes(encode_t5m_projection(
             target.read_text(encoding="ascii")
         ))
@@ -353,11 +353,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertIn("схема", str(summary["blocked_sample"]))
 
     def test_old_receipt_cannot_authorize_changed_lisp_source(self):
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        fixture = ROOT / "tests/semantic/native-t5"
         for suffix in (".lisp", ".sens", ""):
             target = self.root / "lib" / ("branch" + suffix)
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(fixture / ("branch" + suffix), target)
+            shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target)
         from verify_uk_t5_triplet import verify
         source = self.root / "lib/branch.lisp"
         original_receipt = verify(
@@ -380,11 +380,11 @@ class AllLispTripletCensusTests(unittest.TestCase):
     def test_symlinked_lisp_does_not_get_invisible_release_credit(self):
         # Навіть одна справжня перевірена трійка не доводить облік
         # другого .lisp, якщо той є символічним посиланням.
-        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        fixture = ROOT / "tests/semantic/native-t5"
         target = self.root / "lib" / "branch"
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
-            shutil.copyfile(fixture / ("branch" + suffix), target.with_suffix(suffix))
+            shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target.with_suffix(suffix))
         self.make_current_t5m(target)
         (self.root / "lib" / "посилання.lisp").symlink_to("branch.lisp")
         summary = scan(self.root, verify_bounded=True)
