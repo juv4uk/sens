@@ -563,13 +563,13 @@ pub(crate) fn eval_t5m_paired_file(source: &str, physical: &[u8]) -> Result<sens
     }
     let program = PhysicalT5Program::from_exact_domain_words(&restored)
         .map_err(|error| format!("SENS paired binary reader: {error:?}"))?;
-    let mut result = program
+    // Фізичні вхідні слова вже пройшли точну перевірку Zig/SENS.
+    // Не відхиляємо справжні результати SENS (списки, пари) лише
+    // через те, що кодер зворотного представлення результатів їх не знає.
+    // Це не засвідчує оберненість виходу; release=NOT_CERTIFIED.
+    program
         .execute(&mut session)
-        .map_err(|error| format!("SENS paired evaluator: {}", error.render(source)))?;
-    if !matches!(&result.value, Value::Closure(_)) {
-        result.value = roundtrip_repl_result(result.value)?;
-    }
-    Ok(result)
+        .map_err(|error| format!("SENS paired evaluator: {}", error.render(source)))
 }
 
 fn eval_t5m_repl_line(
