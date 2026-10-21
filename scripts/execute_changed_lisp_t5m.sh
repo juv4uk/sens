@@ -96,6 +96,13 @@ PY
     mark_file_failed
     continue
   fi
+  # Позначка DATA у JSON не анулює справжню помилку процесу міграції.
+  # Інакше exit 1 + files_not_program=1 непомітно перетворювалися на PASS.
+  if (( code != 0 )); then
+    echo "::error::T5M_MIGRATION_FAILED path=$file status=$code written=$written not_program=$not_program" >&2
+    mark_file_failed
+    continue
+  fi
   if (( not_program > 0 )); then
     # Джерело вже не є програмою. Стара однойменна .sens, якщо лишилася,
     # не може тихо вважатися правильною: це колишній виконуваний артефакт,
