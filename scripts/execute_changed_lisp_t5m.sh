@@ -50,6 +50,14 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Reason, у свою чергу, користується визначеннями уніфікації.
     # Обидва джерела лише свідчать завантажувані механізми — не вигадують D9.
     binding_sources=(--binding-source lib/reason.lisp --binding-source lib/unify.lisp)
+  elif [[ "$file" == "lib/result-status.lisp" ]]; then
+    # D9 модуль-відомий? та модуль-клаузи-зараз визначено в Knowledge;
+    # забезпечити-індекс-міркування й міркувати — у Reason.
+    # До перевірки T5M надаємо лише справжні Lisp DEFINE та їхні SHA.
+    # Резидент каталогу D9 без DEFINE надалі лишається недопущеним.
+    binding_sources=(--binding-source lib/knowledge.lisp
+                     --binding-source lib/reason.lisp
+                     --binding-source lib/unify.lisp)
   fi
   python3 scripts/migrate-three-pass.py "$file" \
     --out "$dir" --report "$report" --codec t5m --source-surface укр "${binding_sources[@]}" \
