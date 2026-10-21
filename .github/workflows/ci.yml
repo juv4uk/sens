@@ -229,6 +229,11 @@ jobs:
             echo 'guard_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
+          # Process: фіксуємо реально виконувані D4 DEFINE/D1 і протокольні дані.
+          if grep -Eq '^(lib/process\.lisp|crates/sens/tests/process_d1_(direct|reflection)\.rs|tests/test_process_d1_(direct|predicate_cutover)\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
+            echo 'process_runtime_tests=true' >> "$GITHUB_OUTPUT"
+            echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
+          fi
           # LIFE-1: при зміні семантики планувальника виконуємо SENS.
           if grep -Eq '^(lib/life-1-scheduler\.lisp|crates/sens/tests/life_1_scheduler\.rs|tests/fixtures/life-1-exact-d3-semantic\.lisp|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'life_runtime_tests=true' >> "$GITHUB_OUTPUT"
@@ -319,6 +324,15 @@ jobs:
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test narrate_outcomes --test understand_exact_empty -- --nocapture
           # Справжній D1 для символу/NIL/пари/D24 замість каталожного D9.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test result_status український_символ_результату_виконується_через_d1_а_не_недопущений_d9 -- --exact --nocapture
+
+      - name: "Process — чинне SENS D4 виконання та двопольовий D1"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.process_runtime_tests == 'true' }}
+        timeout-minutes: 7
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.test_process_d1_direct tests.test_process_d1_predicate_cutover -v
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test process_d1_direct --test process_d1_reflection -- --nocapture
 
       - name: "LIFE-1 — живі позитивні й негативні SENS D1 свідки"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.life_runtime_tests == 'true' }}
