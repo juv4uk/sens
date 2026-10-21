@@ -44,6 +44,24 @@ fn eval_translation(source: &str) -> String {
 }
 
 #[test]
+fn reasoning_index_predicate_returns_d1_no_instead_of_cond_nil() {
+    // Раніше обидві кінцеві гілки (ні ні) повертали () при промаху:
+    // D3:110 COND потребує точні D1:1 або D1:0.
+    let source = r#"
+      (список
+        (індекс-міркування? (як-є ()))
+        (індекс-міркування? (як-є ((human socrates))))
+        (індекс-міркування? (список *схема-індексу-міркування*
+                                       (як-є linear) (як-є ()) (як-є ()))))
+    "#;
+    assert_eq!(
+        eval_translation(source),
+        "(0 0 1)",
+        "реальний SENS D1-предикат на відсутньому та дійсному індексі"
+    );
+}
+
+#[test]
 fn translation_reads_current_knowledge_journal_in_real_sens() {
     // Доказова різниця: до повідомлення журнал порожній, після нього
     // український reader бачить поточну версію; протилежна клауза
