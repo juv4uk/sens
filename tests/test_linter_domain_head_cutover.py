@@ -128,10 +128,13 @@ class UkrainianLinterProjection(unittest.TestCase):
         # відповідь-не очікує СКЛАДЕНУ шкалу, тому перше(атом?) — помилка.
         self.assertNotIn("(відповідь-не ", self.active)
         self.assertIn("((атом? дерево)", self.active)
-        self.assertIn("((атом? (решта дерево))", self.active)
-        # Синглтон (голова) не дає права викликати CDR на порожньому хвості.
-        self.assertIn("((тотожне? (решта дерево) (як-є ()))", self.active)
-        self.assertNotIn("((атом? (решта (решта дерево)))", self.active)
+        start = self.active.index("(визначити аналіз-форма-голова")
+        end = self.active.index("(визначити лінтер-коротка-голова", start)
+        head_reader = self.active[start:end]
+        self.assertIn("((атом? (решта дерево))", head_reader)
+        # Тільки ця функція: інші аналізатори законно можуть мати два CDR.
+        self.assertIn("((тотожне? (решта дерево) (як-є ()))", head_reader)
+        self.assertNotIn("((атом? (решта (решта дерево)))", head_reader)
         samples = (ROOT / "tests/fixtures/linter.lisp").read_text(encoding="utf-8")
         self.assertIn("(нехай-послідовно ((x 1) (y x)) (додати x y z))", samples)
 
