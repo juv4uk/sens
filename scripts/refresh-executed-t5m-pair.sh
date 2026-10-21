@@ -85,6 +85,22 @@ if timeout 45s "$binary" "$pair" >"$dir/standalone.stdout" 2>"$dir/standalone.st
     exit 2
   fi
   mode=paired-and-standalone
+else
+  status=$?
+  # Парний SENS уже підтвердив виконання. Але невідома помилка
+  # автономного reader не повинна тихо дозволяти публікацію пари.
+  # Paired-only допустимий лише для двох відомих меж D24+/D7.
+  if (( status != 124 && status != 137 )) &&
+     { grep -Fq 'T5M requires exact source projection to D24+ before transport' "$dir/standalone.stderr" ||
+       grep -Fq 'unknown Text7 binding:' "$dir/standalone.stderr" ||
+       { grep -Fq 'Фізичне T5M-декодування зберегло точні ширини слів' "$dir/standalone.stderr" &&
+         grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$dir/standalone.stderr"; }; }; then
+    sed 's/^/SENS paired-only відома межа: /' "$dir/standalone.stderr" >&2
+  else
+    sed 's/^/SENS standalone невідома помилка: /' "$dir/standalone.stderr" >&2
+    printf 'ПОМИЛКА: T5M_STANDALONE_UNEXPECTED_FAIL source=%s status=%s; пару не змінено\n' "$source_file" "$status" >&2
+    exit 2
+  fi
 fi
 if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
   echo 'ПОМИЛКА: вихідний Lisp змінився під час перевірки; пару не змінено' >&2
