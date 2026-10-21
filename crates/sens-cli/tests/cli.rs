@@ -1312,6 +1312,40 @@ fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
     let original = fs::read(&physical).expect("справжні T5M байти");
     assert!(!original.is_empty());
     assert!(!fs::read_to_string(&view).unwrap().trim().is_empty());
+    // Перевірка реального mint/eval через SENS, але з примусовою
+    // невідомою аварією лише standalone-виконання фізичного носія.
+    // Такий дефект не може перезаписати вже робочу пару як успіх.
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let proxy = dir.join("sens-standalone-failure.sh");
+        let real_sens = format!("{:?}", env!("CARGO_BIN_EXE_sens"));
+        fs::write(&proxy, format!(
+            "#!/bin/sh\ncase \"$1\" in\n  --t5m-mint|--t5m-pair) exec {real_sens} \"$@\" ;;\n  *) echo 'unexpected standalone failure' >&2; exit 23 ;;\nesac\n"
+        )).expect("обгортка фізичного виконання");
+        let mut perms = fs::metadata(&proxy).unwrap().permissions();
+        perms.set_mode(0o700);
+        fs::set_permissions(&proxy, perms).unwrap();
+        let unexpected = Command::new("bash")
+            .arg(&script)
+            .arg(&src)
+            .arg(&proxy)
+            .arg(env!("CARGO_BIN_EXE_sens-trit"))
+            .current_dir(repo)
+            .output()
+            .expect("ремонт із невідомою standalone-аварією");
+        assert!(!unexpected.status.success(),
+            "test_id=t5m-repair-standalone-red layer=SENS/Zig stdout={}",
+            String::from_utf8_lossy(&unexpected.stdout));
+        assert!(
+            String::from_utf8_lossy(&unexpected.stderr)
+                .contains("T5M_REPAIR_STANDALONE_UNEXPECTED_FAIL"),
+            "test_id=t5m-repair-standalone-red layer=SENS/Zig stderr={}",
+            String::from_utf8_lossy(&unexpected.stderr));
+        assert_eq!(fs::read(&physical).unwrap(), original,
+            "невідома standalone-аварія не має переписувати вже перевірені байти");
+        let _ = fs::remove_file(proxy);
+    }
     let paired = sens().args(["--t5m-pair", src.to_str().unwrap(),
         physical.to_str().unwrap()]).output().expect("SENS eval");
     assert!(paired.status.success(), "SENS paired stderr={}",
