@@ -92,6 +92,28 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn('mark_file_failed', source[failed:failed+160])
         self.assertIn('if (( failed_files > 0 )); then\n  exit 2', source)
 
+    def test_new_standalone_diagnostic_still_tries_real_zig_pair_without_false_pass(self):
+        # Лише маршрут Bash. Семантику засвідчує реальний SENS CLI у CI.
+        source = RUNNER.read_text(encoding="utf-8")
+        standalone = source.index('if timeout 45s "$binary" "$pair"')
+        old_d7 = source.index("T5M_PHYSICAL_PAIRED_D7_FAIL", standalone)
+        generic = source.index("T5M_PHYSICAL_PAIRED_GENERIC_PASS", old_d7)
+        paired = source.rfind(
+            'timeout 45s "$binary" --t5m-pair "$file" "$pair"',
+            old_d7, generic,
+        )
+        self.assertGreater(paired, old_d7)
+        self.assertLess(paired, generic)
+        branch = source[paired:source.index("T5M_FILE_EXECUTION_FAIL", generic)]
+        self.assertIn('standalone_status=$status', source[old_d7:generic])
+        self.assertIn('cp "$stderr" "$dir/standalone.stderr"', source[old_d7:generic])
+        self.assertIn("physical=ZIG_VERIFIED", branch)
+        self.assertIn("semantic=NOT_CERTIFIED", branch)
+        self.assertIn("release=NOT_CERTIFIED", branch)
+        self.assertIn("paired_status=$status", source[generic:])
+        self.assertIn("mark_file_failed", source[generic:])
+        self.assertNotIn("T5M_FILE_EXECUTION PASS", branch)
+
     def test_nonprogram_cannot_hide_obsolete_committed_sens(self):
         # Перевірка самого Bash-маршруту на синтетичному звіті мігратора:
         # тут НЕ виконується і НЕ підмінюється обчислювач SENS.
