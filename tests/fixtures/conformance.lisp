@@ -39,3 +39,6 @@
 ((expr . "(не (як-є ()))") (expected . "t") (tier . 3) (axioms . (G5)))
 ((expr . "(не (як-є radio))") (expected . "()") (tier . 3) (axioms . (G5)))
 ((expr . "(sid8-call-heads)") (error . "UnknownSymbol") (tier . 1) (note . "SID8 retired; uk projection only"))
+((expr . "(уніфікувати (як-є (var x)) (як-є (f (var x))) (як-є ()))") (expected . "fail") (tier . 3) (note . "occurs-check, принцип 3 — не дає побудувати нескінченну структуру"))
+((expr . "(розібрати (як-є (earth is a planet)))") (expected . "((planet earth))") (tier . 3) (note . "контрольовано-природномовний міст, принцип 5"))
+((expr . "(пояснити-факт (перше (розібрати (як-є (earth is a planet)))))") (expected . "(earth is a planet)") (tier . 3) (note . "структура->текст, принцип 5"))
