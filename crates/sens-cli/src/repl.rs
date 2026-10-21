@@ -102,6 +102,19 @@ fn append_t5m_expression(
     words: &mut Vec<ExactDomainWord>,
     depth: usize,
 ) -> Result<(), String> {
+    append_t5m_expression_context(expression, layout, words, depth, false)
+}
+
+/// Цитовані протокольні символи — дані, не українські викличні імена.
+/// Їхні W7 glyph-и мають точний ASCII/en маршрут, а D2 списки мають
+/// канонічні 00-роздільники. Викличні імена надалі лишаються укр.
+fn append_t5m_expression_context(
+    expression: &Expr,
+    layout: sens::Text7Layout,
+    words: &mut Vec<ExactDomainWord>,
+    depth: usize,
+    quoted_data: bool,
+) -> Result<(), String> {
     if depth > 768 {
         return Err("T5M source AST exceeds the SENS nesting limit".into());
     }
@@ -111,7 +124,11 @@ fn append_t5m_expression(
             words.push(control(0b10)?);
             words.push(ExactDomainWord::Identity(DomainIdentity::from(*identity)));
             for argument in arguments.iter() {
-                append_t5m_expression(argument, layout, words, depth + 1)?;
+                words.push(control(0b00)?);
+                append_t5m_expression_context(
+                    argument, layout, words, depth + 1,
+                    quoted_data || (identity.width() == 3 && identity.packed_bits() == 0b001),
+                )?;
             }
             words.push(control(0b01)?);
         }
@@ -130,30 +147,73 @@ fn append_t5m_expression(
             words.push(ExactDomainWord::Identity(t5m_domain_identity(3, 0)?));
         }
         ExprKind::List(items) => {
+            // Поточний Lisp QUOTE задає D3:001, не W7 напис «як-є».
+            // Нормалізація відбувається лише в коді; вкладені цитовані
+            // списки залишаються незмінними даними.
+            let quoted_head = !quoted_data && matches!(
+                items.first().map(|item| &item.kind),
+                Some(ExprKind::DomainIdentity(identity))
+                    if identity.width() == 3 && identity.packed_bits() == 0b001
+            ) || !quoted_data && matches!(
+                items.first().map(|item| &item.kind),
+                Some(ExprKind::Symbol(name)) if name.as_ref() == "як-є"
+            );
             words.push(control(0b10)?);
-            for item in items.iter() {
-                append_t5m_expression(item, layout, words, depth + 1)?;
+            if quoted_head {
+                words.push(ExactDomainWord::Identity(t5m_domain_identity(3, 0b001)?));
+                for item in items.iter().skip(1) {
+                    words.push(control(0b00)?);
+                    append_t5m_expression_context(item, layout, words, depth + 1, true)?;
+                }
+            } else {
+                for (index, item) in items.iter().enumerate() {
+                    if index > 0 {
+                        words.push(control(0b00)?);
+                    }
+                    append_t5m_expression_context(
+                        item, layout, words, depth + 1, quoted_data,
+                    )?;
+                }
             }
             words.push(control(0b01)?);
         }
         ExprKind::Pair(head, tail) => {
             words.push(control(0b10)?);
-            append_t5m_expression(head, layout, words, depth + 1)?;
+            append_t5m_expression_context(head, layout, words, depth + 1, quoted_data)?;
             words.push(control(0b11)?);
-            append_t5m_expression(tail, layout, words, depth + 1)?;
+            append_t5m_expression_context(tail, layout, words, depth + 1, quoted_data)?;
             words.push(control(0b01)?);
         }
         ExprKind::Symbol(name) => {
-            // Вказуємо точний атом і позицію: одне «byte 0» без назви
-            // приховує дефект конкретного Lisp-джерела.
-            let text = sens::encode_text7(name, layout).map_err(|error| {
+            // У цитаті ратифікована тотожність має пріоритет над текстом.
+            // Нова викличність з одного лише збігу напису не виникає.
+            if quoted_data {
+                if let Some(identity) =
+                    sens::semantic_registry_export::admitted_core_domain_for_surface(name)
+                {
+                    words.push(ExactDomainWord::Identity(DomainIdentity::from(identity)));
+                    return Ok(());
+                }
+            }
+            // Англійські мітки зовнішнього протоколу (world/tell/...)
+            // лишаються цитованими даними. Нецитована укр-проєкція
+            // НІКОЛИ не переходить до англійського fallback.
+            let symbol_layout = if quoted_data && name.is_ascii() {
+                sens::Text7Layout::En
+            } else {
+                layout
+            };
+            let text = sens::encode_text7(name, symbol_layout).map_err(|error| {
                 format!(
                     "T5M identifier projection: symbol={name:?} source_byte={}: {error}",
                     expression.span.start
                 )
             })?;
             words.push(control(0b10)?);
-            for cell in text.cells() {
+            for (index, cell) in text.cells().iter().enumerate() {
+                if index > 0 {
+                    words.push(control(0b00)?);
+                }
                 words.push(ExactDomainWord::Identity(t5m_domain_identity(
                     7,
                     u16::from(*cell),
@@ -176,7 +236,7 @@ fn append_t5m_expression(
                 kind: ExprKind::DomainCall(quotient, vec![numerator, denominator].into()),
                 span: expression.span,
             };
-            append_t5m_expression(&ratio, layout, words, depth + 1)?;
+            append_t5m_expression_context(&ratio, layout, words, depth + 1, quoted_data)?;
         }
         ExprKind::String(..) => {
             return Err(
