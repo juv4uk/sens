@@ -325,7 +325,15 @@ pub(crate) fn evaluate_step(
                 ));
             }
             if let Some(value) = environment.get(symbol) {
+                // Core4 має чинні параметри з іменами «так» та «ні»:
+                // лексичне зв'язування завжди має перевагу в сумісному Lisp.
                 return Ok(EvalStep::Value(value));
+            }
+            // Тільки незв'язані Д1 поверхні читаємо за ратифікованою
+            // таблицею, як у точному reader. Це не host truthiness,
+            // не арифметика 0/1 і не другий реєстр кодів.
+            if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(symbol) {
+                return Ok(EvalStep::Value(Value::DomainIdentity(identity)));
             }
             Err(LanguageError::new(
                 ErrorKind::UnknownSymbol,
