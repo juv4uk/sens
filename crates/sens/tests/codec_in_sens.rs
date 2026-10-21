@@ -49,7 +49,10 @@ fn codec_distinguishes_d2_dot_from_separator() {
 #[test]
 fn codec_round_trips_every_shape() {
     let mut s = codec_session();
-    for src in ["101", "()", "(100 111 000)", "(100 . 111)", "((100) 111)"] {
+    for src in [
+        "101", "()", "(100 111 000)", "(100 . 111)", "((100) 111)",
+        "((100 . 111) . 000)", "(100 (111 . 000))",
+    ] {
         let got = eval(&format!("(перевірити-обертання-д2 (quote {src}))"), &mut s);
         let want = eval(&format!("(quote {src})"), &mut s);
         assert_eq!(got, want, "round-trip for {src}");
