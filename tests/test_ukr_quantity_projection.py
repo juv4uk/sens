@@ -101,6 +101,8 @@ def verify(source: str) -> dict[str, tuple]:
     ):
         if source.count(guard) != 1:
             raise AssertionError("нечинна D1 перевірка поля наукової константи: " + guard)
+    if source.count("(сполучити схема-одиниці-виміру розмірності)") != 1:
+        raise AssertionError("конструктор одиниці більше не зберігає обернену структуру")
     length = scope["науковий-список-довжина-дорівнює?"]
     if not all(
         phrase in source for phrase in (
@@ -153,6 +155,15 @@ class CurrentQuantityUkrProjectionTests(unittest.TestCase):
         mutated = self.source.replace(current, legacy, 1)
         self.assertNotEqual(mutated, self.source)
         with self.assertRaisesRegex(AssertionError, "D1 перевірка поля"):
+            verify(mutated)
+
+    def test_unit_constructor_shape_and_old_nested_list_mutation(self):
+        current = "(сполучити схема-одиниці-виміру розмірності)"
+        obsolete = "(список схема-одиниці-виміру розмірності)"
+        self.assertEqual(self.source.count(current), 1)
+        self.assertNotIn(obsolete, self.source)
+        mutated = self.source.replace(current, obsolete, 1)
+        with self.assertRaisesRegex(AssertionError, "конструктор одиниці"):
             verify(mutated)
 
     def test_duplicate_ukrainian_definition_rejected(self):
