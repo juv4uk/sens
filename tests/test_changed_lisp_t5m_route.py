@@ -168,18 +168,18 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="sens-t5m-nonprogram-exit-") as td:
             root = Path(td)
             (root / "scripts").mkdir()
-            (root / "module.lisp").write_text("; коментар як дані\\n", encoding="utf-8")
-            (root / "changed.txt").write_text("module.lisp\\n", encoding="utf-8")
+            (root / "module.lisp").write_text("; коментар як дані\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\n", encoding="utf-8")
             (root / "scripts/migrate-three-pass.py").write_text(
-                "import json, pathlib, sys\\n"
-                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\\n"
+                "import json, pathlib, sys\n"
+                "report = pathlib.Path(sys.argv[sys.argv.index('--report') + 1])\n"
                 "report.write_text(json.dumps({'summary': {'files_written': 0, "
-                "'files_blocked': 0, 'files_not_program': 1}, 'files': []}))\\n"
-                "raise SystemExit(1)\\n",
+                "'files_blocked': 0, 'files_not_program': 1}, 'files': []}))\n"
+                "raise SystemExit(1)\n",
                 encoding="utf-8",
             )
             binary = root / "must-not-run-sens"
-            binary.write_text("#!/bin/sh\\nprintf invoked > executed.marker\\nexit 0\\n", encoding="utf-8")
+            binary.write_text("#!/bin/sh\nprintf invoked > executed.marker\nexit 0\n", encoding="utf-8")
             binary.chmod(0o755)
             result = subprocess.run(
                 ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"],
