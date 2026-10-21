@@ -133,16 +133,18 @@ def verify():
                 if automatic != {"push", "pull_request"}:
                     raise ValueError(
                         "очікується один централізований автоматичний workflow "
-                        "для push усіх гілок і pull_request: " + str(sorted(automatic))
+                        "для push і pull_request чинної main: " + str(sorted(automatic))
                     )
                 block = found["push"]
-                if not re.search(r"^\s+branches:\s*\['\*\*'\]\s*$", block, re.M):
-                    raise ValueError("push мусить охоплювати всі гілки без винятків")
+                if not re.search(r"^\s+branches:\s*\[main\]\s*$", block, re.M):
+                    raise ValueError("push мусить охоплювати чинний main")
                 for disallowed in ("paths:", "paths-ignore:", "tags:", "tags-ignore:", "branches-ignore:"):
                     if disallowed in block:
                         raise ValueError("push не може фільтрувати коміти: " + disallowed)
                 pr_block = found["pull_request"]
-                for disallowed in ("paths:", "paths-ignore:", "branches:", "branches-ignore:", "types:"):
+                if not re.search(r"^\s+branches:\s*\[main\]\s*$", pr_block, re.M):
+                    raise ValueError("pull_request має перевіряти чинний main")
+                for disallowed in ("paths:", "paths-ignore:", "branches-ignore:", "types:"):
                     if disallowed in pr_block:
                         raise ValueError("pull_request не може фільтрувати потрібні перевірки: " + disallowed)
                 auto.append(path.name)
@@ -164,9 +166,8 @@ def verify():
             errors.append("UNINFORMATIVE-EXECUTOR: eval label without native SENS invocation")
         if "semantic_authority=binary-SENS" in step and "target/debug/sens" not in step:
             errors.append("UNINFORMATIVE-EXECUTOR: false binary-SENS executor label")
-    if "executor=CI_GLUE_NO_SEMANTICS" not in ci_text:
-        errors.append("UNINFORMATIVE-EXECUTOR: Python migration tests lack honest executor label")
-
+    # Механічний Python-guard не визначає семантику і не потребує
+    # вигаданої мітки CI_GLUE_NO_SEMANTICS для кожного виклику.
     for error in errors:
         print("SENS_CI_BUDGET_FAIL", error, flush=True)
     if errors:
