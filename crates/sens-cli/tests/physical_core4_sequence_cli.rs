@@ -354,11 +354,24 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/pair-swap",
         "lib/d4-second-two-tails-law",
         "lib/rotate-three-right",
+        // Реальні українські DEFINE/LAMBDA: дві взаємодоповнювальні
+        // рекурсивні функції над вкладеними NIL/CONS, без Text7 EQ.
+        "d5-ukr-drop-until-recursive-program",
+        "d5-ukr-take-before-recursive-program",
     ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
         assert!(paired.status.success(), "{name}: paired SENS: {}", error(&paired));
-        assert_eq!(observed(&paired).trim(), "1", "{name}: exact D1 witness");
+        let expected = match name {
+            "d5-ukr-drop-until-recursive-program" => "(((()) ()) ((()) ()) () ())",
+            "d5-ukr-take-before-recursive-program" => "(() (()) (() () ()) ())",
+            _ => "1",
+        };
+        assert_eq!(
+            observed(&paired).trim(),
+            expected,
+            "{name}: exact SENS result (language evaluator, not host semantics)",
+        );
 
         let standalone = triple.run_sens(false);
         assert!(
