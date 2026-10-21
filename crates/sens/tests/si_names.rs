@@ -108,3 +108,37 @@ fn derived_si_double_charge_is_evaluated_by_sens_without_numeric_shortcut() {
         assert_eq!(actual, expected, "втрачено точну семантику {symbol}");
     }
 }
+
+#[test]
+fn si_faraday_executes_but_mixed_domain_gas_is_reported_as_type_error() {
+    // Виконуємо саме фрагменти чинного українського Lisp, не Rust-імітацію.
+    let mut session = Session::default();
+    eval_program(include_str!("../../../lib/si.lisp"), &mut session)
+        .expect("вихідні SI-константи мають завантажуватися");
+    let source = include_str!("../../../lib/si-derived.lisp");
+    let first = source
+        .find("(визначити сі:стала-фарадея")
+        .expect("українське визначення сталої Фарадея");
+    let second = source
+        .find("(визначити сі:молярна-газова-стала")
+        .expect("українське визначення газової сталої");
+    let third = source
+        .find("(визначити сі:подвоєний-заряд")
+        .expect("українське визначення подвоєного заряду");
+    assert!(first < second && second < third);
+    eval_program(&source[first..second], &mut session)
+        .expect("допущена частина справді виконується у SENS");
+    let faraday = eval_program("сі:стала-фарадея", &mut session)
+        .expect("результат має бути доступний після виконання")
+        .value
+        .to_string();
+    assert_eq!(faraday, "120606665154137523/1250000000000");
+
+    let refusal = eval_program(&source[second..third], &mut session)
+        .expect_err("змішані Dn без явного доменного приведення не виконуються");
+    assert_eq!(refusal.kind, sens::ErrorKind::Type);
+    assert!(
+        refusal.message.contains("same-domain operands"),
+        "справжня відмова повинна називати точну проблему: {refusal}"
+    );
+}
