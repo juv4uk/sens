@@ -703,6 +703,7 @@ jobs:
           python3 -m unittest tests/test_persistent_vector_ukr_primary_projection.py -v
           python3 -m unittest tests/test_machine_encoding_ukr_aliases.py -v
           python3 -m unittest tests/test_changed_lisp_t5m_route.py -v
+          python3 -m unittest tests/test_yantra_ukr_projection.py -v
           python3 -m unittest tests/test_world_ukr_primary_projection.py -v
           python3 scripts/test-content-store-d1-bitness.py
           # Борг active Latin call heads лишається видимим у звіті й JSON.
