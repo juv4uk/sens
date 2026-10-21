@@ -159,3 +159,25 @@ fn predicate_false_is_not_d3_empty() {
     assert_eq!(no.as_predicate_bit(), Some(false));
     assert_eq!(empty.as_predicate_bit(), None);
 }
+
+#[test]
+fn ukrainian_knowledge_clause_kind_is_evaluated() {
+    // Обидва випадки виконує SENS, результат є структурою даних, не host-bool.
+    let mut s = session();
+    for (code, expected) in [
+        (
+            "(є-факт? (як-є ((planet earth))))",
+            "(clause-kind fact)",
+        ),
+        (
+            "(є-факт? (як-є ((ancestor (var x) (var y)) (parent (var x) (var y)))))",
+            "(clause-kind rule)",
+        ),
+    ] {
+        let actual = eval(&mut s, code);
+        assert_eq!(actual.to_string(), expected, "{code}: {actual}");
+        assert_eq!(actual.as_predicate_bit(), None, "{code}: це дані, не D1");
+    }
+    let malformed = eval(&mut s, "(є-факт? (як-є malformed))");
+    assert!(matches!(malformed, Value::Nil));
+}
