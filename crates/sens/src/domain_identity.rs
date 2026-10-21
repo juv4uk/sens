@@ -140,6 +140,12 @@ impl DomainIdentity {
                 value.word().packed_bits(),
                 0b110011110 | 0b110011100 | 0b110011101 | 0b110101010 | 0b110101011 | 0b110100110
             ) => Some(CoreDomainIdentity::D9(value)),
+            // The ratified selector family is a proof of one exact
+            // callable mechanism, not a blanket admission of D8/D9.
+            Self::D8(value) if matches!(value.word().packed_bits() >> 5, 0b011 | 0b100) =>
+                Some(CoreDomainIdentity::D8(value)),
+            Self::D9(value) if matches!(value.word().packed_bits() >> 6, 0b011 | 0b100) =>
+                Some(CoreDomainIdentity::D9(value)),
             Self::D9(_) => None,
             Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D10(_) => None,
         }

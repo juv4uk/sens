@@ -211,6 +211,9 @@ pub(crate) fn invoke_value(
             if let Some(core_identity) = identity.core_operation() {
                 return canon::invoke_domain_identity(core_identity, arguments, environment, span);
             }
+            if let Some(result) = selector_law::invoke(*identity, arguments, span) {
+                return result;
+            }
             // A bounded D9 mechanism cut remains outside CoreDomainIdentity.
             if canon::has_d9_string_mechanism(*identity) {
                 return canon::invoke_d9_string_mechanism(*identity, arguments, environment, span)
@@ -650,6 +653,18 @@ fn dispatch_call(
                     values.push(evaluate(argument, environment)?);
                 }
                 return canon::invoke_domain_identity(core_identity, &values, environment, span)
+                    .map(EvalStep::Value);
+            }
+            // The ratified D10 selector family is generated from D3 CAR/CDR
+            // without a hand-written D10 function, name map or new opcode.
+            // D7 and all nonselector D10 residents remain fail-closed.
+            if selector_law::is_selector(*identity) {
+                let mut values = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    values.push(evaluate(argument, environment)?);
+                }
+                return selector_law::invoke(*identity, &values, span)
+                    .expect("ratified selector shape was checked above")
                     .map(EvalStep::Value);
             }
             // Only four exact D9 string residents have this direct value-call

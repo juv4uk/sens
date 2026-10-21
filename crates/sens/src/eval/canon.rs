@@ -541,7 +541,7 @@ pub(crate) fn invoke_domain_identity(
     if let Some(result) = invoke_d4_eval(identity, args, environment, span) {
         return result;
     }
-    if let Some(result) = super::selector_law::invoke(identity, args, span) {
+    if let Some(result) = super::selector_law::invoke(identity.into(), args, span) {
         return result;
     }
 
