@@ -20,6 +20,6 @@
           (як-є (status written))
           (список (як-є forms) покриття-кодувальника-кількість-форм)
           (список (як-є partial) (довжина покриття-кодувальника-часткові-записи)))))))
-  (так
+  ((атом? (як-є ()))
    (друкувати
      (як-є (encoder-coverage-generate (status rejected) (reason invalid-coverage-input-projection))))))
