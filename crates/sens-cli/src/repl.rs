@@ -721,6 +721,34 @@ pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
     mint_t5m_source_pair(source).map(|(physical, _)| physical)
 }
 
+/// Фізичний точний перегляд SENS/Zig: ті самі біти, які дійсно
+/// повернув Zig-декодер, лише після звірення з джерелом за доменом і шириною.
+/// Цей видимий список слів — доказ оберненості байтів, НЕ семантичний PASS.
+#[cfg(feature = "zig-transport")]
+pub(crate) fn view_t5m_source_file(source: &str, physical: &[u8]) -> Result<String, String> {
+    let expected = prepare_t5m_repl_words(
+        source, ReplSurface::UkrainianFull, &Session::default(),
+    )?;
+    let actual = crate::zig_transport::decode_t5_exact_words(physical)?;
+    restore_t5m_words(&expected, &actual)
+        .map_err(|error| format!("T5M_PHYSICAL_PAIR_MISMATCH: {error}"))?;
+    let canonical = crate::zig_transport::encode_t5_exact_words(&actual)?;
+    if canonical != physical {
+        return Err("T5M_PHYSICAL_PAIR_MISMATCH: noncanonical T5M bytes".into());
+    }
+    let view = actual
+        .iter()
+        .map(|word| {
+            word.bits
+                .iter()
+                .map(|bit| if *bit == 0 { '0' } else { '1' })
+                .collect::<String>()
+        })
+        .collect::<Vec<_>>()
+        .join(" ");
+    Ok(format!("{view}\n"))
+}
+
 /// Явно парний фізичний шлях: .lisp НАДАЄ перевірену доменну ідентичність,
 /// Zig відновлює справжні байти .sens. Повний збіг усіх ширин і бітів
 /// обов'язковий до SENS D2 та виконання. Однакова ширина НЕ є доказом домену.
