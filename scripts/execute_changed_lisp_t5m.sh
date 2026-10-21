@@ -12,10 +12,20 @@ outdir="$3"
 test -x "$binary"
 test -f "$manifest"
 mkdir -p "$outdir"
-if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then
-  native_open="${SENS_T5M_OPEN:-$(dirname "$binary")/sens-trit}"
-  test -x "$native_open" || { echo "::error::SENS_NATIVE_VIEW_READER_MISSING path=$native_open" >&2; exit 2; }
-fi
+# Нативний SENS/Zig — єдиний типовий маршрут. Невідомий режим
+# НЕ має права непомітно запускати допоміжний Python/JSON мігратор.
+# Історичний preview доступний тільки після явного SENS_NATIVE_T5M=0.
+case "${SENS_NATIVE_T5M:-1}" in
+  1)
+    native_open="${SENS_T5M_OPEN:-$(dirname "$binary")/sens-trit}"
+    test -x "$native_open" || { echo "::error::SENS_NATIVE_VIEW_READER_MISSING path=$native_open" >&2; exit 2; }
+    ;;
+  0) ;;
+  *)
+    echo "::error::SENS_NATIVE_T5M_INVALID expected=0_or_1 source=environment; Python fallback forbidden" >&2
+    exit 2
+    ;;
+esac
 failed_files=0
 # Одне джерело може мати кілька реальних порушень (байти, перегляд,
 # виконання). Звітуємо всі, але files_failed рахує саме файли.
