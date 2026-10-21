@@ -808,6 +808,10 @@ jobs:
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_module_name_symbol_law_is_d1_and_rejects_non_symbols -- --exact --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_d1_symbol_guard_must_precede_d8_write -- --exact --nocapture
           fi
+          # D4 Prolog/Datalog: реальний SENS і негативні записи без втрат.
+          if grep -Eq '^(lib/bridge/prolog-to-datalog\.lisp|crates/sens/tests/prolog_bridge_current_d4\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test prolog_bridge_current_d4 -- --nocapture
+          fi
       - name: Реальний SENS — точна двопольова форма правил виведення
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
         timeout-minutes: 4

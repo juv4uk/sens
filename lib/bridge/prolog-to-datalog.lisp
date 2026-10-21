@@ -43,6 +43,15 @@
              (список
                (як-є projection-failure)
                (як-є malformed-source-ref)))))
+         ; Поле source-ref повинне містити рівно одне значення.
+         ; Додаткові комірки або крапковий хвіст не можна губити.
+         ((атом? (решта рядок-джерела))
+          (за-умовою
+            ((порожній? (решта рядок-джерела))
+             (як-є (projection-failure missing-source-ref)))
+            (так (як-є (projection-failure malformed-source-ref)))))
+         ((хибне? (порожній? (решта (решта рядок-джерела))))
+          (як-є (projection-failure malformed-source-ref)))
          ((атом? рядок-змінної)
           (за-умовою
             ((тотожне? рядок-змінної (як-є ()))
@@ -53,6 +62,14 @@
              (список
                (як-є projection-failure)
                (як-є malformed-variable-role)))))
+         ; Поле variable теж має рівно одну роль.
+         ((атом? (решта рядок-змінної))
+          (за-умовою
+            ((порожній? (решта рядок-змінної))
+             (як-є (projection-failure missing-variable-role)))
+            (так (як-є (projection-failure malformed-variable-role)))))
+         ((хибне? (порожній? (решта (решта рядок-змінної))))
+          (як-є (projection-failure malformed-variable-role)))
          ((атом? рядок-значень)
           (за-умовою
             ((тотожне? рядок-значень (як-є ()))
