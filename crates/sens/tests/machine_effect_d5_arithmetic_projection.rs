@@ -311,44 +311,43 @@ fn machine_effect_shape_predicates_use_live_exact_d1_not_legacy_true_false() {
 
 #[test]
 fn bounded_effect_source_keeps_exact_d1_controls() {
-    // #5360: застаріла масова міграція не має повертати числове 1 чи історичне t у D3 COND.
-    let text = read("lib/machine/effects/u64.lisp");
-    for (number, line) in text.lines().enumerate() {
+    // Раніше цей тест вимагав голі «так/ні» і забороняв чинний D3 ATOM.
+    // Перевіряємо реальну відповідь виконавця SENS, а не застарілий текст.
+    let source = read("lib/machine/effects/u64.lisp");
+    for (number, line) in source.lines().enumerate() {
         let active = line.split(';').next().unwrap_or("").trim_start();
         assert!(
             !active.starts_with("(1 ")
                 && !active.starts_with("(1\t")
+                && !active.starts_with("(так ")
+                && !active.starts_with("(ні ")
                 && !active.contains(" t)"),
-            "Джерело D5 повернуло неточний D1 у рядку {}: {}",
+            "Невизначений D1 у виконуваному Lisp, рядок {}: {}",
             number + 1,
             line
         );
     }
-    // Чинні точні значення D1 — «так» і «ні». Забороняємо старі
-    // закодовані псевдовідповіді та обчислення констант заради truth-bit.
-    for застарілий_обхід in [
-        "(00000010 (00000001 ()))",
-        "(атом? (як-є (())))",
-        "(атом? (як-є ()))",
-        "(атом? ())",
-        "(менше? 1 0)",
-        "(менше? 0 1)",
-    ] {
-        assert!(
-            !text.contains(застарілий_обхід),
-            "Повернувся застарілий спосіб утворення D1: {застарілий_обхід}"
-        );
+    for legacy in ["(00000010 (як-є ()))", "(00000011 ", "(00100010 "] {
+        assert!(!source.contains(legacy), "Стара машинна виклична голова: {legacy}");
     }
-    assert!(
-        text.contains("((атом? ефект) ні)")
-            && text.contains("(так")
-            && text.contains("((менше? значення нижня-межа) ні)"),
-        "Активні гілки мають повертати прямі D1 так/ні"
-    );
-    for застарілий_код in ["(00000011 ", "(00100010 "] {
-        assert!(
-            !text.contains(застарілий_код),
-            "Історичний 8-бітовий виклик рівності знову з'явився в D5: {застарілий_код}"
+
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("чинне ядро SENS");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+    for (expression, expected) in [
+        ("(машинний-ефект-ціле-в-межах? 5 0 10)", true),
+        ("(машинний-ефект-ціле-в-межах? -1 0 10)", false),
+        ("(машинний-ефект-ціле-в-межах? 11 0 10)", false),
+        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))", true),
+        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-sub 2 3)))", false),
+    ] {
+        let actual = eval_program(expression, &mut session)
+            .unwrap_or_else(|error| panic!("Справжній SENS не виконав {expression}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "Точний D1 результат {expression}: {actual}"
         );
     }
 }
@@ -361,9 +360,9 @@ fn bounded_effect_negative_form_predicates_return_exact_d1_no() {
     load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
 
     for source in [
-        "(машинний-ефект-форма-додавання-64? (00000001 ()))",
-        "(машинний-ефект-форма-віднімання-64? (00000001 ()))",
-        "(машинний-ефект-форма-множення-64? (00000001 ()))",
+        "(машинний-ефект-форма-додавання-64? (як-є ()))",
+        "(машинний-ефект-форма-віднімання-64? (як-є ()))",
+        "(машинний-ефект-форма-множення-64? (як-є ()))",
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
@@ -427,12 +426,12 @@ fn bounded_effect_structural_forms_return_exact_d1_for_matching_and_mismatched_k
     load_core_library(&mut session).expect("ядро");
     load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
     for (source, expected) in [
-        ("(машинний-ефект-форма-додавання-64? (quote (bounded-u64-add 2 3)))", true),
-        ("(машинний-ефект-форма-віднімання-64? (quote (bounded-u64-sub 5 3)))", true),
-        ("(машинний-ефект-форма-множення-64? (quote (bounded-u64-mul 2 3)))", true),
-        ("(машинний-ефект-форма-додавання-64? (quote (bounded-u64-sub 5 3)))", false),
-        ("(машинний-ефект-форма-віднімання-64? (quote (bounded-u64-mul 2 3)))", false),
-        ("(машинний-ефект-форма-множення-64? (quote (bounded-u64-add 2 3)))", false),
+        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))", true),
+        ("(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-sub 5 3)))", true),
+        ("(машинний-ефект-форма-множення-64? (як-є (bounded-u64-mul 2 3)))", true),
+        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-sub 5 3)))", false),
+        ("(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-mul 2 3)))", false),
+        ("(машинний-ефект-форма-множення-64? (як-є (bounded-u64-add 2 3)))", false),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
