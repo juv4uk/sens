@@ -10,6 +10,12 @@ fn knowledge_journal_filters_events_and_preserves_order_in_sens() {
         .expect("межа визначення фільтра");
     assert!(start < end);
     let mut session = Session::default();
+    // Справжній канонічний Core визначає однобітні так/ні та D3 закони.
+    // Голий Session::default() не є завантаженою програмою SENS.
+    sens::eval_core_library_source(
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    ).expect("виконуваний Core SENS має бути завантажений до бібліотеки знань");
     eval_program(&source[start..end], &mut session)
         .expect("SENS повинен завантажити український D3-код");
 
