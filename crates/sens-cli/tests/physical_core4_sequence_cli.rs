@@ -439,6 +439,8 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/pair-replace-rest",
         "lib/d4-second-two-tails-law",
         "lib/rotate-three-right",
+        "lib/reverse-three",
+        "lib/interleave-pairs",
         // Реальні українські DEFINE/LAMBDA: дві взаємодоповнювальні
         // рекурсивні функції над вкладеними NIL/CONS, без Text7 EQ.
         "d5-ukr-drop-until-recursive-program",
