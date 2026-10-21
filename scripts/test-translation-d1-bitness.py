@@ -90,6 +90,11 @@ def check_translation_text(source: str) -> list[str]:
             errors.append(f"стара істинність хоста: {atom}")
         if RAW_WIDTH.match(atom):
             errors.append(f"застарілий машинний літерал у програмі: {atom}")
+        # У цитатах і рядках латиниця — протокольні дані, а не код.
+        # Однак виконуваний атом, зокрема старе ім'я глобального журналу,
+        # не може обійти українську проєкцію лише тому, що не є DEFINE.
+        if LATIN.search(atom):
+            errors.append(f"англомовне посилання або виклик: {atom}")
     return errors
 
 
