@@ -72,8 +72,10 @@ fn x86_exact_integer_wire_checks_return_typed_d1() {
     for (source, expected) in [
         ("(машина-допуск-точне-ціле? 7)", true),
         ("(машина-допуск-точне-ціле? -7)", true),
+        ("(машина-допуск-точне-ціле? 7/1)", true),
         ("(машина-допуск-точне-ціле? 0)", true),
         ("(машина-допуск-точне-ціле? 7/2)", false),
+        ("(машина-допуск-точне-ціле? -7/2)", false),
         ("(машина-допуск-точне-ціле? \"7\")", false),
         ("(машина-допуск-точне-ціле? (як-є ()))", false),
         ("(машина-допуск-точне-ціле? (00000001 not-an-integer))", false),
@@ -85,6 +87,38 @@ fn x86_exact_integer_wire_checks_return_typed_d1() {
             Some(expected),
             "канонічне ціле число має відповідати лише точним D1:1/D1:0: {source}"
         );
+    }
+}
+
+#[test]
+fn x86_current_d8_binary_wire_denominator_is_checked_by_sens_d1() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("чинне SENS ядро");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+
+    // Справжній SENS, не host-функція і не Python-імітація.
+    // Чинний D8 WRITE формує #q2 із двійкових чисельника/знаменника.
+    // Перевірка явного wire окремо від перевірки числового значення.
+    for (wire, expected) in [
+        ("#q2:111/1", true),
+        ("#q2:-111/1", true),
+        ("#q2:0/1", true),
+        ("#q2:111/10", false),
+        ("#q2:-111/10", false),
+        ("#q2:/1", false),
+        ("#q2:-/1", false),
+        ("#q2:112/1", false),
+        ("#q2:111", false),
+        ("7", false),
+        ("", false),
+    ] {
+        let source = format!("(машина-допуск-текст-точне-ціле? {wire:?})");
+        let value = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=x86-integer-wire layer=SENS input={source} actual={error:?}"))
+            .value;
+        assert_eq!(value.as_predicate_bit(), Some(expected),
+            "test_id=x86-integer-wire layer=SENS input={source} expected=D1:{expected} actual={value}");
     }
 }
 
