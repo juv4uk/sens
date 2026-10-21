@@ -54,7 +54,7 @@ fi
 # Парний вхід обов'язковий: Zig звіряє саме джерело з фізичним T5M,
 # а SENS його виконує. Standalone може бути непідтриманим для D7/D24+,
 # але сам по собі не доводить оберненості джерела.
-if ! "$binary" --t5m-pair "$source_file" "$pair" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
+if ! timeout 45s "$binary" --t5m-pair "$source_file" "$pair" >"$dir/paired.stdout" 2>"$dir/paired.stderr"; then
   cat "$dir/paired.stderr" >&2
   echo 'ПОМИЛКА: T5M_PAIRED_SOURCE_EXECUTION_FAIL; пару не змінено' >&2
   exit 2
@@ -62,7 +62,7 @@ fi
 mode=paired
 # Коли standalone також виконується, зіставляємо дійсні результати
 # обох SENS-входів побайтно, не host-оракулом і не лише exit=0.
-if "$binary" "$pair" >"$dir/standalone.stdout" 2>"$dir/standalone.stderr"; then
+if timeout 45s "$binary" "$pair" >"$dir/standalone.stdout" 2>"$dir/standalone.stderr"; then
   if ! cmp -s "$dir/standalone.stdout" "$dir/paired.stdout"; then
     echo "ПОМИЛКА: T5M_PAIRED_RESULT_MISMATCH standalone_sha256=$(sha256sum "$dir/standalone.stdout" | cut -d' ' -f1) paired_sha256=$(sha256sum "$dir/paired.stdout" | cut -d' ' -f1); пару не змінено" >&2
     exit 2
