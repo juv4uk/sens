@@ -98,36 +98,114 @@ for target in "$committed_pair" "$committed_view"; do
     exit 2
   fi
 done
-# Публікація — лише файлові операції Bash, без Python/JSON.
-# Стадіюємо файли поруч із цілями; якщо друга заміна не відбулася,
-# повертаємо точні попередні байти обох файлів.
-stage_pair="$(mktemp "${committed_pair}.sens-stage.XXXXXX")"
-stage_view="$(mktemp "${committed_view}.view-stage.XXXXXX")"
-trap 'rm -rf "$dir"; rm -f "$stage_pair" "$stage_view"' EXIT
-cp "$pair" "$stage_pair"
-cp "$view" "$stage_view"
+# Публікація лише після SENS + Zig: жодних Python/JSON у цьому шляху.
+# Резервні копії та стадія розміщені на тому самому томі, що й цілі.
+# Не замінюємо чужий новостворений файл і не стираємо паралельну зміну.
+publish_dir="$(mktemp -d "$(dirname "$committed_pair")/.sens-executed.XXXXXXXX")"
+installed_pair=0
+installed_view=0
+had_pair=0
+had_view=0
+pair_stamp=""
+view_stamp=""
+rollback_one() {
+  local target="$1" original="$2" expected="$3" stamp="$4" had="$5"
+  # Не торкатися чужого запису, якщо носій змінився після нашого rename.
+  if [[ -L "$target" || ! -f "$target" ]] ||
+     [[ "$(stat -c '%d:%i' "$target")" != "$stamp" ]] ||
+     ! cmp -s "$target" "$expected"; then
+    echo "T5M_REFRESH_ROLLBACK_CONFLICT path=$target action=manual-review" >&2
+    return 1
+  fi
+  if (( had )); then
+    mv -fT -- "$original" "$target"
+  else
+    rm -- "$target"
+  fi
+}
+cleanup_publish() {
+  local status=$?
+  trap - EXIT
+  if (( status != 0 )); then
+    local rollback_failed=0
+    if (( installed_view )); then
+      rollback_one "$committed_view" "$publish_dir/old.view" "$publish_dir/expected.view" "$view_stamp" "$had_view" || rollback_failed=1
+    fi
+    if (( installed_pair )); then
+      rollback_one "$committed_pair" "$publish_dir/old.sens" "$publish_dir/expected.sens" "$pair_stamp" "$had_pair" || rollback_failed=1
+    fi
+    if (( rollback_failed )); then
+      echo "T5M_REFRESH_BACKUPS path=$publish_dir; паралельну зміну не перезаписано" >&2
+      rm -rf -- "$dir"
+      exit 2
+    fi
+    echo "T5M_REFRESH_INSTALL_FAILED source=$source_file status=$status; відновлено попередню пару" >&2
+  fi
+  rm -rf -- "$publish_dir" "$dir"
+  exit "$status"
+}
+trap cleanup_publish EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+cp -- "$pair" "$publish_dir/new.sens"
+cp -- "$pair" "$publish_dir/expected.sens"
+cp -- "$view" "$publish_dir/new.view"
+cp -- "$view" "$publish_dir/expected.view"
 if [[ -f "$committed_pair" ]]; then
-  cp -p "$committed_pair" "$dir/previous.sens"
   had_pair=1
-else
-  had_pair=0
+  cp -p -- "$committed_pair" "$publish_dir/old.sens"
+  chmod --reference="$committed_pair" "$publish_dir/new.sens"
 fi
 if [[ -f "$committed_view" ]]; then
-  cp -p "$committed_view" "$dir/previous.view"
   had_view=1
+  cp -p -- "$committed_view" "$publish_dir/old.view"
+  chmod --reference="$committed_view" "$publish_dir/new.view"
+fi
+# Перевірка після стадіювання: не випереджати іншого writer.
+for target in "$committed_pair" "$committed_view"; do
+  if [[ -L "$target" || ( -e "$target" && ! -f "$target" ) ]]; then
+    echo "T5M_REFRESH_TARGET_CHANGED path=$target" >&2
+    exit 2
+  fi
+done
+if (( had_pair )); then
+  [[ -f "$committed_pair" ]] && cmp -s "$committed_pair" "$publish_dir/old.sens" || {
+    echo "T5M_REFRESH_CONCURRENT_CHANGE path=$committed_pair" >&2; exit 2;
+  }
+elif [[ -e "$committed_pair" || -L "$committed_pair" ]]; then
+  echo "T5M_REFRESH_CONCURRENT_CHANGE path=$committed_pair" >&2; exit 2
+fi
+if (( had_view )); then
+  [[ -f "$committed_view" ]] && cmp -s "$committed_view" "$publish_dir/old.view" || {
+    echo "T5M_REFRESH_CONCURRENT_CHANGE path=$committed_view" >&2; exit 2;
+  }
+elif [[ -e "$committed_view" || -L "$committed_view" ]]; then
+  echo "T5M_REFRESH_CONCURRENT_CHANGE path=$committed_view" >&2; exit 2
+fi
+if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
+  echo 'ПОМИЛКА: вихідний Lisp змінився перед записом; пару не змінено' >&2
+  exit 2
+fi
+# Для нової цілі hardlink із stage: створення атомарне й без clobber.
+# Існуючу ціль замінює rename; точні наші байти/інод відомі для rollback.
+if (( had_pair )); then
+  mv -fT -- "$publish_dir/new.sens" "$committed_pair"
 else
-  had_view=0
+  ln -- "$publish_dir/new.sens" "$committed_pair"
+  rm -- "$publish_dir/new.sens"
 fi
-if ! mv -f "$stage_pair" "$committed_pair"; then
-  echo 'ПОМИЛКА: T5M_PAIR_INSTALL_FAILED; наявну пару не змінено' >&2
-  exit 2
+installed_pair=1
+pair_stamp="$(stat -c '%d:%i' "$committed_pair")"
+cmp "$publish_dir/expected.sens" "$committed_pair"
+if (( had_view )); then
+  mv -fT -- "$publish_dir/new.view" "$committed_view"
+else
+  ln -- "$publish_dir/new.view" "$committed_view"
+  rm -- "$publish_dir/new.view"
 fi
-if ! mv -f "$stage_view" "$committed_view"; then
-  if (( had_pair )); then cp -p "$dir/previous.sens" "$committed_pair"; else rm -f "$committed_pair"; fi
-  if (( had_view )); then cp -p "$dir/previous.view" "$committed_view"; else rm -f "$committed_view"; fi
-  echo 'ПОМИЛКА: T5M_VIEW_INSTALL_FAILED; відновлено попередню пару' >&2
-  exit 2
-fi
-cmp "$pair" "$committed_pair"
-cmp "$view" "$committed_view"
+installed_view=1
+view_stamp="$(stat -c '%d:%i' "$committed_view")"
+cmp "$publish_dir/expected.view" "$committed_view"
+trap - EXIT INT TERM
+rm -rf -- "$publish_dir" "$dir"
 printf 'T5M_REFRESHED source=%s mode=%s physical=%s executed=SENS semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' "$source_file" "$mode" "$producer"
