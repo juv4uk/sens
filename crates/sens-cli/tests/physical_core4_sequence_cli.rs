@@ -276,6 +276,7 @@ impl Drop for SourceTriplet {
 // Український Lisp є джерелом; exact-слова читає SENS, T5M пакує Zig.
 fn verify_unpaired_ukrainian_libs_natively() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let mut independently_executed = std::collections::BTreeSet::new();
     for stem in [
         "d1-direct-values",
         "pair-replace-first",
@@ -410,8 +411,13 @@ fn verify_unpaired_ukrainian_libs_natively() {
             error(&mismatch)
         );
         fs::remove_dir_all(&scratch).expect("прибрати лише власні тимчасові файли");
+        independently_executed.insert(stem);
         println!("SENS_UKR_EXECUTABLE_PASS file=lib/{stem}.lisp exact=Zig/T5M d1=1");
     }
+    println!(
+        "SENS_UKR_EXECUTABLE_TOTAL scope=cli-native-subset unique_files={} native=SENS/Zig/T5M",
+        independently_executed.len()
+    );
 }
 
 #[test]
