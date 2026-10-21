@@ -285,6 +285,8 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-null-not-cons",
             "cdr-dotted-tail-domain-identity",
         "cons-two-projections-joint-domain-identity",
+        "d4-append-empty-left-preserves-head",
+        "d4-append-empty-right-preserves-second",
         "d4-caar-nested-list",
         "d4-cdar-pair-tail",
         "d4-cddr-exact-two",
