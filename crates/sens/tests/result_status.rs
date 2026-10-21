@@ -250,7 +250,7 @@ fn reason_observe_preserves_every_successful_alternative() {
           (довжина
             (третє
               (міркувати-спостерігати
-                (list (quote edge) (логічна-змінна (quote x)) (quote z))
+                (список (як-є edge) (логічна-змінна (як-є x)) (як-є z))
                 rules))))
     "#;
     assert_eq!(eval_reason_observation(source), "3");
