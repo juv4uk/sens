@@ -250,7 +250,7 @@ jobs:
           if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/cli\.rs|scripts/execute_changed_lisp_t5m\.sh|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/cli\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Лише змінені T5M інструменти одержують адресний Zig-свідок.
@@ -497,6 +497,29 @@ jobs:
           cargo test --locked -p sens-cli --bin sens -- --list |
             grep -Fqx 'repl::tests::native_sens_mint_and_pair_execute_without_python_or_json_oracle: test'
           cargo test --locked -p sens-cli --bin sens repl::tests::native_sens_mint_and_pair_execute_without_python_or_json_oracle -- --exact --nocapture
+          # Перевірка реального SENS/Zig ремонту фізичної пари без Python/JSON.
+          bash -n scripts/refresh-verified-t5m-pair.sh
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit
+          repair_dir="$(mktemp -d)"
+          trap 'rm -rf "$repair_dir"' EXIT
+          source="$repair_dir/current.lisp"
+          printf '(атом? (як-є ()))\n' > "$source"
+          bash scripts/refresh-verified-t5m-pair.sh "$source" "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit"
+          initial_sha="$(sha256sum "$repair_dir/current.sens" | cut -d' ' -f1)"
+          printf '(атом? (як-є (())))\n' > "$source"
+          bash scripts/refresh-verified-t5m-pair.sh "$source" "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit"
+          repaired_sha="$(sha256sum "$repair_dir/current.sens" | cut -d' ' -f1)"
+          test "$initial_sha" != "$repaired_sha"
+          "$PWD/target/debug/sens-trit" view "$repair_dir/current.sens" > "$repair_dir/readback"
+          cmp "$repair_dir/readback" "$repair_dir/current"
+          printf '(невідома-функція ())\n' > "$source"
+          if bash scripts/refresh-verified-t5m-pair.sh "$source" "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit"; then
+            echo "::error::T5M_REPAIR_BAD_SOURCE_ACCEPTED" >&2
+            exit 1
+          fi
+          test "$(sha256sum "$repair_dir/current.sens" | cut -d' ' -f1)" = "$repaired_sha"
+          cmp "$repair_dir/readback" "$repair_dir/current"
+          echo "T5M_REPAIR_LIVE_SENS PASS: native mint, pair, replacement, inverse view, negative"
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' }}
