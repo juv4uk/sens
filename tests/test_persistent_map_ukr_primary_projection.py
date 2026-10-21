@@ -20,11 +20,11 @@ def read(path: str) -> str:
 
 
 class PersistentMapUkrPrimaryProjectionTests(unittest.TestCase):
-    def test_primary_names_match_ratified_d9_rows_and_preserve_old_aliases(self):
+    def test_primary_names_match_ratified_d9_rows_without_legacy_aliases(self):
         source = read("lib/persistent-map.lisp")
-        # Історичні англійські псевдоніми перенесено до сумісного четвертого ядра
-        # (коміт 7393ede8 «вилучити історичні англійські псевдоніми»).
-        compat = read("lib/core4.lisp")
+        # Англійські назви — тільки en-колонка домену як дані.
+        # Сучасний Core4 не створює додаткової викличної поверхні Latin.
+        core4 = read("lib/core4.lisp")
         d9 = read("lib/domains/d9.lisp")
 
         for english, ukrainian, bits in TARGETS:
@@ -51,7 +51,11 @@ class PersistentMapUkrPrimaryProjectionTests(unittest.TestCase):
                     rf"(?m)^\(визначити\s+{re.escape(english)}\s+(?=\(функція|\(як-є)",
                     f"{english}: English must not remain primary",
                 )
-                self.assertIn(f"(визначити {english} {ukrainian})", compat)
+                self.assertNotRegex(
+                    core4,
+                    rf"(?m)^\s*\(визначити\s+{re.escape(english)}(?=\s|\))",
+                    f"{english}: історичний англійський DEFINE не має повертатися",
+                )
 
         for name, target in (
             ("внутрішня-мапа-порожній", "мапа-порожній"),
