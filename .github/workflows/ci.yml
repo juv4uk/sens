@@ -163,13 +163,16 @@ jobs:
           files="$RUNNER_TEMP/changed-t5m-lisp.txt"
           raw="$RUNNER_TEMP/changed-lisp-paths.txt"
           : > "$files"
+          # Git за замовчуванням екранує кирилицю у шляхах; це приховує
+          # виконувані *.lisp з українськими назвами від нативного SENS.
+          # Отримуємо буквальні UTF-8 шляхи, не змінюючи мову/семантику.
           if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
             if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
               timeout 60s git fetch --no-tags --depth=1 origin "$base"
             fi
-            git diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' > "$raw"
+            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' > "$raw"
           else
-            git diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' > "$raw"
+            git -c core.quotePath=false diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' > "$raw"
           fi
           python3 - "$raw" "$files" <<'PY'
           from pathlib import Path
