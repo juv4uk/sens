@@ -29,8 +29,15 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   report="$dir/migration.json"
   echo "T5M_CHANGED_SOURCE path=$file"
   code=0
+  binding_sources=()
+  # Механізм D9 «уніфікувати» справді визначено в lib/unify.lisp.
+  # Це точне джерело завантажуваного DEFINE, не дозвіл викликати
+  # кожного резидента D9 без реалізації.
+  if [[ "$file" == "lib/reason.lisp" ]]; then
+    binding_sources=(--binding-source lib/unify.lisp)
+  fi
   python3 scripts/migrate-three-pass.py "$file" \
-    --out "$dir" --report "$report" --codec t5m --source-surface укр \
+    --out "$dir" --report "$report" --codec t5m --source-surface укр "${binding_sources[@]}" \
     >"$dir/migration.log" 2>&1 || code=$?
   if [[ ! -s "$report" ]]; then
     cat "$dir/migration.log" >&2
