@@ -215,3 +215,100 @@ fn synthetic_witness_carries_one_state_through_three_typed_questions() {
         "(probabilistic-witness/1 ((case billing) (revision 1)) choice-observation/1 2/3 1/2)"
     );
 }
+
+#[test]
+fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
+    let selected = r#"
+        (let* ((question
+                (pd-question-choice
+                  (quote route)
+                  (quote (billing technical))))
+              (observation
+                (pd-choice-observe
+                  question
+                  (quote ((billing 3/4) (technical 1/4)))
+                  (quote ((source synthetic) (revision 1)))))
+              (decision (pd-choice-auto-policy observation 2/3)))
+          (list
+            (second decision)
+            (second (fourth decision))
+            (pd-observation-provenance (third decision))))
+    "#;
+    assert_eq!(
+        eval_probabilistic_decision(selected),
+        "(accept billing ((source synthetic) (revision 1)))"
+    );
+
+    let tied = r#"
+        (let* ((question
+                (pd-question-choice
+                  (quote route)
+                  (quote (billing technical))))
+              (observation
+                (pd-choice-observe
+                  question
+                  (quote ((billing 1/2) (technical 1/2)))
+                  (quote ((source synthetic) (case tied)))))
+              (decision (pd-choice-auto-policy observation 1/2)))
+          (list
+            (second decision)
+            (second (fourth decision))
+            (second (fifth decision))))
+    "#;
+    assert_eq!(
+        eval_probabilistic_decision(tied),
+        "(defer ambiguous-maximum-probability (billing technical))"
+    );
+
+    let below_threshold = r#"
+        (let* ((question
+                (pd-question-choice
+                  (quote route)
+                  (quote (billing technical))))
+              (observation
+                (pd-choice-observe
+                  question
+                  (quote ((billing 3/4) (technical 1/4)))
+                  (quote ((source synthetic)))))
+              (decision (pd-choice-auto-policy observation 4/5)))
+          (list
+            (second decision)
+            (second (fourth decision))
+            (second (fifth decision))
+            (pd-observation-confidence (third decision))))
+    "#;
+    assert_eq!(
+        eval_probabilistic_decision(below_threshold),
+        "(defer below-confidence-threshold billing 3/4)"
+    );
+
+    let forged_confidence = r#"
+        (let* ((question
+                (pd-question-choice
+                  (quote route)
+                  (quote (billing technical))))
+              (observation
+                (list
+                  (quote choice-observation/1)
+                  question
+                  (quote ((billing 3/4) (technical 1/4)))
+                  1/4
+                  (quote ((source synthetic)))))
+          (result-status (pd-choice-auto-policy observation 2/3)))
+    "#;
+    assert_eq!(eval_probabilistic_decision(forged_confidence), "invalid");
+
+    let invalid_threshold = r#"
+        (let* ((question
+                (pd-question-choice
+                  (quote route)
+                  (quote (billing technical))))
+              (observation
+                (pd-choice-observe
+                  question
+                  (quote ((billing 3/4) (technical 1/4)))
+                  (quote ((source synthetic)))))
+          (result-status (pd-choice-auto-policy observation 3/2)))
+    "#;
+    assert_eq!(eval_probabilistic_decision(invalid_threshold), "invalid");
+}
