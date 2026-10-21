@@ -28,6 +28,31 @@ fn observe(s: &mut Session, source: &str) -> String {
 }
 
 #[test]
+fn filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage() {
+    let mut s = session();
+    for (stage, expected) in [
+        ("objects", true),
+        ("journal", true),
+        ("root-pointer", true),
+        ("unknown", false),
+    ] {
+        let source = format!("(фс-етап-коміту? (як-є {stage}))");
+        let result = eval_program(&source, &mut s)
+            .unwrap_or_else(|e| panic!("SENS D1 етап коміту {stage}: {e:?}"))
+            .value;
+        assert_eq!(
+            result.as_predicate_bit(), Some(expected),
+            "test_id=fs-commit-stage layer=SENS input={source} expected=D1:{expected} actual={result}"
+        );
+    }
+    let result = eval_program("(фс-етап-коміту? (як-є (objects)))", &mut s)
+        .expect("SENS повинен виконувати негативний структурний випадок")
+        .value;
+    assert_eq!(result.as_predicate_bit(), Some(false),
+        "список не є маркером етапу; фактично {result}");
+}
+
+#[test]
 fn journal_event_fields_are_retrieved_from_a_real_alist() {
     let mut s = session();
     for (field, expected) in [("format","wsm-fs-event"), ("op","future-op")] {
