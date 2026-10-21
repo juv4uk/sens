@@ -416,23 +416,10 @@ fn keyboard_d7_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
 /// No physical T5 encoding takes place here; external transports (including
 /// Zig ABI v2) may consume this checked, width-qualified SENS projection.
 pub fn encode_d7_uk_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
-    let words = keyboard_d7_words(source)?;
-    // The same owner D7 table already defines the reverse projection.
-    // Check each exact W7 coordinate before packing; decoding the complete
-    // packed file here would add a redundant T5 pass and allocate a String.
-    for (character, word) in source.chars().zip(words.iter()) {
-        let BinarySourceWord::W7(cell) = word else {
-            return Err(D7T5Error::NonD7Word);
-        };
-        let canonical = crate::semantic_registry::d7_uk_keyboard_glyph(cell.packed_bits())
-            .ok_or(D7T5Error::UnrenderableD7Cell)?;
-        let mut utf8 = [0u8; 4];
-        let input: &str = character.encode_utf8(&mut utf8);
-        if canonical != input {
-            return Err(D7T5Error::AmbiguousText);
-        }
-    }
-    Ok(words)
+    // Українські glyph-и перетворюються в D7 лише на межі читання.
+    // keyboard_d7_words уже відхиляє невідомі знаки й повертає точні W7.
+    // Не виконуємо вдруге Unicode-проєкцію перед машинним передаванням.
+    keyboard_d7_words(source)
 }
 
 /// Physical Rust T5 reference remains supported independently of Zig.
@@ -642,6 +629,29 @@ mod tests {
                 assert_eq!(decode_ternary_words(&physical).unwrap(), original);
             }
         }
+    }
+
+    #[test]
+    fn d7_keyboard_all_128_cells_roundtrip_without_unicode_machine_identity() {
+        // Таблиця визначає всі 128 W7 кодів; Unicode — тільки видима межа.
+        for cell in 0u8..=127 {
+            let glyph = crate::semantic_registry::d7_uk_keyboard_glyph(cell)
+                .expect("ратифікована D7 має всі 128 клітинок");
+            let words = encode_d7_uk_words(glyph).unwrap();
+            assert_eq!(
+                words,
+                vec![BinarySourceWord::W7(Bit7::new(cell).unwrap())],
+                "W7 cell {cell}"
+            );
+            assert_eq!(decode_d7_uk_words(&words).unwrap(), glyph);
+        }
+        assert!(matches!(encode_d7_uk_words("🙂"),
+            Err(D7T5Error::UnassignedKeyboardGlyph { .. })));
+        assert_eq!(encode_d7_uk_words(""), Err(D7T5Error::EmptyText));
+        assert_eq!(
+            decode_d7_uk_words(&words("10 01")),
+            Err(D7T5Error::NonD7Word)
+        );
     }
 
     #[test]
