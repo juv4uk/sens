@@ -358,10 +358,10 @@ fn init_meta_session() -> Session {
 }
 
 fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
-    let expr = escape_lisp_string(&row.expr);
+    let expr = &row.expr;
     eval_program(
         &format!(
-            "(визначити свідок-мета-крок (обчислити-послідовність-форм (читати-всі \"{expr}\") свідок-мета-середовище))"
+            "(визначити свідок-мета-крок (обчислити-послідовність-форм (як-є ({expr})) свідок-мета-середовище))"
         ),
         session,
     )
