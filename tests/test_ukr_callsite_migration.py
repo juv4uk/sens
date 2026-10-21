@@ -1437,7 +1437,7 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
     def _undo_exact_heads(cls, source):
         import re
         for width, bits, ukr, count in reversed(cls.PEERS):
-            pattern = re.compile(r"\\(\\s*" + re.escape(ukr) + r"(?=\\s|\\))")
+            pattern = re.compile(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))")
             found = list(pattern.finditer(source))
             if len(found) != count:
                 raise AssertionError(f"PEER_COUNT D{width}:{bits} {ukr}: {len(found)} != {count}")
