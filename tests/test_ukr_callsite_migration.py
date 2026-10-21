@@ -1448,7 +1448,7 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
     def _redo_exact_heads(cls, source):
         import re
         for width, bits, ukr, count in cls.PEERS:
-            pattern = re.compile(r"\\(\\s*" + re.escape(bits) + r"(?=\\s|\\))")
+            pattern = re.compile(r"\(\s*" + re.escape(bits) + r"(?=\s|\))")
             found = list(pattern.finditer(source))
             if len(found) != count:
                 raise AssertionError(f"WORD_COUNT D{width}:{bits}: {len(found)} != {count}")
@@ -1465,7 +1465,7 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
                 self.assertEqual(len(matches), 1)
                 self.assertIn(f"(укр {ukr})", matches[0])
                 import re
-                found = re.findall(r"\\(\\s*" + re.escape(ukr) + r"(?=\\s|\\))", source)
+                found = re.findall(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))", source)
                 self.assertEqual(len(found), count)
         self.assertIn("(однакова-кількість? (довжина (рядки-домену д1))", source)
         self.assertNotIn("(тотожне? (довжина ", source)
