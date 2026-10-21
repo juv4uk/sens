@@ -12,6 +12,47 @@ RUNNER = ROOT / "scripts/execute_changed_lisp_t5m.sh"
 CI = ROOT / ".github/workflows/ci.yml"
 
 class ChangedLispT5MRouteTests(unittest.TestCase):
+    def test_native_route_without_python_or_json_and_true_red_propagation(self):
+        # Це тест ТІЛЬКИ shell-оркестрації. Семантику виконує CI через
+        # реальний sens --t5m-pair, а не цей замінник командного інтерфейсу.
+        import os
+        ci = CI.read_text(encoding="utf-8")
+        self.assertIn("SENS_NATIVE_T5M=1", ci)
+        self.assertIn("cargo build --locked -p sens-cli --bin sens --bin sens-trit", ci)
+        with tempfile.TemporaryDirectory(prefix="sens-native-t5m-shell-") as td:
+            root = Path(td)
+            (root / "module.lisp").write_text("(як-є ())\n", encoding="utf-8")
+            (root / "changed.txt").write_text("module.lisp\n", encoding="utf-8")
+            binary = root / "sens-entry"
+            binary.write_text(
+                "#!/bin/sh\n"
+                "if [ \"$1\" = --t5m-mint ]; then printf 'physical' > \"$3\"; exit 0; fi\n"
+                "if [ \"$1\" = --t5m-pair ] && [ -f reject-pair ]; then\n"
+                "  echo 'real paired failure' >&2; exit 19; fi\n"
+                "printf 'SENS_RESULT\\n'\n",
+                encoding="utf-8",
+            )
+            binary.chmod(0o755)
+            opener = root / "sens-trit"
+            opener.write_text("#!/bin/sh\nprintf '10 001 01\\n'\n", encoding="utf-8")
+            opener.chmod(0o755)
+            environment = dict(os.environ, SENS_NATIVE_T5M="1",
+                               SENS_T5M_OPEN=str(opener))
+            cmd = ["bash", str(RUNNER), str(binary), "changed.txt", "evidence"]
+            ok = subprocess.run(cmd, cwd=root, env=environment,
+                                capture_output=True, text=True, timeout=20)
+            self.assertEqual(ok.returncode, 0, ok.stdout + ok.stderr)
+            self.assertIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", ok.stdout)
+            self.assertNotIn("T5M_MIGRATION_NO_REPORT", ok.stderr)
+            self.assertTrue(list((root / "evidence").glob("*/module.sens")))
+            (root / "reject-pair").touch()
+            red = subprocess.run(cmd, cwd=root, env=environment,
+                                 capture_output=True, text=True, timeout=20)
+            self.assertEqual(red.returncode, 2, red.stdout + red.stderr)
+            self.assertIn("T5M_NATIVE_PAIRED_EXECUTION_FAIL", red.stderr)
+            self.assertIn("files_checked=1 files_failed=1", red.stdout)
+            self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", red.stdout)
+
     def test_mint_before_execution(self):
         source = RUNNER.read_text(encoding="utf-8")
         self.assertIn('scripts/migrate-three-pass.py "$file"', source)
