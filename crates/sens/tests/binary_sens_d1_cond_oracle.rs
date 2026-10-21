@@ -8,7 +8,7 @@ use sens::{
     ternary_transport_accounting, Session,
 };
 
-const LOGIC: &str = include_str!("../../../tests/oracles/d1-cond-law/proof.lisp");
+const LOGIC: &str = include_str!("../../../tests/oracles/d1-cond-law/proof.bits");
 const PHYSICAL: &[u8] = include_bytes!("../../../tests/oracles/d1-cond-law/proof.sens");
 const PROCESS_BINDING_LOGIC: &str = include_str!("../../../tests/semantic/process-d4-lambda-law.bits");
 
