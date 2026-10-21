@@ -355,6 +355,44 @@ fn t5m_file_mode_rejects_malformed_ukrainian_source() {
 }
 
 #[test]
+fn t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24() {
+    // Справжній SENS+Zig T5M обчислює рекурсії з виконуваних .lisp,
+    // а не Python чи статичні підтвердження присутності форм.
+    let cases = [
+        ("fib.setup.lisp", "(фібоначчі 0)", "0"),
+        ("fib.setup.lisp", "(фібоначчі 1)", "1"),
+        ("fib.setup.lisp", "(фібоначчі 5)", "5"),
+        ("ackermann.setup.lisp", "(аккерман 0 1)", "2"),
+        ("ackermann.setup.lisp", "(аккерман 1 1)", "3"),
+    ];
+    let mut observed = Vec::new();
+    for (index, (name, expression, expected)) in cases.iter().enumerate() {
+        let source_path = format!(
+            "{}/../../benchmarks/cross-language/sens-vs-python/sens/{name}",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let source = std::fs::read_to_string(&source_path)
+            .unwrap_or_else(|error| panic!("відсутній живий {name}: {error}"));
+        let temporary = std::env::temp_dir().join(format!(
+            "sens-d24-recursion-{}-{index}.lisp", std::process::id()
+        ));
+        std::fs::write(&temporary, format!("{source}\n{expression}\n"))
+            .expect("тимчасова точна D24+ програма");
+        let output = sens()
+            .args(["--t5m-file", temporary.to_str().expect("UTF-8 шлях")])
+            .output()
+            .expect("живий SENS T5M");
+        let _ = std::fs::remove_file(&temporary);
+        assert!(output.status.success(), "SENS {name} {expression}: {}",
+            String::from_utf8_lossy(&output.stderr));
+        observed.push(((*name).to_owned(), (*expression).to_owned(),
+                       String::from_utf8_lossy(&output.stdout).trim().to_owned()));
+        assert_eq!(observed.last().unwrap().2, *expected,
+                   "SENS {name} має виконати точну рекурсію {expression}");
+    }
+}
+
+#[test]
 fn t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program() {
     // Живе виконання SENS: розрізнити помилку арифметики, листка,
     // рекурсивного створення дерева та його підрахунку.
