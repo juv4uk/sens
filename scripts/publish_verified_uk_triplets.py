@@ -3,7 +3,9 @@
 
 .lisp копіюється без змін, але тотожність програми звіряється за точними
 словами та структурою, а не за коментарями чи форматуванням тексту.
-Немає самовільного семантичного допуску, запису в master або перезапису.
+Фізичне видання .sens виконує лише SHA-атестований Zig 0.16 T5M;
+Python T5M є незалежним еталоном для попереднього перегляду та порівняння.
+Немає самовільного семантичного допуску, запису в main або перезапису.
 """
 from __future__ import annotations
 
@@ -18,6 +20,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import encode_t5m_projection, decode_t5m_bytes, typed_sha256
+import zig_codec_bridge
 from verify_uk_t5_triplet import (
     ProjectionBlocked, canonical_uk_from_words, project_current_uk, verify,
 )
@@ -176,6 +179,7 @@ def export(root: Path, mirror: Path, report: Path,
                        word_count=len(words), physical_bytes=len(physical),
                        physical_codec="t5m",
                        source_sha256=sha(original), physical_sha256=sha(physical),
+                       physical_authority="reference-only-nonpublic",
                        view_sha256=sha(view), typed_word_sha256=typed_sha256(words))
         except (ProjectionBlocked, OSError, ValueError) as exc:
             row.update(status="blocked", reason=str(exc))
@@ -183,6 +187,26 @@ def export(root: Path, mirror: Path, report: Path,
 
     created: list[Path] = []
     if write and all(row["status"] != "blocked" for row in rows):
+        # Python transport is a read-only reference; publication is Zig-only.
+        # Build once for the cohort, not once per file. Never write a .sens
+        # unless the attested Zig physical bytes equal the independent
+        # exact-word reference and Zig's own canonical roundtrip succeeds.
+        with tempfile.TemporaryDirectory(prefix="sens-uk-zig-t5m-") as tool_dir:
+            binary = zig_codec_bridge.build_transport(Path(tool_dir))
+            for index, (rel, source, original, words, reference, view) in enumerate(candidates):
+                physical = zig_codec_bridge.carry_t5(
+                    binary, view.decode("ascii"), codec="t5m",
+                )
+                receipt = zig_codec_bridge.verify_t5(binary, physical, codec="t5m")
+                if physical != reference or decode_t5m_bytes(physical) != words:
+                    raise ProjectionBlocked(
+                        f"ZIG_T5M_REFERENCE_PARITY_MISMATCH: {rel}"
+                    )
+                candidates[index] = (rel, source, original, words, physical, view)
+                rows[index]["physical_sha256"] = sha(physical)
+                rows[index]["physical_bytes"] = len(physical)
+                rows[index]["zig_binary_sha256"] = receipt["zig_binary_sha256"]
+                rows[index]["physical_authority"] = "zig-attested-t5m"
         paths_data: list[tuple[Path, bytes]] = []
         for rel, source, original, words, physical, view in candidates:
             if source.read_bytes() != original:
