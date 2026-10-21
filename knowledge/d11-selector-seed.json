@@ -32,7 +32,8 @@
     "universal_derivation": "forall ratified selector p in D10: derived_0(x)=p(CAR(x)); derived_1(x)=p(CDR(x))",
     "left_11bit_derived": "01100000000",
     "right_11bit_derived": "01100000001",
-    "opcode_admission": "DERIVED_SEMANTICS_DEFINED_NO_SEPARATE_DIRECT_D11_OPCODE_YET; NO_NEW_PRIMITIVE; NO_ZIG_T5_DIRECT_OPCODE_ADMISSION"
+    "opcode_admission": "DERIVED_SEMANTICS_DEFINED_NO_SEPARATE_DIRECT_D11_OPCODE_YET; NO_NEW_PRIMITIVE; NO_ZIG_T5_DIRECT_OPCODE_ADMISSION",
+    "partial_domain_uk": "Застосування кожного похідного селектора визначається звичайною областю визначення композиції CAR/CDR і батька p; не обіцяємо застосовності CAR/CDR до атомів."
   },
   "accounting": {
     "d10_selector_parents": 256,
@@ -48,7 +49,9 @@
     "coordinates_outside_testing_vocabulary": 2005,
     "coordinates_outside_testing_and_derived_selectors": 1493,
     "selector_derived_coordinates": 512,
-    "derived_selectors_without_direct_opcode_admission": 512
+    "derived_selectors_without_direct_opcode_admission": 512,
+    "independently_ratified_selector_primitive_laws": 0,
+    "defined_d11_selector_functions_in_math": 512
   },
   "verification": {
     "positive": "512 exact 11-bit selector coordinates and names follow uniquely from 256 D10 parents and D3 CAR/CDR; all are defined compositions, not proposals.",
@@ -69,8 +72,9 @@
       "ci_test_result": "1 passed; 0 failed; 0 ignored",
       "workflow_conclusion": "FAILURE_OTHER_STEPS",
       "all_512_individually_executed": false,
-      "owner_ratification": false,
-      "callability_added": 0
+      "callability_added": 0,
+      "new_primitive_ratification_needed": false,
+      "direct_11bit_opcode_admission": false
     },
     "mathematical_status": "ALL_512_DERIVED_FUNCTIONS_DEFINED",
     "direct_opcode_status": "NOT_ADMITTED_AS_NEW_PRIMITIVES"
