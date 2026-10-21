@@ -62,30 +62,22 @@ if [[ "$snapshot" != "$(sha256sum "$source_file" | cut -d' ' -f1)" ]]; then
 fi
 # Перевірені байти публікуємо лише у фізичний .sens і його побітовий
 # перегляд. Жоден інший .lisp або доменний закон не переписуємо.
-dir="$(dirname "$physical")"
-tmp_pair="$(mktemp "$dir/.sens-t5m-XXXXXXXX")"
-tmp_view="$(mktemp "$dir/.sens-view-XXXXXXXX")"
-trap 'rm -f "$tmp_pair" "$tmp_view"; rm -rf "$scratch"' EXIT
-cp "$staged" "$tmp_pair"
-cp "$staged_view" "$tmp_view"
-had_pair=0
-if [[ -f "$physical" ]]; then
-  cp "$physical" "$scratch/old.sens"
-  had_pair=1
-fi
-if [[ -f "$view" ]]; then
-  cp "$view" "$scratch/old.view"
-fi
-mv -f "$tmp_pair" "$physical"
-if ! mv -f "$tmp_view" "$view"; then
-  if (( had_pair )); then
-    cp "$scratch/old.sens" "$physical"
-  else
-    rm -f "$physical"
-  fi
-  echo "T5M_REPAIR_INSTALL_FAILED source=$source_file" >&2
-  exit 2
-fi
+# Єдина транзакція для фізичного T5M і точного перегляду. При збою
+# друга операція відновлює попередню пару, не залишаючи напівпублікації.
+# Тут лише файловий I/O: SENS вже виконав програму, Zig перевірив байти.
+python3 - "$physical" "$staged" "$view" "$staged_view" <<'PY'
+from pathlib import Path
+import sys
+
+sys.path.insert(0, "scripts")
+from migration_publish_pair import replace_pair
+
+physical, staged, view, staged_view = (Path(p) for p in sys.argv[1:])
+try:
+    replace_pair(physical, staged.read_bytes(), view, staged_view.read_bytes())
+except (OSError, ValueError) as exc:
+    raise SystemExit(f"T5M_REPAIR_INSTALL_FAILED source={physical} error={exc}") from exc
+PY
 cmp "$staged" "$physical"
 cmp "$staged_view" "$view"
 echo "T5M_REPAIR_OK source=$source_file physical=$physical view=$view exact=ZIG_AND_SENS negative=REJECTED semantic_parity=NOT_CERTIFIED release=NOT_CERTIFIED"
