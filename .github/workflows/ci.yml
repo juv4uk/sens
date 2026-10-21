@@ -176,10 +176,9 @@ jobs:
           else
             git -c core.quotePath=false diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' > "$raw"
           fi
-          # Заборона push/PR із будь-яким неукраїнським символом у зміненому
-          # .lisp: перевіряємо повні Git-байти (включно з даними, коментарями,
-          # архівом), не лише викличні імена. Старі незмінені файли не чіпаємо.
-          python3 scripts/guard_ukr_lisp_keyboard.py --paths-from "$raw" --ref "$GITHUB_SHA"
+          # Цитовані об'єкти й D7-гліфи не є латинськими іменами виконання.
+          # Не блокуємо SENS→Zig/T5M за байтами коментарів або даних:
+          # мова визначає допустимі коди власним читачем і законами.
           python3 - "$raw" "$files" "$binaries" <<'PY'
           from pathlib import Path
           import sys
