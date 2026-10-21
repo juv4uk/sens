@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/fs.lisp has no bare host truthiness (t / T / NIL)
-  2. The fallback uses the ratified named D1 true value, not an encoded token
+  2. The fallback computes exact D1:1 with ATOM(QUOTE ()), not an unbound name
   3. Reuses Ukrainian UTF-8 and raw filesystem capability projections
   4. Key fs surface present
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FS = ROOT / "lib" / "fs.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(так"
+D1_TRUE = "((атом? (як-є ()))"
 REQUIRED = (
     "читати-файл",
     "записати-файл",
@@ -44,13 +44,17 @@ def check_fs() -> list[str]:
             continue
         errs.append(f"fs: host truthiness {m.group()!r} at offset {m.start()}")
     if D1_TRUE not in text:
-        errs.append("fs: exact D1:1 form (010 (001 ())) missing")
+        errs.append("fs: executable D1:1 = ATOM(QUOTE ()) missing")
     if "#d1:1" in text:
         errs.append("fs: encoded D1 literal is forbidden in primary source")
     executable = "\n".join(line for line in text.splitlines()
                              if not line.lstrip().startswith(";"))
     if re.search(r"\(\s*[01]{3,9}(?=\s|\))", executable):
         errs.append("fs: raw binary call head is forbidden in primary source")
+    if re.search(r"\(\s*так(?=\s|\))", executable):
+        errs.append("fs: unbound legacy truth head forbidden")
+    if "((функція " in executable:
+        errs.append("fs: anonymous D5 value-call forbidden")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"fs: required Ukrainian projection missing: {fn}")
@@ -86,7 +90,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("FS: PASS — two-field COND, named D1, Ukrainian raw-capability calls")
+    print("FS: PASS — two-field COND, computed D1 and Ukrainian raw I/O")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
