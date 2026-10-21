@@ -125,3 +125,43 @@ fn compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match() {
         assert_eq!(value, expected, "Forward must preserve successful compound facts and their order");
     }
 }
+
+
+// Зворотна перевірка реального D1-виконання: свідомо затінюємо
+// історичний глобальний alias, щоб жодна запасна гілка Forward
+// не брала істину з host-подання або незв'язаного символу «так».
+// Семантика вирішується у SENS evaluator, а не в текстовому сканері.
+#[test]
+fn forward_fallback_branches_execute_real_d1_even_after_truth_alias_shadowing() {
+    let mut runtime = session();
+    eval_program("(визначити так (атом? (як-є (())))", &mut runtime)
+        .expect("SENS допускає затінення звичайного зв'язування так");
+    let shadow = eval_program("так", &mut runtime)
+        .expect("перевірити реальне значення затіненого імені")
+        .value;
+    assert_eq!(shadow.as_predicate_bit(), Some(false));
+
+    for (program, expected) in [
+        (
+            "(запустити-правило (як-є ((факт а) (наслідок а))) (як-є (факт а)))",
+            "(наслідок а)",
+        ),
+        (
+            "(запустити-правило (як-є ((факт а) (наслідок а))) (як-є (факт б)))",
+            "no-match",
+        ),
+        (
+            "(запустити-правило-на-факти (як-є ((факт а) (наслідок а))) (як-є ((факт а) (факт б))))",
+            "((наслідок а))",
+        ),
+        (
+            "(запустити-правило-на-факти (як-є ((факт а) (наслідок а))) (як-є ((факт б))))",
+            "()",
+        ),
+    ] {
+        let value = eval_program(program, &mut runtime)
+            .unwrap_or_else(|error| panic!("SENS D1-branch failed: {program}: {error:?}"))
+            .value;
+        assert_eq!(value.to_string(), expected, "SENS Forward must not depend on alias так: {program}");
+    }
+}
