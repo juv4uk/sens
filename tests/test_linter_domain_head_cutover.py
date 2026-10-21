@@ -123,6 +123,28 @@ class UkrainianLinterProjection(unittest.TestCase):
                 self.assertIn(program, examples)
         self.assertGreaterEqual(examples.count('(expected . "()")'), 2)
 
+    def test_lexical_scope_branches_reachable_for_let_star_and_letrec(self):
+        # Це перевірка досяжності мовних гілок, НЕ Python-емуляція SENS.
+        # Для повної (голова зв'язування тіло) перші два стани atom?/not
+        # взаємовиключні; стара пара поглинала гілку роботи з прив'язками.
+        for name in (
+            "зібрати-вільні-змінні-з-послідовного-зв'язування",
+            "зібрати-вільні-змінні-з-рекурсивного-зв'язування",
+        ):
+            with self.subTest(name=name):
+                start = self.active.index("(визначити " + name + "\\n")
+                next_definition = self.active.find("(визначити ", start + 1)
+                body = self.active[start:next_definition if next_definition >= 0 else None]
+                self.assertNotIn("((хибне? (атом? (решта дерево)))", body)
+                self.assertNotIn("((хибне? (атом? (решта (решта дерево))))", body)
+                self.assertIn("((атом? (решта дерево))", body)
+                self.assertIn("((атом? (решта (решта дерево)))", body)
+                self.assertIn("(так\\n       (нехай ((привязки", body)
+        # Дійсні приклади з очікуваними результатами належать SENS.
+        fixture = (ROOT / "tests/fixtures/linter.lisp").read_text(encoding="utf-8")
+        self.assertIn("(нехай-послідовно ((x 1) (y x)) (додати x y z))", fixture)
+        self.assertIn("(letrec ((even? (lambda (n)", fixture)
+
     def test_wrong_peer_and_reintroduced_binary_head_fail_source_contract(self):
         wrong_peer = self.active.replace(
             "(як-є визначити)) (як-є визначити))",
