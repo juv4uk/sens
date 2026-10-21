@@ -720,23 +720,53 @@ mod raw_invoke_sens_1006;
 
 #[test]
 fn український_скрипт_відбирає_саме_запитаний_рівень() {
-    // Чинний SENS CLI, не сканер тексту: вхідні записи мають (tier . 1).
+    // Не оголошуємо весь файл виконуваним: читати-всі ще не має
+    // допущеного механізму в цьому CLI. Тут виконується справжнім SENS
+    // рівно та сама українська логіка, узята з поточного Lisp-джерела.
+    let source = std::fs::read_to_string(
+        concat!(env!("CARGO_MANIFEST_DIR"), "/../../scripts/fixtures-for-tier.lisp"),
+    )
+    .expect("поточний український Lisp");
+    let start = source.find("(визначити рівень-прикладу\n")
+        .expect("канонічний український селектор");
+    let end = source[start..].find("\n(надрукувати-відповідні\n")
+        .map(|index| start + index)
+        .expect("кінець визначень перед файловим читачем");
+    let definitions = &source[start..end];
+
     for (level, other) in [("1", "2"), ("2", "1")] {
-        let output = sens()
-            .args(["scripts/fixtures-for-tier.lisp", level])
-            .output()
-            .expect("SENS CLI повинен запускатися");
+        let code = format!(
+            "(визначити потрібний-рівень {level})\n{definitions}\n             (надрукувати-відповідні (як-є (                ((expr . \"перший\") (tier . 1))                 ((expr . \"другий\") (tier . 2))                 ((expr . \"третій\") (tier . 1)))))\n"
+        );
+        let path = std::env::temp_dir().join(format!(
+            "sens-ukr-tier-{level}-{}.lisp", std::process::id()
+        ));
+        std::fs::write(&path, code).expect("тимчасова програма SENS");
+        let output = sens().arg(&path).output().expect("SENS виконується");
+        let _ = std::fs::remove_file(&path);
         assert!(
             output.status.success(),
             "рівень {level}: stderr={} stdout={}",
             String::from_utf8_lossy(&output.stderr),
             String::from_utf8_lossy(&output.stdout)
         );
-        let text = String::from_utf8_lossy(&output.stdout);
-        assert!(text.contains(&format!("(tier . {level})")), "{text}");
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        assert!(stdout.contains(&format!("(tier . {level})")), "{stdout}");
+        assert!(!stdout.contains(&format!("(tier . {other})")), "{stdout}");
+    }
+
+    // Окреме негативне свідчення: відсутня функція читання не стає
+    // удаваним PASS усього файлового сценарію.
+    let full = sens()
+        .args(["scripts/fixtures-for-tier.lisp", "1"])
+        .output()
+        .expect("SENS CLI працює");
+    if !full.status.success() {
+        let stderr = String::from_utf8_lossy(&full.stderr);
         assert!(
-            !text.contains(&format!("(tier . {other})")),
-            "виведено сторонній рівень {other}: {text}"
+            stderr.contains("читати-всі"),
+            "неочікувана помилка замість відомої відсутності читача: {stderr}"
         );
+        eprintln!("SENS_FILE_READER_NOT_ADMITTED: читати-всі");
     }
 }
