@@ -779,7 +779,7 @@ fn український_скрипт_відбирає_саме_запитан�
         ),
     ];
     for (index, (expression, expected)) in cases.into_iter().enumerate() {
-        let code = format!("{selector}\\n{expression}\\n");
+        let code = format!("{selector}\n{expression}\n");
         let path = std::env::temp_dir().join(format!(
             "sens-ukr-tier-filter-{index}-{}.lisp", std::process::id()
         ));
