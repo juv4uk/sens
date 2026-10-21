@@ -68,10 +68,14 @@ def active_ukrainian_definitions(source: str):
             raise ValueError("повторне визначення " + name)
         definitions[name] = form
 
-    if any(name in definitions for name in LEGACY_HEADS):
-        raise ValueError("англійська спадкова DEFINE знову стала виконуваною")
     if any(name not in definitions for name in NAMES):
         raise ValueError("втрачене українське визначення")
+    # Старі локальні клієнти ще використовують три явні посилання.
+    # Вони не можуть перевизначати семантику: це тільки прозорі
+    # сумісні зв'язування на первинні українські визначення.
+    for old_name, primary in zip(LEGACY_HEADS, NAMES):
+        if definitions.get(old_name) != ["визначити", old_name, primary]:
+            raise ValueError("англійський сумісний запис не є українським посиланням")
     if re.search(r"(?<![\w])#(?:d\d+:|b[01]|q2:)", source):
         # Коментарі та рядки не є виконуваним кодом — скануємо лише
         # токени програми. Історичні пояснення залишаються дозволені.
@@ -177,9 +181,14 @@ class RecoverKnowledge(unittest.TestCase):
             source.replace("(клаузи-бази-знань-коректні? (решта клаузи))",
                            "(клаузи-бази-знань-коректні? (перше клаузи))", 1),
             source.replace("(перше-першого пакет)", "(перше пакет)", 1),
-            source.replace("(атом? (як-є (стан)))",
-                           "(атом? (як-є ()))", 1),
-            source + "\n(визначити knowledge-not-head? голова-твердження-знань-заперечена?)\n",
+            source.replace(
+                "((тотожне? голова (як-є not)) (атом? (як-є ())))",
+                "((тотожне? голова (як-є not)) (атом? (як-є (стан))))", 1
+            ),
+            source.replace(
+                "(визначити knowledge-not-head? голова-твердження-знань-заперечена?)",
+                "(визначити knowledge-not-head? вигаданий-старий-механізм)", 1
+            ),
         ]
         for changed in mutations:
             self.assertNotEqual(changed, source)
