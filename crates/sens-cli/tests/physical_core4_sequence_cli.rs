@@ -344,6 +344,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-interleave-two-general",
         "list-reverse-tail-general",
         "list-last-adjacent-equal-atom-suffix-general",
+        "list-first-adjacent-equal-atom-suffix-general",
+        "list-every-third-linear-general",
         "list-drop-last-general",
         "list-append-general",
         "list-collapse-adjacent",
@@ -398,6 +400,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-remove-first-atom",
         "list-prefix-atoms-general",
         "list-flatten-nested-general",
+        "list-flatten-stack-linear-general",
         "list-all-suffixes-general",
         "list-all-prefixes-general",
         "list-all-distinct-atoms-general",
@@ -586,6 +589,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-remove-first-atom"
                 | "list-prefix-atoms-general"
                 | "list-flatten-nested-general"
+                | "list-flatten-stack-linear-general"
                 | "list-all-suffixes-general"
                 | "list-all-prefixes-general"
                 | "замінити-третій-в-четвірці"
@@ -613,6 +617,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-interleave-two-general"
                 | "list-reverse-tail-general"
                 | "list-last-adjacent-equal-atom-suffix-general"
+                | "list-first-adjacent-equal-atom-suffix-general"
+                | "list-every-third-linear-general"
                 | "list-interleave-three-general"
                 | "list-interleave-three-rotation-general"
                 | "list-drop-every-third-compact-general"
