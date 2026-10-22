@@ -125,24 +125,30 @@ def teacher_targets(rows: list[dict[str, Any]], teacher_path: Path, seed_sha: st
 
 
 def train(args: argparse.Namespace) -> int:
-    rows, raw = read_jsonl(args.input)
+    all_rows, raw = read_jsonl(args.input)
     seed_sha = digest(raw)
     if args.output.resolve() == args.input.resolve():
         raise StudentError("вихід моделі не може перезаписати навчальний корпус")
     if args.teacher is not None and args.output.resolve() == args.teacher.resolve():
         raise StudentError("вихід моделі не може перезаписати вчительські спостереження")
+
+    # Хеш прив'язує вчительські спостереження до повного зафіксованого корпусу,
+    # але статистики моделі обчислюються винятково на train.
     seen: set[str] = set()
-    for row in rows:
+    for row in all_rows:
         row_id = str(row.get("id", ""))
         if not row_id or row_id in seen:
             raise StudentError(f"відсутній або повторений id: {row_id!r}")
         seen.add(row_id)
-        if row.get("split") != "train":
-            raise StudentError(f"{row_id}: навчання дозволене лише на split=train")
+        if row.get("split") not in ("train", "validation", "test"):
+            raise StudentError(f"{row_id}: невідомий поділ вибірки")
         if row.get("gold") not in LABELS:
             raise StudentError(f"{row_id}: невідома еталонна мітка")
         if not isinstance(row.get("text"), str) or not row["text"].strip():
             raise StudentError(f"{row_id}: відсутній текст")
+    rows = [row for row in all_rows if row.get("split") == "train"]
+    if not rows:
+        raise StudentError("у корпусі немає жодного прикладу split=train")
 
     has_teacher = args.teacher is not None
     gold_weight = args.gold_weight if args.gold_weight is not None else (0.25 if has_teacher else 1.0)
@@ -283,10 +289,23 @@ def predict(args: argparse.Namespace) -> int:
         raise StudentError(f"файл моделі некоректний: {exc}") from exc
     if model.get("schema") != MODEL_SCHEMA:
         raise StudentError("несумісна схема моделі")
-    rows, input_raw = read_jsonl(args.input)
+    all_rows, input_raw = read_jsonl(args.input)
     if args.output.resolve() in {args.input.resolve(), args.model.resolve()}:
         raise StudentError("вихід прогнозів не може перезаписати вхідні дані або файл моделі")
     seen: set[str] = set()
+    for row in all_rows:
+        row_id = str(row.get("id", ""))
+        if not row_id or row_id in seen:
+            raise StudentError(f"відсутній або повторений id: {row_id!r}")
+        seen.add(row_id)
+        if row.get("split") not in ("train", "validation", "test"):
+            raise StudentError(f"{row_id}: невідомий поділ вибірки")
+        if row.get("gold") not in LABELS or not isinstance(row.get("text"), str):
+            raise StudentError(f"{row_id}: некоректний приклад для оцінювання")
+    rows = [row for row in all_rows if row.get("split") == args.split]
+    if not rows:
+        raise StudentError(f"у корпусі немає прикладів для split={args.split!r}")
+    seen.clear()
     model_sha = digest(model_bytes)
     output: list[dict[str, Any]] = []
     for row in rows:
