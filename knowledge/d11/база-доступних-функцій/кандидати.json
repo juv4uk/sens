@@ -7805,7 +7805,7 @@
         "partial_only": true,
         "library_file": "lib/d11-interlisp-safe-analysis.lisp",
         "library_blob_sha": "d0d9b6d4be239ec3391a881b87e689182bb900de",
-        "function_surface": "dwim-запропонувати-з-контексту",
+        "function_surface": "підказка-з-контексту",
         "covered_semantics": "explicit evidence-backed alternatives only; unique suggestion / absent / ambiguous",
         "native_witness_file": "crates/sens/tests/d11_interlisp_safe_analysis.rs",
         "native_witness_count": 8,

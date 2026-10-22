@@ -124,5 +124,56 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
         self.assertIn("D5:00001", findings[0])
         self.assertIn("D5:00111", findings[-1])
 
+    def test_current_domain_uk_and_ukr_are_real_keyboard_glyphs(self):
+        """Перевірити фактичні D1-D11, а не лише тестові підставні рядки."""
+        expected = {width: (1 << width if width <= 10 else 43)
+                    for width in range(1, 12)}
+        total = 0
+        for width, count in expected.items():
+            path = ROOT / "lib" / "domains" / f"d{width}.lisp"
+            rows = []
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                if not re.match(r"^\\s*\\([01]{1,11}\\s+", line):
+                    continue
+                match = DOMAIN_ROW.fullmatch(line)
+                self.assertIsNotNone(
+                    match,
+                    f"{path}:{number}: некоректний рядок проєкції",
+                )
+                bits, uk, ukr, san, en, lisp, sym = match.groups()
+                self.assertEqual(len(bits), width)
+                rows.append(bits)
+                for column, token in (("ук", uk), ("укр", ukr)):
+                    value = projection_value(token, f"D{width}")
+                    disallowed = set(char for char in value
+                                     if char.isprintable()
+                                     and char not in UKRAINIAN_KEYBOARD_OUTPUTS)
+                    self.assertFalse(
+                        disallowed,
+                        format_projection_violation(
+                            str(path.relative_to(ROOT)), f"D{width}:{bits}",
+                            number, column, token, value,
+                        ),
+                    )
+            self.assertEqual(len(rows), count, f"{path}: неповна таблиця")
+            self.assertEqual(len(set(rows)), count, f"{path}: повтор координати")
+            total += count
+        self.assertEqual(total, 2089)
+
+    def test_live_interlisp_library_has_only_ukrainian_keyboard_symbols(self):
+        """Жодної латиниці навіть у коментарях або іменах функцій."""
+        path = ROOT / "lib/d11-interlisp-safe-analysis.lisp"
+        source = path.read_text(encoding="utf-8")
+        allowed = UKRAINIAN_KEYBOARD_OUTPUTS | set("\\t\\r\\n")
+        violations = [
+            f"{i}:{ch!r} U+{ord(ch):04X}"
+            for i, line in enumerate(source.splitlines(), 1)
+            for ch in line if ch not in allowed
+        ]
+        self.assertEqual(violations, [],
+                         "Латиниця або недозволена пунктуація в SENS-бібліотеці: "
+                         + ", ".join(violations[:20]))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
