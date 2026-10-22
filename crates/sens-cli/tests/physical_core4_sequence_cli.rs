@@ -488,6 +488,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "замінити-третій-в-четвірці",
         "list-last-three-zero-copy-general",
         "list-tail-after-third-compound-zero-copy-general",
+        "list-penultimate-element-zero-copy-general",
+        "list-suffix-after-first-adjacent-atom-pair-zero-copy-general",
         "list-unique-stable-fast-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
@@ -663,6 +665,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "rotate-three-right"
                 | "list-last-three-zero-copy-general"
                 | "list-tail-after-third-compound-zero-copy-general"
+                | "list-leading-atom-run-length-unary-general"
+                | "list-partition-atomic-compound-general"
+                | "list-penultimate-element-zero-copy-general"
+                | "list-suffix-after-first-adjacent-atom-pair-zero-copy-general"
                 | "list-unique-stable-fast-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
