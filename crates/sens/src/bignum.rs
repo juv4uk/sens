@@ -43,7 +43,10 @@ impl Magnitude {
     const KARATSUBA_THRESHOLD: usize = 32;
 
     fn from_u64(mut value: u64) -> Self {
-        let mut limbs = Vec::new();
+        // 0, 1 or 2 base-2^32 limbs: avoid Vec's default four-limb
+        // growth for the small integers found in reduced rationals.
+        let capacity = if value == 0 { 0 } else if value <= u32::MAX as u64 { 1 } else { 2 };
+        let mut limbs = Vec::with_capacity(capacity);
         while value != 0 {
             limbs.push((value & 0xFFFF_FFFF) as u32);
             value >>= 32;
