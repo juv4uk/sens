@@ -1639,19 +1639,36 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/forward.lisp",
-        "blob_sha": "48f8bd53955176e60e48ca3121c0b5fa0cbf8c1e",
+        "blob_sha": "71c49888ae95689f378321ed18088006e5c6dc79",
         "original_file": "lib/forward.lisp",
         "snapshot_not_live_proof": false,
         "historical_snapshot": "docs/FUNCTIONS.md"
       },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00110001100",
       "exact_bit_width_if_admitted": 11,
-      "review_status": "LIVE_SENS_LAW_TEST_ADDED_CI_PENDING",
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
       "ratified": false,
       "callable": false,
-      "native_law_test_pending": "crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs::d11_jtms_знайти_запис_за_фактом_зберігає_докази_й_перший_збіг",
-      "research_coordinate": "00110001100"
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00110001100",
+        "ukr": "знайти-запис-за-фактом",
+        "source_file": "lib/forward.lisp",
+        "source_blob": "71c49888ae95689f378321ed18088006e5c6dc79",
+        "law": "Рекурсивний пошук першого структурно рівного ключа JTMS за справжнім SENS-предикатом уніфікація-рівні?; повертається незмінений запис із усіма обґрунтуваннями, відсутній ключ дає (), наступний дублікат не витісняє перший.",
+        "native_law_test": "crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs::d11_jtms_знайти_запис_за_фактом_зберігає_докази_й_перший_збіг",
+        "native_test_blob": "16192907754e3bca3963b9c7b2933c16c377420f",
+        "native_test_result": "NATIVE_SENS_PASS_11_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39704432519",
+        "native_step_result": "FORWARD_STEP_SUCCESS_WITH_UNRELATED_CI_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Реальне SENS-виконання пошуку й 11 позитивних та негативних D1 свідків після виправлення бібліотечного виклику",
+        "historical_research_alias": "FIND-ENTRY"
+      }
     },
     {
       "surface_name": "GET-THRESHOLD",
@@ -4333,8 +4350,8 @@
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 42,
-    "semantic_winners_total": 554,
+    "native_sens_composition_winners": 43,
+    "semantic_winners_total": 555,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
