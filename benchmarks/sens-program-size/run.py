@@ -140,6 +140,23 @@ def binary_annotation(path: str, metrics: dict[str, int | str]) -> str:
     )
 
 
+
+def benchmark_summary_annotation(results: list[dict[str, int | str]]) -> str:
+    """Summarize only programs actually executed through the physical SENS path."""
+    if not results:
+        raise ValueError("cannot summarize an empty measured cohort")
+    return (
+        "::notice title=SENS T5M executable cohort::"
+        f"programs={len(results)}; "
+        f"T5M={sum(int(row['t5m_bytes']) for row in results)} B; "
+        f"AST nodes={sum(int(row['ast_nodes']) for row in results)}; "
+        f"evaluator visits={sum(int(row['eval_visits']) for row in results)}; "
+        f"words={sum(int(row['exact_words']) for row in results)}; "
+        f"semantic bits={sum(int(row['exact_bits']) for row in results)}; "
+        "execution/parity=PASS; no wall-time claim"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     inputs = parser.add_mutually_exclusive_group(required=True)
@@ -166,6 +183,7 @@ def main() -> int:
             f"t5m_bytes={metrics['t5m_bytes']} result={metrics['result']}"
         )
     print(f"SENS_BINARY_BENCHMARKED count={len(results)} input=physical-sens parity=PASS")
+    print(benchmark_summary_annotation(results))
 
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
