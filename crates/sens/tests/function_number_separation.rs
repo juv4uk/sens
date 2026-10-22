@@ -1,8 +1,8 @@
 //! Чинний SENS: точна D5 identity не є числом D24+ і навпаки.
-//! Жодна історична 8-бітна Function8/SID8 коробка не потрібна.
+//! Людський десятковий запис аргументів належить математичному D24+, не коду D5.
 use sens::{
     eval_program, lower_program, parse, parse_exact_domain_source, Bit5, CoreD5,
-    DomainIdentity, ErrorKind, ExprKind, Session, Value,
+    DomainIdentity, ExprKind, Session, Value,
 };
 
 fn додавання_d5() -> DomainIdentity {
@@ -10,8 +10,8 @@ fn додавання_d5() -> DomainIdentity {
 }
 
 #[test]
-fn українське_додавання_виконується_як_d5_над_d24_а_не_як_sid8() {
-    let source = "(додати #d24:000000000000000000000100 #d24:000000000000000000000110)";
+fn українське_додавання_приймає_десяткову_проєкцію_d24_з_d5_головою() {
+    let source = "(додати 4 6)";
     let lowered = lower_program(&parse(source).expect("читач українського Lisp"));
     let [expr] = lowered.as_slice() else {
         panic!("потрібен один виклик");
@@ -39,17 +39,23 @@ fn голе_d5_слово_є_доменом_а_не_десятковим_чис�
         panic!("потрібна одна D5 identity");
     };
     assert_eq!(expr.kind, ExprKind::DomainIdentity(додавання_d5()));
-    assert_ne!(
-        Value::DomainIdentity(додавання_d5()),
-        Value::Number(10.0, sens::Exactness::Exact),
-    );
+    let numeric = eval_program("10", &mut Session::default())
+        .expect("людська десяткова проєкція D24+ у SENS")
+        .value;
+    assert_ne!(Value::DomainIdentity(додавання_d5()), numeric);
 }
 
 #[test]
-fn голі_числа_не_стають_операндами_d24_за_збігом_бітів() {
-    let error = eval_program("(додати 1 2)", &mut Session::default())
-        .expect_err("без явного D24 арифметика має відмовити");
-    assert_eq!(error.kind, ErrorKind::Type);
+fn людські_числа_є_d24_операндами_але_не_кодами_функцій() {
+    let value = eval_program("(додати 1 2)", &mut Session::default())
+        .expect("SENS виконує D5 над сучасною десятковою проєкцією D24+")
+        .value;
+    let Value::BinaryNumber(number) = &value else {
+        panic!("потрібне математичне значення D24+, отримано: {value:?}");
+    };
+    assert_eq!(number.numeric_domain_width(), Some(24));
+    assert_eq!(number.to_decimal_string(), "3");
+    assert_ne!(value, Value::DomainIdentity(додавання_d5()));
 }
 
 #[test]
