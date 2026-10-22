@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 325,
+    "total": 333,
     "historical": 28,
-    "library": 297,
-    "distinct_families": 115
+    "library": 305,
+    "distinct_families": 123
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -8155,6 +8155,182 @@
       "lower_crosswalk_coordinates_verified": true,
       "semantic_distinctness": "UNPROVEN",
       "native_test_result": "NOT_NATIVE_TESTED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "порахувати-сусідні-атомні-серії",
+      "source_family": "atomic-adjacent-run-count-unary",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-count-consecutive-atomic-runs-unary-general.lisp",
+        "blob_sha": "875d4ca718f2868b3b97780ccd5c599cd17489ec",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → list(unary-marker)",
+      "law": "Кількість максимальних суміжних серій однакових атомів як унарний список; складена пара перериває серію, навіть якщо навколо однакові атоми.",
+      "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "останній-глобально-одиночний-атом",
+      "source_family": "last-globally-singleton-atom",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-last-globally-unique-atom-general.lisp",
+        "blob_sha": "0bead6679bd0c818b1cc82824b147fa1454d169e",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → atom | ()",
+      "law": "Повернути правий найпізніший атом, який має рівно одне входження в усьому списку; не рахувати вкладені списки чи повтори після відкидання префікса.",
+      "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "спільний-префікс-трьох-атомних-списків",
+      "source_family": "three-way-longest-atomic-prefix",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-common-prefix-three-atoms-general.lisp",
+        "blob_sha": "2e5b085aa7d8d08c647d338f553963e864b7a1ff",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × list(atom) × list(atom) → list(atom)",
+      "law": "Максимальний початковий атомний фрагмент одночасно спільний трьом спискам; зупинка при першому порожньому списку, складеній голові або розходженні.",
+      "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "хвіст-від-першого-атома",
+      "source_family": "zero-copy-first-atom-suffix",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-drop-leading-compounds-zero-copy-general.lisp",
+        "blob_sha": "df523795f08f9ac009e9af73f6e26bea0a32f891",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → suffix | ()",
+      "law": "Пропустити всі початкові складені елементи, повернути наявний вихідний суфікс з першого атомного елемента; не створювати нових пар.",
+      "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "суфікс-другої-половини",
+      "source_family": "two-pointer-middle-suffix",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-middle-suffix-two-pointers-zero-copy-general.lisp",
+        "blob_sha": "af13e0115c56193fc160b286121af2f69927027a",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → suffix",
+      "law": "Повернути наявний суфікс довжини заокругленої вгору половини для непарної довжини: середній елемент зберігається, два покажчики без числових літералів.",
+      "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "вилучити-лише-внутрішні-входження",
+      "source_family": "interior-only-atom-delete",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-remove-interior-matching-atoms-general.lisp",
+        "blob_sha": "51ac6ced1f9276628f4e4c4ec673ea39900a7e90",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list × atom → proper-list",
+      "law": "Вилучити всі збіги з шуканим атомом, крім першої та останньої позиції списку; крайні елементи зберегти незалежно від їхнього значення.",
+      "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "залишити-повторені-атоми-один-раз",
+      "source_family": "first-of-repeated-atoms-only",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-keep-repeated-atoms-once-general.lisp",
+        "blob_sha": "966893b4348d3cda6ea6cd75292ad56672855ef0",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → list(atom)",
+      "law": "Залишити перше входження лише тих атомів, що мають щонайменше два входження в початковій послідовності; не плутати з усуненням усіх дублікатів.",
+      "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "замінити-останнє-входження",
+      "source_family": "stable-replace-rightmost-equal-atom",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-replace-last-occurrence-general.lisp",
+        "blob_sha": "e8d944f5dc67f08d6b8d0d23d98349a2c7080ab2",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list × atom × value → proper-list",
+      "law": "Замінити тільки найправіше входження шуканого атома, зберегти кратність усіх інших та їхній порядок; за відсутності збігу залишити список без змін.",
+      "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true
     }
   ],
