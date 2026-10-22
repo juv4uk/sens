@@ -238,7 +238,7 @@ def check_main_t5_ingress(source: str) -> None:
         r"(?m)^\s*(?:#\[path\s*=.*?\]\s*)?mod\s+zig_transport\s*;", live
     ):
         raise CorridorBlocked("sens main must import exactly one live, feature-gated shared Zig bridge")
-    ingress = _route_between(source, "fn decode_physical_t5_words(", "\nfn eval_physical_t5(")
+    ingress = _route_between(source, "fn decode_physical_t5m_words(", "\nfn eval_physical_t5(")
     positive = '#[cfg(feature = "zig-transport")]'
     negative = '#[cfg(not(feature = "zig-transport"))]'
     if ingress.count(positive) != 1 or ingress.count(negative) != 1:
@@ -248,7 +248,7 @@ def check_main_t5_ingress(source: str) -> None:
     # Require the real return call on the default-feature ingress path.
     active_zig = re.sub(r"/\*.*?\*/|//[^\n]*", "", zig, flags=re.S)
     if not re.search(
-        r"(?m)^\s*return\s+zig_transport::decode_t5_exact_words\s*\(\s*bytes\s*\)\s*\?",
+        r"(?m)^\s*return\s+zig_transport::decode_t5m_exact_words\s*\(\s*bytes\s*\)\s*\?",
         active_zig,
     ):
         raise CorridorBlocked("sens main default physical .sens lacks live Zig return")
@@ -261,7 +261,7 @@ def check_main_t5_ingress(source: str) -> None:
         "fn eval_physical_t5(",
         "\nfn eval_physical_t5_with_benchmark_metrics(",
     )
-    if "decode_physical_t5_words(bytes)?" not in eval_route:
+    if "decode_physical_t5m_words(bytes)?" not in eval_route:
         raise CorridorBlocked("sens main eval bypasses Zig physical ingress")
     if ("sens::decode_ternary_words(" in eval_route
             or "PhysicalT5Program::decode(" in eval_route
@@ -300,7 +300,7 @@ def check_trit_t5_egress(source: str) -> None:
     if encode.count(feature) != 1 or encode.count(nozig) != 1:
         raise CorridorBlocked("sens-trit encode missing exclusive Zig/no-Zig feature gates")
     zig, refused = encode.split(nozig, 1)
-    required = "let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;"
+    required = "let bytes = zig_transport::encode_t5m_direct(&admitted_source_words(&projection)?)?;"
     live_zig = re.sub(r"/\*.*?\*/|//[^\n]*", "", zig, flags=re.S)
     if not re.search(r"(?m)^[ \t]*" + re.escape(required) + r"[ \t]*$", live_zig):
         raise CorridorBlocked("sens-trit default encode lacks live Zig physical T5 egress")
@@ -337,7 +337,7 @@ def check_trit_t5_egress(source: str) -> None:
     for required_companion in (
         "let expected_words = admitted_source_words(source)?;",
         "if decoded != expected_words",
-        "zig_transport::encode_t5(&expected_words, binary)",
+        "zig_transport::verify_t5m_encoding(&expected_words, binary)",
     ):
         if required_companion not in zig_companion:
             raise CorridorBlocked("sens-trit companion no longer checks SENS words and Zig bytes")
@@ -355,14 +355,14 @@ def check_trit_t5_egress(source: str) -> None:
 def check_trit_explain_typed_word_route(source: str) -> None:
     """The real Zig T5 ingress must feed SENS typed words, never a text reparse."""
     route = _route_between(
-        source, "fn explain_t5_bytes(", "\nfn require_zig_transport("
+        source, "fn explain_t5m_bytes(", "\nfn require_zig_transport("
     )
     live = re.sub(r"/\*.*?\*/|//[^\n]*", "", route, flags=re.S)
     zig_marker = '#[cfg(feature = "zig-transport")]'
     if live.count(zig_marker) != 1:
         raise CorridorBlocked("sens-trit explain missing sole Zig physical branch")
     active = live.split(zig_marker, 1)[1]
-    if "zig_transport::decode_t5_words(bytes)" not in active:
+    if "zig_transport::decode_t5m_words(bytes)" not in active:
         raise CorridorBlocked("sens-trit explain bypasses physical Zig T5 ingress")
     if "sens::parse_canonical_word_sequence(&words)" not in active:
         raise CorridorBlocked("sens-trit explain does not admit exact SENS words")
@@ -378,7 +378,7 @@ def check_trit_explain_typed_word_route(source: str) -> None:
 
 def check_trit_e1_egress(source: str) -> None:
     """One E1 physical export MUST be Zig->SENS-owned admission->Zig."""
-    route = _route_between(source, "\nfn encode_e1_from_t5(", "\nfn eval_e1_bytes(")
+    route = _route_between(source, "\nfn encode_e1_from_t5m(", "\nfn eval_e1_bytes(")
     negative = '#[cfg(not(feature = "zig-transport"))]'
     positive = '#[cfg(feature = "zig-transport")]'
     if route.count(negative) != 1 or route.count(positive) != 1:
@@ -386,16 +386,16 @@ def check_trit_e1_egress(source: str) -> None:
     fail, active = route.split(positive, 1)
     if negative not in fail or "no Rust fallback" not in fail:
         raise CorridorBlocked("sens-trit E1 feature-negative must refuse before decoding")
-    if "decode_canonical_t5_words(physical_t5)" in fail:
+    if "decode_canonical_t5m_words(physical_t5)" in fail:
         raise CorridorBlocked("sens-trit E1 decodes in Rust before refusing missing Zig")
-    if ("decode_canonical_t5_words(physical_t5)" not in active
+    if ("decode_canonical_t5m_words(physical_t5)" not in active
             or "zig_transport::encode_e1_direct(&words)" not in active):
         raise CorridorBlocked("sens-trit E1 missing Zig ingress or physical egress")
     if "sens::envelope_e1::encode(" in route or "sens::decode_ternary_words(" in route:
         raise CorridorBlocked("sens-trit E1 uses direct Rust physical codec")
     arm = _route_between(source, '\n        "encode-e1" => {\n',
                          '\n        "eval-e1" => {\n')
-    if "encode_e1_from_t5(&bytes)?" not in arm:
+    if "encode_e1_from_t5m(&bytes)?" not in arm:
         raise CorridorBlocked("sens-trit encode-e1 command bypasses guarded Zig helper")
 
 
@@ -426,8 +426,8 @@ def check_trit_e1_ingress(source: str) -> None:
 
 def check_trit_t5_execution(source: str) -> None:
     """Live eval/eval-core4 execution may only receive physical T5 from Zig."""
-    route = _route_between(source, "\nfn eval_t5_bytes_core4(",
-                           "\nfn explain_t5_bytes(")
+    route = _route_between(source, "\nfn eval_t5m_bytes_core4(",
+                           "\nfn explain_t5m_bytes(")
     off = '#[cfg(not(feature = "zig-transport"))]'
     on = '#[cfg(feature = "zig-transport")]'
     if route.count(off) != 1 or route.count(on) != 1:
@@ -438,7 +438,7 @@ def check_trit_t5_execution(source: str) -> None:
         raise CorridorBlocked("sens-trit no-Zig T5 execution must refuse first")
     # The live route moved to the exact D24+ words ingress (Zig restores exact
     # widths; SENS admits exact domain words) -- still Zig-mediated, never Rust.
-    if ("zig_transport::decode_t5_exact_words(bytes)?" not in active
+    if ("zig_transport::decode_t5m_exact_words(bytes)?" not in active
             or ("sens::PhysicalT5Program::from_exact_domain_words(&words)" not in active
                 and "sens::PhysicalT5Program::from_exact_domain_words_owned(words)" not in active)
             or ".execute(&mut session)" not in active):
@@ -449,8 +449,8 @@ def check_trit_t5_execution(source: str) -> None:
         raise CorridorBlocked("sens-trit T5 execution contains Rust physical codec")
     arm = _route_between(source, '\n        "eval" | "eval-core4" => {\n',
                          '\n        "encode-e1" => {\n')
-    if ('eval_t5_bytes_core4(&bytes, true)?' not in arm
-            or 'eval_t5_bytes(&bytes)?' not in arm):
+    if ('eval_t5m_bytes_core4(&bytes, true)?' not in arm
+            or 'eval_t5m_bytes(&bytes)?' not in arm):
         raise CorridorBlocked("live eval/eval-core4 command bypasses Zig-gated execution")
 
 
@@ -465,10 +465,11 @@ def check_trit_f3_no_rust_fallback(source: str) -> None:
     if route.count(marker) != 2:
         raise CorridorBlocked("sens-trit F3C must gate both missing-Zig branches")
     ingress, egress = route.split("fn encode_f3_carrier(", 1)
+    # Поточна форма коридору: вхід декодує T5M через Zig (decode_t5m_words),
+    # вихід пакує через Zig (encode_f3). Обидва боки лишаються обов'язковими.
     if ("zig_transport::decode_f3(bytes)?" not in ingress
-            or "zig_transport::decode_t5_words(&restored)?" not in ingress
-            or "return zig_transport::encode_f3(bytes);" not in egress
-            or "zig_transport::decode_t5_words(bytes)?" not in egress):
+            or "zig_transport::decode_t5m_words(&restored)?" not in ingress
+            or "return zig_transport::encode_f3(bytes);" not in egress):
         raise CorridorBlocked("sens-trit F3C ingress/egress bypasses Zig ABI")
     # Remove comments before source-level evidence; inert markers are no proof.
     live = re.sub(r"/\*.*?\*/|//[^\n]*", "", route, flags=re.S)
@@ -491,7 +492,7 @@ def check_f3c_validate_before_no_savings(body: str) -> None:
     """F3C no-savings must never bypass Zig physical T5 validation.
 
     The public input is current T5M. encode_f3 decodes it through
-    decode_t5_words, whose first step is the Zig T5M validator, before any
+    decode_t5m_words, whose first step is the Zig T5M validator, before any
     no-savings decision. A malformed carrier must fail closed, not report None.
     """
     prod = _production_source(body)
@@ -503,21 +504,21 @@ def check_f3c_validate_before_no_savings(body: str) -> None:
     if end not in prod[start:]:
         raise CorridorBlocked("zig_transport.rs encode_f3 route not bounded")
     route = prod[start:prod.index(end, start)]
-    decode_call = "decode_t5_words(t5)?"
+    decode_call = "decode_t5m_words(t5)?"
     no_savings = "if legacy.len() > 16"
     if decode_call not in route:
         raise CorridorBlocked(
             "encode_f3 must decode/validate its T5M input through the Zig path"
         )
-    decode_words = "pub fn decode_t5_words("
+    decode_words = "pub fn decode_t5m_words("
     decode_words_end = "fn decode_legacy_t5_words("
     if decode_words not in prod or decode_words_end not in prod[prod.index(decode_words):]:
         raise CorridorBlocked("zig_transport.rs missing bounded T5M decoder")
     decode_start = prod.index(decode_words)
     decode_route = prod[decode_start:prod.index(decode_words_end, decode_start)]
-    if "validate_t5(bytes)?" not in decode_route:
-        raise CorridorBlocked("decode_t5_words must validate T5M before Zig decode")
-    validate = "pub fn validate_t5(bytes: &[u8])"
+    if "validate_t5m(bytes)?" not in decode_route:
+        raise CorridorBlocked("decode_t5m_words must validate T5M before Zig decode")
+    validate = "pub fn validate_t5m(bytes: &[u8])"
     if validate not in prod:
         raise CorridorBlocked("zig_transport.rs missing T5M validator")
     validate_start = prod.index(validate)
