@@ -1651,39 +1651,6 @@ jobs:
 
 
 
-      # Лише за явним комітом конкурсу; один наявний центральний CI.
-      # Фізичні байти видають справжні SENS/Zig, не скрипт або Python.
-      - name: "Конкурс — нативне доведення нових українських трійок T5M"
-        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-CONTEST:') }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo build --locked -p sens-cli --bin sens --bin sens-trit
-          exported=0
-          for source in benchmarks/contest-uk/*.lisp; do
-            [[ -f "$source" && ! -L "$source" ]] || continue
-            base="${source%.lisp}"
-            if [[ -e "$base.sens" || -e "$base" || -L "$base.sens" || -L "$base" ]]; then
-              if [[ ! -s "$base.sens" || ! -f "$base" || -L "$base.sens" || -L "$base" ]]; then
-                echo "::error::CONTEST_HALF_PAIR source=$source"
-                exit 1
-              fi
-              continue
-            fi
-            # Атомарний нативний ремонт з D1 результатом, Zig verify-view,
-            # парним / standalone SENS і негативним мутантом.
-            bash scripts/refresh-executed-t5m-pair.sh "$source" target/debug/sens
-            SENS_CONTEST_PROOF_ONLY=true bash benchmarks/contest-uk/judge.sh "$base.sens"
-            # Цей текстовий чек потрібний тільки для перенесення справжніх
-            # байтів із runner; жоден base64/host не визначає семантику.
-            name="${base##*/}"
-            printf 'CONTEST_MINT_SOURCE name=%s sha256=%s\n' "$name" "$(sha256sum "$source" | cut -d' ' -f1)"
-            printf 'CONTEST_MINT_SENS name=%s base64=%s\n' "$name" "$(base64 -w0 < "$base.sens")"
-            printf 'CONTEST_MINT_VIEW name=%s base64=%s\n' "$name" "$(base64 -w0 < "$base")"
-            exported=$((exported + 1))
-          done
-          echo "CONTEST_MINT_DONE native_verified_new=$exported"
-          
       - name: "ONE-SHOT — нативні SENS/Zig T5M-пари поточних lib-програм"
         if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') }}
         shell: bash
