@@ -35,7 +35,11 @@ jobs:
           set -uo pipefail
           list="$FILES"
           if [ -z "$list" ]; then
-            list="$(git log --diff-filter=A --name-only -n 600 -- '*.sens' | grep '\.sens$' | sed 's/\.sens$/.lisp/' | sort -u)"
+            if [ -f scripts/remint-drifted-pairs.txt ]; then
+              list="$(grep -vE '^[[:space:]]*(#|$)' scripts/remint-drifted-pairs.txt)"
+            else
+              list="$(git log --diff-filter=A --name-only -n 600 -- '*.sens' | grep '\.sens$' | sed 's/\.sens$/.lisp/' | sort -u)"
+            fi
           fi
           echo "candidates:"; printf '%s\n' "$list" | sed '/^$/d' | wc -l
           ok=0; skip=0
