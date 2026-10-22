@@ -235,6 +235,115 @@ fn meta_eval_predicates_are_actual_d1_bits() {
             "meta-eval повинен повернути саме D1: {source}",
         );
     }
+
+
+    // Д11: реальне SENS виконання двох бібліотечних композицій.
+    // Власний примітив створює пару (primitive ім'я); предикат
+    // читає структурний тег, не видаючи замикання за примітив.
+    for (case, source, expected) in [
+        (
+            "існуючий-тег",
+            "(це-примітив? (як-є (primitive атом?)))",
+            true,
+        ),
+        (
+            "конструктор-тег",
+            "(це-примітив? (власний-примітив (як-є атом?)))",
+            true,
+        ),
+        (
+            "конструктор-інше-ім'я",
+            "(це-примітив? (власний-примітив (як-є перше)))",
+            true,
+        ),
+        (
+            "сам-тег-у-списку",
+            "(це-примітив? (як-є (primitive)))",
+            true,
+        ),
+        (
+            "замикання-не-примітив",
+            "(це-примітив? (як-є (closure атом?)))",
+            false,
+        ),
+        (
+            "рекурсивне-замикання-не-примітив",
+            "(це-примітив? (як-є (recursive-closure атом?)))",
+            false,
+        ),
+        (
+            "подібний-тег-не-примітив",
+            "(це-примітив? (як-є (primitive-other атом?)))",
+            false,
+        ),
+        (
+            "порожній-список-не-примітив",
+            "(це-примітив? (як-є ()))",
+            false,
+        ),
+        (
+            "атом-не-примітив",
+            "(це-примітив? (як-є primitive))",
+            false,
+        ),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=d11-primitive-tag-{case} layer=SENS input={source} actual=error:{error}"
+            )).value;
+        assert_eq!(
+            result.as_predicate_bit(), Some(expected),
+            "test_id=d11-primitive-tag-{case} layer=SENS input={source} expected=D1:{expected} actual={result}"
+        );
+    }
+
+    // Незалежний свідок власне побудови даних — не тільки предиката.
+    // Обидві частини порівняння отримані через SENS.
+    for (case, source, expected_source, same) in [
+        (
+            "ім'я-атом",
+            "(власний-примітив (як-є атом?))",
+            "(як-є (primitive атом?))",
+            true,
+        ),
+        (
+            "ім'я-перше",
+            "(власний-примітив (як-є перше))",
+            "(як-є (primitive перше))",
+            true,
+        ),
+        (
+            "ім'я-невідоме",
+            "(власний-примітив (як-є довільне))",
+            "(як-є (primitive довільне))",
+            true,
+        ),
+        (
+            "не-заміняти-ім'я",
+            "(власний-примітив (як-є атом?))",
+            "(як-є (primitive перше))",
+            false,
+        ),
+        (
+            "не-підміняти-тег",
+            "(власний-примітив (як-є атом?))",
+            "(як-є (closure атом?))",
+            false,
+        ),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=d11-primitive-constructor-{case} layer=SENS input={source} actual=error:{error}"
+            )).value;
+        let expected = eval_program(expected_source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=d11-primitive-constructor-{case} layer=SENS expected_source={expected_source} actual=error:{error}"
+            )).value;
+        assert_eq!(
+            actual == expected, same,
+            "test_id=d11-primitive-constructor-{case} layer=SENS input={source} expected_source={expected_source} expected_equal={same} actual={actual}"
+        );
+    }
 }
 
 // Виконуємо оригінальні українські Lisp-свідки графа, не Python таблицю
