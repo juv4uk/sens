@@ -691,10 +691,15 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     // переписуваною назвою. FS, TCP і process можуть звернутися до
     // спільного UTF-8 після першого завантаження; другий DEFINE
     // того самого доменного коду порушує незмінність SENS.
-    let first = semantic_registry::d10_binding_identity_for_definition(
-        "кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні?",
-    )
-    .expect("ратифікована Д10 координата первинної UTF-8 функції");
+    // D10:0010111011 is the exact, owner-ratified `укр` coordinate in
+    // lib/domains/d10.lisp. The generic D10 definition-binding projection
+    // includes concrete Core4 definitions only; UTF-8 is loaded separately
+    // and must not be guessed from that narrower table (or from SID8/W8).
+    // This identity locates an existing SENS-defined closure, not a host
+    // implementation or blanket admission of a D10 resident.
+    let first = DomainIdentity::D10(
+        DomainD10::new(0b0010111011).expect("ратифікована Д10 координата UTF-8"),
+    );
     if session.environment.domain_code_slot(first).is_some() {
         let terminal = crate::encode_text7("успішно-декодовано?", crate::Text7Layout::Uk)
             .expect("кінцеве ім'я UTF-8 визначене українською клавіатурою")
