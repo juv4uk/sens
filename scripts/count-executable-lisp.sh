@@ -58,6 +58,16 @@ while IFS= read -r -d '' source; do
       printf 'NATIVE_DATA_ONLY\t%s\tclassification=EVIDENCE_INVENTORY\n' "$source" >&2
       continue ;;
   esac
+  # Прямо позначений інвентар сайтів є схемними даними, не викликом.
+  # Якщо файл перетвориться на програму, без точної кореневої форми
+  # автоматичного виключення не буде: його перевірить SENS/Zig.
+  if [[ "$source" == knowledge/silent-fallback-inventory.lisp &&
+        -f "$source" && ! -L "$source" ]] &&
+     LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$source"; then
+    (( nonprogram_data += 1 ))
+    printf 'NATIVE_DATA_ONLY\t%s\tclassification=SCHEMA_INVENTORY\n' "$source" >&2
+    continue
+  fi
   # Джерело лише з коментарів/порожніх рядків не має Lisp-програми.
   # Воно НЕ мусить мати вигадану фізичну трійку, тому не є missing.
   # Наявність хоча б одного некоментарного рядка залишає незмінними
