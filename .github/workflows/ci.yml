@@ -319,7 +319,7 @@ jobs:
             echo 'parser_benchmark_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Зміна чинної Lisp-семантики має запускати SENS, не лише source audit.
-          if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|lib/domains/d9[.]lisp|crates/sens/src/d9_definition_bindings_generated[.]rs|crates/sens/tests/d9_binary_surface_native[.]rs|tests/semantic/d9-four-uk-projections-laws[.]lisp|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|benchmarks/contest-uk/(run-native\.sh|[^/]+\.(lisp|sens))|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -733,6 +733,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests.test_code_runs.TranslationSelectorsUkrProjectionTests -v
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test d9_binary_surface_native -- --nocapture
 
       - name: "SENS D2 — незалежний Zig/T5M roundtrip фізичної пари"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' }}
