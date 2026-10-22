@@ -448,6 +448,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-interleave-three-general",
         "list-interleave-three-rotation-general",
         "list-drop-every-third-compact-general",
+        "list-drop-every-third-general",
         "list-split-atomic-prefix-general",
         "list-first-compound-general",
         "list-last-compound-suffix-general",
@@ -604,6 +605,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-interleave-three-general"
                 | "list-interleave-three-rotation-general"
                 | "list-drop-every-third-compact-general"
+                | "list-drop-every-third-general"
                 | "list-last-compound-suffix-general"
                 | "list-last-atom-suffix-general"
                 | "list-all-subsets-by-position-general"
@@ -906,6 +908,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-interleave-three-general",
         "lib/list-interleave-three-rotation-general",
         "lib/list-drop-every-third-compact-general",
+        "lib/list-drop-every-third-general",
         "lib/list-keep-repeated-atoms-once-general",
         "lib/list-last-repeated-atom-by-final-occurrence-general",
         "lib/list-last-compound-suffix-general",
