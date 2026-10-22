@@ -544,6 +544,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-first-globally-unique-atom-general"
                 | "list-prefix-before-repeat-general"
                 | "list-split-before-every-atom-general"
+                | "tree-contains-atom-general"
                 | "tree-replace-atom-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
@@ -798,6 +799,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-stable-intersection-general",
         "lib/list-prefix-atoms-general",
         "lib/list-strip-prefix-atoms-general",
+        "lib/tree-contains-atom-general",
         "lib/list-split-before-every-atom-general",
         "lib/list-first-globally-unique-atom-general",
         "lib/list-prefix-before-repeat-general",
