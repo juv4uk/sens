@@ -346,6 +346,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-collapse-adjacent",
         "list-collapse-adjacent-atoms",
         "list-common-prefix-general",
+        "list-common-prefix-three-atoms-general",
         "list-unique-stable",
         "розділити-до-першого-входження",
         "list-interleave-two-pairs",
@@ -498,6 +499,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-collapse-adjacent"
                 | "list-collapse-adjacent-atoms"
                 | "list-common-prefix-general"
+                | "list-common-prefix-three-atoms-general"
                 | "list-chunk-triplets-general"
                 | "list-common-suffix-general"
                 | "list-middle-even"
@@ -834,6 +836,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-collapse-adjacent-runs-general",
         "lib/list-neighbor-windows-general",
         "lib/list-common-prefix-general",
+        "lib/list-common-prefix-three-atoms-general",
         "lib/list-common-suffix-general",
         "lib/list-subsequence-atoms-general",
         "lib/list-rotate-inverse-general",
