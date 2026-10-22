@@ -341,6 +341,9 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-halfturn-four",
         "list-halfturn-six",
         "list-reverse-general",
+        "list-interleave-two-general",
+        "list-reverse-tail-general",
+        "list-last-adjacent-equal-atom-suffix-general",
         "list-drop-last-general",
         "list-append-general",
         "list-collapse-adjacent",
@@ -588,6 +591,9 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-move-first-match-to-front-general"
                 | "list-all-unordered-position-pairs-general"
                 | "list-distinct-unordered-atom-pairs-general"
+                | "list-interleave-two-general"
+                | "list-reverse-tail-general"
+                | "list-last-adjacent-equal-atom-suffix-general"
                 | "list-interleave-three-general"
                 | "list-interleave-three-rotation-general"
                 | "list-last-compound-suffix-general"
@@ -829,6 +835,9 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/rotate-four-left",
         "lib/rotate-four-right",
         "lib/list-reverse-general",
+        "lib/list-interleave-two-general",
+        "lib/list-reverse-tail-general",
+        "lib/list-last-adjacent-equal-atom-suffix-general",
         "lib/list-append-general",
         "lib/list-collapse-adjacent",
         "lib/list-collapse-adjacent-atoms",
