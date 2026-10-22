@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: fs COND + domain bitness.
+"""Лише механічний аудит сучасної української FS-проєкції й Д1–Д10.
 
-Axiom: the binary key width IS the domain address.
-Checks:
-  1. lib/fs.lisp has no bare host truthiness (t / T / NIL)
-  2. The fallback computes exact D1:1 with ATOM(QUOTE ()), not an unbound name
-  3. Reuses Ukrainian UTF-8 and raw filesystem capability projections
-  4. Key fs surface present
-  5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
-
-Run:
-    python3 scripts/test-fs-d1-bitness.py
+Не інтерпретує Lisp, не встановлює істину Д1, не підміняє SENS/Zig.
+Для реальної оберненості й виконання застосовувати native T5M суд.
 """
 from __future__ import annotations
 
@@ -19,13 +11,15 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FS = ROOT / "lib" / "fs.lisp"
+SOURCE = ROOT / "lib" / "fs.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
-HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "((атом? (як-є ()))"
+HOST = re.compile(r"(?<!\w)(?:t|T|NIL)(?!\w)")
+D1_FALLBACK = re.compile(r"\(\(атом\?\s+\(як-є\s+\(\)\)\)\s+декодоване\s*\)")
 REQUIRED = (
+    "файл-обробити-декодоване",
     "читати-файл",
     "записати-файл",
+    "успішно-декодовано?",
     "кодування-юнікод-8-кодувати-рядок",
     "читати-сирий-текст-файла",
     "записати-байти-файла",
@@ -33,67 +27,59 @@ REQUIRED = (
 
 
 def check_fs() -> list[str]:
-    errs: list[str] = []
-    if not FS.is_file():
-        return [f"missing {FS.relative_to(ROOT)}"]
-    text = FS.read_text(encoding="utf-8")
-    for m in HOST.finditer(text):
-        line_start = text.rfind("\n", 0, m.start()) + 1
-        line = text[line_start : text.find("\n", m.start())]
-        if line.lstrip().startswith(";"):
-            continue
-        errs.append(f"fs: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("fs: executable D1:1 = ATOM(QUOTE ()) missing")
-    if "#d1:1" in text:
-        errs.append("fs: encoded D1 literal is forbidden in primary source")
-    executable = "\n".join(line for line in text.splitlines()
-                             if not line.lstrip().startswith(";"))
-    if re.search(r"\(\s*[01]{3,9}(?=\s|\))", executable):
-        errs.append("fs: raw binary call head is forbidden in primary source")
-    if re.search(r"\(\s*так(?=\s|\))", executable):
-        errs.append("fs: unbound legacy truth head forbidden")
+    if not SOURCE.is_file():
+        return [f"FS_SOURCE_MISSING path={SOURCE.relative_to(ROOT)}"]
+    text = SOURCE.read_text(encoding="utf-8")
+    executable = "\n".join(
+        line.split(";", 1)[0] for line in text.splitlines()
+    )
+    errors = []
+    for token in HOST.finditer(executable):
+        errors.append(f"FS_HOST_TRUTH offset={token.start()} word={token.group()!r}")
+    if len(D1_FALLBACK.findall(executable)) != 1:
+        errors.append("FS_D1_FALLBACK expected=one_computed_ATOM_QUOTE actual=missing_or_duplicated")
+    if "#d1:" in executable:
+        errors.append("FS_RETIRED_TYPED_D1_LITERAL")
+    if re.search(r"\(\s*[01]{3,10}(?=\s|\))", executable):
+        errors.append("FS_RAW_BIT_CALL_HEAD")
+    if re.search(r"\(\s*(?:так|ні)(?=\s|\))", executable):
+        errors.append("FS_UNBOUND_TRUTH_HEAD")
     if "((функція " in executable:
-        errs.append("fs: anonymous D5 value-call forbidden")
-    for fn in REQUIRED:
-        if fn not in text:
-            errs.append(f"fs: required Ukrainian projection missing: {fn}")
-    return errs
+        errors.append("FS_ANONYMOUS_FUNCTION_HEAD")
+    for name in REQUIRED:
+        if name not in executable:
+            errors.append(f"FS_UKR_SURFACE_MISSING name={name}")
+    return errors
 
 
-def check_domain(n: int) -> list[str]:
-    path = ROOT / "lib" / "domains" / f"d{n}.lisp"
-    errs: list[str] = []
+def check_domain(width: int) -> list[str]:
+    path = ROOT / "lib" / "domains" / f"d{width}.lisp"
     if not path.is_file():
-        return [f"D{n}: missing"]
-    keys = ROW.findall(path.read_text(encoding="utf-8"))
-    expect = 1 << n
-    if len(keys) != expect:
-        errs.append(f"D{n}: expected {expect} rows, got {len(keys)}")
-    bad = [k for k in keys if len(k) != n]
-    if bad:
-        errs.append(f"D{n}: key width {len(bad[0])} != {n}")
-    if len(set(keys)) != len(keys):
-        errs.append(f"D{n}: duplicate coordinates")
-    return errs
+        return [f"DOMAIN_FILE_MISSING domain=D{width}"]
+    words = ROW.findall(path.read_text(encoding="utf-8"))
+    expected = 1 << width
+    errors = []
+    if len(words) != expected:
+        errors.append(f"DOMAIN_ROW_COUNT domain=D{width} expected={expected} actual={len(words)}")
+    for word in words:
+        if len(word) != width:
+            errors.append(f"DOMAIN_WORD_WIDTH domain=D{width} word={word}")
+            break
+    if len(set(words)) != len(words):
+        errors.append(f"DOMAIN_DUPLICATE_COORDINATE domain=D{width}")
+    return errors
 
 
 def main() -> int:
-    all_errs: list[str] = []
-    all_errs.extend(check_fs())
-    for n in range(1, 11):
-        all_errs.extend(check_domain(n))
-
-    if all_errs:
-        print("FS+BITNESS: BLOCKED", file=sys.stderr)
-        for e in all_errs:
-            print(f"  {e}", file=sys.stderr)
+    errors = check_fs()
+    for width in range(1, 11):
+        errors.extend(check_domain(width))
+    if errors:
+        for error in errors:
+            print(error, file=sys.stderr)
         return 1
-
-    print("FS: PASS — two-field COND, computed D1 and Ukrainian raw I/O")
-    for n in range(1, 11):
-        print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
-    print("BITNESS: PASS — every domain key width equals domain address")
+    print("FS_D1_DOMAIN_SOURCE_MECHANICAL_PASS semantic=NOT_ATTESTED inverse=NOT_ATTESTED")
+    print("NATIVE_PROOF_REQUIRED SENS=paired_and_standalone Zig=T5M_inverse")
     return 0
 
 
