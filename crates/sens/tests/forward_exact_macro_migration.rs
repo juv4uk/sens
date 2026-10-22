@@ -273,3 +273,44 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
         "до каскадного відкликання надходять лише факти без підстав"
     );
 }
+
+#[test]
+fn exact_d9_definition_accepts_real_sens_macro_not_plain_data() {
+    // Точна Д9-голова (не старий SID8) зберігає макросний D5-механізм.
+    // Нативний оцінювач отримує сирий AST, а не Python/JSON-імітацію.
+    let mut session = Session::default();
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("завантажити чинний SENS Core");
+
+    let macro_source =
+        "(визначити ствердити-факт! (макрос (функція (факт) факт)))";
+    let parsed = parse_mixed_exact_domain_reasoning_source("lib/forward.lisp", macro_source)
+        .expect("точна Д9-голова макроса");
+    let defined = eval_parsed_expressions(&parsed, &mut session)
+        .expect("точна Д9-голова приймає виконуване значення D5 МАКРОС");
+    assert!(matches!(defined.value, Value::Macro(_)));
+
+    let call = parse_mixed_exact_domain_reasoning_source(
+        "lib/forward.lisp",
+        "(ствердити-факт! (як-є насіння))",
+    )
+    .expect("реальний виклик макроса");
+    let actual = eval_parsed_expressions(&call, &mut session)
+        .expect("виконати макрос у SENS");
+    assert_eq!(actual.value.to_string(), "насіння");
+
+    let mut negative = Session::default();
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut negative)
+        .expect("завантажити незалежне середовище SENS");
+    let noncallable = parse_mixed_exact_domain_reasoning_source(
+        "lib/forward.lisp",
+        "(визначити ствердити-факт! (як-є ()))",
+    )
+    .expect("прочитати негативну форму");
+    let error = eval_parsed_expressions(&noncallable, &mut negative)
+        .expect_err("точний Д9-механізм не можна замінити даними");
+    assert!(
+        error.to_string().contains("exact DEFINE target requires a callable"),
+        "неправильна відмова для даних: {error}"
+    );
+}
