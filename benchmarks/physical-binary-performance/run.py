@@ -107,6 +107,24 @@ def i_refs(argv: list[str]) -> int:
     return int(match.group(1).replace(b",", b""))
 
 
+
+def action_notice(runtime: dict, encoding: dict) -> str:
+    """One measured process-latency annotation per parity-admitted T5 program."""
+    if runtime["fixture"] != encoding["committed_fixture"] or runtime["lane"] != "sens-exec":
+        raise ValueError("annotation requires matching physical T5 execution and encoding")
+    if encoding["bytewise_matches_committed"] is not True:
+        raise ValueError("annotation requires proven identical T5 bytes")
+    return (
+        f"::notice title=SENS physical T5 · {Path(runtime['fixture']).name}::"
+        f"execution p50={runtime['median_wall_ms']:.3f} ms; "
+        f"p95={runtime['p95_wall_ms']:.3f} ms; "
+        f"encode p50={encoding['encode_median_wall_ms']:.3f} ms; "
+        f"T5={runtime['physical_bytes']} B; "
+        f"view/T5={runtime['visible_to_physical_ratio']:.3f}x; "
+        "parity=PASS; process startup and I/O included; legacy T5 corpus"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sens", type=Path, required=True)
@@ -452,6 +470,11 @@ def main() -> None:
     )
     (args.out / "report.md").write_text("\n".join(lines), encoding="utf-8")
     print("\n".join(lines))
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        compiled = {row["committed_fixture"]: row for row in compile_summaries}
+        for runtime in summaries:
+            if runtime["lane"] == "sens-exec":
+                print(action_notice(runtime, compiled[runtime["fixture"]]))
     compile_tmp.cleanup()
 
 
