@@ -64,6 +64,27 @@ fn d11_stable_intersection_retains_left_multiplicity_not_right_counts() {
 }
 
 #[test]
+fn d11_multiset_difference_consumes_copies_in_left_order() {
+    // Rust лише викликає справжній SENS: усі відповіді породжує eval_program.
+    // Перевіряємо кратності, порядок і негативи без окремого host-алгоритму.
+    let mut session = with_source(include_str!(
+        "../../../lib/list-multiset-difference-general.lisp"
+    ));
+    witness(&mut session, "MULTISET-DIFFERENCE", &[
+        ("empty", r#"(однакові? (різниця-мультимножин (як-є ()) (як-є ())) (як-є ()))"#, true),
+        ("empty-right", r#"(однакові? (різниця-мультимножин (як-є (а б а)) (як-є ())) (як-є (а б а)))"#, true),
+        ("no-match", r#"(однакові? (різниця-мультимножин (як-є (а б а)) (як-є (г))) (як-є (а б а)))"#, true),
+        ("remove-first", r#"(однакові? (різниця-мультимножин (як-є (а б а)) (як-є (а))) (як-є (б а)))"#, true),
+        ("remove-middle", r#"(однакові? (різниця-мультимножин (як-є (а б в)) (як-є (б))) (як-є (а в)))"#, true),
+        ("remove-last", r#"(однакові? (різниця-мультимножин (як-є (а б в)) (як-є (в))) (як-є (а б)))"#, true),
+        ("ordered-min", r#"(однакові? (різниця-мультимножин (як-є (а б а а в)) (як-є (а а б))) (як-є (а в)))"#, true),
+        ("right-surplus", r#"(однакові? (різниця-мультимножин (як-є (а б)) (як-є (а а б б))) (як-є ()))"#, true),
+        ("reject-set-subtraction", r#"(однакові? (різниця-мультимножин (як-є (а а а)) (як-є (а))) (як-є ()))"#, false),
+        ("reject-reordering", r#"(однакові? (різниця-мультимножин (як-є (а б а)) (як-є (а))) (як-є (а б)))"#, false),
+    ]);
+}
+
+#[test]
 fn d11_multiset_intersection_has_minimum_multiplicity() {
     let mut session = with_source(include_str!(
         "../../../lib/list-multiset-intersection-general.lisp"
