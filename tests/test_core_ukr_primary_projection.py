@@ -110,14 +110,16 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertNotIn("(визначити pair пара)", core4)
             self.assertNotIn("(визначити second друге)", core4)
             self.assertNotIn("(визначити third третє)", core4)
-            # четверте переїхало з core4 у core.lisp (чинна компактна поверхня)
-            self.assertIn(
-                "(визначити четверте\n"
-                "  (функція (значення-функції)\n"
-                "    (третє (решта значення-функції))))",
-                source("lib/core.lisp"),
+            # Д6:100111 — ратифікована тотожність. Допоміжне
+            # визначення не повинне дублюватися в Core4; перевіряємо
+            # закон композиції, а не випадкове ім'я формального параметра.
+            # Окремий SENS runtime oracle перевіряє саме виконання.
+            self.assertRegex(
+                core,
+                r"\(визначити\s+четверте\s+\(функція\s+\(([^()\s]+)\)\s+"
+                r"\(третє\s+\(решта\s+\1\)\)\)\)",
             )
-            self.assertNotIn("(визначити четверте fourth)", core4)
+            self.assertNotRegex(core4, r"(?m)^\(визначити\s+четверте(?=\s|\))")
 
         with self.subTest(file="lib/surface/uk.lisp"):
             # Чинна компактна поверхня — проєкція, а не файл
