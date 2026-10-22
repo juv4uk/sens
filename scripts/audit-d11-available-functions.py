@@ -197,6 +197,7 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
                         "crates/sens/tests/codec_in_sens.rs::d11_кодек_д2_три_допоміжні_закони_у_sens",
                         "crates/sens/tests/world_ancestor_sens.rs::d11_world_remove_first_native_law_and_mutant",
                         "crates/sens/tests/world_ancestor_sens.rs::d11_world_event_and_module_presence_are_native_sens_compositions",
+                        "crates/sens/tests/world_ancestor_sens.rs::d11_world_internal_three_defined_compositions",
                         "crates/sens/tests/scientific_constants.rs::d11_si_три_закони_запису_значення_та_одиниці",
                         "crates/sens/tests/repl_core_malformed_tails.rs::d11_four_repl_library_laws_run_inside_sens",
                         "crates/sens/tests/epistemic_exact_ref_equality.rs::посилання_на_джерело_повертає_точні_значення_d1",
