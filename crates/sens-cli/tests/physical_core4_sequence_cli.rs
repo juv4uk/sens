@@ -349,10 +349,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-reverse-tail-general",
         "list-last-adjacent-equal-atom-suffix-general",
         "list-first-adjacent-equal-atom-suffix-general",
-        "list-every-fourth-linear-general"
-        "list-every-second-general"
+        "list-every-fourth-linear-general",
+        "list-every-second-general",
         "list-every-third-linear-general",
-        "list-drop-three-zero-copy-general"
+        "list-drop-three-zero-copy-general",
         "list-drop-two-zero-copy-general",
         "list-drop-last-general",
         "list-append-general",
@@ -489,7 +489,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-suffix-after-first-atomic-triple-zero-copy-general",
         "list-suffix-after-last-atomic-triple-zero-copy-general",
         "list-suffix-after-last-atomic-pair-zero-copy-general",
-        "list-suffix-from-last-compound-zero-copy-general"
+        "list-suffix-from-last-compound-zero-copy-general",
         "list-tail-after-second-atom-zero-copy-general",
         "list-suffix-after-last-compound-zero-copy-general",
         "pair-associativity-law",
@@ -497,12 +497,12 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "rotate-left",
         "rotate-three-right",
         "замінити-третій-в-четвірці",
-        "list-last-element-zero-copy-general"
+        "list-last-element-zero-copy-general",
         "list-last-three-zero-copy-general",
         "list-tail-after-fourth-compound-zero-copy-general",
         "list-tail-after-third-compound-zero-copy-general",
         "list-penultimate-element-zero-copy-general",
-        "list-suffix-after-first-compound-atom-zero-copy-general"
+        "list-suffix-after-first-compound-atom-zero-copy-general",
         "list-suffix-after-first-adjacent-compounds-zero-copy-general",
         "list-suffix-after-first-adjacent-atom-pair-zero-copy-general",
         "list-unique-stable-fast-general",
