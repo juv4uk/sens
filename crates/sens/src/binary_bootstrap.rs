@@ -13,6 +13,10 @@ pub(super) fn core3_program() -> Result<PhysicalT5Program, LanguageError> {
     program(CORE3_BOOTSTRAP_WORDS)
 }
 
+pub(super) fn time_program() -> Result<PhysicalT5Program, LanguageError> {
+    program(TIME_BOOTSTRAP_WORDS)
+}
+
 fn program(restored: &[(usize, &[u8])]) -> Result<PhysicalT5Program, LanguageError> {
     let words = restored
         .iter()

@@ -56,6 +56,34 @@ fn exact_domain_code_as_a_value_invokes_its_bound_definition() {
 }
 
 #[test]
+fn an_admitted_d9_or_d10_definition_is_called_by_its_exact_code() {
+    for target in ["101111001", "0100001100"] {
+        let mut session = Session::bare();
+        let definition = format!("(0011 {target} (0010 () (001 1)))");
+        eval_exact_domain_program(&definition, &mut session)
+            .unwrap_or_else(|error| panic!("admitted exact target {target}: {error}"));
+
+        let call = format!("({target})");
+        let result = eval_exact_domain_program(&call, &mut session)
+            .unwrap_or_else(|error| panic!("exact code call {target}: {error}"));
+        assert!(
+            matches!(
+                result.value,
+                sens::Value::DomainIdentity(sens::DomainIdentity::D1(bit))
+                    if bit.word().packed_bits() == 1
+            ),
+            "exact target {target} must return its D1 value, got {}",
+            result.value
+        );
+    }
+
+    let mut session = Session::bare();
+    let error = eval_exact_domain_program("(0011 0000000 (0010 () (001 1)))", &mut session)
+        .expect_err("D7 data identity cannot become callable by D4 DEFINE");
+    assert_eq!(error.kind, ErrorKind::InvalidForm);
+}
+
+#[test]
 fn local_lexical_shadow_does_not_retarget_an_exact_domain_code() {
     let mut session = core_session();
     assert_eq!(

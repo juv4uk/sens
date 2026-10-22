@@ -318,7 +318,7 @@ fn catalog_domain_identity(identity: &str) -> Result<Option<DomainIdentity>, Str
 fn selected_surface_callable(
     surface: ReplSurface,
     name: &str,
-) -> Result<Option<sens::CoreDomainIdentity>, String> {
+) -> Result<Option<DomainIdentity>, String> {
     let projected_name = match surface {
         // The projection is displayed in its canonical uppercase spelling,
         // while the interactive reader accepts the same Lisp name lowercase.
@@ -339,7 +339,10 @@ fn selected_surface_callable(
     Ok(
         sens::semantic_registry_export::exact_uk_callable_for_source_head(&ukr_name)
             .filter(|admitted| *admitted == identity)
-            .and_then(DomainIdentity::core_operation),
+            .or_else(|| {
+                sens::semantic_registry_export::is_admitted_exact_definition_target(identity)
+                    .then_some(identity)
+            }),
     )
 }
 
@@ -347,15 +350,17 @@ fn project_repl_surface_expression(
     expression: &Expr,
     session: &Session,
     surface: ReplSurface,
+    source: &str,
     depth: usize,
 ) -> Result<Expr, String> {
-    project_repl_surface_expression_in_scope(expression, session, surface, depth, &[])
+    project_repl_surface_expression_in_scope(expression, session, surface, source, depth, &[])
 }
 
 fn project_repl_surface_expression_in_scope(
     expression: &Expr,
     session: &Session,
     surface: ReplSurface,
+    source: &str,
     depth: usize,
     bound: &[std::rc::Rc<str>],
 ) -> Result<Expr, String> {
@@ -386,7 +391,7 @@ fn project_repl_surface_expression_in_scope(
                         selected_surface_callable(surface, head)?.filter(|identity| {
                             matches!(
                                 identity,
-                                CoreDomainIdentity::D4(word)
+                                DomainIdentity::D4(word)
                                     if word.word().packed_bits() == 0b0010
                             )
                         });
@@ -414,6 +419,7 @@ fn project_repl_surface_expression_in_scope(
                                 item,
                                 session,
                                 surface,
+                                source,
                                 depth + 1,
                                 &lambda_bound,
                             )
@@ -433,19 +439,59 @@ fn project_repl_surface_expression_in_scope(
                         item,
                         session,
                         surface,
+                        source,
                         depth + 1,
                         bound,
                     )
                 })
                 .collect::<Result<Vec<_>, _>>()?;
+            let define_head = match &items[0].kind {
+                ExprKind::DomainIdentity(DomainIdentity::D4(word)) => {
+                    word.word().packed_bits() == 0b0011
+                }
+                ExprKind::Symbol(head) if session.environment.get(head).is_none() => {
+                    selected_surface_callable(surface, head)?.is_some_and(|identity| {
+                        matches!(identity, DomainIdentity::D4(word) if word.word().packed_bits() == 0b0011)
+                    })
+                }
+                _ => false,
+            };
+            if define_head {
+                if let Some(target) = items.get(1) {
+                    if let Some(target_name) = source.get(target.span.start..target.span.end) {
+                        if let Some(identity) = selected_surface_callable(surface, target_name)? {
+                            if sens::semantic_registry_export::is_admitted_exact_definition_target(
+                                identity,
+                            ) {
+                                projected[1] = Expr {
+                                    kind: ExprKind::DomainIdentity(identity),
+                                    span: target.span,
+                                };
+                            }
+                        }
+                    }
+                }
+            }
             if let ExprKind::Symbol(head) = &items[0].kind {
                 // A user binding in the persistent REPL frame shadows a projection
                 // alias, preserving ordinary interactive rebinding behavior.
                 if session.environment.get(head).is_none() {
                     if let Some(identity) = selected_surface_callable(surface, head)? {
                         let arguments = projected.drain(1..).collect::<Vec<_>>();
+                        if let Some(core_identity) = identity.core_operation() {
+                            return Ok(Expr {
+                                kind: ExprKind::DomainCall(core_identity, arguments.into()),
+                                span: expression.span,
+                            });
+                        }
+                        let mut call = Vec::with_capacity(arguments.len() + 1);
+                        call.push(Expr {
+                            kind: ExprKind::DomainIdentity(identity),
+                            span: items[0].span,
+                        });
+                        call.extend(arguments);
                         return Ok(Expr {
-                            kind: ExprKind::DomainCall(identity, arguments.into()),
+                            kind: ExprKind::List(call.into()),
                             span: expression.span,
                         });
                     }
@@ -756,7 +802,7 @@ fn prepare_t5m_repl_words(
     let parsed = sens::parse_mixed_exact_domain(line).map_err(|error| error.render(line))?;
     let expressions = parsed
         .iter()
-        .map(|expression| project_repl_surface_expression(expression, session, surface, 0))
+        .map(|expression| project_repl_surface_expression(expression, session, surface, line, 0))
         .collect::<Result<Vec<_>, _>>()?;
     if expressions.is_empty() {
         return Err("T5M_REPL_EMPTY: no SENS form".into());
@@ -1666,6 +1712,33 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn repl_projects_admitted_ukr_define_targets_to_exact_domain_words() {
+        let session = Session::default();
+        assert!(
+            selected_surface_callable(
+                ReplSurface::UkrainianFull,
+                "інтернет-час-режим-припустимий?"
+            )
+            .unwrap()
+            .is_some(),
+            "current Ukrainian D10 surface must resolve through the selected table and definition roster"
+        );
+        let words = prepare_t5m_repl_words(
+            "(визначити інтернет-час-режим-припустимий? (функція (режим) режим))",
+            ReplSurface::UkrainianFull,
+            &session,
+        )
+        .expect("current Ukrainian D10 definition projection");
+        let target = ExactDomainWord::Identity(
+            t5m_domain_identity(10, 0b1011101010).expect("current D10 resident"),
+        );
+        assert!(
+            words.contains(&target),
+            "D4 DEFINE's selected D10 target must cross T5M as its exact domain identity; words={words:?}"
+        );
+    }
 
     #[test]
     fn standalone_d7_text_identity_uses_repl_echo_without_granting_callability() {

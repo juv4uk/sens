@@ -709,8 +709,8 @@ fn main() {
     // even after the old Rust calendar builtin is removed.
     if let Err(e) = sens::load_time_library(&mut session) {
         eprintln!(
-            "Error loading time.lisp: {}",
-            e.render(sens::TIME_LIBRARY_SOURCE)
+            "Error loading time bootstrap: {}",
+            e.render("<T5M time bootstrap>")
         );
         process::exit(1);
     }

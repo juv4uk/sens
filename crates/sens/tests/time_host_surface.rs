@@ -1,4 +1,61 @@
-use sens::{eval_program, load_core_library, load_time_library, Session, Value};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, load_time_library, DomainIdentity,
+    Expr, ExprKind, Session, Span, Value,
+};
+
+#[test]
+fn time_library_bootstraps_from_exact_t5m_and_d10_functions_execute() {
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("Core4 bootstrap");
+    load_time_library(&mut session).expect("time bootstrap from Zig-restored T5M words");
+
+    let invoke = |bits: u16, argument: u32, session: &mut Session| {
+        let identity = DomainIdentity::from_coordinate(
+            sens::domain_ladder::DomainCoordinate::new(10, bits)
+                .expect("the time function is an exact D10 word"),
+        );
+        let argument_bits = (0..24)
+            .rev()
+            .map(|shift| ((argument >> shift) & 1) as u8)
+            .collect::<Vec<_>>();
+        let call = Expr {
+            kind: ExprKind::List(
+                vec![
+                    Expr {
+                        kind: ExprKind::DomainIdentity(identity),
+                        span: Span::default(),
+                    },
+                    Expr {
+                        kind: ExprKind::BinaryNumber(
+                            sens::BinaryNumber::from_numeric_domain_bits(24, &argument_bits)
+                                .expect("test argument is an exact D24+ value"),
+                        ),
+                        span: Span::default(),
+                    },
+                ]
+                .into(),
+            ),
+            span: Span::default(),
+        };
+        eval_parsed_expressions(&[call], session)
+            .unwrap_or_else(|error| panic!("exact T5M-loaded D10 {bits:010b}: {error}"))
+    };
+
+    for (bits, argument, expected) in [
+        (0b1011101010, 4, true),
+        (0b1011101010, 3, false),
+        (0b1011101011, 15, true),
+        (0b1011101011, 16, false),
+    ] {
+        let result = invoke(bits, argument, &mut session);
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "D10:{bits:010b} must return the exact D1 result; got {:?}",
+            result.value
+        );
+    }
+}
 
 /// Назва з таблиці функцій веде до коду, що має примітив (хостовий механізм).
 fn is_raw_primitive(name: &str) -> bool {
