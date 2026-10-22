@@ -135,7 +135,7 @@ fn knowledge_package_round_trip_precedes_reasoning_without_eval_of_package_data(
           (створити-пакет-структурованих-знань
             (як-є archive)
             (як-є (((planet mars))))))
-        (визначити *knowledge-journal* (як-є ()))
+        (визначити журнал-знань (як-є ()))
         (імпортувати-пакет-знань package)
         (пояснити-підсумок
           (міркувати-у-спостерігати (як-є archive) (як-є (planet mars))))
