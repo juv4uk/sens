@@ -477,11 +477,21 @@ jobs:
                   # Rust src, Zig, Lisp та фізичні .sens і далі вимагають remint.
                   ;;
                 benchmarks/contest-uk/*.lisp)
-                  # Без фізичної пари новий Lisp НЕ стає виконуваним від
-                  # одного git rebase. Перейти до SENS/Zig на чинному SHA.
-                  echo "REMINT_NEW_CONTESTANT source=$changed mint=REVERIFY_CURRENT_MAIN"
-                  safe_rebase=0
-                  break ;;
+                  # Новий, незалежний кандидат без носія не може змінити
+                  # вже доведених фізичних байтів решти учасників.
+                  # НЕ зараховуємо новий Lisp виконаним чи переможцем.
+                  # Пошкоджену/змінену програму, її .sens/view або кандидата
+                  # із поточної перевірки обов'язково перевіряти знову.
+                  if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
+                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" "origin/$target_branch" -- "$changed" | grep -Fxq -- "$changed" ||
+                     git cat-file -e "origin/$target_branch:${changed%.lisp}.sens" 2>/dev/null ||
+                     git cat-file -e "origin/$target_branch:${changed%.lisp}" 2>/dev/null; then
+                    echo "REMINT_CONTESTANT_CHANGED source=$changed mint=REVERIFY_CURRENT_MAIN"
+                    safe_rebase=0
+                    break
+                  fi
+                  echo "REMINT_NEW_UNPAIRED_CONTESTANT source=$changed status=NOT_EXECUTED mint=NEXT_PUSH"
+                  ;;
                 lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp|tests/fixtures/*.lisp)
                   # Перемайн лише коли змінилося ВИКОРИСТАНЕ джерело.
                   # Самостійна зміна іншого Lisp не міняє вже перевірених
