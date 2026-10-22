@@ -5651,7 +5651,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "69dab19cbc5f6b2b8478e887631e7587b4e48a4a",
+        "blob_sha": "0b871313aed5da594c2855850c4fcd3c96389268",
         "legacy_fixture_name": "HAS-DEFINE",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5659,14 +5659,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «визначити». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
       "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
       "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
       "native_positive_negative_cases_shared": 28,
-      "native_ci_status": "PENDING"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
     },
     {
       "surface_name": "містить-форму-функція?",
@@ -5674,7 +5677,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "69dab19cbc5f6b2b8478e887631e7587b4e48a4a",
+        "blob_sha": "0b871313aed5da594c2855850c4fcd3c96389268",
         "legacy_fixture_name": "HAS-LAMBDA",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5682,14 +5685,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «функція». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
       "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
       "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
       "native_positive_negative_cases_shared": 28,
-      "native_ci_status": "PENDING"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
     },
     {
       "surface_name": "містить-форму-цитування?",
@@ -5697,7 +5703,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "69dab19cbc5f6b2b8478e887631e7587b4e48a4a",
+        "blob_sha": "0b871313aed5da594c2855850c4fcd3c96389268",
         "legacy_fixture_name": "HAS-QUOTE",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5705,14 +5711,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «як-є». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
       "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
       "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
       "native_positive_negative_cases_shared": 28,
-      "native_ci_status": "PENDING"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
     },
     {
       "surface_name": "містить-форму-сполучити?",
@@ -5720,7 +5729,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "69dab19cbc5f6b2b8478e887631e7587b4e48a4a",
+        "blob_sha": "0b871313aed5da594c2855850c4fcd3c96389268",
         "legacy_fixture_name": "HAS-CONS",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5728,14 +5737,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «сполучити». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
       "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
       "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
       "native_positive_negative_cases_shared": 28,
-      "native_ci_status": "PENDING"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
     },
     {
       "surface_name": "містить-форму-перше?",
@@ -5743,7 +5755,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "69dab19cbc5f6b2b8478e887631e7587b4e48a4a",
+        "blob_sha": "0b871313aed5da594c2855850c4fcd3c96389268",
         "legacy_fixture_name": "HAS-CAR",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5751,14 +5763,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «перше». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
       "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
       "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
       "native_positive_negative_cases_shared": 28,
-      "native_ci_status": "PENDING"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
     },
     {
       "surface_name": "містить-форму-атом?",
@@ -5766,7 +5781,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "69dab19cbc5f6b2b8478e887631e7587b4e48a4a",
+        "blob_sha": "0b871313aed5da594c2855850c4fcd3c96389268",
         "legacy_fixture_name": "HAS-ATOM",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5774,14 +5789,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «атом?». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
       "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
       "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
       "native_positive_negative_cases_shared": 28,
-      "native_ci_status": "PENDING"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
     },
     {
       "surface_name": "містить-форму-тотожне?",
@@ -5789,7 +5807,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "69dab19cbc5f6b2b8478e887631e7587b4e48a4a",
+        "blob_sha": "0b871313aed5da594c2855850c4fcd3c96389268",
         "legacy_fixture_name": "HAS-EQ",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5797,14 +5815,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «тотожне?». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
       "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
       "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
       "native_positive_negative_cases_shared": 28,
-      "native_ci_status": "PENDING"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
     },
     {
       "surface_name": "містить-форму-умов?",
@@ -5812,7 +5833,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "69dab19cbc5f6b2b8478e887631e7587b4e48a4a",
+        "blob_sha": "0b871313aed5da594c2855850c4fcd3c96389268",
         "legacy_fixture_name": "HAS-COND",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5820,14 +5841,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «за-умовою». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
       "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
       "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
       "native_positive_negative_cases_shared": 28,
-      "native_ci_status": "PENDING"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
     }
   ],
   "winners_20261022": {

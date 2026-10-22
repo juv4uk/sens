@@ -980,7 +980,7 @@
       "source": "lib/d11-form-presence.lisp",
       "native_test": "crates/sens/tests/d11_legacy_form_presence.rs",
       "native_cases": 28,
-      "native_status": "CI_PENDING",
+      "native_status": "TARGETED_NATIVE_SENS_PASS_28_CASES_WORKFLOW_RED_OTHER_CASE",
       "introspection_projections": [
         "містить-форму-визначити?",
         "містить-форму-функція?",
@@ -996,7 +996,11 @@
       "newly_admitted_d11_opcodes": 0,
       "decision": "Корисні HAS-* — одна SENS-бібліотечна композиція та 8 укр-викликів. Тотожне нижчим доменам не дублювати, дані й транспорт не видавати за opcode.",
       "existing_proper_list_law": "NO-DOT reuses already implemented and natively tested lib/lisp-fs.lisp list-shape law",
-      "last_fix": "37d02638b62a98093c594a0686288bebb5dd6cfa: proper AST call-head vs arguments; do not count atomic argument as callable head"
+      "last_fix": "37d02638b62a98093c594a0686288bebb5dd6cfa: proper AST call-head vs arguments; do not count atomic argument as callable head",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_source_blob": "0b871313aed5da594c2855850c4fcd3c96389268",
+      "native_test_blob": "5f866e70991ddb038d78735007b42f52f70a2e2e"
     }
   }
 }
