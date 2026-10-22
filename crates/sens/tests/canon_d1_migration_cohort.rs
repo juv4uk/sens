@@ -527,3 +527,33 @@ fn eq_atomic_answers_and_pair_errors_drive_cond_without_host_truthiness() {
         );
     }
 }
+
+
+/// #2014/#2016: CONS is a binary constructor, not an associative algebra.
+/// This is a *bounded structural counterexample*, not a global impossibility
+/// result for every possible constructor generator. Both terms contain the
+/// same ordered atoms. ATOM with CAR/CDR distinguishes their parenthesization
+/// through the real SENS evaluator, without applying partial EQ to pairs.
+#[test]
+fn cons_tree_growth_is_observably_nonassociative_with_atom_and_selectors() {
+    let mut session = Session::default();
+    let left = "(сполучити (сполучити (як-є а) (як-є б)) (як-є в))";
+    let right = "(сполучити (як-є а) (сполучити (як-є б) (як-є в)))";
+    for (shape, tree, left_atom, right_atom) in [
+        ("left-nested", left, false, true),
+        ("right-nested", right, true, false),
+    ] {
+        for (selector, expected) in [("перше", left_atom), ("решта", right_atom)] {
+            let program = format!("(атом? ({selector} {tree}))");
+            let actual = eval_program(&program, &mut session)
+                .unwrap_or_else(|error| panic!(
+                    "test_id=2014-CONS-NONASSOC layer=SENS shape={shape} input={program} actual_error={error}"
+                ))
+                .value;
+            assert_eq!(
+                actual.as_predicate_bit(), Some(expected),
+                "test_id=2014-CONS-NONASSOC layer=SENS shape={shape} input={program} expected=D1:{expected} actual={actual}"
+            );
+        }
+    }
+}
