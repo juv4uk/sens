@@ -394,6 +394,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-all-distinct-atoms-general",
         "list-first-adjacent-repeat-atom-general",
         "list-keep-all-matching-atoms-general",
+        "list-replace-first-atom-general",
         "list-multiset-intersection-general",
         "list-zip-with-tails-general",
         "list-three-lanes-general",
@@ -495,6 +496,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-split-first-occurrence-general"
                 | "list-all-distinct-atoms-general"
                 | "list-keep-all-matching-atoms-general"
+                | "list-replace-first-atom-general"
                 | "list-multiset-intersection-general"
                 | "list-zip-with-tails-general"
                 | "list-three-lanes-general"
@@ -777,6 +779,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-trim-edges-atom-general",
         "lib/list-all-distinct-atoms-general",
         "lib/list-keep-all-matching-atoms-general",
+        "lib/list-replace-first-atom-general",
         "lib/list-multiset-intersection-general",
         "lib/list-zip-with-tails-general",
         "lib/list-three-lanes-general",
