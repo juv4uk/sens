@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 215,
+    "total": 216,
     "historical": 17,
-    "library": 198,
-    "distinct_families": 33
+    "library": 199,
+    "distinct_families": 34
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5425,6 +5425,26 @@
       "native_ci_step": "Д11 / Scheme + Clojure — нативні закони списків і стану",
       "physical_t5m_status": "COMMITTED_PAIR_FOUND_EXACT_SHA_CI_PENDING",
       "physical_t5m_source": "lib/d11-clojure-group-by.sens"
+    },
+    {
+      "surface_name": "відобразити-та-зберегти-нехибні",
+      "source_family": "scheme-srfi1-filter-map-exact-d1",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-filter-map.lisp",
+        "blob_sha": "e23b812a9403b15a8838bbc2711aebbd761f27fa",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
+      },
+      "proposed_law_uk": "Скінченний unary Scheme SRFI-1 FILTER-MAP мовою SENS: для кожного елемента один раз обчислити перетворене значення; відкинути лише якщо воно структурно дорівнює канонічному точному D1 «ні». Зберігати всі інші значення у вихідному порядку, зокрема структурне (), D1 «так», вкладені списки та повтори; жодного NIL/truthiness host.",
+      "native_law_test": "crates/sens/tests/d11_srfi1_filter_map.rs::d11_srfi1_filter_map_preserves_empty_structures_and_drops_only_d1_no",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
     }
   ],
   "winners_20261022": {
