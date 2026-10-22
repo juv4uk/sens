@@ -62,9 +62,6 @@ lib/list-first-compound-general.lisp
 benchmarks/sens-program-size/fixtures/konkurs-minimal-polynomial.lisp
 lib/list-leading-atom-run-length-unary-general.lisp
 lib/list-interleave-three-general.lisp
-benchmarks/contest-uk/факторіал.lisp
-benchmarks/contest-uk/сума-до-n.lisp
-benchmarks/contest-uk/довжина-списку.lisp
 benchmarks/sens-program-size/fixtures/konkurs-polynomial-compact.lisp
 lib/list-interleave-three-rotation-general.lisp
 lib/list-reverse-tail-general.lisp
@@ -73,7 +70,6 @@ lib/list-drop-every-third-general.lisp
 lib/list-drop-every-third-compact-general.lisp
 lib/залишити-точні-числа.lisp
 benchmarks/contest-uk/довжина-списку-одинарна.lisp
-benchmarks/contest-uk/довжина-списку-стисло.lisp
 benchmarks/contest-uk/сума-до-n-формула.lisp
 lib/list-drop-leading-compounds-zero-copy-general.lisp
 lib/list-first-adjacent-equal-atom-suffix-general.lisp
