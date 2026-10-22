@@ -307,6 +307,17 @@ jobs:
                       continue
                     fi ;;
                 esac
+                # Застарілий queued job міг бачити файл, який вже
+                # вилучено/перейменовано іншим комітом main. Якщо повного
+                # джерела та його фізичних виходів більше НЕМА, це не
+                # помилка SENS. Наявність хоч одного осиротілого байтового
+                # носія лишається RED і підхоплюється нативним судом.
+                if [[ "$f" == *.lisp && ! -e "$f" && ! -L "$f" &&
+                      ! -e "${f%.lisp}.sens" && ! -L "${f%.lisp}.sens" &&
+                      ! -e "${f%.lisp}" && ! -L "${f%.lisp}" ]]; then
+                  echo "REMINT_REMOVED_ON_CURRENT_MAIN source=$f stale_queue=YES"
+                  continue
+                fi
                 echo "::error::REMINT_SOURCE_MISSING $f" >&2
                 regenerated_failed=1
                 continue
