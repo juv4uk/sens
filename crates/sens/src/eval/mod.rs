@@ -423,6 +423,15 @@ pub(crate) fn evaluate_step(
             if let Some(identity) = current {
                 return Ok(EvalStep::Value(Value::DomainIdentity(identity)));
             }
+            // Клавіатурний D7 токен — вже створений Lisp binding, а не
+            // нова функція, псевдо-SID8 чи host-реєстр. Відновлюємо лише
+            // ІСНУЮЧЕ зв'язування того самого українського написання.
+            // Невідома назва без такого зв'язування й далі дає UnknownSymbol.
+            if let Ok(text7) = crate::encode_text7(symbol, crate::Text7Layout::Uk) {
+                if let Some(value) = environment.get(&text7.to_canonical_wire_token()) {
+                    return Ok(EvalStep::Value(value));
+                }
+            }
             // Тільки незв'язані Д1 поверхні читаємо за ратифікованою
             // таблицею, як у точному reader. Це не host truthiness,
             // не арифметика 0/1 і не другий реєстр кодів.
