@@ -24,141 +24,296 @@
 //! nicht für kryptografisch große Zahlen optimiert, für die diese Sprache
 //! keine Verwendung hat.
 
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt;
 use std::str::FromStr;
 
-/// Unsigned magnitude: little-endian base-2^32 limbs, no trailing zero limbs
-/// (an empty vec is the canonical representation of zero).
-/// Bezznakova velychyna: little-endian limby bazy 2^32, bez kintsevykh
-/// nulovykh limbiv (porozhnii vec — kanonichne predstavlennia nulia).
-/// Vorzeichenlose Größe: Little-Endian-Limbs zur Basis 2^32, keine
-/// abschließenden Null-Limbs (ein leerer Vec ist die kanonische
-/// Darstellung von Null).
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct Magnitude(Vec<u32>);
+/// Unsigned magnitude with two representations, kept in one canonical form:
+/// every value that fits in 64 bits — including zero — lives inline in a
+/// `u64` and allocates nothing; anything wider is a little-endian base-2^32
+/// limb vector with no trailing zero limbs. The canonical shape is therefore
+/// fixed: `Inline` for `0..=u64::MAX`, `Heap` only for values strictly wider
+/// than 64 bits (so a `Heap` always has at least three limbs and a nonzero
+/// top limb). Every constructor and every operation returns a value in that
+/// shape, which keeps `PartialEq`/`Eq` (defined here as value equality via
+/// `cmp`) a single canonical comparison.
+/// Bezznakova velychyna z dvoma predstavlenniamy v odnii kanonichnii formi:
+/// kozhne znachennia, shcho vmistytulia v 64 bity — vkliuchno z nulem —
+/// lezhyt inline u `u64` i ne alokuye nichoho; vse shyrshe — tse
+/// little-endian vektor limbiv bazy 2^32 bez kintsevykh nulovykh limbiv.
+/// Kanonichna forma tozh fiksovana: `Inline` dlia `0..=u64::MAX`, `Heap`
+/// lyshe dlia znachen stroho shyryshykh za 64 bity (tozh `Heap` zavzhdy maie
+/// shchonaimenshe try limby i nenulovyi verkhniy limb). Kozhen konstruktor i
+/// kozhna operatsiia povertaiut znachennia u tsii formi, shcho robyt
+/// `PartialEq`/`Eq` (tut vyznacheni yak rivnist znachen cherez `cmp`)
+/// yedynym kanonichnym porivnianniam.
+/// Vorzeichenlose Größe mit zwei Darstellungen in einer kanonischen Form:
+/// jeder Wert, der in 64 Bits passt — einschließlich Null — liegt inline in
+/// einem `u64` und allokiert nichts; alles Breitere ist ein
+/// Little-Endian-Limb-Vektor zur Basis 2^32 ohne abschließende Null-Limbs.
+/// Die kanonische Gestalt ist damit festgelegt: `Inline` für `0..=u64::MAX`,
+/// `Heap` nur für Werte, die strikt breiter als 64 Bits sind (ein `Heap` hat
+/// daher immer mindestens drei Limbs und ein von null verschiedenes
+/// oberstes Limb). Jeder Konstruktor und jede Operation liefert einen Wert
+/// in dieser Gestalt, wodurch `PartialEq`/`Eq` (hier als Wertgleichheit über
+/// `cmp` definiert) ein einziger kanonischer Vergleich bleibt.
+#[derive(Clone, Debug)]
+enum Magnitude {
+    /// Values in `0..=u64::MAX`, zero included, held with no heap allocation.
+    Inline(u64),
+    /// Values strictly wider than 64 bits: little-endian base-2^32 limbs, no
+    /// trailing zero limbs (at least three limbs, top limb nonzero).
+    Heap(Vec<u32>),
+}
 
 impl Magnitude {
-    const ZERO: Magnitude = Magnitude(Vec::new());
+    const ZERO: Magnitude = Magnitude::Inline(0);
     const KARATSUBA_THRESHOLD: usize = 32;
 
-    fn from_u64(mut value: u64) -> Self {
-        // 0, 1 or 2 base-2^32 limbs: avoid Vec's default four-limb
-        // growth for the small integers found in reduced rationals.
-        let capacity = if value == 0 { 0 } else if value <= u32::MAX as u64 { 1 } else { 2 };
-        let mut limbs = Vec::with_capacity(capacity);
-        while value != 0 {
-            limbs.push((value & 0xFFFF_FFFF) as u32);
-            value >>= 32;
+    /// Canonical constructor from little-endian limbs: drops trailing zero
+    /// limbs and folds anything that fits in 64 bits back into `Inline`, so
+    /// every returned magnitude satisfies the canonical-shape invariant.
+    fn from_limbs(mut limbs: Vec<u32>) -> Self {
+        while limbs.last() == Some(&0) {
+            limbs.pop();
         }
-        Magnitude(limbs)
+        match limbs.len() {
+            0 => Magnitude::Inline(0),
+            1 => Magnitude::Inline(u64::from(limbs[0])),
+            2 => Magnitude::Inline(u64::from(limbs[0]) | (u64::from(limbs[1]) << 32)),
+            _ => Magnitude::Heap(limbs),
+        }
+    }
+
+    /// Canonical constructor from a 128-bit intermediate (sum or product of
+    /// two inline values), folding back into `Inline` when it fits.
+    fn from_u128(value: u128) -> Self {
+        if value <= u64::MAX as u128 {
+            Magnitude::Inline(value as u64)
+        } else {
+            Magnitude::from_limbs(vec![
+                (value & 0xFFFF_FFFF) as u32,
+                ((value >> 32) & 0xFFFF_FFFF) as u32,
+                ((value >> 64) & 0xFFFF_FFFF) as u32,
+                (value >> 96) as u32,
+            ])
+        }
+    }
+
+    fn from_u64(value: u64) -> Self {
+        // The whole point of the inline branch: a value that fits in 64 bits
+        // costs no heap allocation at all (no Vec, no growth, no capacity
+        // guess). Zero stays the canonical `Inline(0)`.
+        Magnitude::Inline(value)
+    }
+
+    /// Number of significant limbs (0 for zero) — the canonical limb count.
+    fn limb_len(&self) -> usize {
+        match self {
+            Magnitude::Inline(value) => {
+                if *value == 0 {
+                    0
+                } else if *value <= u32::MAX as u64 {
+                    1
+                } else {
+                    2
+                }
+            }
+            Magnitude::Heap(limbs) => limbs.len(),
+        }
+    }
+
+    /// `index`-th base-2^32 limb (little-endian), `0` past the top — lets
+    /// limb-wise readers work without materializing a slice for `Inline`.
+    fn limb_at(&self, index: usize) -> u32 {
+        match self {
+            Magnitude::Inline(value) => match index {
+                0 => (*value & 0xFFFF_FFFF) as u32,
+                1 => (*value >> 32) as u32,
+                _ => 0,
+            },
+            Magnitude::Heap(limbs) => limbs.get(index).copied().unwrap_or(0),
+        }
+    }
+
+    /// Borrowed limbs for `Heap`, materialized once for `Inline`.
+    fn limbs(&self) -> Cow<'_, [u32]> {
+        match self {
+            Magnitude::Heap(limbs) => Cow::Borrowed(limbs.as_slice()),
+            Magnitude::Inline(_) => {
+                let len = self.limb_len();
+                Cow::Owned((0..len).map(|i| self.limb_at(i)).collect())
+            }
+        }
     }
 
     /// Number of trailing zero bits across all limbs (0 for zero magnitude).
     /// Kilkist kintsevykh nulovykh bitiv usikh limbiv.
     fn trailing_zeros(&self) -> u32 {
-        let mut zeros = 0u32;
-        for limb in &self.0 {
-            if *limb == 0 {
-                zeros += 32;
-            } else {
-                zeros += limb.trailing_zeros();
-                break;
+        match self {
+            Magnitude::Inline(value) => {
+                if *value == 0 {
+                    0
+                } else {
+                    value.trailing_zeros()
+                }
+            }
+            Magnitude::Heap(limbs) => {
+                let mut zeros = 0u32;
+                for limb in limbs {
+                    if *limb == 0 {
+                        zeros += 32;
+                    } else {
+                        zeros += limb.trailing_zeros();
+                        break;
+                    }
+                }
+                zeros
             }
         }
-        zeros
     }
 
     /// In-place logical right shift by `bits` (< total bit length).
     /// Pobitovyi zsun vpravo na `bits` bil in-place.
     fn shr_assign(&mut self, bits: u32) {
-        let limbs = (bits / 32) as usize;
-        let rem = bits % 32;
-        if limbs >= self.0.len() {
-            self.0.clear();
+        if let Magnitude::Inline(value) = self {
+            *self = if bits >= 64 {
+                Magnitude::ZERO
+            } else {
+                Magnitude::Inline(*value >> bits)
+            };
             return;
         }
-        if limbs > 0 {
-            self.0.drain(0..limbs);
+        let Magnitude::Heap(limbs) = self else {
+            unreachable!("matched Inline above")
+        };
+        let whole = (bits / 32) as usize;
+        let rem = bits % 32;
+        if whole >= limbs.len() {
+            *self = Magnitude::ZERO;
+            return;
+        }
+        if whole > 0 {
+            limbs.drain(0..whole);
         }
         if rem > 0 {
             let mut carry = 0u32;
-            for limb in self.0.iter_mut().rev() {
+            for limb in limbs.iter_mut().rev() {
                 let next_carry = *limb << (32 - rem);
                 *limb = (*limb >> rem) | carry;
                 carry = next_carry;
             }
         }
-        while self.0.last() == Some(&0) {
-            self.0.pop();
+        let normalized = Magnitude::from_limbs(std::mem::take(limbs));
+        *self = normalized;
+    }
+
+    /// Shift a limb vector left in place by `bits` (limb count may grow).
+    fn shift_limbs_left(limbs: &mut Vec<u32>, bits: u32) {
+        let whole = (bits / 32) as usize;
+        let rem = bits % 32;
+        if rem > 0 {
+            let mut carry = 0u32;
+            for limb in limbs.iter_mut() {
+                let next_carry = *limb >> (32 - rem);
+                *limb = (*limb << rem) | carry;
+                carry = next_carry;
+            }
+            if carry != 0 {
+                limbs.push(carry);
+            }
+        }
+        if whole > 0 {
+            limbs.splice(0..0, std::iter::repeat_n(0, whole));
         }
     }
 
     /// In-place logical left shift by `bits`.
     /// Pobitovyi zsun vlivo na `bits` bil.
     fn shl_assign(&mut self, bits: u32) {
-        if self.is_zero() {
+        if let Magnitude::Inline(value) = self {
+            let value = *value;
+            if value == 0 {
+                return;
+            }
+            if bits <= value.leading_zeros() {
+                *self = Magnitude::Inline(value << bits);
+                return;
+            }
+            let mut limbs = vec![value as u32, (value >> 32) as u32];
+            Magnitude::shift_limbs_left(&mut limbs, bits);
+            *self = Magnitude::from_limbs(limbs);
             return;
         }
-        let limbs = (bits / 32) as usize;
-        let rem = bits % 32;
-        if rem > 0 {
-            let mut carry = 0u32;
-            for limb in self.0.iter_mut() {
-                let next_carry = *limb >> (32 - rem);
-                *limb = (*limb << rem) | carry;
-                carry = next_carry;
-            }
-            if carry != 0 {
-                self.0.push(carry);
-            }
-        }
-        if limbs > 0 {
-            self.0.splice(0..0, std::iter::repeat_n(0, limbs));
-        }
+        let Magnitude::Heap(limbs) = self else {
+            unreachable!("matched Inline above")
+        };
+        Magnitude::shift_limbs_left(limbs, bits);
+        let normalized = Magnitude::from_limbs(std::mem::take(limbs));
+        *self = normalized;
     }
 
     fn is_zero(&self) -> bool {
-        self.0.is_empty()
+        match self {
+            Magnitude::Inline(value) => *value == 0,
+            Magnitude::Heap(limbs) => limbs.is_empty(),
+        }
     }
 
-    fn trim(mut self) -> Self {
-        while self.0.last() == Some(&0) {
-            self.0.pop();
+    fn trim(self) -> Self {
+        match self {
+            Magnitude::Inline(value) => Magnitude::Inline(value),
+            Magnitude::Heap(limbs) => Magnitude::from_limbs(limbs),
         }
-        self
     }
 
     fn cmp(&self, other: &Self) -> Ordering {
-        self.0
-            .len()
-            .cmp(&other.0.len())
-            .then_with(|| self.0.iter().rev().cmp(other.0.iter().rev()))
+        match (self, other) {
+            (Magnitude::Inline(a), Magnitude::Inline(b)) => a.cmp(b),
+            // Every inline value is below 2^64; every heap value is at or
+            // above 2^64, so the branches never overlap.
+            (Magnitude::Inline(_), Magnitude::Heap(_)) => Ordering::Less,
+            (Magnitude::Heap(_), Magnitude::Inline(_)) => Ordering::Greater,
+            (Magnitude::Heap(a), Magnitude::Heap(b)) => a
+                .len()
+                .cmp(&b.len())
+                .then_with(|| a.iter().rev().cmp(b.iter().rev())),
+        }
     }
 
     fn add(&self, other: &Self) -> Self {
-        let mut result = Vec::with_capacity(self.0.len().max(other.0.len()) + 1);
+        if let (Magnitude::Inline(a), Magnitude::Inline(b)) = (self, other) {
+            return Magnitude::from_u128(u128::from(*a) + u128::from(*b));
+        }
+        let a = self.limbs();
+        let b = other.limbs();
+        let mut result = Vec::with_capacity(a.len().max(b.len()) + 1);
         let mut carry = 0u64;
-        for i in 0..self.0.len().max(other.0.len()) {
+        for i in 0..a.len().max(b.len()) {
             let sum = carry
-                + u64::from(self.0.get(i).copied().unwrap_or(0))
-                + u64::from(other.0.get(i).copied().unwrap_or(0));
+                + u64::from(a.get(i).copied().unwrap_or(0))
+                + u64::from(b.get(i).copied().unwrap_or(0));
             result.push((sum & 0xFFFF_FFFF) as u32);
             carry = sum >> 32;
         }
         if carry != 0 {
             result.push(carry as u32);
         }
-        Magnitude(result).trim()
+        Magnitude::from_limbs(result)
     }
 
     /// Assumes `self >= other`; panics otherwise (only called that way from `BigInt`).
     fn sub(&self, other: &Self) -> Self {
-        let mut result = Vec::with_capacity(self.0.len());
+        if let (Magnitude::Inline(a), Magnitude::Inline(b)) = (self, other) {
+            debug_assert!(*a >= *b, "sub called with self < other");
+            return Magnitude::Inline(*a - *b);
+        }
+        let a = self.limbs();
+        let mut result = Vec::with_capacity(a.len());
         let mut borrow = 0i64;
-        for i in 0..self.0.len() {
-            let diff =
-                i64::from(self.0[i]) - i64::from(other.0.get(i).copied().unwrap_or(0)) - borrow;
+        for i in 0..a.len() {
+            let diff = i64::from(a[i]) - i64::from(other.limb_at(i)) - borrow;
             if diff < 0 {
                 result.push((diff + (1i64 << 32)) as u32);
                 borrow = 1;
@@ -168,22 +323,27 @@ impl Magnitude {
             }
         }
         debug_assert_eq!(borrow, 0, "sub called with self < other");
-        Magnitude(result).trim()
+        Magnitude::from_limbs(result)
     }
 
     fn mul_schoolbook(&self, other: &Self) -> Self {
         if self.is_zero() || other.is_zero() {
             return Magnitude::ZERO;
         }
-        let mut result = vec![0u32; self.0.len() + other.0.len()];
-        for (i, &a) in self.0.iter().enumerate() {
+        if let (Magnitude::Inline(a), Magnitude::Inline(b)) = (self, other) {
+            return Magnitude::from_u128(u128::from(*a) * u128::from(*b));
+        }
+        let a = self.limbs();
+        let b = other.limbs();
+        let mut result = vec![0u32; a.len() + b.len()];
+        for (i, &ai) in a.iter().enumerate() {
             let mut carry = 0u64;
-            for (j, &b) in other.0.iter().enumerate() {
-                let product = u64::from(a) * u64::from(b) + u64::from(result[i + j]) + carry;
+            for (j, &bj) in b.iter().enumerate() {
+                let product = u64::from(ai) * u64::from(bj) + u64::from(result[i + j]) + carry;
                 result[i + j] = (product & 0xFFFF_FFFF) as u32;
                 carry = product >> 32;
             }
-            let mut k = i + other.0.len();
+            let mut k = i + b.len();
             while carry != 0 {
                 let sum = u64::from(result[k]) + carry;
                 result[k] = (sum & 0xFFFF_FFFF) as u32;
@@ -191,17 +351,18 @@ impl Magnitude {
                 k += 1;
             }
         }
-        Magnitude(result).trim()
+        Magnitude::from_limbs(result)
     }
 
     fn shl_limbs(&self, limbs: usize) -> Self {
         if self.is_zero() {
             return Magnitude::ZERO;
         }
-        let mut shifted = Vec::with_capacity(self.0.len() + limbs);
+        let source = self.limbs();
+        let mut shifted = Vec::with_capacity(source.len() + limbs);
         shifted.resize(limbs, 0);
-        shifted.extend_from_slice(&self.0);
-        Magnitude(shifted)
+        shifted.extend_from_slice(&source);
+        Magnitude::from_limbs(shifted)
     }
 
     /// Karatsuba multiplication for large magnitudes; schoolbook remains the
@@ -211,16 +372,16 @@ impl Magnitude {
         if self.is_zero() || other.is_zero() {
             return Magnitude::ZERO;
         }
-        if self.0.len().min(other.0.len()) < Self::KARATSUBA_THRESHOLD {
+        let a = self.limbs();
+        let b = other.limbs();
+        if a.len().min(b.len()) < Self::KARATSUBA_THRESHOLD {
             return self.mul_schoolbook(other);
         }
-        let split = self.0.len().min(other.0.len()) / 2;
-        let (a_low, a_high) = self.0.split_at(split);
-        let (b_low, b_high) = other.0.split_at(split);
-        let a_low = Magnitude(a_low.to_vec());
-        let a_high = Magnitude(a_high.to_vec());
-        let b_low = Magnitude(b_low.to_vec());
-        let b_high = Magnitude(b_high.to_vec());
+        let split = a.len().min(b.len()) / 2;
+        let a_low = Magnitude::from_limbs(a[..split].to_vec());
+        let a_high = Magnitude::from_limbs(a[split..].to_vec());
+        let b_low = Magnitude::from_limbs(b[..split].to_vec());
+        let b_high = Magnitude::from_limbs(b[split..].to_vec());
         let z0 = a_low.mul(&b_low);
         let z2 = a_high.mul(&b_high);
         let z1 = a_low
@@ -232,40 +393,74 @@ impl Magnitude {
     }
 
     fn bit_len(&self) -> u32 {
-        match self.0.last() {
-            None => 0,
-            Some(&top) => (self.0.len() as u32 - 1) * 32 + (32 - top.leading_zeros()),
+        match self {
+            Magnitude::Inline(value) => {
+                if *value == 0 {
+                    0
+                } else {
+                    64 - value.leading_zeros()
+                }
+            }
+            Magnitude::Heap(limbs) => match limbs.last() {
+                None => 0,
+                Some(&top) => (limbs.len() as u32 - 1) * 32 + (32 - top.leading_zeros()),
+            },
         }
     }
 
     fn get_bit(&self, index: u32) -> bool {
-        let limb = (index / 32) as usize;
-        let bit = index % 32;
-        self.0
-            .get(limb)
-            .is_some_and(|&value| (value >> bit) & 1 == 1)
+        match self {
+            Magnitude::Inline(value) => index < 64 && (*value >> index) & 1 == 1,
+            Magnitude::Heap(limbs) => {
+                let limb = (index / 32) as usize;
+                let bit = index % 32;
+                limbs
+                    .get(limb)
+                    .is_some_and(|&value| (value >> bit) & 1 == 1)
+            }
+        }
     }
 
     fn shl1(&self) -> Self {
-        let mut result = Vec::with_capacity(self.0.len() + 1);
-        let mut carry = 0u32;
-        for &limb in &self.0 {
-            result.push((limb << 1) | carry);
-            carry = limb >> 31;
+        match self {
+            Magnitude::Inline(value) => Magnitude::from_u128(u128::from(*value) << 1),
+            Magnitude::Heap(limbs) => {
+                let mut result = Vec::with_capacity(limbs.len() + 1);
+                let mut carry = 0u32;
+                for &limb in limbs {
+                    result.push((limb << 1) | carry);
+                    carry = limb >> 31;
+                }
+                if carry != 0 {
+                    result.push(carry);
+                }
+                Magnitude::from_limbs(result)
+            }
         }
-        if carry != 0 {
-            result.push(carry);
-        }
-        Magnitude(result).trim()
     }
 
     fn set_bit(&mut self, index: u32) {
         let limb = (index / 32) as usize;
         let bit = index % 32;
-        if self.0.len() <= limb {
-            self.0.resize(limb + 1, 0);
+        match self {
+            Magnitude::Inline(value) => {
+                if index < 64 {
+                    *value |= 1u64 << index;
+                } else {
+                    let mut limbs = vec![0u32; limb + 1];
+                    limbs[0] = (*value & 0xFFFF_FFFF) as u32;
+                    limbs[1] = (*value >> 32) as u32;
+                    limbs[limb] |= 1 << bit;
+                    *self = Magnitude::from_limbs(limbs);
+                }
+            }
+            Magnitude::Heap(limbs) => {
+                if limbs.len() <= limb {
+                    limbs.resize(limb + 1, 0);
+                }
+                limbs[limb] |= 1 << bit;
+            }
         }
-        self.0[limb] |= 1 << bit;
     }
 
     /// Schoolbook binary long division — O(bit_len^2), not the fastest
@@ -293,10 +488,11 @@ impl Magnitude {
         }
         let mut quotient = Magnitude::ZERO;
         let mut remainder = Magnitude::ZERO;
+        let one = Magnitude::Inline(1);
         for i in (0..self.bit_len()).rev() {
             remainder = remainder.shl1();
             if self.get_bit(i) {
-                remainder = remainder.add(&Magnitude::from_u64(1));
+                remainder = remainder.add(&one);
             }
             if remainder.cmp(divisor) != Ordering::Less {
                 remainder = remainder.sub(divisor);
@@ -307,20 +503,39 @@ impl Magnitude {
     }
 
     fn to_f64(&self) -> f64 {
-        self.0
-            .iter()
-            .rev()
-            .fold(0.0, |acc, &limb| acc * 4294967296.0 + f64::from(limb))
+        match self {
+            Magnitude::Inline(value) => *value as f64,
+            Magnitude::Heap(limbs) => limbs
+                .iter()
+                .rev()
+                .fold(0.0, |acc, &limb| acc * 4294967296.0 + f64::from(limb)),
+        }
     }
 
     fn to_u64(&self) -> Option<u64> {
-        match self.0.len() {
-            0 => Some(0),
-            1 => Some(u64::from(self.0[0])),
-            2 => Some(u64::from(self.0[0]) | (u64::from(self.0[1]) << 32)),
-            _ => None,
+        match self {
+            Magnitude::Inline(value) => Some(*value),
+            // A heap magnitude is strictly wider than 64 bits by construction.
+            Magnitude::Heap(_) => None,
         }
     }
+}
+
+impl PartialEq for Magnitude {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
+}
+
+impl Eq for Magnitude {}
+
+/// Internal convenience mirroring the former tuple-struct constructor: build
+/// a canonical magnitude from raw little-endian limbs. Used by the unit tests
+/// below; kept out of non-test builds.
+#[cfg(test)]
+#[allow(non_snake_case)]
+fn Magnitude(limbs: Vec<u32>) -> Magnitude {
+    Magnitude::from_limbs(limbs)
 }
 
 impl fmt::Display for Magnitude {
@@ -349,16 +564,16 @@ impl fmt::Display for Magnitude {
 
 /// An arbitrary-precision signed integer: sign plus magnitude. Zero is
 /// always represented with `negative: false` so that `PartialEq`/`Eq` (both
-/// derived) and `Magnitude`'s empty-vec zero stay a single canonical form —
+/// derived) and `Magnitude`'s inline zero stay a single canonical form —
 /// there's no separate "negative zero" this type could accidentally produce.
 /// Tsile chyslo dovilnoi tochnosti zi znakom: znak plius velychyna. Nul
 /// zavzhdy predstavlenyi z `negative: false`, tozh `PartialEq`/`Eq` (obydva
-/// derived) i porozhnii-vec nul `Magnitude` lyshaiutsia yedynoiu kanonichnoiu
+/// derived) i inline-nul `Magnitude` lyshaiutsia yedynoiu kanonichnoiu
 /// formoiu — nemaie okremoho "vidiemnoho nulia", yakyi tsei typ mih by
 /// vypadkovo vyrobyty.
 /// Eine Ganzzahl beliebiger Genauigkeit mit Vorzeichen: Vorzeichen plus
 /// Größe. Null wird immer mit `negative: false` dargestellt, sodass
-/// `PartialEq`/`Eq` (beide derived) und `Magnitude`s leerer-Vec-Null eine
+/// `PartialEq`/`Eq` (beide derived) und `Magnitude`s Inline-Null eine
 /// einzige kanonische Form bleiben — es gibt keine separate "negative
 /// Null", die dieser Typ versehentlich erzeugen könnte.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -417,7 +632,7 @@ impl BigInt {
             out.push('-');
         }
         for bit in (0..width).rev() {
-            let limb = self.magnitude.0[bit / 32];
+            let limb = self.magnitude.limb_at(bit / 32);
             let value = (limb >> (bit % 32)) & 1;
             out.push(if value == 0 { '0' } else { '1' });
         }
@@ -446,8 +661,8 @@ impl BigInt {
     /// O(limbs) linear pass — used by the gcd small-operand fast path.
     fn rem_by_limb(&self, divisor: u32) -> u32 {
         let mut rem: u64 = 0;
-        for limb in self.magnitude.0.iter().rev() {
-            rem = ((rem << 32) | (*limb as u64)) % (divisor as u64);
+        for i in (0..self.magnitude.limb_len()).rev() {
+            rem = ((rem << 32) | (self.magnitude.limb_at(i) as u64)) % (divisor as u64);
         }
         rem as u32
     }
@@ -456,9 +671,10 @@ impl BigInt {
     /// Pidtrymka FASL: znak + LE limby u `out`.
     pub(crate) fn write_fasl(&self, out: &mut Vec<u8>) {
         out.push(self.is_negative() as u8);
-        out.extend_from_slice(&(self.magnitude.0.len() as u32).to_le_bytes());
-        for limb in &self.magnitude.0 {
-            out.extend_from_slice(&limb.to_le_bytes());
+        let len = self.magnitude.limb_len();
+        out.extend_from_slice(&(len as u32).to_le_bytes());
+        for i in 0..len {
+            out.extend_from_slice(&self.magnitude.limb_at(i).to_le_bytes());
         }
     }
 
@@ -478,14 +694,11 @@ impl BigInt {
         if tag > 1 {
             return None;
         }
-        Some(Self::normalized(tag == 1, Magnitude(limbs)))
+        Some(Self::normalized(tag == 1, Magnitude::from_limbs(limbs)))
     }
 
     pub fn bit_length(&self) -> usize {
-        match self.magnitude.0.last() {
-            None => 0,
-            Some(&top) => (self.magnitude.0.len() - 1) * 32 + (32 - top.leading_zeros() as usize),
-        }
+        self.magnitude.bit_len() as usize
     }
 
     fn normalized(negative: bool, magnitude: Magnitude) -> Self {
@@ -606,11 +819,8 @@ impl BigInt {
         // One linear pass computes giant % small, and from there both
         // operands are tiny; full binary stepping on equal-size giants
         // would be orders of magnitude slower.
-        if other.magnitude.0.len() == 1
-            && !other.magnitude.0.is_empty()
-            && self.magnitude.0.len() > 2
-        {
-            let divisor = other.magnitude.0[0];
+        if other.magnitude.limb_len() == 1 && self.magnitude.limb_len() > 2 {
+            let divisor = other.magnitude.limb_at(0);
             let r = self.rem_by_limb(divisor);
             let mut x = BigInt::from_i64(r as i64);
             let mut y = BigInt::from_i64(divisor as i64);
