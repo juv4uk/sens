@@ -267,7 +267,8 @@ pub(crate) enum EvalStep {
     },
 }
 
-#[cfg(test)]
+/// Єдиний виклик першокласного значення: точний доменний код,
+/// а не рядок, W8 або обраний носій. Резидент без механізму не виконується.
 pub(crate) fn invoke_value(
     function: &Value,
     arguments: &[Value],
@@ -276,11 +277,13 @@ pub(crate) fn invoke_value(
 ) -> Result<Value, LanguageError> {
     match function {
         Value::DomainIdentity(identity) => {
-            if let Some(core_identity) = identity.core_operation() {
-                return canon::invoke_domain_identity(core_identity, arguments, environment, span);
-            }
+            // D8–D10 селектори — одна сім'я точного закону. D9 не має
+            // втрачати свій закон при приведенні до CoreDomainIdentity.
             if let Some(result) = selector_law::invoke(*identity, arguments, span) {
                 return result;
+            }
+            if let Some(core_identity) = identity.core_operation() {
+                return canon::invoke_domain_identity(core_identity, arguments, environment, span);
             }
             // A bounded D9 mechanism cut remains outside CoreDomainIdentity.
             if canon::has_d9_mechanism(*identity) {
@@ -368,25 +371,42 @@ pub(crate) fn evaluate_step(
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
-            // A ratified D3 surface is syntax-only here. Diagnose its exact
-            // domain identity, not the historical SID8 compatibility byte.
-            if let Some(identity @ CoreDomainIdentity::D3(_)) =
-                lower::immutable_surface_domain_identity(symbol)
-            {
-                return Err(LanguageError::new(
-                    ErrorKind::InvalidForm,
-                    format!("exact domain surface is syntax-only in this position: D3 {identity}"),
-                    expression.span,
-                ));
+            // Поверхня «укр» є лише проєкцією точного доменного слова.
+            // Функцію можна зберігати, передавати та викликати як значення.
+            // Особливі форми залишаються синтаксисом: їм потрібні сирі AST.
+            let current = crate::semantic_registry::exact_uk_callable_for_source_head(symbol);
+            if let Some(identity) = current {
+                if let Some(core) = identity.core_operation() {
+                    if is_d3(core, 0b001)
+                        || is_d3(core, 0b110)
+                        || is_d5(core, 0b00100)
+                        || is_d5(core, 0b00110)
+                        || is_d5(core, 0b00111)
+                        || necessary_forms::identity_for_domain_identity(core).is_some()
+                    {
+                        return Err(LanguageError::new(
+                            ErrorKind::InvalidForm,
+                            format!("exact domain form is syntax-only in this position: D{} {}", identity.width(), identity),
+                            expression.span,
+                        ));
+                    }
+                    if matches!(core, CoreDomainIdentity::D3(_)) {
+                        // Незмінна Д3 функція має першокласну тотожність
+                        // навіть без DEFINE і без історичного SID8.
+                        return Ok(EvalStep::Value(Value::DomainIdentity(identity)));
+                    }
+                }
             }
-            if let Some(sid) = canon::routed_sid_for_surface(symbol) {
-                return Err(LanguageError::new(
-                    ErrorKind::InvalidForm,
-                    format!(
-                        "function SID is syntax-only in this position · function SID тут лише синтаксис · Funktions-SID ist hier nur Syntax: {sid}"
-                    ),
-                    expression.span,
-                ));
+            if current.is_none() {
+                if let Some(sid) = canon::routed_sid_for_surface(symbol) {
+                    return Err(LanguageError::new(
+                        ErrorKind::InvalidForm,
+                        format!(
+                            "function SID is syntax-only in this position · function SID тут лише синтаксис · Funktions-SID ist nur Syntax: {sid}"
+                        ),
+                        expression.span,
+                    ));
+                }
             }
             if necessary_forms::identity_for_symbol(symbol).is_some() {
                 return Err(LanguageError::new(
@@ -396,9 +416,12 @@ pub(crate) fn evaluate_step(
                 ));
             }
             if let Some(value) = environment.get(symbol) {
-                // Core4 має чинні параметри з іменами «так» та «ні»:
-                // лексичне зв'язування завжди має перевагу в сумісному Lisp.
+                // Лексичний параметр залишається значенням, але незмінна
+                // Д3 identity вище не може бути затінена.
                 return Ok(EvalStep::Value(value));
+            }
+            if let Some(identity) = current {
+                return Ok(EvalStep::Value(Value::DomainIdentity(identity)));
             }
             // Тільки незв'язані Д1 поверхні читаємо за ратифікованою
             // таблицею, як у точному reader. Це не host truthiness,
@@ -750,6 +773,17 @@ fn dispatch_call(
     };
     match &function {
         Value::DomainIdentity(identity) => {
+            // Точні селектори Д3–Д10 мають однаковий закон і як голова,
+            // і як передане значення; особливо Д9 не губиться в Core-маршруті.
+            if selector_law::is_selector(*identity) {
+                let mut values = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    values.push(evaluate(argument, environment)?);
+                }
+                return selector_law::invoke(*identity, &values, span)
+                    .expect("exact selector family was checked above")
+                    .map(EvalStep::Value);
+            }
             if let Some(core_identity) = identity.core_operation() {
                 let mut values = Vec::with_capacity(arguments.len());
                 for argument in arguments {
@@ -917,14 +951,78 @@ mod exact_domain_surface_value_position_tests {
     use super::*;
 
     #[test]
-    fn bare_ukrainian_d3_surface_is_diagnosed_without_sid8() {
+    fn ukrainian_d3_code_is_a_first_class_function_without_sid8() {
         let mut session = Session::default();
-        let error = eval_program("атом?", &mut session)
-            .expect_err("bare D3 function surface is not a value call");
-        assert_eq!(error.kind, ErrorKind::InvalidForm);
-        assert!(error.message.contains("D3 010"), "{}", error.message);
-        assert!(!error.message.contains("SID"), "{}", error.message);
-        assert!(!error.message.contains("00000010"), "{}", error.message);
+        let bare = eval_program("атом?", &mut session)
+            .expect("Д3 функцію можна прочитати як першокласне значення");
+        assert!(matches!(
+            bare.value,
+            Value::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b010
+        ));
+        let result = eval_program(
+            "(визначити обрана-дія-для-свідка атом?) ((функція (дія-для-свідка) (дія-для-свідка (як-є ()))) обрана-дія-для-свідка)",
+            &mut session,
+        )
+        .expect("точний код Д3 передано в замикання і викликано");
+        assert_eq!(result.value.as_predicate_bit(), Some(true));
+    }
+
+    #[test]
+    fn d8_d9_d10_selector_codes_are_first_class_values_inside_closures() {
+        let expected = eval_program("(як-є атом?)", &mut Session::default())
+            .expect("цитований атом у чинному SENS")
+            .value;
+        for (domain, depth) in [
+            (
+                crate::DomainIdentity::D8(crate::CoreD8::from_word(
+                    crate::Bit8::new(0b10000000).unwrap(),
+                )),
+                6usize,
+            ),
+            (
+                crate::DomainIdentity::D9(crate::CoreD9::from_word(
+                    crate::Bit9::new(0b100000000).unwrap(),
+                )),
+                7,
+            ),
+            (
+                crate::DomainIdentity::D10(crate::DomainD10::new(0b1000000000).unwrap()),
+                8,
+            ),
+        ] {
+            let mut session = Session::default();
+            session.environment.define("код-для-передачі", Value::DomainIdentity(domain));
+            let mut input = "(як-є атом?)".to_owned();
+            for _ in 0..depth {
+                input = format!("(сполучити {input} (як-є ()))");
+            }
+            let program = format!(
+                "((функція (операція) (операція {input})) код-для-передачі)"
+            );
+            let result = eval_program(&program, &mut session)
+                .expect("ратифікований код передається як значення, а потім виконується");
+            assert_eq!(result.value, expected, "Д{}: точна identity має бути першокласною", domain.width());
+        }
+    }
+
+    #[test]
+    fn unadmitted_d10_code_is_a_value_but_not_a_fabricated_function() {
+        let mut session = Session::default();
+        let code = crate::DomainIdentity::D10(
+            crate::DomainD10::new(0b0000000010).unwrap(),
+        );
+        session.environment.define("невикличний-код", Value::DomainIdentity(code));
+        assert_eq!(
+            eval_program("невикличний-код", &mut session)
+                .expect("резидент є першокласним значенням")
+                .value,
+            Value::DomainIdentity(code),
+        );
+        let error = eval_program("(невикличний-код)", &mut session)
+            .expect_err("невизначений механізм не створюється з ширини");
+        assert_eq!(error.kind, ErrorKind::Type);
+        assert!(error.message.contains("domain identity"), "{}", error.message);
     }
 }
 
