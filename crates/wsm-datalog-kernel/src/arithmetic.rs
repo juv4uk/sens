@@ -40,32 +40,20 @@ pub fn is_legacy_math_id(legacy_abi_byte: u8) -> bool {
     )
 }
 
-/// A Datalog arithmetic mechanism, never a domain identity by itself.
+/// Host arithmetic is a mechanism, not a language operation selector.
+/// SENS owns the exact domain/code/укр lookup; Zig alone transports its bits.
+/// Rust receives a typed execution request AFTER that admission. In particular
+/// no W8 byte, D7 text or domain-width guessing can select a mechanism here.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum ArithmeticMechanism {
+pub enum ArithmeticMechanism {
     Add, Sub, Mul, Div, Abs, Min, Max, Mod, Quotient,
 }
 
-/// Only mechanisms with a verified matching domain law enter this path.
-/// Both exact width and bits are required: an historical SID8 byte cannot
-/// make an operation callable in present-day D8.
-pub fn parse_exact_domain_request(
-    width: u8, bits: &str, payload: &str
+/// Execute an already-selected *mechanism*. This API accepts neither SID8
+/// nor domain words: choosing their meaning remains exclusively SENS's job.
+pub fn parse_arithmetic_mechanism(
+    operation: ArithmeticMechanism, payload: &str,
 ) -> Result<NumericExpr, DatalogMathError> {
-    use ArithmeticMechanism as Op;
-    let operation = match (width, bits) {
-        (5, "01010") => Op::Add,  // додати
-        (5, "01011") => Op::Sub,  // відняти
-        (5, "10110") => Op::Mul,  // помножити
-        (6, "010011") => Op::Abs, // модуль
-        (6, "110101") => Op::Min, // найменше
-        (6, "110111") => Op::Max, // найбільше
-        // Quotient, division and remainder wait for exact signed/rational
-        // SENS parity; an i64 adapter must not invent their laws.
-        _ => return Err(DatalogMathError::UnsupportedDomainOperation {
-            width, bits: bits.to_owned(),
-        }),
-    };
     parse_math_operation(operation, payload)
 }
 
@@ -150,7 +138,6 @@ pub enum DatalogMathError {
     NonIntegerValue(Value),
     InvalidArgument(String),
     UnsupportedLegacyAbiId(u8),
-    UnsupportedDomainOperation { width: u8, bits: String },
     DivisionByZero,
     Overflow,
 }
@@ -167,9 +154,6 @@ impl fmt::Display for DatalogMathError {
             }
             Self::UnsupportedLegacyAbiId(sid) => {
                 write!(formatter, "datalog-math-unsupported-legacy-abi-slot:{sid:08b}")
-            }
-            Self::UnsupportedDomainOperation { width, bits } => {
-                write!(formatter, "datalog-math-unsupported-domain:D{width}:{bits}")
             }
             Self::DivisionByZero => write!(formatter, "datalog-math-division-by-zero"),
             Self::Overflow => write!(formatter, "datalog-math-overflow"),
@@ -277,33 +261,25 @@ mod tests {
     use super::*;
 
     #[test]
-    fn ratified_domain_math_is_not_legacy_sid8() {
-        let cases = [
-            (5, "01010", "2 3", 5),    // укр додати
-            (5, "01011", "7 3", 4),    // укр відняти
-            (5, "10110", "6 7", 42),   // укр помножити
-            (6, "010011", "-5", 5),    // укр модуль
-            (6, "110101", "4 9", 4),   // укр найменше
-            (6, "110111", "4 9", 9),   // укр найбільше
-        ];
-        for (width, bits, input, expected) in cases {
-            let expr = parse_exact_domain_request(width, bits, input)
-                .expect("ratified exact-domain mechanism");
+    fn typed_arithmetic_mechanism_does_not_accept_sid8_or_operator_text() {
+        use ArithmeticMechanism::*;
+        for (mechanism, input, expected) in [
+            (Add, "2 3", 5),
+            (Sub, "7 3", 4),
+            (Mul, "6 7", 42),
+            (Abs, "-5", 5),
+            (Min, "4 9", 4),
+            (Max, "4 9", 9),
+        ] {
+            let expr = parse_arithmetic_mechanism(mechanism, input)
+                .expect("already-authorized mechanism");
             assert_eq!(expr.evaluate(&HashMap::new()), Ok(Value::Int(expected)));
         }
-        // Historic W8 ADD is not D8 ADD, nor is a width silently padded.
-        assert!(matches!(
-            parse_exact_domain_request(8, "00001100", "2 3"),
-            Err(DatalogMathError::UnsupportedDomainOperation { width: 8, .. })
-        ));
-        assert!(parse_exact_domain_request(6, "01010", "2 3").is_err());
-        assert!(parse_exact_domain_request(5, "00001100", "2 3").is_err());
-        // Exact SENS quotient cannot be assumed to be truncated i64 division.
-        assert!(parse_exact_domain_request(5, "10111", "7 3").is_err());
-        assert!(parse_exact_domain_request(5, "01010", "+ 2 3").is_err());
-        let expr = parse_exact_domain_request(
-            5, "01010", "9223372036854775807 1",
-        ).expect("exact addition mechanism");
+        // The API takes an enum rather than the historic W8 ABI slot.
+        assert!(parse_arithmetic_mechanism(Add, "+ 2 3").is_err());
+        let expr = parse_arithmetic_mechanism(
+            Add, "9223372036854775807 1",
+        ).expect("mechanism and operands are valid");
         assert_eq!(expr.evaluate(&HashMap::new()), Err(DatalogMathError::Overflow));
     }
 

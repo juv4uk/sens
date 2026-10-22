@@ -4,7 +4,7 @@
 use wsm_datalog_kernel::{
     Atom, Database, DatalogAbiAdapter, Evaluator, Program, Rule, Term, Value,
     arithmetic::{
-        DatalogMathError, NumericExpr, parse_exact_domain_request,
+        DatalogMathError, NumericExpr, ArithmeticMechanism, parse_arithmetic_mechanism,
         LEGACY_ABI_ABS, LEGACY_ABI_ADD, LEGACY_ABI_DIV, LEGACY_ABI_MAX, LEGACY_ABI_MIN, LEGACY_ABI_MOD,
         LEGACY_ABI_MUL, LEGACY_ABI_QUOTIENT, LEGACY_ABI_SUB,
     },
@@ -40,47 +40,38 @@ fn exchange_math(
     (status, output)
 }
 
-/// Current SENS ownership is D5/D6 exact-domain words and their full укр
-/// projection, not the flat historical one-byte C-ABI mechanism slot.
+/// These laws are owned by the current D5/D6 tables. The host can only
+/// execute a typed mechanism received from SENS; it must not convert SID8,
+/// domain bits or D7 spelling into a callable operation.
 #[test]
-fn present_day_domain_ladder_executes_exact_ukr_math_without_sid8() {
-    for (width, bits, ukr, input, expected) in [
-        (5, "01010", "додати", "2 3", 5),
-        (5, "01011", "відняти", "7 3", 4),
-        (5, "10110", "помножити", "6 7", 42),
-        (6, "010011", "модуль", "-5", 5),
-        (6, "110101", "найменше", "4 9", 4),
-        (6, "110111", "найбільше", "4 9", 9),
+fn present_day_ukr_tables_and_typed_arithmetic_mechanisms() {
+    for (mechanism, width, bits, ukr, input, expected) in [
+        (ArithmeticMechanism::Add, 5, "01010", "додати", "2 3", 5),
+        (ArithmeticMechanism::Sub, 5, "01011", "відняти", "7 3", 4),
+        (ArithmeticMechanism::Mul, 5, "10110", "помножити", "6 7", 42),
+        (ArithmeticMechanism::Abs, 6, "010011", "модуль", "-5", 5),
+        (ArithmeticMechanism::Min, 6, "110101", "найменше", "4 9", 4),
+        (ArithmeticMechanism::Max, 6, "110111", "найбільше", "4 9", 9),
     ] {
-        let operation = parse_exact_domain_request(width, bits, input)
-            .unwrap_or_else(|error| panic!("D{width}:{bits} {ukr}: {error}"));
-        // Ratified domain tables are authority, not the flat 8-bit ABI.
-        // Verify the Ukrainian callable spelling against the current row.
         let table = match width {
             5 => include_str!("../../../lib/domains/d5.lisp"),
             6 => include_str!("../../../lib/domains/d6.lisp"),
-            _ => unreachable!("only current D5/D6 admitted"),
+            _ => unreachable!("only current D5/D6 evidence"),
         };
         let prefix = format!("  ({bits} ");
         let resident = table.lines().find(|line| line.starts_with(&prefix))
-            .unwrap_or_else(|| panic!("Missing resident D{width}:{bits}"));
+            .unwrap_or_else(|| panic!("Missing D{width}:{bits} resident"));
         assert!(resident.contains(&format!("(укр {ukr})")),
             "D{width}:{bits} changed its ratified Ukrainian projection");
+        let operation = parse_arithmetic_mechanism(mechanism, input)
+            .unwrap_or_else(|error| panic!("host mechanism {mechanism:?}: {error}"));
         assert_eq!(operation.evaluate(&std::collections::HashMap::new()),
-            Ok(Value::int(expected)), "D{width}:{bits} {ukr}");
+            Ok(Value::int(expected)));
     }
-    for (width, bits, input) in [
-        (8, "00001100", "2 3"), // old W8 ADD != D8 resident
-        (5, "00001100", "2 3"), // incorrect width
-        (5, "10111", "7 3"),    // D5 quotient needs SENS rational-law parity
-        (6, "010100", "7 3"),   // D6 remainder needs signed-law parity
-        (8, "11110110", "7 3"), // D8 division needs separate callability proof
-    ] {
-        assert!(matches!(
-            parse_exact_domain_request(width, bits, input),
-            Err(DatalogMathError::UnsupportedDomainOperation { .. })
-        ), "cannot infer current identity from historical SID8: D{width}:{bits}");
-    }
+    // Unsupported/untrusted text cannot become a mechanism selector.
+    assert!(parse_arithmetic_mechanism(ArithmeticMechanism::Add, "+ 2 3").is_err());
+    // Historical W8 ADD lives exclusively in the explicit legacy C-ABI test;
+    // no runtime Rust function takes (domain width, bits) and invents identity.
 }
 
 #[test]
