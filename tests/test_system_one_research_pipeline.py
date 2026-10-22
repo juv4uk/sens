@@ -5,8 +5,10 @@ import hashlib
 import importlib.util
 import json
 import tempfile
+import threading
 import unittest
 from argparse import Namespace
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -107,6 +109,82 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
         }
         with self.assertRaises(teacher.TeacherError):
             teacher.teacher_distribution(missing)
+
+    def test_teacher_http_request_uses_local_constrained_endpoint(self):
+        captured = {}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                length = int(self.headers.get("Content-Length", "0"))
+                captured["payload"] = json.loads(self.rfile.read(length).decode("utf-8"))
+                captured["authorization"] = self.headers.get("Authorization")
+                body = json.dumps(
+                    {
+                        "choices": [
+                            {
+                                "message": {"content": "A"},
+                                "logprobs": {
+                                    "content": [
+                                        {
+                                            "top_logprobs": [
+                                                {"token": letter, "logprob": score}
+                                                for letter, score in zip(
+                                                    "ABCDE", [0.0, -0.5, -1.0, -1.5, -2.0]
+                                                )
+                                            ]
+                                        }
+                                    ]
+                                },
+                            }
+                        ]
+                    }
+                ).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, _format, *_args):
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            endpoint = f"http://127.0.0.1:{server.server_port}/v1/chat/completions"
+            response = teacher.call_teacher(
+                endpoint=endpoint,
+                model="fixture-model",
+                api_key="fixture-secret",
+                prompt="Вибери тільки один дозволений маршрут.",
+                text="Мене двічі оштрафували за одну операцію.",
+                timeout=3.0,
+            )
+            self.assertEqual(captured["authorization"], "Bearer fixture-secret")
+            self.assertEqual(captured["payload"]["model"], "fixture-model")
+            self.assertEqual(captured["payload"]["max_tokens"], 1)
+            self.assertTrue(captured["payload"]["logprobs"])
+            self.assertEqual(captured["payload"]["top_logprobs"], 20)
+            self.assertEqual(
+                captured["payload"]["structured_outputs"]["choice"],
+                ["A", "B", "C", "D", "E"],
+            )
+            self.assertEqual(
+                captured["payload"]["messages"][1]["content"],
+                "Мене двічі оштрафували за одну операцію.",
+            )
+            generated, winner, _scores, distribution = teacher.teacher_distribution(response)
+            self.assertEqual(generated, "оплата")
+            self.assertEqual(winner, "оплата")
+            self.assertEqual(
+                sum(value["numerator"] for value in distribution.values()),
+                1_000_000_000,
+            )
+        finally:
+            server.shutdown()
+            thread.join(timeout=2.0)
+            server.server_close()
 
     def test_compact_student_trains_from_gold_or_soft_targets_and_evaluates_holdout(self):
         with tempfile.TemporaryDirectory() as directory:
