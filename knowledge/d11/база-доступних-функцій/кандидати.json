@@ -22,9 +22,9 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 186,
+    "total": 188,
     "historical": 17,
-    "library": 169,
+    "library": 171,
     "distinct_families": 27
   },
   "excluded": {
@@ -4503,13 +4503,85 @@
         "selection_basis": "Дійсний meta-eval.lisp + нативні позитивні і негативні виклики SENS у адресному CI, старі дослідні місця без нових opcode",
         "historical_research_alias": "досяжність-залежностей-графа?"
       }
+    },
+    {
+      "surface_name": "імена-визначень-лямбди",
+      "source_family": "meta-evaluation",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/meta-eval.lisp",
+        "blob_sha": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "original_file": "lib/meta-eval.lisp",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00001001110",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00001001110",
+        "ukr": "імена-визначень-лямбди",
+        "source_file": "lib/meta-eval.lisp",
+        "source_blob": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "law": "Витягнути з верхніх форм DEFINE імена в початковому порядку; повтори залишаються, порожні визначення дають ().",
+        "native_law_test": "crates/sens/tests/core_postcore_ukr.rs::meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens",
+        "native_test_blob": "13923e3ad2fae567f146e022891856470594b27d",
+        "native_test_result": "NATIVE_SENS_PASS_3_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39708817816",
+        "native_step_result": "META_EVAL_TARGET_STEP_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Живий MetaEval, 10 нативних позитивних та негативних SENS-свідків, відсутність точного дубля D1–D10",
+        "historical_research_alias": "імена-визначень-лямбди"
+      }
+    },
+    {
+      "surface_name": "побудувати-граф-залежностей-за-іменами",
+      "source_family": "meta-evaluation",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/meta-eval.lisp",
+        "blob_sha": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "original_file": "lib/meta-eval.lisp",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00000110101",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00000110101",
+        "ukr": "побудувати-граф-залежностей-за-іменами",
+        "source_file": "lib/meta-eval.lisp",
+        "source_blob": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "law": "Для кожної верхньої форми DEFINE зібрати вузол із упорядкованим списком вільних залежностей лише серед заданих імен; цитати й лексично затінені параметри не породжують ребра.",
+        "native_law_test": "crates/sens/tests/core_postcore_ukr.rs::meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens",
+        "native_test_blob": "13923e3ad2fae567f146e022891856470594b27d",
+        "native_test_result": "NATIVE_SENS_PASS_7_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39708817816",
+        "native_step_result": "META_EVAL_TARGET_STEP_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Живий MetaEval, 10 нативних позитивних та негативних SENS-свідків, відсутність точного дубля D1–D10",
+        "historical_research_alias": "побудувати-граф-залежностей-за-іменами"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 45,
-    "semantic_winners_total": 557,
+    "native_sens_composition_winners": 47,
+    "semantic_winners_total": 559,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
