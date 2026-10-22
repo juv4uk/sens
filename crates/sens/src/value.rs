@@ -580,7 +580,28 @@ impl PartialEq for Value {
             (Value::String(left), Value::String(right)) => left == right,
             (Value::Symbol(left), Value::Symbol(right)) => left == right,
             (Value::Pair(left), Value::Pair(right)) => {
-                left.head == right.head && left.tail == right.tail
+                if Rc::ptr_eq(left, right) {
+                    return true;
+                }
+                // A long Lisp list is a tail-linked chain: recursive Value
+                // equality would consume one call frame per CONS cell.
+                // Match the same structural law using a bounded work stack.
+                // Visit the head before the tail to keep proper-list stacks
+                // small; sharing is an identity-preserving fast path.
+                let mut pending = vec![(&left.tail, &right.tail), (&left.head, &right.head)];
+                while let Some((a, b)) = pending.pop() {
+                    match (a, b) {
+                        (Value::Pair(a), Value::Pair(b)) => {
+                            if !Rc::ptr_eq(a, b) {
+                                pending.push((&a.tail, &b.tail));
+                                pending.push((&a.head, &b.head));
+                            }
+                        }
+                        (a, b) if a == b => {}
+                        _ => return false,
+                    }
+                }
+                true
             }
             // Vectors compare structurally, element by element — same rule
             // as Pair chains. Identity would make `(eq (vector 1) (vector 1))`
@@ -1026,6 +1047,37 @@ mod exact_domain_value_tests {
         assert_ne!(values[0], values[1]);
         assert_ne!(values[0], values[2]);
         assert_ne!(values[1], values[2]);
+    }
+
+    /// Structurally equal CONS spines must remain comparable with a small
+    /// stack after PairNode moves CAR/CDR to one heap allocation per cell.
+    /// This is *host mechanism equality*, not the partial D3 EQ(atom,atom).
+    #[test]
+    fn deep_cons_spines_compare_iteratively_and_preserve_structural_difference() {
+        fn spine(depth: usize, end: Value) -> Value {
+            (0..depth).fold(end, |tail, _| {
+                Value::Pair(std::rc::Rc::new(super::PairNode {
+                    head: Value::Nil,
+                    tail,
+                }))
+            })
+        }
+
+        std::thread::Builder::new()
+            .name("cons-equality-small-stack".to_owned())
+            .stack_size(64 * 1024)
+            .spawn(|| {
+                let expected = spine(16_384, Value::Nil);
+                let identical = spine(16_384, Value::Nil);
+                let different = spine(16_384, Value::Symbol("змінено".into()));
+                assert_eq!(expected, identical, "test_id=CONS-EQ-DEEP expected=structural-equality");
+                assert_ne!(expected, different, "test_id=CONS-EQ-DEEP expected=distinguish-final-tail");
+                let shared = expected.clone();
+                assert_eq!(shared, expected, "test_id=CONS-EQ-SHARED expected=identity-preservation");
+            })
+            .expect("test_id=CONS-EQ-DEEP spawn")
+            .join()
+            .expect("test_id=CONS-EQ-DEEP must finish on bounded stack");
     }
 
     #[test]
