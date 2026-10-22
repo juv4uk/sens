@@ -51,6 +51,12 @@ while IFS= read -r -d '' source; do
       (( nonprogram_data += 1 ))
       printf 'NATIVE_DATA_ONLY\t%s\tclassification=DOMAIN_TABLE\n' "$source" >&2
       continue ;;
+    knowledge/meta-eval-evidence.lisp)
+      # (schema ...)/(row ...)/(claim ...) — реєстр доказів, не виклики SENS.
+      # Не вигадувати виконання чи фізичну пару для metadata.
+      (( nonprogram_data += 1 ))
+      printf 'NATIVE_DATA_ONLY\t%s\tclassification=EVIDENCE_INVENTORY\n' "$source" >&2
+      continue ;;
   esac
   # Джерело лише з коментарів/порожніх рядків не має Lisp-програми.
   # Воно НЕ мусить мати вигадану фізичну трійку, тому не є missing.
