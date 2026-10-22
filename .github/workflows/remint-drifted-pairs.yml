@@ -60,8 +60,7 @@ jobs:
             if [[ -z "$list" ]]; then
               for source in benchmarks/contest-uk/*.lisp; do
                 [[ -f "$source" && ! -f "${source%.lisp}.sens" ]] || continue
-                list="$list
-$source"
+                list="$(printf '%s\n%s' "$list" "$source")"
               done
             fi
           fi
