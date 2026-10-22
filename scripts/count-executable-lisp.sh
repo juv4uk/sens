@@ -62,12 +62,6 @@ while IFS= read -r -d '' source; do
     continue
   fi
   (( complete += 1 ))
-  # Нативний mint для великих бібліотек потребує того самого кінцевого
-  # бюджету, що й справжній перевірений refresh; 30s -> 180s від 256 KiB.
-  mint_seconds="$seconds"
-  if (( $(wc -c < "$source") >= 262144 && mint_seconds < 180 )); then
-    mint_seconds=180
-  fi
   # DEFINE-залежності мають бути завантажені тим самим SENS, що виконує
   # програму. Без них помилково оголошували працюючий файл не-виконуваним.
   binding_sources=()
@@ -89,6 +83,18 @@ while IFS= read -r -d '' source; do
     tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp)
       binding_sources=(--binding-source lib/world.lisp) ;;
   esac
+  # Часовий бюджет визначає повний SENS-вхід, а не тільки файл-
+  # споживач: --binding-source може завантажувати великий Core4.
+  # Така сама межа, як у refresh-verified-t5m-pair.sh; семантика
+  # та вердикт залишаються винятково за нативним SENS/Zig.
+  total_input_bytes=$(wc -c < "$source")
+  for ((i=1; i<${#binding_sources[@]}; i+=2)); do
+    (( total_input_bytes += $(wc -c < "${binding_sources[i]}") ))
+  done
+  mint_seconds="$seconds"
+  if (( total_input_bytes >= 262144 && mint_seconds < 180 )); then
+    mint_seconds=180
+  fi
   mint_flag=--t5m-mint
   if (( ${#binding_sources[@]} )); then
     mint_flag=--t5m-mint-pair
