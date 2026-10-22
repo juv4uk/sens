@@ -188,6 +188,15 @@ jobs:
               esac
               echo "MISSING $f"; skip=$((skip+1)); continue
             fi
+            # Коментарний файл — опис, не виконуваний Lisp. Навіть старий
+            # queued/rebase список не має майнити порожню програму:
+            # T5M_REPL_EMPTY тут є хибним адміністративним RED.
+            # Symlink і реальне джерело з формами НЕ обходити.
+            if [[ ! -L "$f" ]] &&
+               ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$f"; then
+              echo "REMINT_DATA_ONLY source=$f classification=COMMENT_ONLY"
+              continue
+            fi
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
             case "$f" in
@@ -348,6 +357,13 @@ jobs:
                 fi
                 echo "::error::REMINT_SOURCE_MISSING $f" >&2
                 regenerated_failed=1
+                continue
+              fi
+              # Перевірка повторюється після перемикання на новий main:
+              # джерело могло стати суто описовим, не створюємо бутафорію.
+              if [[ ! -L "$f" ]] &&
+                 ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$f"; then
+                echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=COMMENT_ONLY"
                 continue
               fi
               bs=()
