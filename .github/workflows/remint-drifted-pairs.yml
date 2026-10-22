@@ -223,8 +223,16 @@ jobs:
         if: ${{ !cancelled() && steps.remint.outcome == 'success' }}
         env:
           REMINT_CONTEST: ${{ steps.remint.outputs.contest }}
+          REMINT_GITHUB_REF: ${{ github.ref }}
         run: |
           set -euo pipefail
+          # Native proof повертається виключно до ref, який його запустив.
+          # Короткоживуча агентська гілка ніколи не записує свій T5M у main.
+          case "$REMINT_GITHUB_REF" in
+            refs/heads/*) target_branch="${REMINT_GITHUB_REF#refs/heads/}" ;;
+            *) echo "::error::REMINT_TARGET_NOT_BRANCH ref=$REMINT_GITHUB_REF" >&2; exit 2 ;;
+          esac
+          echo "REMINT_TARGET_BRANCH branch=$target_branch"
           git config user.name "sens-remint-bot"
           git config user.email "sens-remint-bot@users.noreply.github.com"
           prune_archived_duplicates() {
@@ -360,14 +368,14 @@ jobs:
           # чи CI, а НЕ Lisp, SENS, Zig, Rust, домени або корпус конкурсу.
           # Інакше обов'язкові новий mint, Zig inverse і SENS execution.
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            if git push origin HEAD:main; then
+            if git push origin "HEAD:$target_branch"; then
               echo "REMINT_PUBLISHED attempt=$attempt"
               published=1
               break
             fi
             echo "REMINT_MAIN_ADVANCED attempt=$attempt: exact remote ref changed" >&2
             if (( attempt == 12 )); then break; fi
-            git fetch origin main
+            git fetch origin "$target_branch"
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
             # Не перезапускати повний SENS суд за НОВОГО незалежного
@@ -389,18 +397,18 @@ jobs:
                   # Лише A: нове джерело не змінює перевірені байти.
                   # Вже існуючі M/D/R, фізичні SENS та семантика => новий mint.
                   if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
-                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" origin/main -- "$changed" | grep -Fxq -- "$changed" ||
-                     git cat-file -e "origin/main:${changed%.lisp}.sens" 2>/dev/null; then
+                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" origin/$target_branch -- "$changed" | grep -Fxq -- "$changed" ||
+                     git cat-file -e "origin/$target_branch:${changed%.lisp}.sens" 2>/dev/null; then
                     safe_rebase=0; break
                   fi
                   echo "REMINT_NEW_INDEPENDENT_CONTESTANT source=$changed mint=NEXT_QUEUE"
                   ;;
                 *) safe_rebase=0; break ;;
               esac
-            done < <(git -c core.quotePath=false diff --name-only "$verified_parent" origin/main)
+            done < <(git -c core.quotePath=false diff --name-only "$verified_parent" origin/$target_branch)
             if (( safe_rebase )) &&
-               git merge-base --is-ancestor "$verified_parent" origin/main; then
-              if git rebase origin/main; then
+               git merge-base --is-ancestor "$verified_parent" origin/$target_branch; then
+              if git rebase origin/$target_branch; then
                 echo "REMINT_SAFE_FAST_REBASE attempt=$attempt verified_inputs=UNCHANGED"
                 continue
               fi
@@ -410,7 +418,7 @@ jobs:
             echo "REMINT_REVERIFY_REQUIRED attempt=$attempt reason=semantic_or_source_delta"
             # Це тільки епізодичний workspace Actions, НЕ перепис історії
             # remote/main. Старий mint відкидається і перевіряється знову.
-            git reset --hard origin/main
+            git reset --hard origin/$target_branch
             # Кожний новий main має отримати свій справжній SENS binary:
             # ніколи не перевіряти поточний Lisp за старим виконуваним кодом.
             cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
