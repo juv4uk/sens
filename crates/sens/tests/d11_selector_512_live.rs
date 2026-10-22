@@ -10,17 +10,24 @@ use sens::{eval_program, load_core_library, Session};
 const SELECTORS: &str =
     include_str!("../../../knowledge/d11/база-доступних-функцій/селектори-512-д11.tsv");
 
-fn native_truth(session: &mut Session, id: &str, program: &str, expected: bool) {
-    let result = eval_program(program, session).unwrap_or_else(|error| {
-        panic!(
-            "test_id={id} layer=SENS input={program} expected=D1:{expected} actual_error={error}"
+// Семантичний вирок робить сама програма SENS: для правильного результату
+// COND коротко замикається на безпечному значенні, для мутанта доходить до
+// навмисно невикличного D1 «ні». Rust перевіряє лише успішність виконання.
+fn native_self_verdict(session: &mut Session, id: &str, predicate: &str, expected: bool) {
+    let program = if expected {
+        format!(
+            "(за-умовою ({predicate} (як-є так)) ((атом? (як-є ())) (ні)))"
         )
-    }).value;
-    assert_eq!(
-        result.as_predicate_bit(),
-        Some(expected),
-        "test_id={id} layer=SENS input={program} expected=D1:{expected} actual={result}"
-    );
+    } else {
+        format!(
+            "(за-умовою ({predicate} (ні)) ((атом? (як-є ())) (як-є так)))"
+        )
+    };
+    eval_program(&program, session).unwrap_or_else(|error| {
+        panic!(
+            "test_id={id} layer=SENS input={program} expected=self-verdict-success actual_error={error}"
+        )
+    });
 }
 
 /// Побудова *даних* для незалежного спостереження: для кожного A/D із
@@ -119,7 +126,7 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
         let positive = format!(
             "(тотожне? (перше ({child_name} {input})) (як-є {marker}))"
         );
-        native_truth(
+        native_self_verdict(
             &mut session,
             &format!("D11-SELECTOR-{bits}-POS"),
             &positive,
@@ -129,7 +136,7 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
         let negative = format!(
             "(тотожне? (перше ({child_name} {input})) (як-є {other}))"
         );
-        native_truth(
+        native_self_verdict(
             &mut session,
             &format!("D11-SELECTOR-{bits}-NEG"),
             &negative,
@@ -141,7 +148,7 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
         let parent_law = format!(
             "(тотожне? (перше ({parent_name} ({carrier} {input}))) (як-є {marker}))"
         );
-        native_truth(
+        native_self_verdict(
             &mut session,
             &format!("D11-SELECTOR-{bits}-D10-PARENT"),
             &parent_law,
