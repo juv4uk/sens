@@ -398,6 +398,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-stable-bipartition-general",
         "вилучити-всі-входження",
         "замінити-всі-входження",
+        "list-split-before-every-atom-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
