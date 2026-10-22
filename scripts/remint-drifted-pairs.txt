@@ -68,3 +68,4 @@ lib/list-keep-last-unique-atoms-general.lisp
 lib/list-all-unordered-position-pairs-general.lisp
 lib/list-all-subsets-by-position-general.lisp
 lib/list-keep-repeated-atoms-once-general.lisp
+lib/tree-pair-tally-unary-general.lisp
