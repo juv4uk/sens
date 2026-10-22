@@ -1234,6 +1234,7 @@ jobs:
           set -euo pipefail
           base="$PUSH_BEFORE"
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE"; fi
+          touched=".github/workflows/ci.yml"
           if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
             git fetch --no-tags --depth=1 origin "$base"
             touched="$(git diff --name-only "$base" HEAD -- crates/sens/src/domain_numeric.rs crates/sens/src/binary_number.rs crates/sens/src/machine_math.rs crates/sens/src/machine_math_skylake.S crates/sens/src/eval/d5_arithmetic.rs .github/workflows/ci.yml)"
@@ -1242,13 +1243,11 @@ jobs:
               exit 0
             fi
           fi
-          if grep -Eq '^(crates/sens/src/(domain_numeric|binary_number|machine_math)\\.rs|crates/sens/src/machine_math_skylake\\.S|\\.github/workflows/ci\\.yml)
- <<< "${touched:-.github/workflows/ci.yml}"; then
+          if [[ "$touched" == *"crates/sens/src/domain_numeric.rs"* || "$touched" == *"crates/sens/src/binary_number.rs"* || "$touched" == *"crates/sens/src/machine_math.rs"* || "$touched" == *"crates/sens/src/machine_math_skylake.S"* || "$touched" == *".github/workflows/ci.yml"* ]]; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 120s cargo test --locked -p sens --lib domain_numeric::tests::wide_asm_seeded_full_domain_parity -- --exact
           fi
-          if grep -Eq '^(crates/sens/src/eval/d5_arithmetic\\.rs|\\.github/workflows/ci\\.yml)
- <<< "${touched:-.github/workflows/ci.yml}"; then
-            # Не статичний oracle: SENS виконує ZEROP і D1 позитив/негатив.
+          if [[ "$touched" == *"crates/sens/src/eval/d5_arithmetic.rs"* || "$touched" == *".github/workflows/ci.yml"* ]]; then
+            # SENS виконує ZEROP з D1 позитивом/негативом і точними D24+.
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 120s cargo test --locked -p sens --lib eval::d5_arithmetic::exact_d5_numberp::zerop_is_exact_d24_law_and_never_coerces_text_or_host_number -- --exact --nocapture
           fi
 
