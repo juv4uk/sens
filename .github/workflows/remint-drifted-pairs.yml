@@ -253,6 +253,9 @@ jobs:
             git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main"
           }
           regenerate_on_current_main() {
+            # RED належить саме цьому актуальному SHA. Стара помилка у
+            # попередній спробі не переживає нативного ремонту нової версії.
+            regenerated_failed=0
             local f old source
             local -a bs
             # Після чергового push у main могли з'явитися нові конкурсанти.
@@ -358,6 +361,14 @@ jobs:
               case "$changed" in
                 docs/*.md|benchmarks/contest-uk/RESULTS.md|.github/workflows/*.yml|.github/workflows/*.yaml)
                   ;;
+                lib/list-*.lisp|lib/tree-*.lisp|lib/d11-*.lisp)
+                  # Лише чужий незалежний source, НЕ наш native candidate.
+                  # При зміні нашого Lisp або будь-якого фізичного SENS
+                  # обов'язково новий exact SENS/Zig mint на свіжому main.
+                  if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list"; then
+                    safe_rebase=0; break
+                  fi
+                  ;;
                 *) safe_rebase=0; break ;;
               esac
             done < <(git diff --name-only "$verified_parent" origin/main)
@@ -385,7 +396,7 @@ jobs:
             fi
           done
           if (( ! published )); then
-            echo "::error::REMINT_PUBLISH_RACE after 6 safe attempts; no force push" >&2
+            echo "::error::REMINT_PUBLISH_RACE after 12 verified attempts; no force push" >&2
             exit 1
           fi
           if (( regenerated_failed )); then
