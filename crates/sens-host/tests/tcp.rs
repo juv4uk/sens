@@ -1,7 +1,9 @@
 //! TCP capability and language-owned read-semantics integration tests.
 //! TCP integration tests use real sockets and separate sessions per endpoint.
 
-use sens::{eval_program, load_tcp_library, ErrorKind, Session, Value};
+use sens::{
+    eval_program, load_core_library, load_tcp_library, ErrorKind, Exactness, Session, Value,
+};
 use sens_host::install;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
@@ -9,7 +11,7 @@ use std::thread;
 
 fn tcp_session() -> Session {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    load_core_library(&mut session).unwrap();
     load_tcp_library(&mut session).unwrap();
     session
 }
@@ -41,7 +43,7 @@ fn free_port() -> u16 {
 }
 
 fn load_knowledge(session: &mut Session) {
-    eval_program(include_str!("../../../lib/core.lisp"), session).unwrap();
+    load_core_library(session).unwrap();
     load_tcp_library(session).unwrap();
     eval_program(include_str!("../../../lib/unify.lisp"), session).unwrap();
     eval_program(include_str!("../../../lib/reason.lisp"), session).unwrap();
@@ -125,37 +127,55 @@ fn send_knowledge_package_transmits_one_canonical_expression_then_eof() {
 }
 
 #[test]
-fn receive_knowledge_package_drains_chunks_and_atomically_imports() {
+fn protocol_read_drains_tcp_chunks_until_eof() {
     install();
     let port = free_port();
     let server = thread::spawn(move || {
         let mut session = Session::default();
         load_knowledge(&mut session);
+        session
+            .environment
+            .define("порт", Value::Number(port as f64, Exactness::Exact));
         let source = format!(
             r#"
-            (def listener (tcp-listen {port}))
-            (def connection (tcp-accept listener))
-            (receive-knowledge-package connection)
-            (car (car (reason-in (quote exchange) (quote (has-mass earth)))))
+            (визначити слухач (протокол-передавання-сире-слухання "127.0.0.1" порт))
+            (визначити підключення (tcp-accept слухач))
+            (протокол-передавання-сире-читання підключення)
             "#
         );
         eval_program(&source, &mut session)
-            .unwrap()
+            .unwrap_or_else(|error| panic!("TCP reader failed: {error}"))
             .value
             .to_string()
     });
     let payload = b"((format . my-lisp-knowledge) (version 0 1) (module . exchange) (clauses . (((planet earth)) ((has-mass (var x)) (planet (var x))))))";
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
     let mut stream = loop {
         match TcpStream::connect(("127.0.0.1", port)) {
             Ok(stream) => break stream,
-            Err(_) => thread::sleep(std::time::Duration::from_millis(50)),
+            Err(error) => {
+                assert!(
+                    !server.is_finished(),
+                    "TCP reader exited before accepting TCP (last connect error: {error})"
+                );
+                assert!(
+                    std::time::Instant::now() < deadline,
+                    "TCP reader did not open listener within 5s (last connect error: {error})"
+                );
+                thread::sleep(std::time::Duration::from_millis(50));
+            }
         }
     };
     for chunk in payload.chunks(17) {
         stream.write_all(chunk).unwrap();
     }
     drop(stream);
-    assert_eq!(server.join().unwrap(), "(((x . 0) . earth))");
+    let expected = Value::list(
+        payload
+            .iter()
+            .map(|byte| Value::Number(*byte as f64, Exactness::Exact)),
+    );
+    assert_eq!(server.join().unwrap(), expected.to_string());
 }
 
 #[test]
