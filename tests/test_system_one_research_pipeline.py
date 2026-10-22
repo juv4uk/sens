@@ -604,6 +604,89 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertTrue((output_dir / "student-gold-test.jsonl").is_file())
             self.assertTrue((output_dir / "student-soft-test.jsonl").is_file())
 
+            # Приєднуємо фіктивні прогнозування трансформера до тих самих метрик.
+            # Ваги справжньої моделі не завантажуються; перевіряється лише контракт.
+            transformer_paths = {}
+            for split in ("validation", "test"):
+                rows = []
+                for row in seed_rows:
+                    if row["split"] != split:
+                        continue
+                    rows.append(
+                        {
+                            "id": row["id"],
+                            "split": split,
+                            "text": row["text"],
+                            "gold": row["gold"],
+                            "model_schema": "sens.system-one.transformer-student/1",
+                            "base_model": "fixture-mmbert",
+                            "training_dataset_sha256": seed_sha,
+                            "calibration_temperature": 1.25,
+                            "distribution": exact_distribution(row["gold"]),
+                        }
+                    )
+                transformer_path = root / f"transformer-{split}.jsonl"
+                write_jsonl(transformer_path, rows)
+                transformer_paths[split] = transformer_path
+
+            transformer_output = root / "comparison-with-transformer"
+            transformer_report = comparison.run(
+                Namespace(
+                    input=seed_path,
+                    teacher_train=teacher_paths["train"],
+                    teacher_validation=teacher_paths["validation"],
+                    teacher_test=teacher_paths["test"],
+                    transformer_validation_predictions=transformer_paths["validation"],
+                    transformer_test_predictions=transformer_paths["test"],
+                    output_dir=transformer_output,
+                    threshold=0.5,
+                    bins=5,
+                    smoothing=1.0,
+                    min_count=1,
+                    gold_weight=0.25,
+                    min_temperature=0.05,
+                    max_temperature=20.0,
+                    grid_points=51,
+                    overwrite=False,
+                )
+            )
+            self.assertIn("student_transformer", transformer_report["comparison"]["validation"])
+            self.assertIn("student_transformer", transformer_report["comparison"]["test"])
+            self.assertEqual(
+                transformer_report["transformer_student"]["validation"]["base_model"],
+                "fixture-mmbert",
+            )
+            self.assertFalse(transformer_report["test_used_for_training_or_calibration"])
+
+            # Неправильний SHA test-виводу має відхилятися до навчання або запису моделі.
+            bad_test_rows, _ = student.read_jsonl(transformer_paths["test"])
+            bad_test_rows[0]["training_dataset_sha256"] = "wrong-sha"
+            bad_test_path = root / "transformer-test-bad.jsonl"
+            write_jsonl(bad_test_path, bad_test_rows)
+            bad_output = root / "comparison-bad-transformer"
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.run(
+                    Namespace(
+                        input=seed_path,
+                        teacher_train=teacher_paths["train"],
+                        teacher_validation=teacher_paths["validation"],
+                        teacher_test=teacher_paths["test"],
+                        transformer_validation_predictions=transformer_paths["validation"],
+                        transformer_test_predictions=bad_test_path,
+                        output_dir=bad_output,
+                        threshold=0.5,
+                        bins=5,
+                        smoothing=1.0,
+                        min_count=1,
+                        gold_weight=0.25,
+                        min_temperature=0.05,
+                        max_temperature=20.0,
+                        grid_points=51,
+                        overwrite=False,
+                    )
+                )
+            self.assertFalse((bad_output / "student-gold-uncalibrated.json").exists())
+
     def test_temperature_calibration_uses_validation_only_and_nll_does_not_worsen(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
