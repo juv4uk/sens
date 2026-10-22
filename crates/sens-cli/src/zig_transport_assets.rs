@@ -20,4 +20,9 @@ unsafe extern "C" {
     pub(super) fn sens_zig_world_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_content_store_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_lisp_fs_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_domain_table_bytes_copy(
+        domain: u8,
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
 }

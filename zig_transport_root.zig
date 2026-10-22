@@ -434,6 +434,62 @@ test "F6 lisp_fs exact bytes and unchanged short buffer" {
     try std.testing.expectEqualSlices(u8, lisp_fs_asset[0..lisp_fs_asset.len], &full);
 }
 
+// Domain projection tables cross the corridor as opaque bytes. SENS parses
+// and interprets them; the index selects only which checked-in asset to copy.
+const domain_table_assets = [_][]const u8{
+    @embedFile("lib/domains/d1.lisp"),
+    @embedFile("lib/domains/d2.lisp"),
+    @embedFile("lib/domains/d3.lisp"),
+    @embedFile("lib/domains/d4.lisp"),
+    @embedFile("lib/domains/d5.lisp"),
+    @embedFile("lib/domains/d6.lisp"),
+    @embedFile("lib/domains/d7.lisp"),
+    @embedFile("lib/domains/d8.lisp"),
+    @embedFile("lib/domains/d9.lisp"),
+    @embedFile("lib/domains/d10.lisp"),
+    @embedFile("lib/domains/d11.lisp"),
+};
+
+pub export fn sens_zig_domain_table_bytes_copy(domain: u8, dst: [*]u8, capacity: usize) isize {
+    if (domain == 0 or domain > domain_table_assets.len) return -1;
+    const asset = domain_table_assets[@as(usize, domain) - 1];
+    if (asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(asset.len);
+    if (capacity < asset.len) return -2;
+    @memcpy(dst[0..asset.len], asset);
+    return @intCast(asset.len);
+}
+
+test "domain projection tables cross Zig byte-exact and refuse short writes" {
+    const allocator = std.testing.allocator;
+    for (domain_table_assets, 0..) |asset, index| {
+        const domain: u8 = @intCast(index + 1);
+        const required = sens_zig_domain_table_bytes_copy(domain, undefined, 0);
+        try std.testing.expectEqual(@as(isize, @intCast(asset.len)), required);
+        var short: [1]u8 = .{0xA5};
+        try std.testing.expectEqual(
+            @as(isize, -2),
+            sens_zig_domain_table_bytes_copy(domain, &short, short.len),
+        );
+        try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+        const output = try allocator.alloc(u8, @intCast(required));
+        defer allocator.free(output);
+        try std.testing.expectEqual(
+            required,
+            sens_zig_domain_table_bytes_copy(domain, output.ptr, output.len),
+        );
+        try std.testing.expectEqualSlices(u8, asset, output);
+    }
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_domain_table_bytes_copy(0, undefined, 0),
+    );
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_domain_table_bytes_copy(12, undefined, 0),
+    );
+}
+
 // This live host-data file intentionally remains reloadable without rebuilding
 // the CLI. Rust receives bytes only through this Zig-owned, fixed-path adapter.
 const CFile = opaque {};

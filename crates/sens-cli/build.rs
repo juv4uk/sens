@@ -53,6 +53,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/uk.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/uk-docs.lisp");
+    println!("cargo:rerun-if-changed=../../lib/domains");
     // Zig embeds this release artifact into the linked archive; a manifest
     // change must invalidate Cargo's previous Zig build before packaging.
     println!("cargo:rerun-if-changed=../../packaging/islands-manifest-v1.json");

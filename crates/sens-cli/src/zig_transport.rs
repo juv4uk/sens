@@ -1319,3 +1319,39 @@ pub fn content_store_source_bytes() -> Result<Vec<u8>, String> {
     }
     Ok(bytes)
 }
+
+/// Returns one SENS-owned domain projection table as opaque Zig-carried bytes.
+pub fn domain_table_source_bytes(domain: u8) -> Result<Vec<u8>, String> {
+    version()?;
+    if !(1..=11).contains(&domain) {
+        return Err(format!(
+            "ZIG_DOMAIN_TABLE_CARRIER unknown asset index {domain}"
+        ));
+    }
+    let required = unsafe {
+        asset_ffi::sens_zig_domain_table_bytes_copy(
+            domain,
+            std::ptr::NonNull::<u8>::dangling().as_ptr(),
+            0,
+        )
+    };
+    if required <= 0 {
+        return Err(format!(
+            "ZIG_DOMAIN_TABLE_CARRIER invalid length for asset {domain}: {required}"
+        ));
+    }
+    let len = usize::try_from(required).map_err(|_| "ZIG_DOMAIN_TABLE_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_DOMAIN_TABLE_CARRIER host byte cap exceeded".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_domain_table_bytes_copy(domain, bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!(
+            "ZIG_DOMAIN_TABLE_CARRIER byte-copy mismatch for asset {domain}: {copied}"
+        ));
+    }
+    Ok(bytes)
+}
