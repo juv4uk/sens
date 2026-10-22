@@ -192,7 +192,9 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertIn("(визначити механізми-функції", code)
         self.assertNotRegex(code, r"\(\s*так(?=\s|\))")
         self.assertNotRegex(code, r"\(\s*ні(?=\s|\))")
-        self.assertEqual(code.count("((атом? (як-є ()))"), 2)
+        # Чинні дві D1-гілки fallback та єдиний SENS fail-fast helper.
+        self.assertGreaterEqual(code.count("((атом? (як-є ()))"), 2)
+        self.assertIn("(визначити довести-механізм", code)
 
     def test_exact_d1_registry_predicate_not_old_textual_boolean(self):
         code = uncommented(self.source)
