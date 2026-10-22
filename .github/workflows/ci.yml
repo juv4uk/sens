@@ -10,7 +10,7 @@ on:
 # Для push/PR перевіряємо найновіший код, не накопичуємо старі SHA в черзі.
 # Ручний повний прогін не конкурує з автоматичними push-перевірками.
 concurrency:
-  group: sens-central-ci-${{ github.event_name }}-${{ github.ref }}
+  group: ${{ github.event_name == 'workflow_dispatch' && 'sens-manual' || 'sens-central-ci' }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
 
 permissions:
