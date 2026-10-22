@@ -18,8 +18,8 @@ REPLACEMENTS = (
     # У цитованому паспорті є по одному ключу маршруту DEFINE/LAMBDA:
     # це ДАНІ, але лексичний лічильник бачить їх як форми.
     # Прямі виклики не змінені; нічого не виконується Python-ом.
-    ("0011", "визначити", "define", "DEFINE", 12),
-    ("0010", "функція", "lambda", "LAMBDA", 8),
+    ("0011", "визначити", "define", "DEFINE", 13),
+    ("0010", "функція", "lambda", "LAMBDA", 9),
 )
 LOCAL_RENAMES = (
     ("mechanism-selector-find-section", "механізм-знайти-секцію"),
@@ -204,11 +204,11 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertNotRegex(code, r"(?<![\w-])(?:так|ні)(?![\w-])")
         self.assertNotIn("(як-є yes)", code)
         self.assertNotIn("(як-є no)", code)
+        self.assertIn("(хибне?\\n         (реєстр-містить-ідентичність?", code)
         self.assertRegex(
             code,
             r"\(реєстр-містить-ідентичність\?\s+"
-            r"ідентичність\s+рядки-реєстру-механізму\)\s+"
-            + re.escape(false_d1) + r"\)",
+            r"ідентичність\s+рядки-реєстру-механізму\)\s*\)",
         )
 
     def test_named_helpers_execute_without_unadmitted_d5_value_calls(self):
