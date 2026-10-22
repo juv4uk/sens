@@ -146,6 +146,10 @@ while IFS= read -r -d '' source; do
       binding_sources=(--binding-source lib/unify.lisp) ;;
     lib/d11-clojure-partition-by.lisp)
       binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp) ;;
+    lib/d11-clojure-frequencies-unary.lisp)
+      # FREQUENCIES викликає український GROUP-BY, який є окремим SENS DEFINE.
+      # Без нього mint/paired хибно класифікували живу програму як RED.
+      binding_sources=(--binding-source lib/d11-clojure-group-by.lisp) ;;
     lib/narrate.lisp)
       binding_sources=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp) ;;
     lib/result-status.lisp)
