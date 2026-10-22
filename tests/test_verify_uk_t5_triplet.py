@@ -119,6 +119,45 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.assertIn("keyboard-v2", mod.three_pass.build_text7(foundation, ratified))
         self.assertTrue(self.verify()["canonical_uk_roundtrip"])
 
+    def test_native_multiform_t5m_fixture_has_exact_ukr_inverse(self):
+        # Реальна двоформова фізична програма вже виконується у
+        # crates/sens/tests/physical_t5m_execution.rs, а не у Python.
+        # Тут доводимо лише механічну укр ↔ точні D2 слова ↔ Zig/T5M.
+        fixture = ROOT / "tests/fixtures/migration-multiform-cohort-main"
+        lisp = fixture / "two-forms.lisp"
+        sens = fixture / "two-forms.sens"
+        view = fixture / "two-forms"
+        original = (lisp.read_bytes(), sens.read_bytes(), view.read_bytes())
+        words = view.read_text(encoding="ascii").split()
+        self.assertEqual(
+            mod.canonical_uk_from_words(words),
+            "(як-є ())\\n(сполучити (як-є ()) (як-є ()))\\n",
+        )
+        self.assertEqual(mod.project_current_uk(lisp.read_text(encoding="utf-8")), words)
+        record = mod.verify(lisp, sens, view)
+        self.assertTrue(record["program_identity_roundtrip"])
+        self.assertTrue(record["canonical_view_roundtrip"])
+        self.assertFalse(record["runtime_oracle_admitted_by_this_audit"])
+        self.assertEqual(
+            (lisp.read_bytes(), sens.read_bytes(), view.read_bytes()), original
+        )
+
+    def test_multiform_bad_separators_and_reader_depth_are_rejected(self):
+        forms = ["10", "001", "00", "000", "01"]
+        for bad in (
+            ["00", *forms],
+            [*forms, "00"],
+            [*forms, "00", "00", *forms],
+            [*forms, "01", *forms],
+        ):
+            with self.subTest(words=bad), self.assertRaises(mod.ProjectionBlocked):
+                mod.canonical_uk_from_words(bad)
+        # Реальний SENS reader має межу 128: ширша Python-рекурсія
+        # не може породжувати хибного сертифіката оберненості.
+        too_deep = ["10"] * 130 + ["000"] + ["01"] * 130
+        with self.assertRaisesRegex(mod.ProjectionBlocked, "128"):
+            mod.canonical_uk_from_words(too_deep)
+
     def test_single_atom_and_empty_list_are_distinct_from_d2_separator(self):
         self.assertEqual(mod.canonical_uk_from_words(["0"]), "ні\n")
         self.assertEqual(mod.canonical_uk_from_words(["1"]), "так\n")
