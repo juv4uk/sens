@@ -443,6 +443,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-move-first-match-to-front-general",
         "list-all-unordered-position-pairs-general",
         "list-distinct-unordered-atom-pairs-general",
+        "list-first-divergence-suffix-general",
         "list-interleave-three-general",
         "list-interleave-three-rotation-general",
         "list-split-atomic-prefix-general",
@@ -591,6 +592,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-move-first-match-to-front-general"
                 | "list-all-unordered-position-pairs-general"
                 | "list-distinct-unordered-atom-pairs-general"
+                | "list-first-divergence-suffix-general"
                 | "list-interleave-two-general"
                 | "list-reverse-tail-general"
                 | "list-last-adjacent-equal-atom-suffix-general"
@@ -891,6 +893,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-interpose-general",
         "lib/list-all-unordered-position-pairs-general",
         "lib/list-distinct-unordered-atom-pairs-general",
+        "lib/list-first-divergence-suffix-general",
         "lib/list-interleave-three-general",
         "lib/list-interleave-three-rotation-general",
         "lib/list-keep-repeated-atoms-once-general",
