@@ -448,7 +448,7 @@ pub(super) const D9_DEFINITION_BINDINGS: &[D9DefinitionBinding] = &[
     D9DefinitionBinding { bits: 0b110110011, names: &["протокол-передавання-записати", "tcp-lekhana", "tcp-write", "TCP-WRITE"] },
     D9DefinitionBinding { bits: 0b110110100, names: &["відповідь-і", "uttara-ca", "answer-and", "ANSWER-AND"] },
     D9DefinitionBinding { bits: 0b110110101, names: &["п'ятий", "pañcama", "fifth", "FIFTH"] },
-    D9DefinitionBinding { bits: 0b110110110, names: &["бінарний", "dvimāna", "binary", "BINARY"] },
+    D9DefinitionBinding { bits: 0b110110110, names: &["двійковий", "dvimāna", "binary", "BINARY"] },
     D9DefinitionBinding { bits: 0b110110111, names: &["читати-файл", "paṭhana-sañcikā", "read-file", "READ-FILE"] },
     D9DefinitionBinding { bits: 0b110111000, names: &["створити-символ", "gensym", "GENSYM"] },
     D9DefinitionBinding { bits: 0b110111001, names: &["число-рядок", "saṅkhyā-śabda", "number->string", "NUMBER->STRING"] },
