@@ -149,6 +149,28 @@ jobs:
         run: |
           git config user.name "sens-remint-bot"
           git config user.email "sens-remint-bot@users.noreply.github.com"
+          # Старий queued remint може повернути у main сироту після promotion.
+          # Прибираємо ТІЛЬКИ точний фізичний дубль уже архівованої трійки;
+          # жодної нової .lisp чи фальшивої оберненості не синтезуємо.
+          prune_archived_duplicates() {
+            local physical stem archive
+            for physical in benchmarks/contest-uk/*.sens; do
+              [[ -f "$physical" && ! -L "$physical" ]] || continue
+              stem="${physical%.sens}"
+              [[ ! -e "$stem.lisp" && ! -L "$stem.lisp" ]] || continue
+              archive="benchmarks/contest-uk/superseded/${stem##*/}"
+              if [[ -f "$stem" && ! -L "$stem" &&
+                    -f "$archive.lisp" && ! -L "$archive.lisp" &&
+                    -f "$archive.sens" && ! -L "$archive.sens" &&
+                    -f "$archive" && ! -L "$archive" ]] &&
+                 cmp -s "$physical" "$archive.sens" &&
+                 cmp -s "$stem" "$archive"; then
+                rm -- "$physical" "$stem"
+                echo "REMINT_PRUNED_ARCHIVED_DUPLICATE stem=$stem exact_blobs=YES"
+              fi
+            done
+          }
+          prune_archived_duplicates
           git add -A
           if git diff --cached --quiet; then
             echo "no drift -- nothing to commit"
@@ -160,6 +182,19 @@ jobs:
             published=0
             for attempt in 1 2 3 4 5 6; do
               git pull --rebase origin main
+              # Переузгодження зі свіжим main ОБОВ'ЯЗКОВЕ: інакше
+              # старий queued bot повертає вже архівовані .sens без .lisp.
+              prune_archived_duplicates
+              git add -A -- benchmarks/contest-uk
+              if ! git diff --cached --quiet; then
+                # Не переписувати чужий HEAD, якщо наш commit став порожнім
+                # після rebase; тільки наша локальна версія до push.
+                if [[ "$(git rev-list --count origin/main..HEAD)" != 0 ]]; then
+                  git commit --amend --no-edit
+                else
+                  git commit -m "конкурс: прибрати фізичний дубль уже архівованої програми"
+                fi
+              fi
               if git push origin HEAD:main; then
                 echo "REMINT_PUBLISHED attempt=$attempt"
                 published=1
