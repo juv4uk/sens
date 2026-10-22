@@ -362,6 +362,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-interpose-general",
         "list-last-occurrence-suffix",
         "list-split-first-occurrence-general",
+        "list-deduplicate-neighbors",
+        "list-alternating-split-four",
+        "list-remove-first-atom",
+        "list-prefix-atoms-general",
+        "list-flatten-nested-general",
         "list-all-suffixes-general",
         "list-all-prefixes-general",
     ] {
@@ -445,6 +450,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-interpose-general"
                 | "list-last-occurrence-suffix"
                 | "list-split-first-occurrence-general"
+                | "list-deduplicate-neighbors"
+                | "list-alternating-split-four"
+                | "list-remove-first-atom"
+                | "list-prefix-atoms-general"
+                | "list-flatten-nested-general"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
