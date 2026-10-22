@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 207,
+    "total": 208,
     "historical": 17,
-    "library": 190,
-    "distinct_families": 28
+    "library": 191,
+    "distinct_families": 29
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5200,13 +5200,16 @@
       },
       "proposed_law_uk": "SRFI-1 SPAN: взяти найдовший proper-list префікс, для якого D1-предикат істинний; результат (префікс . незмінений-суфікс), зупинитися на першому D1:0.",
       "native_law_test": "crates/sens/tests/d11_srfi1_span_break.rs::d11_srfi1_span_break_preserve_prefix_suffix_and_short_circuit",
-      "native_ci_status": "NOT_YET_CONFIRMED",
+      "native_ci_status": "NATIVE_SENS_PASS_20_CASES_TARGETED_STEP_WORKFLOW_FAILED_OTHER_STEP",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39717620502",
+      "native_ci_job": 119623421558,
+      "native_ci_exact_test": "test d11_srfi1_span_break_preserve_prefix_suffix_and_short_circuit ... ok"
     },
     {
       "surface_name": "розділити-перед-умовою",
@@ -5220,6 +5223,29 @@
       },
       "proposed_law_uk": "SRFI-1 BREAK: взяти найдовший proper-list префікс, для якого D1-предикат хибний; суфікс починається першим D1:1, пізніший ввід не читати.",
       "native_law_test": "crates/sens/tests/d11_srfi1_span_break.rs::d11_srfi1_span_break_preserve_prefix_suffix_and_short_circuit",
+      "native_ci_status": "NATIVE_SENS_PASS_20_CASES_TARGETED_STEP_WORKFLOW_FAILED_OTHER_STEP",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
+      "ratified": false,
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39717620502",
+      "native_ci_job": 119623421558,
+      "native_ci_exact_test": "test d11_srfi1_span_break_preserve_prefix_suffix_and_short_circuit ... ok"
+    },
+    {
+      "surface_name": "групувати-суміжні-за-ключем",
+      "source_family": "clojure-consecutive-partition",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-clojure-partition-by.lisp",
+        "blob_sha": "833c217777ffefe3b439f33b7b93871cb3c2e68e",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
+      },
+      "proposed_law_uk": "Скінченний SENS-аналог Clojure partition-by: розбиття на максимальні суміжні серії однакових структурних ключів; A→B→A утворює три серії. Ключі обчислює замикання SENS, послідовність і повтори зберігаються. Ця eager-бібліотека не вдає Clojure lazy seq чи transducer.",
+      "native_law_test": "crates/sens/tests/d11_clojure_partition_by.rs::d11_clojure_consecutive_partition_by_has_real_sens_witnesses",
       "native_ci_status": "NOT_YET_CONFIRMED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
