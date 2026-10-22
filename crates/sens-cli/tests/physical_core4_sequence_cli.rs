@@ -717,15 +717,24 @@ fn verify_unpaired_ukrainian_libs_natively() {
             "test_id=ukr-lib-mutant source={stem} actual={}",
             error(&mismatch)
         );
-        fs::remove_dir_all(&scratch).expect("прибрати лише власні тимчасові файли");
-        // Лише фактична трійка .lisp/.sens/exact-view є файлом, готовим
-        // до автономного виконання. Тимчасовий native mint сам по собі
-        // не збільшує кількість опублікованих виконуваних Lisp.
+        // Не зараховувати за сам факт наявності однойменної трійки:
+        // її реальні байти мусять збігатися зі щойно виконаним SENS mint
+        // та бітовим виглядом Zig. Дрейф позначається адресно без HOLD
+        // для інших незалежних українських програм.
         let committed_physical = root.join("lib").join(format!("{stem}.sens"));
         let committed_view = root.join("lib").join(stem);
-        if committed_physical.is_file() && committed_view.is_file() {
+        let has_pair = committed_physical.is_file() && committed_view.is_file();
+        let exact_pair = has_pair
+            && fs::read(&physical).expect("нативний T5M")
+                == fs::read(&committed_physical).expect("наявний T5M")
+            && fs::read(&view).expect("нативний точний вигляд")
+                == fs::read(&committed_view).expect("наявний точний вигляд");
+        fs::remove_dir_all(&scratch).expect("прибрати лише власні тимчасові файли");
+        if exact_pair {
             independently_executed.insert(stem);
             println!("SENS_UKR_EXECUTABLE_PASS file=lib/{stem}.lisp exact=Zig/T5M d1=1");
+        } else if has_pair {
+            println!("SENS_UKR_EXECUTABLE_DRIFT file=lib/{stem}.lisp reason=MINT_OR_VIEW_MISMATCH native=SENS/Zig/T5M");
         } else {
             println!("SENS_UKR_EXECUTABLE_PENDING file=lib/{stem}.lisp reason=NO_COMMITTED_T5M_TRIPLE");
         }
