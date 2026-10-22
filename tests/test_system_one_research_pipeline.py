@@ -6,6 +6,7 @@ import importlib.util
 import json
 import tempfile
 import threading
+import unicodedata
 import unittest
 from argparse import Namespace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -479,6 +480,20 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
         )
         self.assertEqual(len({row["text"] for row in rows}), 60)
         self.assertTrue(all(row["source"] == "synthetic-curated-seed" for row in rows))
+
+        self.assertEqual(len({row["id"] for row in rows}), len(rows))
+        normalized_texts = {
+            unicodedata.normalize("NFKC", row["text"]).casefold().strip()
+            for row in rows
+        }
+        self.assertEqual(len(normalized_texts), len(rows))
+        for split, expected_count in (("train", 8), ("validation", 2), ("test", 2)):
+            rows_in_split = [row for row in rows if row["split"] == split]
+            self.assertEqual(len(rows_in_split), expected_count * len(student.LABELS))
+            self.assertEqual(
+                {label: sum(row["gold"] == label for row in rows_in_split) for label in student.LABELS},
+                {label: expected_count for label in student.LABELS},
+            )
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
