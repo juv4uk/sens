@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: tcp COND + domain bitness.
+"""Механічний аудит чинної української TCP-проєкції та ширин Д1–Д10.
 
-Axiom: the binary key width IS the domain address.
-Checks:
-  1. lib/tcp.lisp has no bare host truthiness (t / T / NIL)
-  2. Ratified exact D1:1 directly guards the D3 COND fallback; no D3-derived detour
-  3. Reuses utf8-decode-string / utf8-encode-string and tcp-*-raw
-  4. Key tcp surface present
-  5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
-
-Run:
-    python3 scripts/test-tcp-d1-bitness.py
+Це лише допоміжний інвентар вихідного тексту, НЕ обчислювач СЕНС.
+Жодний результат цього скрипту не доводить оберненості T5M чи виконання.
+Мовна істина й помилки встановлюються виключно нативним SENS/Zig.
 """
 from __future__ import annotations
 
@@ -21,80 +14,84 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TCP = ROOT / "lib" / "tcp.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
-HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(#d1:1\n          decoded)"
+HOST = re.compile(r"(?<!\w)(?:t|T|NIL)(?!\w)")
+# Чинний D1:1 є результатом самої мови: Д3 ATOM(QUOTE ()).
+# Зіставляємо лише синтаксичний свідок, не підміняємо SENS обчисленням.
+D1_FALLBACK = re.compile(
+    r"\(\(атом\?\s+\(як-є\s+\(\)\)\)\s+декодований-вміст\s*\)"
+)
 REQUIRED = (
-    "tcp-listen",
-    "tcp-listen-on",
-    "tcp-read",
-    "tcp-write",
-    "tcp-read-bytes->text",
-    "utf8-decode-string",
-    "utf8-encode-string",
-    "tcp-read-raw",
-    "tcp-write-raw",
-    "tcp-listen-raw",
+    "протокол-передавання-слухати-на",
+    "протокол-передавання-слухати",
+    "протокол-передавання-обробити-декодоване",
+    "протокол-передавання-читати-байти-текст",
+    "протокол-передавання-читати",
+    "протокол-передавання-записати-текст-байти",
+    "протокол-передавання-записати-через-сирий",
+    "протокол-передавання-записати",
+    "кодування-юнікод-8-декодувати-рядок",
+    "кодування-юнікод-8-кодувати-рядок",
+    "протокол-передавання-сире-читання",
+    "протокол-передавання-сирий-запис",
+    "протокол-передавання-сире-слухання",
+    "успішно-декодовано?",
 )
 
 
 def check_tcp() -> list[str]:
-    errs: list[str] = []
     if not TCP.is_file():
-        return [f"missing {TCP.relative_to(ROOT)}"]
-    text = TCP.read_text(encoding="utf-8")
-    for m in HOST.finditer(text):
-        line_start = text.rfind("\n", 0, m.start()) + 1
-        line = text[line_start : text.find("\n", m.start())]
-        if line.lstrip().startswith(";"):
-            continue
-        errs.append(f"tcp: host truthiness {m.group()!r} at offset {m.start()}")
-    code = "\n".join(
-        line for line in text.splitlines()
-        if not line.lstrip().startswith(";")
+        return [f"TCP_SOURCE_MISSING path={TCP.relative_to(ROOT)}"]
+    source = TCP.read_text(encoding="utf-8")
+    active = "\n".join(
+        line.split(";", 1)[0] for line in source.splitlines()
     )
-    if code.count(D1_TRUE) != 1:
-        errs.append("tcp: require exactly one direct D1 YES in COND fallback")
-    if "(010 (001 ()))" in code:
-        errs.append("tcp: previous derived D3 ATOM(QUOTE EMPTY) fallback returned")
-    for fn in REQUIRED:
-        if fn not in text:
-            errs.append(f"tcp: required surface missing: {fn}")
-    return errs
+    errors: list[str] = []
+    for match in HOST.finditer(active):
+        errors.append(f"TCP_HOST_TRUTH offset={match.start()} word={match.group()!r}")
+    if len(D1_FALLBACK.findall(active)) != 1:
+        errors.append("TCP_D1_FALLBACK expected=one_computed_ATOM_QUOTE actual=missing_or_duplicated")
+    if "#d1:" in active:
+        errors.append("TCP_RETIRED_TYPED_D1_LITERAL")
+    if re.search(r"\(\s*[01]{3,10}(?=\s|\))", active):
+        errors.append("TCP_RAW_BIT_CALL_HEAD")
+    if re.search(r"\(\s*(?:так|ні)(?=\s|\))", active):
+        errors.append("TCP_UNBOUND_TRUTH_HEAD")
+    if "((функція " in active:
+        errors.append("TCP_ANONYMOUS_FUNCTION_HEAD")
+    for name in REQUIRED:
+        if name not in active:
+            errors.append(f"TCP_UKR_SURFACE_MISSING name={name}")
+    return errors
 
 
-def check_domain(n: int) -> list[str]:
-    path = ROOT / "lib" / "domains" / f"d{n}.lisp"
-    errs: list[str] = []
+def check_domain(width: int) -> list[str]:
+    path = ROOT / "lib" / "domains" / f"d{width}.lisp"
     if not path.is_file():
-        return [f"D{n}: missing"]
+        return [f"DOMAIN_FILE_MISSING domain=D{width}"]
     keys = ROW.findall(path.read_text(encoding="utf-8"))
-    expect = 1 << n
-    if len(keys) != expect:
-        errs.append(f"D{n}: expected {expect} rows, got {len(keys)}")
-    bad = [k for k in keys if len(k) != n]
-    if bad:
-        errs.append(f"D{n}: key width {len(bad[0])} != {n}")
+    expected = 1 << width
+    errors = []
+    if len(keys) != expected:
+        errors.append(f"DOMAIN_ROW_COUNT domain=D{width} expected={expected} actual={len(keys)}")
+    for key in keys:
+        if len(key) != width:
+            errors.append(f"DOMAIN_WORD_WIDTH domain=D{width} word={key}")
+            break
     if len(set(keys)) != len(keys):
-        errs.append(f"D{n}: duplicate coordinates")
-    return errs
+        errors.append(f"DOMAIN_DUPLICATE_COORDINATE domain=D{width}")
+    return errors
 
 
 def main() -> int:
-    all_errs: list[str] = []
-    all_errs.extend(check_tcp())
-    for n in range(1, 11):
-        all_errs.extend(check_domain(n))
-
-    if all_errs:
-        print("TCP+BITNESS: BLOCKED", file=sys.stderr)
-        for e in all_errs:
-            print(f"  {e}", file=sys.stderr)
+    errors = check_tcp()
+    for width in range(1, 11):
+        errors.extend(check_domain(width))
+    if errors:
+        for error in errors:
+            print(error, file=sys.stderr)
         return 1
-
-    print("TCP: PASS — two-field COND, exact D1, utf8/tcp-raw reuse")
-    for n in range(1, 11):
-        print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
-    print("BITNESS: PASS — every domain key width equals domain address")
+    print("TCP_D1_DOMAIN_SOURCE_MECHANICAL_PASS semantic=NOT_ATTESTED inverse=NOT_ATTESTED")
+    print("NATIVE_PROOF_REQUIRED SENS=paired_and_standalone Zig=T5M_inverse")
     return 0
 
 
