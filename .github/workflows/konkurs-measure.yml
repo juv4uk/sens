@@ -1,0 +1,44 @@
+name: konkurs-measure
+
+# Вимір внесків конкурсу #5934: T5M-байти, AST, visits, result.
+# Той самий стенд, що в CI (benchmarks/sens-program-size), лише з opt-in метриками.
+on:
+  workflow_dispatch:
+    inputs:
+      binary:
+        description: ".sens to measure (default: all konkurs-*.sens fixtures)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build SENS binaries with benchmark metrics
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+
+      - name: Measure competition entries (T5M / AST / visits / result)
+        env:
+          BINARY: ${{ inputs.binary }}
+        run: |
+          set -uo pipefail
+          if [ -n "$BINARY" ]; then
+            python3 benchmarks/sens-program-size/run.py --binary "$BINARY"
+          else
+            any=0
+            for f in benchmarks/sens-program-size/fixtures/konkurs-*.sens; do
+              [ -f "$f" ] || continue
+              any=1
+              echo "=== $f"
+              python3 benchmarks/sens-program-size/run.py --binary "$f" || echo "MEASURE_FAIL $f"
+            done
+            [ "$any" = 1 ] || echo "no konkurs-*.sens fixtures found"
+          fi
