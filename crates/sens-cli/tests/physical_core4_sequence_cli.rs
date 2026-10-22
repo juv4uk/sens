@@ -376,6 +376,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-unzip-pairs-general",
         "list-palindrome-atoms-general",
         "list-palindrome-linear-atoms-general",
+        "list-trailing-compound-run-zero-copy-general",
         "list-trailing-equal-atomic-run-general",
         "list-multiset-difference-general",
         "list-stable-union-general",
@@ -474,8 +475,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-all-matching-positions-unary-general",
         "list-partition-atomic-compound-general",
         "list-count-consecutive-atomic-runs-unary-general",
+        "list-leading-compound-run-length-unary-general",
         "list-leading-atom-run-length-unary-general",
         "list-drop-last-two-linear",
+        "list-last-n-unary-zero-copy-general",
         "list-last-two-zero-copy-general",
         "list-tail-after-first-compound-zero-copy-general",
         "list-tail-after-second-compound-zero-copy-general",
@@ -491,8 +494,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "rotate-three-right",
         "замінити-третій-в-четвірці",
         "list-last-three-zero-copy-general",
+        "list-tail-after-fourth-compound-zero-copy-general",
         "list-tail-after-third-compound-zero-copy-general",
         "list-penultimate-element-zero-copy-general",
+        "list-suffix-after-first-adjacent-compounds-zero-copy-general",
         "list-suffix-after-first-adjacent-atom-pair-zero-copy-general",
         "list-unique-stable-fast-general",
     ] {
@@ -562,6 +567,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-unzip-pairs-general"
                 | "list-palindrome-atoms-general"
                 | "list-palindrome-linear-atoms-general"
+                | "list-trailing-compound-run-zero-copy-general"
                 | "list-trailing-equal-atomic-run-general"
                 | "list-multiset-difference-general"
                 | "list-stable-union-general"
@@ -660,6 +666,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-all-subsets-by-position-general"
                 | "tree-pair-tally-unary-general"
                 | "list-drop-last-two-linear"
+                | "list-last-n-unary-zero-copy-general"
                 | "list-last-two-zero-copy-general"
                 | "list-tail-after-first-compound-zero-copy-general"
                 | "list-tail-after-second-compound-zero-copy-general"
@@ -670,11 +677,14 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "pair-swap"
                 | "rotate-left"
                 | "rotate-three-right"
+                | "list-tail-after-fourth-compound-zero-copy-general"
                 | "list-last-three-zero-copy-general"
                 | "list-tail-after-third-compound-zero-copy-general"
+                | "list-leading-compound-run-length-unary-general"
                 | "list-leading-atom-run-length-unary-general"
                 | "list-partition-atomic-compound-general"
                 | "list-penultimate-element-zero-copy-general"
+                | "list-suffix-after-first-adjacent-compounds-zero-copy-general"
                 | "list-suffix-after-first-adjacent-atom-pair-zero-copy-general"
                 | "list-unique-stable-fast-general"
         ) {
