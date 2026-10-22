@@ -267,6 +267,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/unify.lisp
                      --binding-source lib/knowledge.lisp
                      --binding-source lib/reason.lisp)
+  elif [[ "$file" == "tests/fixtures/island-lowering-1048-witness.lisp" ]]; then
+    # Чотири зовнішні механізми вибирає SENS, не Python/JSON;
+    # точні D24+ операнди переносяться Zig без рядкових літералів.
+    binding_sources=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp)
   elif [[ "$file" == "tests/fixtures/mechanism-selector-1047-witness.lisp" ]]; then
     # Іменовані SENS DEFINE механізмів походять із мовних бібліотек,
     # а не з вигаданих D9/D10 resident callables чи host-функцій.
