@@ -159,6 +159,62 @@ run_native_t5m_program() {
         return
       fi
     fi
+    # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
+    # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
+    # виконані SENS після контролю оборотності. Ніякого Python-оракула.
+    if [[ "$file" == "tests/semantic/core1-gc-reachability-laws.lisp" ]]; then
+      printf '1\n' > "$dir/core1-gc-d1.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/core1-gc-d1.expected"; then
+        echo "::error::CORE1_GC_PAIRED_WRONG_D1 expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      cat -- lib/core1.lisp "$file" > "$dir/core1-gc-direct.lisp"
+      if ! timeout "$native_timeout" "$binary" "$dir/core1-gc-direct.lisp" \
+          >"$dir/core1-gc-direct.stdout" 2>"$dir/core1-gc-direct.stderr"; then
+        sed 's/^/Core1 direct SENS: /' "$dir/core1-gc-direct.stderr" >&2
+        echo "::error::CORE1_GC_DIRECT_EXECUTION_FAIL" >&2
+        mark_file_failed
+        return
+      fi
+      if ! cmp -s "$dir/core1-gc-direct.stdout" "$dir/native-paired.stdout"; then
+        echo "::error::CORE1_GC_TWO_CARRIERS_DIVERGED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      # Справжній негатив: змінимо фінальне Д1-питання, обидва SENS
+      # шляхи мають повернути 0 (а не просто exit=0).
+      sed '$c\(хибне? (атом? (як-є ())))' "$file" > "$dir/core1-gc-negative.lisp"
+      if cmp -s "$file" "$dir/core1-gc-negative.lisp"; then
+        echo "::error::CORE1_GC_MUTANT_NOT_CREATED" >&2
+        mark_file_failed
+        return
+      fi
+      cat -- lib/core1.lisp "$dir/core1-gc-negative.lisp" > "$dir/core1-gc-negative-direct.lisp"
+      if ! timeout "$native_timeout" "$binary" "$dir/core1-gc-negative-direct.lisp" \
+          >"$dir/core1-gc-negative-direct.stdout" 2>"$dir/core1-gc-negative-direct.stderr" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint-pair \
+          "$dir/core1-gc-negative.lisp" "$dir/core1-gc-negative.sens" \
+          --binding-source lib/core1.lisp >"$dir/core1-gc-negative-mint.stdout" 2>"$dir/core1-gc-negative-mint.stderr" ||
+         ! timeout "$native_timeout" "$binary" --t5m-pair \
+          "$dir/core1-gc-negative.lisp" "$dir/core1-gc-negative.sens" \
+          --binding-source lib/core1.lisp >"$dir/core1-gc-negative-paired.stdout" 2>"$dir/core1-gc-negative-paired.stderr"; then
+        echo "::error::CORE1_GC_NEGATIVE_EXECUTION_FAIL source=$file" >&2
+        for diagnostic in "$dir"/core1-gc-negative*.stderr; do
+          [[ -f "$diagnostic" ]] && sed 's/^/Core1 negative: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      printf '0\n' > "$dir/core1-gc-d0.expected"
+      if ! cmp -s "$dir/core1-gc-negative-direct.stdout" "$dir/core1-gc-d0.expected" ||
+         ! cmp -s "$dir/core1-gc-negative-paired.stdout" "$dir/core1-gc-d0.expected"; then
+        echo "::error::CORE1_GC_NEGATIVE_D1_MISMATCH expected=0" >&2
+        mark_file_failed
+        return
+      fi
+      echo "CORE1_GC_TWO_CARRIERS_PASS source=$file direct=LISP physical=T5M native=SENS positive=D1:1 negative=D1:0 GC=SYMBOLIC_REACHABILITY_ONLY"
+    fi
     native_paired_executed_paths["$file"]=1
     if timeout "$native_timeout" "$binary" "$physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
