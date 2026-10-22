@@ -47,7 +47,11 @@ class PinnedZigWindowsSetupTests(unittest.TestCase):
     def test_build_error_points_to_windows_helper_and_keeps_fail_closed_pin(self):
         self.assertIn("include_str!(\"../../.zig-version\")", BUILD_RS)
         self.assertIn("with-pinned-zig.ps1 cargo build", BUILD_RS)
-        self.assertIn('assert_eq!(actual, pinned, "Guard source transport Zig version mismatch")', BUILD_RS)
+        # Rustfmt може переносити аргументи assert_eq!, але сам закон pin лишається.
+        self.assertRegex(
+            BUILD_RS,
+            r'assert_eq!\(\s*actual,\s*pinned,\s*"Guard source transport Zig version mismatch"\s*\)',
+        )
 
     def test_msvc_archive_and_pic_flags_follow_target_platform(self):
         self.assertIn('if target_env == "msvc"', BUILD_RS)
