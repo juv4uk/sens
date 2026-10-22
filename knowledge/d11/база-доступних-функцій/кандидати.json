@@ -22,9 +22,9 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 194,
+    "total": 196,
     "historical": 17,
-    "library": 177,
+    "library": 179,
     "distinct_families": 27
   },
   "excluded": {
@@ -4791,13 +4791,85 @@
         "selection_basis": "Справжній SENS MetaEval, 25 позитивних та негативних нативних викликів, точних дублів імен у D1-D10 немає",
         "historical_research_alias": "канонічне-ім'я-форми?"
       }
+    },
+    {
+      "surface_name": "канонічна-виклична-тотожність?",
+      "source_family": "meta-evaluation",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/meta-eval.lisp",
+        "blob_sha": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "original_file": "lib/meta-eval.lisp",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00001001111",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00001001111",
+        "ukr": "канонічна-виклична-тотожність?",
+        "source_file": "lib/meta-eval.lisp",
+        "source_blob": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "law": "Точний D1:1 лише для канонічних викличних ядерних тотожностей атом?, тотожне?, сполучити, перше, решта; спеціальні форми, числа, інші й невідомі імена не видаються за цей викличний примітив.",
+        "native_law_test": "crates/sens/tests/core_postcore_ukr.rs::meta_eval_predicates_are_actual_d1_bits",
+        "native_test_blob": "693658ca49054ea22272a78fa68df0659258b8b0",
+        "native_test_result": "NATIVE_SENS_PASS_10_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39710607403",
+        "native_step_result": "META_EVAL_TARGETED_STEP_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинний MetaEval і 21 нативний D1-позитивний та негативний виклик без другого оракула, немає збігу поверхні D1–D10",
+        "historical_research_alias": "канонічна-виклична-тотожність?"
+      }
+    },
+    {
+      "surface_name": "тотожність-відповідає-поверхні?",
+      "source_family": "meta-evaluation",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/meta-eval.lisp",
+        "blob_sha": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "original_file": "lib/meta-eval.lisp",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00001100000",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00001100000",
+        "ukr": "тотожність-відповідає-поверхні?",
+        "source_file": "lib/meta-eval.lisp",
+        "source_blob": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "law": "Порівняти семантичну тотожність заданої атомарної проєкції зі справжньою тотожністю імені; неатоми, чужі або невідомі імена дають точний D1:0, різні поверхні не зливаються.",
+        "native_law_test": "crates/sens/tests/core_postcore_ukr.rs::meta_eval_predicates_are_actual_d1_bits",
+        "native_test_blob": "693658ca49054ea22272a78fa68df0659258b8b0",
+        "native_test_result": "NATIVE_SENS_PASS_11_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39710607403",
+        "native_step_result": "META_EVAL_TARGETED_STEP_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинний MetaEval і 21 нативний D1-позитивний та негативний виклик без другого оракула, немає збігу поверхні D1–D10",
+        "historical_research_alias": "тотожність-відповідає-поверхні?"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 53,
-    "semantic_winners_total": 565,
+    "native_sens_composition_winners": 55,
+    "semantic_winners_total": 567,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
