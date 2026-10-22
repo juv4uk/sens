@@ -53,6 +53,18 @@ class RustIsolationTests(unittest.TestCase):
             'let m = fs::read_to_string("lib/macro.lisp");\n', encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
+    def test_physical_t5m_execution_entry_must_not_decode_in_rust(self) -> None:
+        source = self.root / "crates/sens/src/binary_execution.rs"
+        source.write_text(
+            "pub fn decode(physical: &[u8]) { decode_ternary_words(physical); }\n"
+            "pub fn eval_t5_program(physical: &[u8]) { decode(physical); }\n",
+            encoding="utf-8",
+        )
+
+        problems = self.module.check(self.root)
+
+        self.assertTrue(any("I3:" in problem for problem in problems), problems)
+
     def test_include_within_crate_is_forbidden(self) -> None:
         (self.root / "crates/sens/src/lib.rs").write_text(
             'let s = include_str!("embedded.lisp");\n', encoding="utf-8")

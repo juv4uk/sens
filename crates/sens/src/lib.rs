@@ -271,10 +271,7 @@ pub use ternary_transport::{
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{encode_text7, render_text7, Text7Layout, Text7ProjectionError};
 
-pub use binary_execution::{
-    eval_e1_program, eval_t5_program, E1ExecutionError, ExactDomainWord, PhysicalT5Program,
-    T5ExecutionError,
-};
+pub use binary_execution::{eval_e1_program, E1ExecutionError, ExactDomainWord, PhysicalT5Program};
 
 pub use eval::exact_arity;
 pub use eval::lower::lower_program;

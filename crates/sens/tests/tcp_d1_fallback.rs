@@ -58,21 +58,23 @@ fn numeric_one_cannot_substitute_for_d1_truth_in_cond() {
 fn real_tcp_file_reads_with_current_domain_widths() {
     let parsed = parse_mixed_exact_domain_process_tcp_source(PATH, SOURCE)
         .expect("pinned real TCP module must parse");
-    assert_eq!(parsed.len(), 7);
+    assert_eq!(parsed.len(), 8);
     let code_only = SOURCE
         .lines()
         .filter(|line| !line.trim_start().starts_with(';'))
         .collect::<Vec<_>>()
         .join("\n");
-    assert_eq!(code_only.matches("(#d1:1").count(), 1);
-    assert!(!code_only.contains("(010 (001 ()))"));
-    assert!(!SOURCE.contains("(0100 (101 (100 decoded) (001 decoded)))"));
+    assert_eq!(code_only.matches("(успішно-декодовано?").count(), 1);
+    assert!(!code_only.contains("(010 "));
+    assert!(!code_only.contains("(0100 "));
     assert!(parse_mixed_exact_domain_process_tcp_source("lib/untrusted.lisp", SOURCE).is_err());
 }
 
+mod support;
+
 use sens::{
-    decode_ternary_program, encode_ternary_words, eval_t5_program, load_core_library,
-    load_tcp_library, parse_binary_source_words, ExprKind,
+    decode_ternary_program, encode_ternary_words, load_core_library, load_tcp_library,
+    parse_binary_source_words, ExprKind,
 };
 const SELFTEST: &str = include_str!("../../../tests/fixtures/semantic/tcp-exact-selftest.bits");
 
@@ -97,7 +99,7 @@ fn tcp_semantic_law_is_decided_by_physical_binary_sens_only() {
         words
     );
 
-    let verdict = eval_t5_program(&physical, &mut session)
+    let verdict = support::eval_reference_t5m(&physical, &mut session)
         .expect("фізичний SENS-виконавець виконує власний TCP-свідок");
     assert_eq!(
         verdict.value.as_predicate_bit(),
@@ -107,50 +109,31 @@ fn tcp_semantic_law_is_decided_by_physical_binary_sens_only() {
 }
 
 #[test]
-fn tcp_two_one_binding_sites_are_d4_lambda_not_d6_let() {
+fn tcp_definitions_use_d4_function_forms_without_d6_let_heads() {
     let forms = parse_mixed_exact_domain_process_tcp_source(PATH, SOURCE)
         .expect("лише власний TCP шлях може інтерпретувати ці доменні голови");
-    assert_eq!(forms.len(), 7, "сім зовнішніх TCP визначень збережено");
+    assert_eq!(forms.len(), 8, "вісім зовнішніх TCP визначень збережено");
 
-    for name in ["tcp-read-bytes->text", "tcp-write-via-raw"] {
-        let entry = forms
-            .iter()
-            .find(|expr| {
-                let ExprKind::List(parts) = &expr.kind else {
-                    return false;
-                };
-                matches!(
-                    parts.get(1).map(|part| &part.kind),
-                    Some(ExprKind::Symbol(symbol)) if symbol.as_ref() == name
-                )
-            })
-            .expect("точне визначення не зникло");
-
+    for entry in &forms {
         let ExprKind::List(define) = &entry.kind else {
-            panic!("DEFINE")
+            panic!("кожен зовнішній запис — визначення")
         };
-        let ExprKind::List(lambda) = &define[2].kind else {
-            panic!("LAMBDA")
-        };
-        let ExprKind::List(application) = &lambda[2].kind else {
-            panic!("застосування")
-        };
-        assert_eq!(application.len(), 2, "рівно один ініціалізатор");
-        let ExprKind::List(closure) = &application[0].kind else {
-            panic!("внутрішня LAMBDA")
+        assert_eq!(define.len(), 3, "визначення має ім'я та тіло");
+        let ExprKind::List(function) = &define[2].kind else {
+            panic!("тіло визначення — функція D4")
         };
         assert!(
             matches!(
-                &closure[0].kind,
+                &function[0].kind,
                 ExprKind::DomainIdentity(id) if id.width() == 4 && id.packed_bits() == 0b0010
             ),
-            "D4:0010 має власну ширину, не старе D6:001000"
+            "кожна визначена функція має точну identity D4:0010"
         );
-        assert_eq!(closure.len(), 3, "одне тіло");
-        let ExprKind::List(parameters) = &closure[1].kind else {
-            panic!("параметри")
-        };
-        assert_eq!(parameters.len(), 1);
+        assert_eq!(function.len(), 3, "функція має параметри й тіло");
+        assert!(
+            matches!(&function[1].kind, ExprKind::List(_)),
+            "параметри функції"
+        );
     }
 
     assert!(

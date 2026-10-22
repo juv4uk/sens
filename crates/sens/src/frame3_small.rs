@@ -26,7 +26,10 @@ pub enum SmallF3Error {
 /// complete physical carrier (including 0xf3) saves bytes. Other canonical
 /// T5 programs remain T5. This never mutates the input or falls back at decode.
 pub fn encode_explicit_small_f3(t5_input: &[u8]) -> Result<Option<Vec<u8>>, SmallF3Error> {
-    let parsed = PhysicalT5Program::decode(t5_input).map_err(|_| SmallF3Error::InvalidProgram)?;
+    let parsed = PhysicalT5Program::from_exact_words(
+        &decode_ternary_words(t5_input).map_err(|_| SmallF3Error::InvalidProgram)?,
+    )
+    .map_err(|_| SmallF3Error::InvalidProgram)?;
     if parsed.form_count() != 1 || t5_input.len() > MAX_TINY_T5_BYTES {
         return Ok(None);
     }
@@ -75,7 +78,8 @@ pub fn decode_explicit_small_f3(input: &[u8]) -> Result<Vec<u8>, SmallF3Error> {
     if t5.len() > MAX_TINY_T5_BYTES || input.len() >= t5.len() {
         return Err(SmallF3Error::NotSmallerThanT5);
     }
-    let parsed = PhysicalT5Program::decode(&t5).map_err(|_| SmallF3Error::InvalidProgram)?;
+    let parsed =
+        PhysicalT5Program::from_exact_words(&typed).map_err(|_| SmallF3Error::InvalidProgram)?;
     if parsed.form_count() != 1 {
         return Err(SmallF3Error::InvalidProgram);
     }
@@ -96,10 +100,12 @@ mod tests {
         // Independent research vector F3 f3 40 60 <-> T5 63 89 06 a1.
         let packed = decode_explicit_small_f3(&[0xf3, 0x40, 0x60]).unwrap();
         assert_eq!(packed, [0x63, 0x89, 0x06, 0xa1]);
-        let parsed = PhysicalT5Program::decode(&packed).unwrap();
+        let packed_words = decode_ternary_words(&packed).unwrap();
+        let parsed = PhysicalT5Program::from_exact_words(&packed_words).unwrap();
         assert_eq!(parsed.form_count(), 1);
         let a = parsed.execute(&mut crate::Session::default()).unwrap();
-        let b = PhysicalT5Program::decode(&[0x63, 0x89, 0x06, 0xa1])
+        let packed_words = decode_ternary_words(&[0x63, 0x89, 0x06, 0xa1]).unwrap();
+        let b = PhysicalT5Program::from_exact_words(&packed_words)
             .unwrap()
             .execute(&mut crate::Session::default())
             .unwrap();
@@ -135,7 +141,7 @@ mod tests {
 
     #[test]
     fn original_f3_is_not_silently_parsed_as_t5() {
-        assert!(PhysicalT5Program::decode(&[0xf3, 0x40, 0x60]).is_err());
+        assert!(decode_ternary_words(&[0xf3, 0x40, 0x60]).is_err());
         assert_eq!(
             decode_explicit_small_f3(&[0xf3, 0x40, 0x60]).unwrap().len(),
             4

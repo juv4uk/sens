@@ -11,8 +11,10 @@ use std::{collections::HashSet, path::Path};
 use sens::{
     encode_ternary_words, eval_parsed_expressions,
     frame3_micro_enumerator::{decode_payload, encode_expr, Frame3MicroExpr},
-    parse_binary_source_words, parse_canonical_binary, PhysicalT5Program, Session,
+    parse_binary_source_words, parse_canonical_binary, Session,
 };
+#[path = "support/reference_t5m.rs"]
+mod reference_t5m;
 
 fn verify_one(code: u8) -> Result<(usize, String, Frame3MicroExpr), String> {
     let payload = [code];
@@ -36,8 +38,7 @@ fn verify_one(code: u8) -> Result<(usize, String, Frame3MicroExpr), String> {
 
     let expected = eval_parsed_expressions(&parsed, &mut Session::default())
         .map_err(|error| format!("evaluator: {error:?}"))?;
-    let t5_program =
-        PhysicalT5Program::decode(&t5).map_err(|error| format!("physical reader: {error:?}"))?;
+    let t5_program = reference_t5m::program(&t5)?;
     if t5_program.form_count() != 1 {
         return Err(format!("not one physical T5 form: {source}"));
     }
@@ -96,9 +97,7 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     }
     let expected =
         eval_parsed_expressions(&parse_canonical_binary(&visible)?, &mut Session::default())?;
-    let t5_value = PhysicalT5Program::decode(&full_t5)
-        .map_err(|error| format!("T5 physical decode: {error:?}"))?
-        .execute(&mut Session::default())?;
+    let t5_value = reference_t5m::program(&full_t5)?.execute(&mut Session::default())?;
     if expected != t5_value {
         return Err("real evaluator mismatch".into());
     }

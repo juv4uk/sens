@@ -2,9 +2,11 @@
 //! D2 owns structure, D7 owns exact Text7 cells, D4 owns LAMBDA.
 //! This proves physical T5 can carry D7 contextual identifiers without
 //! treating arbitrary untyped D2/W7 data as executable symbols.
+mod support;
+
 use sens::{
-    decode_ternary_program, encode_binary_projection_ternary, eval_t5_program,
-    open_ternary_program, parse_canonical_binary, Session, TernaryTransportError, Value,
+    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
+    parse_canonical_binary, Session, TernaryTransportError, Value,
 };
 
 #[test]
@@ -21,7 +23,7 @@ fn existing_d2_d7_and_d4_lambda_execute_from_real_t5_bytes() {
     let parsed = parse_canonical_binary(WORDS).unwrap();
     assert_eq!(parsed.len(), 1);
     let mut session = Session::default();
-    let result = eval_t5_program(&t5, &mut session)
+    let result = support::eval_reference_t5m(&t5, &mut session)
         .expect("D2 structure + D7 contextual binder + D4 lambda must work");
     assert_eq!(result.value, Value::Nil);
 }

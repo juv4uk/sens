@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Безумовний контроль CSV-вимірювань чинного прямого виконання T5.
+"""Безумовний контроль CSV-вимірювань чинного прямого виконання T5M.
 
 Це перевірка вимірювань, а не семантики SENS чи фізичного кодека.
 Перевірки діють і під Python -O; відсутня фікстура завжди означає відмову.
@@ -14,7 +14,7 @@ from pathlib import Path
 import sys
 
 COLUMNS = (
-    "fixture", "bytes", "forms", "t5_decode_parse_lower_ns",
+    "fixture", "bytes", "forms", "t5m_reference_decode_parse_lower_ns",
     "visible_parse_lower_ns", "cached_lowered_eval_ns",
 )
 FIXTURES = {
@@ -22,7 +22,7 @@ FIXTURES = {
     "atom": "tests/fixtures/migration-atom-cohort/atom-empty.sens",
     "cond": "tests/fixtures/migration-d1-cond-cohort/branch.sens",
 }
-# Закріплені SHA-256 реальних канонічних T5-файлів. Без цього підміна
+# Закріплені SHA-256 реальних канонічних T5M-файлів. Без цього підміна
 # фізичного свідка іншими байтами тієї ж довжини була б невидимою.
 # Контракт порівняння вимірювань змінюється лише окремим доказовим PR.
 FIXTURE_SHA256 = {
@@ -68,7 +68,7 @@ def check(csv_path: Path, root: Path) -> dict[str, float]:
         if raw_bytes <= 0 or raw_bytes != fixture.stat().st_size or forms != 1:
             raise EvidenceError(f"неправильний розмір або число форм: {name}")
         if hashlib.sha256(fixture.read_bytes()).hexdigest() != FIXTURE_SHA256[name]:
-            raise EvidenceError(f"змінилася фізична T5-фікстура: {name}")
+            raise EvidenceError(f"змінилася фізична T5M-фікстура: {name}")
         for key in TIMINGS:
             try:
                 elapsed = float(row[key])
@@ -91,9 +91,9 @@ def main() -> int:
     try:
         check(args.csv_path, args.root)
     except (OSError, UnicodeError, csv.Error, EvidenceError) as exc:
-        print(f"DIRECT-T5-TIMING: BLOCKED: {exc}", file=sys.stderr)
+        print(f"DIRECT-T5M-TIMING: BLOCKED: {exc}", file=sys.stderr)
         return 2
-    print("DIRECT-T5-TIMING: PASS — повні фізичні свідки, лише вимірювання")
+    print("DIRECT-T5M-TIMING: PASS — повні фізичні свідки, лише вимірювання")
     return 0
 
 

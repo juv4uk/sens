@@ -37,6 +37,10 @@ from pathlib import Path
 PROJECT_TREES = ("lib/", "contracts/", "knowledge/", "language-contract")
 INCLUDE_RE = re.compile(r'(?P<kind>include_str|include_bytes)!\s*\(\s*"(?P<path>[^"]+)"')
 READ_RE = re.compile(r'(?:std::)?fs::read(?:_to_string)?\s*\(\s*"(?P<path>[^"]+)"')
+PHYSICAL_T5_EVAL_RE = re.compile(
+    r"\bpub\s+fn\s+(?:decode\s*\(\s*physical\s*:\s*&\s*\[\s*u8\s*\]"
+    r"|eval_t5_program\s*\(\s*physical\s*:\s*&\s*\[\s*u8\s*\])"
+)
 # The interactive Rust REPL is the projection-facing exception, not the
 # binary-runtime isolation surface. Keep its sources out of this guard while
 # continuing to scan every other production module in the same crate.
@@ -106,6 +110,14 @@ def check(root: Path) -> list[str]:
         raw = path.read_text(encoding="utf-8", errors="replace")
         src = _PRODUCTION_SOURCE(raw)
         shape = _CODE_SHAPE(src)
+        if rel == "crates/sens/src/binary_execution.rs":
+            for match in PHYSICAL_T5_EVAL_RE.finditer(src):
+                if _live_at(shape, match.start(), "pub"):
+                    api = match.group(0).split("(", 1)[0].strip()
+                    problems.append(
+                        f"I3: {rel} exposes `{api}` for physical bytes; "
+                        "restore exact words through the Zig corridor first"
+                    )
         for m in INCLUDE_RE.finditer(src):
             if (_live_at(shape, m.start(), m.group("kind")) and
                     _is_project_path(m.group('path'))):

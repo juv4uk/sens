@@ -106,22 +106,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s tests -p 'test_direct_t5_timing_guard.py' -v
-          python3 -O -m unittest discover -s tests -p 'test_direct_t5_timing_guard.py' -v
+          python3 -m unittest discover -s tests -p 'test_direct_t5m_timing_guard.py' -v
+          python3 -O -m unittest discover -s tests -p 'test_direct_t5m_timing_guard.py' -v
       - name: Реальний фізичний декодер проти D2-parser і кешованого AST
         shell: bash
         run: |
           set -euo pipefail
-          cargo run --locked --release --quiet -p sens --example bench_direct_t5 -- 2000 \
-            | tee "$RUNNER_TEMP/direct-t5.csv"
-          python3 scripts/check_direct_t5_timing.py "$RUNNER_TEMP/direct-t5.csv"
-      - name: Сирі T5 вимірювання і provenance
+          cargo run --locked --release --quiet -p sens --example bench_direct_t5m -- 2000 \
+            | tee "$RUNNER_TEMP/direct-t5m.csv"
+          python3 scripts/check_direct_t5m_timing.py "$RUNNER_TEMP/direct-t5m.csv"
+      - name: Сирі T5M вимірювання і provenance
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: canonical-physical-t5-${{ github.sha }}
+          name: canonical-physical-t5m-${{ github.sha }}
           path: |
             ${{ runner.temp }}/physical-t5/
-            ${{ runner.temp }}/direct-t5.csv
+            ${{ runner.temp }}/direct-t5m.csv
           if-no-files-found: warn
           retention-days: 30

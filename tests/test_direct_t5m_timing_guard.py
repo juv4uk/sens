@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 
-GUARD = Path(__file__).resolve().parents[1] / "scripts/check_direct_t5_timing.py"
+GUARD = Path(__file__).resolve().parents[1] / "scripts/check_direct_t5m_timing.py"
 spec = importlib.util.spec_from_file_location("direct_t5_guard", GUARD)
 if spec is None or spec.loader is None:
     raise RuntimeError("не знайдено код перевірки")
@@ -15,7 +15,7 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
-class DirectT5TimingGuard(unittest.TestCase):
+class DirectT5mTimingGuard(unittest.TestCase):
     """Exercise valid evidence and adversarial timing/fixture mutations."""
     def setUp(self):
         """Create isolated CSV and fixture inputs for each test."""
@@ -91,7 +91,7 @@ class DirectT5TimingGuard(unittest.TestCase):
         path.write_bytes(corrupted)
         witness = self.run_guard(optimized=True)
         self.assertEqual(witness.returncode, 2)
-        self.assertIn("змінилася фізична T5-фікстура", witness.stderr)
+        self.assertIn("змінилася фізична T5M-фікстура", witness.stderr)
         path.write_bytes(original)
         self.assertEqual(self.run_guard(optimized=True).returncode, 0)
 

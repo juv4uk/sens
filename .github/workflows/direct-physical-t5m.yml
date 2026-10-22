@@ -1,0 +1,39 @@
+name: Direct physical T5M interpreter parity and isolated timing
+
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  physical-source-free-evaluation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Physical input / visible reference semantic parity
+        run: cargo test --locked -q -p sens --test direct_t5m_pipeline
+      - name: Exact-domain T5M execution — pointwise width witnesses
+        run: cargo test --locked -p sens --lib exact_t5m_cutover_tests -- --nocapture
+      - name: Original SENS CLI evaluation and diagnostic regression
+        run: cargo test --locked -q -p sens-cli --bin sens-trit
+      - name: Негативні свідки коректності T5M-вимірювань за Python і Python -O
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_direct_t5m_timing_guard.py' -v
+          python3 -O -m unittest discover -s tests -p 'test_direct_t5m_timing_guard.py' -v
+      - name: Physical decode vs visible parser vs cached AST, measurement-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked --release --quiet -p sens --example bench_direct_t5m -- 2000 \
+            | tee "$RUNNER_TEMP/t5m-direct-timing.csv"
+          python3 scripts/check_direct_t5m_timing.py "$RUNNER_TEMP/t5m-direct-timing.csv"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t5m-direct-timing
+          path: ${{ runner.temp }}/t5m-direct-timing.csv
+          retention-days: 14

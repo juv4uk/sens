@@ -142,13 +142,14 @@ physical_route = cli_source[route_start:route_end]
 ingress_start = cli_source.index("fn decode_physical_t5_words(")
 ingress_end = cli_source.index("\nfn eval_physical_t5(", ingress_start)
 ingress = cli_source[ingress_start:ingress_end]
-assert 'return zig_transport::decode_t5_words(bytes);' in ingress
+assert 'return zig_transport::decode_t5_exact_words(bytes)?' in ingress
 assert '#[cfg(feature = "zig-transport")]' in ingress
 assert '#[cfg(not(feature = "zig-transport"))]' in ingress
 assert "no Rust fallback" in ingress
 assert "sens::decode_ternary_words(bytes)" not in ingress
 assert "let words = decode_physical_t5_words(bytes)?;" in physical_route
-assert "sens::parse_canonical_word_sequence(&words)" in physical_route
+assert "sens::PhysicalT5Program::from_exact_domain_words_owned(words)" in physical_route
+assert ".execute(&mut pure)" in physical_route
 assert "sens::pack_binary_source_words" not in physical_route
 assert "sens::parse_canonical_packed_words" not in physical_route
 assert "open_ternary_program" not in physical_route
@@ -161,14 +162,18 @@ physical_decoder = transport_source[decode_start:decode_end]
 assert "parts.join(" not in physical_decoder
 assert "parse_binary_source_words(&visible)" not in physical_decoder
 
-# The alternate sens-trit entrypoint delegates through the shared physical-program API.
-# Verify both delegation and the source-free decode/parse/lower implementation.
+# The production T5M ingress delegates physical restoration to Zig, then
+# passes exact domain words into the SENS-owned reader/evaluator. The Rust
+# library must not expose a physical-byte evaluator shortcut.
 trit_source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
 trit_start = trit_source.index("fn eval_t5_bytes_core4(")
-trit_end = trit_source.index("\n}\n", trit_start) + 3
+trit_end = trit_source.index("\n/// Diagnose a physical packed T5 file", trit_start)
 trit_route = trit_source[trit_start:trit_end]
-assert "sens::PhysicalT5Program::decode(bytes)" in trit_route
-assert "program.execute(&mut session)" in trit_route
+assert "zig_transport::decode_t5_exact_words(bytes)?" in trit_route
+assert "sens::PhysicalT5Program::from_exact_domain_words_owned(words)" in trit_route
+assert ".execute(&mut session)" in trit_route
+assert "sens::PhysicalT5Program::decode(bytes)" not in trit_route
+assert "sens::eval_t5_program(" not in trit_route
 assert "sens::decode_ternary_program(bytes)" not in trit_route
 assert "sens::pack_binary_source_words" not in trit_route
 assert "sens::parse_canonical_packed_words" not in trit_route
@@ -176,27 +181,8 @@ assert "sens::open_ternary_program(bytes)" not in trit_route
 assert "sens::parse_canonical_binary(&visible)" not in trit_route
 
 binary_execution_source = (ROOT / "crates/sens/src/binary_execution.rs").read_text(encoding="utf-8")
-physical_decode_start = binary_execution_source.index("pub fn decode(physical: &[u8])")
-physical_decode_end = binary_execution_source.index("/// Number of top-level D2 forms", physical_decode_start)
-physical_decode_route = binary_execution_source[physical_decode_start:physical_decode_end]
-assert "decode_ternary_words(physical)" in physical_decode_route
-assert "parse_t5_domain_words(&words)" in physical_decode_route
-assert "lower_program(&parsed)" in physical_decode_route
-assert "parse_binary_source_words" not in physical_decode_route
-assert "parse_canonical_binary" not in physical_decode_route
-
-# Pin the whole physical route against every retired text/repack escape hatch.
-for forbidden in (
-    "decode_ternary_program(",
-    "open_ternary_program(",
-    "parse_binary_source_words(",
-    "parse_canonical_binary(",
-    "pack_binary_source_words(",
-    "parse_canonical_packed_words(",
-    "render_ternary_words_spaced(",
-):
-    assert forbidden not in physical_decode_route, ("noncanonical physical decoder", forbidden)
-    assert forbidden not in trit_route, ("noncanonical trit caller", forbidden)
+assert "pub fn decode(physical: &[u8])" not in binary_execution_source
+assert "pub fn eval_t5_program(" not in binary_execution_source
 
 # Transport validation itself must keep D2 grammar on the same direct typed words,
 # rather than serialize and immediately decode a second packed payload.
@@ -207,7 +193,7 @@ assert "crate::parse_canonical_word_sequence(words)" in transport_route
 assert "pack_binary_source_words" not in transport_route
 
 print("SENS-TRIT-DIRECT-TYPED-WORDS: PASS")
-print("PHYSICAL-T5-DIRECT-TYPED-WORDS: PASS")
+print("PHYSICAL-T5M-ZIG-TO-EXACT-WORDS: PASS")
 print("BINARY-LANGUAGE-NEGATIVE-CONTROLS: PASS")
 print("leading-zero collapse: blocked")
 print("width/domain confusion: blocked")

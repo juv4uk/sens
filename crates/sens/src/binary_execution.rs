@@ -5,19 +5,11 @@
 //! machine-code claim is constructed by this adapter.
 
 use crate::{
-    decode_ternary_words,
     eval::{lower::lower_exact_domain_program, validate_exact_executable_heads},
     eval_lowered_expressions, BinaryNumber, BinarySourceWord, DomainIdentity, EvalResult, Expr,
-    LanguageError, Session, TernaryTransportError, Value,
+    LanguageError, Session, Value,
 };
 use std::sync::OnceLock;
-
-/// Transport and language failures have distinct, fail-closed provenance.
-#[derive(Debug)]
-pub enum T5ExecutionError {
-    Transport(TernaryTransportError),
-    Language(LanguageError),
-}
 
 /// SENS-owned word after physical T5M restoration. Identity is explicit:
 /// exact domain words are not inferred from payload width, and D24+ numbers
@@ -78,15 +70,6 @@ pub struct PhysicalT5Program {
 }
 
 impl PhysicalT5Program {
-    /// Physical bytes -> exact D1-D9 words -> ratified D2 forms, without
-    /// creating any text or parsing human identifier surfaces.
-    /// Never admit a historical CoreDomainIdentity head from physical bits or from
-    /// an accidental compatibility-only symbol in a partially lowered AST.
-    pub fn decode(physical: &[u8]) -> Result<Self, T5ExecutionError> {
-        let words = decode_ternary_words(physical).map_err(T5ExecutionError::Transport)?;
-        Self::from_exact_words(&words).map_err(T5ExecutionError::Language)
-    }
-
     /// The SAME SENS admission/evaluator for typed words restored from ANY
     /// physical carrier, including the Zig-owned T5 ABI boundary.
     /// The caller must already have validated the physical carrier; this
@@ -406,22 +389,15 @@ pub fn eval_e1_program(
     program.execute(session).map_err(E1ExecutionError::Language)
 }
 
-/// One-shot version of the same source-free program path.
-///
-/// Keep this wrapper to preserve the stable public API and ensure it shares
-/// the precise decode/parse/evaluate law with `sens-trit eval`.
-pub fn eval_t5_program(
-    physical: &[u8],
-    session: &mut Session,
-) -> Result<EvalResult, T5ExecutionError> {
-    let program = PhysicalT5Program::decode(physical)?;
-    program.execute(session).map_err(T5ExecutionError::Language)
-}
-
 #[cfg(test)]
-mod exact_t5_cutover_tests {
+mod exact_t5m_cutover_tests {
     use super::*;
-    use crate::{encode_ternary_words, parse_binary_source_words, ExprKind};
+    use crate::{decode_ternary_words, encode_ternary_words, parse_binary_source_words, ExprKind};
+
+    fn reference_t5_program(physical: &[u8]) -> Result<PhysicalT5Program, String> {
+        let words = crate::decode_ternary_words(physical).map_err(|error| format!("{error:?}"))?;
+        PhysicalT5Program::from_exact_words(&words).map_err(|error| format!("{error:?}"))
+    }
 
     // Д2 має один закон вкладеності у текстовому та відновленому
     // з Zig/T5M exact-domain readers. Жодного другого parser-ліміту.
@@ -636,7 +612,7 @@ mod exact_t5_cutover_tests {
     #[test]
     fn physical_d3_quote_is_exact_domain_call_not_historical_w8_dispatch() {
         let bytes = physical("10 001 00 000 01");
-        let program = PhysicalT5Program::decode(&bytes).expect("admitted D3 quote");
+        let program = reference_t5_program(&bytes).expect("admitted D3 quote");
         assert_eq!(program.form_count(), 1);
         assert!(matches!(
             program.forms()[0].kind,
@@ -668,7 +644,7 @@ mod exact_t5_cutover_tests {
         for physical in codes {
             let decoded = decode_ternary_words(&physical).unwrap();
             widths.push(decoded[0].width());
-            let program = PhysicalT5Program::decode(&physical).unwrap();
+            let program = reference_t5_program(&physical).unwrap();
             assert_eq!(program.form_count(), 1);
             assert!(matches!(
                 program.forms()[0].kind,
@@ -686,10 +662,7 @@ mod exact_t5_cutover_tests {
             .map(|x| x.word)
             .collect::<Vec<_>>();
         let physical = encode_ternary_words(&raw).unwrap();
-        assert!(matches!(
-            PhysicalT5Program::decode(&physical),
-            Err(T5ExecutionError::Language(_))
-        ));
+        assert!(reference_t5_program(&physical).is_err());
     }
 
     #[test]

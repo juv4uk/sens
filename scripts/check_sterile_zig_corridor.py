@@ -256,15 +256,29 @@ def check_main_t5_ingress(source: str) -> None:
         raise CorridorBlocked("sens main T5 ingress has Rust physical fallback")
     if "no Rust fallback" not in reference and "requires the Zig transport" not in reference:
         raise CorridorBlocked("sens main must refuse physical .sens without Zig")
-    eval_route = _route_between(source, "fn eval_physical_t5(", "\nfn main() {")
+    eval_route = _route_between(
+        source,
+        "fn eval_physical_t5(",
+        "\nfn eval_physical_t5_with_benchmark_metrics(",
+    )
     if "decode_physical_t5_words(bytes)?" not in eval_route:
         raise CorridorBlocked("sens main eval bypasses Zig physical ingress")
+    if ("sens::decode_ternary_words(" in eval_route
+            or "PhysicalT5Program::decode(" in eval_route
+            or "sens::eval_t5_program(" in eval_route):
+        raise CorridorBlocked("sens main eval contains Rust physical T5M decoder")
     # The live SENS admission moved to the exact-domain reader, which parses D2
     # and admits D1-D10/D24+ identities inside SENS -- never a Rust path.
-    if "sens::PhysicalT5Program::from_exact_domain_words(&words)" not in eval_route:
+    if "sens::PhysicalT5Program::from_exact_domain_words_owned(words)" not in eval_route:
         raise CorridorBlocked("sens main eval must admit exact words via SENS D2")
     entry = _route_between(source, "fn main() {", "\n#[cfg(test)]")
-    if "physical_t5_request" not in entry or "eval_physical_t5" not in entry:
+    active_entry = re.sub(r"/\*.*?\*/|//[^\n]*", "", entry, flags=re.S)
+    if ("physical_t5_request" not in active_entry
+            or not re.search(
+                r"\.and_then\(\|bytes\|\s*eval_physical_t5\(&bytes\)\)",
+                active_entry,
+            )
+            or "sens::decode_ternary_words(" in active_entry):
         raise CorridorBlocked("sens main must dispatch physical .sens before Lisp")
 
 
@@ -965,8 +979,7 @@ def check() -> list[str]:
 
     if not MAIN.is_file() or MAIN.is_symlink():
         raise CorridorBlocked("missing regular crates/sens-cli/src/main.rs")
-    main_source = MAIN.read_text(encoding="utf-8").replace(
-        "from_exact_domain_words_owned(words)", "from_exact_domain_words(&words)")
+    main_source = MAIN.read_text(encoding="utf-8")
     check_main_t5_ingress(main_source)
     notes.append("sens-cli-main-zig-only-ingress")
     if not ROOT_ZIG.is_file() or ROOT_ZIG.is_symlink():

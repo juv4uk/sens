@@ -2,9 +2,9 @@
 //! Never relabel S3/v1-v3 as original Frame-3; original F3 is imported from
 //! research/framed3/rust_codec/senc.rs. No execution of arbitrary repository
 //! files, only real Rust canonical reader admission. This is a research bench.
-use sens::{
-    decode_ternary_words, encode_ternary_words, parse_canonical_word_sequence, PhysicalT5Program,
-};
+use sens::{decode_ternary_words, encode_ternary_words, parse_canonical_word_sequence};
+#[path = "support/reference_t5m.rs"]
+mod reference_t5m;
 use std::{fs, path::Path, process::Command, time::Instant};
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
 mod senc;
@@ -64,7 +64,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     for path in paths {
         scanned += 1;
         let raw = fs::read(Path::new(&path))?;
-        let Ok(physical) = PhysicalT5Program::decode(&raw) else {
+        let Ok(physical) = reference_t5m::program(&raw) else {
             println!(
                 "{path}\tREJECTED_RUST_T5_READER\t{}\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA",
                 raw.len()

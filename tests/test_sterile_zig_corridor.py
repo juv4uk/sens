@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import subprocess
 import runpy
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -132,9 +133,11 @@ class SterileZigCorridorTests(unittest.TestCase):
             ("main", "zig_transport::contract_source_bytes()?", "Vec::new()"),
             ("main", '"RUST_ZIG_ONLY: language contract requires Zig; no Rust source fallback"',
              '"rust-reference"'),
-            ("host",
-             "let copied = unsafe { asset_ffi::sens_zig_contract_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };\n    if copied != required",
-             "let copied = unsafe { asset_ffi::sens_zig_contract_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };\n    if false /* forged contract count */"),
+            (
+                "host",
+                "asset_ffi::sens_zig_contract_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };\n    if copied != required",
+                "asset_ffi::sens_zig_contract_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };\n    if false",
+            ),
             ("zig", '@embedFile("language-contract.lisp")', '@embedFile("lib/linter.lisp")'),
             ("zig", "if (capacity < contract_asset.len) return -2;", "if (false) return -2;"),
             ("zig", "@memcpy(dst[0..contract_asset.len], contract_asset[0..contract_asset.len]);",
@@ -272,17 +275,19 @@ class SterileZigCorridorTests(unittest.TestCase):
             "build": (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8"),
         }
         check(sources["repl"], sources["host"], sources["zig"], sources["build"])
-        checked = (
-            'if copied != required { return Err(format!'
-            '("ZIG_UK_CARRIER mismatch: {copied}")); }'
-        )
-        ignored = "if copied != required { /* swallowed mismatch */ }"
         host = sources["host"]
         start = host.index("pub fn uk_surface_bytes(")
         stop = host.index("\n}\n", start)
         uk_body = host[start:stop]
-        self.assertEqual(uk_body.count(checked), 1, "mutation must hit live UK code")
-        mutated = host[:start] + uk_body.replace(checked, ignored, 1) + host[stop:]
+        checked = re.compile(
+            r'if copied != required \{\s*return Err\(format!\('
+            r'"ZIG_UK_CARRIER mismatch: \{copied\}"\)\);\s*\}'
+        )
+        mutated_body, count = checked.subn(
+            "if copied != required { /* swallowed mismatch */ }", uk_body, count=1
+        )
+        self.assertEqual(count, 1, "mutation must hit live UK code")
+        mutated = host[:start] + mutated_body + host[stop:]
         with self.assertRaisesRegex(blocked, "UK_ZIG_ONLY"):
             check(sources["repl"], mutated, sources["zig"], sources["build"])
 
@@ -371,23 +376,36 @@ class SterileZigCorridorTests(unittest.TestCase):
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         check(body)
 
-        no_bound = body.replace(
-            "usize::try_from(len).ok().filter(|&n| n < legacy.len() && n <= bytes.len())",
-            "Some(0usize) /* mutant: no capacity filter */",
-            1,
+        encode_start = body.index("pub fn encode_f3(")
+        encode_end = body.index("pub fn decode_f3(", encode_start)
+        encode_route = body[encode_start:encode_end]
+        no_bound_route = re.sub(
+            r"\.filter\(\|&n\| n < legacy\.len\(\) && n <= bytes\.len\(\)\)",
+            ".filter(|_| true)",
+            encode_route,
+            count=1,
         )
+        self.assertNotEqual(no_bound_route, encode_route)
+        no_bound = body[:encode_start] + no_bound_route + body[encode_end:]
         with self.assertRaises(blocked):
             check(no_bound)
 
-        no_decode_bound = body.replace(
-            "usize::try_from(len).ok().filter(|&n| n <= output.len())",
-            "Some(0usize) /* mutant: no capacity filter */",
-            1,
+        decode_start = body.index("pub fn decode_f3(")
+        decode_end = body.index("#[cfg(test)]", decode_start)
+        decode_route = body[decode_start:decode_end]
+        no_decode_route = re.sub(
+            r"\.filter\(\|&n\| n <= output\.len\(\)\)",
+            ".filter(|_| true)",
+            decode_route,
+            count=1,
         )
+        self.assertNotEqual(no_decode_route, decode_route)
+        no_decode_bound = body[:decode_start] + no_decode_route + body[decode_end:]
         with self.assertRaises(blocked):
             check(no_decode_bound)
 
-        no_cap = body.replace("n <= bytes.len()", "true /* mutant */", 1)
+        no_cap_route = encode_route.replace("n <= bytes.len()", "true /* mutant */", 1)
+        no_cap = body[:encode_start] + no_cap_route + body[encode_end:]
         with self.assertRaises(blocked):
             check(no_cap)
 
@@ -430,8 +448,7 @@ class SterileZigCorridorTests(unittest.TestCase):
             ("missing-command", '.arg("build-lib")', '.arg("version")'),
             ("wrong-root", '.arg("zig_transport_root.zig")',
              '.arg("research/zig-codecs/transport_abi.zig")'),
-            ("wrong-version-assert", 'assert_eq!(actual, pinned,',
-             'assert_eq!(actual, actual,'),
+            ("wrong-version-assert", 'actual, pinned,', 'actual, actual,'),
             ("no-archive-emission",
              '.arg(format!("-femit-bin={}", archive.display()))',
              '.arg("-femit-bin=other.a")'),
@@ -503,31 +520,48 @@ class SterileZigCorridorTests(unittest.TestCase):
 
         replacements = (
             (
+                "ingress",
                 "return zig_transport::decode_t5_exact_words(bytes)?",
                 "return sens::decode_ternary_words(bytes).map_err(|e| format!(\"{e:?}\"));",
             ),
             (
+                "ingress",
                 'Err("physical .sens requires the Zig transport corridor; no Rust fallback".into())',
                 'sens::decode_ternary_words(bytes).map_err(|e| format!("{e:?}"))',
             ),
             (
+                "eval",
                 "let words = decode_physical_t5_words(bytes)?;",
                 "let words = sens::decode_ternary_words(bytes).unwrap();",
             ),
             (
-                "sens::PhysicalT5Program::from_exact_domain_words(&words)",
+                "eval",
+                "sens::PhysicalT5Program::from_exact_domain_words_owned(words)",
                 "sens::parse_canonical_binary(\"not exact words\")",
             ),
             (
+                "main",
                 "eval_physical_t5(&bytes)",
                 "sens::decode_ternary_words(&bytes).map(|_| Default::default())",
             ),
         )
-        for old, replacement in replacements:
+        for route_name, old, replacement in replacements:
             with self.subTest(bypass=old):
                 self.assertIn(old, source)
+                if route_name == "ingress":
+                    start = source.index("fn decode_physical_t5_words(")
+                    end = source.index("\nfn eval_physical_t5(", start)
+                elif route_name == "eval":
+                    start = source.index("fn eval_physical_t5(")
+                    end = source.index("\nfn eval_physical_t5_with_benchmark_metrics(", start)
+                else:
+                    start = source.index("fn main() {")
+                    end = source.index("\n#[cfg(test)]", start)
+                route = source[start:end]
+                changed_route = route.replace(old, replacement, 1)
+                self.assertNotEqual(changed_route, route, "mutation must alter the intended live route")
                 with self.assertRaises(blocked):
-                    check(source.replace(old, replacement, 1))
+                    check(source[:start] + changed_route + source[end:])
 
 
     def test_explain_must_use_typed_words_not_rust_text_reparse(self) -> None:
@@ -718,7 +752,7 @@ class SterileZigCorridorTests(unittest.TestCase):
                 "sens::decode_ternary_words(bytes).unwrap()",
             ),
             (
-                "sens::PhysicalT5Program::from_exact_domain_words(&words)",
+                "sens::PhysicalT5Program::from_exact_domain_words_owned(words)",
                 "sens::PhysicalT5Program::decode(bytes).unwrap()",
             ),
             (

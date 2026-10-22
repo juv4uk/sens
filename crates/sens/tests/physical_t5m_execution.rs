@@ -1,18 +1,20 @@
 //! Direct executable .sens code is parsed without an English or text roundtrip.
-use sens::{
-    decode_ternary_program, encode_ternary_words, eval_t5_program, parse_canonical_binary,
-    parse_canonical_packed_words, BinarySourceWord, Bit1, BitPacker, ErrorKind, Session,
-    T5ExecutionError, TernaryTransportError, Value,
-};
+mod support;
 
-const QUOTE_T5: &[u8] =
+use sens::{
+    decode_ternary_program, encode_ternary_words, parse_canonical_binary,
+    parse_canonical_packed_words, BinarySourceWord, Bit1, BitPacker, ErrorKind, Session, Value,
+};
+use support::{eval_reference_t5m, ReferenceT5mError};
+
+const QUOTE_T5M: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
-const MULTIFORM_T5: &[u8] =
+const MULTIFORM_T5M: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
 
 #[test]
 fn physical_quote_executes_directly_in_a_fresh_binary_session() {
-    let result = eval_t5_program(QUOTE_T5, &mut Session::default())
+    let result = eval_reference_t5m(QUOTE_T5M, &mut Session::default())
         .expect("physical D3 QUOTE must run without Lisp bootstrap");
     assert!(matches!(result.value, Value::Nil));
     assert!(result.output.is_empty());
@@ -20,8 +22,8 @@ fn physical_quote_executes_directly_in_a_fresh_binary_session() {
 
 #[test]
 fn physical_multi_form_program_executes_as_a_single_exact_domain_stream() {
-    let result = eval_t5_program(MULTIFORM_T5, &mut Session::default())
-        .expect("physical T5 must execute both D2-framed forms");
+    let result = eval_reference_t5m(MULTIFORM_T5M, &mut Session::default())
+        .expect("physical T5M must execute both D2-framed forms");
     assert!(matches!(
         &result.value,
         Value::Pair(head, tail)
@@ -31,7 +33,7 @@ fn physical_multi_form_program_executes_as_a_single_exact_domain_stream() {
 
 #[test]
 fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
-    let words = decode_ternary_program(MULTIFORM_T5).expect("canonical physical T5");
+    let words = decode_ternary_program(MULTIFORM_T5M).expect("canonical physical T5M");
     let mut packer = BitPacker::new();
     for word in words.iter().copied() {
         sens::append_binary_source_word(&mut packer, word);
@@ -57,7 +59,7 @@ fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
 fn physical_d1_value_is_exact_predicate_not_legacy_t() {
     let physical = encode_ternary_words(&[BinarySourceWord::W1(Bit1::new(1).unwrap())])
         .expect("single D1 predicate transports");
-    let result = eval_t5_program(&physical, &mut Session::default())
+    let result = eval_reference_t5m(&physical, &mut Session::default())
         .expect("D1 predicate executes from physical bytes");
     assert_eq!(result.value.as_predicate_bit(), Some(true));
 }
@@ -65,9 +67,9 @@ fn physical_d1_value_is_exact_predicate_not_legacy_t() {
 #[test]
 fn malformed_transport_and_invalid_d2_are_distinct_fail_closed_errors() {
     assert!(matches!(
-        eval_t5_program(&[243], &mut Session::default()),
-        Err(T5ExecutionError::Transport(
-            TernaryTransportError::InvalidPhysicalByte
+        eval_reference_t5m(&[243], &mut Session::default()),
+        Err(ReferenceT5mError::Transport(
+            sens::TernaryTransportError::InvalidPhysicalByte
         ))
     ));
     let words = sens::parse_binary_source_words("10 001")
@@ -77,8 +79,8 @@ fn malformed_transport_and_invalid_d2_are_distinct_fail_closed_errors() {
         .collect::<Vec<_>>();
     let physical = encode_ternary_words(&words).unwrap();
     assert!(matches!(
-        eval_t5_program(&physical, &mut Session::default()),
-        Err(T5ExecutionError::Language(err)) if err.kind == ErrorKind::Parse
+        eval_reference_t5m(&physical, &mut Session::default()),
+        Err(ReferenceT5mError::Language(err)) if err.kind == ErrorKind::Parse
     ));
 }
 
@@ -94,19 +96,19 @@ fn named_lisp_cannot_enter_canonical_binary_reader() {
 #[test]
 fn sens_zero_physical_cond_uses_only_exact_d1() {
     let program = "10 110 00 10 1 00 1 01 01";
-    const PHYSICAL_T5: &[u8] = &[0x67, 0x38, 0x68, 0x17, 0x2e];
+    const PHYSICAL_T5M: &[u8] = &[0x67, 0x38, 0x68, 0x17, 0x2e];
     let words = sens::parse_binary_source_words(program)
         .expect("exact-width binary oracle")
         .into_iter()
         .map(|token| token.word)
         .collect::<Vec<_>>();
-    assert_eq!(decode_ternary_program(PHYSICAL_T5).unwrap(), words);
+    assert_eq!(decode_ternary_program(PHYSICAL_T5M).unwrap(), words);
     assert_eq!(
         encode_ternary_words(&words).unwrap().as_slice(),
-        PHYSICAL_T5
+        PHYSICAL_T5M
     );
 
-    let selected = eval_t5_program(PHYSICAL_T5, &mut Session::default())
+    let selected = eval_reference_t5m(PHYSICAL_T5M, &mut Session::default())
         .expect("D1:1 must select the two-field physical COND clause");
     assert_eq!(selected.value.as_predicate_bit(), Some(true));
     assert!(selected.output.is_empty());
@@ -119,7 +121,7 @@ fn sens_zero_physical_cond_uses_only_exact_d1() {
         .map(|token| token.word)
         .collect::<Vec<_>>();
     let no_bytes = encode_ternary_words(&no_words).unwrap();
-    let result = eval_t5_program(&no_bytes, &mut Session::default())
+    let result = eval_reference_t5m(&no_bytes, &mut Session::default())
         .expect("the selected result remains exact D1:0");
     assert_eq!(result.value.as_predicate_bit(), Some(false));
     assert!(result.output.is_empty());
@@ -132,13 +134,13 @@ fn sens_zero_physical_cond_uses_only_exact_d1() {
         .map(|token| token.word)
         .collect::<Vec<_>>();
     let empty_bytes = encode_ternary_words(&empty_words).unwrap();
-    let result = eval_t5_program(&empty_bytes, &mut Session::default())
+    let result = eval_reference_t5m(&empty_bytes, &mut Session::default())
         .expect("no matching exact D1 clause returns structural empty");
     assert!(matches!(result.value, Value::Nil));
     assert_eq!(result.value.as_predicate_bit(), None);
 }
 
-/// Strict negative oracles on actual T5 bytes; failures must come from the
+/// Strict negative oracles on actual T5M bytes; failures must come from the
 /// SENS language mechanism, not from malformed transport or old truthiness.
 #[test]
 fn sens_zero_physical_cond_rejects_wrong_domain_and_three_field_clause() {
@@ -152,12 +154,12 @@ fn sens_zero_physical_cond_rejects_wrong_domain_and_three_field_clause() {
             .map(|token| token.word)
             .collect::<Vec<_>>();
         let physical =
-            encode_ternary_words(&words).expect("negative witness must be valid T5 transport");
+            encode_ternary_words(&words).expect("negative witness must be valid T5M transport");
         assert_eq!(decode_ternary_program(&physical).unwrap(), words);
         assert!(
             matches!(
-                eval_t5_program(&physical, &mut Session::default()),
-                Err(T5ExecutionError::Language(err)) if err.kind == expected_kind
+                eval_reference_t5m(&physical, &mut Session::default()),
+                Err(ReferenceT5mError::Language(err)) if err.kind == expected_kind
             ),
             "exact D1/COND rejected with wrong error category: {source}"
         );
@@ -193,7 +195,7 @@ fn d3_semantics_are_executed_and_decided_by_binary_sens() {
         "no word added or deleted"
     );
     assert_eq!(pass_words.iter().map(|word| word.len()).sum::<usize>(), 457);
-    assert_eq!(fixtures[0].1.len(), 136, "pinned physical T5 size");
+    assert_eq!(fixtures[0].1.len(), 136, "pinned physical T5M size");
     assert_eq!(fixtures[0].1.len(), fixtures[1].1.len());
     let changed = pass_words
         .iter()
@@ -217,7 +219,7 @@ fn d3_semantics_are_executed_and_decided_by_binary_sens() {
             physical,
             "the tracked .sens must match its binary source bit-for-bit"
         );
-        let result = eval_t5_program(physical, &mut Session::default())
+        let result = eval_reference_t5m(physical, &mut Session::default())
             .expect("SENS self-test must execute directly from packed T5");
         assert!(
             result.output.is_empty(),

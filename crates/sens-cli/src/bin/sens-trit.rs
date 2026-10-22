@@ -996,8 +996,16 @@ mod eval_tests {
         assert_eq!(canonical.as_slice(), t5.as_slice());
         let mut direct_session = sens::Session::default();
         let mut framed_session = sens::Session::default();
-        let direct = sens::eval_t5_program(&t5, &mut direct_session).unwrap();
-        let framed = sens::eval_t5_program(&canonical, &mut framed_session).unwrap();
+        let direct_words = sens::decode_ternary_words(&t5).unwrap();
+        let framed_words = sens::decode_ternary_words(&canonical).unwrap();
+        let direct = sens::PhysicalT5Program::from_exact_words(&direct_words)
+            .unwrap()
+            .execute(&mut direct_session)
+            .unwrap();
+        let framed = sens::PhysicalT5Program::from_exact_words(&framed_words)
+            .unwrap()
+            .execute(&mut framed_session)
+            .unwrap();
         assert_eq!(direct.value, framed.value);
         assert_eq!(direct.output, framed.output);
         assert!(sens::decode_ternary_program(&bytes).is_err());

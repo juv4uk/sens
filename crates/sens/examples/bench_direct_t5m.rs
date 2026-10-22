@@ -2,9 +2,10 @@
 //! visible-source baseline, and repeated interpretation on the SAME hardware.
 //! Reports observations, never asserts a synthetic speedup or a native ISA.
 use sens::{
-    eval_parsed_expressions, lower_program, open_ternary_program, parse_canonical_binary,
-    PhysicalT5Program, Session,
+    eval_parsed_expressions, lower_program, open_ternary_program, parse_canonical_binary, Session,
 };
+#[path = "support/reference_t5m.rs"]
+mod reference_t5m;
 use std::{hint::black_box, time::Instant};
 const QUOTE: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
@@ -28,9 +29,9 @@ fn main() {
     eprintln!(
         "measurement only; ns/op includes allocations and host overhead; iterations={iterations}"
     );
-    println!("fixture,bytes,forms,t5_decode_parse_lower_ns,visible_parse_lower_ns,cached_lowered_eval_ns");
+    println!("fixture,bytes,forms,t5m_reference_decode_parse_lower_ns,visible_parse_lower_ns,cached_lowered_eval_ns");
     for (label, bytes) in [("quote", QUOTE), ("atom", ATOM), ("cond", COND)] {
-        let program = PhysicalT5Program::decode(bytes).unwrap();
+        let program = reference_t5m::program(bytes).unwrap();
         let visible = open_ternary_program(bytes).unwrap();
         let reference = parse_canonical_binary(&visible).unwrap();
         let expected = eval_parsed_expressions(&reference, &mut Session::default()).unwrap();
@@ -39,7 +40,7 @@ fn main() {
         assert_eq!(expected.output, actual.output);
         // Untimed warmups. No reliance on timing to establish semantics.
         for _ in 0..100 {
-            black_box(PhysicalT5Program::decode(black_box(bytes)).unwrap());
+            black_box(reference_t5m::program(black_box(bytes)).unwrap());
             black_box(lower_program(
                 &parse_canonical_binary(black_box(&visible)).unwrap(),
             ));
@@ -47,7 +48,7 @@ fn main() {
         }
         let direct_ns = measure(
             || {
-                black_box(PhysicalT5Program::decode(black_box(bytes)).unwrap());
+                black_box(reference_t5m::program(black_box(bytes)).unwrap());
             },
             iterations,
         );

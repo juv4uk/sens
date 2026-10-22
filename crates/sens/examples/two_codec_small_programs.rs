@@ -16,8 +16,10 @@ use std::{
 
 use sens::{
     decode_ternary_words, encode_ternary_words, eval_parsed_expressions, parse_binary_source_words,
-    parse_canonical_binary, parse_canonical_word_sequence, PhysicalT5Program, Session,
+    parse_canonical_binary, parse_canonical_word_sequence, Session,
 };
+#[path = "support/reference_t5m.rs"]
+mod reference_t5m;
 
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
 mod senc;
@@ -54,8 +56,8 @@ struct Choice {
 }
 
 fn read_t5_canon(raw: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
-    let p = PhysicalT5Program::decode(raw)
-        .map_err(|e| format!("production T5 reader rejection: {e:?}"))?;
+    let p =
+        reference_t5m::program(raw).map_err(|e| format!("reference T5M reader rejection: {e}"))?;
     if p.form_count() == 0 {
         return Err("zero canonical forms: not a program".into());
     }
@@ -188,8 +190,8 @@ fn self_test() -> Result<(), String> {
     let expected = eval_parsed_expressions(&parsed, &mut Session::default())
         .map_err(|e| format!("direct SENS oracle: {e:?}"))?;
     let recovered = explicit_decode(&chosen.physical, "senc")?;
-    let physical_program = PhysicalT5Program::decode(&recovered)
-        .map_err(|e| format!("recovered physical SENS program: {e:?}"))?;
+    let physical_program = reference_t5m::program(&recovered)
+        .map_err(|e| format!("recovered reference T5M program: {e}"))?;
     let actual = physical_program
         .execute(&mut Session::default())
         .map_err(|e| format!("recovered SENS execution: {e:?}"))?;

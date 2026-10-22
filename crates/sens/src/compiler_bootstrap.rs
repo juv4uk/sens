@@ -219,8 +219,9 @@ impl<'a> CanonicalCompilerDecoder<'a> {
                 ))
             }
         };
-        let invalid =
-            || format!("canonical compiler domain identity has invalid D{width} payload {packed}");
+        let invalid = || {
+            format!("canonical compiler domain identity has invalid D{width} payload 0b{packed:b}")
+        };
         let source = match width {
             1 => BinarySourceWord::W1(Bit1::new(packed as u8).ok_or_else(invalid)?),
             2 => BinarySourceWord::W2(Bit2::new(packed as u8).ok_or_else(invalid)?),
