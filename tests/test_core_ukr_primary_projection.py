@@ -156,7 +156,6 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         live_callers = (
             "lib/yantra.lisp",
             "lib/translation.lisp",
-            "scripts/generate-rust-semantic-registry.lisp",
             "scripts/generate-function-table.lisp",
         )
         for filename in live_callers:
@@ -164,6 +163,16 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             with self.subTest(file=filename, migration="string classification"):
                 self.assertIn("класифікувати-рядкове-значення", code)
                 self.assertNotIn("(string-membership-helper ", code)
+
+        # Старий Rust-генератор лишається явним якорем, а не живим
+        # генератором чи доказом успішності/готовності.
+        registry_anchor = source("scripts/generate-rust-semantic-registry.lisp")
+        with self.subTest(file="scripts/generate-rust-semantic-registry.lisp",
+                          migration="retired generator stays unverified"):
+            self.assertIn("(визначити якір", registry_anchor)
+            self.assertIn("(status not-verified)", registry_anchor)
+            self.assertNotIn("(status pass)", registry_anchor)
+            self.assertNotIn("класифікувати-рядкове-значення", registry_anchor)
         inventory = source("lib/surface/uk-inventory.lisp")
         # Чинна форма є виконуваним українським визначенням, яке
         # повертає цитовані дані; старі SID8-рядки більше не є контрактом.
