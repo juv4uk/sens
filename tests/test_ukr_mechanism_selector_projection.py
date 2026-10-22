@@ -196,9 +196,9 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         # «так/ні» замість обчисленого D1-предиката.
         self.assertNotRegex(code, r"\(\s*(?:так|ні)\s*\)")
         self.assertNotRegex(code, r"\(\s*так\s+(?:так|ні)\s*\)")
-        # Чинні дві D1-гілки fallback та єдиний SENS fail-fast helper.
-        self.assertGreaterEqual(code.count("((атом? (як-є ()))"), 2)
-        self.assertIn("(визначити довести-механізм", code)
+        # Тільки два SENS D1 fallback у самому паспорті; живі
+        # позитивні/негативні запити виконує guard.rs, не Python.
+        self.assertEqual(code.count("((атом? (як-є ()))"), 2)
 
     def test_exact_d1_registry_predicate_not_old_textual_boolean(self):
         code = uncommented(self.source)
