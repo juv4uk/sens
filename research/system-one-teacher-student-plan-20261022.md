@@ -219,16 +219,6 @@ python3 research/system-one-teacher-observe-20261022.py \
   --input research/system-one-support-challenge-20261022.jsonl \
   --output /tmp/system-one-challenge-teacher.jsonl
 
-# Ті самі вже навчені та відкалібровані CPU-учні, без повторного навчання.
-python3 research/system-one-compact-student-20261022.py predict \
-  --model /tmp/system-one-comparison/student-gold-calibrated.json \
-  --input research/system-one-support-challenge-20261022.jsonl \
-  --split test --output /tmp/system-one-challenge-gold.jsonl
-python3 research/system-one-compact-student-20261022.py predict \
-  --model /tmp/system-one-comparison/student-soft-calibrated.json \
-  --input research/system-one-support-challenge-20261022.jsonl \
-  --split test --output /tmp/system-one-challenge-soft.jsonl
-
 # Якщо трансформерний експеримент був виконаний:
 python3 research/system-one-transformer-student-20261022.py predict \
   --model-dir /tmp/system-one-mmbert-soft \
