@@ -86,6 +86,13 @@ jobs:
               list="$(git log --diff-filter=A --name-only -n 600 -- '*.sens' | grep '\.sens$' | sed 's/\.sens$/.lisp/' | sort -u)"
             fi
           fi
+          # Судити конкурс лише після конкурсанта, не кожного lib/list/tree.
+          # Факт категорії визначає реальний змінений/непарний шлях, не JSON.
+          if printf '%s\n' "$list" | grep -Eq '^benchmarks/contest-uk/[^[:space:]]+\.lisp$'; then
+            echo "contest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "contest=false" >> "$GITHUB_OUTPUT"
+          fi
           echo "candidates:"; printf '%s\n' "$list" | sed '/^$/d' | wc -l
           ok=0; skip=0
           while IFS= read -r f; do
@@ -131,7 +138,7 @@ jobs:
           fi
 
       - name: Нативне суддівство і просування справжніх переможців
-        if: github.event_name == 'push' && steps.remint.outputs.failed == 'false'
+        if: github.event_name == 'push' && steps.remint.outputs.failed == 'false' && steps.remint.outputs.contest == 'true'
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
