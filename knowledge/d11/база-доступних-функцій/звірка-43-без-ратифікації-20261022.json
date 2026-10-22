@@ -22,7 +22,7 @@
     {
       "legacy_fixture_bits": "00000000000",
       "uk": "прочитати-файл",
-      "ukr": "прочитати-файл",
+      "ukr": "прочитати-вміст-файла",
       "en": "read-file",
       "lisp": "READ-FILE",
       "classification": "lower_overlap",
@@ -46,7 +46,7 @@
     {
       "legacy_fixture_bits": "00000000001",
       "uk": "прочитати-сенс",
-      "ukr": "прочитати-сенс",
+      "ukr": "прочитати-програму-сенс",
       "en": "read-sens",
       "lisp": "READ-SENS",
       "classification": "transport_reader",
@@ -59,7 +59,7 @@
     {
       "legacy_fixture_bits": "00000000010",
       "uk": "декодувати-т5",
-      "ukr": "декодувати-т5",
+      "ukr": "декодувати-подання-т5",
       "en": "decode-t5",
       "lisp": "DECODE-T5",
       "classification": "transport_reader",
@@ -72,7 +72,7 @@
     {
       "legacy_fixture_bits": "00000000011",
       "uk": "довжина",
-      "ukr": "довжина",
+      "ukr": "довжина-послідовності",
       "en": "length",
       "lisp": "LENGTH",
       "classification": "lower_overlap",
@@ -97,7 +97,7 @@
     {
       "legacy_fixture_bits": "00000000100",
       "uk": "порахувати",
-      "ukr": "порахувати",
+      "ukr": "порахувати-елементи",
       "en": "count",
       "lisp": "COUNT",
       "classification": "unproven_law",
@@ -110,7 +110,7 @@
     {
       "legacy_fixture_bits": "00000000101",
       "uk": "рівні?",
-      "ukr": "рівні?",
+      "ukr": "значення-структурно-рівні?",
       "en": "equal?",
       "lisp": "EQUAL?",
       "classification": "lower_overlap",
@@ -133,7 +133,7 @@
     {
       "legacy_fixture_bits": "00000000110",
       "uk": "друкувати",
-      "ukr": "друкувати",
+      "ukr": "вивести-на-друк",
       "en": "print",
       "lisp": "PRINT",
       "classification": "lower_overlap",
@@ -158,7 +158,7 @@
     {
       "legacy_fixture_bits": "00000000111",
       "uk": "зріз",
-      "ukr": "зріз",
+      "ukr": "зріз-послідовності",
       "en": "slice",
       "lisp": "SLICE",
       "classification": "unproven_law",
@@ -171,7 +171,7 @@
     {
       "legacy_fixture_bits": "00000001000",
       "uk": "взяти",
-      "ukr": "взяти",
+      "ukr": "взяти-початкову-частину",
       "en": "take",
       "lisp": "TAKE",
       "classification": "lower_overlap",
@@ -196,7 +196,7 @@
     {
       "legacy_fixture_bits": "00000001001",
       "uk": "скинути",
-      "ukr": "скинути",
+      "ukr": "відкинути-початкову-частину",
       "en": "drop",
       "lisp": "DROP",
       "classification": "lower_overlap",
@@ -220,7 +220,7 @@
     {
       "legacy_fixture_bits": "00000001010",
       "uk": "істина",
-      "ukr": "істина",
+      "ukr": "значення-істинності",
       "en": "t",
       "lisp": "T",
       "classification": "lower_overlap",
@@ -243,7 +243,7 @@
     {
       "legacy_fixture_bits": "00000001011",
       "uk": "хиба",
-      "ukr": "хиба",
+      "ukr": "значення-хибності",
       "en": "nil",
       "lisp": "NIL",
       "classification": "lower_overlap",
@@ -266,7 +266,7 @@
     {
       "legacy_fixture_bits": "00000001100",
       "uk": "якщо",
-      "ukr": "якщо",
+      "ukr": "умовне-виконання",
       "en": "if",
       "lisp": "IF",
       "classification": "lower_overlap",
@@ -291,7 +291,7 @@
     {
       "legacy_fixture_bits": "00000001101",
       "uk": "якщо-то-інакше",
-      "ukr": "якщо-то-інакше",
+      "ukr": "умовне-виконання-з-альтернативою",
       "en": "if-else",
       "lisp": "IF-ELSE",
       "classification": "unproven_law",
@@ -304,7 +304,7 @@
     {
       "legacy_fixture_bits": "00000001110",
       "uk": "стверджувати",
-      "ukr": "стверджувати",
+      "ukr": "перевірити-твердження",
       "en": "assert",
       "lisp": "ASSERT",
       "classification": "unproven_law",
@@ -317,7 +317,7 @@
     {
       "legacy_fixture_bits": "00000001111",
       "uk": "провал",
-      "ukr": "провал",
+      "ukr": "повідомити-про-помилку",
       "en": "fail",
       "lisp": "FAIL",
       "classification": "unproven_law",
@@ -330,7 +330,7 @@
     {
       "legacy_fixture_bits": "00000010000",
       "uk": "є?",
-      "ukr": "є?",
+      "ukr": "перевірити-існування?",
       "en": "exists?",
       "lisp": "EXISTS?",
       "classification": "unproven_law",
@@ -343,7 +343,7 @@
     {
       "legacy_fixture_bits": "00000010001",
       "uk": "всі?",
-      "ukr": "всі?",
+      "ukr": "усі-елементи-відповідають?",
       "en": "all?",
       "lisp": "ALL?",
       "classification": "lower_overlap",
@@ -366,7 +366,7 @@
     {
       "legacy_fixture_bits": "00000010010",
       "uk": "і",
-      "ukr": "і",
+      "ukr": "логічне-і",
       "en": "and",
       "lisp": "AND",
       "classification": "lower_overlap",
@@ -390,7 +390,7 @@
     {
       "legacy_fixture_bits": "00000010011",
       "uk": "або",
-      "ukr": "або",
+      "ukr": "логічне-або",
       "en": "or",
       "lisp": "OR",
       "classification": "lower_overlap",
@@ -415,7 +415,7 @@
     {
       "legacy_fixture_bits": "00000010100",
       "uk": "не",
-      "ukr": "не",
+      "ukr": "логічне-заперечення",
       "en": "not",
       "lisp": "NOT",
       "classification": "lower_overlap",
@@ -438,7 +438,7 @@
     {
       "legacy_fixture_bits": "00000010101",
       "uk": "тест-шлях",
-      "ukr": "тест-шлях",
+      "ukr": "шлях-тестового-файла",
       "en": "test-path",
       "lisp": "TEST-PATH",
       "classification": "test_only",
@@ -451,7 +451,7 @@
     {
       "legacy_fixture_bits": "00000010110",
       "uk": "тест-байти",
-      "ukr": "тест-байти",
+      "ukr": "байти-тестового-набору",
       "en": "test-bytes",
       "lisp": "TEST-BYTES",
       "classification": "test_only",
@@ -464,7 +464,7 @@
     {
       "legacy_fixture_bits": "00000010111",
       "uk": "тест-слова",
-      "ukr": "тест-слова",
+      "ukr": "слова-тестового-набору",
       "en": "test-words",
       "lisp": "TEST-WORDS",
       "classification": "test_only",
@@ -477,7 +477,7 @@
     {
       "legacy_fixture_bits": "00000011000",
       "uk": "д2-відкрити",
-      "ukr": "д2-відкрити",
+      "ukr": "маркер-відкриття-д2",
       "en": "d2-open",
       "lisp": "D2-OPEN",
       "classification": "structure_or_value",
@@ -490,7 +490,7 @@
     {
       "legacy_fixture_bits": "00000011001",
       "uk": "д2-закрити",
-      "ukr": "д2-закрити",
+      "ukr": "маркер-закриття-д2",
       "en": "d2-close",
       "lisp": "D2-CLOSE",
       "classification": "structure_or_value",
@@ -503,7 +503,7 @@
     {
       "legacy_fixture_bits": "00000011010",
       "uk": "д2-роздільник",
-      "ukr": "д2-роздільник",
+      "ukr": "маркер-розділення-д2",
       "en": "d2-sep",
       "lisp": "D2-SEP",
       "classification": "structure_or_value",
@@ -516,7 +516,7 @@
     {
       "legacy_fixture_bits": "00000011011",
       "uk": "д3-порожній",
-      "ukr": "д3-порожній",
+      "ukr": "порожнє-значення-д3",
       "en": "d3-empty",
       "lisp": "D3-EMPTY",
       "classification": "structure_or_value",
@@ -529,7 +529,7 @@
     {
       "legacy_fixture_bits": "00000011100",
       "uk": "має-визначити",
-      "ukr": "має-визначити",
+      "ukr": "наявне-визначення",
       "en": "has-define",
       "lisp": "HAS-DEFINE",
       "classification": "introspection",
@@ -542,7 +542,7 @@
     {
       "legacy_fixture_bits": "00000011101",
       "uk": "має-функцію",
-      "ukr": "має-функцію",
+      "ukr": "наявне-лямбда-визначення",
       "en": "has-lambda",
       "lisp": "HAS-LAMBDA",
       "classification": "introspection",
@@ -555,7 +555,7 @@
     {
       "legacy_fixture_bits": "00000011110",
       "uk": "має-як-є",
-      "ukr": "має-як-є",
+      "ukr": "наявна-форма-цитування",
       "en": "has-quote",
       "lisp": "HAS-QUOTE",
       "classification": "introspection",
@@ -568,7 +568,7 @@
     {
       "legacy_fixture_bits": "00000011111",
       "uk": "має-сполучити",
-      "ukr": "має-сполучити",
+      "ukr": "наявна-форма-сполучення",
       "en": "has-cons",
       "lisp": "HAS-CONS",
       "classification": "introspection",
@@ -581,7 +581,7 @@
     {
       "legacy_fixture_bits": "00000100000",
       "uk": "має-перше",
-      "ukr": "має-перше",
+      "ukr": "наявний-доступ-до-першого-елемента",
       "en": "has-car",
       "lisp": "HAS-CAR",
       "classification": "introspection",
@@ -594,7 +594,7 @@
     {
       "legacy_fixture_bits": "00000100001",
       "uk": "має-атом",
-      "ukr": "має-атом",
+      "ukr": "наявна-перевірка-атома",
       "en": "has-atom",
       "lisp": "HAS-ATOM",
       "classification": "introspection",
@@ -607,7 +607,7 @@
     {
       "legacy_fixture_bits": "00000100010",
       "uk": "має-тотожність",
-      "ukr": "має-тотожність",
+      "ukr": "наявна-перевірка-тотожності",
       "en": "has-eq",
       "lisp": "HAS-EQ",
       "classification": "introspection",
@@ -620,7 +620,7 @@
     {
       "legacy_fixture_bits": "00000100011",
       "uk": "має-умови",
-      "ukr": "має-умови",
+      "ukr": "наявна-умовна-конструкція",
       "en": "has-cond",
       "lisp": "HAS-COND",
       "classification": "introspection",
@@ -633,7 +633,7 @@
     {
       "legacy_fixture_bits": "00000100100",
       "uk": "всі-точність",
-      "ukr": "всі-точність",
+      "ukr": "усі-елементи-точної-бітності",
       "en": "all-exact",
       "lisp": "ALL-EXACT",
       "classification": "structural_validator",
@@ -646,7 +646,7 @@
     {
       "legacy_fixture_bits": "00000100101",
       "uk": "структура-збалансована",
-      "ukr": "структура-збалансована",
+      "ukr": "збалансованість-структури",
       "en": "struct-balanced",
       "lisp": "STRUCT-BALANCED",
       "classification": "structural_validator",
@@ -659,7 +659,7 @@
     {
       "legacy_fixture_bits": "00000100110",
       "uk": "без-точки",
-      "ukr": "без-точки",
+      "ukr": "без-крапкового-хвоста",
       "en": "no-dot",
       "lisp": "NO-DOT",
       "classification": "structural_validator",
@@ -672,7 +672,7 @@
     {
       "legacy_fixture_bits": "00000100111",
       "uk": "точний-розмір",
-      "ukr": "точний-розмір",
+      "ukr": "точний-розмір-представлення",
       "en": "exact-size",
       "lisp": "EXACT-SIZE",
       "classification": "structural_validator",
@@ -685,7 +685,7 @@
     {
       "legacy_fixture_bits": "00000101000",
       "uk": "тест-прохід",
-      "ukr": "тест-прохід",
+      "ukr": "успішне-проходження-тесту",
       "en": "test-pass",
       "lisp": "TEST-PASS",
       "classification": "test_only",
@@ -698,7 +698,7 @@
     {
       "legacy_fixture_bits": "00000101001",
       "uk": "тест-провал",
-      "ukr": "тест-провал",
+      "ukr": "невдале-проходження-тесту",
       "en": "test-fail",
       "lisp": "TEST-FAIL",
       "classification": "test_only",
@@ -711,7 +711,7 @@
     {
       "legacy_fixture_bits": "00000101010",
       "uk": "тест-елемент",
-      "ukr": "тест-елемент",
+      "ukr": "елемент-тестового-набору",
       "en": "test-element",
       "lisp": "TEST-ELEMENT",
       "classification": "test_only",
