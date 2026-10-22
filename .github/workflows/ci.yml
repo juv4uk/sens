@@ -801,9 +801,74 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
-      # Бенчмарк T5M на кожному push та ручному CI; транспорт, не семантичний oracle.
+      # Заміряємо один і той самий фізичний код і його AST, а не тритний транспорт.
+      # Нативний SENS до таймінгу доводить еквівалентність AST, прямого D2 і lowered.
+      - name: "BENCH-AST — оптимізація D2 AST та виконання SENS (p50/p95)"
+        if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/sens-ast-optimization"
+          mkdir -p "$dir"
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo build --locked --release -p sens --example physical_sens_hot_bench
+          probe="$PWD/target/release/examples/physical_sens_hot_bench"
+          for forms in 1 16 128 1024; do
+            "$probe" --generate "$forms" 65536 11 > "$dir/forms-$forms.tsv"
+          done
+          {
+            echo '## SENS: AST і оптимізація реального виконання'
+            echo
+            printf 'SHA: `%s`\n\n' "$GITHUB_SHA"
+            printf 'CPU: %s\n\n' "$(grep -m1 'model name' /proc/cpuinfo || true)"
+            echo 'Реальні нативні виміри p50/p95, 11 серій після прогріву; однаковий фізичний код і спостережуваний результат SENS до таймінгу.'
+            echo
+            echo '**Порівнювані фази:** побудова D2 AST через текст і прямі типовані слова; виконання із lowering та вже зниженого AST. Друге порівняння показує ціну lowering, а не самостійну перевагу мови.'
+            echo
+          } > "$dir/report.md"
+          awk -F '\t' '
+            BEGIN { n = split("1 16 128 1024", sizes, " ") }
+            $1 == "HOT_BENCH" {
+              delete v
+              for (i = 2; i <= NF; i++) { split($i, pair, "="); v[pair[1]] = pair[2] }
+              key = v["forms"] ":" v["phase"]
+              p50[key] = v["median_ns_op"] + 0
+              p95[key] = v["p95_ns_op"] + 0
+              seen[key]++
+              if (v["samples"] != 11 || v["iterations"] < 4 || v["observable"] == "") bad = 1
+            }
+            END {
+              if (bad) { print "SENS_AST_BENCH_BAD_SAMPLE" > "/dev/stderr"; exit 1 }
+              print "| D3 форми | Текст→AST p50/p95, нс | Слова→AST p50/p95, нс | Text/direct | AST+lowering p50/p95, нс | Lowered p50/p95, нс | Ефект винесення lowering |"
+              print "|---:|---:|---:|---:|---:|---:|---:|"
+              for (i = 1; i <= n; i++) {
+                f = sizes[i]
+                a = f ":t5_visible_parse_d2"
+                b = f ":t5_words_d2"
+                c = f ":eval_from_ast"
+                d = f ":eval_lowered"
+                if (seen[a] != 1 || seen[b] != 1 || seen[c] != 1 || seen[d] != 1 || p50[b] < 1 || p50[d] < 1) {
+                  print "SENS_AST_BENCH_MISSING_OR_DUPLICATE form=" f > "/dev/stderr"
+                  exit 1
+                }
+                printf "| %d | %.0f / %.0f | %.0f / %.0f | %.3fx | %.0f / %.0f | %.0f / %.0f | %.3fx |\n", f, p50[a], p95[a], p50[b], p95[b], p50[a] / p50[b], p50[c], p95[c], p50[d], p95[d], p50[c] / p50[d]
+              }
+            }
+          ' "$dir"/forms-*.tsv >> "$dir/report.md"
+          cat "$dir/report.md" >> "$GITHUB_STEP_SUMMARY"
+          echo "SENS_AST_OPT_BENCH_PASS sha=$GITHUB_SHA samples=11 sizes=1,16,128,1024 runtime=native-SENS"
+
+      - name: "BENCH-AST — сирі серії та порівняння оптимізації"
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        with:
+          name: sens-ast-optimization-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-ast-optimization/
+          if-no-files-found: warn
+          retention-days: 14
+      # Окремий адресний T5M транспортний вимір, не загальний бенчмарк мови.
       - name: "BENCH-T5M — Zig, x86-64 ASM, Rust"
-        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
         timeout-minutes: 10
         shell: bash
         run: |
