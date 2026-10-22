@@ -351,14 +351,19 @@ def render(ownership: list[Ownership], migrations: list[Migration]) -> str:
             "",
             "## Аудитовані поведінки",
             "",
-            "| key | semantic id | owner | layer | status | поведінка |",
-            "|---|---|---|---|---|---|",
+            "| key | точна Dn-ідентичність | укр-проєкція | owner | layer | status | поведінка |",
+            "|---|---|---|---|---|---|---|",
         ]
     )
     for row in sorted(ownership, key=lambda item: item.key):
         semantic = row.semantic_id if row.semantic_id != "-" else "—"
+        ukrainian = (
+            exact_domain_ukr_projection(row.semantic_id, row.key)
+            if row.semantic_id != "-"
+            else "—"
+        )
         lines.append(
-            f"| `{row.key}` | `{semantic}` | `{row.owner_class}` | `{row.layer}` | "
+            f"| `{row.key}` | `{semantic}` | `{ukrainian}` | `{row.owner_class}` | `{row.layer}` | "
             f"`{row.status}` | {row.behavior} |"
         )
 

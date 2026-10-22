@@ -64,42 +64,42 @@
 
 ## Аудитовані поведінки
 
-| key | semantic id | owner | layer | status | поведінка |
-|---|---|---|---|---|---|
-| `backward-reasoning` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Backward-chaining пошук доказу й побудова provenance |
-| `canon-atom` | `D3:010` | `canon-operation` | `canon` | `confirmed` | ATOM: first-class канонічна операція |
-| `canon-car` | `D3:100` | `canon-operation` | `canon` | `confirmed` | CAR: канонічна операція проєкції першого елемента |
-| `canon-cdr` | `D3:011` | `canon-operation` | `canon` | `confirmed` | CDR: канонічна операція структурного залишку |
-| `canon-cond` | `D3:110` | `canon-operation` | `canon` | `confirmed` | COND: канонічна short-circuit syntax |
-| `canon-cons` | `D3:111` | `canon-operation` | `canon` | `confirmed` | CONS: канонічна операція побудови |
-| `canon-empty-list` | `D3:000` | `canon-ground` | `canon` | `confirmed` | Canon 0: порожній список як ground object |
-| `canon-eq` | `D3:101` | `canon-operation` | `canon` | `confirmed` | EQ: канонічна операція тотожності |
-| `canon-quote` | `D3:001` | `canon-operation` | `canon` | `confirmed` | QUOTE: evaluator meaning і зарезервована surface resolution |
-| `filesystem-authorization` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session filesystem read/write scope і host canonicalization enforcement |
-| `gensym` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Політика свіжого символу складена в Lisp зі string-операцій і monotonic observation |
-| `immutable-worlds` | `—` | `lisp-owned` | `knowledge` | `confirmed` | Immutable world snapshots і явні переходи стану світу |
-| `knowledge-journal` | `—` | `lisp-owned` | `knowledge` | `confirmed` | Append-only журнал знань і guarded knowledge admission |
-| `list-constructor` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Варіадичний list-конструктор виведений із lambda/rest семантики самої мови |
-| `macro-definition` | `—` | `lisp-owned` | `bootstrap` | `confirmed` | Поведінка визначення макросів виведена у lib/macro.lisp поверх вузького make-macro substrate |
-| `meta-evaluator` | `—` | `lisp-owned` | `self-hosting` | `confirmed` | Lisp-owned metacircular evaluator witness; усі 34 required parity rows підтверджені machine evidence matrix |
-| `monotonic-clock` | `—` | `host-observation` | `host-capability` | `confirmed` | Monotonic nanosecond observation без calendar policy |
-| `necessary-define` | `D4:0011` | `necessary-form` | `bootstrap` | `confirmed` | DEFINE: evaluator-controlled immutable binding form |
-| `necessary-lambda` | `D4:0010` | `necessary-form` | `bootstrap` | `confirmed` | LAMBDA: evaluator-controlled побудова closure |
-| `outcome-narration` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Людське пояснення поверх структурованих reasoning outcomes |
-| `process-authorization` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session process allowlist, який Lisp-код не може видати собі сам |
-| `process-public-result` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Публічна інтерпретація process-run result поверх process-run-raw |
-| `process-run-raw` | `—` | `host-mechanism` | `host-capability` | `confirmed` | OS process execution і захоплення raw bytes |
-| `reason-index` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Скінченний immutable predicate index із точним linear fallback |
-| `reasoning-outcomes` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Data-only outcome algebra: proved/unknown/partial/blocked/disputed/invalid |
-| `surface-registry-projection` | `—` | `host-mechanism` | `tooling` | `confirmed` | Rust projection/index mechanism читає numeric surface authority, не володіючи людськими spelling |
-| `tcp-authorization` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session connect/listen allowlists, перевірені до OS-операції |
-| `tcp-resource-representation` | `—` | `host-mechanism` | `host-capability` | `confirmed` | Concrete TcpStream/TcpListener storage is confined to core Value; semantics and OS operations remain host-only; opaque Rc<dyn Any> experiment proves representation can be erased when a real portability trigger appears |
-| `tcp-text-semantics` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Публічне декодування TCP text поверх raw socket bytes |
-| `time-semantics` | `—` | `lisp-owned` | `stdlib` | `confirmed` | UTC/calendar/deadline meaning виводиться в Lisp із raw clock observations |
-| `tooling-syntax-discovery` | `—` | `derived-tooling` | `tooling` | `confirmed` | Tooling metadata ключується semantic identity, а spelling отримує з registry |
-| `translation-review` | `—` | `lisp-owned` | `knowledge` | `confirmed` | Валідація зовнішніх translation candidates і admission review |
-| `unification` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Уніфікація логічних змінних з occurs-check |
-| `utf8-interpretation` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Валідація та інтерпретація UTF-8 bytes → text |
+| key | точна Dn-ідентичність | укр-проєкція | owner | layer | status | поведінка |
+|---|---|---|---|---|---|---|
+| `backward-reasoning` | `—` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Backward-chaining пошук доказу й побудова provenance |
+| `canon-atom` | `D3:010` | `атом?` | `canon-operation` | `canon` | `confirmed` | ATOM: first-class канонічна операція |
+| `canon-car` | `D3:100` | `перше` | `canon-operation` | `canon` | `confirmed` | CAR: канонічна операція проєкції першого елемента |
+| `canon-cdr` | `D3:011` | `решта` | `canon-operation` | `canon` | `confirmed` | CDR: канонічна операція структурного залишку |
+| `canon-cond` | `D3:110` | `за-умовою` | `canon-operation` | `canon` | `confirmed` | COND: канонічна short-circuit syntax |
+| `canon-cons` | `D3:111` | `сполучити` | `canon-operation` | `canon` | `confirmed` | CONS: канонічна операція побудови |
+| `canon-empty-list` | `D3:000` | `()` | `canon-ground` | `canon` | `confirmed` | Canon 0: порожній список як ground object |
+| `canon-eq` | `D3:101` | `тотожне?` | `canon-operation` | `canon` | `confirmed` | EQ: канонічна операція тотожності |
+| `canon-quote` | `D3:001` | `як-є` | `canon-operation` | `canon` | `confirmed` | QUOTE: evaluator meaning і зарезервована surface resolution |
+| `filesystem-authorization` | `—` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session filesystem read/write scope і host canonicalization enforcement |
+| `gensym` | `—` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Політика свіжого символу складена в Lisp зі string-операцій і monotonic observation |
+| `immutable-worlds` | `—` | `—` | `lisp-owned` | `knowledge` | `confirmed` | Immutable world snapshots і явні переходи стану світу |
+| `knowledge-journal` | `—` | `—` | `lisp-owned` | `knowledge` | `confirmed` | Append-only журнал знань і guarded knowledge admission |
+| `list-constructor` | `—` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Варіадичний list-конструктор виведений із lambda/rest семантики самої мови |
+| `macro-definition` | `—` | `—` | `lisp-owned` | `bootstrap` | `confirmed` | Поведінка визначення макросів виведена у lib/macro.lisp поверх вузького make-macro substrate |
+| `meta-evaluator` | `—` | `—` | `lisp-owned` | `self-hosting` | `confirmed` | Lisp-owned metacircular evaluator witness; усі 34 required parity rows підтверджені machine evidence matrix |
+| `monotonic-clock` | `—` | `—` | `host-observation` | `host-capability` | `confirmed` | Monotonic nanosecond observation без calendar policy |
+| `necessary-define` | `D4:0011` | `визначити` | `necessary-form` | `bootstrap` | `confirmed` | DEFINE: evaluator-controlled immutable binding form |
+| `necessary-lambda` | `D4:0010` | `функція` | `necessary-form` | `bootstrap` | `confirmed` | LAMBDA: evaluator-controlled побудова closure |
+| `outcome-narration` | `—` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Людське пояснення поверх структурованих reasoning outcomes |
+| `process-authorization` | `—` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session process allowlist, який Lisp-код не може видати собі сам |
+| `process-public-result` | `—` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Публічна інтерпретація process-run result поверх process-run-raw |
+| `process-run-raw` | `—` | `—` | `host-mechanism` | `host-capability` | `confirmed` | OS process execution і захоплення raw bytes |
+| `reason-index` | `—` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Скінченний immutable predicate index із точним linear fallback |
+| `reasoning-outcomes` | `—` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Data-only outcome algebra: proved/unknown/partial/blocked/disputed/invalid |
+| `surface-registry-projection` | `—` | `—` | `host-mechanism` | `tooling` | `confirmed` | Rust projection/index mechanism читає numeric surface authority, не володіючи людськими spelling |
+| `tcp-authorization` | `—` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session connect/listen allowlists, перевірені до OS-операції |
+| `tcp-resource-representation` | `—` | `—` | `host-mechanism` | `host-capability` | `confirmed` | Concrete TcpStream/TcpListener storage is confined to core Value; semantics and OS operations remain host-only; opaque Rc<dyn Any> experiment proves representation can be erased when a real portability trigger appears |
+| `tcp-text-semantics` | `—` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Публічне декодування TCP text поверх raw socket bytes |
+| `time-semantics` | `—` | `—` | `lisp-owned` | `stdlib` | `confirmed` | UTC/calendar/deadline meaning виводиться в Lisp із raw clock observations |
+| `tooling-syntax-discovery` | `—` | `—` | `derived-tooling` | `tooling` | `confirmed` | Tooling metadata ключується semantic identity, а spelling отримує з registry |
+| `translation-review` | `—` | `—` | `lisp-owned` | `knowledge` | `confirmed` | Валідація зовнішніх translation candidates і admission review |
+| `unification` | `—` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Уніфікація логічних змінних з occurs-check |
+| `utf8-interpretation` | `—` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Валідація та інтерпретація UTF-8 bytes → text |
 
 ## Правило інтерпретації
 
