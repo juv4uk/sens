@@ -25,20 +25,41 @@ jobs:
       - name: Build SENS binaries with benchmark metrics
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
 
-      - name: Measure competition entries (T5M / AST / visits / result)
+      - name: Вимірювати реальні програми SENS через Zig/T5M
         env:
           BINARY: ${{ inputs.binary }}
+        shell: bash
         run: |
-          set -uo pipefail
-          if [ -n "$BINARY" ]; then
-            python3 benchmarks/sens-program-size/run.py --binary "$BINARY"
+          set -euo pipefail
+          # Єдина семантика — чинний SENS. Python/JSON не потрібні
+          # ані для вимірювання, ані для оцінки переможця.
+          if [[ -n "$BINARY" ]]; then
+            [[ "$BINARY" == benchmarks/contest-uk/*.sens ||
+               "$BINARY" == benchmarks/sens-program-size/fixtures/konkurs-*.sens ]] || {
+              echo "::error::Невідомий конкурсний шлях: $BINARY"
+              exit 2
+            }
+            [[ -f "$BINARY" && ! -L "$BINARY" ]] || {
+              echo "::error::Відсутній фізичний носій: $BINARY"
+              exit 2
+            }
+            if [[ "$BINARY" == benchmarks/contest-uk/*.sens ]]; then
+              bash benchmarks/contest-uk/judge.sh "$BINARY"
+            else
+              echo "CONTEST_FIXTURE_OBSERVATION_ONLY path=$BINARY"
+              target/debug/sens-trit verify-view "$BINARY"
+              target/debug/sens --benchmark-physical "$BINARY"
+            fi
           else
-            any=0
-            for f in benchmarks/sens-program-size/fixtures/konkurs-*.sens benchmarks/contest-uk/*.sens; do
-              [ -f "$f" ] || continue
-              any=1
-              echo "=== $f"
-              python3 benchmarks/sens-program-size/run.py --binary "$f" || echo "MEASURE_FAIL $f"
+            # Парне та автономне SENS виконання, негативний мутант,
+            # відомий результат, Zig inverse, точні байти й AST/visits.
+            bash benchmarks/contest-uk/judge.sh
+            # Дослідні поліноми вимірюємо окремо: не приписуємо їм
+            # релізного чи семантичного свідка без незалежного оракула.
+            for file in benchmarks/sens-program-size/fixtures/konkurs-*.sens; do
+              [[ -f "$file" ]] || continue
+              echo "CONTEST_FIXTURE_OBSERVATION_ONLY path=$file"
+              target/debug/sens-trit verify-view "$file"
+              target/debug/sens --benchmark-physical "$file"
             done
-            [ "$any" = 1 ] || echo "no konkurs-*.sens fixtures found"
           fi
