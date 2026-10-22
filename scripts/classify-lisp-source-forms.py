@@ -100,10 +100,12 @@ def scan_heads(path: str, text: str, *, source_era: str = "current") -> list[Hea
     # The next list after LAMBDA/DEFINE names binders, not calls.
     # Do not hide the later function body or initializer expressions.
     binder_heads = {
-        "0010", "00001000", "lambda", "функція", "phalana",
-        "0011", "00001001", "00001011", "define", "def",
-        "визначити", "nirvacana",
+        "0010", "lambda", "функція", "phalana",
+        "0011", "define", "def", "визначити", "nirvacana",
     }
+    # SID8 binders не можуть маскувати зовсім інші resident D8.
+    if source_era == "legacy":
+        binder_heads.update({"00001000", "00001001", "00001011"})
 
     while i < len(text):
         ch = text[i]
