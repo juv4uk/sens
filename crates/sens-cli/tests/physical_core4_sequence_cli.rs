@@ -791,6 +791,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-stable-intersection-general",
         "lib/list-prefix-atoms-general",
         "lib/list-strip-prefix-atoms-general",
+        "lib/list-split-before-every-atom-general",
         "lib/list-first-globally-unique-atom-general",
         "lib/list-prefix-before-repeat-general",
         "lib/list-trim-edges-atom-general",
