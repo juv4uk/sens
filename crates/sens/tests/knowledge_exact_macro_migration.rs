@@ -102,15 +102,13 @@ fn knowledge_file_has_no_legacy_defmacro_head_and_preserves_real_d8_width() {
     heads.sort();
     heads.dedup();
 
-    assert_eq!(
-        heads,
-        vec![
-            "11101010".to_string(),
-            "11101101".to_string(),
-            "11110100".to_string(),
-        ],
-        "surviving 8-bit executable heads must be genuine D8 identities"
+    assert!(
+        heads.is_empty(),
+        "нова українська бібліотека не повинна містити старих восьмибітних голів"
     );
+    assert!(KNOWLEDGE.contains("(визначити журнал-знань"));
+    assert!(KNOWLEDGE.contains("(визначити визначити-модуль"));
+    assert!(!KNOWLEDGE.contains("(визначити defmodule"));
 }
 
 #[test]
@@ -120,8 +118,8 @@ fn migrated_defmodule_macro_drives_backward_and_forward_reasoning() {
     eval(
         &mut session,
         r#"
-        (defmodule archive
-          (quote (
+        (визначити-модуль archive
+          (як-є (
             ((planet mars))
             ((valuable (var x)) (planet (var x)))
           )))
@@ -131,13 +129,13 @@ fn migrated_defmodule_macro_drives_backward_and_forward_reasoning() {
     assert_eq!(
         eval(
             &mut session,
-            "(reason-in (quote archive) (quote (planet mars)))",
+            "(міркувати-у (як-є archive) (як-є (planet mars)))",
         ),
         "((() (proved (planet mars) (planet mars) ())))"
     );
 
     assert_eq!(
-        eval(&mut session, "(forward-in (quote archive))"),
+        eval(&mut session, "(вперед-у (як-є archive))"),
         "((valuable mars) (planet mars))"
     );
 }
