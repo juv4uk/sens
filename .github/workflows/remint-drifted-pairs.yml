@@ -121,13 +121,17 @@ jobs:
             # Універсальний diff нижче як і раніше бере реальну зміну core4.
             # Але Core2 є описом профілю, а Core4 без пари не повинен
             # повторно ламати кожен незалежний запуск remint.
+            # Янтра має окремий реальний RED: рядки зовнішнього формату
+            # ще не проходять точну D7-проєкцію. Не перезапускати її на
+            # кожен сторонній push, але зміну самої yantra.lisp з push diff
+            # завжди передавати в нативний remint і зберігати її RED.
             # Не втрачати непарні програми після скасованого queued run.
             # Змінений конкурсний .lisp уже є у git diff вище, навіть якщо
             # стара .sens ще існує. Не перемайнювати незмінені повні трійки
             # при кожному незалежному push: це відтягує обернення нових Lisp.
             # Джерело без .sens або view залишається в черзі; нативний
             # суддя як і раніше відхиляє drift та хибне виконання.
-            for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/yantra.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -141,7 +145,7 @@ jobs:
             # Повертаємо не лише конкурс, а й D11/list/tree, коли
             # проміжний queued push було замінено найновішим.
             if [[ "$EVENT_NAME" == push ]]; then
-              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/yantra.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
                 [[ -f "$source" && ! -L "$source" ]] || continue
                 pair="${source%.lisp}.sens"
                 view="${source%.lisp}"
@@ -402,7 +406,7 @@ jobs:
             # забрати й нові бібліотечні Lisp. Інакше незмінений старий
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
             # Тільки непарні або новіші за носій: без масового перемайну.
-            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/yantra.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
