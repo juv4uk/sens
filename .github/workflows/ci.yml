@@ -308,7 +308,7 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
           # SRFI-1: адресна SENS-перевірка при зміні бібліотеки чи свідка.
-          if grep -Eq '^(lib/d11-srfi1-span-break[.]lisp|crates/sens/tests/d11_srfi1_span_break[.]rs|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/d11-srfi1-span-break[.]lisp|lib/d11-clojure-partition-by[.]lisp|crates/sens/tests/d11_srfi1_span_break[.]rs|crates/sens/tests/d11_clojure_partition_by[.]rs|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'd11_srfi1_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Метаобчислювач перевіряється живим SENS після зміни бібліотеки чи свідка.
@@ -1166,13 +1166,13 @@ jobs:
           # Д11: один адресний нативний запуск шести бібліотечних законів, без нового workflow.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_meta_compare --test d11_meta_arity --test d11_meta_cond_migration --test d11_meta_last_define --test d11_meta_group_error --test d11_meta_sixth -- --nocapture
 
-      - name: "Д11 / Scheme SRFI-1 — справжні SPAN/BREAK SENS-свідки"
+      - name: "Д11 / Scheme + Clojure — живі SENS закони списків"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.d11_srfi1_tests == 'true' }}
         timeout-minutes: 5
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_srfi1_span_break -- --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_srfi1_span_break --test d11_clojure_partition_by -- --nocapture
 
       - name: "Reason: SENS перевіряє індекс і лексичне застосування функцій"
         if: ${{ always() && (steps.changed-t5m-lisp.outputs.reason_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:'))) }}
