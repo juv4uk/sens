@@ -274,10 +274,19 @@ fn eq_atomic_law_does_not_silently_gain_structural_pair_equality() {
         );
     }
     let invalid = "(тотожне? (сполучити (як-є знак) (як-є ())) (сполучити (як-є знак) (як-є ())))";
-    let result = eval_program(invalid, &mut session);
+    // Чинний answer-contract (#3161): D3 EQ поза доменом дає
+    // структурне () / no-witness, НЕ host-помилку і НЕ D1:0.
+    let value = eval_program(invalid, &mut session)
+        .expect("SENS EQ поза атомним доменом повертає no-witness")
+        .value;
     assert!(
-        result.is_err(),
-        "test_id=1968-EQ-PAIR layer=SENS expected=atomic-domain-error actual={result:?}"
+        matches!(value, sens::Value::Nil),
+        "test_id=1968-EQ-PAIR layer=SENS expected=D3:000-no-witness actual={value}"
+    );
+    assert_eq!(
+        value.as_predicate_bit(),
+        None,
+        "test_id=1968-EQ-PAIR layer=SENS expected=non-predicate-not-D1:NO actual={value}"
     );
 }
 
