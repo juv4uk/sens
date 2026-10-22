@@ -4,6 +4,11 @@ name: remint-drifted-pairs
 # Використовує той самий reader/writer, що CI (scripts/refresh-verified-t5m-pair.sh),
 # і комітить лише ті пари, чиї байти справді змінилися.
 on:
+  # Новий україномовний учасник конкурсу одразу отримує фізичну пару
+  # від SENS/Zig, без ручного workflow_dispatch і зовнішнього оракула.
+  push:
+    paths:
+      - "benchmarks/contest-uk/*.lisp"
   workflow_dispatch:
     inputs:
       files:
@@ -13,6 +18,10 @@ on:
 
 permissions:
   contents: write
+
+concurrency:
+  group: remint-native-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   remint:
@@ -31,10 +40,22 @@ jobs:
       - name: Remint pairs via canonical Zig T5M
         env:
           FILES: ${{ inputs.files }}
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
         run: |
           set -uo pipefail
           list="$FILES"
-          if [ -z "$list" ]; then
+          if [[ "$EVENT_NAME" == push ]]; then
+            # Лише реально додані/змінені .lisp у цьому push, не весь
+            # історичний список. Видалені під час promotion не перемайнювати.
+            if [[ "$BEFORE" =~ ^0+$ ]]; then
+              list="$(git diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp')"
+            else
+              list="$(git diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp')"
+            fi
+          fi
+          if [ -z "$list" ] && [[ "$EVENT_NAME" != push ]]; then
             if [ -f scripts/remint-drifted-pairs.txt ]; then
               list="$(grep -vE '^[[:space:]]*(#|$)' scripts/remint-drifted-pairs.txt)"
             else
@@ -63,6 +84,10 @@ jobs:
             fi
           done <<< "$list"
           echo "remint done ok=$ok skip=$skip"
+          if (( skip != 0 )); then
+            echo "::error::Нативний SENS/Zig відхилив $skip конкретних джерел; не маскувати RED як PASS" >&2
+            exit 1
+          fi
 
       - name: Commit refreshed pairs (only real byte changes)
         run: |
