@@ -307,7 +307,7 @@ jobs:
             echo 'repl_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
-          # SRFI-1: адресна SENS-перевірка лише нової історичної композиції.
+          # SRFI-1: адресне SENS-виконання лише при зміні закону або свідка.
           if grep -Eq '^(lib/d11-srfi1-span-break[.]lisp|crates/sens/tests/d11_srfi1_span_break[.]rs|[.]github/workflows/ci[.]yml)
           if grep -Eq '^(lib/meta-eval\.lisp|lib/meta-eval-mutual\.lisp|crates/sens/tests/meta_eval_closure_parity\.rs|crates/sens/tests/d11_meta_(compare|arity|cond_migration|last_define|group_error|sixth)\.rs|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-lexical-shadow-d1\.sh|tests/semantic/meta-eval-lexical-shadow-d1-(law|mutant|mutants)\.lisp)$' "$changed_all"; then
             echo 'meta_eval_d1_tests=true' >> "$GITHUB_OUTPUT"
