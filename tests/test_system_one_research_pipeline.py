@@ -388,6 +388,8 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 0,
             )
             model = json.loads(model_path.read_text(encoding="utf-8"))
+            # Перевіряємо, що HTTP-вузол справді застосовує задану температуру.
+            model["calibration_temperature"] = 2.0
             server = student.create_local_server(model, port=0, api_key="student-secret")
             thread = threading.Thread(target=server.serve_forever, daemon=True)
             thread.start()
@@ -425,6 +427,17 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                     len(distribution),
                     5,
                 )
+                expected_distribution = student.probabilities(
+                    model, "З мене двічі списали гроші за одне замовлення."
+                )
+                for label, expected_probability in expected_distribution.items():
+                    actual_probability = (
+                        distribution[label]["numerator"]
+                        / distribution[label]["denominator"]
+                    )
+                    self.assertAlmostEqual(
+                        actual_probability, float(expected_probability), places=8
+                    )
                 with self.assertRaises(teacher.TeacherError):
                     teacher.call_teacher(
                         endpoint=endpoint,
