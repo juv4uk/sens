@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 214,
+    "total": 215,
     "historical": 17,
-    "library": 197,
-    "distinct_families": 32
+    "library": 198,
+    "distinct_families": 33
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5396,6 +5396,30 @@
       "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39755195620",
       "native_ci_job": 119745317595,
       "native_ci_step": "Д11 / Scheme + Clojure — нативні закони списків і стану"
+    },
+    {
+      "surface_name": "згрупувати-елементи-за-ключем",
+      "source_family": "clojure-group-by-global",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-clojure-group-by.lisp",
+        "blob_sha": "4fe6fa164dfe978dd851915939bddb1f109febbe",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
+      },
+      "proposed_law_uk": "Глобальне, не лише суміжне групування скінченного списку за структурним ключем із чистого SENS-замикання. Результат — детермінований список двоелементних пар (ключ, список-входжень), ключі в порядку першого входження, елементи кожної групи в початковому порядку. A→B→A дає групу A з двох значень, на відміну від Clojure partition-by. Адаптація Clojure map/vector до SENS proper-list; не hash-map, не lazy seq.",
+      "implementation_helpers": [
+        "вибрати-елементи-з-ключем",
+        "вилучити-елементи-з-ключем"
+      ],
+      "native_law_test": "crates/sens/tests/d11_clojure_group_by.rs::d11_clojure_group_by_non_adjacent_keys_native_sens",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
     }
   ],
   "winners_20261022": {
