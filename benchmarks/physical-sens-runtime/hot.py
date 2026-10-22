@@ -17,7 +17,21 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
 
 FORM = ("10", "001", "00", "000", "01")
-PHASES = {"t5_render_legacy", "t5_render_one_pass", "t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"}
+PHASES = {
+    "t5_render_legacy",
+    "t5_render_one_pass",
+    "t5_open_d2",
+    "t5_visible_parse_d2",
+    "t5_direct_d2",
+    "t5_words_d2",
+    "d2_parse",
+    "packed_width_d2",
+    "eval_from_ast",
+    "eval_lowered",
+    "eval_d24_plus",
+    "t5_encode_two_pass",
+    "t5_encode_streaming",
+}
 
 
 def parse_record(line: str, prefix: str) -> dict[str, str]:
@@ -92,7 +106,11 @@ def main() -> int:
                     measures.append(item)
                 else:
                     raise RuntimeError(f"unrecognized benchmark emission: {line!r}")
-            print(f"HOT complete: {count} current D3 QUOTE forms; {len(physical)} T5 bytes", flush=True)
+            print(
+                f"HOT complete: {count} D3 QUOTE transport forms + {count} exact D24+ additions; "
+                f"{len(physical)} T5 bytes (the arithmetic words are typed separately)",
+                flush=True,
+            )
 
     for count in sizes:
         found = [r for r in measures if r["forms"] == count]
@@ -135,7 +153,7 @@ def main() -> int:
         "",
         f"SHA: `{environment['commit']}`. Без startup; медіана і p95 з {args.samples} незалежних серій.",
         "",
-        "| Форми | Фаза | ns/операція, p50 | ns/операція, p95 | Форм/с (p50) |",
+        "| Форми у програмі | Фаза | нс/виклик програми, p50 | нс/виклик програми, p95 | Форм/с (p50) |",
         "|---:|---|---:|---:|---:|",
     ]
     for row in measures:
@@ -254,6 +272,9 @@ def main() -> int:
         "",
         "t5_open_d2 включає перевірку транспортного T5 і структури D2; d2_parse — лише текстовий читач D2.",
         "eval_from_ast включає lowering; eval_lowered вимірює виконання вже знижених форм.",
+        "eval_d24_plus виконує стільки D5 додавань точних D24+ слів, скільки зазначено у стовпці форм; D24 результат 3 перевіряється до замірів.",
+        "eval_d24_plus включає D2 framing parse/lowering та SENS arithmetic над уже сформованими exact-domain словами; T5M encode/decode і запуск процесу у фазу не входять.",
+        "Для кожного рядка один вимірюваний виклик обробляє всю програму з указаною кількістю форм; throughput нормалізований до форм/с.",
         "Інтерпретатор і канонічний оракул тут не є незалежними реалізаціями.",
         "Вимірювання на спільному runner не є універсальною гарантією стабільної частоти CPU.",
         "",

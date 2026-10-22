@@ -6,7 +6,8 @@ use sens::{
     decode_ternary_words, encode_ternary_words, eval_lowered_expressions, eval_parsed_expressions,
     lower_program, open_ternary_program, pack_binary_source_tokens, pack_binary_source_words,
     parse_binary_source_words, parse_canonical_binary, parse_canonical_packed_words,
-    parse_canonical_word_sequence, render_ternary_words_spaced, Session,
+    parse_canonical_word_sequence, render_ternary_words_spaced, BinaryNumber, DomainIdentity,
+    ExactDomainWord, PhysicalT5Program, Session, Value,
 };
 use std::{env, fs, hint::black_box, time::Instant};
 
@@ -21,6 +22,7 @@ const PHASES: &[&str] = &[
     "packed_width_d2",
     "eval_from_ast",
     "eval_lowered",
+    "eval_d24_plus",
     "t5_encode_two_pass",
     "t5_encode_streaming",
 ];
@@ -82,6 +84,39 @@ fn measure(mut f: impl FnMut(), count: usize, samples: usize) -> Vec<u128> {
         observations.push(started.elapsed().as_nanos() / count as u128);
     }
     observations
+}
+
+fn d24_addition_program(forms: usize) -> PhysicalT5Program {
+    let identity = |width, bits| {
+        let coordinate = sens::domain_ladder::DomainCoordinate::new(width, bits)
+            .expect("benchmark uses exact SENS domain coordinates");
+        ExactDomainWord::identity(DomainIdentity::from_coordinate(coordinate))
+    };
+    let number = |value: u8| {
+        let mut bits = vec![0; 24];
+        bits[23] = value & 1;
+        bits[22] = (value >> 1) & 1;
+        ExactDomainWord::number(
+            BinaryNumber::from_numeric_domain_bits(24, &bits)
+                .expect("D24 is a ratified numeric width"),
+        )
+        .expect("exact D24+ numeric word")
+    };
+    let form = [
+        identity(2, 0b10),    // D2 open
+        identity(5, 0b01010), // admitted D5 addition head
+        identity(2, 0b00),    // D2 separator
+        number(1),
+        identity(2, 0b00),
+        number(2),
+        identity(2, 0b01), // D2 close
+    ];
+    let mut words = Vec::with_capacity(form.len() * forms);
+    for _ in 0..forms {
+        words.extend(form.iter().cloned());
+    }
+    PhysicalT5Program::from_exact_domain_words_owned(words)
+        .expect("current SENS evaluator admits D5 addition over exact D24+ numbers")
 }
 
 fn main() {
@@ -165,6 +200,20 @@ fn main() {
     assert_eq!(visible_parsed.len(), forms, "visible T5 form count drift");
     let lowered = lower_program(&parsed);
     let mut session = Session::default();
+    let numeric_program = d24_addition_program(forms);
+    assert_eq!(numeric_program.form_count(), forms);
+    let mut numeric_session = Session::bare();
+    let numeric_observable = numeric_program
+        .execute(&mut numeric_session)
+        .expect("exact-domain D24+ arithmetic execution")
+        .value;
+    assert!(matches!(
+        numeric_observable,
+        Value::BinaryNumber(ref number)
+            if number.numeric_domain_width() == Some(24) && number.bits() == "11"
+    ));
+    let numeric_stable = numeric_observable.to_string();
+    assert_eq!(numeric_stable, "3", "D5 addition result before timing");
 
     // Наявні канонічні шляхи мають давати однаковий observable, до вимірювання.
     let ast_observable =
@@ -302,7 +351,22 @@ fn main() {
                 count,
                 samples,
             ),
+            "eval_d24_plus" => measure(
+                || {
+                    let result = numeric_program
+                        .execute(&mut numeric_session)
+                        .expect("exact-domain D24+ arithmetic");
+                    black_box(result);
+                },
+                count,
+                samples,
+            ),
             _ => unreachable!(),
+        };
+        let phase_observable = if phase == "eval_d24_plus" {
+            numeric_stable.as_str()
+        } else {
+            stable.as_str()
         };
         let (median, p95, minimum) = median_ns(observations.clone());
         for (rep, elapsed_ns) in observations.iter().enumerate() {
@@ -312,7 +376,7 @@ fn main() {
             );
         }
         println!(
-            "HOT_BENCH\tforms={forms}\tphase={phase}\titerations={count}\tsamples={samples}\tmedian_ns_op={median}\tp95_ns_op={p95}\tmin_ns_op={minimum}\tphysical_bytes={}\tobservable={stable:?}",
+            "HOT_BENCH\tforms={forms}\tphase={phase}\titerations={count}\tsamples={samples}\tmedian_ns_op={median}\tp95_ns_op={p95}\tmin_ns_op={minimum}\tphysical_bytes={}\tobservable={phase_observable:?}",
             physical.len(),
         );
     }

@@ -944,19 +944,20 @@ jobs:
             }
             END {
               if (bad) { print "SENS_AST_BENCH_BAD_SAMPLE" > "/dev/stderr"; exit 1 }
-              print "| D3 форми | Текст→AST p50/p95, нс | Слова→AST p50/p95, нс | Text/direct | AST+lowering p50/p95, нс | Lowered p50/p95, нс | Ефект винесення lowering |"
-              print "|---:|---:|---:|---:|---:|---:|---:|"
+              print "| Форми | Текст→AST p50/p95, нс | Слова→AST p50/p95, нс | Text/direct | AST+lowering p50/p95, нс | Lowered p50/p95, нс | Ефект lowering | D24+ add p50/p95, нс |"
+              print "|---:|---:|---:|---:|---:|---:|---:|---:|"
               for (i = 1; i <= n; i++) {
                 f = sizes[i]
                 a = f ":t5_visible_parse_d2"
                 b = f ":t5_words_d2"
                 c = f ":eval_from_ast"
                 d = f ":eval_lowered"
-                if (seen[a] != 1 || seen[b] != 1 || seen[c] != 1 || seen[d] != 1 || p50[b] < 1 || p50[d] < 1) {
+                e = f ":eval_d24_plus"
+                if (seen[a] != 1 || seen[b] != 1 || seen[c] != 1 || seen[d] != 1 || seen[e] != 1 || p50[b] < 1 || p50[d] < 1 || p50[e] < 1) {
                   print "SENS_AST_BENCH_MISSING_OR_DUPLICATE form=" f > "/dev/stderr"
                   exit 1
                 }
-                printf "| %d | %.0f / %.0f | %.0f / %.0f | %.3fx | %.0f / %.0f | %.0f / %.0f | %.3fx |\n", f, p50[a], p95[a], p50[b], p95[b], p50[a] / p50[b], p50[c], p95[c], p50[d], p95[d], p50[c] / p50[d]
+                printf "| %d | %.0f / %.0f | %.0f / %.0f | %.3fx | %.0f / %.0f | %.0f / %.0f | %.3fx | %.0f / %.0f |\n", f, p50[a], p95[a], p50[b], p95[b], p50[a] / p50[b], p50[c], p95[c], p50[d], p95[d], p50[c] / p50[d], p50[e], p95[e]
               }
             }
           ' "$dir"/forms-*.tsv >> "$dir/report.md"
@@ -1593,9 +1594,11 @@ jobs:
         env:
           CARGO_BUILD_JOBS: 2
           CARGO_INCREMENTAL: 0
-        run: cargo build --locked -p sens-cli --bin sens-trit
+        run: |
+          cargo build --locked -p sens-cli --bin sens-trit
+          cargo build --locked -p sens --example sens_numeric_memory_bench
 
-      - name: Перевірити звіт і виміряти однаковий сценарій у свіжих процесах
+      - name: Перевірити міжмовний smoke та D24+ RSS у свіжих процесах
         env:
           PYTHONDONTWRITEBYTECODE: 1
         run: |
@@ -1603,4 +1606,5 @@ jobs:
           python3 -m unittest benchmarks/interpreter-memory/test_run.py -v
           timeout 90s python3 benchmarks/interpreter-memory/run.py \
             --sens-trit "$PWD/target/debug/sens-trit" \
+            --sens-memory-bench "$PWD/target/debug/examples/sens_numeric_memory_bench" \
             --repetitions 3
