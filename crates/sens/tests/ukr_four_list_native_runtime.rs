@@ -357,6 +357,7 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
         let sens::Value::Pair(node) = cursor else {
             panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=pair(D1:так, tail) actual={cursor}");
         };
+        let head = &node.head;
         assert_eq!(
             &node.head,
             &expected,
@@ -378,6 +379,7 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     let sens::Value::Pair(node) = &preserved.value else {
         panic!("test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=predicate-list actual={}", preserved.value);
     };
+    let first = &node.head;
     assert_eq!(
         node.head.as_predicate_bit(),
         Some(true),
@@ -396,6 +398,7 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     let sens::Value::Pair(node) = &changed.value else {
         panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=predicate-list actual={}", changed.value);
     };
+    let head = &node.head;
     assert_eq!(
         node.head.as_predicate_bit(),
         Some(false),
