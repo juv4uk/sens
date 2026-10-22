@@ -115,6 +115,22 @@ jobs:
             echo "no drift -- nothing to commit"
           else
             git commit -m "ремонт пар: перемайнено дрейфуючі .lisp<->.sens канонічним Zig T5M (refresh-verified-t5m-pair)"
-            git pull --rebase origin main
-            git push
+            # У main пишуть незалежні агенти: перший push може програти
+            # перегони refs/heads/main. Переузгодити лише наш реальний commit,
+            # не маскувати конфлікт rebase та не використовувати force-push.
+            published=0
+            for attempt in 1 2 3 4 5 6; do
+              git pull --rebase origin main
+              if git push origin HEAD:main; then
+                echo "REMINT_PUBLISHED attempt=$attempt"
+                published=1
+                break
+              fi
+              echo "REMINT_MAIN_ADVANCED attempt=$attempt: retry without force" >&2
+              sleep 1
+            done
+            if (( published == 0 )); then
+              echo "::error::Не вдалося опублікувати перевірену T5M-пару після шести спроб" >&2
+              exit 1
+            fi
           fi
