@@ -366,14 +366,32 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     }
     assert!(matches!(cursor, sens::Value::Nil), "test_id=D5-D6-SELECTOR-NATIVE expected=exactly-13-predicates");
 
-    // Псування одного селекторного закону змінює справжній результат SENS,
-    // не лише людинозрозуміле ім'я чи запис у каталозі.
-    let original = "(визначити решта-двох-перших\n  (функція (значення)\n    (решта (перше (перше значення)))))";
-    let corrupted = "(визначити решта-двох-перших\n  (функція (значення)\n    (перше (перше (перше значення)))))";
-    assert_eq!(source.matches(original).count(), 1, "test_id=D5-D6-SELECTOR-NATIVE expected=one-mutation-site");
-    let mutant = source.replacen(original, corrupted, 1);
+    // Канонічний селектор D5 має пріоритет над однойменним DEFINE.
+    // Негативна спроба затінення НЕ змінює його точну семантику.
+    let definition = "(визначити решта-двох-перших\n  (функція (значення)\n    (решта (перше (перше значення)))))";
+    let fake_definition = "(визначити решта-двох-перших\n  (функція (значення)\n    (перше (перше (перше значення)))))";
+    assert_eq!(source.matches(definition).count(), 1, "test_id=D5-D6-SELECTOR-SHADOW expected=one-definition");
+    let shadowed = source.replacen(definition, fake_definition, 1);
+    let preserved = eval_program(&shadowed, &mut Session::default()).unwrap_or_else(|error| {
+        panic!("test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=canonical-D5-law actual_error={error}")
+    });
+    let sens::Value::Pair(first, _) = &preserved.value else {
+        panic!("test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=predicate-list actual={}", preserved.value);
+    };
+    assert_eq!(
+        first.as_predicate_bit(),
+        Some(true),
+        "test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=unchanged-D1:так actual={first}"
+    );
+
+    // А справжня зміна викликаного шляху CDAAR -> CAAAR має дати D1:ні.
+    // Це реальна зміна семантичної координати, не зміна мертвого тіла DEFINE.
+    let call = "(тотожне? (решта-двох-перших дерево-селекторів) (як-є б))";
+    let wrong_call = "(тотожне? (перше-двох-перших дерево-селекторів) (як-є б))";
+    assert_eq!(source.matches(call).count(), 1, "test_id=D5-D6-SELECTOR-MUTANT expected=one-call");
+    let mutant = source.replacen(call, wrong_call, 1);
     let changed = eval_program(&mutant, &mut Session::default()).unwrap_or_else(|error| {
-        panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні-in-first-observation actual_error={error}")
+        panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual_error={error}")
     });
     let sens::Value::Pair(head, _) = &changed.value else {
         panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=predicate-list actual={}", changed.value);
