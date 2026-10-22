@@ -6,8 +6,8 @@
 //! into per-session filesystem/TCP scopes carried by `Environment`.
 
 use sens::{
-    eval_expr, exact_arity, register_capability, register_evaluated_capability, Environment,
-    ErrorKind, Exactness, Expr, LanguageError, Span, Value,
+    eval_expr, exact_arity, register_capability, register_evaluated_capability, BinaryNumber,
+    Environment, ErrorKind, Exactness, Expr, LanguageError, Span, Value,
 };
 use std::{
     cell::RefCell,
@@ -357,21 +357,37 @@ fn expect_tcp_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageEr
         match current {
             Value::Nil => return Ok(bytes),
             Value::Pair(head, tail) => {
-                let Value::Number(number, _) = **head else {
+                // Language-owned UTF-8 encoding produces exact D24+ values;
+                // retain legacy host numbers only as a compatibility input.
+                let byte = match &**head {
+                    Value::Number(number, _)
+                        if number.fract() == 0.0 && (0.0..=255.0).contains(number) =>
+                    {
+                        Some(*number as u8)
+                    }
+                    Value::BinaryNumber(number)
+                        if number.numeric_domain_width() == Some(24) =>
+                    {
+                        number.exact_numeric_domain_bits().and_then(|bits| {
+                            if bits[0] != 0 {
+                                return None;
+                            }
+                            let value = bits.iter().fold(0u32, |value, bit| {
+                                (value << 1) | u32::from(*bit)
+                            });
+                            u8::try_from(value).ok()
+                        })
+                    }
+                    _ => None,
+                };
+                let Some(byte) = byte else {
                     return Err(LanguageError::new(
                         ErrorKind::Type,
-                        "tcp-write-raw expects a list of integers 0-255 · tcp-write-raw ochikuie spysok tsilykh chysel 0-255 · tcp-write-raw erwartet eine Liste von Ganzzahlen 0-255",
+                        "tcp-write-raw expects each element to be an integer byte between 0 and 255, as a legacy host number or exact D24+ value · tcp-write-raw ochikuie tsilyi baity 0-255 yak host-chyslo abo tochne znachennia D24+",
                         span,
                     ));
                 };
-                if number.fract() != 0.0 || !(0.0..=255.0).contains(&number) {
-                    return Err(LanguageError::new(
-                        ErrorKind::Type,
-                        "tcp-write-raw expects each element to be an integer between 0 and 255 · tcp-write-raw ochikuie, shchob kozhen element buv tsilym chyslom vid 0 do 255 · tcp-write-raw erwartet, dass jedes Element eine Ganzzahl zwischen 0 und 255 ist",
-                        span,
-                    ));
-                }
-                bytes.push(number as u8);
+                bytes.push(byte);
                 current = tail;
             }
             _ => {
@@ -537,11 +553,15 @@ fn evaluate_tcp_read_raw(
         ));
     };
     let bytes = tcp_read_raw(connection, span)?;
-    Ok(Value::list(
-        bytes
-            .into_iter()
-            .map(|byte| Value::Number(byte as f64, Exactness::Exact)),
-    ))
+    // The Lisp UTF-8 decoder performs D24+ arithmetic. Qualify each physical
+    // byte explicitly as its nonnegative mathematical value at this boundary.
+    Ok(Value::list(bytes.into_iter().map(|byte| {
+        let mut bits = vec![0; 16];
+        bits.extend((0..8).rev().map(|shift| (byte >> shift) & 1));
+        let number = BinaryNumber::from_numeric_domain_bits(24, &bits)
+            .expect("an unsigned byte is representable as a nonnegative D24+ integer");
+        Value::BinaryNumber(number)
+    })))
 }
 
 fn evaluate_tcp_write_raw(

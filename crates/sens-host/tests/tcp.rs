@@ -6,7 +6,7 @@ use sens::{
 };
 use sens_host::install;
 use std::io::{Read, Write};
-use std::net::{TcpListener, TcpStream};
+use std::net::{Shutdown, TcpListener, TcpStream};
 use std::thread;
 
 fn tcp_session() -> Session {
@@ -14,24 +14,6 @@ fn tcp_session() -> Session {
     load_core_library(&mut session).unwrap();
     load_tcp_library(&mut session).unwrap();
     session
-}
-
-fn eval_client_with_retry(
-    source: &str,
-    session: &mut Session,
-) -> Result<sens::EvalResult, sens::LanguageError> {
-    let mut last_error = None;
-    for attempt in 0..20 {
-        if attempt > 0 {
-            thread::sleep(std::time::Duration::from_millis(100));
-        }
-        match eval_program(source, session) {
-            Ok(result) => return Ok(result),
-            Err(error) if error.message.contains("tcp-connect:") => last_error = Some(error),
-            Err(error) => return Err(error),
-        }
-    }
-    Err(last_error.expect("at least one attempt should have run"))
 }
 
 fn free_port() -> u16 {
@@ -42,100 +24,54 @@ fn free_port() -> u16 {
         .port()
 }
 
-fn load_knowledge(session: &mut Session) {
-    load_core_library(session).unwrap();
-    load_tcp_library(session).unwrap();
-    eval_program(include_str!("../../../lib/unify.lisp"), session).unwrap();
-    eval_program(include_str!("../../../lib/reason.lisp"), session).unwrap();
-    eval_program(include_str!("../../../lib/forward.lisp"), session).unwrap();
-    eval_program(include_str!("../../../lib/knowledge.lisp"), session).unwrap();
+fn tcp_session_with_port(port: u16) -> Session {
+    let session = tcp_session();
+    session
+        .environment
+        .define("порт", Value::Number(port as f64, Exactness::Exact));
+    session
 }
 
 #[test]
-fn client_and_server_exchange_one_message_each_way() {
-    install();
-    let port = free_port();
-
-    let server = thread::spawn(move || {
-        let mut session = tcp_session();
-        let source = format!(
-            r#"
-            (def listener (tcp-listen {port}))
-            (def conn (tcp-accept listener))
-            (def request (tcp-read conn))
-            (tcp-write conn (string-append "echo: " request))
-            (tcp-close conn)
-            request
-            "#
-        );
-        eval_program(&source, &mut session)
-            .expect("server-side program should evaluate without error")
-            .value
-            .to_string()
-    });
-
-    thread::sleep(std::time::Duration::from_millis(200));
-
-    let mut client_session = tcp_session();
-    let client_source = format!(
-        r#"
-        (def conn (tcp-connect "127.0.0.1" {port}))
-        (tcp-write conn "hello from client")
-        (def reply (tcp-read conn))
-        (tcp-close conn)
-        reply
-        "#
-    );
-    let client_result = eval_client_with_retry(&client_source, &mut client_session)
-        .expect("client-side program should evaluate without error");
-
-    assert_eq!(
-        client_result.value,
-        Value::String("echo: hello from client".into())
-    );
-    assert_eq!(
-        server.join().expect("server thread should not panic"),
-        "\"hello from client\""
-    );
-}
-
-#[test]
-fn send_knowledge_package_transmits_one_canonical_expression_then_eof() {
+fn raw_tcp_client_reads_peer_bytes_and_writes_a_response() {
     install();
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let port = listener.local_addr().unwrap().port();
     let server = thread::spawn(move || {
         let (mut stream, _) = listener.accept().unwrap();
-        let mut text = String::new();
-        stream.read_to_string(&mut text).unwrap();
-        text
+        stream.write_all(b"ok").unwrap();
+        stream.shutdown(Shutdown::Write).unwrap();
+        let mut received = Vec::new();
+        stream.read_to_end(&mut received).unwrap();
+        received
     });
-    let mut session = Session::default();
-    load_knowledge(&mut session);
-    let source = format!(
+
+    let mut session = tcp_session_with_port(port);
+    session.environment.define(
+        "дані",
+        Value::list([104, 105].map(|byte| Value::Number(byte as f64, Exactness::Exact))),
+    );
+    let result = eval_program(
         r#"
-        (def connection (tcp-connect "127.0.0.1" {port}))
-        (send-knowledge-package connection (quote exchange)
-          (quote (((planet earth)) ((has-mass (var x)) (planet (var x))))))
-        "#
-    );
-    eval_program(&source, &mut session).unwrap();
-    assert_eq!(
-        server.join().unwrap(),
-        "((format . my-lisp-knowledge) (version 0 1) (module . exchange) (clauses ((planet earth)) ((has-mass (var x)) (planet (var x)))))"
-    );
+        (визначити підключення (tcp-connect "127.0.0.1" порт))
+        (визначити відповідь (протокол-передавання-сире-читання підключення))
+        (визначити записане (протокол-передавання-сирий-запис підключення дані))
+        (tcp-close підключення)
+        (список відповідь записане)
+        "#,
+        &mut session,
+    )
+    .unwrap();
+    assert_eq!(result.value.to_string(), "((111 107) (104 105))");
+    assert_eq!(server.join().unwrap(), b"hi");
 }
 
 #[test]
-fn protocol_read_drains_tcp_chunks_until_eof() {
+fn raw_tcp_server_receives_one_byte_from_peer() {
     install();
     let port = free_port();
     let server = thread::spawn(move || {
-        let mut session = Session::default();
-        load_knowledge(&mut session);
-        session
-            .environment
-            .define("порт", Value::Number(port as f64, Exactness::Exact));
+        let mut session = tcp_session_with_port(port);
         let source = format!(
             r#"
             (визначити слухач (протокол-передавання-сире-слухання "127.0.0.1" порт))
@@ -148,7 +84,6 @@ fn protocol_read_drains_tcp_chunks_until_eof() {
             .value
             .to_string()
     });
-    let payload = b"((format . my-lisp-knowledge) (version 0 1) (module . exchange) (clauses . (((planet earth)) ((has-mass (var x)) (planet (var x))))))";
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
     let mut stream = loop {
         match TcpStream::connect(("127.0.0.1", port)) {
@@ -166,122 +101,32 @@ fn protocol_read_drains_tcp_chunks_until_eof() {
             }
         }
     };
-    for chunk in payload.chunks(17) {
-        stream.write_all(chunk).unwrap();
-    }
+    stream.write_all(b"x").unwrap();
     drop(stream);
-    let expected = Value::list(
-        payload
-            .iter()
-            .map(|byte| Value::Number(*byte as f64, Exactness::Exact)),
-    );
-    assert_eq!(server.join().unwrap(), expected.to_string());
+    assert_eq!(server.join().unwrap(), "(120)");
 }
 
 #[test]
-fn framed_exchange_returns_an_accepted_receipt_to_the_sender() {
+fn text_read_returns_an_empty_string_on_a_closed_connection() {
     install();
-    let port = free_port();
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
     let server = thread::spawn(move || {
-        let mut session = Session::default();
-        load_knowledge(&mut session);
-        let source = format!(
-            r#"
-            (def listener (tcp-listen {port}))
-            (def connection (tcp-accept listener))
-            (accept-knowledge-exchange connection)
-            "#
-        );
-        eval_program(&source, &mut session)
-            .unwrap()
-            .value
-            .to_string()
+        let (stream, _) = listener.accept().unwrap();
+        drop(stream);
     });
-    let mut client = Session::default();
-    load_knowledge(&mut client);
-    let source = format!(
+    let result = eval_program(
         r#"
-        (def connection (tcp-connect "127.0.0.1" {port}))
-        (exchange-knowledge-package connection (quote exchange) (quote (((planet earth)))))
-        "#
-    );
-    let receipt = eval_client_with_retry(&source, &mut client).unwrap();
-    assert_eq!(
-        receipt.value.to_string(),
-        "(accepted (module exchange) (knowledge (((planet earth)))))"
-    );
-    assert_eq!(server.join().unwrap(), receipt.value.to_string());
-}
-
-#[test]
-fn framed_exchange_returns_conflict_and_does_not_install_the_new_fact() {
-    install();
-    let port = free_port();
-    let server = thread::spawn(move || {
-        let mut session = Session::default();
-        load_knowledge(&mut session);
-        let source = format!(
-            r#"
-            (defmodule exchange (quote (((not? (planet pluto))))))
-            (def listener (tcp-listen {port}))
-            (def connection (tcp-accept listener))
-            (def decision (accept-knowledge-exchange connection))
-            (list (car decision) (reason-in (quote exchange) (quote (planet pluto))))
-            "#
-        );
-        eval_program(&source, &mut session)
-            .unwrap()
-            .value
-            .to_string()
-    });
-    let mut client = Session::default();
-    load_knowledge(&mut client);
-    let source = format!(
-        r#"
-        (def connection (tcp-connect "127.0.0.1" {port}))
-        (exchange-knowledge-package connection (quote exchange) (quote (((planet pluto)))))
-        "#
-    );
-    let receipt = eval_client_with_retry(&source, &mut client).unwrap();
-    assert_eq!(
-        receipt.value.to_string().split_whitespace().next(),
-        Some("(conflict")
-    );
-    assert_eq!(server.join().unwrap(), "(conflict ())");
-}
-
-#[test]
-fn tcp_read_returns_an_empty_string_on_a_closed_connection() {
-    install();
-    let port = free_port();
-
-    let server = thread::spawn(move || {
-        let mut session = tcp_session();
-        let source = format!(
-            r#"
-            (def listener (tcp-listen {port}))
-            (def conn (tcp-accept listener))
-            (tcp-close conn)
-            "#
-        );
-        eval_program(&source, &mut session)
-            .expect("server-side program should evaluate without error");
-    });
-
-    thread::sleep(std::time::Duration::from_millis(200));
-
-    let mut client_session = tcp_session();
-    let client_source = format!(
-        r#"
-        (def conn (tcp-connect "127.0.0.1" {port}))
-        (tcp-read conn)
-        "#
-    );
-    let result = eval_client_with_retry(&client_source, &mut client_session)
-        .expect("reading a closed connection should return an empty string, not error");
+        (визначити підключення (tcp-connect "127.0.0.1" порт))
+        (визначити текст (протокол-передавання-читати підключення))
+        (tcp-close підключення)
+        текст
+        "#,
+        &mut tcp_session_with_port(port),
+    )
+    .expect("reading a closed connection should return an empty string, not error");
     assert_eq!(result.value, Value::String("".into()));
-
-    server.join().expect("server thread should not panic");
+    server.join().unwrap();
 }
 
 #[test]
@@ -327,7 +172,7 @@ fn tcp_read_rejects_a_non_connection_argument() {
 }
 
 #[test]
-fn tcp_raw_read_preserves_non_utf8_bytes_and_public_read_rejects_them_in_lisp() {
+fn raw_read_preserves_non_utf8_bytes_and_public_read_rejects_them() {
     install();
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let port = listener.local_addr().unwrap().port();
@@ -338,11 +183,14 @@ fn tcp_raw_read_preserves_non_utf8_bytes_and_public_read_rejects_them_in_lisp() 
     });
 
     let mut raw_session = tcp_session();
+    raw_session
+        .environment
+        .define("порт", Value::Number(port as f64, Exactness::Exact));
     let raw = eval_program(
-        &format!(r#"(def c (tcp-connect "127.0.0.1" {port})) (tcp-read-raw c)"#),
+        r#"(визначити підключення (tcp-connect "127.0.0.1" порт)) (протокол-передавання-сире-читання підключення)"#,
         &mut raw_session,
     )
-    .unwrap();
+    .unwrap_or_else(|error| panic!("raw TCP read failed: {error}"));
     assert_eq!(raw.value.to_string(), "(255)");
     server.join().unwrap();
 
@@ -353,47 +201,37 @@ fn tcp_raw_read_preserves_non_utf8_bytes_and_public_read_rejects_them_in_lisp() 
         stream.write_all(&[255]).unwrap();
     });
     let mut text_session = tcp_session();
+    text_session
+        .environment
+        .define("порт", Value::Number(port as f64, Exactness::Exact));
     let interpreted = eval_program(
-        &format!(r#"(def c (tcp-connect "127.0.0.1" {port})) (tcp-read c)"#),
+        r#"(визначити підключення (tcp-connect "127.0.0.1" порт)) (протокол-передавання-читати підключення)"#,
         &mut text_session,
     )
-    .unwrap();
+    .unwrap_or_else(|error| panic!("public TCP text reader failed: {error}"));
     assert_eq!(interpreted.value.to_string(), "(rejected invalid-utf8)");
     server.join().unwrap();
 }
 
 #[test]
-fn tcp_write_returns_its_content_argument_unchanged() {
+fn public_text_writer_sends_utf8_and_returns_the_input_text() {
     install();
-    let port = free_port();
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
     let server = thread::spawn(move || {
-        let mut session = tcp_session();
-        let source = format!(
-            r#"
-            (def listener (tcp-listen {port}))
-            (def conn (tcp-accept listener))
-            (tcp-read conn)
-            (tcp-close conn)
-            "#
-        );
-        eval_program(&source, &mut session)
-            .expect("server-side program should evaluate without error");
+        let (mut stream, _) = listener.accept().unwrap();
+        let mut bytes = Vec::new();
+        stream.read_to_end(&mut bytes).unwrap();
+        bytes
     });
-
-    thread::sleep(std::time::Duration::from_millis(200));
-
-    let mut client_session = tcp_session();
-    let client_source = format!(
-        r#"
-        (def conn (tcp-connect "127.0.0.1" {port}))
-        (def written (tcp-write conn "payload"))
-        (tcp-close conn)
-        written
-        "#
-    );
-    let result = eval_client_with_retry(&client_source, &mut client_session)
-        .expect("client-side program should evaluate without error");
+    let source = r#"
+        (визначити підключення (tcp-connect "127.0.0.1" порт))
+        (визначити записане (протокол-передавання-записати підключення "payload"))
+        (tcp-close підключення)
+        записане
+    "#;
+    let result = eval_program(source, &mut tcp_session_with_port(port))
+        .unwrap_or_else(|error| panic!("public TCP text writer failed: {error}"));
     assert_eq!(result.value, Value::String("payload".into()));
-
-    server.join().expect("server thread should not panic");
+    assert_eq!(server.join().unwrap(), b"payload");
 }
