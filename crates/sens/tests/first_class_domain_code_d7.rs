@@ -39,3 +39,31 @@ fn an_unbound_mechanism_d7_value_is_not_made_callable() {
     assert_eq!(error.kind, ErrorKind::Type,
         "test_id=FIRST_CLASS_DOMAIN_NEGATIVE expected=Type actual={error}");
 }
+
+#[test]
+fn ukrainian_d3_codes_are_passed_and_invoked_as_first_class_functions() {
+    // Це справжня завантажувана Lisp-програма, не таблиця відповідностей
+    // і не хостова симуляція. Д3-перше/решта надходять як значення.
+    let source = include_str!("../../../lib/list-domain-first-class-compose.lisp");
+    let mut session = Session::default();
+    let actual = sens::eval_program(source, &mut session)
+        .unwrap_or_else(|error| panic!(
+            "test_id=D3-FIRST-CLASS-UKR layer=SENS expected=2 actual_error={error}"
+        )).value;
+    assert_eq!(actual.to_string(), "2",
+        "test_id=D3-FIRST-CLASS-UKR layer=SENS expected=2 actual={actual}");
+
+    // Поміняти порядок застосування двох РІЗНИХ доменних функцій:
+    // mutant не може отримати той самий результат.
+    let before = "(застосувати-два-коди решта перше (список 1 2 3))";
+    let after = "(застосувати-два-коди перше решта (список 1 2 3))";
+    assert_eq!(source.matches(before).count(), 1,
+        "test_id=D3-FIRST-CLASS-UKR expected=unique_negative_mutation_site");
+    let mutant = source.replacen(before, after, 1);
+    let mut negative_session = Session::default();
+    match sens::eval_program(&mutant, &mut negative_session) {
+        Ok(value) => assert_ne!(value.value.to_string(), "2",
+            "test_id=D3-FIRST-CLASS-UKR layer=SENS mutant_was_accepted"),
+        Err(_) => {} // Передати решта атомові також є коректним негативом Д3.
+    }
+}
