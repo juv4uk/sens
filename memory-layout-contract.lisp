@@ -7,5 +7,5 @@
      (symbol . 2)
      (number . 3)
      (string . 4)))
-  (sid8-call-heads . retired)
+  (виклики-укр . чинні)
   (projection . ukr))
