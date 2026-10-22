@@ -172,7 +172,6 @@ run_native_t5m_program() {
   fi
 }
 checked_files=0
-physical_not_supported=0
 while IFS= read -r file || [[ -n "$file" ]]; do
   [[ -n "$file" ]] || continue
   checked_files=$((checked_files + 1))
@@ -242,8 +241,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   fi
   run_native_t5m_program
 done < "$manifest"
-printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s physical_not_supported=%s native_view_roundtrip=%s native_paired_executed=%s native_standalone_parity=%s scope=changed_manifest semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' \
-  "$checked_files" "$failed_files" "$physical_not_supported" \
+printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s native_view_roundtrip=%s native_paired_executed=%s native_standalone_parity=%s scope=changed_manifest semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' \
+  "$checked_files" "$failed_files" \
   "${#native_view_roundtrip_paths[@]}" "${#native_paired_executed_paths[@]}" "${#native_standalone_parity_paths[@]}"
 if (( failed_files > 0 )); then
   exit 2
