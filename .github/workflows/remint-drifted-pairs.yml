@@ -225,6 +225,13 @@ jobs:
           REMINT_CONTEST: ${{ steps.remint.outputs.contest }}
         run: |
           set -euo pipefail
+          # Джерельний push у короткоживучу гілку має публікувати її
+          # власну фізичну .sens/view пару, а не писати чужі байти у main.
+          case "${GITHUB_REF:-}" in
+            refs/heads/*) target_branch="${GITHUB_REF#refs/heads/}" ;;
+            *) echo "::error::REMINT_TARGET_NOT_BRANCH ref=${GITHUB_REF:-unset}" >&2; exit 2 ;;
+          esac
+          echo "REMINT_TARGET_BRANCH branch=$target_branch"
           git config user.name "sens-remint-bot"
           git config user.email "sens-remint-bot@users.noreply.github.com"
           prune_archived_duplicates() {
@@ -252,15 +259,15 @@ jobs:
               echo "REMINT_ALREADY_CURRENT no-byte-changes"
               return 1
             fi
-            git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main"
+            git commit -m "ремонт пар: канонічні SENS/Zig T5M на гілці $target_branch"
           }
-          regenerate_on_current_main() {
+          regenerate_on_current_ref() {
             # RED належить саме цьому актуальному SHA. Стара помилка у
             # попередній спробі не переживає нативного ремонту нової версії.
             regenerated_failed=0
             local f old source
             local -a bs
-            # Після чергового push у main могли з'явитися нові конкурсанти.
+            # Після нового push у цільову гілку могли з'явитися конкурсанти.
             # Не судити їх за старим T5M: додати в той самий нативний
             # маршрут mint → Zig inverse → paired/standalone SENS.
             # Після паралельного оновлення перевірити й дрейфуючі трійки,
@@ -318,7 +325,7 @@ jobs:
                 if [[ "$f" == *.lisp && ! -e "$f" && ! -L "$f" &&
                       ! -e "${f%.lisp}.sens" && ! -L "${f%.lisp}.sens" &&
                       ! -e "${f%.lisp}" && ! -L "${f%.lisp}" ]]; then
-                  echo "REMINT_REMOVED_ON_CURRENT_MAIN source=$f stale_queue=YES"
+                  echo "REMINT_REMOVED_ON_CURRENT_REF source=$f stale_queue=YES"
                   continue
                 fi
                 echo "::error::REMINT_SOURCE_MISSING $f" >&2
@@ -336,14 +343,14 @@ jobs:
                 tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
               esac
               if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}"; then
-                echo "::error::REMINT_CURRENT_MAIN_NATIVE_FAILED $f" >&2
+                echo "::error::REMINT_CURRENT_REF_NATIVE_FAILED $f" >&2
                 regenerated_failed=1
               fi
             done < "$RUNNER_TEMP/sens-remint-candidates.list"
             # Перевірити дійсний конкурс уже на тих самих поточних джерелах.
             if [[ "$REMINT_CONTEST" == true ]]; then
               if ! bash benchmarks/contest-uk/promote.sh; then
-                echo "::error::REMINT_CURRENT_MAIN_CONTEST_RED" >&2
+                echo "::error::REMINT_CURRENT_REF_CONTEST_RED" >&2
                 regenerated_failed=1
               fi
             fi
@@ -360,14 +367,14 @@ jobs:
           # чи CI, а НЕ Lisp, SENS, Zig, Rust, домени або корпус конкурсу.
           # Інакше обов'язкові новий mint, Zig inverse і SENS execution.
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            if git push origin HEAD:main; then
+            if git push origin "HEAD:refs/heads/$target_branch"; then
               echo "REMINT_PUBLISHED attempt=$attempt"
               published=1
               break
             fi
-            echo "REMINT_MAIN_ADVANCED attempt=$attempt: exact remote ref changed" >&2
+            echo "REMINT_REF_ADVANCED branch=$target_branch attempt=$attempt: exact remote ref changed" >&2
             if (( attempt == 12 )); then break; fi
-            git fetch origin main
+            git fetch origin "+refs/heads/$target_branch:refs/remotes/origin/$target_branch"
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
             while IFS= read -r changed; do
@@ -385,10 +392,10 @@ jobs:
                   ;;
                 *) safe_rebase=0; break ;;
               esac
-            done < <(git diff --name-only "$verified_parent" origin/main)
+            done < <(git diff --name-only "$verified_parent" "origin/$target_branch")
             if (( safe_rebase )) &&
-               git merge-base --is-ancestor "$verified_parent" origin/main; then
-              if git rebase origin/main; then
+               git merge-base --is-ancestor "$verified_parent" "origin/$target_branch"; then
+              if git rebase "origin/$target_branch"; then
                 echo "REMINT_SAFE_FAST_REBASE attempt=$attempt verified_inputs=UNCHANGED"
                 continue
               fi
@@ -397,18 +404,18 @@ jobs:
             fi
             echo "REMINT_REVERIFY_REQUIRED attempt=$attempt reason=semantic_or_source_delta"
             # Це тільки епізодичний workspace Actions, НЕ перепис історії
-            # remote/main. Старий mint відкидається і перевіряється знову.
-            git reset --hard origin/main
-            # Кожний новий main має отримати свій справжній SENS binary:
+            # віддаленої гілки. Старий mint відкидається і перевіряється знову.
+            git reset --hard "origin/$target_branch"
+            # Кожний новий exact-head має отримати свій справжній SENS binary:
             # ніколи не перевіряти поточний Lisp за старим виконуваним кодом.
             cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
-            regenerate_on_current_main
+            regenerate_on_current_ref
             # Ознаку успішного відновлення дозволено лише після
             # нативного remint і суду на новому main. Старий RED не є
             # чинним, якщо цей самий source уже виправлено та перевірено.
             recovered_on_current_main=1
             if ! commit_verified_changes; then
-              echo "REMINT_ALREADY_PUBLISHED_EXACT on-current-main"
+              echo "REMINT_ALREADY_PUBLISHED_EXACT branch=$target_branch"
               published=1
               break
             fi
@@ -423,7 +430,7 @@ jobs:
           fi
           if (( recovered_on_current_main )); then
             echo "recovered=true" >> "$GITHUB_OUTPUT"
-            echo "REMINT_CURRENT_MAIN_NATIVE_RECOVERED sha=$(git rev-parse HEAD) verified=YES"
+            echo "REMINT_CURRENT_REF_NATIVE_RECOVERED branch=$target_branch sha=$(git rev-parse HEAD) verified=YES"
           fi
 
       # Не оголошувати GREEN, коли SENS відхилив джерело; але не губити
