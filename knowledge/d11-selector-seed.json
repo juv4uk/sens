@@ -51,12 +51,14 @@
     "selector_derived_coordinates": 512,
     "derived_selectors_without_direct_opcode_admission": 512,
     "independently_ratified_selector_primitive_laws": 0,
-    "defined_d11_selector_functions_in_math": 512
+    "defined_d11_selector_functions_in_math": 512,
+    "sens_library_compositions_native_ci_pass": 512,
+    "sens_library_composition_addressed_checks": 1536
   },
   "verification": {
     "positive": "512 exact 11-bit selector coordinates and names follow uniquely from 256 D10 parents and D3 CAR/CDR; all are defined compositions, not proposals.",
     "negative": "A 10-bit truncated coordinate is rejected by exact-width invariant.",
-    "semantics": "UNIVERSAL_MATHEMATICAL_DERIVATION_FROM_D3_CAR_CDR_AND_D10_SELECTOR_LADDER; representative native SENS test proves both branches and two negative mutants; direct opcode execution of all 512 not yet asserted.",
+    "semantics": "ALL_512_DERIVED_COMPOSITIONS_NATIVE_SENS_EXECUTED_WITH_1536_CHECKS; NO_DIRECT_D11_OPCODE_ADMISSION",
     "hosted_ci": "ONE_NATIVE_SENS_TEST_PASSED_IN_FAILED_WORKFLOW_RUN_39679874500; other steps red.",
     "representative_native_sens": {
       "status": "REPRESENTATIVE_NATIVE_SENS_LAW_PASS",
@@ -77,7 +79,25 @@
       "direct_11bit_opcode_admission": false
     },
     "mathematical_status": "ALL_512_DERIVED_FUNCTIONS_DEFINED",
-    "direct_opcode_status": "NOT_ADMITTED_AS_NEW_PRIMITIVES"
+    "direct_opcode_status": "NOT_ADMITTED_AS_NEW_PRIMITIVES",
+    "full_native_512": {
+      "status": "PASS_ALL_512_SENS_LIBRARY_COMPOSITIONS",
+      "scope": "512 named SENS DEFINE functions composed from ratified D10 parent with D3 CAR/CDR; 512 correct outcomes, 512 negative wrong-branch outcomes, 512 separately checked native D10 parents",
+      "derived_functions_executed": 512,
+      "addressed_semantic_cases": 1536,
+      "distinct_d10_parents": 256,
+      "car_branches": 256,
+      "cdr_branches": 256,
+      "test_path": "crates/sens/tests/d11_selector_512_live.rs",
+      "canonical_table": "knowledge/d11/база-доступних-функцій/селектори-512-д11.tsv",
+      "ci_run": "https://github.com/juv4uk/sens/actions/runs/39821680852",
+      "ci_job": 119974297826,
+      "ci_result": "1 passed; 0 failed; finished in 0.54s",
+      "workflow_result": "FAILURE_UNRELATED_STEPS",
+      "direct_d11_opcode_calls_tested": 0,
+      "direct_d11_opcode_admitted": 0,
+      "new_primitive_ratifications": 0
+    }
   },
   "rows": [
     [
