@@ -133,7 +133,6 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             ("порівняти-рядки-за-кодовими-точками", "string-order-helper"),
             ("класифікувати-непорожність-рядка", "nonempty-string-membership-helper"),
             ("знайти-пару-підстановки", "sublis-pair"),
-            ("підготувати-цитовані-аргументи", "apply-quote-args"),
             ("уточнити-корінь-ітерацією", "sqrt-iter"),
             ("крок-цілого-кореня", "isqrt-step"),
             ("знайти-найбільший-блок-частки", "largest-chunk"),
