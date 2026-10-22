@@ -1,4 +1,5 @@
 //! Native CLIPS island boundary.
+//! Historical C ABI byte tags are not exact D5/D6/D8 SENS identities.
 //!
 //! This crate owns only mechanical access to the external CLIPS C runtime.
 //! It does not reimplement CLIPS semantics and does not assign meaning to
@@ -686,7 +687,7 @@ impl Drop for ClipsFact {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct LegacyAbiSemanticId(pub u8);
 
-const SID_ADD: u8 = 0b0000_1100;
+const LEGACY_ABI_ADD: u8 = 0b0000_1100;
 
 fn legacy_abi_add_expression(payload: &str) -> Result<String, ()> {
     let mut parts = payload.split_whitespace();
@@ -924,7 +925,7 @@ unsafe extern "C" fn clips_exchange(
         let Some(environment) = context.environment.as_mut() else {
             return WsmStatus::NotRunning;
         };
-        let output = if request.semantic_id == SID_ADD {
+        let output = if request.semantic_id == LEGACY_ABI_ADD {
             let Ok(expression) = legacy_abi_add_expression(command) else {
                 return WsmStatus::InvalidArgument;
             };
