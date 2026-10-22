@@ -1290,7 +1290,7 @@ fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
         .expect("Zig T5M open");
     assert!(opened.status.success(), "Zig open: {}", error(&opened));
     assert!(!opened.stdout.is_empty(), "Zig повернув порожню фізичну проєкцію");
-    fs::write(&view, &opened.stdout).expect("зафіксувати точне Zig-бітове в\u0027ю");
+    fs::write(&view, &opened.stdout).expect("зафіксувати точне Zig-бітове вигляд");
     let verified = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
         .arg("verify-view").arg(&physical).output()
         .expect("Zig verify-view");
