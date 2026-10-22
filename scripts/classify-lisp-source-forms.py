@@ -69,7 +69,7 @@ def line_col(text: str, offset: int) -> tuple[int, int]:
     return line, offset + 1 if last < 0 else offset - last
 
 
-def scan_heads(path: str, text: str) -> list[Head]:
+def scan_heads(path: str, text: str, *, source_era: str = "current") -> list[Head]:
     """Lexically find list heads while excluding quoted/comment/string data.
 
     This scanner intentionally does not call unknown heads "my-lisp".  Semantic
@@ -87,7 +87,16 @@ def scan_heads(path: str, text: str) -> list[Head]:
 
     # A quoted *form* is data, even when it syntactically contains lists.
     # Only explicit QUOTE is recognized here. It grants no W8 -> D8 meaning.
-    quote_heads = {"quote", "як-є", "001", "00000001"}
+    if source_era not in {"current", "legacy"}:
+        raise ValueError(f"невідома епоха джерела: {source_era}")
+    # D3:001 ЯК-Є є чинною координатою цитування. Історичний
+    # SID8:00000001 також був QUOTE, але сучасний D8:00000001 —
+    # ратифікований ДЛЯ-КОЖНОГО-ЕЛЕМЕНТА (DOSEQ), НЕ цитата.
+    # Не приховувати вкладені виконувані голови під удаваною цитатою
+    # без явного історичного походження.
+    quote_heads = {"quote", "як-є", "001"}
+    if source_era == "legacy":
+        quote_heads.add("00000001")
     # The next list after LAMBDA/DEFINE names binders, not calls.
     # Do not hide the later function body or initializer expressions.
     binder_heads = {
