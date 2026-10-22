@@ -37,6 +37,23 @@ class ProgramSizeTests(unittest.TestCase):
         self.assertIn("T5M=4 B", line)
         self.assertIn("result=()", line)
 
+    def test_cohort_annotation_sums_only_verified_physical_measurements(self):
+        a = {"t5m_bytes": 4, "ast_nodes": 6, "eval_visits": 4,
+             "exact_words": 5, "exact_bits": 17}
+        b = {"t5m_bytes": 8, "ast_nodes": 9, "eval_visits": 12,
+             "exact_words": 7, "exact_bits": 28}
+        line = bench.benchmark_summary_annotation([a, b])
+        self.assertIn("::notice title=SENS T5M executable cohort::", line)
+        self.assertIn("programs=2", line)
+        self.assertIn("T5M=12 B", line)
+        self.assertIn("AST nodes=15", line)
+        self.assertIn("evaluator visits=16", line)
+        self.assertIn("words=12", line)
+        self.assertIn("semantic bits=45", line)
+        self.assertIn("no wall-time claim", line)
+        with self.assertRaisesRegex(ValueError, "empty"):
+            bench.benchmark_summary_annotation([])
+
     def test_loads_only_regular_sens_binary_paths_from_manifest(self):
         import tempfile
 
