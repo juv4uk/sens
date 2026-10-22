@@ -1508,6 +1508,9 @@ jobs:
           fi
           # Справжнє виконання джерел SENS D3/D4, не Python-імітація.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration -- --nocapture
+          # Три українські D7 пам'яті: assert, retract, JTMS/TMS.
+          # Це живий SENS evaluator, а не тест текстової підстановки.
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test forward_exact_macro_migration migrated_macros_drive_plain_tms_and_jtms_state_transitions -- --exact --nocapture
 
       - name: Перевірити Zig/T5M оновлення існуючої фізичної пари
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.migration_refresh_tests == 'true' }}
