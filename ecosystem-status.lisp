@@ -4,7 +4,7 @@
   (функція ()
     (як-є (ecosystem
             (projection ukr)
-            (sid8-call-heads retired)
+            (виклики-укр чинні)
             (domains d1-d10 active)
             (boot racket/boot/core ukr)
             (fixtures cohorts canaries semantic ukr)))))
