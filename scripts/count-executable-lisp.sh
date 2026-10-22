@@ -65,6 +65,8 @@ while IFS= read -r -d '' source; do
   case "$source" in
     lib/reason.lisp|lib/forward.lisp)
       binding_sources=(--binding-source lib/unify.lisp) ;;
+    lib/d11-clojure-partition-by.lisp)
+      binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp) ;;
     lib/narrate.lisp)
       binding_sources=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp) ;;
     lib/result-status.lisp)
