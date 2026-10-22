@@ -457,3 +457,36 @@ fn mechanism_selector_named_d4_helpers_execute_real_sens_positive_and_negative()
             "test_id=mechanism-d4 layer=SENS input={input} expected={expected} actual={actual}");
     }
 }
+
+
+#[test]
+fn mechanism_selector_d3_d5_is_executable_without_sid8_or_host_file_reader() {
+    // Обчислює справжній SENS. Ніяких Python, JSON, старих SID8-значень
+    // або статичних перевірок замість виконання.
+    let source = include_str!("../../../lib/mechanism-selector.lisp");
+    assert!(!source.contains("(читати-всі"), "host reader недопущений для T5M");
+    assert!(!source.contains("(читати-файл"), "host file I/O недопущений для T5M");
+    let mut session = Session::default();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("чинне українське ядро D3-D5");
+    let parsed = parse_mixed_exact_domain(source).expect("точний читач SENS");
+    sens::eval_parsed_expressions(&parsed, &mut session)
+        .expect("паспорт і маршрути мусять реально визначатися мовою SENS");
+    for (input, expected) in [
+        ("(реєстр-містить-ідентичність? (як-є атом?) рядки-реєстру-механізму)", true),
+        ("(реєстр-містить-ідентичність? (як-є додати) рядки-реєстру-механізму)", true),
+        ("(реєстр-містить-ідентичність? 12 рядки-реєстру-механізму)", false),
+        ("(тотожне? (перше (вибрати-механізм (як-є атом?) (як-є evaluator))) (як-є mechanism-selected))", true),
+        ("(тотожне? (перше (вибрати-механізм (як-є додати) (як-є prolog))) (як-є mechanism-selected))", true),
+        ("(тотожне? (перше (вибрати-механізм (як-є атом?) (як-є prolog))) (як-є mechanism-unavailable))", true),
+        ("(тотожне? (перше (вибрати-механізм 12 (як-є prolog))) (як-є mechanism-selection-failure))", true),
+    ] {
+        let forms = parse_mixed_exact_domain(input)
+            .expect("доменний читач SENS не замінюється тестовим симулятором");
+        let actual = sens::eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|error| panic!("SENS selector input={input}: {error}"))
+            .value.as_predicate_bit();
+        assert_eq!(actual, Some(expected),
+            "test_id=mechanism-native-d3d5 layer=SENS input={input} expected={expected} actual={actual:?}");
+    }
+}
