@@ -205,7 +205,9 @@ class SourceResolver:
             ) if len(ordered) > 1 else (),
         )
 
-    def resolve_head(self, token: str) -> Resolution:
+    def resolve_head(self, token: str, *, source_era: str = "current") -> Resolution:
+        if source_era not in {"current", "legacy"}:
+            raise ValueError(f"невідома епоха джерела: {source_era}")
         # Already-current operation-domain source is not one of the historical
         # passes; preserve exact width and identity.
         if re.fullmatch(r"[01]{3,6}", token):
@@ -224,6 +226,23 @@ class SourceResolver:
         # NOT to D8 merely because the payload has eight bits. A modern raw W8
         # token is likewise ambiguous without an explicit source-era proof.
         if re.fullmatch(r"[01]{8}", token):
+            if source_era == "legacy":
+                rows = self.hist_by_sid.get(token, [])
+                # Лише явно історичний корпус: роль із джерела минулої
+                # епохи зіставляємо з чинною доменною поверхнею.
+                # Це КАНДИДАТ адреси, не доказ еквівалентності чи виконання.
+                candidates: set[CurrentIdentity] = set()
+                for row in rows:
+                    for spelling in (row.my_lisp, row.historical):
+                        candidates.update(self.current_surface.get(spelling, set()))
+                return self._choose(
+                    "sid8-sens8", 1, token, candidates,
+                    legacy_sid8=token, rows=rows,
+                    evidence=(
+                        "explicit legacy provenance, not modern D8",
+                        "ratified surface candidate; execution not certified",
+                    ),
+                )
             raise ValueError(
                 f"retired SID8-era head {token}: ambiguous eight-bit source; "
                 "modern D8 residency does not prove historical function identity "

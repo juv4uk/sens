@@ -12,6 +12,8 @@ builtins.  Literal () is structural-empty inventory, not a function head.
 
 This is a text-source inventory, not an evaluator or a rewrite tool.
 Physical .sens is binary T5M and must never be decoded as Lisp/UTF-8.
+Eight-bit SID8 heads require explicitly selected legacy provenance, never default D8.
+Any proposed domain match is an inventory candidate, not execution evidence.
 """
 from __future__ import annotations
 
@@ -265,6 +267,8 @@ def _hit(head: Head, resolution: Resolution) -> Hit:
 def classify_heads(
     heads: list[Head],
     resolver: SourceResolver,
+    *,
+    source_era: str = "current",
 ) -> tuple[list[Hit], list[Hit], list[Head], list[Head]]:
     """Return (three_pass_hits, current_exact, dynamic_heads, empty_lists)."""
     three_pass: list[Hit] = []
@@ -276,7 +280,7 @@ def classify_heads(
         if head.empty_list:
             empty.append(head)
             continue
-        resolution = resolver.resolve_head(head.token)
+        resolution = resolver.resolve_head(head.token, source_era=source_era)
         if resolution.pass_number in (1, 2, 3):
             three_pass.append(_hit(head, resolution))
         elif resolution.kind == "current-exact":
@@ -302,6 +306,8 @@ def source_files(root: Path):
 def scan_tree(
     root: Path,
     resolver: SourceResolver,
+    *,
+    source_era: str = "current",
 ) -> tuple[list[Hit], list[Hit], list[Head], list[Head], dict[str, int]]:
     historical: list[Hit] = []
     current: list[Hit] = []
@@ -316,7 +322,10 @@ def scan_tree(
         except (OSError, UnicodeDecodeError):
             continue
         rel = path.relative_to(root).as_posix()
-        groups = classify_heads(scan_heads(rel, text), resolver)
+        groups = classify_heads(
+            scan_heads(rel, text, source_era=source_era),
+            resolver, source_era=source_era,
+        )
         historical.extend(groups[0])
         current.extend(groups[1])
         dynamic.extend(groups[2])
@@ -377,6 +386,10 @@ def main() -> int:
     parser.add_argument("--json", type=Path)
     parser.add_argument("--tsv", type=Path)
     parser.add_argument("--summary-only", action="store_true")
+    parser.add_argument(
+        "--source-era", choices=("current", "legacy"), default="current",
+        help="legacy лише для доведено історичного корпусу; кандидати не виконуються",
+    )
     args = parser.parse_args()
 
     resolver = build_resolver(
@@ -385,7 +398,7 @@ def main() -> int:
         registry=args.registry.resolve(),
         domain_surfaces=[p.resolve() for p in args.domain_surfaces],
     )
-    result = scan_tree(args.root.resolve(), resolver)
+    result = scan_tree(args.root.resolve(), resolver, source_era=args.source_era)
     historical, current, dynamic, empty, summary = result
 
     if args.json:
