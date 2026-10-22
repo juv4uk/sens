@@ -60,3 +60,4 @@ lib/list-count-matching-atoms-unary.lisp
 lib/list-run-length-unary-general.lisp
 lib/tree-contains-atom-general.lisp
 lib/list-remove-last-matching-atom-general.lisp
+lib/list-first-position-unary-general.lisp
