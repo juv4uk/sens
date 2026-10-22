@@ -319,6 +319,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Без цього SENS правильно відхиляє невідомий D7 Text7-символ «світ?».
     # Не підміняємо виконання хостовим оракулом і не тягнемо весь Reason.
     binding_sources=(--binding-source lib/world.lisp)
+  elif [[ "$file" == "tests/semantic/core1-gc-reachability-laws.lisp" ]]; then
+    # Обхід коренів і циклів виконує лише наявний Core1 Lisp.
+    binding_sources=(--binding-source lib/core1.lisp)
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)

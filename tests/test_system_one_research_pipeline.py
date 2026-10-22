@@ -646,11 +646,27 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                             "teacher": "fixture-teacher-v1",
                             "teacher_distribution": exact_distribution(row["gold"]),
                             "teacher_prediction": row["gold"],
+                            "teacher_generated_label": row["gold"],
+                            "generated_label_matches_top_probability": True,
                         }
                     )
                 output = root / f"teacher-{split}.jsonl"
                 write_jsonl(output, observations)
                 teacher_paths[split] = output
+
+            # Узгодженість фактично згенерованої літери з argmax має бути перевірюваною.
+            test_teacher_rows, _ = student.read_jsonl(teacher_paths["test"])
+            inconsistent = [dict(row) for row in test_teacher_rows]
+            inconsistent[0]["generated_label_matches_top_probability"] = False
+            inconsistent_path = root / "teacher-test-inconsistent.jsonl"
+            write_jsonl(inconsistent_path, inconsistent)
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.validate_teacher_file(
+                    inconsistent_path,
+                    [row for row in seed_rows if row["split"] == "test"],
+                    "test",
+                    seed_sha,
+                )
 
             output_dir = root / "comparison"
             report = comparison.run(
@@ -675,6 +691,10 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(report["dataset_sha256"], seed_sha)
             self.assertEqual(report["teacher_observations_used_for_training"], ["train"])
             self.assertFalse(report["test_used_for_training_or_calibration"])
+            for split in ("train", "validation", "test"):
+                agreement = report["teacher_decoding_agreement"][split]
+                self.assertEqual(agreement["agreement_rate"], 1.0)
+                self.assertEqual(agreement["disagreements"], 0)
             self.assertEqual(set(report["comparison"]), {"validation", "test"})
             for split in ("validation", "test"):
                 self.assertEqual(
@@ -726,6 +746,8 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                     "teacher": "fixture-teacher-v1",
                     "teacher_distribution": exact_distribution(row["gold"]),
                     "teacher_prediction": row["gold"],
+                            "teacher_generated_label": row["gold"],
+                            "generated_label_matches_top_probability": True,
                 }
                 for row in challenge_rows
             ]
@@ -785,6 +807,10 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(challenge_report["record_count"], 60)
             self.assertFalse(challenge_report["test_used_for_training_or_calibration"])
             self.assertFalse(challenge_report["threshold_selected_on_challenge"])
+            self.assertEqual(
+                challenge_report["teacher_decoding_agreement"]["agreement_rate"],
+                1.0,
+            )
             self.assertEqual(
                 set(challenge_report["comparison"]),
                 {"teacher", "student_gold", "student_soft", "student_transformer"},

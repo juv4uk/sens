@@ -34,7 +34,7 @@ struct Frame {
     /// імена — у `slot_names` (той самий порядок), тож пошук за іменем теж
     /// їх бачить. `None` — звичайний кадр без слотів (корінь, `child`).
     slot_names: Option<Rc<[Rc<str>]>>,
-    slots: Vec<Value>,
+    slots: Box<[Value]>,
     /// Тіло цього виклику не може додати нове ім'я в кадр (без `def`, `eval`,
     /// макросів і можливостей хоста) — розв'язувач може дивитися крізь нього.
     pure: bool,
@@ -46,7 +46,7 @@ impl Frame {
     fn empty(parent: Option<Environment>) -> Self {
         Frame {
             slot_names: None,
-            slots: Vec::new(),
+            slots: Box::new([]),
             pure: false,
             values: HashMap::new(),
             parent,
@@ -296,7 +296,8 @@ impl Environment {
     ) -> Self {
         let mut frame = Frame::empty(Some(self.clone()));
         frame.slot_names = Some(names);
-        frame.slots = slots;
+        // Slots are immutable after parameter binding: discard unused Vec capacity.
+        frame.slots = slots.into_boxed_slice();
         frame.pure = pure;
         Self(Rc::new(RefCell::new(frame)), self.1.clone(), self.2.clone())
     }
