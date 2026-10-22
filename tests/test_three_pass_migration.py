@@ -300,11 +300,17 @@ class ThreePassMigrationTests(unittest.TestCase):
             mod.encode_lambda_params(binder("()"), self.text7),
             [mod.D3_EMPTY],
         )
-        # Справжні головні Lisp-джерела використовують саме variadic.
-        # Їх не можна переписувати на (функція (аргументи) ...).
+        # lib/core.lisp використовує справжній variadic FUNCTION.
+        # core4 відтепер викликає ратифікований D4:1110 LIST замість
+        # повторного DEFINE; не вимагати повернути видалений код.
+        core4_source = (ROOT / "lib/core4.lisp").read_text(encoding="utf-8")
+        self.assertIn(
+            "(визначити та\n  (макрос\n    (функція аргументи\n",
+            core4_source,
+        )
+        self.assertNotIn("(визначити список (функція", core4_source)
         for source_name, parameter in (
             ("lib/core.lisp", "аргументи"),
-            ("lib/core4.lisp", "аргументи-функції"),
         ):
             with self.subTest(source=source_name):
                 source = (ROOT / source_name).read_text(encoding="utf-8")
