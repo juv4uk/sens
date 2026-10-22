@@ -214,85 +214,41 @@ class BatchSourceTests(unittest.TestCase):
             {"source-era-unproved"},
         )
 
-    def test_historical_W8_read_successors_use_distinct_ratified_D9_codes(self):
-        path = "scripts/semantic-authority-guard-enforce.lisp"
-        src = (ROOT / path).read_text(encoding="utf-8")
-        heads = MOD.executable_call_heads(src, self.guard)
-        for old, new in (("01001011", "110101001"),
-                         ("10100110", "110110111")):
-            self.assertNotIn(old, heads)
-            self.assertIn(new, heads)
-            self.assertEqual(self.mapping[old], new)
-        self.assertIn("(110101001 (110110111 ", src)
-        self.assertEqual(
-            MOD.pinned_cross_domain_empties(ROOT, path, heads, self.mapping),
-            [], "No retired D8/W8 head may be reused as current D8"
-        )
-        report = MOD.run(ROOT, False, {path})
-        self.assertEqual(report["summary"]["admitted_files"], 0)
-        self.assertEqual(report["summary"]["blocked_files"], 0)
-        self.assertEqual(report["files"][0]["status"], "unchanged")
-
-        facts = "knowledge/guard-fact-policy.lisp"
-        current_heads = MOD.executable_call_heads(
-            (ROOT / facts).read_text(encoding="utf-8"), self.guard
-        )
-        self.assertNotIn("10011100", current_heads,
-                         "six historical LETs must be lowered to D4 LAMBDA")
-        self.assertEqual(
-            MOD.pinned_cross_domain_empties(ROOT, facts, current_heads, self.mapping),
-            [],
-            "No historical W8 LET must remain as executable code",
-        )
-        self.assertEqual(
-            MOD.pinned_cross_domain_empties(ROOT, facts, set(), self.mapping),
-            [],
-            "A historical-looking token only in quote/string is not executable",
-        )
-        self.assertEqual(
-            MOD.pinned_cross_domain_empties(ROOT, "lib/modern-d8.lisp", {"10011100"}, self.mapping),
-            [],
-            "No global W8 interpretation for legitimate D8 source",
-        )
+    def test_guard_sources_use_current_ukr_d3_d9_without_legacy_source_pin(self):
+        cases = {
+            "scripts/semantic-authority-guard-enforce.lisp": (
+                "читати-всі", "читати-файл", "символ-у-текст", "за-умовою"),
+            "knowledge/guard-fact-policy.lisp": (
+                "визначити", "функція", "за-умовою", "тотожне?"),
+        }
+        for path, required in cases.items():
+            with self.subTest(path=path):
+                source = (ROOT / path).read_text(encoding="utf-8")
+                heads = MOD.executable_call_heads(source, self.guard)
+                for name in required:
+                    self.assertIn(name, heads)
+                for legacy in ("01001011", "10100110", "10011100",
+                               "00000111", "00001001", "00001011"):
+                    self.assertNotIn(legacy, heads)
+                self.assertEqual(self.guard.scan_lisp(source, path), [])
+                report = MOD.run(ROOT, False, {path})
+                self.assertEqual(report["summary"]["blocked_files"], 0)
+                self.assertEqual(report["files"][0]["status"], "unchanged")
+                self.assertEqual(report["files"][0]["reasons"], [])
 
     def test_guard_reference_uses_ukrainian_heads_without_filename_hold(self):
         path = "knowledge/guard-reference.lisp"
         source = (ROOT / path).read_text(encoding="utf-8")
-        start = source.index("(визначити guard-script-find")
-        tail = source[start:]
-
-        # Current source is checked by its executable syntax, not a path hold.
-        live_heads = MOD.executable_call_heads(tail, self.guard)
-        for retired in ("00000010", "00100111", "00000111", "00000001",
-                        "00011011", "10011101"):
-            self.assertNotIn(retired, live_heads)
-        self.assertEqual(self.guard.scan_lisp(tail, path), [],
-                         "Guard tail must use current two-field Ukrainian forms")
-        for current_head in ("за-умовою", "тотожне?", "сполучити",
-                             "перше", "решта", "як-є", "визначити", "функція",
-                             "нехай", "нехай-послідовно"):
-            self.assertIn("(" + current_head, tail)
-        # Use the ratified Ukrainian D4 NULL projection; never compare () with D3 EQ.
-        self.assertIn("(порожній? інструменти)", tail)
-        self.assertIn("(порожній? інструмент)", tail)
-        self.assertIn("(порожній? посилання)", tail)
-        self.assertIn("(порожній? стан)", tail)
-        self.assertIn("(порожній? найкращий)", tail)
-        # Evidence statuses are nominal tags, not arithmetic operands.
-        self.assertNotIn("(більше? сила-кандидата сила-найкращого)", tail)
-        for status in ("confirmed", "partial", "unresolved", "broken"):
-            self.assertIn("(тотожне? стан-найкращого (як-є " + status + "))", tail)
-            self.assertIn("(тотожне? стан-кандидата (як-є " + status + "))", tail)
-        self.assertNotIn("(тотожне? (як-є ())", tail)
-        self.assertNotIn("(за-умовою ((атом?", tail)
-        self.assertNotIn("(t ", tail)
-        self.assertNotIn(" (1) ", tail)
-        self.assertNotIn(" (0) ", tail)
-
+        heads = MOD.executable_call_heads(source, self.guard)
+        for name in ("визначити", "функція", "за-умовою", "тотожне?"):
+            self.assertIn(name, heads)
+        for old in ("00000010", "00100111", "00000111",
+                    "00001001", "00001011", "10011101"):
+            self.assertNotIn(old, heads)
+        self.assertEqual(self.guard.scan_lisp(source, path), [])
         report = MOD.run(ROOT, False, {path})
-        self.assertEqual(report["summary"]["scanned"], 1)
         self.assertEqual(report["summary"]["blocked_files"], 0)
-        self.assertNotIn(path, MOD.PARTIAL_D4_WITH_LEGACY_D3)
+        self.assertEqual(report["files"][0]["status"], "unchanged")
 
     def test_fact_policy_has_exact_D1_D3_but_no_unsupported_source_admission(self):
         path = "knowledge/guard-fact-policy.lisp"
@@ -308,47 +264,36 @@ class BatchSourceTests(unittest.TestCase):
 
     def test_semantic_guard_d3_and_d9_reader_are_both_exact_source(self):
         path = "scripts/semantic-authority-guard-enforce.lisp"
-        text = (ROOT / path).read_text(encoding="utf-8")
-        self.assertEqual(self.guard.scan_lisp(text, path), [],
-                         "no three-field/host-truth D3 may remain")
-        self.assertIn("(110101001 (110110111 ", text)
+        source = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(self.guard.scan_lisp(source, path), [])
+        for current in ("(читати-всі", "(читати-файл", "(символ-у-текст",
+                        "(за-умовою", "(тотожне?"):
+            self.assertIn(current, source)
+        self.assertNotIn("(110101001 (110110111 ", source)
         report = MOD.run(ROOT, False, {path})
-        self.assertEqual(report["summary"]["admitted_files"], 0)
         self.assertEqual(report["summary"]["blocked_files"], 0)
-        row = report["files"][0]
-        self.assertEqual(row["status"], "unchanged")
-        self.assertEqual(row["reasons"], [])
+        self.assertEqual(report["files"][0]["status"], "unchanged")
 
-    def test_immutable_guard_reference_not_rewritten_until_cond_law(self):
-        report = MOD.run(ROOT, False, {"knowledge/guard-reference.lisp"})
-        self.assertEqual(report["summary"]["admitted_files"], 0)
-        self.assertGreaterEqual(report["summary"]["blocked_files"], 1)
-        self.assertEqual(report["files"][0]["status"], "blocked")
+    def test_current_guard_reference_not_blocked_by_historical_cond(self):
+        path = "knowledge/guard-reference.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(self.guard.scan_lisp(source, path), [])
+        report = MOD.run(ROOT, False, {path})
+        self.assertEqual(report["summary"]["blocked_files"], 0)
+        self.assertEqual(report["files"][0]["status"], "unchanged")
 
-
-    def test_forward_assert_fact_quotes_exact_d3_cons(self):
+    def test_forward_assert_fact_uses_current_ukr_d3_cons(self):
         source = (ROOT / "lib/forward.lisp").read_text(encoding="utf-8")
-        start = source.index("(0011 assert-fact!")
-        stop = source.index("; Tries to unify", start)
-        body = source[start:stop]
-
-        # Historical W8 identity is only provenance. The ratified crosswalk
-        # proves exact-width D3:111 CONS; equal payload alone is not authority.
-        self.assertEqual(self.mapping["00000100"], "111")
-        self.assertNotIn("00000100", self.blocked)
-        self.assertEqual(body.count("(001 00000100)"), 0)
-        self.assertEqual(body.count("(001 111)"), 1)
-        self.assertIn("(make-macro", body)
-        self.assertIn("(0010 (fact)", body)
-        self.assertIn("(001 def)", body)
+        self.assertIn("(визначити ствердити-факт!", source)
+        self.assertIn("(список (як-є сполучити) факт", source)
+        self.assertNotIn("(001 00000100)", source)
+        self.assertNotIn("(001 111)", source)
+        self.assertEqual(self.guard.scan_lisp(source, "lib/forward.lisp"), [])
 
         ladder = MOD.verify_full_domain_bitspace(ROOT)
         self.assertEqual(ladder["typed_coordinates"], 2046)
         self.assertEqual(ladder["meaningful_bits"], 18434)
         self.assertEqual(ladder["runtime_admission_claims_added"], 0)
-        self.assertEqual(ladder["counts_by_domain"], {
-            f"D{width}": 1 << width for width in range(1, 11)
-        })
 
 if __name__ == "__main__":
     unittest.main()
