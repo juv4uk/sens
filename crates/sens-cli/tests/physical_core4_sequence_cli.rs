@@ -425,6 +425,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-run-length-unary-general",
         "tree-contains-atom-general",
         "list-count-matching-atoms-unary",
+        "list-first-position-unary-general",
         "tree-replace-atom-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
