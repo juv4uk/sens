@@ -309,7 +309,7 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
           # D3: точна фізична T5M-семантика COND, не текстовий оракул.
-          if grep -Eq '^(crates/sens/tests/physical_t5m_execution[.]rs|crates/sens/src/eval/special_forms/core[.]rs|contracts/answer-contract[.]lisp|[.]github/workflows/ci[.]yml)
+          if grep -Eq '^(crates/sens/tests/physical_t5m_execution[.]rs|crates/sens/src/eval/special_forms/core[.]rs|contracts/answer-contract[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'physical_d3_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # REPL: лише після зміни мовного джерела або чинного SENS-свідка.
