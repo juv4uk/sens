@@ -4,7 +4,7 @@
 ))]
 
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library,
+    eval_parsed_expressions, load_core_library, parse_mixed_exact_domain,
     parse_mixed_exact_domain_machine_source, Exactness, Session, Value,
 };
 use sens_host::install;
@@ -49,7 +49,9 @@ fn bounded_eq_cond_native_execution_follows_generated_cmp_jnz_branches() {
         let native_source = format!(
             "(викликати-допущену-машинну-програму (машина-знизити-рівність-та-умову-64 {left} {right} 111 222) 0)"
         );
-        let native = eval_program(&native_source, &mut session)
+        let expressions = parse_mixed_exact_domain(&native_source)
+            .expect("native witness uses current exact-domain source projection");
+        let native = eval_parsed_expressions(&expressions, &mut session)
             .expect("admitted bounded CMP+JNZ lowering must execute on the native CPU")
             .value;
 

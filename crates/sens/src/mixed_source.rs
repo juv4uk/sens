@@ -252,13 +252,14 @@ fn lift_pinned_d9_language_calls(
     expression: Expr,
     depth: u32,
 ) -> Result<Expr, LanguageError> {
-    const UKRAINIAN_D9_MECHANISMS: [&str; 6] = [
+    const UKRAINIAN_D9_MECHANISMS: [&str; 7] = [
         "рядок-додати",
         "рядок-порожній?",
         "рядок-решта",
         "рядок-префікс?",
         "рядок-перший",
         "рядок?",
+        "читати-всі",
     ];
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
@@ -306,7 +307,7 @@ fn lift_pinned_d9_language_calls(
     } else if spelling.is_some_and(|name| UKRAINIAN_D9_MECHANISMS.contains(&name)) {
         if let Some(identity) = spelling
             .and_then(crate::semantic_registry::d9_binding_identity_for_definition)
-            .filter(|identity| crate::eval::canon::has_d9_string_mechanism(*identity))
+            .filter(|identity| crate::eval::canon::has_d9_mechanism(*identity))
         {
             // The source projection and concrete mechanism must both agree.
             // D9 residency alone never promotes an arbitrary surface to a call.
@@ -1281,15 +1282,21 @@ mod tests {
             parse_mixed_exact_domain("(як-є (текст-у-символ а))")
                 .expect("цитування не проектує викличні голови"),
         );
-        let ExprKind::List(outer) = quoted.kind else { panic!("quote"); };
-        let ExprKind::List(inner) = &outer[1].kind else { panic!("quoted list"); };
+        let ExprKind::List(outer) = quoted.kind else {
+            panic!("quote");
+        };
+        let ExprKind::List(inner) = &outer[1].kind else {
+            panic!("quoted list");
+        };
         assert!(matches!(&inner[0].kind, ExprKind::Symbol(name)
             if name.as_ref() == "текст-у-символ"));
 
         let input = "(визначити текст-у-символ (функція (а) а)) (текст-у-символ (як-є а))";
-        let expressions = parse_mixed_exact_domain(input)
-            .expect("власна функція перекриває зовнішній виклик");
-        let ExprKind::List(call) = &expressions[1].kind else { panic!("call"); };
+        let expressions =
+            parse_mixed_exact_domain(input).expect("власна функція перекриває зовнішній виклик");
+        let ExprKind::List(call) = &expressions[1].kind else {
+            panic!("call");
+        };
         assert!(matches!(&call[0].kind, ExprKind::Symbol(name)
             if name.as_ref() == "текст-у-символ"));
 
@@ -1297,7 +1304,9 @@ mod tests {
             parse_mixed_exact_domain("(символ-за-кодом 65)")
                 .expect("нератифікований D8 не змінюється від читання"),
         );
-        let ExprKind::List(parts) = unadmitted.kind else { panic!("call"); };
+        let ExprKind::List(parts) = unadmitted.kind else {
+            panic!("call");
+        };
         assert!(matches!(&parts[0].kind, ExprKind::Symbol(name)
             if name.as_ref() == "символ-за-кодом"));
     }
@@ -2956,14 +2965,11 @@ mod tests {
 
     #[test]
     fn process_tcp_language_loaders_use_path_bound_reader() {
-        let process_ast = parse_mixed_exact_domain_process_tcp_source(
-            "lib/process.lisp",
-            crate::PROCESS_LIBRARY_SOURCE,
-        )
-        .expect("actual process.lisp parses through its path-bound reader");
-        let tcp_ast =
-            parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", crate::TCP_LIBRARY_SOURCE)
-                .expect("actual tcp.lisp parses through its path-bound reader");
+        let process_ast =
+            parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", crate::PROCESS_LIBRARY_SOURCE)
+                .expect("actual process.lisp parses through its path-bound reader");
+        let tcp_ast = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", crate::TCP_LIBRARY_SOURCE)
+            .expect("actual tcp.lisp parses through its path-bound reader");
         assert!(!process_ast.is_empty() && !tcp_ast.is_empty());
 
         let mut session = crate::Session::default();

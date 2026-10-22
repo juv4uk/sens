@@ -4,20 +4,35 @@
 //! language-owned (lib/fs.lisp) over this crate's `read-file-bytes` raw
 //! capability.
 
-use sens::{eval_program, Session};
+use sens::{
+    eval_pinned_reasoning_source, eval_program, load_core_library, load_fs_library, Session,
+};
 use sens_host::install;
 
 fn eval_import(source: &str) -> String {
     install();
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/utf8.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/fs.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/clips-import.lisp"), &mut session).unwrap();
+    load_core_library(&mut session).unwrap();
+    load_fs_library(&mut session).unwrap();
+    for (path, source) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
+        (
+            "lib/clips-import.lisp",
+            include_str!("../../../lib/clips-import.lisp"),
+        ),
+    ] {
+        eval_pinned_reasoning_source(path, source, &mut session)
+            .unwrap_or_else(|error| panic!("{path} failed to load: {error}"));
+    }
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
@@ -73,9 +88,9 @@ fn clips_import_file_reads_and_imports_a_real_clp_file() {
     // caller-supplied quoted literal — the actual "connect to old
     // symbolic-AI systems" tool this whole file exists to build.
     let source = r#"
-        (def imported (кліпс-імпорт-файл "../../tests/fixtures/astronomy.clp"))
-        (defmodule imported-astro imported)
-        (forward-in (quote imported-astro))
+        (визначити імпортоване (кліпс-імпорт-файл "../../tests/fixtures/astronomy.clp"))
+        (визначити-модуль імпортована-астрономія імпортоване)
+        (вперед-у (як-є імпортована-астрономія))
     "#;
     assert_eq!(
         eval_import(source),
@@ -215,7 +230,7 @@ fn clips_import_file_imports_a_seventh_real_external_clp_file_at_scale() {
         imported.contains("(solution pet zebra (var p5)) (avh nationality englishman (var n1))"),
         "expected find-solution's 25-condition body to convert correctly, got: {imported}"
     );
-    let source_count = format!("(length {source})");
+    let source_count = format!("(довжина {source})");
     assert_eq!(
         eval_import(&source_count),
         "50",
@@ -254,7 +269,7 @@ fn clips_import_file_imports_an_eighth_real_external_clp_file_with_bare_tilde_co
         imported.contains("(monkey t5-7 green-couch blank)"),
         "expected startup's zero-condition rule to survive and produce a clause, got: {imported}"
     );
-    let source_count = format!("(length {source})");
+    let source_count = format!("(довжина {source})");
     assert_eq!(
         eval_import(&source_count),
         "30",

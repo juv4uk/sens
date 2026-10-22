@@ -1,7 +1,7 @@
 //! Capability-surface tests for sens-host. Moved verbatim from
 //! crates/sens/tests/mccarthy.rs during the core/host split (2026-08-22):
 //! host forms are installed by this crate and verified against an installed
-//! registry. Public `process-run` is now a Lisp wrapper over `process-run-raw`.
+//! registry. Public `процес-запустити` is a Lisp wrapper over its raw capability.
 
 use sens::{
     eval_program, load_core_library, load_fs_library, load_process_library, Environment, ErrorKind,
@@ -55,12 +55,12 @@ fn write_file_then_read_file_round_trips_the_same_content() {
         .to_str()
         .expect("temp path should be valid UTF-8")
         .replace('\\', "/");
-    let source = format!(r#"(write-file "{path_str}" "hello from sens")"#);
+    let source = format!(r#"(записати-файл "{path_str}" "hello from sens")"#);
     let mut session = capability_session();
     let result = eval_program(&source, &mut session).expect("write-file should succeed");
     assert_eq!(result.value, Value::String("hello from sens".into()));
 
-    let read_back = eval_program(&format!(r#"(read-file "{path_str}")"#), &mut session)
+    let read_back = eval_program(&format!(r#"(читати-файл "{path_str}")"#), &mut session)
         .expect("read-file should read back what write-file wrote");
     assert_eq!(read_back.value, Value::String("hello from sens".into()));
 
@@ -105,16 +105,16 @@ fn write_file_overwrites_rather_than_appends() {
         .replace('\\', "/");
     let mut session = capability_session();
     eval_program(
-        &format!(r#"(write-file "{path_str}" "first")"#),
+        &format!(r#"(записати-файл "{path_str}" "first")"#),
         &mut session,
     )
     .expect("first write-file should succeed");
     eval_program(
-        &format!(r#"(write-file "{path_str}" "second")"#),
+        &format!(r#"(записати-файл "{path_str}" "second")"#),
         &mut session,
     )
     .expect("second write-file should succeed");
-    let read_back = eval_program(&format!(r#"(read-file "{path_str}")"#), &mut session)
+    let read_back = eval_program(&format!(r#"(читати-файл "{path_str}")"#), &mut session)
         .expect("read-file should see only the second write");
     assert_eq!(read_back.value, Value::String("second".into()));
 
@@ -123,7 +123,7 @@ fn write_file_overwrites_rather_than_appends() {
 
 #[test]
 fn write_file_rejects_a_non_string_path() {
-    let error = eval_program(r#"(write-file 42 "x")"#, &mut capability_session())
+    let error = eval_program(r#"(записати-файл 42 "x")"#, &mut capability_session())
         .expect_err("a non-string path must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
 }
@@ -131,7 +131,7 @@ fn write_file_rejects_a_non_string_path() {
 #[test]
 fn write_file_rejects_a_non_string_content_argument() {
     let error = eval_program(
-        r#"(write-file "path-does-not-matter-here.txt" 42)"#,
+        r#"(записати-файл "path-does-not-matter-here.txt" 42)"#,
         &mut capability_session(),
     )
     .expect_err("a non-string content argument must fail named, not panic");
@@ -141,7 +141,7 @@ fn write_file_rejects_a_non_string_content_argument() {
 #[test]
 fn write_file_wrong_arity_is_an_arity_error() {
     let error = eval_program(
-        r#"(write-file "only-a-path.txt")"#,
+        r#"(записати-файл "only-a-path.txt")"#,
         &mut capability_session(),
     )
     .expect_err("write-file with one argument must fail named, not panic");
@@ -201,13 +201,10 @@ fn write_file_bytes_then_read_file_bytes_round_trips_non_utf8_bytes() {
         .to_str()
         .expect("temp path should be valid UTF-8")
         .replace('\\', "/");
-    let source = format!(r#"(write-file-bytes "{path_str}" (quote (0 1 2 255 65 254)))"#);
+    let source = format!(r#"(записати-байти-файла "{path_str}" (як-є (0 1 2 255 65 254)))"#);
     let mut session = capability_session();
-    let result = eval_program(&source, &mut session).expect("write-file-bytes should succeed");
-    assert_eq!(
-        result.value,
-        Value::list([0, 1, 2, 255, 65, 254].map(|n| Value::Number(n as f64, Exactness::Exact)))
-    );
+    let result = eval_program(&source, &mut session).expect("byte writer should succeed");
+    assert_eq!(result.value.to_string(), "(0 1 2 255 65 254)");
 
     let raw = std::fs::read(&path).expect("the file should exist with raw bytes");
     assert_eq!(raw, vec![0u8, 1, 2, 255, 65, 254]);
@@ -225,8 +222,8 @@ fn write_file_bytes_then_read_file_bytes_round_trips_non_utf8_bytes() {
 #[test]
 fn write_file_bytes_rejects_a_non_string_path() {
     let error = eval_program(
-        r#"(write-file-bytes 42 (quote (1 2 3)))"#,
-        &mut Session::default(),
+        r#"(записати-байти-файла 42 (як-є (1 2 3)))"#,
+        &mut capability_session(),
     )
     .expect_err("a non-string path must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -235,8 +232,8 @@ fn write_file_bytes_rejects_a_non_string_path() {
 #[test]
 fn write_file_bytes_rejects_a_non_list_second_argument() {
     let error = eval_program(
-        r#"(write-file-bytes "path-does-not-matter.bin" 42)"#,
-        &mut Session::default(),
+        r#"(записати-байти-файла "path-does-not-matter.bin" 42)"#,
+        &mut capability_session(),
     )
     .expect_err("a non-list second argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -245,8 +242,8 @@ fn write_file_bytes_rejects_a_non_list_second_argument() {
 #[test]
 fn write_file_bytes_rejects_an_out_of_range_element() {
     let error = eval_program(
-        r#"(write-file-bytes "path-does-not-matter.bin" (quote (1 256 3)))"#,
-        &mut Session::default(),
+        r#"(записати-байти-файла "path-does-not-matter.bin" (як-є (1 256 3)))"#,
+        &mut capability_session(),
     )
     .expect_err("an element above 255 must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -255,8 +252,8 @@ fn write_file_bytes_rejects_an_out_of_range_element() {
 #[test]
 fn write_file_bytes_rejects_a_negative_element() {
     let error = eval_program(
-        r#"(write-file-bytes "path-does-not-matter.bin" (quote (1 -1 3)))"#,
-        &mut Session::default(),
+        r#"(записати-байти-файла "path-does-not-matter.bin" (як-є (1 -1 3)))"#,
+        &mut capability_session(),
     )
     .expect_err("a negative element must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -272,8 +269,8 @@ fn read_file_bytes_rejects_a_non_string_path() {
 #[test]
 fn write_file_bytes_wrong_arity_is_an_arity_error() {
     let error = eval_program(
-        r#"(write-file-bytes "only-a-path.bin")"#,
-        &mut Session::default(),
+        r#"(записати-байти-файла "only-a-path.bin")"#,
+        &mut capability_session(),
     )
     .expect_err("write-file-bytes with one argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Arity);
@@ -289,10 +286,13 @@ fn read_file_bytes_wrong_arity_is_an_arity_error() {
 #[test]
 fn process_run_is_unrestricted_in_a_native_root_session() {
     let mut session = process_session(Environment::root());
-    let result = eval_program(r#"(process-run "git" (quote ("--version")))"#, &mut session)
-        .expect("the trusted native root session should run a named program");
+    let result = eval_program(
+        r#"(процес-запустити "git" (як-є ("--version")))"#,
+        &mut session,
+    )
+    .expect("the trusted native root session should run a named program");
     let Value::Pair(ref node) = result.value else {
-        panic!("process-run should return a 3-element list");
+        panic!("процес-запустити should return a 3-element list");
     };
     assert_eq!(node.head, Value::Number(0.0, Exactness::Exact));
     let Value::Pair(ref rest) = node.tail else {
@@ -308,11 +308,11 @@ fn process_run_is_unrestricted_in_a_native_root_session() {
 fn process_run_succeeds_for_an_explicitly_allowed_program() {
     let mut session =
         process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
-    let source = r#"(process-run "git" (quote ("--version")))"#;
+    let source = r#"(процес-запустити "git" (як-є ("--version")))"#;
     let result =
         eval_program(source, &mut session).expect("an explicitly allowed program should run");
     let Value::Pair(ref node) = result.value else {
-        panic!("process-run should return a 3-element list");
+        panic!("процес-запустити should return a 3-element list");
     };
     assert_eq!(node.head, Value::Number(0.0, Exactness::Exact));
     let Value::Pair(ref rest) = node.tail else {
@@ -327,8 +327,11 @@ fn process_run_succeeds_for_an_explicitly_allowed_program() {
 #[test]
 fn process_run_is_deny_all_for_an_explicit_empty_allowlist() {
     let mut session = process_session(Environment::root().with_process_allowlist(Vec::new()));
-    let error = eval_program(r#"(process-run "git" (quote ("--version")))"#, &mut session)
-        .expect_err("an explicit empty embedding allowlist must remain deny-all");
+    let error = eval_program(
+        r#"(процес-запустити "git" (як-є ("--version")))"#,
+        &mut session,
+    )
+    .expect_err("an explicit empty embedding allowlist must remain deny-all");
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }
 
@@ -337,7 +340,7 @@ fn process_run_rejects_a_program_not_on_the_allowlist() {
     let mut session =
         process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
     let error = eval_program(
-        r#"(process-run "cmd" (quote ("/C" "echo" "hi")))"#,
+        r#"(процес-запустити "cmd" (як-є ("/C" "echo" "hi")))"#,
         &mut session,
     )
     .expect_err("a program not on the allowlist must fail named, not run");
@@ -348,7 +351,7 @@ fn process_run_rejects_a_program_not_on_the_allowlist() {
 fn process_run_rejects_a_non_string_program() {
     let mut session =
         process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
-    let error = eval_program("(process-run 42 (list \"x\"))", &mut session)
+    let error = eval_program("(процес-запустити 42 (список \"x\"))", &mut session)
         .expect_err("a non-string program name must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
 }
@@ -357,7 +360,7 @@ fn process_run_rejects_a_non_string_program() {
 fn process_run_rejects_a_non_list_args_argument() {
     let mut session =
         process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
-    let error = eval_program(r#"(process-run "git" "not-a-list")"#, &mut session)
+    let error = eval_program(r#"(процес-запустити "git" "not-a-list")"#, &mut session)
         .expect_err("a non-list args argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
 }
@@ -366,7 +369,7 @@ fn process_run_rejects_a_non_list_args_argument() {
 fn process_run_rejects_a_non_string_element_in_args() {
     let mut session =
         process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
-    let error = eval_program("(process-run \"git\" (quote (42)))", &mut session)
+    let error = eval_program("(процес-запустити \"git\" (як-є (42)))", &mut session)
         .expect_err("a non-string element in args must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
 }
@@ -375,7 +378,7 @@ fn process_run_rejects_a_non_string_element_in_args() {
 fn process_run_wrong_arity_is_an_arity_error() {
     let mut session =
         process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
-    let error = eval_program(r#"(process-run "git")"#, &mut session)
+    let error = eval_program(r#"(процес-запустити "git")"#, &mut session)
         .expect_err("process-run with one argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Arity);
 }
@@ -384,11 +387,18 @@ fn process_run_wrong_arity_is_an_arity_error() {
 fn load_evaluates_every_form_in_a_file_and_returns_the_last_value() {
     let path = std::env::temp_dir().join("sens-load-round-trip.lisp");
     let path_str = path.to_str().unwrap().replace('\\', "/");
-    std::fs::write(&path, "(def x 1) (def y 2) (+ x y)").unwrap();
+    std::fs::write(&path, "(визначити х 1) (визначити у 2) (додати х у)").unwrap();
 
-    let result = eval_program(&format!(r#"(load "{path_str}")"#), &mut Session::default())
-        .expect("load should evaluate the file and return the last form's value");
-    assert_eq!(result.value, Value::Number(3.0, Exactness::Exact));
+    let result = eval_program(
+        &format!(r#"(load "{path_str}")"#),
+        &mut capability_session(),
+    )
+    .expect("load should evaluate the file and return the last form's value");
+    let Value::BinaryNumber(number) = &result.value else {
+        panic!("loaded decimal arithmetic must produce an exact D24+ value");
+    };
+    assert_eq!(number.numeric_domain_width(), Some(24));
+    assert_eq!(number.to_decimal_string(), "3");
 
     std::fs::remove_file(&path).ok();
 }
@@ -408,7 +418,11 @@ fn load_uses_the_same_surface_lowering_as_eval_program() {
     .expect("load should use the same lowering path as eval_program");
 
     assert_eq!(loaded.value, direct.value);
-    assert_eq!(loaded.value, Value::Number(42.0, Exactness::Exact));
+    let Value::BinaryNumber(number) = &loaded.value else {
+        panic!("loaded decimal arithmetic must produce an exact D24+ value");
+    };
+    assert_eq!(number.numeric_domain_width(), Some(24));
+    assert_eq!(number.to_decimal_string(), "42");
 
     std::fs::remove_file(&path).ok();
 }
@@ -417,13 +431,17 @@ fn load_uses_the_same_surface_lowering_as_eval_program() {
 fn load_definitions_are_visible_in_the_calling_environment() {
     let path = std::env::temp_dir().join("sens-load-definitions.lisp");
     let path_str = path.to_str().unwrap().replace('\\', "/");
-    std::fs::write(&path, "(def loaded-value 99)").unwrap();
+    std::fs::write(&path, "(визначити завантажене-значення 99)").unwrap();
 
     let mut session = capability_session();
     eval_program(&format!(r#"(load "{path_str}")"#), &mut session).expect("load should succeed");
-    let result = eval_program("loaded-value", &mut session)
+    let result = eval_program("завантажене-значення", &mut session)
         .expect("a definition made by load should be visible afterward");
-    assert_eq!(result.value, Value::Number(99.0, Exactness::Exact));
+    let Value::BinaryNumber(number) = &result.value else {
+        panic!("loaded decimal must retain exact D24+ identity");
+    };
+    assert_eq!(number.numeric_domain_width(), Some(24));
+    assert_eq!(number.to_decimal_string(), "99");
 
     std::fs::remove_file(&path).ok();
 }
@@ -496,16 +514,15 @@ fn eq_rejects_non_atom_arguments() {
 
 #[test]
 fn cond_rejects_a_clause_that_is_not_a_list() {
-    let error = eval_program("(cond 42)", &mut Session::default())
+    let error = eval_program("(за-умовою 42)", &mut Session::default())
         .expect_err("a non-list cond clause must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }
 
 #[test]
 fn cond_rejects_a_clause_with_the_wrong_number_of_parts() {
-    // Since #1495 a clause is canonical `(query expected-result expression)`
-    // or migration-only `(test expression)`; one part or four are malformed.
-    for source in ["(00000111 (t))", "(00000111 (t t 1 2))"] {
+    // Current D3 COND accepts exactly two-part (test expression) clauses.
+    for source in ["(за-умовою ((x)))", "(за-умовою ((x y z w)))"] {
         let error = eval_program(source, &mut Session::default())
             .expect_err("a malformed cond clause must fail named, not panic");
         assert_eq!(error.kind, ErrorKind::InvalidForm, "{source}");
@@ -514,7 +531,7 @@ fn cond_rejects_a_clause_with_the_wrong_number_of_parts() {
 
 #[test]
 fn def_rejects_a_non_symbol_name() {
-    let error = eval_program("(def 42 1)", &mut Session::default())
+    let error = eval_program("(визначити 42 1)", &mut Session::default())
         .expect_err("def with a non-symbol name must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }

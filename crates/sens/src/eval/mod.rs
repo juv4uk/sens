@@ -283,8 +283,8 @@ pub(crate) fn invoke_value(
                 return result;
             }
             // A bounded D9 mechanism cut remains outside CoreDomainIdentity.
-            if canon::has_d9_string_mechanism(*identity) {
-                return canon::invoke_d9_string_mechanism(*identity, arguments, environment, span)
+            if canon::has_d9_mechanism(*identity) {
+                return canon::invoke_d9_mechanism(*identity, arguments, environment, span)
                     .expect("exact D9 string-mechanism route was checked above");
             }
             match environment.domain_code_slot(*identity).as_ref() {
@@ -629,12 +629,12 @@ fn dispatch_domain_call(
     }
 
     let domain_identity: crate::DomainIdentity = identity.into();
-    if canon::has_d9_string_mechanism(domain_identity) {
+    if canon::has_d9_mechanism(domain_identity) {
         let mut values = Vec::with_capacity(arguments.len());
         for argument in arguments {
             values.push(evaluate(argument, environment)?);
         }
-        return canon::invoke_d9_string_mechanism(domain_identity, &values, environment, span)
+        return canon::invoke_d9_mechanism(domain_identity, &values, environment, span)
             .expect("exact D9 string-mechanism route was checked above")
             .map(EvalStep::Value);
     }
@@ -770,14 +770,14 @@ fn dispatch_call(
                     .expect("ratified selector shape was checked above")
                     .map(EvalStep::Value);
             }
-            // Only four exact D9 string residents have this direct value-call
-            // mechanism. Leave all other D9 values on the ordinary fail-closed slot path.
-            if canon::has_d9_string_mechanism(*identity) {
+            // Лише D9-резиденти з реалізованим механізмом мають прямий виклик.
+            // Решта проходять звичайний шлях пошуку доменного слота.
+            if canon::has_d9_mechanism(*identity) {
                 let mut values = Vec::with_capacity(arguments.len());
                 for argument in arguments {
                     values.push(evaluate(argument, environment)?);
                 }
-                return canon::invoke_d9_string_mechanism(*identity, &values, environment, span)
+                return canon::invoke_d9_mechanism(*identity, &values, environment, span)
                     .expect("exact D9 string-mechanism route was checked above")
                     .map(EvalStep::Value);
             }

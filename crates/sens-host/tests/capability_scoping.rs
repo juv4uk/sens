@@ -54,7 +54,7 @@ fn trusted_default_remains_unrestricted_for_filesystem() {
 
     let mut session = session(Environment::root());
     let result = eval_program(
-        &format!(r#"(read-file "{}")"#, lisp_path(&path)),
+        &format!(r#"(читати-файл "{}")"#, lisp_path(&path)),
         &mut session,
     )
     .expect("trusted default should retain unrestricted host read behavior");
@@ -76,17 +76,17 @@ fn read_scope_allows_inside_and_denies_outside() {
     let mut session = session(env);
 
     eval_program(
-        &format!(r#"(read-file "{}")"#, lisp_path(&inside_file)),
+        &format!(r#"(читати-файл "{}")"#, lisp_path(&inside_file)),
         &mut session,
     )
     .expect("inside allowed read root should succeed");
 
     let error = eval_program(
-        &format!(r#"(read-file "{}")"#, lisp_path(&outside_file)),
+        &format!(r#"(читати-файл "{}")"#, lisp_path(&outside_file)),
         &mut session,
     )
     .expect_err("outside read root must be denied before filesystem read");
-    assert_scope_denied(error, "read-file");
+    assert_scope_denied(error, "читати-файл");
 
     fs::remove_dir_all(allowed).ok();
     fs::remove_dir_all(outside).ok();
@@ -103,18 +103,21 @@ fn write_scope_allows_new_file_inside_and_denies_outside() {
     let mut session = session(env);
 
     eval_program(
-        &format!(r#"(write-file "{}" "inside")"#, lisp_path(&inside_file)),
+        &format!(r#"(записати-файл "{}" "inside")"#, lisp_path(&inside_file)),
         &mut session,
     )
     .expect("new file directly under allowed write root should succeed");
     assert_eq!(fs::read_to_string(&inside_file).unwrap(), "inside");
 
     let error = eval_program(
-        &format!(r#"(write-file "{}" "outside")"#, lisp_path(&outside_file)),
+        &format!(
+            r#"(записати-файл "{}" "outside")"#,
+            lisp_path(&outside_file)
+        ),
         &mut session,
     )
     .expect_err("outside write root must be denied before file creation");
-    assert_scope_denied(error, "write-file");
+    assert_scope_denied(error, "записати-файл");
     assert!(
         !outside_file.exists(),
         "denied write must not create a file"
@@ -129,7 +132,7 @@ fn load_cannot_bypass_read_scope() {
     let allowed = unique_dir("scope-load-allowed");
     let outside = unique_dir("scope-load-outside");
     let source = outside.join("escape.lisp");
-    fs::write(&source, "(def escaped-through-load 42)").unwrap();
+    fs::write(&source, "(визначити обхід-завантаження 42)").unwrap();
 
     let env = Environment::root().with_fs_read_roots(vec![allowed.clone()]);
     let mut session = session(env);
@@ -137,7 +140,7 @@ fn load_cannot_bypass_read_scope() {
         .expect_err("load must obey the same read scope as read-file");
     assert_scope_denied(error, "load");
     assert!(
-        session.environment.get("escaped-through-load").is_none(),
+        session.environment.get("обхід-завантаження").is_none(),
         "denied load must not mutate the session"
     );
 
@@ -160,11 +163,11 @@ fn symlink_inside_allowed_root_cannot_escape_to_outside_file() {
     let env = Environment::root().with_fs_read_roots(vec![allowed.clone()]);
     let mut session = session(env);
     let error = eval_program(
-        &format!(r#"(read-file "{}")"#, lisp_path(&link)),
+        &format!(r#"(читати-файл "{}")"#, lisp_path(&link)),
         &mut session,
     )
     .expect_err("canonicalization must reject a symlink that escapes the root");
-    assert_scope_denied(error, "read-file");
+    assert_scope_denied(error, "читати-файл");
 
     fs::remove_dir_all(allowed).ok();
     fs::remove_dir_all(outside).ok();
@@ -195,8 +198,11 @@ fn connect_and_listen_policies_are_independent() {
         .with_tcp_listen_allowlist(vec![("127.0.0.1".into(), 0, 0)]);
     let mut session = session(env);
 
-    eval_program(r#"(tcp-listen-raw "127.0.0.1" 0)"#, &mut session)
-        .expect("explicitly allowed loopback ephemeral bind should succeed");
+    eval_program(
+        r#"(протокол-передавання-сире-слухання "127.0.0.1" 0)"#,
+        &mut session,
+    )
+    .expect("explicitly allowed loopback ephemeral bind should succeed");
 
     let error = eval_program(r#"(tcp-connect "127.0.0.1" 7999)"#, &mut session)
         .expect_err("port below connect allow-range must be policy-denied");

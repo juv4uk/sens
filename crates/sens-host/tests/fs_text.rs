@@ -30,22 +30,20 @@ fn fs_session() -> Session {
     session
 }
 
-/// FS-CAPABILITY-UTF8-POLICY-MIGRATION (2026-09-12): the host registers only
-/// the raw byte-boundary capabilities; public `read-file`/`write-file` are
-/// language-owned, mirroring `process_surface.rs`'s equivalent proof for
-/// `process-run`.
+/// Host registers only current raw byte/text-boundary capabilities; public
+/// Ukrainian `читати-файл`/`записати-файл` are language-owned.
 #[test]
 fn host_installs_only_the_raw_file_capabilities() {
     sens_host::install();
 
-    assert!(capability_installed("read-file-bytes"));
-    assert!(capability_installed("write-file-bytes"));
+    assert!(capability_installed("читати-сирий-текст-файла"));
+    assert!(capability_installed("записати-байти-файла"));
     assert!(
-        !capability_installed("read-file"),
+        !capability_installed("читати-файл"),
         "public read-file semantics must not return to the host registry"
     );
     assert!(
-        !capability_installed("write-file"),
+        !capability_installed("записати-файл"),
         "public write-file semantics must not return to the host registry"
     );
 }
@@ -56,19 +54,19 @@ fn public_read_file_and_write_file_appear_only_as_language_bindings() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
-    assert!(session.environment.get("read-file").is_none());
-    assert!(session.environment.get("write-file").is_none());
+    assert!(session.environment.get("читати-файл").is_none());
+    assert!(session.environment.get("записати-файл").is_none());
     load_fs_library(&mut session).unwrap();
     assert!(matches!(
-        session.environment.get("read-file"),
+        session.environment.get("читати-файл"),
         Some(Value::Closure(_))
     ));
     assert!(matches!(
-        session.environment.get("write-file"),
+        session.environment.get("записати-файл"),
         Some(Value::Closure(_))
     ));
-    assert!(!capability_installed("read-file"));
-    assert!(!capability_installed("write-file"));
+    assert!(!capability_installed("читати-файл"));
+    assert!(!capability_installed("записати-файл"));
 }
 
 #[test]
@@ -76,7 +74,7 @@ fn write_file_then_read_file_round_trips_utf8_text() {
     let mut session = fs_session();
     let path = unique_path("fs-text-roundtrip");
     let source = format!(
-        r#"(list (write-file "{p}" "hello, свiт, €") (read-file "{p}"))"#,
+        r#"(список (записати-файл "{p}" "hello, свiт, €") (читати-файл "{p}"))"#,
         p = lisp_path(&path)
     );
 
@@ -99,7 +97,7 @@ fn read_file_rejects_invalid_utf8_without_lossy_replacement() {
     let path = unique_path("fs-text-invalid-utf8");
     fs::write(&path, [0xFFu8]).unwrap();
 
-    let source = format!(r#"(read-file "{}")"#, lisp_path(&path));
+    let source = format!(r#"(читати-файл "{}")"#, lisp_path(&path));
     let result = eval_program(&source, &mut session)
         .expect("invalid UTF-8 must be a language-level rejection value, not a Rust panic/error");
     assert_eq!(result.value.to_string(), "(rejected invalid-utf8)");

@@ -34,7 +34,10 @@ pub(super) fn invoke(
             if args.len() != 1 {
                 Err(LanguageError::new(
                     ErrorKind::Arity,
-                    format!("{identity}: D5 ZEROP expects 1 argument; received {}", args.len()),
+                    format!(
+                        "{identity}: D5 ZEROP expects 1 argument; received {}",
+                        args.len()
+                    ),
                     span,
                 ))
             } else if !crate::domain_numeric::is_domain_value(&args[0]) {
@@ -56,11 +59,16 @@ pub(super) fn invoke(
             if args.len() != 1 {
                 Err(LanguageError::new(
                     ErrorKind::Arity,
-                    format!("{identity}: D5 NUMBERP expects 1 argument; received {}", args.len()),
+                    format!(
+                        "{identity}: D5 NUMBERP expects 1 argument; received {}",
+                        args.len()
+                    ),
                     span,
                 ))
             } else {
-                Ok(Value::predicate_bit(crate::domain_numeric::is_domain_value(&args[0])))
+                Ok(Value::predicate_bit(
+                    crate::domain_numeric::is_domain_value(&args[0]),
+                ))
             }
         }
         0b01010 => arithmetic::arithmetic_on_values("+", args, environment, span), // PLUS
@@ -80,7 +88,10 @@ mod exact_d5_numberp {
 
     fn d24(n: i32) -> Value {
         let word = (n as u32) & 0x00ff_ffff;
-        let bits = (0..24).rev().map(|offset| ((word >> offset) & 1) as u8).collect::<Vec<_>>();
+        let bits = (0..24)
+            .rev()
+            .map(|offset| ((word >> offset) & 1) as u8)
+            .collect::<Vec<_>>();
         Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
     }
 

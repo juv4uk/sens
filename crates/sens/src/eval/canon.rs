@@ -283,55 +283,57 @@ fn invoke_domain_primitive(
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum D9StringPrimitiveKind {
+enum D9PrimitiveKind {
     Append,
     Empty,
     Rest,
     Prefix,
     First,
     StringP,
+    ReadAll,
 }
 
-fn d9_string_primitive_kind(identity: crate::DomainIdentity) -> Option<D9StringPrimitiveKind> {
+fn d9_primitive_kind(identity: crate::DomainIdentity) -> Option<D9PrimitiveKind> {
     let crate::DomainIdentity::D9(word) = identity else {
         return None;
     };
     match word.word().packed_bits() {
-        0b110011110 => Some(D9StringPrimitiveKind::Append),
-        0b110011100 => Some(D9StringPrimitiveKind::Empty),
-        0b110011101 => Some(D9StringPrimitiveKind::Rest),
-        0b110101010 => Some(D9StringPrimitiveKind::Prefix),
-        0b110101011 => Some(D9StringPrimitiveKind::First),
-        0b110100110 => Some(D9StringPrimitiveKind::StringP),
+        0b110011110 => Some(D9PrimitiveKind::Append),
+        0b110011100 => Some(D9PrimitiveKind::Empty),
+        0b110011101 => Some(D9PrimitiveKind::Rest),
+        0b110101010 => Some(D9PrimitiveKind::Prefix),
+        0b110101011 => Some(D9PrimitiveKind::First),
+        0b110100110 => Some(D9PrimitiveKind::StringP),
+        0b110101001 => Some(D9PrimitiveKind::ReadAll),
         _ => None,
     }
 }
 
-/// True only for the six ratified D9 value mechanisms required by the
+/// True only for the seven ratified D9 value mechanisms required by the
 /// machine-admission wire checker. This is deliberately outside
 /// CoreDomainIdentity: D9 identity remains universal-domain identity, not Core.
-pub(crate) fn has_d9_string_mechanism(identity: crate::DomainIdentity) -> bool {
-    d9_string_primitive_kind(identity).is_some()
+pub(crate) fn has_d9_mechanism(identity: crate::DomainIdentity) -> bool {
+    d9_primitive_kind(identity).is_some()
 }
 
 /// Execute the bounded D9 string mechanism cut. Routing is selected from the
 /// full nine-bit D9 identity; the called functions are reused implementation
 /// bodies only, never looked up or invoked through a historical SID8.
-pub(crate) fn invoke_d9_string_mechanism(
+pub(crate) fn invoke_d9_mechanism(
     identity: crate::DomainIdentity,
     args: &[Value],
     environment: &Environment,
     span: Span,
 ) -> Option<Result<Value, LanguageError>> {
-    let kind = d9_string_primitive_kind(identity)?;
+    let kind = d9_primitive_kind(identity)?;
     Some((|| {
         let expected = match kind {
-            D9StringPrimitiveKind::Append => 2,
-            D9StringPrimitiveKind::Empty
-            | D9StringPrimitiveKind::Rest
-            | D9StringPrimitiveKind::First
-            | D9StringPrimitiveKind::StringP => 1,
-            D9StringPrimitiveKind::Prefix => 2,
+            D9PrimitiveKind::Append | D9PrimitiveKind::Prefix => 2,
+            D9PrimitiveKind::Empty
+            | D9PrimitiveKind::Rest
+            | D9PrimitiveKind::First
+            | D9PrimitiveKind::StringP
+            | D9PrimitiveKind::ReadAll => 1,
         };
         if args.len() != expected {
             return Err(LanguageError::new(
@@ -344,24 +346,19 @@ pub(crate) fn invoke_d9_string_mechanism(
             ));
         }
         let value = match kind {
-            D9StringPrimitiveKind::Append => {
-                super::special_forms::string_append_values(args, span)?
-            }
-            D9StringPrimitiveKind::Empty => super::builtins::string_empty(args, environment, span)?,
-            D9StringPrimitiveKind::Rest => super::builtins::string_rest(args, environment, span)?,
-            D9StringPrimitiveKind::Prefix => {
-                super::builtins::string_prefix(args, environment, span)?
-            }
-            D9StringPrimitiveKind::First => super::builtins::string_first(args, environment, span)?,
-            D9StringPrimitiveKind::StringP => {
-                Value::predicate_bit(matches!(&args[0], Value::String(_)))
+            D9PrimitiveKind::Append => super::special_forms::string_append_values(args, span)?,
+            D9PrimitiveKind::Empty => super::builtins::string_empty(args, environment, span)?,
+            D9PrimitiveKind::Rest => super::builtins::string_rest(args, environment, span)?,
+            D9PrimitiveKind::Prefix => super::builtins::string_prefix(args, environment, span)?,
+            D9PrimitiveKind::First => super::builtins::string_first(args, environment, span)?,
+            D9PrimitiveKind::StringP => Value::predicate_bit(matches!(&args[0], Value::String(_))),
+            D9PrimitiveKind::ReadAll => {
+                super::special_forms::read_all_values(args, environment, span)?
             }
         };
         if matches!(
             kind,
-            D9StringPrimitiveKind::Empty
-                | D9StringPrimitiveKind::Prefix
-                | D9StringPrimitiveKind::StringP
+            D9PrimitiveKind::Empty | D9PrimitiveKind::Prefix | D9PrimitiveKind::StringP
         ) && value.as_predicate_bit().is_none()
         {
             return Err(LanguageError::new(
@@ -537,14 +534,15 @@ pub(crate) fn invoke_domain_identity(
             }
         }
 
-        return invoke_d9_string_mechanism(domain_identity, args, environment, span)
-            .unwrap_or_else(|| {
+        return invoke_d9_mechanism(domain_identity, args, environment, span).unwrap_or_else(
+            || {
                 Err(LanguageError::new(
                     ErrorKind::Type,
                     format!("D9 identity has no admitted value-call mechanism: {identity}"),
                     span,
                 ))
-            });
+            },
+        );
     }
 
     if let Some(result) = invoke_d4_eval(identity, args, environment, span) {
@@ -888,11 +886,11 @@ mod exact_domain_primitive_tests {
     }
 
     #[test]
-    fn six_ratified_d9_string_operations_have_explicit_exact_domain_mechanisms() {
+    fn seven_ratified_d9_value_operations_have_explicit_exact_domain_mechanisms() {
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
 
-        let appended = invoke_d9_string_mechanism(
+        let appended = invoke_d9_mechanism(
             d9(0b110011110),
             &[
                 Value::String(std::rc::Rc::from("core4-")),
@@ -905,7 +903,7 @@ mod exact_domain_primitive_tests {
         .expect("D9 STRING-APPEND value");
         assert!(matches!(appended, Value::String(ref value) if value.as_ref() == "core4-probe"));
 
-        let append_arity_error = invoke_d9_string_mechanism(
+        let append_arity_error = invoke_d9_mechanism(
             d9(0b110011110),
             &[Value::String(std::rc::Rc::from("one"))],
             &environment,
@@ -915,7 +913,7 @@ mod exact_domain_primitive_tests {
         .expect_err("STRING-APPEND has exact binary arity two");
         assert_eq!(append_arity_error.kind, ErrorKind::Arity);
 
-        let empty = invoke_d9_string_mechanism(
+        let empty = invoke_d9_mechanism(
             d9(0b110011100),
             &[Value::String(std::rc::Rc::from(""))],
             &environment,
@@ -925,7 +923,7 @@ mod exact_domain_primitive_tests {
         .expect("D9 STRING-EMPTY? value");
         assert_eq!(empty.as_predicate_bit(), Some(true));
 
-        let nonempty = invoke_d9_string_mechanism(
+        let nonempty = invoke_d9_mechanism(
             d9(0b110011100),
             &[Value::String(std::rc::Rc::from("q2:7/1"))],
             &environment,
@@ -935,7 +933,7 @@ mod exact_domain_primitive_tests {
         .expect("D9 STRING-EMPTY? value");
         assert_eq!(nonempty.as_predicate_bit(), Some(false));
 
-        let starts = invoke_d9_string_mechanism(
+        let starts = invoke_d9_mechanism(
             d9(0b110101010),
             &[
                 Value::String(std::rc::Rc::from("#q2:")),
@@ -948,7 +946,7 @@ mod exact_domain_primitive_tests {
         .expect("D9 STRING-PREFIX? value");
         assert_eq!(starts.as_predicate_bit(), Some(true));
 
-        let does_not_start = invoke_d9_string_mechanism(
+        let does_not_start = invoke_d9_mechanism(
             d9(0b110101010),
             &[
                 Value::String(std::rc::Rc::from("q2:")),
@@ -961,7 +959,7 @@ mod exact_domain_primitive_tests {
         .expect("D9 STRING-PREFIX? value");
         assert_eq!(does_not_start.as_predicate_bit(), Some(false));
 
-        let first = invoke_d9_string_mechanism(
+        let first = invoke_d9_mechanism(
             d9(0b110101011),
             &[Value::String(std::rc::Rc::from("#q2:7/1"))],
             &environment,
@@ -971,7 +969,7 @@ mod exact_domain_primitive_tests {
         .expect("D9 STRING-FIRST value");
         assert!(matches!(first, Value::String(ref value) if value.as_ref() == "#"));
 
-        let rest = invoke_d9_string_mechanism(
+        let rest = invoke_d9_mechanism(
             d9(0b110011101),
             &[Value::String(std::rc::Rc::from("#q2:7/1"))],
             &environment,
@@ -982,17 +980,28 @@ mod exact_domain_primitive_tests {
         assert!(matches!(rest, Value::String(ref value) if value.as_ref() == "q2:7/1"));
 
         assert!(
-            !has_d9_string_mechanism(d9(0b110111111)),
+            !has_d9_mechanism(d9(0b110111111)),
             "other D9 residents stay fail-closed"
         );
+
+        let read_all = invoke_d9_mechanism(
+            d9(0b110101001),
+            &[Value::String(std::rc::Rc::from("alpha beta"))],
+            &environment,
+            span,
+        )
+        .expect("D9:110101001 READ-ALL is a ratified current mechanism")
+        .expect("READ-ALL returns all forms as data");
+        assert_eq!(read_all.to_string(), "(alpha beta)");
+        assert!(has_d9_mechanism(d9(0b110101001)));
         assert!(
-            !has_d9_string_mechanism(crate::DomainIdentity::D8(crate::CoreD8::from_word(
+            !has_d9_mechanism(crate::DomainIdentity::D8(crate::CoreD8::from_word(
                 crate::Bit8::new(0b00111100).expect("D8 word")
             ))),
             "D8 coordinates never alias D9 mechanisms"
         );
 
-        let arity_error = invoke_d9_string_mechanism(
+        let arity_error = invoke_d9_mechanism(
             d9(0b110101010),
             &[Value::String(std::rc::Rc::from("#q2:"))],
             &environment,
@@ -1010,19 +1019,19 @@ mod exact_domain_primitive_tests {
         let environment = Environment::root();
         let span = Span::default();
         let identity = d9(0b110100110);
-        assert!(has_d9_string_mechanism(identity));
+        assert!(has_d9_mechanism(identity));
         for (value, expected) in [
             (Value::String(std::rc::Rc::from("0010")), true),
             (Value::String(std::rc::Rc::from("")), true),
             (Value::Symbol("0010".into()), false),
             (Value::Nil, false),
         ] {
-            let result = invoke_d9_string_mechanism(identity, &[value], &environment, span)
+            let result = invoke_d9_mechanism(identity, &[value], &environment, span)
                 .expect("D9 STRINGP exact-code route")
                 .expect("D9 STRINGP D1 result");
             assert_eq!(result.as_predicate_bit(), Some(expected));
         }
-        let arity = invoke_d9_string_mechanism(identity, &[], &environment, span)
+        let arity = invoke_d9_mechanism(identity, &[], &environment, span)
             .expect("D9 STRINGP route")
             .expect_err("D9 STRINGP rejects zero arguments");
         assert_eq!(arity.kind, ErrorKind::Arity);
