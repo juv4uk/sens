@@ -1,15 +1,33 @@
 //! Regression witnesses for the Lisp-owned Jev/System-One-like probabilistic decision slice.
 //!
-//! These tests exercise only the contract/data layer. There is no model call,
-//! provider identity, new SID, or Rust Value variant.
+//! These tests exercise the SENS-owned contract and a fixture-backed local model adapter.
+//! No external provider is called; no new SID or Rust Value variant is introduced.
 
-use sens::{eval_program, load_core_library, Session};
+use sens::{exact_domain_fraction_parts, eval_program, load_core_library, BinaryNumber, Value, Session};
 use std::{
     io::{Read, Write},
     net::TcpListener,
     thread,
     time::Duration,
 };
+
+fn d48_probability_word(value: u64) -> BinaryNumber {
+    const WIDTH: usize = 48;
+    assert!(value < (1_u64 << (WIDTH - 1)), "value must fit positive D48");
+    let bits: Vec<u8> = (0..WIDTH)
+        .rev()
+        .map(|shift| ((value >> shift) & 1) as u8)
+        .collect();
+    BinaryNumber::from_numeric_domain_bits(WIDTH, &bits).expect("explicit D48 word")
+}
+
+fn d48_probability(numerator: u64, denominator: u64) -> Value {
+    assert!(denominator > 0, "probability denominator must be nonzero");
+    let numerator = d48_probability_word(numerator);
+    let denominator = d48_probability_word(denominator);
+    exact_domain_fraction_parts(false, &numerator, &denominator)
+        .expect("exact, same-domain D48 probability")
+}
 
 fn eval_probabilistic_decision(source: &str) -> String {
     let mut session = Session::default();
@@ -34,6 +52,20 @@ fn eval_probabilistic_decision(source: &str) -> String {
         &mut session,
     )
     .expect("typed System One contract should load");
+    // Probability data must retain its domain width. Bare Rational literals are
+    // deliberately rejected by SENS mathematical operations.
+    for (name, numerator, denominator) in [
+        ("доля-3-4", 3, 4),
+        ("доля-1-4", 1, 4),
+        ("доля-2-3", 2, 3),
+        ("доля-4-5", 4, 5),
+        ("доля-1-2", 1, 2),
+        ("доля-3-2", 3, 2),
+    ] {
+        session
+            .environment
+            .define(name, d48_probability(numerator, denominator));
+    }
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
@@ -50,17 +82,17 @@ fn choice_observation_keeps_probability_confidence_and_provenance() {
               (observation
                 (спостерегти-вибір
                   question
-                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
+                  (list (list (quote billing) доля-3-4) (list (quote technical) доля-1-4))
                   (quote ((source synthetic) (revision 1))))))
           (list
             (упевненість-спостереження observation)
             (походження-спостереження observation)
-            (second (правило-вибору observation (quote billing) (частка 2 3)))))
+            (second (правило-вибору observation (quote billing) доля-2-3))))
     "#;
 
     assert_eq!(
         eval_probabilistic_decision(source),
-        r#"((частка 3 4) ((source synthetic) (revision 1)) accept)"#
+        r#"(доля-3-4 ((source synthetic) (revision 1)) accept)"#
     );
 }
 
@@ -74,7 +106,7 @@ fn invalid_choice_distribution_fails_closed_when_not_normalized() {
           (result-status
             (спостерегти-вибір
               question
-              (list (list (quote billing) (частка 2 3)) (list (quote technical) (частка 1 4)))
+              (list (list (quote billing) доля-2-3) (list (quote technical) доля-1-4))
               (quote ((source malformed))))))
     "#;
 
@@ -88,11 +120,11 @@ fn noul_policy_is_explicit_threshold_control_not_truthiness() {
               (observation
                 (спостерегти-так-ні
                   question
-                  (частка 3 4)
+                  доля-3-4
                   (quote ((source synthetic))))))
           (list
-            (second (правило-так-ні observation (частка 2 3)))
-            (second (правило-так-ні observation (частка 4 5)))
+            (second (правило-так-ні observation доля-2-3))
+            (second (правило-так-ні observation доля-4-5))
             (упевненість-спостереження observation)))
     "#;
 
@@ -109,7 +141,7 @@ fn score_observation_uses_the_same_typed_distribution_contract() {
               (observation
                 (спостерегти-шкалу
                   question
-                  (list (list (quote low) (частка 1 4)) (list (quote medium) (частка 1 2)) (list (quote high) (частка 1 4)))
+                  (list (list (quote low) доля-1-4) (list (quote medium) доля-1-2) (list (quote high) доля-1-4))
                   (quote ((source synthetic))))))
           (list
             (car observation)
@@ -131,14 +163,14 @@ fn independent_questions_do_not_invent_joint_consistency() {
                   (запит-вибору
                     (quote route)
                     (quote (billing technical)))
-                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
+                  (list (list (quote billing) доля-3-4) (list (quote technical) доля-1-4))
                   (quote ((source a)))))
               (right
                 (спостерегти-вибір
                   (запит-вибору
                     (quote route-2)
                     (quote (billing technical)))
-                  (list (list (quote billing) (частка 1 4)) (list (quote technical) (частка 3 4)))
+                  (list (list (quote billing) доля-1-4) (list (quote technical) доля-3-4))
                   (quote ((source b))))))
           (car (узгодженість-двох-запитів left right (quote independent))))
     "#;
@@ -154,14 +186,14 @@ fn declared_agreement_with_different_distributions_is_disputed() {
                   (запит-вибору
                     (quote route)
                     (quote (billing technical)))
-                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
+                  (list (list (quote billing) доля-3-4) (list (quote technical) доля-1-4))
                   (quote ((source a)))))
               (right
                 (спостерегти-вибір
                   (запит-вибору
                     (quote route)
                     (quote (billing technical)))
-                  (list (list (quote billing) (частка 1 4)) (list (quote technical) (частка 3 4)))
+                  (list (list (quote billing) доля-1-4) (list (quote technical) доля-3-4))
                   (quote ((source b))))))
           (result-status
             (узгодженість-двох-запитів left right (quote agree))))
@@ -177,10 +209,10 @@ fn noul_policy_rejects_out_of_domain_threshold() {
               (observation
                 (спостерегти-так-ні
                   question
-                  (частка 3 4)
+                  доля-3-4
                   (quote ((source synthetic))))))
           (result-status
-            (правило-так-ні observation (частка 3 2))))
+            (правило-так-ні observation доля-3-2)))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "invalid");
@@ -196,10 +228,10 @@ fn choice_policy_rejects_out_of_domain_threshold() {
               (observation
                 (спостерегти-вибір
                   question
-                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
+                  (list (list (quote billing) доля-3-4) (list (quote technical) доля-1-4))
                   (quote ((source synthetic))))))
           (result-status
-            (правило-вибору observation (quote billing) (частка 3 2))))
+            (правило-вибору observation (quote billing) доля-3-2)))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "invalid");
@@ -242,9 +274,9 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
               (observation
                 (спостерегти-вибір
                   question
-                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
+                  (list (list (quote billing) доля-3-4) (list (quote technical) доля-1-4))
                   (quote ((source synthetic) (revision 1)))))
-              (decision (правило-автоматичного-вибору observation (частка 2 3))))
+              (decision (правило-автоматичного-вибору observation доля-2-3)))
           (list
             (second decision)
             (second (fourth decision))
@@ -263,9 +295,9 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
               (observation
                 (спостерегти-вибір
                   question
-                  (list (list (quote billing) (частка 1 2)) (list (quote technical) (частка 1 2)))
+                  (list (list (quote billing) доля-1-2) (list (quote technical) доля-1-2))
                   (quote ((source synthetic) (case tied)))))
-              (decision (правило-автоматичного-вибору observation (частка 1 2))))
+              (decision (правило-автоматичного-вибору observation доля-1-2)))
           (list
             (second decision)
             (second (fourth decision))
@@ -284,9 +316,9 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
               (observation
                 (спостерегти-вибір
                   question
-                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
+                  (list (list (quote billing) доля-3-4) (list (quote technical) доля-1-4))
                   (quote ((source synthetic)))))
-              (decision (правило-автоматичного-вибору observation (частка 4 5))))
+              (decision (правило-автоматичного-вибору observation доля-4-5)))
           (list
             (second decision)
             (second (fourth decision))
@@ -307,10 +339,10 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                 (list
                   (quote choice-observation/1)
                   question
-                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
-                  (частка 1 4)
+                  (list (list (quote billing) доля-3-4) (list (quote technical) доля-1-4))
+                  доля-1-4
                   (quote ((source synthetic))))))
-          (result-status (правило-автоматичного-вибору observation (частка 2 3))))
+          (result-status (правило-автоматичного-вибору observation доля-2-3)))
     "#;
     assert_eq!(eval_probabilistic_decision(forged_confidence), "invalid");
 
@@ -322,9 +354,9 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
               (observation
                 (спостерегти-вибір
                   question
-                  (list (list (quote billing) (частка 3 4)) (list (quote technical) (частка 1 4)))
+                  (list (list (quote billing) доля-3-4) (list (quote technical) доля-1-4))
                   (quote ((source synthetic))))))
-          (result-status (правило-автоматичного-вибору observation (частка 3 2))))
+          (result-status (правило-автоматичного-вибору observation доля-3-2)))
     "#;
     assert_eq!(eval_probabilistic_decision(invalid_threshold), "invalid");
 }
@@ -383,15 +415,15 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
              (answers
                (список
                  (спостерегти-вибір-системи-один choice-question
-                   (список (список (як-є billing) (частка 3 4))
-                           (список (як-є technical) (частка 1 4)))
+                   (список (список (як-є billing) доля-3-4)
+                           (список (як-є technical) доля-1-4))
                    (як-є ((source synthetic) (question route))))
-                 (спостерегти-так-ні noul-question (частка 2 3)
+                 (спостерегти-так-ні noul-question доля-2-3
                    (як-є ((source synthetic) (question urgent))))
                  (спостерегти-шкалу-системи-один score-question
-                   (список (список (як-є low) (частка 1 4))
-                           (список (як-є medium) (частка 1 2))
-                           (список (як-є high) (частка 1 4)))
+                   (список (список (як-є low) доля-1-4)
+                           (список (як-є medium) доля-1-2)
+                           (список (як-є high) доля-1-4))
                    (як-є ((source synthetic) (question severity))))))
              (response (відповідь-системи-один request answers)))
         (список
@@ -454,8 +486,8 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
              (questions (список choice-question noul-question))
              (request (запит-системи-один state questions))
              (choice-answer (спостерегти-вибір-системи-один choice-question
-               (список (список (як-є billing) (частка 3 4))
-                           (список (як-є technical) (частка 1 4)))
+               (список (список (як-є billing) доля-3-4)
+                           (список (як-є technical) доля-1-4))
                (як-є ((source synthetic)))))
              (missing (відповідь-системи-один request (список choice-answer)))
              (duplicate (відповідь-системи-один request (список choice-answer choice-answer)))
