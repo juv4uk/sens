@@ -23,10 +23,10 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/install-zig
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.99.0
 
       - name: Build SENS binaries (sens + sens-trit)
-        run: cargo build -p sens-cli --bin sens --bin sens-trit
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
       - name: Remint pairs via canonical Zig T5M
         env:
