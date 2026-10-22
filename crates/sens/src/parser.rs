@@ -568,13 +568,11 @@ impl Parser<'_> {
             });
         }
 
-        // The complete 8-bit space is reserved for function identities.
-        // This is a direct SID read, not numeric conversion:
-        // `00001100` is function SID 00001100; decimal `12` remains a number.
+        // У чинному Contract 11.9 текст із восьми бітів НЕ є функцією:
+        // семантичний код вимагає і ширини, і ратифікованого домену.
+        // Історичний плоский запис лишається тільки інертним символом;
+        // точне D8-слово розпізнає окремий доменний читач.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            // Compatibility reader: retain historical W8-looking metadata
-            // only as inert textual data. It cannot mint a D8 function or SID.
-            // The exact-domain reader handles modern W8 using its explicit mode.
             return Ok(Expr {
                 kind: ExprKind::Symbol(Rc::from(token)),
                 span: Span {
