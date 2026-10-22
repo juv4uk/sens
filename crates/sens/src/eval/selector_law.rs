@@ -340,6 +340,44 @@ mod tests {
         }
     }
 
+    // #2016: 0/1 suffix meanings are local to CAR/CDR; they do not become
+    // a universal D3-root grammar merely because an exact coordinate exists.
+    // D7 stays text/data even when its bits resemble a selector address.
+    #[test]
+    fn other_d3_roots_do_not_inherit_the_selector_prefix_generator() {
+        let mut rejected = 0usize;
+        for width in [3usize, 4, 5, 6, 8, 9, 10] {
+            for root in [0b000u16, 0b001, 0b010, 0b101, 0b110, 0b111] {
+                for suffix in 0..(1u16 << (width - 3)) {
+                    let bits = (root << (width - 3)) | suffix;
+                    let candidate = identity(width, bits);
+                    assert!(
+                        decode(candidate).is_none(),
+                        "test_id=2016-GENERATOR-LOCAL layer=SENS-mechanism D{width}:{bits:0width$b} expected=not-selector",
+                        width = width,
+                    );
+                    assert!(
+                        invoke(candidate, &[Value::Nil], Span::default()).is_none(),
+                        "test_id=2016-GENERATOR-LOCAL layer=SENS-mechanism D{width}:{bits:0width$b} expected=no-selector-invocation",
+                        width = width,
+                    );
+                    rejected += 1;
+                }
+            }
+        }
+        assert_eq!(rejected, 1434);
+
+        for bits in 0..128u8 {
+            let text7 = DomainIdentity::D7(crate::D7DataWord::from_word(
+                crate::Bit7::new(bits).unwrap(),
+            ));
+            assert!(
+                decode(text7).is_none(),
+                "test_id=2016-TEXT7-BOUNDARY layer=SENS-mechanism D7:{bits:07b} expected=not-selector"
+            );
+        }
+    }
+
     #[test]
     fn boundary_rejects_d7_nonselector_and_unsupported_arity() {
         // D7:1000000 must never be treated as an extension of D3 CAR.
