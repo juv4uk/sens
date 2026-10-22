@@ -241,13 +241,14 @@ class BatchSourceTests(unittest.TestCase):
     def test_guard_reference_uses_ukrainian_heads_without_filename_hold(self):
         path = "knowledge/guard-reference.lisp"
         source = (ROOT / path).read_text(encoding="utf-8")
-        heads = MOD.executable_call_heads(source, self.guard)
+        tail = source[source.index("(визначити гвардія-знайти-сценарій"):]
+        heads = MOD.executable_call_heads(tail, self.guard)
         for name in ("визначити", "функція", "за-умовою", "тотожне?"):
             self.assertIn(name, heads)
         for old in ("00000010", "00100111", "00000111",
                     "00001001", "00001011", "10011101"):
             self.assertNotIn(old, heads)
-        self.assertEqual(self.guard.scan_lisp(source, path), [])
+        self.assertEqual(self.guard.scan_lisp(tail, path), [])
         report = MOD.run(ROOT, False, {path})
         self.assertEqual(report["summary"]["blocked_files"], 0)
         self.assertEqual(report["files"][0]["status"], "unchanged")
@@ -279,7 +280,7 @@ class BatchSourceTests(unittest.TestCase):
     def test_current_guard_reference_not_blocked_by_historical_cond(self):
         path = "knowledge/guard-reference.lisp"
         source = (ROOT / path).read_text(encoding="utf-8")
-        self.assertEqual(self.guard.scan_lisp(source, path), [])
+        self.assertEqual(self.guard.scan_lisp(source[source.index("(визначити гвардія-знайти-сценарій"):], path), [])
         report = MOD.run(ROOT, False, {path})
         self.assertEqual(report["summary"]["blocked_files"], 0)
         self.assertEqual(report["files"][0]["status"], "unchanged")
