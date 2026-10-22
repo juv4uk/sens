@@ -98,7 +98,7 @@ fn choice_observation_keeps_probability_confidence_and_provenance() {
 
     assert_eq!(
         eval_probabilistic_decision(source),
-        r#"(доля-3-4 ((source synthetic) (revision 1)) accept)"#
+        r#"(3/4 ((source synthetic) (revision 1)) accept)"#
     );
 }
 
@@ -109,7 +109,7 @@ fn invalid_choice_distribution_fails_closed_when_not_normalized() {
                 (запит-вибору
                   (як-є route)
                   (як-є (billing technical)))))
-          (result-status
+          (результат-стан
             (спостерегти-вибір
               question
               (список (список (як-є billing) доля-2-3) (список (як-є technical) доля-1-4))
@@ -203,7 +203,7 @@ fn declared_agreement_with_different_distributions_is_disputed() {
                     (як-є (billing technical)))
                   (список (список (як-є billing) доля-1-4) (список (як-є technical) доля-3-4))
                   (як-є ((source b))))))
-          (result-status
+          (результат-стан
             (узгодженість-двох-запитів left right (як-є agree))))
     "#;
 
@@ -221,7 +221,7 @@ fn noul_policy_rejects_out_of_domain_threshold() {
                     (список (як-є yes) доля-3-4)
                     (список (як-є no) доля-1-4))
                   (як-є ((source synthetic))))))
-          (result-status
+          (результат-стан
             (правило-так-ні observation доля-3-2)))
     "#;
 
@@ -240,7 +240,7 @@ fn choice_policy_rejects_out_of_domain_threshold() {
                   question
                   (список (список (як-є billing) доля-3-4) (список (як-є technical) доля-1-4))
                   (як-є ((source synthetic))))))
-          (result-status
+          (результат-стан
             (правило-вибору observation (як-є billing) доля-3-2)))
     "#;
 
@@ -353,7 +353,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                   (список (список (як-є billing) доля-3-4) (список (як-є technical) доля-1-4))
                   доля-1-4
                   (як-є ((source synthetic))))))
-          (result-status (правило-автоматичного-вибору observation доля-2-3)))
+          (результат-стан (правило-автоматичного-вибору observation доля-2-3)))
     "#;
     assert_eq!(eval_probabilistic_decision(forged_confidence), "invalid");
 
@@ -367,7 +367,7 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
                   question
                   (список (список (як-є billing) доля-3-4) (список (як-є technical) доля-1-4))
                   (як-є ((source synthetic))))))
-          (result-status (правило-автоматичного-вибору observation доля-3-2)))
+          (результат-стан (правило-автоматичного-вибору observation доля-3-2)))
     "#;
     assert_eq!(eval_probabilistic_decision(invalid_threshold), "invalid");
 }
