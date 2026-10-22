@@ -687,6 +687,31 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
             Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
         );
     }
+    // D10-слот є першокласною мовною функцією, а не повторно
+    // переписуваною назвою. FS, TCP і process можуть звернутися до
+    // спільного UTF-8 після першого завантаження; другий DEFINE
+    // того самого доменного коду порушує незмінність SENS.
+    let first = semantic_registry::domain_identity_for_surface(
+        "кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні?",
+    )
+    .expect("ратифікована Д10 координата первинної UTF-8 функції");
+    if session.environment.domain_code_slot(first).is_some() {
+        let terminal = crate::encode_text7("успішно-декодовано?", crate::Text7Layout::Uk)
+            .expect("кінцеве ім'я UTF-8 визначене українською клавіатурою")
+            .to_canonical_wire_token();
+        let value = session.environment.get(&terminal).ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                "неповне завантаження UTF-8: Д10 функція вже існує, але кінцеве SENS-визначення відсутнє",
+                Span::default(),
+            )
+        })?;
+        bind_missing_stable_surface_peers(&session.environment);
+        return Ok(EvalResult {
+            value,
+            output: session.environment.output_snapshot(),
+        });
+    }
     let result = binary_bootstrap::utf8_program()?.execute(session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
