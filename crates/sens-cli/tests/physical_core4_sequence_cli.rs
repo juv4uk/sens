@@ -432,6 +432,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-keep-last-unique-atoms-general",
         "list-move-first-match-to-front-general",
         "list-all-unordered-position-pairs-general",
+        "tree-pair-tally-unary-general",
         "list-all-subsets-by-position-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
