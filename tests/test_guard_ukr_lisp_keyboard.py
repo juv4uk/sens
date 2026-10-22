@@ -5,10 +5,14 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 from pathlib import Path
+from unittest.mock import patch
 
 
 GUARD = Path(__file__).resolve().parents[1] / "scripts/guard_ukr_lisp_keyboard.py"
+sys.path.insert(0, str(GUARD.parent))
+import guard_ukr_lisp_keyboard as guard
 
 
 class UkrainianLispGitGuard(unittest.TestCase):
@@ -105,6 +109,33 @@ class UkrainianLispGitGuard(unittest.TestCase):
         self.git("add", ".")
         self.git("commit", "-qm", "зламане")
         self.assertEqual(self.check("--paths-from", str(names)).returncode, 1)
+
+    def test_pre_push_fetches_an_unseen_advertised_remote_base_with_timeout(self):
+        responses = [
+            SimpleNamespace(returncode=1, stdout=b"", stderr=b"missing"),
+            SimpleNamespace(returncode=0, stdout=b"", stderr=b""),
+            SimpleNamespace(returncode=0, stdout=b"", stderr=b""),
+        ]
+        with patch.object(guard.subprocess, "run", side_effect=responses) as run:
+            guard.ensure_remote_revision("a" * 40, "refs/heads/main")
+
+        self.assertEqual(run.call_count, 3)
+        fetch = run.call_args_list[1]
+        self.assertEqual(
+            fetch.args[0],
+            ["git", "fetch", "--no-tags", "origin", "refs/heads/main"],
+        )
+        self.assertEqual(fetch.kwargs["timeout"], 20)
+
+    def test_pre_push_fails_closed_if_bounded_fetch_does_not_restore_base(self):
+        responses = [
+            SimpleNamespace(returncode=1, stdout=b"", stderr=b"missing"),
+            SimpleNamespace(returncode=0, stdout=b"", stderr=b""),
+            SimpleNamespace(returncode=1, stdout=b"", stderr=b"still missing"),
+        ]
+        with patch.object(guard.subprocess, "run", side_effect=responses):
+            with self.assertRaisesRegex(ValueError, "відсутня після bounded fetch"):
+                guard.ensure_remote_revision("b" * 40, "refs/heads/main")
 
 
 if __name__ == "__main__":

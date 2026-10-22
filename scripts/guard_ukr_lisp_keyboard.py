@@ -60,6 +60,43 @@ def object_bytes(revision: str, path: str) -> bytes:
     return git("show", spec)
 
 
+def ensure_remote_revision(revision: str, remote_ref: str) -> None:
+    """Fetch a just-advertised push base when this clone has not seen it yet."""
+    probe = subprocess.run(
+        ["git", "cat-file", "-e", f"{revision}^{{commit}}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if probe.returncode == 0:
+        return
+
+    try:
+        fetched = subprocess.run(
+            ["git", "fetch", "--no-tags", "origin", remote_ref],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            timeout=20,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError(
+            f"не вдалося за 20 с отримати push-базу {remote_ref}"
+        ) from exc
+    if fetched.returncode:
+        detail = fetched.stderr.decode("utf-8", "replace").strip()
+        raise ValueError(
+            f"не вдалося отримати push-базу {remote_ref}: {detail}"
+        )
+
+    try:
+        git("cat-file", "-e", f"{revision}^{{commit}}")
+    except ValueError as exc:
+        raise ValueError(
+            f"push-база {revision} відсутня після bounded fetch {remote_ref}"
+        ) from exc
+
+
 def first_bad(data: bytes) -> str | None:
     try:
         source = data.decode("utf-8", errors="strict")
@@ -103,7 +140,7 @@ def validate_push() -> int:
         fields = line.rstrip("\n").split()
         if len(fields) != 4:
             raise ValueError("пошкоджений pre-push протокол Git")
-        _local_ref, local_sha, _remote_ref, remote_sha = fields
+        _local_ref, local_sha, remote_ref, remote_sha = fields
         if set(local_sha) == {"0"}:  # видалення ref нічого не додає
             continue
         if set(remote_sha) == {"0"}:
@@ -117,6 +154,7 @@ def validate_push() -> int:
                 ) from exc
         else:
             base = remote_sha
+            ensure_remote_revision(base, remote_ref)
         if validate(modified_paths(base, local_sha), local_sha):
             return 1
     return 0
