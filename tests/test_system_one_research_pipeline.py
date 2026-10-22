@@ -36,6 +36,9 @@ evaluator = load_research_module(
 calibrator = load_research_module(
     "system-one-calibrate-20261022.py", "system_one_calibrate"
 )
+comparison = load_research_module(
+    "system-one-compare-20261022.py", "system_one_compare"
+)
 
 
 def write_jsonl(path: Path, rows: list[dict]) -> bytes:
@@ -506,6 +509,84 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             )
             self.assertEqual(report["count"], 10)
             self.assertEqual(report["split"], "test")
+
+    def test_comparison_runner_keeps_holdout_out_of_training(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            seed_rows = []
+            for label_index, label in enumerate(student.LABELS):
+                for split, repeat in (("train", 2), ("validation", 1), ("test", 1)):
+                    for index in range(repeat):
+                        seed_rows.append(
+                            {
+                                "id": f"{split}-{label_index}-{index}",
+                                "split": split,
+                                "text": f"слово{label_index} приклад{index} тема {label}",
+                                "gold": label,
+                                "source": "synthetic-curated-seed",
+                                "version": 1,
+                            }
+                        )
+            seed_path = root / "seed.jsonl"
+            seed_raw = write_jsonl(seed_path, seed_rows)
+            seed_sha = hashlib.sha256(seed_raw).hexdigest()
+            teacher_paths = {}
+            for split in ("train", "validation", "test"):
+                observations = []
+                for row in seed_rows:
+                    if row["split"] != split:
+                        continue
+                    observations.append(
+                        {
+                            **row,
+                            "dataset_sha256": seed_sha,
+                            "prompt_version": "fixture-prompt-v1",
+                            "teacher": "fixture-teacher-v1",
+                            "teacher_distribution": exact_distribution(row["gold"]),
+                            "teacher_prediction": row["gold"],
+                        }
+                    )
+                output = root / f"teacher-{split}.jsonl"
+                write_jsonl(output, observations)
+                teacher_paths[split] = output
+
+            output_dir = root / "comparison"
+            report = comparison.run(
+                Namespace(
+                    input=seed_path,
+                    teacher_train=teacher_paths["train"],
+                    teacher_validation=teacher_paths["validation"],
+                    teacher_test=teacher_paths["test"],
+                    output_dir=output_dir,
+                    threshold=0.5,
+                    bins=5,
+                    smoothing=1.0,
+                    min_count=1,
+                    gold_weight=0.25,
+                    min_temperature=0.05,
+                    max_temperature=20.0,
+                    grid_points=51,
+                    overwrite=False,
+                )
+            )
+            self.assertEqual(report["result"], "measured")
+            self.assertEqual(report["dataset_sha256"], seed_sha)
+            self.assertEqual(report["teacher_observations_used_for_training"], ["train"])
+            self.assertFalse(report["test_used_for_training_or_calibration"])
+            self.assertEqual(set(report["comparison"]), {"validation", "test"})
+            for split in ("validation", "test"):
+                self.assertEqual(
+                    set(report["comparison"][split]),
+                    {"teacher", "student_gold", "student_soft"},
+                )
+                for model_name in ("teacher", "student_gold", "student_soft"):
+                    self.assertIn("accuracy", report["comparison"][split][model_name])
+            for result in report["calibration"].values():
+                self.assertLessEqual(result["nll_after"], result["nll_before"] + 1e-12)
+            saved = json.loads((output_dir / "comparison.json").read_text(encoding="utf-8"))
+            self.assertFalse(saved["test_used_for_training_or_calibration"])
+            self.assertTrue((output_dir / "student-gold-test.jsonl").is_file())
+            self.assertTrue((output_dir / "student-soft-test.jsonl").is_file())
 
     def test_temperature_calibration_uses_validation_only_and_nll_does_not_worsen(self):
         with tempfile.TemporaryDirectory() as directory:
