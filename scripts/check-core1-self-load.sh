@@ -21,6 +21,14 @@ if LC_ALL=C grep -Eq '^[(]визначити[[:space:]]+C1-' "$source"; then
   echo 'CORE1_LEGACY_CALLABLE_RED: історичне C1 визначення в чинному SENS' >&2
   exit 1
 fi
+# Вихідні трьох-, чотирьох- й п'ятибітні SID-літерали не є
+# викличними словами сучасної драбини. Тут читаємо лише текстову
+# форму програми; істину виконання доводять SENS/Zig нижче.
+if sed '/^[[:space:]]*;/d' "$source" |
+   LC_ALL=C grep -Eq '(^|[[:space:](])0[01]{2,4}([[:space:])]|$)'; then
+  echo 'CORE1_OLD_RAW_DOMAIN_WORD: замінити на повну укр проєкцію D3–D5' >&2
+  exit 1
+fi
 "$sens" --t5m-mint "$source" "$physical"
 "$trit" open "$physical" > "$view"
 "$trit" verify-view "$physical" >/dev/null
