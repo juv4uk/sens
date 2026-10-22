@@ -38,7 +38,7 @@ permissions:
 concurrency:
   group: remint-queued-v2-${{ github.ref }}
   cancel-in-progress: false
-  queue: max
+  queue: single
 
 jobs:
   remint:
