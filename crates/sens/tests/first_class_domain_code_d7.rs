@@ -67,3 +67,31 @@ fn ukrainian_d3_codes_are_passed_and_invoked_as_first_class_functions() {
         Err(_) => {} // СЕНС може обґрунтовано відхилити REШТА від атома.
     }
 }
+
+#[test]
+fn last_atomic_run_uses_real_first_class_d3_predicate_without_copying_pairs() {
+    // Сам Lisp виконує три незалежні закони для одного проходу за суфіксами.
+    // Rust не імітує ATOM, CAR, CDR або семантику D1.
+    let source = include_str!("../../../lib/list-last-atomic-run-first-class-zero-copy-general.lisp");
+    let mut session = Session::default();
+    let actual = sens::eval_program(source, &mut session)
+        .unwrap_or_else(|error| panic!(
+            "test_id=D3-LAST-ATOMIC-RUN layer=SENS actual_error={error}"
+        )).value;
+    assert_eq!(actual.as_predicate_bit(), Some(true),
+        "test_id=D3-LAST-ATOMIC-RUN layer=D1 expected=так actual={actual}");
+
+    // Зміна лише реального критерію атомарності повинна бути виявлена
+    // живими позитивними й негативними Lisp-свідками цього ж файлу.
+    let before = "(критерій (перше елементи))";
+    let after = "(хибне? (критерій (перше елементи)))";
+    assert_eq!(source.matches(before).count(), 1,
+        "test_id=D3-LAST-ATOMIC-RUN layer=mutant expected=unique_site");
+    let mutant = source.replacen(before, after, 1);
+    let mut negative = Session::default();
+    match sens::eval_program(&mutant, &mut negative) {
+        Ok(value) => assert_ne!(value.value.as_predicate_bit(), Some(true),
+            "test_id=D3-LAST-ATOMIC-RUN layer=SENS mutant_accepted"),
+        Err(_) => {} // Реальний SENS має право відкинути хибну форму через D3 CAR.
+    }
+}
