@@ -1,6 +1,9 @@
 benchmarks/contest-uk/максимум-компактний.lisp
 benchmarks/contest-uk/збільшити-всі-компакт.lisp
 benchmarks/contest-uk/збільшити-всі-стисло.lisp
+lib/list-every-sixth-linear-general.lisp
+lib/list-maximum-fold-general.lisp
+lib/list-tail-after-third-atom-zero-copy-general.lisp
 benchmarks/sens-program-size/fixtures/decimal-arithmetic.lisp
 experiments/probabilistic-decision-jev-like.lisp
 knowledge/foreign-tools-census.lisp
@@ -99,6 +102,3 @@ benchmarks/contest-uk/кількість-атомів-компакт.lisp
 benchmarks/contest-uk/лише-атоми-один-guard.lisp
 lib/list-every-fifth-linear-general.lisp
 benchmarks/contest-uk/збільшити-всі.lisp
-lib/list-every-sixth-linear-general.lisp
-lib/list-maximum-fold-general.lisp
-lib/list-tail-after-third-atom-zero-copy-general.lisp
