@@ -73,6 +73,64 @@ Seed-корпус — лише перевірка формату та почат
 
 Для curriculum і синтетичного наслідування є свіже дослідження [ICLR 2026: Pedagogically-Inspired Data Synthesis](https://proceedings.iclr.cc/paper_files/paper/2026/hash/b693a240cf1009bff9fa4422141c9392-Abstract-Conference.html). Це напрям для наступного експерименту, не підстава наперед заявляти очікуваний приріст.
 
+## Відтворюваний перший запуск
+
+Після встановлення локального vLLM і перевірки наявної пам'яті виконується так:
+
+```bash
+export SENS_SYSTEM_ONE_API_KEY='локальний-тимчасовий-ключ'
+vllm serve Qwen/Qwen3.5-2B --host 127.0.0.1 --port 8000 --api-key "$SENS_SYSTEM_ONE_API_KEY"
+```
+
+Інший термінал, з кореня репозиторію:
+
+```bash
+# 1) Еталонна базова лінія: навчання лише на gold-мітках.
+python3 research/system-one-compact-student-20261022.py train \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --output /tmp/system-one-gold-student.json
+
+# 2) Зібрати оцінки вчителя ТІЛЬКИ для train.
+python3 research/system-one-teacher-observe-20261022.py \
+  --model Qwen/Qwen3.5-2B \
+  --split train \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --output /tmp/system-one-teacher-train.jsonl
+
+# 3) Навчити другого компактного учня на м'яких оцінках і gold-мітках.
+python3 research/system-one-compact-student-20261022.py train \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --teacher /tmp/system-one-teacher-train.jsonl \
+  --gold-weight 0.25 \
+  --output /tmp/system-one-distilled-student.json
+
+# 4) Вибрати поріг ТІЛЬКИ на validation.
+python3 research/system-one-compact-student-20261022.py predict \
+  --model /tmp/system-one-distilled-student.json \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --split validation \
+  --output /tmp/system-one-validation.jsonl
+python3 research/system-one-evaluate-20261022.py \
+  --input /tmp/system-one-validation.jsonl \
+  --expected-split validation --threshold 0.80
+
+# 5) Остаточний test запуск окремо після фіксації порога.
+python3 research/system-one-compact-student-20261022.py predict \
+  --model /tmp/system-one-distilled-student.json \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --split test \
+  --output /tmp/system-one-test.jsonl
+python3 research/system-one-evaluate-20261022.py \
+  --input /tmp/system-one-test.jsonl \
+  --expected-split test --threshold 0.80
+```
+
+Обробник учителя відхиляє будь-яку адресу, крім `127.0.0.1`, не підставляє відсутні оцінки і записує точний розподіл із сумою `1_000_000_000 / 1_000_000_000). Для `validation` або `test` збір вчительських оцінок вимагає явного `--allow-holdout`; для навчання учня такі приклади відхиляються. Вихідні дані моделей зберігаються окремо в `/tmp`, не додаються до seed-корпусу.
+
+Перший учень — малий багатокласовий наївний баєсів класифікатор зі словником і логарифмами ймовірностей; він навмисно написаний без сторонніх залежностей, щоб перевірити користь м'яких міток без GPU. Це лише базова лінія. Лише якщо вона показує відтворюваний приріст на validation, є сенс переходити до донавчання трансформера Qwen3.5-0.8B або іншого компактного учня.
+
+Документація vLLM підтверджує сумісність Chat Completions, `logprobs` та обмеженого набору `structured_outputs.choice` ([інтерфейс сервера](https://docs.vllm.ai/en/latest/serving/online_serving/openai_compatible_server/), [структуровані відповіді](https://docs.vllm.cc/en/latest/features/structured_outputs/)). Вона також попереджає, що ключ сервера не захищає всі його шляхи, тому прив'язка до loopback тут принципова, а не декоративна. Модель Qwen3.5-2B має картку з Apache-2.0 та вказаною сумісністю з vLLM ([картка моделі](https://huggingface.co/Qwen/Qwen3.5-2B)). Фактичну точність українською ці посилання не гарантують — її потрібно виміряти локально.
+
 ## Межа виконаного
 
-На момент створення цього плану додано й перевірено схему локального адаптера, типізовану політику, тестовий HTTP-свідок і синтетичний seed-корпус. **Ваги реальної моделі не завантажувалися, учительські прогнози не збиралися, компактну модель не навчали, а показники точності/калібрування не вимірювали.** Наступний підтверджуваний крок — запустити локального вчителя на train, зберегти його оцінки з походженням і звірити їх з еталонними мітками до будь-якого донавчання.
+На момент останньої перевірки додано локальний адаптер, типізовану політику, тестовий HTTP-свідок, 60 синтетичних прикладів, збирач учительських оцінок, навчання компактного CPU-учня та оцінювач. **Ваги реальної моделі ще не завантажувалися, учительські прогнози не збиралися, компактного учня фактично не навчали, а показники точності/калібрування не вимірювали.** Наступний крок — виконати наведений запуск на машині, де доступні ресурси для локальної моделі; лише після цього можна чесно звітувати фактичні метрики.
