@@ -40,52 +40,38 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
             self.assertEqual(unescaped, ["lib/поміняти-перші-два.lisp"])
 
     def test_ci_never_treats_human_lisp_as_physical_t5m(self):
-        # Структурний guard чинного шляху: .lisp -> Zig T5M -> фізичний
-        # .sens -> справжній binary SENS. Це НЕ семантичний Python-оракул.
+        # Застосовується тільки дійсний Zig/T5M + SENS reader/eval.
+        # Ні Python preview, ні JSON-звіт не можуть визначати виконуваність.
         workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         start = workflow.index(
             "      - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS"
         )
-        # Межа наступного кроку CI, а не застарілий коментар перед бенчмарком.
         end = workflow.index("\n      - name:", start + 1)
         execution = workflow[start:end]
         self.assertIn("bash scripts/execute_changed_lisp_t5m.sh", execution)
         self.assertIn('"$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt"', execution)
 
-        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
-            encoding="utf-8"
-        )
-        # Нормативний шлях — SENS reader + Zig; Python є тільки
-        # необов'язковим явно вибраним історичним preview.
-        self.assertIn('case "${SENS_NATIVE_T5M:-1}" in', runner)
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
+        self.assertIn('if [[ "${SENS_NATIVE_T5M:-1}" != 1 ]]; then', runner)
         self.assertIn('SENS_NATIVE_T5M_INVALID', runner)
-        self.assertIn('run_native_t5m_program', runner)
-        self.assertIn('if [[ "${SENS_NATIVE_T5M:-1}" == 1 ]]; then', runner)
+        self.assertNotIn('python3 scripts/migrate-three-pass.py', runner)
+        self.assertNotIn('diagnose_sens_authority_mint', runner)
+        self.assertIn('run_native_t5m_program() {', runner)
+        self.assertIn('  run_native_t5m_program\ndone < "$manifest"', runner)
         self.assertIn('mint_flag=--t5m-mint', runner)
         self.assertIn('mint_flag=--t5m-mint-pair', runner)
         self.assertIn('"$binary" "$mint_flag" "$file" "$physical" "${binding_sources[@]}"', runner)
         self.assertIn('"$native_open" open "$physical"', runner)
+        self.assertIn('"$native_open" verify-view "$physical"', runner)
         self.assertIn('"$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}"', runner)
-        self.assertLess(runner.index('  binding_sources=()'),
-                        runner.index('    run_native_t5m_program\n    continue'))
-        # Історичний режим не видалений, але він не є типовим входом.
-        self.assertIn('python3 scripts/migrate-three-pass.py "$file"', runner)
-        self.assertIn('--codec t5m --source-surface укр', runner)
-        self.assertLess(runner.index('    run_native_t5m_program'),
-                        runner.index('python3 scripts/migrate-three-pass.py'))
-        self.assertIn('pair="$dir/$(basename "$file" .lisp).sens"', runner)
-        # --t5m-file читає текстовий Lisp (read_to_string); для створеного
-        # фізичного T5M слід викликати окремий .sens ingress, без цього прапорця.
-        self.assertIn('if timeout 45s "$binary" "$pair"', runner)
-        self.assertNotIn('--t5m-file "$pair"', runner)
+        self.assertIn('cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"', runner)
         self.assertIn('T5M_COMMITTED_PAIR_DRIFT', runner)
-        # Супутній двійковий перегляд звіряється з фізичною парою;
-        # сам збіг .sens без перегляду не доводить повної трійки.
-        self.assertIn('T5M_MINTED_VIEW_MISSING', runner)
         self.assertIn('T5M_COMMITTED_VIEW_MISSING', runner)
         self.assertIn('T5M_COMMITTED_VIEW_DRIFT', runner)
-        self.assertIn('cmp -s "$staged_view" "$committed_view"', runner)
-        self.assertIn('T5M_FILE_EXECUTION_FAIL', runner)
+        self.assertIn('T5M_NATIVE_VIEW_ROUNDTRIP_FAILED', runner)
+        self.assertNotIn('--t5m-file "$physical"', runner)
+        self.assertIn('semantic=NOT_CERTIFIED release=NOT_CERTIFIED', runner)
+
         cli = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
         self.assertIn('fs::read_to_string(filename)', cli)
         self.assertIn('fs::read(filename)', cli)
@@ -119,55 +105,44 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         )
 
     def test_changed_executable_lisp_migration_failure_is_not_green(self):
-        # Не видавати пропущене виконання за успішний CI: це борг, а не PASS.
-        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn("  if (( blocked > 0 )); then", runner)
-        blocked_arm = runner.split("  if (( blocked > 0 )); then", 1)[1].split(
-            "  if (( not_program > 0 )); then", 1
-        )[0]
-        self.assertIn("::error::T5M_MIGRATION_UNPROVEN", blocked_arm)
-        self.assertIn("mark_file_failed", blocked_arm)
-        self.assertIn("continue", blocked_arm)
-        self.assertIn("if (( failed_files > 0 )); then\n  exit 2", runner)
+        # Помилки reader, Zig, байтів та реального SENS не замасковано.
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
+        for marker in (
+            'T5M_NATIVE_MINT_FAILED',
+            'T5M_NATIVE_VIEW_FAILED',
+            'T5M_NATIVE_VIEW_ROUNDTRIP_FAILED',
+            'T5M_NATIVE_PAIRED_EXECUTION_FAIL',
+            'T5M_NATIVE_EXECUTION_OUTPUT_DRIFT',
+            'T5M_NATIVE_STANDALONE_UNEXPECTED_FAIL',
+            'T5M_COMMITTED_PAIR_DRIFT',
+            'T5M_COMMITTED_VIEW_DRIFT',
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn('::error::' + marker, runner)
+        self.assertIn('failed_files=$((failed_files + 1))', runner)
+        self.assertIn('if (( failed_files > 0 )); then\n  exit 2', runner)
+        self.assertNotIn('T5M_MIGRATION_UNPROVEN', runner)
 
-    def test_not_supported_d24_physical_is_counted_not_certified(self):
-        # Це guard звітності shell, не Python-імітація SENS семантики.
-        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn("physical_not_supported=0", runner)
-        self.assertIn(
-            "physical_not_supported=$((physical_not_supported + 1))", runner
-        )
-        # Новий журнал рахує три різні факти, не лише D24 unsupported.
-        self.assertIn(
-            "physical_not_supported=%s native_view_roundtrip=%s "
-            "native_paired_executed=%s native_standalone_parity=%s "
-            "scope=changed_manifest semantic=NOT_CERTIFIED release=NOT_CERTIFIED",
-            runner,
-        )
-        self.assertIn(
-            "T5M_PHYSICAL_PAIRED_D24_PASS source=$file pair=$pair physical=ZIG_VERIFIED",
-            runner,
-        )
-        self.assertIn("T5M_STANDALONE_D24_NOT_SUPPORTED", runner)
+    def test_known_standalone_limits_do_not_forge_independent_pass(self):
+        # Paired-only є точним станом, не підтвердженням автономного
+        # виконання, не семантичним PASS і не приводом мовчки гасити RED.
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
+        self.assertIn('T5M_NATIVE_PAIRED_ONLY source=$file standalone_status=$status', runner)
+        self.assertIn('status != 124 && status != 137', runner)
+        self.assertIn('unknown Text7 binding:', runner)
+        self.assertIn('T5M requires exact source projection to D24+ before transport', runner)
+        self.assertIn('T5M_NATIVE_STANDALONE_UNEXPECTED_FAIL', runner)
+        self.assertIn('native_view_roundtrip=%s native_paired_executed=%s native_standalone_parity=%s', runner)
+        self.assertIn('semantic=NOT_CERTIFIED release=NOT_CERTIFIED', runner)
+        self.assertNotIn('physical_not_supported=$((physical_not_supported + 1))', runner)
 
-    def test_failed_d24_pair_keeps_real_sens_exit_status(self):
-        # Shell-механізм: несправний SENS з кодом 37 не стає status=0
-        # після завершення if без else. Реальні байти залишаються обов’язковими.
-        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(
-            encoding="utf-8"
-        )
-        beginning = 'if timeout 45s "$binary" --t5m-pair "$file" "$pair"'
-        self.assertIn(beginning, runner)
-        fallback = runner.split(beginning, 1)[1].split(
-            "T5M_PHYSICAL_PAIRED_D24_FAIL", 1
-        )[0]
-        self.assertIn("      else\n        # Код береться з реального невдалого SENS", fallback)
-        self.assertIn("        status=$?\n      fi", fallback)
-        self.assertNotIn("      fi\n      status=$?", fallback)
+    def test_failed_native_pair_keeps_real_sens_exit_status(self):
+        runner = (ROOT / "scripts/execute_changed_lisp_t5m.sh").read_text(encoding="utf-8")
+        start = 'if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical"'
+        self.assertIn(start, runner)
+        segment = runner.split(start, 1)[1].split('T5M_NATIVE_PAIRED_EXECUTION_FAIL', 1)[0]
+        self.assertIn('else\n    status=$?', segment)
+        self.assertIn('mark_file_failed', runner)
         result = subprocess.run(
             ["bash", "-c",
              "if bash -c 'exit 37'; then :; else status=$?; fi; "
