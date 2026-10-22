@@ -61,6 +61,28 @@ def read_rows(path: Path) -> tuple[list[dict[str, Any]], bytes]:
         raise ComparisonError(str(exc)) from exc
 
 
+def teacher_decoding_agreement(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Measure whether constrained decoding agrees with the distribution argmax."""
+    matches = [
+        str(row["teacher_generated_label"]) == str(row["teacher_prediction"])
+        for row in rows
+    ]
+    disagreements = [
+        str(row["id"])
+        for row, matches_argmax in zip(rows, matches)
+        if not matches_argmax
+    ]
+    count = len(rows)
+    return {
+        "count": count,
+        "agreements": sum(matches),
+        "disagreements": len(disagreements),
+        "agreement_rate": (sum(matches) / count) if count else None,
+        "disagreement_ids": disagreements,
+        "interpretation": "generated constrained label compared with argmax of normalized top-logprob distribution",
+    }
+
+
 def validate_teacher_file(
     path: Path,
     expected_rows: list[dict[str, Any]],
@@ -88,7 +110,19 @@ def validate_teacher_file(
         original = expected[row_id]
         if row.get("gold") != original.get("gold") or row.get("text") != original.get("text"):
             raise ComparisonError(f"{row_id}: teacher-запис змінює еталонну мітку або текст")
-        evaluator.extract_distribution(row)
+        distribution = evaluator.extract_distribution(row)
+        probability_winner = max(
+            LABELS,
+            key=lambda label: (distribution[label], -LABELS.index(label)),
+        )
+        generated_label = row.get("teacher_generated_label")
+        if generated_label not in LABELS:
+            raise ComparisonError(f"{row_id}: немає допустимої фактично згенерованої мітки вчителя")
+        if row.get("teacher_prediction") != probability_winner:
+            raise ComparisonError(f"{row_id}: teacher_prediction не збігається з argmax розподілу")
+        expected_agreement = generated_label == probability_winner
+        if row.get("generated_label_matches_top_probability") is not expected_agreement:
+            raise ComparisonError(f"{row_id}: ознака збігу з argmax не відповідає фактичним міткам")
 
     if set(observed) != set(expected):
         raise ComparisonError(
@@ -497,6 +531,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "record_count": len(challenge_rows),
             "class_counts": {label: sum(row["gold"] == label for row in challenge_rows) for label in LABELS},
             "teacher_observation_sha256": challenge_teacher_sha,
+            "teacher_decoding_agreement": teacher_decoding_agreement(challenge_teacher_records),
             "transformer_predictions_sha256": challenge_transformer_report["predictions_sha256"] if challenge_transformer_report else None,
             "threshold": args.threshold,
             "threshold_selected_on_challenge": False,
@@ -521,6 +556,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "teacher": teacher_name,
         "prompt_version": prompt_version,
         "teacher_observation_sha256": teacher_file_hashes,
+        "teacher_decoding_agreement": {
+            split: teacher_decoding_agreement(records)
+            for split, records in teacher_records.items()
+        },
         "teacher_observations_used_for_training": ["train"],
         "validation_used_for_calibration": True,
         "test_used_for_training_or_calibration": False,
@@ -583,6 +622,7 @@ def main() -> int:
                     "dataset_sha256": report["dataset_sha256"],
                     "dataset_count_by_split": report["dataset_count_by_split"],
                     "comparison": report["comparison"],
+                    "teacher_decoding_agreement": report["teacher_decoding_agreement"],
                     "challenge": (
                         {
                             "dataset_sha256": report["challenge"]["dataset_sha256"],
