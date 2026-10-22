@@ -580,6 +580,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-prefix-before-repeat-general"
                 | "list-split-before-every-atom-general"
                 | "list-run-length-unary-general"
+                | "list-count-consecutive-atomic-runs-unary-general"
                 | "tree-contains-atom-general"
                 | "list-count-matching-atoms-unary"
                 | "list-first-position-unary-general"
@@ -872,6 +873,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-replace-first-atom-general",
         "lib/list-remove-interior-matching-atoms-general",
         "lib/list-run-length-unary-general",
+        "lib/list-count-consecutive-atomic-runs-unary-general",
         "lib/list-multiset-intersection-general",
         "lib/list-zip-with-tails-general",
         "lib/list-three-lanes-general",
