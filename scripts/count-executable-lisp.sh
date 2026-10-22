@@ -82,6 +82,9 @@ while IFS= read -r -d '' source; do
   if (( ${#binding_sources[@]} )); then
     mint_flag=--t5m-mint-pair
   fi
+  # create_new у SENS --t5m-mint-pair: старі scratch-байти і view
+  # не можуть лишатися під тим самим шляхом для наступної програми.
+  rm -f -- "$scratch/mint.sens" "$scratch/mint"
   if ! timeout "${mint_seconds}s" "$sens" "$mint_flag" "$source" "$scratch/mint.sens" "${binding_sources[@]}" >"$scratch/mint.out" 2>"$scratch/mint.err" ||
      ! cmp -s "$physical" "$scratch/mint.sens" ||
      ! timeout "${seconds}s" "$trit" open "$physical" >"$scratch/view" 2>"$scratch/view.err" ||
