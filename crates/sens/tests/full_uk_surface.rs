@@ -98,47 +98,28 @@ fn українські_арифметичні_назви_мають_точні_
 }
 
 #[test]
-fn generated_function_table_uses_uk_then_ukr_without_duplicate_full_uk_column() {
-    let table = include_str!("../../../lib/generated/function-table.lisp");
-    let row = table
-        .lines()
-        .find(|line| line.trim_start().starts_with("(00111100 "))
-        .expect("generated function table must contain byte SID 00111100");
-
-    let uk = row
-        .find("(ук текст-порожній?)")
-        .expect("row must contain current uk column");
-    let ukr = row
-        .find("(укр порожній-текст?)")
-        .expect("row must contain authoritative full Ukrainian ukr column");
-    let en = row
-        .find("(en string-empty?)")
-        .expect("row must contain English column");
-
-    assert!(
-        uk < ukr && ukr < en,
-        "generated machine table column order must be uk -> ukr -> en: {row}"
-    );
-    assert!(
-        !row.contains("(full-uk "),
-        "generated machine table must not duplicate ukr as full-uk: {row}"
-    );
-
-    let markdown = include_str!("../../../docs/generated/function-table.md");
-    assert!(
-        markdown.contains(
-            "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |"
-        ),
-        "human function table must expose exactly uk and ukr Ukrainian columns"
-    );
-    assert!(
-        markdown.contains(
-            "| `00111100` | текст-порожній? | порожній-текст? | string-empty? | śūnya? | () | () |"
-        ),
-        "human row must show uk followed by full Ukrainian ukr"
-    );
-    assert!(
-        !markdown.contains("Повна українська"),
-        "human table must not duplicate ukr under a second full-Ukrainian column"
-    );
+fn ратифікована_д5_драбина_має_укр_як_повну_проєкцію_без_старої_sid8_таблиці() {
+    // Виробничий закон — чинна D5 таблиця, а не generated/function-table
+    // з історичними 8-бітними слотами. Не створювати другу колонку full-uk.
+    let table = include_str!("../../../lib/domains/d5.lisp");
+    for (word, ukrainian) in [
+        ("01010", "додати"),
+        ("01011", "відняти"),
+        ("10110", "помножити"),
+        ("10111", "частка"),
+    ] {
+        let row = table.lines()
+            .find(|line| line.starts_with(&format!("  ({word} ")))
+            .unwrap_or_else(|| panic!("відсутній D5:{word}"));
+        let short = row.find(&format!("(ук {ukrainian})"))
+            .unwrap_or_else(|| panic!("немає короткої української назви D5:{word}"));
+        let full = row.find(&format!("(укр {ukrainian})"))
+            .unwrap_or_else(|| panic!("немає повної української назви D5:{word}"));
+        let english = row.find("(en ").expect("англійська поверхня є лише проєкцією");
+        assert!(
+            short < full && full < english,
+            "колонки D5 мають порядок ук → укр → en: {row}"
+        );
+        assert!(!row.contains("(full-uk "), "укр не дублюється: {row}");
+    }
 }
