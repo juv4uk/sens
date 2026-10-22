@@ -380,6 +380,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-swap-adjacent-pairs",
         "list-contiguous-sublist-atoms-general",
         "list-duplicate-reversible",
+        "list-duplicate-atoms-preserve-compounds-general",
         "list-has-adjacent-equal-atoms",
         "list-rotate-five-by-two",
         "list-tree-mirror-general",
@@ -532,6 +533,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-contiguous-sublist-atoms-general"
                 | "list-replace-last-occurrence-general"
                 | "list-duplicate-reversible"
+                | "list-duplicate-atoms-preserve-compounds-general"
                 | "list-has-adjacent-equal-atoms"
                 | "list-rotate-five-by-two"
                 | "list-tree-mirror-general"
@@ -842,6 +844,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/rotate-four-left",
         "lib/rotate-four-right",
         "lib/list-reverse-general",
+        "lib/list-duplicate-atoms-preserve-compounds-general",
         "lib/list-interleave-two-general",
         "lib/list-reverse-tail-general",
         "lib/list-last-adjacent-equal-atom-suffix-general",
