@@ -3,8 +3,8 @@
   "generated_from_main": "9490b8897dac4863ebf1a6d927c42c8d53e1e00e",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
-  "cohort": "ratified D1-D10 human-readable domain definition tables plus the D11 testing-only vocabulary table",
-  "reason": "domain-table-1 rows declare authoritative exact-width identities and surfaces; D1-D10 are domain tables and D11 is only the ratified testing vocabulary. These are DATA, not executable SENS programs.",
+  "cohort": "ratified D1-D10 human-readable domain definition tables plus the unratified D11 testing-only vocabulary table",
+  "reason": "domain-table-1 rows declare authoritative exact-width identities and surfaces; D1-D10 are domain tables and D11 is an unratified testing vocabulary. These are DATA, not executable SENS programs.",
   "automatic_sens_companion": false,
   "not_executable_programs": true,
   "not_physical_migration_credit": true,
@@ -101,7 +101,7 @@
     },
     {
       "path": "lib/domains/d11.lisp",
-      "git_blob_sha1": "c7b2abb36c2a6051c6db27c80a366c4a7a3eb076",
+      "git_blob_sha1": "2cc87c897ad07ebf540cfe369de2c4a69a657c98",
       "domain": "D11",
       "bit_width": 11,
       "expected_rows": 43,
@@ -110,6 +110,6 @@
   ],
   "updated_current_d7": "2026-10-13 keyboard/v2 owner-ratified; historical v1 source pinned separately",
   "updated_current_d10": "2026-10-12 owner-ratified whole-domain catalogue; residency does not imply callable or physical admission",
-  "updated_current_d11": "2026-10-13 owner-ratified testing vocabulary (43 rows); selector candidates remain research-only, non-callable, and not T5-admitted",
+  "updated_current_d11": "2026-10-22 owner clarified: 43 testing labels are NOT ratified, not reserved function addresses, and not callable; 512 independently defined D11 selectors retain their mathematical laws without implicit opcode admission",
   "review_of_current_rows": "2026-10-21: D3/D8 restored to current domain-table-1; exact Git blob pins synchronized with Rust build and ratified domain schemas. Domain data are not executable programs."
 }
