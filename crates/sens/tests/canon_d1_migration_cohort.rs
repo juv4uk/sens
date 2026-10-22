@@ -314,27 +314,31 @@ fn cond_exhaustion_and_false_answer_are_distinct_live_sens_values() {
         "test_id=1968-COND-EXHAUST layer=SENS expected=structural-NIL-not-D1-NO"
     );
 
-    // Структурне () — не D1:NO. COND має відхилити його як умову,
-    // замість мовчки перейти до наступної гілки.
-    let invalid = "(за-умовою ((як-є ()) (як-є не-має-виконатися)) (так (як-є правильно)))";
-    let error = eval_program(invalid, &mut session)
-        .expect_err("SENS COND має відхилити структурне () як умову")
-        .to_string();
-    assert!(
-        error.contains("COND") && error.contains("D1"),
-        "test_id=1968-COND-EMPTY-WITNESS layer=SENS input={invalid} expected=exact-D1-type-error actual={error}"
-    );
+    // Контракт #3161: D3:000 — відсутність свідка, не D1:NO.
+    // Обидва пропускають гілку, але залишаються різними значеннями.
+    for (id, condition) in [("empty-witness", "(як-є ())"), ("d1-no", "ні")] {
+        let program = format!(
+            "(тотожне? (за-умовою ({condition} (перше (як-є ()))) (так (як-є правильно))) (як-є правильно))"
+        );
+        let value = eval_program(&program, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=1968-COND-{id} layer=SENS input={program} actual_error={error}"
+            ))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(), Some(true),
+            "test_id=1968-COND-{id} layer=SENS expected=D1:true actual={value}"
+        );
+    }
 
-    // На відміну від (), точне D1:NO означає пропуск гілки.
-    let valid = "(тотожне? (за-умовою (ні (як-є не-має-виконатися)) (так (як-є правильно))) (як-є правильно))";
-    let value = eval_program(valid, &mut session)
-        .unwrap_or_else(|error| panic!(
-            "test_id=1968-COND-D1-NO layer=SENS input={valid} actual_error={error}"
-        ))
-        .value;
+    // Символ не належить ані D1, ані D3:000: його відхиляє сам SENS.
+    let invalid = "(за-умовою ((як-є сторонній) (як-є неможливе)) (так (як-є правильно)))";
+    let error = eval_program(invalid, &mut session)
+        .expect_err("SENS COND має відхилити символ як керівне значення");
     assert_eq!(
-        value.as_predicate_bit(), Some(true),
-        "test_id=1968-COND-D1-NO layer=SENS expected=D1:true actual={value}"
+        error.kind,
+        sens::ErrorKind::Type,
+        "test_id=1968-COND-WRONG-DOMAIN layer=SENS input={invalid} expected=Type actual={error}"
     );
 
     // Позаобласний EQ має породжувати D3:000; COND продовжує далі.
