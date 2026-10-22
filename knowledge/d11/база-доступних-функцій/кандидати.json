@@ -22,9 +22,9 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 180,
+    "total": 182,
     "historical": 15,
-    "library": 165,
+    "library": 167,
     "distinct_families": 26
   },
   "excluded": {
@@ -4254,13 +4254,87 @@
         "selection_basis": "Живе визначення SENS, відмінні успіх і fail та 8 негативних/позитивних свідків",
         "historical_research_alias": "unify-observe"
       }
+    },
+    {
+      "surface_name": "reason-term-predicate",
+      "source_family": "logic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/reason.lisp",
+        "blob_sha": "be19f23835381e5e20c867a37f12d20fb8deaa7d",
+        "original_file": "lib/reason.lisp",
+        "snapshot_not_live_proof": false,
+        "historical_research_alias": "reason-term-predicate"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00111111010",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00111111010",
+        "ukr": "предикат-терма-міркування",
+        "source_file": "lib/reason.lisp",
+        "source_blob": "be19f23835381e5e20c867a37f12d20fb8deaa7d",
+        "law": "Атомарний предикат складеного терма; для var, атома, порожнього терма і неатомарної голови повернути ().",
+        "native_law_test": "crates/sens/tests/reason_index.rs::reason_index_d1_verdicts_from_real_predicates",
+        "native_test_blob": "4f3abd7f16e764a5d195355c43c31a8f531b39c9",
+        "native_test_result": "NATIVE_SENS_PASS_6_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39703645931",
+        "native_step_result": "REASON_STEP_SUCCESS_WITH_UNRELATED_CI_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Живе SENS-визначення, позитивні й негативні семантичні випадки, підтверджено адресним Reason step, без створення D11 opcode",
+        "historical_research_alias": "reason-term-predicate"
+      }
+    },
+    {
+      "surface_name": "reason-rule-predicate",
+      "source_family": "logic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/reason.lisp",
+        "blob_sha": "be19f23835381e5e20c867a37f12d20fb8deaa7d",
+        "original_file": "lib/reason.lisp",
+        "snapshot_not_live_proof": false,
+        "historical_research_alias": "reason-rule-predicate"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00111110111",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00111110111",
+        "ukr": "предикат-правила-міркування",
+        "source_file": "lib/reason.lisp",
+        "source_blob": "be19f23835381e5e20c867a37f12d20fb8deaa7d",
+        "law": "Предикат голови чинного правила з семантичною перевіркою форми; атомне правило, var і складена голова дають ().",
+        "native_law_test": "crates/sens/tests/reason_index.rs::reason_index_d1_verdicts_from_real_predicates",
+        "native_test_blob": "4f3abd7f16e764a5d195355c43c31a8f531b39c9",
+        "native_test_result": "NATIVE_SENS_PASS_5_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39703645931",
+        "native_step_result": "REASON_STEP_SUCCESS_WITH_UNRELATED_CI_RED",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Живе SENS-визначення, позитивні й негативні семантичні випадки, підтверджено адресним Reason step, без створення D11 opcode",
+        "historical_research_alias": "reason-rule-predicate"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 40,
-    "semantic_winners_total": 552,
+    "native_sens_composition_winners": 42,
+    "semantic_winners_total": 554,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
