@@ -22,6 +22,8 @@ for source in \
   lib/d11-srfi1-unary-count.lisp \
   lib/d11-srfi1-set-relations.lisp \
   lib/list-foundation-compositions.lisp \
+  lib/викликати-доменний-код.lisp \
+  lib/list-domain-first-class-compose.lisp \
   lib/d11-srfi1-alist-protocol.lisp; do
   stem="${source##*/}"
   physical="$scratch/${stem%.lisp}.sens"
