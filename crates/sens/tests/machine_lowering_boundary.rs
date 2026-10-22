@@ -198,10 +198,10 @@ fn lisp_owned_encoder_is_part_of_the_vertical_boundary_proof() {
     eval_program(&source, &mut session).expect("x86-64 encoder must load as ordinary sens");
 
     for (form, expected) in [
-        ("(x86-encode-ret)", "(195)"),
-        ("(x86-encode-mov-eax-imm32 42)", "(184 42 0 0 0)"),
+        ("(машина-кодувати-повернення)", "(195)"),
+        ("(машина-кодувати-завантаження-числа-32-до-акумулятора 42)", "(184 42 0 0 0)"),
         (
-            "(x86-encode-add-r64-r64 (quote rax) (quote rbx))",
+            "(машина-кодувати-додавання-регістрів-64 (як-є rax) (як-є rbx))",
             "(72 1 216)",
         ),
     ] {
@@ -267,7 +267,7 @@ fn ukrainian_d5_addition_lowers_through_real_sens_machine_forms() {
     );
 
     let bytes = eval_program(
-        "(x86-encode-admitted-program (машина-знизити-додавання-беззнакових-64-до-форм 2 3))",
+        "(машина-кодувати-допущену-програму-або-відхилити (машина-знизити-додавання-беззнакових-64-до-форм 2 3))",
         &mut session,
     )
     .expect("structured semantic forms must materialize bytes only through admission")
