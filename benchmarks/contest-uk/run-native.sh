@@ -81,8 +81,11 @@ for source in "$here"/*.lisp; do
     fail=1
     continue
   fi
+  # Порівнюємо байти результату, а не command substitution, яке
+  # непомітно відкидає зайві LF і може зарахувати некоректний друк.
+  printf '%s\n' "$expected" >"$scratch/expected.out"
   if ! cmp -s "$scratch/paired.out" "$scratch/standalone.out" ||
-     [[ "$(cat "$scratch/standalone.out")" != "$expected" ]]; then
+     ! cmp -s "$scratch/standalone.out" "$scratch/expected.out"; then
     printf '%s\t-\t-\t0\tНЕ_ЗБІГАЄТЬСЯ_РЕЗУЛЬТАТ\n' "$name"
     echo "CONTEST_OUTPUT_MISMATCH name=$name expected=$expected paired=$(cat "$scratch/paired.out") physical=$(cat "$scratch/standalone.out")" >&2
     fail=1
