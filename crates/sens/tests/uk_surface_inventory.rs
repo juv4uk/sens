@@ -35,10 +35,13 @@ fn core_definition_names() -> BTreeSet<String> {
                 return None;
             };
 
+            // D4:0011 — ратифікована DEFINE, людиночитана проєкція «визначити».
+            // Голий історичний SID8 не набуває права визначати ядро.
             let is_definition = match &head.kind {
-                // 00001001 define, 00001010 defmacro.
-                ExprKind::Sid(sid) => matches!(sid.to_string().as_str(), "00001001" | "00001010"),
-                ExprKind::Symbol(symbol) => matches!(symbol.as_ref(), "def" | "defmacro"),
+                ExprKind::DomainIdentity(sens::DomainIdentity::D4(word)) => {
+                    word.word().packed_bits() == 0b0011
+                }
+                ExprKind::Symbol(symbol) => symbol.as_ref() == "визначити",
                 _ => false,
             };
             if !is_definition {
