@@ -22,6 +22,13 @@ if (( $# == 0 )); then
     view="${source%.lisp}"
     if [[ ! -s "$physical" || ! -f "$view" ||
           -L "$physical" || -L "$view" ]]; then
+      # Лише цілком відсутня пара означає чергу на рідний remint.
+      # Напівпара, порожні байти або symlink — справжній RED, не pending:
+      # інакше чинний суд приховує незворотний фізичний носій.
+      if [[ -e "$physical" || -L "$physical" ||
+            -e "$view" || -L "$view" ]]; then
+        error "неповна або підмінена фізична пара source=$source physical=$physical view=$view"
+      fi
       echo "CONTEST_PENDING_NATIVE_PAIR source=$source status=NOT_EXECUTED" >&2
       pending_native_pair=$((pending_native_pair + 1))
     fi
