@@ -495,10 +495,31 @@ jobs:
                      ! git cat-file -e "origin/$target_branch:$changed" 2>/dev/null; then
                     safe_rebase=0; break
                   fi
-                  # Нова незалежна форма без .sens не стає виконуваною
-                  # від одного rebase; повний корпус і наступний mint
-                  # залишаються обов'язковими. Це лише збереження вже
-                  # нативно доведених фізичних пар від зайвого повтору.
+                  # Новий незалежний Lisp не можна пропустити після
+                  # fast-rebase: очікуваний queued workflow міг бути
+                  # скасований, а push через GITHUB_TOKEN не породить
+                  # наступного запуску. Перевірити фізичну трійку саме
+                  # на поточному remote/main.
+                  case "$changed" in
+                    lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp)
+                      candidate_pair="${changed%.lisp}.sens"
+                      candidate_view="${changed%.lisp}"
+                      if ! git cat-file -e "origin/$target_branch:$candidate_pair" 2>/dev/null ||
+                         ! git cat-file -e "origin/$target_branch:$candidate_view" 2>/dev/null; then
+                        echo "REMINT_NEW_UNPAIRED_LISP source=$changed mint=REVERIFY_CURRENT_MAIN"
+                        safe_rebase=0
+                        break
+                      fi
+                      candidate_source_commit="$(git log -1 --format=%H "origin/$target_branch" -- "$changed")"
+                      candidate_pair_commit="$(git log -1 --format=%H "origin/$target_branch" -- "$candidate_pair")"
+                      if [[ -z "$candidate_source_commit" || -z "$candidate_pair_commit" ]] ||
+                         ! git merge-base --is-ancestor "$candidate_source_commit" "$candidate_pair_commit"; then
+                        echo "REMINT_NEW_DRIFTED_LISP source=$changed mint=REVERIFY_CURRENT_MAIN"
+                        safe_rebase=0
+                        break
+                      fi
+                      ;;
+                  esac
                   echo "REMINT_UNRELATED_LISP source=$changed verified_candidates=UNCHANGED"
                   ;;
                 *) safe_rebase=0; break ;;
