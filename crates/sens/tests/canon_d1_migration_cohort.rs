@@ -202,3 +202,47 @@ fn cons_preserves_independent_payloads_without_fabricating_generator_children() 
         "test_id=1968-CONS-PAYLOAD layer=SENS case=mutant expected=D1:false actual={value}"
     );
 }
+
+
+/// #1968/#2011: quoting preserves a structural datum without evaluating its
+/// head. A second QUOTE written inside a quoted list is DATA, not automatically
+/// the next executable child of a hypothetical D3 prefix generator.
+#[test]
+fn quote_depth_is_structural_data_not_an_invented_generator_opcode() {
+    let mut session = Session::default();
+    let cases = [
+        (
+            "(тотожне? (перше (як-є (неозначений))) (як-є неозначений))",
+            true,
+        ),
+        (
+            "(тотожне? (перше (перше (як-є ((неозначений))))) (як-є неозначений))",
+            true,
+        ),
+        (
+            "(тотожне? (перше (як-є (як-є неозначений))) (як-є як-є))",
+            true,
+        ),
+        (
+            "(тотожне? (перше (як-є (як-є неозначений))) (як-є неозначений))",
+            false,
+        ),
+    ];
+    for (source, expected) in cases {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=1968-QUOTE-DATA layer=SENS input={source} actual_error={error}"
+            ))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(), Some(expected),
+            "test_id=1968-QUOTE-DATA layer=SENS input={source} expected=D1:{expected} actual={value}"
+        );
+    }
+    // Distinct from QUOTE: evaluating the same unbound head cannot succeed.
+    let unquoted = eval_program("(неозначений)", &mut session);
+    assert!(
+        unquoted.is_err(),
+        "test_id=1968-QUOTE-DATA layer=SENS case=unquoted-mutant expected=unbound-head-error actual={unquoted:?}"
+    );
+}
