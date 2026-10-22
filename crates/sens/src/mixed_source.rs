@@ -8,7 +8,8 @@
 //!   Ukrainian D8 I/O names are exact-lifted, with other D8 mechanisms path-pinned;
 //! - approved path-pinned readers lift exact D9 words; Ukrainian D9 string heads
 //!   additionally require both an explicit projection allowlist and a concrete mechanism;
-//! - admitted unquoted callable values keep their exact first-class domain identity;\n//! - quoted data and lexical bindings are never inferred from name similarity.
+//! - admitted unquoted callable values keep their exact first-class domain identity;
+//! - quoted data and lexical bindings are never inferred from name similarity.
 //!
 //! This gives active Core migration a mixed symbol + exact-domain path without
 //! teaching the compatibility parser to infer domains from historical bytes.
@@ -1072,15 +1073,20 @@ fn lift_expression(
                 {
                     let syntax_only = matches!(
                         (identity.width(), identity.packed_bits()),
-                        (3, 0b001 | 0b110) | (4, 0b0010 | 0b0011)
+                        (3, 0b001 | 0b110)
+                            | (4, 0b0010 | 0b0011)
+                            | (5, 0b00100 | 0b00110 | 0b00111)
                     );
-                    if !syntax_only {
-                        if let Some(callable) = identity.core_operation() {
-                            return Ok(Expr {
-                                kind: ExprKind::DomainIdentity(DomainIdentity::from(callable)),
-                                span,
-                            });
-                        }
+                    if !syntax_only
+                        && (identity.core_operation().is_some()
+                            || crate::eval::selector_law::is_selector(identity))
+                    {
+                        // First-class D10 selectors are actual ten-bit
+                        // function values, not D7 text or a fabricated D8 code.
+                        return Ok(Expr {
+                            kind: ExprKind::DomainIdentity(identity),
+                            span,
+                        });
                     }
                 }
             }
@@ -1253,6 +1259,33 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn d10_selector_ukrainian_value_lowers_to_first_class_ten_bit_code() {
+        let identity = DomainIdentity::D10(crate::DomainD10::new(0b1000000000).unwrap());
+        let name = crate::semantic_registry::selector_ukr_for_exact(identity)
+            .expect("ратифікована українська поверхня Д10");
+        let source = format!("(визначити вибраний-селектор-для-свідка {name})");
+        let expression = only(parse_mixed_exact_domain(&source).expect("чинний D10 reader"));
+        let ExprKind::List(parts) = expression.kind else { panic!("форма DEFINE") };
+        assert!(matches!(&parts[2].kind, ExprKind::DomainIdentity(code) if *code == identity),
+            "Д10 код у позиції значення має бути десятирозрядним, а не Д7 текстом");
+
+        let mut input = "(як-є атом?)".to_owned();
+        for _ in 0..8 {
+            input = format!("(сполучити {input} (як-є ()))");
+        }
+        let program = format!(
+            "(визначити вибраний-селектор-для-свідка {name}) (вибраний-селектор-для-свідка {input})"
+        );
+        let parsed = parse_mixed_exact_domain(&program).expect("обернений український код Д10");
+        let mut session = crate::Session::default();
+        let actual = crate::eval_parsed_expressions(&parsed, &mut session)
+            .expect("Д10 діє як першокласна функція без другого реєстру");
+        let mut expected_session = crate::Session::default();
+        let expected = crate::eval_program("(як-є атом?)", &mut expected_session).unwrap();
+        assert_eq!(actual.value, expected.value);
     }
 
     #[test]

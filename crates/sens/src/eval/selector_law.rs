@@ -41,7 +41,7 @@ fn decode(identity: DomainIdentity) -> Option<(Step, u16, usize)> {
     Some((root, payload, width - 3))
 }
 
-pub(super) fn is_selector(identity: DomainIdentity) -> bool {
+pub(crate) fn is_selector(identity: DomainIdentity) -> bool {
     decode(identity).is_some()
 }
 
