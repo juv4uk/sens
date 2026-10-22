@@ -311,11 +311,12 @@ fn automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices() {
           (list
             (second decision)
             (second (fourth decision))
-            (second (fifth decision))))
+            (second (fifth decision))
+            (походження-спостереження (третє decision))))
     "#;
     assert_eq!(
         eval_probabilistic_decision(tied),
-        "(defer ambiguous-maximum-probability (billing technical))"
+        "(defer ambiguous-maximum-probability (billing technical) ((source synthetic) (case tied)))"
     );
 
     let below_threshold = r#"
