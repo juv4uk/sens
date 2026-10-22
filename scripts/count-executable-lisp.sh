@@ -136,9 +136,13 @@ while IFS= read -r -d '' source; do
     continue
   fi
   (( inverse += 1 ))
-  if ! timeout "${mint_seconds}s" "$sens" --t5m-pair "$source" "$physical" "${binding_sources[@]}" >"$scratch/paired.out" 2>"$scratch/paired.err"; then
+  if timeout "${mint_seconds}s" "$sens" --t5m-pair "$source" "$physical" "${binding_sources[@]}" >"$scratch/paired.out" 2>"$scratch/paired.err"; then
+    :
+  else
+    status=$?
     (( bad += 1 ))
-    printf 'NATIVE_PAIRED_FAILED\t%s\n' "$source" >&2
+    printf 'NATIVE_PAIRED_FAILED\t%s\tstatus=%s\n' "$source" "$status" >&2
+    sed 's/^/SENS paired: /' "$scratch/paired.err" >&2
     continue
   fi
   if timeout "${mint_seconds}s" "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/standalone.err"; then
