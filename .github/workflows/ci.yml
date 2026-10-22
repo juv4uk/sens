@@ -648,13 +648,13 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
         if: ${{ steps.changed-t5m-lisp.outputs.system_one_tests == 'true' || steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.prolog_bridge_tests == 'true' || steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
-      - name: "Jev-подібний System One — справжнє виконання типізованого пакета SENS"
+      - name: "Jev-подібний System One — справжнє виконання пакета, політики й нічиєї SENS"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 8
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 300s cargo test --locked -p sens --test probabilistic_decision_jev_like system_one_validates_one_state_with_parallel_typed_questions_and_answers -- --exact --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 300s cargo test --locked -p sens --test probabilistic_decision_jev_like -- --nocapture
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
