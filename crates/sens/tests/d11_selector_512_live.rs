@@ -59,6 +59,7 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
     load_core_library(&mut session).expect("завантажити чинне ядро SENS");
 
     let mut count = 0;
+    let mut partial_failures = 0usize;
     let mut parent_bits = std::collections::HashSet::new();
     let mut child_bits = std::collections::HashSet::new();
     let mut child_names = std::collections::HashSet::new();
@@ -155,11 +156,33 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
             true,
         );
 
+        // D11 descendant remains a *partial* CAR/CDR composition:
+        // failure at the first D3 selector or inside the D10 parent must
+        // propagate as Type, never as D1:NO, D3:000 or an invented D11 opcode.
+        // All three source programs are executed by the real SENS evaluator.
+        for (case, source_arg) in [
+            ("atom-at-entry", "(як-є невузол)"),
+            ("empty-at-entry", "(як-є ())"),
+            ("atom-after-first-step", "(сполучити (як-є невузол) (як-є ()))"),
+        ] {
+            let source = format!("({child_name} {source_arg})");
+            let error = eval_program(&source, &mut session).expect_err(
+                "частковий D11 селектор має відхиляти обрив структури"
+            );
+            assert_eq!(
+                error.kind,
+                sens::ErrorKind::Type,
+                "test_id=D11-SELECTOR-{bits}-PARTIALITY-{case} layer=SENS input={source} expected=Type actual={error}"
+            );
+            partial_failures += 1;
+        }
+
         count += 1;
         branches[suffix_index] += 1;
     }
 
     assert_eq!(count, 512, "test_id=D11-SELECTOR-COUNT");
+    assert_eq!(partial_failures, 1536, "test_id=D11-SELECTOR-PARTIALITY-COUNT");
     assert_eq!(child_bits.len(), 512, "test_id=D11-SELECTOR-COORDINATES");
     assert_eq!(child_names.len(), 512, "test_id=D11-SELECTOR-SURFACES");
     assert_eq!(parent_bits.len(), 256, "test_id=D11-SELECTOR-PARENTS");
