@@ -201,7 +201,10 @@ done < <(git ls-files -z -- '*.lisp')
 # Підсумковий printf раніше завжди повертав 0 навіть за реального RED.
 # Відсутня трійка/paired-only — неповне покриття, не доведений реліз.
 status=COMPLETE
-if (( bad != 0 || missing != 0 || paired_only != 0 )); then
+if (( sources == 0 )); then
+  # Порожня вибірка НЕ може засвідчувати виконання SENS.
+  status=EMPTY
+elif (( bad != 0 || missing != 0 || paired_only != 0 )); then
   status=PARTIAL
 fi
 printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_executed=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s status=%s\n' \
