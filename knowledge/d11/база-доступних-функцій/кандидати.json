@@ -1,7 +1,7 @@
 {
   "schema": "sens.available-functions/v1",
   "title": "База доступних функцій",
-  "date": "2026-10-14",
+  "date": "2026-10-23",
   "target_domain": "D11",
   "bit_width": 11,
   "domain_capacity": 2048,
@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 349,
+    "total": 352,
     "historical": 28,
-    "library": 321,
-    "distinct_families": 134
+    "library": 324,
+    "distinct_families": 136
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -8682,6 +8682,81 @@
       "signature": "three proper-lists(equal-length) → proper-list",
       "law": "Чергувати по одному елементу трьох потоків; на образі трійкового розкладу точно відновити джерело.",
       "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "частоти-елементів-унарно",
+      "source_family": "clojure-frequencies-unary",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-clojure-frequencies-unary.lisp",
+        "blob_sha": "c06e77ca0e50ad68ddc873b45310041e6208eef2",
+        "original_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html",
+        "snapshot_not_live_proof": false,
+        "physical_lisp_sens_pair_exists": false,
+        "roundtrip_verification": "NOT_VERIFIED_NO_PHYSICAL_PAIR"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "SOURCE_DEFINED_NATIVE_TEST_AWAITING_CI",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → ordered-alist(key,unary-count)",
+      "law": "Згрупувати структурно однакові елементи незалежно від суміжності; порядок різних ключів — за першою появою; кратність — список унарних маркерів о, без чисел D24 чи Clojure hash-map.",
+      "negative_falsifier": "а б а дає одну групу а з двома унарними маркерами, а не дві роздільні групи чи один маркер.",
+      "native_law_test": "crates/sens/tests/d11_clojure_frequencies_unary.rs::d11_clojure_frequencies_unary_run_in_sens",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "частоти-за-ключем-унарно",
+      "source_family": "clojure-frequencies-unary",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-clojure-frequencies-unary.lisp",
+        "blob_sha": "c06e77ca0e50ad68ddc873b45310041e6208eef2",
+        "original_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html",
+        "snapshot_not_live_proof": false,
+        "physical_lisp_sens_pair_exists": false,
+        "roundtrip_verification": "NOT_VERIFIED_NO_PHYSICAL_PAIR"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "SOURCE_DEFINED_NATIVE_TEST_AWAITING_CI",
+      "ratified": false,
+      "callable": false,
+      "signature": "(pure key-closure, proper-list) → ordered-alist(key,unary-count)",
+      "law": "Спочатку застосувати чисте SENS-замикання ключа, потім стабільно згрупувати всі входження за структурною рівністю ключів та побудувати унарну кратність для кожного ключа.",
+      "negative_falsifier": "(а л) (б м) (а н) за першим елементом → (а (о о)), (б (о)); не три групи.",
+      "native_law_test": "crates/sens/tests/d11_clojure_frequencies_unary.rs::d11_clojure_frequencies_unary_run_in_sens",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "знайти-хвіст-за-умовою",
+      "source_family": "srfi1-find-tail",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-find-tail.lisp",
+        "blob_sha": "9e227352ec3a746f811c2590cb585278006b479e",
+        "original_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html",
+        "snapshot_not_live_proof": false,
+        "physical_lisp_sens_pair_exists": false,
+        "roundtrip_verification": "NOT_VERIFIED_NO_PHYSICAL_PAIR"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "SOURCE_DEFINED_NATIVE_TEST_AWAITING_CI",
+      "ratified": false,
+      "callable": false,
+      "signature": "(D1 predicate closure, proper-list) → nonempty original suffix or D1:no",
+      "law": "Повернути перший непорожній вихідний хвіст, CAR якого задовольняє предикат. Немає збігу → точне D1 ні; не структурне (); пізні елементи хвоста не фільтрувати.",
+      "negative_falsifier": "а б в б за предикатом =б дає (б в б), а не (б б) і не останній (б).",
+      "native_law_test": "crates/sens/tests/d11_srfi1_find_tail.rs::d11_srfi1_find_tail_sens_witnesses",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true
     }
