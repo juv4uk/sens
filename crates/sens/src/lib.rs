@@ -691,7 +691,7 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     // переписуваною назвою. FS, TCP і process можуть звернутися до
     // спільного UTF-8 після першого завантаження; другий DEFINE
     // того самого доменного коду порушує незмінність SENS.
-    let first = semantic_registry::domain_identity_for_surface(
+    let first = semantic_registry::d10_binding_identity_for_definition(
         "кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні?",
     )
     .expect("ратифікована Д10 координата первинної UTF-8 функції");
