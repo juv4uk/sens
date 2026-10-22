@@ -56,6 +56,10 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 def validate_endpoint(endpoint: str) -> tuple[str, int, str]:
     parsed = urllib.parse.urlsplit(endpoint)
+    try:
+        port = parsed.port
+    except ValueError as exc:
+        raise TeacherError("порт локального endpoint некоректний") from exc
     if (
         parsed.scheme != "http"
         or parsed.hostname != "127.0.0.1"
@@ -64,14 +68,14 @@ def validate_endpoint(endpoint: str) -> tuple[str, int, str]:
         or parsed.query
         or parsed.fragment
         or parsed.path != "/v1/chat/completions"
-        or parsed.port is None
-        or not 1 <= parsed.port <= 65535
+        or port is None
+        or not 1 <= port <= 65535
     ):
         raise TeacherError(
             "адреса має бути http://127.0.0.1:ПОРТ/v1/chat/completions; "
             "зовнішні адреси заборонені"
         )
-    return "127.0.0.1", parsed.port, parsed.path
+    return "127.0.0.1", port, parsed.path
 
 
 def log_add(left: float, right: float) -> float:
@@ -79,7 +83,7 @@ def log_add(left: float, right: float) -> float:
     return maximum + math.log(math.exp(left - maximum) + math.exp(right - maximum))
 
 
-def teacher_distribution(response: dict[str, Any]) -> tuple[str, dict[str, float], dict[str, dict[str, int]]]:
+def teacher_distribution(response: dict[str, Any]) -> tuple[str, str, dict[str, float], dict[str, dict[str, int]]]:
     try:
         choice = response["choices"][0]
         answer = choice["message"]["content"].strip()
@@ -141,7 +145,11 @@ def teacher_distribution(response: dict[str, Any]) -> tuple[str, dict[str, float
         }
         for letter in LETTERS
     }
-    return answer_label, raw_scores, distribution
+    probability_label = max(
+        (label for label, _description in LABELS),
+        key=lambda label: (distribution[label]["numerator"], -[item[0] for item in LABELS].index(label)),
+    )
+    return answer_label, probability_label, raw_scores, distribution
 
 
 def call_teacher(
@@ -238,8 +246,12 @@ def main() -> int:
 
     try:
         validate_endpoint(args.endpoint)
+        if not args.model.strip():
+            raise TeacherError("--model не може бути порожнім")
         if args.timeout <= 0:
             raise TeacherError("--timeout має бути додатним")
+        if args.output.exists() and not args.overwrite:
+            raise TeacherError(f"вихідний файл вже існує: {args.output}; додайте --overwrite свідомо")
         if args.limit < 0:
             raise TeacherError("--limit не може бути від'ємним")
         if args.split != "train" and not args.allow_holdout:
@@ -284,17 +296,17 @@ def main() -> int:
             response = call_teacher(
                 args.endpoint, args.model, api_key, prompt, row["text"], args.timeout
             )
-            prediction, scores, distribution = teacher_distribution(response)
-            top_confidence = max(
+            generated_label, prediction, scores, distribution = teacher_distribution(response)
+            top_confidence_numerator = max(
                 value["numerator"] for value in distribution.values()
-            ) / DENOMINATOR
+            )
             observations.append(
                 {
                     "id": row["id"],
                     "split": row["split"],
                     "text": row["text"],
                     "gold": row["gold"],
-                    "source": "synthetic-curated-seed",
+                    "source": row.get("source", "unspecified"),
                     "dataset_sha256": dataset_sha256,
                     "prompt_version": PROMPT_VERSION,
                     "prompt_sha256": prompt_sha256,
@@ -303,8 +315,10 @@ def main() -> int:
                     "method": "vllm-top-logprobs-softmax-largest-remainder-1e9",
                     "teacher_scores": scores,
                     "teacher_prediction": prediction,
+                    "teacher_generated_label": generated_label,
+                    "generated_label_matches_top_probability": generated_label == prediction,
                     "teacher_confidence": {
-                        "numerator": round(top_confidence * DENOMINATOR),
+                        "numerator": top_confidence_numerator,
                         "denominator": DENOMINATOR,
                     },
                     "teacher_distribution": distribution,
