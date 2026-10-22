@@ -903,7 +903,7 @@ pub fn sha256_source(input: &[u8]) -> [u8; 32] {
     eval::digest_sha256(input)
 }
 pub use syntax::{Exactness, Expr, ExprKind, Span};
-pub use value::{Closure, NumericBuffer, Rational, Value};
+pub use value::{Closure, NumericBuffer, PairNode, Rational, Value};
 
 /// Return a half-open, Unicode-scalar-indexed substring with clamped bounds.
 ///
