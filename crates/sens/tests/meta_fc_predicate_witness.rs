@@ -168,6 +168,16 @@ fn d11_first_class_closure_captures_lexical_environment_and_shadows_parameters()
             "(першокласне-обчислити (як-є ((функція (х у) у) (як-є ліве) (як-є праве))) (як-є ()))",
             "праве",
         ),
+        (
+            "pair-value-remains-structured",
+            "(першокласне-обчислити (як-є ((функція (х) х) (як-є (а (б))))) (як-є ()))",
+            "(а (б))",
+        ),
+        (
+            "empty-argument-shadows-existing-binding",
+            "(першокласне-обчислити (як-є ((функція (х) х) (як-є ()))) (як-є ((х . старе))))",
+            "()",
+        ),
     ] {
         let actual = exact(input, &mut s)
             .unwrap_or_else(|error| panic!(
