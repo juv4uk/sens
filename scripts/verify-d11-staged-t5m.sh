@@ -25,6 +25,7 @@ for source in \
   lib/викликати-доменний-код.lisp \
   lib/list-domain-first-class-compose.lisp \
   lib/застосувати-ланцюг-доменних-функцій.lisp \
+  lib/повторити-доменну-функцію.lisp \
   lib/d11-srfi1-alist-protocol.lisp; do
   stem="${source##*/}"
   physical="$scratch/${stem%.lisp}.sens"
