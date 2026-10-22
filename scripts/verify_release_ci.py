@@ -21,12 +21,9 @@ REQUIRED_CHECKS = (
     "physical-binary-cli",
     "d2-grammar-audit",
     "focused release preflight",
-    # GitHub Check Runs API reports the central Zig/SENS job with this exact
-    # truncated name (verified against completed Actions checks on main).
-    # The source YAML name is longer; checking that unreturned name would
-    # permanently block release. Zig/C/Rust physical corridor proof must not
-    # disappear from exact-SHA publication admission.
-    "Часові D1 предикати — один фізичний SENS-свідок і чинні ...",
+    # The real ci.yml/lisp-guards job runs native Zig T5M + SENS checks on main.
+    # Use its exact published check-run name; never require a retired label.
+    "Українська проєкція та заборона сирих літералів",
 )
 
 SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
