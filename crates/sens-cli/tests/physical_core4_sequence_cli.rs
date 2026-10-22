@@ -1096,7 +1096,12 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
     use std::collections::BTreeSet;
 
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let dir = root.join("benchmarks/contest-uk");
+    // Конкурс друкує абсолютний canonical source; PathBuf із ../.. у
+    // CARGO_MANIFEST_DIR не є лексичним префіксом цього самого шляху.
+    // Нормалізуємо директорію, а не послаблюємо перевірку source-only.
+    let dir = root.join("benchmarks/contest-uk")
+        .canonicalize()
+        .expect("чинна тека нативного конкурсу");
     let output = Command::new("bash")
         .arg(dir.join("run-native.sh"))
         .env("SENS_BINARY", env!("CARGO_BIN_EXE_sens"))
