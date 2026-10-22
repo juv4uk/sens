@@ -4,17 +4,29 @@
 ; Зовнішні назви виконавців і стани є цитованими даними протоколу.
 ; Умови двопольові, результат предиката — точний D1.
 
-; Каталог починається з (визначити паспорт (як-є ТАБЛИЦЯ)).
-; Читаємо паспорт рівно раз власним SENS reader, не виконуємо
-; DEFINE із прочитаного AST і не відкриваємо історичного реєстру SID8.
+; Самодостатня точна проєкція чинного паспорта маршрутів.
+; SENS виконує лише цитовані українські функції D3-D5;
+; жодних host-файлових викликів, Python/JSON чи SID8 у виконанні.
+; Рядки звіряються з lib/function-table-mechanisms.lisp.
 (визначити реєстр-вибору-механізму
-  (друге
-    (третє
-      (перше
-        (читати-всі
-          (читати-файл
-            (символ-у-текст (як-є lib/function-table-mechanisms.lisp))))))))
-
+  (як-є
+    ((schema function-table-mechanisms-1)
+     (authority д1-д10)
+     (rows
+       (як-є evaluator quote-form)
+       (атом? evaluator atom-primitive)
+       (тотожне? evaluator eq-primitive)
+       (сполучити evaluator cons-primitive)
+       (перше evaluator car-primitive)
+       (решта evaluator cdr-primitive)
+       (за-умовою evaluator cond-form)
+       (функція evaluator lambda-form)
+       (визначити evaluator define-form)
+       (додати common-lisp bounded-exact-add)
+       (додати prolog bounded-exact-add)
+       (додати clips bounded-exact-add)
+       (додати datalog bounded-exact-add))
+     (profile-routes))))
 (визначити метадані-вибору-механізму
   реєстр-вибору-механізму)
 
