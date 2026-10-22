@@ -56,3 +56,6 @@ tests/fixtures/x86-64-instruction-set-witness.lisp
 lib/list-collapse-adjacent-runs-general.lisp
 lib/tree-replace-atom-general.lisp
 tests/fixtures/push-proof-uk.lisp
+lib/list-count-matching-atoms-unary.lisp
+lib/list-run-length-unary-general.lisp
+lib/tree-contains-atom-general.lisp
