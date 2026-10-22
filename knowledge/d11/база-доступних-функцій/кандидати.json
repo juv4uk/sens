@@ -1022,17 +1022,37 @@
       "source_family": "logic",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "repo_file": "lib/unify.lisp",
+        "blob_sha": "49d378952892fcdfab4c815e993c2989b0ab736d",
         "original_file": "lib/unify.lisp",
-        "snapshot_not_live_proof": true
+        "snapshot_not_live_proof": false,
+        "historical_snapshot": "docs/FUNCTIONS.md"
       },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00110000101",
       "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00110000101",
+        "ukr": "застосувати-підстановку-обійдений",
+        "source_file": "lib/unify.lisp",
+        "source_blob": "49d378952892fcdfab4c815e993c2989b0ab736d",
+        "law": "Рекурсивно застосувати чинне SENS розіменування до CAR і CDR терма; атом незмінний, правильні й крапкові пари зберігаються за структурою, вихідний терм не мутує.",
+        "native_law_test": "crates/sens/tests/d11_unify_once.rs::d11_застосувати_підстановку_обійдений_працює_рекурсивно",
+        "native_test_blob": "65680496554fd7559f1ccc2904cc4f2f4c9cd5ce",
+        "native_test_result": "NATIVE_SENS_PASS_8_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39700508987",
+        "native_step_result": "SUCCESS_WITH_FULL_CI_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинне lib/unify.lisp; нативні позитивні й негативні SENS-випробування пройшли на GitHub-hosted CI; історична назва не створює дубля",
+        "historical_research_alias": "APPLY-SUBST-WALKED"
+      }
     },
     {
       "surface_name": "BALANCE",
@@ -1566,17 +1586,37 @@
       "source_family": "logic",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "repo_file": "lib/unify.lisp",
+        "blob_sha": "49d378952892fcdfab4c815e993c2989b0ab736d",
         "original_file": "lib/unify.lisp",
-        "snapshot_not_live_proof": true
+        "snapshot_not_live_proof": false,
+        "historical_snapshot": "docs/FUNCTIONS.md"
       },
-      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
-      "coordinate": null,
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00110001000",
       "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00110001000",
+        "ukr": "розширити-підстановку",
+        "source_file": "lib/unify.lisp",
+        "source_blob": "49d378952892fcdfab4c815e993c2989b0ab736d",
+        "law": "Додати нову точну пару (змінна . терм) на початок незмінного списку зв'язувань; попередні пари зберегти, новіша прив'язка має пріоритет.",
+        "native_law_test": "crates/sens/tests/d11_unify_once.rs::d11_розширити_підстановку_зберігає_пари_та_пріоритет",
+        "native_test_blob": "65680496554fd7559f1ccc2904cc4f2f4c9cd5ce",
+        "native_test_result": "NATIVE_SENS_PASS_6_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39700508987",
+        "native_step_result": "SUCCESS_WITH_FULL_CI_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинне lib/unify.lisp; нативні позитивні й негативні SENS-випробування пройшли на GitHub-hosted CI; історична назва не створює дубля",
+        "historical_research_alias": "EXTEND-SUBST"
+      }
     },
     {
       "surface_name": "FINALIZE-INHERITANCE",
@@ -4179,8 +4219,8 @@
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 37,
-    "semantic_winners_total": 549,
+    "native_sens_composition_winners": 39,
+    "semantic_winners_total": 551,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,

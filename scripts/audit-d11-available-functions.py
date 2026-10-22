@@ -189,6 +189,8 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
                     winner.get("native_law_test") in {
                         "crates/sens/tests/persistent_vector.rs::d11_пятнадцять_визначених_переможців_виконує_sens",
                         "crates/sens/tests/d11_unify_once.rs::d11_розвязати_один_раз_не_підмінює_рекурсивне_проходження",
+                        "crates/sens/tests/d11_unify_once.rs::d11_застосувати_підстановку_обійдений_працює_рекурсивно",
+                        "crates/sens/tests/d11_unify_once.rs::d11_розширити_підстановку_зберігає_пари_та_пріоритет",
                         "crates/sens/tests/codec_in_sens.rs::codec_emits_exact_t5_d2_order",
                         "crates/sens/tests/codec_in_sens.rs::codec_round_trips_every_shape",
                         "crates/sens/tests/codec_in_sens.rs::d11_кодек_д2_три_допоміжні_закони_у_sens",
