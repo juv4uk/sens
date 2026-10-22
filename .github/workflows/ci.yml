@@ -1715,10 +1715,25 @@ jobs:
               printf '%s\tDATA_ONLY\t-\t-\t-\n' "$source" >> "$report"
               continue
             fi
+            # Усі залежні DEFINE завантажує той самий нативний SENS.
+            # Інакше чинні бібліотеки отримували фальшиве NATIVE_REJECTED.
+            bindings=()
+            case "$source" in
+              lib/reason.lisp|lib/forward.lisp)
+                bindings=(--binding-source lib/unify.lisp) ;;
+              lib/d11-clojure-partition-by.lisp)
+                bindings=(--binding-source lib/d11-srfi1-span-break.lisp) ;;
+              lib/narrate.lisp)
+                bindings=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp) ;;
+              lib/result-status.lisp)
+                bindings=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp) ;;
+              lib/translation.lisp)
+                bindings=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp) ;;
+            esac
             # Одна й та сама нативна процедура майнить, звіряє Zig-view,
             # перевіряє SENS paired/standalone та реальний негатив.
             if bash scripts/refresh-verified-t5m-pair.sh \
-                "$source" target/debug/sens target/debug/sens-trit; then
+                "$source" target/debug/sens target/debug/sens-trit "${bindings[@]}"; then
               stem="${source%.lisp}"
               mkdir -p "$output/$(dirname "$source")"
               cp -- "$source" "$stem.sens" "$stem" "$output/$(dirname "$source")/"
