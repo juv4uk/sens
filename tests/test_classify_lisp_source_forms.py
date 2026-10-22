@@ -171,7 +171,7 @@ class ThreePassClassifierTests(unittest.TestCase):
 
     def test_legacy_lambda_sid8_cannot_hide_modern_d8_arguments(self):
         # D8:00001000 = ТОТОЖНЕ-ЗНАЧЕННЯ?, не історична LAMBDA.
-        src = "(00001000 (додати 2 3))\\n"
+        src = "(00001000 (додати 2 3))\n"
         modern = mod.scan_heads("modern.lisp", src)
         self.assertEqual([h.token for h in modern], ["00001000", "додати"])
         historic = mod.scan_heads("historic.lisp", src, source_era="legacy")
