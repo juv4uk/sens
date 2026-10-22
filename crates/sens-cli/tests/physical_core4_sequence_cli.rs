@@ -449,6 +449,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-interleave-three-rotation-general",
         "list-drop-every-third-compact-general",
         "list-drop-every-third-general",
+        "list-drop-leading-compounds-zero-copy-general",
+        "list-drop-leading-equal-atoms-zero-copy-general",
         "list-split-atomic-prefix-general",
         "list-first-compound-general",
         "list-last-compound-suffix-general",
