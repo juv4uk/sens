@@ -8,7 +8,7 @@ trit="${SENS_TRIT_BIN:-$PWD/target/debug/sens-trit}"
 error() { printf "КОНКУРС: ПОМИЛКА %s\n" "$*" >&2; exit 2; }
 inputs=("benchmarks/contest-uk/факторіал.sens" "benchmarks/contest-uk/сума-до-n.sens" "benchmarks/contest-uk/довжина-списку.sens")
 inputs+=("$@")
-declare -A seen baseline
+declare -A seen
 rows=""
 for path in "${inputs[@]}"; do
   [[ "$path" == benchmarks/contest-uk/*.sens && "$path" != *"/../"* ]] || error "некоректний шлях: $path"
@@ -17,7 +17,12 @@ for path in "${inputs[@]}"; do
   source="${path%.sens}.lisp"; view="${path%.sens}"
   [[ -s "$path" && -f "$source" && -f "$view" && ! -L "$path" ]] || error "неповна трійка $path"
   name="${path##*/}"; name="${name%.sens}"
-  case "$name" in факторіал*) task="факторіал";; сума-до-n*) task="сума-до-n";; довжина-списку*) task="довжина-списку";; *) error "невідома задача $name";; esac
+  case "$name" in
+    факторіал|факторіал-*) task="факторіал"; expected="3628800";;
+    сума-до-n|сума-до-n-*) task="сума-до-n"; expected="5050";;
+    довжина-списку|довжина-списку-*) task="довжина-списку"; expected="8";;
+    *) error "невідома задача $name";;
+  esac
   tmp="$(mktemp -d)"
   "$sens" --t5m-mint "$source" "$tmp/minted.sens" >/dev/null || error "mint $path"
   cmp -s "$path" "$tmp/minted.sens" || error "необоротний T5M $path"
@@ -36,8 +41,10 @@ for path in "${inputs[@]}"; do
   [[ "$line" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]] || error "невірні метрики $path"
   nodes="${BASH_REMATCH[1]}"; visits="${BASH_REMATCH[2]}"; result="${BASH_REMATCH[3]}"
   [[ "$(tail -n 1 "$tmp/standalone")" == "$result" ]] || error "результат метрик відмінний $path"
-  if [[ -z "${baseline[$task]+yes}" ]]; then baseline[$task]="$result"; fi
-  [[ "$result" == "${baseline[$task]}" ]] || error "результат не дорівнює еталону $path"
+  # Перевірені задачі мають незалежний числовий еталон. Перший
+  # конкурсант НЕ може визначати правильність усіх наступних.
+  [[ "$result" == "$expected" ]] || error "хибне значення $path: отримано=$result очікувано=$expected"
+  [[ "$(cat "$tmp/standalone")" == "$expected" ]] || error "хибний вивід $path: очікувано=$expected"
   bytes="$(wc -c < "$path")"
   rows+="$task"$'\t'"$bytes"$'\t'"$nodes"$'\t'"$visits"$'\t'"$path"$'\n'
   printf "CONTEST_EXECUTED_PASS path=%s T5M=%s AST=%s visits=%s result=%s\n" "$path" "$bytes" "$nodes" "$visits" "$result"
