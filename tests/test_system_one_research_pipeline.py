@@ -466,6 +466,48 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 thread.join(timeout=2.0)
                 server.server_close()
 
+    def test_adversarial_challenge_is_holdout_only_and_disjoint_from_seed(self):
+        seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
+        challenge_path = ROOT / "research" / "system-one-support-challenge-20261022.jsonl"
+        seed_rows, _ = student.read_jsonl(seed_path)
+        challenge_rows, challenge_raw = student.read_jsonl(challenge_path)
+        self.assertEqual(len(challenge_rows), 60)
+        self.assertTrue(all(row.get("evaluation_only") is True for row in challenge_rows))
+        self.assertTrue(all(row.get("split") == "test" for row in challenge_rows))
+        self.assertTrue(
+            all(row.get("source") == "synthetic-adversarial-challenge" for row in challenge_rows)
+        )
+        self.assertEqual(
+            {label: sum(row.get("gold") == label for row in challenge_rows) for label in student.LABELS},
+            {label: 12 for label in student.LABELS},
+        )
+        normalize = lambda value: unicodedata.normalize("NFKC", value).casefold().strip()
+        seed_texts = {normalize(row["text"]) for row in seed_rows}
+        challenge_texts = [normalize(row["text"]) for row in challenge_rows]
+        self.assertEqual(len(set(challenge_texts)), len(challenge_texts))
+        self.assertTrue(seed_texts.isdisjoint(challenge_texts))
+        self.assertEqual(len({row["id"] for row in challenge_rows}), len(challenge_rows))
+        self.assertEqual(
+            hashlib.sha256(challenge_raw).hexdigest(),
+            hashlib.sha256(challenge_path.read_bytes()).hexdigest(),
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "must-not-be-trained.json"
+            with self.assertRaises(student.StudentError):
+                student.train(
+                    Namespace(
+                        input=challenge_path,
+                        teacher=None,
+                        output=output,
+                        smoothing=1.0,
+                        min_count=1,
+                        gold_weight=None,
+                        overwrite=False,
+                    )
+                )
+            self.assertFalse(output.exists())
+
     def test_committed_seed_trains_and_predicts_only_selected_splits(self):
         seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
         rows, raw = student.read_jsonl(seed_path)
