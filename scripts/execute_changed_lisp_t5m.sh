@@ -222,6 +222,13 @@ run_native_t5m_program() {
     fi
   else
     status=$?
+    # Негативний SENS-свідок повинен відмовити саме на невикличній формі.
+    if [[ "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]] &&
+       (( status != 124 && status != 137 )) &&
+       grep -Eq 'kind=(Type|InvalidForm)' "$dir/native-paired.stderr"; then
+      echo "T5M_META_FC_NATIVE_MUTANT_REJECTED source=$file native=SENS"
+      return
+    fi
     sed 's/^/SENS native paired: /' "$dir/native-paired.stderr" >&2
     echo "::error::T5M_NATIVE_PAIRED_EXECUTION_FAIL source=$file status=$status release=NOT_CERTIFIED" >&2
     mark_file_failed
