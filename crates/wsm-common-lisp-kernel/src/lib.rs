@@ -1,4 +1,5 @@
 //! Independent Common Lisp execution kernel.
+//! Historical C ABI byte tags are not exact D5/D6/D8 SENS identities.
 //!
 //! sens owns semantic identities and laws. This crate owns only process
 //! execution against a real Common Lisp implementation and preserves the
@@ -23,10 +24,10 @@ use wsm_kernel_c_abi::{
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct LegacyAbiSemanticId(pub u8);
 
-const SID_ADD: u8 = 0b0000_1100;
+const LEGACY_ABI_ADD: u8 = 0b0000_1100;
 
 fn legacy_abi_form_for_request(semantic_id: u8, payload: &str) -> Result<String, ()> {
-    if semantic_id != SID_ADD {
+    if semantic_id != LEGACY_ABI_ADD {
         return Ok(payload.to_string());
     }
 
@@ -370,11 +371,11 @@ mod tests {
     #[test]
     fn legacy_abi_add_uses_exact_byte_and_arguments_only() {
         assert_eq!(
-            legacy_abi_form_for_request(SID_ADD, "2 3"),
+            legacy_abi_form_for_request(LEGACY_ABI_ADD, "2 3"),
             Ok("(+ 2 3)".to_string())
         );
         assert!(
-            legacy_abi_form_for_request(SID_ADD, "(- 7 3)").is_err(),
+            legacy_abi_form_for_request(LEGACY_ABI_ADD, "(- 7 3)").is_err(),
             "operator/form text must not override the + SID"
         );
         assert_eq!(
@@ -432,7 +433,7 @@ mod tests {
             (vtable.exchange.expect("exchange callback"))(
                 vtable.context,
                 WsmKernelRequest {
-                    semantic_id: SID_ADD,
+                    semantic_id: LEGACY_ABI_ADD,
                     payload: wsm_kernel_c_abi::WsmByteSpan {
                         ptr: input.as_ptr(),
                         len: input.len(),
@@ -449,7 +450,7 @@ mod tests {
         assert_eq!(String::from_utf8_lossy(&output[..written]).trim(), "5");
         assert_eq!(
             adapter.last_legacy_abi_id(),
-            Some(LegacyAbiSemanticId(SID_ADD))
+            Some(LegacyAbiSemanticId(LEGACY_ABI_ADD))
         );
 
         let override_text = b"(- 7 3)";
@@ -458,7 +459,7 @@ mod tests {
             (vtable.exchange.expect("exchange callback"))(
                 vtable.context,
                 WsmKernelRequest {
-                    semantic_id: SID_ADD,
+                    semantic_id: LEGACY_ABI_ADD,
                     payload: wsm_kernel_c_abi::WsmByteSpan {
                         ptr: override_text.as_ptr(),
                         len: override_text.len(),
