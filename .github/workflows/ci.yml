@@ -424,7 +424,6 @@ jobs:
           echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
 
       - uses: ./.github/actions/install-zig
-        if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.reason_tests == 'true' || steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:')) || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "System One research — один адресний тест учителя, учня та метрик"
         if: ${{ always() && steps.changed-t5m-lisp.outputs.system_one_research_tests == 'true' }}
