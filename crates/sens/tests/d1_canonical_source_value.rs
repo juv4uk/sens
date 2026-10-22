@@ -139,9 +139,9 @@ fn executable_axioms_use_exact_d1_for_positive_and_invalid_knowledge() {
     // Самостійні негативи виконуються тією ж мовою в живій SENS-сесії.
     // Невірна форма повинна повернути саме D1:0, а не D3 NIL або Type.
     for (id, source) in [
-        ("atom-not-four-words", "(принцип-п'ять-факт (як-є earth))"),
-        ("incomplete-knowledge-pair", "(принцип-п'ять-слова (як-є (earth)))"),
-        ("invalid-axiom-fact", "(перевірити-принцип-п'ять (як-є (earth)))"),
+        ("atom-not-four-words", "(принцип-п'ять-факт (як-є атом?))"),
+        ("incomplete-knowledge-pair", "(принцип-п'ять-слова (як-є (атом?)))"),
+        ("invalid-axiom-fact", "(перевірити-принцип-п'ять (як-є (атом?)))"),
     ] {
         let forms = sens::parse_mixed_exact_domain(source)
             .unwrap_or_else(|error| panic!("test_id=D1-AXIOMS-{id} layer=reader {error}"));
