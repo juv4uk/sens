@@ -15,8 +15,11 @@ SOURCE = ROOT / "lib/mechanism-selector.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
 D5 = ROOT / "lib/domains/d5.lisp"
 REPLACEMENTS = (
-    ("0011", "визначити", "define", "DEFINE", 10),
-    ("0010", "функція", "lambda", "LAMBDA", 6),
+    # У цитованому паспорті є по одному ключу маршруту DEFINE/LAMBDA:
+    # це ДАНІ, але лексичний лічильник бачить їх як форми.
+    # Прямі виклики не змінені; нічого не виконується Python-ом.
+    ("0011", "визначити", "define", "DEFINE", 11),
+    ("0010", "функція", "lambda", "LAMBDA", 7),
 )
 LOCAL_RENAMES = (
     ("mechanism-selector-find-section", "механізм-знайти-секцію"),
