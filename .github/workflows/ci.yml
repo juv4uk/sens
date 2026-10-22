@@ -322,7 +322,7 @@ jobs:
           if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|lib/domains/d9[.]lisp|crates/sens/src/d9_definition_bindings_generated[.]rs|crates/sens/tests/d9_binary_surface_native[.]rs|tests/semantic/d9-four-uk-projections-laws[.]lisp|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|benchmarks/contest-uk/(run-native\.sh|[^/]+\.(lisp|sens))|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|benchmarks/contest-uk/(run-native\.sh|judge\.sh|[^/]+\.(lisp|sens))|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # D11: тільки зміни селекторів, SENS-реалізації або їхніх тестів.
