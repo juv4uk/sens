@@ -72,7 +72,7 @@
     },
     {
       "path": "lib/domains/d8.lisp",
-      "git_blob_sha1": "1f12843275e1f13d3fbc69e101cecd07ae061118",
+      "git_blob_sha1": "71da43f6d21fe583c52398921e077fecda78ea41",
       "domain": "D8",
       "bit_width": 8,
       "expected_rows": 256,
