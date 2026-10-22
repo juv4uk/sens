@@ -859,7 +859,7 @@ jobs:
           echo "SENS_AST_OPT_BENCH_PASS sha=$GITHUB_SHA samples=11 sizes=1,16,128,1024 runtime=native-SENS"
 
       - name: "BENCH-AST — сирі серії та порівняння оптимізації"
-        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
+        if: ${{ always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
         with:
           name: sens-ast-optimization-${{ github.sha }}
@@ -897,7 +897,7 @@ jobs:
             echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: "BENCH-T5M — зберегти звіт"
-        if: ${{ always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
         with:
           name: t5m-zig-asm-rust-${{ github.sha }}
