@@ -66,5 +66,5 @@ fn доменний_виклик_з_d24_проходить_точне_перет
     let quote = CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(0b001).unwrap()));
     let call = вузол(ExprKind::DomainCall(quote, Rc::from([доменне_число(24)])));
     let program = lowered_program_to_exact_data(&[call]).expect("D3 і D24 узгоджені");
-    assert!(matches!(program, Value::Pair(_, _)));
+    assert!(matches!(program, Value::Pair(_)));
 }

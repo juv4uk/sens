@@ -70,8 +70,10 @@ class WordParser:
         return result
 
     def term(self, depth: int = 0):
-        if depth > 256:
-            raise ProjectionBlocked("D2 structure depth exceeds bounded proof")
+        # Чинний SENS reader обмежує фізичні D2-вкладення 128.
+        # Статичний доказ не має допускати програму, яку SENS відхилить.
+        if depth > 128:
+            raise ProjectionBlocked("D2 nesting exceeds current SENS reader limit (128)")
         token = self.take()
         if token == "10":
             if self.index == len(self.words) or self.words[self.index] == "01":
@@ -100,10 +102,15 @@ class WordParser:
     def parse(self):
         if not self.words:
             raise ProjectionBlocked("empty exact-word program")
-        result = self.term()
-        if self.index != len(self.words):
-            raise ProjectionBlocked("multiple top-level forms are not yet admitted here")
-        return result
+        # D2: кілька верхніх форм — одна програма, а не помилка.
+        # Канонічний друк між формами має рівно одне слово D2:00:
+        # зайві, початкові чи кінцеві роздільники не є оберненою укр-проєкцією.
+        forms = [self.term()]
+        while self.index < len(self.words):
+            if self.take() != "00" or self.index >= len(self.words):
+                raise ProjectionBlocked("noncanonical D2 separator between top-level forms")
+            forms.append(self.term())
+        return forms
 
 
 def proved_nil_pair_tree(node) -> bool:
@@ -198,7 +205,10 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str],
 
 def canonical_uk_from_words(words: list[str]) -> str:
     d1, d3, d4 = uk_surface(1), uk_surface(3), uk_surface(4)
-    return render_uk(WordParser(words).parse(), d1, d3, d4) + "\n"
+    # Лише відновлення точних назв і меж D2; результат виконує сам SENS.
+    return "\n".join(
+        render_uk(form, d1, d3, d4) for form in WordParser(words).parse()
+    ) + "\n"
 
 
 def project_current_uk(source: str) -> list[str]:

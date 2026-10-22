@@ -131,6 +131,22 @@ class WholeFileMetricTests(FileTree):
         self.assertNotIn("lib/surface/метадані.lisp", reasons)
         self.assertNotIn("lib/surface/вкладені-дані.lisp", reasons)
 
+    def test_retired_comment_only_lib_files_are_not_counted_as_programs(self):
+        root = self.tree({
+            "lib/списане.lisp": "; ФАЙЛ ВИВЕДЕНО З УЖИТКУ\\n".replace("\\n", "\n"),
+            "lib/блокові-дані.lisp": "#| коментар #| вкладений |# кінець |#\\n".replace("\\n", "\n"),
+            "lib/чинне.lisp": "(визначити результат (атом? (як-є ())))\n",
+            "lib/пошкоджене.lisp": "#| незакритий коментар",
+        })
+        progress = report.measure_source_projection(root)
+        self.assertEqual(progress.excluded_nonprogram_files, 2)
+        self.assertEqual(progress.total_source_files, 2)
+        self.assertEqual(progress.fully_projected_source_files, 1)
+        self.assertIn("lib/пошкоджене.lisp",
+                      {entry.path for entry in progress.pending})
+        # У повнофайловому обліку жоден файл не зникає.
+        self.assertEqual(report.measure(root).total_lisp_files, 4)
+
     def test_isa_catalogue_is_data_not_a_lisp_program(self):
         # Це фізичні факти CPU, не D7/українські викличні імена.
         # Новий executable у тій самій теці НЕ можна приховувати.

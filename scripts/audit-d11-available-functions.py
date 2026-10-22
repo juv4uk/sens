@@ -76,6 +76,12 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
             "OWNER_D10", "whole-domain D10 ratification document absent or invalid")
     require(owner.get("inventory", {}).get("git_blob") == hashes["d10"]["git_blob_sha1"],
             "OWNER_PIN", "D10 codebook bytes differ from owner-ratified inventory SHA")
+    require(d11.get("status") == "UNRATIFIED_REVIEW" and
+            d11.get("ratified") is False and d11.get("ratified_by") is None,
+            "D11_OWNER_AUTHORITY", "43 historical test words are not owner-ratified")
+    require(aggregate.get("domains", {}).get("D11", {}).get("ratified") is False and
+            aggregate.get("domains", {}).get("D11", {}).get("fixture_only") is True,
+            "D11_AGGREGATE_SCOPE", "D11 historical test data cannot become ratified residents")
     require(d11.get("semantic_scope") == "Testing vocabulary for binary SENS semantic tests; not callable Core",
             "TESTING_SCOPE", "D11 testing-only scope unexpectedly changed")
     require(d11.get("width") == 11 and d11.get("occupancy") == 43, "TESTING_WIDTH", "D11 test width/occupancy changed")
@@ -224,7 +230,12 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
         "library": kinds["SENS_LIBRARY_SNAPSHOT"], "distinct_families": len(families),
     }
     require(base.get("counts") == actual, "CATALOG_COUNTS", f"counts declared={base.get('counts')} actual={actual}")
-    require(base.get("current_d11", {}).get("occupied") == 43, "D11_CATALOG_SCOPE", "D11 test census mismatch")
+    require(base.get("current_d11", {}).get("occupied") == 0 and
+            base.get("current_d11", {}).get("legacy_fixture_count") == 43 and
+            base.get("current_d11", {}).get("admitted_resident_occupancy") == 0 and
+            base.get("current_d11", {}).get("unratified") is True and
+            base.get("current_d11", {}).get("ratified") is False,
+            "D11_CATALOG_SCOPE", "43 unratified fixtures are not 43 occupied semantic resident slots")
     expect_winners = base.get("winners_20261022", {})
     # Переможці зростають з доведеними законами: жодного штучного стопу на 27.
     # Перевіряємо поточний підрахунок, а не заморожене історичне число.
@@ -267,7 +278,8 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
         "status": "MECHANICAL_PASS", "semantic_status": f"{selected_winners}_LIBRARY_WINNERS_SENS_LAW_512_DERIVED_SELECTORS",
         "target": "D11", "bit_width": 11, "capacity": 2048,
         "candidates": actual, "winner_compositions": selected_winners, "derived_selectors": 512,
-        "defined_functions_total": 512 + selected_winners, "d10_owner_pinned": 1024, "d11_testing_only": 43,
+        "defined_functions_total": 512 + selected_winners, "d10_owner_pinned": 1024,
+        "d11_legacy_fixture_count": 43, "d11_owner_ratified_residents": 0,
         "historical_aggregate_sha": original.get("foundation_blob_sha"),
         "current_aggregate_sha": hashes["aggregate"]["git_blob_sha1"],
         "aggregate_changed_since_ingest": original.get("foundation_blob_sha") != hashes["aggregate"]["git_blob_sha1"],
@@ -299,6 +311,18 @@ def self_test(s: dict, hashes: dict, root: Path) -> int:
     def bad_test_width(x):
         x["d11_test"]["table"][0]["bits"] = "0000000000"
     cases.append(("D11_TEST_WIDTH", bad_test_width))
+
+    def bad_owner_claim(x):
+        x["d11_test"]["status"] = "owner-ratified"
+    cases.append(("D11_OWNER_AUTHORITY", bad_owner_claim))
+
+    def bad_d11_reauthorization(x):
+        x["aggregate"]["domains"]["D11"]["ratified"] = True
+    cases.append(("D11_AGGREGATE_SCOPE", bad_d11_reauthorization))
+
+    def bad_fixture_occupancy(x):
+        x["base"]["current_d11"]["occupied"] = 43
+    cases.append(("D11_CATALOG_SCOPE", bad_fixture_occupancy))
 
     def bad_d7_v1(x):
         first = next(iter(x["aggregate"]["domains"]["D7"]["residents"]))

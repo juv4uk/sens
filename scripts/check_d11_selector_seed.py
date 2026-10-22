@@ -100,7 +100,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
     require(isinstance(parent_pin, str) and re.fullmatch(r"[0-9a-f]{40}", parent_pin),
             "PARENT_PIN_FORMAT", "historical parent Git blob pin must be a 40-digit SHA-1")
     require(source.get("d11_testing_vocabulary") == PATHS["d11_vocabulary"],
-            "TEST_VOCAB_SOURCE", "seed must name the ratified D11 testing vocabulary")
+            "TEST_VOCAB_SOURCE", "seed must identify the legacy unratified D11 test fixture")
 
     law = seed.get("law", {})
     require(law.get("derived_by_law") is True and
@@ -156,11 +156,12 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
     parent_pin_matches = current_d10_blob == parent_pin
 
     # Verify that the canonical D11 table still consists only of the 43
-    # owner-ratified testing entries, not the 512 research deriveds.
+    # unratified legacy test fixtures, not the 512 derived selectors.
     require(vocabulary.get("schema") == "sens.d11.testing/v1" and
-            vocabulary.get("status") == "owner-ratified" and
-            vocabulary.get("ratified_by") == "PROJECT_OWNER",
-            "TEST_VOCAB_AUTHORITY", "D11 testing vocabulary must remain owner-ratified")
+            vocabulary.get("status") == "UNRATIFIED_REVIEW" and
+            vocabulary.get("ratified") is False and
+            vocabulary.get("ratified_by") is None,
+            "TEST_VOCAB_AUTHORITY", "D11 legacy testing fixtures must remain explicitly unratified")
     require(vocabulary.get("width") == 11 and vocabulary.get("capacity") == 2048 and
             vocabulary.get("occupancy") == 43 and
             vocabulary.get("semantic_scope") ==
@@ -169,7 +170,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
 
     vocab_rows = vocabulary.get("table")
     require(isinstance(vocab_rows, list) and len(vocab_rows) == 43,
-            "TEST_VOCAB_COUNT", "expected exactly 43 ratified D11 testing entries")
+            "TEST_VOCAB_COUNT", "expected exactly 43 unratified historical D11 test fixtures")
     test_map: dict[str, str] = {}
     test_names: set[str] = set()
     for index, row in enumerate(vocab_rows):
@@ -198,7 +199,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
         d11_map[bits] = name
         d11_names.add(name.casefold())
     require(d11_map == test_map, "D11_TABLE_DRIFT",
-            "lib/domains/d11.lisp differs from the owner-ratified 43-row testing vocabulary")
+            "lib/domains/d11.lisp differs from the unratified 43-row test fixture")
 
     derived_rows = seed.get("rows")
     require(isinstance(derived_rows, list) and len(derived_rows) == 512,
@@ -224,9 +225,9 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
     coord_collisions = derived_coordinates & test_coordinates
     name_collisions = derived_names & d11_names
     require(not coord_collisions, "D11_TEST_COORD_COLLISION",
-            f"derived coordinates overlap ratified testing rows: {sorted(coord_collisions)[:5]}")
+            f"derived coordinates overlap legacy testing fixture addresses: {sorted(coord_collisions)[:5]}")
     require(not name_collisions, "D11_TEST_NAME_COLLISION",
-            f"derived names overlap ratified testing rows: {sorted(name_collisions)[:5]}")
+            f"derived names overlap legacy testing fixture addresses: {sorted(name_collisions)[:5]}")
 
     expected_coordinates: set[str] = set()
     parent_extensions: dict[str, set[str]] = {bits: set() for bits in parents}

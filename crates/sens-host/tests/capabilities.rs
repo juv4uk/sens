@@ -291,14 +291,14 @@ fn process_run_is_unrestricted_in_a_native_root_session() {
     let mut session = process_session(Environment::root());
     let result = eval_program(r#"(process-run "git" (quote ("--version")))"#, &mut session)
         .expect("the trusted native root session should run a named program");
-    let Value::Pair(ref exit_code, ref rest) = result.value else {
+    let Value::Pair(ref node) = result.value else {
         panic!("process-run should return a 3-element list");
     };
-    assert_eq!(**exit_code, Value::Number(0.0, Exactness::Exact));
-    let Value::Pair(ref stdout, _) = **rest else {
+    assert_eq!(node.head, Value::Number(0.0, Exactness::Exact));
+    let Value::Pair(ref rest) = node.tail else {
         panic!("process-run should return a 3-element list");
     };
-    let Value::String(ref stdout) = **stdout else {
+    let Value::String(ref stdout) = rest.head else {
         panic!("stdout should be a string");
     };
     assert!(stdout.contains("git version"));
@@ -311,14 +311,14 @@ fn process_run_succeeds_for_an_explicitly_allowed_program() {
     let source = r#"(process-run "git" (quote ("--version")))"#;
     let result =
         eval_program(source, &mut session).expect("an explicitly allowed program should run");
-    let Value::Pair(ref exit_code, ref rest) = result.value else {
+    let Value::Pair(ref node) = result.value else {
         panic!("process-run should return a 3-element list");
     };
-    assert_eq!(**exit_code, Value::Number(0.0, Exactness::Exact));
-    let Value::Pair(ref stdout, _) = **rest else {
+    assert_eq!(node.head, Value::Number(0.0, Exactness::Exact));
+    let Value::Pair(ref rest) = node.tail else {
         panic!("process-run should return a 3-element list");
     };
-    let Value::String(ref stdout) = **stdout else {
+    let Value::String(ref stdout) = rest.head else {
         panic!("stdout should be a string");
     };
     assert!(stdout.contains("git version"));

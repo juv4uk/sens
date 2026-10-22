@@ -10,14 +10,14 @@ fn env_lookup(snapshot: &Value, name: &str) -> Option<Value> {
     loop {
         match cursor {
             Value::Nil => return None,
-            Value::Pair(entry, tail) => {
-                let Value::Pair(key, value) = entry.as_ref() else {
+            Value::Pair(node) => {
+                let Value::Pair(entry) = &node.head else {
                     panic!("ENV snapshot entry must be a dotted pair");
                 };
-                if matches!(key.as_ref(), Value::String(text) if text.as_ref() == name) {
-                    return Some(value.as_ref().clone());
+                if matches!(&entry.head, Value::String(text) if text.as_ref() == name) {
+                    return Some(entry.tail.clone());
                 }
-                cursor = tail.as_ref();
+                cursor = &node.tail;
             }
             other => panic!("ENV snapshot must be a proper list, got {other}"),
         }
@@ -30,15 +30,15 @@ fn env_names(snapshot: &Value) -> Vec<String> {
     loop {
         match cursor {
             Value::Nil => return names,
-            Value::Pair(entry, tail) => {
-                let Value::Pair(key, _) = entry.as_ref() else {
+            Value::Pair(node) => {
+                let Value::Pair(entry) = &node.head else {
                     panic!("ENV snapshot entry must be a dotted pair");
                 };
-                let Value::String(text) = key.as_ref() else {
+                let Value::String(text) = &entry.head else {
                     panic!("ENV snapshot key must be a string");
                 };
                 names.push(text.to_string());
-                cursor = tail.as_ref();
+                cursor = &node.tail;
             }
             other => panic!("ENV snapshot must be a proper list, got {other}"),
         }

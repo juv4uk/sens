@@ -9,13 +9,28 @@ on:
   push:
     paths:
       - "benchmarks/contest-uk/*.lisp"
+      # Зміна правил нативного конкурсу має дібрати всі ще непарні
+      # Lisp-кандидати, навіть якщо самі .lisp не змінилися.
+      - "benchmarks/contest-uk/judge.sh"
       - "lib/list-*.lisp"
+      - "lib/interleave-pairs.lisp"
       - "lib/tree-*.lisp"
       - "lib/d11-*.lisp"
-      - "tests/semantic/d9-four-uk-projections-laws.lisp"
+      - "lib/meta-eval-first-class.lisp"
+      - "tests/semantic/*.lisp"
       - "lib/reverse-three.lisp"
       - "lib/axioms-d1-principle-five.lisp"
+      - "lib/core*.lisp"
+      - "lib/island-lowering.lisp"
       - "lib/life-1-scheduler.lisp"
+      - "lib/lisp-fs.lisp"
+      - "lib/world.lisp"
+      - "lib/reason.lisp"
+      - "lib/forward.lisp"
+      - "lib/knowledge.lisp"
+      - "lib/unify.lisp"
+      - "lib/clips-import.lisp"
+      - "lib/yantra.lisp"
       - "lib/machine/projection/x86-64.lisp"
       - "lib/machine/lowering/semantic-x86-64.lisp"
       - ".github/workflows/remint-drifted-pairs.yml"
@@ -64,17 +79,65 @@ jobs:
             # Лише реально додані/змінені .lisp у цьому push, не весь
             # історичний список. Видалені під час promotion не перемайнювати.
             if [[ "$BEFORE" =~ ^0+$ ]]; then
-              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/d9-four-uk-projections-laws.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp')"
+              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'lib/meta-eval-first-class.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/lisp-fs.lisp' 'lib/world.lisp' 'lib/reason.lisp' 'lib/forward.lisp' 'lib/knowledge.lisp' 'lib/unify.lisp' 'lib/clips-import.lisp' 'lib/yantra.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp' ':(exclude)tests/semantic/meta-fc-predicates-d1-mutant.lisp')"
             else
-              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/d9-four-uk-projections-laws.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp')"
+              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'lib/meta-eval-first-class.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/lisp-fs.lisp' 'lib/world.lisp' 'lib/reason.lisp' 'lib/forward.lisp' 'lib/knowledge.lisp' 'lib/unify.lisp' 'lib/clips-import.lisp' 'lib/yantra.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp' ':(exclude)tests/semantic/meta-fc-predicates-d1-mutant.lisp')"
             fi
+            # Зміна самого SENS-нижувача потребує перевірки його
+            # СПОЖИВАЧА навіть коли вихідний свідок і байти ще не змінювались.
+            # Не намагатись виконати бібліотеку як невідомий текстовий виклик.
+            if [[ "$BEFORE" =~ ^0+$ ]]; then
+              island_change="$(git -c core.quotePath=false diff-tree --no-commit-id --name-only -r HEAD -- lib/island-lowering.lisp)"
+            else
+              island_change="$(git -c core.quotePath=false diff --name-only "$BEFORE" "$AFTER" -- lib/island-lowering.lisp)"
+            fi
+            if [[ -n "$island_change" ]] &&
+               ! printf '%s\n' "$list" | grep -Fxq 'tests/fixtures/island-lowering-1048-witness.lisp'; then
+              list="$(printf '%s\n%s' "$list" 'tests/fixtures/island-lowering-1048-witness.lisp')"
+              echo "REMINT_ISLAND_BINDING_CHANGED test=tests/fixtures/island-lowering-1048-witness.lisp"
+            fi
+            # Закон першокласного предиката залежить від реального D11 DEFINE.
+            # Зміна бібліотеки повинна перемайнити і фізичного споживача.
+            if [[ "$BEFORE" =~ ^0+$ ]]; then
+              meta_eval_change="$(git -c core.quotePath=false diff-tree --no-commit-id --name-only -r HEAD -- lib/meta-eval-first-class.lisp)"
+            else
+              meta_eval_change="$(git -c core.quotePath=false diff --name-only "$BEFORE" "$AFTER" -- lib/meta-eval-first-class.lisp)"
+            fi
+            if [[ -n "$meta_eval_change" ]] &&
+               ! printf '%s\n' "$list" | grep -Fxq 'tests/semantic/meta-fc-predicates-d1-law.lisp'; then
+              list="$(printf '%s\n%s' "$list" 'tests/semantic/meta-fc-predicates-d1-law.lisp')"
+              echo "REMINT_D11_BINDING_CHANGED source=lib/meta-eval-first-class.lisp test=tests/semantic/meta-fc-predicates-d1-law.lisp"
+            fi
+            # Core1 — справжній власник обходу графа; GC-свідок залежить
+            # від його DEFINE, хоч фізичний .sens-супутник ще існує.
+            if [[ "$BEFORE" =~ ^0+$ ]]; then
+              core1_change="$(git -c core.quotePath=false diff-tree --no-commit-id --name-only -r HEAD -- lib/core1.lisp)"
+            else
+              core1_change="$(git -c core.quotePath=false diff --name-only "$BEFORE" "$AFTER" -- lib/core1.lisp)"
+            fi
+            if [[ -n "$core1_change" ]] &&
+               ! printf '%s\n' "$list" | grep -Fxq 'tests/semantic/core1-gc-reachability-laws.lisp'; then
+              list="$(printf '%s\n%s' "$list" 'tests/semantic/core1-gc-reachability-laws.lisp')"
+              echo "REMINT_CORE1_BINDING_CHANGED source=lib/core1.lisp test=tests/semantic/core1-gc-reachability-laws.lisp"
+            fi
+            # Не передавати нативному mint незмінні описи принципів:
+            # core2 і core-math складаються тільки з коментарів, не є програмами.
+            # Git pathspec виключає їх з push-дифа, а реальні core1/core3/core4
+            # залишає без змін для предметного нативного виконання.
+            # Універсальний diff нижче як і раніше бере реальну зміну core4.
+            # Але Core2 є описом профілю, а Core4 без пари не повинен
+            # повторно ламати кожен незалежний запуск remint.
+            # Янтра має окремий реальний RED: рядки зовнішнього формату
+            # ще не проходять точну D7-проєкцію. Не перезапускати її на
+            # кожен сторонній push, але зміну самої yantra.lisp з push diff
+            # завжди передавати в нативний remint і зберігати її RED.
             # Не втрачати непарні програми після скасованого queued run.
             # Змінений конкурсний .lisp уже є у git diff вище, навіть якщо
             # стара .sens ще існує. Не перемайнювати незмінені повні трійки
             # при кожному незалежному push: це відтягує обернення нових Lisp.
             # Джерело без .sens або view залишається в черзі; нативний
             # суддя як і раніше відхиляє drift та хибне виконання.
-            for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -88,7 +151,7 @@ jobs:
             # Повертаємо не лише конкурс, а й D11/list/tree, коли
             # проміжний queued push було замінено найновішим.
             if [[ "$EVENT_NAME" == push ]]; then
-              for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
                 [[ -f "$source" && ! -L "$source" ]] || continue
                 pair="${source%.lisp}.sens"
                 view="${source%.lisp}"
@@ -110,7 +173,7 @@ jobs:
           # активну конкурсну трійку (в т. ч. незмінений НСД), щоб
           # пропущений дрейф негайно став кандидатом на справжній remint.
           if [[ "$EVENT_NAME" == push ]]; then
-            for source in benchmarks/contest-uk/*.lisp lib/axioms-d1-principle-five.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in benchmarks/contest-uk/*.lisp tests/semantic/meta-fc-predicates-d1-law.lisp lib/axioms-d1-principle-five.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               if printf '%s\n' "$list" | grep -Fxq -- "$source"; then
                 continue
@@ -123,13 +186,22 @@ jobs:
               probe_dir="$(mktemp -d "$RUNNER_TEMP/sens-native-mint.XXXXXX")"
               probe="$probe_dir/program.sens"
               drift=0
-              if ! target/debug/sens --t5m-mint "$source" "$probe" >/dev/null; then
+              if [[ "$source" == tests/semantic/meta-fc-predicates-d1-law.lisp ]]; then
+                # Д11 DEFINE існує у власному SENS Lisp, не в host-регулярці.
+                # Для чесного drift-probe використовуємо ТОЙ САМИЙ native
+                # binding-source, що в позитивному парному eval.
+                if ! target/debug/sens --t5m-mint-pair "$source" "$probe" --binding-source lib/meta-eval-first-class.lisp >/dev/null; then
+                  echo "REMINT_MINT_PROBE_RED source=$source binding=lib/meta-eval-first-class.lisp"
+                  drift=1
+                fi
+              elif ! target/debug/sens --t5m-mint "$source" "$probe" >/dev/null; then
                 echo "REMINT_MINT_PROBE_RED source=$source"
                 drift=1
-              elif ! cmp -s "$probe" "$pair"; then
+              fi
+              if (( ! drift )) && ! cmp -s "$probe" "$pair"; then
                 echo "REMINT_PHYSICAL_DRIFT source=$source"
                 drift=1
-              elif ! target/debug/sens-trit view "$pair" | cmp -s - "$view"; then
+              elif (( ! drift )) && ! target/debug/sens-trit view "$pair" | cmp -s - "$view"; then
                 echo "REMINT_VIEW_DRIFT source=$source"
                 drift=1
               fi
@@ -176,6 +248,31 @@ jobs:
               esac
               echo "MISSING $f"; skip=$((skip+1)); continue
             fi
+            # Коментарний файл — опис, не виконуваний Lisp. Навіть старий
+            # queued/rebase список не має майнити порожню програму:
+            # T5M_REPL_EMPTY тут є хибним адміністративним RED.
+            # Symlink і реальне джерело з формами НЕ обходити.
+            # Схемний реєстр сайтів є інвентарем, а не виконуваним Lisp.
+            # Перевіряємо і точний шлях, і форму даних: зміна на програму
+            # не може бути непомітно пропущена.
+            if [[ "$f" == knowledge/silent-fallback-inventory.lisp && ! -L "$f" ]] &&
+               LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$f"; then
+              echo "REMINT_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
+              continue
+            fi
+            if [[ ! -L "$f" ]] &&
+               ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$f"; then
+              echo "REMINT_DATA_ONLY source=$f classification=COMMENT_ONLY"
+              continue
+            fi
+            # Це навмисно негативна програма: SENS мусить відхилити
+            # її виклик Д1:ні. Єдиний нативний суд — meta_fc_predicate_witness,
+            # де доведено тип помилки та рівно один змінений біт джерела.
+            # Не видавати очікуваний негатив за зламаний позитивний remint.
+            if [[ "$f" == tests/semantic/meta-fc-predicates-d1-mutant.lisp ]]; then
+              echo "REMINT_EXPECTED_SENS_NEGATIVE source=$f test=meta_fc_predicate_witness counted_executable=NO"
+              continue
+            fi
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
             case "$f" in
@@ -184,8 +281,11 @@ jobs:
               lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
               lib/result-status.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
               lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
-              tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/surface/semantic-registry-api.lisp --binding-source lib/mechanism-selector.lisp);;
+              tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp);;
+              tests/fixtures/island-lowering-1048-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp);;
               tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
+              tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
+              tests/semantic/meta-fc-predicates-d1-law.lisp) bs=(--binding-source lib/meta-eval-first-class.lisp);;
             esac
             if bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}"; then
               ok=$((ok+1))
@@ -257,18 +357,20 @@ jobs:
           }
           commit_verified_changes() {
             prune_archived_duplicates
-            git add -A
-            if git diff --cached --quiet; then
-              echo "REMINT_ALREADY_CURRENT no-byte-changes"
-              return 1
-            fi
-            git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main"
+            git add -A || return 2
+            local diff_status=0
+            git diff --cached --quiet || diff_status=$?
+            case "$diff_status" in
+              0) echo "REMINT_ALREADY_CURRENT no-byte-changes"; return 1 ;;
+              1) ;;
+              *) echo "::error::REMINT_GIT_DIFF_FAILED status=$diff_status" >&2; return 2 ;;
+            esac
+            git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main" || return 2
           }
           regenerate_on_current_main() {
             # Стан відмови — тільки поточної перевірки exact main.
             # Якщо наступний rebase уже містить виправлення, старий RED
             # не переживає новий успішний SENS/Zig remint.
-            regenerated_failed=0
             # RED належить саме цьому актуальному SHA. Стара помилка у
             # попередній спробі не переживає нативного ремонту нової версії.
             regenerated_failed=0
@@ -279,19 +381,38 @@ jobs:
             # маршрут mint → Zig inverse → paired/standalone SENS.
             # Після паралельного оновлення перевірити й дрейфуючі трійки,
             # а не лишати їх новим непоясненим RED під час judge.
-            if [[ "$REMINT_CONTEST" == true ]]; then
-              for source in benchmarks/contest-uk/*.lisp; do
-                [[ -f "$source" && ! -L "$source" ]] || continue
+            # Новий незалежний конкурсант міг з'явитися, коли workflow
+            # уже майнив старий HEAD. Push від GITHUB_TOKEN не запускає
+            # наступний push-workflow: забираємо його в поточний native mint.
+            for source in benchmarks/contest-uk/*.lisp; do
+              [[ -f "$source" && ! -L "$source" ]] || continue
+              pair="${source%.lisp}.sens"
+              view="${source%.lisp}"
+              needs_pair=0
+              if [[ ! -s "$pair" || ! -f "$view" ||
+                    -L "$pair" || -L "$view" ]]; then
+                needs_pair=1
+              else
+                source_commit="$(git log -1 --format=%H -- "$source")"
+                pair_commit="$(git log -1 --format=%H -- "$pair")"
+                if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
+                   ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
+                  needs_pair=1
+                fi
+              fi
+              if (( needs_pair )); then
+                REMINT_CONTEST=true
                 if ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
                   printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
+                  echo "REMINT_RECOVER_CONTEST_SOURCE source=$source"
                 fi
-              done
-            fi
+              fi
+            done
             # Якщо попередні queued push скасовано, після rebase потрібно
             # забрати й нові бібліотечні Lisp. Інакше незмінений старий
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
             # Тільки непарні або новіші за носій: без масового перемайну.
-            for source in lib/list-*.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -339,6 +460,27 @@ jobs:
                 regenerated_failed=1
                 continue
               fi
+              # Перевірка повторюється після перемикання на новий main:
+              # джерело могло стати суто описовим, не створюємо бутафорію.
+              # Схемний реєстр сайтів є інвентарем, а не виконуваним Lisp.
+              # Перевіряємо і точний шлях, і форму даних: зміна на програму
+              # не може бути непомітно пропущена.
+              if [[ "$f" == knowledge/silent-fallback-inventory.lisp && ! -L "$f" ]] &&
+                 LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$f"; then
+                echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
+                continue
+              fi
+              if [[ ! -L "$f" ]] &&
+                 ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$f"; then
+                echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=COMMENT_ONLY"
+                continue
+              fi
+              # На свіжому main той самий явно негативний свідок
+              # перевіряється SENS meta_fc_predicate_witness, не позитивним mint.
+              if [[ "$f" == tests/semantic/meta-fc-predicates-d1-mutant.lisp ]]; then
+                echo "REMINT_CURRENT_MAIN_EXPECTED_SENS_NEGATIVE source=$f test=meta_fc_predicate_witness counted_executable=NO"
+                continue
+              fi
               bs=()
               case "$f" in
                 lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
@@ -346,8 +488,11 @@ jobs:
                 lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
                 lib/result-status.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
                 lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
-                tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/surface/semantic-registry-api.lisp --binding-source lib/mechanism-selector.lisp);;
+                tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp);;
+              tests/fixtures/island-lowering-1048-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp);;
                 tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
+              tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
+              tests/semantic/meta-fc-predicates-d1-law.lisp) bs=(--binding-source lib/meta-eval-first-class.lisp);;
               esac
               if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}"; then
                 echo "::error::REMINT_CURRENT_MAIN_NATIVE_FAILED $f" >&2
@@ -364,26 +509,34 @@ jobs:
           }
           regenerated_failed=0
           recovered_on_current_main=0
-          if ! commit_verified_changes; then
-            exit 0
-          fi
+          commit_result=0
+          commit_verified_changes || commit_result=$?
+          case "$commit_result" in
+            0) ;;
+            1) exit 0 ;;
+            *) echo "::error::REMINT_NATIVE_COMMIT_FAILED status=$commit_result" >&2; exit "$commit_result" ;;
+          esac
           published=0
           # При частих незалежних push перевірені фізичні T5M можуть
           # годинами програвати гонку refs: повний суд триває десятки секунд.
           # Швидкий rebase дозволений ЛИШЕ коли remote змінив документацію
           # чи CI, а НЕ Lisp, SENS, Zig, Rust, домени або корпус конкурсу.
           # Інакше обов'язкові новий mint, Zig inverse і SENS execution.
-          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+          for attempt in 1 2 3 4 5 6; do
             if git push origin "HEAD:$target_branch"; then
               echo "REMINT_PUBLISHED attempt=$attempt"
               published=1
               break
             fi
             echo "REMINT_MAIN_ADVANCED attempt=$attempt: exact remote ref changed" >&2
-            if (( attempt == 12 )); then break; fi
+            if (( attempt == 6 )); then break; fi
             git fetch origin "$target_branch"
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
+            # Новий незалежний lib/list Lisp не змінює байтів раніше
+            # нативно перевіреного корпусу. Перевіримо ЙОГО SENS/Zig
+            # після fast-rebase замість 80-секундного повного пересуду.
+            fast_mint_sources=()
             # Не перезапускати повний SENS суд за НОВОГО незалежного
             # конкурсанта без фізичної пари: він потрапить у наступний mint.
             # Але M/D/R Lisp, SENS/Zig/Rust, реєстри й фізичні байти
@@ -394,20 +547,84 @@ jobs:
               case "$changed" in
                 docs/*.md|benchmarks/contest-uk/RESULTS.md|.github/workflows/*.yml|.github/workflows/*.yaml)
                   ;;
-                crates/sens/tests/*.rs|crates/sens-cli/tests/*.rs|crates/xtask/tests/*.rs)
-                  # Інтеграційні тестові модулі не входять у sens/sens-trit runtime.
-                  # Не повторювати довгий native judge через незалежний test-only commit.
-                  # Rust src, Zig, .lisp і фізичні .sens як раніше потребують перевірки.
+                crates/sens/tests/*.rs|crates/sens-cli/tests/*.rs|crates/xtask/tests/*.rs|tests/*.py)
+                  # Тести Python, як і Rust integration tests, не входять у
+                  # sens/sens-trit runtime та не визначають семантики SENS.
+                  # Їхні окремі перевірки виконує CI; для попередньо
+                  # доведених SENS/Zig пар не потрібен повторний native judge.
+                  # Rust src, Zig, Lisp та фізичні .sens і далі вимагають remint.
                   ;;
                 benchmarks/contest-uk/*.lisp)
-                  # Лише A: нове джерело не змінює перевірені байти.
-                  # Вже існуючі M/D/R, фізичні SENS та семантика => новий mint.
+                  # Новий, незалежний кандидат без носія не може змінити
+                  # вже доведених фізичних байтів решти учасників.
+                  # НЕ зараховуємо новий Lisp виконаним чи переможцем.
+                  # Пошкоджену/змінену програму, її .sens/view або кандидата
+                  # із поточної перевірки обов'язково перевіряти знову.
                   if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
-                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" origin/$target_branch -- "$changed" | grep -Fxq -- "$changed" ||
-                     git cat-file -e "origin/$target_branch:${changed%.lisp}.sens" 2>/dev/null; then
+                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" "origin/$target_branch" -- "$changed" | grep -Fxq -- "$changed" ||
+                     git cat-file -e "origin/$target_branch:${changed%.lisp}.sens" 2>/dev/null ||
+                     git cat-file -e "origin/$target_branch:${changed%.lisp}" 2>/dev/null; then
+                    echo "REMINT_CONTESTANT_CHANGED source=$changed mint=REVERIFY_CURRENT_MAIN"
+                    safe_rebase=0
+                    break
+                  fi
+                  # Після concurrency-cancel нового конкурсанта не губити:
+                  # перевірити його на ЦЬОМУ HEAD нативним SENS/Zig,
+                  # без оголошення переможцем до окремого judge.
+                  fast_mint_sources+=("$changed")
+                  REMINT_CONTEST=true
+                  echo "REMINT_FAST_NATIVE_NEW_CONTESTANT source=$changed status=PENDING_REAL_SENS_ZIG winner=NOT_JUDGED"
+                  ;;
+                lib/d11-*.lisp|lib/meta-eval-first-class.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp|tests/fixtures/*.lisp)
+                  # Перемайн лише коли змінилося ВИКОРИСТАНЕ джерело.
+                  # Самостійна зміна іншого Lisp не міняє вже перевірених
+                  # SENS/Zig байтів: потрібні той самий сенсовий runtime,
+                  # кандидати та binding-source. Усі зміни .sens, Zig,
+                  # Rust runtime, core і доменів обробляє fail-closed case *.
+                  # При M/D/R від поточного кандидата — завжди native remint.
+                  # Вилучені джерела й відомий binding-source теж fail-closed.
+                  if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
+                     [[ "$changed" == lib/d11-srfi1-span-break.lisp ]] ||
+                     ! git cat-file -e "origin/$target_branch:$changed" 2>/dev/null; then
                     safe_rebase=0; break
                   fi
-                  echo "REMINT_NEW_INDEPENDENT_CONTESTANT source=$changed mint=NEXT_QUEUE"
+                  # Новий незалежний Lisp не можна пропустити після
+                  # fast-rebase: очікуваний queued workflow міг бути
+                  # скасований, а push через GITHUB_TOKEN не породить
+                  # наступного запуску. Перевірити фізичну трійку саме
+                  # на поточному remote/main.
+                  case "$changed" in
+                    lib/d11-*.lisp|lib/meta-eval-first-class.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp)
+                      candidate_pair="${changed%.lisp}.sens"
+                      candidate_view="${changed%.lisp}"
+                      if ! git cat-file -e "origin/$target_branch:$candidate_pair" 2>/dev/null ||
+                         ! git cat-file -e "origin/$target_branch:$candidate_view" 2>/dev/null; then
+                        # Тільки незалежний НОВИЙ бібліотечний файл,
+                        # без фізичних супутників та зміни інших runtime inputs.
+                        # Всі M/D/R, D11 та tests/semantic лишаються fail-closed.
+                        if [[ "$changed" == lib/list-*.lisp ]] &&
+                           git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" "origin/$target_branch" -- "$changed" | grep -Fxq -- "$changed" &&
+                           ! git cat-file -e "origin/$target_branch:$candidate_pair" 2>/dev/null &&
+                           ! git cat-file -e "origin/$target_branch:$candidate_view" 2>/dev/null; then
+                          fast_mint_sources+=("$changed")
+                          echo "REMINT_FAST_NATIVE_NEW_LIB source=$changed status=PENDING_REAL_SENS_ZIG"
+                          continue
+                        fi
+                        echo "REMINT_NEW_UNPAIRED_LISP source=$changed mint=REVERIFY_CURRENT_MAIN"
+                        safe_rebase=0
+                        break
+                      fi
+                      candidate_source_commit="$(git log -1 --format=%H "origin/$target_branch" -- "$changed")"
+                      candidate_pair_commit="$(git log -1 --format=%H "origin/$target_branch" -- "$candidate_pair")"
+                      if [[ -z "$candidate_source_commit" || -z "$candidate_pair_commit" ]] ||
+                         ! git merge-base --is-ancestor "$candidate_source_commit" "$candidate_pair_commit"; then
+                        echo "REMINT_NEW_DRIFTED_LISP source=$changed mint=REVERIFY_CURRENT_MAIN"
+                        safe_rebase=0
+                        break
+                      fi
+                      ;;
+                  esac
+                  echo "REMINT_UNRELATED_LISP source=$changed verified_candidates=UNCHANGED"
                   ;;
                 *) safe_rebase=0; break ;;
               esac
@@ -415,8 +632,27 @@ jobs:
             if (( safe_rebase )) &&
                git merge-base --is-ancestor "$verified_parent" origin/$target_branch; then
               if git rebase origin/$target_branch; then
-                echo "REMINT_SAFE_FAST_REBASE attempt=$attempt verified_inputs=UNCHANGED"
-                continue
+                # Ніяких вгаданих T5M: кожен новий lib/list отримує
+                # справжній mint + exact Zig inverse + SENS paired/standalone.
+                fast_mint_failed=0
+                for independent in "${fast_mint_sources[@]}"; do
+                  if ! bash scripts/refresh-verified-t5m-pair.sh "$independent" target/debug/sens target/debug/sens-trit; then
+                    echo "::error::REMINT_FAST_NATIVE_RED source=$independent" >&2
+                    fast_mint_failed=1
+                  fi
+                done
+                if (( ! fast_mint_failed )); then
+                  if (( ${#fast_mint_sources[@]} )); then
+                    for independent in "${fast_mint_sources[@]}"; do
+                      git add -- "$independent" "${independent%.lisp}.sens" "${independent%.lisp}"
+                    done
+                    git commit --amend --no-edit
+                  fi
+                  echo "REMINT_SAFE_FAST_REBASE attempt=$attempt verified_inputs=UNCHANGED new_native=${#fast_mint_sources[@]}"
+                  continue
+                fi
+                # Після адресного RED не переносимо жодних неперевірених
+                # байтів: нижче існуючий повний native remint на exact main.
               fi
               # Конфлікт не вирішувати силоміць: перейти на native remint.
               git rebase --abort || true
@@ -433,14 +669,16 @@ jobs:
             # нативного remint і суду на новому main. Старий RED не є
             # чинним, якщо цей самий source уже виправлено та перевірено.
             recovered_on_current_main=1
-            if ! commit_verified_changes; then
-              echo "REMINT_ALREADY_PUBLISHED_EXACT on-current-main"
-              published=1
-              break
-            fi
+            commit_result=0
+            commit_verified_changes || commit_result=$?
+            case "$commit_result" in
+              0) ;;
+              1) echo "REMINT_ALREADY_PUBLISHED_EXACT on-current-main"; published=1; break ;;
+              *) echo "::error::REMINT_NATIVE_COMMIT_FAILED status=$commit_result" >&2; exit "$commit_result" ;;
+            esac
           done
           if (( ! published )); then
-            echo "::error::REMINT_PUBLISH_RACE after 12 verified attempts; no force push" >&2
+            echo "::error::REMINT_PUBLISH_RACE after 6 verified attempts; newer main must retry natively; no force push" >&2
             exit 1
           fi
           if (( regenerated_failed )); then

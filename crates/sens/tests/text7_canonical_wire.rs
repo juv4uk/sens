@@ -11,7 +11,7 @@ use std::rc::Rc;
 
 use sens::{
     decode_binary_frame, encode_binary_frame, encode_text7, render_text7, BinaryFrame, Exactness,
-    Text7, Text7Layout, Text7WireError, Value,
+    PairNode, Text7, Text7Layout, Text7WireError, Value,
 };
 
 const LAYOUTS: [Text7Layout; 3] = [Text7Layout::Uk, Text7Layout::SaDeva, Text7Layout::En];
@@ -84,7 +84,7 @@ fn text7_inside_pair_and_vector_round_trips_via_canonical_wire() {
     let nested_vector = Value::Vector(Rc::new(RefCell::new(vec![Value::Text7(text.clone())])));
     assert_eq!(nested_vector.to_canonical_wire_string(), "#(#t7:4142)");
 
-    let nested_pair = Value::Pair(Rc::new(Value::Text7(text)), Rc::new(Value::Nil));
+    let nested_pair = Value::Pair(Rc::new(PairNode { head: Value::Text7(text), tail: Value::Nil }));
     assert_eq!(nested_pair.to_canonical_wire_string(), "(#t7:4142)");
 }
 

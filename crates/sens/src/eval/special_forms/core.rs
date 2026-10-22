@@ -5,8 +5,8 @@
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
 use crate::{
-    Bit4, CoreD4, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span,
-    Value,
+    Bit4, CoreD4, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError,
+    PairNode, Span, Value,
 };
 
 use std::rc::Rc;
@@ -15,7 +15,7 @@ use std::rc::Rc;
 /// Core profile, or historical T/NIL carrier.
 /// The domain-word contracts own the meaning of the returned bit.
 pub(crate) fn atom_value(value: &Value, _environment: &Environment) -> Value {
-    Value::predicate_bit(!matches!(value, Value::Pair(_, _)))
+    Value::predicate_bit(!matches!(value, Value::Pair(_)))
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -26,9 +26,10 @@ enum ExactD3CondControl {
 
 /// Canonical D3:110 control projection.
 ///
-/// Contract 11.8: only exact D1 PredicateBit answers may control COND.
-/// D1:1 selects and D1:0 skips. Structural (), Number 0/1, T/NIL and
-/// every other non-D1 value are wrong-domain control inputs and fail closed.
+/// Контракт 11.8 (#3161 CURRENT FOUNDATION SUPERSESSION, 2026-10-08):
+/// лише точні відповіді D1 керують COND. D1:1 вибирає, D1:0 пропускає.
+/// D3:000 є структурним результатом вичерпання, НЕ допустимою умовою.
+/// Будь-яке інше значення має спричинити адресну помилку типу.
 fn exact_d3_cond_control(value: &Value, span: Span) -> Result<ExactD3CondControl, LanguageError> {
     match value.as_predicate_bit() {
         Some(true) => Ok(ExactD3CondControl::Select),
@@ -253,9 +254,10 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
                 }
                 Value::list(out)
             }
-            ExprKind::Pair(head, tail) => {
-                Value::Pair(Rc::new(go(head, depth + 1)?), Rc::new(go(tail, depth + 1)?))
-            }
+            ExprKind::Pair(head, tail) => Value::Pair(Rc::new(PairNode {
+                head: go(head, depth + 1)?,
+                tail: go(tail, depth + 1)?,
+            })),
             // Зведений виклик як дані — список із функцією СЕНС у голові.
             ExprKind::Call(sid, arguments) => {
                 let mut out = Vec::with_capacity(arguments.len() + 1);
@@ -282,9 +284,11 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
 // Same compute as the expr-handlers above; arguments arrive
 // pre-evaluated. The expr-handlers delegate here after evaluating.
 
-pub(crate) fn car_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
+// Один механізм вибірки для D3 і складених селекторів: семантична
+// помилка на непридатному вході визначається тут, без дублювання в D10.
+pub(crate) fn car_ref(value: &Value, span: Span) -> Result<&Value, LanguageError> {
     match value {
-        Value::Pair(ref head, _) => Ok((**head).clone()),
+        Value::Pair(node) => Ok(&node.head),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
             "car expects a non-empty list · car ochikuie neporozhnii spysok · car erwartet eine nicht leere Liste",
@@ -293,9 +297,9 @@ pub(crate) fn car_value(value: &Value, span: Span) -> Result<Value, LanguageErro
     }
 }
 
-pub(crate) fn cdr_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
+pub(crate) fn cdr_ref(value: &Value, span: Span) -> Result<&Value, LanguageError> {
     match value {
-        Value::Pair(_, ref tail) => Ok((**tail).clone()),
+        Value::Pair(node) => Ok(&node.tail),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
             "cdr expects a non-empty list · cdr ochikuie neporozhnii spysok · cdr erwartet eine nicht leere Liste",
@@ -317,9 +321,12 @@ pub(crate) fn cons_values(
             span,
         ));
     }
-    Ok(Value::Pair(std::rc::Rc::new(head), std::rc::Rc::new(tail)))
+    Ok(Value::Pair(std::rc::Rc::new(PairNode { head, tail })))
 }
 
+/// Контракт 11.8: EQ — атомна операція; пара або значення поза
+/// доменом спричиняє іменовану помилку Type, не D1:NO чи D3:000.
+/// Актуальна ратифікація 2026-10-08 supersedes старе #3161 формулювання.
 pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, LanguageError> {
     if !left.is_atom() || !right.is_atom() {
         return Err(LanguageError::new(

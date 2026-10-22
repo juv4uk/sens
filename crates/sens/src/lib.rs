@@ -22,6 +22,9 @@ pub mod frame3_micro_v5;
 pub mod frame3_micro_v5_lambda;
 pub mod frame3_micro_v5_lambda_app;
 pub mod frame3_semantic;
+// Rust F3 лишається лише test/reference реалізацією; для окремого benchmark
+// його треба явно opt-in ввімкнути. Production-коридор F3C — Zig.
+#[cfg(any(test, feature = "rust-f3-reference"))]
 pub mod frame3_small;
 pub mod machine_math;
 pub mod universal_frame3;
@@ -72,6 +75,10 @@ pub(crate) mod eval;
 mod gpu_execution_packet;
 mod language_items;
 mod mixed_source;
+// Legacy Rust bit-packer retained only as a unit-test reference. Production
+// SENS exposes no Rust OuterEnvelope carrier; physical packing belongs to the
+// sterile Zig corridor.
+#[cfg(test)]
 mod outer_envelope;
 mod packed_bits;
 mod parser;
@@ -255,7 +262,6 @@ pub use mixed_source::{
     parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_reasoning_source,
     parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_utf8_source,
 };
-pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
 pub use packed_bits::{BitPacker, PackedBitstream};
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, pack_binary_source_words,
@@ -899,7 +905,7 @@ pub fn sha256_source(input: &[u8]) -> [u8; 32] {
     eval::digest_sha256(input)
 }
 pub use syntax::{Exactness, Expr, ExprKind, Span};
-pub use value::{Closure, NumericBuffer, Rational, Value};
+pub use value::{Closure, NumericBuffer, PairNode, Rational, Value};
 
 /// Return a half-open, Unicode-scalar-indexed substring with clamped bounds.
 ///

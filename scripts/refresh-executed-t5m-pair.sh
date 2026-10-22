@@ -40,12 +40,27 @@ view="$dir/$name"
 # Zig пакує готові слова; Python/JSON у цьому маршруті відсутні.
 # За відсутності зовнішніх визначень працює нативний --t5m-mint;
 # --t5m-mint-pair призначено для SENS DEFINE із --binding-source.
-# Великий Lisp не повинен помилково ставати RED через 60-секундний timeout.
+# Бюджет повного SENS-входу: DEFINE з великої бібліотеки
+# читаються тим самим нативним процесом, а не безкоштовно з Python.
+# Враховувати ВСІ --binding-source, інакше справний Lisp дістає
+# хибний timeout лише через малий розмір власного файлу.
 source_bytes=$(wc -c < "$source_file")
+total_input_bytes=$source_bytes
+for ((i=1; i<${#binding_args[@]}; i+=2)); do
+  dependency="${binding_args[i]}"
+  if [[ "$dependency" != *.lisp || "$dependency" == /* ||
+        "$dependency" == ../* || "$dependency" == */../* ||
+        ! -f "$dependency" || -L "$dependency" ]]; then
+    echo "T5M_REFRESH_BINDING_SOURCE_INVALID path=$dependency" >&2
+    exit 2
+  fi
+  (( total_input_bytes += $(wc -c < "$dependency") ))
+done
 native_timeout=60s
-if (( source_bytes >= 262144 )); then
+if (( total_input_bytes >= 262144 )); then
   native_timeout=180s
 fi
+echo "T5M_REFRESH_BUDGET source=$source_file input_bytes=$total_input_bytes timeout=$native_timeout"
 mint_flag=--t5m-mint
 if (( ${#binding_args[@]} != 0 )); then
   mint_flag=--t5m-mint-pair
@@ -257,4 +272,4 @@ if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
 fi
 trap - EXIT INT TERM
 rm -rf -- "$publish_dir" "$dir"
-printf 'T5M_REFRESHED source=%s mode=%s physical=%s executed=SENS semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' "$source_file" "$mode" "$producer"
+printf 'T5M_REFRESHED source=%s mode=%s physical=%s producer=%s executed=SENS semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' "$source_file" "$mode" "$committed_pair" "$producer"

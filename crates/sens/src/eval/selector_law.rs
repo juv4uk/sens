@@ -46,10 +46,11 @@ pub(super) fn is_selector(identity: DomainIdentity) -> bool {
 }
 
 #[inline]
-fn select(step: Step, value: &Value, span: Span) -> Result<Value, LanguageError> {
+fn select<'a>(step: Step, value: &'a Value, span: Span) -> Result<&'a Value, LanguageError> {
+    // Спільний з D3 механізм: без проміжного клону і без panic на атомі.
     match step {
-        Step::Car => special_forms::car_value(value, span),
-        Step::Cdr => special_forms::cdr_value(value, span),
+        Step::Car => special_forms::car_ref(value, span),
+        Step::Cdr => special_forms::cdr_ref(value, span),
     }
 }
 
@@ -103,7 +104,8 @@ pub(super) fn invoke(
             Err(error) => return Some(Err(error)),
         };
     }
-    Some(Ok(value))
+    // Єдиний клон — кінцеве значення, а не кожен проміжний вузол шляху.
+    Some(Ok(value.clone()))
 }
 
 #[cfg(test)]
@@ -132,10 +134,10 @@ mod tests {
             *first += 1;
             return Value::Symbol(format!("листок-{leaf}").into());
         }
-        Value::Pair(
-            std::rc::Rc::new(full_pair_tree(depth - 1, first)),
-            std::rc::Rc::new(full_pair_tree(depth - 1, first)),
-        )
+        Value::Pair(std::rc::Rc::new(crate::PairNode {
+            head: full_pair_tree(depth - 1, first),
+            tail: full_pair_tree(depth - 1, first),
+        }))
     }
 
     #[test]
@@ -296,6 +298,72 @@ mod tests {
                     "D{width} selector {name} must execute"
                 );
             }
+        }
+    }
+
+    #[test]
+    fn d11_derived_compositions_preserve_car_cdr_partiality() {
+        // Усі 512 позитивних D11-композицій уже виконує окремий
+        // d11_selector_512_live.rs. Тут незалежна негативна межа:
+        // p(CAR(x)) / p(CDR(x)) не мають права приймати атом або ().
+        // Немає нового D11 opcode і немає host-підміни SENS-обчислення.
+        for bits in [0b1000000000u16, 0b0110101101] {
+            let parent = identity(10, bits);
+            let name = crate::semantic_registry::selector_ukr_for_exact(parent)
+                .expect("ratified D10 parent must have an Ukrainian name");
+            for child_head in ["перше", "решта"] {
+                for input in ["(як-є опора)", "(як-є ())"] {
+                    let program = format!("({name} ({child_head} {input}))");
+                    let error = crate::eval_program(
+                        &program,
+                        &mut crate::Session::default(),
+                    )
+                    .expect_err("CAR/CDR-derived selector is undefined on non-pairs");
+                    assert_eq!(
+                        error.kind,
+                        ErrorKind::Type,
+                        "D11 child of D10:{bits:010b} must reject {input} as a type error, not reader/transport failure: {error}"
+                    );
+                }
+            }
+        }
+    }
+
+    // #2016: 0/1 suffix meanings are local to CAR/CDR; they do not become
+    // a universal D3-root grammar merely because an exact coordinate exists.
+    // D7 stays text/data even when its bits resemble a selector address.
+    #[test]
+    fn other_d3_roots_do_not_inherit_the_selector_prefix_generator() {
+        let mut rejected = 0usize;
+        for width in [3usize, 4, 5, 6, 8, 9, 10] {
+            for root in [0b000u16, 0b001, 0b010, 0b101, 0b110, 0b111] {
+                for suffix in 0..(1u16 << (width - 3)) {
+                    let bits = (root << (width - 3)) | suffix;
+                    let candidate = identity(width, bits);
+                    assert!(
+                        decode(candidate).is_none(),
+                        "test_id=2016-GENERATOR-LOCAL layer=SENS-mechanism D{width}:{bits:0width$b} expected=not-selector",
+                        width = width,
+                    );
+                    assert!(
+                        invoke(candidate, &[Value::Nil], Span::default()).is_none(),
+                        "test_id=2016-GENERATOR-LOCAL layer=SENS-mechanism D{width}:{bits:0width$b} expected=no-selector-invocation",
+                        width = width,
+                    );
+                    rejected += 1;
+                }
+            }
+        }
+        assert_eq!(rejected, 1434);
+
+        for bits in 0..128u8 {
+            let text7 = DomainIdentity::D7(crate::D7DataWord::from_word(
+                crate::Bit7::new(bits).unwrap(),
+            ));
+            assert!(
+                decode(text7).is_none(),
+                "test_id=2016-TEXT7-BOUNDARY layer=SENS-mechanism D7:{bits:07b} expected=not-selector"
+            );
         }
     }
 

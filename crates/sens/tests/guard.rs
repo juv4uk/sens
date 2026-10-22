@@ -424,19 +424,16 @@ fn mechanism_selector_named_d4_helpers_execute_real_sens_positive_and_negative()
     // Зовнішній читач каталогу D9 перевіряється окремо: тут D4 ядро
     // мусить виконати обидва нові іменовані замикання.
     let source = include_str!("../../../lib/mechanism-selector.lisp");
-    let start = source
-        .find("(визначити механізм-зіставити-маршрут")
-        .expect("чинне визначення першого D4 helper-а");
-    let end = source
-        .find("\n(визначити вибрати-механізм")
-        .expect("межа helper-ів у чинному Lisp");
-    let helpers = &source[start..end];
+    // Завантажуємо повний чинний SENS-модуль, а не вирізаний
+    // підрядок helper-ів: точне резидентне оточення та взаємні
+    // DEFINE-зв'язування має визначати сама мова, не тестовий зріз.
+    // Той самий паспорт та ті самі D3/D7 закони використовує runtime.
     let mut session = Session::default();
     sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
         .expect("SENS D3–D5 core для виконуваних українських імен");
-    let definitions = parse_mixed_exact_domain(helpers).expect("парсер SENS: чинні D4 DEFINE");
+    let definitions = parse_mixed_exact_domain(source).expect("парсер SENS: повний чинний модуль D3–D5");
     sens::eval_parsed_expressions(&definitions, &mut session)
-        .expect("два D4 helper-и реально завантажуються SENS");
+        .expect("усі чинні DEFINE-маршрути реально завантажуються в SENS");
 
     for (input, expected) in [
         ("(механізм-знайти-маршрут (як-є target) (як-є runner) (як-є ((other runner x) (target runner chosen))))",
@@ -455,5 +452,68 @@ fn mechanism_selector_named_d4_helpers_execute_real_sens_positive_and_negative()
             .value.to_string();
         assert_eq!(actual, expected,
             "test_id=mechanism-d4 layer=SENS input={input} expected={expected} actual={actual}");
+    }
+}
+
+
+#[test]
+fn mechanism_selector_d3_d5_is_executable_without_sid8_or_host_file_reader() {
+    // Обчислює справжній SENS. Ніяких Python, JSON, старих SID8-значень
+    // або статичних перевірок замість виконання.
+    let source = include_str!("../../../lib/mechanism-selector.lisp");
+    assert!(!source.contains("(читати-всі"), "host reader недопущений для T5M");
+    assert!(!source.contains("(читати-файл"), "host file I/O недопущений для T5M");
+    let mut session = Session::default();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("чинне українське ядро D3-D5");
+    let parsed = parse_mixed_exact_domain(source).expect("точний читач SENS");
+    sens::eval_parsed_expressions(&parsed, &mut session)
+        .expect("паспорт і маршрути мусять реально визначатися мовою SENS");
+    for (input, expected) in [
+        ("(реєстр-містить-ідентичність? (як-є атом?) рядки-реєстру-механізму)", true),
+        ("(реєстр-містить-ідентичність? (як-є додати) рядки-реєстру-механізму)", true),
+        ("(реєстр-містить-ідентичність? 12 рядки-реєстру-механізму)", false),
+        ("(тотожне? (перше (вибрати-механізм (як-є атом?) (як-є evaluator))) (як-є mechanism-selected))", true),
+        ("(тотожне? (перше (вибрати-механізм (як-є додати) (як-є prolog))) (як-є mechanism-selected))", true),
+        ("(тотожне? (перше (вибрати-механізм (як-є атом?) (як-є prolog))) (як-є mechanism-unavailable))", true),
+        ("(тотожне? (перше (вибрати-механізм 12 (як-є prolog))) (як-є mechanism-selection-failure))", true),
+    ] {
+        let forms = parse_mixed_exact_domain(input)
+            .expect("доменний читач SENS не замінюється тестовим симулятором");
+        let actual = sens::eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|error| panic!("SENS selector input={input}: {error}"))
+            .value.as_predicate_bit();
+        assert_eq!(actual, Some(expected),
+            "test_id=mechanism-native-d3d5 layer=SENS input={input} expected={expected} actual={actual:?}");
+    }
+}
+
+
+#[test]
+fn function_table_native_d3_d5_routes_and_fail_closed() {
+    // Виконуються справжні DEFINE, закони й запити української SENS.
+    // Rust — лише тестовий процес; не виконавець чи оракул семантики.
+    let source = include_str!("../../../lib/function-table-mechanisms.lisp");
+    let mut session = Session::default();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("українські домени D3–D5");
+    let forms = parse_mixed_exact_domain(source)
+        .expect("ратифікований SENS reader читає паспорт");
+    sens::eval_parsed_expressions(&forms, &mut session)
+        .expect("п'ять законів і весь паспорт повинні виконатися у SENS");
+    for (input, expected) in [
+        ("(хибне? (порожній? (механізми-функції (як-є додати))))", true),
+        ("(хибне? (порожній? (решта (решта (решта (механізми-функції (як-є додати)))))))", true),
+        ("(порожній? (решта (решта (решта (решта (механізми-функції (як-є додати)))))))", true),
+        ("(порожній? (механізми-функції (як-є повернути)))", true),
+        ("(порожній? (механізми-функції (список (як-є додати))))", true),
+        ("(порожній? (механізми-функції (як-є додати)))", false),
+    ] {
+        let query = parse_mixed_exact_domain(input).expect("точна мова запиту SENS");
+        let actual = sens::eval_parsed_expressions(&query, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=function-table-native layer=SENS input={input}: {error}"))
+            .value.as_predicate_bit();
+        assert_eq!(actual, Some(expected),
+            "test_id=function-table-native layer=SENS input={input} expected={expected} actual={actual:?}");
     }
 }

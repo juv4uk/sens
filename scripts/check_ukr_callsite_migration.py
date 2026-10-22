@@ -262,7 +262,7 @@ def peer_index(root: Path) -> tuple[dict[str, list[str]], dict]:
     """Names in one row share an identity; different rows never get conflated."""
     names: dict[str, set[str]] = {}
     rows = missing = pair_differences = 0
-    for number in range(1, 12):
+    for number in range(1, 11):  # Д11: 43 записи НЕ ратифіковані як виклики
         path = root / 'lib' / 'domains' / f'd{number}.lisp'
         if not path.exists():
             continue
@@ -289,7 +289,7 @@ def peer_index(root: Path) -> tuple[dict[str, list[str]], dict]:
 def peer_roles(root: Path) -> dict[str, set[str]]:
     """Classify exact compact/full spellings without equating them."""
     roles: dict[str, set[str]] = {}
-    for number in range(1, 12):
+    for number in range(1, 11):  # Д11: 43 записи НЕ ратифіковані як виклики
         path = root / 'lib' / 'domains' / f'd{number}.lisp'
         if not path.exists():
             continue

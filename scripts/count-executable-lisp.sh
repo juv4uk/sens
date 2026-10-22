@@ -27,11 +27,13 @@ trap 'rm -rf -- "$scratch"' EXIT
 sources=0
 complete=0
 inverse=0
+paired_executable=0
 executable=0
 paired_only=0
 bad=0
 missing=0
 nonprogram_data=0
+expected_negative=0
 
 while IFS= read -r -d '' source; do
   if [[ -n "$scope" && "$source" != "$scope"* ]]; then
@@ -50,7 +52,39 @@ while IFS= read -r -d '' source; do
       (( nonprogram_data += 1 ))
       printf 'NATIVE_DATA_ONLY\t%s\tclassification=DOMAIN_TABLE\n' "$source" >&2
       continue ;;
+    knowledge/meta-eval-evidence.lisp)
+      # (schema ...)/(row ...)/(claim ...) — реєстр доказів, не виклики SENS.
+      # Не вигадувати виконання чи фізичну пару для metadata.
+      (( nonprogram_data += 1 ))
+      printf 'NATIVE_DATA_ONLY\t%s\tclassification=EVIDENCE_INVENTORY\n' "$source" >&2
+      continue ;;
   esac
+  # Прямо позначений інвентар сайтів є схемними даними, не викликом.
+  # Якщо файл перетвориться на програму, без точної кореневої форми
+  # автоматичного виключення не буде: його перевірить SENS/Zig.
+  if [[ "$source" == knowledge/silent-fallback-inventory.lisp &&
+        -f "$source" && ! -L "$source" ]] &&
+     LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$source"; then
+    (( nonprogram_data += 1 ))
+    printf 'NATIVE_DATA_ONLY\t%s\tclassification=SCHEMA_INVENTORY\n' "$source" >&2
+    continue
+  fi
+  # Нативний негатив — НЕ позитивна виконувана програма.
+  # Цей SENS-мутант підтверджує окремий meta_fc_predicate_witness.
+  # Не маскуємо дрейф: виняток діє лише коли весь файл відрізняється
+  # від позитивного свідка РІВНО одним байтом ASCII 0 -> 1.
+  if [[ "$source" == tests/semantic/meta-fc-predicates-d1-mutant.lisp &&
+        -f "$source" && ! -L "$source" &&
+        -f tests/semantic/meta-fc-predicates-d1-law.lisp &&
+        ! -L tests/semantic/meta-fc-predicates-d1-law.lisp ]] &&
+     [[ "$(wc -c < "$source")" == "$(wc -c < tests/semantic/meta-fc-predicates-d1-law.lisp)" ]]; then
+    one_byte_diff="$(cmp -l tests/semantic/meta-fc-predicates-d1-law.lisp "$source" 2>/dev/null || :)"
+    if [[ "$one_byte_diff" =~ ^[[:space:]]*[0-9]+[[:space:]]+60[[:space:]]+61[[:space:]]*$ ]]; then
+      (( expected_negative += 1 ))
+      printf 'NATIVE_EXPECTED_NEGATIVE\t%s\ttest=meta_fc_predicate_witness\n' "$source" >&2
+      continue
+    fi
+  fi
   # Джерело лише з коментарів/порожніх рядків не має Lisp-програми.
   # Воно НЕ мусить мати вигадану фізичну трійку, тому не є missing.
   # Наявність хоча б одного некоментарного рядка залишає незмінними
@@ -60,6 +94,24 @@ while IFS= read -r -d '' source; do
      ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$source"; then
     (( nonprogram_data += 1 ))
     printf 'NATIVE_DATA_ONLY\t%s\tclassification=COMMENT_ONLY\n' "$source" >&2
+    continue
+  fi
+  # Точно розпізнаний реєстр/профіль є ДАНИМИ, не виконуваним
+  # Lisp. Не плодити помилкові missing-triple, які не допомагають SENS.
+  # Це не виключення за шляхом: якщо схема зміниться на програму,
+  # вона знову піде до справжнього SENS/Zig mint, inverse та eval.
+  data_schema=""
+  case "$source" in
+    lib/generated/function-table.lisp) data_schema="ft-2" ;;
+    lib/generated/uk-surface-audit.lisp) data_schema="uk-surface-audit-2" ;;
+    lib/surface/uk-sa-coverage.lisp) data_schema="uk-sa-coverage" ;;
+    lib/machine/intel-core-i5-6400.lisp) data_schema="machine-profile-1" ;;
+    lib/machine/profile/current-domain-x86-64.lisp) data_schema="machine-domain-profile-2" ;;
+  esac
+  if [[ -n "$data_schema" && -f "$source" && ! -L "$source" ]] &&
+     LC_ALL=C grep -Eq "^[[:space:]]*\\($data_schema([[:space:]]|$)" -- "$source"; then
+    (( nonprogram_data += 1 ))
+    printf 'NATIVE_DATA_ONLY\t%s\tclassification=EXACT_SCHEMA:%s\n' "$source" "$data_schema" >&2
     continue
   fi
   # Історичні бенчмарки входять до діагностики, не у підтверджені PASS.
@@ -88,9 +140,20 @@ while IFS= read -r -d '' source; do
     lib/translation.lisp)
       binding_sources=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp) ;;
     tests/fixtures/mechanism-selector-1047-witness.lisp)
-      binding_sources=(--binding-source lib/surface/semantic-registry-api.lisp --binding-source lib/mechanism-selector.lisp) ;;
+      binding_sources=(--binding-source lib/mechanism-selector.lisp) ;;
+    tests/fixtures/island-lowering-1048-witness.lisp)
+      # СЕНС завантажує чинні визначення в порядку залежностей;
+      # жодного стороннього LOAD або Python/JSON-семантики.
+      binding_sources=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp) ;;
     tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp)
       binding_sources=(--binding-source lib/world.lisp) ;;
+    tests/semantic/core1-gc-reachability-laws.lisp)
+      # Символьний GC-закон отримує Core1 DEFINE в одному SENS-сеансі.
+      binding_sources=(--binding-source lib/core1.lisp) ;;
+    tests/semantic/meta-fc-predicates-d1-law.lisp)
+      # Д11 предикат оголошено в SENS, не у D11 таблиці й не в Rust-хості.
+      # Облік виконує той самий native binding-source, що й парний CLI.
+      binding_sources=(--binding-source lib/meta-eval-first-class.lisp) ;;
   esac
   # Часовий бюджет визначає повний SENS-вхід, а не тільки файл-
   # споживач: --binding-source може завантажувати великий Core4.
@@ -162,6 +225,9 @@ while IFS= read -r -d '' source; do
     sed 's/^/SENS paired: /' "$scratch/paired.err" >&2
     continue
   fi
+  # Цей фізичний файл вже успішно виконав SENS-парний шлях.
+  # Не плутати парне виконання з незалежним standalone admission.
+  (( paired_executable += 1 ))
   if timeout "${mint_seconds}s" "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/standalone.err"; then
     :
   else
@@ -197,12 +263,23 @@ done < <(git ls-files -z -- '*.lisp')
 # Підсумковий printf раніше завжди повертав 0 навіть за реального RED.
 # Відсутня трійка/paired-only — неповне покриття, не доведений реліз.
 status=COMPLETE
-if (( bad != 0 || missing != 0 || paired_only != 0 )); then
+if (( sources == 0 )); then
+  # Порожня вибірка НЕ може засвідчувати виконання SENS.
+  status=EMPTY
+elif (( bad != 0 || missing != 0 || paired_only != 0 )); then
   status=PARTIAL
 fi
-printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s status=%s\n' \
-  "${scope:-all}" "$sources" "$complete" "$inverse" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data" "$status"
+printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_executed=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s intentional_negative=%s status=%s\n' \
+  "${scope:-all}" "$sources" "$complete" "$inverse" "$paired_executable" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data" "$expected_negative" "$status"
 if (( bad != 0 )); then
   echo "NATIVE_LISP_EXECUTION_RED failed=$bad: справжню помилку не приховує статус обліку" >&2
+  exit 1
+fi
+# PARTIAL/EMPTY — не успіх. Лічильники друкуємо вище навіть для
+# неповного корпусу, але оболонка не має права трактувати пропущені
+# фізичні трійки або paired-only як повне нативне виконання.
+if [[ "$status" != COMPLETE ]]; then
+  printf 'NATIVE_LISP_NOT_COMPLETE status=%s missing=%s paired_only=%s sources=%s\n' \
+    "$status" "$missing" "$paired_only" "$sources" >&2
   exit 1
 fi

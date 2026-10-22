@@ -54,9 +54,9 @@ fn list_values(value: &Value) -> Vec<&Value> {
     loop {
         match cursor {
             Value::Nil => return out,
-            Value::Pair(head, tail) => {
-                out.push(head.as_ref());
-                cursor = tail.as_ref();
+            Value::Pair(node) => {
+                out.push(&node.head);
+                cursor = &node.tail;
             }
             other => panic!("expected proper list, got {other}"),
         }

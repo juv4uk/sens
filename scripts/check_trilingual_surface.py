@@ -1,140 +1,82 @@
 #!/usr/bin/env python3
-"""Перевіряє рівноправність UK/EN/SA від status-free byte-SID authority.
+"""Спостережна звірка людських проєкцій із чинними D1–D10.
 
-Кожна identity має фіксовані en/uk/ukr/sa/sym слоти.
-Слот містить spelling або (); окремої системи stable/candidate/missing немає.
+Точна тотожність — (домен, бітове слово), а не історичний byte SID8.
+Д7 — алфавіт людської поверхні, Д2 — структура, Д24+ — математика.
+Наявність назви НЕ підтверджує викличного допуску, виконання, T5M,
+оберненості файлів чи готовності релізу. Семантику виконує лише СЕНС.
 """
 
 from __future__ import annotations
 
 import argparse
-import re
-from dataclasses import dataclass
-from pathlib import Path
+from collections import Counter
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-REGISTRY = REPO_ROOT / "lib" / "surface" / "semantic-registry.lisp"
-HUMAN_SURFACES = ("ук", "en", "sa")
-ALL_SURFACES = ("en", "ук", "укр", "sa", "sym")
-ENTRY = re.compile(r"^\s*\(([01]{8})\s+(.*)\)\s*$")
-SURFACE = re.compile(
-    r'\((en|ук|укр|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)'
-)
+from domain_tables import CURRENT_HUMAN_TABLES, read_domain_tables
+
+HUMAN_SURFACES = ("укр", "en", "san")
+ALL_SURFACES = ("ук", "укр", "san", "en", "lisp", "sym")
 
 
-@dataclass(frozen=True)
-class Entry:
-    identity: str
-    surfaces: dict[str, str | None]
+def current_rows():
+    """Читати лише ратифіковані точнодоменні таблиці, не SID8-реєстр."""
+    rows = read_domain_tables(CURRENT_HUMAN_TABLES)
+    identities = [(row.domain, row.bits) for row in rows]
+    if len(identities) != len(set(identities)):
+        raise ValueError("повторено точну тотожність (домен, біти)")
+    if {row.domain for row in rows} != {f"D{n}" for n in range(1, 11)}:
+        raise ValueError("неповна сучасна драбина D1–D10")
+    return rows
 
 
-def decode_name(raw: str) -> str | None:
-    if raw == "()":
-        return None
-    if raw.startswith('"') and raw.endswith('"'):
-        return raw[1:-1]
-    return raw
+def counts(rows, language: str) -> tuple[int, int]:
+    present = sum(getattr(row, language) is not None for row in rows)
+    return present, len(rows) - present
 
 
-def parse_entries(source: str) -> list[Entry]:
-    entries: list[Entry] = []
-    seen: set[str] = set()
-    for line_number, line in enumerate(source.splitlines(), start=1):
-        match = ENTRY.match(line)
-        if not match:
-            continue
-        identity, body = match.groups()
-        if identity in seen:
-            raise ValueError(f"line {line_number}: duplicate semantic ID {identity}")
-        seen.add(identity)
-
-        matches = list(SURFACE.finditer(body))
-        residue = SURFACE.sub("", body).strip()
-        if residue:
-            raise ValueError(f"line {line_number}: malformed semantic entry {identity}")
-
-        surfaces: dict[str, str | None] = {}
-        for item in matches:
-            language, raw_name = item.groups()
-            if language in surfaces:
-                raise ValueError(f"line {line_number}: duplicate {language} in {identity}")
-            surfaces[language] = decode_name(raw_name)
-
-        if tuple(surfaces.keys()) != ALL_SURFACES:
-            raise ValueError(
-                f"{identity}: expected fixed surface order {ALL_SURFACES}, got {tuple(surfaces.keys())}"
-            )
-        entries.append(Entry(identity, surfaces))
-
-    if not entries:
-        raise ValueError("byte-SID semantic registry contains no entries")
-    return entries
+def is_surface_complete(rows) -> bool:
+    return all(all(getattr(row, language) is not None
+                   for language in HUMAN_SURFACES) for row in rows)
 
 
-def counts(entries: list[Entry], language: str) -> tuple[int, int]:
-    present = sum(entry.surfaces[language] is not None for entry in entries)
-    return present, len(entries) - present
-
-
-def is_release_complete(entries: list[Entry]) -> bool:
-    return all(
-        all(entry.surfaces[language] is not None for language in HUMAN_SURFACES)
-        for entry in entries
-    )
-
-
-def render_report(entries: list[Entry]) -> str:
-    denominator = len(entries)
-    symbolic = sum(entry.surfaces["sym"] is not None for entry in entries)
+def render_report(rows) -> str:
+    per_domain = Counter(row.domain for row in rows)
     lines = [
-        "Рівноправність людських поверхонь від status-free byte-SID authority",
-        f"semantic identities: {denominator}",
-        f"shared symbolic identities: {symbolic}",
+        "Сучасні людські проєкції D1–D10 (не реєстр SID8/Sens8)",
+        f"точнодоменних рядків: {len(rows)}; викличних функцій: НЕ ВИМІРЯНО",
+        "ширини: " + " ".join(f"D{n}={per_domain[f'D{n}']}" for n in range(1, 11)),
         "",
-        "surface  present  empty  present/total",
+        "проєкція  наявні  порожні  рядків",
     ]
-    for language in HUMAN_SURFACES:
-        present, empty = counts(entries, language)
-        lines.append(
-            f"{language.upper():<7}{present:>7}{empty:>7}{present:>9}/{denominator}"
-        )
-
-    complete = sum(
-        all(entry.surfaces[language] is not None for language in HUMAN_SURFACES)
-        for entry in entries
-    )
-    lines.extend(
-        [
-            "",
-            f"trilingual present identities: {complete}/{denominator}",
-            f"release parity: {'CONFIRMED' if is_release_complete(entries) else 'OPEN'}",
-        ]
-    )
+    for language in ALL_SURFACES:
+        present, empty = counts(rows, language)
+        lines.append(f"{language:<9}{present:>7}{empty:>9}{len(rows):>8}")
+    complete = sum(all(getattr(row, lang) is not None
+                       for lang in HUMAN_SURFACES) for row in rows)
+    lines.extend([
+        "",
+        f"укр/en/san заповнені разом: {complete}/{len(rows)}",
+        f"повнота людських поверхонь: {'ТАК' if is_surface_complete(rows) else 'НІ'}",
+        "релізний статус: НЕ ВИЗНАЧАЄТЬСЯ ЦИМ СКРИПТОМ",
+        "для релізу потрібні нативні СЕНС/Zig виконання й оберненість T5M на одному SHA",
+    ])
     return "\n".join(lines)
 
 
-def parse_args() -> argparse.Namespace:
+def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--require-complete",
-        action="store_true",
-        help="fail until UK, EN and SA slots are non-empty for every byte SID",
+        "--require-complete", action="store_true",
+        help="перевірити заповнення укр/en/san; не є доказом релізу",
     )
-    return parser.parse_args()
-
-
-def main() -> int:
-    args = parse_args()
+    args = parser.parse_args()
     try:
-        entries = parse_entries(REGISTRY.read_text(encoding="utf-8"))
+        rows = current_rows()
     except (OSError, ValueError) as error:
-        print(f"surface registry error: {error}")
+        print(f"помилка ратифікованих таблиць: {error}")
         return 2
-
-    print(render_report(entries))
-    if args.require_complete and not is_release_complete(entries):
-        return 1
-    return 0
+    print(render_report(rows))
+    return 1 if args.require_complete and not is_surface_complete(rows) else 0
 
 
 if __name__ == "__main__":

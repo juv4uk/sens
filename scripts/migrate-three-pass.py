@@ -182,6 +182,8 @@ def strip_comments(source: str) -> str:
         if ch==";":
             state="line"; i+=1; continue
         if source.startswith("#|",i):
+            # Без пробілу x#|коментар|#y неправильно стає атомом xy.
+            out.append(" ")
             state="block"; depth=1; i+=2; continue
         out.append(ch); i+=1
     if state=="block":
@@ -1462,7 +1464,7 @@ NONPROGRAM_MANIFESTS = (
 # Старі SHA до українізації не мають блокувати кожну виконувану програму.
 # Вміст, схема, кількість і кожен власний source-blob усе ще перевіряються.
 NONPROGRAM_MANIFEST_BLOB_SHA = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "f18f2dd72fa7f9b198d20bdf60a7758033d651b8",
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "cc4e927f802e349b86ed55104e88560f399be14f",
     "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "e258a854fb4abab0070c3f7585b96b6acdfcbfb7",
     "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "d66fa8f636e47cd00744dc0ed5fa5f2f2c16ccd8",
     "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "ea5d3cdfeaf90490c6dee1d00866e56feeb44f6c",
@@ -1500,6 +1502,34 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
             reviewed_lib_cohort = "schema"
         else:
             return  # Виконуваний або ще не класифікований Lisp; не фальшивий STOP.
+
+    # D11 — мінливий НЕратифікований словник даних. Живий файл може
+    # змінюватися без оновлення історичного SHA в маніфесті 08.10.
+    # Не визнаємо D11 виконуваним: перевіряємо саме форму таблиці,
+    # а не дату/хеш старої фікстури; зайвий вираз відхиляємо.
+    if relative == "lib/domains/d11.lisp":
+        try:
+            rows = [line.strip() for line in source.read_text(encoding="utf-8").splitlines()
+                    if line.strip() and not line.lstrip().startswith(";")]
+        except (OSError, UnicodeError) as exc:
+            raise SensT5Error(f"NONPROGRAM_D11_TABLE_UNREADABLE layer=encode {exc}") from exc
+        row_pattern = re.compile(
+            r"\(([01]{11})\s+\(ук\s+[^()\s]+\)\s+"
+            r"\(укр\s+[^()\s]+\)\s+\(san\s+[^()\s]+\)\s+"
+            r"\(en\s+[^()\s]+\)\s+\(LISP\s+[^()\s]+\)\s+"
+            r"\(sym\s+\(\)\)\)"
+        )
+        matches = [row_pattern.fullmatch(row) for row in rows[1:-1]]
+        if (len(rows) < 3 or rows[0] != "(domain-table-1" or rows[-1] != ")"
+                or not all(matches)):
+            raise SensT5Error(f"NONPROGRAM_D11_TABLE_INVALID layer=encode source={relative}")
+        bits = [match.group(1) for match in matches]
+        if len(bits) != len(set(bits)) or bits != sorted(bits):
+            raise SensT5Error(f"NONPROGRAM_D11_TABLE_INVALID layer=encode source={relative} reason=duplicate-or-order")
+        raise SensT5Error(
+            f"NONPROGRAM_DATA_NOT_EXECUTABLE layer=encode source={relative} "
+            f"cohort=domain-table rows={len(bits)}"
+        )
 
     for cohort, name, expected_count in NONPROGRAM_MANIFESTS:
         if reviewed_lib_cohort is not None and cohort != reviewed_lib_cohort:

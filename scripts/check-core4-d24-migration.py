@@ -30,7 +30,9 @@ MATH_HEADS = frozenset({
 SEED_HEADS = frozenset({"length-onto"})
 # Only explicit Lisp/D3 quote forms are proven inert at this reader stage.
 # The abbreviated apostrophe reader surface is outside this narrow audit.
-QUOTE_HEADS = frozenset({"001", "quote", "00000001"})
+# D8:00000001 is now DOSEQ, not historical SID8 QUOTE. The
+# current D3:001 and Ukrainian full projection are the inert heads.
+QUOTE_HEADS = frozenset({"001", "як-є", "quote", "QUOTE"})
 NUMERIC_TOKEN = re.compile(
     r"(?:[+-]?[0-9]+(?:/[+-]?[0-9]+)?(?:\.[0-9]+)?|#[bBoOdDxX][0-9a-fA-F]+)\Z"
 )
@@ -154,6 +156,7 @@ def self_test():
         '(01010 "<string with 2 and (01011 a 8)>" a)\n'
         '(001 (01010 quoted-code 42))\n'
         '(quote (01011 quoted-code 44))\n'
+        '(як-є (11010 quoted-code 48))\n'
         '(00000001 (11010 quoted-code 46))\n'
     )
     actual = audit(sample)
@@ -161,8 +164,15 @@ def self_test():
         "math|01010|2|1": 1,
         "math|01011|2|#d10": 1,
         "seed|length-onto|2|0": 1,
+        "math|11010|2|46": 1,
     })
     check(actual, expected)
+    # Current D8 DOSEQ cannot conceal a nested numerical call;
+    # real D3 quotation and the Ukrainian projection must conceal it.
+    if len(audit("(00000001 (11010 x 46))")) != 1:
+        raise ValueError("D8 DOSEQ was incorrectly treated as old SID8 QUOTE")
+    if audit("(як-є (11010 x 46))"):
+        raise ValueError("D3 Ukrainian quoted data was scanned as executable")
     for damaged in (
         sample + "(01010 a 1)\n",  # same key, increased count
         sample + "(01010 a 2)\n",  # novel numeric spelling

@@ -80,10 +80,10 @@ fn current_revision(repo_root: &str) -> Result<String, String> {
 }
 
 fn artifact_schema(value: &Value) -> Result<&str, String> {
-    let Value::Pair(head, _) = value else {
+    let Value::Pair(node) = value else {
         return Err("SENS compiler returned a non-list artifact".into());
     };
-    let Value::Symbol(schema) = head.as_ref() else {
+    let Value::Symbol(schema) = &node.head else {
         return Err("SENS compiler artifact must start with a schema symbol".into());
     };
     match schema.as_ref() {

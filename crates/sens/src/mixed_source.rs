@@ -3,8 +3,9 @@
 //! The ordinary Lisp parser remains unchanged. This bridge is intentionally
 //! bounded to executable list heads:
 //! - exact 3/4/5/6-bit heads become DomainIdentity;
-//! - exact 7-bit heads fail closed because current D7 is Sound/Text/local-ordinal, not callable;
-//! - exact 8-bit heads remain the compatibility path except in readers pinned to admitted D8 mechanisms;
+//! - exact 7-bit heads fail closed: D7 v2 is keyboard text/data, not a callable function;
+//! - historical bare 8-bit heads remain opaque W8; only explicitly admitted
+//!   Ukrainian D8 I/O names are exact-lifted, with other D8 mechanisms path-pinned;
 //! - approved path-pinned readers lift exact D9 words; Ukrainian D9 string heads
 //!   additionally require both an explicit projection allowlist and a concrete mechanism;
 //! - non-head and quoted data keep the ordinary parser's interpretation.
@@ -68,11 +69,19 @@ pub fn parse_mixed_exact_domain_machine_source(
     }
 }
 
-/// Approved current D8 mechanism heads at this migration boundary are lifted
-/// only for path-pinned trusted Lisp sources. This includes CHAR-CODE plus the
-/// admitted reader/serializer identities; identical eight-bit payloads never
-/// become current D8 merely because of their width. Historical W8 QUOTE
-/// remains opaque, and binder names remain source data.
+/// Already-admitted D8 I/O names and exact words from the owner domain ladder.
+/// Shared by ordinary Ukrainian source and path-pinned readers. Neither bare
+/// historical W8 bytes nor quoted/bound words obtain callable authority.
+fn admitted_d8_io_uk_bits(spelling: &str) -> Option<&'static str> {
+    match spelling {
+        "код-символу" => Some("11100000"),
+        "текст-у-символ" => Some("11101101"),
+        "символ-у-текст" => Some("11101110"),
+        "значення-у-текст" => Some("11110100"),
+        _ => None,
+    }
+}
+
 fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
@@ -103,22 +112,7 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
         });
     }
 
-    if head_spelling == Some("код-символу") {
-        let word = parse_binary_source_words("11100000")?[0].word;
-        lifted[0] = Expr {
-            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
-            span: lifted[0].span,
-        };
-    } else if matches!(
-        head_spelling,
-        Some("текст-у-символ" | "символ-у-текст" | "значення-у-текст")
-    ) {
-        let bits = match head_spelling.expect("matched an admitted Ukrainian D8 surface") {
-            "текст-у-символ" => "11101101",
-            "символ-у-текст" => "11101110",
-            "значення-у-текст" => "11110100",
-            _ => unreachable!("surface was matched above"),
-        };
+    if let Some(bits) = head_spelling.and_then(admitted_d8_io_uk_bits) {
         let word = parse_binary_source_words(bits)?[0].word;
         lifted[0] = Expr {
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
@@ -1104,6 +1098,16 @@ fn lift_head(
                 span: head.span,
             });
         }
+        // D8 I/O was already admitted by the same reader in pinned modules.
+        // Apply its exact Ukrainian address in ordinary source as well:
+        // binder names above win; quoted data never reaches lift_head.
+        if let Some(bits) = admitted_d8_io_uk_bits(spelling) {
+            let word = parse_binary_source_words(bits)?[0].word;
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+                span: head.span,
+            });
+        }
         return Ok(head);
     }
 
@@ -1244,6 +1248,58 @@ mod tests {
                 "{surface} має лишитися значенням D1:{bits}"
             );
         }
+    }
+
+    #[test]
+    fn ordinary_ukrainian_source_lifts_only_admitted_d8_io_heads() {
+        for (surface, bits) in [
+            ("код-символу", 0b11100000),
+            ("текст-у-символ", 0b11101101),
+            ("символ-у-текст", 0b11101110),
+            ("значення-у-текст", 0b11110100),
+        ] {
+            let input = format!("({surface} (як-є а))");
+            let expression = only(
+                parse_mixed_exact_domain(&input)
+                    .expect("ратифікований D8 I/O має мати єдину exact адресу"),
+            );
+            let ExprKind::List(parts) = expression.kind else {
+                panic!("виклична форма");
+            };
+            assert!(
+                matches!(
+                    &parts[0].kind,
+                    ExprKind::DomainIdentity(identity)
+                        if identity.width() == 8 && identity.packed_bits() == bits
+                ),
+                "{surface}: людська назва не стає D7-зв'язуванням"
+            );
+        }
+
+        // Quote payload is data; user DEFINE shadows even an admitted surface.
+        let quoted = only(
+            parse_mixed_exact_domain("(як-є (текст-у-символ а))")
+                .expect("цитування не проектує викличні голови"),
+        );
+        let ExprKind::List(outer) = quoted.kind else { panic!("quote"); };
+        let ExprKind::List(inner) = &outer[1].kind else { panic!("quoted list"); };
+        assert!(matches!(&inner[0].kind, ExprKind::Symbol(name)
+            if name.as_ref() == "текст-у-символ"));
+
+        let input = "(визначити текст-у-символ (функція (а) а)) (текст-у-символ (як-є а))";
+        let expressions = parse_mixed_exact_domain(input)
+            .expect("власна функція перекриває зовнішній виклик");
+        let ExprKind::List(call) = &expressions[1].kind else { panic!("call"); };
+        assert!(matches!(&call[0].kind, ExprKind::Symbol(name)
+            if name.as_ref() == "текст-у-символ"));
+
+        let unadmitted = only(
+            parse_mixed_exact_domain("(символ-за-кодом 65)")
+                .expect("нератифікований D8 не змінюється від читання"),
+        );
+        let ExprKind::List(parts) = unadmitted.kind else { panic!("call"); };
+        assert!(matches!(&parts[0].kind, ExprKind::Symbol(name)
+            if name.as_ref() == "символ-за-кодом"));
     }
 
     #[test]

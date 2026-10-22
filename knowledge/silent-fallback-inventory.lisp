@@ -54,4 +54,6 @@
   (site (class "silent-regeneration") (file "scripts/generate-uk-surface-audit.lisp") (key "silent-regeneration|scripts/generate-uk-surface-audit.lisp|((00000010 candidate) (1) (00000001 needs-research))") (line "154"))
   (site (class "silent-regeneration") (file "scripts/generate-uk-surface-audit.lisp") (key "silent-regeneration|scripts/generate-uk-surface-audit.lisp|((00000010 candidate) () (00000001 missing))") (line "162"))
   (site (class "total-serializer-fallback") (file "crates/sens/src/value.rs") (key "total-serializer-fallback|crates/sens/src/value.rs|_ => render(value, true),") (line "852"))
+  (site (class "total-serializer-fallback") (file "crates/sens/src/presentation.rs") (key "total-serializer-fallback|crates/sens/src/presentation.rs|_ => format!(\"#<host-об'єкт {kind}>\"),") (line "53"))
+  (site (class "total-serializer-fallback") (file "crates/sens/src/value.rs") (key "total-serializer-fallback|crates/sens/src/value.rs|_ => format!(\"#<host-handle {kind}>\"),") (line "780"))
 )

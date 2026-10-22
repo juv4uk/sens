@@ -8,8 +8,8 @@ use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
 use sens::{
     eval_program, render_value_for_presentation, BinaryNumber, CoreDomainIdentity, DomainIdentity,
-    Environment, ExactDomainWord, Expr, ExprKind, PhysicalT5Program, PresentationLanguage, Session,
-    Value,
+    Environment, ExactDomainWord, Expr, ExprKind, PhysicalT5Program, PresentationLanguage,
+    Session, Value,
 };
 use std::env;
 use std::path::PathBuf;
@@ -20,7 +20,6 @@ use std::process;
 unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
     fn sens_zig_repl_persistent_vector_bytes_copy(dst: *mut u8, cap: usize) -> isize;
-    fn sens_zig_repl_time_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_meta_eval_bytes_copy(dst: *mut u8, cap: usize) -> isize;
 }
@@ -58,10 +57,6 @@ fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String>
                     sens_zig_repl_persistent_vector_bytes_copy,
                     "ZIG_REPL_PERSISTENT_VECTOR",
                 )?,
-            ),
-            (
-                "time.lisp",
-                repl_zig_source(sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")?,
             ),
             (
                 "epistemic.lisp",
@@ -115,8 +110,14 @@ fn append_t5m_expression_context(
     depth: usize,
     quoted_data: bool,
 ) -> Result<(), String> {
-    if depth > 768 {
-        return Err("T5M source AST exceeds the SENS nesting limit".into());
+    // Двійковий читач SENS у binary_execution.rs має межу D2=128.
+    // Не видавати Zig/T5M байти для джерела, яке той самий reader
+    // гарантовано відхилить. Глобальна межа source AST (768) не є
+    // доказом фізичного D2-допуску.
+    if depth > 128 {
+        return Err(
+            "T5M_SOURCE_DEPTH_NOT_ADMITTED: exact physical D2 reader limit=128".into(),
+        );
     }
     let control = |bits| t5m_domain_identity(2, bits).map(ExactDomainWord::Identity);
     match &expression.kind {
@@ -339,9 +340,18 @@ fn selected_surface_callable(
     Ok(
         sens::semantic_registry_export::exact_uk_callable_for_source_head(&ukr_name)
             .filter(|admitted| *admitted == identity)
+            .and_then(DomainIdentity::core_operation)
+            .map(DomainIdentity::from)
             .or_else(|| {
                 sens::semantic_registry_export::is_admitted_exact_definition_target(identity)
                     .then_some(identity)
+            })
+            .or_else(|| {
+                (identity.width() == 8
+                    && projected_name == ukr_name
+                    && matches!(surface, ReplSurface::UkrainianFull | ReplSurface::Ukrainian))
+                    .then(|| identity.core_operation().map(DomainIdentity::from))
+                    .flatten()
             }),
     )
 }
@@ -648,9 +658,9 @@ fn exact_t5m_result_data(value: &Value, depth: usize) -> Result<Expr, String> {
     let kind = match value {
         Value::Nil => ExprKind::List(Vec::new().into()),
         Value::Symbol(symbol) => ExprKind::Symbol(symbol.clone()),
-        Value::Pair(head, tail) => ExprKind::Pair(
-            std::rc::Rc::new(exact_t5m_result_data(head, depth + 1)?),
-            std::rc::Rc::new(exact_t5m_result_data(tail, depth + 1)?),
+        Value::Pair(node) => ExprKind::Pair(
+            std::rc::Rc::new(exact_t5m_result_data(&node.head, depth + 1)?),
+            std::rc::Rc::new(exact_t5m_result_data(&node.tail, depth + 1)?),
         ),
         Value::BinaryNumber(number) => ExprKind::BinaryNumber(number.clone()),
         Value::DomainIdentity(identity) if !matches!(identity, DomainIdentity::D2(_)) => {
@@ -764,8 +774,6 @@ fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
                 Value::HostHandle { .. } => "HostHandle",
                 Value::Vector(_) => "Vector",
                 Value::NumericBuffer(_) => "NumericBuffer",
-                Value::TcpConnection(_) => "TcpConnection",
-                Value::TcpListener(_) => "TcpListener",
             }
         )),
     }
@@ -1229,9 +1237,7 @@ fn build_surface_layer(
                     .map(|(name, source)| (*name, source.as_str())),
             );
         for (name, source) in prerequisites {
-            (if name == "time.lisp" {
-                sens::load_time_library_from_source(&mut session, source)
-            } else if matches!(
+            (if matches!(
                 name,
                 "unify.lisp"
                     | "reason.lisp"
@@ -1248,6 +1254,12 @@ fn build_surface_layer(
             })
             .map_err(|error| format!("не вдалося завантажити {name}: {}", error.render(source)))?;
         }
+        sens::load_time_library(&mut session).map_err(|error| {
+            format!(
+                "не вдалося завантажити часове ядро T5M: {}",
+                error.render("<T5M time bootstrap>")
+            )
+        })?;
         // Keep the same SENS evaluation order; only source transport changes.
         let selected_source = match surface {
             ReplSurface::Ukrainian => Some(("uk.lisp", uk_surface_source()?)),
@@ -1325,7 +1337,7 @@ fn render_repl_reply(value: &Value, language: PresentationLanguage) -> String {
         Value::DomainIdentity(sens::DomainIdentity::D1(_)) => {
             render_value_for_presentation(value, language).to_uppercase()
         }
-        Value::Pair(_, _) => render_repl_pair(value, language),
+        Value::Pair(_) => render_repl_pair(value, language),
         Value::Vector(vector) => {
             let items = vector
                 .borrow()
@@ -1345,12 +1357,12 @@ fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
 
     loop {
         match current {
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 if !first {
                     output.push(' ');
                 }
-                output.push_str(&render_repl_reply(head, language));
-                current = tail;
+                output.push_str(&render_repl_reply(&node.head, language));
+                current = &node.tail;
                 first = false;
             }
             Value::Nil => {
@@ -1875,6 +1887,21 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
+    fn t5m_source_depth_must_not_exceed_physical_reader() {
+        // Загальний текстовий SENS-reader допускає AST до 768, але
+        // фізичний D2 reader нині обмежений 128 вкладеннями.
+        // Джерело не можна mint-ити успішно, якщо SENS відхилить байти.
+        let deep_source = format!("{}(як-є ()){}", "(як-є ".repeat(129), ")".repeat(129));
+        let error = mint_t5m_source_pair(&deep_source)
+            .expect_err("source >128 must fail before physical mint");
+        assert!(
+            error.contains("T5M_SOURCE_DEPTH_NOT_ADMITTED"),
+            "test_id=T5M-D2-DEPTH layer=SENS-source expected=pre-mint-fail-closed actual={error}"
+        );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
     fn native_sens_mint_and_pair_execute_without_python_or_json_oracle() {
         // Один живий SENS reader є владою для обох маршрутів.
         // Python preview і JSON-маніфест сюди не потрапляють.
@@ -1901,6 +1928,58 @@ mod tests {
         assert!(
             eval_t5m_paired_file(source, &altered).is_err(),
             "пошкоджений фізичний носій не повинен виконатися"
+        );
+    }
+
+    /// #1968: той самий цілий український Lisp-свідок має реально
+    /// виконуватися з байтів Zig/T5M. D7-гліфи не підмінюють атоми D3;
+    /// помилки EQ залишаються помилками SENS, а не вдаваним D1:NO.
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn bija3_refinement_full_ukrainian_source_executes_as_exact_zig_t5m() {
+        let source = include_str!("../../../tests/semantic/біджа3-уточнення-атома-1968.lisp");
+        let (physical, exact_view) = mint_t5m_source_pair(source)
+            .expect("test_id=1968-T5M-MINT source=SENS/Zig");
+        assert!(!physical.is_empty());
+        assert!(!exact_view.trim().is_empty());
+        let result = eval_t5m_paired_file(source, &physical)
+            .unwrap_or_else(|error| panic!(
+                "test_id=1968-T5M-EVAL layer=SENS expected=D1:1 actual_error={error}"
+            ));
+        assert_eq!(
+            result.value.as_predicate_bit(), Some(true),
+            "test_id=1968-T5M-EVAL layer=SENS expected=D1:1 actual={}",
+            result.value
+        );
+
+        // Мутант джерела за незмінених байтів — не та сама програма.
+        let before = "(тотожне? (перше біджа-пара) (як-є атом?))";
+        let after = "(тотожне? (перше біджа-пара) (як-є решта))";
+        assert_eq!(source.matches(before).count(), 1);
+        let mutant = source.replacen(before, after, 1);
+        let error = eval_t5m_paired_file(&mutant, &physical)
+            .expect_err("test_id=1968-T5M-MUTANT expected=physical-source-mismatch");
+        assert!(
+            error.contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+            "test_id=1968-T5M-MUTANT expected=T5M_PHYSICAL_PAIR_MISMATCH actual={error}"
+        );
+    }
+
+    /// D7 quote payload is a sequence of glyphs, not a secretly
+    /// interned atom; EQ must not accept the derived pair as an atom.
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn bija3_eq_d7_text_does_not_gain_atomic_identity_on_physical_route() {
+        let source =
+            "(тотожне? (перше (сполучити (як-є ліве) (як-є праве))) (як-є ліве))";
+        let (physical, _) = mint_t5m_source_pair(source)
+            .expect("test_id=1968-T5M-D7-MINT");
+        let error = eval_t5m_paired_file(source, &physical)
+            .expect_err("test_id=1968-T5M-D7-EQ expected=Type");
+        assert!(
+            error.contains("eq expects two atoms")
+                && error.contains("physical_form_index=0"),
+            "test_id=1968-T5M-D7-EQ expected=Type/form-0 actual={error}"
         );
     }
 
@@ -1933,6 +2012,120 @@ mod tests {
         };
         assert_eq!(number.numeric_domain_width(), Some(24));
         assert_eq!(number.to_decimal_string(), "3");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn full_ukrainian_d8_io_is_domain_qualified_not_text7_or_sid8() {
+        // These five mechanisms are already admitted by D8, not by a legacy
+        // eight-bit SID. No independent Rust semantics are introduced.
+        for (name, bits) in [
+            ("код-символу", 0b11100000),
+            ("прочитати", 0b11101010),
+            ("текст-у-символ", 0b11101101),
+            ("символ-у-текст", 0b11101110),
+            ("значення-у-текст", 0b11110100),
+        ] {
+            let actual = selected_surface_callable(ReplSurface::UkrainianFull, name)
+                .expect("ratified Ukrainian ladder must parse")
+                .expect("current D8 mechanism must remain callable");
+            assert_eq!(actual.width(), 8, "{name}");
+            assert_eq!(actual.packed_bits(), bits, "{name}");
+        }
+
+        // A resident without an executable mechanism stays inert; foreign
+        // spelling and D7 text never become D8 by width or name similarity.
+        assert!(
+            selected_surface_callable(ReplSurface::UkrainianFull, "вектор")
+                .expect("ratified non-callable D8 resident lookup")
+                .is_none()
+        );
+        assert!(
+            selected_surface_callable(ReplSurface::English, "string->symbol")
+                .expect("English projection must not elevate new D8 calls")
+                .is_none()
+        );
+
+        // The former real RED interpreted this admitted nested call as a
+        // Text7 variable (#t7:...). Check it now lowers to exact SENS words,
+        // not a Python/JSON oracle or a textual surrogate for the execution.
+        let session = Session::default();
+        let words = prepare_t5m_repl_words(
+            "(текст-у-символ (значення-у-текст (як-є сполучити)))",
+            ReplSurface::UkrainianFull,
+            &session,
+        )
+        .expect("current Ukrainian nested D8 source must reach exact T5M words");
+        assert!(words.iter().any(|word| matches!(
+            word,
+            ExactDomainWord::Identity(DomainIdentity::D8(id))
+                if id.word().packed_bits() == 0b11101101
+        )));
+        assert!(words.iter().any(|word| matches!(
+            word,
+            ExactDomainWord::Identity(DomainIdentity::D8(id))
+                if id.word().packed_bits() == 0b11110100
+        )));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn d9_witness_source_is_carried_by_zig_and_readable_by_sens() {
+        let bytes =
+            crate::zig_transport::d9_witness_source_bytes().expect("Zig carries D9 witness bytes");
+        let source = String::from_utf8(bytes).expect("D9 witness source is UTF-8");
+        let forms =
+            sens::parse_mixed_exact_domain(&source).expect("SENS reads the D9 witness source");
+        let call = forms.last().expect("D9 witness entry");
+        let ExprKind::List(items) = &call.kind else {
+            panic!("D9 witness entry must be a source call");
+        };
+        let ExprKind::List(witnesses) = &items[1].kind else {
+            panic!("D9 witness must supply one SENS list of assertions");
+        };
+        assert_eq!(witnesses.len() - 1, 8, "eight native SENS witness laws");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn d9_four_ukr_witnesses_execute_individually_in_native_sens() {
+        // One false witness used to collapse to a generic CAR-of-NIL error.
+        // Diagnose the actual Lisp source one law at a time using precisely
+        // the same SENS -> Zig T5M -> SENS path as --t5m-pair.
+        // This code extracts AST spans only; Rust never calculates law truth.
+        let source = String::from_utf8(
+            crate::zig_transport::d9_witness_source_bytes().expect("Zig carries D9 witness bytes"),
+        )
+        .expect("D9 witness source is UTF-8");
+        let forms = sens::parse_mixed_exact_domain(&source)
+            .expect("D9 native Lisp source must be readable");
+        let call = forms.last().expect("eight native witness assertions");
+        let ExprKind::List(call_items) = &call.kind else {
+            panic!("D9 witness entry must be a source call");
+        };
+        let ExprKind::List(witnesses) = &call_items[1].kind else {
+            panic!("D9 witness must supply one SENS list of assertions");
+        };
+        assert_eq!(witnesses.len() - 1, 8, "eight existing SENS laws");
+        let definitions = &source[..call.span.start];
+        for (index, witness) in witnesses.iter().enumerate().skip(1) {
+            let law_source = &source[witness.span.start..witness.span.end];
+            let program = format!("{definitions}\n{law_source}\n");
+            let result = eval_t5m_source_file(&program).unwrap_or_else(|error| {
+                panic!(
+                    "test_id=D9-EIGHT-{} layer=SENS_ZIG_T5M source={} actual_error={error}",
+                    index, law_source
+                )
+            });
+            assert_eq!(
+                result.value.as_predicate_bit(),
+                Some(true),
+                "test_id=D9-EIGHT-{} layer=SENS_ZIG_T5M input={} expected=D1:true actual={}",
+                index,
+                law_source,
+                result.value
+            );
+        }
     }
 
     #[cfg(feature = "zig-transport")]
@@ -2284,10 +2477,10 @@ mod tests {
             "(CAR (CONS \"Keep Mixed Case\" 42))"
         );
         // Presentation is one-way only: the runtime symbol identity is untouched.
-        let Value::Pair(head, _) = &value else {
+        let Value::Pair(node) = &value else {
             panic!("list");
         };
-        assert_eq!(head.as_ref(), &Value::Symbol("car".into()));
+        assert_eq!(&node.head, &Value::Symbol("car".into()));
     }
 
     #[test]
@@ -2351,10 +2544,10 @@ mod tests {
 
     #[test]
     fn classic_repl_reply_uppercases_dotted_and_vector_symbol_data() {
-        let dotted = Value::Pair(
-            std::rc::Rc::new(Value::Symbol("left".into())),
-            std::rc::Rc::new(Value::Symbol("right".into())),
-        );
+        let dotted = Value::Pair(std::rc::Rc::new(sens::PairNode {
+            head: Value::Symbol("left".into()),
+            tail: Value::Symbol("right".into()),
+        }));
         assert_eq!(
             render_repl_reply(&dotted, PresentationLanguage::Canonical),
             "(LEFT . RIGHT)"

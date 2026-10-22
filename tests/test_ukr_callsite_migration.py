@@ -442,10 +442,41 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         self.assertNotIn("#d1:0", life_source)
         self.assertIn("(нехай-послідовно ", life_source)
         # Чинний LIFE-1 виводить D1 без голих host-істин.
-        # Позитивний та негативний біти будуються живими D3 ATOM.
-        self.assertNotIn("(так ні)", life_source)
+        # Керування перевіряє D3 ATOM, негативні гілки повертають D1 «ні».
+        # Коментарі можуть містити історичний приклад (так ні);
+        # перевіряємо лише виконуваний Lisp, зберігаючи рядки без змін.
+        source_without_comments = []
+        in_string = escaped = in_comment = False
+        for char in life_source:
+            if in_comment:
+                if char == "\n":
+                    source_without_comments.append(char)
+                    in_comment = False
+                else:
+                    source_without_comments.append(" ")
+                continue
+            if in_string:
+                source_without_comments.append(char)
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    in_string = False
+                continue
+            if char == ";":
+                source_without_comments.append(" ")
+                in_comment = True
+            else:
+                source_without_comments.append(char)
+                if char == '"':
+                    in_string = True
+        self.assertNotIn("(так ні)", "".join(source_without_comments))
         self.assertIn("(атом? (як-є ()))", life_source)
-        self.assertIn("(атом? (як-є (()))", life_source)
+        # Чинні негативні гілки повертають точний D1 «ні» без
+        # обхідного D3 ATOM від цитованої пари.
+        self.assertIn("((атом? (як-є ())) ні)", life_source)
+        self.assertNotIn("(атом? (як-є (()))", life_source)
         self.assertIn("(хибне? (атом? проєкції))", life_source)
         sample = "(як-є (100 цитоване)) (сполучити (як-є ліве) (як-є ()))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
@@ -1638,43 +1669,9 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
     INVERSE = {surface: bits for bits, surface in PROJECTIONS.items()}
     # Точні зворотні SHA оновлено після українізації повідомлень;
     # ратифіковані коди та кількість виконуваних голів не змінено.
+    # Тільки справжній живий генератор лишається в зворотній проєкції.
+    # Два старі Rust-генератори — явні неперевірені якорі, не програми.
     SPECS = {
-        "scripts/build-constitution.lisp": {
-            "current_blob": "66a15e260368d080ecec15b4ad4269c0cdefbf82",
-            "counts": {"110": 1, "111": 8, "1110": 19, "11011011": 27, "110101001": 1,
-                       "110110111": 1, "0011": 3, "001": 51, "0010": 3, "010": 1,
-                       "100": 1, "011": 1},
-        },
-        "scripts/generate-rust-evaluator-dispatch.lisp": {
-            # Зворотний зріз після українізації локальних імен і параметрів.
-            "blob": "d6cd8fe1afd7d3cda3c4f17eac233ee3ea2d8fe9",
-            # Контрольний inverse blob і точні лічильники від фактичних
-            # D1 fallback-гілок поточного генератора; інші голови не послаблено.
-            "counts": {
-                       "100": 9,
-                       "110": 7,
-                       "111": 1,
-                       "1001": 4,
-                       "1110": 3,
-                       "11100": 2,
-                       "101110": 1,
-                       "11011011": 4,
-                       "11110100": 1,
-                       "11110111": 4,
-                       "110011110": 1,
-                       "110101001": 1,
-                       "110110111": 2,
-                       "110111100": 2,
-                       "001000": 2,
-                       "0011": 12,
-                       "0010": 7,
-                       "001": 15,
-                       "011": 5,
-                       "010": 12
-                       },
-        },
-        # Живий генератор має перевірку реальної поверхні й алгоритму
-        # нижче, а не зафіксований SHA історичної мініатюри.
         "scripts/generate-rust-function-signatures.lisp": {},
     }
 
@@ -1768,14 +1765,6 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
             rows = [line for line in table.splitlines() if line.strip().startswith(f"({bits} (ук ")]
             self.assertEqual(len(rows), 1, f"D{len(bits)}:{bits}: один власник")
             self.assertIn(f"(укр {surface})", rows[0], f"D{len(bits)}:{bits}: неузгоджена проєкція")
-        if path == "scripts/build-constitution.lisp":
-            # Сьогоднішній SENS-код, а не зворотний знімок застарілих голів.
-            assert_live_ukrainian_script(self, self.ROOT, path, source)
-            self.assertIn("(визначити надрукувати-приклад", source)
-            self.assertIn("(визначити надрукувати-приклади", source)
-            self.assertIn('(читати-файл "tests/fixtures/conformance.lisp")', source)
-            self.assertIn("(надрукувати-приклади фікстури)", source)
-            return
         if path == "scripts/generate-rust-function-signatures.lisp":
             # Працює повний новий генератор: історичний blob короткого
             # макета не можна вважати каноном виконуваного SENS.
@@ -1809,14 +1798,35 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         mod.parse(source)
         mod.parse(restored)
         self.assertEqual(len(source.splitlines()), len(restored.splitlines()))
-    def test_three_live_generators_use_exact_ukr_projection_and_inverse(self):
+    def test_live_function_signature_generator_uses_exact_ukr_projection_and_inverse(self):
         for path in self.SPECS:
             with self.subTest(path=path):
                 source = (self.ROOT / path).read_text(encoding="utf-8")
                 self._assert_source_is_exact_ukr_projection(path, source)
 
+    def test_retired_rust_generators_are_not_executable_or_fake_witnesses(self):
+        # Виведений з ужитку генератор не повинен містити бутафорний
+        # «якір» або вигадану готовність. Це не новий SENS-свідок.
+        for path in (
+            "scripts/build-constitution.lisp",
+            "scripts/generate-rust-evaluator-dispatch.lisp",
+            "scripts/generate-rust-semantic-registry.lisp",
+        ):
+            with self.subTest(path=path):
+                source = (self.ROOT / path).read_text(encoding="utf-8")
+                lines = [line.strip() for line in source.splitlines() if line.strip()]
+                self.assertTrue(lines, f"{path}: відсутня позначка виведення")
+                self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", source)
+                self.assertIn("Не виконуваний SENS-програма", source)
+                self.assertTrue(all(line.startswith(";") for line in lines),
+                                f"{path}: архівний файл знову має живий Lisp-код")
+                self.assertNotIn("(визначити якір", source)
+                self.assertNotIn("(status pass)", source)
+                self.assertNotIn("(визначити надрукувати-приклад", source)
+                self.assertNotIn("(класифікувати-рядкове-значення", source)
+
     def test_wrong_peer_mutation_is_rejected(self):
-        path = "scripts/build-constitution.lisp"
+        path = "scripts/generate-rust-function-signatures.lisp"
         source = (self.ROOT / path).read_text(encoding="utf-8")
         edits = self._head_edits(source)
         first = next(edit for edit in edits if edit["bits"] == "0011")

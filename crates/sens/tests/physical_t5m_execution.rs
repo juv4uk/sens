@@ -26,9 +26,39 @@ fn physical_multi_form_program_executes_as_a_single_exact_domain_stream() {
         .expect("physical T5M must execute both D2-framed forms");
     assert!(matches!(
         &result.value,
-        Value::Pair(head, tail)
-            if matches!(head.as_ref(), Value::Nil) && matches!(tail.as_ref(), Value::Nil)
+        Value::Pair(node)
+            if matches!(node.head, Value::Nil) && matches!(node.tail, Value::Nil)
     ));
+}
+
+/// Кілька верхніх D2-форм: живе українське джерело й фізичний Zig/T5M
+/// виконуються тим самим SENS, а не інтерпретатором зовнішньої мови.
+/// Негатив змінює останню форму і мусить змінити фактичне SENS-значення.
+#[test]
+fn multiform_ukr_and_physical_t5m_execute_to_the_same_sens_value() {
+    const SOURCE: &str =
+        include_str!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.lisp");
+    let source_value = sens::eval_program(SOURCE, &mut Session::default())
+        .expect("test_id=D2-MULTIFORM-UKR layer=SENS native source execution")
+        .value;
+    let physical_value = eval_reference_t5m(MULTIFORM_T5M, &mut Session::default())
+        .expect("test_id=D2-MULTIFORM-T5M layer=SENS physical execution")
+        .value;
+    assert_eq!(
+        source_value, physical_value,
+        "test_id=D2-MULTIFORM-PARITY layer=SENS expected=identical-value for укр/T5M"
+    );
+
+    let genuine_last_form = "(сполучити (як-є ()) (як-є ()))";
+    assert_eq!(SOURCE.matches(genuine_last_form).count(), 1);
+    let mutant = SOURCE.replacen(genuine_last_form, "(як-є ())", 1);
+    let wrong_value = sens::eval_program(&mutant, &mut Session::default())
+        .expect("test_id=D2-MULTIFORM-MUTANT layer=SENS real negative execution")
+        .value;
+    assert_ne!(
+        wrong_value, physical_value,
+        "test_id=D2-MULTIFORM-MUTANT layer=SENS expected=changed-result actual=same"
+    );
 }
 
 #[test]
@@ -140,30 +170,56 @@ fn sens_zero_physical_cond_uses_only_exact_d1() {
     assert_eq!(result.value.as_predicate_bit(), None);
 }
 
-/// Strict negative oracles on actual T5M bytes; failures must come from the
-/// SENS language mechanism, not from malformed transport or old truthiness.
+/// #3161 CURRENT FOUNDATION SUPERSESSION / Contract 11.8:
+/// фізичний D3:000 у позиції COND test відхиляється помилкою Type,
+/// а структурне () при вичерпанні зберігається окремим позитивом вище.
+/// Немає прихованого перетворення () на D1:NO під час T5M кодування.
 #[test]
-fn sens_zero_physical_cond_rejects_wrong_domain_and_three_field_clause() {
-    for (source, expected_kind) in [
-        ("10 110 00 10 000 00 1 01 01", ErrorKind::Type),
-        ("10 110 00 10 1 00 0 00 1 01 01", ErrorKind::InvalidForm),
+fn sens_zero_physical_cond_rejects_structural_empty_as_test() {
+    for source in [
+        "10 110 00 10 000 00 1 01 01",
+        "10 110 00 10 000 00 1 01 00 10 1 00 0 01 01",
     ] {
         let words = sens::parse_binary_source_words(source)
-            .expect("negative witness must be well-formed binary words")
+            .expect("точний D2/D3 негативний свідок має читатися")
             .into_iter()
             .map(|token| token.word)
             .collect::<Vec<_>>();
-        let physical =
-            encode_ternary_words(&words).expect("negative witness must be valid T5M transport");
+        let physical = encode_ternary_words(&words).expect("чинний Zig/T5M");
         assert_eq!(decode_ternary_program(&physical).unwrap(), words);
-        assert!(
-            matches!(
-                eval_reference_t5m(&physical, &mut Session::default()),
-                Err(ReferenceT5mError::Language(err)) if err.kind == expected_kind
+        match eval_reference_t5m(&physical, &mut Session::default()) {
+            Err(ReferenceT5mError::Language(error)) => {
+                assert_eq!(
+                    error.kind, ErrorKind::Type,
+                    "test_id=3161-PHYSICAL-COND layer=SENS source={source} expected=Type actual={error}"
+                );
+            }
+            other => panic!(
+                "test_id=3161-PHYSICAL-COND layer=SENS source={source} expected=Type actual={other:?}"
             ),
-            "exact D1/COND rejected with wrong error category: {source}"
-        );
+        }
     }
+}
+
+/// Трипольовий COND лишається реальною помилкою форми, а не альтернативою
+/// точному двопольовому закону; негатив виконується з фізичних байтів.
+#[test]
+fn sens_zero_physical_cond_rejects_three_field_clause() {
+    let source = "10 110 00 10 1 00 0 00 1 01 01";
+    let words = sens::parse_binary_source_words(source)
+        .expect("negative witness must be well-formed binary words")
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    let physical = encode_ternary_words(&words).expect("negative witness must be valid T5M");
+    assert_eq!(decode_ternary_program(&physical).unwrap(), words);
+    assert!(
+        matches!(
+            eval_reference_t5m(&physical, &mut Session::default()),
+            Err(ReferenceT5mError::Language(err)) if err.kind == ErrorKind::InvalidForm
+        ),
+        "test_id=3161-PHYSICAL-COND-three-fields source={source} expected=InvalidForm"
+    );
 }
 
 /// SENS owns the entire semantic law matrix in its executable 0/1 program.

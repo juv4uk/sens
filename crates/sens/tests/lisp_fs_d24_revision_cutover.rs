@@ -3,7 +3,7 @@
 //! Початковий fs-empty все ще містить історичний 0; цей тест не приписує
 //! йому неіснуючого source-конструктора D24 і не послаблює арифметичний закон.
 
-use sens::{eval_program, BinaryNumber, ErrorKind, Session, Value};
+use sens::{eval_program, BinaryNumber, ErrorKind, PairNode, Session, Value};
 use std::rc::Rc;
 
 fn load_filesystem() -> Session {
@@ -53,25 +53,25 @@ fn dnumber(width: usize, one: bool) -> Value {
 
 fn list(items: Vec<Value>) -> Value {
     items.into_iter().rev().fold(Value::Nil, |tail, head| {
-        Value::Pair(Rc::new(head), Rc::new(tail))
+        Value::Pair(Rc::new(PairNode { head, tail }))
     })
 }
 
 fn revision_of(snapshot: Value) -> Value {
-    let Value::Pair(_, rest) = &snapshot else {
+    let Value::Pair(node) = &snapshot else {
         panic!("snapshot: missing objects");
     };
-    let Value::Pair(_, rest) = rest.as_ref() else {
+    let Value::Pair(node) = &node.tail else {
         panic!("snapshot: missing bindings");
     };
-    let Value::Pair(revision, tail) = rest.as_ref() else {
+    let Value::Pair(node) = &node.tail else {
         panic!("snapshot: missing revision");
     };
     assert!(
-        matches!(tail.as_ref(), Value::Nil),
+        matches!(node.tail, Value::Nil),
         "snapshot has extra fields"
     );
-    revision.as_ref().clone()
+    node.head.clone()
 }
 
 #[test]

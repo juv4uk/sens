@@ -1481,6 +1481,17 @@ mod core_profile_bootstrap_tests {
             Some(sens::CoreProfile::Core3)
         );
     }
+
+    #[test]
+    fn cli_time_library_bootstraps_from_exact_t5m_words() {
+        let mut session = Session {
+            environment: Environment::root(),
+        };
+        bootstrap_core(&mut session, CliCore::Core4).expect("CLI Core4 bootstrap must succeed");
+
+        sens::load_time_library(&mut session)
+            .expect("SENS restores and loads the exact T5M time words");
+    }
 }
 
 #[allow(dead_code)] // wired by the REPL path once the Zig-only core is admitted
@@ -1495,3 +1506,4 @@ fn repl_core_source_zig_only() -> Result<String, String> {
         Err("RUST_ZIG_ONLY: SENS REPL core requires Zig; no Rust source fallback".into())
     }
 }
+

@@ -42,9 +42,32 @@ for row in rows:
     actual_sources[row["source_file"]]=actual_sources.get(row["source_file"],0)+1
 assert actual_sources==expected_sources
 
+# Чинні виконавчі визначення пишуться повною українською проєкцією.
+# Історичні 8-бітні голови не є визначеннями нового SENS, навіть
+# якщо старий файл колись містив такий самий набір функцій.
+TOP_LEVEL_DEFINE = re.compile(
+    r'^[ \t]*\(визначити\s+([^\s()]+)\s+', re.MULTILINE
+)
+
+
+def top_level_definitions(text: str) -> set[str]:
+    return {match.group(1) for match in TOP_LEVEL_DEFINE.finditer(text)}
+
+
+# Позитивні й негативні свідки лише синтаксису джерела, не SENS-eval.
+assert top_level_definitions("(визначити поточне (функція (x) x))\n") == {"поточне"}
+assert top_level_definitions("(визначити багаторядкове\n (функція (x) x))\n") == {"багаторядкове"}
+for legacy in (
+    "(00001001 історичне (00001000 (x) x))\n",
+    "(00000001 історичне (001 x))\n",
+    "(11001110 історичне ())\n",
+    "; (визначити коментар ())\n",
+):
+    assert top_level_definitions(legacy) == set(), legacy
+
 for source_file,count in expected_sources.items():
     text=(root/source_file).read_text(encoding="utf-8")
-    defs={m.group(1) for m in re.finditer(r'^\((?:визначити|[01]{8})\s+([^\s()]+)\s+', text, re.MULTILINE)}
+    defs=top_level_definitions(text)
     claimed={row["source_name"] for row in rows if row["source_file"]==source_file}
     assert len(claimed)==count
     assert claimed <= defs

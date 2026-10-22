@@ -8,18 +8,31 @@ permissions:
 
 jobs:
   routing:
-    name: No self-hosted actions runner on owner PC
+    name: GitHub-hosted plus one approved manual GPU route
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Reject any literal self-hosted runner route
+      - name: Перевірити єдиний дозволений self-hosted маршрут
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE '^[[:space:]]*runs-on:[[:space:]].*self-hosted' .github/workflows; then
-            echo '::error::This repository must use GitHub-hosted runners only'
+          allowed='.github/workflows/local-gpu-smoke.yml'
+          routes="$(grep -RIlE '^[[:space:]]*runs-on:[[:space:]].*self-hosted' .github/workflows || true)"
+          unexpected="$(printf '%s\n' "$routes" | grep -vxF "$allowed" || true)"
+          if [[ -n "$unexpected" ]]; then
+            echo "::error::Unexpected self-hosted workflow route(s): $unexpected"
             exit 1
           fi
-          echo 'HOSTED_ROUTING_GREEN: no explicit self-hosted runs-on'
-          echo '::notice::Hardware GPU/FPGA parity remains unverified when gated jobs are skipped'
+          test -f "$allowed"
+          grep -Fq '  workflow_dispatch:' "$allowed"
+          if grep -Eq '^  (push|pull_request|schedule):' "$allowed"; then
+            echo '::error::The local GPU smoke must remain manual-only'
+            exit 1
+          fi
+          grep -Fq 'runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti]' "$allowed"
+          if grep -Eq '^[[:space:]]*uses:' "$allowed"; then
+            echo '::error::The local GPU smoke must not execute third-party actions'
+            exit 1
+          fi
+          echo 'RUNNER_ROUTING_GREEN: GitHub-hosted by default; one manual, label-pinned CML GPU smoke is allowed'

@@ -156,31 +156,31 @@ fn d3_empty_identity_decomposes_to_exact_shape() {
         .expect("D3:000 shape decomposition must remain representational")
         .value;
 
-    let Value::Pair(width, rest) = &result else {
+    let Value::Pair(node) = &result else {
         panic!("D3:000 decomposition must be a two-element list, got {result:?}");
     };
     assert!(matches!(
-        width.as_ref(),
+        &node.head,
         Value::Number(value, Exactness::Exact) if *value == 3.0
     ));
-    let Value::Pair(bits, tail) = rest.as_ref() else {
-        panic!("D3:000 shape bits missing: {rest:?}");
+    let Value::Pair(node) = &node.tail else {
+        panic!("D3:000 shape bits missing: {result:?}");
     };
-    assert!(matches!(tail.as_ref(), Value::Nil));
+    assert!(matches!(node.tail, Value::Nil));
 
-    let Value::Pair(bit0, rest) = bits.as_ref() else {
-        panic!("D3:000 first bit missing: {bits:?}");
+    let Value::Pair(bit0) = &node.head else {
+        panic!("D3:000 first bit missing: {result:?}");
     };
-    let Value::Pair(bit1, rest) = rest.as_ref() else {
-        panic!("D3:000 second bit missing: {rest:?}");
+    let Value::Pair(bit1) = &bit0.tail else {
+        panic!("D3:000 second bit missing: {result:?}");
     };
-    let Value::Pair(bit2, tail) = rest.as_ref() else {
-        panic!("D3:000 third bit missing: {rest:?}");
+    let Value::Pair(bit2) = &bit1.tail else {
+        panic!("D3:000 third bit missing: {result:?}");
     };
-    assert!(matches!(tail.as_ref(), Value::Nil));
-    assert_eq!(bit0.as_predicate_bit(), Some(false));
-    assert_eq!(bit1.as_predicate_bit(), Some(false));
-    assert_eq!(bit2.as_predicate_bit(), Some(false));
+    assert!(matches!(bit2.tail, Value::Nil));
+    assert_eq!(bit0.head.as_predicate_bit(), Some(false));
+    assert_eq!(bit1.head.as_predicate_bit(), Some(false));
+    assert_eq!(bit2.head.as_predicate_bit(), Some(false));
 }
 
 #[test]

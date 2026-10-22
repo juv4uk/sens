@@ -146,16 +146,73 @@ fn verify_exact_t5m_view(physical: &[u8], view: &[u8]) -> Result<(), String> {
 #[cfg(all(test, feature = "zig-transport"))]
 #[test]
 fn t5m_view_inverse_preserves_d24_and_rejects_noncanonical_view() {
-    let words = vec![
-        zig_transport::ExactT5MWord::new(3, vec![1, 0, 0]).unwrap(),
-        zig_transport::ExactT5MWord::new(24, vec![1; 24]).unwrap(),
-    ];
+    // Один фізичний потік перевіряє всі ширини D1–D10 і числові D24+:
+    // неоднакова довжина слів не повинна стирати доменні межі.
+    // Це виключно Zig/T5M транспорт, не host-реалізація законів SENS.
+    let words = (1usize..=10)
+        .chain([24, 48, 96])
+        .map(|width| {
+            let bits = (0..width)
+                .map(|index| ((index + width) % 2) as u8)
+                .collect();
+            zig_transport::ExactT5MWord::new(width, bits).unwrap()
+        })
+        .collect::<Vec<_>>();
     let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
-    let canonical_view = format!("100 {}\n", "1".repeat(24));
-    assert!(verify_exact_t5m_view(&physical, canonical_view.as_bytes()).is_ok());
+    let restored = zig_transport::decode_t5m_exact_words(&physical).unwrap();
+    assert_eq!(restored, words, "Zig T5M змінив точні біти або ширини D1–D10/D24+");
+
+    let canonical_view = format!(
+        "{}\n",
+        words
+            .iter()
+            .map(|word| {
+                word.bits()
+                    .iter()
+                    .map(|&bit| if bit == 0 { '0' } else { '1' })
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
+    verify_exact_t5m_view(&physical, canonical_view.as_bytes())
+        .expect("Zig відновлює рівно ті самі слова й канонічний перегляд");
+
+    // Негативи не змінюють фізичний носій: жодного мовчазного
+    // прийняття обрізаного слова, підміненого біта чи зайвого пробілу.
+    let mut changed_bit = canonical_view.as_bytes().to_vec();
+    changed_bit[0] = if changed_bit[0] == b'0' { b'1' } else { b'0' };
+    assert!(verify_exact_t5m_view(&physical, &changed_bit).is_err());
+
+    let mut shortened = canonical_view.as_bytes().to_vec();
+    shortened.remove(shortened.len() - 2); // біт перед кінцевим LF
+    assert!(verify_exact_t5m_view(&physical, &shortened).is_err());
     assert!(verify_exact_t5m_view(&physical, canonical_view.trim_end().as_bytes()).is_err());
     assert!(
-        verify_exact_t5m_view(&physical, format!("100  {}\n", "1".repeat(24)).as_bytes()).is_err()
+        verify_exact_t5m_view(&physical, canonical_view.replace(' ', "  ").as_bytes()).is_err()
+    );
+
+    // Контроль зі схожими бітами, але РІЗНИМИ ідентичностями:
+    // D1:0 («ні») не є структурним D3:000 («()»).
+    // Zig лише відновлює фізичні межі; тлумачення належить SENS.
+    let distinct_domains = vec![
+        zig_transport::ExactT5MWord::new(1, vec![0]).unwrap(),
+        zig_transport::ExactT5MWord::new(3, vec![0, 0, 0]).unwrap(),
+    ];
+    let exact_carrier = zig_transport::encode_t5m_exact_words(&distinct_domains).unwrap();
+    assert_eq!(
+        zig_transport::decode_t5m_exact_words(&exact_carrier).unwrap(),
+        distinct_domains,
+        "D1:0 та D3:000 мусять зберігати окремі точні ширини"
+    );
+    verify_exact_t5m_view(&exact_carrier, b"0 000\n").unwrap();
+    assert!(
+        verify_exact_t5m_view(&exact_carrier, b"000 0\n").is_err(),
+        "перестановка доменних слів не є оборотним переглядом"
+    );
+    assert!(
+        verify_exact_t5m_view(&exact_carrier, b"0000\n").is_err(),
+        "злиття різних доменних слів заборонено"
     );
 }
 
@@ -718,7 +775,7 @@ fn zig_test_fixture(name: &'static str) -> &'static [u8] {
         // exact words to the current T5M wire in memory; never rewrite them.
         #[cfg(feature = "zig-transport")]
         {
-            let legacy_words = sens::decode_ternary_words(&bytes)
+            let legacy_words = zig_transport::decode_legacy_t5_words(&bytes)
                 .unwrap_or_else(|e| panic!("legacy T5 fixture decode {name}: {e:?}"));
             let t5m = zig_transport::encode_t5m_direct(&legacy_words)
                 .unwrap_or_else(|e| panic!("T5M fixture carry {name}: {e}"));
@@ -764,6 +821,19 @@ mod rust_zig_only_cutover_tests {
         assert!(runtime.contains("eval_t5m_bytes(&bytes)"));
         assert!(runtime
             .contains("zig_transport::encode_t5m_direct(&admitted_source_words(&projection)?)"));
+
+        let fixture_start = source
+            .find("fn zig_test_fixture(")
+            .expect("fixture adapter");
+        let fixture_adapter = source[fixture_start..]
+            .split("#[cfg(test)]\nmod rust_zig_only_cutover_tests")
+            .next()
+            .expect("fixture adapter section");
+        assert!(
+            !fixture_adapter.contains("sens::decode_ternary_words(&bytes)"),
+            "historical fixture transport must not use the Rust T5 codec"
+        );
+        assert!(fixture_adapter.contains("zig_transport::decode_legacy_t5_words(&bytes)"));
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -988,28 +1058,15 @@ mod eval_tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn original_tiny_f3_requires_explicit_route_and_preserves_quote_execution() {
-        let bytes = [0xf3, 0x40, 0x60];
-        let canonical = sens::frame3_small::decode_explicit_small_f3(&bytes).unwrap();
+    fn explicit_f3_codec_roundtrip_is_zig_owned() {
         let legacy_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
         let t5 = std::fs::read(legacy_path).unwrap();
-        assert_eq!(canonical.as_slice(), t5.as_slice());
-        let mut direct_session = sens::Session::default();
-        let mut framed_session = sens::Session::default();
-        let direct_words = sens::decode_ternary_words(&t5).unwrap();
-        let framed_words = sens::decode_ternary_words(&canonical).unwrap();
-        let direct = sens::PhysicalT5Program::from_exact_words(&direct_words)
-            .unwrap()
-            .execute(&mut direct_session)
-            .unwrap();
-        let framed = sens::PhysicalT5Program::from_exact_words(&framed_words)
-            .unwrap()
-            .execute(&mut framed_session)
-            .unwrap();
-        assert_eq!(direct.value, framed.value);
-        assert_eq!(direct.output, framed.output);
-        assert!(zig_transport::decode_t5m_exact_words(&bytes).is_err());
+        let carrier = encode_f3_carrier(&t5)
+            .expect("Zig owns explicit F3C encoding")
+            .expect("fixture fits the explicit compact carrier");
+        let restored = decode_f3_carrier(&carrier).expect("Zig owns explicit F3C decoding");
+        assert_eq!(restored, t5, "F3C must preserve the canonical T5M bytes");
         assert!(USAGE.contains("eval-f3 path.senc"));
         assert!(USAGE.contains("encode-f3 path.sens"));
     }

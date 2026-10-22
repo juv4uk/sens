@@ -119,6 +119,45 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.assertIn("keyboard-v2", mod.three_pass.build_text7(foundation, ratified))
         self.assertTrue(self.verify()["canonical_uk_roundtrip"])
 
+    def test_native_multiform_t5m_fixture_has_exact_ukr_inverse(self):
+        # Реальна двоформова фізична програма вже виконується у
+        # crates/sens/tests/physical_t5m_execution.rs, а не у Python.
+        # Тут доводимо лише механічну укр ↔ точні D2 слова ↔ Zig/T5M.
+        fixture = ROOT / "tests/fixtures/migration-multiform-cohort-main"
+        lisp = fixture / "two-forms.lisp"
+        sens = fixture / "two-forms.sens"
+        view = fixture / "two-forms"
+        original = (lisp.read_bytes(), sens.read_bytes(), view.read_bytes())
+        words = view.read_text(encoding="ascii").split()
+        self.assertEqual(
+            mod.canonical_uk_from_words(words),
+            "(як-є ())\n(сполучити (як-є ()) (як-є ()))\n",
+        )
+        self.assertEqual(mod.project_current_uk(lisp.read_text(encoding="utf-8")), words)
+        record = mod.verify(lisp, sens, view)
+        self.assertTrue(record["program_identity_roundtrip"])
+        self.assertTrue(record["canonical_view_roundtrip"])
+        self.assertFalse(record["runtime_oracle_admitted_by_this_audit"])
+        self.assertEqual(
+            (lisp.read_bytes(), sens.read_bytes(), view.read_bytes()), original
+        )
+
+    def test_multiform_bad_separators_and_reader_depth_are_rejected(self):
+        forms = ["10", "001", "00", "000", "01"]
+        for bad in (
+            ["00", *forms],
+            [*forms, "00"],
+            [*forms, "00", "00", *forms],
+            [*forms, "01", *forms],
+        ):
+            with self.subTest(words=bad), self.assertRaises(mod.ProjectionBlocked):
+                mod.canonical_uk_from_words(bad)
+        # Реальний SENS reader має межу 128: ширша Python-рекурсія
+        # не може породжувати хибного сертифіката оберненості.
+        too_deep = ["10"] * 130 + ["000"] + ["01"] * 130
+        with self.assertRaisesRegex(mod.ProjectionBlocked, "128"):
+            mod.canonical_uk_from_words(too_deep)
+
     def test_single_atom_and_empty_list_are_distinct_from_d2_separator(self):
         self.assertEqual(mod.canonical_uk_from_words(["0"]), "ні\n")
         self.assertEqual(mod.canonical_uk_from_words(["1"]), "так\n")
@@ -306,12 +345,19 @@ class BoundedUkTripletTests(unittest.TestCase):
             ["10", "110", "00", "0000011", "01"],         # Text7 unknown
             ["10", "110", "00", "01010", "01"],           # D5 number/other
             ["10", "100", "00", "1", "00", "0", "01"],       # CAR arity
-            ["0", "00", "1"],                             # multiple roots
             ["10", "1", "00", "1", "01"],                 # raw predicate call
         ):
             with self.subTest(words=invalid_words):
                 with self.assertRaises(mod.ProjectionBlocked):
                     mod.canonical_uk_from_words(invalid_words)
+
+    def test_two_exact_d1_top_level_forms_are_valid_d2_program(self):
+        # D1:0, роздільник D2:00, D1:1 — це дві чинні форми
+        # у фізичному SENS, а не «зайвий корінь».
+        self.assertEqual(
+            mod.canonical_uk_from_words(["0", "00", "1"]),
+            "ні\nтак\n",
+        )
 
     def test_caar_real_uk_source_against_original_unmodified_physical_t5(self):
         source_dir = ROOT / "tests/fixtures/migration-d4-selector-cohort"

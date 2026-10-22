@@ -13,7 +13,7 @@ mod strings;
 pub(super) use codepoint::{codepoint_to_string_values, string_to_codepoint_values};
 pub use core::exact_arity;
 pub(super) use core::{
-    atom_value, car_value, cdr_value, cons_values, eq_values, evaluate_definition,
+    atom_value, car_ref, cdr_ref, cons_values, eq_values, evaluate_definition,
     evaluate_domain_cond, quoted,
 };
 pub(super) use io::{eval_values, read_values, write_to_string_values};

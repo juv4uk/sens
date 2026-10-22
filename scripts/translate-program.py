@@ -1,64 +1,53 @@
 #!/usr/bin/env python3
-"""Перекладає програми SENS між людськими поверхнями через byte SIDs.
+"""Лише допоміжна проєкція назв із чинної точної драбини D1–D10.
 
-Джерело словника — `lib/surface/semantic-registry.lisp`. Жодна людська мова не
-є мостом до іншої. `sym` — спільна немовна нотація, а `compat` — службовий
-простір compatibility-імен; вони не є людськими поверхнями для CLI-перекладу.
+Ніяких історичних byte SID8/Sens8: джерело відповідностей — виключно
+ратифіковані рядки lib/domains/dN.lisp (точний домен + точні біти).
+D2 визначає структуру, D7 визначає текстові дані; їх не перекладати
+як імена функцій. Неоднозначний символ відхиляється, а не вгадується.
+
+Цей інструмент переписує людський текст, НЕ виконує SENS, НЕ пакує T5M
+і НЕ надає викличного допуску. Семантичний шлях належить самому SENS.
 """
 
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-REGISTRY = REPO_ROOT / "lib" / "surface" / "semantic-registry.lisp"
-ENTRY = re.compile(r'^\s*\(([01]{8})\s+(.*)\)\s*$')
-SURFACE = re.compile(r"\(([^\s()]+)\s+(\(\)|[^\s()]+)\)")
-NON_HUMAN = {"sym", "compat"}
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 
+from domain_tables import CURRENT_HUMAN_TABLES, read_domain_tables
 
-def decode_surface_token(token: str) -> str:
-    if len(token) >= 2 and token[0] == token[-1] == '"':
-        return token[1:-1]
-    return token
+# Повні дані D7 не є викличними головами; D2 не є лексичними операторами.
+PROGRAM_TABLES = tuple(
+    path for path in CURRENT_HUMAN_TABLES
+    if path.stem not in {"d2", "d7"}
+)
+LANGUAGE_FIELDS = {
+    "en": "en", "ук": "uk", "укр": "ukr",
+    "uk": "uk", "ukr": "ukr", "sa": "san", "san": "san",
+}
 
 
 def registry_rows() -> list[dict[str, str]]:
+    """Кожна відповідність прив'язана до сучасної доменної координати."""
     rows = []
-    for line_number, line in enumerate(
-        REGISTRY.read_text(encoding="utf-8").splitlines(), 1
-    ):
-        match = ENTRY.match(line)
-        if not match:
+    for row in read_domain_tables(PROGRAM_TABLES):
+        if row.domain == "D3" and row.bits == "000":
+            # Порожній список — структурне значення, не назва функції.
             continue
-        identity, body = match.groups()
-        if identity == "00000000":
-            continue
-
-        matches = list(SURFACE.finditer(body))
-        residue = SURFACE.sub("", body).strip()
-        if not matches or residue:
-            raise ValueError(
-                f"line {line_number}: malformed semantic registry row for SID {identity}"
-            )
-
-        surfaces: dict[str, str] = {}
-        for surface in matches:
-            language, raw_name = surface.groups()
-            name = decode_surface_token(raw_name)
-            if language in surfaces:
-                raise ValueError(
-                    f"line {line_number}: duplicate {language} surface for {identity}"
-                )
-            if name not in ("()", "—"):
-                surfaces[language] = name
-        rows.append(surfaces)
-
+        names = {
+            language: getattr(row, field)
+            for language, field in LANGUAGE_FIELDS.items()
+        }
+        names["_identity"] = f"{row.domain}:{row.bits}"
+        rows.append({key: value for key, value in names.items() if value})
     if not rows:
-        raise ValueError("byte-SID semantic registry has no entries")
+        raise ValueError("чинні доменні таблиці не містять жодної проєкції")
     return rows
 
 
@@ -67,35 +56,76 @@ def human_languages(rows: list[dict[str, str]]) -> set[str]:
         language
         for row in rows
         for language in row
-        if language not in NON_HUMAN
+        if language in LANGUAGE_FIELDS
     }
 
 
-def translation_map(source_language: str, target_language: str) -> dict[str, str]:
-    translations: dict[str, str] = {}
+def translation_map(
+    source_language: str, target_language: str
+) -> dict[str, str | None]:
+    if source_language not in LANGUAGE_FIELDS or target_language not in LANGUAGE_FIELDS:
+        raise ValueError("невідома людська проєкція")
+    if LANGUAGE_FIELDS[source_language] == LANGUAGE_FIELDS[target_language]:
+        raise ValueError("джерело й ціль мають бути різними проєкціями")
+
+    translations: dict[str, str | None] = {}
+    owners: dict[str, str] = {}
     for row in registry_rows():
         source_name = row.get(source_language)
         target_name = row.get(target_language)
-        if source_name is None or target_name is None:
+        if not source_name or not target_name:
             continue
-        previous = translations.get(source_name)
-        if previous is not None and previous != target_name:
-            raise ValueError(
-                f"ambiguous {source_language} surface {source_name!r}: "
-                f"{previous!r} or {target_name!r}"
-            )
+        identity = row["_identity"]
+        if source_name in owners and owners[source_name] != identity:
+            # Наприклад, en:map існує у D6 і D8. Жоден не має
+            # переваги лише через назву або вісім бітів.
+            translations[source_name] = None
+            continue
+        owners[source_name] = identity
         translations[source_name] = target_name
     return translations
 
 
-def translate_program(source: str, translations: dict[str, str]) -> str:
-    """Rewrite symbols while preserving layout, comments, strings and shared symbols."""
+def translate_program(source: str, translations: dict[str, str | None]) -> str:
+    """Перекладаємо викличні голови, не дані, цитати чи формальні параметри.
+
+    Це лише текстова допоміжна проєкція: жодного runtime, D7-кодування
+    або перетворення історичних байтів SID8 у сучасні координати.
+    """
+    protected_quote_heads: set[str] = set()
+    protected_formal_heads: set[str] = set()
+    for row in read_domain_tables(
+        tuple(path for path in PROGRAM_TABLES if path.stem in {"d3", "d4"})
+    ):
+        if (row.domain, row.bits) not in {
+            ("D3", "001"), ("D4", "0010"), ("D4", "0011")
+        }:
+            continue
+        names = {
+            name for name in (row.uk, row.ukr, row.san, row.en) if name
+        }
+        if (row.domain, row.bits) == ("D3", "001"):
+            protected_quote_heads.update(names)
+        else:
+            # FUNCTION/LAMBDA parameters and DEFINE declaration head
+            # are syntax/bindings, not callable expressions.
+            protected_formal_heads.update(names)
+
     output: list[str] = []
     index = 0
     length = len(source)
+    frames = [
+        {"head": False, "literal": False, "next_literal": False, "apostrophe": False}
+    ]
+
+    def finish_expression(frame: dict[str, bool]) -> None:
+        frame["head"] = False
+        frame["next_literal"] = False
+        frame["apostrophe"] = False
 
     while index < length:
         character = source[index]
+        frame = frames[-1]
         if character == ";":
             end = source.find("\n", index)
             if end == -1:
@@ -108,29 +138,60 @@ def translate_program(source: str, translations: dict[str, str]) -> str:
             index += 1
             while index < length:
                 if source[index] == "\\":
-                    index += 2
+                    index = min(index + 2, length)
                 elif source[index] == '"':
                     index += 1
                     break
                 else:
                     index += 1
             output.append(source[start:index])
-        elif character.isspace() or character in "()":
+            finish_expression(frame)
+        elif character.isspace():
             output.append(character)
             index += 1
         elif character == "'":
+            output.append(character)
+            index += 1
+            frame["apostrophe"] = True
+        elif character == "(":
+            literal = frame["literal"] or frame["next_literal"] or frame["apostrophe"]
+            finish_expression(frame)
+            frames.append(
+                {"head": True, "literal": literal, "next_literal": False, "apostrophe": False}
+            )
+            output.append(character)
+            index += 1
+        elif character == ")":
+            if len(frames) == 1:
+                raise ValueError("зайва закривальна дужка у проєкції")
+            frames.pop()
             output.append(character)
             index += 1
         else:
             start = index
             while index < length:
                 current = source[index]
-                if current.isspace() or current in "();\"":
+                if current.isspace() or current in '();\"':
                     break
                 index += 1
             token = source[start:index]
-            output.append(translations.get(token, token))
+            callable_head = frame["head"] and not (
+                frame["literal"] or frame["next_literal"] or frame["apostrophe"]
+            )
+            if callable_head and token in translations and translations[token] is None:
+                raise ValueError(
+                    f"неоднозначна сучасна доменна проєкція: {token!r}"
+                )
+            output.append(translations.get(token, token) if callable_head else token)
+            protect_next = callable_head and (
+                token in protected_quote_heads or token in protected_formal_heads
+            )
+            finish_expression(frame)
+            if protect_next:
+                frame["next_literal"] = True
 
+    if len(frames) != 1:
+        raise ValueError("незакрита дужка у проєкції")
     return "".join(output)
 
 
@@ -165,7 +226,11 @@ def main() -> int:
         if str(args.input) == "-"
         else args.input.read_text(encoding="utf-8")
     )
-    translated = translate_program(source, translations)
+    try:
+        translated = translate_program(source, translations)
+    except ValueError as error:
+        print(f"projection error: {error}", file=sys.stderr)
+        return 2
     if args.output:
         args.output.write_text(translated, encoding="utf-8")
     else:

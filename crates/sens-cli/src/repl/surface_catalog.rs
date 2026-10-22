@@ -69,7 +69,7 @@ fn load_registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     let mut entries = Vec::new();
     for width in 1u8..=11 {
         let source = domain_table_source(width)
-            .ok_or_else(|| format!("D{width}: відсутня таблиця проєкцій"))?;
+            .map_err(|error| format!("D{width}: не вдалося отримати таблицю проєкцій: {error}"))?;
         let forms = parse(&source).map_err(|error| {
             format!(
                 "не вдалося розібрати таблицю D{width}: {}",
@@ -133,20 +133,18 @@ fn load_registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     Ok(entries)
 }
 
-fn domain_table_source(width: u8) -> Option<&'static str> {
-    match width {
-        1 => Some(include_str!("../../../../lib/domains/d1.lisp")),
-        2 => Some(include_str!("../../../../lib/domains/d2.lisp")),
-        3 => Some(include_str!("../../../../lib/domains/d3.lisp")),
-        4 => Some(include_str!("../../../../lib/domains/d4.lisp")),
-        5 => Some(include_str!("../../../../lib/domains/d5.lisp")),
-        6 => Some(include_str!("../../../../lib/domains/d6.lisp")),
-        7 => Some(include_str!("../../../../lib/domains/d7.lisp")),
-        8 => Some(include_str!("../../../../lib/domains/d8.lisp")),
-        9 => Some(include_str!("../../../../lib/domains/d9.lisp")),
-        10 => Some(include_str!("../../../../lib/domains/d10.lisp")),
-        11 => Some(include_str!("../../../../lib/domains/d11.lisp")),
-        _ => None,
+fn domain_table_source(width: u8) -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = crate::zig_transport::domain_table_source_bytes(width)?;
+        String::from_utf8(bytes)
+            .map_err(|error| format!("ZIG_DOMAIN_TABLE_CARRIER invalid UTF-8: {error}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err(format!(
+            "RUST_ZIG_ONLY: domain table D{width} requires Zig; no Rust source fallback"
+        ))
     }
 }
 
@@ -501,6 +499,7 @@ pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, Stri
 mod tests {
     use super::*;
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn domain_and_exact_bits_are_the_identity() {
         let entries = registry_entries().expect("byte registry");
@@ -527,6 +526,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn all_projection_columns_come_from_domain_tables() {
         let entries = registry_entries().expect("numeric registry");
@@ -542,6 +542,7 @@ mod tests {
         assert_eq!(normalize_surface("sa"), "san");
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn repl_never_reports_a_human_spelling_as_identity() {
         let output = render_name("ук", "D3:010").expect("render D3 identity");
@@ -587,12 +588,19 @@ mod tests {
             error.contains("RUST_ZIG_ONLY: uk-docs requires Zig; no Rust source fallback"),
             "unexpected denial: {error}"
         );
+        let domain_error =
+            domain_table_source(1).expect_err("Rust must not embed/read domain tables");
+        assert!(
+            domain_error.contains("RUST_ZIG_ONLY: domain table D1 requires Zig"),
+            "unexpected domain-table denial: {domain_error}"
+        );
         println!(
             "ZIG_UK_DOCS_NO_FALLBACK_PASS test_id=zig-uk-docs-deny-no-zig \
              layer=transport semantic_authority=SENS"
         );
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn core_catalog_lists_domain_qualified_identities() {
         let output = render_names("core").expect("core catalog");
@@ -601,6 +609,7 @@ mod tests {
         assert!(!output.contains("byte semantic"));
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn projection_spelling_resolves_only_when_unique() {
         let entries = registry_entries().expect("domain registry");
@@ -610,6 +619,7 @@ mod tests {
         assert!(output.starts_with("identity: D1:1\n"));
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn repl_surface_catalog_projects_the_ratified_d11_table_row() {
         let output = render_name("укр", "прочитати-вміст-файла").expect("D11 projection");
@@ -619,5 +629,30 @@ mod tests {
         );
         assert!(output.contains("UKR: прочитати-вміст-файла"), "{output}");
         assert!(output.contains("EN: read-file"), "{output}");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn domain_table_bytes_are_carried_by_zig_then_parsed_by_sens() {
+        for width in 1..=11 {
+            let bytes = crate::zig_transport::domain_table_source_bytes(width)
+                .expect("Zig should return the exact table bytes");
+            let source = domain_table_source(width).expect("SENS source route");
+            assert!(!bytes.is_empty(), "D{width} table must not be empty");
+            assert_eq!(bytes, source.as_bytes(), "D{width} bytes must remain exact");
+            let forms = parse(&source).expect("SENS parser owns source interpretation");
+            let root = forms
+                .first()
+                .and_then(expr_list)
+                .expect("SENS parser returns a domain table root");
+            assert_eq!(
+                root.first().and_then(expr_symbol),
+                Some("domain-table-1"),
+                "D{width} table root must be parsed by SENS"
+            );
+        }
+        assert!(crate::zig_transport::domain_table_source_bytes(0)
+            .expect_err("invalid asset selector must fail closed")
+            .contains("unknown asset index"));
     }
 }

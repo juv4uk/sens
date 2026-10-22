@@ -179,106 +179,19 @@ else
   exit 1
 fi
 
+# Сучасний SENS-свідок сам доводить закони точних Д24+ чисел.
+# Жодних історичних бітових викличних голів, Python-генераторів,
+# сторонніх JSON-оракулів чи старої назви неіснуючої функції.
 quantity_witness="tests/fixtures/exact-quantity-arithmetic-witness.lisp"
-if quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- "$quantity_witness" 2>&1)"; then
-  if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-    printf 'exact quantity Lisp witness returned a non-pass result: %s\n' "$quantity_status" >&2
-    # Diagnostic-only replay. Preserve the real failure and the Lisp-owned
-    # pass envelope; never alter or suppress the source witness.
-    quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
-    python3 - "$quantity_witness" "$quantity_diag_dir" <<'PY'
-from pathlib import Path
-import sys
-
-source = Path(sys.argv[1]).read_text(encoding="utf-8").rstrip()
-tail = "\n(exact-quantity-arithmetic-witness)"
-if not source.endswith(tail):
-    raise SystemExit("QUANTITY-DIAGNOSTIC-BLOCKED: fixture tail changed")
-prefix = source[:-len(tail)].rstrip()
-root = Path(sys.argv[2])
-probes = {
-    "speed-record-valid": "(scientific-constant? si:defining-speed-of-light)",
-    "speed-proper-list": "(науковий-список-правильний? si:defining-speed-of-light)",
-    "speed-length-seven": "(00011100 (00101000 si:defining-speed-of-light) 7)",
-    "speed-length-raw": "(00101000 si:defining-speed-of-light)",
-    "numeric-seven-equalp": "(00011100 7 7)",
-    "speed-length-eq": "(00000011 (00101000 si:defining-speed-of-light) 7)",
-    "speed-schema": "(00000011 (00000101 si:defining-speed-of-light) *scientific-constant-schema*)",
-    "speed-name-symbol": "(00100011 (scientific-constant-name si:defining-speed-of-light))",
-    "speed-quantity-valid": "(quantity? (scientific-constant-quantity si:defining-speed-of-light))",
-    "speed-status-valid": "(scientific-constant-status-valid? (scientific-constant-status si:defining-speed-of-light))",
-    "speed-kind-valid": "(scientific-constant-kind-valid? (scientific-constant-kind si:defining-speed-of-light))",
-    "speed-source-valid": "(science-source? (scientific-constant-source si:defining-speed-of-light))",
-}
-for name, expression in probes.items():
-    (root / f"quantity-{name}.lisp").write_text(prefix + "\n" + expression + "\n", encoding="utf-8")
-PY
-    for stage in speed-record-valid speed-proper-list speed-length-seven speed-length-raw numeric-seven-equalp speed-length-eq speed-schema speed-name-symbol speed-quantity-valid speed-status-valid speed-kind-valid speed-source-valid; do
-      probe="$quantity_diag_dir/quantity-$stage.lisp"
-      if probe_out="$(cargo run --quiet -p sens-cli --bin sens -- "$probe" 2>&1)"; then
-        printf 'QUANTITY-PROBE %s=%s\n' "$stage" "$probe_out" >&2
-      else
-        printf 'QUANTITY-PROBE %s=ERROR %s\n' "$stage" "$probe_out" >&2
-      fi
-    done
-    exit 1
-  fi
-else
-  quantity_rc=$?
-  printf 'exact quantity Lisp witness failed (exit %s):\n%s\n' "$quantity_rc" "$quantity_status" >&2
-
-  # Diagnostic-only replay of the existing definitions. Read bindings and
-  # calls separately so a non-callable value cannot masquerade as a law failure.
-  # The source, expected quantities and failing gate stay unchanged.
-  quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
-  python3 - "$quantity_witness" "$quantity_diag_dir" <<'PY'
-from pathlib import Path
-import sys
-
-source = Path(sys.argv[1]).read_text(encoding="utf-8")
-tail = "\n(exact-quantity-arithmetic-witness)"
-base = source.rstrip()
-if not base.endswith(tail):
-    raise SystemExit("QUANTITY-DIAGNOSTIC-BLOCKED: unexpected fixture terminator; refusing to rewrite")
-prefix = base[:-len(tail)].rstrip()
-root = Path(sys.argv[2])
-probes = {
-    "rows-binding": "\nexact-quantity-arithmetic-rows\n",
-    "check-binding": "\nexact-quantity-arithmetic-check\n",
-    "witness-binding": "\nexact-quantity-arithmetic-witness\n",
-    "rows-call": "\n(exact-quantity-arithmetic-rows)\n",
-    "check-call": "\n(exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))\n",
-    "planck-record": "\n(scientific-constant-quantity si:defining-planck-constant)\n",
-    "cesium-record": "\n(scientific-constant-quantity si:defining-cesium-frequency)\n",
-    "quantity-product": "\n(quantity-product (scientific-constant-quantity si:defining-planck-constant) (scientific-constant-quantity si:defining-cesium-frequency))\n",
-    "one-second": "\n(make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))\n",
-    "distance-product": "\n(quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))\n",
-    "planck-value": "\n(quantity-value (scientific-constant-quantity si:defining-planck-constant))\n",
-    "planck-unit": "\n(quantity-unit (scientific-constant-quantity si:defining-planck-constant))\n",
-    "numeric-product": "\n(00001110 (quantity-value (scientific-constant-quantity si:defining-planck-constant)) (quantity-value (scientific-constant-quantity si:defining-cesium-frequency)))\n",
-    "product-units": "\n(unit-product (quantity-unit (scientific-constant-quantity si:defining-planck-constant)) (quantity-unit (scientific-constant-quantity si:defining-cesium-frequency)))\n",
-    "merge-dimensions": "\n(science-merge-dimensions (unit-dimensions (quantity-unit (scientific-constant-quantity si:defining-planck-constant))) (unit-dimensions (quantity-unit (scientific-constant-quantity si:defining-cesium-frequency))))\n",
-}
-for stage, suffix in probes.items():
-    (root / f"exact-quantity-{stage}-probe.lisp").write_text(
-        prefix + suffix, encoding="utf-8"
-    )
-PY
-
-  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units distance-product; do
-    probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
-    log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
-    if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
-      printf 'QUANTITY-DIAGNOSTIC %s=PASS\n' "$stage"
-      cat "$log"
-    else
-      probe_rc=$?
-      printf 'QUANTITY-DIAGNOSTIC %s=FAIL exit=%s\n' "$stage" "$probe_rc" >&2
-      cat "$log" >&2
-    fi
-  done
+if ! quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- "$quantity_witness" 2>&1)"; then
+  printf 'QUANTITY-NATIVE-RED source=%s expected=quantity-arithmetic-pass actual=execution-error diagnostic=%s\n' "$quantity_witness" "$quantity_status" >&2
   exit 1
 fi
+if [[ "$quantity_status" != "(quantity-arithmetic (status pass))" ]]; then
+  printf 'QUANTITY-NATIVE-RED source=%s expected=%s actual=%s\n' "$quantity_witness" "(quantity-arithmetic (status pass))" "$quantity_status" >&2
+  exit 1
+fi
+printf 'QUANTITY-NATIVE-PASS source=%s authority=SENS domain=D24+\n' "$quantity_witness"
 
 # #305 / TASK-001: empty meta-program semantics are owned by Lisp. The shell
 # observes only the named pass envelope; environment/result meaning stays in
@@ -293,15 +206,15 @@ fi
 # are now witnessed by Lisp itself. The shell observes only the named pass
 # envelope and does not encode any semantic expected values.
 meta_registry_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/meta-semantic-registry-witness.lisp)"
-if [[ "$meta_registry_status" != "(meta-semantic-registry-witness (status pass))" ]]; then
+if [[ "$meta_registry_status" != "(semantic-registry (status pass))" ]]; then
   printf 'meta semantic-registry Lisp witness failed: %s\n' "$meta_registry_status" >&2
   exit 1
 fi
  
-# #771: чинна українська функція процесного модуля має завантажитися
-# та зберегти точне правило коду виходу без старого англійського псевдоніма.
+# #771: SENS повертає фактичні три значення: порожній код -> -1,
+# нуль -> 0, ненульовий -> 1. Перевіряємо результат, а не старий status-marker.
 process_load_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/process-load-witness.lisp)"
-if [[ "$process_load_status" != "(process-load-witness (status pass))" ]]; then
+if [[ "$process_load_status" != "(-1 0 1)" ]]; then
   printf 'process-load Lisp witness failed: %s\n' "$process_load_status" >&2
   exit 1
 fi
@@ -346,7 +259,7 @@ fi
 # deterministically and enforce admission bounds in Lisp. The shell observes
 # only the named pass envelope.
 x86_instruction_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/x86-64-instruction-set-witness.lisp)"
-if [[ "$x86_instruction_status" != "(x86-64-instruction-set-witness (status pass))" ]]; then
+if [[ "$x86_instruction_status" != "(machine-commands (status pass))" ]]; then
   printf 'x86-64 instruction set Lisp witness failed: %s\n' "$x86_instruction_status" >&2
   exit 1
 fi
@@ -417,19 +330,39 @@ if [[ "$science_projection_status" != "(scientific-constant-knowledge-projection
   exit 1
 fi
 
-# #1047: mechanism selection occurs only after surface->SID resolution and may
-# choose only executor routes already admitted by Canon/function-table metadata.
-mechanism_selector_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/mechanism-selector-1047-witness.lisp)"
+# #1047: тільки точна ратифікована драбина, без колишнього плоского SID.
+# Вибір механізму перевіряє SENS із нинішніми українськими DEFINE.
+# Фізичний T5M переносить Zig; paired є реальним SENS-виконанням.
+mechanism_selector_status="$(
+  set -euo pipefail
+  native_scratch="$(mktemp -d)"
+  trap 'rm -rf -- "$native_scratch"' EXIT
+  cargo run --quiet -p sens-cli --bin sens -- \
+    --t5m-mint-pair tests/fixtures/mechanism-selector-1047-witness.lisp \
+    "$native_scratch/mechanism.sens" \
+    --binding-source lib/mechanism-selector.lisp >/dev/null
+  cargo run --quiet -p sens-cli --bin sens -- \
+    --t5m-pair tests/fixtures/mechanism-selector-1047-witness.lisp \
+    "$native_scratch/mechanism.sens" \
+    --binding-source lib/mechanism-selector.lisp
+)"
 if [[ "$mechanism_selector_status" != "(mechanism-selector-1047 (status pass))" ]]; then
-  printf 'mechanism selector Lisp witness failed: %s\n' "$mechanism_selector_status" >&2
+  printf 'mechanism selector native SENS witness failed: %s\n' "$mechanism_selector_status" >&2
   exit 1
 fi
 
-# #1048/#1169: lowering consumes only Lisp-selected mechanisms. All admitted
-# bounded-add transports carry arguments only; operation identity remains SID8.
-island_lowering_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/island-lowering-1048-witness.lisp)"
-if [[ "$island_lowering_status" != "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))" ]]; then
-  printf 'island lowering Lisp witness failed: %s\n' "$island_lowering_status" >&2
+# #1048/#1169: the current SENS selector chooses admitted mechanisms.
+# Four exact D24+ operand pairs cross Zig/T5M; no old flat SID8, no host LOAD,
+# no unsupported string literal and no Python/JSON execution oracle.
+island_lowering_status="$(
+  set -euo pipefail
+  native_scratch="$(mktemp -d)"
+  trap 'rm -rf -- "$native_scratch"' EXIT
+  cargo run --quiet -p sens-cli --bin sens --     --t5m-mint-pair tests/fixtures/island-lowering-1048-witness.lisp     "$native_scratch/island.sens"     --binding-source lib/mechanism-selector.lisp     --binding-source lib/island-lowering.lisp >/dev/null
+  cargo run --quiet -p sens-cli --bin sens --     --t5m-pair tests/fixtures/island-lowering-1048-witness.lisp     "$native_scratch/island.sens"     --binding-source lib/mechanism-selector.lisp     --binding-source lib/island-lowering.lisp
+)"
+if [[ "$island_lowering_status" != "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct))" ]]; then
+  printf 'island lowering native SENS witness failed: %s\n' "$island_lowering_status" >&2
   exit 1
 fi
 
@@ -446,7 +379,7 @@ fi
 # #536: preserve comparison-peer topology after retiring stale Rust t-oracles.
 # The current Lisp-owned witness is observed only through its pass envelope.
 runtime_peer_topology_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp)"
-if [[ "$runtime_peer_topology_status" != "(runtime-peer-comparison-topology-witness (status pass))" ]]; then
+if [[ "$runtime_peer_topology_status" != "(peer-topology (status pass))" ]]; then
   printf 'runtime comparison peer topology witness failed: %s\n' "$runtime_peer_topology_status" >&2
   exit 1
 fi

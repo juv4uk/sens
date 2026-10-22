@@ -175,27 +175,32 @@ fn machine_u3_projection_executes_d24_law_without_encoded_literals() {
 }
 
 #[test]
-fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
-    // Беремо точне чинне українське DEFINE з репозиторію, не створюємо
-    // Python-імітації чи другий код закону. D5 вирішує порядок у SENS.
-    let source =
-        fs::read_to_string(repo_root().join("lib/machine/encoding/coverage-generator.lisp"))
-            .expect("поточне українське джерело генератора");
-    let marker = "(визначити покриття-кодувальника-числа-рівні?";
-    let start = source.find(marker).expect("визначення числового D5-закону");
+fn native_d24_numeric_equality_runs_current_x86_lisp_in_sens() {
+    // Генератор покриття вже виведено з ужитку. Читаємо діючий закон
+    // безпосередньо з українського x86-кодувальника й виконуємо його в SENS.
+    let source = fs::read_to_string(repo_root().join("lib/machine/encoding/x86-64.lisp"))
+        .expect("чинне українське джерело кодера x86");
+    let marker = "(визначити машина-числа-рівні?";
+    let start = source.find(marker).expect("чинне D5 визначення числової рівності");
     let end = source[start..]
-        .find("\n(визначити покриття-кодувальника-кількість-збігається?")
+        .find("\n(визначити машина-молодші-три-біти")
         .map(|offset| start + offset)
-        .expect("наступне українське визначення");
+        .expect("межа визначення числової рівності");
     let definition = &source[start..end];
-    assert!(
-        !definition.contains("(тотожне?"),
-        "D3 EQ не є математичною рівністю"
-    );
+    assert!(!definition.contains("(тотожне?"),
+            "D3 EQ не є математичною рівністю D24+");
+    assert!(definition.contains("(менше? ліве праве)")
+            && definition.contains("(менше? праве ліве"),
+            "живий D5 закон має перевіряти обидва строгі порядки");
 
     let mut session = Session::default();
-    load_core_library(&mut session).expect("канонічний SENS Core4");
-    eval_program(definition, &mut session).expect("справжній SENS визначає функцію порівняння");
+    load_core_library(&mut session).expect("чинний SENS Core4");
+    let parsed = parse(definition).expect("український Lisp визначає D5 закон");
+    let exact = sens::source_projection::project_ukr_decimal_integer_literals(
+        &parsed, definition
+    ).expect("точні D24+ числові операнди");
+    sens::eval_parsed_expressions(&exact, &mut session)
+        .expect("справжній SENS визначає числову рівність");
     for (left, right, expected) in [
         ("0", "0", true),
         ("1", "1", true),
@@ -206,16 +211,16 @@ fn coverage_d24_count_equality_runs_current_lisp_in_sens() {
         ("-3", "2", false),
         ("2", "-3", false),
     ] {
-        let call = format!("(покриття-кодувальника-числа-рівні? {left} {right})");
-        let parsed = parse(&call).expect("український Lisp-запит");
-        let exact = sens::source_projection::project_ukr_decimal_integer_literals(&parsed, &call)
-            .expect("точна D24+ числова проєкція");
+        let call = format!("(машина-числа-рівні? {left} {right})");
+        let parsed = parse(&call).expect("український виклик SENS");
+        let exact = sens::source_projection::project_ukr_decimal_integer_literals(
+            &parsed, &call
+        ).expect("точна числова проєкція D24+");
         let actual = sens::eval_parsed_expressions(&exact, &mut session)
             .unwrap_or_else(|error| panic!("SENS D24+ {call}: {error}"))
             .value;
         assert_eq!(
-            actual.as_predicate_bit(),
-            Some(expected),
+            actual.as_predicate_bit(), Some(expected),
             "SENS D1 predicate: {call}"
         );
     }

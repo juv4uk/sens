@@ -1,4 +1,4 @@
-use sens::{eval_program, load_tcp_library, Session};
+use sens::{eval_program, load_core_library, load_tcp_library, Exactness, Session, Value};
 use sens_host::install;
 use std::any::Any;
 use std::cell::RefCell;
@@ -9,8 +9,8 @@ use std::thread;
 
 fn tcp_session() -> Session {
     install();
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("SENS core library must load");
     load_tcp_library(&mut session).unwrap();
     session
 }
@@ -19,21 +19,22 @@ fn tcp_session() -> Session {
 fn listener_handles_expose_only_class_and_identity() {
     // Port 0 asks the OS for a fresh ephemeral listener each time, avoiding
     // the race inherent in probing a free port and then reopening it later.
-    let source = r#"
-        (def a (tcp-listen-on "127.0.0.1" 0))
-        (def b (tcp-listen-on "127.0.0.1" 0))
-        (list (eq? a a) (eq? a b) a b)
-    "#;
-
-    let value = eval_program(source, &mut tcp_session())
-        .expect("two listener handles should be ordinary opaque runtime values")
+    let mut session = tcp_session();
+    session
+        .environment
+        .define("port", Value::Number(0.0, Exactness::Exact));
+    let source = r#"(протокол-передавання-сире-слухання "127.0.0.1" port)"#;
+    let first = eval_program(source, &mut session)
+        .expect("listener should be an opaque runtime value")
+        .value;
+    let second = eval_program(source, &mut session)
+        .expect("second listener should be an opaque runtime value")
         .value;
 
-    assert_eq!(
-        value.to_string(),
-        "((1) (0) <tcp-listener> <tcp-listener>)",
-        "listener observables are pointer identity plus resource class, not std::net details"
-    );
+    assert_eq!(first, first.clone(), "clones preserve handle identity");
+    assert_ne!(first, second, "separate listeners have separate identities");
+    assert_eq!(first.to_string(), "<tcp-listener>");
+    assert_eq!(second.to_string(), "<tcp-listener>");
 }
 
 #[test]
@@ -45,19 +46,22 @@ fn connection_handle_keeps_identity_and_display_across_close() {
         drop(stream);
     });
 
-    let source = format!(
-        r#"
-        (def c (tcp-connect "127.0.0.1" {port}))
-        (def same (eq? c c))
-        (tcp-close c)
-        (list same c)
-        "#
-    );
-    let value = eval_program(&source, &mut tcp_session())
-        .expect("connection identity remains meaningful after lifecycle operation")
+    let mut session = tcp_session();
+    session
+        .environment
+        .define("port", Value::Number(port as f64, Exactness::Exact));
+    let source = r#"(tcp-connect "127.0.0.1" port)"#;
+    let connection = eval_program(&source, &mut session)
+        .expect("connection should be an opaque runtime value")
         .value;
-
-    assert_eq!(value.to_string(), "((1) <tcp-connection>)");
+    assert_eq!(connection, connection.clone());
+    assert_eq!(connection.to_string(), "<tcp-connection>");
+    session
+        .environment
+        .define("connection", connection.clone());
+    eval_program("(tcp-close connection)", &mut session)
+        .expect("host should close its own opaque connection resource");
+    assert_eq!(connection.to_string(), "<tcp-connection>");
     server.join().expect("server thread should finish");
 }
 

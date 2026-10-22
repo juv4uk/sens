@@ -315,7 +315,7 @@ pub(crate) fn invoke_value(
                     Value::Number(_, _) | Value::Rational(_) => "число",
                     Value::BinaryNumber(_) => "двійкове число",
                     Value::Symbol(_) => "символ",
-                    Value::Pair(_, _) => "пара",
+                    Value::Pair(_) => "пара",
                     Value::Macro(_) => "макрос",
                     Value::String(_) | Value::Text7(_) => "текст",
                     _ => "інший невикликний носій",
@@ -711,7 +711,7 @@ fn dispatch_call(
             .map(EvalStep::Value);
     }
 
-    // One mathematically admitted selector family needs no D10 DEFINE for
+    // One mathematically admitted selector family needs no per-resident DEFINE for
     // each word. Resolve only a *unique owner-ratified Ukrainian head*, then
     // apply the exact CAR/CDR composition; no English/SID8/JSON shortcut.
     if let Some(identity) = head_name
@@ -719,7 +719,8 @@ fn dispatch_call(
         .filter(|id| {
             matches!(
                 id,
-                crate::DomainIdentity::D8(_)
+                crate::DomainIdentity::D6(_)
+                    | crate::DomainIdentity::D8(_)
                     | crate::DomainIdentity::D9(_)
                     | crate::DomainIdentity::D10(_)
             ) && selector_law::is_selector(*id)
@@ -730,7 +731,7 @@ fn dispatch_call(
             values.push(evaluate(argument, environment)?);
         }
         return selector_law::invoke(identity, &values, span)
-            .expect("unique ratified D10 selector head")
+            .expect("unique ratified D6-D10 selector head")
             .map(EvalStep::Value);
     }
 
@@ -963,7 +964,7 @@ mod exact_domain_program_tests {
         let mut session = Session::bare();
         let result = eval_exact_domain_program("(001 (def x 11110111))", &mut session)
             .expect("D3 quoted syntax must not be mistaken for a call");
-        assert!(matches!(result.value, Value::Pair(_, _)));
+        assert!(matches!(result.value, Value::Pair(_)));
     }
 
     #[test]

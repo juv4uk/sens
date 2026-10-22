@@ -136,9 +136,26 @@ impl PhysicalT5Program {
     /// host capabilities, and session reuse remain the caller's decision.
     pub fn execute(&self, session: &mut Session) -> Result<EvalResult, LanguageError> {
         let mut cursor = 0;
+        let mut form_index = 0usize;
         let mut value = Value::Nil;
-        while let Some(form) = next_lowered_exact_form(&self.words, &mut cursor)? {
-            value = eval_lowered_expressions(std::slice::from_ref(&form), session)?.value;
+        loop {
+            let physical_word_start = cursor;
+            let Some(form) = next_lowered_exact_form(&self.words, &mut cursor)? else {
+                break;
+            };
+            // SENS evaluates each D2-framed form itself. The evaluator's span
+            // is local to that form, so a paired-T5M error cannot otherwise
+            // identify which source form failed in a multi-form program.
+            value = eval_lowered_expressions(std::slice::from_ref(&form), session)
+                .map_err(|mut error| {
+                    error.message = format!(
+                        "{} [physical_form_index={} physical_word_start={} physical_word_end={}]",
+                        error.message, form_index, physical_word_start, cursor
+                    );
+                    error
+                })?
+                .value;
+            form_index += 1;
         }
         Ok(EvalResult {
             value,
@@ -607,6 +624,26 @@ mod exact_t5m_cutover_tests {
         let physical = encode_ternary_words(&words).expect("canonical T5");
         assert_eq!(decode_ternary_words(&physical).unwrap(), words);
         physical
+    }
+
+    /// The physical SENS engine, not a host-side semantic oracle, must report
+    /// which D2 form actually failed. The first form executes; the second
+    /// rejects D3:000 in COND test position under current Contract 11.8.
+    #[test]
+    fn physical_runtime_type_error_identifies_the_failing_second_form() {
+        let bytes = physical("10 001 00 000 01 00 10 110 00 10 000 00 1 01 01");
+        let program = reference_t5_program(&bytes).expect("two admitted D2 forms");
+        assert_eq!(program.form_count(), 2);
+        let error = program
+            .execute(&mut Session::default())
+            .expect_err("second form must reject a non-D1 COND condition");
+        assert_eq!(error.kind, crate::ErrorKind::Type);
+        assert!(
+            error.message.contains("physical_form_index=1")
+                && error.message.contains("physical_word_start=5")
+                && error.message.contains("physical_word_end=15"),
+            "test_id=1968-PHYSICAL-FORM layer=SENS expected=form-1-words-5..15 actual={error}"
+        );
     }
 
     #[test]

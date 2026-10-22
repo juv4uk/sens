@@ -14,6 +14,7 @@ sup="$dir/superseded"
 
 task_of() {
   case "$1" in
+    акерман|акерман-*) task="акерман";;
     факторіал|факторіал-*) task="факторіал";;
     подвійний-факторіал|подвійний-факторіал-*) task="подвійний-факторіал";;
     сума-до-n|сума-до-n-*) task="сума-до-n";;
@@ -37,14 +38,20 @@ task_of() {
     відстань|відстань-*) task="відстань";;
     різниця-кубів|різниця-кубів-*) task="різниця-кубів";;
     кількість-пар|кількість-пар-*) task="кількість-пар";;
+    кількість-атомів|кількість-атомів-*) task="кількість-атомів";;
     кількість-трійок|кількість-трійок-*) task="кількість-трійок";;
     центроване-квадратне|центроване-квадратне-*) task="центроване-квадратне";;
     центроване-трикутне|центроване-трикутне-*) task="центроване-трикутне";;
     центроване-шестикутне|центроване-шестикутне-*) task="центроване-шестикутне";;
     пентагональне|пентагональне-*) task="пентагональне";;
     семикутне|семикутне-*) task="семикутне";;
+    восьмикутне|восьмикутне-*) task="восьмикутне";;
     шестикутне|шестикутне-*) task="шестикутне";;
     добуток-сусідів|добуток-сусідів-*) task="добуток-сусідів";;
+    перевернути|перевернути-*) task="перевернути";;
+    лише-атоми|лише-атоми-*) task="лише-атоми";;
+    розгорнути-один|розгорнути-один-*) task="розгорнути-один";;
+    збільшити-всі|збільшити-всі-*) task="збільшити-всі";;
     *) return 1;;
   esac
   printf '%s' "$task"
@@ -147,20 +154,58 @@ for path in "$dir"/*.sens; do
   [[ -n "${seen[$path]+yes}" ]] || { echo "PROMOTE_UNJUDGED $path" >&2; exit 2; }
 done
 (( winner_count > 0 )) || { echo "PROMOTE_NO_ENTRIES" >&2; exit 2; }
-# 3) Виключити не-переможців: перенести трійку (.sens/.lisp/в'ю) у superseded/.
-# Усі цілі архівації перевіряємо перед першим move:
-# ніколи не перезаписувати старі оптимізації або неповну трійку.
+# 3) Архівувати лише нативно перевірені програлі трійки.
+# Історія може містити стару оптимізацію З ТИМ САМИМ ІМЕНЕМ:
+# ніколи не перезаписуємо її та не блокуємо конкурс через колізію.
+# Точний дублікат прибираємо, відмінну трійку зберігаємо за SHA-256.
+# Рішення та всі шляхи перевіряємо до першого переміщення.
+declare -A archive_targets archive_actions
 for path in "$dir"/*.sens; do
   [[ -f "$path" ]] || continue
   name="${path##*/}"; name="${name%.sens}"
   task="$(task_of "$name")" || continue
   [[ "$path" == "${best[$task]}" ]] && continue
-  for f in "$path" "${path%.sens}.lisp" "${path%.sens}"; do
+  stem="${path%.sens}"
+  for f in "$path" "$stem.lisp" "$stem"; do
     [[ -f "$f" && ! -L "$f" ]] || { echo "PROMOTE_INCOMPLETE_TRIPLE $f" >&2; exit 2; }
-    [[ ! -e "$sup/${f##*/}" && ! -L "$sup/${f##*/}" ]] || {
-      echo "PROMOTE_ARCHIVE_COLLISION $sup/${f##*/}" >&2; exit 2;
-    }
   done
+  destination="$sup/$name"
+  # В архіві вже існує інша версія цього самого алгоритму.
+  if [[ -e "$destination.sens" || -L "$destination.sens" ||
+        -e "$destination.lisp" || -L "$destination.lisp" ||
+        -e "$destination" || -L "$destination" ]]; then
+    if [[ -f "$destination.sens" && ! -L "$destination.sens" &&
+          -f "$destination.lisp" && ! -L "$destination.lisp" &&
+          -f "$destination" && ! -L "$destination" ]] &&
+       cmp -s "$path" "$destination.sens" &&
+       cmp -s "$stem.lisp" "$destination.lisp" &&
+       cmp -s "$stem" "$destination"; then
+      archive_actions[$path]=duplicate
+      archive_targets[$path]="$destination"
+      continue
+    fi
+    digest="$(cat -- "$path" "$stem.lisp" "$stem" | sha256sum)"
+    digest="${digest%% *}"
+    destination="$sup/$name-варіант-$digest"
+    if [[ -e "$destination.sens" || -L "$destination.sens" ||
+          -e "$destination.lisp" || -L "$destination.lisp" ||
+          -e "$destination" || -L "$destination" ]]; then
+      if [[ -f "$destination.sens" && ! -L "$destination.sens" &&
+            -f "$destination.lisp" && ! -L "$destination.lisp" &&
+            -f "$destination" && ! -L "$destination" ]] &&
+         cmp -s "$path" "$destination.sens" &&
+         cmp -s "$stem.lisp" "$destination.lisp" &&
+         cmp -s "$stem" "$destination"; then
+        archive_actions[$path]=duplicate
+        archive_targets[$path]="$destination"
+        continue
+      fi
+      echo "PROMOTE_ARCHIVE_SHA_COLLISION $destination" >&2
+      exit 2
+    fi
+  fi
+  archive_actions[$path]=move
+  archive_targets[$path]="$destination"
 done
 
 mkdir -p "$sup"
@@ -170,11 +215,18 @@ for path in "$dir"/*.sens; do
   name="${path##*/}"; name="${name%.sens}"
   task="$(task_of "$name")" || continue
   [[ "$path" == "${best[$task]}" ]] && continue
-  for f in "$path" "${path%.sens}.lisp" "${path%.sens}"; do
-    [[ -e "$f" ]] || continue
-    mv -- "$f" "$sup/${f##*/}"
-    echo "SUPERSEDED ${f#"$dir"/}"
-  done
+  stem="${path%.sens}"
+  destination="${archive_targets[$path]}"
+  if [[ "${archive_actions[$path]}" == duplicate ]]; then
+    # Побайтово тотожний архів уже є; ці активні байти зайві.
+    rm -- "$path" "$stem.lisp" "$stem"
+    echo "SUPERSEDED_EXACT_DUPLICATE $name archive=$destination"
+  else
+    mv -- "$path" "$destination.sens"
+    mv -- "$stem.lisp" "$destination.lisp"
+    mv -- "$stem" "$destination"
+    echo "SUPERSEDED $name archive=$destination"
+  fi
   excluded=$((excluded+1))
 done
 

@@ -383,6 +383,17 @@ def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
             excluded += 1
             continue
 
+        # Файл лише з коментарів (також вкладених #|...|#) не містить
+        # виконуваних форм і не збільшує чисельник «проєктованих програм».
+        # Пошкоджений коментар / UTF-8 залишається в аудиті як помилка.
+        try:
+            has_forms = bool(tokenize_lisp(path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeError, ValueError):
+            has_forms = True
+        if not has_forms:
+            excluded += 1
+            continue
+
         # ISA-каталог — дані про процесор, НЕ виконуваний Lisp.
         # Не додаємо його латинські mnemonic/extension поля до боргу
         # українських викликів. Доводимо саме AST-формою документа, а не

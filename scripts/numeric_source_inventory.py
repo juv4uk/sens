@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Inventory numeric source spellings before the binary-first reader migration.
+"""Inventory numeric source spellings without assigning SENS semantics.
 
 This tool is observational. It does not define SENS numeric semantics.
 It scans tracked *.lisp files, ignores comments and string contents, and
 classifies source tokens so #1614 can migrate them deliberately.
 
-Exact eight-bit binary tokens are SENS function identities, never numbers.
+Eight-bit binary-looking tokens are ambiguous historical W8/SID8-shaped data;
+without syntactic role, source era and a ratified domain law they are NOT
+current SENS function identities and cannot establish callability.
 Human presentation is out of scope: #1622 preserves exact-rational display.
 """
 
@@ -22,7 +24,7 @@ from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-SENS_FUNCTION = re.compile(r"^[01]{8}$")
+LEGACY_EIGHT_BIT_SHAPE = re.compile(r"^[01]{8}$")
 SIGNED_INTEGER = re.compile(r"^[+-]?[0-9]+$")
 RATIONAL = re.compile(r"^[+-]?[0-9]+/[+-]?[0-9]+$")
 DECIMAL_OR_SCIENTIFIC = re.compile(
@@ -129,8 +131,11 @@ def bucket(path: Path) -> str:
 
 
 def classify(token: str) -> str | None:
-    if SENS_FUNCTION.fullmatch(token):
-        return "sens-function"
+    if LEGACY_EIGHT_BIT_SHAPE.fullmatch(token):
+        # An untyped 8-bit spelling may be a legacy call head, quoted data,
+        # metadata, or a decimal literal. Only the SENS reader can assign
+        # semantics from the enclosing source and ratified current domain.
+        return "legacy-eight-bit-ambiguous"
 
     if RATIONAL.fullmatch(token):
         return "rational-literal"
@@ -335,7 +340,7 @@ def self_test() -> int:
 """
     got = [(token, classify(token)) for token in source_tokens(sample)]
     expected = [
-        ("00001100", "sens-function"),
+        ("00001100", "legacy-eight-bit-ambiguous"),
         ("10", "binary-shaped-multibit-number"),
         ("101", "binary-shaped-multibit-number"),
         ("42", "decimal-integer-needs-migration"),

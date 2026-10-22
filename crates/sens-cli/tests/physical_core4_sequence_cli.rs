@@ -294,12 +294,12 @@ impl Drop for SourceTriplet {
 // Перевіряємо реальне виконання ще не опублікованих фізичних трійок.
 // Український Lisp є джерелом; exact-слова читає SENS, T5M пакує Zig.
 // Адресна діагностика: перший реальний розбіжний байт без дампу всієї програми.
-fn assert_same_bytes(
+fn same_bytes_with_diagnostic(
     actual_path: &std::path::Path,
     committed_path: &std::path::Path,
     stem: &str,
     test_id: &str,
-) {
+) -> bool {
     let actual = fs::read(actual_path).expect("згенеровані Zig/T5M байти");
     let expected = fs::read(committed_path).expect("закомічена фізична пара");
     if actual != expected {
@@ -308,16 +308,19 @@ fn assert_same_bytes(
             .zip(&expected)
             .position(|(a, b)| a != b)
             .unwrap_or(actual.len().min(expected.len()));
-        panic!(
+        println!(
             "test_id={test_id} source={stem} first_diff_byte={offset} minted={:?} committed={:?} minted_len={} committed_len={}",
             actual.get(offset), expected.get(offset), actual.len(), expected.len()
         );
+        return false;
     }
+    true
 }
 
 fn verify_unpaired_ukrainian_libs_natively() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let mut independently_executed = std::collections::BTreeSet::new();
+    let mut physical_drifted = std::collections::BTreeSet::new();
     for stem in [
         "d1-direct-values",
         "axioms-d1-principle-five",
@@ -340,6 +343,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-swap-ends-five",
         "поміняти-другий-і-третій",
         "list-swap-inner-five",
+        "reverse-three",
         "list-reverse-four",
         "list-halfturn-four",
         "list-halfturn-six",
@@ -348,7 +352,12 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-reverse-tail-general",
         "list-last-adjacent-equal-atom-suffix-general",
         "list-first-adjacent-equal-atom-suffix-general",
+        "list-every-fifth-linear-general",
+        "list-every-fourth-linear-general",
+        "list-every-second-general",
         "list-every-third-linear-general",
+        "list-drop-three-zero-copy-general",
+        "list-drop-two-zero-copy-general",
         "list-drop-last-general",
         "list-append-general",
         "list-collapse-adjacent",
@@ -374,6 +383,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-unzip-pairs-general",
         "list-palindrome-atoms-general",
         "list-palindrome-linear-atoms-general",
+        "list-trailing-compound-run-zero-copy-general",
         "list-trailing-equal-atomic-run-general",
         "list-multiset-difference-general",
         "list-stable-union-general",
@@ -463,6 +473,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-drop-through-last-atom-zero-copy-general",
         "list-select-longer-zero-copy-general",
         "list-split-atomic-prefix-general",
+        "list-first-compound-zero-copy-general",
         "list-first-compound-general",
         "list-last-compound-suffix-general",
         "list-last-atom-suffix-general",
@@ -471,8 +482,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-all-matching-positions-unary-general",
         "list-partition-atomic-compound-general",
         "list-count-consecutive-atomic-runs-unary-general",
+        "list-leading-compound-run-length-unary-general",
         "list-leading-atom-run-length-unary-general",
         "list-drop-last-two-linear",
+        "list-last-n-unary-zero-copy-general",
         "list-last-two-zero-copy-general",
         "list-tail-after-first-compound-zero-copy-general",
         "list-tail-after-second-compound-zero-copy-general",
@@ -480,18 +493,36 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-suffix-after-first-atomic-triple-zero-copy-general",
         "list-suffix-after-last-atomic-triple-zero-copy-general",
         "list-suffix-after-last-atomic-pair-zero-copy-general",
+        "list-suffix-from-last-compound-zero-copy-general",
         "list-tail-after-second-atom-zero-copy-general",
         "list-suffix-after-last-compound-zero-copy-general",
+        "interleave-pairs",
         "pair-associativity-law",
         "pair-swap",
         "rotate-left",
         "rotate-three-right",
         "замінити-третій-в-четвірці",
+        "list-prefix-through-last-compound-general",
+        "list-last-element-zero-copy-general",
         "list-last-three-zero-copy-general",
+        "list-tail-after-fourth-compound-zero-copy-general",
         "list-tail-after-third-compound-zero-copy-general",
         "list-penultimate-element-zero-copy-general",
+        "list-suffix-after-first-compound-atom-zero-copy-general",
+        "list-suffix-after-first-adjacent-compound-pair-zero-copy-general",
+        "list-suffix-after-first-adjacent-compounds-zero-copy-general",
         "list-suffix-after-first-adjacent-atom-pair-zero-copy-general",
         "list-unique-stable-fast-general",
+        "list-every-sixth-linear-general",
+        "list-maximum-fold-general",
+        "list-tail-after-third-atom-zero-copy-general",
+        "list-tail-after-fourth-atom-zero-copy-general",
+        "list-tail-after-first-matching-atom-zero-copy-general",
+        // Два нові алгоритми одразу виконуються нативним SENS, навіть
+        // доки їхні фізичні T5M-трійки допубліковує Zig remint.
+        "list-tail-after-fifth-atom-zero-copy-general",
+        "list-penultimate-atomic-suffix-zero-copy-general",
+        "залишити-точні-числа",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -534,10 +565,13 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "rotate-four-right"
                 | "list-delete-second"
                 | "list-insert-second"
+                | "reverse-three"
                 | "list-reverse-four"
                 | "list-halfturn-four"
                 | "list-halfturn-six"
                 | "list-zip-general"
+                | "list-drop-three-zero-copy-general"
+                | "list-drop-two-zero-copy-general"
                 | "list-drop-last-general"
                 | "list-append-general"
                 | "list-collapse-adjacent"
@@ -557,6 +591,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-unzip-pairs-general"
                 | "list-palindrome-atoms-general"
                 | "list-palindrome-linear-atoms-general"
+                | "list-trailing-compound-run-zero-copy-general"
                 | "list-trailing-equal-atomic-run-general"
                 | "list-multiset-difference-general"
                 | "list-stable-union-general"
@@ -609,6 +644,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "вилучити-всі-входження"
                 | "замінити-всі-входження"
                 | "list-deduplicate-neighbors"
+                | "list-first-compound-zero-copy-general"
                 | "list-first-adjacent-repeat-atom-general"
                 | "tree-leaf-tally-unary"
                 | "list-alternating-split-four"
@@ -644,6 +680,9 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-reverse-tail-general"
                 | "list-last-adjacent-equal-atom-suffix-general"
                 | "list-first-adjacent-equal-atom-suffix-general"
+                | "list-every-fifth-linear-general"
+                | "list-every-fourth-linear-general"
+                | "list-every-second-general"
                 | "list-every-third-linear-general"
                 | "list-interleave-three-general"
                 | "list-interleave-three-rotation-general"
@@ -654,33 +693,57 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-all-subsets-by-position-general"
                 | "tree-pair-tally-unary-general"
                 | "list-drop-last-two-linear"
+                | "list-last-n-unary-zero-copy-general"
                 | "list-last-two-zero-copy-general"
                 | "list-tail-after-first-compound-zero-copy-general"
                 | "list-tail-after-second-compound-zero-copy-general"
                 | "list-remove-first-compound-general"
                 | "list-suffix-after-first-atomic-triple-zero-copy-general"
+                | "list-suffix-from-last-compound-zero-copy-general"
                 | "list-tail-after-second-atom-zero-copy-general"
+                | "interleave-pairs"
                 | "pair-associativity-law"
                 | "pair-swap"
                 | "rotate-left"
                 | "rotate-three-right"
+                | "list-tail-after-fourth-compound-zero-copy-general"
+                | "list-prefix-through-last-compound-general"
+                | "list-last-element-zero-copy-general"
                 | "list-last-three-zero-copy-general"
                 | "list-tail-after-third-compound-zero-copy-general"
+                | "list-leading-compound-run-length-unary-general"
                 | "list-leading-atom-run-length-unary-general"
                 | "list-partition-atomic-compound-general"
                 | "list-penultimate-element-zero-copy-general"
+                | "list-suffix-after-first-compound-atom-zero-copy-general"
+                | "list-suffix-after-first-adjacent-compound-pair-zero-copy-general"
+                | "list-suffix-after-first-adjacent-compounds-zero-copy-general"
                 | "list-suffix-after-first-adjacent-atom-pair-zero-copy-general"
                 | "list-unique-stable-fast-general"
+                | "list-every-sixth-linear-general"
+                | "list-maximum-fold-general"
+                | "list-tail-after-third-atom-zero-copy-general"
+                | "залишити-точні-числа"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
-            assert_same_bytes(
+            // Дрейф однієї трійки не зупиняє виконання інших програм.
+            // Але підсумок CI залишається RED, доки байти не виправлені.
+            let bytes_equal = same_bytes_with_diagnostic(
                 &physical,
                 &committed_physical,
                 stem,
                 "ukr-lib-physical-parity",
             );
-            assert_same_bytes(&view, &committed_view, stem, "ukr-lib-exact-parity");
+            let view_equal = same_bytes_with_diagnostic(
+                &view,
+                &committed_view,
+                stem,
+                "ukr-lib-exact-parity",
+            );
+            if !bytes_equal || !view_equal {
+                physical_drifted.insert(stem);
+            }
         }
         let verify = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
             .arg("verify-view")
@@ -761,6 +824,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
     println!(
         "SENS_UKR_EXECUTABLE_TOTAL scope=cli-native-subset unique_files={} native=SENS/Zig/T5M",
         independently_executed.len()
+    );
+    assert!(
+        physical_drifted.is_empty(),
+        "test_id=ukr-lib-committed-parity-drift source_files={physical_drifted:?} action=refresh-via-SENS-Zig"
     );
 }
 
@@ -1230,39 +1297,60 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
 }
 
 #[test]
-fn d9_native_witness_reuses_exact_core4_lisp_laws() {
-    // Не повторювати семантику чотирьох функцій у мові хоста.
-    // Через непредставний у D7 legacy в решті Core4 witness переносить
-    // лише точні чинні SENS-форми; перевірка суто байтова.
+fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
+    // SENS вирішує семантику, Zig — фізичну оберненість.
+    // Не підтверджувати старий SYMBOL? статичним порівнянням із Core4:
+    // Text7 не є Value::Symbol і не допускає SYMBOL->STRING.
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let core = fs::read_to_string(root.join("lib/core4.lisp")).expect("чинне Core4");
-    let witness = fs::read_to_string(
-        root.join("tests/semantic/d9-four-uk-projections-laws.lisp"),
-    ).expect("живий D9 witness");
-    for name in ["список", "двійковий", "символ?", "частка-остача"] {
-        let prefix = format!("(визначити {name} ");
-        let alt_prefix = format!("(визначити {name}\n");
-        let start = core.find(&prefix).or_else(|| core.find(&alt_prefix))
-            .unwrap_or_else(|| panic!("немає визначення Core4: {name}"));
-        let mut depth = 0_usize;
-        let mut end = None;
-        for (offset, byte) in core.as_bytes()[start..].iter().enumerate() {
-            match byte {
-                b'(' => depth += 1,
-                b')' => {
-                    depth -= 1;
-                    if depth == 0 {
-                        end = Some(start + offset + 1);
-                        break;
-                    }
-                }
-                _ => {}
-            }
-        }
-        let form = &core[start..end.expect("закрита SENS форма Core4")];
-        assert!(
-            witness.contains(form),
-            "D9 нативне визначення {name} відійшло від Core4; оновіть точну форму",
-        );
-    }
+    let source = root.join("tests/semantic/d9-four-uk-projections-laws.lisp");
+    let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
+    let stem = format!("sens-d9-{}-{id}", std::process::id());
+    let physical = std::env::temp_dir().join(format!("{stem}.sens"));
+    let view = physical.with_extension("");
+    let altered = std::env::temp_dir().join(format!("{stem}.lisp"));
+    assert!(!physical.exists() && !view.exists() && !altered.exists(), "конфлікт тимчасового SENS-носія");
+
+    let mint = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg("--t5m-mint").arg(&source).arg(&physical)
+        .output().expect("нативний SENS mint Д9");
+    assert!(mint.status.success(), "SENS mint: {}", error(&mint));
+    assert!(physical.is_file(), "SENS mint не створив T5M");
+
+    let opened = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("open").arg(&physical).output()
+        .expect("Zig T5M open");
+    assert!(opened.status.success(), "Zig open: {}", error(&opened));
+    assert!(!opened.stdout.is_empty(), "Zig повернув порожню фізичну проєкцію");
+    fs::write(&view, &opened.stdout).expect("зафіксувати точне Zig-бітове вигляд");
+    let verified = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("verify-view").arg(&physical).output()
+        .expect("Zig verify-view");
+    assert!(verified.status.success(), "Zig verify-view: {}", error(&verified));
+
+    let paired = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg("--t5m-pair").arg(&source).arg(&physical).output()
+        .expect("виконання живого Д9 Lisp із парою");
+    assert!(paired.status.success(), "SENS paired: {}", error(&paired));
+    let standalone = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg(&physical).output()
+        .expect("незалежне фізичне виконання Д9");
+    assert!(standalone.status.success(), "SENS standalone: {}", error(&standalone));
+    assert_eq!(paired.stdout, standalone.stdout, "виконання джерела та T5M не збігається");
+
+    // Змінене джерело мусить отримати справжнє T5M_PHYSICAL_PAIR_MISMATCH.
+    let original = fs::read_to_string(&source).expect("український свідок Д9");
+    fs::write(&altered, format!("{original}\n(як-є ())\n"))
+        .expect("підмінене джерело для негативного свідка");
+    let mismatch = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg("--t5m-pair").arg(&altered).arg(&physical).output()
+        .expect("негативний T5M виклик");
+    assert!(!mismatch.status.success(), "змінений Lisp помилково прийнято як T5M");
+    assert!(
+        error(&mismatch).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "неправильна причина відхилення: {}", error(&mismatch)
+    );
+
+    fs::remove_file(&altered).expect("прибрати негативний Lisp");
+    fs::remove_file(&physical).expect("прибрати тимчасовий T5M");
+    fs::remove_file(&view).expect("прибрати точний Zig-вигляд");
 }

@@ -69,14 +69,6 @@ impl OuterEnvelope {
         self.packed.bit_len()
     }
 
-    pub const fn valid_bits_in_last_byte(&self) -> u8 {
-        self.packed.valid_bits_in_last_byte()
-    }
-
-    pub fn into_parts(self) -> (Vec<u8>, usize) {
-        self.packed.into_parts()
-    }
-
     pub fn decode(&self) -> Result<Vec<OuterRecord>, OuterEnvelopeError> {
         let mut cursor = BitCursor::new(&self.packed);
         let mut out = Vec::new();

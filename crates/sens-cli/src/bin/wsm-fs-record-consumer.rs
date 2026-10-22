@@ -111,10 +111,10 @@ fn main() {
     )
     .unwrap()
     .value;
-    let Value::Pair(root_tag, _) = &root else {
+    let Value::Pair(root_node) = &root else {
         std::process::exit(1)
     };
-    let Value::Symbol(tag) = &**root_tag else {
+    let Value::Symbol(tag) = &root_node.head else {
         std::process::exit(1)
     };
     if &**tag != "accepted" {
@@ -125,10 +125,10 @@ fn main() {
         records[0], records[1]
     );
     let rebuilt = eval_program(&expr, &mut session).unwrap().value;
-    let Value::Pair(ref tag, _) = rebuilt else {
+    let Value::Pair(ref node) = rebuilt else {
         std::process::exit(1)
     };
-    if !matches!(&**tag, Value::Symbol(name) if &**name == "accepted") {
+    if !matches!(&node.head, Value::Symbol(name) if &**name == "accepted") {
         std::process::exit(1);
     }
     println!("f6-semantic-consumer-ok records=2");

@@ -71,8 +71,9 @@ def report() -> dict:
     lexicon = load_json(TEST_LEXICON)
     if foundation.get("status") != "owner-ratified":
         raise ValueError("extended foundation lacks stated ratification status")
-    if lexicon.get("status") != "owner-ratified" or lexicon.get("width") != 11:
-        raise ValueError("expected owner-ratified exact D11 testing vocabulary")
+    if (lexicon.get("status") != "UNRATIFIED_REVIEW" or
+            lexicon.get("ratified") is not False or lexicon.get("width") != 11):
+        raise ValueError("expected unratified exact D11 testing fixture")
     if "not callable Core" not in lexicon.get("semantic_scope", ""):
         raise ValueError("D11 lexicon scope unexpectedly changed; recheck owner authority")
     if not isinstance(lexicon.get("table"), list):
@@ -81,7 +82,7 @@ def report() -> dict:
     source_d11 = foundation["domains"]["D11"]["residents"]
     lexicon_d11 = {row["bits"]: row["lisp"] for row in lexicon["table"]}
     if source_d11 != lexicon_d11:
-        raise ValueError("extended foundation D11 differs from ratified testing vocabulary")
+        raise ValueError("extended foundation D11 differs from unratified testing fixture")
 
     baseline = lower_first(foundation)
     observed = actual_migration_labels(foundation)

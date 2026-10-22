@@ -35,16 +35,8 @@ SKIP = ("lib/domains/", "lib/generated/", "lib/surface/", "knowledge/archive/",
 # Виконувана таблиця механізмів не підпадає під NONPROGRAM: у ній є живі DEFINE.
 # Проходимо звичайну source-era перевірку, не створюючи виконуваних .sens з повітря.
 
-# The five pinned service/policy sources were migrated only at D4 DEFINE/LAMBDA
-# heads. Their surviving 8-bit D3 COND forms remain HISTORICAL, not current D8.
-# Do not let removal of the old D4 definition head hide legacy empties from
-# the fail-closed inventory. Revisit this pin only after executable D3 parity.
-PARTIAL_D4_WITH_LEGACY_D3 = {
-    # Два активні джерела ще мають старі COND; Guard уже перейшов на чинну укр-проєкцію.
-    "knowledge/guard-fact-policy.lisp",
-    "scripts/semantic-authority-guard-enforce.lisp",
-}
-
+# Current D3 Ukrainian forms have already replaced the historical W8 COND
+# in the guard/policy sources. No per-filename source-era override remains.
 
 
 def _exact_codebook(bits, width, origin):
@@ -324,12 +316,8 @@ def run(root, write=False, selected=None):
         # when a source file contains no historical DEFINE/DEF anchor.
         possible_legacy = bool(re.search(
             r"\(\s*[01]{8}(?=[\s)])", original))
-        possible_pinned_d3 = (
-            path in PARTIAL_D4_WITH_LEGACY_D3
-            and bool(re.search(r"\(\s*(?:00000111|110)(?=[\s)])", original))
-        )
         active_heads = set()
-        if possible_legacy or possible_pinned_d3:
+        if possible_legacy:
             try:
                 active_heads = executable_call_heads(original, guard)
             except (guard.Unscannable, RecursionError) as err:
@@ -338,11 +326,14 @@ def run(root, write=False, selected=None):
                                "reasons": ["source-era parser incomplete: " + str(err)]})
                 continue
         has_legacy_definition = bool(active_heads & {"00001001", "00001011"})
-        has_pinned_legacy_d3 = (
-            path in PARTIAL_D4_WITH_LEGACY_D3
-            and bool(active_heads & {"00000111", "110"})
-        )
-        if not (has_legacy_definition or has_pinned_legacy_d3):
+        if not has_legacy_definition:
+            if not possible_legacy:
+                # No old 8-bit executable candidate: this file has nothing
+                # to migrate. Do not call a current Ukrainian D3/D4 source
+                # "source-era-unproved" merely because it lacks legacy DEFINE.
+                report.append({"path": path, "status": "unchanged",
+                               "potential_heads": 0, "reasons": []})
+                continue
             # An unmatched 8-bit head may be contemporary D8 or historical W8;
             # neither a missing DEFINE nor a bit-pattern match proves its era.
             unproved = sorted(h for h in active_heads if BITS.fullmatch(h))
@@ -357,7 +348,7 @@ def run(root, write=False, selected=None):
                            "reasons": ["generated carrier needs generator migration"]})
             continue
         updated, n, problems = rewrite(original, mapping, blocked)
-        if n or has_pinned_legacy_d3:
+        if n:
             try:
                 problems.extend(x.rule + " at line " + str(x.line)
                                 for x in guard.scan_lisp(updated, path))

@@ -248,7 +248,166 @@ fn historical_stable_symmetric_difference_keeps_multiplicity_and_order() {
     execute_with_negative(
         "lib/list-stable-symmetric-difference-general.lisp",
         include_str!("../../../lib/list-stable-symmetric-difference-general.lisp"),
-        "(лише-один-бік ліві праві)\n      (лише-один-бік праві ліві)",
-        "(лише-один-бік праві ліві)\n      (лише-один-бік ліві праві)",
+        // Міняємо єдиний справжній виклик, а не його відступи.
+        // Два праві фільтри порушують симетричну різницю у живому SENS.
+        "(лише-один-бік ліві праві)",
+        "(лише-один-бік праві ліві)",
+    );
+}
+
+#[test]
+fn sixth_atomic_tail_skips_compounds_and_preserves_original_suffix() {
+    // D3/D5 algorithm and all positive laws execute in a real SENS session.
+    // The mutant skips one atomic position; it cannot satisfy the same laws.
+    execute_with_negative(
+        "lib/list-tail-after-sixth-atom-zero-copy-general.lisp",
+        include_str!("../../../lib/list-tail-after-sixth-atom-zero-copy-general.lisp"),
+        "((атом? (перше елементи)) (хвіст-після-пяти-для-шостого (решта елементи)))",
+        "((атом? (перше елементи)) (хвіст-після-чотирьох-для-шостого (решта елементи)))",
+    );
+}
+
+#[test]
+fn bija3_1968_atom_null_partial_law_executes_and_rejects_false_generator() {
+    // Українська проєкція виконується реальною SENS-сесією.
+    // Мутант прибирає уточнення EQ(x, NIL): непорожній атом починає
+    // помилково проходити як порожній, і СЕНС виконує CAR NIL.
+    execute_with_negative(
+        "tests/semantic/біджа3-уточнення-атома-1968.lisp",
+        include_str!("../../../tests/semantic/біджа3-уточнення-атома-1968.lisp"),
+        "(тотожне? значення (як-є ()))",
+        "(атом? значення)",
+    );
+
+    // Два позитивні керувальні випадки: саме Д1:так/ні придатні COND.
+    for (case, program, expected) in [
+        (
+            "Д1-так",
+            "(за-умовою ((атом? (як-є ())) (як-є підтверджено)))",
+            "підтверджено",
+        ),
+        (
+            "Д1-ні-та-так",
+            "(за-умовою ((тотожне? (як-є атом?) (як-є решта)) (як-є помилка)) ((атом? (як-є ())) (як-є підтверджено)))",
+            "підтверджено",
+        ),
+    ] {
+        let mut session = Session::default();
+        let observed = eval_program(program, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=1968-D1-COND-{case} layer=SENS input={program} expected={expected} actual_error={error}")
+        });
+        assert_eq!(
+            observed.value.to_string(),
+            expected,
+            "test_id=1968-D1-COND-{case} layer=SENS input={program} expected={expected}"
+        );
+    }
+
+    // CURRENT FOUNDATION SUPERSESSION #3161, Contract 11.8/11.9:
+    // тільки D1:0 пропускає гілку. D3:000 є результатом вичерпання,
+    // але НЕ допустимою умовою; не підміняти його хибою D1.
+    let program =
+        "(за-умовою (ні (перше (як-є ()))) (так (як-є підтверджено)))";
+    let mut session = Session::default();
+    let observed = eval_program(program, &mut session)
+        .unwrap_or_else(|error| panic!(
+            "test_id=1968-D1-COND-SKIP layer=SENS input={program} actual_error={error}"
+        ))
+        .value;
+    assert_eq!(
+        observed.to_string(),
+        "підтверджено",
+        "test_id=1968-D1-COND-SKIP layer=SENS expected=підтверджено actual={observed}"
+    );
+
+    // Форма з D3:000, числом чи стороннім атомом відхиляється
+    // саме доменною помилкою COND; тіло гілки не виконується.
+    for (case, source) in [
+        ("структурне-порожнє", "(за-умовою ((як-є ()) (перше (як-є ()))) (так (як-є неправильно)))"),
+        ("математичний-нуль", "(за-умовою (0 (як-є неправильно)))"),
+        ("сторонній-атом", "(за-умовою ((як-є сторонній) (як-є неправильно)))"),
+    ] {
+        let mut session = Session::default();
+        let error = eval_program(source, &mut session)
+            .expect_err("SENS COND має відхилити недопустимий домен");
+        let diagnostic = error.to_string();
+        assert!(
+            diagnostic.contains("D3:110 COND expects exact D1"),
+            "test_id=1968-D1-COND-{case} layer=SENS input={source} expected=typed_domain_rejection actual_error={diagnostic}"
+        );
+    }
+}
+
+
+#[test]
+fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
+    // Не порівнюємо лише таблиці: запускаємо сам SENS із визначеннями Д5–Д6.
+    let source = include_str!("../../../research/d5-d6-selector-definitions-batch-2026-10-17.lisp");
+    let mut session = Session::default();
+    let observed = eval_program(source, &mut session).unwrap_or_else(|error| {
+        panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS expected=22-D1:так actual_error={error}")
+    });
+    let expected = eval_program("(атом? (як-є ()))", &mut Session::default())
+        .expect("D1:так у SENS")
+        .value;
+
+    // Вісім викличних D5, один D6, дев'ять D3-композицій та чотири негативи — усі живі D1-відповіді.
+    let mut cursor = &observed.value;
+    for index in 0..22 {
+        let sens::Value::Pair(node) = cursor else {
+            panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=pair(D1:так, tail) actual={cursor}");
+        };
+        assert_eq!(
+            &node.head,
+            &expected,
+            "test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=D1:так actual={}", node.head
+        );
+        cursor = &node.tail;
+    }
+    assert!(matches!(cursor, sens::Value::Nil), "test_id=D5-D6-SELECTOR-NATIVE expected=exactly-22-predicates");
+
+    // Локальна D3-композиція є незалежною мовною реалізацією закону.
+    // Її мутація повинна псувати саме 10-й результат, не канонічний D5.
+    let definition = "(визначити дослід-решта-двох-перших\n  (функція (значення)\n    (решта (перше (перше значення)))))";
+    let fake_definition = "(визначити дослід-решта-двох-перших\n  (функція (значення)\n    (перше (перше (перше значення)))))";
+    assert_eq!(source.matches(definition).count(), 1, "test_id=D5-D6-D3-DERIVATION expected=one-definition");
+    let mutant_definition = source.replacen(definition, fake_definition, 1);
+    let mutated = eval_program(&mutant_definition, &mut Session::default()).unwrap_or_else(|error| {
+        panic!("test_id=D5-D6-D3-DERIVATION layer=SENS expected=predicate-list actual_error={error}")
+    });
+    let mut cursor = &mutated.value;
+    for index in 0..9 {
+        let sens::Value::Pair(node) = cursor else {
+            panic!("test_id=D5-D6-D3-DERIVATION index={index} expected=canonical-D1:так actual={cursor}");
+        };
+        assert_eq!(node.head.as_predicate_bit(), Some(true),
+            "test_id=D5-D6-D3-DERIVATION index={index} expected=canonical-D1:так");
+        cursor = &node.tail;
+    }
+    let sens::Value::Pair(node) = cursor else {
+        panic!("test_id=D5-D6-D3-DERIVATION expected=derived-predicate-at-index-9 actual={cursor}");
+    };
+    assert_eq!(
+        node.head.as_predicate_bit(),
+        Some(false),
+        "test_id=D5-D6-D3-DERIVATION layer=SENS expected=mutated-D1:ні actual={}", node.head
+    );
+
+    // А справжня зміна викликаного шляху CDAAR -> CAAAR має дати D1:ні.
+    // Це реальна зміна семантичної координати, не зміна мертвого тіла DEFINE.
+    let call = "(тотожне? (решта-двох-перших дерево-селекторів) (як-є б))";
+    let wrong_call = "(тотожне? (перше-двох-перших дерево-селекторів) (як-є б))";
+    assert_eq!(source.matches(call).count(), 1, "test_id=D5-D6-SELECTOR-MUTANT expected=one-call");
+    let mutant = source.replacen(call, wrong_call, 1);
+    let changed = eval_program(&mutant, &mut Session::default()).unwrap_or_else(|error| {
+        panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual_error={error}")
+    });
+    let sens::Value::Pair(node) = &changed.value else {
+        panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=predicate-list actual={}", changed.value);
+    };
+    assert_eq!(
+        node.head.as_predicate_bit(),
+        Some(false),
+        "test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual={}", node.head
     );
 }

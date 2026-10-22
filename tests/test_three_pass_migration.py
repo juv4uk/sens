@@ -70,7 +70,9 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        self.assertEqual(vocabulary["status"], "owner-ratified")
+        self.assertEqual(vocabulary["status"], "UNRATIFIED_REVIEW")
+        self.assertIs(vocabulary["ratified"], False)
+        self.assertIsNone(vocabulary["ratified_by"])
         self.assertIn("not callable Core", vocabulary["semantic_scope"])
         rows = vocabulary["table"]
         self.assertEqual(len(rows), 43)
@@ -115,7 +117,7 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
     def test_no_d11_test_identity_enters_any_three_pass_successor_map(self):
         # Inspect all three REAL migration maps, not just current_residents().
         # Historical name and generated-surface imports must not accidentally
-        # promote the ratified *test data* D11 to callable SENS identities.
+        # promote the unratified *test fixture* D11 to callable SENS identities.
         foundation = mod.load_foundation(
             ROOT / "knowledge/d1-d11-foundation.json"
         )
@@ -298,28 +300,24 @@ class ThreePassMigrationTests(unittest.TestCase):
             mod.encode_lambda_params(binder("()"), self.text7),
             [mod.D3_EMPTY],
         )
-        # Справжні головні Lisp-джерела використовують саме variadic.
-        # Їх не можна переписувати на (функція (аргументи) ...).
-        for source_name, parameter in (
-            ("lib/core.lisp", "аргументи"),
-            ("lib/core4.lisp", "аргументи-функції"),
-        ):
-            with self.subTest(source=source_name):
-                source = (ROOT / source_name).read_text(encoding="utf-8")
-                program = f"(визначити список (функція {parameter} {parameter}))"
-                self.assertIn(program, source)
-                projection, _ = self.migrate(program)
-                words = projection.split()
-                binder_words = mod.encode_text7_identifier(
-                    parameter, self.text7, mod.Tok("ATOM", parameter, 0),
-                )
-                # Точна D4 форма бере Text7-атом параметра як є,
-                # а не створює нову D2-обгортку одноаргументної функції.
-                self.assertIn(
-                    ["0010", mod.D2_SEP, *binder_words, mod.D2_SEP],
-                    [words[i:i + len(binder_words) + 3]
-                     for i in range(len(words) - len(binder_words) - 2)],
-                )
+        # Д4:1110 список є ратифікованим і не перевизначається у core/core4.
+        # Синтаксис variadic binder все одно тестуємо на автономній
+        # пробній формі: не прив'язуємо граматику до старого DEFINE.
+        for source_name in ("lib/core.lisp", "lib/core4.lisp"):
+            source = (ROOT / source_name).read_text(encoding="utf-8")
+            self.assertNotIn("(визначити список (функція", source)
+        program = "(визначити проба (функція аргументи аргументи))"
+        projection, _ = self.migrate(program)
+        words = projection.split()
+        binder_words = mod.encode_text7_identifier(
+            "аргументи", self.text7, mod.Tok("ATOM", "аргументи", 0),
+        )
+        # Точна D4 форма бере D7-атом параметра без D2-обгортки.
+        self.assertIn(
+            ["0010", mod.D2_SEP, *binder_words, mod.D2_SEP],
+            [words[i:i + len(binder_words) + 3]
+             for i in range(len(words) - len(binder_words) - 2)],
+        )
 
 
         # Один машинний Lisp-атом із апострофом не має перетворитися
@@ -522,6 +520,17 @@ class ThreePassMigrationTests(unittest.TestCase):
         a,_=self.migrate("; top\n(CAR #| nested #| inner |# body |# x)\n")
         b,_=self.migrate("(CAR x)\n")
         self.assertEqual(a,b)
+
+    def test_block_comment_keeps_executable_atoms_separate(self):
+        # Раніше x#|...|#y ставав одним атомом xy, змінюючи програму.
+        a, _ = self.migrate("(CONS x#| вкладений #| фрагмент |# текст |#y)\n")
+        b, _ = self.migrate("(CONS x y)\n")
+        self.assertEqual(a, b)
+        # Символи коментаря в лапках належать рядку даних.
+        self.assertEqual(
+            mod.strip_comments('"x#|не-коментар|#y"'),
+            '"x#|не-коментар|#y"',
+        )
 
     def test_unknown_ukrainian_name_is_carried_as_opaque_text7_data(self):
         out,resolver=self.migrate("(невідома-функція ікс)\n")
@@ -1139,8 +1148,10 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertFalse(output.exists())
 
 
-    def test_export_trigger_installs_pinned_zig_in_existing_ci(self):
-        # Explicit one-shot T5M must never reach the publisher without Zig.
+    def test_export_trigger_uses_pinned_zig_and_native_sens_writer(self):
+        # CI packaging may use Python tests, but executable .sens MUST be
+        # produced by native SENS -> Zig/T5M and executed by SENS itself.
+        # A renamed historical Python/JSON exporter is no longer authority.
         workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         guards = workflow.split("  lisp-guards:", 1)[1]
         installer = guards.split("      - uses: ./.github/actions/install-zig", 1)[1]
@@ -1149,7 +1160,17 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertIn("BENCH-T5M:", condition)
         self.assertIn("github.event_name == 'push'", condition)
         self.assertIn("steps.changed-t5m-lisp.outputs.needs_zig == 'true'", condition)
-        self.assertIn("ONE-SHOT — фізичні T5M-пари", guards)
+        section = guards.split(
+            '      - name: "ONE-SHOT — нативні SENS/Zig T5M-пари', 1
+        )[1].split('      - name: "ONE-SHOT — artifact', 1)[0]
+        self.assertIn("MIGRATE-LIB-TRIPLETS:", section)
+        self.assertIn("cargo build --locked -p sens-cli --bin sens --bin sens-trit", section)
+        self.assertIn("scripts/refresh-verified-t5m-pair.sh", section)
+        self.assertIn('target/debug/sens-trit "${bindings[@]}"', section)
+        self.assertIn("NATIVE-RESULTS.tsv", section)
+        self.assertIn("NATIVE_REJECTED", section)
+        self.assertNotIn("python3 ", section)
+        self.assertNotIn("migrate-three-pass.py", section)
 
 
     def test_current_nonprogram_sha_pins_are_real_and_d10_d11_are_data(self):
@@ -1168,6 +1189,22 @@ class ThreePassMigrationTests(unittest.TestCase):
             with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"):
                 mod.reject_reviewed_nonprogram_source(ROOT / f"lib/domains/{domain}.lisp")
 
+
+    def test_evolving_d11_table_is_data_without_historical_sha_lock(self):
+        # Поточний D11 — тестовий словник, не виконуваний SENS і не
+        # ратифікація. Старий запис blob у маніфесті не блокує дані.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "lib/domains/d11.lisp"
+            source.parent.mkdir(parents=True)
+            current = (ROOT / "lib/domains/d11.lisp").read_text(encoding="utf-8")
+            source.write_text(current, encoding="utf-8")
+            with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"):
+                mod.reject_reviewed_nonprogram_source(source, root)
+            # Стороння програма не може сховатися після таблиці.
+            source.write_text(current + "\n(визначити підміна так)\n", encoding="utf-8")
+            with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_D11_TABLE_INVALID"):
+                mod.reject_reviewed_nonprogram_source(source, root)
 
     def test_reviewed_data_and_comment_only_are_not_failed_programs(self):
         # Both are read-only positive classifications, not executable .sens.

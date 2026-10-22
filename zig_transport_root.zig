@@ -377,23 +377,24 @@ test "REPL persistent_vector exact bytes and untouched short buffer" {
     try std.testing.expectEqualSlices(u8, repl_persistent_vector_asset[0..repl_persistent_vector_asset.len], &full);
 }
 
-const repl_time_asset = @embedFile("lib/time.lisp");
-pub export fn sens_zig_repl_time_bytes_copy(dst: [*]u8, capacity: usize) isize {
-    if (repl_time_asset.len == 0) return -1;
-    if (capacity == 0) return @intCast(repl_time_asset.len);
-    if (capacity < repl_time_asset.len) return -2;
-    @memcpy(dst[0..repl_time_asset.len], repl_time_asset[0..repl_time_asset.len]);
-    return @intCast(repl_time_asset.len);
+const d9_witness_asset = @embedFile("tests/semantic/d9-four-uk-projections-laws.lisp");
+pub export fn sens_zig_d9_witness_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (d9_witness_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(d9_witness_asset.len);
+    if (capacity < d9_witness_asset.len) return -2;
+    @memcpy(dst[0..d9_witness_asset.len], d9_witness_asset[0..d9_witness_asset.len]);
+    return @intCast(d9_witness_asset.len);
 }
-test "REPL time exact bytes and untouched short buffer" {
-    const length = sens_zig_repl_time_bytes_copy(undefined, 0);
-    try std.testing.expectEqual(@as(isize, @intCast(repl_time_asset.len)), length);
+
+test "D9 witness source crosses Zig byte-exact, short buffer is untouched" {
+    const length = sens_zig_d9_witness_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(d9_witness_asset.len)), length);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_time_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_d9_witness_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
-    var full: [repl_time_asset.len]u8 = undefined;
-    try std.testing.expectEqual(length, sens_zig_repl_time_bytes_copy(&full, full.len));
-    try std.testing.expectEqualSlices(u8, repl_time_asset[0..repl_time_asset.len], &full);
+    var full: [d9_witness_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_d9_witness_bytes_copy(&full, full.len));
+    try std.testing.expectEqualSlices(u8, d9_witness_asset[0..d9_witness_asset.len], &full);
 }
 
 const repl_epistemic_asset = @embedFile("lib/epistemic.lisp");
@@ -432,6 +433,107 @@ test "F6 lisp_fs exact bytes and unchanged short buffer" {
     var full: [lisp_fs_asset.len]u8 = undefined;
     try std.testing.expectEqual(required, sens_zig_lisp_fs_bytes_copy(&full, full.len));
     try std.testing.expectEqualSlices(u8, lisp_fs_asset[0..lisp_fs_asset.len], &full);
+}
+
+// Domain projection tables cross the corridor as opaque bytes. SENS parses
+// and interprets them; the index selects only which checked-in asset to copy.
+const domain_table_assets = [_][]const u8{
+    @embedFile("lib/domains/d1.lisp"),
+    @embedFile("lib/domains/d2.lisp"),
+    @embedFile("lib/domains/d3.lisp"),
+    @embedFile("lib/domains/d4.lisp"),
+    @embedFile("lib/domains/d5.lisp"),
+    @embedFile("lib/domains/d6.lisp"),
+    @embedFile("lib/domains/d7.lisp"),
+    @embedFile("lib/domains/d8.lisp"),
+    @embedFile("lib/domains/d9.lisp"),
+    @embedFile("lib/domains/d10.lisp"),
+    @embedFile("lib/domains/d11.lisp"),
+};
+
+pub export fn sens_zig_domain_table_bytes_copy(domain: u8, dst: [*]u8, capacity: usize) isize {
+    if (domain == 0 or domain > domain_table_assets.len) return -1;
+    const asset = domain_table_assets[@as(usize, domain) - 1];
+    if (asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(asset.len);
+    if (capacity < asset.len) return -2;
+    @memcpy(dst[0..asset.len], asset);
+    return @intCast(asset.len);
+}
+
+test "domain projection tables cross Zig byte-exact and refuse short writes" {
+    const allocator = std.testing.allocator;
+    for (domain_table_assets, 0..) |asset, index| {
+        const domain: u8 = @intCast(index + 1);
+        const required = sens_zig_domain_table_bytes_copy(domain, undefined, 0);
+        try std.testing.expectEqual(@as(isize, @intCast(asset.len)), required);
+        var short: [1]u8 = .{0xA5};
+        try std.testing.expectEqual(
+            @as(isize, -2),
+            sens_zig_domain_table_bytes_copy(domain, &short, short.len),
+        );
+        try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+        const output = try allocator.alloc(u8, @intCast(required));
+        defer allocator.free(output);
+        try std.testing.expectEqual(
+            required,
+            sens_zig_domain_table_bytes_copy(domain, output.ptr, output.len),
+        );
+        try std.testing.expectEqualSlices(u8, asset, output);
+    }
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_domain_table_bytes_copy(0, undefined, 0),
+    );
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_domain_table_bytes_copy(12, undefined, 0),
+    );
+}
+
+const compiler_nucleus_asset = @embedFile("lib/compiler-nucleus.lisp");
+const compiler_identity_corpus_asset =
+    @embedFile("contracts/compiler-nucleus-identity-corpus-v1.tsv");
+
+fn copy_compiler_asset(asset: []const u8, dst: [*]u8, capacity: usize) isize {
+    if (asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(asset.len);
+    if (capacity < asset.len) return -2;
+    @memcpy(dst[0..asset.len], asset);
+    return @intCast(asset.len);
+}
+
+pub export fn sens_zig_compiler_nucleus_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_compiler_asset(compiler_nucleus_asset, dst, capacity);
+}
+
+pub export fn sens_zig_compiler_identity_corpus_bytes_copy(
+    dst: [*]u8,
+    capacity: usize,
+) isize {
+    return copy_compiler_asset(compiler_identity_corpus_asset, dst, capacity);
+}
+
+test "compiler export assets cross Zig byte-exact without partial writes" {
+    const assets = [_][]const u8{
+        compiler_nucleus_asset,
+        compiler_identity_corpus_asset,
+    };
+    for (assets, 0..) |asset, index| {
+        const copy = if (index == 0)
+            sens_zig_compiler_nucleus_bytes_copy
+        else
+            sens_zig_compiler_identity_corpus_bytes_copy;
+        const required = copy(undefined, 0);
+        try std.testing.expectEqual(@as(isize, @intCast(asset.len)), required);
+        var short: [1]u8 = .{0xA5};
+        try std.testing.expectEqual(@as(isize, -2), copy(&short, short.len));
+        try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+        const output = try std.testing.allocator.alloc(u8, @intCast(required));
+        defer std.testing.allocator.free(output);
+        try std.testing.expectEqual(required, copy(output.ptr, output.len));
+        try std.testing.expectEqualSlices(u8, asset, output);
+    }
 }
 
 // This live host-data file intentionally remains reloadable without rebuilding

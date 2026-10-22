@@ -92,8 +92,8 @@ fn expect_machine_bytes(
     loop {
         match current {
             Value::Nil => return Ok(bytes),
-            Value::Pair(head, tail) => {
-                let Some(byte) = machine_byte(head) else {
+            Value::Pair(node) => {
+                let Some(byte) = machine_byte(&node.head) else {
                     return Err(LanguageError::new(
                         ErrorKind::Type,
                         format!(
@@ -103,7 +103,7 @@ fn expect_machine_bytes(
                     ));
                 };
                 bytes.push(byte);
-                current = tail;
+                current = &node.tail;
             }
             _ => {
                 return Err(LanguageError::new(

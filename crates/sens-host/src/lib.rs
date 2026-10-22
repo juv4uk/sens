@@ -6,13 +6,60 @@
 //! into per-session filesystem/TCP scopes carried by `Environment`.
 
 use sens::{
-    eval_expr, exact_arity, register_capability, register_evaluated_capability, Environment,
-    ErrorKind, Exactness, Expr, LanguageError, Span, Value,
+    eval_expr, exact_arity, register_capability, register_evaluated_capability, BinaryNumber,
+    Environment, ErrorKind, Exactness, Expr, LanguageError, Span, Value,
 };
 use std::{
+    cell::RefCell,
     path::{Path, PathBuf},
     rc::Rc,
+    sync::atomic::{AtomicU64, Ordering},
 };
+
+static NEXT_TCP_HANDLE_TOKEN: AtomicU64 = AtomicU64::new(1);
+
+fn allocate_tcp_handle_token(counter: &AtomicU64, span: Span) -> Result<u64, LanguageError> {
+    let mut current = counter.load(Ordering::Relaxed);
+    loop {
+        let Some(next) = current.checked_add(1) else {
+            return Err(LanguageError::new(
+                ErrorKind::NumericOverflow,
+                "TCP host-resource identity space exhausted",
+                span,
+            ));
+        };
+        match counter.compare_exchange_weak(current, next, Ordering::Relaxed, Ordering::Relaxed) {
+            Ok(previous) => return Ok(previous),
+            Err(observed) => current = observed,
+        }
+    }
+}
+
+fn next_tcp_handle_token(span: Span) -> Result<u64, LanguageError> {
+    allocate_tcp_handle_token(&NEXT_TCP_HANDLE_TOKEN, span)
+}
+
+fn tcp_connection_value(
+    stream: std::net::TcpStream,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    Ok(Value::host_resource(
+        "tcp-connection",
+        next_tcp_handle_token(span)?,
+        RefCell::new(stream),
+    ))
+}
+
+fn tcp_listener_value(
+    listener: std::net::TcpListener,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    Ok(Value::host_resource(
+        "tcp-listener",
+        next_tcp_handle_token(span)?,
+        listener,
+    ))
+}
 
 #[cfg(all(
     any(target_os = "linux", target_os = "windows"),
@@ -250,12 +297,12 @@ fn expect_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageError>
     loop {
         match current {
             Value::Nil => return Ok(bytes),
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 // SENS arithmetic now returns exactly qualified D24+ numbers.
                 // The FS host transports raw bytes only: decode 0..255 at
                 // this I/O boundary, never turn decimal host values into the
                 // normative numeric identity and never accept negative bits.
-                let byte = match &**head {
+                let byte = match &node.head {
                     Value::Number(number, _)
                         if number.is_finite()
                             && number.fract() == 0.0
@@ -290,7 +337,7 @@ fn expect_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageError>
                     }
                 };
                 bytes.push(byte);
-                current = tail;
+                current = &node.tail;
             }
             _ => {
                 return Err(LanguageError::new(
@@ -309,23 +356,39 @@ fn expect_tcp_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageEr
     loop {
         match current {
             Value::Nil => return Ok(bytes),
-            Value::Pair(head, tail) => {
-                let Value::Number(number, _) = **head else {
+            Value::Pair(node) => {
+                // Language-owned UTF-8 encoding produces exact D24+ values;
+                // retain legacy host numbers only as a compatibility input.
+                let byte = match &node.head {
+                    Value::Number(number, _)
+                        if number.fract() == 0.0 && (0.0..=255.0).contains(number) =>
+                    {
+                        Some(*number as u8)
+                    }
+                    Value::BinaryNumber(number)
+                        if number.numeric_domain_width() == Some(24) =>
+                    {
+                        number.exact_numeric_domain_bits().and_then(|bits| {
+                            if bits[0] != 0 {
+                                return None;
+                            }
+                            let value = bits.iter().fold(0u32, |value, bit| {
+                                (value << 1) | u32::from(*bit)
+                            });
+                            u8::try_from(value).ok()
+                        })
+                    }
+                    _ => None,
+                };
+                let Some(byte) = byte else {
                     return Err(LanguageError::new(
                         ErrorKind::Type,
-                        "tcp-write-raw expects a list of integers 0-255 · tcp-write-raw ochikuie spysok tsilykh chysel 0-255 · tcp-write-raw erwartet eine Liste von Ganzzahlen 0-255",
+                        "tcp-write-raw expects each element to be an integer byte between 0 and 255, as a legacy host number or exact D24+ value · tcp-write-raw ochikuie tsilyi baity 0-255 yak host-chyslo abo tochne znachennia D24+",
                         span,
                     ));
                 };
-                if number.fract() != 0.0 || !(0.0..=255.0).contains(&number) {
-                    return Err(LanguageError::new(
-                        ErrorKind::Type,
-                        "tcp-write-raw expects each element to be an integer between 0 and 255 · tcp-write-raw ochikuie, shchob kozhen element buv tsilym chyslom vid 0 do 255 · tcp-write-raw erwartet, dass jedes Element eine Ganzzahl zwischen 0 und 255 ist",
-                        span,
-                    ));
-                }
-                bytes.push(number as u8);
-                current = tail;
+                bytes.push(byte);
+                current = &node.tail;
             }
             _ => {
                 return Err(LanguageError::new(
@@ -431,9 +494,7 @@ fn evaluate_tcp_connect(
         return Err(denied("tcp-connect", format!("{host}:{port}"), span));
     }
     let stream = tcp_connect(host, port, span)?;
-    Ok(Value::TcpConnection(Rc::new(std::cell::RefCell::new(
-        stream,
-    ))))
+    tcp_connection_value(stream, span)
 }
 
 fn evaluate_tcp_listen_raw(
@@ -455,7 +516,7 @@ fn evaluate_tcp_listen_raw(
         return Err(denied("tcp-listen-raw", format!("{address}:{port}"), span));
     }
     let listener = tcp_listen_raw(address, port, span)?;
-    Ok(Value::TcpListener(Rc::new(listener)))
+    tcp_listener_value(listener, span)
 }
 
 fn evaluate_tcp_accept(
@@ -464,7 +525,8 @@ fn evaluate_tcp_accept(
     span: Span,
 ) -> Result<Value, LanguageError> {
     let (listener_value, listener_span) = &arguments[0];
-    let Value::TcpListener(listener) = listener_value else {
+    let Some(listener) = listener_value.as_host_resource::<std::net::TcpListener>("tcp-listener")
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-accept expects a TCP listener · tcp-accept ochikuie TCP-listener · tcp-accept erwartet einen TCP-Listener",
@@ -472,9 +534,7 @@ fn evaluate_tcp_accept(
         ));
     };
     let stream = tcp_accept(listener, span)?;
-    Ok(Value::TcpConnection(Rc::new(std::cell::RefCell::new(
-        stream,
-    ))))
+    tcp_connection_value(stream, span)
 }
 
 fn evaluate_tcp_read_raw(
@@ -483,7 +543,9 @@ fn evaluate_tcp_read_raw(
     span: Span,
 ) -> Result<Value, LanguageError> {
     let (connection_value, connection_span) = &arguments[0];
-    let Value::TcpConnection(connection) = connection_value else {
+    let Some(connection) =
+        connection_value.as_host_resource::<RefCell<std::net::TcpStream>>("tcp-connection")
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-read-raw expects a TCP connection · tcp-read-raw ochikuie TCP-ziednannia · tcp-read-raw erwartet eine TCP-Verbindung",
@@ -491,11 +553,15 @@ fn evaluate_tcp_read_raw(
         ));
     };
     let bytes = tcp_read_raw(connection, span)?;
-    Ok(Value::list(
-        bytes
-            .into_iter()
-            .map(|byte| Value::Number(byte as f64, Exactness::Exact)),
-    ))
+    // The Lisp UTF-8 decoder performs D24+ arithmetic. Qualify each physical
+    // byte explicitly as its nonnegative mathematical value at this boundary.
+    Ok(Value::list(bytes.into_iter().map(|byte| {
+        let mut bits = vec![0; 16];
+        bits.extend((0..8).rev().map(|shift| (byte >> shift) & 1));
+        let number = BinaryNumber::from_numeric_domain_bits(24, &bits)
+            .expect("an unsigned byte is representable as a nonnegative D24+ integer");
+        Value::BinaryNumber(number)
+    })))
 }
 
 fn evaluate_tcp_write_raw(
@@ -505,7 +571,9 @@ fn evaluate_tcp_write_raw(
 ) -> Result<Value, LanguageError> {
     exact_arity("tcp-write-raw", arguments, 2, span)?;
     let connection_value = eval_expr(&arguments[0], environment)?;
-    let Value::TcpConnection(ref connection) = connection_value else {
+    let Some(connection) =
+        connection_value.as_host_resource::<RefCell<std::net::TcpStream>>("tcp-connection")
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-write-raw expects a TCP connection · tcp-write-raw ochikuie TCP-ziednannia · tcp-write-raw erwartet eine TCP-Verbindung",
@@ -534,7 +602,9 @@ fn evaluate_tcp_close(
         ));
     }
     let (value, argument_span) = &arguments[0];
-    let Value::TcpConnection(connection) = value else {
+    let Some(connection) =
+        value.as_host_resource::<RefCell<std::net::TcpStream>>("tcp-connection")
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-close expects a TCP connection · tcp-close ochikuie TCP-ziednannia · tcp-close erwartet eine TCP-Verbindung",
@@ -629,7 +699,7 @@ fn tcp_accept(
 }
 
 fn tcp_read_raw(
-    connection: &std::cell::RefCell<std::net::TcpStream>,
+    connection: &RefCell<std::net::TcpStream>,
     span: Span,
 ) -> Result<Vec<u8>, LanguageError> {
     use std::io::Read;
@@ -645,7 +715,7 @@ fn tcp_read_raw(
 }
 
 fn tcp_write_raw(
-    connection: &std::cell::RefCell<std::net::TcpStream>,
+    connection: &RefCell<std::net::TcpStream>,
     bytes: &[u8],
     span: Span,
 ) -> Result<(), LanguageError> {
@@ -660,7 +730,7 @@ fn tcp_write_raw(
 }
 
 fn tcp_close(
-    connection: &std::cell::RefCell<std::net::TcpStream>,
+    connection: &RefCell<std::net::TcpStream>,
     span: Span,
 ) -> Result<(), LanguageError> {
     connection
@@ -757,6 +827,26 @@ pub fn install() {
 #[cfg(test)]
 mod install_tests {
     use sens::{Environment, ErrorKind, Exactness, Span, Value};
+    use std::sync::atomic::AtomicU64;
+
+    #[test]
+    fn tcp_handle_token_allocator_is_atomic_and_rejects_overflow() {
+        let span = Span { start: 4, end: 9 };
+        let counter = AtomicU64::new(1);
+        assert_eq!(super::allocate_tcp_handle_token(&counter, span).unwrap(), 1);
+        assert_eq!(super::allocate_tcp_handle_token(&counter, span).unwrap(), 2);
+        assert_eq!(counter.load(std::sync::atomic::Ordering::Relaxed), 3);
+
+        let exhausted = AtomicU64::new(u64::MAX);
+        let error = super::allocate_tcp_handle_token(&exhausted, span)
+            .expect_err("the handle identity counter must not wrap");
+        assert_eq!(error.kind, ErrorKind::NumericOverflow);
+        assert_eq!(error.span, span);
+        assert_eq!(
+            exhausted.load(std::sync::atomic::Ordering::Relaxed),
+            u64::MAX
+        );
+    }
 
     #[test]
     fn tcp_close_value_handler_keeps_argument_local_span() {

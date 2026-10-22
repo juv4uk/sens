@@ -241,24 +241,24 @@ class LegacyD3GuardTests(unittest.TestCase):
         source = (ROOT / "scripts" / "check-island-math-evidence.lisp").read_text(encoding="utf-8")
         self.assertEqual(MODULE.scan_lisp(source, "scripts/check-island-math-evidence.lisp"), [])
 
-    def test_build_inventory_uses_only_exact_d1_two_field_cond(self):
-        source = (ROOT / "scripts" / "build-inventory.lisp").read_text(encoding="utf-8")
-        self.assertEqual(MODULE.scan_lisp(source, "scripts/build-inventory.lisp"), [])
+    def test_current_ukr_map_uses_exact_d1_and_two_field_cond(self):
+        # scripts/build-inventory.lisp є лише якорем; не видавати його за
+        # виконуваний рекурсивний доказ D3. Поточне джерело — сама мапа.
+        path = "lib/persistent-map.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        self.assertIn("(визначити мапа-отримати", source)
+        self.assertIn("(за-умовою", source)
+        self.assertEqual(MODULE.scan_lisp(source, path), [])
 
-        # Host truth is never a PredicateBit; restoration must fail.
-        fallback = "((010 (001 ())) (assoc key (011 alist)))"
-        self.assertIn(fallback, source)
-        changed = source.replace(fallback, "(t (assoc key (011 alist)))", 1)
+        # Host t не є ратифікованим D1; негативний свідок справді змінює
+        # джерело, а лексичний сканер мусить його відхилити.
+        bad_truth = source + "\n(за-умовою (t (як-є помилка)))\n"
         self.assertIn("COND_HOST_TRUTH", [
-            f.rule for f in MODULE.scan_lisp(changed, "scripts/build-inventory.lisp")
+            f.rule for f in MODULE.scan_lisp(bad_truth, path)
         ])
-
-        # Historical three-field ATOM-result matching is also forbidden.
-        clause = "((010 (0111 v)) ())"
-        self.assertIn(clause, source)
-        changed = source.replace(clause, "((010 (0111 v)) (1) ())", 1)
+        bad_arity = source + "\n(за-умовою ((атом? форма) (як-є так) (як-є ні)))\n"
         self.assertIn("COND_NOT_TWO_FIELDS", [
-            f.rule for f in MODULE.scan_lisp(changed, "scripts/build-inventory.lisp")
+            f.rule for f in MODULE.scan_lisp(bad_arity, path)
         ])
 
     def test_dependency_classifier_exact_d1_cond_and_negative_guards(self):

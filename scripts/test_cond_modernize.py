@@ -58,7 +58,7 @@ class SafeCondMigration(unittest.TestCase):
     def test_quote_data_is_untouched(self):
         examples = [
             "(001 (110 ((010 x) (1) data)))",
-            "(00000001 (110 ((010 x) (1) data)))",
+            "(як-є (110 ((010 x) (1) data)))",
             "'(110 ((010 x) (1) data))",
             '(110 ((010 x) (1) yes)) ; "(110 ((010 z) (1) no))"',
             '"; (110 ((010 x) (1) text))"',
@@ -69,6 +69,17 @@ class SafeCondMigration(unittest.TestCase):
             with self.subTest(source=source):
                 self.assertEqual(mod.inspect(source)[0], [])
         self.assertEqual(len(mod.inspect(examples[3])[0]), 1)
+
+    def test_current_d8_doseq_does_not_mask_a_real_cond(self):
+        # Historical SID8:00000001 used QUOTE; ratified D8:00000001
+        # is DOSEQ. An executable descendant must remain visible.
+        source = "(00000001 (110 ((010 x) (1) run)))"
+        rows, _ = mod.inspect(source)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].status, "AUTO_YES")
+        staged, _ = mod.stage(source)
+        self.assertEqual(staged, "(00000001 (110 ((010 x)  run)))")
+        self.assertEqual(mod.inspect("(як-є (110 ((010 x) (1) data)))")[0], [])
 
     def test_preserve_outside_exact_span(self):
         src = "; prologue\n(110 ; keep header\n  ((010 x) (1) yes))\n; trailer\n"

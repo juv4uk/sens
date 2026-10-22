@@ -5,7 +5,7 @@
 //! DomainCall(identity,args...) becomes a proper list headed by the exact
 //! first-class DomainIdentity. This module owns representation only.
 
-use crate::{DomainIdentity, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
+use crate::{DomainIdentity, ErrorKind, Expr, ExprKind, LanguageError, PairNode, Span, Value};
 use std::rc::Rc;
 
 fn invalid_program_data(message: impl Into<String>) -> LanguageError {
@@ -41,10 +41,10 @@ pub fn expr_to_exact_program_data(expr: &Expr) -> Result<Value, LanguageError> {
                 .map(expr_to_exact_program_data)
                 .collect::<Result<Vec<_>, _>>()?,
         ),
-        ExprKind::Pair(head, tail) => Value::Pair(
-            Rc::new(expr_to_exact_program_data(head)?),
-            Rc::new(expr_to_exact_program_data(tail)?),
-        ),
+        ExprKind::Pair(head, tail) => Value::Pair(Rc::new(PairNode {
+            head: expr_to_exact_program_data(head)?,
+            tail: expr_to_exact_program_data(tail)?,
+        })),
         ExprKind::DomainCall(identity, arguments) => {
             let mut items = Vec::with_capacity(arguments.len() + 1);
             items.push(Value::DomainIdentity(DomainIdentity::from(*identity)));
@@ -146,6 +146,6 @@ mod тести_міграції_чисел_d24 {
             Rc::from([кваліфіковане_число(24)]),
         ));
         let result = expr_to_exact_program_data(&source).expect("доведена форма");
-        assert!(matches!(result, Value::Pair(_, _)));
+        assert!(matches!(result, Value::Pair(_)));
     }
 }

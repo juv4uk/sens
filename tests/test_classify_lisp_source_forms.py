@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,12 +40,43 @@ class ThreePassClassifierTests(unittest.TestCase):
             domain_surfaces=SURFACES,
         )
 
-    def classify(self, source: str):
-        heads = mod.scan_heads("sample.lisp", source)
-        return mod.classify_heads(heads, self.resolver)
+    def classify(self, source: str, *, source_era: str = "current"):
+        heads = mod.scan_heads("sample.lisp", source, source_era=source_era)
+        return mod.classify_heads(
+            heads, self.resolver, source_era=source_era,
+        )
+
+    def test_physical_t5m_never_enters_text_source_inventory(self):
+        # Навіть UTF-8-подібний .sens не є джерелом чи дозволом
+        # трактувати історичний SID8 як поточний код Д8.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "дійсний.lisp").write_text("(атом? (як-є ()))\n", encoding="utf-8")
+            (root / "дійсний.sens").write_bytes(b"\x00\xff\x02")
+            (root / "старий.sens").write_text("(00000101 x)\n", encoding="utf-8")
+            self.assertEqual(
+                {p.name for p in mod.source_files(root)}, {"дійсний.lisp"}
+            )
+            _, _, _, _, summary = mod.scan_tree(root, self.resolver)
+            self.assertEqual(summary["files_seen"], 1)
+
+    def test_current_sid8_lookalike_is_rejected_not_assumed_d8_or_legacy(self):
+        for old_word in ("00000101", "00000001", "00001100", "11111111"):
+            with self.subTest(old_word=old_word):
+                with self.assertRaisesRegex(ValueError, "retired SID8-era head"):
+                    self.classify(f"({old_word} x)\\n")
+
+    def test_explicit_legacy_quote_candidate_does_not_authorize_modern_d8(self):
+        historical, _, _, _ = self.classify(
+            "(00000001 (00000101 x))\\n", source_era="legacy",
+        )
+        self.assertEqual(len(historical), 1)
+        self.assertEqual(historical[0].current_domain, "D3")
+        self.assertEqual(historical[0].current_bits, "001")
+        self.assertIn("execution not certified", historical[0].evidence)
 
     def test_pass1_detects_legacy_sid8_and_resolves_current_car(self):
-        historical, current, dynamic, empty = self.classify("(00000101 x)\n")
+        historical, current, dynamic, empty = self.classify("(00000101 x)\n", source_era="legacy")
         self.assertFalse(current)
         self.assertFalse(dynamic)
         self.assertFalse(empty)
@@ -55,7 +87,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual((hit.current_domain, hit.current_bits, hit.current_label), ("D3", "100", "CAR"))
 
     def test_pass1_uses_named_registry_role_not_bit_shape_for_map(self):
-        historical, _, _, _ = self.classify("(00110111 f xs)\n")
+        historical, _, _, _ = self.classify("(00110111 f xs)\n", source_era="legacy")
         self.assertEqual(len(historical), 1)
         hit = historical[0]
         self.assertEqual(hit.pass_number, 1)
@@ -116,7 +148,7 @@ class ThreePassClassifierTests(unittest.TestCase):
 (car x)
 (COND (p a) (T b))
 """
-        historical, _, dynamic, _ = self.classify(source)
+        historical, _, dynamic, _ = self.classify(source, source_era="legacy")
         self.assertEqual(
             [(hit.pass_number, hit.token) for hit in historical],
             [(1, "00000100"), (2, "car"), (3, "COND")],
@@ -150,7 +182,9 @@ class ThreePassClassifierTests(unittest.TestCase):
             [head.token for head in heads if not head.empty_list],
             ["quote", "001", "QUOTE", "00000001", "car"],
         )
-        historical, current, dynamic, empty = mod.classify_heads(heads, self.resolver)
+        historical, current, dynamic, empty = mod.classify_heads(
+            heads, self.resolver, source_era="legacy",
+        )
         self.assertEqual([hit.token for hit in historical],
                          ["quote", "QUOTE", "00000001", "car"])
         self.assertEqual([hit.token for hit in current], ["001"])
@@ -232,7 +266,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual(hit.resolution, "resolved")
 
     def test_unknown_eight_bit_head_is_pass1_but_unresolved(self):
-        historical, _, dynamic, _ = self.classify("(11111111 x)\n")
+        historical, _, dynamic, _ = self.classify("(11111111 x)\n", source_era="legacy")
         self.assertFalse(dynamic)
         self.assertEqual(len(historical), 1)
         hit = historical[0]
@@ -241,7 +275,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual(hit.legacy_sid8, "11111111")
 
     def test_old_registry_function_without_current_domain_is_legacy_unmapped(self):
-        historical, _, dynamic, _ = self.classify("(01001000 x)\n")
+        historical, _, dynamic, _ = self.classify("(01001000 x)\n", source_era="legacy")
         self.assertFalse(dynamic)
         self.assertEqual(len(historical), 1)
         hit = historical[0]

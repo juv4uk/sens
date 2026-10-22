@@ -50,14 +50,25 @@ run_native_t5m_program() {
   local source_bytes native_timeout
   source_bytes=$(wc -c < "$file")
   native_timeout=45s
-  # Реальне core4.lisp має ~0,5 MiB: 45s перериває SENS mint
-  # раніше від результату (CI status=124), не доводячи помилки джерела.
-  # Ліміт лишається кінцевим; лише велике джерело дістає час на
-  # справжній SENS reader → Zig/T5M → обернення → виконання.
-  if (( source_bytes >= 262144 )); then
+  # Мінімальний свідок може підвантажувати 300+ KiB визначень.
+  # Дати бюджет СУМІ реальних Lisp-входів, інакше CI хибно
+  # вважає живий SENS-закон непрацездатним через timeout=124.
+  # Ні Python, ні JSON не беруть участі у reader чи семантиці.
+  local total_input_bytes="$source_bytes"
+  local dependency
+  for ((i=1; i<${#binding_sources[@]}; i+=2)); do
+    dependency="${binding_sources[i]}"
+    if [[ ! -f "$dependency" || -L "$dependency" ]]; then
+      echo "::error::T5M_NATIVE_BINDING_SOURCE_MISSING source=$file binding=$dependency" >&2
+      mark_file_failed
+      return
+    fi
+    (( total_input_bytes += $(wc -c < "$dependency") ))
+  done
+  if (( total_input_bytes >= 262144 )); then
     native_timeout=180s
   fi
-  echo "T5M_NATIVE_BUDGET source=$file bytes=$source_bytes timeout=$native_timeout"
+  echo "T5M_NATIVE_BUDGET source=$file input_bytes=$total_input_bytes timeout=$native_timeout"
   # Для модулів з DEFINE-залежностями використовуємо новий SENS CLI.
   # Mint і парна перевірка відбуваються з однаковими binding-source.
   local mint_flag=--t5m-mint
@@ -134,6 +145,78 @@ run_native_t5m_program() {
   # Критичний доказ — реальне парне виконання фізичних Zig-байтів.
   if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
       >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
+    if [[ "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
+      echo "::error::T5M_META_FC_MUTANT_ACCEPTED source=$file" >&2
+      mark_file_failed
+      return
+    fi
+    # Д11-позитив: точний SENS D1:YES, не успіх довільної відповіді.
+    if [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ]]; then
+      printf '1\n' > "$dir/meta-fc-d1.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/meta-fc-d1.expected"; then
+        echo "::error::T5M_META_FC_WRONG_POSITIVE source=$file expected=D1:1" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
+    # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
+    # виконані SENS після контролю оборотності. Ніякого Python-оракула.
+    if [[ "$file" == "tests/semantic/core1-gc-reachability-laws.lisp" ]]; then
+      printf '1\n' > "$dir/core1-gc-d1.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/core1-gc-d1.expected"; then
+        echo "::error::CORE1_GC_PAIRED_WRONG_D1 expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      cat -- lib/core1.lisp "$file" > "$dir/core1-gc-direct.lisp"
+      if ! timeout "$native_timeout" "$binary" "$dir/core1-gc-direct.lisp" \
+          >"$dir/core1-gc-direct.stdout" 2>"$dir/core1-gc-direct.stderr"; then
+        sed 's/^/Core1 direct SENS: /' "$dir/core1-gc-direct.stderr" >&2
+        echo "::error::CORE1_GC_DIRECT_EXECUTION_FAIL" >&2
+        mark_file_failed
+        return
+      fi
+      if ! cmp -s "$dir/core1-gc-direct.stdout" "$dir/native-paired.stdout"; then
+        echo "::error::CORE1_GC_TWO_CARRIERS_DIVERGED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      # Справжній негатив: змінимо фінальне Д1-питання, обидва SENS
+      # шляхи мають повернути 0 (а не просто exit=0).
+      sed '$c\(хибне? (атом? (як-є ())))' "$file" > "$dir/core1-gc-negative.lisp"
+      if cmp -s "$file" "$dir/core1-gc-negative.lisp"; then
+        echo "::error::CORE1_GC_MUTANT_NOT_CREATED" >&2
+        mark_file_failed
+        return
+      fi
+      cat -- lib/core1.lisp "$dir/core1-gc-negative.lisp" > "$dir/core1-gc-negative-direct.lisp"
+      if ! timeout "$native_timeout" "$binary" "$dir/core1-gc-negative-direct.lisp" \
+          >"$dir/core1-gc-negative-direct.stdout" 2>"$dir/core1-gc-negative-direct.stderr" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint-pair \
+          "$dir/core1-gc-negative.lisp" "$dir/core1-gc-negative.sens" \
+          --binding-source lib/core1.lisp >"$dir/core1-gc-negative-mint.stdout" 2>"$dir/core1-gc-negative-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view \
+          "$dir/core1-gc-negative.sens" >"$dir/core1-gc-negative-view.stdout" 2>"$dir/core1-gc-negative-view.stderr" ||
+         ! timeout "$native_timeout" "$binary" --t5m-pair \
+          "$dir/core1-gc-negative.lisp" "$dir/core1-gc-negative.sens" \
+          --binding-source lib/core1.lisp >"$dir/core1-gc-negative-paired.stdout" 2>"$dir/core1-gc-negative-paired.stderr"; then
+        echo "::error::CORE1_GC_NEGATIVE_EXECUTION_FAIL source=$file" >&2
+        for diagnostic in "$dir"/core1-gc-negative*.stderr; do
+          [[ -f "$diagnostic" ]] && sed 's/^/Core1 negative: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      printf '0\n' > "$dir/core1-gc-d0.expected"
+      if ! cmp -s "$dir/core1-gc-negative-direct.stdout" "$dir/core1-gc-d0.expected" ||
+         ! cmp -s "$dir/core1-gc-negative-paired.stdout" "$dir/core1-gc-d0.expected"; then
+        echo "::error::CORE1_GC_NEGATIVE_D1_MISMATCH expected=0" >&2
+        mark_file_failed
+        return
+      fi
+      echo "CORE1_GC_TWO_CARRIERS_PASS source=$file direct=LISP physical=T5M native=SENS positive=D1:1 negative=D1:0 GC=SYMBOLIC_REACHABILITY_ONLY"
+    fi
     native_paired_executed_paths["$file"]=1
     if timeout "$native_timeout" "$binary" "$physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
@@ -206,6 +289,13 @@ run_native_t5m_program() {
     fi
   else
     status=$?
+    # Негативний SENS-свідок повинен відмовити саме на невикличній формі.
+    if [[ "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]] &&
+       (( status != 124 && status != 137 )) &&
+       grep -Eq 'kind=(Type|InvalidForm)' "$dir/native-paired.stderr"; then
+      echo "T5M_META_FC_NATIVE_MUTANT_REJECTED source=$file native=SENS"
+      return
+    fi
     sed 's/^/SENS native paired: /' "$dir/native-paired.stderr" >&2
     echo "::error::T5M_NATIVE_PAIRED_EXECUTION_FAIL source=$file status=$status release=NOT_CERTIFIED" >&2
     mark_file_failed
@@ -241,6 +331,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
     # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
+  elif [[ "$file" == "lib/d11-clojure-partition-by.lisp" ]]; then
+    # Partition-by викликає чинні DEFINE із SRFI-1 span/break.
+    # Ті самі SENS-зв'язування вже використовують remint і нативний census.
+    # Без цього парне виконання помилково відкидає коректний Text7 виклик.
+    binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp)
   # preload_t5m_binding_sources виконує DEFINE послідовно у SENS;
   # залежність завжди завантажується РАНІШЕ за користувача.
   elif [[ "$file" == "lib/narrate.lisp" ]]; then
@@ -256,12 +351,16 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/unify.lisp
                      --binding-source lib/knowledge.lisp
                      --binding-source lib/reason.lisp)
+  elif [[ "$file" == "tests/fixtures/island-lowering-1048-witness.lisp" ]]; then
+    # Чотири зовнішні механізми вибирає SENS, не Python/JSON;
+    # точні D24+ операнди переносяться Zig без рядкових літералів.
+    binding_sources=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp)
   elif [[ "$file" == "tests/fixtures/mechanism-selector-1047-witness.lisp" ]]; then
     # Іменовані SENS DEFINE механізмів походять із мовних бібліотек,
     # а не з вигаданих D9/D10 resident callables чи host-функцій.
-    # Передувати залежностям повинен реєстр українських проєкцій.
-    binding_sources=(--binding-source lib/surface/semantic-registry-api.lisp
-                     --binding-source lib/mechanism-selector.lisp)
+    # Чинний селектор використовує тільки ратифіковану українську
+    # проєкцію й паспорт допущених маршрутів, без плоского SID8 API.
+    binding_sources=(--binding-source lib/mechanism-selector.lisp)
   elif [[ "$file" == "lib/translation.lisp" ]]; then
     # Переклад викликає лише реальні визначення: знання/світ та D8
     # класифікацію тексту з Yantra. Каталог D9/D10 сам по собі
@@ -278,6 +377,12 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Без цього SENS правильно відхиляє невідомий D7 Text7-символ «світ?».
     # Не підміняємо виконання хостовим оракулом і не тягнемо весь Reason.
     binding_sources=(--binding-source lib/world.lisp)
+  elif [[ "$file" == "tests/semantic/core1-gc-reachability-laws.lisp" ]]; then
+    # Обхід коренів і циклів виконує лише наявний Core1 Lisp.
+    binding_sources=(--binding-source lib/core1.lisp)
+  elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
+          "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
+    binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
   fi
   run_native_t5m_program
 done < "$manifest"

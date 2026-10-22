@@ -4,10 +4,27 @@ use crate::semantic_registry::LegacyRegistrySlot;
 use crate::BinaryNumber;
 use crate::DomainIdentity;
 use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Text7};
-use std::{
-    cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
-    str::FromStr,
-};
+use std::{any::Any, cmp::Ordering, fmt, ops::Neg, rc::Rc, str::FromStr};
+
+#[doc(hidden)]
+#[derive(Clone)]
+pub struct OpaqueHostResource(Rc<dyn Any>);
+
+impl OpaqueHostResource {
+    fn new<T: Any>(resource: T) -> Self {
+        Self(Rc::new(resource))
+    }
+
+    fn downcast_ref<T: Any>(&self) -> Option<&T> {
+        self.0.downcast_ref()
+    }
+}
+
+impl fmt::Debug for OpaqueHostResource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("#<opaque-host-resource>")
+    }
+}
 
 /// A reduced exact fraction owned by the language runtime, backed by the
 /// hand-rolled `BigInt` in `bignum.rs` — "exact" has no numeric ceiling
@@ -480,6 +497,16 @@ impl std::fmt::Debug for Builtin {
     }
 }
 
+/// One cons cell: the head and tail live in a single heap block, so a
+/// `Value::Pair` costs one allocation rather than two.
+/// Odna kons-komirka: holova i khvist lezhat v odnomu heap-blotsi, tozh
+/// `Value::Pair` koshtuie odnu alokatsiiu, a ne dvi.
+#[derive(Clone, Debug)]
+pub struct PairNode {
+    pub head: Value,
+    pub tail: Value,
+}
+
 /// Runtime data is independent of the parser and any host representation.
 /// Dani vykonannia ne zalezhat vid parsera ta predstavlennia u khost-systemi.
 /// Laufzeitdaten sind unabhängig vom Parser und von jeder Host-Darstellung.
@@ -508,7 +535,7 @@ pub enum Value {
     /// projection lives at the reader/boundary layer.
     Text7(Text7),
     Symbol(Rc<str>),
-    Pair(Rc<Value>, Rc<Value>),
+    Pair(Rc<PairNode>),
     Closure(Rc<Closure>),
     Macro(Rc<Closure>),
     /// Legacy host implementation closure as a first-class value. This is an
@@ -520,42 +547,13 @@ pub enum Value {
     HostHandle {
         kind: Rc<str>,
         token: u64,
+        resource: OpaqueHostResource,
     },
     /// Persistent vector: O(1) indexed access for numeric workloads
     Vector(std::rc::Rc<std::cell::RefCell<Vec<Value>>>),
     /// Fixed-width immutable numeric data. Unlike `Vector`, this is
     /// homogeneous, contiguous, and has no mutating language operation.
     NumericBuffer(NumericBuffer),
-    /// An open TCP connection (PLAN.md item 21) — the outbound-client half
-    /// of "talk to other AI systems," principle 3 extended to external
-    /// agents/LLM APIs. Opaque host-capability handle, the same category
-    /// `read-file`/`write-file` already occupy — not user-visible mutable
-    /// *data* in the item-16 sense (nothing here lets a program mutate an
-    /// ordinary binding), just a resource the host manages on the
-    /// language's behalf. `RefCell` because reading/writing a stream
-    /// genuinely advances its position — there is no persistent,
-    /// side-effect-free way to model "the next unread byte of a live
-    /// network connection."
-    /// Vidkryte TCP-ziednannia (PLAN.md, punkt 21) — vykhidna/kliientska
-    /// polovyna "spilkuvatys z inshymy AI-systemamy", pryntsyp 3, poshyrenyi
-    /// na zovnishnikh ahentiv/LLM API. Neprozoryi handle host-mozhlyvosti, ta
-    /// sama katehoriia, shcho vzhe zaimaiut `read-file`/`write-file` — ne
-    /// vydyma korystuvachu mutabelna *dani* v sensi item 16 (nishcho tut ne
-    /// daie prohrami mutuvaty zvychaine zviazuvannia), lyshe resurs, yakym khost
-    /// keruie vid imeni movy. `RefCell`, bo chytannia/zapys u potik spravdi
-    /// prosuvaie yoho pozytsiiu — nemaie postiinoho, bez-pobichno-efektnoho
-    /// sposobu zmodeliuvaty "nastupnyi neprochytanyi bait zhyvoho merezhevoho
-    /// ziednannia".
-    TcpConnection(Rc<RefCell<TcpStream>>),
-    /// A listening TCP socket (PLAN.md item 21) — the inbound-server half:
-    /// lets sens accept connections from other agents, not just call
-    /// out to them. No `RefCell` needed — `TcpListener::accept` takes
-    /// `&self`, it doesn't need to mutate the listener itself.
-    /// TCP-soket, shcho slukhaie (PLAN.md, punkt 21) — vkhidna/serverna
-    /// polovyna: dozvoliaie sens pryimaty ziednannia vid inshykh ahentiv, ne
-    /// lyshe zvertatys do nykh. `RefCell` ne potriben — `TcpListener::accept`
-    /// bere `&self`, ne potrebuie mutuvaty sam listener.
-    TcpListener(Rc<TcpListener>),
 }
 
 impl PartialEq for Value {
@@ -581,8 +579,29 @@ impl PartialEq for Value {
             (Value::DomainIdentity(left), Value::DomainIdentity(right)) => left == right,
             (Value::String(left), Value::String(right)) => left == right,
             (Value::Symbol(left), Value::Symbol(right)) => left == right,
-            (Value::Pair(left_head, left_tail), Value::Pair(right_head, right_tail)) => {
-                left_head == right_head && left_tail == right_tail
+            (Value::Pair(left), Value::Pair(right)) => {
+                if Rc::ptr_eq(left, right) {
+                    return true;
+                }
+                // A long Lisp list is a tail-linked chain: recursive Value
+                // equality would consume one call frame per CONS cell.
+                // Match the same structural law using a bounded work stack.
+                // Visit the head before the tail to keep proper-list stacks
+                // small; sharing is an identity-preserving fast path.
+                let mut pending = vec![(&left.tail, &right.tail), (&left.head, &right.head)];
+                while let Some((a, b)) = pending.pop() {
+                    match (a, b) {
+                        (Value::Pair(a), Value::Pair(b)) => {
+                            if !Rc::ptr_eq(a, b) {
+                                pending.push((&a.tail, &b.tail));
+                                pending.push((&a.head, &b.head));
+                            }
+                        }
+                        (a, b) if a == b => {}
+                        _ => return false,
+                    }
+                }
+                true
             }
             // Vectors compare structurally, element by element — same rule
             // as Pair chains. Identity would make `(eq (vector 1) (vector 1))`
@@ -599,10 +618,12 @@ impl PartialEq for Value {
                 Value::HostHandle {
                     kind: left_kind,
                     token: left_token,
+                    ..
                 },
                 Value::HostHandle {
                     kind: right_kind,
                     token: right_token,
+                    ..
                 },
             ) => left_kind == right_kind && left_token == right_token,
             // Functions have identity: two separately created closures are not equal.
@@ -610,12 +631,6 @@ impl PartialEq for Value {
             // Funktionen besitzen Identität: Zwei getrennt erzeugte Closures sind nicht gleich.
             (Value::Closure(left), Value::Closure(right)) => Rc::ptr_eq(left, right),
             (Value::Macro(left), Value::Macro(right)) => Rc::ptr_eq(left, right),
-            // Same identity rule as Closure/Macro — a resource handle is
-            // itself, not a value with structural equality.
-            // Te same pravylo identychnosti, shcho y Closure/Macro — handle
-            // resursu — tse vin sam, ne znachennia zi strukturnoiu rivnistiu.
-            (Value::TcpConnection(left), Value::TcpConnection(right)) => Rc::ptr_eq(left, right),
-            (Value::TcpListener(left), Value::TcpListener(right)) => Rc::ptr_eq(left, right),
             // Text identity is exact cell-stream equality.
             (Value::Text7(left), Value::Text7(right)) => left == right,
             _ => false,
@@ -627,16 +642,38 @@ impl Value {
     /// Creates an embedding-owned opaque handle. Only a host integration can
     /// construct it; the reader deliberately has no corresponding syntax.
     pub fn host_handle(kind: impl Into<Rc<str>>, token: u64) -> Self {
+        Self::host_resource(kind, token, ())
+    }
+
+    /// Creates an opaque handle that keeps a host-owned resource alive.
+    ///
+    /// The core can retain, clone, compare, and display this handle, but only
+    /// the host that knows `T` can downcast the resource to use it.
+    pub fn host_resource<T: Any>(kind: impl Into<Rc<str>>, token: u64, resource: T) -> Self {
         Self::HostHandle {
             kind: kind.into(),
             token,
+            resource: OpaqueHostResource::new(resource),
         }
     }
 
     /// Returns the embedding-owned identity of an opaque handle.
     pub fn as_host_handle(&self) -> Option<(&str, u64)> {
         match self {
-            Self::HostHandle { kind, token } => Some((kind, *token)),
+            Self::HostHandle { kind, token, .. } => Some((kind, *token)),
+            _ => None,
+        }
+    }
+
+    /// Borrows a host resource only when both its opaque kind and concrete type
+    /// match. SENS source cannot construct or inspect host resources.
+    pub fn as_host_resource<T: Any>(&self, kind: &str) -> Option<&T> {
+        match self {
+            Self::HostHandle {
+                kind: actual_kind,
+                resource,
+                ..
+            } if actual_kind.as_ref() == kind => resource.downcast_ref(),
             _ => None,
         }
     }
@@ -710,12 +747,12 @@ impl Value {
             .into_iter()
             .rev()
             .fold(Value::Nil, |tail, head| {
-                Value::Pair(Rc::new(head), Rc::new(tail))
+                Value::Pair(Rc::new(PairNode { head, tail }))
             })
     }
 
     pub fn is_atom(&self) -> bool {
-        !matches!(self, Value::Pair(_, _))
+        !matches!(self, Value::Pair(_))
     }
 }
 
@@ -768,7 +805,11 @@ impl Value {
 fn render(value: &Value, quote_strings: bool) -> String {
     match value {
         Value::Builtin(builtin) => format!("#<builtin {}>", builtin.name),
-        Value::HostHandle { kind, .. } => format!("#<host-handle {kind}>"),
+        Value::HostHandle { kind, .. } => match kind.as_ref() {
+            "tcp-connection" => "<tcp-connection>".to_string(),
+            "tcp-listener" => "<tcp-listener>".to_string(),
+            _ => format!("#<host-handle {kind}>"),
+        },
         Value::Vector(v) => {
             let items: Vec<String> = v
                 .borrow()
@@ -854,11 +895,9 @@ fn render(value: &Value, quote_strings: bool) -> String {
         // exact cells rather than inventing a Unicode spelling.
         Value::Text7(text) => text.to_canonical_wire_token(),
         Value::Symbol(symbol) => symbol.to_string(),
-        Value::Pair(_, _) => render_pair(value, quote_strings),
+        Value::Pair(_) => render_pair(value, quote_strings),
         Value::Closure(_) => "<lambda>".to_string(),
         Value::Macro(_) => "<macro>".to_string(),
-        Value::TcpConnection(_) => "<tcp-connection>".to_string(),
-        Value::TcpListener(_) => "<tcp-listener>".to_string(),
     }
 }
 
@@ -879,7 +918,7 @@ fn render_canonical_wire(value: &Value) -> String {
             Some(width) => format!("#<D{width}-NUMERIC-WIRE-UNSUPPORTED>"),
             None => format!("#b{}", number.bits()),
         },
-        Value::Pair(_, _) => render_pair_canonical_wire(value),
+        Value::Pair(_) => render_pair_canonical_wire(value),
         Value::Vector(values) => {
             let items = values
                 .borrow()
@@ -901,12 +940,12 @@ fn render_pair_canonical_wire(value: &Value) -> String {
     let mut first = true;
     loop {
         match current {
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 if !first {
                     out.push(' ');
                 }
-                out.push_str(&render_canonical_wire(head));
-                current = tail;
+                out.push_str(&render_canonical_wire(&node.head));
+                current = &node.tail;
                 first = false;
             }
             Value::Nil => {
@@ -929,12 +968,12 @@ fn render_pair(value: &Value, quote_strings: bool) -> String {
     let mut first = true;
     loop {
         match current {
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 if !first {
                     out.push(' ');
                 }
-                out.push_str(&render(head, quote_strings));
-                current = tail;
+                out.push_str(&render(&node.head, quote_strings));
+                current = &node.tail;
                 first = false;
             }
             Value::Nil => {
@@ -953,7 +992,7 @@ fn render_pair(value: &Value, quote_strings: bool) -> String {
 
 impl Drop for Value {
     fn drop(&mut self) {
-        if !matches!(self, Value::Pair(_, _)) {
+        if !matches!(self, Value::Pair(_)) {
             return;
         }
 
@@ -963,17 +1002,16 @@ impl Drop for Value {
         while let Some(value) = worklist.pop() {
             let mut value = std::mem::ManuallyDrop::new(value);
             match &mut *value {
-                Value::Pair(head, tail) => {
-                    let head = unsafe { std::ptr::read(head) };
-                    let tail = unsafe { std::ptr::read(tail) };
-                    if let Ok(inner) = Rc::try_unwrap(head) {
-                        if matches!(inner, Value::Pair(_, _)) {
-                            worklist.push(inner);
+                Value::Pair(node) => {
+                    let node = unsafe { std::ptr::read(node) };
+                    if let Ok(mut inner) = Rc::try_unwrap(node) {
+                        let head = std::mem::replace(&mut inner.head, Value::Nil);
+                        let tail = std::mem::replace(&mut inner.tail, Value::Nil);
+                        if matches!(head, Value::Pair(_)) {
+                            worklist.push(head);
                         }
-                    }
-                    if let Ok(inner) = Rc::try_unwrap(tail) {
-                        if matches!(inner, Value::Pair(_, _)) {
-                            worklist.push(inner);
+                        if matches!(tail, Value::Pair(_)) {
+                            worklist.push(tail);
                         }
                     }
                 }
@@ -1011,6 +1049,37 @@ mod exact_domain_value_tests {
         assert_ne!(values[1], values[2]);
     }
 
+    /// Structurally equal CONS spines must remain comparable with a small
+    /// stack after PairNode moves CAR/CDR to one heap allocation per cell.
+    /// This is *host mechanism equality*, not the partial D3 EQ(atom,atom).
+    #[test]
+    fn deep_cons_spines_compare_iteratively_and_preserve_structural_difference() {
+        fn spine(depth: usize, end: Value) -> Value {
+            (0..depth).fold(end, |tail, _| {
+                Value::Pair(std::rc::Rc::new(super::PairNode {
+                    head: Value::Nil,
+                    tail,
+                }))
+            })
+        }
+
+        std::thread::Builder::new()
+            .name("cons-equality-small-stack".to_owned())
+            .stack_size(64 * 1024)
+            .spawn(|| {
+                let expected = spine(16_384, Value::Nil);
+                let identical = spine(16_384, Value::Nil);
+                let different = spine(16_384, Value::Symbol("змінено".into()));
+                assert_eq!(expected, identical, "test_id=CONS-EQ-DEEP expected=structural-equality");
+                assert_ne!(expected, different, "test_id=CONS-EQ-DEEP expected=distinguish-final-tail");
+                let shared = expected.clone();
+                assert_eq!(shared, expected, "test_id=CONS-EQ-SHARED expected=identity-preservation");
+            })
+            .expect("test_id=CONS-EQ-DEEP spawn")
+            .join()
+            .expect("test_id=CONS-EQ-DEEP must finish on bounded stack");
+    }
+
     #[test]
     fn equal_payload_d3_and_d4_keep_their_own_widths() {
         let d3 = DomainIdentity::D3(Bija3::from_word(Bit3::new(0b010).unwrap()));
@@ -1026,6 +1095,7 @@ mod exact_domain_value_tests {
 #[cfg(test)]
 mod host_handle_tests {
     use super::Value;
+    use std::cell::RefCell;
 
     #[test]
     fn host_handle_hides_its_token_when_rendered() {
@@ -1036,5 +1106,26 @@ mod host_handle_tests {
         );
         assert_eq!(handle.to_string(), "#<host-handle cyberpunk.IScriptable>");
         assert_ne!(handle.to_string(), "#<host-handle 305419896>");
+    }
+
+    #[test]
+    fn opaque_host_resource_is_shared_and_type_checked() {
+        let handle = Value::host_resource("test-resource", 7, RefCell::new(42_u32));
+        let alias = handle.clone();
+
+        assert_eq!(handle, alias);
+        assert_eq!(
+            *handle
+                .as_host_resource::<RefCell<u32>>("test-resource")
+                .expect("matching host resource type")
+                .borrow(),
+            42
+        );
+        assert!(handle
+            .as_host_resource::<RefCell<u32>>("another-resource")
+            .is_none());
+        assert!(handle
+            .as_host_resource::<u32>("test-resource")
+            .is_none());
     }
 }

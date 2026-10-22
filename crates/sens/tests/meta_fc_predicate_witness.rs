@@ -82,3 +82,111 @@ fn first_class_predicates_obey_sens_d1_law_and_reject_one_bit_mutant() {
         "test_id=meta-fc-d1-mutant layer=eval expected=non-callable-D1 actual={error}"
     );
 }
+
+/// D11: значення-примітив і замикання розрізняються у самій SENS,
+/// без нового opcode й без Rust-оракула для CAR/CDR.
+#[test]
+fn d11_first_class_primitive_and_closure_types_are_native_d1() {
+    let mut s = session();
+    for (id, input, expected) in [
+        ("primitive-constructed", "(першокласний-примітив? (першокласний-примітив (як-є перше)))", true),
+        ("primitive-quoted", "(першокласний-примітив? (як-є (примітив сполучити)))", true),
+        ("primitive-not-closure", "(першокласне-замикання? (першокласний-примітив (як-є перше)))", false),
+        ("primitive-not-empty", "(першокласний-примітив? (як-є ()))", false),
+        ("primitive-not-atom", "(першокласний-примітив? (як-є примітив))", false),
+        ("primitive-not-ordinary-pair", "(першокласний-примітив? (як-є (значення примітив)))", false),
+        ("closure-constructed", "(першокласне-замикання? (як-є (замикання (х) (х) ())))", true),
+        ("closure-not-primitive", "(першокласний-примітив? (як-є (замикання (х) (х) ())))", false),
+        ("closure-not-atom", "(першокласне-замикання? (як-є замикання))", false),
+        ("closure-not-empty", "(першокласне-замикання? (як-є ()))", false),
+        ("closure-not-wrong-tag", "(першокласне-замикання? (як-є (примітив перше)))", false),
+    ] {
+        let verdict = exact(input, &mut s)
+            .unwrap_or_else(|e| panic!(
+                "test_id=D11-FIRST-CLASS-{id} layer=SENS input={input} expected=D1:{expected} actual_error={e}"
+            ))
+            .value;
+        assert_eq!(
+            verdict.as_predicate_bit(), Some(expected),
+            "test_id=D11-FIRST-CLASS-{id} layer=SENS input={input} expected=D1:{expected} actual={verdict}"
+        );
+    }
+}
+
+/// D11: лексична видимість — перше зв'язування перемагає, а відсутнє
+/// ім'я не породжує host-значення. Свідки обчислює лише SENS.
+#[test]
+fn d11_first_class_lexical_lookup_and_parameter_binding_preserve_order() {
+    let mut s = session();
+    for (id, input, expected) in [
+        ("lookup-first", "(першокласне-знайти-в-середовищі (як-є ключ) (як-є ((ключ . нове) (ключ . старе))))", "нове"),
+        ("lookup-second", "(першокласне-знайти-в-середовищі (як-є другий) (як-є ((перший . а) (другий . б))))", "б"),
+        ("lookup-missing", "(першокласне-знайти-в-середовищі (як-є немає) (як-є ((перший . а))))", "немає"),
+        ("lookup-empty", "(першокласне-знайти-в-середовищі (як-є немає) (як-є ()))", "немає"),
+        ("lookup-primitive-value", "(першокласне-знайти-в-середовищі (як-є перше) першокласне-початкове-середовище)", "(примітив перше)"),
+        ("bind-empty", "(першокласне-звязати-параметри (як-є ()) (як-є ()) (як-є ((вільне . старе))))", "((вільне . старе))"),
+        ("bind-one", "(першокласне-звязати-параметри (як-є (х)) (як-є (нове)) (як-є ()))", "((х . нове))"),
+        ("bind-two", "(першокласне-звязати-параметри (як-є (х у)) (як-є (ліве праве)) (як-є ((вільне . збережено))))", "((х . ліве) (у . праве) (вільне . збережено))"),
+        ("bind-shadows", "(першокласне-звязати-параметри (як-є (х)) (як-є (нове)) (як-є ((х . старе))))", "((х . нове) (х . старе))"),
+    ] {
+        let actual = exact(input, &mut s)
+            .unwrap_or_else(|e| panic!(
+                "test_id=D11-LEXICAL-{id} layer=SENS input={input} expected={expected} actual_error={e}"
+            ))
+            .value.to_string();
+        assert_eq!(
+            actual, expected,
+            "test_id=D11-LEXICAL-{id} layer=SENS input={input} expected={expected} actual={actual}"
+        );
+    }
+}
+
+/// Д11: лексичне замикання зберігає оточення визначення, а формальний
+/// параметр затінює однойменну змінну без зміни захопленого значення.
+/// Це наскрізне виконання метаобчислювача SENS, не моделювання на Rust.
+#[test]
+fn d11_first_class_closure_captures_lexical_environment_and_shadows_parameters() {
+    let mut s = session();
+    for (id, input, expected) in [
+        (
+            "captures-environment",
+            "(першокласне-обчислити (як-є ((функція (у) х) (як-є нове))) (як-є ((х . захоплене))))",
+            "захоплене",
+        ),
+        (
+            "parameter-shadows-capture",
+            "(першокласне-обчислити (як-є ((функція (х) х) (як-є нове))) (як-є ((х . старе))))",
+            "нове",
+        ),
+        (
+            "two-parameters-preserve-order",
+            "(першокласне-обчислити (як-є ((функція (х у) х) (як-є ліве) (як-є праве))) (як-є ()))",
+            "ліве",
+        ),
+        (
+            "second-parameter-selected",
+            "(першокласне-обчислити (як-є ((функція (х у) у) (як-є ліве) (як-є праве))) (як-є ()))",
+            "праве",
+        ),
+        (
+            "pair-value-remains-structured",
+            "(першокласне-обчислити (як-є ((функція (х) х) (як-є (а (б))))) (як-є ()))",
+            "(а (б))",
+        ),
+        (
+            "empty-argument-shadows-existing-binding",
+            "(першокласне-обчислити (як-є ((функція (х) х) (як-є ()))) (як-є ((х . старе))))",
+            "()",
+        ),
+    ] {
+        let actual = exact(input, &mut s)
+            .unwrap_or_else(|error| panic!(
+                "test_id=D11-FC-CAPTURE-{id} layer=SENS input={input} expected={expected} actual_error={error}"
+            ))
+            .value.to_string();
+        assert_eq!(
+            actual, expected,
+            "test_id=D11-FC-CAPTURE-{id} layer=SENS input={input} expected={expected} actual={actual}"
+        );
+    }
+}

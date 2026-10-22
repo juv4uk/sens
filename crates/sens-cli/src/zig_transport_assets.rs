@@ -7,6 +7,7 @@ unsafe extern "C" {
     pub(super) fn sens_zig_linter_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_contract_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_repl_core_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_d9_witness_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_sanskrit_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_ukr_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_uk_bytes_copy(output: *mut u8, capacity: usize) -> isize;
@@ -20,4 +21,14 @@ unsafe extern "C" {
     pub(super) fn sens_zig_world_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_content_store_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_lisp_fs_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_domain_table_bytes_copy(
+        domain: u8,
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
+    pub(super) fn sens_zig_compiler_nucleus_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_compiler_identity_corpus_bytes_copy(
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
 }

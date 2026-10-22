@@ -11,7 +11,8 @@
 - **crates/sens-host/src/system_one_model.rs**: локальний loopback-адаптер OpenAI-сумісного сервера. Повертає лише розподіл і provenance; фінальна політика залишається в Lisp/SENS.
 - **research/probabilistic-decision-auto-choice-20261021.lisp**: дослідницька політика вибору.
 - **research/probabilistic-decision-system-one-20261022.lisp**: типізований пакет запитань і спостережень.
-- **research/system-one-support-seed-20261022.jsonl**: 60 синтетичних українських прикладів; 5 класів по 12 прикладів; 40 train / 10 validation / 10 test; повторів тексту немає.
+- **research/system-one-support-seed-20261022.jsonl**: 60 синтетичних українських прикладів;
+- **research/system-one-support-challenge-20261022.jsonl**: незалежні 60 синтетичних adversarial-прикладів лише для фінальної challenge-перевірки; 5 класів по 12 прикладів; 40 train / 10 validation / 10 test; повторів тексту немає.
 - **research/system-one-teacher-observe-20261022.py**: збирає обмежені оцінки вчителя, забороняє зовнішній endpoint і HTTP-перенаправлення.
 - **research/system-one-compact-student-20261022.py**: навчає gold/soft-label CPU-базову лінію, генерує ймовірності та надає вузький loopback HTTP API.
 - **research/system-one-calibrate-20261022.py**: підбирає температуру лише на validation і не допускає погіршення NLL порівняно з температурою 1.
@@ -123,6 +124,8 @@ python3 research/system-one-compare-20261022.py \
 # Звіт: /tmp/system-one-comparison/comparison.json
 # Містить accuracy, macro-F1, Brier, ECE, coverage та selective risk
 # для вчителя, gold-учня й учня з м'якими цілями на validation і test.
+# Окреме поле teacher_decoding_agreement показує збіг фактично згенерованої
+# літери вчителя з argmax нормованого розподілу; розбіжності явно звітуються.
 
 # 5) Запустити каліброваного компактного учня як локальний HTTP-вузол.
 export SENS_SYSTEM_ONE_STUDENT_API_KEY="$SENS_SYSTEM_ONE_API_KEY"
@@ -203,6 +206,47 @@ python3 research/system-one-transformer-student-20261022.py serve \
 ```
 
 Ваги mmBERT-small можуть завантажуватися під час `train`, якщо їх ще немає в кеші; для відтворення слід зберігати ревізію базової моделі, SHA seed/teacher-даних, версії бібліотек, параметри запуску та виміри пам'яті/швидкості. За потреби відокремлений teacher-token-level experiment можна пізніше порівняти з офіційним [TRL DistillationTrainer](https://huggingface.co/docs/trl/en/distillation_trainer), який працює з повнішими розподілами наступного токена; його не можна вважати тотожним п'ятикласовому loss цього скрипта.
+
+## Незалежний challenge-test: не для навчання і не для добору порога
+
+Файл `research/system-one-support-challenge-20261022.jsonl` містить 60 окремих, синтетично створених складних звернень — по 12 на кожен із п'яти класів. Набір позначено `evaluation_only=true`, він повністю має `split=test`, і в ньому немає нормалізованих текстових збігів із 60 записами seed. Це **challenge-набір для перевірки стійкості після фіксації моделі й порога**, а не заміна реальних звернень і не доказ виробничої якості.
+
+Після завершення основного порівняння запустити окрему оцінку на challenge-наборі. Ці виклики нічого не донавчають і не калібрують:
+
+```bash
+# Окремий прогноз вчителя. --allow-holdout тут лише дозволяє оцінку test;
+# збережений файл не передавати до жодної команди train.
+python3 research/system-one-teacher-observe-20261022.py \
+  --model Qwen/Qwen3.5-2B --split test --allow-holdout \
+  --input research/system-one-support-challenge-20261022.jsonl \
+  --output /tmp/system-one-challenge-teacher.jsonl
+
+# Якщо трансформерний експеримент був виконаний:
+python3 research/system-one-transformer-student-20261022.py predict \
+  --model-dir /tmp/system-one-mmbert-soft \
+  --input research/system-one-support-challenge-20261022.jsonl \
+  --split test --output /tmp/system-one-challenge-transformer.jsonl
+
+# Звести звичайний seed і challenge-test в один comparison.json.
+# Поріг має бути зафіксований на validation ДО цього виклику.
+python3 research/system-one-compare-20261022.py \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --teacher-train /tmp/system-one-teacher-train.jsonl \
+  --teacher-validation /tmp/system-one-teacher-validation.jsonl \
+  --teacher-test /tmp/system-one-teacher-test.jsonl \
+  --challenge-input research/system-one-support-challenge-20261022.jsonl \
+  --challenge-teacher /tmp/system-one-challenge-teacher.jsonl \
+  --output-dir /tmp/system-one-comparison-with-challenge \
+  --threshold 0.80 --bins 10
+
+# Якщо трансформерний експеримент виконано, додати ці три аргументи до команди вище:
+# --transformer-validation-predictions /tmp/system-one-mmbert-validation.jsonl
+# --transformer-test-predictions /tmp/system-one-mmbert-test.jsonl
+# --challenge-transformer-predictions /tmp/system-one-challenge-transformer.jsonl
+# comparison.json матиме секцію challenge.comparison із метриками для всіх доступних моделей.
+```
+
+У командах нижче `0.80` — лише приклад уже зафіксованого порога; замінити його на значення, яке було вибране **до challenge-тесту** на validation, і зафіксувати це значення у звіті. Не підбирати поріг за результатом challenge-набору. Якщо його результат спричинив зміну моделі, порога або правил, challenge-набір стає частиною процесу розробки; для чесної наступної оцінки потрібен новий незалежний challenge-набір. Кількість 60 і синтетичне походження треба показувати поруч із метриками.
 
 ## Межа виконаного
 

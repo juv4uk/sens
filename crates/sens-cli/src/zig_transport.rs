@@ -257,6 +257,11 @@ pub fn repl_core_source_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(asset_ffi::sens_zig_repl_core_bytes_copy, "ZIG_SENS_REPL")
 }
 
+/// Opaque D9 witness source bytes carried through the Zig root ABI.
+pub fn d9_witness_source_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(asset_ffi::sens_zig_d9_witness_bytes_copy, "ZIG_D9_WITNESS")
+}
+
 /// Перечитує актуальний Guard-довідник через Zig; шлях зафіксований у Zig,
 /// Rust не відкриває файл сам і не кешує його між викликами.
 pub fn guard_reference_source_bytes() -> Result<Vec<u8>, String> {
@@ -806,7 +811,7 @@ pub fn decode_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Str
     Ok(words)
 }
 
-fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+pub fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     validate_legacy_t5(bytes)?;
     let capacity = bytes
         .len()
@@ -1318,4 +1323,56 @@ pub fn content_store_source_bytes() -> Result<Vec<u8>, String> {
         ));
     }
     Ok(bytes)
+}
+
+/// Returns one SENS-owned domain projection table as opaque Zig-carried bytes.
+pub fn domain_table_source_bytes(domain: u8) -> Result<Vec<u8>, String> {
+    version()?;
+    if !(1..=11).contains(&domain) {
+        return Err(format!(
+            "ZIG_DOMAIN_TABLE_CARRIER unknown asset index {domain}"
+        ));
+    }
+    let required = unsafe {
+        asset_ffi::sens_zig_domain_table_bytes_copy(
+            domain,
+            std::ptr::NonNull::<u8>::dangling().as_ptr(),
+            0,
+        )
+    };
+    if required <= 0 {
+        return Err(format!(
+            "ZIG_DOMAIN_TABLE_CARRIER invalid length for asset {domain}: {required}"
+        ));
+    }
+    let len = usize::try_from(required).map_err(|_| "ZIG_DOMAIN_TABLE_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_DOMAIN_TABLE_CARRIER host byte cap exceeded".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_domain_table_bytes_copy(domain, bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!(
+            "ZIG_DOMAIN_TABLE_CARRIER byte-copy mismatch for asset {domain}: {copied}"
+        ));
+    }
+    Ok(bytes)
+}
+
+/// Opaque SENS compiler nucleus bytes carried through the Zig root ABI.
+pub fn compiler_nucleus_source_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_nucleus_bytes_copy,
+        "ZIG_COMPILER_NUCLEUS_CARRIER",
+    )
+}
+
+/// Opaque compiler identity corpus bytes carried through the Zig root ABI.
+pub fn compiler_identity_corpus_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_identity_corpus_bytes_copy,
+        "ZIG_COMPILER_IDENTITY_CORPUS_CARRIER",
+    )
 }

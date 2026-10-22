@@ -1,0 +1,1006 @@
+{
+  "schema": "sens.d11.legacy43-placement-review/v1",
+  "date": "2026-10-22",
+  "status": "UNRATIFIED_REVIEW",
+  "owner_clarification": "Власник не ратифіковував ці 43 записи; попередні owner-ratified/PROJECT_OWNER були помилковою атрибуцією.",
+  "original_source": "knowledge/d11-testing-vocabulary-ratified.json (історична назва шляху збережена для сумісності)",
+  "assessment": "Exact names/surfaces and preliminary role classification, NOT a semantic execution proof or ratification",
+  "totals": {
+    "examined": 43,
+    "lower_overlap": 13,
+    "structure_or_value": 4,
+    "test_only": 6,
+    "introspection": 8,
+    "structural_validator": 4,
+    "transport_reader": 2,
+    "unproven_law": 6,
+    "ratified_D11_from_these": 0
+  },
+  "matching_rule": "Exact string matches in ук/укр/en/LISP against current D1–D10 domain tables; D7 is a text domain and not a function match; equality of names does not establish behavior",
+  "rule": "No independent D11 resident without owner approval, exact-domain law, signed source/code equivalence and native positive/negative SENS evidence; old fixture key is not an admitted coordinate",
+  "rows": [
+    {
+      "legacy_fixture_bits": "00000000000",
+      "uk": "прочитати-файл",
+      "ukr": "прочитати-вміст-файла",
+      "en": "read-file",
+      "lisp": "READ-FILE",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D9",
+          "exact_bits": "110110111",
+          "lower_uk": "читати-файл",
+          "lower_ukr": "читати-файл",
+          "matched_surfaces": [
+            "en",
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "status": "NOT_TESTED_IO_EFFECT",
+        "reason": "Потребує контрольованого файлового/потокового тесту, не підмінювати перевіркою лише surface назви"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000000001",
+      "uk": "прочитати-сенс",
+      "ukr": "прочитати-програму-сенс",
+      "en": "read-sens",
+      "lisp": "READ-SENS",
+      "classification": "transport_reader",
+      "lower_surface_matches": [],
+      "review_route": "Порівняти SENS reader/структуру та Zig транспорт: фізичний кодек не робить самостійного D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000000010",
+      "uk": "декодувати-т5",
+      "ukr": "декодувати-подання-т5",
+      "en": "decode-t5",
+      "lisp": "DECODE-T5",
+      "classification": "transport_reader",
+      "lower_surface_matches": [],
+      "review_route": "Порівняти SENS reader/структуру та Zig транспорт: фізичний кодек не робить самостійного D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000000011",
+      "uk": "довжина",
+      "ukr": "довжина-послідовності",
+      "en": "length",
+      "lisp": "LENGTH",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D6",
+          "exact_bits": "000000",
+          "lower_uk": "довжина",
+          "lower_ukr": "довжина",
+          "matched_surfaces": [
+            "uk",
+            "en",
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000000100",
+      "uk": "порахувати",
+      "ukr": "порахувати-елементи",
+      "en": "count",
+      "lisp": "COUNT",
+      "classification": "unproven_law",
+      "lower_surface_matches": [],
+      "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "AMBIGUOUS",
+        "candidates": [
+          {
+            "domain": "D6",
+            "bits": "000000",
+            "uk": "довжина",
+            "note": "Якщо COUNT означає число елементів; Common Lisp COUNT рахує входження елемента, тому може відрізнятися"
+          },
+          {
+            "domain": "D10",
+            "bits": "0100001000",
+            "uk": "кількість-у-послідовності",
+            "note": "З'ясувати арність і чи передбачено критерій відбору"
+          }
+        ],
+        "needed_law": "Уточнити, чи підраховується довжина, кількість входжень заданого значення чи фільтрований підрахунок"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000000101",
+      "uk": "рівні?",
+      "ukr": "значення-структурно-рівні?",
+      "en": "equal?",
+      "lisp": "EQUAL?",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D8",
+          "exact_bits": "11110111",
+          "lower_uk": "однакові?",
+          "lower_ukr": "однакові?",
+          "matched_surfaces": [
+            "en"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000000110",
+      "uk": "друкувати",
+      "ukr": "вивести-на-друк",
+      "en": "print",
+      "lisp": "PRINT",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D8",
+          "exact_bits": "11011011",
+          "lower_uk": "друкувати",
+          "lower_ukr": "друкувати",
+          "matched_surfaces": [
+            "uk",
+            "en",
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "status": "NOT_TESTED_IO_EFFECT",
+        "reason": "Потребує контрольованого файлового/потокового тесту, не підмінювати перевіркою лише surface назви"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000000111",
+      "uk": "зріз",
+      "ukr": "зріз-послідовності",
+      "en": "slice",
+      "lisp": "SLICE",
+      "classification": "unproven_law",
+      "lower_surface_matches": [],
+      "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "AMBIGUOUS",
+        "candidates": [
+          {
+            "domain": "D8",
+            "bits": "00100001",
+            "uk": "підпослідовність",
+            "note": "Напіввідкритий зріз proper-list із двома межами D24+"
+          },
+          {
+            "domain": "D9",
+            "bits": "110100011",
+            "uk": "рядок-зріз",
+            "note": "Окрема область рядкових значень"
+          },
+          {
+            "domain": "D10",
+            "bits": "0000110110",
+            "uk": "взяти-напіввідкритий-зріз-вектора",
+            "note": "Окрема область векторних значень"
+          }
+        ],
+        "needed_law": "Вказати вид послідовності, межі, результат, розрізнити обхід списку і транспорт"
+      },
+      "native_evidence": {
+        "status": "BEHAVIORAL_NEIGHBOR_NATIVE_PASS_NOT_EQUIVALENCE",
+        "observed_lower_name": "підпослідовність",
+        "observed_lower_domain": "D8",
+        "source": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "ci": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "reason": "Перевірений D8 сусідній закон, не тотожність усіх історичних D11 сигнатур"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000001000",
+      "uk": "взяти",
+      "ukr": "взяти-початкову-частину",
+      "en": "take",
+      "lisp": "TAKE",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D6",
+          "exact_bits": "110000",
+          "lower_uk": "взяти",
+          "lower_ukr": "взяти",
+          "matched_surfaces": [
+            "uk",
+            "en",
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000001001",
+      "uk": "скинути",
+      "ukr": "відкинути-початкову-частину",
+      "en": "drop",
+      "lisp": "DROP",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D6",
+          "exact_bits": "110001",
+          "lower_uk": "відкинути",
+          "lower_ukr": "відкинути",
+          "matched_surfaces": [
+            "en",
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000001010",
+      "uk": "істина",
+      "ukr": "значення-істинності",
+      "en": "t",
+      "lisp": "T",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D1",
+          "exact_bits": "1",
+          "lower_uk": "так",
+          "lower_ukr": "так",
+          "matched_surfaces": [
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000001011",
+      "uk": "хиба",
+      "ukr": "значення-хибності",
+      "en": "nil",
+      "lisp": "NIL",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D1",
+          "exact_bits": "0",
+          "lower_uk": "ні",
+          "lower_ukr": "ні",
+          "matched_surfaces": [
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000001100",
+      "uk": "якщо",
+      "ukr": "умовне-виконання",
+      "en": "if",
+      "lisp": "IF",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D10",
+          "exact_bits": "0000000110",
+          "lower_uk": "якщо",
+          "lower_ukr": "якщо",
+          "matched_surfaces": [
+            "uk",
+            "en",
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "status": "D10_DIRECT_CALL_NOT_PROVEN",
+        "lower_domain": "D10",
+        "lower_exact_bits": "0000000110",
+        "current_native_witness": "D3 за-умовою",
+        "observation": "Прямий виклик якщо давав unknown symbol у гілці Core4; замінений на чинний D3 COND, який має підтверджений нативний PASS. Саме D10 IF через це не стає викличним.",
+        "evidence": "https://github.com/juv4uk/sens/actions/runs/39776483959"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000001101",
+      "uk": "якщо-то-інакше",
+      "ukr": "умовне-виконання-з-альтернативою",
+      "en": "if-else",
+      "lisp": "IF-ELSE",
+      "classification": "unproven_law",
+      "lower_surface_matches": [],
+      "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "LOWER_SAME_BEHAVIOR_CANDIDATE",
+        "candidates": [
+          {
+            "domain": "D10",
+            "bits": "0000000110",
+            "uk": "якщо",
+            "note": "lib/core.lisp визначає триаргументний варіант із коротким обчисленням гілок; не новий закон без іншої семантики"
+          }
+        ],
+        "needed_law": "Нативно перевірити позитивну, негативну та неоцінену гілку у D10; відрізнити синтаксичний псевдонім від opcode"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000001110",
+      "uk": "стверджувати",
+      "ukr": "перевірити-твердження",
+      "en": "assert",
+      "lisp": "ASSERT",
+      "classification": "unproven_law",
+      "lower_surface_matches": [],
+      "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "SEMANTIC_SCOPE_UNCLEAR",
+        "candidates": [],
+        "needed_law": "Відокремити тестове ASSERT із зупинкою/діагностикою від логічного факту та ствердження у світі; не дублювати D9 ASSERT-FACT"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000001111",
+      "uk": "провал",
+      "ukr": "повідомити-про-помилку",
+      "en": "fail",
+      "lisp": "FAIL",
+      "classification": "unproven_law",
+      "lower_surface_matches": [],
+      "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "SEMANTIC_SCOPE_UNCLEAR",
+        "candidates": [],
+        "needed_law": "Розрізнити структурований результат-помилку, D1 ні, виняток виконання та транспортну відмову; не присвоювати код за словом FAIL"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000010000",
+      "uk": "є?",
+      "ukr": "перевірити-існування?",
+      "en": "exists?",
+      "lisp": "EXISTS?",
+      "classification": "unproven_law",
+      "lower_surface_matches": [],
+      "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "LOWER_SAME_BEHAVIOR_CANDIDATE",
+        "candidates": [
+          {
+            "domain": "D8",
+            "bits": "10100101",
+            "uk": "існує-збіг?",
+            "note": "D8 SOME: перевірити D1-предикат над правильним списком, порожню основу й коротке обчислення"
+          }
+        ],
+        "needed_law": "Потрібна точна сигнатура: ∃ pred(x) над елементами чи просто існування значення/імені"
+      },
+      "native_evidence": {
+        "status": "BEHAVIORAL_NEIGHBOR_NATIVE_PASS_NOT_EQUIVALENCE",
+        "observed_lower_name": "існує-збіг?",
+        "observed_lower_domain": "D8",
+        "source": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "ci": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "reason": "Перевірений D8 сусідній закон, не тотожність усіх історичних D11 сигнатур"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000010001",
+      "uk": "всі?",
+      "ukr": "усі-елементи-відповідають?",
+      "en": "all?",
+      "lisp": "ALL?",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D6",
+          "exact_bits": "111101",
+          "lower_uk": "усі?",
+          "lower_ukr": "усі?",
+          "matched_surfaces": [
+            "en"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000010010",
+      "uk": "і",
+      "ukr": "логічне-і",
+      "en": "and",
+      "lisp": "AND",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D8",
+          "exact_bits": "11110101",
+          "lower_uk": "та",
+          "lower_ukr": "та",
+          "matched_surfaces": [
+            "en",
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000010011",
+      "uk": "або",
+      "ukr": "логічне-або",
+      "en": "or",
+      "lisp": "OR",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D8",
+          "exact_bits": "11111100",
+          "lower_uk": "або",
+          "lower_ukr": "або",
+          "matched_surfaces": [
+            "uk",
+            "en",
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000010100",
+      "uk": "не",
+      "ukr": "логічне-заперечення",
+      "en": "not",
+      "lisp": "NOT",
+      "classification": "lower_overlap",
+      "lower_surface_matches": [
+        {
+          "domain": "D4",
+          "exact_bits": "0100",
+          "lower_uk": "хибне?",
+          "lower_ukr": "хибне?",
+          "matched_surfaces": [
+            "lisp"
+          ]
+        }
+      ],
+      "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "TARGETED_NATIVE_LOWER_DOMAIN_LAW_PASS",
+        "scope": "Нативний SENS підтвердив функцію вже чинного нижчого домену, але НЕ виконання історичного D11 fixture-ключа, НЕ допуск нового D11 opcode",
+        "run": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+        "job": 119816615208
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000010101",
+      "uk": "тест-шлях",
+      "ukr": "шлях-тестового-файла",
+      "en": "test-path",
+      "lisp": "TEST-PATH",
+      "classification": "test_only",
+      "lower_surface_matches": [],
+      "review_route": "Залишити у тестовій інфраструктурі, не наділяти семантичним кодом",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000010110",
+      "uk": "тест-байти",
+      "ukr": "байти-тестового-набору",
+      "en": "test-bytes",
+      "lisp": "TEST-BYTES",
+      "classification": "test_only",
+      "lower_surface_matches": [],
+      "review_route": "Залишити у тестовій інфраструктурі, не наділяти семантичним кодом",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000010111",
+      "uk": "тест-слова",
+      "ukr": "слова-тестового-набору",
+      "en": "test-words",
+      "lisp": "TEST-WORDS",
+      "classification": "test_only",
+      "lower_surface_matches": [],
+      "review_route": "Залишити у тестовій інфраструктурі, не наділяти семантичним кодом",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000011000",
+      "uk": "д2-відкрити",
+      "ukr": "маркер-відкриття-д2",
+      "en": "d2-open",
+      "lisp": "D2-OPEN",
+      "classification": "structure_or_value",
+      "lower_surface_matches": [],
+      "review_route": "Зіставити маркер з D2/D3 граматикою чи значенням, не трактувати як самостійну функцію D11",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000011001",
+      "uk": "д2-закрити",
+      "ukr": "маркер-закриття-д2",
+      "en": "d2-close",
+      "lisp": "D2-CLOSE",
+      "classification": "structure_or_value",
+      "lower_surface_matches": [],
+      "review_route": "Зіставити маркер з D2/D3 граматикою чи значенням, не трактувати як самостійну функцію D11",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000011010",
+      "uk": "д2-роздільник",
+      "ukr": "маркер-розділення-д2",
+      "en": "d2-sep",
+      "lisp": "D2-SEP",
+      "classification": "structure_or_value",
+      "lower_surface_matches": [],
+      "review_route": "Зіставити маркер з D2/D3 граматикою чи значенням, не трактувати як самостійну функцію D11",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000011011",
+      "uk": "д3-порожній",
+      "ukr": "порожнє-значення-д3",
+      "en": "d3-empty",
+      "lisp": "D3-EMPTY",
+      "classification": "structure_or_value",
+      "lower_surface_matches": [],
+      "review_route": "Зіставити маркер з D2/D3 граматикою чи значенням, не трактувати як самостійну функцію D11",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000011100",
+      "uk": "має-визначити",
+      "ukr": "наявне-визначення",
+      "en": "has-define",
+      "lisp": "HAS-DEFINE",
+      "classification": "introspection",
+      "lower_surface_matches": [],
+      "review_route": "Довести метаобчислювальний закон SENS; можлива бібліотечна композиція D3–D5, не нова функція через збіг написання",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000011101",
+      "uk": "має-функцію",
+      "ukr": "наявне-лямбда-визначення",
+      "en": "has-lambda",
+      "lisp": "HAS-LAMBDA",
+      "classification": "introspection",
+      "lower_surface_matches": [],
+      "review_route": "Довести метаобчислювальний закон SENS; можлива бібліотечна композиція D3–D5, не нова функція через збіг написання",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000011110",
+      "uk": "має-як-є",
+      "ukr": "наявна-форма-цитування",
+      "en": "has-quote",
+      "lisp": "HAS-QUOTE",
+      "classification": "introspection",
+      "lower_surface_matches": [],
+      "review_route": "Довести метаобчислювальний закон SENS; можлива бібліотечна композиція D3–D5, не нова функція через збіг написання",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000011111",
+      "uk": "має-сполучити",
+      "ukr": "наявна-форма-сполучення",
+      "en": "has-cons",
+      "lisp": "HAS-CONS",
+      "classification": "introspection",
+      "lower_surface_matches": [],
+      "review_route": "Довести метаобчислювальний закон SENS; можлива бібліотечна композиція D3–D5, не нова функція через збіг написання",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000100000",
+      "uk": "має-перше",
+      "ukr": "наявний-доступ-до-першого-елемента",
+      "en": "has-car",
+      "lisp": "HAS-CAR",
+      "classification": "introspection",
+      "lower_surface_matches": [],
+      "review_route": "Довести метаобчислювальний закон SENS; можлива бібліотечна композиція D3–D5, не нова функція через збіг написання",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000100001",
+      "uk": "має-атом",
+      "ukr": "наявна-перевірка-атома",
+      "en": "has-atom",
+      "lisp": "HAS-ATOM",
+      "classification": "introspection",
+      "lower_surface_matches": [],
+      "review_route": "Довести метаобчислювальний закон SENS; можлива бібліотечна композиція D3–D5, не нова функція через збіг написання",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000100010",
+      "uk": "має-тотожність",
+      "ukr": "наявна-перевірка-тотожності",
+      "en": "has-eq",
+      "lisp": "HAS-EQ",
+      "classification": "introspection",
+      "lower_surface_matches": [],
+      "review_route": "Довести метаобчислювальний закон SENS; можлива бібліотечна композиція D3–D5, не нова функція через збіг написання",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000100011",
+      "uk": "має-умови",
+      "ukr": "наявна-умовна-конструкція",
+      "en": "has-cond",
+      "lisp": "HAS-COND",
+      "classification": "introspection",
+      "lower_surface_matches": [],
+      "review_route": "Довести метаобчислювальний закон SENS; можлива бібліотечна композиція D3–D5, не нова функція через збіг написання",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000100100",
+      "uk": "всі-точність",
+      "ukr": "усі-елементи-точної-бітності",
+      "en": "all-exact",
+      "lisp": "ALL-EXACT",
+      "classification": "structural_validator",
+      "lower_surface_matches": [],
+      "review_route": "Потребує конкретної структурної властивості й нативного SENS-свідка; розміщувати після доказу",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000100101",
+      "uk": "структура-збалансована",
+      "ukr": "збалансованість-структури",
+      "en": "struct-balanced",
+      "lisp": "STRUCT-BALANCED",
+      "classification": "structural_validator",
+      "lower_surface_matches": [],
+      "review_route": "Потребує конкретної структурної властивості й нативного SENS-свідка; розміщувати після доказу",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000100110",
+      "uk": "без-точки",
+      "ukr": "без-крапкового-хвоста",
+      "en": "no-dot",
+      "lisp": "NO-DOT",
+      "classification": "structural_validator",
+      "lower_surface_matches": [],
+      "review_route": "Потребує конкретної структурної властивості й нативного SENS-свідка; розміщувати після доказу",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "status": "EXISTING_SENS_LIBRARY_LAW_WITH_NATIVE_WITNESS",
+        "source": "lib/lisp-fs.lisp",
+        "function": "внутрішній-правильний-список?",
+        "test_file": "crates/sens/tests/fs_bridge_diagnostics.rs",
+        "test_function": "root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails",
+        "law": "D1+D3; proper-list yes, dotted-tail or atom no",
+        "caveat": "Це прочитаний структурний S-вираз, не сканування сирих текстових крапок"
+      }
+    },
+    {
+      "legacy_fixture_bits": "00000100111",
+      "uk": "точний-розмір",
+      "ukr": "точний-розмір-представлення",
+      "en": "exact-size",
+      "lisp": "EXACT-SIZE",
+      "classification": "structural_validator",
+      "lower_surface_matches": [],
+      "review_route": "Потребує конкретної структурної властивості й нативного SENS-свідка; розміщувати після доказу",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000101000",
+      "uk": "тест-прохід",
+      "ukr": "успішне-проходження-тесту",
+      "en": "test-pass",
+      "lisp": "TEST-PASS",
+      "classification": "test_only",
+      "lower_surface_matches": [],
+      "review_route": "Залишити у тестовій інфраструктурі, не наділяти семантичним кодом",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000101001",
+      "uk": "тест-провал",
+      "ukr": "невдале-проходження-тесту",
+      "en": "test-fail",
+      "lisp": "TEST-FAIL",
+      "classification": "test_only",
+      "lower_surface_matches": [],
+      "review_route": "Залишити у тестовій інфраструктурі, не наділяти семантичним кодом",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    },
+    {
+      "legacy_fixture_bits": "00000101010",
+      "uk": "тест-елемент",
+      "ukr": "елемент-тестового-набору",
+      "en": "test-element",
+      "lisp": "TEST-ELEMENT",
+      "classification": "test_only",
+      "lower_surface_matches": [],
+      "review_route": "Залишити у тестовій інфраструктурі, не наділяти семантичним кодом",
+      "ratified": false,
+      "independent_law_proven": false,
+      "direct_D11_opcode": false
+    }
+  ],
+  "follow_up": {
+    "native_witnesses": {
+      "existing_lower_names_targeted": 10,
+      "positive_negative_cases_source": 41,
+      "source": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+      "ci": "https://github.com/juv4uk/sens/actions/runs/39776483959",
+      "status": "TARGETED_NATIVE_SENS_PASS_LOWER_LAWS_WITH_D10_IF_EXCEPTION",
+      "excluded_for_now": [
+        "READ-FILE",
+        "PRINT"
+      ],
+      "previous_ci_red": {
+        "run": "https://github.com/juv4uk/sens/actions/runs/39773695380",
+        "observed": "Нативна SENS група D24 пройшла, а група чистих законів зупинилась на забороні синтаксичної D3 форми у негативному свідку короткого виконання",
+        "corrected_test_commit": "5843ad9c230603a872e833c48e8c9c5629de0a62",
+        "meaning": "Не перетворювати відмову читача на твердження про хибність закону D8 AND"
+      },
+      "ci_job": 119816615208,
+      "d10_if_exception": "D10 IF існує в канонічній таблиці, але його прямий виклик окремо не доведений; свідок перевіряє D3 COND",
+      "cases_native_d1": "41 native source cases; both test functions PASS. Not 41 admitted D11 residents"
+    },
+    "name_only_missing_semantic_neighborhood": 6,
+    "clarification": "Попередня категорія unproven_law означає брак точного буквального збігу, а не доказ відсутності семантичного резидента у D1–D10.",
+    "semantic_scope": "Збережено правило попередніх доменів: exact address, independent law, current native mechanism, owner decision. Neighbor ≠ same law; runtime D3 COND ≠ admitted D10 IF.",
+    "filtered_placement_20261022": {
+      "file": "knowledge/d11/база-доступних-функцій/розміщення-43-фільтр-20261022.tsv",
+      "examined": 43,
+      "status": "ROUTED_NO_MACHINE_ADMISSION",
+      "source": "lib/d11-form-presence.lisp",
+      "native_test": "crates/sens/tests/d11_legacy_form_presence.rs",
+      "native_cases": 28,
+      "native_status": "TARGETED_NATIVE_SENS_PASS_28_CASES_WORKFLOW_RED_OTHER_CASE",
+      "introspection_projections": [
+        "містить-форму-визначити?",
+        "містить-форму-функція?",
+        "містить-форму-цитування?",
+        "містить-форму-сполучити?",
+        "містить-форму-перше?",
+        "містить-форму-атом?",
+        "містить-форму-тотожне?",
+        "містить-форму-умов?"
+      ],
+      "historic_d11_fixture_bits_only": true,
+      "owner_ratified_from_43": 0,
+      "newly_admitted_d11_opcodes": 0,
+      "decision": "Корисні HAS-* — одна SENS-бібліотечна композиція та 8 укр-викликів. Тотожне нижчим доменам не дублювати, дані й транспорт не видавати за opcode.",
+      "existing_proper_list_law": "NO-DOT reuses already implemented and natively tested lib/lisp-fs.lisp list-shape law",
+      "last_fix": "37d02638b62a98093c594a0686288bebb5dd6cfa: proper AST call-head vs arguments; do not count atomic argument as callable head",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
+      "native_ci_job": 119841052389,
+      "native_source_blob": "0b871313aed5da594c2855850c4fcd3c96389268",
+      "native_test_blob": "5f866e70991ddb038d78735007b42f52f70a2e2e"
+    }
+  }
+}

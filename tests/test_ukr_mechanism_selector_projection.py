@@ -15,8 +15,11 @@ SOURCE = ROOT / "lib/mechanism-selector.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
 D5 = ROOT / "lib/domains/d5.lisp"
 REPLACEMENTS = (
-    ("0011", "визначити", "define", "DEFINE", 10),
-    ("0010", "функція", "lambda", "LAMBDA", 6),
+    # У цитованому паспорті є по одному ключу маршруту DEFINE/LAMBDA:
+    # це ДАНІ, але лексичний лічильник бачить їх як форми.
+    # Прямі виклики не змінені; нічого не виконується Python-ом.
+    ("0011", "визначити", "define", "DEFINE", 13),
+    ("0010", "функція", "lambda", "LAMBDA", 9),
 )
 LOCAL_RENAMES = (
     ("mechanism-selector-find-section", "механізм-знайти-секцію"),
@@ -107,26 +110,37 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
             "(функція (ідентичність виконавець)",
         ):
             self.assertIn(signature, code)
-        self.assertIn("(як-є rows)", code)
+        # Третє поле rows вже відкрите СЕНС, без повторного D7-пошуку.
+        self.assertIn("(визначити маршрути-вибору-механізму\n  рядки-реєстру-механізму)", code)
+        self.assertNotIn("(як-є rows)", code)
         self.assertIn("(третє маршрут)", code)
         self.assertNotIn("(третє route)", code)
 
-    def test_registry_and_symbolic_sid_values_still_present(self):
-        # Шлях є цитованими D7-даними; D8 повертає String у джерельному
-        # законі. Сирий String literal не має чинного T5M REPL projection.
-        # Після нормального форматування Lisp перенос рядків між
-        # викличними вузлами не змінює їхньої тотожності.
+    def test_only_ratified_mechanism_passport_is_active(self):
+        # Ключі маршруту вже є українськими об'єктами D3/D5.
+        # Історичний восьмибітний реєстр не має семантичної влади.
         normalized = re.sub(r"\s+", " ", uncommented(self.source))
-        for path in ("lib/surface/semantic-registry.lisp",
-                     "lib/function-table-mechanisms.lisp"):
-            with self.subTest(path=path):
-                self.assertIn(
-                    f"(читати-файл (символ-у-текст (як-є {path})))",
-                    normalized,
-                )
-                self.assertNotIn(f'"{path}"', self.source)
-        for token in ("(як-є rows)",
-                      "(як-є mechanism-selected)", "(як-є sid-not-in-function-table)"):
+        self.assertNotIn("(читати-файл", normalized)
+        self.assertNotIn("(читати-всі", normalized)
+        self.assertNotIn("lib/surface/semantic-registry.lisp", self.source)
+        for row in (
+            "(атом? evaluator atom-primitive)",
+            "(додати common-lisp bounded-exact-add)",
+            "(додати prolog bounded-exact-add)",
+            "(додати clips bounded-exact-add)",
+            "(додати datalog bounded-exact-add)",
+        ):
+            self.assertIn(row, normalized)
+        self.assertIn(
+            "(визначити метадані-вибору-механізму реєстр-вибору-механізму)",
+            normalized
+        )
+        self.assertIn(
+            "(визначити рядки-реєстру-механізму (решта (третє метадані-вибору-механізму)))",
+            normalized
+        )
+        for token in ("(rows", "(як-є mechanism-selected)",
+                      "(як-є sid-not-in-function-table)"):
             self.assertIn(token, self.source)
         for legacy, current in LOCAL_RENAMES:
             self.assertIn(f"(визначити {current}", self.source)
@@ -154,11 +168,18 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         code = uncommented(self.source)
         self.assertRegex(
             code,
-            r"\(визначити\s+метадані-вибору-механізму"
-            r"\s+\(друге\s+\(третє\s+\(перше\s+\(читати-всі",
+            r"\(визначити\s+реєстр-вибору-механізму"
+            r"\s+\(як-є\s+\(\(schema",
         )
-        self.assertNotIn(
-            "(визначити метадані-вибору-механізму\n  (перше", code
+        # Ніякого відокремленого джерела семантичного змісту: байтово
+        # ті самі маршрути є в чинному паспорті; автономний SENS
+        # потребує лише цитовані значення, а не файлову host-функцію.
+        from_rows = metadata.split("     (rows", 1)[1].split("     (profile-routes)", 1)[0]
+        local_rows = self.source.split("     (rows", 1)[1].split("     (profile-routes)", 1)[0]
+        self.assertEqual(from_rows, local_rows)
+        self.assertIn(
+            "(визначити метадані-вибору-механізму\n  реєстр-вибору-механізму)",
+            code
         )
 
     def test_function_table_fallbacks_use_sens_d1_not_bare_yes(self):
@@ -169,8 +190,14 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         code = uncommented(metadata)
         self.assertIn("(визначити зібрати-механізми-функції", code)
         self.assertIn("(визначити механізми-функції", code)
-        self.assertNotRegex(code, r"\(\s*так(?=\s|\))")
-        self.assertNotRegex(code, r"\(\s*ні(?=\s|\))")
+        # «(так <вираз>)» — законна гілка D3 COND, а не голий D1.
+        # Старий regex забороняв кожну гілку «так» і давав хибний RED.
+        # Відхиляємо лише голі псевдовиклики та буквальне повернення
+        # «так/ні» замість обчисленого D1-предиката.
+        self.assertNotRegex(code, r"\(\s*(?:так|ні)\s*\)")
+        self.assertNotRegex(code, r"\(\s*так\s+(?:так|ні)\s*\)")
+        # Тільки два SENS D1 fallback у самому паспорті; живі
+        # позитивні/негативні запити виконує guard.rs, не Python.
         self.assertEqual(code.count("((атом? (як-є ()))"), 2)
 
     def test_exact_d1_registry_predicate_not_old_textual_boolean(self):
@@ -179,17 +206,17 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         false_d1 = "(атом? (як-є (())))"
         self.assertIn("((атом? рядки) " + false_d1 + ")", code)
         self.assertIn(
-            "((тотожне? ідентичність (перше (перше рядки))) "
+            "((механізм-однакові? ідентичність (перше (перше рядки))) "
             + true_d1 + ")", code,
         )
         self.assertNotRegex(code, r"(?<![\w-])(?:так|ні)(?![\w-])")
         self.assertNotIn("(як-є yes)", code)
         self.assertNotIn("(як-є no)", code)
+        self.assertRegex(code, r"\(хибне\?\s+\(реєстр-містить-ідентичність\?")
         self.assertRegex(
             code,
             r"\(реєстр-містить-ідентичність\?\s+"
-            r"ідентичність\s+рядки-реєстру-механізму\)\s+"
-            + re.escape(false_d1) + r"\)",
+            r"ідентичність\s+рядки-реєстру-механізму\)\s*\)",
         )
 
     def test_named_helpers_execute_without_unadmitted_d5_value_calls(self):

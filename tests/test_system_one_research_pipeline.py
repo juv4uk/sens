@@ -6,6 +6,7 @@ import importlib.util
 import json
 import tempfile
 import threading
+import unicodedata
 import unittest
 from argparse import Namespace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -465,6 +466,48 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 thread.join(timeout=2.0)
                 server.server_close()
 
+    def test_adversarial_challenge_is_holdout_only_and_disjoint_from_seed(self):
+        seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
+        challenge_path = ROOT / "research" / "system-one-support-challenge-20261022.jsonl"
+        seed_rows, _ = student.read_jsonl(seed_path)
+        challenge_rows, challenge_raw = student.read_jsonl(challenge_path)
+        self.assertEqual(len(challenge_rows), 60)
+        self.assertTrue(all(row.get("evaluation_only") is True for row in challenge_rows))
+        self.assertTrue(all(row.get("split") == "test" for row in challenge_rows))
+        self.assertTrue(
+            all(row.get("source") == "synthetic-adversarial-challenge" for row in challenge_rows)
+        )
+        self.assertEqual(
+            {label: sum(row.get("gold") == label for row in challenge_rows) for label in student.LABELS},
+            {label: 12 for label in student.LABELS},
+        )
+        normalize = lambda value: unicodedata.normalize("NFKC", value).casefold().strip()
+        seed_texts = {normalize(row["text"]) for row in seed_rows}
+        challenge_texts = [normalize(row["text"]) for row in challenge_rows]
+        self.assertEqual(len(set(challenge_texts)), len(challenge_texts))
+        self.assertTrue(seed_texts.isdisjoint(challenge_texts))
+        self.assertEqual(len({row["id"] for row in challenge_rows}), len(challenge_rows))
+        self.assertEqual(
+            hashlib.sha256(challenge_raw).hexdigest(),
+            hashlib.sha256(challenge_path.read_bytes()).hexdigest(),
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "must-not-be-trained.json"
+            with self.assertRaises(student.StudentError):
+                student.train(
+                    Namespace(
+                        input=challenge_path,
+                        teacher=None,
+                        output=output,
+                        smoothing=1.0,
+                        min_count=1,
+                        gold_weight=None,
+                        overwrite=False,
+                    )
+                )
+            self.assertFalse(output.exists())
+
     def test_committed_seed_trains_and_predicts_only_selected_splits(self):
         seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
         rows, raw = student.read_jsonl(seed_path)
@@ -479,6 +522,20 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
         )
         self.assertEqual(len({row["text"] for row in rows}), 60)
         self.assertTrue(all(row["source"] == "synthetic-curated-seed" for row in rows))
+
+        self.assertEqual(len({row["id"] for row in rows}), len(rows))
+        normalized_texts = {
+            unicodedata.normalize("NFKC", row["text"]).casefold().strip()
+            for row in rows
+        }
+        self.assertEqual(len(normalized_texts), len(rows))
+        for split, expected_count in (("train", 8), ("validation", 2), ("test", 2)):
+            rows_in_split = [row for row in rows if row["split"] == split]
+            self.assertEqual(len(rows_in_split), expected_count * len(student.LABELS))
+            self.assertEqual(
+                {label: sum(row["gold"] == label for row in rows_in_split) for label in student.LABELS},
+                {label: expected_count for label in student.LABELS},
+            )
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -526,6 +583,35 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(report["count"], 10)
             self.assertEqual(report["split"], "test")
 
+    def test_challenge_comparison_rejects_seed_overlap_and_non_holdout_rows(self):
+        seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
+        challenge_path = ROOT / "research" / "system-one-support-challenge-20261022.jsonl"
+        seed_rows, _ = student.read_jsonl(seed_path)
+        challenge_rows, _ = student.read_jsonl(challenge_path)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            overlap_rows = [dict(row) for row in challenge_rows]
+            overlap_rows[0]["text"] = seed_rows[0]["text"]
+            overlap_path = root / "overlap.jsonl"
+            write_jsonl(overlap_path, overlap_rows)
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.validate_challenge_corpus(overlap_path, seed_rows)
+
+            train_leak_rows = [dict(row) for row in challenge_rows]
+            train_leak_rows[0]["evaluation_only"] = False
+            train_leak_path = root / "not-holdout.jsonl"
+            write_jsonl(train_leak_path, train_leak_rows)
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.validate_challenge_corpus(train_leak_path, seed_rows)
+
+            duplicate_rows = [dict(row) for row in challenge_rows]
+            duplicate_rows[1]["text"] = duplicate_rows[0]["text"].upper()
+            duplicate_path = root / "duplicate-normalized.jsonl"
+            write_jsonl(duplicate_path, duplicate_rows)
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.validate_challenge_corpus(duplicate_path, seed_rows)
+
     def test_comparison_runner_keeps_holdout_out_of_training(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -560,11 +646,27 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                             "teacher": "fixture-teacher-v1",
                             "teacher_distribution": exact_distribution(row["gold"]),
                             "teacher_prediction": row["gold"],
+                            "teacher_generated_label": row["gold"],
+                            "generated_label_matches_top_probability": True,
                         }
                     )
                 output = root / f"teacher-{split}.jsonl"
                 write_jsonl(output, observations)
                 teacher_paths[split] = output
+
+            # Узгодженість фактично згенерованої літери з argmax має бути перевірюваною.
+            test_teacher_rows, _ = student.read_jsonl(teacher_paths["test"])
+            inconsistent = [dict(row) for row in test_teacher_rows]
+            inconsistent[0]["generated_label_matches_top_probability"] = False
+            inconsistent_path = root / "teacher-test-inconsistent.jsonl"
+            write_jsonl(inconsistent_path, inconsistent)
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.validate_teacher_file(
+                    inconsistent_path,
+                    [row for row in seed_rows if row["split"] == "test"],
+                    "test",
+                    seed_sha,
+                )
 
             output_dir = root / "comparison"
             report = comparison.run(
@@ -589,6 +691,10 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(report["dataset_sha256"], seed_sha)
             self.assertEqual(report["teacher_observations_used_for_training"], ["train"])
             self.assertFalse(report["test_used_for_training_or_calibration"])
+            for split in ("train", "validation", "test"):
+                agreement = report["teacher_decoding_agreement"][split]
+                self.assertEqual(agreement["agreement_rate"], 1.0)
+                self.assertEqual(agreement["disagreements"], 0)
             self.assertEqual(set(report["comparison"]), {"validation", "test"})
             for split in ("validation", "test"):
                 self.assertEqual(
@@ -629,6 +735,41 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 write_jsonl(transformer_path, rows)
                 transformer_paths[split] = transformer_path
 
+            challenge_path = ROOT / "research" / "system-one-support-challenge-20261022.jsonl"
+            challenge_rows, challenge_raw = student.read_jsonl(challenge_path)
+            challenge_sha = hashlib.sha256(challenge_raw).hexdigest()
+            challenge_teacher_rows = [
+                {
+                    **row,
+                    "dataset_sha256": challenge_sha,
+                    "prompt_version": "fixture-prompt-v1",
+                    "teacher": "fixture-teacher-v1",
+                    "teacher_distribution": exact_distribution(row["gold"]),
+                    "teacher_prediction": row["gold"],
+                            "teacher_generated_label": row["gold"],
+                            "generated_label_matches_top_probability": True,
+                }
+                for row in challenge_rows
+            ]
+            challenge_teacher_path = root / "teacher-challenge.jsonl"
+            write_jsonl(challenge_teacher_path, challenge_teacher_rows)
+            challenge_transformer_rows = [
+                {
+                    "id": row["id"],
+                    "split": "test",
+                    "text": row["text"],
+                    "gold": row["gold"],
+                    "model_schema": "sens.system-one.transformer-student/1",
+                    "base_model": "fixture-mmbert",
+                    "training_dataset_sha256": seed_sha,
+                    "calibration_temperature": 1.25,
+                    "distribution": exact_distribution(row["gold"]),
+                }
+                for row in challenge_rows
+            ]
+            challenge_transformer_path = root / "challenge-transformer.jsonl"
+            write_jsonl(challenge_transformer_path, challenge_transformer_rows)
+
             transformer_output = root / "comparison-with-transformer"
             transformer_report = comparison.run(
                 Namespace(
@@ -638,6 +779,9 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                     teacher_test=teacher_paths["test"],
                     transformer_validation_predictions=transformer_paths["validation"],
                     transformer_test_predictions=transformer_paths["test"],
+                    challenge_input=challenge_path,
+                    challenge_teacher=challenge_teacher_path,
+                    challenge_transformer_predictions=challenge_transformer_path,
                     output_dir=transformer_output,
                     threshold=0.5,
                     bins=5,
@@ -657,6 +801,22 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 "fixture-mmbert",
             )
             self.assertFalse(transformer_report["test_used_for_training_or_calibration"])
+            challenge_report = transformer_report["challenge"]
+            self.assertTrue(challenge_report["evaluation_only"])
+            self.assertEqual(challenge_report["dataset_sha256"], challenge_sha)
+            self.assertEqual(challenge_report["record_count"], 60)
+            self.assertFalse(challenge_report["test_used_for_training_or_calibration"])
+            self.assertFalse(challenge_report["threshold_selected_on_challenge"])
+            self.assertEqual(
+                challenge_report["teacher_decoding_agreement"]["agreement_rate"],
+                1.0,
+            )
+            self.assertEqual(
+                set(challenge_report["comparison"]),
+                {"teacher", "student_gold", "student_soft", "student_transformer"},
+            )
+            self.assertTrue((transformer_output / "challenge-student-gold.jsonl").is_file())
+            self.assertTrue((transformer_output / "challenge-student-soft.jsonl").is_file())
 
             # Неправильний SHA test-виводу має відхилятися до навчання або запису моделі.
             bad_test_rows, _ = student.read_jsonl(transformer_paths["test"])
