@@ -8,7 +8,7 @@ use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
 use sens::{
     eval_program, render_value_for_presentation, BinaryNumber, CoreDomainIdentity, DomainIdentity,
-    Environment, ExactDomainWord, Expr, ExprKind, PairNode, PhysicalT5Program, PresentationLanguage,
+    Environment, ExactDomainWord, Expr, ExprKind, PhysicalT5Program, PresentationLanguage,
     Session, Value,
 };
 use std::env;
@@ -2475,7 +2475,7 @@ mod tests {
 
     #[test]
     fn classic_repl_reply_uppercases_dotted_and_vector_symbol_data() {
-        let dotted = Value::Pair(std::rc::Rc::new(PairNode {
+        let dotted = Value::Pair(std::rc::Rc::new(sens::PairNode {
             head: Value::Symbol("left".into()),
             tail: Value::Symbol("right".into()),
         }));
