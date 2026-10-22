@@ -546,6 +546,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-take-while-atom-general"
                 | "list-interpose-general"
                 | "list-last-occurrence-suffix"
+                | "list-suffix-after-last-atom-match-zero-copy-general"
                 | "list-split-first-occurrence-general"
                 | "list-all-distinct-atoms-general"
                 | "list-keep-all-matching-atoms-general"
