@@ -123,6 +123,21 @@ class CallsiteAuditTests(unittest.TestCase):
                         f'({bits} (ук {uk}) (укр {ukr}) (san ()) '
                         f'(en {en}) (LISP {en.upper()}) (sym ()))\n')
 
+    def test_current_ukrainian_let_bindings_are_not_executable_calls(self):
+        # Генератор справді використовує нехай з локальним
+        # фізичний-запис: це ім'я параметра, а не мовний виклик.
+        for binder in ("нехай", "нехай-послідовно"):
+            with self.subTest(binder=binder):
+                program = (
+                    f"({binder} ((фізичний-запис (число-рядок число))) "
+                    '(рядок-додати фізичний-запис "0b"))'
+                )
+                heads = [token.text for token in mod.candidate_heads(mod.parse(program))]
+                self.assertIn(binder, heads)
+                self.assertIn("число-рядок", heads)
+                self.assertIn("рядок-додати", heads)
+                self.assertNotIn("фізичний-запис", heads)
+
     def test_compact_and_full_peer_can_differ_with_exact_same_identity(self):
         self.row(3, '101', 'коротко', 'повне-українське-імя', 'equal')
         self.put('lib/app.lisp', '(повне-українське-імя а б)\n(коротко а б)\n')
