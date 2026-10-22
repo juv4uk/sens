@@ -583,6 +583,15 @@ def main() -> int:
                     "dataset_sha256": report["dataset_sha256"],
                     "dataset_count_by_split": report["dataset_count_by_split"],
                     "comparison": report["comparison"],
+                    "challenge": (
+                        {
+                            "dataset_sha256": report["challenge"]["dataset_sha256"],
+                            "record_count": report["challenge"]["record_count"],
+                            "comparison": report["challenge"]["comparison"],
+                        }
+                        if report.get("challenge") is not None
+                        else None
+                    ),
                     "output": str(args.output_dir.resolve() / "comparison.json"),
                 },
                 ensure_ascii=False,
