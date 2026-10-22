@@ -110,16 +110,14 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertNotIn("(визначити pair пара)", core4)
             self.assertNotIn("(визначити second друге)", core4)
             self.assertNotIn("(визначити third третє)", core4)
-            # D6:100111 четверте (CADDDR) — ратифікований механізм.
-            # Повторний бібліотечний DEFINE перекривав би точну адресу
-            # локальним D7 зв'язуванням. Перевіряємо його відсутність,
-            # а виконання селекторів доводить нативний SENS-свідок.
-            d6 = source("lib/domains/d6.lisp")
-            self.assertRegex(
-                d6,
-                r"(?m)^\s*\(100111\s+\(ук\s+пррр\)\s+\(укр\s+четверте\)",
+            # четверте переїхало з core4 у core.lisp (чинна компактна поверхня)
+            self.assertIn(
+                "(визначити четверте\n"
+                "  (функція (значення-функції)\n"
+                "    (третє (решта значення-функції))))",
+                source("lib/core.lisp"),
             )
-            self.assertNotIn("(визначити четверте", core4)
+            self.assertNotIn("(визначити четверте fourth)", core4)
 
         with self.subTest(file="lib/surface/uk.lisp"):
             # Чинна компактна поверхня — проєкція, а не файл
