@@ -396,6 +396,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-multiset-intersection-general",
         "list-zip-with-tails-general",
         "list-three-lanes-general",
+        "list-adjacent-runs-general",
+        "list-all-slices-ends-general",
+        "list-rotation-inverse-general",
+        "list-trim-edges-atom-general",
+        "list-trim-ends-atom-general",
         "list-alternating-split-general",
         "list-chunk-pairs-general",
         "list-remove-last-atom",
@@ -492,6 +497,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-multiset-intersection-general"
                 | "list-zip-with-tails-general"
                 | "list-three-lanes-general"
+                | "list-adjacent-runs-general"
+                | "list-all-slices-ends-general"
+                | "list-rotation-inverse-general"
+                | "list-trim-edges-atom-general"
+                | "list-trim-ends-atom-general"
                 | "list-alternating-split-general"
                 | "list-chunk-pairs-general"
                 | "list-remove-last-atom"
