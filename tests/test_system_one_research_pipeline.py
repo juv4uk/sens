@@ -148,7 +148,27 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             teacher_path = root / "teacher.jsonl"
             teacher_raw = write_jsonl(teacher_path, teacher_rows)
             teacher_sha = hashlib.sha256(teacher_raw).hexdigest()
-            model_path = root / "student.json"
+
+            gold_model_path = root / "student-gold.json"
+            self.assertEqual(
+                student.train(
+                    Namespace(
+                        input=seed_path,
+                        teacher=None,
+                        output=gold_model_path,
+                        smoothing=1.0,
+                        min_count=1,
+                        gold_weight=None,
+                        overwrite=False,
+                    )
+                ),
+                0,
+            )
+            gold_model = json.loads(gold_model_path.read_text(encoding="utf-8"))
+            self.assertFalse(gold_model["teacher_used"])
+            self.assertEqual(gold_model["gold_weight"], 1.0)
+
+            model_path = root / "student-soft.json"
 
             self.assertEqual(
                 student.train(
