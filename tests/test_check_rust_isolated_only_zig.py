@@ -30,6 +30,8 @@ class RustIsolationTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
+        (self.root / "Cargo.toml").write_text(
+            '[workspace]\nmembers = ["crates/sens"]\n', encoding="utf-8")
         d = self.root / "crates/sens/src"
         d.mkdir(parents=True, exist_ok=True)
         (d / "lib.rs").write_text(ISOLATED, encoding="utf-8")
@@ -66,6 +68,35 @@ class RustIsolationTests(unittest.TestCase):
         (self.root / "crates/sens/src/lib.rs").write_text(
             'let s = std::fs::read("lib/binary.sens");\n', encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
+
+    def test_repl_sources_are_outside_runtime_isolation_boundary(self) -> None:
+        repl = self.root / "crates/sens-cli/src/repl"
+        repl.mkdir(parents=True, exist_ok=True)
+        (repl / "surface_catalog.rs").write_text(
+            'const D1: &str = include_str!("../../../../lib/domains/d1.lisp");\n',
+            encoding="utf-8",
+        )
+        runtime = self.root / "crates/sens/src/runtime.rs"
+        runtime.write_text(
+            'const CORE: &str = include_str!("../../../lib/core4.lisp");\n',
+            encoding="utf-8",
+        )
+
+        problems = self.module.check(self.root)
+
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("crates/sens/src/runtime.rs", problems[0])
+        self.assertNotIn("repl", problems[0])
+
+    def test_non_workspace_backup_crate_is_not_isolation_debt(self) -> None:
+        backup = self.root / "crates/xtask.bak/src"
+        backup.mkdir(parents=True)
+        (backup / "checks.rs").write_text(
+            'const DOC: &str = include_str!("../../../README.md");\n',
+            encoding="utf-8",
+        )
+
+        self.assertEqual(self.module.check(self.root), [])
 
 
     def test_test_only_scopes_are_not_production_but_unknown_cfg_is_red(self) -> None:
