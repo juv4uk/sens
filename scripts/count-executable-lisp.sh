@@ -76,6 +76,8 @@ while IFS= read -r -d '' source; do
       binding_sources=(--binding-source lib/unify.lisp) ;;
     lib/d11-clojure-partition-by.lisp)
       binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp) ;;
+    tests/semantic/d9-four-uk-projections-laws.lisp)
+      binding_sources=(--binding-source lib/core4.lisp) ;;
     lib/narrate.lisp)
       binding_sources=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp) ;;
     lib/result-status.lisp)
