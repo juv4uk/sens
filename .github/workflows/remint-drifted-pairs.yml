@@ -18,6 +18,7 @@ on:
       - "lib/axioms-d1-principle-five.lisp"
       - "lib/core*.lisp"
       - "lib/mechanism-selector.lisp"
+      - "lib/island-lowering.lisp"
       - "tests/fixtures/mechanism-selector-1047-witness.lisp"
       - "tests/fixtures/island-lowering-1048-witness.lisp"
       - "lib/life-1-scheduler.lisp"
@@ -72,6 +73,19 @@ jobs:
               list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/mechanism-selector.lisp' 'tests/fixtures/mechanism-selector-1047-witness.lisp' 'tests/fixtures/island-lowering-1048-witness.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
             else
               list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/mechanism-selector.lisp' 'tests/fixtures/mechanism-selector-1047-witness.lisp' 'tests/fixtures/island-lowering-1048-witness.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
+            fi
+            # Зміна самого SENS-нижувача потребує перевірки його
+            # СПОЖИВАЧА навіть коли вихідний свідок і байти ще не змінювались.
+            # Не намагатись виконати бібліотеку як невідомий текстовий виклик.
+            if [[ "$BEFORE" =~ ^0+$ ]]; then
+              island_change="$(git -c core.quotePath=false diff-tree --no-commit-id --name-only -r HEAD -- lib/island-lowering.lisp)"
+            else
+              island_change="$(git -c core.quotePath=false diff --name-only "$BEFORE" "$AFTER" -- lib/island-lowering.lisp)"
+            fi
+            if [[ -n "$island_change" ]] &&
+               ! printf '%s\n' "$list" | grep -Fxq 'tests/fixtures/island-lowering-1048-witness.lisp'; then
+              list="$(printf '%s\n%s' "$list" 'tests/fixtures/island-lowering-1048-witness.lisp')"
+              echo "REMINT_ISLAND_BINDING_CHANGED test=tests/fixtures/island-lowering-1048-witness.lisp"
             fi
             # Не передавати нативному mint незмінні описи принципів:
             # core2 і core-math складаються тільки з коментарів, не є програмами.
