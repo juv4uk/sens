@@ -103,3 +103,4 @@ benchmarks/contest-uk/факторіал-хвостовий.lisp
 lib/core-math.lisp
 lib/core2.lisp
 lib/list-suffix-from-last-compound-zero-copy-general.lisp
+benchmarks/contest-uk/лише-атоми.lisp

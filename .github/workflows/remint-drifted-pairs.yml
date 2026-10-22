@@ -16,6 +16,7 @@ on:
       - "tests/semantic/d9-four-uk-projections-laws.lisp"
       - "lib/reverse-three.lisp"
       - "lib/axioms-d1-principle-five.lisp"
+      - "lib/core*.lisp"
       - "lib/life-1-scheduler.lisp"
       - "lib/machine/projection/x86-64.lisp"
       - "lib/machine/lowering/semantic-x86-64.lisp"
