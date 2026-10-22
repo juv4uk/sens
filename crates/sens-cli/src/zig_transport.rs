@@ -257,6 +257,11 @@ pub fn repl_core_source_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(asset_ffi::sens_zig_repl_core_bytes_copy, "ZIG_SENS_REPL")
 }
 
+/// Opaque time-library source bytes carried through the Zig root ABI.
+pub fn repl_time_source_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(asset_ffi::sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")
+}
+
 /// Перечитує актуальний Guard-довідник через Zig; шлях зафіксований у Zig,
 /// Rust не відкриває файл сам і не кешує його між викликами.
 pub fn guard_reference_source_bytes() -> Result<Vec<u8>, String> {

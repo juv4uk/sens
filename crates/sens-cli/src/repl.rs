@@ -20,7 +20,6 @@ use std::process;
 unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
     fn sens_zig_repl_persistent_vector_bytes_copy(dst: *mut u8, cap: usize) -> isize;
-    fn sens_zig_repl_time_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_meta_eval_bytes_copy(dst: *mut u8, cap: usize) -> isize;
 }
@@ -59,10 +58,7 @@ fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String>
                     "ZIG_REPL_PERSISTENT_VECTOR",
                 )?,
             ),
-            (
-                "time.lisp",
-                repl_zig_source(sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")?,
-            ),
+            ("time.lisp", crate::time_library_source_zig_only()?),
             (
                 "epistemic.lisp",
                 repl_zig_source(sens_zig_repl_epistemic_bytes_copy, "ZIG_REPL_EPISTEMIC")?,
