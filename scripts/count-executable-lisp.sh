@@ -85,13 +85,45 @@ while IFS= read -r -d '' source; do
   # create_new у SENS --t5m-mint-pair: старі scratch-байти і view
   # не можуть лишатися під тим самим шляхом для наступної програми.
   rm -f -- "$scratch/mint.sens" "$scratch/mint"
-  if ! timeout "${mint_seconds}s" "$sens" "$mint_flag" "$source" "$scratch/mint.sens" "${binding_sources[@]}" >"$scratch/mint.out" 2>"$scratch/mint.err" ||
-     ! cmp -s "$physical" "$scratch/mint.sens" ||
-     ! timeout "${seconds}s" "$trit" open "$physical" >"$scratch/view" 2>"$scratch/view.err" ||
-     ! cmp -s "$view" "$scratch/view" ||
-     ! timeout "${seconds}s" "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/verify.err"; then
+  # Точна причина RED, а не загальний INVERSE_FAILED для всіх шарів.
+  # Позитивний шлях не виконує нічого зайвого: ті самі SENS/Zig команди.
+  if timeout "${mint_seconds}s" "$sens" "$mint_flag" "$source" "$scratch/mint.sens" "${binding_sources[@]}" >"$scratch/mint.out" 2>"$scratch/mint.err"; then
+    :
+  else
+    status=$?
     (( bad += 1 ))
-    printf 'NATIVE_INVERSE_FAILED\t%s\n' "$source" >&2
+    printf 'NATIVE_MINT_FAILED\t%s\tstatus=%s\n' "$source" "$status" >&2
+    sed 's/^/SENS mint: /' "$scratch/mint.err" >&2
+    continue
+  fi
+  if ! cmp -s "$physical" "$scratch/mint.sens"; then
+    (( bad += 1 ))
+    printf 'NATIVE_COMMITTED_PAIR_DRIFT\t%s\t' "$source" >&2
+    cmp "$physical" "$scratch/mint.sens" 2>&1 | head -n 1 >&2 || true
+    continue
+  fi
+  if timeout "${seconds}s" "$trit" open "$physical" >"$scratch/view" 2>"$scratch/view.err"; then
+    :
+  else
+    status=$?
+    (( bad += 1 ))
+    printf 'NATIVE_ZIG_OPEN_FAILED\t%s\tstatus=%s\n' "$source" "$status" >&2
+    sed 's/^/Zig open: /' "$scratch/view.err" >&2
+    continue
+  fi
+  if ! cmp -s "$view" "$scratch/view"; then
+    (( bad += 1 ))
+    printf 'NATIVE_COMMITTED_VIEW_DRIFT\t%s\t' "$source" >&2
+    cmp "$view" "$scratch/view" 2>&1 | head -n 1 >&2 || true
+    continue
+  fi
+  if timeout "${seconds}s" "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/verify.err"; then
+    :
+  else
+    status=$?
+    (( bad += 1 ))
+    printf 'NATIVE_ZIG_VERIFY_FAILED\t%s\tstatus=%s\n' "$source" "$status" >&2
+    sed 's/^/Zig verify: /' "$scratch/verify.err" >&2
     continue
   fi
   (( inverse += 1 ))
