@@ -686,6 +686,39 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 write_jsonl(transformer_path, rows)
                 transformer_paths[split] = transformer_path
 
+            challenge_path = ROOT / "research" / "system-one-support-challenge-20261022.jsonl"
+            challenge_rows, challenge_raw = student.read_jsonl(challenge_path)
+            challenge_sha = hashlib.sha256(challenge_raw).hexdigest()
+            challenge_teacher_rows = [
+                {
+                    **row,
+                    "dataset_sha256": challenge_sha,
+                    "prompt_version": "fixture-prompt-v1",
+                    "teacher": "fixture-teacher-v1",
+                    "teacher_distribution": exact_distribution(row["gold"]),
+                    "teacher_prediction": row["gold"],
+                }
+                for row in challenge_rows
+            ]
+            challenge_teacher_path = root / "teacher-challenge.jsonl"
+            write_jsonl(challenge_teacher_path, challenge_teacher_rows)
+            challenge_transformer_rows = [
+                {
+                    "id": row["id"],
+                    "split": "test",
+                    "text": row["text"],
+                    "gold": row["gold"],
+                    "model_schema": "sens.system-one.transformer-student/1",
+                    "base_model": "fixture-mmbert",
+                    "training_dataset_sha256": seed_sha,
+                    "calibration_temperature": 1.25,
+                    "distribution": exact_distribution(row["gold"]),
+                }
+                for row in challenge_rows
+            ]
+            challenge_transformer_path = root / "challenge-transformer.jsonl"
+            write_jsonl(challenge_transformer_path, challenge_transformer_rows)
+
             transformer_output = root / "comparison-with-transformer"
             transformer_report = comparison.run(
                 Namespace(
@@ -695,6 +728,9 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                     teacher_test=teacher_paths["test"],
                     transformer_validation_predictions=transformer_paths["validation"],
                     transformer_test_predictions=transformer_paths["test"],
+                    challenge_input=challenge_path,
+                    challenge_teacher=challenge_teacher_path,
+                    challenge_transformer_predictions=challenge_transformer_path,
                     output_dir=transformer_output,
                     threshold=0.5,
                     bins=5,
@@ -714,6 +750,18 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 "fixture-mmbert",
             )
             self.assertFalse(transformer_report["test_used_for_training_or_calibration"])
+            challenge_report = transformer_report["challenge"]
+            self.assertTrue(challenge_report["evaluation_only"])
+            self.assertEqual(challenge_report["dataset_sha256"], challenge_sha)
+            self.assertEqual(challenge_report["record_count"], 60)
+            self.assertFalse(challenge_report["test_used_for_training_or_calibration"])
+            self.assertFalse(challenge_report["threshold_selected_on_challenge"])
+            self.assertEqual(
+                set(challenge_report["comparison"]),
+                {"teacher", "student_gold", "student_soft", "student_transformer"},
+            )
+            self.assertTrue((transformer_output / "challenge-student-gold.jsonl").is_file())
+            self.assertTrue((transformer_output / "challenge-student-soft.jsonl").is_file())
 
             # Неправильний SHA test-виводу має відхилятися до навчання або запису моделі.
             bad_test_rows, _ = student.read_jsonl(transformer_paths["test"])
