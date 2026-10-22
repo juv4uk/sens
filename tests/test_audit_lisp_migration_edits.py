@@ -76,14 +76,14 @@ class MigrationLexicalSafety(unittest.TestCase):
         )
         self.blocked(old, changed, "locally bound callable")
 
-    def test_actual_local_scan_is_not_domain_d6_scan(self):
-        old = (ROOT / "scripts/semantic-authority-guard.lisp").read_text()
-        self.assertIn("(визначити текст-містить-будь-який?", old)
-        self.assertIn("(текст-містить-будь-який? джерело (решта зразки))", old)
-        changed = old.replace(
-            "(текст-містить-будь-який? джерело (решта зразки))",
-            "(101111 джерело (решта зразки))", 1,
-        )
+    def test_actual_local_recursion_is_not_domain_d6_scan(self):
+        # Перевіряємо актуальну власну функцію SENS, а не вилучений
+        # історичний код semantic-authority-guard.
+        old = (ROOT / "scripts/gen-functions.lisp").read_text(encoding="utf-8")
+        self.assertIn("(визначити видати", old)
+        local_call = "(видати (решта записи))"
+        self.assertIn(local_call, old)
+        changed = old.replace(local_call, "(101111 (решта записи))", 1)
         self.blocked(old, changed, "locally bound callable")
 
     def test_lambda_parameter_shadows_builtin_name(self):
