@@ -5,8 +5,8 @@ Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/knowledge.lisp size >= 1000 and no PLACEHOLDER
   2. No host COND else (1110 (001 t)
-  3. Exact D1:1 form present
-  4. Key surface: tell-knowledge, module-clauses-now, reason-in
+  3. Поточні D1-предикати у виконуваних умовах, без історичних сирих літералів
+  4. Первинна українська проєкція: повідомити-знання, модуль-клаузи-зараз, міркувати-у
   5. D1–D10 exact-width tables
 
 Run:
@@ -23,13 +23,13 @@ ROOT = Path(__file__).resolve().parents[1]
 KNOW = ROOT / "lib" / "knowledge.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST_T = "(1110 (001 t)"
-D1_TRUE = "(010 (001 ()))"
+D1_GUARDS = ("(за-умовою", "((хибне?", "(порожній?")
 REQUIRED = (
-    "tell-knowledge",
-    "module-clauses-now",
-    "reason-in",
+    "повідомити-знання",
+    "модуль-клаузи-зараз",
+    "міркувати-у",
     "журнал-знань",
-    "check-conflict",
+    "перевірити-конфлікт?",
 )
 
 
@@ -47,8 +47,9 @@ def check_knowledge() -> list[str]:
         errs.append("knowledge: PLACEHOLDER present — run assemble_knowledge.py")
     if HOST_T in text:
         errs.append("knowledge: host COND else (1110 (001 t) still present")
-    if D1_TRUE not in text:
-        errs.append("knowledge: exact D1:1 form (010 (001 ())) missing")
+    for guard in D1_GUARDS:
+        if guard not in text:
+            errs.append(f"knowledge: current D1 conditional/predicate missing: {guard}")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"knowledge: required surface missing: {fn}")
@@ -84,7 +85,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("KNOWLEDGE: PASS — full file, no host COND t, exact D1, surface intact")
+    print("KNOWLEDGE: structural audit OK — Ukrainian source and D1 predicates; native SENS evaluation not asserted")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")

@@ -100,6 +100,8 @@ def ensure_remote_revision(revision: str, remote_ref: str) -> None:
 
 def _mask_exempt(source: str) -> str:
     """Маскувати те, що не є кодом укр-проєкції, зберігаючи довжину:
+    - коментарі `;` і вкладені `#| |#` (коментарі НЕ кодуються у носій — див.
+      strip_comments у scripts/migrate-three-pass.py, тож у Д7 їх не перевіряємо);
     - дані D7 у цитатах `(як-є …)` (вміст фактів може бути латиницею);
     - зовнішні URL (історичні джерела).
     """
@@ -110,29 +112,90 @@ def _mask_exempt(source: str) -> str:
             if chars[i] != "\n":
                 chars[i] = " "
 
-    # (як-є …) з балансуванням дужок
+    # 1) Коментарі — не код і не носій: ; до кінця рядка, вкладені #| |#,
+    #    зі збереженням рядків і лапок (дзеркало strip_comments мінтера).
+    n = len(chars)
     i = 0
-    n = len(source)
+    state = "normal"
+    depth = 0
+    while i < n:
+        ch = chars[i]
+        if state == "string":
+            if ch == "\\" and i + 1 < n:
+                i += 2
+                continue
+            if ch == '"':
+                state = "normal"
+            i += 1
+            continue
+        if state == "line":
+            if ch == "\n":
+                state = "normal"
+            else:
+                chars[i] = " "
+            i += 1
+            continue
+        if state == "block":
+            if source.startswith("#|", i):
+                depth += 1
+                chars[i] = " "
+                chars[i + 1] = " "
+                i += 2
+                continue
+            if source.startswith("|#", i):
+                depth -= 1
+                chars[i] = " "
+                chars[i + 1] = " "
+                i += 2
+                if depth == 0:
+                    state = "normal"
+                continue
+            if ch != "\n":
+                chars[i] = " "
+            i += 1
+            continue
+        if ch == '"':
+            state = "string"
+            i += 1
+            continue
+        if ch == ";":
+            chars[i] = " "
+            state = "line"
+            i += 1
+            continue
+        if source.startswith("#|", i):
+            chars[i] = " "
+            chars[i + 1] = " "
+            state = "block"
+            depth = 1
+            i += 2
+            continue
+        i += 1
+
+    masked = "".join(chars)
+
+    # 2) (як-є …) з балансуванням дужок
+    i = 0
     while True:
-        j = source.find("(як-є", i)
+        j = masked.find("(як-є", i)
         if j == -1:
             break
-        depth = 0
+        depth2 = 0
         k = j
         while k < n:
-            if source[k] == "(":
-                depth += 1
-            elif source[k] == ")":
-                depth -= 1
-                if depth == 0:
+            if masked[k] == "(":
+                depth2 += 1
+            elif masked[k] == ")":
+                depth2 -= 1
+                if depth2 == 0:
                     k += 1
                     break
             k += 1
         blank(j, k)
         i = k
 
-    # URL
-    for m in re.finditer(r"https?://\S+", source):
+    # 3) URL
+    for m in re.finditer(r"https?://\S+", masked):
         blank(m.start(), m.end())
     return "".join(chars)
 

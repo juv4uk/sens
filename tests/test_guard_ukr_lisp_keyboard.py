@@ -45,14 +45,23 @@ class UkrainianLispGitGuard(unittest.TestCase):
             input=stdin, text=True, capture_output=True,
         )
 
-    def test_comments_strings_and_special_characters_are_never_exempt(self):
+    def test_comments_are_exempt_but_strings_and_code_are_not(self):
+        # Коментарі НЕ кодуються у фізичний носій (strip_comments у мінтері),
+        # тож у Д7-перевірці їх не чіпаємо.
+        for source in (
+            "(визначити ім'я 1)\n; TODO\n",
+            "; знак —\n",
+            "; смайлик 🙂\n",
+        ):
+            with self.subTest(exempt=source.strip()):
+                self.write("lib/діюче.lisp", source)
+                self.git("add", "lib/діюче.lisp")
+                self.assertEqual(self.check("--staged").returncode, 0)
+        # Рядки та код кодуються у носій — перевіряються далі.
         for source, codepoint in (
-            ("(визначити ім'я 1)\n; TODO\n", "U+0054"),
             ('(визначити рядок "hello")\n', "U+0068"),
-            ("; знак —\n", "U+2014"),
             ("(визначити імʼя 1)\n", "U+02BC"),
             ("(визначити ім'я #d1:1)\n", "U+0023"),
-            ("; смайлик 🙂\n", "U+1F642"),
         ):
             with self.subTest(codepoint=codepoint):
                 self.write("lib/діюче.lisp", source)
@@ -63,7 +72,7 @@ class UkrainianLispGitGuard(unittest.TestCase):
                 self.assertIn(codepoint, outcome.stderr)
 
     def test_staged_not_worktree_and_genuine_keyboard_positive(self):
-        self.write("lib/діюче.lisp", "; TODO\n")
+        self.write("lib/діюче.lisp", "(визначити ім'я x)\n")
         self.git("add", "lib/діюче.lisp")
         self.write("lib/діюче.lisp", "(визначити ім'я 1)\n")
         self.assertEqual(self.check("--staged").returncode, 1)
@@ -105,7 +114,7 @@ class UkrainianLispGitGuard(unittest.TestCase):
         names = self.root / "changed.txt"
         names.write_text("lib/додано.lisp\nREADME.md\n", encoding="utf-8")
         self.assertEqual(self.check("--paths-from", str(names)).returncode, 0)
-        self.write("lib/додано.lisp", "; x\n")
+        self.write("lib/додано.lisp", "(визначити нове x)\n")
         self.git("add", ".")
         self.git("commit", "-qm", "зламане")
         self.assertEqual(self.check("--paths-from", str(names)).returncode, 1)
