@@ -234,7 +234,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         source = RUNNER.read_text(encoding="utf-8")
         standalone = source.index('if timeout 45s "$binary" "$pair"')
         old_d7 = source.index("T5M_PHYSICAL_PAIRED_D7_FAIL", standalone)
-        generic = source.index("T5M_PHYSICAL_PAIRED_GENERIC_PASS", old_d7)
+        generic = source.index("T5M_STANDALONE_UNCLASSIFIED_FAILURE", old_d7)
         paired = source.rfind(
             'timeout 45s "$binary" --t5m-pair "$file" "$pair"',
             old_d7, generic,
@@ -247,6 +247,9 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn("physical=ZIG_VERIFIED", branch)
         self.assertIn("semantic=NOT_CERTIFIED", branch)
         self.assertIn("release=NOT_CERTIFIED", branch)
+        self.assertIn("standalone_status=$standalone_status paired_status=0", branch)
+        self.assertIn("mark_file_failed", branch)
+        self.assertNotIn("T5M_PHYSICAL_PAIRED_GENERIC_PASS", source)
         self.assertIn("paired_status=$status", source[generic:])
         self.assertIn("mark_file_failed", source[generic:])
         self.assertNotIn("T5M_FILE_EXECUTION PASS", branch)
