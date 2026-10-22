@@ -78,3 +78,46 @@ fn d11_clojure_consecutive_partition_by_has_real_sens_witnesses() {
         );
     }
 }
+
+#[test]
+fn d11_clojure_dedupe_preserves_nonconsecutive_reappearances() {
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("чинне ядро SENS");
+    for (path, source) in [
+        ("lib/d11-srfi1-span-break.lisp", include_str!("../../../lib/d11-srfi1-span-break.lisp")),
+        ("lib/d11-clojure-partition-by.lisp", include_str!("../../../lib/d11-clojure-partition-by.lisp")),
+    ] {
+        eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=D11-CLOJURE-DEDUPE-LOAD layer=SENS path={path} actual_error={error}"));
+    }
+
+    for (id, source, expected) in [
+        ("порожній", "(однакові? (прибрати-суміжні-повтори (як-є ())) (як-є ()))", true),
+        ("один", "(однакові? (прибрати-суміжні-повтори (як-є (а))) (як-є (а)))", true),
+        ("однакові-три", "(однакові? (прибрати-суміжні-повтори (як-є (а а а))) (як-є (а)))", true),
+        ("однакові-два", "(однакові? (прибрати-суміжні-повтори (як-є (а а))) (як-є (а)))", true),
+        ("усі-різні", "(однакові? (прибрати-суміжні-повтори (як-є (а б в))) (як-є (а б в)))", true),
+        ("повтор-після-межі", "(однакові? (прибрати-суміжні-повтори (як-є (а б а))) (як-є (а б а)))", true),
+        ("дві-пари", "(однакові? (прибрати-суміжні-повтори (як-є (а а б б))) (як-є (а б)))", true),
+        ("три-пари", "(однакові? (прибрати-суміжні-повтори (як-є (а а б б а а))) (як-є (а б а)))", true),
+        ("різні-довжини", "(однакові? (прибрати-суміжні-повтори (як-є (а б б б а))) (як-є (а б а)))", true),
+        ("зберегти-останнє", "(однакові? (прибрати-суміжні-повтори (як-є (а б а а))) (як-є (а б а)))", true),
+        ("вкладені-структури", "(однакові? (прибрати-суміжні-повтори (як-є ((а) (а) (б)))) (як-є ((а) (б))))", true),
+        ("розділені-структури", "(однакові? (прибрати-суміжні-повтори (як-є ((а) (б) (а)))) (як-є ((а) (б) (а))))", true),
+        ("атом-і-список", "(однакові? (прибрати-суміжні-повтори (як-є (а (а) (а) а))) (як-є (а (а) а)))", true),
+        ("не-глобальна-унікальність", "(однакові? (прибрати-суміжні-повтори (як-є (а б а))) (як-є (а б)))", false),
+        ("не-повертати-повтори", "(однакові? (прибрати-суміжні-повтори (як-є (а а б))) (як-є (а а б)))", false),
+        ("не-зливати-нерівні-пари", "(однакові? (прибрати-суміжні-повтори (як-є ((а) (б) (а)))) (як-є ((а) (б))))", false),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=D11-CLOJURE-DEDUPE-{id} layer=SENS input={source} expected=D1:{expected} actual_error={error}"
+            ))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "test_id=D11-CLOJURE-DEDUPE-{id} layer=SENS input={source} expected=D1:{expected} actual={value}"
+        );
+    }
+}
