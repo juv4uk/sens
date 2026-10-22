@@ -54,19 +54,8 @@ for path in "$dir"/*.sens; do
   excluded=$((excluded+1))
 done
 
-# 4) Записати чинний набір переможців (стабільний порядок ключів).
-{
-  printf '{\n  "schema": "sens-contest-winners/v1",\n  "active": {\n'
-  first=1
-  for task in довжина-списку сума-до-n факторіал; do
-    [[ -n "${best[$task]:-}" ]] || continue
-    [[ $first == 1 ]] || printf ',\n'
-    first=0
-    printf '    "%s": {"path": "%s", "t5m_bytes": %s}' \
-      "$task" "${best[$task]}" "${bestbytes[$task]}"
-  done
-  printf '\n  }\n}\n'
-} > "$dir/winners.json"
+# 4) Стан визначають чинні фізичні файли, а не дубльований JSON-реєстр.
+# Вихід нижче містить реальні шляхи й фізичні T5M-байти SENS/Zig.
 
 for task in довжина-списку сума-до-n факторіал; do
   [[ -n "${best[$task]:-}" ]] || continue
