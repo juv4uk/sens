@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 333,
+    "total": 340,
     "historical": 28,
-    "library": 305,
-    "distinct_families": 123
+    "library": 312,
+    "distinct_families": 128
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -8330,6 +8330,160 @@
       "signature": "proper-list × atom × value → proper-list",
       "law": "Замінити тільки найправіше входження шуканого атома, зберегти кратність усіх інших та їхній порядок; за відсутності збігу залишити список без змін.",
       "native_law_test": "crates/sens/tests/d11_existing_deep_list_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "поділ-перед-останнім",
+      "source_family": "last-occurrence-split",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-split-last-occurrence-general.lisp",
+        "blob_sha": "8946c2ed90f41304e33d3b0009dbabbd657afa44",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × atom → pair(list(atom), list(atom))",
+      "law": "Розрізати перед останнім входженням: суфікс починається зі збігу, за відсутності збігу префікс дорівнює всьому входу, а суфікс порожній.",
+      "native_law_test": "crates/sens/tests/d11_existing_inverse_splits_and_suffixes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "зібрати-останній-поділ",
+      "source_family": "last-occurrence-split",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-split-last-occurrence-general.lisp",
+        "blob_sha": "8946c2ed90f41304e33d3b0009dbabbd657afa44",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "pair(list(atom), list(atom)) → list(atom)",
+      "law": "Склеїти префікс та суфікс; для кожного правильного входу обертає поділ-перед-останнім, зберігаючи кожен елемент.",
+      "native_law_test": "crates/sens/tests/d11_existing_inverse_splits_and_suffixes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "суфікс-першої-сусідньої-пари-атомів",
+      "source_family": "first-adjacent-equal-atom-suffix",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-first-adjacent-equal-atom-suffix-general.lisp",
+        "blob_sha": "3b04327c3cb5d3b8a3f2657326202290bae558be",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → suffix | ()",
+      "law": "Повернути найлівіший існуючий суфікс, голова якого складає першу сусідню пару однакових атомів; складені пари не порівнювати як атоми.",
+      "native_law_test": "crates/sens/tests/d11_existing_inverse_splits_and_suffixes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "зсунути-ліворуч",
+      "source_family": "invertible-cyclic-rotation",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-rotate-inverse-general.lisp",
+        "blob_sha": "aea98aba7d3e09271cfdcb0ed30156d8cd550058",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → proper-list",
+      "law": "Циклічно перенести перший елемент у кінець, зберегти порядок решти; для порожнього та одноелементного списку без змін.",
+      "native_law_test": "crates/sens/tests/d11_existing_inverse_splits_and_suffixes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "зсунути-праворуч",
+      "source_family": "invertible-cyclic-rotation",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-rotate-inverse-general.lisp",
+        "blob_sha": "aea98aba7d3e09271cfdcb0ed30156d8cd550058",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → proper-list",
+      "law": "Циклічно перенести останній елемент на початок; на скінченному правильному списку є оберненою функцією до зсунути-ліворуч.",
+      "native_law_test": "crates/sens/tests/d11_existing_inverse_splits_and_suffixes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "перший-складений-елемент-зліва",
+      "source_family": "first-compound-element",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-first-compound-zero-copy-general.lisp",
+        "blob_sha": "22f687c7fade51b891cd7dee78a79baacd8a3a12",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → cons | ()",
+      "law": "Повернути перший складений елемент зліва без копіювання, пропускаючи атоми, включно з порожнім списком як окремим елементом.",
+      "native_law_test": "crates/sens/tests/d11_existing_inverse_splits_and_suffixes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "хвіст-після-останньої-пари",
+      "source_family": "tail-after-last-compound",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-suffix-after-last-compound-zero-copy-general.lisp",
+        "blob_sha": "4ab86a1475b8d73c39efdb7c2de81fe92fe80359",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → existing-suffix",
+      "law": "Повернути наявний хвіст після найправішого складеного елемента; без складених елементів повернути увесь вхід.",
+      "native_law_test": "crates/sens/tests/d11_existing_inverse_splits_and_suffixes.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true
     }
