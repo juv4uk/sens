@@ -1537,7 +1537,7 @@ jobs:
           # Викликаємо реальний SENS, зберігаємо відмову для D10 без механізму.
           # Тільки за зміни evaluator / свідків, у тому самому CI.
           if [[ -f "$RUNNER_TEMP/changed-core-dependencies.txt" ]] &&
-             grep -Eq '^(crates/sens/src/eval/(mod|closures|selector_law)[.]rs|crates/sens/src/mixed_source[.]rs|crates/sens/tests/first_class_domain_code_d7[.]rs|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+             grep -Eq '^(crates/sens/src/eval/(mod|closures|selector_law)[.]rs|crates/sens/src/mixed_source[.]rs|crates/sens/tests/first_class_domain_code_d7[.]rs|lib/list-domain-first-class-compose[.]lisp|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib eval::exact_domain_surface_value_position_tests:: -- --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib mixed_source::tests::d10_selector_ukrainian_value_lowers_to_first_class_ten_bit_code -- --exact --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test first_class_domain_code_d7 -- --nocapture
