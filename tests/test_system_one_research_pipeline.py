@@ -316,6 +316,87 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertIn("top_class_ece", report["metrics"])
             self.assertIn("selective_risk_at_threshold", report["metrics"])
 
+    def test_compact_student_serves_same_local_distribution_contract_as_teacher(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
+            model_path = root / "student.json"
+            self.assertEqual(
+                student.train(
+                    Namespace(
+                        input=seed_path,
+                        teacher=None,
+                        output=model_path,
+                        smoothing=1.0,
+                        min_count=1,
+                        gold_weight=None,
+                        overwrite=False,
+                    )
+                ),
+                0,
+            )
+            model = json.loads(model_path.read_text(encoding="utf-8"))
+            server = student.create_local_server(model, port=0, api_key="student-secret")
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                endpoint = f"http://127.0.0.1:{server.server_port}/v1/chat/completions"
+                prompt = "\n".join(
+                    f"{letter}: {label} — {description}"
+                    for letter, (label, description) in zip(
+                        "ABCDE",
+                        [
+                            ("оплата", "Платіж або повернення коштів."),
+                            ("доставка", "Посилка або кур'єр."),
+                            ("технічне", "Помилка програми або сайту."),
+                            ("обліковий-запис", "Вхід, пароль або профіль."),
+                            ("невизначено", "Недостатньо даних або змішана тема."),
+                        ],
+                    )
+                )
+                response = teacher.call_teacher(
+                    endpoint=endpoint,
+                    model="compact-student-fixture",
+                    api_key="student-secret",
+                    prompt=prompt,
+                    text="З мене двічі списали гроші за одне замовлення.",
+                    timeout=3.0,
+                )
+                generated, winner, _scores, distribution = teacher.teacher_distribution(response)
+                self.assertIn(generated, student.LABELS)
+                self.assertIn(winner, student.LABELS)
+                self.assertEqual(
+                    sum(value["numerator"] for value in distribution.values()),
+                    1_000_000_000,
+                )
+                self.assertEqual(
+                    len(distribution),
+                    5,
+                )
+                with self.assertRaises(teacher.TeacherError):
+                    teacher.call_teacher(
+                        endpoint=endpoint,
+                        model="compact-student-fixture",
+                        api_key="wrong-key",
+                        prompt=prompt,
+                        text="Перевірка авторизації.",
+                        timeout=3.0,
+                    )
+                bad_prompt = prompt.replace("A: оплата", "A: невизначено", 1)
+                with self.assertRaises(teacher.TeacherError):
+                    teacher.call_teacher(
+                        endpoint=endpoint,
+                        model="compact-student-fixture",
+                        api_key="student-secret",
+                        prompt=bad_prompt,
+                        text="Не повинно бути класифіковано з іншою мапою.",
+                        timeout=3.0,
+                    )
+            finally:
+                server.shutdown()
+                thread.join(timeout=2.0)
+                server.server_close()
+
     def test_committed_seed_trains_and_predicts_only_selected_splits(self):
         seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
         rows, raw = student.read_jsonl(seed_path)
