@@ -69,7 +69,7 @@ import migration_publish_pair
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_EXTS = {".lisp"}
-SKIP_DIRS = {".git", ".worktrees", "target", "node_modules", "vendor", "dist", "build", ".venv", "venv", "__pycache__"}
+SKIP_DIRS = {".git", ".worktrees", "target", "node_modules", "vendor", "dist", "build", ".venv", "venv", "__pycache__", "superseded"}
 
 D2_SEP="00"
 D2_CLOSE="01"
