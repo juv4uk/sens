@@ -5,7 +5,8 @@ Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/knowledge.lisp size >= 1000 and no PLACEHOLDER
   2. No host COND else (1110 (001 t)
-  3. D1:1 has the current Ukrainian projection in the domain table
+  3. Current D1 predicates without historical raw literals
+  4. Current Ukrainian D1 projection in the domain table
   4. Первинна українська проєкція: повідомити-знання, модуль-клаузи-зараз, міркувати-у
   5. D1–D10 exact-width tables
 
@@ -24,6 +25,7 @@ KNOW = ROOT / "lib" / "knowledge.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST_T = "(1110 (001 t)"
 D1_TRUE_UKR = "(1 (ук так) (укр так)"
+D1_GUARDS = ("(за-умовою", "((хибне?", "(порожній?")
 REQUIRED = (
     "повідомити-знання",
     "модуль-клаузи-зараз",
@@ -47,6 +49,9 @@ def check_knowledge() -> list[str]:
         errs.append("knowledge: PLACEHOLDER present — run assemble_knowledge.py")
     if HOST_T in text:
         errs.append("knowledge: host COND else (1110 (001 t) still present")
+    for guard in D1_GUARDS:
+        if guard not in text:
+            errs.append(f"knowledge: current D1 conditional/predicate missing: {guard}")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"knowledge: required surface missing: {fn}")
