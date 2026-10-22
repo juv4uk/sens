@@ -70,12 +70,23 @@ def read_forms(source: str):
     return result
 
 
+# Окремий кореневий виклик справді виконується в SENS; він не DEFINE
+# і не привід ігнорувати довільні нові неоголошені форми.
+NATIVE_WITNESS = ["список-із-рівно-двох-елементів?", ["як-є", ["а", "б"]]]
+
+
 def definitions(source: str):
     result = {}
+    witnessed = 0
     for form in read_forms(source):
+        if form == NATIVE_WITNESS:
+            witnessed += 1
+            if witnessed != 1:
+                raise AssertionError("дубль нативного SENS-виклику")
+            continue
         if (not isinstance(form, list) or len(form) != 3
                 or form[0] not in ("0011", "визначити")):
-            raise AssertionError("кожне верхнє визначення — D4:0011")
+            raise AssertionError("невідомий кореневий вираз: D4 DEFINE або точний SENS-виклик")
         name = form[1]
         if not isinstance(name, str) or name in result:
             raise AssertionError("дубль або неправильне ім'я DEFINE")
@@ -99,6 +110,9 @@ class NarrateUkrPeerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.src = NARRATE.read_text(encoding="utf-8")
+        forms = read_forms(cls.src)
+        if not forms or forms[-1] != NATIVE_WITNESS or forms.count(NATIVE_WITNESS) != 1:
+            raise AssertionError("lib/narrate.lisp мусить завершуватися одним реальним SENS-викликом")
         cls.defs = definitions(cls.src)
         cls.result_status_defs = definitions(RESULT_STATUS.read_text(encoding="utf-8"))
         cls.domains = {
