@@ -149,9 +149,9 @@ fn migrated_macros_drive_plain_tms_and_jtms_state_transitions() {
     let mut session = session();
     // Реальний SENS-виклик: стан змінюється D4 DEFINE, потім відкликається.
     eval(&mut session, "(ствердити-факт! (як-є альфа))");
-    assert_eq!(eval(&mut session, "*робоча-пам'ять*"), "(альфа)");
+    assert_eq!(eval(&mut session, "робоча-пам'ять"), "(альфа)");
     eval(&mut session, "(відкликати-факт! (як-є альфа))");
-    assert_eq!(eval(&mut session, "*робоча-пам'ять*"), "()");
+    assert_eq!(eval(&mut session, "робоча-пам'ять"), "()");
 
     for source in [
         "(ствердити-факт! (як-є альфа))",
@@ -173,7 +173,7 @@ fn migrated_macros_drive_plain_tms_and_jtms_state_transitions() {
     assert_eq!(
         eval(
             &mut session,
-            "(list *робоча-пам'ять* *обґрунтована-пам'ять* *пам'ять-обґрунтувань*)",
+            "(list робоча-пам'ять обґрунтована-пам'ять пам'ять-обґрунтувань)",
         ),
         "(() () ())",
         "all three mutable reasoning memories must return to empty after bounded assert/run/retract"
