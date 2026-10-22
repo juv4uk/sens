@@ -310,15 +310,40 @@ jobs:
             exit 0
           fi
           published=0
-          for attempt in 1 2 3 4 5 6; do
+          # При частих незалежних push перевірені фізичні T5M можуть
+          # годинами програвати гонку refs: повний суд триває десятки секунд.
+          # Швидкий rebase дозволений ЛИШЕ коли remote змінив документацію
+          # чи CI, а НЕ Lisp, SENS, Zig, Rust, домени або корпус конкурсу.
+          # Інакше обов'язкові новий mint, Zig inverse і SENS execution.
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
             if git push origin HEAD:main; then
               echo "REMINT_PUBLISHED attempt=$attempt"
               published=1
               break
             fi
-            echo "REMINT_MAIN_ADVANCED attempt=$attempt: regenerate with current SENS/Zig" >&2
-            if (( attempt == 6 )); then break; fi
+            echo "REMINT_MAIN_ADVANCED attempt=$attempt: exact remote ref changed" >&2
+            if (( attempt == 12 )); then break; fi
             git fetch origin main
+            verified_parent="$(git rev-parse HEAD^)"
+            safe_rebase=1
+            while IFS= read -r changed; do
+              [[ -n "$changed" ]] || continue
+              case "$changed" in
+                docs/*.md|benchmarks/contest-uk/RESULTS.md|.github/workflows/*.yml|.github/workflows/*.yaml)
+                  ;;
+                *) safe_rebase=0; break ;;
+              esac
+            done < <(git diff --name-only "$verified_parent" origin/main)
+            if (( safe_rebase )) &&
+               git merge-base --is-ancestor "$verified_parent" origin/main; then
+              if git rebase origin/main; then
+                echo "REMINT_SAFE_FAST_REBASE attempt=$attempt verified_inputs=UNCHANGED"
+                continue
+              fi
+              # Конфлікт не вирішувати силоміць: перейти на native remint.
+              git rebase --abort || true
+            fi
+            echo "REMINT_REVERIFY_REQUIRED attempt=$attempt reason=semantic_or_source_delta"
             # Це тільки епізодичний workspace Actions, НЕ перепис історії
             # remote/main. Старий mint відкидається і перевіряється знову.
             git reset --hard origin/main
