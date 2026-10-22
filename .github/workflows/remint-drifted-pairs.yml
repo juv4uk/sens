@@ -112,7 +112,10 @@ jobs:
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
               [[ -s "$pair" && -f "$view" && ! -L "$pair" && ! -L "$view" ]] || continue
-              probe="$(mktemp "$RUNNER_TEMP/sens-native-mint.XXXXXX")"
+              # CLI SENS допускає ціль ЛИШЕ *.sens; mktemp без суфікса
+              # завжди давав помилковий RED для кожного справного Lisp.
+              probe_dir="$(mktemp -d "$RUNNER_TEMP/sens-native-mint.XXXXXX")"
+              probe="$probe_dir/program.sens"
               drift=0
               if ! target/debug/sens --t5m-mint "$source" "$probe" >/dev/null; then
                 echo "REMINT_MINT_PROBE_RED source=$source"
@@ -124,7 +127,7 @@ jobs:
                 echo "REMINT_VIEW_DRIFT source=$source"
                 drift=1
               fi
-              rm -f -- "$probe"
+              rm -rf -- "$probe_dir"
               if (( drift )); then
                 list="$(printf '%s\n%s' "$list" "$source")"
               fi
