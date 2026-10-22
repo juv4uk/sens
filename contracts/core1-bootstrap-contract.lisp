@@ -6,8 +6,8 @@
    (owner . sens)
    (profile . core1)
    (semantic-authority-transfer . forbidden)
-   (seed-may-mint-sid . forbidden)
-   (seed-may-redefine-current-sid . forbidden))
+   (seed-may-mint-domain-identity . forbidden)
+   (seed-may-redefine-current-domain . forbidden))
 
   ((identity . stage-lineage)
    (stages .
@@ -34,4 +34,4 @@
    (current-forms .
      (як-є атом? тотожне? за-умовою перше решта сполучити визначити функція))
    (decimals . required)
-   (sid8-call-heads . retired)))
+   (виклики-укр . чинні)))
