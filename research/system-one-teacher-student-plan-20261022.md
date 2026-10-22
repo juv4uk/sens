@@ -124,6 +124,8 @@ python3 research/system-one-compare-20261022.py \
 # Звіт: /tmp/system-one-comparison/comparison.json
 # Містить accuracy, macro-F1, Brier, ECE, coverage та selective risk
 # для вчителя, gold-учня й учня з м'якими цілями на validation і test.
+# Окреме поле teacher_decoding_agreement показує збіг фактично згенерованої
+# літери вчителя з argmax нормованого розподілу; розбіжності явно звітуються.
 
 # 5) Запустити каліброваного компактного учня як локальний HTTP-вузол.
 export SENS_SYSTEM_ONE_STUDENT_API_KEY="$SENS_SYSTEM_ONE_API_KEY"
