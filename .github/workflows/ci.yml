@@ -265,7 +265,8 @@ jobs:
           else
             git diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" > "$changed_all"
           fi
-          # Факт відповідності генератора даним перевіряється виконанням.
+          # Д6: нормативний закон живе в СЕНС, а не в хостовому оракулі.
+          if grep -Eq '^(crates/sens/src/eval/d6_arithmetic[.]rs|crates/sens/src/domain_identity[.]rs|crates/sens/tests/d6_add1_sub1_mechanisms[.]rs|knowledge/d6-mechanism-ledger[.]json|scripts/check-d6-mechanism-ledger[.]py|[.]github/workflows/ci[.]yml)
           if grep -Eq '^(sens-cml-export[.]contract|crates/sens-cli/src/bin/cml-export[.]rs)$' "$changed_all"; then
             echo 'cml_export_tests=true' >> "$GITHUB_OUTPUT"
           fi
@@ -664,7 +665,7 @@ jobs:
         uses: dtolnay/rust-toolchain@1.99.0
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ steps.changed-t5m-lisp.outputs.system_one_tests == 'true' || steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.prolog_bridge_tests == 'true' || steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+        if: ${{ steps.changed-t5m-lisp.outputs.d6_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.system_one_tests == 'true' || steps.changed-t5m-lisp.outputs.utf8_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.prolog_bridge_tests == 'true' || steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' || steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
       - name: "System One — Choice: впевненість і походження"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
@@ -731,6 +732,15 @@ jobs:
         timeout-minutes: 4
         shell: bash
         run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like system_one_validates_one_state_with_parallel_typed_questions_and_answers -- --exact --nocapture
+
+      - name: "Д6 NEG — виконати чинний закон та точні негативи СЕНС"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.d6_runtime_tests == 'true' }}
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib d6_arithmetic::tests:: -- --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test d6_add1_sub1_mechanisms -- --nocapture
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
@@ -1666,6 +1676,7 @@ jobs:
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 \
             cargo build --locked -p sens-cli --bin sens --bin sens-trit
           succeeded=0
+          paired_only=0
           rejected=0
           data_only=0
           for source in lib/*.lisp; do
@@ -1699,26 +1710,43 @@ jobs:
             esac
             # Одна й та сама нативна процедура майнить, звіряє Zig-view,
             # перевіряє SENS paired/standalone та реальний негатив.
-            if bash scripts/refresh-verified-t5m-pair.sh \
-                "$source" target/debug/sens target/debug/sens-trit "${bindings[@]}"; then
+            if native_receipt="$(bash scripts/refresh-verified-t5m-pair.sh \
+                "$source" target/debug/sens target/debug/sens-trit "${bindings[@]}")"; then
+              printf '%s\n' "$native_receipt"
+              # Фізична оберненість + парне виконання не є доказом
+              # автономного запуску. Довіряємо тільки режиму SENS-скрипта.
+              case "$native_receipt" in
+                *"T5M_REPAIR_OK source=$source "*"mode=paired-and-standalone "*)
+                  native_status=NATIVE_VERIFIED
+                  succeeded=$((succeeded + 1)) ;;
+                *"T5M_REPAIR_OK source=$source "*"mode=paired-only "*)
+                  native_status=NATIVE_PAIRED_ONLY
+                  paired_only=$((paired_only + 1)) ;;
+                *)
+                  echo "::error::LIB_NATIVE_RECEIPT_INVALID source=$source" >&2
+                  printf '%s\tNATIVE_REJECTED\t-\t-\t-\n' "$source" >> "$report"
+                  rejected=$((rejected + 1))
+                  continue ;;
+              esac
               stem="${source%.lisp}"
               mkdir -p "$output/$(dirname "$source")"
               cp -- "$source" "$stem.sens" "$stem" "$output/$(dirname "$source")/"
-              printf '%s\tNATIVE_VERIFIED\t%s\t%s\t%s\n' \
-                "$source" \
+              printf '%s\t%s\t%s\t%s\t%s\n' \
+                "$source" "$native_status" \
                 "$(sha256sum "$source" | cut -d' ' -f1)" \
                 "$(sha256sum "$stem.sens" | cut -d' ' -f1)" \
                 "$(sha256sum "$stem" | cut -d' ' -f1)" >> "$report"
-              succeeded=$((succeeded + 1))
             else
               printf '::error::LIB_NATIVE_TRIPLET_RED source=%s\n' "$source" >&2
               printf '%s\tNATIVE_REJECTED\t-\t-\t-\n' "$source" >> "$report"
               rejected=$((rejected + 1))
             fi
           done
-          echo "SENS_LIB_NATIVE_TRIPLETS sha=$GITHUB_SHA verified=$succeeded rejected=$rejected data_only=$data_only release=NOT_CERTIFIED"
-          # Усі вже доведені пари лишаються в artifact навіть за RED.
-          # Невиконані .lisp НЕ отримують вигаданого .sens чи PASS.
+          state=COMPLETE
+          if (( rejected != 0 || paired_only != 0 )); then state=PARTIAL; fi
+          echo "SENS_LIB_NATIVE_TRIPLETS sha=$GITHUB_SHA verified=$succeeded paired_only=$paired_only rejected=$rejected data_only=$data_only status=$state release=NOT_CERTIFIED"
+          # Усі доведені фізичні пари залишаються в artifact навіть за RED.
+          # PARTIAL ніколи не називаємо COMPLETE чи релізним GO.
           (( rejected == 0 ))
 
       - name: "ONE-SHOT — artifact фізичних пар для точкового перенесення в main"
