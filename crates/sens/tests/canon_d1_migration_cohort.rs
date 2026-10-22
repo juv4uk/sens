@@ -338,3 +338,107 @@ fn cond_exhaustion_and_false_answer_are_distinct_live_sens_values() {
         "test_id=1968-EQ-COND-COMPOSITION layer=SENS expected=D1:true actual={answer}"
     );
 }
+
+
+/// #2014: both binary growth shapes are executable SENS constructions.
+/// The same CONS root can hold independent left/right payloads; suffix bits
+/// cannot synthesize either unknown payload, so no D4 child is allocated.
+/// Every traversal below is evaluated by SENS, not a host Lisp simulator.
+#[test]
+fn cons_left_and_right_growth_remain_payload_dependent_in_live_sens() {
+    let mut session = Session::default();
+    for (a, b, c) in [
+        ("лівий-атом", "середній-атом", "правий-атом"),
+        ("перший-атом", "другий-атом", "третій-атом"),
+    ] {
+        let left = format!(
+            "(сполучити (сполучити (як-є {a}) (як-є {b})) (як-є {c}))"
+        );
+        let right = format!(
+            "(сполучити (як-є {a}) (сполучити (як-є {b}) (як-є {c})))"
+        );
+        let paths = [
+            (format!("(перше (перше {left}))"), a),
+            (format!("(решта (перше {left}))"), b),
+            (format!("(решта {left})"), c),
+            (format!("(перше {right})"), a),
+            (format!("(перше (решта {right}))"), b),
+            (format!("(решта (решта {right}))"), c),
+        ];
+        for (path, expected_atom) in paths {
+            let source = format!("(тотожне? {path} (як-є {expected_atom}))");
+            let value = eval_program(&source, &mut session)
+                .unwrap_or_else(|error| panic!(
+                    "test_id=2014-CONS-GROWTH layer=SENS input={source} actual_error={error}"
+                ))
+                .value;
+            assert_eq!(
+                value.as_predicate_bit(),
+                Some(true),
+                "test_id=2014-CONS-GROWTH layer=SENS input={source} expected=D1:YES actual={value}"
+            );
+        }
+        for source in [
+            format!("(тотожне? (перше (перше {left})) (як-є {b}))"),
+            format!("(тотожне? (перше (решта {right})) (як-є {c}))"),
+        ] {
+            let value = eval_program(&source, &mut session)
+                .unwrap_or_else(|error| panic!(
+                    "test_id=2014-CONS-MUTANT layer=SENS input={source} actual_error={error}"
+                ))
+                .value;
+            assert_eq!(
+                value.as_predicate_bit(),
+                Some(false),
+                "test_id=2014-CONS-MUTANT layer=SENS input={source} expected=D1:NO actual={value}"
+            );
+        }
+    }
+}
+
+/// #2013/#2015/#3161: EQ on two constructed pairs yields D3:000
+/// (no witness), not a false predicate. D3 COND may skip that answer,
+/// but must still reject an unrelated atomic datum as a condition.
+#[test]
+fn eq_no_witness_composes_with_cond_without_truthiness() {
+    let mut session = Session::default();
+    let eq_pairs = "(тотожне? (сполучити (як-є а) (як-є б)) (сполучити (як-є а) (як-є б)))";
+    let no_witness = eval_program(eq_pairs, &mut session)
+        .expect("дійсний SENS EQ для двох пар")
+        .value;
+    assert!(
+        matches!(no_witness, sens::Value::Nil),
+        "test_id=2015-EQ-COND layer=SENS expected=D3:000-no-witness actual={no_witness}"
+    );
+    let explicit_no = eval_program("(тотожне? (як-є а) (як-є б))", &mut session)
+        .expect("D3 EQ двох відмінних атомів")
+        .value;
+    assert_eq!(explicit_no.as_predicate_bit(), Some(false));
+    assert_ne!(
+        no_witness, explicit_no,
+        "test_id=2015-EQ-COND layer=SENS expected=D3:000-not-D1:0"
+    );
+
+    for condition in [eq_pairs, "(тотожне? (як-є а) (як-є б))"] {
+        let source = format!(
+            "(за-умовою ({condition} (як-є хибна-гілка)) (так (як-є правильна-гілка)))"
+        );
+        let value = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=2015-EQ-COND layer=SENS input={source} actual_error={error}"
+            ))
+            .value;
+        assert_eq!(
+            value,
+            sens::Value::Symbol("правильна-гілка".into()),
+            "test_id=2015-EQ-COND layer=SENS input={source} expected=правильна-гілка actual={value}"
+        );
+    }
+
+    let wrong_domain = "(за-умовою ((як-є не-предикат) (як-є хибна-гілка)) (так (як-є правильна-гілка)))";
+    let result = eval_program(wrong_domain, &mut session);
+    assert!(
+        result.is_err(),
+        "test_id=2015-EQ-COND layer=SENS input={wrong_domain} expected=wrong-domain-error actual={result:?}"
+    );
+}
