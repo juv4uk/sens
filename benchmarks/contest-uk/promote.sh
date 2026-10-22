@@ -171,10 +171,12 @@ done
 # 4) Стан визначають чинні фізичні файли, а не дубльований JSON-реєстр.
 # Вихід нижче містить реальні шляхи й фізичні T5M-байти SENS/Zig.
 
-for task in довжина-списку сума-до-n факторіал подвійний-факторіал фібоначчі степінь-двійки квадрат куб сума-квадратів сума-кубів нсд різниця-квадратів сума-парних сума-непарних сума-трикутних модуль різниця-кубів кількість-пар максимум мінімум; do
-  [[ -n "${best[$task]:-}" ]] || continue
+# Усі категорії визначають виключно результати нативного судді,
+# а не старий ручний список: нові переможці більше не зникають зі звіту.
+while IFS= read -r task; do
+  [[ -n "$task" ]] || continue
   echo "PROMOTED $task ${best[$task]} T5M=${bestbytes[$task]} AST=${bestnodes[$task]} visits=${bestvisits[$task]}"
-done
+done < <(printf '%s\n' "${!best[@]}" | LC_ALL=C sort)
 echo "CONTEST_PROMOTED excluded=$excluded active=$winner_count"
 # Архівні учасники виконані до promotion, але не належать до активної runtime.
 if (( judge_executed != winner_count + excluded )); then
