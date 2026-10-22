@@ -221,6 +221,12 @@ jobs:
               # Самостійний CLI без цих зв'язувань давав хибний RED.
               # Файл протокольного CML-export має розширення .contract,
               # тому не потрапляє до списку виконуваних Lisp-програм.
+              # Першокласний D11-мутант ЗУМИСНО не виконується з успіхом:
+              # його SENS Type/InvalidForm перевіряє meta_fc_predicate_witness.
+              # Не рахувати очікуване відхилення як незалежний позитив T5M.
+              if name == "tests/semantic/meta-fc-predicates-d1-mutant.lisp":
+                  print(f"T5M_EXPECTED_NATIVE_NEGATIVE path={name} test=meta_fc_predicate_witness")
+                  continue
               # Conformance transition — дані для SENS witness_authority, не програма T5M.
               if name == "tests/fixtures/conformance-transition-witness.lisp":
                   print(f"T5M_TRANSITION_DATA_FIXTURE path={name} runtime=witness_authority release=NOT_CERTIFIED")
