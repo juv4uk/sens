@@ -99,11 +99,10 @@ jobs:
               done
             fi
           fi
-          # Істину оборотності дає SENS/Zig, а не git-історія комітів:
-          # source/pair можуть мати однаковий останній коміт, але різні байти.
-          # Перед суддівством перевіряємо КОЖНУ активну фізичну трійку,
-          # а не лише змінені в push джерела. Саме це усуває пропущений
-          # "необоротний T5M" для нсд-евклід після успішного mint інших.
+          # Не судити за git-дата/наявністю файла: точний T5M визначають
+          # тільки чинний SENS mint та Zig view. Перевірити кожну
+          # активну конкурсну трійку (в т. ч. незмінений НСД), щоб
+          # пропущений дрейф негайно став кандидатом на справжній remint.
           if [[ "$EVENT_NAME" == push ]]; then
             for source in benchmarks/contest-uk/*.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
@@ -113,17 +112,17 @@ jobs:
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
               [[ -s "$pair" && -f "$view" && ! -L "$pair" && ! -L "$view" ]] || continue
-              probe="$(mktemp "$RUNNER_TEMP/sens-remint-probe.XXXXXX")"
+              probe="$(mktemp "$RUNNER_TEMP/sens-native-mint.XXXXXX")"
               drift=0
               if ! target/debug/sens --t5m-mint "$source" "$probe" >/dev/null; then
+                echo "REMINT_MINT_PROBE_RED source=$source"
                 drift=1
-                echo "REMINT_NATIVE_PROBE_FAILED source=$source"
               elif ! cmp -s "$probe" "$pair"; then
-                drift=1
                 echo "REMINT_PHYSICAL_DRIFT source=$source"
-              elif ! target/debug/sens-trit view "$pair" | cmp -s - "$view"; then
                 drift=1
+              elif ! target/debug/sens-trit view "$pair" | cmp -s - "$view"; then
                 echo "REMINT_VIEW_DRIFT source=$source"
+                drift=1
               fi
               rm -f -- "$probe"
               if (( drift )); then
@@ -138,26 +137,16 @@ jobs:
               list="$(git log --diff-filter=A --name-only -n 600 -- '*.sens' | grep '\.sens$' | sed 's/\.sens$/.lisp/' | sort -u)"
             fi
           fi
-          # Якщо змінено конкурсанта — перед суддівством перепакувати ВСІ
-          # активні конкурсні джерела. Стан наявності .sens і дата коміту
-          # не доводять оберненості: саме незмінений НСД дав реальний RED
-          # у run 39720761656, хоча remint перевірив інші 17 джерел.
-          # Це адресна перевірка маленького корпусу, не глобальний HOLD.
+          # Джерела для відтворення на новому exact main, якщо інші агенти
+          # посунули HEAD до публікації. Не зберігати готові старі байти.
+          printf '%s\n' "$list" > "$RUNNER_TEMP/sens-remint-candidates.list"
+          # Судити конкурс лише після конкурсанта, не кожного lib/list/tree.
+          # Факт категорії визначає реальний змінений/непарний шлях, не JSON.
           if printf '%s\n' "$list" | grep -Eq '^benchmarks/contest-uk/[^[:space:]]+\.lisp$'; then
             echo "contest=true" >> "$GITHUB_OUTPUT"
-            # Кожний active source перед promotion має точну T5M-пару,
-            # а не тільки файл із тим самим іменем. Єдиний доказ —
-            # SENS + Zig у refresh-verified-t5m-pair.sh нижче.
-            for source in benchmarks/contest-uk/*.lisp; do
-              [[ -f "$source" && ! -L "$source" ]] || continue
-              if ! printf '%s\n' "$list" | grep -Fxq -- "$source"; then
-                list="$(printf '%s\n%s' "$list" "$source")"
-              fi
-            done
           else
             echo "contest=false" >> "$GITHUB_OUTPUT"
           fi
-          printf '%s\n' "$list" > "$RUNNER_TEMP/sens-remint-candidates.list"
           echo "candidates:"; printf '%s\n' "$list" | sed '/^$/d' | wc -l
           # Журнал тільки справді виконаних нативних джерел переживе
           # перемикання ephemeral checkout на свіжий main у кроці публікації.
@@ -253,19 +242,8 @@ jobs:
             git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main"
           }
           regenerate_on_current_main() {
-            local f old source
+            local f old
             local -a bs
-            # Після конкурентного push поточний набір активних Lisp міг
-            # розширитися: нові конкурсанти також мають пройти native mint
-            # ПЕРЕД judge, інакше чужий source-only або drift робить RED.
-            if [[ "$REMINT_CONTEST" == true ]]; then
-              for source in benchmarks/contest-uk/*.lisp; do
-                [[ -f "$source" && ! -L "$source" ]] || continue
-                if ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
-                  printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
-                fi
-              done
-            fi
             while IFS= read -r f; do
               [[ -n "$f" ]] || continue
               if [[ ! -f "$f" ]]; then
