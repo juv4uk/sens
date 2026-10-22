@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import hmac
 import json
 import math
 import os
@@ -17,6 +18,7 @@ import sys
 import tempfile
 import unicodedata
 from collections import Counter
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from fractions import Fraction
 from pathlib import Path
 from typing import Any
@@ -255,30 +257,208 @@ def train(args: argparse.Namespace) -> int:
     return 0
 
 
-def probabilities(model: dict[str, Any], text: str) -> dict[str, Fraction]:
+def class_scores(model: dict[str, Any], text: str) -> dict[str, float]:
+    """Ненормовані оцінки класів; не округлюємо їх до транспортних дробів."""
     classes = model.get("classes")
     vocabulary = model.get("vocabulary")
     if classes != list(LABELS) or not isinstance(vocabulary, list):
         raise StudentError("схема компактної моделі не відповідає System One")
     vocab = set(vocabulary)
-    scores = dict(model["class_log_prior"])
+    scores = {label: float(model["class_log_prior"][label]) for label in LABELS}
     for token in tokenize(text):
         if token not in vocab:
             continue
         for label in LABELS:
-            scores[label] += model["token_log_probability"][label][token]
+            scores[label] += float(model["token_log_probability"][label][token])
+    if any(not math.isfinite(value) for value in scores.values()):
+        raise StudentError("компактна модель повернула нескінченну оцінку")
+    return scores
+
+
+def probabilities(model: dict[str, Any], text: str) -> dict[str, Fraction]:
+    scores = class_scores(model, text)
     maximum = max(scores.values())
     exps = {label: math.exp(scores[label] - maximum) for label in LABELS}
     total = sum(exps.values())
+    if not math.isfinite(total) or total <= 0:
+        raise StudentError("оцінки компактної моделі не утворюють розподіл")
     scaled = {label: exps[label] / total * DENOMINATOR for label in LABELS}
     counts = {label: math.floor(scaled[label]) for label in LABELS}
     remainder = DENOMINATOR - sum(counts.values())
-    ranked = sorted(LABELS, key=lambda label: (-(scaled[label] - math.floor(scaled[label])), LABELS.index(label)))
+    ranked = sorted(
+        LABELS,
+        key=lambda label: (
+            -(scaled[label] - math.floor(scaled[label])),
+            LABELS.index(label),
+        ),
+    )
     for label in ranked[:remainder]:
         counts[label] += 1
     if sum(counts.values()) != DENOMINATOR:
         raise StudentError("внутрішня помилка: нормування учня")
     return {label: Fraction(counts[label], DENOMINATOR) for label in LABELS}
+
+
+def create_local_server(
+    model: dict[str, Any],
+    port: int = 0,
+    api_key: str | None = None,
+) -> ThreadingHTTPServer:
+    """Підняти вузький OpenAI-сумісний HTTP інтерфейс лише на loopback."""
+    if model.get("schema") != MODEL_SCHEMA or model.get("classes") != list(LABELS):
+        raise StudentError("несумісна схема компактної моделі для HTTP")
+    if not isinstance(port, int) or not 0 <= port <= 65535:
+        raise StudentError("порт має бути цілим числом у межах 0..65535")
+    if api_key is not None and ("\r" in api_key or "\n" in api_key):
+        raise StudentError("ключ сервера містить заборонені символи")
+
+    letter_to_label = dict(zip("ABCDE", LABELS))
+    expected_labels = list(LABELS)
+    maximum_body = 1 * 1024 * 1024
+
+    class Handler(BaseHTTPRequestHandler):
+        server_version = "SENS-System-One-Student/1"
+        sys_version = ""
+
+        def _reply(self, status: int, value: dict[str, Any]) -> None:
+            data = json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(data)
+
+        def do_GET(self) -> None:
+            if self.path == "/health":
+                self._reply(200, {"status": "ok", "model": MODEL_SCHEMA})
+            else:
+                self._reply(404, {"error": {"message": "route not found", "type": "not_found"}})
+
+        def do_POST(self) -> None:
+            if self.path != "/v1/chat/completions":
+                self._reply(404, {"error": {"message": "route not found", "type": "not_found"}})
+                return
+            if api_key is not None:
+                received = self.headers.get("Authorization", "")
+                expected = f"Bearer {api_key}"
+                if not hmac.compare_digest(received, expected):
+                    self._reply(401, {"error": {"message": "unauthorized", "type": "authentication_error"}})
+                    return
+            try:
+                length_text = self.headers.get("Content-Length", "")
+                if not length_text.isdigit():
+                    self._reply(411, {"error": {"message": "Content-Length required", "type": "invalid_request_error"}})
+                    return
+                length = int(length_text)
+                if length <= 0 or length > maximum_body:
+                    self._reply(413, {"error": {"message": "request body too large or empty", "type": "invalid_request_error"}})
+                    return
+                request = json.loads(self.rfile.read(length).decode("utf-8"))
+                if not isinstance(request, dict):
+                    raise StudentError("request root must be an object")
+                messages = request.get("messages")
+                choices = request.get("structured_outputs", {}).get("choice")
+                if choices != list("ABCDE"):
+                    raise StudentError("structured_outputs.choice must be exactly A,B,C,D,E")
+                if not isinstance(messages, list) or len(messages) < 2:
+                    raise StudentError("messages must contain system instructions and user text")
+                system_prompts = [
+                    message.get("content")
+                    for message in messages
+                    if isinstance(message, dict) and message.get("role") == "system"
+                ]
+                user_texts = [
+                    message.get("content")
+                    for message in messages
+                    if isinstance(message, dict) and message.get("role") == "user"
+                ]
+                if not system_prompts or not isinstance(system_prompts[-1], str):
+                    raise StudentError("system prompt is required")
+                if not user_texts or not isinstance(user_texts[-1], str) or not user_texts[-1].strip():
+                    raise StudentError("user text is required")
+                prompt_labels = []
+                for line in system_prompts[-1].splitlines():
+                    match = re.match(r"^([A-E]):\s*(.*?)\s+—\s+.+$", line.strip())
+                    if match:
+                        prompt_labels.append((match.group(1), match.group(2)))
+                expected_pairs = list(zip("ABCDE", expected_labels))
+                if prompt_labels != expected_pairs:
+                    raise StudentError(
+                        "criterion labels/order do not match the compact student's fixed class map"
+                    )
+                model_name = request.get("model")
+                if not isinstance(model_name, str) or not model_name.strip():
+                    raise StudentError("model name is required")
+                scores = class_scores(model, user_texts[-1])
+                maximum = max(scores.values())
+                log_total = maximum + math.log(sum(math.exp(value - maximum) for value in scores.values()))
+                log_probabilities = {
+                    label: scores[label] - log_total for label in LABELS
+                }
+                predicted_index = max(
+                    range(len(LABELS)),
+                    key=lambda index: (scores[LABELS[index]], -index),
+                )
+                generated_letter = "ABCDE"[predicted_index]
+                top_logprobs = [
+                    {"token": letter, "logprob": log_probabilities[label]}
+                    for letter, label in zip("ABCDE", LABELS)
+                ]
+                self._reply(
+                    200,
+                    {
+                        "id": "sens-student-local",
+                        "object": "chat.completion",
+                        "created": 0,
+                        "model": model_name,
+                        "choices": [
+                            {
+                                "index": 0,
+                                "message": {"role": "assistant", "content": generated_letter},
+                                "finish_reason": "stop",
+                                "logprobs": {
+                                    "content": [{"token": generated_letter, "top_logprobs": top_logprobs}]
+                                },
+                            }
+                        ],
+                    },
+                )
+            except (UnicodeDecodeError, json.JSONDecodeError, StudentError, TypeError, ValueError) as exc:
+                self._reply(400, {"error": {"message": str(exc), "type": "invalid_request_error"}})
+
+        def log_message(self, _format: str, *_args: Any) -> None:
+            return
+
+    try:
+        return ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    except OSError as exc:
+        raise StudentError(f"не вдалося запустити локальний HTTP сервер: {exc}") from exc
+
+
+def serve(args: argparse.Namespace) -> int:
+    try:
+        raw = args.model_path.read_bytes()
+        model = json.loads(raw.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise StudentError(f"не вдалося прочитати модель: {exc}") from exc
+    if model.get("schema") != MODEL_SCHEMA:
+        raise StudentError("несумісна схема моделі")
+    if args.port < 1 or args.port > 65535:
+        raise StudentError("--port має бути в межах 1..65535")
+    api_key = args.api_key or os.environ.get("SENS_SYSTEM_ONE_STUDENT_API_KEY")
+    server = create_local_server(model, args.port, api_key)
+    print(
+        f"System One student ready at http://127.0.0.1:{server.server_port}/v1/chat/completions",
+        file=sys.stderr,
+    )
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+    return 0
 
 
 def predict(args: argparse.Namespace) -> int:
@@ -386,6 +566,12 @@ def main() -> int:
     predict_parser.add_argument("--output", type=Path, required=True)
     predict_parser.add_argument("--overwrite", action="store_true")
     predict_parser.set_defaults(handler=predict)
+
+    serve_parser = commands.add_parser("serve", help="запустити локальний HTTP-вузол компактного учня")
+    serve_parser.add_argument("--model-path", type=Path, required=True)
+    serve_parser.add_argument("--port", type=int, default=8100)
+    serve_parser.add_argument("--api-key", help="необов'язковий локальний Bearer-ключ; за замовчуванням змінна SENS_SYSTEM_ONE_STUDENT_API_KEY")
+    serve_parser.set_defaults(handler=serve)
 
     args = parser.parse_args()
     try:
