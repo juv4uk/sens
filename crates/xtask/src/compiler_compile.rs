@@ -15,7 +15,7 @@ use sens::{
     parse_canonical_binary, parse_mixed_exact_domain, sha256_source,
     verify_compiler_program_artifact_from_sens, wire_decode_program, wire_encode_program, Value,
 };
-use sens_cli::zig_transport::{decode_t5_exact_words, encode_t5_exact_words};
+use sens_cli::zig_transport::{decode_t5m_exact_words, encode_t5m_exact_words};
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -172,7 +172,7 @@ fn compile_t5m_triplet_on_worker(
 
     // Фізичний T5M декодує лише Zig; Rust відображає вже відновлені
     // точні слова для незалежного SENS-парсера й не вводить власний кодек.
-    let exact = decode_t5_exact_words(physical_t5m)
+    let exact = decode_t5m_exact_words(physical_t5m)
         .map_err(|error| format!("Zig T5M відхилив фізичний носій: {error}"))?;
     let visible = exact
         .iter()
@@ -189,7 +189,7 @@ fn compile_t5m_triplet_on_worker(
     if visible_view != canonical_view.as_slice() {
         return Err("T5M: похідний бітовий перегляд не збігається зі словами Zig".into());
     }
-    let reencoded_t5m = encode_t5_exact_words(&exact)
+    let reencoded_t5m = encode_t5m_exact_words(&exact)
         .map_err(|error| format!("Zig T5M не відновив фізичний носій: {error}"))?;
     if reencoded_t5m.as_slice() != physical_t5m {
         return Err("T5M: порушено побайтову канонічність кодека".into());
@@ -567,14 +567,14 @@ mod tests {
             .trim_end_matches('\n')
             .split(' ')
             .map(|word| {
-                sens_cli::zig_transport::ExactT5Word::new(
+                sens_cli::zig_transport::ExactT5MWord::new(
                     word.len(),
                     word.bytes().map(|bit| bit - b'0').collect(),
                 )
                 .expect("точне бітове слово")
             })
             .collect::<Vec<_>>();
-        let physical = encode_t5_exact_words(&exact).expect("Zig T5M");
+        let physical = encode_t5m_exact_words(&exact).expect("Zig T5M");
 
         let revision = "0123456789abcdef0123456789abcdef01234567";
         let (bytes, accepted) = compile_t5m_triplet_bytes(source, &physical, view, revision)
