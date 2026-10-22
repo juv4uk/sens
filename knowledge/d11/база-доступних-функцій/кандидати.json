@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 272,
+    "total": 273,
     "historical": 17,
-    "library": 255,
-    "distinct_families": 71
+    "library": 256,
+    "distinct_families": 72
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -6811,6 +6811,29 @@
       "law": "Порядок лексичних параметрів та аргументів збережено; нові зв'язування передують захопленим і затінюють однойменні попередні.",
       "native_law_test": "crates/sens/tests/meta_fc_predicate_witness.rs",
       "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "першокласне-обчислити",
+      "source_family": "meta-first-class-lexical-evaluation",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/meta-eval-first-class.lisp",
+        "blob_sha": "b71d2ce12cc2507672ee692d7ffa1f6df8db5a5f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_CI_TARGETED_LAWS_PASS_FULL_SUITE_PENDING",
+      "ratified": false,
+      "callable": false,
+      "signature": "expression × lexical-environment → value",
+      "law": "Справжній SENS-метаобчислювач повертає останнє значення замикання, захоплює лексичне оточення визначення, дозволяє параметру затінювати одноіменне зв'язування і зберігає структурні та порожні аргументи без Python/JSON підміни.",
+      "native_law_test": "crates/sens/tests/meta_fc_predicate_witness.rs",
+      "native_test_result": "NATIVE_SENS_CAPTURE_LAWS_PASS_4_CASES_FULL_SUITE_PENDING",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39835235059",
       "no_new_primitive": true
     }
   ],
