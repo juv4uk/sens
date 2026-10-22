@@ -46,7 +46,7 @@ jobs:
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             if [ ! -f "$f" ]; then echo "MISSING $f"; skip=$((skip+1)); continue; fi
-            if [ ! -f "${f%.lisp}.sens" ]; then echo "UNPAIRED $f"; skip=$((skip+1)); continue; fi
+            # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
             case "$f" in
               lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
