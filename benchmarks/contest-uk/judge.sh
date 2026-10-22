@@ -6,7 +6,10 @@ sens="${SENS_BIN:-$PWD/target/debug/sens}"
 trit="${SENS_TRIT_BIN:-$PWD/target/debug/sens-trit}"
 [[ -x "$sens" && -x "$trit" ]] || { echo "Зберіть sens + sens-trit з --features benchmark-ast-visits" >&2; exit 2; }
 error() { printf "КОНКУРС: ПОМИЛКА %s\n" "$*" >&2; exit 2; }
-inputs=("benchmarks/contest-uk/факторіал.sens" "benchmarks/contest-uk/сума-до-n.sens" "benchmarks/contest-uk/довжина-списку.sens")
+# Автоматично включати нові реальні трійки до конкурсу:
+# оптимізована програма не має залежати від ручної реєстрації.
+inputs=(benchmarks/contest-uk/*.sens)
+[[ -f "${inputs[0]}" ]] || error "немає жодного чинного фізичного T5M учасника"
 inputs+=("$@")
 declare -A seen
 rows=""
@@ -15,7 +18,8 @@ for path in "${inputs[@]}"; do
   [[ -z "${seen[$path]+yes}" ]] || continue
   seen[$path]=1
   source="${path%.sens}.lisp"; view="${path%.sens}"
-  [[ -s "$path" && -f "$source" && -f "$view" && ! -L "$path" ]] || error "неповна трійка $path"
+  [[ -s "$path" && -f "$source" && -f "$view" &&
+     ! -L "$path" && ! -L "$source" && ! -L "$view" ]] || error "неповна трійка $path"
   name="${path##*/}"; name="${name%.sens}"
   case "$name" in
     факторіал|факторіал-*) task="факторіал"; expected="3628800";;
