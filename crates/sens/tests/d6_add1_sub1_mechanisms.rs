@@ -25,12 +25,12 @@ fn exact_d6_call(
 }
 
 #[test]
-fn only_d6_add1_and_sub1_project_to_callable_core() {
+fn only_proven_d6_arithmetic_and_integerp_project_to_callable_core() {
     for bits in 0u8..64 {
         let identity = DomainIdentity::D6(CoreD6::from_word(Bit6::new(bits).unwrap()));
         assert_eq!(
             identity.core_operation().is_some(),
-            matches!(bits, 0b001110 | 0b001111),
+            matches!(bits, 0b001110 | 0b001111 | 0b010010 | 0b111110),
             "D6:{bits:06b}"
         );
     }
@@ -55,6 +55,44 @@ fn exact_d6_add1_sub1_execute_as_exact_lower_domain_composition() {
             "D6:{bits:06b}({args})"
         );
     }
+}
+
+#[test]
+fn d6_neg_executes_in_the_sens_evaluator_with_signed_and_fractional_operands() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("SENS core");
+    for (argument, expected) in [
+        ("0", "0"),
+        ("7", "-7"),
+        ("-7", "7"),
+        ("1/2", "-1/2"),
+        ("-1/2", "1/2"),
+    ] {
+        assert_eq!(
+            exact_d6_call(0b010010, argument, &mut session)
+                .expect("SENS-owned D6 NEG via exact D5 subtraction"),
+            expected,
+            "D6:010010({argument})"
+        );
+    }
+    for argument in ["", "1 2"] {
+        assert_eq!(
+            exact_d6_call(0b010010, argument, &mut session)
+                .unwrap_err()
+                .kind,
+            sens::ErrorKind::Arity
+        );
+    }
+    assert_eq!(
+        exact_d6_call(0b010010, "(як-є х)", &mut session)
+            .unwrap_err()
+            .kind,
+        sens::ErrorKind::Type
+    );
+    let same_payload_d7 = DomainIdentity::D7(
+        D7DataWord::from_word(Bit7::new(0b010010).unwrap())
+    );
+    assert!(same_payload_d7.core_operation().is_none());
 }
 
 #[test]

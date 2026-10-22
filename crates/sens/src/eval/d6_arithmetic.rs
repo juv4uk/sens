@@ -3,9 +3,9 @@
 //! Semantic authority: #3393 / Contract 11.8.
 //! Mechanism authority: #3394.
 //!
-//! ADD1/SUB1 do not mint a new arithmetic backend. They are admitted as
-//! LOWER_DOMAIN_COMPOSITION over the already-admitted D5 PLUS/DIFFERENCE laws
-//! with an exact ONE in the SAME admitted D24+ domain as the operand.
+//! ADD1/SUB1/NEG do not mint another numeric authority. They compose the
+//! admitted D5 PLUS/DIFFERENCE laws with exact 0 or 1 in the operand's
+//! already admitted D24+ domain. D6 identity and its law remain SENS-owned.
 
 use crate::{
     BinaryNumber, Bit5, CoreD5, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Span,
@@ -29,7 +29,7 @@ pub(super) fn invoke(
     };
 
     let bits = word.word().packed_bits();
-    if !matches!(bits, 0b001110 | 0b001111 | 0b111110) {
+    if !matches!(bits, 0b001110 | 0b001111 | 0b010010 | 0b111110) {
         return None;
     }
 
@@ -57,7 +57,7 @@ pub(super) fn invoke(
         return Some(Err(LanguageError::new(
             ErrorKind::Arity,
             format!(
-                "{identity}: exact D6 ADD1/SUB1 mechanism expects 1 argument; received {}",
+                "{identity}: exact D6 ADD1/SUB1/NEG mechanism expects 1 argument; received {}",
                 args.len()
             ),
             span,
@@ -75,18 +75,28 @@ pub(super) fn invoke(
     let Some(width) = width else {
         return Some(Err(LanguageError::new(
             ErrorKind::Type,
-            "D6 ADD1/SUB1 requires a D24+ numeric operand",
+            "D6 ADD1/SUB1/NEG requires a D24+ numeric operand",
             span,
         )));
     };
-    let mut one_bits = vec![0; width];
-    one_bits[width - 1] = 1;
-    let one = BinaryNumber::from_numeric_domain_bits(width, &one_bits)
+    // D6 NEG uses the exact D5 DIFFERENCE(0,x) law, not a host sign bit,
+    // a D7 glyph, or an unqualified numeric literal. Domain/width survives
+    // the boundary; the D5 arithmetic law handles overflow and fractions.
+    let mut constant_bits = vec![0; width];
+    if bits != 0b010010 {
+        constant_bits[width - 1] = 1;
+    }
+    let constant = BinaryNumber::from_numeric_domain_bits(width, &constant_bits)
         .expect("D24+ domain width from qualified operand");
-    let composed_args = [args[0].clone(), Value::BinaryNumber(one)];
+    let composed_args = if bits == 0b010010 {
+        [Value::BinaryNumber(constant), args[0].clone()]
+    } else {
+        [args[0].clone(), Value::BinaryNumber(constant)]
+    };
     let d5_identity = match bits {
         0b001110 => d5(0b01010), // ADD1 = D5 PLUS(x, 1)
         0b001111 => d5(0b01011), // SUB1 = D5 DIFFERENCE(x, 1)
+        0b010010 => d5(0b01011), // NEG = D5 DIFFERENCE(0, x)
         _ => unreachable!(),
     };
 
@@ -162,6 +172,53 @@ mod tests {
                 .unwrap(),
             d24(0),
         );
+    }
+
+    #[test]
+    fn neg_reuses_exact_d5_difference_and_keeps_d24_boundaries() {
+        let env = Environment::root();
+        let neg = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b010010).unwrap(),
+        ));
+        for (operand, expected) in [
+            (d24(0), d24(0)),
+            (d24(7), d24(-7)),
+            (d24(-7), d24(7)),
+        ] {
+            assert_eq!(
+                invoke(neg, &[operand], &env, Span::default())
+                    .unwrap()
+                    .unwrap(),
+                expected
+            );
+        }
+        let widened = invoke(neg, &[d24(-(1 << 23))], &env, Span::default())
+            .unwrap()
+            .unwrap();
+        let Value::BinaryNumber(ref number) = widened else {
+            panic!("D24 minimum negation must remain a precise word");
+        };
+        assert_eq!(number.numeric_domain_width(), Some(48));
+        assert_eq!(widened.to_string(), "8388608");
+
+        for invalid in [Value::Nil, Value::Rational(crate::Rational::integer(7))] {
+            assert_eq!(
+                invoke(neg, &[invalid], &env, Span::default())
+                    .unwrap()
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::Type
+            );
+        }
+        for arguments in [vec![], vec![d24(1), d24(2)]] {
+            assert_eq!(
+                invoke(neg, &arguments, &env, Span::default())
+                    .unwrap()
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::Arity
+            );
+        }
     }
 
     #[test]
