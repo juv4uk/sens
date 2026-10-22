@@ -96,6 +96,7 @@ benchmarks/contest-uk/сума-четвертих-степенів-формул�
 benchmarks/contest-uk/нсд.lisp
 benchmarks/contest-uk/сума-парних.lisp
 benchmarks/contest-uk/перевернути.lisp
+knowledge/silent-fallback-inventory.lisp
 benchmarks/contest-uk/перевернути-компакт.lisp
 benchmarks/contest-uk/перевернути-короткий.lisp
 benchmarks/contest-uk/факторіал-хвостовий.lisp

@@ -33,6 +33,10 @@ fn is_explicit_non_implementation(rel: &str) -> bool {
         // програмами укр-проєкції (як lib/domains/*).
         || rel == "lib/core4.lisp"
         || rel == "lib/yantra.lisp"
+        // core-math і core2 — «опис принципів / профілю», навмисно без
+        // виконуваних визначень (так само виключені у remint-drifted-pairs).
+        || rel == "lib/core-math.lisp"
+        || rel == "lib/core2.lisp"
 }
 
 /// The generated machine catalogue is data, not executable source. Validate
@@ -394,5 +398,7 @@ fn completion_gate_exclusions_are_narrow_and_explicit() {
     // core4 і yantra — декларативні джерела, не виконувані програми.
     assert!(is_explicit_non_implementation("lib/core4.lisp"));
     assert!(is_explicit_non_implementation("lib/yantra.lisp"));
+    assert!(is_explicit_non_implementation("lib/core-math.lisp"));
+    assert!(is_explicit_non_implementation("lib/core2.lisp"));
     assert!(!is_explicit_non_implementation("lib/core.lisp"));
 }
