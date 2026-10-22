@@ -55,7 +55,7 @@ for source in "$here"/*.lisp; do
     мінімум|мінімум-*) expected=-17 ;;
     різниця-кубів|різниця-кубів-*) expected=279 ;;
     кількість-пар|кількість-пар-*) expected=45 ;;
-    *) echo "CONTEST_SKIP: немає перевіреного очікуваного результату: $source" >&2; continue ;;
+    *) echo "CONTEST_UNKNOWN_TASK: немає перевіреного очікуваного результату: $source" >&2; fail=1; continue ;;
   esac
   physical="$scratch/$name.sens"
   view="$scratch/$name"
