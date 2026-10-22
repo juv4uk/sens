@@ -723,9 +723,9 @@ jobs:
           cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
           cargo test --locked -p sens-cli --test cli t5m_physical_pair_ -- --nocapture
           cargo test --locked -p sens-cli --test physical_bare_session_cli part_ii_exact_carrier_preserves_value_across_ukrainian_projection -- --exact --nocapture
-          cargo test --locked -p sens-cli --test physical_core4_sequence_cli ukrainian_d3_d4_existing_files_mint_verify_and_execute -- --exact --nocapture
-          # Д1: живі аксіоми мають повертати типізований біт, не D3 NIL або число.
+          # Д1: спершу живий закон аксіом; чужий дрейф T5M не маскує діагностику.
           cargo test --locked -p sens --test d1_canonical_source_value executable_axioms_use_exact_d1_for_positive_and_invalid_knowledge -- --exact --nocapture
+          cargo test --locked -p sens-cli --test physical_core4_sequence_cli ukrainian_d3_d4_existing_files_mint_verify_and_execute -- --exact --nocapture
           cargo test --locked -p sens-cli --test physical_core4_sequence_cli contest_uk_all_physical_programs_have_native_execution_and_peers -- --exact --nocapture
           cargo test --locked -p sens-cli --bin sens-trit exact_bit_view_maps_to_its_existing_sens_physical_companion -- --exact --nocapture
           cargo test --locked -p sens-cli --bin sens-trit t5m_view_inverse_preserves_d24_and_rejects_noncanonical_view -- --exact --nocapture
