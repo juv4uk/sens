@@ -206,15 +206,15 @@ fi
 # are now witnessed by Lisp itself. The shell observes only the named pass
 # envelope and does not encode any semantic expected values.
 meta_registry_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/meta-semantic-registry-witness.lisp)"
-if [[ "$meta_registry_status" != "(meta-semantic-registry-witness (status pass))" ]]; then
+if [[ "$meta_registry_status" != "(semantic-registry (status pass))" ]]; then
   printf 'meta semantic-registry Lisp witness failed: %s\n' "$meta_registry_status" >&2
   exit 1
 fi
  
-# #771: чинна українська функція процесного модуля має завантажитися
-# та зберегти точне правило коду виходу без старого англійського псевдоніма.
+# #771: SENS повертає фактичні три значення: порожній код -> -1,
+# нуль -> 0, ненульовий -> 1. Перевіряємо результат, а не старий status-marker.
 process_load_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/process-load-witness.lisp)"
-if [[ "$process_load_status" != "(process-load-witness (status pass))" ]]; then
+if [[ "$process_load_status" != "(-1 0 1)" ]]; then
   printf 'process-load Lisp witness failed: %s\n' "$process_load_status" >&2
   exit 1
 fi
@@ -259,7 +259,7 @@ fi
 # deterministically and enforce admission bounds in Lisp. The shell observes
 # only the named pass envelope.
 x86_instruction_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/x86-64-instruction-set-witness.lisp)"
-if [[ "$x86_instruction_status" != "(x86-64-instruction-set-witness (status pass))" ]]; then
+if [[ "$x86_instruction_status" != "(machine-commands (status pass))" ]]; then
   printf 'x86-64 instruction set Lisp witness failed: %s\n' "$x86_instruction_status" >&2
   exit 1
 fi
@@ -379,7 +379,7 @@ fi
 # #536: preserve comparison-peer topology after retiring stale Rust t-oracles.
 # The current Lisp-owned witness is observed only through its pass envelope.
 runtime_peer_topology_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp)"
-if [[ "$runtime_peer_topology_status" != "(runtime-peer-comparison-topology-witness (status pass))" ]]; then
+if [[ "$runtime_peer_topology_status" != "(peer-topology (status pass))" ]]; then
   printf 'runtime comparison peer topology witness failed: %s\n' "$runtime_peer_topology_status" >&2
   exit 1
 fi
