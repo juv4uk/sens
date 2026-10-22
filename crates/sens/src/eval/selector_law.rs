@@ -300,57 +300,31 @@ mod tests {
     }
 
     #[test]
-    fn all_512_d11_derived_children_execute_as_d10_compositions() {
-        // D11 тут не новий opcode: усі 512 похідних виконуються як
-        // p(CAR(x)) / p(CDR(x)) для 256 ратифікованих батьків D10.
-        // Кожна асиметрична CONS-гілка має тільки один шлях до «ціль».
-        // Реальний reader/evaluator SENS, не Rust-симуляція семантики.
-        let mut witnessed = 0;
-        for root in [0b011u16, 0b100] {
-            for suffix in 0..(1u16 << 7) {
-                let bits = (root << 7) | suffix;
-                let parent = identity(10, bits);
-                let name = crate::semantic_registry::selector_ukr_for_exact(parent)
-                    .expect("D10 selector has an owner-ratified Ukrainian projection");
-                assert_eq!(
-                    crate::semantic_registry::exact_uk_callable_for_source_head(name),
-                    Some(parent),
-                    "Ukrainian D10 parent name must invert to the exact coordinate"
-                );
-                for (child_head, child_is_cdr) in [("перше", false), ("решта", true)] {
-                    // Порядок виконання: новий внутрішній крок D11, далі
-                    // сім суфіксних кроків D10 з молодшого біта, потім корінь.
-                    let steps = std::iter::once(child_is_cdr)
-                        .chain((0..7).map(|shift| (suffix >> shift) & 1 == 1))
-                        .chain(std::iter::once(root == 0b011))
-                        .collect::<Vec<_>>();
-                    let mut tree = String::from("(як-є ціль)");
-                    for is_cdr in steps.iter().rev() {
-                        tree = if *is_cdr {
-                            format!("(сполучити (як-є інше) {tree})")
-                        } else {
-                            format!("(сполучити {tree} (як-є інше))")
-                        };
-                    }
-                    let program = format!("({name} ({child_head} {tree}))");
-                    let actual = crate::eval_program(
+    fn d11_derived_compositions_preserve_car_cdr_partiality() {
+        // Усі 512 позитивних D11-композицій уже виконує окремий
+        // d11_selector_512_live.rs. Тут незалежна негативна межа:
+        // p(CAR(x)) / p(CDR(x)) не мають права приймати атом або ().
+        // Немає нового D11 opcode і немає host-підміни SENS-обчислення.
+        for bits in [0b1000000000u16, 0b0110101101] {
+            let parent = identity(10, bits);
+            let name = crate::semantic_registry::selector_ukr_for_exact(parent)
+                .expect("ratified D10 parent must have an Ukrainian name");
+            for child_head in ["перше", "решта"] {
+                for input in ["(як-є опора)", "(як-є ())"] {
+                    let program = format!("({name} ({child_head} {input}))");
+                    let error = crate::eval_program(
                         &program,
                         &mut crate::Session::default(),
                     )
-                    .unwrap_or_else(|error| {
-                        panic!("D11 child of D10:{bits:010b}, {child_head}: {program}: {error}")
-                    })
-                    .value;
+                    .expect_err("CAR/CDR-derived selector is undefined on non-pairs");
                     assert_eq!(
-                        actual,
-                        Value::Symbol("ціль".into()),
-                        "D11 child via D10:{bits:010b} must preserve composition order"
+                        error.kind,
+                        ErrorKind::Type,
+                        "D11 child of D10:{bits:010b} must reject {input} as a type error, not reader/transport failure: {error}"
                     );
-                    witnessed += 1;
                 }
             }
         }
-        assert_eq!(witnessed, 512);
     }
 
     #[test]
