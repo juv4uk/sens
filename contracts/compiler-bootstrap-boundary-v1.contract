@@ -1,4 +1,4 @@
-; contracts/compiler-bootstrap-boundary-v1.lisp
+; contracts/compiler-bootstrap-boundary-v1.contract
 ; sens#3805 — машинно-читаний контракт межі початкового компілятора мовою СЕНС.
 ;
 ; Контракт не визначає значення СЕНС. Він класифікує наявні допоміжні
@@ -39,10 +39,10 @@
        (component
         (path . "crates/sens/src/compiler_role.rs")
         (symbol . compiler_execution_role)
-        (owner . bootstrap-oracle)
-        (role . differential-reference-only)
-        (production . forbidden)
-        (semantic-decision . bootstrap-only))
+        (owner . host-adapter)
+        (role . execute-sens-role-law-and-convert-result)
+        (production . allowed)
+        (semantic-decision . no))
        (component
         (path . "knowledge/bija3-l1-l5-structure-projection.json")
         (owner . generated-law-data)
@@ -71,6 +71,6 @@
 
   (retirement
     . ((rust-role-oracle
-        . "retain only while differential evidence remains useful; never production authority")
+        . "the former identity-to-role oracle was removed; the compatibility API now delegates to the SENS-owned law")
        (historical-core1-prelude
         . "donor/provenance only; not part of current compiler nucleus"))))

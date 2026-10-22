@@ -187,7 +187,6 @@ fn forward_fallback_branches_execute_ratified_d1_without_tak_call() {
     }
 }
 
-
 // D11 FIND-ENTRY: чинна lib/forward.lisp, без другого host-алгоритму.
 // Усі результати й D1-судження обчислюються самим SENS.
 #[test]

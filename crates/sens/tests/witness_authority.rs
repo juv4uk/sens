@@ -602,7 +602,8 @@ fn same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend() {
     // нативними структурами та D3 -> D1 boundary вище; не вимагати
     // 8-бітних SID8 і латинських голів там, де вони скасовані.
     assert!(
-        rows.iter().any(|row| row.expr.trim_start().starts_with("(за-умовою ")),
+        rows.iter()
+            .any(|row| row.expr.trim_start().starts_with("(за-умовою ")),
         "test_id=meta-current-d3-cond witness missing"
     );
     assert!(

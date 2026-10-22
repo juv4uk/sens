@@ -1,37 +1,38 @@
-//! #1455: код СЕНС (8 біт) викликає й функції таблиці, визначені мовою в
-//! lib/core.lisp, а не лише примітиви Rust. Порядок: примітив → визначення
-//! мовою, прив'язане до коду → помилка.
-
-use sens::{eval_program, load_core_library, ErrorKind, Session};
+//! Виклик мовних функцій через точні поточні доменні identity.
+use sens::{
+    eval_exact_domain_program, eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain, ErrorKind, Session,
+};
 
 fn core_session() -> Session {
     let mut session = Session::default();
-    load_core_library(&mut session).expect("core library should load");
+    load_core_library(&mut session).expect("чинне ядро має завантажитися");
     session
 }
 
 fn eval(session: &mut Session, source: &str) -> String {
-    eval_program(source, session)
-        .unwrap_or_else(|error| panic!("{source}: {error:?}"))
+    let forms = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|error| panic!("не вдалося розібрати {source}: {error}"));
+    eval_parsed_expressions(&forms, session)
+        .unwrap_or_else(|error| panic!("не вдалося виконати {source}: {error:?}"))
         .value
         .to_string()
 }
 
 #[test]
-fn language_defined_functions_are_callable_by_code() {
+fn current_exact_domain_codes_call_their_language_defined_functions() {
     let mut session = core_session();
-    // list = 00100111, member? = 00101100, quotient = 00010100, append = 00101001
     for (by_code, by_name) in [
-        ("(00100111 1 2 3)", "(list 1 2 3)"),
+        ("(1110 1 2 3)", "(список 1 2 3)"),
         (
-            "(00101100 2 (00000001 (1 2 3)))",
-            "(member? 2 (00000001 (1 2 3)))",
+            "(11101 (як-є кіт) (список (як-є кіт) (як-є пес)))",
+            "(значення-у-списку? (як-є кіт) (список (як-є кіт) (як-є пес)))",
         ),
-        ("(00010100 17 5)", "(quotient 17 5)"),
         (
-            "(00101001 (00000001 (1 2)) (00000001 (3)))",
-            "(append (00000001 (1 2)) (00000001 (3)))",
+            "(1111 (список (як-є кіт)) (список (як-є пес)))",
+            "(приєднати (список (як-є кіт)) (список (як-є пес)))",
         ),
+        ("(10111 17 5)", "(частка 17 5)"),
     ] {
         assert_eq!(
             eval(&mut session, by_code),
@@ -42,78 +43,40 @@ fn language_defined_functions_are_callable_by_code() {
 }
 
 #[test]
-fn a_local_definition_does_not_bind_the_code() {
-    let mut session = Session::default();
-    // Без ядра: локальне визначення `list` усередині функції не стає механізмом коду.
-    eval(
-        &mut session,
-        "(00001001 f (00001000 () (00001001 list (00001000 args 7)) 0)) (f)",
-    );
-    let error = eval_program("(00100111 1 2)", &mut session).expect_err("no mechanism yet");
-    assert_eq!(error.kind, ErrorKind::Type);
+fn exact_domain_code_as_a_value_invokes_its_bound_definition() {
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("Core4 binds current exact identities");
+    let result = eval_exact_domain_program("(((0010 (ф) ф) 0100001100) (001 ()))", &mut session)
+        .expect("an exact D10 identity passed as a value invokes its loaded definition");
+    assert!(matches!(
+        result.value,
+        sens::Value::DomainIdentity(sens::DomainIdentity::D1(bit))
+            if bit.word().packed_bits() == 1
+    ));
 }
 
 #[test]
-fn a_code_without_mechanism_fails_closed() {
-    let mut session = core_session();
-    // 11111110 — порожній рядок таблиці функцій (10110001 з #1391 уже зайнятий).
-    let error = eval_program("(11111110 1)", &mut session).expect_err("empty code must fail");
-    assert_eq!(error.kind, ErrorKind::Type);
-    assert!(error.message.contains("no admitted callable mechanism"));
-}
-
-#[test]
-fn a_code_used_as_a_value_is_callable_through_its_definition() {
+fn local_lexical_shadow_does_not_retarget_an_exact_domain_code() {
     let mut session = core_session();
     assert_eq!(
-        eval(&mut session, "((00001000 (f) (f 1 2)) 00100111)"),
+        eval(
+            &mut session,
+            "((функція (список) (1110 1 2)) (функція (значення) (як-є затінено)))",
+        ),
         "(1 2)"
     );
 }
 
 #[test]
-fn a_macro_bound_to_a_code_expands_before_its_arguments_are_evaluated() {
-    let mut session = core_session();
-    // and = 10011010: другий аргумент не обчислюється, якщо перший хибний.
-    assert_eq!(
-        eval(&mut session, "(10011010 () (never-defined-function))"),
-        "()"
-    );
-    assert_eq!(
-        eval(&mut session, "(10011010 1 2)"),
-        eval(&mut session, "(and 1 2)")
-    );
-    // let = 10011100
-    assert_eq!(
-        eval(&mut session, "(10011100 ((x 40)) (00001100 x 2))"),
-        "42"
-    );
+fn resident_without_an_admitted_mechanism_fails_closed() {
+    let error = eval_exact_domain_program("(0000000000 (001 ()))", &mut core_session())
+        .expect_err("D10 residency alone must not grant callability");
+    assert_eq!(error.kind, ErrorKind::Type);
 }
 
 #[test]
-fn a_local_definition_of_a_table_name_does_not_retarget_the_code() {
-    let mut session = core_session();
-    // member? = 00101100; локальний define усередині функції не змінює код.
-    assert_eq!(
-        eval(
-            &mut session,
-            "(00001001 f (00001000 ()
-               (00001001 member? (00001000 (x l) (00000001 hijacked)))
-               (00101100 2 (00000001 (1 2 3)))))
-             (f)"
-        ),
-        eval(&mut session, "(member? 2 (00000001 (1 2 3)))")
-    );
-}
-
-#[test]
-fn defmacro_itself_is_callable_by_its_code() {
-    let mut session = core_session();
-    // defmacro = 00001010: визначення макроса кодом, виклик — назвою й кодом.
-    // (00001010 quoted (x) ...) розгортається в (quote x).
-    eval(
-        &mut session,
-        "(00001010 quoted (x) (00000100 (00000001 00000001) (00000100 x (00000001 ()))))",
-    );
-    assert_eq!(eval(&mut session, "(quoted (a b))"), "(a b)");
+fn decimal_digits_in_a_call_head_do_not_become_a_callable_identity() {
+    let error = eval_program("(00100111 1 2 3)", &mut core_session())
+        .expect_err("a decimal-looking legacy code must not become an opcode");
+    assert_eq!(error.kind, ErrorKind::Type);
 }

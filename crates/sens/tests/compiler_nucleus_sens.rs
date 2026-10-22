@@ -147,6 +147,22 @@ fn list_values(value: &Value) -> Option<Vec<&Value>> {
     }
 }
 
+fn executable_lisp_body(source: &str) -> String {
+    source
+        .lines()
+        .filter(|line| !line.trim_start().starts_with(';'))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn flip_first_expected_d1(source: &str, expected: &str, mutant: &str) -> String {
+    executable_lisp_body(source).replacen(
+        &format!("{expected}) так)"),
+        &format!("{mutant}) так)"),
+        1,
+    )
+}
+
 #[test]
 fn nucleus_source_lowers_without_legacy_sid_or_call_nodes() {
     let parsed = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus source parses");
@@ -277,10 +293,10 @@ fn compiler_program_list_fail_closed_is_sens_owned() {
         );
     }
 
-    // Однобітний mutant змінює виключно очікуване D1:NO на D1:YES.
+    // Мутант змінює тільки перше очікуване D1:ні на D1:так.
     assert_eq!(
-        COMPILER_PROGRAM_LIST_D1_LAW.replacen("#d1:0", "#d1:1", 1),
-        COMPILER_PROGRAM_LIST_D1_MUTANT
+        flip_first_expected_d1(COMPILER_PROGRAM_LIST_D1_LAW, "ні", "так"),
+        executable_lisp_body(COMPILER_PROGRAM_LIST_D1_MUTANT)
     );
     let mutant = parse_mixed_exact_domain(COMPILER_PROGRAM_LIST_D1_MUTANT)
         .expect("mutated SENS source must remain syntactically valid");
@@ -305,11 +321,11 @@ fn compiler_program_list_fail_closed_is_sens_owned() {
         );
     }
 
-    // Лише один очікуваний біт D1:0 → D1:1; SENS сам викликає свій
+    // Лише перше очікуване D1:ні → D1:так; SENS сам викликає свій
     // fail-closed CAR(QUOTE EMPTY) і відхиляє неприпустимий mutant.
     assert_eq!(
-        COMPILER_ARITY_D1_LAW.replacen("#d1:0", "#d1:1", 1),
-        COMPILER_ARITY_D1_MUTANT
+        flip_first_expected_d1(COMPILER_ARITY_D1_LAW, "ні", "так"),
+        executable_lisp_body(COMPILER_ARITY_D1_MUTANT)
     );
     let mutant =
         parse_mixed_exact_domain(COMPILER_ARITY_D1_MUTANT).expect("one-bit SENS mutant must parse");
@@ -335,8 +351,8 @@ fn compiler_program_list_fail_closed_is_sens_owned() {
         );
     }
     assert_eq!(
-        COMPILER_VARIADIC_D1_LAW.replacen("#d1:1", "#d1:0", 1),
-        COMPILER_VARIADIC_D1_MUTANT,
+        flip_first_expected_d1(COMPILER_VARIADIC_D1_LAW, "так", "ні"),
+        executable_lisp_body(COMPILER_VARIADIC_D1_MUTANT),
         "mutant changes exactly one expected D1 bit"
     );
     let mutant = parse_mixed_exact_domain(COMPILER_VARIADIC_D1_MUTANT)

@@ -175,11 +175,11 @@ class CallsiteAuditTests(unittest.TestCase):
         self.row(3, '101', 'коротко', 'повне', 'equal')
         self.put('lib/surface/semantic-registry.lisp', '((legacy registry\\n')
         self.put('lib/surface/semantic-registry-experiment.lisp', '((experiment\\n')
-        self.put('mylisp-cml-export.lisp', '"unterminated')
+        self.put('sens-cml-export.contract', '"unterminated')
         report = mod.measure(self.root)
         self.assertEqual(report['active_unclassified_files'], 0)
         self.assertEqual(report['unclassified_files'], [])
-        self.assertEqual(report['metadata_files_excluded'], 4)
+        self.assertEqual(report['metadata_files_excluded'], 3)
 
     def test_canon_d9_witness_calls_exact_ukrainian_surfaces_and_preserves_quoted_tag(self):
         repo_root = SCRIPT.resolve().parents[1]
@@ -196,7 +196,7 @@ class CallsiteAuditTests(unittest.TestCase):
             "canon-law-cond-first-match-short-circuit", "canon-law-symbolic-surface",
         }
         self.assertEqual(sorted(migrated.intersection(active_heads)), [])
-        self.assertIn("(як-є canon-law-result)", source)  # D3:001 українська проєкція; цитований тег, не виклик
+        self.assertIn("(як-є канон-закон-результат)", source)  # Цитований український тег, не виклик
         self.assertIn("(визначити канон-закон-результат", source)
         self.assertNotRegex(source, r"\(визначити canon-[a-z-]+\b")
 

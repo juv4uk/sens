@@ -61,7 +61,7 @@ fn render_forms_block() -> String {
         let role = function_role(id).expect("exported code must have function-table metadata");
         let callable = role != "syntax";
         lines.push(format!(
-            "    (\\\"{id_bits}\\\" (surfaces {}) (role {}) (callable {}))",
+            "    (\"{id_bits}\" (surfaces {}) (role {}) (callable {}))",
             render_surfaces(&surfaces),
             role,
             if callable { "t" } else { "nil" }
@@ -163,7 +163,7 @@ mod tests {
     fn committed_artifact_matches_producer_output() {
         let committed = std::fs::read_to_string(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../mylisp-cml-export.lisp"
+            "/../../sens-cml-export.contract"
         ))
         .expect("mylisp-cml-export.wsm must exist at the repo root");
         assert_eq!(committed, render_export());

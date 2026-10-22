@@ -160,7 +160,8 @@ fn rust_test_is_semantic_authority(rel: &str) -> bool {
 fn is_operational_doctrine_data(rel: &str, text: &str) -> bool {
     rel == "knowledge/sens-primary.lisp"
         && text.lines().take(8).any(|line| {
-            line.trim() == "; Status: operational doctrine (not language-contract authority)."
+            line.trim()
+                == "; Статус: операційна доктрина, а не джерело повноважень мовного контракту."
         })
         && text
             .lines()
@@ -216,7 +217,7 @@ fn rust_nonsemantic_data_kind(rel: &str, line_text: &str, literal: &str) -> Opti
     // match arm; an ordinary Rust `"eval"` elsewhere remains ratchet debt.
     if rel == "crates/sens-cli/src/bin/sens-trit.rs"
         && literal == "eval"
-        && line_text.trim() == "\"eval\" => {"
+        && line_text.trim() == "\"eval\" | \"eval-core4\" => {"
     {
         return Some("rust-cli-surface");
     }
@@ -659,7 +660,7 @@ fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
     let source = fs::read_to_string(repo_root().join(relative)).expect("read exact real CLI");
     let arms: Vec<_> = source
         .lines()
-        .filter(|line| line.trim() == "\"eval\" => {")
+        .filter(|line| line.trim() == "\"eval\" | \"eval-core4\" => {")
         .collect();
     assert_eq!(
         arms.len(),

@@ -50,9 +50,11 @@ fn точна_ширина_домену_не_зливається_за_одна�
 }
 
 #[test]
-fn історичний_w8_під_цитатою_не_стає_d8() {
-    // The original historical W8:10101000 has no callable D8 projection.
-    // Do not turn a raw eight-bit source word into a machine function.
+fn старий_sid_ast_нормалізується_до_точної_identity_без_викличності() {
+    // Raw historical W8 has no callable D8 projection. Separately, an
+    // explicitly typed legacy Sid AST wrapper carries a CoreDomainIdentity;
+    // generic wire/FASL serialization canonicalizes that identity to the
+    // current DomainIdentity node. This is identity preservation, not a call.
     assert!(
         sens::CoreDomainIdentity::from_source_word(sens::BinarySourceWord::W8(
             Bit8::new(0b10101000).unwrap()
@@ -68,8 +70,9 @@ fn історичний_w8_під_цитатою_не_стає_d8() {
             expression(ExprKind::Pair(
                 std::rc::Rc::new(expression(ExprKind::String("дані".into()))),
                 std::rc::Rc::new(expression(ExprKind::Sid(
-                    // Even an admitted D8 payload is not canonical when carried
-                    // inside the historical Sid AST variant.
+                    // The legacy AST wrapper must be rejected by direct exact
+                    // encoders, then normalized by the generic compatibility
+                    // transport into this explicitly typed current identity.
                     sens::CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(0b11100000).unwrap())),
                 ))),
             )),
@@ -80,10 +83,34 @@ fn історичний_w8_під_цитатою_не_стає_d8() {
     assert!(encode_exact_fasl_program(std::slice::from_ref(&quoted), &[0; 32]).is_none());
     let old_wire = sens::wire_encode_program(std::slice::from_ref(&quoted));
     assert!(sens::wire_decode_program(&old_wire).is_some());
-    assert!(decode_exact_wire_program(&old_wire).is_none());
+    let decoded_wire = decode_exact_wire_program(&old_wire)
+        .expect("generic wire transport preserves the explicit domain-qualified identity");
+    let ExprKind::List(items) = &decoded_wire[0].kind else {
+        panic!("quoted program list");
+    };
+    let ExprKind::Pair(_, tail) = &items[1].kind else {
+        panic!("quoted data pair");
+    };
+    assert!(matches!(
+        &tail.kind,
+        ExprKind::DomainIdentity(DomainIdentity::D8(word))
+            if word.word().packed_bits() == 0b11100000
+    ));
     let old_fasl = sens::fasl_encode_program(&[quoted], &[0; 32]);
     assert!(sens::fasl_decode_program(&old_fasl).is_some());
-    assert!(decode_exact_fasl_program(&old_fasl).is_none());
+    let (decoded_fasl, _) = decode_exact_fasl_program(&old_fasl)
+        .expect("generic FASL transport preserves the explicit domain-qualified identity");
+    let ExprKind::List(items) = &decoded_fasl[0].kind else {
+        panic!("quoted program list");
+    };
+    let ExprKind::Pair(_, tail) = &items[1].kind else {
+        panic!("quoted data pair");
+    };
+    assert!(matches!(
+        &tail.kind,
+        ExprKind::DomainIdentity(DomainIdentity::D8(word))
+            if word.word().packed_bits() == 0b11100000
+    ));
 }
 
 #[test]

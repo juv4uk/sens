@@ -442,8 +442,12 @@ mod tests {
         let other_domain =
             DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(0b011101110).unwrap()));
         assert!(
-            other_domain.core_operation().is_none(),
-            "identical payload in another domain grants no D8 callability"
+            matches!(
+                other_domain.core_operation(),
+                Some(CoreDomainIdentity::D9(word))
+                    if word.word().packed_bits() == 0b011101110
+            ),
+            "the same payload is admitted only as its distinct D9 selector identity"
         );
     }
 

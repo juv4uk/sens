@@ -11,7 +11,7 @@
       "git_blob_sha1": "fb5218c8eefb825fd9971b0a29416eb6e9d9507f"
     },
     {
-      "path": "contracts/compiler-bootstrap-boundary-v1.lisp",
+      "path": "contracts/compiler-bootstrap-boundary-v1.contract",
       "git_blob_sha1": "5cc00df22356bcd2281a5d6d6445e019c54bd1dd"
     },
     {

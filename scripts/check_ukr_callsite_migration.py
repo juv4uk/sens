@@ -313,7 +313,6 @@ def excluded_metadata(path: Path) -> bool:
             or path.as_posix() in {
                 'lib/surface/semantic-registry.lisp',
                 'lib/surface/semantic-registry-experiment.lisp',
-                'mylisp-cml-export.lisp',
             })
 
 

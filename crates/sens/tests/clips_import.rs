@@ -635,9 +635,9 @@ fn eval_exact_clips_slot_lookup(source: &str) -> String {
     // Other historical CLIPS importer functions have separate migration
     // blockers and are not dependencies of this purely structural search.
     let full = include_str!("../../../lib/clips-import.lisp");
-    let begin = full.find("(0011 кліпс-значення-слота").unwrap();
+    let begin = full.find("(визначити кліпс-значення-слота").unwrap();
     let end = full[begin..]
-        .find("(0011 clips-positional-args")
+        .find("(визначити позиційні-аргументи-кліпс")
         .map(|relative| begin + relative)
         .unwrap();
     let definitions = sens::parse_mixed_exact_domain(&full[begin..end])

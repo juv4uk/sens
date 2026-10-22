@@ -4,7 +4,7 @@
 //! regression: production host glue may transport/load/execute SENS, but must
 //! not regain identity->meaning authority.
 
-const BOUNDARY: &str = include_str!("../../../contracts/compiler-bootstrap-boundary-v1.lisp");
+const BOUNDARY: &str = include_str!("../../../contracts/compiler-bootstrap-boundary-v1.contract");
 const BOOTSTRAP: &str = include_str!("../src/compiler_bootstrap.rs");
 const LANGUAGE: &str = include_str!("../src/compiler_language.rs");
 const ORACLE: &str = include_str!("../src/compiler_role.rs");
@@ -19,7 +19,7 @@ fn boundary_inventory_names_current_ownership() {
         "compiler-bootstrap-boundary-1",
         "domain_identity_shape_mechanism",
         "compiler_execution_role_from_sens",
-        "differential-reference-only",
+        "execute-sens-role-law-and-convert-result",
         "bounded-production-compiler-semantics",
         "production-current-nucleus . no",
     ] {
@@ -82,16 +82,24 @@ fn generated_law_data_and_nucleus_keep_role_ownership_separate() {
         "SENS nucleus must retain the executable role law"
     );
     assert!(
-        ORACLE.contains("Differential/bootstrap oracle"),
-        "Rust role projection must remain labelled differential/bootstrap only"
+        ORACLE.contains("Compatibility-facing mechanism adapter")
+            && ORACLE.contains("compiler_execution_role_from_sens(identity)"),
+        "Rust compatibility API must delegate role meaning to the SENS-owned law"
+    );
+    assert!(
+        BOUNDARY.contains("(owner . host-adapter)")
+            && BOUNDARY.contains("(role . execute-sens-role-law-and-convert-result)")
+            && BOUNDARY.contains("(semantic-decision . no)"),
+        "boundary contract must record the current non-semantic SENS adapter"
     );
 }
 
 #[test]
 fn historical_core1_compiler_prelude_is_donor_not_current_nucleus() {
     assert!(
-        CORE1_PRELUDE.contains("historical"),
-        "Core1 compiler prelude must retain explicit historical status"
+        CORE1_PRELUDE.contains("Історична")
+            && CORE1_PRELUDE.contains("а не джерело нового закону мови"),
+        "Core1 compiler prelude must retain explicit Ukrainian historical status"
     );
     assert!(
         !LANGUAGE.contains("core1-compiler-prelude"),

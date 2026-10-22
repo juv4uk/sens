@@ -1332,17 +1332,6 @@ lisp	lib/unify.lisp	var?	1
 lisp	lib/unify.lisp	walk	1
 lisp	memory-layout-contract.lisp	cons	1
 lisp	my-lisp-constitution.lisp	numeric-buffer-map	3
-lisp	mylisp-cml-export.lisp	atom?	1
-lisp	mylisp-cml-export.lisp	car	1
-lisp	mylisp-cml-export.lisp	cdr	1
-lisp	mylisp-cml-export.lisp	cond	1
-lisp	mylisp-cml-export.lisp	cons	1
-lisp	mylisp-cml-export.lisp	define	1
-lisp	mylisp-cml-export.lisp	defmacro	1
-lisp	mylisp-cml-export.lisp	difference	1
-lisp	mylisp-cml-export.lisp	eq?	1
-lisp	mylisp-cml-export.lisp	lambda	1
-lisp	mylisp-cml-export.lisp	quote	1
 lisp	prototype/lisp_core_phonetics/prototype_phonetics.lisp	lambda	3
 lisp	prototype/lisp_core_phonetics/prototype_phonetics.lisp	quote	3
 lisp	racket/boot/core.lisp	append	2

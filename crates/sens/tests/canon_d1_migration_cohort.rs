@@ -22,49 +22,49 @@ fn canon_constitutive_laws_use_current_predicate_results() {
         ("канон-порожній-список", "()"),
         (
             "(канон-закон-порожній-список)",
-            "(canon-law-result empty-list satisfied)",
+            "(канон-закон-результат порожній-список виконано)",
         ),
         (
             "(канон-закон-атом-пара (quote left) (quote right))",
-            "(canon-law-result atom-cons satisfied)",
+            "(канон-закон-результат атом-пара виконано)",
         ),
         (
             "(канон-закон-перше-пара (quote left) (quote right))",
-            "(canon-law-result car-cons satisfied)",
+            "(канон-закон-результат перше-пара виконано)",
         ),
         (
             "(канон-закон-решта-пара (quote left) (quote right))",
-            "(canon-law-result cdr-cons satisfied)",
+            "(канон-закон-результат решта-пара виконано)",
         ),
         (
             "(канон-закон-рівність-рефлексивний-атом (quote left))",
-            "(canon-law-result eq-reflexive-atom satisfied)",
+            "(канон-закон-результат тотожність-рефлексивний-атом виконано)",
         ),
         (
             "(канон-закон-решта-крапковий)",
-            "(canon-law-result cdr-dotted satisfied)",
+            "(канон-закон-результат решта-крапковий виконано)",
         ),
         (
             "(канон-закон-решта-правильний)",
-            "(canon-law-result cdr-proper satisfied)",
+            "(канон-закон-результат решта-правильний виконано)",
         ),
         (
             "(канон-закон-решта-неправильний)",
-            "(canon-law-result cdr-improper satisfied)",
+            "(канон-закон-результат решта-неправильний виконано)",
         ),
         (
             "(канон-закон-цитування-пригнічує-обчислення)",
-            "(canon-law-result quote-suppresses-evaluation satisfied)",
+            "(канон-закон-результат цитування-пригнічує-обчислення виконано)",
         ),
         (
             "(канон-закон-умова-перший-збіг-короткий-ланцюг)",
-            "(canon-law-result cond-first-match-short-circuit satisfied)",
+            "(канон-закон-результат умова-перший-збіг-короткий-ланцюг виконано)",
         ),
         (
             "(канон-закон-символьний-поверхня)",
-            "(canon-law-result symbolic-surface satisfied)",
+            "(канон-закон-результат символьна-поверхня виконано)",
         ),
-        ("(канон-відповідає?)", "(canon-conformance satisfied)"),
+        ("(канон-відповідає?)", "(канон-відповідність виконано)"),
     ];
     for (expr, expected) in cases {
         let actual = eval_program(expr, &mut session)
@@ -82,15 +82,15 @@ fn canon_negative_predicate_polarity_and_exhaustion_are_not_truthiness() {
     let cases: [(&str, &str); 3] = [
         (
             "(канон-закон-рівність-рефлексивний-атом (quote (left right)))",
-            "(canon-law-result eq-reflexive-atom violated)",
+            "(канон-закон-результат тотожність-рефлексивний-атом порушено)",
         ),
         (
             "(канон-відповідність-з (quote ()))",
-            "(canon-conformance satisfied)",
+            "(канон-відповідність виконано)",
         ),
         (
-            "(канон-відповідність-з (quote ((canon-law-result example violated))))",
-            "(canon-conformance violated)",
+            "(канон-відповідність-з (quote ((канон-закон-результат приклад порушено))))",
+            "(канон-відповідність порушено)",
         ),
     ];
     for (expr, expected) in cases {

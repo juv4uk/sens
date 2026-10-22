@@ -1880,7 +1880,7 @@ mod tests {
             panic!("expected list");
         };
         assert!(
-            matches!(&items[2].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "000000000000000001100100"),
+            matches!(&items[2].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100"),
             "ordinary decimal data is an exact D24+ value"
         );
     }
@@ -2106,7 +2106,7 @@ mod tests {
             }
 
             if matches!(&items[0].kind, ExprKind::Number(value, _) if *value == 100.0)
-                || matches!(&items[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100")
+                || matches!(&items[0].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100")
             {
                 let start = expression.span.start as usize;
                 let end = expression.span.end as usize;
@@ -2213,7 +2213,7 @@ mod tests {
         let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else {
             panic!("test");
         };
-        assert!(matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+        assert!(matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100"),
             "ordinary reader remains backward-compatible and keeps 0100 numeric inside opaque W8 wrappers");
 
         let mixed = only(
@@ -2279,7 +2279,7 @@ mod tests {
             }
             if spelling == Some("0100")
                 && (matches!(&head.kind, ExprKind::Number(value, _) if *value == 100.0)
-                    || matches!(&head.kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"))
+                    || matches!(&head.kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100"))
             {
                 let start = expression.span.start as usize;
                 let end = expression.span.end as usize;
@@ -2334,7 +2334,7 @@ mod tests {
             panic!("test");
         };
         assert!(
-            matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+            matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100"),
             "the ordinary mixed reader leaves legacy wrappers opaque"
         );
 
@@ -2400,7 +2400,7 @@ mod tests {
             panic!("ordinary executable body");
         };
         assert!(
-            matches!(&ordinary_call[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+            matches!(&ordinary_call[0].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100"),
             "ordinary bridge keeps legacy W8 containers opaque"
         );
 
@@ -2452,7 +2452,7 @@ mod tests {
             panic!("data call");
         };
         assert!(
-            matches!(&data_call[1].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+            matches!(&data_call[1].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100"),
             "non-head decimal data remains unchanged"
         );
     }
@@ -2689,7 +2689,7 @@ mod tests {
             panic!("lambda body");
         };
         assert!(
-            matches!(&ordinary_body[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+            matches!(&ordinary_body[0].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100"),
             "ordinary mixed source must not opt into machine-source lifting"
         );
 
@@ -2712,7 +2712,7 @@ mod tests {
             "nested executable CAR must be an exact D3 identity"
         );
         assert!(
-            matches!(&call[1].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000000000111"),
+            matches!(&call[1].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "111"),
             "numeric call arguments remain data"
         );
     }

@@ -1,9 +1,16 @@
 use sens::{
-    decode_binary_frame, encode_binary_frame, eval_program, fasl_decode_program,
-    fasl_encode_program, parse, render_value_for_presentation, wire_decode_program,
-    wire_encode_program, BinaryFrame, BinaryNumber, Bit1, Bit2, DomainIdentity, Expr, ExprKind,
-    PredicateBit, PresentationLanguage, Racana2, Session, Span, Value,
+    decode_binary_frame, encode_binary_frame, eval_parsed_expressions, eval_program,
+    fasl_decode_program, fasl_encode_program, load_core_library, parse,
+    render_value_for_presentation, wire_decode_program, wire_encode_program, BinaryFrame,
+    BinaryNumber, Bit1, Bit2, DomainIdentity, Expr, ExprKind, PredicateBit, PresentationLanguage,
+    Racana2, Session, Span, Value,
 };
+
+fn eval_ukr(source: &str, session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
+    let parsed = parse(source)?;
+    let projected = sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)?;
+    eval_parsed_expressions(&projected, session)
+}
 
 #[test]
 fn explicit_binary_source_is_canonical_binary_number_not_rational() {
@@ -45,30 +52,31 @@ fn d24(value: u32) -> Value {
 #[test]
 fn d5_add_mul_and_order_use_explicit_d24_values_not_literals() {
     let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 loads");
     session.environment.define("left", d24(2));
     session.environment.define("right", d24(3));
 
     assert_eq!(
-        eval_program("(+ left right)", &mut session)
-            .expect("D5 PLUS accepts explicitly qualified D24")
+        eval_ukr("(додати left right)", &mut session)
+            .expect("uk D5 PLUS accepts explicitly qualified D24")
             .value,
         d24(5),
     );
     assert_eq!(
-        eval_program("(* left right)", &mut session)
-            .expect("D5 TIMES accepts explicitly qualified D24")
+        eval_ukr("(помножити left right)", &mut session)
+            .expect("uk D5 TIMES accepts explicitly qualified D24")
             .value,
         d24(6),
     );
     assert_eq!(
-        eval_program("(< left right)", &mut session)
-            .expect("D5 LESSP returns exact D1")
+        eval_ukr("(менше? left right)", &mut session)
+            .expect("uk D5 LESSP returns exact D1")
             .value,
         Value::predicate_bit(true),
     );
     assert_eq!(
-        eval_program("(> left right)", &mut session)
-            .expect("D5 GREATERP returns exact D1")
+        eval_ukr("(більше? left right)", &mut session)
+            .expect("uk D5 GREATERP returns exact D1")
             .value,
         Value::predicate_bit(false),
     );
@@ -76,7 +84,9 @@ fn d5_add_mul_and_order_use_explicit_d24_values_not_literals() {
 
 #[test]
 fn binary_number_refuses_implicit_legacy_numeric_coercion() {
-    let error = eval_program("(+ #b10 3)", &mut Session::default())
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 loads");
+    let error = eval_ukr("(додати #b10 3)", &mut session)
         .expect_err("mixed canonical/legacy numerics must fail closed");
     assert_eq!(error.kind, sens::ErrorKind::Type);
 }
@@ -196,12 +206,13 @@ fn number_bits_do_not_collapse_equal_payload_core_domains() {
 #[test]
 fn signed_binary_subtraction_and_exact_division_execute_as_d24_values() {
     let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 loads");
     session.environment.define("six", d24(6));
     session.environment.define("two", d24(2));
     session.environment.define("zero", d24(0));
 
     assert_eq!(
-        eval_program("(- six two)", &mut session)
+        eval_ukr("(відняти six two)", &mut session)
             .expect("exact signed D24 subtraction")
             .value,
         d24(4),
@@ -212,8 +223,8 @@ fn signed_binary_subtraction_and_exact_division_execute_as_d24_values() {
         d24(3),
     );
     assert_eq!(
-        eval_program("(- zero)", &mut session)
-            .expect("negative D24 zero normalizes to D24 zero")
+        eval_ukr("(відняти zero zero)", &mut session)
+            .expect("equal D24 subtraction returns exact D24 zero")
             .value,
         d24(0),
     );
@@ -227,25 +238,28 @@ fn signed_binary_subtraction_and_exact_division_execute_as_d24_values() {
 #[test]
 fn unqualified_numeric_literals_fail_closed_d24_negative_and_ratio_execute() {
     // Old #b spelling is still readable as DATA but does not admit Core math.
+    let mut rejected_session = Session::default();
+    load_core_library(&mut rejected_session).expect("Core4 loads");
     for (source, expected_kind) in [
-        ("(- #b10 #b11)", sens::ErrorKind::Type),
-        ("(- #b10)", sens::ErrorKind::Type),
-        ("(/ #b111 #b10)", sens::ErrorKind::UnknownSymbol),
-        ("(/ #b10)", sens::ErrorKind::UnknownSymbol),
-        ("(/ #b1 #b0)", sens::ErrorKind::UnknownSymbol),
-        ("(/ #b0)", sens::ErrorKind::UnknownSymbol),
-        ("(/ #b110 2)", sens::ErrorKind::UnknownSymbol),
+        ("(відняти #b10 #b11)", sens::ErrorKind::Type),
+        ("(відняти #b10)", sens::ErrorKind::Type),
+        ("(частка #b111 #b10)", sens::ErrorKind::Type),
+        ("(частка #b10)", sens::ErrorKind::Type),
+        ("(частка #b1 #b0)", sens::ErrorKind::Type),
+        ("(частка #b0)", sens::ErrorKind::Type),
+        ("(частка #b110 2)", sens::ErrorKind::Type),
     ] {
-        let err = eval_program(source, &mut Session::default())
+        let err = eval_ukr(source, &mut rejected_session)
             .expect_err("unqualified numeric source is not D24 arithmetic");
         assert_eq!(err.kind, expected_kind, "{source}");
     }
 
     let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 loads");
     session.environment.define("one", d24(1));
     session.environment.define("two", d24(2));
     assert_eq!(
-        eval_program("(- one two)", &mut session)
+        eval_ukr("(відняти one two)", &mut session)
             .unwrap()
             .value
             .to_string(),

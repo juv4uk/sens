@@ -219,11 +219,8 @@ jobs:
               # Їхню семантику (D1:1 і мутант D1:0) обов'язково виконує
               # нижче core_postcore_ukr із завантаженою бібліотекою.
               # Самостійний CLI без цих зв'язувань давав хибний RED.
-              # Генерований CML-export є протокольними даними, а не
-              # виконуваним Lisp; en/sa поля не є D7:укр-головами.
-              if name == "mylisp-cml-export.lisp":
-                  print(f"T5M_NONPROGRAM_EXPORT path={name} witness=cml-export-producer")
-                  continue
+              # Файл протокольного CML-export має розширення .contract,
+              # тому не потрапляє до списку виконуваних Lisp-програм.
               # Conformance transition — дані для SENS witness_authority, не програма T5M.
               if name == "tests/fixtures/conformance-transition-witness.lisp":
                   print(f"T5M_TRANSITION_DATA_FIXTURE path={name} runtime=witness_authority release=NOT_CERTIFIED")
@@ -263,7 +260,7 @@ jobs:
             git diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" > "$changed_all"
           fi
           # Факт відповідності генератора даним перевіряється виконанням.
-          if grep -Eq '^(mylisp-cml-export[.]lisp|crates/sens-cli/src/bin/cml-export[.]rs)$' "$changed_all"; then
+          if grep -Eq '^(sens-cml-export[.]contract|crates/sens-cli/src/bin/cml-export[.]rs)$' "$changed_all"; then
             echo 'cml_export_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|tests/test_core1_(third|fourth)_domain_canary\.py|tests/fixtures/core1-(third|fourth)-domain-canary/.*|crates/sens-cli/tests/core1_array_bounds_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then

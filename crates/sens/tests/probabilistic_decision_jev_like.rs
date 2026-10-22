@@ -3,7 +3,9 @@
 //! These tests exercise the SENS-owned contract and a fixture-backed local model adapter.
 //! No external provider is called; no new SID or Rust Value variant is introduced.
 
-use sens::{exact_domain_fraction_parts, eval_program, load_core_library, BinaryNumber, Value, Session};
+use sens::{
+    eval_program, exact_domain_fraction_parts, load_core_library, BinaryNumber, Session, Value,
+};
 use std::{
     io::{Read, Write},
     net::TcpListener,
@@ -13,7 +15,10 @@ use std::{
 
 fn d48_probability_word(value: u64) -> BinaryNumber {
     const WIDTH: usize = 48;
-    assert!(value < (1_u64 << (WIDTH - 1)), "value must fit positive D48");
+    assert!(
+        value < (1_u64 << (WIDTH - 1)),
+        "value must fit positive D48"
+    );
     let bits: Vec<u8> = (0..WIDTH)
         .rev()
         .map(|shift| ((value >> shift) & 1) as u8)

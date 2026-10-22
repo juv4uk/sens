@@ -60,14 +60,12 @@ fn d11_розвязати_один_раз_не_підмінює_рекурсив
     }
 }
 
-
 // D11: EXTEND-SUBST, чинна SENS-композиція із lib/unify.lisp.
 // Шість свідків, включно з трьома негативними: порядок пар та пріоритет.
 #[test]
 fn d11_розширити_підстановку_зберігає_пари_та_пріоритет() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("чинне SENS-ядро");
+    eval_program(include_str!("../../../lib/core.lisp"), &mut session).expect("чинне SENS-ядро");
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session)
         .expect("справжня SENS-уніфікація");
 
@@ -119,8 +117,7 @@ fn d11_розширити_підстановку_зберігає_пари_та_
 #[test]
 fn d11_застосувати_підстановку_обійдений_працює_рекурсивно() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("чинне SENS-ядро");
+    eval_program(include_str!("../../../lib/core.lisp"), &mut session).expect("чинне SENS-ядро");
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session)
         .expect("справжня SENS-уніфікація");
     eval_program(
@@ -131,7 +128,8 @@ fn d11_застосувати_підстановку_обійдений_прац
     eval_program(
         "(визначити початковий-терм (як-є ((var х) г)))",
         &mut session,
-    ).expect("початковий SENS-терм збережено");
+    )
+    .expect("початковий SENS-терм збережено");
 
     for (case, source, expected) in [
         (
@@ -186,7 +184,6 @@ fn d11_застосувати_підстановку_обійдений_прац
     }
 }
 
-
 // D11: unify-observe з реального lib/unify-observe.lisp.
 // D1-судження про unified / unification-failure формує сама SENS.
 // Порожня підстановка означає успіх, а не хибу.
@@ -197,8 +194,11 @@ fn d11_спостерігати_уніфікацію_розрізняє_поро
         .expect("завантажити ядро SENS");
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session)
         .expect("завантажити реальну уніфікацію SENS");
-    eval_program(include_str!("../../../lib/unify-observe.lisp"), &mut session)
-        .expect("завантажити українську межу спостереження SENS");
+    eval_program(
+        include_str!("../../../lib/unify-observe.lisp"),
+        &mut session,
+    )
+    .expect("завантажити українську межу спостереження SENS");
 
     for (case, source, expected) in [
         (

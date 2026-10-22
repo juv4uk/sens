@@ -1106,7 +1106,7 @@ mod core4_bootstrap_cache_tests {
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
         );
-        let result = eval_program("(let* ((x 7) (y x)) y)", &mut session)
+        let result = eval_program("(нехай-послідовно ((x 7) (y x)) y)", &mut session)
             .expect("D6 let* remains callable after rejected FASL");
         assert_eq!(result.value.to_string(), "7");
     }

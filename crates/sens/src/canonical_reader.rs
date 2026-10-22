@@ -622,11 +622,14 @@ mod tests {
     }
 
     #[test]
-    fn w9_reaches_ast_as_exact_non_callable_domain_identity() {
+    fn w9_reaches_ast_as_exact_domain_identity_without_width_collapse() {
         let expression = only("100000001");
         let identity = domain(&expression);
         assert_eq!((identity.width(), identity.packed_bits()), (9, 257));
-        assert!(identity.core_operation().is_none());
+        assert!(matches!(
+            identity.core_operation(),
+            Some(crate::CoreDomainIdentity::D9(word)) if word.word().packed_bits() == 257
+        ));
 
         let low = domain(&only("000000001"));
         let d8 = domain(&only("00000001"));

@@ -1,18 +1,17 @@
 //! B3: a small adversarial Advice Taker corpus through one semantic path:
-//! candidate knowledge -> advise/advise-all -> reason-in-observe -> narrate-outcome.
+//! кандидатні знання -> порадити/порадити-всі -> міркувати-у-спостерігати -> пояснити-підсумок.
 //! The cases are chosen for distinct failure/derivation modes, not fixture count.
 
 use sens::{
-    eval_core_library_source, eval_parsed_expressions, eval_pinned_reasoning_source,
+    eval_parsed_expressions, eval_pinned_reasoning_source, load_core_library, parse,
     parse_exact_domain_source, parse_mixed_exact_domain, Session,
 };
 
 fn eval_advice_corpus(source: &str) -> String {
     let mut session = Session::default();
-    // Legacy eval_program treats bare 0011 as an arithmetic literal. The
-    // repository-pinned Core reader keeps the original D4 DEFINE identity.
-    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("pinned exact-width SENS core bootstrap");
+    // Інтерактивний сценарій використовує поточний Core4 та українську
+    // людську проєкцію; D3-цитування нижче записане як «як-є», не як цифри.
+    load_core_library(&mut session).expect("поточне ядро SENS Core4");
     for (library_path, library) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
@@ -59,11 +58,8 @@ fn eval_advice_corpus(source: &str) -> String {
             panic!("SENS corpus dependency {library_path} failed: {error}")
         });
     }
-    // The authored corpus contains literal 3-bit QUOTE/CAR heads. The mixed
-    // legacy reader may reinterpret 001/100 as numeric values (#q2:1/1).
-    // The exact reader preserves their domain widths; W8/D8 remains distinct.
-    let program = parse_exact_domain_source(source)
-        .unwrap_or_else(|e| panic!("Advice Taker exact-domain reader: {e}\nsource: {source}"));
+    let program = parse(source)
+        .unwrap_or_else(|e| panic!("Advice Taker Ukrainian source reader: {e}\nsource: {source}"));
     eval_parsed_expressions(&program, &mut session)
         .unwrap_or_else(|e| panic!("Advice Taker exact-domain eval: {e}\nsource: {source}"))
         .value
@@ -73,9 +69,9 @@ fn eval_advice_corpus(source: &str) -> String {
 #[test]
 fn direct_controlled_fact_reaches_proved_narration() {
     let source = r#"
-        (advise astronomy (understand (001 (earth is a planet))))
+        (порадити astronomy (розібрати (як-є (earth is a planet))))
         (пояснити-підсумок
-          (reason-in-observe (001 astronomy) (001 (planet earth))))
+          (міркувати-у-спостерігати (як-є astronomy) (як-є (planet earth))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved earth is a planet)");
 }
@@ -83,16 +79,16 @@ fn direct_controlled_fact_reaches_proved_narration() {
 #[test]
 fn multistep_rules_survive_admission_reasoning_and_presentation() {
     let source = r#"
-        (advise-all science
-          (001 (
+        (порадити-всі science
+          (як-є (
             ((planet earth))
             ((has (var x) mass) (planet (var x)))
             ((valuable (var x)) (has (var x) mass))
           )))
-        (let* ((outcome
-                 (reason-in-observe (001 science) (001 (valuable earth))))
+        (нехай-послідовно ((outcome
+                 (міркувати-у-спостерігати (як-є science) (як-є (valuable earth))))
                (words (пояснити-підсумок outcome)))
-          (list (result-status outcome) (100 words)))
+          (список (результат-стан outcome) (перше words)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved proved)");
 }
@@ -100,8 +96,8 @@ fn multistep_rules_survive_admission_reasoning_and_presentation() {
 #[test]
 fn recursive_rule_survives_the_same_end_to_end_path() {
     let source = r#"
-        (advise-all family
-          (001 (
+        (порадити-всі family
+          (як-є (
             ((parent alice bob))
             ((parent bob charlie))
             ((ancestor (var x) (var y)) (parent (var x) (var y)))
@@ -109,12 +105,12 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
               (parent (var x) (var z))
               (ancestor (var z) (var y)))
           )))
-        (let* ((outcome
-                 (reason-in-observe
-                   (001 family)
-                   (001 (ancestor alice charlie))))
+        (нехай-послідовно ((outcome
+                 (міркувати-у-спостерігати
+                   (як-є family)
+                   (як-є (ancestor alice charlie))))
                (words (пояснити-підсумок outcome)))
-          (list (result-status outcome) (100 words)))
+          (список (результат-стан outcome) (перше words)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved proved)");
 }
@@ -122,12 +118,12 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
 #[test]
 fn explicit_conflict_is_rejected_and_cannot_replace_the_existing_fact() {
     let source = r#"
-        (advise ethics (001 ((mortal socrates))))
-        (let* ((decision
-                 (advise ethics (001 ((not? (mortal socrates))))))
+        (порадити ethics (як-є ((mortal socrates))))
+        (нехай-послідовно ((decision
+                 (порадити ethics (як-є ((not? (mortal socrates))))))
                (outcome
-                 (reason-in-observe (001 ethics) (001 (mortal socrates)))))
-          (list (100 decision) (result-status outcome)))
+                 (міркувати-у-спостерігати (як-є ethics) (як-є (mortal socrates)))))
+          (список (перше decision) (результат-стан outcome)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(conflict proved)");
 }
@@ -135,14 +131,14 @@ fn explicit_conflict_is_rejected_and_cannot_replace_the_existing_fact() {
 #[test]
 fn knowledge_package_round_trip_precedes_reasoning_without_eval_of_package_data() {
     let source = r#"
-        (def package
-          (make-knowledge-package
-            (001 archive)
-            (001 (((planet mars))))))
-        (def *knowledge-journal* (001 ()))
-        (import-knowledge-package package)
+        (визначити package
+          (створити-пакет-структурованих-знань
+            (як-є archive)
+            (як-є (((planet mars))))))
+        (визначити *knowledge-journal* (як-є ()))
+        (імпортувати-пакет-знань package)
         (пояснити-підсумок
-          (reason-in-observe (001 archive) (001 (planet mars))))
+          (міркувати-у-спостерігати (як-є archive) (як-є (planet mars))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved mars is a planet)");
 }

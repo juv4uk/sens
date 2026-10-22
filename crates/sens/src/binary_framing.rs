@@ -938,8 +938,13 @@ mod tests {
                 crate::Bit8::new(packed as u8).expect("exact eight-bit source word"),
             );
             let identity = CoreDomainIdentity::from_source_word(source);
-            if admitted.contains(&(packed as u8)) {
-                let frame = BinaryFrame::Function(identity.expect("admitted D8 mechanism"));
+            let selector_family = matches!(packed >> 5, 0b011 | 0b100);
+            if admitted.contains(&(packed as u8)) || selector_family {
+                let Some(CoreDomainIdentity::D8(word)) = identity else {
+                    panic!("ratified D8 mechanism {packed:08b} lost its exact D8 identity");
+                };
+                assert_eq!(word.word().packed_bits(), packed as u8);
+                let frame = BinaryFrame::Function(CoreDomainIdentity::D8(word));
                 assert!(matches!(
                     encode_binary_frame(&frame),
                     Err(BinaryFrameError::LegacyFrameForbidden { index: 0 })

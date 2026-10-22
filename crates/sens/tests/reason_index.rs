@@ -134,7 +134,6 @@ fn reason_index_d1_verdicts_from_real_predicates() {
             "test_id=D11-REASON-TERM-RULE-PREDICATE-{case} layer=SENS input={program} expected=D1:{expected} actual={actual}"
         );
     }
-
 }
 
 #[test]

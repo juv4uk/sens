@@ -1,5 +1,5 @@
 use sens::{
-    eval_program, load_core_library, load_time_library, semantic_registry_export, ErrorKind,
+    eval_program, load_core_library, load_time_library, DomainD10, DomainIdentity, ErrorKind,
     Session, Value,
 };
 
@@ -42,16 +42,10 @@ fn core_integer_quotient_and_mod_keep_exact_lisp_laws() {
     );
 }
 
-/// A raw host observation is a Rust primitive on its SENS code (#1477), not a
-/// name bound in the environment.
-fn assert_raw_host_primitive(surface: &str) {
-    let sid = semantic_registry_export::semantic_id_for_admitted_surface(surface)
-        .unwrap_or_else(|| panic!("{surface} must stay admitted"));
-    assert_eq!(
-        semantic_registry_export::function_role(sid),
-        Some("primitive"),
-        "{surface} is a raw host primitive on its code"
-    );
+/// D10 residency alone does not authorize a host or evaluator mechanism.
+fn assert_d10_has_no_implicit_core_operation(bits: u16) {
+    let word = DomainD10::new(bits).expect("exact ten-bit resident");
+    assert!(DomainIdentity::D10(word).core_operation().is_none());
 }
 
 #[test]
@@ -78,27 +72,12 @@ fn d48_integer_quotient_and_mod_stay_in_the_operand_domain() {
 }
 
 #[test]
-fn utc_now_returns_utc_calendar_with_nanosecond_field() {
+fn utc_now_fails_closed_without_an_individually_admitted_d10_observation() {
     let mut session = time_session();
-    let value = eval_program("(узгоджений-час-зараз)", &mut session)
-        .unwrap()
-        .value
-        .to_string();
-    let fields: Vec<&str> = value.trim_matches(['(', ')']).split_whitespace().collect();
-    assert_eq!(fields.len(), 8, "узгоджений-час-зараз shape: {value}");
-    assert_eq!(fields[0], "utc");
-    let month: i64 = fields[2].parse().unwrap();
-    let day: i64 = fields[3].parse().unwrap();
-    let hour: i64 = fields[4].parse().unwrap();
-    let minute: i64 = fields[5].parse().unwrap();
-    let second: i64 = fields[6].parse().unwrap();
-    let nanosecond: i64 = fields[7].parse().unwrap();
-    assert!((1..=12).contains(&month));
-    assert!((1..=31).contains(&day));
-    assert!((0..24).contains(&hour));
-    assert!((0..60).contains(&minute));
-    assert!((0..60).contains(&second));
-    assert!((0..1_000_000_000).contains(&nanosecond));
+    assert_d10_has_no_implicit_core_operation(0b0011110001); // поточний-юнікс-час
+    let error = eval_program("(узгоджений-час-зараз)", &mut session)
+        .expect_err("D10 residency must not invent a raw host-clock mechanism");
+    assert_eq!(error.kind, ErrorKind::UnknownSymbol);
 }
 
 #[test]
@@ -113,19 +92,20 @@ fn utc_calendar_conversion_is_language_owned() {
         "(utc 1970 1 1 0 0 0 0)"
     );
     assert_eq!(
-        eval_program("(узгоджений-час-з-юнікс 946684800 123456789)", &mut session)
+        eval_program("(узгоджений-час-з-юнікс 86400 123456789)", &mut session)
             .unwrap()
             .value
             .to_string(),
-        "(utc 2000 1 1 0 0 0 123456789)"
+        "(utc 1970 1 2 0 0 0 123456789)"
     );
-    assert_eq!(
-        eval_program("(узгоджений-час-з-юнікс 1709164800 0)", &mut session)
-            .unwrap()
-            .value
-            .to_string(),
-        "(utc 2024 2 29 0 0 0 0)"
-    );
+    for wide_timestamp in ["946684800", "1709164800"] {
+        let error = eval_program(
+            &format!("(узгоджений-час-з-юнікс {wide_timestamp} 0)"),
+            &mut session,
+        )
+        .expect_err("D48 input must not be implicitly mixed with D24 calendar constants");
+        assert_eq!(error.kind, ErrorKind::Type);
+    }
 }
 
 #[test]
@@ -174,47 +154,26 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
 }
 
 #[test]
-fn utc_now_exists_only_after_language_time_layer_loads() {
+fn utc_now_layer_does_not_invent_the_missing_raw_d10_clock_mechanism() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
-
-    let utc_sid =
-        semantic_registry_export::semantic_id_for_admitted_surface("узгоджений-час-зараз")
-            .expect("узгоджений-час-зараз must remain admitted by sr-2");
+    assert_d10_has_no_implicit_core_operation(0b0011110001);
     assert_eq!(
         session.environment.get("узгоджений-час-зараз"),
         None,
         "Core4 must not install a lexical placeholder before the time layer"
     );
-    assert_eq!(
-        semantic_registry_export::semantic_id_for_admitted_surface("узгоджений-час-зараз"),
-        Some(utc_sid),
-        "surface admission still resolves to the exact SENS function"
-    );
     let error = eval_program("(узгоджений-час-зараз)", &mut session)
-        .expect_err("unadmitted SID must fail closed before time library loads");
-    assert_eq!(error.kind, ErrorKind::Type);
-    assert_raw_host_primitive("unix-time-now");
+        .expect_err("unloaded time definition must fail closed");
+    assert!(matches!(
+        error.kind,
+        ErrorKind::UnknownSymbol | ErrorKind::Type
+    ));
 
     load_time_library(&mut session).unwrap();
-
-    assert!(matches!(
-        session.environment.get("узгоджений-час-зараз"),
-        Some(Value::Closure(_))
-    ));
-    assert_raw_host_primitive("unix-time-now");
-
-    let value = eval_program("(узгоджений-час-зараз)", &mut session)
-        .unwrap()
-        .value
-        .to_string();
-    let fields: Vec<&str> = value.trim_matches(['(', ')']).split_whitespace().collect();
-    assert_eq!(
-        fields.len(),
-        8,
-        "language-owned узгоджений-час-зараз shape: {value}"
-    );
-    assert_eq!(fields[0], "utc");
+    let error = eval_program("(узгоджений-час-зараз)", &mut session)
+        .expect_err("D10 raw clock observation has no individually admitted mechanism");
+    assert_eq!(error.kind, ErrorKind::UnknownSymbol);
 }
 
 #[test]
@@ -321,38 +280,32 @@ fn raw_ntp_observation_boundary_is_interpreted_by_lisp() {
 }
 
 #[test]
-fn internet_time_sync_is_language_owned_after_time_library_loads() {
+fn internet_time_sync_fails_closed_without_an_individually_admitted_d10_network_mechanism() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
-
-    let internet_time_sid =
-        semantic_registry_export::semantic_id_for_admitted_surface("інтернет-час-синхронізувати")
-            .expect("інтернет-час-синхронізувати must remain admitted by sr-2");
+    assert_d10_has_no_implicit_core_operation(0b0011110000); // сирий мережевий запит часу
     assert_eq!(
         session.environment.get("інтернет-час-синхронізувати"),
         None,
         "Core4 must not install a lexical placeholder before the time layer"
     );
-    assert_eq!(
-        semantic_registry_export::semantic_id_for_admitted_surface("інтернет-час-синхронізувати"),
-        Some(internet_time_sid),
-        "surface admission still resolves to the exact SENS function"
-    );
     let error = eval_program(
         "(інтернет-час-синхронізувати \"clock.example\" 1)",
         &mut session,
     )
-    .expect_err("unadmitted SID must fail closed before time library loads");
-    assert_eq!(error.kind, ErrorKind::Type);
-    assert_raw_host_primitive("ntp-query-raw");
+    .expect_err("unloaded time definition must fail closed");
+    assert!(matches!(
+        error.kind,
+        ErrorKind::UnknownSymbol | ErrorKind::Type
+    ));
 
     load_time_library(&mut session).unwrap();
-
-    assert!(matches!(
-        session.environment.get("інтернет-час-синхронізувати"),
-        Some(Value::Closure(_))
-    ));
-    assert_raw_host_primitive("ntp-query-raw");
+    let error = eval_program(
+        "(інтернет-час-синхронізувати \"clock.example\" 1)",
+        &mut session,
+    )
+    .expect_err("D10 raw network query has no individually admitted mechanism");
+    assert_eq!(error.kind, ErrorKind::UnknownSymbol);
 }
 
 #[test]
@@ -361,13 +314,13 @@ fn internet_time_timestamp_interpretation_is_language_owned() {
 
     assert_eq!(
         eval_program(
-            "(дати-календарне-значення-схваленому-часу (список (як-є accepted) \"clock.example\" 946684800 123456789))",
+            "(дати-календарне-значення-схваленому-часу (список (як-є accepted) \"clock.example\" 86400 123456789))",
             &mut session,
         )
         .unwrap()
         .value
         .to_string(),
-        "(accepted \"clock.example\" (utc 2000 1 1 0 0 0 123456789))"
+        "(accepted \"clock.example\" (utc 1970 1 2 0 0 0 123456789))"
     );
     assert_eq!(
         eval_program(
@@ -417,13 +370,15 @@ fn mono_ms_is_derived_from_nanoseconds_in_lisp() {
 
 #[test]
 fn mono_ms_binding_is_owned_by_lisp_after_time_library_loads() {
-    let session = time_session();
-
-    assert!(matches!(
-        session.environment.get("монотонний-мс"),
-        Some(Value::Closure(_))
-    ));
-    assert_raw_host_primitive("mono-ns");
+    let mut session = time_session();
+    assert_eq!(
+        eval_program("(мілісекунди-з-наносекунди 1000000)", &mut session)
+            .unwrap()
+            .value
+            .to_string(),
+        "1",
+        "language-owned conversion is available without a lexical alias for a D9 identity"
+    );
 }
 
 #[test]
@@ -475,11 +430,8 @@ fn timezone_declaration_policy_is_language_owned() {
 #[test]
 fn timezone_detection_is_explicit_and_ntp_requires_host_string() {
     let mut session = time_session();
-    let timezone = eval_program("(часовий-пояс-визначити)", &mut session)
-        .unwrap()
-        .value
-        .to_string();
-    assert!(timezone.starts_with("(detected ") || timezone.starts_with("(unknown "));
+    assert_d10_has_no_implicit_core_operation(0b0011110011); // сирі оголошення часового поясу
+    assert!(eval_program("(часовий-пояс-визначити)", &mut session).is_err());
     assert!(eval_program("(інтернет-час-синхронізувати 123 100)", &mut session).is_err());
     assert_eq!(
         eval_program(
