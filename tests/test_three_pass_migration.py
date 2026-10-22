@@ -1194,7 +1194,7 @@ class ThreePassMigrationTests(unittest.TestCase):
             with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"):
                 mod.reject_reviewed_nonprogram_source(source, root)
             # Стороння програма не може сховатися після таблиці.
-            source.write_text(current + "\\n(визначити підміна так)\\n", encoding="utf-8")
+            source.write_text(current + "\n(визначити підміна так)\n", encoding="utf-8")
             with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_D11_TABLE_INVALID"):
                 mod.reject_reviewed_nonprogram_source(source, root)
 
