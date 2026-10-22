@@ -535,9 +535,9 @@ fn t5m_physical_pair_minted_by_sens_reader_executes_and_rejects_mutant() {
 #[cfg(feature = "zig-transport")]
 #[test]
 fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
-    use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
+    use sens_cli::zig_transport::{encode_t5m_exact_words, ExactT5MWord};
     let make = |width: usize, bits: u64| {
-        ExactT5Word::new(
+        ExactT5MWord::new(
             width,
             (0..width)
                 .rev()
@@ -556,7 +556,7 @@ fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
         make(24, 2),
         make(2, 1),
     ];
-    let physical = encode_t5_exact_words(&words).expect("Zig exact T5M");
+    let physical = encode_t5m_exact_words(&words).expect("Zig exact T5M");
     let dir = std::env::temp_dir().join(format!("sens-physical-pair-d24-{}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("isolated pair");
     let source = dir.join("обчислення.lisp");
@@ -584,7 +584,7 @@ fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
 
     let mut altered = words.clone();
     altered[5] = make(24, 3);
-    std::fs::write(&packed, encode_t5_exact_words(&altered).unwrap())
+    std::fs::write(&packed, encode_t5m_exact_words(&altered).unwrap())
         .expect("mutated physical carrier");
     let negative = evaluate();
     assert!(
@@ -618,9 +618,9 @@ fn t5m_physical_pair_d24_executes_and_rejects_mutants() {
 #[cfg(feature = "zig-transport")]
 #[test]
 fn t5m_physical_pair_preserves_sens_cons_result() {
-    use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
+    use sens_cli::zig_transport::{encode_t5m_exact_words, ExactT5MWord};
     let make = |width: usize, bits: u64| {
-        ExactT5Word::new(
+        ExactT5MWord::new(
             width,
             (0..width)
                 .rev()
@@ -649,7 +649,7 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
         make(2, 0b01),
         make(2, 0b01),
     ];
-    let bytes = encode_t5_exact_words(&words).expect("Zig T5M physical");
+    let bytes = encode_t5m_exact_words(&words).expect("Zig T5M physical");
     let root = std::env::temp_dir().join(format!("sens-physical-list-pair-{}", std::process::id()));
     std::fs::create_dir_all(&root).expect("isolated files");
     let lisp = root.join("список.lisp");
@@ -678,9 +678,9 @@ fn t5m_physical_pair_preserves_sens_cons_result() {
 #[cfg(feature = "zig-transport")]
 #[test]
 fn t5m_physical_pair_quoted_world_preserves_exact_d7_data_not_symbol_parity() {
-    use sens_cli::zig_transport::{encode_t5_exact_words, ExactT5Word};
+    use sens_cli::zig_transport::{encode_t5m_exact_words, ExactT5MWord};
     let word = |width: usize, bits: u64| {
-        ExactT5Word::new(
+        ExactT5MWord::new(
             width,
             (0..width)
                 .rev()
@@ -706,7 +706,7 @@ fn t5m_physical_pair_quoted_world_preserves_exact_d7_data_not_symbol_parity() {
     let lisp = root.join("цитата.lisp");
     let physical = root.join("цитата.sens");
     std::fs::write(&lisp, "(як-є world)\n").expect("Ukrainian Lisp");
-    std::fs::write(&physical, encode_t5_exact_words(&words).unwrap()).expect("Zig T5M");
+    std::fs::write(&physical, encode_t5m_exact_words(&words).unwrap()).expect("Zig T5M");
     let evaluate = || {
         sens()
             .args([
@@ -740,7 +740,7 @@ fn t5m_physical_pair_quoted_world_preserves_exact_d7_data_not_symbol_parity() {
     // Відрізнити загублену цитату і підмінене D7 ім'я.
     let mut altered = words.clone();
     altered[3] = word(2, 1); // неправильна D2 межа перед текстом
-    std::fs::write(&physical, encode_t5_exact_words(&altered).unwrap()).expect("physical mutant");
+    std::fs::write(&physical, encode_t5m_exact_words(&altered).unwrap()).expect("physical mutant");
     let negative = evaluate();
     assert!(!negative.status.success(), "пошкоджений T5M пройшов у SENS");
 
