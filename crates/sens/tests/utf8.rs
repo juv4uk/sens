@@ -1,18 +1,31 @@
 use sens::{
-    eval_parsed_expressions, load_core_library, load_process_library, load_utf8_library,
-    parse_mixed_exact_domain_utf8_source, Session,
+    eval_parsed_expressions, load_core_library, load_fs_library, load_process_library,
+    load_utf8_library, parse_mixed_exact_domain_utf8_source, Session,
 };
 
 fn utf8_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
+    // Один і той самий код D10 — першокласний, але незмінний.
+    // Після нативного Zig/T5M bootstrap не виконувати ті самі DEFINE вдруге.
     load_utf8_library(&mut session).expect("canonical Zig/T5M UTF-8 library and runtime bridge");
-    let source = include_str!("../../../lib/utf8.lisp");
-    let program = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", source)
-        .expect("the pinned source oracle parses the Ukrainian Lisp layer");
-    eval_parsed_expressions(&program, &mut session)
-        .expect("the pinned source oracle executes the Lisp layer");
     session
+}
+
+#[test]
+fn utf8_domain_functions_survive_repeated_loader_and_fs_without_redefinition() {
+    let mut session = utf8_session();
+    let law = "(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 128 128 191)";
+    let original = eval_in_utf8_context(law, &mut session);
+    assert_eq!(original.as_predicate_bit(), Some(true), "test_id=UTF8-D10-FIRST-LOAD");
+
+    load_utf8_library(&mut session)
+        .expect("повторний запит не може перевизначати мовний D10 код");
+    load_fs_library(&mut session)
+        .expect("FS має використовувати ту саму UTF-8 бібліотеку без другого DEFINE");
+
+    let after = eval_in_utf8_context(law, &mut session);
+    assert_eq!(after, original, "test_id=UTF8-D10-SHARED-SENS-CALL");
 }
 
 fn eval(source: &str) -> String {
