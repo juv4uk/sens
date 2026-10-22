@@ -30,6 +30,35 @@ class TestValidator(unittest.TestCase):
         bad=row("canonical-d1d8","bin",legacy_identity_used=True)
         with self.assertRaisesRegex(ValueError,"legacy identity"):
             v.validate_file(write([row("english-surface","en"),bad]))
+    def test_actions_show_only_measured_t5_hot_numbers(self):
+        spec = importlib.util.spec_from_file_location("scoreboard", ROOT/"performance_scoreboard.py")
+        scoreboard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(scoreboard)
+        measured = {
+            "physical_hot": {
+                "cases": [{
+                    "forms": 16, "physical_bytes": 48,
+                    "typed_word_median_ns": 120, "typed_word_p95_ns": 180,
+                    "previous_over_typed": 2.0, "visible_over_typed": 3.5,
+                }],
+                "encoding": [{
+                    "forms": 16, "physical_bytes": 48,
+                    "streaming_median_ns": 80, "streaming_p95_ns": 105,
+                    "two_pass_over_streaming": 1.25,
+                }],
+            }
+        }
+        notices = scoreboard.action_notices(measured)
+        self.assertEqual(len(notices), 2)
+        self.assertIn("p50=120 ns", notices[0])
+        self.assertIn("p95=180 ns", notices[0])
+        self.assertIn("repack/typed=2.000x", notices[0])
+        self.assertIn("text/typed=3.500x", notices[0])
+        self.assertIn("T5=48 B", notices[0])
+        self.assertIn("streaming p50=80 ns", notices[1])
+        self.assertIn("p95=105 ns", notices[1])
+        self.assertEqual(scoreboard.action_notices({}), [])
+
     def test_binary_sha_must_match(self):
         bad=row("canonical-d1d8","bin",binary_sha256="d"*64)
         with self.assertRaisesRegex(ValueError,"mismatches binary_sha256"):
