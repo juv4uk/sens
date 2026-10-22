@@ -1154,12 +1154,14 @@ class ThreePassMigrationTests(unittest.TestCase):
         # A renamed historical Python/JSON exporter is no longer authority.
         workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         guards = workflow.split("  lisp-guards:", 1)[1]
+        # Поточний native AST/T5M smoke завжди збирає SENS з pinned Zig.
+        # Навіть якщо визначення змінених файлів упаде, не маскувати
+        # первинний RED каскадом "Zig not found" через відсутній output.
+        self.assertIn("echo 'needs_zig=true' >> \"$GITHUB_OUTPUT\"", guards)
         installer = guards.split("      - uses: ./.github/actions/install-zig", 1)[1]
-        condition = installer.splitlines()[1].strip()
-        self.assertIn("MIGRATE-LIB-TRIPLETS:", condition)
-        self.assertIn("BENCH-T5M:", condition)
-        self.assertIn("github.event_name == 'push'", condition)
-        self.assertIn("steps.changed-t5m-lisp.outputs.needs_zig == 'true'", condition)
+        installer_tail = installer.split("      - name:", 1)[0]
+        self.assertNotIn("        if:", installer_tail)
+        self.assertIn("      - uses: ./.github/actions/install-zig\n\n", guards)
         section = guards.split(
             '      - name: "ONE-SHOT — нативні SENS/Zig T5M-пари', 1
         )[1].split('      - name: "ONE-SHOT — artifact', 1)[0]
