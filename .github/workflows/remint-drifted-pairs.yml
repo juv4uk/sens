@@ -457,9 +457,10 @@ jobs:
                   # доведених SENS/Zig пар не потрібен повторний native judge.
                   # Rust src, Zig, Lisp та фізичні .sens і далі вимагають remint.
                   ;;
-                benchmarks/contest-uk/*.lisp|lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp)
+                benchmarks/contest-uk/*.lisp|lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp|tests/fixtures/*.lisp)
                   # Лише A незалежного джерела без фізичної пари:
-                  # нове D11/спискове дерево не змінює вже перевірений вхід.
+                  # нова D11/list/tree форма чи незалежний Lisp-свідок не змінює
+                  # вже перевірений фізичний вхід; candidate і M/D/R — remint.
                   # Зміни/вилучення M/D/R чи готові .sens — тільки re-mint.
                   if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
                      ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" origin/$target_branch -- "$changed" | grep -Fxq -- "$changed" ||
