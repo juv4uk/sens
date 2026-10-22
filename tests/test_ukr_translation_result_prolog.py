@@ -102,12 +102,12 @@ class UkrainianCorpusProjectionTests(unittest.TestCase):
         # Перевірка поверхні не заміняє runtime-свідок SENS.
         knowledge = (ROOT / "lib/knowledge.lisp").read_text(encoding="utf-8")
         self.assertIn("(визначити поточний-журнал-знань", knowledge)
-        self.assertIn("(функція () *knowledge-journal*)", knowledge)
+        self.assertIn("(функція () журнал-знань)", knowledge)
         self.assertEqual(translation.count(
             "(створити-світ (як-є ()) (поточний-журнал-знань) (як-є ()))"
         ), 2)
         self.assertNotIn(
-            "(створити-світ (як-є ()) *knowledge-journal* (як-є ()))",
+            "(створити-світ (як-є ()) журнал-знань (як-є ()))",
             translation,
         )
         for old_en in ("advice-decision", "advice-all-decision"):
