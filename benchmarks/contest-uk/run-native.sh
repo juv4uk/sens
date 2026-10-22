@@ -96,7 +96,7 @@ for source in "$here"/*.lisp; do
   # Справжній нативний суд перевіряє змінні входи, негативного мутанта,
   # точний T5M roundtrip і paired/standalone SENS. Фіксований результат
   # сам по собі не доводить алгоритму і не може отримати «ПІДТВЕРДЖЕНО».
-  if ! SENS_BIN="$sens" SENS_TRIT_BIN="$trit" bash "$here/judge.sh" \
+  if ! SENS_CONTEST_PROOF_ONLY=true SENS_BIN="$sens" SENS_TRIT_BIN="$trit" bash "$here/judge.sh" \
       "benchmarks/contest-uk/$name.sens" >"$scratch/native-proof.out" 2>"$scratch/native-proof.err"; then
     printf '%s\t-\t-\t0\tНЕ_ДОВЕДЕНО_АЛГОРИТМ\n' "$name"
     sed 's|^|SENS/Zig суд: |' "$scratch/native-proof.err" >&2

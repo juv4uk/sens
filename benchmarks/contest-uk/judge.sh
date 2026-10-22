@@ -102,11 +102,19 @@ for path in "${inputs[@]}"; do
   { cat "$source"; printf "\n(як-є ())\n"; } > "$tmp/mutant.lisp"
   if "$sens" --t5m-pair "$tmp/mutant.lisp" "$path" >/dev/null 2>"$tmp/negative"; then error "мутант прийнято $path"; fi
   grep -Fq T5M_PHYSICAL_PAIR_MISMATCH "$tmp/negative" || error "некоректна негативна перевірка $path"
-  "$sens" --benchmark-physical "$path" > "$tmp/bench.out" 2>"$tmp/bench.err" || error "нативні метрики $path"
-  cmp -s "$tmp/standalone" "$tmp/bench.out" || error "бенчмарк змінив результат $path"
-  line="$(grep "^SENS_BINARY_BENCH " "$tmp/bench.err")" || error "немає метрик $path"
-  [[ "$line" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]] || error "невірні метрики $path"
-  nodes="${BASH_REMATCH[1]}"; visits="${BASH_REMATCH[2]}"; result="${BASH_REMATCH[3]}"
+  # Звичайний конкурс має AST/visits. Інтеграційний суд без фічі
+  # benchmark-ast-visits перевіряє ті самі живі входи й самостійний
+  # SENS, але НЕ видає невиміряні показники за числові.
+  if [[ "${SENS_CONTEST_PROOF_ONLY:-false}" == true ]]; then
+    result="$(tail -n 1 "$tmp/standalone")"
+    nodes="НЕ_ВИМІРЮВАЛОСЯ"; visits="НЕ_ВИМІРЮВАЛОСЯ"
+  else
+    "$sens" --benchmark-physical "$path" > "$tmp/bench.out" 2>"$tmp/bench.err" || error "нативні метрики $path"
+    cmp -s "$tmp/standalone" "$tmp/bench.out" || error "бенчмарк змінив результат $path"
+    line="$(grep "^SENS_BINARY_BENCH " "$tmp/bench.err")" || error "немає метрик $path"
+    [[ "$line" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]] || error "невірні метрики $path"
+    nodes="${BASH_REMATCH[1]}"; visits="${BASH_REMATCH[2]}"; result="${BASH_REMATCH[3]}"
+  fi
   [[ "$(tail -n 1 "$tmp/standalone")" == "$result" ]] || error "результат метрик відмінний $path"
   # Перевірені задачі мають незалежний числовий еталон. Перший
   # конкурсант НЕ може визначати правильність усіх наступних.
@@ -293,13 +301,27 @@ for path in "${inputs[@]}"; do
       error "розходження SENS paired/standalone $path на змінному вході №$witness_index"
   done
   printf 'CONTEST_INPUT_WITNESSES_PASS path=%s cases=%s native=SENS_ZIG_T5M\n' "$path" "$witness_index"
-  bytes="$(wc -c < "$path")"
-  rows+="$task"$'\t'"$bytes"$'\t'"$nodes"$'\t'"$visits"$'\t'"$path"$'\n'
-  printf "CONTEST_EXECUTED_PASS path=%s T5M=%s AST=%s visits=%s result=%s\n" "$path" "$bytes" "$nodes" "$visits" "$result"
+  if [[ "${SENS_CONTEST_PROOF_ONLY:-false}" == true ]]; then
+    printf 'CONTEST_PROOF_ONLY_PASS path=%s inputs=%s native=SENS_ZIG_T5M\n' "$path" "$witness_index"
+  else
+    bytes="$(wc -c < "$path")"
+    rows+="$task"
+\t'"$bytes"
+\t'"$nodes"
+\t'"$visits"
+\t'"$path"
+\n'
+    printf "CONTEST_EXECUTED_PASS path=%s T5M=%s AST=%s visits=%s result=%s\n" "$path" "$bytes" "$nodes" "$visits" "$result"
+  fi
   rm -rf -- "$tmp"
   tmp=""
 done
-printf "\nЗадача | T5M байти | AST | visits | Файл\n"
-printf "%s" "$rows" | sort -t $'\t' -k1,1 -k2,2n -k3,3n -k4,4n
-printf "CONTEST_NATIVE_PASS count=%s\n" "${#seen[@]}"
+if [[ "${SENS_CONTEST_PROOF_ONLY:-false}" == true ]]; then
+  printf "CONTEST_NATIVE_WITNESSES_PASS count=%s native=SENS_ZIG_T5M metrics=NOT_MEASURED\n" "${#seen[@]}"
+else
+  printf "\nЗадача | T5M байти | AST | visits | Файл\n"
+  printf "%s" "$rows" | sort -t 
+\t' -k1,1 -k2,2n -k3,3n -k4,4n
+  printf "CONTEST_NATIVE_PASS count=%s\n" "${#seen[@]}"
+fi
 printf "CONTEST_PENDING_NATIVE_PAIR_COUNT count=%s status=NOT_EXECUTED\n" "$pending_native_pair"
