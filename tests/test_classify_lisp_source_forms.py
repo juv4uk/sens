@@ -150,7 +150,7 @@ class ThreePassClassifierTests(unittest.TestCase):
             [head.token for head in heads if not head.empty_list],
             ["quote", "001", "QUOTE", "00000001", "car"],
         )
-        historical, current, dynamic, empty = self.classify(source)
+        historical, current, dynamic, empty = mod.classify_heads(heads, self.resolver)
         self.assertEqual([hit.token for hit in historical],
                          ["quote", "QUOTE", "00000001", "car"])
         self.assertEqual([hit.token for hit in current], ["001"])
