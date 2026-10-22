@@ -183,6 +183,19 @@ python3 research/system-one-evaluate-20261022.py \
   --input /tmp/system-one-mmbert-test.jsonl \
   --expected-split test --threshold 0.80
 
+# Тепер порівняти teacher, два CPU-базові варіанти та трансформер в одному звіті.
+python3 research/system-one-compare-20261022.py \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --teacher-train /tmp/system-one-teacher-train.jsonl \
+  --teacher-validation /tmp/system-one-teacher-validation.jsonl \
+  --teacher-test /tmp/system-one-teacher-test.jsonl \
+  --transformer-validation-predictions /tmp/system-one-mmbert-validation.jsonl \
+  --transformer-test-predictions /tmp/system-one-mmbert-test.jsonl \
+  --output-dir /tmp/system-one-comparison-with-transformer \
+  --threshold 0.80 --bins 10
+
+# comparison.json тепер містить teacher, student_gold, student_soft та student_transformer.
+
 # Для під'єднання до host адаптера SENS; інструкція/порядок критеріїв мають збігатися.
 export SENS_SYSTEM_ONE_STUDENT_API_KEY='локальний-тимчасовий-ключ'
 python3 research/system-one-transformer-student-20261022.py serve \
