@@ -286,10 +286,11 @@ fn bija3_1968_atom_null_partial_law_executes_and_rejects_false_generator() {
         ("математичний-нуль", "(за-умовою (0 (як-є неправильно)))"),
     ] {
         let mut session = Session::default();
-        let outcome = eval_program(source, &mut session);
-        assert!(
-            outcome.is_err(),
-            "test_id=1968-D1-COND-{case} layer=SENS input={source} expected=reject_non_D1 actual={outcome:?}"
-        );
+        if let Ok(actual) = eval_program(source, &mut session) {
+            panic!(
+                "test_id=1968-D1-COND-{case} layer=SENS input={source} expected=reject_non_D1 actual={}",
+                actual.value
+            );
+        }
     }
 }
