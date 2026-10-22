@@ -446,7 +446,7 @@
   (110110011 (ук протокол-передавання-записати) (укр протокол-передавання-записати) (san tcp-lekhana) (en tcp-write) (LISP TCP-WRITE) (sym ()))
   (110110100 (ук відповідь-і) (укр відповідь-і) (san uttara-ca) (en answer-and) (LISP ANSWER-AND) (sym ()))
   (110110101 (ук п'ятий) (укр п'ятий) (san pañcama) (en fifth) (LISP FIFTH) (sym ()))
-  (110110110 (ук бінарний) (укр бінарний) (san dvimāna) (en binary) (LISP BINARY) (sym ()))
+  (110110110 (ук двійковий) (укр двійковий) (san dvimāna) (en binary) (LISP BINARY) (sym ()))
   (110110111 (ук читати-файл) (укр читати-файл) (san paṭhana-sañcikā) (en read-file) (LISP READ-FILE) (sym ()))
   (110111000 (ук створити-символ) (укр створити-символ) (san gensym) (en gensym) (LISP GENSYM) (sym ()))
   (110111001 (ук число-рядок) (укр число-рядок) (san saṅkhyā-śabda) (en number->string) (LISP NUMBER->STRING) (sym ()))
