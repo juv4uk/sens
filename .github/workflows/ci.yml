@@ -1555,7 +1555,7 @@ jobs:
           retention-days: 1
 
   lisp-surface:
-    name: Українська проєкція та заборона сирих літералів
+    name: Підсумковий гейт перевірок SENS
     if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
     needs: [lisp-guards, runtime-shards]
     runs-on: ubuntu-24.04
