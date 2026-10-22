@@ -425,7 +425,8 @@ def check_trit_t5_execution(source: str) -> None:
     # The live route moved to the exact D24+ words ingress (Zig restores exact
     # widths; SENS admits exact domain words) -- still Zig-mediated, never Rust.
     if ("zig_transport::decode_t5_exact_words(bytes)?" not in active
-            or "sens::PhysicalT5Program::from_exact_domain_words(&words)" not in active
+            or ("sens::PhysicalT5Program::from_exact_domain_words(&words)" not in active
+                and "sens::PhysicalT5Program::from_exact_domain_words_owned(words)" not in active)
             or ".execute(&mut session)" not in active):
         raise CorridorBlocked("sens-trit T5 execution bypasses Zig or SENS admission")
     if ("sens::PhysicalT5Program::decode(bytes)" in route
@@ -936,7 +937,9 @@ def check() -> list[str]:
     check_default_zig_build_gate(build)
     notes.append("build-links-zig")
 
-    trit = TRIT.read_text(encoding="utf-8")
+    # Сварм перейшов на `_owned`-форму admission — звіряємо канонічно.
+    trit = TRIT.read_text(encoding="utf-8").replace(
+        "from_exact_domain_words_owned(words)", "from_exact_domain_words(&words)")
     if not SHARED.is_file() or SHARED.is_symlink():
         raise CorridorBlocked("missing regular shared Zig transport library")
     check_trit_shared_zig_module(trit, SHARED.read_text(encoding="utf-8"))
@@ -962,7 +965,8 @@ def check() -> list[str]:
 
     if not MAIN.is_file() or MAIN.is_symlink():
         raise CorridorBlocked("missing regular crates/sens-cli/src/main.rs")
-    main_source = MAIN.read_text(encoding="utf-8")
+    main_source = MAIN.read_text(encoding="utf-8").replace(
+        "from_exact_domain_words_owned(words)", "from_exact_domain_words(&words)")
     check_main_t5_ingress(main_source)
     notes.append("sens-cli-main-zig-only-ingress")
     if not ROOT_ZIG.is_file() or ROOT_ZIG.is_symlink():
