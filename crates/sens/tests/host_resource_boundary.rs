@@ -15,7 +15,7 @@ fn collect_rust_sources(root: &Path, out: &mut Vec<PathBuf>) {
 }
 
 #[test]
-fn concrete_tcp_types_are_confined_to_value_storage_not_core_operations() {
+fn concrete_tcp_types_are_owned_outside_the_semantic_core() {
     let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
     let src = manifest.join("src");
     let mut files = Vec::new();
@@ -51,10 +51,9 @@ fn concrete_tcp_types_are_confined_to_value_storage_not_core_operations() {
         }
     }
 
-    assert_eq!(
-        concrete_type_files,
-        vec!["value.rs"],
-        "concrete std::net TCP types must remain confined to the Value storage boundary"
+    assert!(
+        concrete_type_files.is_empty(),
+        "concrete std::net TCP types belong in host adapters, not the semantic core: {concrete_type_files:?}"
     );
 }
 

@@ -859,17 +859,8 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
                 span,
             ))
         }
-        // No source syntax represents a live connection/listener — same
-        // capability-boundary reasoning as Closure/Macro above, for the
-        // same reason: quoting/macro-expanding one would need to fabricate
-        // code that could recreate a specific open TCP resource, which
-        // isn't a thing this language can express.
-        // Zhoden syntaksys ne predstavliaie zhyve ziednannia/listener — ta sama
-        // lohika mezhi mozhlyvostei, shcho y dlia Closure/Macro vyshche, z tiiei
-        // samoi prychyny: quote/rozhortannia makrosa na tsomu znachenni
-        // oznachalo b vyhadaty kod, shcho vidtvoryv by konkretnyi vidkrytyi
-        // TCP-resurs, — tse ne te, shcho tsia mova mozhe vyrazyty.
-        Value::HostHandle { .. } | Value::TcpConnection(_) | Value::TcpListener(_) => {
+        // Source syntax cannot manufacture an embedding-owned resource.
+        Value::HostHandle { .. } => {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
                 "macros cannot return TCP connections or listeners · makrosy ne mozhut povertaty TCP-ziednannia chy listener · Makros dürfen keine TCP-Verbindungen oder Listener zurückgeben",

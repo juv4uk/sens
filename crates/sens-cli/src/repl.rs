@@ -734,8 +734,6 @@ fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
                 Value::HostHandle { .. } => "HostHandle",
                 Value::Vector(_) => "Vector",
                 Value::NumericBuffer(_) => "NumericBuffer",
-                Value::TcpConnection(_) => "TcpConnection",
-                Value::TcpListener(_) => "TcpListener",
             }
         )),
     }

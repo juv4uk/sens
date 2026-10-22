@@ -10,9 +10,49 @@ use sens::{
     ErrorKind, Exactness, Expr, LanguageError, Span, Value,
 };
 use std::{
+    cell::RefCell,
     path::{Path, PathBuf},
     rc::Rc,
+    sync::atomic::{AtomicU64, Ordering},
 };
+
+static NEXT_TCP_HANDLE_TOKEN: AtomicU64 = AtomicU64::new(1);
+
+fn next_tcp_handle_token(span: Span) -> Result<u64, LanguageError> {
+    NEXT_TCP_HANDLE_TOKEN
+        .try_update(Ordering::Relaxed, Ordering::Relaxed, |token| {
+            token.checked_add(1)
+        })
+        .map_err(|_| {
+            LanguageError::new(
+                ErrorKind::NumericOverflow,
+                "TCP host-resource identity space exhausted",
+                span,
+            )
+        })
+}
+
+fn tcp_connection_value(
+    stream: std::net::TcpStream,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    Ok(Value::host_resource(
+        "tcp-connection",
+        next_tcp_handle_token(span)?,
+        RefCell::new(stream),
+    ))
+}
+
+fn tcp_listener_value(
+    listener: std::net::TcpListener,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    Ok(Value::host_resource(
+        "tcp-listener",
+        next_tcp_handle_token(span)?,
+        listener,
+    ))
+}
 
 #[cfg(all(
     any(target_os = "linux", target_os = "windows"),
@@ -431,9 +471,7 @@ fn evaluate_tcp_connect(
         return Err(denied("tcp-connect", format!("{host}:{port}"), span));
     }
     let stream = tcp_connect(host, port, span)?;
-    Ok(Value::TcpConnection(Rc::new(std::cell::RefCell::new(
-        stream,
-    ))))
+    tcp_connection_value(stream, span)
 }
 
 fn evaluate_tcp_listen_raw(
@@ -455,7 +493,7 @@ fn evaluate_tcp_listen_raw(
         return Err(denied("tcp-listen-raw", format!("{address}:{port}"), span));
     }
     let listener = tcp_listen_raw(address, port, span)?;
-    Ok(Value::TcpListener(Rc::new(listener)))
+    tcp_listener_value(listener, span)
 }
 
 fn evaluate_tcp_accept(
@@ -464,7 +502,8 @@ fn evaluate_tcp_accept(
     span: Span,
 ) -> Result<Value, LanguageError> {
     let (listener_value, listener_span) = &arguments[0];
-    let Value::TcpListener(listener) = listener_value else {
+    let Some(listener) = listener_value.as_host_resource::<std::net::TcpListener>("tcp-listener")
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-accept expects a TCP listener · tcp-accept ochikuie TCP-listener · tcp-accept erwartet einen TCP-Listener",
@@ -472,9 +511,7 @@ fn evaluate_tcp_accept(
         ));
     };
     let stream = tcp_accept(listener, span)?;
-    Ok(Value::TcpConnection(Rc::new(std::cell::RefCell::new(
-        stream,
-    ))))
+    tcp_connection_value(stream, span)
 }
 
 fn evaluate_tcp_read_raw(
@@ -483,7 +520,9 @@ fn evaluate_tcp_read_raw(
     span: Span,
 ) -> Result<Value, LanguageError> {
     let (connection_value, connection_span) = &arguments[0];
-    let Value::TcpConnection(connection) = connection_value else {
+    let Some(connection) =
+        connection_value.as_host_resource::<RefCell<std::net::TcpStream>>("tcp-connection")
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-read-raw expects a TCP connection · tcp-read-raw ochikuie TCP-ziednannia · tcp-read-raw erwartet eine TCP-Verbindung",
@@ -505,7 +544,9 @@ fn evaluate_tcp_write_raw(
 ) -> Result<Value, LanguageError> {
     exact_arity("tcp-write-raw", arguments, 2, span)?;
     let connection_value = eval_expr(&arguments[0], environment)?;
-    let Value::TcpConnection(ref connection) = connection_value else {
+    let Some(connection) =
+        connection_value.as_host_resource::<RefCell<std::net::TcpStream>>("tcp-connection")
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-write-raw expects a TCP connection · tcp-write-raw ochikuie TCP-ziednannia · tcp-write-raw erwartet eine TCP-Verbindung",
@@ -534,7 +575,9 @@ fn evaluate_tcp_close(
         ));
     }
     let (value, argument_span) = &arguments[0];
-    let Value::TcpConnection(connection) = value else {
+    let Some(connection) =
+        value.as_host_resource::<RefCell<std::net::TcpStream>>("tcp-connection")
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-close expects a TCP connection · tcp-close ochikuie TCP-ziednannia · tcp-close erwartet eine TCP-Verbindung",
@@ -629,7 +672,7 @@ fn tcp_accept(
 }
 
 fn tcp_read_raw(
-    connection: &std::cell::RefCell<std::net::TcpStream>,
+    connection: &RefCell<std::net::TcpStream>,
     span: Span,
 ) -> Result<Vec<u8>, LanguageError> {
     use std::io::Read;
@@ -645,7 +688,7 @@ fn tcp_read_raw(
 }
 
 fn tcp_write_raw(
-    connection: &std::cell::RefCell<std::net::TcpStream>,
+    connection: &RefCell<std::net::TcpStream>,
     bytes: &[u8],
     span: Span,
 ) -> Result<(), LanguageError> {
@@ -660,7 +703,7 @@ fn tcp_write_raw(
 }
 
 fn tcp_close(
-    connection: &std::cell::RefCell<std::net::TcpStream>,
+    connection: &RefCell<std::net::TcpStream>,
     span: Span,
 ) -> Result<(), LanguageError> {
     connection
