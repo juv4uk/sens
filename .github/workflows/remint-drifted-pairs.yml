@@ -448,14 +448,14 @@ jobs:
           # Швидкий rebase дозволений ЛИШЕ коли remote змінив документацію
           # чи CI, а НЕ Lisp, SENS, Zig, Rust, домени або корпус конкурсу.
           # Інакше обов'язкові новий mint, Zig inverse і SENS execution.
-          for attempt in 1 2 3 4; do
+          for attempt in 1 2 3 4 5 6; do
             if git push origin "HEAD:$target_branch"; then
               echo "REMINT_PUBLISHED attempt=$attempt"
               published=1
               break
             fi
             echo "REMINT_MAIN_ADVANCED attempt=$attempt: exact remote ref changed" >&2
-            if (( attempt == 4 )); then break; fi
+            if (( attempt == 6 )); then break; fi
             git fetch origin "$target_branch"
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
@@ -483,16 +483,23 @@ jobs:
                   safe_rebase=0
                   break ;;
                 lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp|tests/fixtures/*.lisp)
-                  # Лише A незалежного джерела без фізичної пари:
-                  # нова D11/list/tree форма чи незалежний Lisp-свідок не змінює
-                  # вже перевірений фізичний вхід; candidate і M/D/R — remint.
-                  # Зміни/вилучення M/D/R чи готові .sens — тільки re-mint.
+                  # Перемайн лише коли змінилося ВИКОРИСТАНЕ джерело.
+                  # Самостійна зміна іншого Lisp не міняє вже перевірених
+                  # SENS/Zig байтів: потрібні той самий сенсовий runtime,
+                  # кандидати та binding-source. Усі зміни .sens, Zig,
+                  # Rust runtime, core і доменів обробляє fail-closed case *.
+                  # При M/D/R від поточного кандидата — завжди native remint.
+                  # Вилучені джерела й відомий binding-source теж fail-closed.
                   if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
-                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" origin/$target_branch -- "$changed" | grep -Fxq -- "$changed" ||
-                     git cat-file -e "origin/$target_branch:${changed%.lisp}.sens" 2>/dev/null; then
+                     [[ "$changed" == lib/d11-srfi1-span-break.lisp ]] ||
+                     ! git cat-file -e "origin/$target_branch:$changed" 2>/dev/null; then
                     safe_rebase=0; break
                   fi
-                  echo "REMINT_NEW_INDEPENDENT_SOURCE source=$changed mint=NEXT_QUEUE"
+                  # Нова незалежна форма без .sens не стає виконуваною
+                  # від одного rebase; повний корпус і наступний mint
+                  # залишаються обов'язковими. Це лише збереження вже
+                  # нативно доведених фізичних пар від зайвого повтору.
+                  echo "REMINT_UNRELATED_LISP source=$changed verified_candidates=UNCHANGED"
                   ;;
                 *) safe_rebase=0; break ;;
               esac
@@ -525,7 +532,7 @@ jobs:
             fi
           done
           if (( ! published )); then
-            echo "::error::REMINT_PUBLISH_RACE after 4 verified attempts; newer main must retry natively; no force push" >&2
+            echo "::error::REMINT_PUBLISH_RACE after 6 verified attempts; newer main must retry natively; no force push" >&2
             exit 1
           fi
           if (( regenerated_failed )); then
