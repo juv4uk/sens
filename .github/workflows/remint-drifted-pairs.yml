@@ -227,36 +227,8 @@ jobs:
               list="$(git log --diff-filter=A --name-only -n 600 -- '*.sens' | grep '\.sens$' | sed 's/\.sens$/.lisp/' | sort -u)"
             fi
           fi
-          # Кожен push раніше майнив сотні незалежних Lisp: поки це
-          # тривало, main мінявся, і всі успішні T5M втрачались у rebase.
-          # Спочатку нові/змінені кандидати, потім лише мала порція боргу.
-          # Усе, що лишилось, чесно повідомляємо як PENDING, не PASS.
-          # Наступний push повторно забирає тільки ще непарні/дрейфуючі.
-          # Жодних Python/JSON рішень чи пропуску нативного SENS-суду.
-          batch_limit=24
-          declare -A batch_seen=()
-          batch_list=""
-          batch_total=0
-          batch_selected=0
-          while IFS= read -r source; do
-            [[ -n "$source" ]] || continue
-            if [[ -n "${batch_seen[$source]+yes}" ]]; then continue; fi
-            batch_seen["$source"]=1
-            batch_total=$((batch_total+1))
-            if (( batch_selected < batch_limit )); then
-              if (( batch_selected == 0 )); then
-                batch_list="$source"
-              else
-                batch_list="$(printf '%s\n%s' "$batch_list" "$source")"
-              fi
-              batch_selected=$((batch_selected+1))
-            else
-              echo "REMINT_BATCH_PENDING source=$source status=NOT_EXECUTED"
-            fi
-          done <<< "$list"
-          list="$batch_list"
-          echo "REMINT_BATCH source_total=$batch_total selected=$batch_selected pending=$((batch_total-batch_selected))"
-          # Лише актуально вибрані програми публікує той самий SENS/Zig.
+          # Джерела для відтворення на новому exact main, якщо інші агенти
+          # посунули HEAD до публікації. Не зберігати готові старі байти.
           printf '%s\n' "$list" > "$RUNNER_TEMP/sens-remint-candidates.list"
           # Судити конкурс лише після конкурсанта, не кожного lib/list/tree.
           # Факт категорії визначає реальний змінений/непарний шлях, не JSON.
