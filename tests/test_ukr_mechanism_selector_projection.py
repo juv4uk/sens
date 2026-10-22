@@ -110,7 +110,9 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
             "(функція (ідентичність виконавець)",
         ):
             self.assertIn(signature, code)
-        self.assertIn("(як-є rows)", code)
+        # Третє поле rows вже відкрите СЕНС, без повторного D7-пошуку.
+        self.assertIn("(визначити маршрути-вибору-механізму\n  рядки-реєстру-механізму)", code)
+        self.assertNotIn("(як-є rows)", code)
         self.assertIn("(третє маршрут)", code)
         self.assertNotIn("(третє route)", code)
 
@@ -137,8 +139,8 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
             "(визначити рядки-реєстру-механізму (решта (третє метадані-вибору-механізму)))",
             normalized
         )
-        for token in ("(як-є rows)",
-                      "(як-є mechanism-selected)", "(як-є sid-not-in-function-table)"):
+        for token in ("(rows", "(як-є mechanism-selected)",
+                      "(як-є sid-not-in-function-table)"):
             self.assertIn(token, self.source)
         for legacy, current in LOCAL_RENAMES:
             self.assertIn(f"(визначити {current}", self.source)
@@ -204,7 +206,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertNotRegex(code, r"(?<![\w-])(?:так|ні)(?![\w-])")
         self.assertNotIn("(як-є yes)", code)
         self.assertNotIn("(як-є no)", code)
-        self.assertIn("(хибне?\\n         (реєстр-містить-ідентичність?", code)
+        self.assertRegex(code, r"\(хибне\?\s+\(реєстр-містить-ідентичність\?")
         self.assertRegex(
             code,
             r"\(реєстр-містить-ідентичність\?\s+"
