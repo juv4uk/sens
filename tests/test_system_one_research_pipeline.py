@@ -583,6 +583,35 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(report["count"], 10)
             self.assertEqual(report["split"], "test")
 
+    def test_challenge_comparison_rejects_seed_overlap_and_non_holdout_rows(self):
+        seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
+        challenge_path = ROOT / "research" / "system-one-support-challenge-20261022.jsonl"
+        seed_rows, _ = student.read_jsonl(seed_path)
+        challenge_rows, _ = student.read_jsonl(challenge_path)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            overlap_rows = [dict(row) for row in challenge_rows]
+            overlap_rows[0]["text"] = seed_rows[0]["text"]
+            overlap_path = root / "overlap.jsonl"
+            write_jsonl(overlap_path, overlap_rows)
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.validate_challenge_corpus(overlap_path, seed_rows)
+
+            train_leak_rows = [dict(row) for row in challenge_rows]
+            train_leak_rows[0]["evaluation_only"] = False
+            train_leak_path = root / "not-holdout.jsonl"
+            write_jsonl(train_leak_path, train_leak_rows)
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.validate_challenge_corpus(train_leak_path, seed_rows)
+
+            duplicate_rows = [dict(row) for row in challenge_rows]
+            duplicate_rows[1]["text"] = duplicate_rows[0]["text"].upper()
+            duplicate_path = root / "duplicate-normalized.jsonl"
+            write_jsonl(duplicate_path, duplicate_rows)
+            with self.assertRaises(comparison.ComparisonError):
+                comparison.validate_challenge_corpus(duplicate_path, seed_rows)
+
     def test_comparison_runner_keeps_holdout_out_of_training(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

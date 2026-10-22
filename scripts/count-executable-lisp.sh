@@ -130,6 +130,10 @@ while IFS= read -r -d '' source; do
       binding_sources=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp) ;;
     tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp)
       binding_sources=(--binding-source lib/world.lisp) ;;
+    tests/semantic/meta-fc-predicates-d1-law.lisp)
+      # Д11 предикат оголошено в SENS, не у D11 таблиці й не в Rust-хості.
+      # Облік виконує той самий native binding-source, що й парний CLI.
+      binding_sources=(--binding-source lib/meta-eval-first-class.lisp) ;;
   esac
   # Часовий бюджет визначає повний SENS-вхід, а не тільки файл-
   # споживач: --binding-source може завантажувати великий Core4.

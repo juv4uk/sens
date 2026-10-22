@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 273,
+    "total": 278,
     "historical": 17,
-    "library": 256,
-    "distinct_families": 72
+    "library": 261,
+    "distinct_families": 77
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -6852,6 +6852,116 @@
       "no_new_primitive": true,
       "native_ci_job": 120025085901,
       "native_ci_scope": "META_EVAL_TARGETED_STEP_PASS_PHYSICAL_T5M_STEPS_RED"
+    },
+    {
+      "surface_name": "першокласне-обчислити-список",
+      "source_family": "meta-first-class-eval-list",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/meta-eval-first-class.lisp",
+        "blob_sha": "b71d2ce12cc2507672ee692d7ffa1f6df8db5a5f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(expression) × environment → list(value)",
+      "law": "Обчислити у SENS кожен вираз аргументів у визначеному лексичному оточенні, зберегти порядок, порожні й вкладені значення; повернути правильний список результатів.",
+      "native_law_test": "crates/sens/tests/d11_first_class_eval_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "першокласне-обчислити-тіло",
+      "source_family": "meta-first-class-sequential-body",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/meta-eval-first-class.lisp",
+        "blob_sha": "b71d2ce12cc2507672ee692d7ffa1f6df8db5a5f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "nonempty-list(expression) × environment → value",
+      "law": "Обчислити вирази тіла послідовно й повернути тільки останнє значення; попередні оцінки не замінюють фінальну.",
+      "native_law_test": "crates/sens/tests/d11_first_class_eval_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "першокласне-обчислити-умови",
+      "source_family": "meta-first-class-conditional-evaluation",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/meta-eval-first-class.lisp",
+        "blob_sha": "b71d2ce12cc2507672ee692d7ffa1f6df8db5a5f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "clauses × environment → value",
+      "law": "Лексично обчислити предикати у порядку, виконати тіло першої D1-істинної гілки, пропустити хибні; за відсутності істинної гілки повернути порожню структуру.",
+      "native_law_test": "crates/sens/tests/d11_first_class_eval_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "першокласне-застосувати",
+      "source_family": "meta-first-class-application",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/meta-eval-first-class.lisp",
+        "blob_sha": "b71d2ce12cc2507672ee692d7ffa1f6df8db5a5f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "callable-value × list(value) → value-or-diagnostic",
+      "law": "Застосувати збережене значення примітива або замикання через SENS; невідомий примітив і невикличний атом повертають різні структурні діагностики.",
+      "native_law_test": "crates/sens/tests/d11_first_class_eval_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "обчислити-першокласні-функції",
+      "source_family": "meta-first-class-entrypoint",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/meta-eval-first-class.lisp",
+        "blob_sha": "b71d2ce12cc2507672ee692d7ffa1f6df8db5a5f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "expression → value",
+      "law": "Вхід першокласного метаобчислення оцінює вираз у початковому оточенні SENS, зберігаючи цитування, лексичні функції й затінення назв.",
+      "native_law_test": "crates/sens/tests/d11_first_class_eval_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
     }
   ],
   "winners_20261022": {

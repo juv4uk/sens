@@ -17,35 +17,47 @@ if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION test_id=%s layer=eval actual=executor-missing reproduce=%q\n' "$id" "$reproduce" >&2
   exit 1
 fi
-python3 - "$law" "$mutant" <<'PY'
-from pathlib import Path
-import sys
+# Контроль форми мутанта — лише байтова інваріанта свідків.
+# Жоден Python/JSON і жодна оболонка не обчислює закон D1:
+# обидва вироки нижче виконує виключно нативний SENS.
+positive="$(sed '/^[[:space:]]*;/d' "$law")"
+negative="$(sed '/^[[:space:]]*;/d' "$mutant")"
+before="(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є requested))"
+after="(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є other))"
 
-def code(path):
-    source = Path(path).read_text(encoding="utf-8")
-    return "\n".join(line for line in source.splitlines()
-                     if not line.lstrip().startswith(";")).strip()
+# Підрахунок буквальних викличних голів: лапки і '?' — дані, не glob.
+count_fixed() {
+  local remaining="$1" needle="$2" occurrences=0
+  while [[ "$remaining" == *"$needle"* ]]; do
+    remaining="${remaining#*"$needle"}"
+    (( occurrences += 1 ))
+  done
+  printf '%s' "$occurrences"
+}
 
-positive = code(sys.argv[1])
-mutant = code(sys.argv[2])
-before = "(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є requested))"
-after = "(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є other))"
-if positive.count(before) != 1 or mutant != positive.replace(before, after):
-    raise SystemExit("META_GRAPH_FIXTURE_RED: mutant must change one SENS call")
-for name, expected in (
-    ("має-перехідну-гілку-за-умовою?", 2),
-    ("ім'я-зв'язане-формальними-параметрами?", 3),
-    ("форма-посилається-на-ім'я?", 1),
-    ("досяжність-залежностей-графа?", 1),
-):
-    actual = positive.count("(" + name + " ")
-    if actual != expected:
-        raise SystemExit(f"META_GRAPH_FIXTURE_RED: {name} expected={expected} actual={actual}")
-if "#d1:" in positive or "(ні)" in positive or "(так)" in positive:
-    raise SystemExit("META_GRAPH_FIXTURE_RED: historical D1 text cannot run in SENS")
-print("META_GRAPH_MUTATION_CHECK input=one-exact-quoted-symbol positive=D1:1 mutant=D1:0")
-PY
-tmp="$(mktemp -d)"
+if [[ "$(count_fixed "$positive" "$before")" != 1 ||
+      "$negative" != "${positive/"$before"/"$after"}" ]]; then
+  echo "META_GRAPH_FIXTURE_RED: mutant must change one SENS call" >&2
+  exit 1
+fi
+for witness in \
+  'має-перехідну-гілку-за-умовою?:2' \
+  "ім'я-зв'язане-формальними-параметрами?:3" \
+  "форма-посилається-на-ім'я?:1" \
+  'досяжність-залежностей-графа?:1'; do
+  name="${witness%:*}"
+  expected="${witness##*:}"
+  actual="$(count_fixed "$positive" "($name ")"
+  if [[ "$actual" != "$expected" ]]; then
+    printf 'META_GRAPH_FIXTURE_RED: %s expected=%s actual=%s\n' "$name" "$expected" "$actual" >&2
+    exit 1
+  fi
+done
+if [[ "$positive" == *'#d1:'* || "$positive" == *'(ні)'* || "$positive" == *'(так)'* ]]; then
+  echo "META_GRAPH_FIXTURE_RED: historical D1 text cannot run in SENS" >&2
+  exit 1
+fi
+echo "META_GRAPH_MUTATION_CHECK input=one-exact-quoted-symbol positive=D1:1 mutant=D1:0"tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 cat "$lib" "$law" > "$tmp/positive.lisp"
 cat "$lib" "$mutant" > "$tmp/mutant.lisp"

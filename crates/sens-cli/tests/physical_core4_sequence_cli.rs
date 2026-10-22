@@ -517,6 +517,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-maximum-fold-general",
         "list-tail-after-third-atom-zero-copy-general",
         "list-tail-after-fourth-atom-zero-copy-general",
+        // Два нові алгоритми одразу виконуються нативним SENS, навіть
+        // доки їхні фізичні T5M-трійки допубліковує Zig remint.
+        "list-tail-after-fifth-atom-zero-copy-general",
+        "list-penultimate-atomic-suffix-zero-copy-general",
         "залишити-точні-числа",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
