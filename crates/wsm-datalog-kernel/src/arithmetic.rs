@@ -7,34 +7,36 @@
 //! The historical 8-bit C ABI slot is a *transport compatibility selector*,
 //! NOT an SENS domain identity. Modern calls use exact ratified D5/D6 words.
 //! D7 and operator text never select execution; unproven laws fail closed.
+//! LEGACY_ABI_* constants are historical C-ABI transport tags, not D5/D6/D8
+//! codes. Their numeric values MUST NOT grant SENS-language callability.
 
 use std::collections::HashMap;
 use std::fmt;
 
 use crate::Value;
 
-pub const SID_ADD: u8 = 0b0000_1100;
-pub const SID_SUB: u8 = 0b0000_1101;
-pub const SID_MUL: u8 = 0b0000_1110;
-pub const SID_DIV: u8 = 0b0000_1111;
-pub const SID_ABS: u8 = 0b0001_0000;
-pub const SID_MIN: u8 = 0b0001_0001;
-pub const SID_MAX: u8 = 0b0001_0010;
-pub const SID_MOD: u8 = 0b0001_0011;
-pub const SID_QUOTIENT: u8 = 0b0001_0100;
+pub const LEGACY_ABI_ADD: u8 = 0b0000_1100;
+pub const LEGACY_ABI_SUB: u8 = 0b0000_1101;
+pub const LEGACY_ABI_MUL: u8 = 0b0000_1110;
+pub const LEGACY_ABI_DIV: u8 = 0b0000_1111;
+pub const LEGACY_ABI_ABS: u8 = 0b0001_0000;
+pub const LEGACY_ABI_MIN: u8 = 0b0001_0001;
+pub const LEGACY_ABI_MAX: u8 = 0b0001_0010;
+pub const LEGACY_ABI_MOD: u8 = 0b0001_0011;
+pub const LEGACY_ABI_QUOTIENT: u8 = 0b0001_0100;
 
-pub fn is_legacy_math_id(sid: u8) -> bool {
+pub fn is_legacy_math_id(legacy_abi_byte: u8) -> bool {
     matches!(
-        sid,
-        SID_ADD
-            | SID_SUB
-            | SID_MUL
-            | SID_DIV
-            | SID_ABS
-            | SID_MIN
-            | SID_MAX
-            | SID_MOD
-            | SID_QUOTIENT
+        legacy_abi_byte,
+        LEGACY_ABI_ADD
+            | LEGACY_ABI_SUB
+            | LEGACY_ABI_MUL
+            | LEGACY_ABI_DIV
+            | LEGACY_ABI_ABS
+            | LEGACY_ABI_MIN
+            | LEGACY_ABI_MAX
+            | LEGACY_ABI_MOD
+            | LEGACY_ABI_QUOTIENT
     )
 }
 
@@ -184,15 +186,15 @@ pub fn parse_legacy_abi_request(
 ) -> Result<NumericExpr, DatalogMathError> {
     use ArithmeticMechanism as Op;
     let operation = match semantic_id {
-        SID_ADD => Op::Add,
-        SID_SUB => Op::Sub,
-        SID_MUL => Op::Mul,
-        SID_DIV => Op::Div,
-        SID_ABS => Op::Abs,
-        SID_MIN => Op::Min,
-        SID_MAX => Op::Max,
-        SID_MOD => Op::Mod,
-        SID_QUOTIENT => Op::Quotient,
+        LEGACY_ABI_ADD => Op::Add,
+        LEGACY_ABI_SUB => Op::Sub,
+        LEGACY_ABI_MUL => Op::Mul,
+        LEGACY_ABI_DIV => Op::Div,
+        LEGACY_ABI_ABS => Op::Abs,
+        LEGACY_ABI_MIN => Op::Min,
+        LEGACY_ABI_MAX => Op::Max,
+        LEGACY_ABI_MOD => Op::Mod,
+        LEGACY_ABI_QUOTIENT => Op::Quotient,
         other => return Err(DatalogMathError::UnsupportedLegacyAbiId(other)),
     };
     parse_math_operation(operation, payload)
@@ -415,14 +417,14 @@ mod tests {
 
     #[test]
     fn semantic_request_uses_sid_as_operation_identity() {
-        let add = parse_legacy_abi_request(SID_ADD, "2 3").expect("add request");
+        let add = parse_legacy_abi_request(LEGACY_ABI_ADD, "2 3").expect("add request");
         assert_eq!(add.evaluate(&HashMap::new()), Ok(Value::Int(5)));
 
-        let sub = parse_legacy_abi_request(SID_SUB, "7 3").expect("sub request");
+        let sub = parse_legacy_abi_request(LEGACY_ABI_SUB, "7 3").expect("sub request");
         assert_eq!(sub.evaluate(&HashMap::new()), Ok(Value::Int(4)));
 
         assert!(
-            parse_legacy_abi_request(SID_ADD, "+ 2 3").is_err(),
+            parse_legacy_abi_request(LEGACY_ABI_ADD, "+ 2 3").is_err(),
             "operator text must not be accepted as semantic identity"
         );
         assert!(matches!(
