@@ -22,9 +22,9 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 196,
+    "total": 198,
     "historical": 17,
-    "library": 179,
+    "library": 181,
     "distinct_families": 27
   },
   "excluded": {
@@ -4863,13 +4863,85 @@
         "selection_basis": "Чинний MetaEval і 21 нативний D1-позитивний та негативний виклик без другого оракула, немає збігу поверхні D1–D10",
         "historical_research_alias": "тотожність-відповідає-поверхні?"
       }
+    },
+    {
+      "surface_name": "власний-примітив",
+      "source_family": "meta-evaluation",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/meta-eval.lisp",
+        "blob_sha": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "original_file": "lib/meta-eval.lisp",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00001000010",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00001000010",
+        "ukr": "власний-примітив",
+        "source_file": "lib/meta-eval.lisp",
+        "source_blob": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "law": "Створити власне представлення викличного примітива як точну двоелементну пару (primitive ім'я), зберігаючи символ і відрізняючи структуру від closure.",
+        "native_law_test": "crates/sens/tests/core_postcore_ukr.rs::meta_eval_predicates_are_actual_d1_bits",
+        "native_test_blob": "d5c69908562cedf792b6ecde170b261d5a9cbe71",
+        "native_test_result": "NATIVE_SENS_PASS_5_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39711569701",
+        "native_step_result": "META_EVAL_TARGETED_STEP_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинний lib/meta-eval.lisp та 14 нативних SENS-свідків позитивної й негативної структурної семантики; немає точних дублів у D1–D10",
+        "historical_research_alias": "власний-примітив"
+      }
+    },
+    {
+      "surface_name": "це-примітив?",
+      "source_family": "meta-evaluation",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/meta-eval.lisp",
+        "blob_sha": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "original_file": "lib/meta-eval.lisp",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00001100001",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00001100001",
+        "ukr": "це-примітив?",
+        "source_file": "lib/meta-eval.lisp",
+        "source_blob": "753295df129442b23ee92d1f85c15ce3f382a20c",
+        "law": "Точний D1-предикат розпізнає неатомарне значення, голова якого тотожна тегу primitive; відхиляє closure, recursive-closure, схожі теги, атом і порожнє значення.",
+        "native_law_test": "crates/sens/tests/core_postcore_ukr.rs::meta_eval_predicates_are_actual_d1_bits",
+        "native_test_blob": "d5c69908562cedf792b6ecde170b261d5a9cbe71",
+        "native_test_result": "NATIVE_SENS_PASS_9_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39711569701",
+        "native_step_result": "META_EVAL_TARGETED_STEP_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Чинний lib/meta-eval.lisp та 14 нативних SENS-свідків позитивної й негативної структурної семантики; немає точних дублів у D1–D10",
+        "historical_research_alias": "це-примітив?"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 55,
-    "semantic_winners_total": 567,
+    "native_sens_composition_winners": 57,
+    "semantic_winners_total": 569,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
