@@ -10,6 +10,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -253,6 +254,33 @@ def pack_report(path: Path) -> tuple[list[str], dict]:
     return lines, {"cases": cases}
 
 
+
+def action_notices(report: dict[str, object]) -> list[str]:
+    """Visible GitHub annotations from already parity-validated measured hot rows."""
+    physical = report.get("physical_hot")
+    if not isinstance(physical, dict):
+        return []
+    notices: list[str] = []
+    for row in physical["cases"]:
+        notices.append(
+            f"::notice title=SENS T5/D2 · {row['forms']} forms::"
+            f"T5={row['physical_bytes']} B; typed p50={row['typed_word_median_ns']} ns; "
+            f"p95={row['typed_word_p95_ns']} ns; "
+            f"repack/typed={row['previous_over_typed']:.3f}x; "
+            f"text/typed={row['visible_over_typed']:.3f}x; "
+            "scope=hot reader, same bytes, no startup or full execution"
+        )
+    for row in physical["encoding"]:
+        notices.append(
+            f"::notice title=SENS T5 encoder · {row['forms']} forms::"
+            f"T5={row['physical_bytes']} B; streaming p50={row['streaming_median_ns']} ns; "
+            f"p95={row['streaming_p95_ns']} ns; "
+            f"two-pass/streaming={row['two_pass_over_streaming']:.3f}x; "
+            "scope=hot packing, identical physical output"
+        )
+    return notices
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cpu-jsonl", type=Path)
@@ -288,6 +316,9 @@ def main() -> None:
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     print(args.out.read_text(encoding="utf-8"))
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        for notice in action_notices(report):
+            print(notice)
 
 
 if __name__ == "__main__":
