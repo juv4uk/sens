@@ -516,6 +516,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-every-sixth-linear-general",
         "list-maximum-fold-general",
         "list-tail-after-third-atom-zero-copy-general",
+        "list-tail-after-fourth-atom-zero-copy-general",
         "залишити-точні-числа",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
