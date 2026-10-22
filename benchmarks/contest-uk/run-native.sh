@@ -33,6 +33,7 @@ for source in "$here"/*.lisp; do
     нсд|нсд-*) expected=21 ;;
     квадрат|квадрат-*) expected=144 ;;
     куб|куб-*) expected=343 ;;
+    різниця-квадратів|різниця-квадратів-*) expected=91 ;;
     *) echo "CONTEST_SKIP: немає перевіреного очікуваного результату: $source" >&2; continue ;;
   esac
   physical="$scratch/$name.sens"
