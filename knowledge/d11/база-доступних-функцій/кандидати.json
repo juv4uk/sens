@@ -5339,7 +5339,7 @@
         "snapshot_not_live_proof": false,
         "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
       },
-      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_reductions_and_pair_fold_native_sens_laws",
+      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_clojure_reductions_seeds_every_prefix_native",
       "native_ci_status": "NOT_YET_CONFIRMED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
@@ -5359,7 +5359,7 @@
         "snapshot_not_live_proof": false,
         "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
       },
-      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_reductions_and_pair_fold_native_sens_laws",
+      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_scheme_pair_fold_receives_each_suffix_native",
       "native_ci_status": "NOT_YET_CONFIRMED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
@@ -5379,7 +5379,7 @@
         "snapshot_not_live_proof": false,
         "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
       },
-      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_reductions_and_pair_fold_native_sens_laws",
+      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_scheme_pair_fold_right_receives_each_suffix_native",
       "native_ci_status": "NOT_YET_CONFIRMED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
