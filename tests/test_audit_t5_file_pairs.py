@@ -58,6 +58,15 @@ class AuditT5PairsTests(unittest.TestCase):
         self.assertEqual(len(result["files"]), 1)
         self.assertEqual(result["files"][0]["source"], "main/програма.lisp")
 
+    def test_superseded_contest_candidates_are_outside_active_audit(self):
+        self.pair("benchmarks/contest-uk/winner", "10 01\n", ["10", "01"])
+        self.pair("benchmarks/contest-uk/superseded/older", "10 01\n", ["10", "01"])
+        report = self.audit()
+        self.assertEqual(report["summary"]["sens_files"], 1)
+        self.assertEqual(report["summary"]["lisp_files"], 1)
+        self.assertEqual(report["files"][0]["source"],
+                         "benchmarks/contest-uk/winner.lisp")
+
     def test_paired_binary_projection_exact_width_is_verified(self):
         self.pair("examples/demo", "10 01\n", ["10", "01"])
         result = self.audit(strict=True)
