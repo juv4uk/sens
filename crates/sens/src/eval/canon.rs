@@ -399,16 +399,6 @@ fn canonicalize_domain_result(
         return Ok(value);
     }
 
-    // #3161: D3:101 EQ is a partial atomic predicate. Outside its atomic
-    // domain it returns exact structural D3:000 (no witness), never D1:0.
-    // Only EQ may cross this boundary with NIL: ATOM, D5 and D8 predicates
-    // must still return a genuine D1 answer, or fail closed as before.
-    if let CoreDomainIdentity::D3(word) = identity {
-        if word.word().packed_bits() == 0b101 && matches!(&value, Value::Nil) {
-            return Ok(value);
-        }
-    }
-
     // Контракт 11.8: Rust перевіряє тільки тип межі D1.
     // Старі t/(), числові й спискові відповіді не перетворюються на предикат.
     Err(LanguageError::new(
