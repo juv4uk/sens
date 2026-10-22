@@ -17,10 +17,7 @@ on:
       - "lib/reverse-three.lisp"
       - "lib/axioms-d1-principle-five.lisp"
       - "lib/core*.lisp"
-      - "lib/mechanism-selector.lisp"
       - "lib/island-lowering.lisp"
-      - "tests/fixtures/mechanism-selector-1047-witness.lisp"
-      - "tests/fixtures/island-lowering-1048-witness.lisp"
       - "lib/life-1-scheduler.lisp"
       - "lib/machine/projection/x86-64.lisp"
       - "lib/machine/lowering/semantic-x86-64.lisp"
@@ -70,9 +67,9 @@ jobs:
             # Лише реально додані/змінені .lisp у цьому push, не весь
             # історичний список. Видалені під час promotion не перемайнювати.
             if [[ "$BEFORE" =~ ^0+$ ]]; then
-              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/mechanism-selector.lisp' 'tests/fixtures/mechanism-selector-1047-witness.lisp' 'tests/fixtures/island-lowering-1048-witness.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
+              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
             else
-              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/mechanism-selector.lisp' 'tests/fixtures/mechanism-selector-1047-witness.lisp' 'tests/fixtures/island-lowering-1048-witness.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
+              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
             fi
             # Зміна самого SENS-нижувача потребує перевірки його
             # СПОЖИВАЧА навіть коли вихідний свідок і байти ще не змінювались.
@@ -100,7 +97,7 @@ jobs:
             # при кожному незалежному push: це відтягує обернення нових Lisp.
             # Джерело без .sens або view залишається в черзі; нативний
             # суддя як і раніше відхиляє drift та хибне виконання.
-            for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/mechanism-selector.lisp tests/fixtures/mechanism-selector-1047-witness.lisp tests/fixtures/island-lowering-1048-witness.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -114,7 +111,7 @@ jobs:
             # Повертаємо не лише конкурс, а й D11/list/tree, коли
             # проміжний queued push було замінено найновішим.
             if [[ "$EVENT_NAME" == push ]]; then
-              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/mechanism-selector.lisp tests/fixtures/mechanism-selector-1047-witness.lisp tests/fixtures/island-lowering-1048-witness.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
                 [[ -f "$source" && ! -L "$source" ]] || continue
                 pair="${source%.lisp}.sens"
                 view="${source%.lisp}"
@@ -320,39 +317,21 @@ jobs:
             # Після чергового push у main могли з'явитися нові конкурсанти.
             # Не судити їх за старим T5M: додати в той самий нативний
             # маршрут mint → Zig inverse → paired/standalone SENS.
-            # Якщо конкурентний push додав виконуваний Lisp, сам
-            # GITHUB_TOKEN push НЕ запустить наступний remint. Тому
-            # непарні / застарілі конкурсні джерела майнимо ЗАРАЗ
-            # на новому main, а не відкладаємо в неіснуючу чергу.
-            for source in benchmarks/contest-uk/*.lisp; do
-              [[ -f "$source" && ! -L "$source" ]] || continue
-              pair="${source%.lisp}.sens"
-              view="${source%.lisp}"
-              needs_pair=0
-              if [[ ! -s "$pair" || ! -f "$view" ||
-                    -L "$pair" || -L "$view" ]]; then
-                needs_pair=1
-              else
-                source_commit="$(git log -1 --format=%H -- "$source")"
-                pair_commit="$(git log -1 --format=%H -- "$pair")"
-                if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
-                   ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
-                  needs_pair=1
-                fi
-              fi
-              if (( needs_pair )); then
-                REMINT_CONTEST=true
+            # Після паралельного оновлення перевірити й дрейфуючі трійки,
+            # а не лишати їх новим непоясненим RED під час judge.
+            if [[ "$REMINT_CONTEST" == true ]]; then
+              for source in benchmarks/contest-uk/*.lisp; do
+                [[ -f "$source" && ! -L "$source" ]] || continue
                 if ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
                   printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
-                  echo "REMINT_RECOVER_CONTEST_SOURCE source=$source"
                 fi
-              fi
-            done
+              done
+            fi
             # Якщо попередні queued push скасовано, після rebase потрібно
             # забрати й нові бібліотечні Lisp. Інакше незмінений старий
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
             # Тільки непарні або новіші за носій: без масового перемайну.
-            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/mechanism-selector.lisp tests/fixtures/mechanism-selector-1047-witness.lisp tests/fixtures/island-lowering-1048-witness.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -450,14 +429,14 @@ jobs:
           # Швидкий rebase дозволений ЛИШЕ коли remote змінив документацію
           # чи CI, а НЕ Lisp, SENS, Zig, Rust, домени або корпус конкурсу.
           # Інакше обов'язкові новий mint, Zig inverse і SENS execution.
-          for attempt in 1 2 3 4 5 6 7 8; do
+          for attempt in 1 2 3 4; do
             if git push origin "HEAD:$target_branch"; then
               echo "REMINT_PUBLISHED attempt=$attempt"
               published=1
               break
             fi
             echo "REMINT_MAIN_ADVANCED attempt=$attempt: exact remote ref changed" >&2
-            if (( attempt == 8 )); then break; fi
+            if (( attempt == 4 )); then break; fi
             git fetch origin "$target_branch"
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
@@ -477,12 +456,15 @@ jobs:
                   # Rust src, Zig, .lisp і фізичні .sens як раніше потребують перевірки.
                   ;;
                 benchmarks/contest-uk/*.lisp)
-                  # Навіть новий незалежний учасник потребує фізичної
-                  # пари зараз: push від GITHUB_TOKEN не створює новий run.
-                  # Не переносити неперевірене джерело як начебто виконане.
-                  echo "REMINT_NEW_CONTESTANT source=$changed mint=REVERIFY_CURRENT_MAIN"
-                  safe_rebase=0
-                  break ;;
+                  # Лише A: нове джерело не змінює перевірені байти.
+                  # Вже існуючі M/D/R, фізичні SENS та семантика => новий mint.
+                  if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
+                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" origin/$target_branch -- "$changed" | grep -Fxq -- "$changed" ||
+                     git cat-file -e "origin/$target_branch:${changed%.lisp}.sens" 2>/dev/null; then
+                    safe_rebase=0; break
+                  fi
+                  echo "REMINT_NEW_INDEPENDENT_CONTESTANT source=$changed mint=NEXT_QUEUE"
+                  ;;
                 *) safe_rebase=0; break ;;
               esac
             done < <(git -c core.quotePath=false diff --name-only "$verified_parent" origin/$target_branch)
@@ -514,7 +496,7 @@ jobs:
             fi
           done
           if (( ! published )); then
-            echo "::error::REMINT_PUBLISH_RACE after 8 verified attempts; newer main must retry natively; no force push" >&2
+            echo "::error::REMINT_PUBLISH_RACE after 4 verified attempts; newer main must retry natively; no force push" >&2
             exit 1
           fi
           if (( regenerated_failed )); then
