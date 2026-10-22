@@ -433,3 +433,33 @@ fn core4_ukrainian_rest_args_are_executed_after_d7_dotted_tail_removal() {
         );
     }
 }
+
+
+// Перевірка не текстового шаблону, а результатів виконання чинного Core4:
+// D1:0 тепер повертається прямо; жодного CONS/ATOM для штучної хиби.
+#[test]
+fn core4_ukrainian_clips_shortcut_truth_tables_execute_in_sens() {
+    let mut session = migrated_core();
+    for (program, expected) in [
+        ("(твердження-кліпс? (як-є а))", false),
+        ("(твердження-кліпс? (як-є (assert а)))", true),
+        ("(твердження-кліпс? (як-є (printout а)))", false),
+        ("(виведення-кліпс? (як-є а))", false),
+        ("(виведення-кліпс? (як-є (printout а)))", true),
+        ("(виведення-кліпс? (як-є (assert а)))", false),
+        ("(усі-твердження-кліпс? (як-є ()))", true),
+        ("(усі-твердження-кліпс? (як-є ((assert а))))", true),
+        ("(усі-твердження-кліпс? (як-є ((printout а))))", false),
+    ] {
+        let actual = eval_program(program, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=CORE4-CLIPS-D1 layer=SENS input={program} expected=D1:{expected} actual_error={error}"
+            ))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "test_id=CORE4-CLIPS-D1 layer=SENS input={program} expected=D1:{expected} actual={actual}"
+        );
+    }
+}
