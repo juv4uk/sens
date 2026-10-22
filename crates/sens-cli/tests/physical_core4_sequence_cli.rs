@@ -778,6 +778,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-cartesian-product-general",
         "lib/list-stable-intersection-general",
         "lib/list-prefix-atoms-general",
+        "lib/list-strip-prefix-atoms-general",
         "lib/list-trim-edges-atom-general",
         "lib/list-all-distinct-atoms-general",
         "lib/list-keep-all-matching-atoms-general",
