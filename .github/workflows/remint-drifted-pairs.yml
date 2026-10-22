@@ -355,30 +355,22 @@ jobs:
             git fetch origin main
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
-            # Дозволити rebase вже доведених байтів лише на зміні,
-            # яка не торкається власного source, transport чи семантики.
-            # Новий незалежний конкурент — лише A нового .lisp:
-            # зміну/видалення наявного конкурсанта не пропускати.
             while IFS= read -r changed; do
               [[ -n "$changed" ]] || continue
               case "$changed" in
                 docs/*.md|benchmarks/contest-uk/RESULTS.md|.github/workflows/*.yml|.github/workflows/*.yaml)
                   ;;
-                benchmarks/contest-uk/*.lisp)
-                  if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
-                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" origin/main -- "$changed" | grep -Fxq -- "$changed"; then
-                    safe_rebase=0; break
-                  fi
-                  echo "REMINT_NEW_INDEPENDENT_CONTESTANT source=$changed mint=NEXT_QUEUE"
-                  ;;
                 lib/list-*.lisp|lib/tree-*.lisp|lib/d11-*.lisp|lib/axioms-d1-principle-five.lisp)
+                  # Лише чужий незалежний source, НЕ наш native candidate.
+                  # При зміні нашого Lisp або будь-якого фізичного SENS
+                  # обов'язково новий exact SENS/Zig mint на свіжому main.
                   if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list"; then
                     safe_rebase=0; break
                   fi
                   ;;
                 *) safe_rebase=0; break ;;
               esac
-            done < <(git -c core.quotePath=false diff --name-only "$verified_parent" origin/main)
+            done < <(git diff --name-only "$verified_parent" origin/main)
             if (( safe_rebase )) &&
                git merge-base --is-ancestor "$verified_parent" origin/main; then
               if git rebase origin/main; then
