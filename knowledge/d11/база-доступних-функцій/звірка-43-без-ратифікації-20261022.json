@@ -41,7 +41,11 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "status": "NOT_TESTED_IO_EFFECT",
+        "reason": "Потребує контрольованого файлового/потокового тесту, не підмінювати перевіркою лише surface назви"
+      }
     },
     {
       "legacy_fixture_bits": "00000000001",
@@ -92,7 +96,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000000100",
@@ -105,7 +118,25 @@
       "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "AMBIGUOUS",
+        "candidates": [
+          {
+            "domain": "D6",
+            "bits": "000000",
+            "uk": "довжина",
+            "note": "Якщо COUNT означає число елементів; Common Lisp COUNT рахує входження елемента, тому може відрізнятися"
+          },
+          {
+            "domain": "D10",
+            "bits": "0100001000",
+            "uk": "кількість-у-послідовності",
+            "note": "З'ясувати арність і чи передбачено критерій відбору"
+          }
+        ],
+        "needed_law": "Уточнити, чи підраховується довжина, кількість входжень заданого значення чи фільтрований підрахунок"
+      }
     },
     {
       "legacy_fixture_bits": "00000000101",
@@ -128,7 +159,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000000110",
@@ -153,7 +193,11 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "status": "NOT_TESTED_IO_EFFECT",
+        "reason": "Потребує контрольованого файлового/потокового тесту, не підмінювати перевіркою лише surface назви"
+      }
     },
     {
       "legacy_fixture_bits": "00000000111",
@@ -166,7 +210,31 @@
       "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "AMBIGUOUS",
+        "candidates": [
+          {
+            "domain": "D8",
+            "bits": "00100001",
+            "uk": "підпослідовність",
+            "note": "Напіввідкритий зріз proper-list із двома межами D24+"
+          },
+          {
+            "domain": "D9",
+            "bits": "110100011",
+            "uk": "рядок-зріз",
+            "note": "Окрема область рядкових значень"
+          },
+          {
+            "domain": "D10",
+            "bits": "0000110110",
+            "uk": "взяти-напіввідкритий-зріз-вектора",
+            "note": "Окрема область векторних значень"
+          }
+        ],
+        "needed_law": "Вказати вид послідовності, межі, результат, розрізнити обхід списку і транспорт"
+      }
     },
     {
       "legacy_fixture_bits": "00000001000",
@@ -191,7 +259,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000001001",
@@ -215,7 +292,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000001010",
@@ -238,7 +324,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000001011",
@@ -261,7 +356,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000001100",
@@ -286,7 +390,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000001101",
@@ -299,7 +412,19 @@
       "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "LOWER_SAME_BEHAVIOR_CANDIDATE",
+        "candidates": [
+          {
+            "domain": "D10",
+            "bits": "0000000110",
+            "uk": "якщо",
+            "note": "lib/core.lisp визначає триаргументний варіант із коротким обчисленням гілок; не новий закон без іншої семантики"
+          }
+        ],
+        "needed_law": "Нативно перевірити позитивну, негативну та неоцінену гілку у D10; відрізнити синтаксичний псевдонім від opcode"
+      }
     },
     {
       "legacy_fixture_bits": "00000001110",
@@ -312,7 +437,12 @@
       "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "SEMANTIC_SCOPE_UNCLEAR",
+        "candidates": [],
+        "needed_law": "Відокремити тестове ASSERT із зупинкою/діагностикою від логічного факту та ствердження у світі; не дублювати D9 ASSERT-FACT"
+      }
     },
     {
       "legacy_fixture_bits": "00000001111",
@@ -325,7 +455,12 @@
       "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "SEMANTIC_SCOPE_UNCLEAR",
+        "candidates": [],
+        "needed_law": "Розрізнити структурований результат-помилку, D1 ні, виняток виконання та транспортну відмову; не присвоювати код за словом FAIL"
+      }
     },
     {
       "legacy_fixture_bits": "00000010000",
@@ -338,7 +473,19 @@
       "review_route": "З'ясувати нормативний закон, типи та незалежність; не займати D11 адресу до рішення власника",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "behavioral_neighbor_hypothesis": {
+        "kind": "LOWER_SAME_BEHAVIOR_CANDIDATE",
+        "candidates": [
+          {
+            "domain": "D8",
+            "bits": "10100101",
+            "uk": "існує-збіг?",
+            "note": "D8 SOME: перевірити D1-предикат над правильним списком, порожню основу й коротке обчислення"
+          }
+        ],
+        "needed_law": "Потрібна точна сигнатура: ∃ pred(x) над елементами чи просто існування значення/імені"
+      }
     },
     {
       "legacy_fixture_bits": "00000010001",
@@ -361,7 +508,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000010010",
@@ -385,7 +541,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000010011",
@@ -410,7 +575,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000010100",
@@ -433,7 +607,16 @@
       "review_route": "Перевірити арність, типи, закон і негативні приклади з D1–D10; якщо рівнозначно, повторно використати нижчий домен без нового D11 opcode",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "test_file": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+        "methods": [
+          "d11_legacy43_existing_pure_lower_domain_laws_are_native",
+          "d11_legacy43_existing_d24_list_boundaries_are_native"
+        ],
+        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
+      }
     },
     {
       "legacy_fixture_bits": "00000010101",
@@ -721,5 +904,20 @@
       "independent_law_proven": false,
       "direct_D11_opcode": false
     }
-  ]
+  ],
+  "follow_up": {
+    "native_witnesses": {
+      "existing_lower_names_targeted": 11,
+      "positive_negative_cases_source": 34,
+      "source": "crates/sens/tests/d11_legacy43_lower_laws.rs",
+      "ci": "https://github.com/juv4uk/sens/actions/runs/39773160845",
+      "status": "PENDING_CI",
+      "excluded_for_now": [
+        "READ-FILE",
+        "PRINT"
+      ]
+    },
+    "name_only_missing_semantic_neighborhood": 6,
+    "clarification": "Попередня категорія unproven_law означає брак точного буквального збігу, а не доказ відсутності семантичного резидента у D1–D10."
+  }
 }
