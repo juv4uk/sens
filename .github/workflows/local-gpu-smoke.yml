@@ -2,6 +2,11 @@ name: SENS — короткий локальний GPU smoke
 
 on:
   workflow_dispatch:
+  # Один адресний запуск на оновлення самого GPU smoke; не кожен commit.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/local-gpu-smoke.yml'
 
 permissions: {}
 
@@ -40,4 +45,14 @@ jobs:
           expected='6 7 8'
           printf 'operation=add-i32 expected=%s actual=%s\n' "$expected" "$actual"
           test "$actual" = "$expected"
-          printf 'CML_GPU_WORKER_SMOKE_PASS (mechanism check; not a SENS semantic verdict)\n' >> "$GITHUB_STEP_SUMMARY"
+          # Перевірити справжнє GPU-виконання на різних точних i32-входах.
+          # Ці механічні smoke-вектори не ратифікують семантику SENS.
+          actual="$("$timeout_bin" 15s "$worker" add-i32 2 0 1 5)"
+          expected='2 3 7'
+          printf 'operation=add-i32 input=0,1,5 expected=%s actual=%s\n' "$expected" "$actual"
+          test "$actual" = "$expected"
+          actual="$("$timeout_bin" 15s "$worker" add-i32 5 -3 0 3)"
+          expected='2 5 8'
+          printf 'operation=add-i32 input=-3,0,3 expected=%s actual=%s\n' "$expected" "$actual"
+          test "$actual" = "$expected"
+          printf 'CML_GPU_WORKER_SMOKE_PASS physical_device=GTX_1050_Ti vectors=3 semantic_authority=SENS_ONLY\n' >> "$GITHUB_STEP_SUMMARY"
