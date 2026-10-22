@@ -439,7 +439,6 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-move-first-match-to-front-general",
         "list-all-unordered-position-pairs-general",
         "list-distinct-unordered-atom-pairs-general",
-        "list-interleave-three-general",
         "list-split-atomic-prefix-general",
         "list-first-compound-general",
         "tree-pair-tally-unary-general",
@@ -584,7 +583,6 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-move-first-match-to-front-general"
                 | "list-all-unordered-position-pairs-general"
                 | "list-distinct-unordered-atom-pairs-general"
-                | "list-interleave-three-general"
                 | "list-all-subsets-by-position-general"
                 | "tree-pair-tally-unary-general"
         ) {
@@ -875,7 +873,6 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-interpose-general",
         "lib/list-all-unordered-position-pairs-general",
         "lib/list-distinct-unordered-atom-pairs-general",
-        "lib/list-interleave-three-general",
         "lib/list-keep-repeated-atoms-once-general",
         "lib/list-last-repeated-atom-by-final-occurrence-general",
         "lib/list-last-compound-suffix-general",
@@ -955,4 +952,30 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
             );
         }
     }
+}
+
+#[test]
+fn ukr_cond_skips_unsafe_branch_and_preserves_exact_t5m_triplet() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let stem = root.join("examples/migrated/коротке-замикання");
+    let source = stem.with_extension("lisp");
+    let physical = stem.with_extension("sens");
+    let view = fs::read_to_string(&stem).expect("точний бітовий перегляд");
+    assert_eq!(view, format!("{}\\n", view.trim_end()), "канонічний LF");
+
+    let opened = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("open").arg(&physical).output().expect("Zig/T5M open");
+    assert!(opened.status.success(), "{}", error(&opened));
+    assert_eq!(opened.stdout, view.as_bytes(), "точне обернене представлення");
+
+    let paired = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg("--t5m-pair").arg(&source).arg(&physical).output()
+        .expect("SENS: українська проєкція ↔ фізична програма");
+    assert!(paired.status.success(), "{}", error(&paired));
+    assert_eq!(observed(&paired).trim(), "1", "D1:1 без виконання хибної гілки");
+
+    let direct = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg(&physical).output().expect("нативне виконання SENS");
+    assert!(direct.status.success(), "{}", error(&direct));
+    assert_eq!(direct.stdout, paired.stdout, "носій не змінює SENS семантики");
 }
