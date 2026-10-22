@@ -613,3 +613,76 @@ fn eq_equal_atoms_in_separately_built_pairs_are_value_equal_in_sens() {
         "test_id=1968-EQ-CARRIERS-PAIRS layer=SENS input={invalid} expected=Type actual={error}"
     );
 }
+/// #5950 / #1968: SENS constructs two distinct CONS roots with one shared tail.
+/// The SENS evaluator must preserve exact D3 CAR/CDR semantics. Rc::ptr_eq is
+/// checked only as a *mechanism* invariant (no copy of an existing PairNode),
+/// never as language-level EQ or a canonical identity representation.
+#[test]
+fn cdr_on_shared_sens_tail_preserves_pairnode_allocation() {
+    use std::rc::Rc;
+
+    let mut session = Session::default();
+    let setup = r#"
+        (визначити спільний-хвіст (як-є (а б)))
+        (визначити ліва-гілка (сполучити (як-є л) спільний-хвіст))
+        (визначити права-гілка (сполучити (як-є п) спільний-хвіст))
+    "#;
+    eval_program(setup, &mut session).unwrap_or_else(|error| panic!(
+        "test_id=5950-SHARED-SETUP layer=SENS input={setup} actual_error={error}"
+    ));
+
+    let read = |source: &str, session: &mut Session| {
+        eval_program(source, session).unwrap_or_else(|error| panic!(
+            "test_id=5950-SHARED-CDR layer=SENS input={source} actual_error={error}"
+        )).value
+    };
+
+    let tail = read("спільний-хвіст", &mut session);
+    let left = read("(решта ліва-гілка)", &mut session);
+    let right = read("(решта права-гілка)", &mut session);
+    let (sens::Value::Pair(tail_node), sens::Value::Pair(left_node), sens::Value::Pair(right_node)) =
+        (&tail, &left, &right)
+    else {
+        panic!("test_id=5950-SHARED-CDR layer=SENS expected=three-PairNode-tails actual=({tail}, {left}, {right})");
+    };
+
+    assert!(
+        Rc::ptr_eq(tail_node, left_node) && Rc::ptr_eq(tail_node, right_node),
+        "test_id=5950-SHARED-CDR layer=mechanism expected=same-PairNode-allocation after SENS CDR"
+    );
+
+    for (id, source, expected) in [
+        (
+            "same-tail-atom",
+            "(тотожне? (перше (решта ліва-гілка)) (перше (решта права-гілка)))",
+            true,
+        ),
+        (
+            "distinct-root-heads",
+            "(тотожне? (перше ліва-гілка) (перше права-гілка))",
+            false,
+        ),
+    ] {
+        let actual = read(source, &mut session);
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "test_id=5950-SHARED-{id} layer=SENS input={source} expected=D1:{expected} actual={actual}"
+        );
+    }
+
+    // Shared physical representation does not widen partial D3 EQ or CDR.
+    for (id, source) in [
+        ("eq-pairs", "(тотожне? ліва-гілка права-гілка)"),
+        ("cdr-nil", "(решта (як-є ()))"),
+    ] {
+        let error = eval_program(source, &mut session).expect_err(
+            "test_id=5950-SHARED-NEGATIVE expected=Type actual=success",
+        );
+        assert_eq!(
+            error.kind,
+            sens::ErrorKind::Type,
+            "test_id=5950-SHARED-{id} layer=SENS input={source} expected=Type actual={error}"
+        );
+    }
+}
