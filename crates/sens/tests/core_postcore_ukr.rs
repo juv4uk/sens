@@ -220,6 +220,100 @@ fn meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens() {
             result.value,
         );
     }
+
+    // D11: реальні закони двох композицій зі старого MetaEval:
+    // залежності-графа та досяжність-залежностей-графа?.
+    // Rust лише порівнює дві відповіді справжнього SENS і читає D1.
+    let mut session = core_session();
+    sens::load_meta_evaluator_library(&mut session)
+        .expect("дійсний метаобчислювач SENS");
+    for (case, actual_source, expected_source) in [
+        (
+            "перший-запис",
+            "(залежності-графа (як-є а) (як-є ((а (б в)) (б (г)))))",
+            "(як-є (б в))",
+        ),
+        (
+            "другий-запис",
+            "(залежності-графа (як-є б) (як-є ((а (б в)) (б (г)))))",
+            "(як-є (г))",
+        ),
+        (
+            "немає-імені",
+            "(залежності-графа (як-є г) (як-є ((а (б в)) (б (г)))))",
+            "(як-є ())",
+        ),
+        (
+            "порожній-граф",
+            "(залежності-графа (як-є а) (як-є ()))",
+            "(як-є ())",
+        ),
+        (
+            "перший-дублікат",
+            "(залежності-графа (як-є а) (як-є ((а (перший)) (а (другий)))))",
+            "(як-є (перший))",
+        ),
+    ] {
+        let actual = eval_program(actual_source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=d11-meta-graph-{case} layer=SENS input={actual_source} actual=error:{error}")).value;
+        let expected = eval_program(expected_source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=d11-meta-graph-{case} layer=SENS expected_source={expected_source} actual=error:{error}")).value;
+        assert_eq!(
+            actual, expected,
+            "test_id=d11-meta-graph-{case} layer=SENS input={actual_source} expected_source={expected_source} actual={actual}"
+        );
+    }
+
+    for (case, source, expected) in [
+        (
+            "прямий-шлях",
+            "(досяжність-залежностей-графа? (як-є (б)) (як-є б) (як-є ()) (як-є ()))",
+            true,
+        ),
+        (
+            "один-перехід",
+            "(досяжність-залежностей-графа? (як-є (б)) (як-є в) (як-є ((б (в)))) (як-є ()))",
+            true,
+        ),
+        (
+            "два-переходи",
+            "(досяжність-залежностей-графа? (як-є (б)) (як-є г) (як-є ((б (в)) (в (г)))) (як-є ()))",
+            true,
+        ),
+        (
+            "немає-шляху",
+            "(досяжність-залежностей-графа? (як-є (б)) (як-є г) (як-є ((б (в)) (в ()))) (як-є ()))",
+            false,
+        ),
+        (
+            "порожні-залежності",
+            "(досяжність-залежностей-графа? (як-є ()) (як-є г) (як-є ((б (г)))) (як-є ()))",
+            false,
+        ),
+        (
+            "цикл-без-цілі",
+            "(досяжність-залежностей-графа? (як-є (а)) (як-є г) (як-є ((а (б)) (б (а)))) (як-є ()))",
+            false,
+        ),
+        (
+            "відвідану-обійти-інший-шлях-знайти",
+            "(досяжність-залежностей-графа? (як-є (а в)) (як-є г) (як-є ((в (г)))) (як-є (а)))",
+            true,
+        ),
+        (
+            "ціль-не-підмінено",
+            "(досяжність-залежностей-графа? (як-є (б)) (як-є інша) (як-є ((б (в)) (в (г)))) (як-є ()))",
+            false,
+        ),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=d11-meta-graph-{case} layer=SENS input={source} actual=error:{error}")).value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "test_id=d11-meta-graph-{case} layer=SENS input={source} expected=D1:{expected} actual={actual}"
+        );
+    }
 }
 
 // Шістнадцять окремих семантичних результатів від живого SENS.
