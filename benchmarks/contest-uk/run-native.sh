@@ -23,21 +23,33 @@ for source in "$here"/*.lisp; do
   [[ -f "$source" && ! -L "$source" ]] || continue
   name="$(basename -- "$source" .lisp)"
   case "$name" in
-    довжина-списку) expected=8 ;;
-    сума-до-n) expected=5050 ;;
-    факторіал) expected=3628800 ;;
+    довжина-списку|довжина-списку-*) expected=8 ;;
+    сума-до-n|сума-до-n-*) expected=5050 ;;
+    факторіал|факторіал-*) expected=3628800 ;;
     *) echo "CONTEST_SKIP: немає перевіреного очікуваного результату: $source" >&2; continue ;;
   esac
   physical="$scratch/$name.sens"
   view="$scratch/$name"
+  committed="$here/$name.sens"
+  committed_view="$here/$name"
+  if [[ ! -f "$committed" || -L "$committed" ||
+        ! -f "$committed_view" || -L "$committed_view" ]]; then
+    printf '%s\t-\t-\t0\tНЕМАЄ_ОБЕРНЕНОЇ_ПАРИ\n' "$name"
+    fail=1
+    continue
+  fi
+  source_sha="$(sha256sum "$source" | cut -d' ' -f1)"
   if ! "$sens" --t5m-mint "$source" "$physical" >"$scratch/mint.out" 2>"$scratch/error" ||
      [[ ! -s "$physical" ]] ||
      ! "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/error" ||
      ! "$trit" open "$physical" >"$view" 2>"$scratch/error" ||
      [[ ! -s "$view" ]] ||
+     ! cmp -s "$physical" "$committed" ||
+     ! cmp -s "$view" "$committed_view" ||
+     [[ "$source_sha" != "$(sha256sum "$source" | cut -d' ' -f1)" ]] ||
      ! "$sens" --t5m-pair "$source" "$physical" >"$scratch/paired.out" 2>"$scratch/error" ||
      ! "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/error"; then
-    printf '%s\t-\t-\t0\tНЕ_ПРОЙШЛО_ФІЗИЧНЕ_ВИКОНАННЯ\n' "$name"
+    printf '%s\t-\t-\t0\tНЕМАЄ_ТОЧНОЇ_ОБЕРНЕНОСТІ_АБО_ВИКОНАННЯ\n' "$name"
     sed 's/^/SENS: /' "$scratch/error" >&2
     fail=1
     continue
@@ -78,6 +90,12 @@ for source in "$here"/*.lisp; do
   done
   if (( ${#samples[@]} != repeats )); then
     printf '%s\t-\t-\t0\tНЕСТАБІЛЬНЕ_ВИКОНАННЯ\n' "$name"
+    continue
+  fi
+  if [[ "$source_sha" != "$(sha256sum "$source" | cut -d' ' -f1)" ]] ||
+     ! cmp -s "$physical" "$committed" || ! cmp -s "$view" "$committed_view"; then
+    printf '%s\t-\t-\t0\tДЖЕРЕЛО_ЧИ_ПАРА_ЗМІНИЛИСЯ\n' "$name"
+    fail=1
     continue
   fi
   median="$(printf '%s\n' "${samples[@]}" | sort -n | sed -n "$((repeats/2+1))p")"
