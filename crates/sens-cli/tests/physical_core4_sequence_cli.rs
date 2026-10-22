@@ -480,6 +480,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-suffix-after-first-atomic-triple-zero-copy-general",
         "list-suffix-after-last-atomic-triple-zero-copy-general",
         "list-tail-after-second-atom-zero-copy-general",
+        "list-suffix-after-last-compound-zero-copy-general",
         "pair-associativity-law",
         "pair-swap",
         "rotate-left",
