@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,6 +43,20 @@ class ThreePassClassifierTests(unittest.TestCase):
     def classify(self, source: str):
         heads = mod.scan_heads("sample.lisp", source)
         return mod.classify_heads(heads, self.resolver)
+
+    def test_physical_t5m_never_enters_text_source_inventory(self):
+        # Навіть UTF-8-подібний .sens не є джерелом чи дозволом
+        # трактувати історичний SID8 як поточний код Д8.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "дійсний.lisp").write_text("(атом? (як-є ()))\n", encoding="utf-8")
+            (root / "дійсний.sens").write_bytes(b"\x00\xff\x02")
+            (root / "старий.sens").write_text("(00000101 x)\n", encoding="utf-8")
+            self.assertEqual(
+                {p.name for p in mod.source_files(root)}, {"дійсний.lisp"}
+            )
+            _, _, _, _, summary = mod.scan_tree(root, self.resolver)
+            self.assertEqual(summary["files_seen"], 1)
 
     def test_pass1_detects_legacy_sid8_and_resolves_current_car(self):
         historical, current, dynamic, empty = self.classify("(00000101 x)\n")

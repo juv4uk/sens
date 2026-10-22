@@ -10,7 +10,8 @@ Already-current D3-D6 exact-width heads are reported separately.  Unknown
 user/dynamic call heads are also separate and are NEVER mislabeled as my-lisp
 builtins.  Literal () is structural-empty inventory, not a function head.
 
-This is an inventory/resolution tool; it does not rewrite source.
+This is a text-source inventory, not an evaluator or a rewrite tool.
+Physical .sens is binary T5M and must never be decoded as Lisp/UTF-8.
 """
 from __future__ import annotations
 
@@ -27,7 +28,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from sens_source_resolver import Resolution, SourceResolver, build_resolver
 
-SOURCE_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
+SOURCE_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt"}
 SKIP_DIRS = {
     ".git", ".hg", ".svn", "target", "node_modules", "vendor",
     ".venv", "venv", "dist", "build", "__pycache__",
@@ -288,7 +289,9 @@ def classify_heads(
 
 def source_files(root: Path):
     for path in root.rglob("*"):
-        if not path.is_file():
+        # .sens є фізичним двійковим T5M, а не текстовим Lisp-джерелом.
+        # Не видавати навіть UTF-8-подібні байти або симлінки за вихідний код.
+        if not path.is_file() or path.is_symlink():
             continue
         if any(part in SKIP_DIRS for part in path.parts):
             continue
