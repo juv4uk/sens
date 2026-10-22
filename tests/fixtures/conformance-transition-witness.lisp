@@ -43,3 +43,19 @@
  (expected . "antenna")
  (meta-eval . t)
  (owner . "4196/4166"))
+
+; Чинні позитивні D5-свідки: виконуються нативним SENS, не текстовим оракулом.
+; Застарілі латинські форми нижче — лише походження у supersedes-expr.
+((supersedes-expr . "((lambda (x) x) (quote ()))")
+ (expr . "((функція (значення) значення) (як-є ()))")
+ (expected . "()")
+ (compiler-corpus . t)
+ (reason . exact-ukr-lambda-application)
+ (owner . "4196"))
+
+((supersedes-expr . "(let ((x (quote ()))) x)")
+ (expr . "(нехай ((значення (як-є ()))) значення)")
+ (expected . "()")
+ (compiler-corpus . t)
+ (reason . exact-ukr-let-binding)
+ (owner . "4196"))
