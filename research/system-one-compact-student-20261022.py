@@ -127,6 +127,10 @@ def teacher_targets(rows: list[dict[str, Any]], teacher_path: Path, seed_sha: st
 def train(args: argparse.Namespace) -> int:
     rows, raw = read_jsonl(args.input)
     seed_sha = digest(raw)
+    if args.output.resolve() == args.input.resolve():
+        raise StudentError("вихід моделі не може перезаписати навчальний корпус")
+    if args.teacher is not None and args.output.resolve() == args.teacher.resolve():
+        raise StudentError("вихід моделі не може перезаписати вчительські спостереження")
     seen: set[str] = set()
     for row in rows:
         row_id = str(row.get("id", ""))
@@ -280,6 +284,8 @@ def predict(args: argparse.Namespace) -> int:
     if model.get("schema") != MODEL_SCHEMA:
         raise StudentError("несумісна схема моделі")
     rows, input_raw = read_jsonl(args.input)
+    if args.output.resolve() in {args.input.resolve(), args.model.resolve()}:
+        raise StudentError("вихід прогнозів не може перезаписати вхідні дані або файл моделі")
     seen: set[str] = set()
     model_sha = digest(model_bytes)
     output: list[dict[str, Any]] = []
