@@ -103,7 +103,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -166,7 +166,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -266,7 +266,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -299,7 +299,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -331,7 +331,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -363,7 +363,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -397,7 +397,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -515,7 +515,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -548,7 +548,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -582,7 +582,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -614,7 +614,7 @@
           "d11_legacy43_existing_pure_lower_domain_laws_are_native",
           "d11_legacy43_existing_d24_list_boundaries_are_native"
         ],
-        "status": "SOURCE_ADDED_CI_RESULT_PENDING",
+        "status": "REVISED_SOURCE_CI_PENDING",
         "scope": "Witness of existing lower-domain semantics only; no proof that legacy D11 keys execute"
       }
     },
@@ -908,14 +908,20 @@
   "follow_up": {
     "native_witnesses": {
       "existing_lower_names_targeted": 11,
-      "positive_negative_cases_source": 34,
+      "positive_negative_cases_source": 41,
       "source": "crates/sens/tests/d11_legacy43_lower_laws.rs",
-      "ci": "https://github.com/juv4uk/sens/actions/runs/39773160845",
-      "status": "PENDING_CI",
+      "ci": "https://github.com/juv4uk/sens/actions/runs/39774189440",
+      "status": "REVISED_SOURCE_CI_RUNNING",
       "excluded_for_now": [
         "READ-FILE",
         "PRINT"
-      ]
+      ],
+      "previous_ci_red": {
+        "run": "https://github.com/juv4uk/sens/actions/runs/39773695380",
+        "observed": "Нативна SENS група D24 пройшла, а група чистих законів зупинилась на забороні синтаксичної D3 форми у негативному свідку короткого виконання",
+        "corrected_test_commit": "5843ad9c230603a872e833c48e8c9c5629de0a62",
+        "meaning": "Не перетворювати відмову читача на твердження про хибність закону D8 AND"
+      }
     },
     "name_only_missing_semantic_neighborhood": 6,
     "clarification": "Попередня категорія unproven_law означає брак точного буквального збігу, а не доказ відсутності семантичного резидента у D1–D10."
