@@ -402,6 +402,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-zip-with-tails-general",
         "list-three-lanes-general",
         "list-adjacent-runs-general",
+        "list-collapse-adjacent-runs-general"
         "list-all-slices-ends-general",
         "list-rotation-inverse-general",
         "list-trim-edges-atom-general",
@@ -514,6 +515,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-zip-with-tails-general"
                 | "list-three-lanes-general"
                 | "list-adjacent-runs-general"
+                | "list-collapse-adjacent-runs-general"
                 | "list-all-slices-ends-general"
                 | "list-rotation-inverse-general"
                 | "list-trim-edges-atom-general"
