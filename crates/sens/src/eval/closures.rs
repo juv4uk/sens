@@ -583,23 +583,36 @@ pub(super) fn apply(
 ) -> Result<EvalStep, LanguageError> {
     match function {
         Value::DomainIdentity(identity) => {
-            let Some(core_identity) = identity.core_operation() else {
-                return Err(LanguageError::new(
-                    ErrorKind::Type,
-                    format!(
-                        "domain identity is not callable under its ratified law: D{} {}",
-                        identity.width(),
-                        identity
-                    ),
+            if let Some(core_identity) = identity.core_operation() {
+                let mut values = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    values.push(evaluate(argument, calling_environment)?);
+                }
+                return canon::invoke_domain_identity(
+                    core_identity,
+                    &values,
+                    calling_environment,
                     span,
-                ));
-            };
-            let mut values = Vec::with_capacity(arguments.len());
-            for argument in arguments {
-                values.push(evaluate(argument, calling_environment)?);
+                )
+                .map(EvalStep::Value);
             }
-            canon::invoke_domain_identity(core_identity, &values, calling_environment, span)
-                .map(EvalStep::Value)
+            // Д9/Д10 — також першокласні коди: коли Д7-ім'я зберігає
+            // точну identity, її виклик має йти тим самим доменним
+            // маршрутом, що й безпосередня голова (D10 ...).
+            // Немає обходу через SID8, назви, Unicode чи викликаності
+            // самого факту присутності коду в драбині.
+            let exact_head = Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span,
+            };
+            super::dispatch_call(
+                None,
+                None,
+                Some(&exact_head),
+                arguments,
+                calling_environment,
+                span,
+            )
         }
         Value::Sid(sid) => {
             let mut values = Vec::with_capacity(arguments.len());
