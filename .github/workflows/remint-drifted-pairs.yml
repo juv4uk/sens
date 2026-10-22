@@ -251,6 +251,14 @@ jobs:
               echo "REMINT_DATA_ONLY source=$f classification=COMMENT_ONLY"
               continue
             fi
+            # Це навмисно негативна програма: SENS мусить відхилити
+            # її виклик Д1:ні. Єдиний нативний суд — meta_fc_predicate_witness,
+            # де доведено тип помилки та рівно один змінений біт джерела.
+            # Не видавати очікуваний негатив за зламаний позитивний remint.
+            if [[ "$f" == tests/semantic/meta-fc-predicates-d1-mutant.lisp ]]; then
+              echo "REMINT_EXPECTED_SENS_NEGATIVE source=$f test=meta_fc_predicate_witness counted_executable=NO"
+              continue
+            fi
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
             case "$f" in
@@ -451,6 +459,12 @@ jobs:
               if [[ ! -L "$f" ]] &&
                  ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$f"; then
                 echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=COMMENT_ONLY"
+                continue
+              fi
+              # На свіжому main той самий явно негативний свідок
+              # перевіряється SENS meta_fc_predicate_witness, не позитивним mint.
+              if [[ "$f" == tests/semantic/meta-fc-predicates-d1-mutant.lisp ]]; then
+                echo "REMINT_CURRENT_MAIN_EXPECTED_SENS_NEGATIVE source=$f test=meta_fc_predicate_witness counted_executable=NO"
                 continue
               fi
               bs=()
