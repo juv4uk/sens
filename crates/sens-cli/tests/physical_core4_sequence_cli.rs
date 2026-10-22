@@ -294,11 +294,18 @@ impl Drop for SourceTriplet {
 // Перевіряємо реальне виконання ще не опублікованих фізичних трійок.
 // Український Lisp є джерелом; exact-слова читає SENS, T5M пакує Zig.
 // Адресна діагностика: перший реальний розбіжний байт без дампу всієї програми.
-fn assert_same_bytes(actual_path: &std::path::Path, committed_path: &std::path::Path, stem: &str, test_id: &str) {
+fn assert_same_bytes(
+    actual_path: &std::path::Path,
+    committed_path: &std::path::Path,
+    stem: &str,
+    test_id: &str,
+) {
     let actual = fs::read(actual_path).expect("згенеровані Zig/T5M байти");
     let expected = fs::read(committed_path).expect("закомічена фізична пара");
     if actual != expected {
-        let offset = actual.iter().zip(&expected)
+        let offset = actual
+            .iter()
+            .zip(&expected)
             .position(|(a, b)| a != b)
             .unwrap_or(actual.len().min(expected.len()));
         panic!(
@@ -505,7 +512,12 @@ fn verify_unpaired_ukrainian_libs_natively() {
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
-            assert_same_bytes(&physical, &committed_physical, stem, "ukr-lib-physical-parity");
+            assert_same_bytes(
+                &physical,
+                &committed_physical,
+                stem,
+                "ukr-lib-physical-parity",
+            );
             assert_same_bytes(&view, &committed_view, stem, "ukr-lib-exact-parity");
         }
         let verify = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
