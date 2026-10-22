@@ -51,6 +51,17 @@ while IFS= read -r -d '' source; do
       printf 'NATIVE_DATA_ONLY\t%s\tclassification=DOMAIN_TABLE\n' "$source" >&2
       continue ;;
   esac
+  # Джерело лише з коментарів/порожніх рядків не має Lisp-програми.
+  # Воно НЕ мусить мати вигадану фізичну трійку, тому не є missing.
+  # Наявність хоча б одного некоментарного рядка залишає незмінними
+  # обов'язкові SENS/Zig mint, inverse та виконання. Без Python/JSON.
+  # Symlink навмисно не класифікуємо як безпечні дані.
+  if [[ -f "$source" && ! -L "$source" ]] &&
+     ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$source"; then
+    (( nonprogram_data += 1 ))
+    printf 'NATIVE_DATA_ONLY\t%s\tclassification=COMMENT_ONLY\n' "$source" >&2
+    continue
+  fi
   # Історичні бенчмарки входять до діагностики, не у підтверджені PASS.
   (( sources += 1 ))
   physical="${source%.lisp}.sens"
