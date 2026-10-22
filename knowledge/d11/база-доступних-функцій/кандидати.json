@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 209,
+    "total": 211,
     "historical": 17,
-    "library": 192,
-    "distinct_families": 29
+    "library": 194,
+    "distinct_families": 30
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5279,6 +5279,46 @@
       "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39719039706",
       "native_ci_job": 119627977252,
       "native_ci_step": "Д11 / Scheme + Clojure — живі SENS закони списків"
+    },
+    {
+      "surface_name": "розгорнути-список-зі-стану",
+      "source_family": "scheme-srfi1-anamorphism",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-unfold.lisp",
+        "blob_sha": "09812bec8796b706491d68ad74855bfdfe9a1f33",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
+      },
+      "proposed_law_uk": "SRFI-1 UNFOLD: з початкового стану породити proper-list ліворуч→праворуч; P(state) обирає завершення, F(state) дає елемент, G(state) дає наступний стан; функція хвоста отримує завершальний стан. Після P:1 F і G більше не викликаються.",
+      "native_law_test": "crates/sens/tests/d11_srfi1_unfold.rs::d11_srfi1_unfold_and_unfold_right_native_laws",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "розгорнути-список-праворуч-зі-стану",
+      "source_family": "scheme-srfi1-anamorphism",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-unfold.lisp",
+        "blob_sha": "09812bec8796b706491d68ad74855bfdfe9a1f33",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
+      },
+      "proposed_law_uk": "SRFI-1 UNFOLD-RIGHT: ітерувати P/F/G над станом і консувати F(state) перед накопиченим хвостом. Результат має зворотний порядок елементів відносно UNFOLD; вихідний явний хвіст незмінний, P:1 не викликає F/G.",
+      "native_law_test": "crates/sens/tests/d11_srfi1_unfold.rs::d11_srfi1_unfold_and_unfold_right_native_laws",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
     }
   ],
   "winners_20261022": {
