@@ -33,6 +33,7 @@ paired_only=0
 bad=0
 missing=0
 nonprogram_data=0
+expected_negative=0
 
 while IFS= read -r -d '' source; do
   if [[ -n "$scope" && "$source" != "$scope"* ]]; then
@@ -67,6 +68,22 @@ while IFS= read -r -d '' source; do
     (( nonprogram_data += 1 ))
     printf 'NATIVE_DATA_ONLY\t%s\tclassification=SCHEMA_INVENTORY\n' "$source" >&2
     continue
+  fi
+  # Нативний негатив — НЕ позитивна виконувана програма.
+  # Цей SENS-мутант підтверджує окремий meta_fc_predicate_witness.
+  # Не маскуємо дрейф: виняток діє лише коли весь файл відрізняється
+  # від позитивного свідка РІВНО одним байтом ASCII 0 -> 1.
+  if [[ "$source" == tests/semantic/meta-fc-predicates-d1-mutant.lisp &&
+        -f "$source" && ! -L "$source" &&
+        -f tests/semantic/meta-fc-predicates-d1-law.lisp &&
+        ! -L tests/semantic/meta-fc-predicates-d1-law.lisp ]] &&
+     [[ "$(wc -c < "$source")" == "$(wc -c < tests/semantic/meta-fc-predicates-d1-law.lisp)" ]]; then
+    one_byte_diff="$(cmp -l tests/semantic/meta-fc-predicates-d1-law.lisp "$source" 2>/dev/null || :)"
+    if [[ "$one_byte_diff" =~ ^[[:space:]]*[0-9]+[[:space:]]+60[[:space:]]+61[[:space:]]*$ ]]; then
+      (( expected_negative += 1 ))
+      printf 'NATIVE_EXPECTED_NEGATIVE\\t%s\\ttest=meta_fc_predicate_witness\\n' "$source" >&2
+      continue
+    fi
   fi
   # Джерело лише з коментарів/порожніх рядків не має Lisp-програми.
   # Воно НЕ мусить мати вигадану фізичну трійку, тому не є missing.
@@ -252,8 +269,8 @@ if (( sources == 0 )); then
 elif (( bad != 0 || missing != 0 || paired_only != 0 )); then
   status=PARTIAL
 fi
-printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_executed=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s status=%s\n' \
-  "${scope:-all}" "$sources" "$complete" "$inverse" "$paired_executable" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data" "$status"
+printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_executed=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s intentional_negative=%s status=%s\n' \
+  "${scope:-all}" "$sources" "$complete" "$inverse" "$paired_executable" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data" "$expected_negative" "$status"
 if (( bad != 0 )); then
   echo "NATIVE_LISP_EXECUTION_RED failed=$bad: справжню помилку не приховує статус обліку" >&2
   exit 1
