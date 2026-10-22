@@ -1932,6 +1932,46 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
+    fn d9_four_ukr_witnesses_execute_individually_in_native_sens() {
+        // One false witness used to collapse to a generic CAR-of-NIL error.
+        // Diagnose the actual Lisp source one law at a time using precisely
+        // the same SENS -> Zig T5M -> SENS path as --t5m-pair.
+        // This code extracts AST spans only; Rust never calculates law truth.
+        let source =
+            include_str!("../../../tests/semantic/d9-four-uk-projections-laws.lisp");
+        let forms = sens::parse_mixed_exact_domain(source)
+            .expect("D9 native Lisp source must be readable");
+        let call = forms.last().expect("eight native witness assertions");
+        let ExprKind::List(call_items) = &call.kind else {
+            panic!("D9 witness entry must be a source call");
+        };
+        let ExprKind::List(witnesses) = &call_items[1].kind else {
+            panic!("D9 witness must supply one SENS list of assertions");
+        };
+        assert_eq!(witnesses.len() - 1, 8, "eight existing SENS laws");
+        let definitions = &source[..call.span.start];
+        for (index, witness) in witnesses.iter().enumerate().skip(1) {
+            let law_source = &source[witness.span.start..witness.span.end];
+            let program = format!("{definitions}\n{law_source}\n");
+            let result = eval_t5m_source_file(&program).unwrap_or_else(|error| {
+                panic!(
+                    "test_id=D9-EIGHT-{} layer=SENS_ZIG_T5M source={} actual_error={error}",
+                    index, law_source
+                )
+            });
+            assert_eq!(
+                result.value.as_predicate_bit(),
+                Some(true),
+                "test_id=D9-EIGHT-{} layer=SENS_ZIG_T5M input={} expected=D1:true actual={}",
+                index,
+                law_source,
+                result.value
+            );
+        }
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
     fn interactive_t5m_uses_the_same_d5_identity_across_repl_projections() {
         let cases = [
             (ReplSurface::Core, "(додати 1 2)"),
