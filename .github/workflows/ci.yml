@@ -7,6 +7,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Один реальний CI на ref; кожен commit має власний результат, а не скасовані докази.
+# Черга до 100 очікуваних запусків зберігає адресні перевірки проміжних SHA.
+concurrency:
+  group: sens-central-ci-${{ github.ref }}
+  cancel-in-progress: false
+  queue: max
+
 permissions:
   contents: read
 
