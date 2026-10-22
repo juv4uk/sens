@@ -39,8 +39,15 @@ LAYERS = {
     "tooling",
 }
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
-SID8 = re.compile(r"^[01]{8}$")
-QUOTED_SID8_OWNERSHIP = re.compile(r'^\(ownership\s+\S+\s+"[01]{8}"(?:\s|\))')
+DOMAIN_ID = re.compile(r"^D([1-9]|10):([01]+)$")
+QUOTED_DOMAIN_ID = re.compile(
+    r'^\(ownership\s+\S+\s+"(?:D(?:[1-9]|10):[01]+|[01]{8})"(?:\s|\))'
+)
+DOMAIN_ROW = re.compile(
+    r"^\s*\(([01]+)\s+\(ук\s+(?:[^()\s]+|\(\))\)\s+\(укр\s+([^()\s]+|\(\))\)"
+)
+LISP_SURFACE = re.compile(r"\(LISP\s+([^()\s]+)\)")
+
 
 
 @dataclass(frozen=True)
@@ -89,10 +96,36 @@ def forms(path: Path) -> list[list[str]]:
 def require_bare_semantic_identity_syntax() -> None:
     for number, raw in enumerate(MAP_PATH.read_text(encoding="utf-8").splitlines(), 1):
         line = raw.strip()
-        if QUOTED_SID8_OWNERSHIP.match(line):
+        if QUOTED_DOMAIN_ID.match(line):
             raise ValueError(
-                f"{MAP_PATH}:{number}: semantic identity must be exact bare SID8, not a quoted String"
+                f"{MAP_PATH}:{number}: ратифікований доменний код має бути окремим словом, не текстом D7"
             )
+
+
+def exact_domain_ukr_projection(identity: str, key: str) -> str:
+    """Доказ координати + УКР з чинного Dn; без SID8/JSON та без механізму Python."""
+    match = DOMAIN_ID.fullmatch(identity)
+    if not match:
+        raise ValueError(f"{key}: потрібний точний Dn:біти, не історичний SID8")
+    width, bits = int(match.group(1)), match.group(2)
+    if width == 2 or width == 7 or len(bits) != width:
+        raise ValueError(f"{key}: недопустима ширина викличної координати {identity}")
+    table = ROOT / "lib/domains" / f"d{width}.lisp"
+    found = []
+    for line in table.read_text(encoding="utf-8").splitlines():
+        row = DOMAIN_ROW.match(line)
+        if row and row.group(1) == bits:
+            found.append((row.group(2), LISP_SURFACE.search(line)))
+    if len(found) != 1:
+        raise ValueError(f"{key}: код {identity} не має єдиного резидента у {table}")
+    ukr, legacy_name = found[0]
+    if ukr == "()":
+        if key == "canon-empty-list" and identity == "D3:000":
+            return "()"
+        raise ValueError(f"{key}: {identity} не має УКР викличної проєкції")
+    if not legacy_name and key.startswith(("canon-", "necessary-")):
+        raise ValueError(f"{key}: {identity} не має закону LISP")
+    return ukr
 
 
 def split_paths(text: str) -> list[str]:
@@ -167,10 +200,17 @@ def load() -> tuple[list[Ownership], list[Migration]]:
             if row.policy_candidate not in {"yes", "no"}:
                 raise ValueError(f"{row.key}: policy candidate мусить бути yes/no")
             if row.semantic_id != "-":
-                if not SID8.fullmatch(row.semantic_id):
-                    raise ValueError(
-                        f"{row.key}: semantic identity must be exactly 8 binary digits or -"
-                    )
+                ukrainian = exact_domain_ukr_projection(row.semantic_id, row.key)
+                if row.owner_class in {"canon-operation", "necessary-form"}:
+                    # Слова повинні мати саме той ратифікований LISP-закон;
+                    # Python перевіряє інвентар, НЕ виконує мову.
+                    expected_lisp = row.behavior.split(":", 1)[0]
+                    table = ROOT / "lib/domains" / f"d{len(row.semantic_id.split(':')[1])}.lisp"
+                    words = [line for line in table.read_text(encoding="utf-8").splitlines()
+                             if DOMAIN_ROW.match(line)
+                             and DOMAIN_ROW.match(line).group(1) == row.semantic_id.split(":")[1]]
+                    if len(words) != 1 or f"(LISP {expected_lisp})" not in words[0]:
+                        raise ValueError(f"{row.key}: {row.semantic_id}/{ukrainian} має чужий Dn закон")
                 previous = seen_semantic.get(row.semantic_id)
                 if previous is not None:
                     raise ValueError(

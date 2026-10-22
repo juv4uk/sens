@@ -1,24 +1,27 @@
 ; semantic-ownership.lisp — виконуваний інвентар ownership для issue #25.
 ; Це дані, не семантичний контракт. Вони вимірюють лише вже аудитовану власність.
+; Точний код Dn:слово походить із чинної таблиці lib/domains/dn.lisp,
+; у споживачів діє її укр-проєкція, а не старий восьмибітний slot.
+; Складений макрос = визначити(D4:0011) + макрос(D5:00011), не окремий SID8.
 ; Один рядок = одна поведінка/відповідальність. Без LOC-claim і без "self-hosting %".
 (schema semantic-ownership/1)
 (as-of "2026-09-17")
 (scope audited-primary-behaviors)
 
-; ownership KEY SEMANTIC_ID CLASS LAYER STATUS POLICY_CANDIDATE
+; ownership KEY EXACT_DOMAIN_WORD_OR_DERIVED CLASS LAYER STATUS POLICY_CANDIDATE
 ;           "BEHAVIOR" "IMPLEMENTATION_PATHS" "EVIDENCE_PATHS" PREVIOUS_OWNER MIGRATION_REF
-(ownership canon-empty-list - canon-ground canon confirmed no "Canon 0: порожній список як ground object" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
-(ownership canon-quote 00000001 canon-operation canon confirmed no "QUOTE: evaluator meaning і зарезервована surface resolution" "crates/sens/src/eval/canon.rs;crates/sens/src/eval/mod.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
-(ownership canon-atom 00000010 canon-operation canon confirmed no "ATOM: first-class канонічна операція" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
-(ownership canon-eq 00000011 canon-operation canon confirmed no "EQ: канонічна операція тотожності" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
-(ownership canon-cons 00000100 canon-operation canon confirmed no "CONS: канонічна операція побудови" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
-(ownership canon-car 00000101 canon-operation canon confirmed no "CAR: канонічна операція проєкції першого елемента" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
-(ownership canon-cdr 00000110 canon-operation canon confirmed no "CDR: канонічна операція структурного залишку" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
-(ownership canon-cond 00000111 canon-operation canon confirmed no "COND: канонічна short-circuit syntax" "crates/sens/src/eval/canon.rs;crates/sens/src/eval/mod.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
+(ownership canon-empty-list D3:000 canon-ground canon confirmed no "Canon 0: порожній список як ground object" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
+(ownership canon-quote D3:001 canon-operation canon confirmed no "QUOTE: evaluator meaning і зарезервована surface resolution" "crates/sens/src/eval/canon.rs;crates/sens/src/eval/mod.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
+(ownership canon-atom D3:010 canon-operation canon confirmed no "ATOM: first-class канонічна операція" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
+(ownership canon-eq D3:101 canon-operation canon confirmed no "EQ: канонічна операція тотожності" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
+(ownership canon-cons D3:111 canon-operation canon confirmed no "CONS: канонічна операція побудови" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
+(ownership canon-car D3:100 canon-operation canon confirmed no "CAR: канонічна операція проєкції першого елемента" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
+(ownership canon-cdr D3:011 canon-operation canon confirmed no "CDR: канонічна операція структурного залишку" "crates/sens/src/eval/canon.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
+(ownership canon-cond D3:110 canon-operation canon confirmed no "COND: канонічна short-circuit syntax" "crates/sens/src/eval/canon.rs;crates/sens/src/eval/mod.rs" "crates/sens/src/eval/canon.rs;crates/sens/tests/mccarthy.rs" - -)
 
-(ownership necessary-lambda 00001000 necessary-form bootstrap confirmed no "LAMBDA: evaluator-controlled побудова closure" "crates/sens/src/eval/necessary_forms.rs;crates/sens/src/eval/closures.rs" "crates/sens/tests/mccarthy.rs" - -)
-(ownership necessary-define 00001001 necessary-form bootstrap confirmed no "DEFINE: evaluator-controlled immutable binding form" "crates/sens/src/eval/necessary_forms.rs;crates/sens/src/eval/mod.rs" "crates/sens/tests/mccarthy.rs" - -)
-(ownership macro-definition 00001010 lisp-owned bootstrap confirmed no "Поведінка визначення макросів виведена у lib/macro.lisp поверх вузького make-macro substrate" "lib/macro.lisp;crates/sens/src/eval/macro_substrate.rs;crates/sens/src/lib.rs" "crates/sens/tests/macro_derivation.rs" host-mechanism 3fff9e9fbb7171a81ba128baedd68f093fc0c65b)
+(ownership necessary-lambda D4:0010 necessary-form bootstrap confirmed no "LAMBDA: evaluator-controlled побудова closure" "crates/sens/src/eval/necessary_forms.rs;crates/sens/src/eval/closures.rs" "crates/sens/tests/mccarthy.rs" - -)
+(ownership necessary-define D4:0011 necessary-form bootstrap confirmed no "DEFINE: evaluator-controlled immutable binding form" "crates/sens/src/eval/necessary_forms.rs;crates/sens/src/eval/mod.rs" "crates/sens/tests/mccarthy.rs" - -)
+(ownership macro-definition - lisp-owned bootstrap confirmed no "Поведінка визначення макросів виведена у lib/macro.lisp поверх вузького make-macro substrate" "lib/macro.lisp;crates/sens/src/eval/macro_substrate.rs;crates/sens/src/lib.rs" "crates/sens/tests/macro_derivation.rs" host-mechanism 3fff9e9fbb7171a81ba128baedd68f093fc0c65b)
 
 (ownership list-constructor - lisp-owned stdlib confirmed no "Варіадичний list-конструктор виведений із lambda/rest семантики самої мови" "lib/core4.lisp" "crates/sens/tests/mccarthy.rs" host-mechanism efdd9252fd4ca4af4503b219ab3ae79130ef0e64)
 (ownership gensym - lisp-owned stdlib confirmed no "Політика свіжого символу складена в Lisp зі string-операцій і monotonic observation" "lib/core4.lisp" "tests/fixtures/conformance.lisp;crates/sens/tests/mccarthy.rs" - -)

@@ -67,24 +67,24 @@
 | key | semantic id | owner | layer | status | поведінка |
 |---|---|---|---|---|---|
 | `backward-reasoning` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Backward-chaining пошук доказу й побудова provenance |
-| `canon-atom` | `00000010` | `canon-operation` | `canon` | `confirmed` | ATOM: first-class канонічна операція |
-| `canon-car` | `00000101` | `canon-operation` | `canon` | `confirmed` | CAR: канонічна операція проєкції першого елемента |
-| `canon-cdr` | `00000110` | `canon-operation` | `canon` | `confirmed` | CDR: канонічна операція структурного залишку |
-| `canon-cond` | `00000111` | `canon-operation` | `canon` | `confirmed` | COND: канонічна short-circuit syntax |
-| `canon-cons` | `00000100` | `canon-operation` | `canon` | `confirmed` | CONS: канонічна операція побудови |
-| `canon-empty-list` | `—` | `canon-ground` | `canon` | `confirmed` | Canon 0: порожній список як ground object |
-| `canon-eq` | `00000011` | `canon-operation` | `canon` | `confirmed` | EQ: канонічна операція тотожності |
-| `canon-quote` | `00000001` | `canon-operation` | `canon` | `confirmed` | QUOTE: evaluator meaning і зарезервована surface resolution |
+| `canon-atom` | `D3:010` | `canon-operation` | `canon` | `confirmed` | ATOM: first-class канонічна операція |
+| `canon-car` | `D3:100` | `canon-operation` | `canon` | `confirmed` | CAR: канонічна операція проєкції першого елемента |
+| `canon-cdr` | `D3:011` | `canon-operation` | `canon` | `confirmed` | CDR: канонічна операція структурного залишку |
+| `canon-cond` | `D3:110` | `canon-operation` | `canon` | `confirmed` | COND: канонічна short-circuit syntax |
+| `canon-cons` | `D3:111` | `canon-operation` | `canon` | `confirmed` | CONS: канонічна операція побудови |
+| `canon-empty-list` | `D3:000` | `canon-ground` | `canon` | `confirmed` | Canon 0: порожній список як ground object |
+| `canon-eq` | `D3:101` | `canon-operation` | `canon` | `confirmed` | EQ: канонічна операція тотожності |
+| `canon-quote` | `D3:001` | `canon-operation` | `canon` | `confirmed` | QUOTE: evaluator meaning і зарезервована surface resolution |
 | `filesystem-authorization` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session filesystem read/write scope і host canonicalization enforcement |
 | `gensym` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Політика свіжого символу складена в Lisp зі string-операцій і monotonic observation |
 | `immutable-worlds` | `—` | `lisp-owned` | `knowledge` | `confirmed` | Immutable world snapshots і явні переходи стану світу |
 | `knowledge-journal` | `—` | `lisp-owned` | `knowledge` | `confirmed` | Append-only журнал знань і guarded knowledge admission |
 | `list-constructor` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Варіадичний list-конструктор виведений із lambda/rest семантики самої мови |
-| `macro-definition` | `00001010` | `lisp-owned` | `bootstrap` | `confirmed` | Поведінка визначення макросів виведена у lib/macro.lisp поверх вузького make-macro substrate |
+| `macro-definition` | `—` | `lisp-owned` | `bootstrap` | `confirmed` | Поведінка визначення макросів виведена у lib/macro.lisp поверх вузького make-macro substrate |
 | `meta-evaluator` | `—` | `lisp-owned` | `self-hosting` | `confirmed` | Lisp-owned metacircular evaluator witness; усі 34 required parity rows підтверджені machine evidence matrix |
 | `monotonic-clock` | `—` | `host-observation` | `host-capability` | `confirmed` | Monotonic nanosecond observation без calendar policy |
-| `necessary-define` | `00001001` | `necessary-form` | `bootstrap` | `confirmed` | DEFINE: evaluator-controlled immutable binding form |
-| `necessary-lambda` | `00001000` | `necessary-form` | `bootstrap` | `confirmed` | LAMBDA: evaluator-controlled побудова closure |
+| `necessary-define` | `D4:0011` | `necessary-form` | `bootstrap` | `confirmed` | DEFINE: evaluator-controlled immutable binding form |
+| `necessary-lambda` | `D4:0010` | `necessary-form` | `bootstrap` | `confirmed` | LAMBDA: evaluator-controlled побудова closure |
 | `outcome-narration` | `—` | `lisp-owned` | `reasoning` | `confirmed` | Людське пояснення поверх структурованих reasoning outcomes |
 | `process-authorization` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session process allowlist, який Lisp-код не може видати собі сам |
 | `process-public-result` | `—` | `lisp-owned` | `stdlib` | `confirmed` | Публічна інтерпретація process-run result поверх process-run-raw |
