@@ -62,6 +62,7 @@ fn eval_probabilistic_decision(source: &str) -> String {
     for (name, numerator, denominator) in [
         ("доля-3-4", 3, 4),
         ("доля-1-4", 1, 4),
+        ("доля-1-3", 1, 3),
         ("доля-2-3", 2, 3),
         ("доля-4-5", 4, 5),
         ("доля-1-2", 1, 2),
@@ -125,7 +126,9 @@ fn noul_policy_is_explicit_threshold_control_not_truthiness() {
               (observation
                 (спостерегти-так-ні
                   question
-                  доля-3-4
+                  (список
+                    (список (як-є yes) доля-3-4)
+                    (список (як-є no) доля-1-4))
                   (quote ((source synthetic))))))
           (list
             (second (правило-так-ні observation доля-2-3))
@@ -214,7 +217,9 @@ fn noul_policy_rejects_out_of_domain_threshold() {
               (observation
                 (спостерегти-так-ні
                   question
-                  доля-3-4
+                  (список
+                    (список (як-є yes) доля-3-4)
+                    (список (як-є no) доля-1-4))
                   (quote ((source synthetic))))))
           (result-status
             (правило-так-ні observation доля-3-2)))
@@ -423,7 +428,10 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
                    (список (список (як-є billing) доля-3-4)
                            (список (як-є technical) доля-1-4))
                    (як-є ((source synthetic) (question route))))
-                 (спостерегти-так-ні noul-question доля-2-3
+                 (спостерегти-так-ні noul-question
+                   (список
+                     (список (як-є yes) доля-2-3)
+                     (список (як-є no) доля-1-3))
                    (як-є ((source synthetic) (question urgent))))
                  (спостерегти-шкалу-системи-один score-question
                    (список (список (як-є low) доля-1-4)
