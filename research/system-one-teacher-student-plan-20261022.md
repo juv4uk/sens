@@ -235,15 +235,23 @@ python3 research/system-one-transformer-student-20261022.py predict \
   --input research/system-one-support-challenge-20261022.jsonl \
   --split test --output /tmp/system-one-challenge-transformer.jsonl
 
-# Оцінити кожний файл окремо за тим самим, заздалегідь зафіксованим порогом.
-python3 research/system-one-evaluate-20261022.py \
-  --input /tmp/system-one-challenge-teacher.jsonl --expected-split test --threshold 0.80
-python3 research/system-one-evaluate-20261022.py \
-  --input /tmp/system-one-challenge-gold.jsonl --expected-split test --threshold 0.80
-python3 research/system-one-evaluate-20261022.py \
-  --input /tmp/system-one-challenge-soft.jsonl --expected-split test --threshold 0.80
-python3 research/system-one-evaluate-20261022.py \
-  --input /tmp/system-one-challenge-transformer.jsonl --expected-split test --threshold 0.80
+# Звести звичайний seed і challenge-test в один comparison.json.
+# Поріг має бути зафіксований на validation ДО цього виклику.
+python3 research/system-one-compare-20261022.py \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --teacher-train /tmp/system-one-teacher-train.jsonl \
+  --teacher-validation /tmp/system-one-teacher-validation.jsonl \
+  --teacher-test /tmp/system-one-teacher-test.jsonl \
+  --challenge-input research/system-one-support-challenge-20261022.jsonl \
+  --challenge-teacher /tmp/system-one-challenge-teacher.jsonl \
+  --output-dir /tmp/system-one-comparison-with-challenge \
+  --threshold 0.80 --bins 10
+
+# Якщо трансформерний експеримент виконано, додати ці три аргументи до команди вище:
+# --transformer-validation-predictions /tmp/system-one-mmbert-validation.jsonl
+# --transformer-test-predictions /tmp/system-one-mmbert-test.jsonl
+# --challenge-transformer-predictions /tmp/system-one-challenge-transformer.jsonl
+# comparison.json матиме секцію challenge.comparison із метриками для всіх доступних моделей.
 ```
 
 У командах нижче `0.80` — лише приклад уже зафіксованого порога; замінити його на значення, яке було вибране **до challenge-тесту** на validation, і зафіксувати це значення у звіті. Не підбирати поріг за результатом challenge-набору. Якщо його результат спричинив зміну моделі, порога або правил, challenge-набір стає частиною процесу розробки; для чесної наступної оцінки потрібен новий незалежний challenge-набір. Кількість 60 і синтетичне походження треба показувати поруч із метриками.
