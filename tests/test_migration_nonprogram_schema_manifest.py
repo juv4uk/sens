@@ -14,7 +14,7 @@ class MigrationNonProgramSchemaManifest(unittest.TestCase):
         self.assertEqual(data["classification"], "lisp-data-nonprogram")
         self.assertFalse(data["automatic_sens_companion"])
         entries = data["entries"]
-        self.assertEqual(len(entries), 20)
+        self.assertEqual(len(entries), 19)
 
         for entry in entries:
             rel = pathlib.PurePosixPath(entry["path"])

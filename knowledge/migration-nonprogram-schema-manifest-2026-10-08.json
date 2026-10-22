@@ -3,16 +3,12 @@
   "generated_from_main": "46ede2e1825cf132caa15d00217c8641f1028a3a",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
-  "reason": "strict T5 preview classified these files by their top-level schema/data form; they are not executable SENS source\nПовторний огляд 21.10.2026: чотири schema island-math-evidence/*.lisp залишаються декларативними негативними свідками, не executable SENS; SHA поновлено тільки після перевірки повних форм.",
+  "reason": "strict T5 preview classified these files by their top-level schema/data form; they are not executable SENS source\nПовторний огляд 21.10.2026: чотири schema island-math-evidence/*.lisp залишаються декларативними негативними свідками, не executable SENS; SHA поновлено тільки після перевірки повних форм.\n22.10.2026: .contract вилучено з Lisp-обліку; незмінений контракт лишається у репозиторії.",
   "automatic_sens_companion": false,
   "entries": [
     {
       "path": "contracts/bija3-l1-l5-ratification.lisp",
       "git_blob_sha1": "fb5218c8eefb825fd9971b0a29416eb6e9d9507f"
-    },
-    {
-      "path": "contracts/compiler-bootstrap-boundary-v1.contract",
-      "git_blob_sha1": "dc35b5052e076256da37c01bfaa3c4680ac0e454"
     },
     {
       "path": "contracts/compiler-program-data-v1.lisp",
