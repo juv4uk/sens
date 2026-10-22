@@ -432,6 +432,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-keep-last-unique-atoms-general",
         "list-move-first-match-to-front-general",
         "list-all-unordered-position-pairs-general",
+        "list-all-subsets-by-position-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -561,6 +562,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-keep-last-unique-atoms-general"
                 | "list-move-first-match-to-front-general"
                 | "list-all-unordered-position-pairs-general"
+                | "list-all-subsets-by-position-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
@@ -848,6 +850,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-chunk-triplets-general",
         "lib/list-interpose-general",
         "lib/list-all-unordered-position-pairs-general",
+        "lib/list-all-subsets-by-position-general",
         "lib/list-all-slices-ends-general",
         "lib/list-atom-sequence-equal-general",
         "lib/list-rotation-inverse-general",
