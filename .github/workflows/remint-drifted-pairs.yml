@@ -36,7 +36,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
 
       - name: Build SENS binaries (sens + sens-trit)
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
 
       - name: Remint pairs via canonical Zig T5M
         env:
@@ -97,6 +97,10 @@ jobs:
             echo "::error::Нативний SENS/Zig відхилив $skip конкретних джерел; не маскувати RED як PASS" >&2
             exit 1
           fi
+
+      - name: Нативне суддівство і просування справжніх переможців
+        if: github.event_name == 'push'
+        run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
         run: |
