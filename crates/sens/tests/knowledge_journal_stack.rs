@@ -37,7 +37,7 @@ fn large_module_projection_and_existence_scan_are_stack_safe_on_default_thread()
     assert_eq!(
         eval(
             &mut session,
-            "(length (module-journal-events (quote bench) *knowledge-journal*))",
+            "(length (module-journal-events (quote bench) журнал-знань))",
         ),
         N.to_string()
     );
