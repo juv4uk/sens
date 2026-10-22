@@ -6,16 +6,22 @@ sens="${SENS_BIN:-$PWD/target/debug/sens}"
 trit="${SENS_TRIT_BIN:-$PWD/target/debug/sens-trit}"
 [[ -x "$sens" && -x "$trit" ]] || { echo "Зберіть sens + sens-trit з --features benchmark-ast-visits" >&2; exit 2; }
 error() { printf "КОНКУРС: ПОМИЛКА %s\n" "$*" >&2; exit 2; }
-# Повний суд не приховує українські Lisp, для яких ще немає
-# оберненої фізичної трійки. Реальний запуск лишається за SENS/Zig.
+# Непарні кандидати ще не є програмами конкурсу: повідомляємо їх
+# окремо, але не зупиняємо нативний суд уже наявних фізичних трійок.
+# Це не зарахування source-only Lisp: без Zig/T5M і реального SENS
+# такий файл не входить до inputs, метрик або списку переможців.
+pending_native_pair=0
 if (( $# == 0 )); then
   for source in benchmarks/contest-uk/*.lisp; do
     [[ -e "$source" || -L "$source" ]] || continue
     [[ -f "$source" && ! -L "$source" ]] || error "некоректне Lisp-джерело $source"
     physical="${source%.lisp}.sens"
     view="${source%.lisp}"
-    [[ -s "$physical" && -f "$view" && ! -L "$physical" && ! -L "$view" ]] ||
-      error "НЕПАРНЕ_ДЖЕРЕЛО $source: потрібні нативні SENS/Zig T5M mint + view"
+    if [[ ! -s "$physical" || ! -f "$view" ||
+          -L "$physical" || -L "$view" ]]; then
+      echo "CONTEST_PENDING_NATIVE_PAIR source=$source status=NOT_EXECUTED" >&2
+      pending_native_pair=$((pending_native_pair + 1))
+    fi
   done
 fi
 # Автоматично включати нові реальні трійки до конкурсу:
@@ -186,3 +192,4 @@ done
 printf "\nЗадача | T5M байти | AST | visits | Файл\n"
 printf "%s" "$rows" | sort -t $'\t' -k1,1 -k2,2n -k3,3n -k4,4n
 printf "CONTEST_NATIVE_PASS count=%s\n" "${#seen[@]}"
+printf "CONTEST_PENDING_NATIVE_PAIR_COUNT count=%s status=NOT_EXECUTED\n" "$pending_native_pair"
