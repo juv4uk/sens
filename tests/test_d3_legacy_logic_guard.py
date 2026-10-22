@@ -307,24 +307,24 @@ class LegacyD3GuardTests(unittest.TestCase):
             finding.rule for finding in MODULE.scan_lisp(host, path)
         ])
 
-    def test_oracle_batch_uses_exact_d1_two_field_cond(self):
+    def test_oracle_batch_current_ukrainian_projection_and_d3_guard(self):
         path = "scripts/oracle-batch.lisp"
         source = (ROOT / path).read_text(encoding="utf-8")
+        # Нова програма більше не містить історичних fixture/TCP-гілок.
+        # Живе виконання перевіряє Rust/SENS; тут перевіряємо лише guard.
+        self.assertIn("(визначити пакетний-оракул", source)
+        self.assertNotIn("(визначити адреса-оракула", source)
         self.assertEqual(MODULE.scan_lisp(source, path), [])
 
-        # Both result-match branches previously produced the same data.
-        exact = "((010 entries) (001 ()))"
-        self.assertIn(exact, source)
-        regression = source.replace(exact, "((010 entries) (1) (001 ()))", 1)
+        # Сканер не має вимагати старі 010/011 у чинному файлі,
+        # але повинен відхиляти справжню арність/host-truth регресію.
+        invalid_clause = source + "\n(за-умовою ((атом? записи) (як-є ()) (як-є ())))\n"
         self.assertIn("COND_NOT_TWO_FIELDS", [
-            f.rule for f in MODULE.scan_lisp(regression, path)
+            f.rule for f in MODULE.scan_lisp(invalid_clause, path)
         ])
-
-        exact_fallback = "((010 (001 ())) (fixtures-only (011 entries)))"
-        self.assertIn(exact_fallback, source)
-        regression = source.replace(exact_fallback, "(t (fixtures-only (011 entries)))", 1)
+        host_truth = source + "\n(за-умовою (t (як-є ())))\n"
         self.assertIn("COND_HOST_TRUTH", [
-            f.rule for f in MODULE.scan_lisp(regression, path)
+            f.rule for f in MODULE.scan_lisp(host_truth, path)
         ])
 
     def test_meta_semantic_generator_current_ukrainian_and_no_fake_pass(self):
