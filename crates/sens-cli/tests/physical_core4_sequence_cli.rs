@@ -453,6 +453,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-drop-every-third-general",
         "list-drop-leading-compounds-zero-copy-general",
         "list-drop-leading-equal-atoms-zero-copy-general",
+        "list-tail-after-first-atom-zero-copy-general",
         "list-drop-through-last-atom-zero-copy-general",
         "list-select-longer-zero-copy-general",
         "list-split-atomic-prefix-general",
@@ -550,6 +551,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-interpose-general"
                 | "list-last-occurrence-suffix"
                 | "list-suffix-after-last-atom-match-zero-copy-general"
+                | "list-tail-after-first-atom-zero-copy-general"
                 | "list-drop-through-last-atom-zero-copy-general"
                 | "list-select-longer-zero-copy-general"
                 | "list-split-first-occurrence-general"
