@@ -244,12 +244,12 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.migrate('(текст? "x")')
 
     def test_ukrainian_apostrophe_is_identifier_data_not_a_quote(self):
-        # lib/forward.lisp actually uses *робоча-пам'ять*; splitting the
+        # lib/forward.lisp uses робоча-пам'ять; splitting the
         # apostrophe invents a QUOTE node and destroys program identity.
-        source = "(визначити *робоча-пам'ять* (як-є ()))"
+        source = "(визначити робоча-пам'ять (як-є ()))"
         parsed = mod.Parser(mod.tokenize(source)).parse_program()
         self.assertEqual(len(parsed), 1)
-        self.assertEqual(parsed[0].items[1].tok.text, "*робоча-пам'ять*")
+        self.assertEqual(parsed[0].items[1].tok.text, "робоча-пам'ять")
         self.assertEqual(
             [t.kind for t in mod.tokenize("(функція (ім'я) ім'я)")],
             ["LP", "ATOM", "LP", "ATOM", "RP", "ATOM", "RP"],
