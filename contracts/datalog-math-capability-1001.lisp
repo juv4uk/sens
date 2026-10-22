@@ -1,35 +1,39 @@
-; #1001 — здатність цілочисельного виконання Datalog під точною ідентичністю сід8.
-;
-; Canon/function-table володіє кожним SID, значенням, доменом і законом.
-; Datalog володіє лише обмеженою машинерією цілочисельного виконання.
-; Семантична тотожність операції походить лише зі спільного 8-бітового SID.
-; Байти корисного навантаження несуть лише аргументи; текст оператора заборонений як ідентичність.
+; Чинна семантична адреса арифметичної операції — точна драбина D5/D6.
+; Це проєкція машинерії Datalog, а не нові резиденти чи ратифікація.
+; Історичний плоский SID8 не визначає семантичної тотожності.
+; Наявний C ABI v2 з полем semantic_id:u8 є НЕПЕРЕНЕСЕНИМ механізмом.
+; До typed ingress його 8-бітні запити не мають статусу доказу D5/D6.
+; Числові операнди у SENS належать D24+; signed-i64 лише машинерія острова.
 
-(datalog-math-capability-2
+(datalog-math-capability-3
   ((kernel . wsm-datalog-kernel)
-   (numeric-domain . signed-i64)
-   (expression-evaluator . native)
-   (semantic-authority . my-lisp)
-   (semantic-operation-selector . exact-sid8)
+   (machine-number-carrier . signed-i64)
+   (sens-numeric-operand-domains . d24-plus)
+   (expression-evaluator . native-island-mechanism)
+   (semantic-authority . sens-exact-domain-ladder)
+   (semantic-operation-selector . exact-domain-and-bits)
+   (semantic-identity-fields . (domain bits))
    (payload-role . arguments-only)
    (operator-text-as-semantic-identity . forbidden)
+   (historical-flat-sid8-authority . forbidden)
+   (c-abi-v2-byte-selector . legacy-unmigrated)
+   (c-abi-v2-is-domain-proof . ні)
    (unsupported-extension-policy . explicit)
    (witness . crates/wsm-datalog-kernel/tests/arithmetic_execution_1001.rs))
 
-  ((sid . 00001100) (mechanism . integer-add) (native . present))
-  ((sid . 00001101) (mechanism . integer-subtract) (native . present))
-  ((sid . 00001110) (mechanism . integer-multiply) (native . present))
-  ((sid . 00001111) (mechanism . integer-divide) (native . present))
-  ((sid . 00010000) (mechanism . integer-abs) (native . present))
-  ((sid . 00010001) (mechanism . integer-min) (native . present))
-  ((sid . 00010010) (mechanism . integer-max) (native . present))
-  ((sid . 00010011) (mechanism . integer-mod) (native . present))
-  ((sid . 00010100) (mechanism . integer-quotient) (native . present))
+  ((domain . D5) (bits . 01010) (укр . додати) (mechanism . integer-add))
+  ((domain . D5) (bits . 01011) (укр . відняти) (mechanism . integer-subtract))
+  ((domain . D5) (bits . 10110) (укр . помножити) (mechanism . integer-multiply))
+  ((domain . D5) (bits . 10111) (укр . частка)
+   (mechanisms . (integer-divide integer-quotient)))
+  ((domain . D6) (bits . 010011) (укр . модуль) (mechanism . integer-abs))
+  ((domain . D6) (bits . 110101) (укр . найменше) (mechanism . integer-min))
+  ((domain . D6) (bits . 110111) (укр . найбільше) (mechanism . integer-max))
+  ((domain . D6) (bits . 010100) (укр . остача) (mechanism . integer-mod))
 
   ((failure . division-by-zero)
    (status . typed-kernel-error)
    (identity . datalog-math-division-by-zero))
-
   ((failure . overflow)
    (status . typed-kernel-error)
    (identity . datalog-math-overflow))
