@@ -66,3 +66,5 @@ lib/tree-prune-matching-leaves-general.lisp
 lib/list-first-repeated-atom-general.lisp
 lib/list-keep-last-unique-atoms-general.lisp
 lib/list-all-unordered-position-pairs-general.lisp
+lib/list-all-subsets-by-position-general.lisp
+lib/list-keep-repeated-atoms-once-general.lisp
