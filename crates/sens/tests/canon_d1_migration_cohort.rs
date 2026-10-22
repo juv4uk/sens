@@ -314,15 +314,27 @@ fn cond_exhaustion_and_false_answer_are_distinct_live_sens_values() {
         "test_id=1968-COND-EXHAUST layer=SENS expected=structural-NIL-not-D1-NO"
     );
 
-    let no_witness = "(тотожне? (за-умовою ((як-є ()) (як-є не-має-виконатися)) (так (як-є правильно))) (як-є правильно))";
-    let value = eval_program(no_witness, &mut session)
+    // Структурне () — не D1:NO. COND має відхилити його як умову,
+    // замість мовчки перейти до наступної гілки.
+    let invalid = "(за-умовою ((як-є ()) (як-є не-має-виконатися)) (так (як-є правильно)))";
+    let error = eval_program(invalid, &mut session)
+        .expect_err("SENS COND має відхилити структурне () як умову")
+        .to_string();
+    assert!(
+        error.contains("COND") && error.contains("D1"),
+        "test_id=1968-COND-EMPTY-WITNESS layer=SENS input={invalid} expected=exact-D1-type-error actual={error}"
+    );
+
+    // На відміну від (), точне D1:NO означає пропуск гілки.
+    let valid = "(тотожне? (за-умовою (ні (як-є не-має-виконатися)) (так (як-є правильно))) (як-є правильно))";
+    let value = eval_program(valid, &mut session)
         .unwrap_or_else(|error| panic!(
-            "test_id=1968-COND-EMPTY-WITNESS layer=SENS input={no_witness} actual_error={error}"
+            "test_id=1968-COND-D1-NO layer=SENS input={valid} actual_error={error}"
         ))
         .value;
     assert_eq!(
         value.as_predicate_bit(), Some(true),
-        "test_id=1968-COND-EMPTY-WITNESS layer=SENS expected=D1:true actual={value}"
+        "test_id=1968-COND-D1-NO layer=SENS expected=D1:true actual={value}"
     );
 
     // Позаобласний EQ має породжувати D3:000; COND продовжує далі.
