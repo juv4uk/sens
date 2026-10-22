@@ -54,6 +54,18 @@ fn present_day_domain_ladder_executes_exact_ukr_math_without_sid8() {
     ] {
         let operation = parse_exact_domain_request(width, bits, input)
             .unwrap_or_else(|error| panic!("D{width}:{bits} {ukr}: {error}"));
+        // Ratified domain tables are authority, not the flat 8-bit ABI.
+        // Verify the Ukrainian callable spelling against the current row.
+        let table = match width {
+            5 => include_str!("../../../lib/domains/d5.lisp"),
+            6 => include_str!("../../../lib/domains/d6.lisp"),
+            _ => unreachable!("only current D5/D6 admitted"),
+        };
+        let prefix = format!("  ({bits} ");
+        let resident = table.lines().find(|line| line.starts_with(&prefix))
+            .unwrap_or_else(|| panic!("Missing resident D{width}:{bits}"));
+        assert!(resident.contains(&format!("(укр {ukr})")),
+            "D{width}:{bits} changed its ratified Ukrainian projection");
         assert_eq!(operation.evaluate(&std::collections::HashMap::new()),
             Ok(Value::int(expected)), "D{width}:{bits} {ukr}");
     }
