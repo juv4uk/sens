@@ -7,10 +7,16 @@
   "domain_capacity": 2048,
   "scope": "Дослідницька база назв із історичних Lisp та всіх переглянутих доменів/бібліотек SENS, відсутніх за точною назвою в D1–D10 та чинній тестовій лексиці D11. Назва не є семантичним доказом.",
   "current_d11": {
-    "ratified_testing_vocabulary": "knowledge/d11-testing-vocabulary-ratified.json",
     "blob_sha": "9b4428effaca82629f030c4d168ed585b048aa5f",
     "occupied": 43,
-    "preserved": true
+    "preserved": true,
+    "unratified": true,
+    "ratified": false,
+    "admitted_resident_occupancy": 0,
+    "legacy_fixture_count": 43,
+    "owner_correction_20261022": "Ці 43 записи власник не ратифіковував; старий filename містить історично неправильне слово ratified",
+    "review": "knowledge/d11/база-доступних-функцій/звірка-43-без-ратифікації-20261022.json",
+    "legacy_testing_vocabulary": "knowledge/d11-testing-vocabulary-ratified.json"
   },
   "exclusion_snapshot": {
     "d10_path": "knowledge/d10-v18-semantic-inventory.json",
