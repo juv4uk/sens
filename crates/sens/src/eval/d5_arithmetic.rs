@@ -12,7 +12,7 @@ pub(super) fn has_mechanism(identity: CoreDomainIdentity) -> bool {
     };
     matches!(
         word.word().packed_bits(),
-        0b01001 | 0b01010 | 0b01011 | 0b10110 | 0b10111 | 0b11010 | 0b11011
+        0b01000 | 0b01001 | 0b01010 | 0b01011 | 0b10110 | 0b10111 | 0b11010 | 0b11011
     )
 }
 pub(super) fn invoke(
@@ -26,6 +26,30 @@ pub(super) fn invoke(
     };
 
     Some(match word.word().packed_bits() {
+        // D5:01000 ZEROP: нуль лише в точному D24+ числовому домені.
+        // D7-цифри, голі host-числа і D1/D3 ніколи не стають нулем.
+        // Канонічна дробова композиція з ненульовим знаменником
+        // зберігає ненульовий чисельник; нуль є BinaryNumber.
+        0b01000 => {
+            if args.len() != 1 {
+                Err(LanguageError::new(
+                    ErrorKind::Arity,
+                    format!("{identity}: D5 ZEROP expects 1 argument; received {}", args.len()),
+                    span,
+                ))
+            } else if !crate::domain_numeric::is_domain_value(&args[0]) {
+                Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "D5 ZEROP requires one exact D24+ numeric argument",
+                    span,
+                ))
+            } else {
+                Ok(Value::predicate_bit(matches!(
+                    &args[0],
+                    Value::BinaryNumber(number) if number.is_zero()
+                )))
+            }
+        }
         // Ратифікований D5 NUMBERP — властивість точного D24+ об'єкта,
         // а не розпізнавання хостового Number, тексту D7 чи JSON.
         0b01001 => {
@@ -58,6 +82,57 @@ mod exact_d5_numberp {
         let word = (n as u32) & 0x00ff_ffff;
         let bits = (0..24).rev().map(|offset| ((word >> offset) & 1) as u8).collect::<Vec<_>>();
         Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
+    }
+
+    #[test]
+    fn zerop_is_exact_d24_law_and_never_coerces_text_or_host_number() {
+        let identity = CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01000).unwrap()));
+        let environment = Environment::root();
+        let fraction = crate::domain_numeric::compute("/", &d24(7), &d24(2)).unwrap();
+        for (argument, expected) in [
+            (d24(0), true),
+            (d24(7), false),
+            (d24(-7), false),
+            (fraction, false),
+        ] {
+            let actual = invoke(identity, &[argument], &environment, Span::default())
+                .expect("D5 ZEROP resident")
+                .expect("D5 ZEROP executes");
+            assert_eq!(actual.as_predicate_bit(), Some(expected));
+        }
+        for input in [
+            Value::Nil,
+            Value::predicate_bit(false),
+            Value::String("0".into()),
+            Value::Number(0.0, Exactness::Exact),
+        ] {
+            let error = invoke(identity, &[input], &environment, Span::default())
+                .expect("D5 ZEROP resident")
+                .expect_err("non-D24 must not be coerced into numeric zero");
+            assert_eq!(error.kind, ErrorKind::Type);
+        }
+        for args in [Vec::<Value>::new(), vec![d24(0), d24(0)]] {
+            assert_eq!(
+                invoke(identity, &args, &environment, Span::default())
+                    .expect("D5 ZEROP resident")
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::Arity
+            );
+        }
+
+        // Справжній SENS eval, не хост-оракул і не Python/JSON.
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("чинний SENS core");
+        for (source, expected) in [
+            ("(нуль? 0)", true),
+            ("(нуль? 7)", false),
+            ("(нуль? -7)", false),
+        ] {
+            let result = crate::eval_program(source, &mut session)
+                .unwrap_or_else(|e| panic!("{source}: {e}"));
+            assert_eq!(result.value.as_predicate_bit(), Some(expected), "{source}");
+        }
     }
 
     #[test]
