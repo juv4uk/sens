@@ -455,15 +455,16 @@ jobs:
                   # Не повторювати довгий native judge через незалежний test-only commit.
                   # Rust src, Zig, .lisp і фізичні .sens як раніше потребують перевірки.
                   ;;
-                benchmarks/contest-uk/*.lisp)
-                  # Лише A: нове джерело не змінює перевірені байти.
-                  # Вже існуючі M/D/R, фізичні SENS та семантика => новий mint.
+                benchmarks/contest-uk/*.lisp|lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp)
+                  # Лише A незалежного джерела без фізичної пари:
+                  # нове D11/спискове дерево не змінює вже перевірений вхід.
+                  # Зміни/вилучення M/D/R чи готові .sens — тільки re-mint.
                   if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
                      ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" origin/$target_branch -- "$changed" | grep -Fxq -- "$changed" ||
                      git cat-file -e "origin/$target_branch:${changed%.lisp}.sens" 2>/dev/null; then
                     safe_rebase=0; break
                   fi
-                  echo "REMINT_NEW_INDEPENDENT_CONTESTANT source=$changed mint=NEXT_QUEUE"
+                  echo "REMINT_NEW_INDEPENDENT_SOURCE source=$changed mint=NEXT_QUEUE"
                   ;;
                 *) safe_rebase=0; break ;;
               esac
