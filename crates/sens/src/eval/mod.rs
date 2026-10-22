@@ -722,18 +722,6 @@ pub(super) fn apply_exact_domain_value(
         return canon::invoke_domain_identity(core_identity, &values, environment, span)
             .map(EvalStep::Value);
     }
-    // The ratified D10 selector family is generated from D3 CAR/CDR
-    // without a hand-written D10 function, name map or new opcode.
-    // D7 and all nonselector D10 residents remain fail-closed.
-    if selector_law::is_selector(*identity) {
-        let mut values = Vec::with_capacity(arguments.len());
-        for argument in arguments {
-            values.push(evaluate(argument, environment)?);
-        }
-        return selector_law::invoke(*identity, &values, span)
-            .expect("ratified selector shape was checked above")
-            .map(EvalStep::Value);
-    }
     // Лише D9-резиденти з реалізованим механізмом мають прямий виклик.
     // Решта проходять звичайний шлях пошуку доменного слота.
     if canon::has_d9_mechanism(*identity) {
