@@ -186,6 +186,52 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             thread.join(timeout=2.0)
             server.server_close()
 
+    def test_teacher_refuses_loopback_redirects(self):
+        captured = {"redirected": False}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                self.send_response(302)
+                self.send_header(
+                    "Location",
+                    f"http://127.0.0.1:{self.server.server_port}/redirect-target",
+                )
+                self.end_headers()
+
+            def do_GET(self):
+                if self.path == "/redirect-target":
+                    captured["redirected"] = True
+                    body = json.dumps({"choices": []}).encode("utf-8")
+                    self.send_response(200)
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                else:
+                    self.send_error(404)
+
+            def log_message(self, _format, *_args):
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            endpoint = f"http://127.0.0.1:{server.server_port}/v1/chat/completions"
+            with self.assertRaises(teacher.TeacherError):
+                teacher.call_teacher(
+                    endpoint=endpoint,
+                    model="fixture-model",
+                    api_key="do-not-forward",
+                    prompt="Тест перенаправлення.",
+                    text="Текст не має залишати локальну адресу.",
+                    timeout=3.0,
+                )
+            self.assertFalse(captured["redirected"])
+        finally:
+            server.shutdown()
+            thread.join(timeout=2.0)
+            server.server_close()
+
     def test_compact_student_trains_from_gold_or_soft_targets_and_evaluates_holdout(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
