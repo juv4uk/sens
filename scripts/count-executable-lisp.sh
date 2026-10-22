@@ -175,5 +175,17 @@ while IFS= read -r -d '' source; do
   printf 'NATIVE_EXECUTED\t%s\n' "$source"
 done < <(git ls-files -z -- '*.lisp')
 
-printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s\n' \
-  "${scope:-all}" "$sources" "$complete" "$inverse" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data"
+# Цифра самостійно виконаних файлів є достовірною лише для тих,
+# які пройшли нативне pair/standalone SENS і побайтовий Zig inverse.
+# Підсумковий printf раніше завжди повертав 0 навіть за реального RED.
+# Відсутня трійка/paired-only — неповне покриття, не доведений реліз.
+status=COMPLETE
+if (( bad != 0 || missing != 0 || paired_only != 0 )); then
+  status=PARTIAL
+fi
+printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s status=%s\n' \
+  "${scope:-all}" "$sources" "$complete" "$inverse" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data" "$status"
+if (( bad != 0 )); then
+  echo "NATIVE_LISP_EXECUTION_RED failed=$bad: справжню помилку не приховує статус обліку" >&2
+  exit 1
+fi
