@@ -305,7 +305,7 @@ def create_local_server(
     api_key: str | None = None,
 ) -> ThreadingHTTPServer:
     """Підняти вузький OpenAI-сумісний HTTP інтерфейс лише на loopback."""
-    if model.get("schema") != MODEL_SCHEMA or model.get("classes") != list(LABELS):
+    if not isinstance(model, dict) or model.get("schema") != MODEL_SCHEMA or model.get("classes") != list(LABELS):
         raise StudentError("несумісна схема компактної моделі для HTTP")
     if not isinstance(port, int) or not 0 <= port <= 65535:
         raise StudentError("порт має бути цілим числом у межах 0..65535")
@@ -358,7 +358,10 @@ def create_local_server(
                 if not isinstance(request, dict):
                     raise StudentError("request root must be an object")
                 messages = request.get("messages")
-                choices = request.get("structured_outputs", {}).get("choice")
+                structured_outputs = request.get("structured_outputs")
+                if not isinstance(structured_outputs, dict):
+                    raise StudentError("structured_outputs must be an object")
+                choices = structured_outputs.get("choice")
                 if choices != list("ABCDE"):
                     raise StudentError("structured_outputs.choice must be exactly A,B,C,D,E")
                 if not isinstance(messages, list) or len(messages) < 2:
@@ -442,7 +445,7 @@ def serve(args: argparse.Namespace) -> int:
         model = json.loads(raw.decode("utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise StudentError(f"не вдалося прочитати модель: {exc}") from exc
-    if model.get("schema") != MODEL_SCHEMA:
+    if not isinstance(model, dict) or model.get("schema") != MODEL_SCHEMA:
         raise StudentError("несумісна схема моделі")
     if args.port < 1 or args.port > 65535:
         raise StudentError("--port має бути в межах 1..65535")
