@@ -70,3 +70,6 @@ lib/list-all-subsets-by-position-general.lisp
 lib/list-keep-repeated-atoms-once-general.lisp
 lib/tree-pair-tally-unary-general.lisp
 lib/list-split-atomic-prefix-general.lisp
+lib/list-all-matching-positions-unary-general.lisp
+lib/list-last-repeated-atom-by-final-occurrence-general.lisp
+lib/list-partition-atomic-compound-general.lisp
