@@ -349,6 +349,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-reverse-tail-general",
         "list-last-adjacent-equal-atom-suffix-general",
         "list-first-adjacent-equal-atom-suffix-general",
+        "list-every-fifth-linear-general",
         "list-every-fourth-linear-general",
         "list-every-second-general",
         "list-every-third-linear-general",
@@ -497,12 +498,14 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "rotate-left",
         "rotate-three-right",
         "замінити-третій-в-четвірці",
+        "list-prefix-through-last-compound-general",
         "list-last-element-zero-copy-general",
         "list-last-three-zero-copy-general",
         "list-tail-after-fourth-compound-zero-copy-general",
         "list-tail-after-third-compound-zero-copy-general",
         "list-penultimate-element-zero-copy-general",
         "list-suffix-after-first-compound-atom-zero-copy-general",
+        "list-suffix-after-first-adjacent-compound-pair-zero-copy-general",
         "list-suffix-after-first-adjacent-compounds-zero-copy-general",
         "list-suffix-after-first-adjacent-atom-pair-zero-copy-general",
         "list-unique-stable-fast-general",
@@ -663,6 +666,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-reverse-tail-general"
                 | "list-last-adjacent-equal-atom-suffix-general"
                 | "list-first-adjacent-equal-atom-suffix-general"
+                | "list-every-fifth-linear-general"
                 | "list-every-fourth-linear-general"
                 | "list-every-second-general"
                 | "list-every-third-linear-general"
@@ -688,6 +692,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "rotate-left"
                 | "rotate-three-right"
                 | "list-tail-after-fourth-compound-zero-copy-general"
+                | "list-prefix-through-last-compound-general"
                 | "list-last-element-zero-copy-general"
                 | "list-last-three-zero-copy-general"
                 | "list-tail-after-third-compound-zero-copy-general"
@@ -696,6 +701,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-partition-atomic-compound-general"
                 | "list-penultimate-element-zero-copy-general"
                 | "list-suffix-after-first-compound-atom-zero-copy-general"
+                | "list-suffix-after-first-adjacent-compound-pair-zero-copy-general"
                 | "list-suffix-after-first-adjacent-compounds-zero-copy-general"
                 | "list-suffix-after-first-adjacent-atom-pair-zero-copy-general"
                 | "list-unique-stable-fast-general"
