@@ -89,7 +89,7 @@ fn main() {
     assert_eq!(
         args.len(),
         5,
-        "usage: physical_sens_hot_bench FILE.sens FORMS WORK_BUDGET SAMPLES"
+        "usage: physical_sens_hot_bench [FILE.sens|--generate] FORMS WORK_BUDGET SAMPLES"
     );
     let forms = args[2].parse::<usize>().expect("forms");
     let work_budget = args[3].parse::<usize>().expect("work budget");
@@ -99,7 +99,23 @@ fn main() {
     assert!((3..=101).contains(&samples) && samples % 2 == 1);
     let count = (work_budget / forms).max(4);
 
-    let physical = fs::read(&args[1]).expect("фізичний T5");
+    // CI вимірює справжній SENS AST без Python/JSON та без зовнішнього
+    // генератора фізичного коду. Ті самі ратифіковані D3 QUOTE-форми,
+    // що й у ручному hot-бенчмарку, кодує чинний T5-механізм.
+    let physical = if args[1] == "--generate" {
+        let source = (0..forms)
+            .map(|_| "10 001 00 000 01")
+            .collect::<Vec<_>>()
+            .join(" ");
+        let words = parse_binary_source_words(&source)
+            .expect("канонічні слова SENS для фізичного бенчмарка")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        encode_ternary_words(&words).expect("чинний фізичний кодер SENS")
+    } else {
+        fs::read(&args[1]).expect("фізичний T5")
+    };
     let visible = open_ternary_program(&physical).expect("чинний фізичний T5/D2");
     let parsed = parse_canonical_binary(&visible).expect("канонічний D2");
     assert_eq!(parsed.len(), forms, "одна D3 QUOTE форма на один елемент");
