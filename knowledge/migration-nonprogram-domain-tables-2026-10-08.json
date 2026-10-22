@@ -82,11 +82,12 @@
     },
     {
       "path": "lib/domains/d9.lisp",
-      "git_blob_sha1": "8462cca1ccd9bfd48ce2756ae1d520eedf7d1865",
+      "git_blob_sha1": "5b66057c24d1f1616bdcf1b28d9673f23a7d49b5",
+      "previous_pinned_git_blob_sha1": "8462cca1ccd9bfd48ce2756ae1d520eedf7d1865",
       "domain": "D9",
       "bit_width": 9,
       "expected_rows": 512,
-      "previous_pinned_git_blob_sha1": "b013ad78384ebb0174e0c73205e4b6c85dc344db"
+       "historical_pinned_git_blob_sha1": "b013ad78384ebb0174e0c73205e4b6c85dc344db"
     },
     {
       "path": "lib/domains/d10.lisp",
