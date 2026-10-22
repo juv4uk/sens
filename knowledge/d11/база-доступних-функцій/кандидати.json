@@ -5490,13 +5490,17 @@
       },
       "proposed_law_uk": "SENS-композиція над скінченним правильним списком атомів: за один рекурсивний прохід повертає пару (перший максимальний суміжний ряд рівних атомів . невикористаний хвіст); гарантовано зберігає порядок, не об'єднує несуміжні повтори й не створює opcode. Використовується у групувати-сусідні, пара підлягає D1 та T5M доказу.",
       "native_law_test": "crates/sens/tests/d11_agent_adjacent_runs.rs::d11_agent_5939_adjacent_split_grouping_and_roundtrip_are_native",
-      "native_ci_status": "NOT_YET_CONFIRMED",
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39774189440",
+      "native_ci_job": 119808890482,
+      "native_ci_test": "d11_agent_5939_adjacent_split_grouping_and_roundtrip_are_native",
+      "native_ci_scope": "Лог засвідчує PASS саме цього нативного тесту; інший d11_legacy43_lower_laws завершив крок RED; не ратифікація opcode."
     },
     {
       "surface_name": "застосувати-набір-одномісних-функцій",
@@ -5511,12 +5515,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для скінченного proper-list чистих одномісних SENS-замикань застосувати кожне до того самого значення і повернути proper-list результатів у порядку функцій; зберігати вкладені структури й структурне (); для нульового набору повертати (). Не ототожнювати з D10 відобразити-й-додати, який сплющує підсписки.",
       "native_law_test": "crates/sens/tests/d11_clojure_juxt.rs::d11_clojure_juxt_unary_closures_and_negative_laws_native",
-      "native_ci_status": "NOT_YET_CONFIRMED"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39774189440",
+      "native_ci_job": 119808890482,
+      "native_ci_test": "d11_clojure_juxt_unary_closures_and_negative_laws_native",
+      "native_ci_scope": "Лог засвідчує PASS саме цього нативного тесту; інший d11_legacy43_lower_laws завершив крок RED; не ратифікація opcode.",
+      "native_positive_negative_cases": 24
     },
     {
       "surface_name": "побудувати-зіставлення-функцій",
@@ -5531,12 +5540,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Повертає лексичне SENS-замикання, що зберігає список одномісних функцій; за майбутнього виклику з одним значенням застосовує кожну до цього значення і зберігає порядок їх результатів. Відрізняється від попередньо обчисленого списку результатів.",
       "native_law_test": "crates/sens/tests/d11_clojure_juxt.rs::d11_clojure_juxt_unary_closures_and_negative_laws_native",
-      "native_ci_status": "NOT_YET_CONFIRMED"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39774189440",
+      "native_ci_job": 119808890482,
+      "native_ci_test": "d11_clojure_juxt_unary_closures_and_negative_laws_native",
+      "native_ci_scope": "Лог засвідчує PASS саме цього нативного тесту; інший d11_legacy43_lower_laws завершив крок RED; не ратифікація opcode.",
+      "native_positive_negative_cases": 24
     },
     {
       "surface_name": "усі-префікси",
