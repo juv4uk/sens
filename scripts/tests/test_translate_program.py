@@ -78,7 +78,7 @@ class TranslateProgramTests(unittest.TestCase):
 
     def test_d7_text_not_misused_as_callable(self):
         self.assertNotIn("kh", MODULE.translation_map("san", "укр"))
-        self.assertNotIn("binary", MODULE.translation_map("en", "укр"))
+        self.assertNotIn("open", MODULE.translation_map("en", "укр"))
 
 
 if __name__ == "__main__":
