@@ -449,7 +449,7 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         in_string = escaped = in_comment = False
         for char in life_source:
             if in_comment:
-                if char == "\\n":
+                if char == "\n":
                     source_without_comments.append(char)
                     in_comment = False
                 else:
@@ -459,7 +459,7 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
                 source_without_comments.append(char)
                 if escaped:
                     escaped = False
-                elif char == "\\\\":
+                elif char == "\\":
                     escaped = True
                 elif char == '"':
                     in_string = False
