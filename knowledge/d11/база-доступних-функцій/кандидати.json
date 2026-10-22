@@ -6058,13 +6058,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Для кожного атома результат є ним самим; для правильного скінченного списку віддзеркалити порядок і кожне піддерево. Подвійне застосування відновлює дерево.",
       "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_37_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "закодувати-унарні-серії",
@@ -6079,13 +6082,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Кожна максимальна суміжна серія однакових атомів кодується парою (атом унарний-список-лічильник); жодного D24/host числа.",
       "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_37_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "розкодувати-унарні-серії",
@@ -6100,13 +6106,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Для кожної пари атом + унарний лічильник відновити рівно стільки суміжних повторень; декодування кодування відновлює вхідний список.",
       "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_37_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "розділити-перед-першим",
@@ -6121,13 +6130,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Повертає (префікс суфікс) до першого структурно тотожного атома; суфікс містить сам збіг; за відсутності збігу повертає (вхідний-список ()).",
       "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_37_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "зібрати-після-розбиття",
@@ -6142,13 +6154,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Приєднує префікс до суфікса після першого розрізу, зберігаючи всі значення та їхній порядок.",
       "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_37_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "хвости-першого-розходження",
@@ -6163,13 +6178,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Пропускає максимальний спільний атомний префікс двох правильних списків і повертає обидва вихідні хвости без копіювання їхніх елементів.",
       "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_37_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "симетрична-різниця-атомів",
@@ -6184,14 +6202,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "list × list → list",
       "law": "Для двох скінченних списків атомів відкинути ВСІ входження тих і тільки тих атомів, які присутні в обох списках; зберегти всі повтори та порядок решти зліва, потім справа.",
       "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_53_CASES_SHARED_6_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "сталий-перетин-атомів",
@@ -6206,14 +6227,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "list × list → list",
       "law": "Кожне входження атома зліва зберігається, якщо цей атом хоч один раз є справа; порядок і кратність визначає тільки лівий список.",
       "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_53_CASES_SHARED_6_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "перетнути-мультимножини",
@@ -6228,14 +6252,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "list × list → list",
       "law": "Зберегти зліва рівно мінімальну кратність кожного атома між двома списками; збережені входження стоять у вихідному порядку.",
       "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_53_CASES_SHARED_6_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "поділити-стійко-за-набором",
@@ -6250,14 +6277,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "list × list → pair(list,list)",
       "law": "Поділити скінченний список атомів на дві послідовності за належністю заданому набору, не втрачаючи повторів та внутрішнього порядку.",
       "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_53_CASES_SHARED_6_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "обернути-ліворуч-на-один",
@@ -6272,14 +6302,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "list → list",
       "law": "Перенести перший елемент правильного скінченного списку в кінець, зберігши порядок решти; для порожнього списку повернути порожній.",
       "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_53_CASES_SHARED_6_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "обернути-праворуч-на-один",
@@ -6294,14 +6327,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "list → list",
       "law": "Перенести останній елемент правильного скінченного списку в початок; для будь-якого скінченного власного списку є оберненням лівої ротації.",
       "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_53_CASES_SHARED_6_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     },
     {
       "surface_name": "паліндром-лінійний?",
@@ -6316,14 +6352,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "list → D1 predicate",
       "law": "Для скінченного правильного списку точних атомів обчислити D1 істинність дзеркальної тотожності за O(n) часу з двома покажчиками.",
       "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_53_CASES_SHARED_6_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
+      "native_ci_job": 119981278781,
+      "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
     }
   ],
   "winners_20261022": {
