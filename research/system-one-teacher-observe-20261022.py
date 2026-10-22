@@ -185,8 +185,14 @@ def call_teacher(
         headers=headers,
         method="POST",
     )
+    class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            # A loopback endpoint may not redirect user text or auth to another host.
+            return None
+
+    opener = urllib.request.build_opener(NoRedirectHandler)
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        with opener.open(request, timeout=timeout) as response:
             raw = response.read(MAX_RESPONSE_BYTES + 1)
     except urllib.error.HTTPError as exc:
         body = exc.read(2000).decode("utf-8", errors="replace")
