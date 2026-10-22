@@ -58,6 +58,7 @@ for source in "$here"/*.lisp; do
     різниця-кубів|різниця-кубів-*) expected=279 ;;
     кількість-пар|кількість-пар-*) expected=45 ;;
     кількість-трійок|кількість-трійок-*) expected=120 ;;
+    центроване-квадратне|центроване-квадратне-*) expected=85 ;;
     *) echo "CONTEST_UNKNOWN_TASK: немає перевіреного очікуваного результату: $source" >&2; fail=1; continue ;;
   esac
   physical="$scratch/$name.sens"
