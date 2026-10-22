@@ -115,12 +115,17 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         # Ключі маршруту вже є українськими об'єктами D3/D5.
         # Історичний восьмибітний реєстр не має семантичної влади.
         normalized = re.sub(r"\s+", " ", uncommented(self.source))
-        path = "lib/function-table-mechanisms.lisp"
-        self.assertIn(
-            f"(читати-файл (символ-у-текст (як-є {path})))", normalized
-        )
-        self.assertNotIn(f'"{path}"', self.source)
+        self.assertNotIn("(читати-файл", normalized)
+        self.assertNotIn("(читати-всі", normalized)
         self.assertNotIn("lib/surface/semantic-registry.lisp", self.source)
+        for row in (
+            "(атом? evaluator atom-primitive)",
+            "(додати common-lisp bounded-exact-add)",
+            "(додати prolog bounded-exact-add)",
+            "(додати clips bounded-exact-add)",
+            "(додати datalog bounded-exact-add)",
+        ):
+            self.assertIn(row, normalized)
         self.assertIn(
             "(визначити метадані-вибору-механізму реєстр-вибору-механізму)",
             normalized
@@ -159,8 +164,14 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertRegex(
             code,
             r"\(визначити\s+реєстр-вибору-механізму"
-            r"\s+\(друге\s+\(третє\s+\(перше\s+\(читати-всі",
+            r"\s+\(як-є\s+\(\(schema",
         )
+        # Ніякого відокремленого джерела семантичного змісту: байтово
+        # ті самі маршрути є в чинному паспорті; автономний SENS
+        # потребує лише цитовані значення, а не файлову host-функцію.
+        from_rows = metadata.split("     (rows", 1)[1].split("     (profile-routes)", 1)[0]
+        local_rows = self.source.split("     (rows", 1)[1].split("     (profile-routes)", 1)[0]
+        self.assertEqual(from_rows, local_rows)
         self.assertIn(
             "(визначити метадані-вибору-механізму\n  реєстр-вибору-механізму)",
             code
