@@ -39,6 +39,9 @@ calibrator = load_research_module(
 comparison = load_research_module(
     "system-one-compare-20261022.py", "system_one_compare"
 )
+transformer_student = load_research_module(
+    "system-one-transformer-student-20261022.py", "system_one_transformer_student"
+)
 
 
 def write_jsonl(path: Path, rows: list[dict]) -> bytes:
@@ -646,6 +649,71 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 calibrator.fit_temperature(
                     model, rows, "wrong-corpus-sha", grid_points=101
                 )
+
+    def test_transformer_helpers_keep_exact_distribution_and_validation_boundary(self):
+        probabilities = transformer_student.normalized_probabilities(
+            [5.0, -2.0, 1.0, 0.0, 3.0], temperature=2.0
+        )
+        self.assertAlmostEqual(sum(probabilities), 1.0, places=12)
+        distribution = transformer_student.quantize_distribution(probabilities)
+        self.assertEqual(set(distribution), set(student.LABELS))
+        self.assertEqual(
+            sum(value["numerator"] for value in distribution.values()),
+            1_000_000_000,
+        )
+        self.assertTrue(
+            all(value["denominator"] == 1_000_000_000 for value in distribution.values())
+        )
+        with self.assertRaises(transformer_student.TransformerStudentError):
+            transformer_student.normalized_probabilities([0, 1, 2, 3, 4], temperature=0)
+
+        validation_rows = []
+        validation_logits = []
+        for index, label in enumerate(student.LABELS):
+            validation_rows.append(
+                {"id": f"validation-{index}", "split": "validation", "gold": label, "text": f"текст {index}"}
+            )
+            validation_logits.append([4.0 if column == index else -1.0 for column in range(5)])
+        calibration = transformer_student.fit_temperature(
+            validation_logits, validation_rows, grid_points=51
+        )
+        self.assertEqual(calibration["split"], "validation")
+        self.assertFalse(calibration["used_test_split"])
+        self.assertLessEqual(
+            calibration["nll_after"], calibration["nll_before"] + 1e-12
+        )
+        with self.assertRaises(transformer_student.TransformerStudentError):
+            transformer_student.fit_temperature(
+                [[1.0, 0.0, 0.0, 0.0, 0.0]],
+                [{"id": "test-1", "split": "test", "gold": "оплата", "text": "не калібрувати"}],
+                grid_points=51,
+            )
+
+        seed_rows = [
+            {"id": "train-1", "split": "train", "gold": "оплата", "text": "платіж"},
+            {"id": "validation-1", "split": "validation", "gold": "доставка", "text": "посилка"},
+            {"id": "test-1", "split": "test", "gold": "технічне", "text": "помилка"},
+        ]
+        sha = "fixed-corpus-sha"
+        teacher_rows = [
+            {
+                **seed_rows[0],
+                "dataset_sha256": sha,
+                "teacher_distribution": exact_distribution("оплата"),
+            }
+        ]
+        train_rows, targets = transformer_student.validate_rows(seed_rows, sha, teacher_rows)
+        self.assertEqual([row["id"] for row in train_rows], ["train-1"])
+        self.assertEqual(set(targets), {"train-1"})
+        teacher_rows.append(
+            {
+                **seed_rows[1],
+                "dataset_sha256": sha,
+                "teacher_distribution": exact_distribution("доставка"),
+            }
+        )
+        with self.assertRaises(transformer_student.TransformerStudentError):
+            transformer_student.validate_rows(seed_rows, sha, teacher_rows)
 
     def test_evaluator_refuses_wrong_split_and_incomplete_distribution(self):
         row = {
