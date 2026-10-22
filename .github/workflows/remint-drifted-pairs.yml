@@ -235,7 +235,7 @@ jobs:
           # Незавершений хвіст — PENDING, не виданий за PASS чи реліз.
           list="$(printf '%s\n' "$list" | sed '/^$/d')"
           initial_total="$(printf '%s\n' "$list" | sed '/^$/d' | wc -l)"
-          if (( initial_total > 24 )); then
+          if [[ "$EVENT_NAME" == push ]] && (( initial_total > 24 )); then
             list="$(printf '%s\n' "$list" | sed -n '1,24p')"
             echo "REMINT_INITIAL_BATCH selected=24 pending=$((initial_total - 24)) native=SENS_ZIG"
           else
@@ -384,8 +384,7 @@ jobs:
               prune_archived_duplicates
               git add -A || return 2
             else
-              # Короткоживучий PR не публікує чужі незавершені пари.
-              # Єдиний допуск — список успішно виконаних SENS+Zig native mint.
+              # У PR до коміту допускаються лише власні нативно перевірені пари.
               local confirmed physical view
               while IFS= read -r confirmed; do
                 [[ -n "$confirmed" ]] || continue
