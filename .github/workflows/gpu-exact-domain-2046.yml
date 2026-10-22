@@ -21,6 +21,10 @@ jobs:
       RUST_TEST_THREADS: "1"
     steps:
       - uses: actions/checkout@v5
+      # crates/sens/build.rs вимагає точно закріплений Zig для канонічного T5M.
+      # Використовуємо вже чинний локальний action з основного CI,
+      # а не хостовий rust/json/python обхід двійкового bootstrap.
+      - uses: ./.github/actions/install-zig
       - name: 2046 координат — бітність, допуск та зворотне кодування
         run: >-
           cargo test --locked -p sens --lib
