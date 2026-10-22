@@ -105,9 +105,12 @@ python3 research/system-one-compact-student-20261022.py train \
   --output /tmp/system-one-distilled-student.json
 
 # 4) Запустити компактного учня як локальний сумісний HTTP-вузол.
+export SENS_SYSTEM_ONE_STUDENT_API_KEY='локальний-тимчасовий-ключ'
 python3 research/system-one-compact-student-20261022.py serve \
   --model-path /tmp/system-one-distilled-student.json \
   --port 8100
+# У терміналі SENS встановити той самий ключ для адаптера:
+export SENS_SYSTEM_ONE_API_KEY="$SENS_SYSTEM_ONE_STUDENT_API_KEY"
 # У новому терміналі SENS може викликати учня:
 # (модельний-розподіл-вибору-сире
 #   "http://127.0.0.1:8100/v1/chat/completions"
