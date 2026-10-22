@@ -135,8 +135,10 @@ jobs:
             echo "failed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # RED одного кандидата не затримує конкурс уже доведених трійок.
+      # Наприкінці workflow справжня відмова mint лишається червоною.
       - name: Нативне суддівство і просування справжніх переможців
-        if: github.event_name == 'push' && steps.remint.outputs.failed == 'false' && steps.remint.outputs.contest == 'true'
+        if: github.event_name == 'push' && steps.remint.outputs.contest == 'true'
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
