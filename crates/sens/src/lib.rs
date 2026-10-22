@@ -687,35 +687,46 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
             Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
         );
     }
-    // D10-слот є першокласною мовною функцією, а не повторно
-    // переписуваною назвою. FS, TCP і process можуть звернутися до
-    // спільного UTF-8 після першого завантаження; другий DEFINE
-    // того самого доменного коду порушує незмінність SENS.
-    // D10:0010111011 is the exact, owner-ratified `укр` coordinate in
-    // lib/domains/d10.lisp. The generic D10 definition-binding projection
-    // includes concrete Core4 definitions only; UTF-8 is loaded separately
-    // and must not be guessed from that narrower table (or from SID8/W8).
-    // This identity locates an existing SENS-defined closure, not a host
-    // implementation or blanket admission of a D10 resident.
-    let first = DomainIdentity::D10(
-        DomainD10::new(0b0010111011).expect("ратифікована Д10 координата UTF-8"),
-    );
-    if session.environment.domain_code_slot(first).is_some() {
-        let terminal = crate::encode_text7("успішно-декодовано?", crate::Text7Layout::Uk)
-            .expect("кінцеве ім'я UTF-8 визначене українською клавіатурою")
-            .to_canonical_wire_token();
-        let value = session.environment.get(&terminal).ok_or_else(|| {
-            LanguageError::new(
+    // UTF-8 Lisp-імена у фізичному T5M несуть D7 клавіатурну проєкцію.
+    // D10 у таблиці — першокласна ідентичність, але це не дозвіл
+    // виводити runtime-слот із Core4-only D10 definition bindings.
+    // Наявність обох справжніх мовних замикань засвідчує завершений
+    // bootstrap. Ніякого повторного DEFINE й ніякої host-семантики UTF-8.
+    let text7_binding = |name: &str| {
+        crate::encode_text7(name, crate::Text7Layout::Uk)
+            .map(|cells| cells.to_canonical_wire_token())
+    };
+    let first = text7_binding("кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні?")
+        .ok_or_else(|| LanguageError::new(
+            ErrorKind::InvalidForm,
+            "D7: український код першої функції UTF-8 не має точної проєкції",
+            Span::default(),
+        ))?;
+    let terminal = text7_binding("успішно-декодовано?").ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            "D7: український код останньої функції UTF-8 не має точної проєкції",
+            Span::default(),
+        )
+    })?;
+    let first_value = session.environment.get(&first);
+    let final_value = session.environment.get(&terminal);
+    match (first_value, final_value) {
+        (Some(Value::Closure(_)), Some(value @ Value::Closure(_))) => {
+            bind_missing_stable_surface_peers(&session.environment);
+            return Ok(EvalResult {
+                value,
+                output: session.environment.output_snapshot(),
+            });
+        }
+        (None, None) => {}
+        _ => {
+            return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
-                "неповне завантаження UTF-8: Д10 функція вже існує, але кінцеве SENS-визначення відсутнє",
+                "неповне завантаження UTF-8: обидва мовні D7-замикання повинні існувати",
                 Span::default(),
-            )
-        })?;
-        bind_missing_stable_surface_peers(&session.environment);
-        return Ok(EvalResult {
-            value,
-            output: session.environment.output_snapshot(),
-        });
+            ));
+        }
     }
     let result = binary_bootstrap::utf8_program()?.execute(session)?;
     bind_missing_stable_surface_peers(&session.environment);
