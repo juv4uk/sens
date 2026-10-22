@@ -275,6 +275,25 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if any(not split_rows[split] for split in split_rows):
         raise ComparisonError("seed має містити непорожні train, validation і test")
 
+    # Перевірити готові трансформерні holdout-прогнози ДО будь-якого навчання/запису моделей.
+    transformer_records: dict[str, list[dict[str, Any]]] = {}
+    transformer_report: dict[str, Any] | None = None
+    if transformer_paths:
+        transformer_report = {}
+        for split, prediction_path in (
+            ("validation", transformer_paths[0]),
+            ("test", transformer_paths[1]),
+        ):
+            records, details = validate_transformer_predictions(
+                prediction_path, split_rows[split], split, dataset_sha
+            )
+            transformer_records[split] = records
+            transformer_report[split] = details
+        if transformer_report["validation"]["base_model"] != transformer_report["test"]["base_model"]:
+            raise ComparisonError("validation/test трансформера походять від різних базових моделей")
+        if transformer_report["validation"]["temperature"] != transformer_report["test"]["temperature"]:
+            raise ComparisonError("validation/test трансформера мають різну температуру")
+
     teacher_records: dict[str, list[dict[str, Any]]] = {}
     teachers: set[str] = set()
     prompt_versions: set[str] = set()
@@ -337,23 +356,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 predictions, split, args.threshold, args.bins
             )
 
-    transformer_report: dict[str, Any] | None = None
-    if transformer_paths:
-        transformer_records: dict[str, list[dict[str, Any]]] = {}
-        transformer_report = {}
-        for split, prediction_path in (
-            ("validation", transformer_paths[0]),
-            ("test", transformer_paths[1]),
-        ):
-            records, details = validate_transformer_predictions(
-                prediction_path, split_rows[split], split, dataset_sha
-            )
-            transformer_records[split] = records
-            transformer_report[split] = details
-        if transformer_report["validation"]["base_model"] != transformer_report["test"]["base_model"]:
-            raise ComparisonError("validation/test трансформера походять від різних базових моделей")
-        if transformer_report["validation"]["temperature"] != transformer_report["test"]["temperature"]:
-            raise ComparisonError("validation/test трансформера мають різну температуру")
+    if transformer_report is not None:
         evaluations["student_transformer"] = {
             split: evaluate_rows(records, split, args.threshold, args.bins)
             for split, records in transformer_records.items()
