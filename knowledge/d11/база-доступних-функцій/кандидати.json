@@ -6531,15 +6531,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "term × term → D1",
       "law": "Повна структурна тотожність SENS-термів: пари, порядок, крапкові хвости, порожні вузли та атоми; однаковий корінь без однакової структури не дає істини.",
       "native_law_test": "crates/sens/tests/d11_unify_once.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
+      "native_test_result": "NATIVE_SENS_PASS_D11_UNIFY_ONCE_5_TESTS",
       "no_new_primitive": true,
-      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39829485152",
+      "native_ci_job": 120001514073
     },
     {
       "surface_name": "уніфікація-спостереження-стан",
@@ -6554,15 +6556,17 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "signature": "outcome × left × right × substitution → record",
       "law": "Відрізнити fail від успішної порожньої підстановки: невдача зберігає обидва аргументи й стан, успіх загортає справжній результат без зміни.",
       "native_law_test": "crates/sens/tests/d11_unify_once.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
+      "native_test_result": "NATIVE_SENS_PASS_D11_UNIFY_ONCE_5_TESTS",
       "no_new_primitive": true,
-      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39829485152",
+      "native_ci_job": 120001514073
     },
     {
       "surface_name": "індекс-міркування?",
@@ -6570,7 +6574,7 @@
       "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
       "provenance": {
         "repo_file": "lib/reason.lisp",
-        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "blob_sha": "a1e811f82d85c2d5c971e538a1b436c139e754a1",
         "physical_lisp_sens_pair_exists": true,
         "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
       },
@@ -6585,7 +6589,8 @@
       "native_law_test": "crates/sens/tests/reason_index.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true,
-      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING",
+      "source_evolution": "LIB_REASON_LOCAL_SENS_REVERSE_TO_REPLACE_UNADMITTED_D5_VALUE_CALL"
     },
     {
       "surface_name": "лінійний-індекс-міркування",
@@ -6593,7 +6598,7 @@
       "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
       "provenance": {
         "repo_file": "lib/reason.lisp",
-        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "blob_sha": "a1e811f82d85c2d5c971e538a1b436c139e754a1",
         "physical_lisp_sens_pair_exists": true,
         "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
       },
@@ -6608,7 +6613,8 @@
       "native_law_test": "crates/sens/tests/reason_index.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true,
-      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING",
+      "source_evolution": "LIB_REASON_LOCAL_SENS_REVERSE_TO_REPLACE_UNADMITTED_D5_VALUE_CALL"
     },
     {
       "surface_name": "міркування-пошук-кошика",
@@ -6616,7 +6622,7 @@
       "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
       "provenance": {
         "repo_file": "lib/reason.lisp",
-        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "blob_sha": "a1e811f82d85c2d5c971e538a1b436c139e754a1",
         "physical_lisp_sens_pair_exists": true,
         "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
       },
@@ -6631,7 +6637,8 @@
       "native_law_test": "crates/sens/tests/reason_index.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true,
-      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING",
+      "source_evolution": "LIB_REASON_LOCAL_SENS_REVERSE_TO_REPLACE_UNADMITTED_D5_VALUE_CALL"
     },
     {
       "surface_name": "кандидати-індексу-міркування",
@@ -6639,7 +6646,7 @@
       "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
       "provenance": {
         "repo_file": "lib/reason.lisp",
-        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "blob_sha": "a1e811f82d85c2d5c971e538a1b436c139e754a1",
         "physical_lisp_sens_pair_exists": true,
         "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
       },
@@ -6654,7 +6661,8 @@
       "native_law_test": "crates/sens/tests/reason_index.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true,
-      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING",
+      "source_evolution": "LIB_REASON_LOCAL_SENS_REVERSE_TO_REPLACE_UNADMITTED_D5_VALUE_CALL"
     },
     {
       "surface_name": "побудувати-індекс-міркування",
@@ -6662,7 +6670,7 @@
       "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
       "provenance": {
         "repo_file": "lib/reason.lisp",
-        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "blob_sha": "a1e811f82d85c2d5c971e538a1b436c139e754a1",
         "physical_lisp_sens_pair_exists": true,
         "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
       },
@@ -6677,7 +6685,8 @@
       "native_law_test": "crates/sens/tests/reason_index.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true,
-      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING",
+      "source_evolution": "LIB_REASON_LOCAL_SENS_REVERSE_TO_REPLACE_UNADMITTED_D5_VALUE_CALL"
     }
   ],
   "winners_20261022": {
