@@ -107,3 +107,4 @@ lib/list-tail-after-nth-atom-zero-copy-general.lisp
 benchmarks/contest-uk/сума-четвертих-степенів-без-лямбди.lisp
 benchmarks/contest-uk/факторіал-д6-стислий.lisp
 lib/list-last-atom-to-compound-boundary-zero-copy-general.lisp
+lib/list-tail-after-fourth-atom-zero-copy-general.lisp

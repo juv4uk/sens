@@ -294,12 +294,12 @@ impl Drop for SourceTriplet {
 // Перевіряємо реальне виконання ще не опублікованих фізичних трійок.
 // Український Lisp є джерелом; exact-слова читає SENS, T5M пакує Zig.
 // Адресна діагностика: перший реальний розбіжний байт без дампу всієї програми.
-fn assert_same_bytes(
+fn same_bytes_with_diagnostic(
     actual_path: &std::path::Path,
     committed_path: &std::path::Path,
     stem: &str,
     test_id: &str,
-) {
+) -> bool {
     let actual = fs::read(actual_path).expect("згенеровані Zig/T5M байти");
     let expected = fs::read(committed_path).expect("закомічена фізична пара");
     if actual != expected {
@@ -308,16 +308,19 @@ fn assert_same_bytes(
             .zip(&expected)
             .position(|(a, b)| a != b)
             .unwrap_or(actual.len().min(expected.len()));
-        panic!(
+        println!(
             "test_id={test_id} source={stem} first_diff_byte={offset} minted={:?} committed={:?} minted_len={} committed_len={}",
             actual.get(offset), expected.get(offset), actual.len(), expected.len()
         );
+        return false;
     }
+    true
 }
 
 fn verify_unpaired_ukrainian_libs_natively() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let mut independently_executed = std::collections::BTreeSet::new();
+    let mut physical_drifted = std::collections::BTreeSet::new();
     for stem in [
         "d1-direct-values",
         "axioms-d1-principle-five",
@@ -513,6 +516,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-every-sixth-linear-general",
         "list-maximum-fold-general",
         "list-tail-after-third-atom-zero-copy-general",
+        "list-tail-after-fourth-atom-zero-copy-general",
         "залишити-точні-числа",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
@@ -718,13 +722,23 @@ fn verify_unpaired_ukrainian_libs_natively() {
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
-            assert_same_bytes(
+            // Дрейф однієї трійки не зупиняє виконання інших програм.
+            // Але підсумок CI залишається RED, доки байти не виправлені.
+            let bytes_equal = same_bytes_with_diagnostic(
                 &physical,
                 &committed_physical,
                 stem,
                 "ukr-lib-physical-parity",
             );
-            assert_same_bytes(&view, &committed_view, stem, "ukr-lib-exact-parity");
+            let view_equal = same_bytes_with_diagnostic(
+                &view,
+                &committed_view,
+                stem,
+                "ukr-lib-exact-parity",
+            );
+            if !bytes_equal || !view_equal {
+                physical_drifted.insert(stem);
+            }
         }
         let verify = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
             .arg("verify-view")
@@ -805,6 +819,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
     println!(
         "SENS_UKR_EXECUTABLE_TOTAL scope=cli-native-subset unique_files={} native=SENS/Zig/T5M",
         independently_executed.len()
+    );
+    assert!(
+        physical_drifted.is_empty(),
+        "test_id=ukr-lib-committed-parity-drift source_files={physical_drifted:?} action=refresh-via-SENS-Zig"
     );
 }
 

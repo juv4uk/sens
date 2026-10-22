@@ -140,3 +140,43 @@ fn d11_first_class_lexical_lookup_and_parameter_binding_preserve_order() {
         );
     }
 }
+
+/// Д11: лексичне замикання зберігає оточення визначення, а формальний
+/// параметр затінює однойменну змінну без зміни захопленого значення.
+/// Це наскрізне виконання метаобчислювача SENS, не моделювання на Rust.
+#[test]
+fn d11_first_class_closure_captures_lexical_environment_and_shadows_parameters() {
+    let mut s = session();
+    for (id, input, expected) in [
+        (
+            "captures-environment",
+            "(першокласне-обчислити (як-є ((функція (у) х) (як-є нове))) (як-є ((х . захоплене))))",
+            "захоплене",
+        ),
+        (
+            "parameter-shadows-capture",
+            "(першокласне-обчислити (як-є ((функція (х) х) (як-є нове))) (як-є ((х . старе))))",
+            "нове",
+        ),
+        (
+            "two-parameters-preserve-order",
+            "(першокласне-обчислити (як-є ((функція (х у) х) (як-є ліве) (як-є праве))) (як-є ()))",
+            "ліве",
+        ),
+        (
+            "second-parameter-selected",
+            "(першокласне-обчислити (як-є ((функція (х у) у) (як-є ліве) (як-є праве))) (як-є ()))",
+            "праве",
+        ),
+    ] {
+        let actual = exact(input, &mut s)
+            .unwrap_or_else(|error| panic!(
+                "test_id=D11-FC-CAPTURE-{id} layer=SENS input={input} expected={expected} actual_error={error}"
+            ))
+            .value.to_string();
+        assert_eq!(
+            actual, expected,
+            "test_id=D11-FC-CAPTURE-{id} layer=SENS input={input} expected={expected} actual={actual}"
+        );
+    }
+}
