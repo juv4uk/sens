@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -97,6 +98,45 @@ def ensure_remote_revision(revision: str, remote_ref: str) -> None:
         ) from exc
 
 
+def _mask_exempt(source: str) -> str:
+    """Маскувати те, що не є кодом укр-проєкції, зберігаючи довжину:
+    - дані D7 у цитатах `(як-є …)` (вміст фактів може бути латиницею);
+    - зовнішні URL (історичні джерела).
+    """
+    chars = list(source)
+
+    def blank(start: int, end: int) -> None:
+        for i in range(start, end):
+            if chars[i] != "\n":
+                chars[i] = " "
+
+    # (як-є …) з балансуванням дужок
+    i = 0
+    n = len(source)
+    while True:
+        j = source.find("(як-є", i)
+        if j == -1:
+            break
+        depth = 0
+        k = j
+        while k < n:
+            if source[k] == "(":
+                depth += 1
+            elif source[k] == ")":
+                depth -= 1
+                if depth == 0:
+                    k += 1
+                    break
+            k += 1
+        blank(j, k)
+        i = k
+
+    # URL
+    for m in re.finditer(r"https?://\S+", source):
+        blank(m.start(), m.end())
+    return "".join(chars)
+
+
 def first_bad(data: bytes) -> str | None:
     try:
         source = data.decode("utf-8", errors="strict")
@@ -104,7 +144,7 @@ def first_bad(data: bytes) -> str | None:
         return f"неправильний UTF-8: байт {exc.start + 1}"
     if not source.strip():
         return "порожній файл"
-    for index, char in enumerate(source):
+    for index, char in enumerate(_mask_exempt(source)):
         if char not in ALLOWED:
             line = source.count("\n", 0, index) + 1
             column = index - source.rfind("\n", 0, index)
@@ -112,9 +152,23 @@ def first_bad(data: bytes) -> str | None:
     return None
 
 
+# Шари із законною латиницею: декларативні доменні таблиці (колонки
+# san/en/LISP/sym не перейменовуються), машинний шар (назви ISA/регістрів),
+# згенеровані та поверхневі файли. Це не програми укр-проєкції.
+EXCLUDED_PREFIXES = (
+    "lib/domains/",
+    "lib/machine/",
+    "lib/generated/",
+    "lib/surface/",
+)
+
+
 def validate(paths: set[str], revision: str) -> int:
     failures = 0
-    paths = {p for p in paths if p.endswith(".lisp")}
+    paths = {
+        p for p in paths
+        if p.endswith(".lisp") and not p.startswith(EXCLUDED_PREFIXES)
+    }
     for path in sorted(paths):
         try:
             issue = first_bad(object_bytes(revision, path))
