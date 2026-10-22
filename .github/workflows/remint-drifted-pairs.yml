@@ -372,22 +372,75 @@ jobs:
             git fetch origin main
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
-            while IFS= read -r changed; do
+            # Не перезапускати повний SENS суд за НОВОГО незалежного
+            # конкурсанта без фізичної пари: він потрапить у наступний mint.
+            # Але M/D/R Lisp, SENS/Zig/Rust, реєстри й фізичні байти
+            # ЗАВЖДИ потребують re-mint на новому exact main.
+            # core.quotePath=false зберігає справжні D7/укр назви.
+            while IFS=
+            if (( safe_rebase )) &&
+               git merge-base --is-ancestor "$verified_parent" origin/main; then
+              if git rebase origin/main; then
+                echo "REMINT_SAFE_FAST_REBASE attempt=$attempt verified_inputs=UNCHANGED"
+                continue
+              fi
+              # Конфлікт не вирішувати силоміць: перейти на native remint.
+              git rebase --abort || true
+            fi
+            echo "REMINT_REVERIFY_REQUIRED attempt=$attempt reason=semantic_or_source_delta"
+            # Це тільки епізодичний workspace Actions, НЕ перепис історії
+            # remote/main. Старий mint відкидається і перевіряється знову.
+            git reset --hard origin/main
+            # Кожний новий main має отримати свій справжній SENS binary:
+            # ніколи не перевіряти поточний Lisp за старим виконуваним кодом.
+            cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+            regenerate_on_current_main
+            # Ознаку успішного відновлення дозволено лише після
+            # нативного remint і суду на новому main. Старий RED не є
+            # чинним, якщо цей самий source уже виправлено та перевірено.
+            recovered_on_current_main=1
+            if ! commit_verified_changes; then
+              echo "REMINT_ALREADY_PUBLISHED_EXACT on-current-main"
+              published=1
+              break
+            fi
+          done
+          if (( ! published )); then
+            echo "::error::REMINT_PUBLISH_RACE after 12 verified attempts; no force push" >&2
+            exit 1
+          fi
+          if (( regenerated_failed )); then
+            echo "::error::REMINT_RECOVERY_NATIVE_RED, already verified pairs kept" >&2
+            exit 1
+          fi
+          if (( recovered_on_current_main )); then
+            echo "recovered=true" >> "$GITHUB_OUTPUT"
+            echo "REMINT_CURRENT_MAIN_NATIVE_RECOVERED sha=$(git rev-parse HEAD) verified=YES"
+          fi
+
+      # Не оголошувати GREEN, коли SENS відхилив джерело; але не губити
+      # незалежні вже доведені Zig/T5M пари через одного конкурсанта.
+      - name: Зафіксувати адресні відмови після публікації справних пар
+        if: steps.remint.outputs.failed == 'true' && steps.published_pairs.outputs.recovered != 'true'
+        run: |
+          echo "::error::SENS native mint має адресні RED, не виправлені на новому main; справні трійки збережено" >&2
+          exit 1
+\t' read -r change changed; do
               [[ -n "$changed" ]] || continue
               case "$changed" in
                 docs/*.md|benchmarks/contest-uk/RESULTS.md|.github/workflows/*.yml|.github/workflows/*.yaml)
                   ;;
-                lib/list-*.lisp|lib/tree-*.lisp|lib/d11-*.lisp|lib/axioms-d1-principle-five.lisp)
-                  # Лише чужий незалежний source, НЕ наш native candidate.
-                  # При зміні нашого Lisp або будь-якого фізичного SENS
-                  # обов'язково новий exact SENS/Zig mint на свіжому main.
-                  if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list"; then
+                benchmarks/contest-uk/*.lisp)
+                  if [[ "$change" != A ]] ||
+                     grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
+                     git cat-file -e "origin/main:${changed%.lisp}.sens" 2>/dev/null; then
                     safe_rebase=0; break
                   fi
+                  echo "REMINT_NEW_INDEPENDENT_CONTESTANT source=$changed mint=NEXT_QUEUE"
                   ;;
                 *) safe_rebase=0; break ;;
               esac
-            done < <(git diff --name-only "$verified_parent" origin/main)
+            done < <(git -c core.quotePath=false diff --name-status "$verified_parent" origin/main)
             if (( safe_rebase )) &&
                git merge-base --is-ancestor "$verified_parent" origin/main; then
               if git rebase origin/main; then
