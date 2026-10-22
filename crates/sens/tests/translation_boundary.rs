@@ -84,7 +84,7 @@ fn translation_reads_current_knowledge_journal_in_real_sens() {
         (список
           (порожній? журнал-до)
           (хибне? (порожній? (поточний-журнал-знань)))
-          (однакові? (поточний-журнал-знань) *knowledge-journal*)
+          (однакові? (поточний-журнал-знань) журнал-знань)
           (перше (отримати-рішення-за-порадою (як-є corpus)
                     (як-є ((human socrates))))))
     "#;
@@ -126,7 +126,7 @@ fn d10_advice_decisions_are_pure_world_derived_sens_functions() {
     // Відсутню раніше викличність двох ратифікованих D10 функцій
     // доводить тільки їхнє реальне виконання у SENS.
     let source = r#"
-        (визначити журнал-до *knowledge-journal*)
+        (визначити журнал-до журнал-знань)
         (визначити одиночне-рішення
           (отримати-рішення-за-порадою (як-є corpus)
             (як-є ((human socrates)))))
@@ -136,7 +136,7 @@ fn d10_advice_decisions_are_pure_world_derived_sens_functions() {
         (список
           (перше одиночне-рішення)
           (перше пакетне-рішення)
-          (однакові? журнал-до *knowledge-journal*))
+          (однакові? журнал-до журнал-знань))
     "#;
     assert_eq!(
         eval_translation(source),
@@ -174,7 +174,7 @@ fn translation_content_validity_is_exact_d1_in_real_sens() {
 #[test]
 fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
     let source = r#"
-        (визначити before *knowledge-journal*)
+        (визначити before журнал-знань)
         (визначити proposal
           (як-є (translation-1 candidate clause
                    "Socrates is human."
@@ -183,7 +183,7 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
         (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
-          (однакові? before *knowledge-journal*)
+          (однакові? before журнал-знань)
           (однакові? (переклад-допуск-вміст review)
                   (як-є ((human socrates)))))
     "#;
@@ -217,7 +217,7 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
 #[test]
 fn ambiguous_translation_is_evidence_not_knowledge() {
     let source = r#"
-        (визначити before *knowledge-journal*)
+        (визначити before журнал-знань)
         (визначити proposal
           (як-є (translation-1 ambiguous clause
                    "Mercury is hot."
@@ -229,7 +229,7 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
           (довжина evidence)
-          (однакові? before *knowledge-journal*)
+          (однакові? before журнал-знань)
           (переклад-допустимий? review))
     "#;
     assert_eq!(
@@ -241,7 +241,7 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
 #[test]
 fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
     let source = r#"
-        (визначити before *knowledge-journal*)
+        (визначити before журнал-знань)
         (визначити proposal
           (як-є (translation-1 candidate clause
                    "Socrates is human."
@@ -252,7 +252,7 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
           (довжина evidence)
-          (однакові? before *knowledge-journal*)
+          (однакові? before журнал-знань)
           (переклад-допуск-вміст review))
     "#;
     assert_eq!(
@@ -264,7 +264,7 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
 #[test]
 fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
     let source = r#"
-        (визначити before *knowledge-journal*)
+        (визначити before журнал-знань)
         (визначити proposal
           (як-є (translation-1 rejected clause
                    "Colorless green ideas sleep furiously."
@@ -275,7 +275,7 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
           (довжина evidence)
-          (однакові? before *knowledge-journal*)
+          (однакові? before журнал-знань)
           (переклад-допуск-вміст review))
     "#;
     assert_eq!(
@@ -289,7 +289,7 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
     // Явний заперечний факт має правильну вкладеність списку клауз.
     let source = r#"
         (повідомити-знання corpus (як-є (((not? (human socrates))))))
-        (визначити before *knowledge-journal*)
+        (визначити before журнал-знань)
         (визначити proposal
           (як-є (translation-1 candidate clause
                    "Socrates is human."
@@ -298,7 +298,7 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
         (список
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
-          (однакові? before *knowledge-journal*)
+          (однакові? before журнал-знань)
           (переклад-допуск-вміст review))
     "#;
     assert_eq!(
@@ -310,7 +310,7 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
 #[test]
 fn accepted_query_is_a_question_not_a_knowledge_write() {
     let source = r#"
-        (визначити before *knowledge-journal*)
+        (визначити before журнал-знань)
         (визначити proposal
           (як-є (translation-1 candidate query
                    "Is Plato metallic?"
@@ -320,7 +320,7 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
           (переклад-перевірка-стан review)
           (переклад-перевірка-код review)
           (переклад-допуск-вміст review)
-          (однакові? before *knowledge-journal*)
+          (однакові? before журнал-знань)
           (результат-стан
             (міркувати-у-спостерігати (як-є corpus) (переклад-вміст proposal))))
     "#;
