@@ -525,6 +525,17 @@ class ThreePassMigrationTests(unittest.TestCase):
         b,_=self.migrate("(CAR x)\n")
         self.assertEqual(a,b)
 
+    def test_block_comment_keeps_executable_atoms_separate(self):
+        # Раніше x#|...|#y ставав одним атомом xy, змінюючи програму.
+        a, _ = self.migrate("(CONS x#| вкладений #| фрагмент |# текст |#y)\n")
+        b, _ = self.migrate("(CONS x y)\n")
+        self.assertEqual(a, b)
+        # Символи коментаря в лапках належать рядку даних.
+        self.assertEqual(
+            mod.strip_comments('"x#|не-коментар|#y"'),
+            '"x#|не-коментар|#y"',
+        )
+
     def test_unknown_ukrainian_name_is_carried_as_opaque_text7_data(self):
         out,resolver=self.migrate("(невідома-функція ікс)\n")
         self.assertTrue(all(set(word) <= {"0", "1"} for word in out.split()))
