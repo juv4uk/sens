@@ -74,7 +74,8 @@ fn x86_exact_integer_wire_checks_return_typed_d1() {
     // Це виключає попередній RED "01001 has no admitted value-call mechanism".
     for (expression, expected) in [
         ("(число? 7)", true),
-        ("(число? 7/2)", true),
+        ("(число? (частка 7 2))", true),
+        ("(число? 7/2)", false),
         ("(число? \"7\")", false),
         ("(число? (як-є ()))", false),
     ] {
