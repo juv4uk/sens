@@ -324,4 +324,17 @@ fn cond_exhaustion_and_false_answer_are_distinct_live_sens_values() {
         value.as_predicate_bit(), Some(true),
         "test_id=1968-COND-EMPTY-WITNESS layer=SENS expected=D1:true actual={value}"
     );
+
+    // Позаобласний EQ має породжувати D3:000; COND продовжує далі.
+    // Це наскрізний SENS-закон двох сучасних Д3-механізмів, не host-oracle.
+    let composed = "(тотожне? (за-умовою ((тотожне? (сполучити (як-є ліве) (як-є ())) (як-є ліве)) (як-є хибна-гілка)) (так (як-є правильна-гілка))) (як-є правильна-гілка))";
+    let answer = eval_program(composed, &mut session)
+        .unwrap_or_else(|error| panic!(
+            "test_id=1968-EQ-COND-COMPOSITION layer=SENS input={composed} actual_error={error}"
+        ))
+        .value;
+    assert_eq!(
+        answer.as_predicate_bit(), Some(true),
+        "test_id=1968-EQ-COND-COMPOSITION layer=SENS expected=D1:true actual={answer}"
+    );
 }
