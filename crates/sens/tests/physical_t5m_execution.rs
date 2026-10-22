@@ -140,33 +140,33 @@ fn sens_zero_physical_cond_uses_only_exact_d1() {
     assert_eq!(result.value.as_predicate_bit(), None);
 }
 
-/// #3161: справжній T5M потік має відрізняти відсутній свідок D3:000
-/// від явної відповіді D1:0. Обидва пропускають гілку, але не зливаються
-/// в одну предикатну тотожність, навіть без текстової проєкції.
+/// #3161 CURRENT FOUNDATION SUPERSESSION / Contract 11.8:
+/// фізичний D3:000 у позиції COND test відхиляється помилкою Type,
+/// а структурне () при вичерпанні зберігається окремим позитивом вище.
+/// Немає прихованого перетворення () на D1:NO під час T5M кодування.
 #[test]
-fn sens_zero_physical_cond_skips_no_witness_without_casting_it_to_d1_no() {
-    for (source, expected) in [
-        ("10 110 00 10 000 00 1 01 01", None),
-        ("10 110 00 10 000 00 1 01 00 10 1 00 0 01 01", Some(false)),
+fn sens_zero_physical_cond_rejects_structural_empty_as_test() {
+    for source in [
+        "10 110 00 10 000 00 1 01 01",
+        "10 110 00 10 000 00 1 01 00 10 1 00 0 01 01",
     ] {
         let words = sens::parse_binary_source_words(source)
-            .expect("точний D2/D3 тест повинен читатися");
-        let words = words.into_iter().map(|token| token.word).collect::<Vec<_>>();
-        let physical = encode_ternary_words(&words).expect("чинний T5M");
+            .expect("точний D2/D3 негативний свідок має читатися")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        let physical = encode_ternary_words(&words).expect("чинний Zig/T5M");
         assert_eq!(decode_ternary_program(&physical).unwrap(), words);
-        let value = eval_reference_t5m(&physical, &mut Session::default())
-            .unwrap_or_else(|error| panic!(
-                "test_id=3161-PHYSICAL-COND layer=SENS source={source} actual_error={error:?}"
-            ))
-            .value;
-        assert_eq!(
-            value.as_predicate_bit(),
-            expected,
-            "test_id=3161-PHYSICAL-COND source={source} expected={expected:?} actual={value}"
-        );
-        if expected.is_none() {
-            assert!(matches!(value, Value::Nil),
-                "test_id=3161-PHYSICAL-COND expected=D3:000 actual={value}");
+        match eval_reference_t5m(&physical, &mut Session::default()) {
+            Err(ReferenceT5mError::Language(error)) => {
+                assert_eq!(
+                    error.kind, ErrorKind::Type,
+                    "test_id=3161-PHYSICAL-COND layer=SENS source={source} expected=Type actual={error}"
+                );
+            }
+            other => panic!(
+                "test_id=3161-PHYSICAL-COND layer=SENS source={source} expected=Type actual={other:?}"
+            ),
         }
     }
 }
