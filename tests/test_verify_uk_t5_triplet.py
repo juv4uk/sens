@@ -131,7 +131,7 @@ class BoundedUkTripletTests(unittest.TestCase):
         words = view.read_text(encoding="ascii").split()
         self.assertEqual(
             mod.canonical_uk_from_words(words),
-            "(як-є ())\\n(сполучити (як-є ()) (як-є ()))\\n",
+            "(як-є ())\n(сполучити (як-є ()) (як-є ()))\n",
         )
         self.assertEqual(mod.project_current_uk(lisp.read_text(encoding="utf-8")), words)
         record = mod.verify(lisp, sens, view)
