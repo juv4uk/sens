@@ -464,6 +464,25 @@ class ThreePassMigrationTests(unittest.TestCase):
                 self.assertNotEqual(escaped, wrong_printable)
                 self.assertIn(exact_word, escaped.split())
 
+    def test_string_literals_never_fold_identifier_glyphs(self):
+        # Лише імена допускають клавіатурне скорочення; рядки — дані.
+        for raw, folded in (("a—b", "a-b"), ("a–b", "a-b"),
+                            ("a─b", "a-b"), ("a═b", "a=b")):
+            with self.subTest(raw=raw):
+                token = mod.Tok("ATOM", raw, 0)
+                self.assertEqual(
+                    mod.text7_encode(raw, self.text7, token),
+                    mod.text7_encode(folded, self.text7, token),
+                )
+                # Без захисту literal ставав a-b/a=b без жодної помилки.
+                with self.assertRaisesRegex(mod.MigrationError, "cannot encode"):
+                    self.migrate('(сполучити "' + raw + '")')
+
+    def test_quoted_sanskrit_text_is_not_transliterated_as_identifier(self):
+        # Сама IAST->деванагарі транслітерація змінює рядковий літерал.
+        with self.assertRaisesRegex(mod.MigrationError, "cannot encode"):
+            self.migrate('(сполучити "śūnya")')
+
     def test_sid8_bridge_cannot_authorize_any_executable_head(self):
         with self.assertRaisesRegex(mod.MigrationError, "unratified SID8 bridge"):
             mod.Resolver(self.my, self.upper,
