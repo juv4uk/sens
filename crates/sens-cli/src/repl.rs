@@ -336,11 +336,27 @@ fn selected_surface_callable(
     let Some(ukr_name) = surface_catalog::ukr_name_for_identity(&identity_text)? else {
         return Ok(None);
     };
-    Ok(
-        sens::semantic_registry_export::exact_uk_callable_for_source_head(&ukr_name)
-            .filter(|admitted| *admitted == identity)
-            .and_then(DomainIdentity::core_operation),
-    )
+    // D3–D6 and proved selectors keep their exact source authority.
+    let admitted = sens::semantic_registry_export::exact_uk_callable_for_source_head(&ukr_name)
+        .filter(|admitted| *admitted == identity)
+        .and_then(DomainIdentity::core_operation);
+    if admitted.is_some() {
+        return Ok(admitted);
+    }
+
+    // The D8 table is a distinct, owner-ratified ladder, not historical W8.
+    // The source catalog has already proved the full Ukrainian spelling and
+    // exact D8 coordinate. DomainIdentity::core_operation admits only real
+    // resident mechanisms (currently CHAR-CODE, READ and three text I/O ops).
+    // Do not turn other D8 residents, D7 keyboard text, or English aliases
+    // into callable SENS just because a spelling exists in a table.
+    if identity.width() == 8
+        && projected_name == ukr_name
+        && matches!(surface, ReplSurface::UkrainianFull | ReplSurface::Ukrainian)
+    {
+        return Ok(identity.core_operation());
+    }
+    Ok(None)
 }
 
 fn project_repl_surface_expression(
@@ -1860,6 +1876,60 @@ mod tests {
         };
         assert_eq!(number.numeric_domain_width(), Some(24));
         assert_eq!(number.to_decimal_string(), "3");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn full_ukrainian_d8_io_is_domain_qualified_not_text7_or_sid8() {
+        // These five mechanisms are already admitted by D8, not by a legacy
+        // eight-bit SID. No independent Rust semantics are introduced.
+        for (name, bits) in [
+            ("код-символу", 0b11100000),
+            ("прочитати", 0b11101010),
+            ("текст-у-символ", 0b11101101),
+            ("символ-у-текст", 0b11101110),
+            ("значення-у-текст", 0b11110100),
+        ] {
+            let actual = selected_surface_callable(ReplSurface::UkrainianFull, name)
+                .expect("ratified Ukrainian ladder must parse")
+                .expect("current D8 mechanism must remain callable");
+            assert_eq!(actual.width(), 8, "{name}");
+            assert_eq!(actual.packed_bits(), bits, "{name}");
+        }
+
+        // A resident without an executable mechanism stays inert; foreign
+        // spelling and D7 text never become D8 by width or name similarity.
+        assert!(
+            selected_surface_callable(ReplSurface::UkrainianFull, "вектор")
+                .expect("ratified non-callable D8 resident lookup")
+                .is_none()
+        );
+        assert!(
+            selected_surface_callable(ReplSurface::English, "string->symbol")
+                .expect("English projection must not elevate new D8 calls")
+                .is_none()
+        );
+
+        // The former real RED interpreted this admitted nested call as a
+        // Text7 variable (#t7:...). Check it now lowers to exact SENS words,
+        // not a Python/JSON oracle or a textual surrogate for the execution.
+        let session = Session::default();
+        let words = prepare_t5m_repl_words(
+            "(текст-у-символ (значення-у-текст (як-є сполучити)))",
+            ReplSurface::UkrainianFull,
+            &session,
+        )
+        .expect("current Ukrainian nested D8 source must reach exact T5M words");
+        assert!(words.iter().any(|word| matches!(
+            word,
+            ExactDomainWord::Identity(DomainIdentity::D8(id))
+                if id.word().packed_bits() == 0b11101101
+        )));
+        assert!(words.iter().any(|word| matches!(
+            word,
+            ExactDomainWord::Identity(DomainIdentity::D8(id))
+                if id.word().packed_bits() == 0b11110100
+        )));
     }
 
     #[cfg(feature = "zig-transport")]
