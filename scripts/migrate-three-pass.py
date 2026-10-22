@@ -182,6 +182,8 @@ def strip_comments(source: str) -> str:
         if ch==";":
             state="line"; i+=1; continue
         if source.startswith("#|",i):
+            # Без пробілу x#|коментар|#y неправильно стає атомом xy.
+            out.append(" ")
             state="block"; depth=1; i+=2; continue
         out.append(ch); i+=1
     if state=="block":
