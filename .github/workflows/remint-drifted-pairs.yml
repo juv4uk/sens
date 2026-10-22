@@ -196,6 +196,13 @@ jobs:
             echo "failed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Вимір без паперової статистики: mint/inverse/paired/standalone
+      # на тому самому SHA і саме тому SENS/Zig, що обробив учасників.
+      # Структурна трійка без реального виконання в лічильник не потрапляє.
+      - name: Порахувати реально виконувані українські Lisp конкурсу
+        if: steps.remint.outputs.contest == 'true'
+        run: bash scripts/count-executable-lisp.sh benchmarks/contest-uk/
+
       # RED одного кандидата не затримує конкурс уже доведених трійок.
       # Наприкінці workflow справжня відмова mint лишається червоною.
       - name: Нативне суддівство і просування справжніх переможців
