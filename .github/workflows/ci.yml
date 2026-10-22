@@ -815,6 +815,7 @@ jobs:
           cargo test --locked -p sens --test utf8 utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols -- --exact --nocapture
           cargo test --locked -p sens --test utf8 utf8_integer_quotient_and_remainder_execute_in_sens_with_d1_branch -- --exact --nocapture
           cargo test --locked -p sens --test utf8 utf8_direct_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
+          cargo test --locked -p sens --test utf8 utf8_domain_functions_survive_repeated_loader_and_fs_without_redefinition -- --exact --nocapture
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' }}
