@@ -137,6 +137,7 @@ jobs:
             # при кожному незалежному push: це відтягує обернення нових Lisp.
             # Джерело без .sens або view залишається в черзі; нативний
             # суддя як і раніше відхиляє drift та хибне виконання.
+            if [[ "$GITHUB_REF" == refs/heads/main ]]; then
             for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
@@ -210,6 +211,14 @@ jobs:
                 list="$(printf '%s\n%s' "$list" "$source")"
               fi
             done
+          fi
+            # Глобальний remint належить лише main. У PR — лише свій source diff.
+            fi
+          if [[ "$EVENT_NAME" == push && "$GITHUB_REF" != refs/heads/main ]]; then
+            git rev-parse --verify refs/remotes/origin/main >/dev/null || exit 2
+            pr_base="$(git merge-base origin/main HEAD)" || exit 2
+            list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$pr_base" HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'lib/meta-eval-first-class.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/lisp-fs.lisp' 'lib/world.lisp' 'lib/reason.lisp' 'lib/forward.lisp' 'lib/knowledge.lisp' 'lib/unify.lisp' 'lib/clips-import.lisp' 'lib/yantra.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp' ':(exclude)tests/semantic/meta-fc-predicates-d1-mutant.lisp')"
+            echo "REMINT_PR_SOURCE_SCOPE ref=$GITHUB_REF base=$pr_base"
           fi
           if [ -z "$list" ] && [[ "$EVENT_NAME" != push ]]; then
             if [ -f scripts/remint-drifted-pairs.txt ]; then
@@ -314,7 +323,7 @@ jobs:
       # Наприкінці workflow справжня відмова mint лишається червоною.
       - name: Нативне суддівство і просування справжніх переможців
         id: contest_judge
-        if: github.event_name == 'push' && steps.remint.outputs.contest == 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.remint.outputs.contest == 'true'
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
@@ -356,8 +365,23 @@ jobs:
             done
           }
           commit_verified_changes() {
-            prune_archived_duplicates
-            git add -A || return 2
+            if [[ "$target_branch" == main ]]; then
+              prune_archived_duplicates
+              git add -A || return 2
+            else
+              # У PR публікуємо тільки реально виконані SENS/Zig пари.
+              local verified pair view
+              while IFS= read -r verified; do
+                [[ "$verified" == *.lisp ]] || continue
+                pair="${verified%.lisp}.sens"
+                view="${verified%.lisp}"
+                if [[ ! -f "$pair" || -L "$pair" || ! -f "$view" || -L "$view" ]]; then
+                  echo "::error::REMINT_VERIFIED_PAIR_MISSING source=$verified" >&2
+                  return 2
+                fi
+                git add -- "$pair" "$view" || return 2
+              done < "$RUNNER_TEMP/sens-remint-success.txt"
+            fi
             local diff_status=0
             git diff --cached --quiet || diff_status=$?
             case "$diff_status" in

@@ -1037,6 +1037,8 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/замінити-всі-входження",
         "lib/list-stable-symmetric-difference-general",
         "lib/list-drop-while-atom-general",
+        // Новий source має власний повний SENS/Zig T5M native proof.
+        "lib/list-drop-leading-atoms-zero-copy-general",
         "lib/list-take-while-atom-general",
         "lib/list-remove-first-atom",
         "lib/list-remove-all-atoms-general",
