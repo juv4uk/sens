@@ -479,6 +479,9 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-suffix-after-first-atomic-triple-zero-copy-general",
         "list-suffix-after-last-atomic-triple-zero-copy-general",
         "list-tail-after-second-atom-zero-copy-general",
+        "list-last-three-zero-copy-general",
+        "list-tail-after-third-compound-zero-copy-general",
+        "list-unique-stable-fast-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -646,6 +649,9 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-remove-first-compound-general"
                 | "list-suffix-after-first-atomic-triple-zero-copy-general"
                 | "list-tail-after-second-atom-zero-copy-general"
+                | "list-last-three-zero-copy-general"
+                | "list-tail-after-third-compound-zero-copy-general"
+                | "list-unique-stable-fast-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
@@ -712,8 +718,17 @@ fn verify_unpaired_ukrainian_libs_natively() {
             error(&mismatch)
         );
         fs::remove_dir_all(&scratch).expect("прибрати лише власні тимчасові файли");
-        independently_executed.insert(stem);
-        println!("SENS_UKR_EXECUTABLE_PASS file=lib/{stem}.lisp exact=Zig/T5M d1=1");
+        // Лише фактична трійка .lisp/.sens/exact-view є файлом, готовим
+        // до автономного виконання. Тимчасовий native mint сам по собі
+        // не збільшує кількість опублікованих виконуваних Lisp.
+        let committed_physical = root.join("lib").join(format!("{stem}.sens"));
+        let committed_view = root.join("lib").join(stem);
+        if committed_physical.is_file() && committed_view.is_file() {
+            independently_executed.insert(stem);
+            println!("SENS_UKR_EXECUTABLE_PASS file=lib/{stem}.lisp exact=Zig/T5M d1=1");
+        } else {
+            println!("SENS_UKR_EXECUTABLE_PENDING file=lib/{stem}.lisp reason=NO_COMMITTED_T5M_TRIPLE");
+        }
     }
     println!(
         "SENS_UKR_EXECUTABLE_TOTAL scope=cli-native-subset unique_files={} native=SENS/Zig/T5M",
