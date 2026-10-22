@@ -68,6 +68,7 @@ for source in "$here"/*.lisp; do
     семикутне|семикутне-*) expected=235 ;;
     шестикутне|шестикутне-*) expected=190 ;;
     добуток-сусідів|добуток-сусідів-*) expected=156 ;;
+    перевернути|перевернути-*) expected="(5 4 3 2 1)" ;;
     *) echo "CONTEST_UNKNOWN_TASK: немає перевіреного очікуваного результату: $source" >&2; fail=1; continue ;;
   esac
   physical="$scratch/$name.sens"
