@@ -12,11 +12,11 @@
     },
     {
       "path": "contracts/compiler-bootstrap-boundary-v1.contract",
-      "git_blob_sha1": "5cc00df22356bcd2281a5d6d6445e019c54bd1dd"
+      "git_blob_sha1": "dc35b5052e076256da37c01bfaa3c4680ac0e454"
     },
     {
       "path": "contracts/compiler-program-data-v1.lisp",
-      "git_blob_sha1": "5e73b3a18d2ba3f308995f13c0bcec92045e30a5"
+      "git_blob_sha1": "bd9eb23a513a015998c4873ef78d11819e94280f"
     },
     {
       "path": "contracts/compiler-selfhost-lineage-v1.lisp",
