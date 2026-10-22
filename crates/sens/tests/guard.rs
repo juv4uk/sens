@@ -487,3 +487,33 @@ fn mechanism_selector_d3_d5_is_executable_without_sid8_or_host_file_reader() {
             "test_id=mechanism-native-d3d5 layer=SENS input={input} expected={expected} actual={actual:?}");
     }
 }
+
+
+#[test]
+fn function_table_native_d3_d5_routes_and_fail_closed() {
+    // Виконуються справжні DEFINE, закони й запити української SENS.
+    // Rust — лише тестовий процес; не виконавець чи оракул семантики.
+    let source = include_str!("../../../lib/function-table-mechanisms.lisp");
+    let mut session = Session::default();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("українські домени D3–D5");
+    let forms = parse_mixed_exact_domain(source)
+        .expect("ратифікований SENS reader читає паспорт");
+    sens::eval_parsed_expressions(&forms, &mut session)
+        .expect("п'ять законів і весь паспорт повинні виконатися у SENS");
+    for (input, expected) in [
+        ("(хибне? (порожній? (механізми-функції (як-є додати))))", true),
+        ("(тотожне? (перше (перше (механізми-функції (як-є додати)))) (як-є common-lisp))", true),
+        ("(тотожне? (перше (перше (решта (механізми-функції (як-є додати))))) (як-є prolog))", true),
+        ("(порожній? (механізми-функції (як-є повернути)))", true),
+        ("(порожній? (механізми-функції (список (як-є додати))))", true),
+        ("(порожній? (механізми-функції (як-є додати)))", false),
+    ] {
+        let query = parse_mixed_exact_domain(input).expect("точна мова запиту SENS");
+        let actual = sens::eval_parsed_expressions(&query, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=function-table-native layer=SENS input={input}: {error}"))
+            .value.as_predicate_bit();
+        assert_eq!(actual, Some(expected),
+            "test_id=function-table-native layer=SENS input={input} expected={expected} actual={actual:?}");
+    }
+}
