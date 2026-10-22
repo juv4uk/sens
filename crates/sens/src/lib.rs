@@ -61,6 +61,7 @@ pub mod domain_ladder;
 mod domain_words;
 mod program_data;
 pub use domain_ladder::DomainD10;
+mod binary_bootstrap;
 mod binary_execution;
 mod binary_framing;
 #[cfg(test)]
@@ -73,7 +74,6 @@ mod error;
 pub(crate) mod eval;
 mod gpu_execution_packet;
 mod language_items;
-mod binary_bootstrap;
 mod mixed_source;
 // Legacy Rust bit-packer retained only as a unit-test reference. Production
 // SENS exposes no Rust OuterEnvelope carrier; physical packing belongs to the
@@ -153,6 +153,13 @@ pub mod semantic_registry_export {
     /// NEVER rewrite a valid current Ukrainian head into an old SID8 token.
     pub fn exact_uk_callable_for_source_head(name: &str) -> Option<super::DomainIdentity> {
         super::semantic_registry::exact_uk_callable_for_source_head(name)
+    }
+
+    /// Whether an exact current D9/D10 identity may be an explicit D4 DEFINE
+    /// target. This is admission only, not evidence that a definition exists;
+    /// evaluation still requires a concrete callable and an empty root slot.
+    pub fn is_admitted_exact_definition_target(identity: super::DomainIdentity) -> bool {
+        super::semantic_registry::is_admitted_exact_definition_target(identity)
     }
 
     /// Current domain-ladder lookup for admitted callable surfaces.
@@ -315,11 +322,6 @@ const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 /// Metacircular evaluator source. Primitive identity values are canonical
 /// Ukrainian domain projections, not decimalized bit strings or a generated SID registry.
 pub const META_EVAL_LIBRARY_SOURCE: &str = include_str!("../../../lib/meta-eval.lisp");
-
-/// Language-owned time semantics. Host clocks expose raw observations such as
-/// `mono-ns` and `unix-time-now`; this library derives coarser clocks,
-/// calendar interpretation, UTC structure, and deadline arithmetic.
-pub const TIME_LIBRARY_SOURCE: &str = include_str!("../../../lib/time.lisp");
 
 /// Exact UTF-8 validation and byte-to-Unicode interpretation owned by Lisp.
 pub const UTF8_LIBRARY_SOURCE: &str = include_str!("../../../lib/utf8.lisp");
@@ -674,7 +676,7 @@ pub fn load_meta_evaluator_library_from_source(
 /// preserves the closed language core while giving embedders one canonical
 /// time-layer loader instead of ad-hoc `include_str!` calls.
 pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    load_time_library_from_source(session, TIME_LIBRARY_SOURCE)
+    binary_bootstrap::time_program()?.execute(session)
 }
 
 /// Load caller-supplied time source through the SAME owner-pinned exact-width

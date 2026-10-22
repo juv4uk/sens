@@ -32,13 +32,6 @@ use std::process;
 /// Every expression is still logged to stderr with its peer address, for
 /// the same accountability reason the isolation itself was added for.
 pub(crate) fn run_tcp_repl(port: u16, core_lib: &str, allowed: &[String]) {
-    let time_source = match crate::time_library_source_zig_only() {
-        Ok(source) => source,
-        Err(error) => {
-            eprintln!("Error loading time.lisp: {error}");
-            process::exit(1);
-        }
-    };
     let listener = match TcpListener::bind((Ipv4Addr::LOCALHOST, port)) {
         Ok(listener) => listener,
         Err(err) => {
@@ -74,10 +67,16 @@ pub(crate) fn run_tcp_repl(port: u16, core_lib: &str, allowed: &[String]) {
         // head-name fallback is allowed to rescue a bare custom Environment.
         if load_macro_library(&mut session).is_ok() {
             if let Ok(core_ast) = parse(core_lib) {
-                if eval_parsed_expressions(&core_ast, &mut session).is_ok()
-                    && sens::load_time_library_from_source(&mut session, &time_source).is_ok()
-                {
-                    let _ = load_process_library(&mut session);
+                if eval_parsed_expressions(&core_ast, &mut session).is_ok() {
+                    match sens::load_time_library(&mut session) {
+                        Ok(_) => {
+                            let _ = load_process_library(&mut session);
+                        }
+                        Err(error) => eprintln!(
+                            "TCP REPL: T5M time bootstrap failed: {}",
+                            error.render("<T5M time bootstrap>")
+                        ),
+                    }
                 }
             }
         }

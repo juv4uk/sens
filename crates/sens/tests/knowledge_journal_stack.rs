@@ -10,8 +10,14 @@ fn loaded_session() -> Session {
     for (path, library) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
     ] {
         let forms = parse_mixed_exact_domain_reasoning_source(path, library)
             .unwrap_or_else(|error| panic!("читач СЕНС {path}: {error}"));

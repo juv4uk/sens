@@ -5,7 +5,8 @@ Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/knowledge.lisp size >= 1000 and no PLACEHOLDER
   2. No host COND else (1110 (001 t)
-  3. Поточні D1-предикати у виконуваних умовах, без історичних сирих літералів
+  3. Current D1 predicates without historical raw literals
+  4. Current Ukrainian D1 projection in the domain table
   4. Первинна українська проєкція: повідомити-знання, модуль-клаузи-зараз, міркувати-у
   5. D1–D10 exact-width tables
 
@@ -23,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 KNOW = ROOT / "lib" / "knowledge.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST_T = "(1110 (001 t)"
+D1_TRUE_UKR = "(1 (ук так) (укр так)"
 D1_GUARDS = ("(за-умовою", "((хибне?", "(порожній?")
 REQUIRED = (
     "повідомити-знання",
@@ -76,6 +78,11 @@ def check_domain(n: int) -> list[str]:
 def main() -> int:
     all_errs: list[str] = []
     all_errs.extend(check_knowledge())
+    d1_path = ROOT / "lib" / "domains" / "d1.lisp"
+    if not d1_path.is_file():
+        all_errs.append("D1: missing current domain table")
+    elif D1_TRUE_UKR not in d1_path.read_text(encoding="utf-8"):
+        all_errs.append("D1:1 current ук/укр projection так missing")
     for n in range(1, 11):
         all_errs.extend(check_domain(n))
 
@@ -85,7 +92,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("KNOWLEDGE: structural audit OK — Ukrainian source and D1 predicates; native SENS evaluation not asserted")
+    print("KNOWLEDGE: PASS — full file, no host COND t, Ukrainian D1 projection, surface intact")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")

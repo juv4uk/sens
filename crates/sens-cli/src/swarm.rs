@@ -592,19 +592,12 @@ fn handle_sexpr_connection(
         );
         return;
     }
-    // The time library uses an owner-pinned exact-D3 parser, not the ordinary
-    // composite string reader (which would treat W3 heads as decimal tokens).
-    let time_source = match crate::time_library_source_zig_only() {
-        Ok(source) => source,
-        Err(error) => {
-            eprintln!("TCP REPL: time library bootstrap failed: {error}");
-            return;
-        }
-    };
-    if let Err(error) = sens::load_time_library_from_source(&mut session, &time_source) {
+    // The time library arrives as exact words restored from the pinned T5M
+    // carrier; the CLI has no source-text fallback for this bootstrap.
+    if let Err(error) = sens::load_time_library(&mut session) {
         eprintln!(
             "TCP REPL: time library bootstrap failed: {}",
-            error.render(&time_source)
+            error.render("<T5M time bootstrap>")
         );
         return;
     }

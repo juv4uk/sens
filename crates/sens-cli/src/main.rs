@@ -707,15 +707,11 @@ fn main() {
     // Time is a language-owned semantic layer, not part of the closed core.
     // Load it explicitly after core so local CLI/REPL sessions keep `utc-now`
     // even after the old Rust calendar builtin is removed.
-    let time_source = match time_library_source_zig_only() {
-        Ok(source) => source,
-        Err(error) => {
-            eprintln!("Error loading time.lisp: {error}");
-            process::exit(1);
-        }
-    };
-    if let Err(e) = sens::load_time_library_from_source(&mut session, &time_source) {
-        eprintln!("Error loading time.lisp: {}", e.render(&time_source));
+    if let Err(e) = sens::load_time_library(&mut session) {
+        eprintln!(
+            "Error loading time bootstrap: {}",
+            e.render("<T5M time bootstrap>")
+        );
         process::exit(1);
     }
 
@@ -1487,16 +1483,14 @@ mod core_profile_bootstrap_tests {
     }
 
     #[test]
-    fn cli_time_library_bootstraps_from_exact_zig_carried_source() {
+    fn cli_time_library_bootstraps_from_exact_t5m_words() {
         let mut session = Session {
             environment: Environment::root(),
         };
         bootstrap_core(&mut session, CliCore::Core4).expect("CLI Core4 bootstrap must succeed");
 
-        let source = time_library_source_zig_only().expect("Zig carries the time source");
-        assert_eq!(source, sens::TIME_LIBRARY_SOURCE);
-        sens::load_time_library_from_source(&mut session, &source)
-            .expect("SENS parses and loads the exact Zig-carried source");
+        sens::load_time_library(&mut session)
+            .expect("SENS restores and loads the exact T5M time words");
     }
 }
 
@@ -1513,14 +1507,3 @@ fn repl_core_source_zig_only() -> Result<String, String> {
     }
 }
 
-fn time_library_source_zig_only() -> Result<String, String> {
-    #[cfg(feature = "zig-transport")]
-    {
-        let bytes = zig_transport::repl_time_source_bytes()?;
-        String::from_utf8(bytes).map_err(|e| format!("ZIG_REPL_TIME UTF-8: {e}"))
-    }
-    #[cfg(not(feature = "zig-transport"))]
-    {
-        Err("RUST_ZIG_ONLY: time library requires Zig; no Rust source fallback".into())
-    }
-}

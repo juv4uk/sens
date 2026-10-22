@@ -257,11 +257,6 @@ pub fn repl_core_source_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(asset_ffi::sens_zig_repl_core_bytes_copy, "ZIG_SENS_REPL")
 }
 
-/// Opaque time-library source bytes carried through the Zig root ABI.
-pub fn repl_time_source_bytes() -> Result<Vec<u8>, String> {
-    opaque_zig_asset(asset_ffi::sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")
-}
-
 /// Opaque D9 witness source bytes carried through the Zig root ABI.
 pub fn d9_witness_source_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(asset_ffi::sens_zig_d9_witness_bytes_copy, "ZIG_D9_WITNESS")

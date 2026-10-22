@@ -11,6 +11,7 @@ pub fn main(init: std.process.Init) !void {
     const libraries = [_]struct { name: []const u8, physical: []const u8 }{
         .{ .name = "MACRO_BOOTSTRAP_WORDS", .physical = @embedFile("lib/macro.sens") },
         .{ .name = "CORE3_BOOTSTRAP_WORDS", .physical = @embedFile("lib/core3.sens") },
+        .{ .name = "TIME_BOOTSTRAP_WORDS", .physical = @embedFile("lib/time.sens") },
     };
     for (libraries) |library| {
         try emitWords(allocator, output, library.name, library.physical);

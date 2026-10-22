@@ -1,7 +1,50 @@
 use sens::{
-    eval_parsed_expressions, Bit5, Bit6, Bit7, Bit8, CoreD5, CoreD6, CoreD8, D7DataWord,
-    DomainIdentity, Expr, ExprKind, Rational, Session, Span,
+    eval_parsed_expressions, BinaryNumber, Bit5, Bit6, Bit7, Bit8, CoreD5, CoreD6, CoreD8,
+    D7DataWord, DomainIdentity, Expr, ExprKind, Rational, Session, Span, Value,
 };
+
+fn d24(value: u32) -> Value {
+    let mut bits = vec![0; 24];
+    for index in 0..24 {
+        bits[23 - index] = ((value >> index) & 1) as u8;
+    }
+    Value::BinaryNumber(
+        BinaryNumber::from_numeric_domain_bits(24, &bits).expect("explicit D24 test value"),
+    )
+}
+
+fn install_numeric_witnesses(session: &mut Session) {
+    let zero = d24(0);
+    let one = d24(1);
+    let two = d24(2);
+    let seven = d24(7);
+    let forty_one = d24(41);
+    for (name, value) in [
+        ("zero", zero.clone()),
+        ("one", one.clone()),
+        ("two", two.clone()),
+        ("seven", seven.clone()),
+        ("forty_one", forty_one.clone()),
+    ] {
+        session.environment.define(name, value);
+    }
+    for (name, operator, lhs, rhs) in [
+        ("negative_two", "-", &zero, &two),
+        ("negative_seven", "-", &zero, &seven),
+        ("half", "/", &one, &two),
+    ] {
+        session.environment.define(
+            name,
+            sens::domain_numeric_value(operator, lhs, rhs)
+                .expect("SENS D24+ arithmetic creates exact witness"),
+        );
+    }
+    let half = session.environment.get("half").expect("half witness");
+    session.environment.define(
+        "negative_half",
+        sens::domain_numeric_value("-", &zero, &half).expect("exact negative fraction"),
+    );
+}
 
 fn exact_d6_call(
     bits: u8,
@@ -40,14 +83,15 @@ fn only_proven_d6_arithmetic_and_integerp_project_to_callable_core() {
 fn exact_d6_add1_sub1_execute_as_exact_lower_domain_composition() {
     let mut session = Session::default();
     sens::load_core_library(&mut session).expect("core");
+    install_numeric_witnesses(&mut session);
 
     for (bits, args, expected) in [
-        (0b001110, "1/2", "3/2"),
-        (0b001110, "-2", "-1"),
-        (0b001111, "1/2", "-1/2"),
-        (0b001111, "-2", "-3"),
-        (0b001110, "41", "42"),
-        (0b001111, "41", "40"),
+        (0b001110, "half", "3/2"),
+        (0b001110, "negative_two", "-1"),
+        (0b001111, "half", "-1/2"),
+        (0b001111, "negative_two", "-3"),
+        (0b001110, "forty_one", "42"),
+        (0b001111, "forty_one", "40"),
     ] {
         assert_eq!(
             exact_d6_call(bits, args, &mut session).expect("admitted D6 mechanism"),
@@ -61,12 +105,13 @@ fn exact_d6_add1_sub1_execute_as_exact_lower_domain_composition() {
 fn d6_neg_executes_in_the_sens_evaluator_with_signed_and_fractional_operands() {
     let mut session = Session::default();
     sens::load_core_library(&mut session).expect("SENS core");
+    install_numeric_witnesses(&mut session);
     for (argument, expected) in [
-        ("0", "0"),
-        ("7", "-7"),
-        ("-7", "7"),
-        ("1/2", "-1/2"),
-        ("-1/2", "1/2"),
+        ("zero", "0"),
+        ("seven", "-7"),
+        ("negative_seven", "7"),
+        ("half", "-1/2"),
+        ("negative_half", "1/2"),
     ] {
         assert_eq!(
             exact_d6_call(0b010010, argument, &mut session)
@@ -89,9 +134,7 @@ fn d6_neg_executes_in_the_sens_evaluator_with_signed_and_fractional_operands() {
             .kind,
         sens::ErrorKind::Type
     );
-    let same_payload_d7 = DomainIdentity::D7(
-        D7DataWord::from_word(Bit7::new(0b010010).unwrap())
-    );
+    let same_payload_d7 = DomainIdentity::D7(D7DataWord::from_word(Bit7::new(0b010010).unwrap()));
     assert!(same_payload_d7.core_operation().is_none());
 }
 

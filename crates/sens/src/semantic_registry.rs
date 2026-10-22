@@ -385,6 +385,15 @@ pub(crate) fn d10_binding_identity_for_definition(name: &str) -> Option<DomainId
         })
 }
 
+/// Exact current D9/D10 identity domains support explicit D4 DEFINE binding.
+/// The target identity alone does not grant callability: DEFINE still requires
+/// a concrete closure/builtin, a root frame, and an empty exact runtime slot.
+/// This keeps domain identity, explicit definition, and subsequent invocation
+/// as three separate steps.
+pub(crate) fn is_admitted_exact_definition_target(identity: DomainIdentity) -> bool {
+    matches!(identity, DomainIdentity::D9(_) | DomainIdentity::D10(_))
+}
+
 /// Канонічний surface → domain маршрут читає тільки ратифіковану
 /// exact-width проєкцію. Історичний SID/байт не визначає домен.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {

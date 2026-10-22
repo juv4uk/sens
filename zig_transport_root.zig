@@ -377,25 +377,6 @@ test "REPL persistent_vector exact bytes and untouched short buffer" {
     try std.testing.expectEqualSlices(u8, repl_persistent_vector_asset[0..repl_persistent_vector_asset.len], &full);
 }
 
-const repl_time_asset = @embedFile("lib/time.lisp");
-pub export fn sens_zig_repl_time_bytes_copy(dst: [*]u8, capacity: usize) isize {
-    if (repl_time_asset.len == 0) return -1;
-    if (capacity == 0) return @intCast(repl_time_asset.len);
-    if (capacity < repl_time_asset.len) return -2;
-    @memcpy(dst[0..repl_time_asset.len], repl_time_asset[0..repl_time_asset.len]);
-    return @intCast(repl_time_asset.len);
-}
-test "REPL time exact bytes and untouched short buffer" {
-    const length = sens_zig_repl_time_bytes_copy(undefined, 0);
-    try std.testing.expectEqual(@as(isize, @intCast(repl_time_asset.len)), length);
-    var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_time_bytes_copy(&short, short.len));
-    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
-    var full: [repl_time_asset.len]u8 = undefined;
-    try std.testing.expectEqual(length, sens_zig_repl_time_bytes_copy(&full, full.len));
-    try std.testing.expectEqualSlices(u8, repl_time_asset[0..repl_time_asset.len], &full);
-}
-
 const d9_witness_asset = @embedFile("tests/semantic/d9-four-uk-projections-laws.lisp");
 pub export fn sens_zig_d9_witness_bytes_copy(dst: [*]u8, capacity: usize) isize {
     if (d9_witness_asset.len == 0) return -1;

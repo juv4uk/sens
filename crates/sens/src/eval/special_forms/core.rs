@@ -113,10 +113,17 @@ pub(crate) fn evaluate_definition(
             Ok(value)
         }
         ExprKind::DomainIdentity(identity) => {
-            let Some(identity) = identity.core_operation() else {
+            let Some(target) = identity
+                .core_operation()
+                .map(crate::DomainIdentity::from)
+                .or_else(|| {
+                    crate::semantic_registry::is_admitted_exact_definition_target(*identity)
+                        .then_some(*identity)
+                })
+            else {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
-                    "exact DEFINE target must be a callable D3/D4/D5/D6 DomainIdentity",
+                    "exact DEFINE target must have an admitted domain identity",
                     arguments[0].span,
                 ));
             };
@@ -129,10 +136,10 @@ pub(crate) fn evaluate_definition(
                 ));
             }
 
-            if environment.domain_code_slot(identity).is_some() {
+            if environment.domain_code_slot(target).is_some() {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
-                    format!("exact DEFINE target already has a language-owned binding: {identity}"),
+                    format!("exact DEFINE target already has a language-owned binding: {target}"),
                     arguments[0].span,
                 ));
             }
@@ -146,10 +153,10 @@ pub(crate) fn evaluate_definition(
                 ));
             }
 
-            if !environment.bind_domain_code_slot_once(identity, value.clone()) {
+            if !environment.bind_domain_code_slot_once(target, value.clone()) {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
-                    format!("exact DEFINE target was concurrently bound: {identity}"),
+                    format!("exact DEFINE target was concurrently bound: {target}"),
                     arguments[0].span,
                 ));
             }

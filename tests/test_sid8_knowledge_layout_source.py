@@ -13,15 +13,23 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
         for name in ("astronomy", "physics", "family"):
             with self.subTest(module=name):
                 source = (ROOT / "knowledge" / (name + ".lisp")).read_text()
-                self.assertRegex(source, r"\(defmodule\s+\S+\s+\(001\s+\(")
+                # Реальне джерело вже використовує український Д4 DEFINE
+                # та Д3 QUOTE; старий defmodule/001 більше не є законом.
+                self.assertRegex(
+                    source,
+                    r"\(визначити-модуль\s+" + re.escape(name) + r"\s+\(як-є\s+\(",
+                )
+                self.assertNotIn("(defmodule ", source)
                 self.assertNotRegex(source, r"\(00000001(?=\s|\))")
 
-    def test_guard_reference_legacy_cond_is_explicitly_held(self):
+    def test_guard_reference_is_ukrainian_quoted_data_not_retired_codes(self):
         source = (ROOT / "knowledge/guard-reference.lisp").read_text()
-        # The old three-field COND form needs a semantic migration before D3.
-        self.assertIn("(00001001 *guard-reference-directory*", source)
-        self.assertNotIn("(0011 *guard-reference-directory*", source)
-        self.assertIn("(00000111", source)
+        # Довідник є даними: українські DEFINE/QUOTE, без повернення
+        # історичних SID8-подібних викличних слів у джерело.
+        self.assertIn("(визначити ", source)
+        self.assertIn("(як-є", source)
+        self.assertNotIn("(00001001 *guard-reference-directory*", source)
+        self.assertNotIn("(00000111", source)
         self.assertIn("reference", source)
         self.assertIn("language-policy", source)
 
