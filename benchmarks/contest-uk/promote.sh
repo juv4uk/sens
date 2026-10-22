@@ -45,8 +45,36 @@ for stale in "$dir"/*.sens; do
         -f "$archive.sens" && ! -L "$archive.sens" &&
         -f "$archive" && ! -L "$archive" &&
         -f "$stem" && ! -L "$stem" ]]; then
-    rm -- "$stale" "$stem"
-    echo "CONTEST_PRUNED_SUPERSEDED_ORPHAN stem=$name"
+    if cmp -s "$stale" "$archive.sens" && cmp -s "$stem" "$archive"; then
+      # Видаляємо лише побайтовий дублікат вже збереженої трійки.
+      rm -- "$stale" "$stem"
+      echo "CONTEST_PRUNED_SUPERSEDED_ORPHAN stem=$name identical=yes"
+    else
+      # Чужий/новий T5M без .lisp не стає програмою; його байти не губимо.
+      # Повний SHA у назві: жодної підміни старого архівного варіанта.
+      digest="$(sha256sum "$stale")"
+      digest="${digest%% *}"
+      orphan="$sup/$name-непарний-$digest"
+      if [[ -e "$orphan.sens" || -L "$orphan.sens" ||
+            -e "$orphan" || -L "$orphan" ]]; then
+        # Повторний remint може принести ті самі фізичні байти ще раз.
+        if [[ -f "$orphan.sens" && -f "$orphan" &&
+              ! -L "$orphan.sens" && ! -L "$orphan" ]] &&
+           cmp -s "$stale" "$orphan.sens" &&
+           cmp -s "$stem" "$orphan"; then
+          rm -- "$stale" "$stem"
+          echo "CONTEST_PRUNED_DUPLICATE_UNPAIRED stem=$name sha256=$digest"
+        else
+          echo "CONTEST_ORPHAN_ARCHIVE_COLLISION stem=$name sha256=$digest" >&2
+          exit 2
+        fi
+      else
+        mkdir -p "$sup"
+        mv -- "$stale" "$orphan.sens"
+        mv -- "$stem" "$orphan"
+        echo "CONTEST_PRESERVED_UNPAIRED stem=$name sha256=$digest"
+      fi
+    fi
   fi
 done
 
