@@ -772,6 +772,109 @@ jobs:
               "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
               "$RUNNER_TEMP/changed-t5m-pairs"
 
+      # Кожний push виконуваного .lisp: фізичну пару щойно створив справжній
+      # SENS reader → Zig/T5M. Рахуємо вузли AST та відвідування саме SENS.
+      # Це НЕ розмір лише вже закомічених .sens, і НЕ Python/JSON-оракул.
+      - name: "BENCH-LISP→SENS — AST-проходи і розмір змінених програм"
+        if: ${{ !cancelled() && github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          sources="$RUNNER_TEMP/changed-t5m-lisp.txt"
+          staged="$RUNNER_TEMP/changed-t5m-pairs"
+          report="$RUNNER_TEMP/lisp-ast-size"
+          mkdir -p "$report"
+          test -s "$sources"
+          # benchmark-ast-visits: реальний лічильник evaluator-dispatch,
+          # відсутній у звичайному SENS. Інші мови не визначають результат.
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo build --locked \
+            -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+          sens="$PWD/target/debug/sens"
+          trit="$PWD/target/debug/sens-trit"
+          printf 'source\tsource_bytes\tt5m_bytes\tast_nodes\teval_visits\tresult\n' > "$report/measurements.tsv"
+          {
+            echo '## Змінені Lisp → фізичний SENS: AST і розмір'
+            echo
+            printf 'SHA: %s. Тільки реально створені Zig/T5M програми, які SENS виконав автономно та в парі.\n\n' "$GITHUB_SHA"
+            echo '| Українське Lisp-джерело | Lisp, байт | SENS T5M, байт | Вузли AST | Відвідування evaluator | Результат |'
+            echo '|---|---:|---:|---:|---:|---|'
+          } > "$report/report.md"
+          total=0
+          measured=0
+          skipped=0
+          while IFS= read -r source || [[ -n "$source" ]]; do
+            [[ -n "$source" ]] || continue
+            total=$((total + 1))
+            id="$(printf '%s' "$source" | sha256sum | cut -c1-16)"
+            dir="$staged/$id"
+            physical="$dir/$(basename "$source" .lisp).sens"
+            if [[ ! -f "$source" || -L "$source" || ! -s "$physical" || -L "$physical" ||
+                  ! -s "$dir/native-paired.stdout" || ! -s "$dir/native-standalone.stdout" ]] ||
+               ! cmp -s "$dir/native-paired.stdout" "$dir/native-standalone.stdout"; then
+              echo "SENS_LISP_AST_SIZE_SKIP source=$source reason=no-verified-standalone-pair"
+              skipped=$((skipped + 1))
+              continue
+            fi
+            # Вміст джерела та носія вже парно виконано попереднім кроком.
+            # Повторне verify-view захищає власне вимірювання від зіпсованих байтів.
+            if ! timeout 45s "$trit" verify-view "$physical" >"$dir/size-verify.stdout" 2>"$dir/size-verify.stderr"; then
+              echo "SENS_LISP_AST_SIZE_SKIP source=$source reason=physical-inverse-rejected"
+              skipped=$((skipped + 1))
+              continue
+            fi
+            if ! timeout 90s "$sens" --benchmark-physical "$physical" \
+                 >"$dir/size-bench.stdout" 2>"$dir/size-bench.stderr"; then
+              echo "SENS_LISP_AST_SIZE_SKIP source=$source reason=physical-benchmark-rejected"
+              skipped=$((skipped + 1))
+              continue
+            fi
+            entry="$(grep '^SENS_BINARY_BENCH ' "$dir/size-bench.stderr" || true)"
+            if [[ "$entry" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]]; then
+              nodes="${BASH_REMATCH[1]}"
+              visits="${BASH_REMATCH[2]}"
+              result="${BASH_REMATCH[3]}"
+            else
+              echo "SENS_LISP_AST_SIZE_SKIP source=$source reason=missing-or-invalid-native-metrics"
+              skipped=$((skipped + 1))
+              continue
+            fi
+            if [[ "$result" != "$(tail -n 1 "$dir/size-bench.stdout")" ]] ||
+               ! cmp -s "$dir/native-standalone.stdout" "$dir/size-bench.stdout"; then
+              echo "SENS_LISP_AST_SIZE_SKIP source=$source reason=measured-result-drift"
+              skipped=$((skipped + 1))
+              continue
+            fi
+            source_bytes="$(wc -c < "$source" | tr -d '[:space:]')"
+            t5m_bytes="$(wc -c < "$physical" | tr -d '[:space:]')"
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+              "$source" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report/measurements.tsv"
+            printf '| `%s` | %s | %s | %s | %s | `%s` |\n' \
+              "$source" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report/report.md"
+            echo "SENS_LISP_AST_SIZE source=$source lisp_bytes=$source_bytes t5m_bytes=$t5m_bytes ast_nodes=$nodes eval_visits=$visits result=$result"
+            measured=$((measured + 1))
+          done < "$sources"
+          {
+            echo
+            echo "Виміряно: **$measured / $total**. Невиміряно: **$skipped** (без видуманих AST або PASS)."
+            echo
+            echo 'Це лічильники структури та виконання конкретних фізичних програм, не таймінг і не загальний релізний допуск.'
+          } >> "$report/report.md"
+          cat "$report/report.md" >> "$GITHUB_STEP_SUMMARY"
+          echo "SENS_LISP_AST_SIZE_TOTAL changed=$total measured=$measured unmeasured=$skipped native=SENS/Zig/T5M"
+          if (( measured == 0 )); then
+            echo "::warning::SENS_LISP_AST_SIZE_NO_MEASURED_PROGRAMS changed=$total reason=no-eligible-standalone-physical-pair"
+          fi
+
+      - name: "BENCH-LISP→SENS — зберегти розмір і лічильники AST"
+        if: ${{ always() && github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        with:
+          name: sens-lisp-ast-size-${{ github.sha }}
+          path: ${{ runner.temp }}/lisp-ast-size/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Бенчмарк змінених фізичних програм SENS
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.has_binary_files == 'true' && steps.t5m_changed_execute.outcome == 'success' }}
         timeout-minutes: 10
