@@ -46,3 +46,6 @@
         (lowering partial)
         (clips-result-observation blocked)
         (four-island-round-trip pending)))))
+
+; Кінцевий виклик-свідок: файл виконується при завантаженні, а не лише визначає.
+(ядро3-стан-профілю)
