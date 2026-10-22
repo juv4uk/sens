@@ -222,6 +222,7 @@ fn binary_bootstrap_words(root: &Path, output: &Path) {
         "lib/macro.sens",
         "lib/core3.sens",
         "lib/time.sens",
+        "lib/utf8.sens",
         "research/zig-codecs/t5m.zig",
         "research/zig-codecs/domain_ladder.zig",
         "research/zig-codecs/numeric_domains.zig",

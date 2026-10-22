@@ -12,6 +12,7 @@ pub fn main(init: std.process.Init) !void {
         .{ .name = "MACRO_BOOTSTRAP_WORDS", .physical = @embedFile("lib/macro.sens") },
         .{ .name = "CORE3_BOOTSTRAP_WORDS", .physical = @embedFile("lib/core3.sens") },
         .{ .name = "TIME_BOOTSTRAP_WORDS", .physical = @embedFile("lib/time.sens") },
+        .{ .name = "UTF8_BOOTSTRAP_WORDS", .physical = @embedFile("lib/utf8.sens") },
     };
     for (libraries) |library| {
         try emitWords(allocator, output, library.name, library.physical);

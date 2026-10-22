@@ -262,10 +262,23 @@ fn append_t5m_expression_context(
             };
             append_t5m_expression_context(&ratio, layout, words, depth + 1, quoted_data)?;
         }
-        ExprKind::String(..) => {
-            return Err(
-                "T5M string values have no admitted exact D7 projection in this REPL path".into(),
-            );
+        ExprKind::String(text) => {
+            // Текст у REPL є D3-цитованою послідовністю символів D7.
+            // Зовнішня форма й внутрішній список використовують лише D2-керування.
+            let text7 = sens::encode_text7(text, layout)
+                .map_err(|error| format!("T5M D7 text projection: {error}"))?;
+            words.push(control(0b10)?);
+            words.push(ExactDomainWord::identity(t5m_domain_identity(3, 0b001)?));
+            words.push(control(0b00)?);
+            words.push(control(0b10)?);
+            for (index, cell) in text7.cells().iter().enumerate() {
+                if index > 0 {
+                    words.push(control(0b00)?);
+                }
+                words.push(ExactDomainWord::identity(t5m_domain_identity(7, u16::from(*cell))?));
+            }
+            words.push(control(0b01)?);
+            words.push(control(0b01)?);
         }
         ExprKind::NumericBuffer(..) => {
             return Err("T5M REPL has no admitted NumericBuffer source form".into());
@@ -2459,6 +2472,69 @@ mod tests {
             error.starts_with("T5M_RESULT_UNSUPPORTED value=String"),
             "{error}"
         );
+    }
+
+    #[test]
+    fn t5m_string_literal_is_d3_quoted_d7_data_and_empty_string_stays_distinct() {
+        let source = sens::parse_mixed_exact_domain("\"\"").expect("empty string source");
+        let mut actual = Vec::new();
+        append_t5m_expression(&source[0], sens::Text7Layout::Uk, &mut actual, 0)
+            .expect("D3 quote carries an empty D7 text sequence");
+        let quote = ExactDomainWord::identity(t5m_domain_identity(3, 0b001).unwrap());
+        let d2_open = ExactDomainWord::identity(t5m_domain_identity(2, 0b10).unwrap());
+        let d2_close = ExactDomainWord::identity(t5m_domain_identity(2, 0b01).unwrap());
+        let d2_separator = ExactDomainWord::identity(t5m_domain_identity(2, 0b00).unwrap());
+        assert_eq!(
+            actual,
+            vec![
+                d2_open.clone(),
+                quote,
+                d2_separator,
+                d2_open,
+                d2_close.clone(),
+                d2_close,
+            ],
+            "empty text is D3-quoted empty D7 data, not the bare D2 empty-list word"
+        );
+
+        let source = sens::parse_mixed_exact_domain("\"а\"").expect("Ukrainian text source");
+        let mut actual = Vec::new();
+        append_t5m_expression(&source[0], sens::Text7Layout::Uk, &mut actual, 0)
+            .expect("D3 quote carries Ukrainian D7 glyphs");
+        assert!(matches!(actual.first(), Some(ExactDomainWord::Identity(identity))
+            if identity.width() == 2 && identity.packed_bits() == 0b10));
+        assert!(actual.iter().any(|word| matches!(word,
+            ExactDomainWord::Identity(identity) if identity.width() == 3 && identity.packed_bits() == 0b001)));
+        assert!(actual.iter().any(|word| matches!(word,
+            ExactDomainWord::Identity(identity) if identity.width() == 7)));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn utf8_library_is_invoked_through_selected_uk_d7_name_after_t5m() {
+        let mut session = Session::default();
+        sens::load_core_library(&mut session).expect("Core4");
+        sens::load_utf8_library(&mut session).expect("UTF-8 D7 library through Zig T5M");
+        let wanted = sens::encode_text7(
+            "кодування-юнікод-8-знайти-блок",
+            sens::Text7Layout::Uk,
+        )
+        .expect("ratified D7 Ukrainian projection")
+        .to_canonical_wire_token();
+        assert!(
+            session.environment.get(&wanted).is_some(),
+            "binary UTF-8 library must bind the source D7 identity {wanted}"
+        );
+
+        let result = eval_t5m_repl_line(
+            "(кодування-юнікод-8-знайти-блок 100 10 1)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("selected Ukrainian D7 name resolves the already-loaded closure");
+
+        assert_eq!(result.value.to_string(), "(80 8)");
+
     }
 
     #[test]

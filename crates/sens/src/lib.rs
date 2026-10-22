@@ -323,9 +323,6 @@ const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 /// Ukrainian domain projections, not decimalized bit strings or a generated SID registry.
 pub const META_EVAL_LIBRARY_SOURCE: &str = include_str!("../../../lib/meta-eval.lisp");
 
-/// Exact UTF-8 validation and byte-to-Unicode interpretation owned by Lisp.
-pub const UTF8_LIBRARY_SOURCE: &str = include_str!("../../../lib/utf8.lisp");
-
 /// Process-result interpretation owned by Lisp. The host contributes only the
 /// `process-run-raw` capability; this layer decides how captured bytes become
 /// text and how decoding failures are represented.
@@ -679,6 +676,22 @@ pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     binary_bootstrap::time_program()?.execute(session)
 }
 
+/// Завантажити UTF-8 бібліотеку як точні слова Zig/T5M.
+/// Джерело Lisp тут не читається і не проєктується Rust-ом.
+pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    bind_existing_d9_language_mechanisms(&session.environment);
+    bind_process_tcp_lisp_owned_macros(session)?;
+    if session.environment.get("codepoint->string").is_none() {
+        session.environment.define(
+            "codepoint->string",
+            Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
+        );
+    }
+    let result = binary_bootstrap::utf8_program()?.execute(session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
+}
+
 /// Load caller-supplied time source through the SAME owner-pinned exact-width
 /// reader used by the original loader. Zig transports bytes; SENS interprets.
 pub fn load_time_library_from_source(
@@ -791,16 +804,7 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
 /// public `process-run` over `process-run-raw`, and public `tcp-read` over
 /// `tcp-read-raw`. Neither raw capability is required merely to define them.
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    bind_existing_d9_language_mechanisms(&session.environment);
-    bind_process_tcp_lisp_owned_macros(session)?;
-    if session.environment.get("codepoint->string").is_none() {
-        session.environment.define(
-            "codepoint->string",
-            Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
-        );
-    }
-    let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
-    eval_parsed_expressions(&utf8, session)?;
+    load_utf8_library(session)?;
     let process =
         parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", PROCESS_LIBRARY_SOURCE)?;
     eval_parsed_expressions(&process, session)?;
@@ -813,16 +817,7 @@ pub fn load_process_library(session: &mut Session) -> Result<EvalResult, Languag
 /// Load language-owned TCP text semantics explicitly when an embedder does
 /// not otherwise need the process adapter.
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    bind_existing_d9_language_mechanisms(&session.environment);
-    bind_process_tcp_lisp_owned_macros(session)?;
-    if session.environment.get("codepoint->string").is_none() {
-        session.environment.define(
-            "codepoint->string",
-            Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
-        );
-    }
-    let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
-    eval_parsed_expressions(&utf8, session)?;
+    load_utf8_library(session)?;
     let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
     let result = eval_parsed_expressions(&tcp, session)?;
     bind_missing_stable_surface_peers(&session.environment);
@@ -834,16 +829,7 @@ pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageErr
 /// host capabilities plus the shared UTF-8 layer. No new host capability is
 /// introduced for this migration.
 pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    bind_existing_d9_language_mechanisms(&session.environment);
-    bind_process_tcp_lisp_owned_macros(session)?;
-    if session.environment.get("codepoint->string").is_none() {
-        session.environment.define(
-            "codepoint->string",
-            Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
-        );
-    }
-    let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
-    eval_parsed_expressions(&utf8, session)?;
+    load_utf8_library(session)?;
     let fs = parse_mixed_exact_domain_fs_source("lib/fs.lisp", FS_LIBRARY_SOURCE)?;
     let result = eval_parsed_expressions(&fs, session)?;
     bind_missing_stable_surface_peers(&session.environment);
