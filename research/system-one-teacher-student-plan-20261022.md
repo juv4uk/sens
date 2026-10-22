@@ -11,7 +11,8 @@
 - **crates/sens-host/src/system_one_model.rs**: локальний loopback-адаптер OpenAI-сумісного сервера. Повертає лише розподіл і provenance; фінальна політика залишається в Lisp/SENS.
 - **research/probabilistic-decision-auto-choice-20261021.lisp**: дослідницька політика вибору.
 - **research/probabilistic-decision-system-one-20261022.lisp**: типізований пакет запитань і спостережень.
-- **research/system-one-support-seed-20261022.jsonl**: 60 синтетичних українських прикладів; 5 класів по 12 прикладів; 40 train / 10 validation / 10 test; повторів тексту немає.
+- **research/system-one-support-seed-20261022.jsonl**: 60 синтетичних українських прикладів;
+- **research/system-one-support-challenge-20261022.jsonl**: незалежні 60 синтетичних adversarial-прикладів лише для фінальної challenge-перевірки; 5 класів по 12 прикладів; 40 train / 10 validation / 10 test; повторів тексту немає.
 - **research/system-one-teacher-observe-20261022.py**: збирає обмежені оцінки вчителя, забороняє зовнішній endpoint і HTTP-перенаправлення.
 - **research/system-one-compact-student-20261022.py**: навчає gold/soft-label CPU-базову лінію, генерує ймовірності та надає вузький loopback HTTP API.
 - **research/system-one-calibrate-20261022.py**: підбирає температуру лише на validation і не допускає погіршення NLL порівняно з температурою 1.
@@ -203,6 +204,49 @@ python3 research/system-one-transformer-student-20261022.py serve \
 ```
 
 Ваги mmBERT-small можуть завантажуватися під час `train`, якщо їх ще немає в кеші; для відтворення слід зберігати ревізію базової моделі, SHA seed/teacher-даних, версії бібліотек, параметри запуску та виміри пам'яті/швидкості. За потреби відокремлений teacher-token-level experiment можна пізніше порівняти з офіційним [TRL DistillationTrainer](https://huggingface.co/docs/trl/en/distillation_trainer), який працює з повнішими розподілами наступного токена; його не можна вважати тотожним п'ятикласовому loss цього скрипта.
+
+## Незалежний challenge-test: не для навчання і не для добору порога
+
+Файл `research/system-one-support-challenge-20261022.jsonl` містить 60 окремих, синтетично створених складних звернень — по 12 на кожен із п'яти класів. Набір позначено `evaluation_only=true`, він повністю має `split=test`, і в ньому немає нормалізованих текстових збігів із 60 записами seed. Це **challenge-набір для перевірки стійкості після фіксації моделі й порога**, а не заміна реальних звернень і не доказ виробничої якості.
+
+Після завершення основного порівняння запустити окрему оцінку на challenge-наборі. Ці виклики нічого не донавчають і не калібрують:
+
+```bash
+# Окремий прогноз вчителя. --allow-holdout тут лише дозволяє оцінку test;
+# збережений файл не передавати до жодної команди train.
+python3 research/system-one-teacher-observe-20261022.py \
+  --model Qwen/Qwen3.5-2B --split test --allow-holdout \
+  --input research/system-one-support-challenge-20261022.jsonl \
+  --output /tmp/system-one-challenge-teacher.jsonl
+
+# Ті самі вже навчені та відкалібровані CPU-учні, без повторного навчання.
+python3 research/system-one-compact-student-20261022.py predict \
+  --model /tmp/system-one-comparison/student-gold-calibrated.json \
+  --input research/system-one-support-challenge-20261022.jsonl \
+  --split test --output /tmp/system-one-challenge-gold.jsonl
+python3 research/system-one-compact-student-20261022.py predict \
+  --model /tmp/system-one-comparison/student-soft-calibrated.json \
+  --input research/system-one-support-challenge-20261022.jsonl \
+  --split test --output /tmp/system-one-challenge-soft.jsonl
+
+# Якщо трансформерний експеримент був виконаний:
+python3 research/system-one-transformer-student-20261022.py predict \
+  --model-dir /tmp/system-one-mmbert-soft \
+  --input research/system-one-support-challenge-20261022.jsonl \
+  --split test --output /tmp/system-one-challenge-transformer.jsonl
+
+# Оцінити кожний файл окремо за тим самим, заздалегідь зафіксованим порогом.
+python3 research/system-one-evaluate-20261022.py \
+  --input /tmp/system-one-challenge-teacher.jsonl --expected-split test --threshold 0.80
+python3 research/system-one-evaluate-20261022.py \
+  --input /tmp/system-one-challenge-gold.jsonl --expected-split test --threshold 0.80
+python3 research/system-one-evaluate-20261022.py \
+  --input /tmp/system-one-challenge-soft.jsonl --expected-split test --threshold 0.80
+python3 research/system-one-evaluate-20261022.py \
+  --input /tmp/system-one-challenge-transformer.jsonl --expected-split test --threshold 0.80
+```
+
+Не підбирати поріг за результатом challenge-набору. Якщо його результат спричинив зміну моделі, порога або правил, challenge-набір стає частиною процесу розробки; для чесної наступної оцінки потрібен новий незалежний challenge-набір. Кількість 60 і синтетичне походження треба показувати поруч із метриками.
 
 ## Межа виконаного
 
