@@ -22,61 +22,46 @@ task_of() {
   printf '%s' "$task"
 }
 
-# 1) Спершу — справжній суд: усі активні трійки мусять пройти.
-# Зберігаємо його нативні метрики: не обчислюємо AST/visits із хостових евристик.
+# 1) Справжній SENS/Zig-суд — не хостова оцінка семантики.
 judge_output="$(bash "$dir/judge.sh")"
 
-# 2) Точні правила конкурсу: найменший T5M, далі AST, далі visits.
-# Дані отримані тільки зі справжнього виконання SENS/Zig у judge.sh.
-declare -A best bestbytes bestnodes bestvisits
-while IFS=
-(( ${#best[@]} > 0 )) || { echo "PROMOTE_NO_ENTRIES" >&2; exit 2; }
-
-# 3) Виключити не-переможців: перенести трійку (.sens/.lisp/в'ю) у superseded/.
-mkdir -p "$sup"
-excluded=0
-for path in "$dir"/*.sens; do
-  [[ -e "$path" ]] || continue
-  name="${path##*/}"; name="${name%.sens}"
-  task="$(task_of "$name")" || continue
-  [[ "$path" == "${best[$task]}" ]] && continue
-  for f in "$path" "${path%.sens}.lisp" "${path%.sens}"; do
-    [[ -e "$f" ]] || continue
-    mv -- "$f" "$sup/${f##*/}"
-    echo "SUPERSEDED ${f#"$dir"/}"
-  done
-  excluded=$((excluded+1))
-done
-
-# 4) Стан визначають чинні фізичні файли, а не дубльований JSON-реєстр.
-# Вихід нижче містить реальні шляхи й фізичні T5M-байти SENS/Zig.
-
-for task in довжина-списку сума-до-n факторіал; do
-  [[ -n "${best[$task]:-}" ]] || continue
-  echo "PROMOTED $task ${best[$task]} T5M=${bestbytes[$task]}"
-done
-echo "CONTEST_PROMOTED excluded=$excluded active=${#best[@]}"
-\t' read -r task bytes nodes visits path; do
-  [[ "$path" == "$dir/"*.sens ]] || continue
-  name="${path##*/}"; name="${name%.sens}"
-  actual_task="$(task_of "$name")" || { echo "PROMOTE_UNKNOWN_TASK $name" >&2; exit 2; }
-  [[ "$task" == "$actual_task" &&
-     "$bytes" =~ ^[0-9]+$ && "$nodes" =~ ^[0-9]+$ && "$visits" =~ ^[0-9]+$ &&
-     -f "$path" ]] || { echo "PROMOTE_INVALID_NATIVE_METRIC $path" >&2; exit 2; }
-  [[ "$(wc -c < "$path" | tr -d ' ')" == "$bytes" ]] ||
-    { echo "PROMOTE_BYTE_MISMATCH $path" >&2; exit 2; }
-  if [[ -z "${best[$task]:-}" ]] ||
-     (( bytes < bestbytes[$task] ||
-        (bytes == bestbytes[$task] && nodes < bestnodes[$task]) ||
-        (bytes == bestbytes[$task] && nodes == bestnodes[$task] && visits < bestvisits[$task]) )); then
-    best[$task]="$path"
-    bestbytes[$task]="$bytes"
-    bestnodes[$task]="$nodes"
-    bestvisits[$task]="$visits"
+# 2) Ранжування за нативними (T5M, AST, visits), без Python/JSON.
+declare -A best bestbytes bestnodes bestvisits seen
+while IFS= read -r line; do
+  if [[ "$line" =~ ^CONTEST_EXECUTED_PASS[[:space:]]path=([^[:space:]]+)[[:space:]]T5M=([0-9]+)[[:space:]]AST=([0-9]+)[[:space:]]visits=([0-9]+)[[:space:]]result= ]]; then
+    path="${BASH_REMATCH[1]}"
+    bytes="${BASH_REMATCH[2]}"
+    nodes="${BASH_REMATCH[3]}"
+    visits="${BASH_REMATCH[4]}"
+    [[ "$path" == "$dir/"*.sens && -f "$path" ]] || { echo "PROMOTE_INVALID_PATH $path" >&2; exit 2; }
+    name="${path##*/}"; name="${name%.sens}"
+    task="$(task_of "$name")" || { echo "PROMOTE_UNKNOWN_TASK $name" >&2; exit 2; }
+    [[ -z "${seen[$path]+yes}" ]] || { echo "PROMOTE_DUPLICATE_METRICS $path" >&2; exit 2; }
+    seen[$path]=1
+    [[ "$(wc -c < "$path" | tr -d ' ')" == "$bytes" ]] || { echo "PROMOTE_BYTE_MISMATCH $path" >&2; exit 2; }
+    replace=0
+    if [[ -z "${best[$task]:-}" ]]; then
+      replace=1
+    elif (( bytes < bestbytes[$task] )); then
+      replace=1
+    elif (( bytes == bestbytes[$task] && nodes < bestnodes[$task] )); then
+      replace=1
+    elif (( bytes == bestbytes[$task] && nodes == bestnodes[$task] && visits < bestvisits[$task] )); then
+      replace=1
+    fi
+    if (( replace )); then
+      best[$task]="$path"
+      bestbytes[$task]="$bytes"
+      bestnodes[$task]="$nodes"
+      bestvisits[$task]="$visits"
+    fi
   fi
 done <<< "$judge_output"
+for path in "$dir"/*.sens; do
+  [[ -f "$path" ]] || continue
+  [[ -n "${seen[$path]+yes}" ]] || { echo "PROMOTE_UNJUDGED $path" >&2; exit 2; }
+done
 (( ${#best[@]} > 0 )) || { echo "PROMOTE_NO_ENTRIES" >&2; exit 2; }
-
 # 3) Виключити не-переможців: перенести трійку (.sens/.lisp/в'ю) у superseded/.
 mkdir -p "$sup"
 excluded=0
@@ -98,6 +83,6 @@ done
 
 for task in довжина-списку сума-до-n факторіал; do
   [[ -n "${best[$task]:-}" ]] || continue
-  echo "PROMOTED $task ${best[$task]} T5M=${bestbytes[$task]}"
+  echo "PROMOTED $task ${best[$task]} T5M=${bestbytes[$task]} AST=${bestnodes[$task]} visits=${bestvisits[$task]}"
 done
 echo "CONTEST_PROMOTED excluded=$excluded active=${#best[@]}"
