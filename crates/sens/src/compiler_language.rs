@@ -14,15 +14,14 @@
 use crate::{
     canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
     domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, load_core_library,
-    sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
+    parse_mixed_exact_domain, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
+    CoreDomainIdentity, DomainIdentity,
     ErrorKind, Exactness, Expr, ExprKind, LanguageError, Session, Span, Value,
 };
 use std::rc::Rc;
 
-// Джерельний свідок потрібен лише тестам, які перевіряють компіляцію
-// програмної поверхні. У production ядро надходить через Zig/T5M.
-#[cfg(test)]
-const COMPILER_NUCLEUS_TEST_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
+const COMPILER_NUCLEUS_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
+const LANGUAGE_CONTRACT: &str = include_str!("../../../language-contract.lisp");
 
 const LANGUAGE_CONTRACT_SHA256: &str = crate::binary_bootstrap::LANGUAGE_CONTRACT_SHA256;
 
@@ -32,6 +31,16 @@ pub const COMPILER_D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp
 pub const COMPILER_D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
 pub const COMPILER_AUTHORITY_PATH: &str = "language-contract.lisp";
 pub const COMPILER_CONTRACT_VERSION: &str = "12.0";
+const COMPILER_NUCLEUS_SHA256: &str =
+    "580f8df1320e80b356a09daf695ba58340328d6efaf6331fd7ad0d36eafd5138";
+const D3_PROJECTION_SHA256: &str =
+    "a93b29d70be2017c5e8088f51853d30c8c1efe42949aa74624416d3afea8f387";
+const D3_AUTHORITY_SHA256: &str =
+    "d32c789baacd1d273ce65313e27bec1bd6d9aa50953b190ac650c915e3bf9283";
+const D4_PROJECTION_SHA256: &str =
+    "bb4fc448038b897a48ed3f336c25a5581a56eaadbebc975a5fe4b43616b5af0b";
+const D4_AUTHORITY_SHA256: &str =
+    "f686f346e282da31706feee3c32fc86bf9254725434e39f31253966d768339bd";
 
 /// SENS-owned semantic input for one current compiler identity.
 ///
@@ -82,9 +91,11 @@ pub struct VerifiedCompilerProgramArtifact {
 }
 const LAW_PROJECTION: &str =
     include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
+const LAW_AUTHORITY: &str = include_str!("../../../contracts/bija3-l1-l5-ratification.lisp");
 const LAW_AUTHORITY_SHA256: &str = crate::binary_bootstrap::BIJA3_L1_L5_RATIFICATION_SHA256;
 const D4_LAW_PROJECTION: &str =
     include_str!("../../../knowledge/d4-bootstrap-compiler-structure-projection.json");
+const D4_LAW_AUTHORITY: &str = include_str!("../../../contracts/d4-bootstrap-ratification.lisp");
 const D4_LAW_AUTHORITY_SHA256: &str = crate::binary_bootstrap::D4_BOOTSTRAP_RATIFICATION_SHA256;
 
 const SHAPE_MECHANISM_NAME: &str = "__compiler_domain_shape_mechanism";
@@ -98,6 +109,34 @@ const PROGRAM_DIGEST_VALUE_NAME: &str = "__compiler_program_wire_sha256";
 const VALUE_DIGEST_MECHANISM_NAME: &str = "__compiler_canonical_value_sha256";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
+
+/// Exact SENS-owned inputs used by the compiler role law.
+///
+/// Callers that receive these assets through the Zig corridor can supply them
+/// directly, keeping Rust from selecting or embedding project sources on that
+/// execution path.
+#[derive(Clone, Copy, Debug)]
+pub struct CompilerLanguageSources<'a> {
+    pub compiler_nucleus: &'a str,
+    pub language_contract: &'a str,
+    pub d3_projection: &'a str,
+    pub d3_authority: &'a str,
+    pub d4_projection: &'a str,
+    pub d4_authority: &'a str,
+}
+
+impl CompilerLanguageSources<'static> {
+    fn embedded() -> Self {
+        Self {
+            compiler_nucleus: COMPILER_NUCLEUS_SOURCE,
+            language_contract: LANGUAGE_CONTRACT,
+            d3_projection: LAW_PROJECTION,
+            d3_authority: LAW_AUTHORITY,
+            d4_projection: D4_LAW_PROJECTION,
+            d4_authority: D4_LAW_AUTHORITY,
+        }
+    }
+}
 
 fn invalid_projection(message: impl Into<String>) -> LanguageError {
     LanguageError::new(ErrorKind::InvalidForm, message, Span::default())
@@ -114,30 +153,6 @@ fn quoted_json_string(source: &str, key: &str) -> Result<String, LanguageError> 
         .find('"')
         .ok_or_else(|| invalid_projection(format!("unterminated generated law field: {key}")))?;
     Ok(rest[..end].to_string())
-}
-
-fn projection_width() -> Result<usize, LanguageError> {
-    let domain = LAW_PROJECTION
-        .find("\"domain\"")
-        .ok_or_else(|| invalid_projection("generated law projection has no domain block"))?;
-    let rest = &LAW_PROJECTION[domain..];
-    let marker = "\"width\": ";
-    let start = rest
-        .find(marker)
-        .ok_or_else(|| invalid_projection("generated law projection has no domain width"))?
-        + marker.len();
-    let digits = rest[start..]
-        .chars()
-        .take_while(|ch| ch.is_ascii_digit())
-        .collect::<String>();
-    if digits.is_empty() {
-        return Err(invalid_projection(
-            "generated law domain width is not numeric",
-        ));
-    }
-    digits
-        .parse()
-        .map_err(|_| invalid_projection("generated law domain width is invalid"))
 }
 
 fn projection_width_from(source: &str) -> Result<usize, LanguageError> {
@@ -181,13 +196,13 @@ fn projection_string_array(source: &str, key: &str) -> Result<Vec<String>, Langu
         .collect())
 }
 
-fn projection_spine() -> Result<Vec<String>, LanguageError> {
+fn projection_spine_from(source: &str) -> Result<Vec<String>, LanguageError> {
     let marker = "\"L5_spine\": [";
-    let start = LAW_PROJECTION
+    let start = source
         .find(marker)
         .ok_or_else(|| invalid_projection("generated law projection has no L5 spine"))?
         + marker.len();
-    let tail = &LAW_PROJECTION[start..];
+    let tail = &source[start..];
     let end = tail
         .find(']')
         .ok_or_else(|| invalid_projection("generated L5 spine is unterminated"))?;
@@ -204,6 +219,48 @@ fn sha256_hex(bytes: &[u8]) -> String {
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect()
+}
+
+fn verify_compiler_sources(sources: &CompilerLanguageSources<'_>) -> Result<(), LanguageError> {
+    for (name, bytes, expected) in [
+        (
+            "compiler nucleus",
+            sources.compiler_nucleus.as_bytes(),
+            COMPILER_NUCLEUS_SHA256,
+        ),
+        (
+            "language contract",
+            sources.language_contract.as_bytes(),
+            LANGUAGE_CONTRACT_SHA256,
+        ),
+        (
+            "D3 compiler projection",
+            sources.d3_projection.as_bytes(),
+            D3_PROJECTION_SHA256,
+        ),
+        (
+            "D3 compiler authority",
+            sources.d3_authority.as_bytes(),
+            D3_AUTHORITY_SHA256,
+        ),
+        (
+            "D4 compiler projection",
+            sources.d4_projection.as_bytes(),
+            D4_PROJECTION_SHA256,
+        ),
+        (
+            "D4 compiler authority",
+            sources.d4_authority.as_bytes(),
+            D4_AUTHORITY_SHA256,
+        ),
+    ] {
+        if sha256_hex(bytes) != expected {
+            return Err(invalid_projection(format!(
+                "Zig-carried {name} asset has a stale or unexpected SHA-256"
+            )));
+        }
+    }
+    Ok(())
 }
 
 fn compiler_artifact_list<'a>(
@@ -280,8 +337,8 @@ fn compiler_surface_text(value: &Value) -> Option<String> {
 fn valid_lower_hex(value: &str, len: usize) -> bool {
     value.len() == len
         && value
-            .bytes()
-            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+        .bytes()
+        .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
 }
 
 fn verify_compiler_program_request(
@@ -388,31 +445,34 @@ fn bit_list(bits: &str, width: usize) -> Result<Value, LanguageError> {
     Ok(Value::list(values))
 }
 
-fn compiler_l1_l5_law_value() -> Result<Value, LanguageError> {
-    if !LAW_PROJECTION.contains("\"status\": \"generated-projection-only\"") {
+fn compiler_l1_l5_law_value_from(
+    projection: &str,
+    authority: &str,
+) -> Result<Value, LanguageError> {
+    if !projection.contains("\"status\": \"generated-projection-only\"") {
         return Err(invalid_projection(
             "compiler law input is not marked generated-projection-only",
         ));
     }
-    if !LAW_PROJECTION.contains("\"compiler_role_table\": false") {
+    if !projection.contains("\"compiler_role_table\": false") {
         return Err(invalid_projection(
             "generated law projection must forbid a compiler role table",
         ));
     }
     for forbidden in ["SelectorHead", "SelectorTail", "PairConstruct"] {
-        if LAW_PROJECTION.contains(forbidden) {
+        if projection.contains(forbidden) {
             return Err(invalid_projection(format!(
                 "generated structural law projection precomputes compiler role {forbidden}"
             )));
         }
     }
 
-    verify_projection_authority(LAW_PROJECTION, LAW_AUTHORITY_SHA256)?;
+    verify_projection_authority(projection, authority)?;
 
-    let width = projection_width()?;
-    let empty = quoted_json_string(LAW_PROJECTION, "L1_empty")?;
-    let mask = quoted_json_string(LAW_PROJECTION, "L4_dual_xor_mask")?;
-    let spine = projection_spine()?;
+    let width = projection_width_from(projection)?;
+    let empty = quoted_json_string(projection, "L1_empty")?;
+    let mask = quoted_json_string(projection, "L4_dual_xor_mask")?;
+    let spine = projection_spine_from(projection)?;
     if spine.len() != 4 {
         return Err(invalid_projection(format!(
             "generated L5 spine must contain four structural nodes, got {}",
@@ -433,8 +493,15 @@ fn compiler_l1_l5_law_value() -> Result<Value, LanguageError> {
     ]))
 }
 
-fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
-    if !D4_LAW_PROJECTION.contains("\"status\": \"generated-projection-only\"") {
+fn compiler_l1_l5_law_value() -> Result<Value, LanguageError> {
+    compiler_l1_l5_law_value_from(LAW_PROJECTION, LAW_AUTHORITY)
+}
+
+fn compiler_d4_bootstrap_law_value_from(
+    projection: &str,
+    authority: &str,
+) -> Result<Value, LanguageError> {
+    if !projection.contains("\"status\": \"generated-projection-only\"") {
         return Err(invalid_projection(
             "D4 compiler law input is not marked generated-projection-only",
         ));
@@ -445,7 +512,7 @@ fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
         "\"human_name_routing\": false",
         "\"d8_admission\": false",
     ] {
-        if !D4_LAW_PROJECTION.contains(required_false) {
+        if !projection.contains(required_false) {
             return Err(invalid_projection(format!(
                 "D4 structural projection is missing non-authority guard: {required_false}"
             )));
@@ -458,30 +525,30 @@ fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
         "define-form",
         "CompilerLoweringRole",
     ] {
-        if D4_LAW_PROJECTION.contains(forbidden) {
+        if projection.contains(forbidden) {
             return Err(invalid_projection(format!(
                 "D4 structural projection precomputes compiler role {forbidden}"
             )));
         }
     }
 
-    verify_projection_authority(D4_LAW_PROJECTION, D4_LAW_AUTHORITY_SHA256)?;
+    verify_projection_authority(projection, authority)?;
 
-    let width = projection_width_from(D4_LAW_PROJECTION)?;
+    let width = projection_width_from(projection)?;
     if width != 4 {
         return Err(invalid_projection(format!(
             "D4 bootstrap projection must have exact width 4, got {width}"
         )));
     }
 
-    let parent = quoted_json_string(D4_LAW_PROJECTION, "parent_bits")?;
+    let parent = quoted_json_string(projection, "parent_bits")?;
     if parent.len() + 1 != width {
         return Err(invalid_projection(
             "D4 bootstrap parent must be the exact one-bit-shorter fibre prefix",
         ));
     }
 
-    let children = projection_string_array(D4_LAW_PROJECTION, "children")?;
+    let children = projection_string_array(projection, "children")?;
     if children.len() != 2 {
         return Err(invalid_projection(format!(
             "D4 bootstrap fibre must have exactly two ordered children, got {}",
@@ -506,6 +573,10 @@ fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
                 .collect::<Result<Vec<_>, _>>()?,
         ),
     ]))
+}
+
+fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
+    compiler_d4_bootstrap_law_value_from(D4_LAW_PROJECTION, D4_LAW_AUTHORITY)
 }
 
 /// Return the verified, representation-only bootstrap values required by the
@@ -557,7 +628,7 @@ fn language_role_call(identity: CoreDomainIdentity) -> Expr {
                 symbol(LAW_VALUE_NAME),
                 symbol(D4_LAW_VALUE_NAME),
             ]
-            .into_boxed_slice(),
+                .into_boxed_slice(),
         )),
         span: Span::default(),
     }
@@ -577,10 +648,19 @@ fn compiler_program_call() -> Expr {
                 symbol(D4_PROOF_VALUE_NAME),
                 symbol(PROVENANCE_VALUE_NAME),
             ]
-            .into_boxed_slice(),
+                .into_boxed_slice(),
         )),
         span: Span::default(),
     }
+}
+
+fn eval_compiler_nucleus_from(
+    session: &mut Session,
+    source: &str,
+) -> Result<(), LanguageError> {
+    let expressions = parse_mixed_exact_domain(source)?;
+    eval_parsed_expressions(&expressions, session)?;
+    Ok(())
 }
 
 fn eval_compiler_nucleus(session: &mut Session) -> Result<(), LanguageError> {
@@ -605,7 +685,7 @@ fn compiler_program_artifact_call() -> Expr {
                 symbol(ARTIFACT_PROVENANCE_VALUE_NAME),
                 symbol(PROGRAM_DIGEST_VALUE_NAME),
             ]
-            .into_boxed_slice(),
+                .into_boxed_slice(),
         )),
         span: Span::default(),
     }
@@ -708,20 +788,30 @@ fn decode_language_lowering_role(
 pub fn compiler_lowering_role_from_sens(
     identity: CoreDomainIdentity,
 ) -> Result<Option<CompilerLoweringRole>, LanguageError> {
+    compiler_lowering_role_from_sens_with_sources(identity, &CompilerLanguageSources::embedded())
+}
+
+fn compiler_lowering_role_from_sens_with_sources(
+    identity: CoreDomainIdentity,
+    sources: &CompilerLanguageSources<'_>,
+) -> Result<Option<CompilerLoweringRole>, LanguageError> {
+    verify_compiler_sources(sources)?;
     let mut session = Session::bare();
     load_core_library(&mut session)?;
 
     session
         .environment
         .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
-    session
-        .environment
-        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
-    session
-        .environment
-        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+    session.environment.define(
+        LAW_VALUE_NAME,
+        compiler_l1_l5_law_value_from(sources.d3_projection, sources.d3_authority)?,
+    );
+    session.environment.define(
+        D4_LAW_VALUE_NAME,
+        compiler_d4_bootstrap_law_value_from(sources.d4_projection, sources.d4_authority)?,
+    );
 
-    eval_compiler_nucleus(&mut session)?;
+    eval_compiler_nucleus_from(&mut session, sources.compiler_nucleus)?;
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
     decode_language_lowering_role(&result)
@@ -791,8 +881,8 @@ pub fn compiler_program_artifact_from_sens(
 ) -> Result<Value, LanguageError> {
     if program_wire_sha256.len() != 64
         || !program_wire_sha256
-            .bytes()
-            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+        .bytes()
+        .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
     {
         return Err(invalid_projection(
             "compiler program wire digest must be exactly 64 lowercase hexadecimal characters",
@@ -800,8 +890,8 @@ pub fn compiler_program_artifact_from_sens(
     }
     if sens_revision.len() != 40
         || !sens_revision
-            .bytes()
-            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+        .bytes()
+        .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
     {
         return Err(invalid_projection(
             "compiler SENS revision must be exactly 40 lowercase hexadecimal characters",
@@ -1037,7 +1127,18 @@ fn proof_ref_for_lowering_role(role: CompilerLoweringRole) -> &'static str {
 pub fn compiler_semantic_input_from_sens(
     identity: CoreDomainIdentity,
 ) -> Result<Option<CompilerSemanticInput>, LanguageError> {
-    let Some(lowering_role) = compiler_lowering_role_from_sens(identity)? else {
+    compiler_semantic_input_from_sens_with_sources(identity, &CompilerLanguageSources::embedded())
+}
+
+/// Derive a compiler role using source bytes supplied by the Zig transport.
+/// SENS still parses and evaluates every law; the supplied assets are checked
+/// against their ratified authority before the role can be returned.
+pub fn compiler_semantic_input_from_sens_with_sources(
+    identity: CoreDomainIdentity,
+    sources: &CompilerLanguageSources<'_>,
+) -> Result<Option<CompilerSemanticInput>, LanguageError> {
+    let Some(lowering_role) = compiler_lowering_role_from_sens_with_sources(identity, sources)?
+    else {
         return Ok(None);
     };
 
@@ -1050,7 +1151,7 @@ pub fn compiler_semantic_input_from_sens(
         proof_ref,
         semantic_status: "current",
         authority_path: COMPILER_AUTHORITY_PATH,
-        authority_sha256: LANGUAGE_CONTRACT_SHA256.to_owned(),
+        authority_sha256: sha256_hex(sources.language_contract.as_bytes()),
         language_contract_version: COMPILER_CONTRACT_VERSION,
     }))
 }
@@ -1294,6 +1395,20 @@ mod tests {
             .is_none());
     }
 
+    #[test]
+    fn source_injected_semantic_input_rejects_noncanonical_assets() {
+        let embedded = CompilerLanguageSources::embedded();
+        let changed_contract = format!("{}\n; altered", embedded.language_contract);
+        let altered = CompilerLanguageSources {
+            language_contract: &changed_contract,
+            ..embedded
+        };
+        let error = compiler_semantic_input_from_sens_with_sources(d3(0b010), &altered)
+            .expect_err("caller-supplied source must match the pinned SENS asset");
+        assert!(error.to_string().contains("language contract asset"));
+        assert!(error.to_string().contains("unexpected SHA-256"));
+    }
+
     fn list_values(value: &Value) -> Vec<&Value> {
         let mut out = Vec::new();
         let mut cursor = value;
@@ -1350,7 +1465,7 @@ mod tests {
                 &"00".repeat(32),
                 "0123456789abcdef0123456789abcdef01234567",
             )
-            .expect_err("duplicate authority field must be rejected");
+                .expect_err("duplicate authority field must be rejected");
             assert_eq!(error.kind, ErrorKind::InvalidForm);
             assert!(
                 error
@@ -1369,9 +1484,9 @@ mod tests {
             &"00".repeat(32),
             "0123456789abcdef0123456789abcdef01234567",
         )
-        .unwrap_err()
-        .to_string()
-        .contains("unsupported field"));
+            .unwrap_err()
+            .to_string()
+            .contains("unsupported field"));
     }
 
     #[test]
@@ -1478,7 +1593,7 @@ mod tests {
             &digest,
             "fedcba9876543210fedcba9876543210fedcba98"
         )
-        .is_err());
+            .is_err());
 
         let mut rows = list_values(&artifact)
             .into_iter()
@@ -1562,7 +1677,7 @@ mod tests {
             &crate::Environment::root(),
             Span::default(),
         )
-        .expect("representation-only request digest")
+            .expect("representation-only request digest")
         {
             Value::String(ref value) => value.to_string(),
             other => panic!("request digest mechanism returned non-string: {other}"),
@@ -1616,7 +1731,7 @@ mod tests {
             &digest,
             "0123456789abcdef0123456789abcdef01234567",
         )
-        .expect("semantic rejection is an artifact value, not a host traversal error");
+            .expect("semantic rejection is an artifact value, not a host traversal error");
         let rows = list_values(&artifact);
         assert!(matches!(
             rows.first(),
@@ -1636,7 +1751,7 @@ mod tests {
             "not-a-sha",
             "0123456789abcdef0123456789abcdef01234567",
         )
-        .expect_err("malformed mechanical provenance must fail before SENS invocation");
+            .expect_err("malformed mechanical provenance must fail before SENS invocation");
         assert!(error
             .to_string()
             .contains("64 lowercase hexadecimal characters"));

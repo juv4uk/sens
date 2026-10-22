@@ -73,7 +73,7 @@ unsafe extern "C" {
     ) -> isize;
     fn sens_zig_f3c_pack(input: *const u8, len: usize, output: *mut u8, capacity: usize) -> isize;
     fn sens_zig_f3c_unpack(input: *const u8, len: usize, output: *mut u8, capacity: usize)
-        -> isize;
+                           -> isize;
 }
 
 
@@ -195,9 +195,9 @@ pub fn encode_t5m_exact_words_and_restore(
     };
     if written <= 0
         || usize::try_from(written)
-            .ok()
-            .filter(|&n| n <= physical.len())
-            .is_none()
+        .ok()
+        .filter(|&n| n <= physical.len())
+        .is_none()
     {
         return Err(format!("Zig exact T5M encode rejected: code={written}"));
     }
@@ -915,9 +915,9 @@ pub fn decode_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Str
     };
     if written <= 0
         || usize::try_from(written)
-            .ok()
-            .filter(|&n| n <= be3.len())
-            .is_none()
+        .ok()
+        .filter(|&n| n <= be3.len())
+        .is_none()
         || written % 3 != 0
     {
         if let Ok(exact_words) = decode_t5m_exact_words(bytes) {
@@ -962,7 +962,7 @@ pub fn decode_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Str
             }
             _ => None,
         }
-        .ok_or_else(|| format!("Zig BE3 invalid exact word width={width}"))?;
+            .ok_or_else(|| format!("Zig BE3 invalid exact word width={width}"))?;
         words.push(word);
     }
     Ok(words)
@@ -982,9 +982,9 @@ pub fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord
         unsafe { sens_zig_t5_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()) };
     if written <= 0
         || usize::try_from(written)
-            .ok()
-            .filter(|&n| n <= be3.len() && n % 3 == 0)
-            .is_none()
+        .ok()
+        .filter(|&n| n <= be3.len() && n % 3 == 0)
+        .is_none()
     {
         return Err(format!("legacy T5 Zig decode rejected: code={written}"));
     }
@@ -1009,7 +1009,7 @@ pub fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord
             9 => sens::Bit9::new(payload).map(sens::BinarySourceWord::W9),
             _ => None,
         }
-        .ok_or_else(|| format!("legacy T5 BE3 invalid exact word width={width}"))?;
+            .ok_or_else(|| format!("legacy T5 BE3 invalid exact word width={width}"))?;
         words.push(word);
     }
     Ok(words)
@@ -1032,9 +1032,9 @@ pub fn encode_e1_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
     };
     if written <= 0
         || usize::try_from(written)
-            .ok()
-            .filter(|&n| n <= output.len())
-            .is_none()
+        .ok()
+        .filter(|&n| n <= output.len())
+        .is_none()
     {
         return Err(format!("Zig E1 physical encode rejected: code={written}"));
     }
@@ -1062,9 +1062,9 @@ pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
         unsafe { sens_zig_e1_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()) };
     if written <= 0
         || usize::try_from(written)
-            .ok()
-            .filter(|&n| n <= be3.len() && n % 3 == 0)
-            .is_none()
+        .ok()
+        .filter(|&n| n <= be3.len() && n % 3 == 0)
+        .is_none()
     {
         return Err(format!("Zig E1 physical decode rejected: code={written}"));
     }
@@ -1089,7 +1089,7 @@ pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
             9 => sens::Bit9::new(payload).map(sens::BinarySourceWord::W9),
             _ => None,
         }
-        .ok_or_else(|| format!("Zig E1 BE3 invalid exact word width={width}"))?;
+            .ok_or_else(|| format!("Zig E1 BE3 invalid exact word width={width}"))?;
         words.push(word);
     }
     Ok(words)
@@ -1120,9 +1120,9 @@ pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
     // Zig may never claim more bytes than the caller-owned buffer.
     if len <= 0
         || usize::try_from(len)
-            .ok()
-            .filter(|&n| n < legacy.len() && n <= bytes.len())
-            .is_none()
+        .ok()
+        .filter(|&n| n < legacy.len() && n <= bytes.len())
+        .is_none()
     {
         return Err(format!("Zig F3C pack rejected: code={len}"));
     }
@@ -1144,9 +1144,9 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
     // Fail closed on non-positive or capacity overreport before any truncate.
     if len <= 0
         || usize::try_from(len)
-            .ok()
-            .filter(|&n| n <= output.len())
-            .is_none()
+        .ok()
+        .filter(|&n| n <= output.len())
+        .is_none()
     {
         return Err(format!("explicit Zig F3C rejected: code={len}"));
     }
@@ -1184,6 +1184,46 @@ mod zig_exact_egress_tests {
             .into_iter()
             .map(|token| token.word)
             .collect()
+    }
+
+    #[test]
+    fn compiler_source_assets_cross_zig_byte_exact() {
+        let sources = [
+            (
+                super::compiler_nucleus_source_bytes().unwrap(),
+                include_bytes!("../../../lib/compiler-nucleus.lisp").as_slice(),
+            ),
+            (
+                super::compiler_language_contract_bytes().unwrap(),
+                include_bytes!("../../../language-contract.lisp").as_slice(),
+            ),
+            (
+                super::compiler_d3_projection_bytes().unwrap(),
+                include_bytes!(
+                    "../../../knowledge/bija3-l1-l5-structure-projection.json"
+                )
+                    .as_slice(),
+            ),
+            (
+                super::compiler_d3_authority_bytes().unwrap(),
+                include_bytes!("../../../contracts/bija3-l1-l5-ratification.lisp").as_slice(),
+            ),
+            (
+                super::compiler_d4_projection_bytes().unwrap(),
+                include_bytes!(
+                    "../../../knowledge/d4-bootstrap-compiler-structure-projection.json"
+                )
+                    .as_slice(),
+            ),
+            (
+                super::compiler_d4_authority_bytes().unwrap(),
+                include_bytes!("../../../contracts/d4-bootstrap-ratification.lisp").as_slice(),
+            ),
+        ];
+        for (actual, expected) in sources {
+            assert_eq!(actual, expected, "Zig changed compiler source bytes");
+            std::str::from_utf8(&actual).expect("compiler source assets are UTF-8");
+        }
     }
 
     #[test]
@@ -1262,7 +1302,7 @@ mod zig_exact_egress_tests {
                     .map(|bit| ((bit * 7 + width) % 3 == 0) as u8)
                     .collect(),
             )
-            .expect("binary T5M source word")
+                .expect("binary T5M source word")
         });
         let physical = encode_t5m_exact_words(&source).expect("Zig transports exact words");
         assert_eq!(
@@ -1546,5 +1586,41 @@ pub fn compiler_identity_corpus_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(
         asset_ffi::sens_zig_compiler_identity_corpus_bytes_copy,
         "ZIG_COMPILER_IDENTITY_CORPUS_CARRIER",
+    )
+}
+
+/// Opaque compiler authority and structural projection bytes carried by Zig.
+pub fn compiler_language_contract_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_contract_bytes_copy,
+        "ZIG_COMPILER_CONTRACT_CARRIER",
+    )
+}
+
+pub fn compiler_d3_projection_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_d3_projection_bytes_copy,
+        "ZIG_COMPILER_D3_PROJECTION_CARRIER",
+    )
+}
+
+pub fn compiler_d3_authority_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_d3_authority_bytes_copy,
+        "ZIG_COMPILER_D3_AUTHORITY_CARRIER",
+    )
+}
+
+pub fn compiler_d4_projection_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_d4_projection_bytes_copy,
+        "ZIG_COMPILER_D4_PROJECTION_CARRIER",
+    )
+}
+
+pub fn compiler_d4_authority_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_d4_authority_bytes_copy,
+        "ZIG_COMPILER_D4_AUTHORITY_CARRIER",
     )
 }

@@ -59,4 +59,21 @@ unsafe extern "C" {
         output: *mut u8,
         capacity: usize,
     ) -> isize;
+    pub(super) fn sens_zig_compiler_contract_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_compiler_d3_projection_bytes_copy(
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
+    pub(super) fn sens_zig_compiler_d3_authority_bytes_copy(
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
+    pub(super) fn sens_zig_compiler_d4_projection_bytes_copy(
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
+    pub(super) fn sens_zig_compiler_d4_authority_bytes_copy(
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
 }

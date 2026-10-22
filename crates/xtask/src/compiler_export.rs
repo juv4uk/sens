@@ -5,17 +5,77 @@
 //! raw coordinates itself.
 
 use sens::{
-    compiler_semantic_input_from_sens, parse_binary_source_words, sha256_source, Bija3,
-    BinarySourceWord, CompilerLoweringRole, CompilerSemanticInput, CoreD4, CoreDomainIdentity,
+    compiler_semantic_input_from_sens_with_sources, parse_binary_source_words, sha256_source,
+    Bija3, BinarySourceWord, CompilerLanguageSources, CompilerLoweringRole,
+    CompilerSemanticInput, CoreD4, CoreDomainIdentity,
 };
 use std::path::Path;
 
-fn compiler_sources() -> Result<(String, String), String> {
-    let nucleus = String::from_utf8(sens_cli::zig_transport::compiler_nucleus_source_bytes()?)
-        .map_err(|error| format!("compiler nucleus source is not UTF-8: {error}"))?;
-    let corpus = String::from_utf8(sens_cli::zig_transport::compiler_identity_corpus_bytes()?)
-        .map_err(|error| format!("compiler identity corpus is not UTF-8: {error}"))?;
-    Ok((nucleus, corpus))
+struct CompilerSources {
+    nucleus: String,
+    corpus: String,
+    contract: String,
+    d3_projection: String,
+    d3_authority: String,
+    d4_projection: String,
+    d4_authority: String,
+}
+
+impl CompilerSources {
+    fn semantic_inputs(&self) -> CompilerLanguageSources<'_> {
+        CompilerLanguageSources {
+            compiler_nucleus: &self.nucleus,
+            language_contract: &self.contract,
+            d3_projection: &self.d3_projection,
+            d3_authority: &self.d3_authority,
+            d4_projection: &self.d4_projection,
+            d4_authority: &self.d4_authority,
+        }
+    }
+}
+
+fn compiler_sources() -> Result<CompilerSources, String> {
+    fn source(bytes: Result<Vec<u8>, String>, name: &str) -> Result<String, String> {
+        String::from_utf8(bytes?).map_err(|error| format!("{name} source is not UTF-8: {error}"))
+    }
+    Ok(CompilerSources {
+        nucleus: source(
+            sens_cli::zig_transport::compiler_nucleus_source_bytes(),
+            "compiler nucleus",
+        )?,
+        corpus: source(
+            sens_cli::zig_transport::compiler_identity_corpus_bytes(),
+            "compiler identity corpus",
+        )?,
+        contract: source(
+            sens_cli::zig_transport::compiler_language_contract_bytes(),
+            "language contract",
+        )?,
+        d3_projection: source(
+            sens_cli::zig_transport::compiler_d3_projection_bytes(),
+            "D3 compiler projection",
+        )?,
+        d3_authority: source(
+            sens_cli::zig_transport::compiler_d3_authority_bytes(),
+            "D3 compiler authority",
+        )?,
+        d4_projection: source(
+            sens_cli::zig_transport::compiler_d4_projection_bytes(),
+            "D4 compiler projection",
+        )?,
+        d4_authority: source(
+            sens_cli::zig_transport::compiler_d4_authority_bytes(),
+            "D4 compiler authority",
+        )?,
+    })
+}
+
+fn compiler_semantic_input(
+    identity: CoreDomainIdentity,
+    sources: &CompilerSources,
+) -> Result<Option<CompilerSemanticInput>, String> {
+    compiler_semantic_input_from_sens_with_sources(identity, &sources.semantic_inputs())
+        .map_err(|error| error.to_string())
 }
 
 #[derive(Debug, Clone)]
@@ -182,16 +242,16 @@ fn render_artifact(fixture_id: &str, semantic_request: &str) -> String {
 pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
     let root = Path::new(repo_root);
     let source_commit = current_commit(root)?;
-    let (nucleus, corpus) = compiler_sources()?;
+    let sources = compiler_sources()?;
 
-    let rows = parse_fixture_rows(options.fixture.as_deref(), &corpus)?;
+    let rows = parse_fixture_rows(options.fixture.as_deref(), &sources.corpus)?;
     let mut rendered = Vec::with_capacity(rows.len());
     for (name, identity) in rows {
-        let input = compiler_semantic_input_from_sens(identity)
+        let input = compiler_semantic_input(identity, &sources)
             .map_err(|error| format!("SENS semantic input production failed for {name}: {error}"))?
             .ok_or_else(|| format!("SENS compiler law returned no role for {name}"))?;
 
-        let request = render_request(&name, &input, &source_commit, &nucleus);
+        let request = render_request(&name, &input, &source_commit, &sources.nucleus);
         rendered.push(if options.artifact {
             render_artifact(&name, &request)
         } else {
@@ -222,15 +282,14 @@ mod tests {
 
     #[test]
     fn corpus_is_identity_only_and_covers_nine_current_roles() {
-        let (nucleus, corpus) = compiler_sources().expect("Zig-carried compiler assets");
-        assert!(!nucleus.is_empty());
-        assert!(!corpus.is_empty());
-        let rows = parse_fixture_rows(None, &corpus).unwrap();
+        let sources = compiler_sources().expect("Zig-carried compiler assets");
+        assert!(!sources.nucleus.is_empty());
+        let rows = parse_fixture_rows(None, &sources.corpus).unwrap();
         assert_eq!(rows.len(), 9);
         let roles = rows
             .into_iter()
             .map(|(_, identity)| {
-                compiler_semantic_input_from_sens(identity)
+                compiler_semantic_input(identity, &sources)
                     .unwrap()
                     .expect("every nucleus identity must have SENS-owned semantic input")
                     .lowering_role
@@ -241,15 +300,15 @@ mod tests {
 
     #[test]
     fn compilation_artifact_wraps_the_exact_semantic_request_by_digest() {
-        let input = compiler_semantic_input_from_sens(parse_identity("D3", "010").unwrap())
+        let sources = compiler_sources().unwrap();
+        let input = compiler_semantic_input(parse_identity("D3", "010").unwrap(), &sources)
             .unwrap()
             .expect("ATOM compiler input");
-        let (nucleus, _) = compiler_sources().unwrap();
         let request = render_request(
             "atom",
             &input,
             "0123456789abcdef0123456789abcdef01234567",
-            &nucleus,
+            &sources.nucleus,
         );
         let artifact = render_artifact("atom", &request);
         let request_digest = sha256_hex(request.as_bytes());
@@ -272,14 +331,15 @@ mod tests {
 
     #[test]
     fn compilation_artifact_carries_no_backend_or_install_policy() {
-        let input = compiler_semantic_input_from_sens(parse_identity("D4", "0010").unwrap())
+        let sources = compiler_sources().unwrap();
+        let input = compiler_semantic_input(parse_identity("D4", "0010").unwrap(), &sources)
             .unwrap()
             .expect("LAMBDA compiler input");
         let request = render_request(
             "d4-0010",
             &input,
             "0123456789abcdef0123456789abcdef01234567",
-            &compiler_sources().unwrap().0,
+            &sources.nucleus,
         );
         let artifact = render_artifact("d4-0010", &request).to_ascii_lowercase();
 

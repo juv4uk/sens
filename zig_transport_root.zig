@@ -596,6 +596,13 @@ test "domain projection tables cross Zig byte-exact and refuse short writes" {
 const compiler_nucleus_asset = @embedFile("lib/compiler-nucleus.lisp");
 const compiler_identity_corpus_asset =
     @embedFile("contracts/compiler-nucleus-identity-corpus-v1.tsv");
+const compiler_contract_asset = @embedFile("language-contract.lisp");
+const compiler_d3_projection_asset =
+    @embedFile("knowledge/bija3-l1-l5-structure-projection.json");
+const compiler_d3_authority_asset = @embedFile("contracts/bija3-l1-l5-ratification.lisp");
+const compiler_d4_projection_asset =
+    @embedFile("knowledge/d4-bootstrap-compiler-structure-projection.json");
+const compiler_d4_authority_asset = @embedFile("contracts/d4-bootstrap-ratification.lisp");
 
 fn copy_compiler_asset(asset: []const u8, dst: [*]u8, capacity: usize) isize {
     if (asset.len == 0) return -1;
@@ -616,18 +623,47 @@ pub export fn sens_zig_compiler_identity_corpus_bytes_copy(
     return copy_compiler_asset(compiler_identity_corpus_asset, dst, capacity);
 }
 
+pub export fn sens_zig_compiler_contract_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_compiler_asset(compiler_contract_asset, dst, capacity);
+}
+
+pub export fn sens_zig_compiler_d3_projection_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_compiler_asset(compiler_d3_projection_asset, dst, capacity);
+}
+
+pub export fn sens_zig_compiler_d3_authority_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_compiler_asset(compiler_d3_authority_asset, dst, capacity);
+}
+
+pub export fn sens_zig_compiler_d4_projection_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_compiler_asset(compiler_d4_projection_asset, dst, capacity);
+}
+
+pub export fn sens_zig_compiler_d4_authority_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_compiler_asset(compiler_d4_authority_asset, dst, capacity);
+}
+
 test "compiler export assets cross Zig byte-exact without partial writes" {
     const assets = [_][]const u8{
         compiler_nucleus_asset,
         compiler_identity_corpus_asset,
+        compiler_contract_asset,
+        compiler_d3_projection_asset,
+        compiler_d3_authority_asset,
+        compiler_d4_projection_asset,
+        compiler_d4_authority_asset,
     };
-    inline for (assets, 0..) |asset, index| {
-        // Експортовані функції мають C ABI: при виборі з двох адрес
-        // використовуємо явний покажчик, а не comptime-only fn.
-        const copy: *const fn ([*]u8, usize) callconv(.c) isize = if (index == 0)
-            &sens_zig_compiler_nucleus_bytes_copy
-        else
-            &sens_zig_compiler_identity_corpus_bytes_copy;
+    for (assets, 0..) |asset, index| {
+        const copy: *const fn ([*]u8, usize) callconv(.c) isize = switch (index) {
+            0 => &sens_zig_compiler_nucleus_bytes_copy,
+            1 => &sens_zig_compiler_identity_corpus_bytes_copy,
+            2 => &sens_zig_compiler_contract_bytes_copy,
+            3 => &sens_zig_compiler_d3_projection_bytes_copy,
+            4 => &sens_zig_compiler_d3_authority_bytes_copy,
+            5 => &sens_zig_compiler_d4_projection_bytes_copy,
+            6 => &sens_zig_compiler_d4_authority_bytes_copy,
+            else => unreachable,
+        };
         const required = copy(undefined, 0);
         try std.testing.expectEqual(@as(isize, @intCast(asset.len)), required);
         var short: [1]u8 = .{0xA5};

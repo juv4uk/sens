@@ -68,6 +68,12 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/domains");
     println!("cargo:rerun-if-changed=../../lib/compiler-nucleus.lisp");
     println!("cargo:rerun-if-changed=../../contracts/compiler-nucleus-identity-corpus-v1.tsv");
+    println!("cargo:rerun-if-changed=../../contracts/bija3-l1-l5-ratification.lisp");
+    println!("cargo:rerun-if-changed=../../contracts/d4-bootstrap-ratification.lisp");
+    println!("cargo:rerun-if-changed=../../knowledge/bija3-l1-l5-structure-projection.json");
+    println!(
+        "cargo:rerun-if-changed=../../knowledge/d4-bootstrap-compiler-structure-projection.json"
+    );
     // Zig embeds this release artifact into the linked archive; a manifest
     // change must invalidate Cargo's previous Zig build before packaging.
     println!("cargo:rerun-if-changed=../../packaging/islands-manifest-v1.json");

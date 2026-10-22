@@ -253,8 +253,10 @@ pub use compiler_language::{
     compiler_execution_role_from_sens, compiler_lowering_role_from_sens,
     compiler_program_artifact_from_sens, compiler_program_bootstrap_bundle,
     compiler_program_requests_from_sens, compiler_semantic_input_from_sens,
+    compiler_semantic_input_from_sens_with_sources,
     verify_compiler_program_artifact_from_sens, CompilerProgramBootstrapBundle,
-    CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
+    CompilerLanguageSources, CompilerSemanticInput, VerifiedCompilerProgramArtifact,
+    VerifiedCompilerProgramRequest,
 };
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use d7_projection::{decode_d7_uk_words, encode_d7_uk_words, D7ProjectionError};
@@ -476,7 +478,7 @@ fn canonical_core4_fasl_bytes() -> Option<std::rc::Rc<[u8]>> {
             let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
             Some(std::rc::Rc::<[u8]>::from(fasl_encode(&expressions, &hash)))
         })
-        .clone()
+            .clone()
     })
 }
 
@@ -504,7 +506,7 @@ fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
             let lowered = eval::lower::lower_program(&expressions);
             Some(std::rc::Rc::<[Expr]>::from(lowered))
         })
-        .clone()
+            .clone()
     })
 }
 
@@ -1236,7 +1238,7 @@ mod core4_bootstrap_cache_tests {
                 CORE_LIBRARY_FASL,
                 use_verified_cache,
             )
-            .expect("independent Lisp-owned Core4 bootstrap");
+                .expect("independent Lisp-owned Core4 bootstrap");
             black_box(result);
             assert_eq!(
                 session.environment.selected_core_profile(),
@@ -1382,7 +1384,7 @@ mod core4_bootstrap_cache_tests {
                 &session.environment,
                 Span::default(),
             )
-            .is_err(),
+                .is_err(),
             "one explicit D10 mechanism must not make other D10 residents callable"
         );
     }
@@ -1467,7 +1469,7 @@ mod core4_bootstrap_cache_tests {
             "(нехай-послідовно ((перший 7) (другий перший)) другий)",
             &mut session,
         )
-        .expect("sequential bindings must see previous values");
+            .expect("sequential bindings must see previous values");
         assert_eq!(dependent_sequential.value.to_string(), "7");
     }
 }
