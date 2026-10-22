@@ -8,7 +8,7 @@
   "scope": "Дослідницька база назв із історичних Lisp та всіх переглянутих доменів/бібліотек SENS, відсутніх за точною назвою в D1–D10 та чинній тестовій лексиці D11. Назва не є семантичним доказом.",
   "current_d11": {
     "blob_sha": "9b4428effaca82629f030c4d168ed585b048aa5f",
-    "occupied": 43,
+    "occupied": 0,
     "preserved": true,
     "unratified": true,
     "ratified": false,
@@ -16,7 +16,8 @@
     "legacy_fixture_count": 43,
     "owner_correction_20261022": "Ці 43 записи власник не ратифіковував; старий filename містить історично неправильне слово ratified",
     "review": "knowledge/d11/база-доступних-функцій/звірка-43-без-ратифікації-20261022.json",
-    "legacy_testing_vocabulary": "knowledge/d11-testing-vocabulary-ratified.json"
+    "legacy_testing_vocabulary": "knowledge/d11-testing-vocabulary-ratified.json",
+    "occupied_scope": "Тільки ратифіковані та допущені резиденти; 43 історичних тестових слова не займають машинних адрес"
   },
   "exclusion_snapshot": {
     "d10_path": "knowledge/d10-v18-semantic-inventory.json",
@@ -5564,13 +5565,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для скінченного правильного списку атомів довжини n повертає n+1 початкових частин: перша (), кожна наступна додає рівно наступний вхідний атом, остання — вхід; повторені атоми не зникають. На порожньому вході результат (()).",
       "behavioral_dedup": "Статичне зіставлення з D1–D10 не доводить незалежності; структурна рекурсія D3/D4. Не виділяти opcode за новою назвою.",
       "native_law_test": "crates/sens/tests/d11_existing_list_prefix_suffix_cuts.rs",
-      "native_ci_status": "NOT_YET_CONFIRMED"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39775673970",
+      "native_ci_job": 119813862008,
+      "native_ci_scope": "У журналi цього запуску 3 з 3 нативних cargo-тести (28 позитивних/негативних випадків) пройшли; workflow RED через інший d11_legacy43_lower_laws (unknown symbol якщо). Не ратифікація D11 і не доказ T5M оберненості."
     },
     {
       "surface_name": "усі-суфікси",
@@ -5584,13 +5588,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для скінченного правильного списку атомів довжини n повертає n+1 хвостів: перший увесь вхід, кожний наступний його решта, останній (). Жодне входження чи порядок атомів не змінюється.",
       "behavioral_dedup": "Статичне зіставлення з D1–D10 не доводить незалежності; структурна рекурсія D3/D4. Не виділяти opcode за новою назвою.",
       "native_law_test": "crates/sens/tests/d11_existing_list_prefix_suffix_cuts.rs",
-      "native_ci_status": "NOT_YET_CONFIRMED"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39775673970",
+      "native_ci_job": 119813862008,
+      "native_ci_scope": "У журналi цього запуску 3 з 3 нативних cargo-тести (28 позитивних/негативних випадків) пройшли; workflow RED через інший d11_legacy43_lower_laws (unknown symbol якщо). Не ратифікація D11 і не доказ T5M оберненості."
     },
     {
       "surface_name": "всі-розрізи",
@@ -5604,13 +5611,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для скінченного правильного списку атомів x довжини n повертає n+1 впорядкованих пар (префікс суфікс), які відповідають кожній можливій границі розрізу, включно з краями. Для кожної пари приєднання частин відновлює x.",
       "behavioral_dedup": "Статичне зіставлення з D1–D10 не доводить незалежності; структурна рекурсія D3/D4. Не виділяти opcode за новою назвою.",
       "native_law_test": "crates/sens/tests/d11_existing_list_prefix_suffix_cuts.rs",
-      "native_ci_status": "NOT_YET_CONFIRMED"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39775673970",
+      "native_ci_job": 119813862008,
+      "native_ci_scope": "У журналi цього запуску 3 з 3 нативних cargo-тести (28 позитивних/негативних випадків) пройшли; workflow RED через інший d11_legacy43_lower_laws (unknown symbol якщо). Не ратифікація D11 і не доказ T5M оберненості."
     },
     {
       "surface_name": "усі-розрізи-відновлюють?",
@@ -5624,13 +5634,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "proposed_law_uk": "Для скінченного правильного списку розрізів і початкового списку x повертає D1 так тоді й лише тоді, коли приєднання префікса та суфікса кожного розрізу дорівнює x; хибна хоча б одна пара повертає D1 ні. Цей закон не доводить, що список розрізів повний: повноту перевіряє окреме n+1 правило.",
       "behavioral_dedup": "Статичне зіставлення з D1–D10 не доводить незалежності; структурна рекурсія D3/D4. Не виділяти opcode за новою назвою.",
       "native_law_test": "crates/sens/tests/d11_existing_list_prefix_suffix_cuts.rs",
-      "native_ci_status": "NOT_YET_CONFIRMED"
+      "native_ci_status": "TARGETED_NATIVE_SENS_TEST_PASS_WORKFLOW_RED_OTHER_CASE",
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39775673970",
+      "native_ci_job": 119813862008,
+      "native_ci_scope": "У журналi цього запуску 3 з 3 нативних cargo-тести (28 позитивних/негативних випадків) пройшли; workflow RED через інший d11_legacy43_lower_laws (unknown symbol якщо). Не ратифікація D11 і не доказ T5M оберненості."
     }
   ],
   "winners_20261022": {
