@@ -279,18 +279,50 @@ fn bija3_1968_atom_null_partial_law_executes_and_rejects_false_generator() {
         "(атом? значення)",
     );
 
-    // Безумовне прирівнювання структурного NIL і математичного нуля
-    // до Д1:ні відхиляє СЕНС, а не тестовий виконавець чи Python.
+    // Два позитивні керувальні випадки: саме Д1:так/ні придатні COND.
+    for (case, program, expected) in [
+        (
+            "Д1-так",
+            "(за-умовою ((атом? (як-є ())) (як-є підтверджено)))",
+            "підтверджено",
+        ),
+        (
+            "Д1-ні-та-так",
+            "(за-умовою ((тотожне? (як-є атом?) (як-є решта)) (як-є помилка)) ((атом? (як-є ())) (як-є підтверджено)))",
+            "підтверджено",
+        ),
+    ] {
+        let mut session = Session::default();
+        let observed = eval_program(program, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=1968-D1-COND-{case} layer=SENS input={program} expected={expected} actual_error={error}")
+        });
+        assert_eq!(
+            observed.value.to_string(),
+            expected,
+            "test_id=1968-D1-COND-{case} layer=SENS input={program} expected={expected}"
+        );
+    }
+
+    // Відхилення NON-D1 повинне бути САМЕ доменною помилкою COND.
+    // Невдала граматика, неіснуюча функція або будь-яка стороння
+    // помилка не можуть приховувати відсутність строгого Д1.
     for (case, source) in [
         ("структурне-порожнє", "(за-умовою ((як-є ()) (як-є неправильно)))"),
         ("математичний-нуль", "(за-умовою (0 (як-є неправильно)))"),
     ] {
         let mut session = Session::default();
-        if let Ok(actual) = eval_program(source, &mut session) {
-            panic!(
+        match eval_program(source, &mut session) {
+            Err(error) => {
+                let diagnostic = error.to_string();
+                assert!(
+                    diagnostic.contains("D3:110 COND expects exact D1"),
+                    "test_id=1968-D1-COND-{case} layer=SENS input={source} expected=typed_D1_rejection actual_error={diagnostic}"
+                );
+            }
+            Ok(actual) => panic!(
                 "test_id=1968-D1-COND-{case} layer=SENS input={source} expected=reject_non_D1 actual={}",
                 actual.value
-            );
+            ),
         }
     }
 }
