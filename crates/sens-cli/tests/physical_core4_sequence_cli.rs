@@ -961,7 +961,7 @@ fn ukr_cond_skips_unsafe_branch_and_preserves_exact_t5m_triplet() {
     let source = stem.with_extension("lisp");
     let physical = stem.with_extension("sens");
     let view = fs::read_to_string(&stem).expect("точний бітовий перегляд");
-    assert_eq!(view, format!("{}\\n", view.trim_end()), "канонічний LF");
+    assert_eq!(view, format!("{}\n", view.trim_end()), "канонічний LF");
 
     let opened = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
         .arg("open").arg(&physical).output().expect("Zig/T5M open");
