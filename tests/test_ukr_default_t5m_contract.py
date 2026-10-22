@@ -46,7 +46,8 @@ class UkrainianT5MDefaultContract(unittest.TestCase):
         start = workflow.index(
             "      - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS"
         )
-        end = workflow.index("      # Одноразове вимірювання T5M", start)
+        # Межа наступного кроку CI, а не застарілий коментар перед бенчмарком.
+        end = workflow.index("\n      - name:", start + 1)
         execution = workflow[start:end]
         self.assertIn("bash scripts/execute_changed_lisp_t5m.sh", execution)
         self.assertIn('"$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt"', execution)
