@@ -111,20 +111,24 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertIn("(третє маршрут)", code)
         self.assertNotIn("(третє route)", code)
 
-    def test_registry_and_symbolic_sid_values_still_present(self):
-        # Шлях є цитованими D7-даними; D8 повертає String у джерельному
-        # законі. Сирий String literal не має чинного T5M REPL projection.
-        # Після нормального форматування Lisp перенос рядків між
-        # викличними вузлами не змінює їхньої тотожності.
+    def test_only_ratified_mechanism_passport_is_active(self):
+        # Ключі маршруту вже є українськими об'єктами D3/D5.
+        # Історичний восьмибітний реєстр не має семантичної влади.
         normalized = re.sub(r"\s+", " ", uncommented(self.source))
-        for path in ("lib/surface/semantic-registry.lisp",
-                     "lib/function-table-mechanisms.lisp"):
-            with self.subTest(path=path):
-                self.assertIn(
-                    f"(читати-файл (символ-у-текст (як-є {path})))",
-                    normalized,
-                )
-                self.assertNotIn(f'"{path}"', self.source)
+        path = "lib/function-table-mechanisms.lisp"
+        self.assertIn(
+            f"(читати-файл (символ-у-текст (як-є {path})))", normalized
+        )
+        self.assertNotIn(f'"{path}"', self.source)
+        self.assertNotIn("lib/surface/semantic-registry.lisp", self.source)
+        self.assertIn(
+            "(визначити метадані-вибору-механізму реєстр-вибору-механізму)",
+            normalized
+        )
+        self.assertIn(
+            "(визначити рядки-реєстру-механізму (решта (третє метадані-вибору-механізму)))",
+            normalized
+        )
         for token in ("(як-є rows)",
                       "(як-є mechanism-selected)", "(як-є sid-not-in-function-table)"):
             self.assertIn(token, self.source)
@@ -154,11 +158,12 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         code = uncommented(self.source)
         self.assertRegex(
             code,
-            r"\(визначити\s+метадані-вибору-механізму"
+            r"\(визначити\s+реєстр-вибору-механізму"
             r"\s+\(друге\s+\(третє\s+\(перше\s+\(читати-всі",
         )
-        self.assertNotIn(
-            "(визначити метадані-вибору-механізму\n  (перше", code
+        self.assertIn(
+            "(визначити метадані-вибору-механізму\n  реєстр-вибору-механізму)",
+            code
         )
 
     def test_function_table_fallbacks_use_sens_d1_not_bare_yes(self):
