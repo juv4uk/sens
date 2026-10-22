@@ -106,6 +106,8 @@ while IFS= read -r -d '' source; do
       binding_sources=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp) ;;
     tests/fixtures/mechanism-selector-1047-witness.lisp)
       binding_sources=(--binding-source lib/mechanism-selector.lisp) ;;
+    tests/fixtures/island-lowering-1048-witness.lisp)
+      binding_sources=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp) ;;
     tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp)
       binding_sources=(--binding-source lib/world.lisp) ;;
   esac
