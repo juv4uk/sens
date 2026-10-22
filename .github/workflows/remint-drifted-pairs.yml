@@ -19,6 +19,7 @@ on:
       - "lib/core*.lisp"
       - "lib/island-lowering.lisp"
       - "lib/life-1-scheduler.lisp"
+      - "lib/yantra.lisp"
       - "lib/machine/projection/x86-64.lisp"
       - "lib/machine/lowering/semantic-x86-64.lisp"
       - ".github/workflows/remint-drifted-pairs.yml"
@@ -67,9 +68,9 @@ jobs:
             # Лише реально додані/змінені .lisp у цьому push, не весь
             # історичний список. Видалені під час promotion не перемайнювати.
             if [[ "$BEFORE" =~ ^0+$ ]]; then
-              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
+              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/yantra.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
             else
-              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
+              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/yantra.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
             fi
             # Зміна самого SENS-нижувача потребує перевірки його
             # СПОЖИВАЧА навіть коли вихідний свідок і байти ще не змінювались.
@@ -97,7 +98,7 @@ jobs:
             # при кожному незалежному push: це відтягує обернення нових Lisp.
             # Джерело без .sens або view залишається в черзі; нативний
             # суддя як і раніше відхиляє drift та хибне виконання.
-            for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/yantra.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -111,7 +112,7 @@ jobs:
             # Повертаємо не лише конкурс, а й D11/list/tree, коли
             # проміжний queued push було замінено найновішим.
             if [[ "$EVENT_NAME" == push ]]; then
-              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/yantra.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
                 [[ -f "$source" && ! -L "$source" ]] || continue
                 pair="${source%.lisp}.sens"
                 view="${source%.lisp}"
@@ -353,7 +354,7 @@ jobs:
             # забрати й нові бібліотечні Lisp. Інакше незмінений старий
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
             # Тільки непарні або новіші за носій: без масового перемайну.
-            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/yantra.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
