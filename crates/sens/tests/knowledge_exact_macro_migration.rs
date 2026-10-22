@@ -139,3 +139,38 @@ fn migrated_defmodule_macro_drives_backward_and_forward_reasoning() {
         "((valuable mars) (planet mars))"
     );
 }
+
+#[test]
+fn knowledge_journal_events_are_native_d3_cons_in_order_and_preserve_multiplicity() {
+    // Виконує саме чинна бібліотека СЕНС: жодної Python/JSON-моделі
+    // історичного MAP або восьмибітного alias.
+    let mut runtime = session();
+    for (name, source, expected) in [
+        (
+            "порожні",
+            "(перетворити-клаузи-на-події-повідомлення (як-є архів) (як-є ()))",
+            "()",
+        ),
+        (
+            "одна",
+            "(перетворити-клаузи-на-події-повідомлення (як-є архів) (як-є ((планета марс))))",
+            "((tell архів (планета марс)))",
+        ),
+        (
+            "дві-різні",
+            "(перетворити-клаузи-на-події-повідомлення (як-є архів) (як-є ((планета марс) (зоря сонце))))",
+            "((tell архів (планета марс)) (tell архів (зоря сонце)))",
+        ),
+        (
+            "повторені",
+            "(перетворити-клаузи-на-події-повідомлення (як-є архів) (як-є ((планета марс) (планета марс))))",
+            "((tell архів (планета марс)) (tell архів (планета марс)))",
+        ),
+    ] {
+        let actual = eval(&mut runtime, source);
+        assert_eq!(
+            actual, expected,
+            "test_id=KNOWLEDGE-D3-EVENTS-{name} layer=SENS input={source} expected={expected} actual={actual}"
+        );
+    }
+}
