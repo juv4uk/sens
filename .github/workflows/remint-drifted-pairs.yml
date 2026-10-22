@@ -215,6 +215,7 @@ jobs:
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
+        id: published_pairs
         # Публікація тільки реальних SENS/Zig пар; суперечливий або старий
         # фізичний код не перебазовувати поверх свіжої української програми.
         # Після гонки refs заново майнити джерела на актуальному main.
@@ -347,6 +348,7 @@ jobs:
             fi
           }
           regenerated_failed=0
+          recovered_on_current_main=0
           if ! commit_verified_changes; then
             exit 0
           fi
@@ -400,6 +402,10 @@ jobs:
             # ніколи не перевіряти поточний Lisp за старим виконуваним кодом.
             cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
             regenerate_on_current_main
+            # Ознаку успішного відновлення дозволено лише після
+            # нативного remint і суду на новому main. Старий RED не є
+            # чинним, якщо цей самий source уже виправлено та перевірено.
+            recovered_on_current_main=1
             if ! commit_verified_changes; then
               echo "REMINT_ALREADY_PUBLISHED_EXACT on-current-main"
               published=1
@@ -414,11 +420,15 @@ jobs:
             echo "::error::REMINT_RECOVERY_NATIVE_RED, already verified pairs kept" >&2
             exit 1
           fi
+          if (( recovered_on_current_main )); then
+            echo "recovered=true" >> "$GITHUB_OUTPUT"
+            echo "REMINT_CURRENT_MAIN_NATIVE_RECOVERED sha=$(git rev-parse HEAD) verified=YES"
+          fi
 
       # Не оголошувати GREEN, коли SENS відхилив джерело; але не губити
       # незалежні вже доведені Zig/T5M пари через одного конкурсанта.
       - name: Зафіксувати адресні відмови після публікації справних пар
-        if: steps.remint.outputs.failed == 'true'
+        if: steps.remint.outputs.failed == 'true' && steps.published_pairs.outputs.recovered != 'true'
         run: |
-          echo "::error::SENS native mint має адресні RED; справні трійки збережено" >&2
+          echo "::error::SENS native mint має адресні RED, не виправлені на новому main; справні трійки збережено" >&2
           exit 1
