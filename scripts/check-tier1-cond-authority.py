@@ -13,8 +13,8 @@ current denominator; every other tier-1 constitutive COND row must obey
 """
 import re, sys, pathlib
 
-FIX = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "conformance.lisp")
-OVL = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "conformance-transition-witness.lisp")
+FIX = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "tests/fixtures/conformance.lisp")
+OVL = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "tests/fixtures/conformance-transition-witness.lisp")
 
 
 def rows(text):
