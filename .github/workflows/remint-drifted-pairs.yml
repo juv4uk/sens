@@ -179,6 +179,12 @@ jobs:
               done
             fi
           fi
+          # PR після двобатьківського sync перевіряє тільки власні Lisp.
+          if [[ "$EVENT_NAME" == push && "$GITHUB_REF" != refs/heads/main ]]; then
+            pr_base="$(git merge-base origin/main HEAD)" || exit 2
+            list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$pr_base" HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/*.lisp' 'lib/machine/**/*.lisp' 'tests/semantic/*.lisp' 'tests/fixtures/*.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp' ':(exclude)tests/semantic/meta-fc-predicates-d1-mutant.lisp')"
+            echo "REMINT_PR_SOURCE_SCOPE base=$pr_base"
+          fi
           # Не судити за git-дата/наявністю файла: точний T5M визначають
           # тільки чинний SENS mint та Zig view. Перевірити кожну
           # активну конкурсну трійку (в т. ч. незмінений НСД), щоб
