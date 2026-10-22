@@ -168,23 +168,27 @@ pub fn decode_t5_exact_words(physical: &[u8]) -> Result<Vec<ExactT5Word>, String
         .len()
         .checked_mul(5)
         .ok_or("exact T5M trit count overflow")?;
-    let capacity = trits
-        .checked_mul(5)
-        .ok_or("exact T5M decoded capacity overflow")?;
-    let mut records = vec![0u8; capacity];
+    let capacity =
+        max_t5_decode_record_bytes(trits).ok_or("exact T5M decoded capacity overflow")?;
+    // Zig writes exactly the returned number of initialized record bytes.
+    // Keep the reserved tail uninitialized: zero-filling a 5x-trit buffer
+    // touched pages the decoder never used and inflated peak RSS.
+    let mut records = Vec::<u8>::with_capacity(capacity);
     let written = unsafe {
         sens_zig_t5m_decode_words(
             physical.as_ptr(),
             physical.len(),
             records.as_mut_ptr(),
-            records.len(),
+            records.capacity(),
         )
     };
     let len = usize::try_from(written)
         .ok()
-        .filter(|&n| n > 0 && n <= records.len())
+        .filter(|&n| n > 0 && n <= records.capacity())
         .ok_or_else(|| format!("Zig exact T5M decode rejected: code={written}"))?;
-    records.truncate(len);
+    // SAFETY: Zig's ABI returns `need` only after writing every byte in
+    // `dst[0..need]`; the checked capacity above bounds that initialized range.
+    unsafe { records.set_len(len) };
     let mut words = Vec::new();
     let mut offset = 0usize;
     while offset < records.len() {
@@ -211,6 +215,15 @@ pub fn decode_t5_exact_words(physical: &[u8]) -> Result<Vec<ExactT5Word>, String
         return Err("Zig exact T5M returned no words".into());
     }
     Ok(words)
+}
+
+/// Upper bound for Zig's `[u32 width][one byte per bit]` records. Each word
+/// consumes at least one data trit and each adjacent pair needs a separator,
+/// so at most ceil(trits / 2) records can occur. Padding is included in the
+/// supplied physical trit count and therefore only makes this conservative.
+fn max_t5_decode_record_bytes(trits: usize) -> Option<usize> {
+    let max_words = trits / 2 + trits % 2;
+    trits.checked_add(max_words.checked_mul(3)?)?.checked_add(1)
 }
 
 // SENS defines REPL/read/identity; these functions carry ONLY untouched bytes.
@@ -983,6 +996,15 @@ mod zig_exact_egress_tests {
             .into_iter()
             .map(|token| token.word)
             .collect()
+    }
+
+    #[test]
+    fn exact_t5_decode_workspace_uses_a_tight_worst_case_bound() {
+        assert_eq!(super::max_t5_decode_record_bytes(1), Some(5));
+        assert_eq!(super::max_t5_decode_record_bytes(2), Some(6));
+        assert_eq!(super::max_t5_decode_record_bytes(3), Some(10));
+        assert_eq!(super::max_t5_decode_record_bytes(100), Some(251));
+        assert_eq!(super::max_t5_decode_record_bytes(usize::MAX), None);
     }
 
     #[test]

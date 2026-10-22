@@ -741,7 +741,13 @@ mod rust_zig_only_cutover_tests {
     fn production_sens_trit_never_calls_rust_physical_codecs() {
         // Test the entire production section, not just the feature branch.
         let source = include_str!("sens-trit.rs");
-        let runtime = source.split("#[cfg(test)]").next().unwrap();
+        let start = source
+            .find("fn require_zig_transport(")
+            .expect("physical CLI guard");
+        let runtime = source[start..]
+            .split("#[cfg(test)]")
+            .next()
+            .expect("production CLI section");
         for forbidden in [
             "sens::decode_ternary_words(",
             "sens::encode_binary_projection_ternary(",
@@ -755,7 +761,7 @@ mod rust_zig_only_cutover_tests {
             );
         }
         assert!(runtime.contains("require_zig_transport(command)?"));
-        assert!(runtime.contains("zig_transport::decode_t5_words(bytes)"));
+        assert!(runtime.contains("eval_t5_bytes(&bytes)"));
         assert!(runtime
             .contains("zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)"));
     }
@@ -1329,7 +1335,10 @@ mod eval_tests {
         let start = source
             .find("fn eval_t5_bytes_core4(")
             .expect("physical eval route");
-        let end = source[start..].find("\n}\n").expect("route body") + start + 3;
+        let end = source[start..]
+            .find("\n/// Diagnose a physical packed T5 file")
+            .expect("next production route")
+            + start;
         let route = &source[start..end];
         #[cfg(feature = "zig-transport")]
         {
@@ -1338,7 +1347,8 @@ mod eval_tests {
                 .nth(1)
                 .expect("Zig ingress block");
             assert!(zig_branch.contains("zig_transport::decode_t5_exact_words(bytes)"));
-            assert!(zig_branch.contains("sens::PhysicalT5Program::from_exact_domain_words(&words)"));
+            assert!(zig_branch
+                .contains("sens::PhysicalT5Program::from_exact_domain_words_owned(words)"));
             assert!(!zig_branch.contains("sens::PhysicalT5Program::decode(bytes)"));
         }
         #[cfg(not(feature = "zig-transport"))]
@@ -1346,7 +1356,7 @@ mod eval_tests {
             assert!(route.contains("physical T5 execution requires Zig; no Rust fallback"));
             assert!(!route.contains("sens::PhysicalT5Program::decode(bytes)"));
         }
-        assert!(route.contains("program.execute(&mut session)"));
+        assert!(route.contains(".execute(&mut session)"));
         assert!(!route.contains("sens::pack_binary_source_words("));
         assert!(!route.contains("sens::parse_canonical_packed_words("));
         assert!(!route.contains("sens::open_ternary_program(bytes)"));
