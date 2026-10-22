@@ -81,6 +81,12 @@ class CurrentUkrainianResolverTests(unittest.TestCase):
         name = self.resolver.resolve_head("фальшиве-перше")
         self.assertIsNone(name.current)
         self.assertFalse(name.resolved)
+        # Старий SID8-реєстр сам по собі не є навіть підставою
+        # позначати сучасний динамічний виклик як legacy-unmapped.
+        self.assertEqual(name.kind, "dynamic-symbol-head")
+        self.assertEqual(name.pass_number, 0)
+        self.assertFalse(name.legacy_unmapped)
+        self.assertFalse(any(item.startswith("legacy-sid:") for item in name.evidence))
 
     def test_existing_ratified_lisp_spelling_remains_current(self):
         name = self.resolver.resolve_head("CAR")
