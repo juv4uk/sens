@@ -11,27 +11,32 @@ jobs:
     runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti]
     timeout-minutes: 3
     steps:
-      - name: Підтвердити локальний runner і GPU
+      - name: Підтвердити локальний runner і CML worker
         shell: bash
         run: |
           set -euo pipefail
           test "${RUNNER_ENVIRONMENT:-}" = self-hosted
           test "${RUNNER_NAME:-}" = wsm-i5-6400
-          printf 'runner=%s environment=%s sha=%s\n' "$RUNNER_NAME" "$RUNNER_ENVIRONMENT" "$GITHUB_SHA"
-          nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv,noheader
-          command -v cml-gpu-worker
+          worker=/home/agents/.local/bin/cml-gpu-worker
+          test -x "$worker"
+          printf 'runner=%s environment=%s sha=%s PATH=%s worker=%s\n' "$RUNNER_NAME" "$RUNNER_ENVIRONMENT" "$GITHUB_SHA" "$PATH" "$worker"
 
       - name: Перевірити відповідь спільного CML GPU worker
         shell: bash
         run: |
           set -euo pipefail
           export CML_GPU_WORKER_SOCKET=/run/cml-gpu-worker/worker.sock
-          ping="$(timeout 5s cml-gpu-worker ping)"
+          worker=/home/agents/.local/bin/cml-gpu-worker
+          timeout_bin=/usr/bin/timeout
+          test -x "$timeout_bin"
+          ping="$("$timeout_bin" 5s "$worker" ping)"
           test "$ping" = pong
-          probe="$(timeout 10s cml-gpu-worker probe)"
+          probe="$("$timeout_bin" 10s "$worker" probe)"
           printf 'worker_ping=%s\nworker_probe=%s\n' "$ping" "$probe"
           [[ "$probe" == *"status=ready"* ]]
-          actual="$(timeout 15s cml-gpu-worker add-i32 5 1 2 3)"
+          [[ "$probe" == *"device_name=NVIDIA GeForce GTX 1050 Ti"* ]]
+          [[ "$probe" == *"live_device=NVIDIA GeForce GTX 1050 Ti"* ]]
+          actual="$("$timeout_bin" 15s "$worker" add-i32 5 1 2 3)"
           expected='6 7 8'
           printf 'operation=add-i32 expected=%s actual=%s\n' "$expected" "$actual"
           test "$actual" = "$expected"
