@@ -97,9 +97,25 @@ while IFS= read -r -d '' source; do
     printf 'NATIVE_PAIRED_FAILED\t%s\n' "$source" >&2
     continue
   fi
-  if ! timeout "${mint_seconds}s" "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/standalone.err"; then
-    (( paired_only += 1 ))
-    printf 'NATIVE_PAIRED_ONLY\t%s\n' "$source" >&2
+  if timeout "${mint_seconds}s" "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/standalone.err"; then
+    :
+  else
+    status=$?
+    # Парний шлях доведений, але standalone має лише вузькі відомі
+    # обмеження D7/D24+. Panic, timeout і довільний RED не є paired-only.
+    # Та сама перевірювана межа, що у refresh-verified-t5m-pair.sh.
+    if (( status != 124 && status != 137 )) &&
+       { grep -Fq 'T5M requires exact source projection to D24+ before transport' "$scratch/standalone.err" ||
+         grep -Fq 'unknown Text7 binding:' "$scratch/standalone.err" ||
+         { grep -Fq 'Фізичне T5M-декодування зберегло точні ширини слів' "$scratch/standalone.err" &&
+           grep -Fq 'адаптер BinarySourceWord приймає лише W1–W9' "$scratch/standalone.err"; }; }; then
+      (( paired_only += 1 ))
+      printf 'NATIVE_PAIRED_ONLY\t%s\tstatus=%s reason=KNOWN_STANDALONE_LIMIT\n' "$source" "$status" >&2
+    else
+      (( bad += 1 ))
+      printf 'NATIVE_STANDALONE_FAILED\t%s\tstatus=%s reason=UNEXPECTED\n' "$source" "$status" >&2
+      sed 's/^/SENS standalone: /' "$scratch/standalone.err" >&2
+    fi
     continue
   fi
   if ! cmp -s "$scratch/paired.out" "$scratch/standalone.out"; then
