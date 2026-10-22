@@ -133,7 +133,7 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
             path = ROOT / "lib" / "domains" / f"d{width}.lisp"
             rows = []
             for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-                if not re.match(r"^\\s*\\([01]{1,11}\\s+", line):
+                if not re.match(r"^\s*\([01]{1,11}\s+", line):
                     continue
                 match = DOMAIN_ROW.fullmatch(line)
                 self.assertIsNotNone(
@@ -164,7 +164,7 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
         """Жодної латиниці навіть у коментарях або іменах функцій."""
         path = ROOT / "lib/d11-interlisp-safe-analysis.lisp"
         source = path.read_text(encoding="utf-8")
-        allowed = UKRAINIAN_KEYBOARD_OUTPUTS | set("\\t\\r\\n")
+        allowed = UKRAINIAN_KEYBOARD_OUTPUTS | {chr(9), chr(10), chr(13)}
         violations = [
             f"{i}:{ch!r} U+{ord(ch):04X}"
             for i, line in enumerate(source.splitlines(), 1)
