@@ -273,6 +273,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
     # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
+  elif [[ "$file" == "lib/d11-clojure-partition-by.lisp" ]]; then
+    # Partition-by викликає чинні DEFINE із SRFI-1 span/break.
+    # Ті самі SENS-зв'язування вже використовують remint і нативний census.
+    # Без цього парне виконання помилково відкидає коректний Text7 виклик.
+    binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp)
   # preload_t5m_binding_sources виконує DEFINE послідовно у SENS;
   # залежність завжди завантажується РАНІШЕ за користувача.
   elif [[ "$file" == "lib/narrate.lisp" ]]; then
