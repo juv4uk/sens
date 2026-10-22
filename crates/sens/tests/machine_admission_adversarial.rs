@@ -70,6 +70,23 @@ fn x86_exact_integer_wire_checks_return_typed_d1() {
     load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
 
+    // Безпосередній D5 NUMBERP: SENS D24+ — числовий тип, рядок — ні.
+    // Це виключає попередній RED "01001 has no admitted value-call mechanism".
+    for (expression, expected) in [
+        ("(число? 7)", true),
+        ("(число? 7/2)", true),
+        ("(число? \"7\")", false),
+        ("(число? (як-є ()))", false),
+    ] {
+        let actual = eval_program(expression, &mut session)
+            .unwrap_or_else(|error| panic!("{expression}: {error}"));
+        assert_eq!(
+            actual.value.as_predicate_bit(),
+            Some(expected),
+            "D5 NUMBERP мусить повертати точний D1: {expression}"
+        );
+    }
+
     // Перевірка справді проходить крізь лексичні прив'язки wire/rest.
     // Недопустимі числа не можна заміняти структурним () чи Number 0.
     for (source, expected) in [
