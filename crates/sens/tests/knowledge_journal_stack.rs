@@ -1,15 +1,22 @@
-use sens::{eval_program, Session};
+use sens::{
+    eval_core_library_source, eval_parsed_expressions, eval_program,
+    parse_mixed_exact_domain_reasoning_source, Session,
+};
 
 fn loaded_session() -> Session {
     let mut session = Session::default();
-    for library in [
-        include_str!("../../../lib/core.lisp"),
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
-        include_str!("../../../lib/forward.lisp"),
-        include_str!("../../../lib/knowledge.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("точне ядро СЕНС");
+    for (path, library) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
     ] {
-        eval_program(library, &mut session).expect("knowledge stack fixture should load");
+        let forms = parse_mixed_exact_domain_reasoning_source(path, library)
+            .unwrap_or_else(|error| panic!("читач СЕНС {path}: {error}"));
+        eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|error| panic!("виконання СЕНС {path}: {error}"));
     }
     session
 }
