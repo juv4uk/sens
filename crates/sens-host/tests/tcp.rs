@@ -289,10 +289,14 @@ fn tcp_connect_to_a_closed_port_fails_named_not_silently() {
     install();
     let port = free_port();
     let mut session = tcp_session();
-    let source = format!(r#"(tcp-connect "127.0.0.1" {port})"#);
+    session
+        .environment
+        .define("порт", Value::Number(port as f64, Exactness::Exact));
+    let source = r#"(tcp-connect "127.0.0.1" порт)"#;
     let error = eval_program(&source, &mut session)
         .expect_err("connecting to a port nothing listens on must fail named, not hang or panic");
     assert_eq!(error.kind, ErrorKind::InvalidForm);
+    assert!(error.message.contains("tcp-connect: failed to connect"));
 }
 
 #[test]
@@ -314,8 +318,11 @@ fn tcp_connect_rejects_an_out_of_range_port() {
 #[test]
 fn tcp_read_rejects_a_non_connection_argument() {
     install();
-    let error = eval_program(r#"(tcp-read "not a connection")"#, &mut tcp_session())
-        .expect_err("a non-connection argument must fail named, not panic");
+    let error = eval_program(
+        r#"(протокол-передавання-читати "not a connection")"#,
+        &mut tcp_session(),
+    )
+    .expect_err("a non-connection argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
 }
 
