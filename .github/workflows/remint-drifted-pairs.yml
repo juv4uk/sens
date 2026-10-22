@@ -249,8 +249,21 @@ jobs:
             git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main"
           }
           regenerate_on_current_main() {
-            local f old
+            local f old source
             local -a bs
+            # Після чергового push у main могли з'явитися нові конкурсанти.
+            # Не судити їх за старим T5M: додати в той самий нативний
+            # маршрут mint → Zig inverse → paired/standalone SENS.
+            # Після паралельного оновлення перевірити й дрейфуючі трійки,
+            # а не лишати їх новим непоясненим RED під час judge.
+            if [[ "$REMINT_CONTEST" == true ]]; then
+              for source in benchmarks/contest-uk/*.lisp; do
+                [[ -f "$source" && ! -L "$source" ]] || continue
+                if ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
+                  printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
+                fi
+              done
+            fi
             while IFS= read -r f; do
               [[ -n "$f" ]] || continue
               if [[ ! -f "$f" ]]; then
