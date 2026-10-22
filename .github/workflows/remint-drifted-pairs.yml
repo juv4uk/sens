@@ -244,13 +244,20 @@ jobs:
             batch_seen["$source"]=1
             batch_total=$((batch_total+1))
             if (( batch_selected < batch_limit )); then
-              batch_list="$(printf '%s\n%s' "$batch_list" "$source")"
+              if (( batch_selected == 0 )); then
+                batch_list="$source"
+              else
+                batch_list="$(printf '%s\n%s' "$batch_list" "$source")"
+              fi
               batch_selected=$((batch_selected+1))
             else
               echo "REMINT_BATCH_PENDING source=$source status=NOT_EXECUTED"
             fi
           done <<< "$list"
-          list="${batch_list#
+          list="$batch_list"
+          echo "REMINT_BATCH source_total=$batch_total selected=$batch_selected pending=$((batch_total-batch_selected))"
+          # Лише актуально вибрані програми публікує той самий SENS/Zig.
+          printf '%s\n' "$list" > "$RUNNER_TEMP/sens-remint-candidates.list"
           # Судити конкурс лише після конкурсанта, не кожного lib/list/tree.
           # Факт категорії визначає реальний змінений/непарний шлях, не JSON.
           if printf '%s\n' "$list" | grep -Eq '^benchmarks/contest-uk/[^[:space:]]+\.lisp$'; then
