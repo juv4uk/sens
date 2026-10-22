@@ -62,6 +62,79 @@ fn reason_index_d1_verdicts_from_real_predicates() {
             "функція повинна повернути обчислений D1: {expression}",
         );
     }
+
+    // D11 research law: semantic predicate extraction, not a bare CAR alias.
+    // Real SENS distinguishes compound predicate heads from logic variables,
+    // malformed compound heads, and atomic/empty terms.
+    for (case, program, expected) in [
+        (
+            "терм-складений",
+            "(однакові? (предикат-терма-міркування (як-є (факт а))) (як-є факт))",
+            true,
+        ),
+        (
+            "терм-змінна",
+            "(однакові? (предикат-терма-міркування (як-є (var х))) (як-є ()))",
+            true,
+        ),
+        (
+            "змінна-не-предикат",
+            "(однакові? (предикат-терма-міркування (як-є (var х))) (як-є var))",
+            false,
+        ),
+        (
+            "терм-атом",
+            "(однакові? (предикат-терма-міркування (як-є факт)) (як-є ()))",
+            true,
+        ),
+        (
+            "терм-порожній",
+            "(однакові? (предикат-терма-міркування (як-є ())) (як-є ()))",
+            true,
+        ),
+        (
+            "терм-складена-голова",
+            "(однакові? (предикат-терма-міркування (як-є ((факт) а))) (як-є ()))",
+            true,
+        ),
+        (
+            "правило-з-головою",
+            "(однакові? (предикат-правила-міркування (як-є ((факт а) (висновок а)))) (як-є факт))",
+            true,
+        ),
+        (
+            "правило-атом",
+            "(однакові? (предикат-правила-міркування (як-є відсутнє)) (як-є ()))",
+            true,
+        ),
+        (
+            "правило-зі-змінною",
+            "(однакові? (предикат-правила-міркування (як-є ((var х) (висновок а)))) (як-є ()))",
+            true,
+        ),
+        (
+            "правило-складений-предикат",
+            "(однакові? (предикат-правила-міркування (як-є (((факт) а) (висновок а)))) (як-є ()))",
+            true,
+        ),
+        (
+            "правило-хибна-голова",
+            "(однакові? (предикат-правила-міркування (як-є ((факт а) (висновок а)))) (як-є висновок))",
+            false,
+        ),
+    ] {
+        let actual = eval_program(program, &mut s)
+            .unwrap_or_else(|error| panic!(
+                "test_id=D11-REASON-TERM-RULE-PREDICATE-{case} layer=SENS input={program} error={error}"
+            ))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "test_id=D11-REASON-TERM-RULE-PREDICATE-{case} layer=SENS input={program} expected=D1:{expected} actual={actual}"
+        );
+    }
+
 }
 
 #[test]
