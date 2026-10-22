@@ -480,6 +480,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-remove-first-atom"
                 | "list-prefix-atoms-general"
                 | "list-flatten-nested-general"
+                | "list-all-suffixes-general"
+                | "list-all-prefixes-general"
                 | "замінити-третій-в-четвірці"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
