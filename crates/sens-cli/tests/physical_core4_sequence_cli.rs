@@ -479,6 +479,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-suffix-after-first-atomic-triple-zero-copy-general",
         "list-suffix-after-last-atomic-triple-zero-copy-general",
         "list-tail-after-second-atom-zero-copy-general",
+        "pair-associativity-law",
+        "pair-swap",
+        "rotate-left",
+        "rotate-three-right",
+        "замінити-третій-в-четвірці",
         "list-last-three-zero-copy-general",
         "list-tail-after-third-compound-zero-copy-general",
         "list-unique-stable-fast-general",
@@ -649,6 +654,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-remove-first-compound-general"
                 | "list-suffix-after-first-atomic-triple-zero-copy-general"
                 | "list-tail-after-second-atom-zero-copy-general"
+                | "pair-associativity-law"
+                | "pair-swap"
+                | "rotate-left"
+                | "rotate-three-right"
+                | "замінити-третій-в-четвірці"
                 | "list-last-three-zero-copy-general"
                 | "list-tail-after-third-compound-zero-copy-general"
                 | "list-unique-stable-fast-general"
