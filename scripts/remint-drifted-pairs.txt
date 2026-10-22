@@ -86,3 +86,4 @@ lib/list-select-longer-zero-copy-general.lisp
 lib/list-suffix-after-last-atom-match-zero-copy-general.lisp
 benchmarks/contest-uk/фібоначчі-одинарний.lisp
 knowledge/meta-eval-evidence.lisp
+lib/domains/d6.lisp

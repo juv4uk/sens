@@ -64,7 +64,7 @@
   (110111 (ук найбільше) (укр найбільше) (san brhattara) (en max) (LISP MAX) (sym "+"))
   (111000 (ук спарувати-послідовності) (укр спарувати-послідовності) (san yugma-saṃyojana) (en zip) (LISP ZIP) (sym "зп"))
   (111001 (ук розпарувати-пари) (укр розпарувати-пари) (san yugma-vibhajana) (en unzip) (LISP UNZIP) (sym "рз"))
-  (111010 (ук перетин) (укр перетин) (san mithaścheda) (en intersection) (LISP INTERSECTION) (sym "**"))
+  (111010 (ук перетин) (укр перетин) (san mithaścheda) (en intersection) (LISP INTERSECTION) (sym "пт"))
   (111011 (ук об'єднання) (укр об'єднання) (san samūha-saṃyoga) (en union) (LISP UNION) (sym "++"))
   (111100 (ук будь-яке?) (укр будь-яке?) (san kaścit) (en any?) (LISP ANY) (sym "??"))
   (111101 (ук усі?) (укр усі?) (san sarva) (en all?) (LISP ALL) (sym "!!"))
