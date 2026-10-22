@@ -73,6 +73,18 @@ pub fn parse_mixed_exact_domain_machine_source(
 /// admitted reader/serializer identities; identical eight-bit payloads never
 /// become current D8 merely because of their width. Historical W8 QUOTE
 /// remains opaque, and binder names remain source data.
+/// The *existing admitted* D8 I/O resident names from the owner ladder.
+/// No historical SID8 code can enter here; one helper serves both readers.
+fn admitted_d8_io_uk_bits(spelling: &str) -> Option<&'static str> {
+    match spelling {
+        "код-символу" => Some("11100000"),
+        "текст-у-символ" => Some("11101101"),
+        "символ-у-текст" => Some("11101110"),
+        "значення-у-текст" => Some("11110100"),
+        _ => None,
+    }
+}
+
 fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
@@ -103,22 +115,7 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
         });
     }
 
-    if head_spelling == Some("код-символу") {
-        let word = parse_binary_source_words("11100000")?[0].word;
-        lifted[0] = Expr {
-            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
-            span: lifted[0].span,
-        };
-    } else if matches!(
-        head_spelling,
-        Some("текст-у-символ" | "символ-у-текст" | "значення-у-текст")
-    ) {
-        let bits = match head_spelling.expect("matched an admitted Ukrainian D8 surface") {
-            "текст-у-символ" => "11101101",
-            "символ-у-текст" => "11101110",
-            "значення-у-текст" => "11110100",
-            _ => unreachable!("surface was matched above"),
-        };
+    if let Some(bits) = head_spelling.and_then(admitted_d8_io_uk_bits) {
         let word = parse_binary_source_words(bits)?[0].word;
         lifted[0] = Expr {
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
@@ -1101,6 +1098,16 @@ fn lift_head(
         {
             return Ok(Expr {
                 kind: ExprKind::DomainIdentity(identity),
+                span: head.span,
+            });
+        }
+        // D8 I/O was already admitted by the same reader in pinned modules.
+        // Apply its exact Ukrainian address in ordinary source as well:
+        // binder names above win; quoted data never reaches lift_head.
+        if let Some(bits) = admitted_d8_io_uk_bits(spelling) {
+            let word = parse_binary_source_words(bits)?[0].word;
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
                 span: head.span,
             });
         }
