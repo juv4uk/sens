@@ -312,7 +312,7 @@ jobs:
             echo 'd11_srfi1_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Метаобчислювач перевіряється живим SENS після зміни бібліотеки чи свідка.
-          if grep -Eq '^(lib/meta-eval\.lisp|lib/meta-eval-mutual\.lisp|crates/sens/tests/meta_eval_closure_parity\.rs|crates/sens/tests/d11_meta_(compare|arity|cond_migration|last_define|group_error|sixth)\.rs|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-lexical-shadow-d1\.sh|tests/semantic/meta-eval-lexical-shadow-d1-(law|mutant|mutants)\.lisp)$' "$changed_all"; then
+          if grep -Eq '^(lib/meta-eval\.lisp|lib/meta-eval-mutual\.lisp|crates/sens/tests/meta_eval_closure_parity\.rs|lib/meta-eval-first-class[.]lisp|crates/sens/tests/meta_fc_predicate_witness[.]rs|crates/sens/tests/d11_meta_(compare|arity|cond_migration|last_define|group_error|sixth)\.rs|crates/sens/tests/core_postcore_ukr\.rs|scripts/prove-meta-eval-predicates-d1\.sh|tests/semantic/meta-eval-predicates-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-graph-d1\.sh|tests/semantic/meta-eval-graph-d1-(law|mutant)\.lisp|scripts/prove-meta-eval-lexical-shadow-d1\.sh|tests/semantic/meta-eval-lexical-shadow-d1-(law|mutant|mutants)\.lisp)$' "$changed_all"; then
             echo 'meta_eval_d1_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(benchmarks/parser\.lisp|benchmarks/cross-language/sens-vs-python/sens/(ackermann|fib)\.(setup|call)\.lisp|crates/sens/src/source_projection\.rs|crates/sens/tests/ukr_unpaired_benchmark_runtime\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -1165,6 +1165,7 @@ jobs:
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens -- --exact --nocapture
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_lexical_eight_laws_and_eight_mutants_execute_in_sens -- --exact --nocapture
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test meta_eval_closure_parity mutual_group_closure_d1_is_computed_by_sens_not_bare_truth_names -- --exact --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test meta_fc_predicate_witness -- --nocapture
           # Д11: один адресний нативний запуск шести бібліотечних законів, без нового workflow.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_meta_compare --test d11_meta_arity --test d11_meta_cond_migration --test d11_meta_last_define --test d11_meta_group_error --test d11_meta_sixth -- --nocapture
 
