@@ -96,7 +96,6 @@ benchmarks/contest-uk/сума-четвертих-степенів-формул�
 benchmarks/contest-uk/нсд.lisp
 benchmarks/contest-uk/сума-парних.lisp
 benchmarks/contest-uk/перевернути.lisp
-knowledge/silent-fallback-inventory.lisp
 benchmarks/contest-uk/перевернути-компакт.lisp
 benchmarks/contest-uk/перевернути-короткий.lisp
 benchmarks/contest-uk/факторіал-хвостовий.lisp
@@ -105,8 +104,6 @@ benchmarks/contest-uk/лише-атоми.lisp
 lib/list-suffix-after-last-atomic-pair-zero-copy-general.lisp
 benchmarks/contest-uk/розгорнути-один.lisp
 benchmarks/contest-uk/центроване-квадратне-два-квадрати.lisp
-lib/core-math.lisp
-lib/core2.lisp
 lib/list-last-element-zero-copy-general.lisp
 benchmarks/contest-uk/кількість-атомів-пряма.lisp
 benchmarks/contest-uk/розгорнути-один-компакт.lisp
