@@ -522,6 +522,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         // доки їхні фізичні T5M-трійки допубліковує Zig remint.
         "list-tail-after-fifth-atom-zero-copy-general",
         "list-penultimate-atomic-suffix-zero-copy-general",
+        "суфікс-останнього-предиката-без-копії",
         "залишити-точні-числа",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
