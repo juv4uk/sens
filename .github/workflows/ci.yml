@@ -308,7 +308,7 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
           # SRFI-1: адресна SENS-перевірка при зміні бібліотеки чи свідка.
-          if grep -Eq '^(lib/d11-srfi1-span-break[.]lisp|lib/d11-srfi1-unfold[.]lisp|lib/d11-clojure-partition-by[.]lisp|crates/sens/tests/d11_srfi1_span_break[.]rs|crates/sens/tests/d11_srfi1_unfold[.]rs|crates/sens/tests/d11_clojure_partition_by[.]rs|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/d11-srfi1-span-break[.]lisp|lib/d11-srfi1-unfold[.]lisp|lib/d11-clojure-partition-by[.]lisp|lib/d11-historical-scan-fold[.]lisp|crates/sens/tests/d11_srfi1_span_break[.]rs|crates/sens/tests/d11_srfi1_unfold[.]rs|crates/sens/tests/d11_clojure_partition_by[.]rs|crates/sens/tests/d11_historical_scan_fold[.]rs|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'd11_srfi1_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Метаобчислювач перевіряється живим SENS після зміни бібліотеки чи свідка.
@@ -1172,7 +1172,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_srfi1_span_break --test d11_srfi1_unfold --test d11_clojure_partition_by -- --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_srfi1_span_break --test d11_srfi1_unfold --test d11_clojure_partition_by --test d11_historical_scan_fold -- --nocapture
 
           # Три нові українські Lisp-композиції: відтворити exact фізичні
           # T5M байти тільки поточним SENS reader + Zig writer; жодного
