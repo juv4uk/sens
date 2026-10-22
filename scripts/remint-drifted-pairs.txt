@@ -81,3 +81,6 @@ lib/list-drop-through-last-atom-zero-copy-general.lisp
 benchmarks/contest-uk/сума-квадратів-формула.lisp
 benchmarks/contest-uk/сума-кубів-формула.lisp
 lib/list-tail-after-first-atom-zero-copy-general.lisp
+lib/list-drop-last-two-linear.lisp
+lib/list-select-longer-zero-copy-general.lisp
+lib/list-suffix-after-last-atom-match-zero-copy-general.lisp
