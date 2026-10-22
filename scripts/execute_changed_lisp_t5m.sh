@@ -150,6 +150,15 @@ run_native_t5m_program() {
       mark_file_failed
       return
     fi
+    # Д11-позитив: точний SENS D1:YES, не успіх довільної відповіді.
+    if [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ]]; then
+      printf '1\n' > "$dir/meta-fc-d1.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/meta-fc-d1.expected"; then
+        echo "::error::T5M_META_FC_WRONG_POSITIVE source=$file expected=D1:1" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     native_paired_executed_paths["$file"]=1
     if timeout "$native_timeout" "$binary" "$physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
