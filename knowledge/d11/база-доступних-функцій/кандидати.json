@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 260,
+    "total": 267,
     "historical": 17,
-    "library": 243,
-    "distinct_families": 59
+    "library": 250,
+    "distinct_families": 66
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -6517,6 +6517,167 @@
       "native_law_test": "crates/sens/tests/d11_existing_tree_laws.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true
+    },
+    {
+      "surface_name": "уніфікація-рівні?",
+      "source_family": "logic-term-structural-equality",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/unify.lisp",
+        "blob_sha": "49d378952892fcdfab4c815e993c2989b0ab736d",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "term × term → D1",
+      "law": "Повна структурна тотожність SENS-термів: пари, порядок, крапкові хвости, порожні вузли та атоми; однаковий корінь без однакової структури не дає істини.",
+      "native_law_test": "crates/sens/tests/d11_unify_once.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+    },
+    {
+      "surface_name": "уніфікація-спостереження-стан",
+      "source_family": "logic-unification-outcome-observation",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/unify-observe.lisp",
+        "blob_sha": "421d3bbb1a8753d96838fb1a100e1ab9b66958fb",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "outcome × left × right × substitution → record",
+      "law": "Відрізнити fail від успішної порожньої підстановки: невдача зберігає обидва аргументи й стан, успіх загортає справжній результат без зміни.",
+      "native_law_test": "crates/sens/tests/d11_unify_once.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+    },
+    {
+      "surface_name": "індекс-міркування?",
+      "source_family": "reason-index-identity",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/reason.lisp",
+        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "value → D1",
+      "law": "Пізнавати точну схему індексу reason-index-1 лише за безпечною атомарною головою; інші структури, порожня форма й складена голова відхиляються.",
+      "native_law_test": "crates/sens/tests/reason_index.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+    },
+    {
+      "surface_name": "лінійний-індекс-міркування",
+      "source_family": "reason-index-linear-fallback",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/reason.lisp",
+        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "rules → index",
+      "law": "Сформувати (reason-index-1 linear rules ()) без втрати, перестановки або фільтрації вихідних правил; у режимі linear кандидатами лишаються всі правила.",
+      "native_law_test": "crates/sens/tests/reason_index.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+    },
+    {
+      "surface_name": "міркування-пошук-кошика",
+      "source_family": "reason-index-bucket-selection",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/reason.lisp",
+        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "predicate × buckets → bucket-or-empty",
+      "law": "Вибрати перший кошик з атомарним точним ключем, пропустити пошкоджені атомні записи, повернути () без вигаданого збігу; порядок кошиків збережено.",
+      "native_law_test": "crates/sens/tests/reason_index.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+    },
+    {
+      "surface_name": "кандидати-індексу-міркування",
+      "source_family": "reason-index-safe-candidate-selection",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/reason.lisp",
+        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "goal × rules-or-index → rules",
+      "law": "Для придатної складеної цілі вибрати тільки її кошик; для змінної, невідомої голови чи режиму linear не відкидати можливі правила й повертати повний упорядкований перелік.",
+      "native_law_test": "crates/sens/tests/reason_index.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
+    },
+    {
+      "surface_name": "побудувати-індекс-міркування",
+      "source_family": "reason-index-stable-construction",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/reason.lisp",
+        "blob_sha": "69531f6f6d621e7614fb6f24d2a9b6103b10a76d",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "rules → index",
+      "law": "Скінченний структурний бюджет породжує індекс із збереженими оригінальними правилами та впорядкованими кошиками; непридатні до індексації правила переводять до безпечного linear.",
+      "native_law_test": "crates/sens/tests/reason_index.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "semantic_dedup": "D1_D10_UKRAINIAN_SURFACE_ABSENT; DEEP_BEHAVIORAL_DEDUP_PENDING"
     }
   ],
   "winners_20261022": {
