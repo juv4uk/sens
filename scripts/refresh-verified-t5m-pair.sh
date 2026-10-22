@@ -34,13 +34,19 @@ if [[ "$source_file" != *.lisp || ! -f "$source_file" || -L "$source_file" ]]; t
   exit 2
 fi
 source_bytes=$(wc -c < "$source_file")
+total_input_bytes=$source_bytes
+# Під час --t5m-mint-pair SENS насправді читає й українські binding-source.
+# Бюджет тільки за розміром малого witness помилково давав timeout
+# для чинного 300 KiB Core4, хоч виконання мусить залишитися нативним.
+for ((i=1; i<${#binding_args[@]}; i+=2)); do
+  dependency_bytes=$(wc -c < "${binding_args[i]}")
+  (( total_input_bytes += dependency_bytes ))
+done
 native_timeout=45s
-# Важкі чинні Lisp-джерела не можуть фізично обернутись за 45 секунд;
-# лишаємо кінцевий бюджет, але не оголошуємо повільний SENS mint поламкою.
-if (( source_bytes >= 262144 )); then
+if (( total_input_bytes >= 262144 )); then
   native_timeout=180s
 fi
-echo "T5M_REPAIR_BUDGET source=$source_file bytes=$source_bytes timeout=$native_timeout"
+echo "T5M_REPAIR_BUDGET source=$source_file bytes=$source_bytes inputs_bytes=$total_input_bytes timeout=$native_timeout"
 for executable in "$binary" "$reader"; do
   if [[ ! -x "$executable" ]]; then
     echo "T5M_REPAIR_EXECUTABLE_MISSING path=$executable" >&2
