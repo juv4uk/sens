@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 240,
+    "total": 246,
     "historical": 17,
-    "library": 223,
-    "distinct_families": 42
+    "library": 229,
+    "distinct_families": 46
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -6018,6 +6018,132 @@
       "callable": false,
       "law": "Найдовший початковий сегмент, де атоми двох правильних списків тотожні; зупинка при першій відмінності.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "дзеркалити-дерево",
+      "source_family": "list-tree-mirror",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-tree-mirror-general.lisp",
+        "blob_sha": "1fd0443ca170ef397dc02e298a458d8492029c45",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Для кожного атома результат є ним самим; для правильного скінченного списку віддзеркалити порядок і кожне піддерево. Подвійне застосування відновлює дерево.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "закодувати-унарні-серії",
+      "source_family": "list-unary-rle",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-run-length-unary-general.lisp",
+        "blob_sha": "0ec2961bb4bcd5076f34fbb0911feaddfde5226d",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Кожна максимальна суміжна серія однакових атомів кодується парою (атом унарний-список-лічильник); жодного D24/host числа.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "розкодувати-унарні-серії",
+      "source_family": "list-unary-rle",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-run-length-unary-general.lisp",
+        "blob_sha": "0ec2961bb4bcd5076f34fbb0911feaddfde5226d",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Для кожної пари атом + унарний лічильник відновити рівно стільки суміжних повторень; декодування кодування відновлює вхідний список.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "розділити-перед-першим",
+      "source_family": "list-first-match-split",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-split-first-occurrence-general.lisp",
+        "blob_sha": "9314f79481dfac2053bbbdbcbd280e6c2eba322b",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Повертає (префікс суфікс) до першого структурно тотожного атома; суфікс містить сам збіг; за відсутності збігу повертає (вхідний-список ()).",
+      "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "зібрати-після-розбиття",
+      "source_family": "list-first-match-split",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-split-first-occurrence-general.lisp",
+        "blob_sha": "9314f79481dfac2053bbbdbcbd280e6c2eba322b",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Приєднує префікс до суфікса після першого розрізу, зберігаючи всі значення та їхній порядок.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "хвости-першого-розходження",
+      "source_family": "list-divergent-tails",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-first-divergence-suffix-general.lisp",
+        "blob_sha": "49b8aceeec89e73497cef2d75ff7c264f339845b",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Пропускає максимальний спільний атомний префікс двох правильних списків і повертає обидва вихідні хвости без копіювання їхніх елементів.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true
     }
