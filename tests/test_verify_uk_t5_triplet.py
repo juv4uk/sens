@@ -345,12 +345,19 @@ class BoundedUkTripletTests(unittest.TestCase):
             ["10", "110", "00", "0000011", "01"],         # Text7 unknown
             ["10", "110", "00", "01010", "01"],           # D5 number/other
             ["10", "100", "00", "1", "00", "0", "01"],       # CAR arity
-            ["0", "00", "1"],                             # multiple roots
             ["10", "1", "00", "1", "01"],                 # raw predicate call
         ):
             with self.subTest(words=invalid_words):
                 with self.assertRaises(mod.ProjectionBlocked):
                     mod.canonical_uk_from_words(invalid_words)
+
+    def test_two_exact_d1_top_level_forms_are_valid_d2_program(self):
+        # D1:0, роздільник D2:00, D1:1 — це дві чинні форми
+        # у фізичному SENS, а не «зайвий корінь».
+        self.assertEqual(
+            mod.canonical_uk_from_words(["0", "00", "1"]),
+            "ні\nтак\n",
+        )
 
     def test_caar_real_uk_source_against_original_unmodified_physical_t5(self):
         source_dir = ROOT / "tests/fixtures/migration-d4-selector-cohort"
