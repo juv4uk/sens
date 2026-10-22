@@ -432,14 +432,14 @@ jobs:
           # Швидкий rebase дозволений ЛИШЕ коли remote змінив документацію
           # чи CI, а НЕ Lisp, SENS, Zig, Rust, домени або корпус конкурсу.
           # Інакше обов'язкові новий mint, Zig inverse і SENS execution.
-          for attempt in 1 2 3 4; do
+          for attempt in 1 2 3 4 5 6 7 8; do
             if git push origin "HEAD:$target_branch"; then
               echo "REMINT_PUBLISHED attempt=$attempt"
               published=1
               break
             fi
             echo "REMINT_MAIN_ADVANCED attempt=$attempt: exact remote ref changed" >&2
-            if (( attempt == 4 )); then break; fi
+            if (( attempt == 8 )); then break; fi
             git fetch origin "$target_branch"
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
@@ -499,7 +499,7 @@ jobs:
             fi
           done
           if (( ! published )); then
-            echo "::error::REMINT_PUBLISH_RACE after 4 verified attempts; newer main must retry natively; no force push" >&2
+            echo "::error::REMINT_PUBLISH_RACE after 8 verified attempts; newer main must retry natively; no force push" >&2
             exit 1
           fi
           if (( regenerated_failed )); then
