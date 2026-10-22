@@ -4,8 +4,7 @@
 
 use sens::{eval_program, load_core_library, Session};
 
-#[test]
-fn d11_reductions_and_pair_fold_native_sens_laws() {
+fn run_cases(family: &str) {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("чинне SENS ядро");
     eval_program(
@@ -120,6 +119,9 @@ fn d11_reductions_and_pair_fold_native_sens_laws() {
         ("right-на-порожньому-не-викликати",
          "(однакові? (згорнути-по-хвостах-справа (функція (хвіст стан) (перше (як-є ()))) (як-є старт) (як-є ())) (як-є старт))", true),
     ] {
+        if !id.starts_with(family) {
+            continue;
+        }
         let value = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!(
                 "test_id=D11-SCAN-FOLD-{id} layer=SENS input={source} expected=D1:{expected} actual_error={error}"
@@ -131,4 +133,19 @@ fn d11_reductions_and_pair_fold_native_sens_laws() {
             "test_id=D11-SCAN-FOLD-{id} layer=SENS input={source} expected=D1:{expected} actual={value}"
         );
     }
+}
+
+#[test]
+fn d11_clojure_reductions_seeds_every_prefix_native() {
+    run_cases("scan-");
+}
+
+#[test]
+fn d11_scheme_pair_fold_receives_each_suffix_native() {
+    run_cases("left-");
+}
+
+#[test]
+fn d11_scheme_pair_fold_right_receives_each_suffix_native() {
+    run_cases("right-");
 }
