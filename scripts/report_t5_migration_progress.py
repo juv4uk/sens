@@ -50,7 +50,9 @@ def tracked_lisp_paths(root: Path) -> set[str]:
     validated = [_source_name(name) for name in names]
     if len(validated) != len(set(validated)):
         raise ValueError("duplicate Git source paths")
-    return set(validated)
+    # Вилучені конкурсні варіанти збережені для історії, але не є
+    # активними джерелами та не повинні створювати фальшиві RED.
+    return {name for name in validated if "superseded" not in PurePosixPath(name).parts}
 
 
 def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
