@@ -6,6 +6,18 @@ sens="${SENS_BIN:-$PWD/target/debug/sens}"
 trit="${SENS_TRIT_BIN:-$PWD/target/debug/sens-trit}"
 [[ -x "$sens" && -x "$trit" ]] || { echo "Зберіть sens + sens-trit з --features benchmark-ast-visits" >&2; exit 2; }
 error() { printf "КОНКУРС: ПОМИЛКА %s\n" "$*" >&2; exit 2; }
+# Повний суд не приховує українські Lisp, для яких ще немає
+# оберненої фізичної трійки. Реальний запуск лишається за SENS/Zig.
+if (( $# == 0 )); then
+  for source in benchmarks/contest-uk/*.lisp; do
+    [[ -e "$source" || -L "$source" ]] || continue
+    [[ -f "$source" && ! -L "$source" ]] || error "некоректне Lisp-джерело $source"
+    physical="${source%.lisp}.sens"
+    view="${source%.lisp}"
+    [[ -s "$physical" && -f "$view" && ! -L "$physical" && ! -L "$view" ]] ||
+      error "НЕПАРНЕ_ДЖЕРЕЛО $source: потрібні нативні SENS/Zig T5M mint + view"
+  done
+fi
 # Автоматично включати нові реальні трійки до конкурсу:
 # оптимізована програма не має залежати від ручної реєстрації.
 if (( $# )); then
