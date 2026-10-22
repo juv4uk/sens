@@ -52,10 +52,10 @@ class ExactReleaseChecksTest(unittest.TestCase):
         self.assertTrue(all(x["sha"] == SHA and x["status"] == "success"
                             for x in receipt))
 
-    def test_release_requires_exact_sha_central_zig_job(self):
-        # Grounded in the actual GitHub Check Runs API name, not its longer
-        # YAML job label; SENS semantics stay separate from physical Zig.
-        central = "Часові D1 предикати — один фізичний SENS-свідок і чинні ..."
+    def test_release_requires_exact_sha_native_lisp_t5m_job(self):
+        # Exact check name in ci.yml; a skipped, missing or red native gate
+        # must never be treated as a passed SENS release witness.
+        central = "Українська проєкція та заборона сирих літералів"
         self.assertIn(central, MODULE.REQUIRED_CHECKS)
         payload = complete_payload()
         self.assertEqual(len(MODULE.verify_check_runs(payload, SHA)),
