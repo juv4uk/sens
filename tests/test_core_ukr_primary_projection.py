@@ -214,8 +214,10 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             self.assertIn("(класифікувати-залежності-збірки)", dependency_classifier)
             self.assertNotIn("(визначити build-dependency-classification", dependency_classifier)
             self.assertNotRegex(dependency_classifier, r"\([01]{3,11}(?=\s|\))")
-            # Ключі зовнішньої цитованої схеми не перекладаємо наосліп.
-            self.assertIn("(sid8-call-heads retired)", dependency_classifier)
+            # Чинний цитований інвентар посилається на УКР-проєкцію;
+            # старі ідентичності не проходять навіть як нібито status.
+            self.assertIn("(виклики-укр чинні)", dependency_classifier)
+            self.assertNotIn("(sid8-call-heads retired)", dependency_classifier)
 
         # Numeric iteration workers remain ordinary Ukrainian library helpers.
         for ukrainian, legacy in (
