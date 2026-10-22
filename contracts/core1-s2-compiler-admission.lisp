@@ -18,7 +18,7 @@
    (strings . not-required)
    (io . not-required)
    (mutation . not-required)
-   (sid8-call-heads . retired))
+   (виклики-укр . чинні))
 
   ((cond-projection . uk-за-умовою)
    (source-clause-arity . 2)
