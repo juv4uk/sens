@@ -63,6 +63,7 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
     let mut parent_bits = std::collections::HashSet::new();
     let mut child_bits = std::collections::HashSet::new();
     let mut child_names = std::collections::HashSet::new();
+    let mut child_lisp_names = std::collections::HashSet::new();
     let mut branches = [0usize; 2];
 
     for row in SELECTORS
@@ -78,10 +79,12 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
 
         let bits = columns[0];
         let child_name = columns[2];
+        let child_en = columns[4];
         let child_lisp = columns[5];
         let parent = columns[6];
         let parent_lisp = columns[7];
         let branch = columns[8];
+        let composition = columns[9];
         assert_eq!(bits.len(), 11, "test_id=D11-WIDTH input={bits}");
         assert_eq!(parent.len(), 10, "test_id=D10-WIDTH input={parent}");
         assert_eq!(&bits[..10], parent, "test_id=D11-PARENT input={bits}");
@@ -101,9 +104,27 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
             &bits[10..], if suffix_index == 0 { "0" } else { "1" },
             "test_id=D11-SUFFIX-BIT input={bits}"
         );
+        // Кожен суфікс має єдине математичне прочитання у ВСІХ
+        // проєкціях. Просто C...R-форма недостатня: підміна A↔D
+        // не повинна проходити навіть за правильного runtime DEFINE.
+        let expected_lisp = format!("{}{branch}R", &parent_lisp[..parent_lisp.len() - 1]);
+        assert_eq!(
+            child_lisp, expected_lisp,
+            "test_id=D11-LISP-DERIVATION input={bits} parent={parent_lisp} suffix={branch}"
+        );
+        assert_eq!(
+            child_en,
+            child_lisp.to_ascii_lowercase(),
+            "test_id=D11-EN-DERIVATION input={bits} lisp={child_lisp}"
+        );
+        assert_eq!(
+            composition,
+            if branch == "A" { "p(CAR(x))" } else { "p(CDR(x))" },
+            "test_id=D11-COMPOSITION-LAW input={bits} suffix={branch}"
+        );
         assert!(
-            child_lisp.starts_with('C') && child_lisp.ends_with('R'),
-            "test_id=D11-LISP-NAME input={child_lisp}"
+            child_lisp_names.insert(child_lisp),
+            "test_id=D11-DUP-LISP input={bits} name={child_lisp}"
         );
         let parent_name = child_name
             .strip_suffix(name_end)
@@ -185,6 +206,7 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
     assert_eq!(partial_failures, 1536, "test_id=D11-SELECTOR-PARTIALITY-COUNT");
     assert_eq!(child_bits.len(), 512, "test_id=D11-SELECTOR-COORDINATES");
     assert_eq!(child_names.len(), 512, "test_id=D11-SELECTOR-SURFACES");
+    assert_eq!(child_lisp_names.len(), 512, "test_id=D11-SELECTOR-LISP-UNIQUENESS");
     assert_eq!(parent_bits.len(), 256, "test_id=D11-SELECTOR-PARENTS");
     assert_eq!(branches, [256, 256], "test_id=D11-SELECTOR-BRANCHES");
 }
