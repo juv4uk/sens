@@ -70,7 +70,7 @@ mod error;
 pub(crate) mod eval;
 mod gpu_execution_packet;
 mod language_items;
-mod macro_bootstrap;
+mod binary_bootstrap;
 mod mixed_source;
 mod outer_envelope;
 mod packed_bits;
@@ -302,12 +302,6 @@ pub use syntax::wire::{
 /// Frozen Contract-6 compatibility profile.
 pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
 
-/// Core3 experimental kernel-laboratory profile layered over the current
-/// shared bootstrap substrate. Mechanism selection is loaded separately by
-/// the execution layer because the current selector reads SENS-owned files and
-/// therefore does not belong in this capability-free core crate.
-pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
-
 /// The current Core4 sens bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
@@ -367,7 +361,7 @@ pub fn install_ratified_d5_macro_mechanism(session: &Session) {
 /// D5 створює Macro; людські назви прив'язуються до того самого значення нижче.
 pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval::install_macro_substrate(&session.environment);
-    let result = macro_bootstrap::program()?.execute(session)?;
+    let result = binary_bootstrap::macro_program()?.execute(session)?;
 
     if !matches!(&result.value, Value::Macro(_)) {
         return Err(LanguageError::new(
@@ -651,7 +645,7 @@ pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageE
 /// domains, and mechanism admission remain owned by SENS contracts/Lisp.
 pub fn load_core3_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     load_core_library(session)?;
-    let result = eval_program(CORE3_LIBRARY_SOURCE, session)?;
+    let result = binary_bootstrap::core3_program()?.execute(session)?;
     session.environment.select_core_profile(CoreProfile::Core3);
     Ok(result)
 }

@@ -215,11 +215,12 @@ fn domain_tables(root: &Path, out: &mut String) {
     }
 }
 
-fn macro_bootstrap_words(root: &Path, output: &Path) {
+fn binary_bootstrap_words(root: &Path, output: &Path) {
     for path in [
         ".zig-version",
-        "macro_t5m_bootstrap.zig",
+        "bootstrap_t5m.zig",
         "lib/macro.sens",
+        "lib/core3.sens",
         "research/zig-codecs/t5m.zig",
         "research/zig-codecs/domain_ladder.zig",
         "research/zig-codecs/numeric_domains.zig",
@@ -248,43 +249,43 @@ fn macro_bootstrap_words(root: &Path, output: &Path) {
     let version = Command::new(&compiler)
         .arg("version")
         .output()
-        .expect("macro bootstrap requires pinned Zig; use ./guix/run dev or set ZIG");
+        .expect("binary bootstrap requires pinned Zig; use ./guix/run dev or set ZIG");
     assert!(
         version.status.success(),
-        "macro bootstrap: Zig version probe failed"
+        "binary bootstrap: Zig version probe failed"
     );
     assert_eq!(
         std::str::from_utf8(&version.stdout)
             .expect("Zig version UTF-8")
             .trim(),
         pinned,
-        "macro bootstrap requires the repository Zig pin"
+        "binary bootstrap requires the repository Zig pin"
     );
     // Генератор Zig отримує фізичний носій, а Rust — лише точні слова.
-    // Жодного читання macro.lisp або запасного Rust-декодера.
+    // Жодного читання Lisp або запасного Rust-декодера.
     let restored = Command::new(&compiler)
         .current_dir(root)
-        .args(["run", "macro_t5m_bootstrap.zig", "-O", "ReleaseSafe"])
+        .args(["run", "bootstrap_t5m.zig", "-O", "ReleaseSafe"])
         .output()
         .expect("run pinned Zig T5M bootstrap decoder");
     assert!(
         restored.status.success(),
-        "Zig T5M macro bootstrap rejected: {}",
+        "Zig T5M binary bootstrap rejected: {}",
         String::from_utf8_lossy(&restored.stderr)
     );
     assert!(
         !restored.stdout.is_empty(),
-        "Zig returned no macro bootstrap words"
+        "Zig returned no binary bootstrap words"
     );
-    fs::write(output.join("macro_bootstrap_words.rs"), restored.stdout)
-        .expect("write Zig-restored exact macro bootstrap words");
+    fs::write(output.join("binary_bootstrap_words.rs"), restored.stdout)
+        .expect("write Zig-restored exact binary bootstrap words");
 }
 
 fn main() {
     let root =
         PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("manifest dir")).join("../..");
     let output = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
-    macro_bootstrap_words(&root, &output);
+    binary_bootstrap_words(&root, &output);
     let mut generated = String::from("pub(super) static ENTRIES: &[Entry] = &[\n");
     domain_tables(&root, &mut generated);
     generated.push_str("];\n");

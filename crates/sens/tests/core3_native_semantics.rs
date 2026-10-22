@@ -1,37 +1,44 @@
-//! Mechanical adapter only: all semantic comparisons, ordering and the
-//! fail branch are authored in the binary SENS program below.
+//! Фізичний Core3 завантажується через Zig; тестовий frontend перетворює
+//! українське ім'я на точні D7 клітини перед зверненням до бекенду.
 use sens::{
-    encode_binary_projection_ternary, eval_parsed_expressions, open_ternary_program,
-    parse_canonical_binary, Session,
+    encode_text7, eval_parsed_expressions, parse_canonical_binary, CoreProfile, Session,
+    Text7Layout,
 };
 
-const LOGIC: &str = include_str!("../../../tests/semantic/core3-executors-d3-law.bits");
-const PHYSICAL: &[u8] = include_bytes!("../../../tests/semantic/core3-executors-d3-law.sens");
-
 #[test]
-fn core3_executor_list_has_sens_owned_binary_verdict() {
-    assert!(
-        LOGIC
-            .bytes()
-            .all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')),
-        "the proof must be written in binary SENS"
-    );
-    assert_eq!(encode_binary_projection_ternary(LOGIC).unwrap(), PHYSICAL);
-    let reopened = open_ternary_program(PHYSICAL).expect("canonical T5");
-    assert_eq!(
-        reopened.split_whitespace().collect::<Vec<_>>(),
-        LOGIC.split_whitespace().collect::<Vec<_>>()
-    );
-    let forms = parse_canonical_binary(&reopened).expect("ratified D1/D2/D3/D4/D7 frames");
-    assert_eq!(forms.len(), 1);
+fn core3_physical_bootstrap_preserves_executor_order_and_current_ukrainian_binding() {
     let mut session = Session::default();
     sens::load_core3_library(&mut session).expect("Core3 library load");
-    let answer = eval_parsed_expressions(&forms, &mut session)
-        .expect("binary SENS verdict failed (unbound fail branch)")
+    assert_eq!(
+        session.environment.selected_core_profile(),
+        Some(CoreProfile::Core3)
+    );
+    let name = encode_text7("ядро3-виконавці", Text7Layout::Uk).unwrap();
+    let lookup = frame(name.cells());
+    let forms = parse_canonical_binary(&lookup).unwrap();
+    let actual = eval_parsed_expressions(&forms, &mut session)
+        .expect("точний D7 binder чинної української назви має бути визначений")
+        .value;
+
+    // Незалежний очікуваний список — точні англійські D7 координати
+    // чинного протоколу, не старі викличні голови й не аліаси SID8.
+    let expected_items =
+        ["common-lisp", "prolog", "clips", "datalog"].map(|name| frame(name.as_bytes()));
+    let expected_words = format!("10 001 00 10 {} 01 01", expected_items.join(" 00 "));
+    let expected_forms = parse_canonical_binary(&expected_words).unwrap();
+    let expected = eval_parsed_expressions(&expected_forms, &mut session)
+        .unwrap()
         .value;
     assert_eq!(
-        answer.as_predicate_bit(),
-        Some(true),
-        "only the binary SENS program determines the semantic verdict"
+        actual, expected,
+        "порядок, кожна клітина й довжина списку мають зберегтися"
     );
+}
+
+fn frame(cells: &[u8]) -> String {
+    let words = cells
+        .iter()
+        .map(|cell| format!("{cell:07b}"))
+        .collect::<Vec<_>>();
+    format!("10 {} 01", words.join(" 00 "))
 }
