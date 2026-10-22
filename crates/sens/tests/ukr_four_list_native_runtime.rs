@@ -248,7 +248,7 @@ fn historical_stable_symmetric_difference_keeps_multiplicity_and_order() {
     execute_with_negative(
         "lib/list-stable-symmetric-difference-general.lisp",
         include_str!("../../../lib/list-stable-symmetric-difference-general.lisp"),
-        "(приєднати-для-симетрії\n         (лише-один-бік ліві праві)\n         (лише-один-бік праві ліві))",
-        "(приєднати-для-симетрії\n         (лише-один-бік праві ліві)\n         (лише-один-бік ліві праві))",
+        "(приєднати-для-симетрії\n         (лише-один-бік ліві праві)\n         (лише-один-бік праві ліві)",
+        "(приєднати-для-симетрії\n         (лише-один-бік праві ліві)\n         (лише-один-бік ліві праві)",
     );
 }
