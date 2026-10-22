@@ -41,9 +41,17 @@ for source in "$here"/*.lisp; do
   view="$scratch/$name"
   committed="$here/$name.sens"
   committed_view="$here/$name"
+  # Джерело без ОБОХ фізичних супутників — кандидат у черзі Zig/SENS
+  # remint, а не зламана активна програма. Воно не входить до метрик.
+  # Неповна або підмінена трійка (symlink/тільки один супутник) — RED.
+  if [[ ! -e "$committed" && ! -L "$committed" &&
+        ! -e "$committed_view" && ! -L "$committed_view" ]]; then
+    echo "CONTEST_PENDING_NATIVE_PAIR source=$source status=NOT_EXECUTED" >&2
+    continue
+  fi
   if [[ ! -f "$committed" || -L "$committed" ||
         ! -f "$committed_view" || -L "$committed_view" ]]; then
-    printf '%s\t-\t-\t0\tНЕМАЄ_ОБЕРНЕНОЇ_ПАРИ\n' "$name"
+    printf '%s\t-\t-\t0\tНЕПОВНА_ФІЗИЧНА_ПАРА\n' "$name"
     fail=1
     continue
   fi
