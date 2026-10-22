@@ -40,17 +40,35 @@ for source in "$here"/*.lisp; do
   fi
   source_sha="$(sha256sum "$source" | cut -d' ' -f1)"
   if ! "$sens" --t5m-mint "$source" "$physical" >"$scratch/mint.out" 2>"$scratch/error" ||
-     [[ ! -s "$physical" ]] ||
-     ! "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/error" ||
+     [[ ! -s "$physical" ]]; then
+    printf '%s\\t-\\t-\\t0\\tПОМИЛКА_НАТИВНОГО_MINT\\n' "$name"
+    sed 's/^/SENS mint: /' "$scratch/error" >&2
+    fail=1
+    continue
+  fi
+  if ! "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/error" ||
      ! "$trit" open "$physical" >"$view" 2>"$scratch/error" ||
-     [[ ! -s "$view" ]] ||
-     ! cmp -s "$physical" "$committed" ||
-     ! cmp -s "$view" "$committed_view" ||
-     [[ "$source_sha" != "$(sha256sum "$source" | cut -d' ' -f1)" ]] ||
-     ! "$sens" --t5m-pair "$source" "$physical" >"$scratch/paired.out" 2>"$scratch/error" ||
+     [[ ! -s "$view" ]]; then
+    printf '%s\\t-\\t-\\t0\\tПОМИЛКА_ОБЕРНЕНОСТІ_T5M\\n' "$name"
+    sed 's/^/Zig/T5M: /' "$scratch/error" >&2
+    fail=1
+    continue
+  fi
+  if ! cmp -s "$physical" "$committed" || ! cmp -s "$view" "$committed_view"; then
+    printf '%s\\t-\\t-\\t0\\tЗАСТАРІЛА_ФІЗИЧНА_ПАРА\\n' "$name"
+    echo "CONTEST_PAIR_DRIFT source=$source action=refresh-executed-t5m-pair" >&2
+    fail=1
+    continue
+  fi
+  if [[ "$source_sha" != "$(sha256sum "$source" | cut -d' ' -f1)" ]]; then
+    printf '%s\\t-\\t-\\t0\\tДЖЕРЕЛО_ЗМІНЕНО\\n' "$name"
+    fail=1
+    continue
+  fi
+  if ! "$sens" --t5m-pair "$source" "$physical" >"$scratch/paired.out" 2>"$scratch/error" ||
      ! "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/error"; then
-    printf '%s\t-\t-\t0\tНЕМАЄ_ТОЧНОЇ_ОБЕРНЕНОСТІ_АБО_ВИКОНАННЯ\n' "$name"
-    sed 's/^/SENS: /' "$scratch/error" >&2
+    printf '%s\\t-\\t-\\t0\\tПОМИЛКА_ВИКОНАННЯ_SENS\\n' "$name"
+    sed 's/^/SENS eval: /' "$scratch/error" >&2
     fail=1
     continue
   fi
@@ -58,19 +76,6 @@ for source in "$here"/*.lisp; do
      [[ "$(cat "$scratch/standalone.out")" != "$expected" ]]; then
     printf '%s\t-\t-\t0\tНЕ_ЗБІГАЄТЬСЯ_РЕЗУЛЬТАТ\n' "$name"
     echo "CONTEST_OUTPUT_MISMATCH name=$name expected=$expected paired=$(cat "$scratch/paired.out") physical=$(cat "$scratch/standalone.out")" >&2
-    fail=1
-    continue
-  fi
-  # Конкурс рахує лише закомічену *ту саму* фізичну програму,
-  # а не тимчасово згенеровані байти, що можуть приховати застарілу пару.
-  committed_physical="$here/$name.sens"
-  committed_view="$here/$name"
-  if [[ ! -f "$committed_physical" || -L "$committed_physical" ||
-        ! -f "$committed_view" || -L "$committed_view" ]] ||
-     ! cmp -s "$physical" "$committed_physical" ||
-     ! cmp -s "$view" "$committed_view"; then
-    printf '%s\t-\t-\t0\tЗАСТАРІЛА_АБО_ВІДСУТНЯ_ФІЗИЧНА_ПАРА\n' "$name"
-    echo "CONTEST_TRIPLET_DRIFT name=$name expected_current=Zig/T5M source=$source" >&2
     fail=1
     continue
   fi
