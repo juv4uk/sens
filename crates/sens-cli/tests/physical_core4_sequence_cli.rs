@@ -417,6 +417,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "замінити-всі-входження",
         "list-all-cuts-general",
         "list-strip-prefix-atoms-general",
+        "list-first-globally-unique-atom-general",
+        "list-prefix-before-repeat-general",
         "list-split-before-every-atom-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
@@ -533,6 +535,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "замінити-третій-в-четвірці"
                 | "list-all-cuts-general"
                 | "list-strip-prefix-atoms-general"
+                | "list-first-globally-unique-atom-general"
+                | "list-prefix-before-repeat-general"
                 | "list-split-before-every-atom-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
@@ -787,6 +791,8 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-stable-intersection-general",
         "lib/list-prefix-atoms-general",
         "lib/list-strip-prefix-atoms-general",
+        "lib/list-first-globally-unique-atom-general",
+        "lib/list-prefix-before-repeat-general",
         "lib/list-trim-edges-atom-general",
         "lib/list-all-distinct-atoms-general",
         "lib/list-keep-all-matching-atoms-general",
