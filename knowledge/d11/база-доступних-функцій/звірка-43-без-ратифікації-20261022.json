@@ -885,7 +885,16 @@
       "review_route": "Потребує конкретної структурної властивості й нативного SENS-свідка; розміщувати після доказу",
       "ratified": false,
       "independent_law_proven": false,
-      "direct_D11_opcode": false
+      "direct_D11_opcode": false,
+      "native_evidence": {
+        "status": "EXISTING_SENS_LIBRARY_LAW_WITH_NATIVE_WITNESS",
+        "source": "lib/lisp-fs.lisp",
+        "function": "внутрішній-правильний-список?",
+        "test_file": "crates/sens/tests/fs_bridge_diagnostics.rs",
+        "test_function": "root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails",
+        "law": "D1+D3; proper-list yes, dotted-tail or atom no",
+        "caveat": "Це прочитаний структурний S-вираз, не сканування сирих текстових крапок"
+      }
     },
     {
       "legacy_fixture_bits": "00000100111",
@@ -985,7 +994,8 @@
       "historic_d11_fixture_bits_only": true,
       "owner_ratified_from_43": 0,
       "newly_admitted_d11_opcodes": 0,
-      "decision": "Корисні HAS-* — одна SENS-бібліотечна композиція та 8 укр-викликів. Тотожне нижчим доменам не дублювати, дані й транспорт не видавати за opcode."
+      "decision": "Корисні HAS-* — одна SENS-бібліотечна композиція та 8 укр-викликів. Тотожне нижчим доменам не дублювати, дані й транспорт не видавати за opcode.",
+      "existing_proper_list_law": "NO-DOT reuses already implemented and natively tested lib/lisp-fs.lisp list-shape law"
     }
   }
 }
