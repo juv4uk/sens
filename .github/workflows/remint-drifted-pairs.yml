@@ -422,6 +422,19 @@ jobs:
                   needs_pair=1
                 fi
               fi
+              # Свіжий main може міняти фізичні байти без зміни .lisp.
+              # Перевіряємо чинний SENS/Zig mint перед конкурсним judge,
+              # щоб старий НСД не зупиняв нових справних учасників.
+              if (( ! needs_pair )) && [[ "$REMINT_CONTEST" == true ]]; then
+                probe_dir="$(mktemp -d "$RUNNER_TEMP/sens-contest-probe.XXXXXX")"
+                if ! target/debug/sens --t5m-mint "$source" "$probe_dir/probe.sens" >/dev/null ||
+                   ! cmp -s "$probe_dir/probe.sens" "$pair" ||
+                   ! target/debug/sens-trit view "$pair" | cmp -s - "$view"; then
+                  needs_pair=1
+                  echo "REMINT_RECOVER_CONTEST_DRIFT source=$source native=SENS_ZIG"
+                fi
+                rm -rf -- "$probe_dir"
+              fi
               if (( needs_pair )); then
                 REMINT_CONTEST=true
                 if ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
