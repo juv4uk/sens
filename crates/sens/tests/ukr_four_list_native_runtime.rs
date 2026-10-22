@@ -303,39 +303,33 @@ fn bija3_1968_atom_null_partial_law_executes_and_rejects_false_generator() {
         );
     }
 
-    // Контракт #3161: D3:000 — не D1:0, проте COND пропускає
-    // обидва як різні причини невибору. Виконання хибної гілки
-    // має залишатися неможливим (у ній CAR від порожнього).
-    for (case, condition) in [
-        ("структурне-без-свідка", "(як-є ())"),
-        ("д1-ні", "ні"),
-    ] {
-        let source = format!(
-            "(за-умовою ({condition} (перше (як-є ()))) (так (як-є підтверджено)))"
-        );
-        let mut session = Session::default();
-        let value = eval_program(&source, &mut session)
-            .unwrap_or_else(|error| panic!(
-                "test_id=1968-D1-COND-{case} layer=SENS input={source} actual_error={error}"
-            ))
-            .value;
-        assert_eq!(
-            value.to_string(),
-            "підтверджено",
-            "test_id=1968-D1-COND-{case} layer=SENS expected=підтверджено actual={value}"
-        );
-    }
+    // CURRENT FOUNDATION SUPERSESSION #3161, Contract 11.8/11.9:
+    // тільки D1:0 пропускає гілку. D3:000 є результатом вичерпання,
+    // але НЕ допустимою умовою; не підміняти його хибою D1.
+    let program =
+        "(за-умовою (ні (перше (як-є ()))) (так (як-є підтверджено)))";
+    let mut session = Session::default();
+    let observed = eval_program(program, &mut session)
+        .unwrap_or_else(|error| panic!(
+            "test_id=1968-D1-COND-SKIP layer=SENS input={program} actual_error={error}"
+        ))
+        .value;
+    assert_eq!(
+        observed.to_string(),
+        "підтверджено",
+        "test_id=1968-D1-COND-SKIP layer=SENS expected=підтверджено actual={observed}"
+    );
 
-    // Математичний нуль або сторонній символ не є D1 чи D3:000.
-    // Відхилення повинне бути саме доменною помилкою SENS COND,
-    // а не побічною помилкою синтаксису або невизначеної функції.
+    // Форма з D3:000, числом чи стороннім атомом відхиляється
+    // саме доменною помилкою COND; тіло гілки не виконується.
     for (case, source) in [
+        ("структурне-порожнє", "(за-умовою ((як-є ()) (перше (як-є ()))) (так (як-є неправильно)))"),
         ("математичний-нуль", "(за-умовою (0 (як-є неправильно)))"),
         ("сторонній-атом", "(за-умовою ((як-є сторонній) (як-є неправильно)))"),
     ] {
         let mut session = Session::default();
         let error = eval_program(source, &mut session)
-            .expect_err("SENS COND не має приймати чужий домен");
+            .expect_err("SENS COND має відхилити недопустимий домен");
         let diagnostic = error.to_string();
         assert!(
             diagnostic.contains("D3:110 COND expects exact D1"),
