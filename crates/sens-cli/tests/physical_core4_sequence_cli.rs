@@ -438,6 +438,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "tree-replace-atom-general",
         "list-first-repeated-atom-general",
         "list-last-repeated-atom-by-final-occurrence-general",
+        "list-last-globally-unique-atom-general",
         "tree-prune-matching-leaves-general",
         "list-keep-last-unique-atoms-general",
         "list-keep-repeated-atoms-once-general",
@@ -579,6 +580,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "tree-replace-atom-general"
                 | "list-first-repeated-atom-general"
                 | "list-last-repeated-atom-by-final-occurrence-general"
+                | "list-last-globally-unique-atom-general"
                 | "tree-prune-matching-leaves-general"
                 | "list-keep-last-unique-atoms-general"
                 | "list-keep-repeated-atoms-once-general"
