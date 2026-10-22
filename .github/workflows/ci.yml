@@ -1666,6 +1666,7 @@ jobs:
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 \
             cargo build --locked -p sens-cli --bin sens --bin sens-trit
           succeeded=0
+          paired_only=0
           rejected=0
           data_only=0
           for source in lib/*.lisp; do
@@ -1699,26 +1700,43 @@ jobs:
             esac
             # Одна й та сама нативна процедура майнить, звіряє Zig-view,
             # перевіряє SENS paired/standalone та реальний негатив.
-            if bash scripts/refresh-verified-t5m-pair.sh \
-                "$source" target/debug/sens target/debug/sens-trit "${bindings[@]}"; then
+            if native_receipt="$(bash scripts/refresh-verified-t5m-pair.sh \
+                "$source" target/debug/sens target/debug/sens-trit "${bindings[@]}")"; then
+              printf '%s\n' "$native_receipt"
+              # Фізична оберненість + парне виконання не є доказом
+              # автономного запуску. Довіряємо тільки режиму SENS-скрипта.
+              case "$native_receipt" in
+                *"T5M_REPAIR_OK source=$source "*"mode=paired-and-standalone "*)
+                  native_status=NATIVE_VERIFIED
+                  succeeded=$((succeeded + 1)) ;;
+                *"T5M_REPAIR_OK source=$source "*"mode=paired-only "*)
+                  native_status=NATIVE_PAIRED_ONLY
+                  paired_only=$((paired_only + 1)) ;;
+                *)
+                  echo "::error::LIB_NATIVE_RECEIPT_INVALID source=$source" >&2
+                  printf '%s\tNATIVE_REJECTED\t-\t-\t-\n' "$source" >> "$report"
+                  rejected=$((rejected + 1))
+                  continue ;;
+              esac
               stem="${source%.lisp}"
               mkdir -p "$output/$(dirname "$source")"
               cp -- "$source" "$stem.sens" "$stem" "$output/$(dirname "$source")/"
-              printf '%s\tNATIVE_VERIFIED\t%s\t%s\t%s\n' \
-                "$source" \
+              printf '%s\t%s\t%s\t%s\t%s\n' \
+                "$source" "$native_status" \
                 "$(sha256sum "$source" | cut -d' ' -f1)" \
                 "$(sha256sum "$stem.sens" | cut -d' ' -f1)" \
                 "$(sha256sum "$stem" | cut -d' ' -f1)" >> "$report"
-              succeeded=$((succeeded + 1))
             else
               printf '::error::LIB_NATIVE_TRIPLET_RED source=%s\n' "$source" >&2
               printf '%s\tNATIVE_REJECTED\t-\t-\t-\n' "$source" >> "$report"
               rejected=$((rejected + 1))
             fi
           done
-          echo "SENS_LIB_NATIVE_TRIPLETS sha=$GITHUB_SHA verified=$succeeded rejected=$rejected data_only=$data_only release=NOT_CERTIFIED"
-          # Усі вже доведені пари лишаються в artifact навіть за RED.
-          # Невиконані .lisp НЕ отримують вигаданого .sens чи PASS.
+          state=COMPLETE
+          if (( rejected != 0 || paired_only != 0 )); then state=PARTIAL; fi
+          echo "SENS_LIB_NATIVE_TRIPLETS sha=$GITHUB_SHA verified=$succeeded paired_only=$paired_only rejected=$rejected data_only=$data_only status=$state release=NOT_CERTIFIED"
+          # Усі доведені фізичні пари залишаються в artifact навіть за RED.
+          # PARTIAL ніколи не називаємо COMPLETE чи релізним GO.
           (( rejected == 0 ))
 
       - name: "ONE-SHOT — artifact фізичних пар для точкового перенесення в main"
