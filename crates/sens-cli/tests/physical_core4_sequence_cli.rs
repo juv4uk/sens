@@ -384,6 +384,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-flatten-nested-general",
         "list-all-suffixes-general",
         "list-all-prefixes-general",
+        "list-all-distinct-atoms-general",
+        "list-keep-all-matching-atoms-general",
+        "list-multiset-intersection-general",
+        "list-zip-with-tails-general",
+        "list-three-lanes-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -465,6 +470,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-interpose-general"
                 | "list-last-occurrence-suffix"
                 | "list-split-first-occurrence-general"
+                | "list-all-distinct-atoms-general"
+                | "list-keep-all-matching-atoms-general"
+                | "list-multiset-intersection-general"
+                | "list-zip-with-tails-general"
+                | "list-three-lanes-general"
                 | "list-deduplicate-neighbors"
                 | "list-alternating-split-four"
                 | "list-remove-first-atom"
@@ -718,6 +728,11 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-cartesian-product-general",
         "lib/list-stable-intersection-general",
         "lib/list-prefix-atoms-general",
+        "lib/list-all-distinct-atoms-general",
+        "lib/list-keep-all-matching-atoms-general",
+        "lib/list-multiset-intersection-general",
+        "lib/list-zip-with-tails-general",
+        "lib/list-three-lanes-general",
         "lib/list-suffix-atoms-general",
         "lib/list-stable-symmetric-difference-general",
         "lib/list-drop-while-atom-general",
