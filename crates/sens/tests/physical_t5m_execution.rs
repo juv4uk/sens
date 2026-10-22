@@ -140,30 +140,56 @@ fn sens_zero_physical_cond_uses_only_exact_d1() {
     assert_eq!(result.value.as_predicate_bit(), None);
 }
 
-/// Strict negative oracles on actual T5M bytes; failures must come from the
-/// SENS language mechanism, not from malformed transport or old truthiness.
+/// #3161: справжній T5M потік має відрізняти відсутній свідок D3:000
+/// від явної відповіді D1:0. Обидва пропускають гілку, але не зливаються
+/// в одну предикатну тотожність, навіть без текстової проєкції.
 #[test]
-fn sens_zero_physical_cond_rejects_wrong_domain_and_three_field_clause() {
-    for (source, expected_kind) in [
-        ("10 110 00 10 000 00 1 01 01", ErrorKind::Type),
-        ("10 110 00 10 1 00 0 00 1 01 01", ErrorKind::InvalidForm),
+fn sens_zero_physical_cond_skips_no_witness_without_casting_it_to_d1_no() {
+    for (source, expected) in [
+        ("10 110 00 10 000 00 1 01 01", None),
+        ("10 110 00 10 000 00 1 01 00 10 1 00 0 01 01", Some(false)),
     ] {
         let words = sens::parse_binary_source_words(source)
-            .expect("negative witness must be well-formed binary words")
-            .into_iter()
-            .map(|token| token.word)
-            .collect::<Vec<_>>();
-        let physical =
-            encode_ternary_words(&words).expect("negative witness must be valid T5M transport");
+            .expect("точний D2/D3 тест повинен читатися");
+        let words = words.into_iter().map(|token| token.word).collect::<Vec<_>>();
+        let physical = encode_ternary_words(&words).expect("чинний T5M");
         assert_eq!(decode_ternary_program(&physical).unwrap(), words);
-        assert!(
-            matches!(
-                eval_reference_t5m(&physical, &mut Session::default()),
-                Err(ReferenceT5mError::Language(err)) if err.kind == expected_kind
-            ),
-            "exact D1/COND rejected with wrong error category: {source}"
+        let value = eval_reference_t5m(&physical, &mut Session::default())
+            .unwrap_or_else(|error| panic!(
+                "test_id=3161-PHYSICAL-COND layer=SENS source={source} actual_error={error:?}"
+            ))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            expected,
+            "test_id=3161-PHYSICAL-COND source={source} expected={expected:?} actual={value}"
         );
+        if expected.is_none() {
+            assert!(matches!(value, Value::Nil),
+                "test_id=3161-PHYSICAL-COND expected=D3:000 actual={value}");
+        }
     }
+}
+
+/// Трипольовий COND лишається реальною помилкою форми, а не альтернативою
+/// точному двопольовому закону; негатив виконується з фізичних байтів.
+#[test]
+fn sens_zero_physical_cond_rejects_three_field_clause() {
+    let source = "10 110 00 10 1 00 0 00 1 01 01";
+    let words = sens::parse_binary_source_words(source)
+        .expect("negative witness must be well-formed binary words")
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    let physical = encode_ternary_words(&words).expect("negative witness must be valid T5M");
+    assert_eq!(decode_ternary_program(&physical).unwrap(), words);
+    assert!(
+        matches!(
+            eval_reference_t5m(&physical, &mut Session::default()),
+            Err(ReferenceT5mError::Language(err)) if err.kind == ErrorKind::InvalidForm
+        ),
+        "test_id=3161-PHYSICAL-COND-three-fields source={source} expected=InvalidForm"
+    );
 }
 
 /// SENS owns the entire semantic law matrix in its executable 0/1 program.
