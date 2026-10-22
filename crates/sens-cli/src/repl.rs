@@ -2231,6 +2231,35 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
+    fn first_class_d6_code_executes_after_zig_t5m_roundtrip() {
+        let mut session = Session::default();
+        // Д6:001111 є значенням-функцією: його можна передавати як аргумент.
+        // Zig транспортує точні біти, а закон виконання належить SENS.
+        let result = eval_t5m_repl_line(
+            "((функція (операція) (операція 42)) відняти-1)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("SENS evaluates passed D6:001111 after exact Zig T5M");
+        let Value::BinaryNumber(ref number) = result.value else {
+            panic!("first-class D6 SUB1 must return an exact D24+ number");
+        };
+        assert_eq!(number.to_decimal_string(), "41");
+
+        // Негатив: та сама виклична identity мусить зберігати числовий закон.
+        assert!(
+            eval_t5m_repl_line(
+                "((функція (операція) (операція (як-є ()))) відняти-1)",
+                &mut session,
+                ReplSurface::UkrainianFull,
+            )
+            .is_err(),
+            "first-class D6 SUB1 must reject a nonnumeric operand"
+        );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
     fn interactive_t5m_does_not_accept_a_name_from_an_unselected_projection() {
         let mut session = Session::default();
         let error = eval_t5m_repl_line("(plus 1 2)", &mut session, ReplSurface::UkrainianFull)
