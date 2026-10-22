@@ -65,15 +65,20 @@ class MigrationLexicalSafety(unittest.TestCase):
         changed = changed.replace("((решта (offset-bytes 8)", "((011 (offset-bytes 8)")
         self.blocked(old, changed, "quoted/data atom")
 
-    def test_actual_local_assoc_recursion_is_not_domain_d5_assoc(self):
-        old = (ROOT / "scripts/build-inventory.lisp").read_text()
-        self.assertIn("(визначити знайти-пару", old)
-        self.assertIn("(знайти-пару ключ (решта список-пар))", old)
-        self.assertNotIn("(визначити знайти-за-ключем знайти-пару)", old)
+    def test_actual_local_map_recursion_is_not_domain_d5_assoc(self):
+        # Чинний виконуваний файл, не колишній build-inventory.lisp:
+        # його вміст нині лише якір, а не визначення рекурсивного пошуку.
+        # D5:11100 ASSOC не має права заміняти власне D4 визначення.
+        old = (ROOT / "lib/persistent-map.lisp").read_text(encoding="utf-8")
+        recursive_call = "(мапа-отримати ключ (решта записи))"
+        self.assertIn("(визначити мапа-отримати", old)
+        self.assertIn(recursive_call, old)
+        self.assertNotIn("(визначити знайти-за-ключем мапа-отримати)", old)
         changed = old.replace(
-            "(знайти-пару ключ (решта список-пар))",
-            "(11100 ключ (решта список-пар))", 1,
+            recursive_call,
+            "(11100 ключ (решта записи))", 1,
         )
+        self.assertNotEqual(changed, old, "мутація мусить змінювати живий виклик")
         self.blocked(old, changed, "locally bound callable")
 
     def test_actual_local_recursion_is_not_domain_d6_scan(self):
