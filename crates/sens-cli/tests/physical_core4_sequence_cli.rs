@@ -469,6 +469,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-partition-atomic-compound-general",
         "list-count-consecutive-atomic-runs-unary-general",
         "list-leading-atom-run-length-unary-general",
+        "list-drop-last-two-linear",
+        "list-last-two-zero-copy-general",
+        "list-tail-after-first-compound-zero-copy-general",
+        "list-tail-after-second-compound-zero-copy-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -627,6 +631,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-last-atom-suffix-general"
                 | "list-all-subsets-by-position-general"
                 | "tree-pair-tally-unary-general"
+                | "list-drop-last-two-linear"
+                | "list-last-two-zero-copy-general"
+                | "list-tail-after-first-compound-zero-copy-general"
+                | "list-tail-after-second-compound-zero-copy-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
