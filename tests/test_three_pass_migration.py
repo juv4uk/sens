@@ -70,7 +70,9 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        self.assertEqual(vocabulary["status"], "owner-ratified")
+        self.assertEqual(vocabulary["status"], "UNRATIFIED_REVIEW")
+        self.assertIs(vocabulary["ratified"], False)
+        self.assertIsNone(vocabulary["ratified_by"])
         self.assertIn("not callable Core", vocabulary["semantic_scope"])
         rows = vocabulary["table"]
         self.assertEqual(len(rows), 43)
@@ -115,7 +117,7 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
     def test_no_d11_test_identity_enters_any_three_pass_successor_map(self):
         # Inspect all three REAL migration maps, not just current_residents().
         # Historical name and generated-surface imports must not accidentally
-        # promote the ratified *test data* D11 to callable SENS identities.
+        # promote the unratified *test fixture* D11 to callable SENS identities.
         foundation = mod.load_foundation(
             ROOT / "knowledge/d1-d11-foundation.json"
         )

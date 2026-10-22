@@ -1,12 +1,12 @@
 {
   "schema": "sens.d11.testing/v1",
-  "status": "owner-ratified",
+  "status": "UNRATIFIED_REVIEW",
   "date": "2026-10-13",
   "width": 11,
   "capacity": 2048,
   "occupancy": 43,
   "semantic_scope": "Testing vocabulary for binary SENS semantic tests; not callable Core",
-  "ratified_by": "PROJECT_OWNER",
+  "ratified_by": null,
   "rules": {
     "coordinates": "exact 11-bit binary 0..2047",
     "encoding": "MSB-first densely packed, exact externally known bit length; bad frames reject",
@@ -444,5 +444,11 @@
       "lisp": "TEST-ELEMENT",
       "sym": ""
     }
-  ]
+  ],
+  "ratified": false,
+  "owner_correction": "2026-10-22: власник прямо заперечив ратифікацію цих 43 тестових записів",
+  "fixture_entries": 43,
+  "ratified_residents": 0,
+  "occupancy_scope": "43 legacy test labels, not 43 admitted or ratified D11 addresses",
+  "placement_review": "knowledge/d11/база-доступних-функцій/звірка-43-без-ратифікації-20261022.json"
 }
