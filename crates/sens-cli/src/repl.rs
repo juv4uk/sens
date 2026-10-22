@@ -111,8 +111,14 @@ fn append_t5m_expression_context(
     depth: usize,
     quoted_data: bool,
 ) -> Result<(), String> {
-    if depth > 768 {
-        return Err("T5M source AST exceeds the SENS nesting limit".into());
+    // Двійковий читач SENS у binary_execution.rs має межу D2=128.
+    // Не видавати Zig/T5M байти для джерела, яке той самий reader
+    // гарантовано відхилить. Глобальна межа source AST (768) не є
+    // доказом фізичного D2-допуску.
+    if depth > 128 {
+        return Err(
+            "T5M_SOURCE_DEPTH_NOT_ADMITTED: exact physical D2 reader limit=128".into(),
+        );
     }
     let control = |bits| t5m_domain_identity(2, bits).map(ExactDomainWord::Identity);
     match &expression.kind {
@@ -1808,6 +1814,21 @@ mod tests {
             .execute(&mut runtime)
             .expect("справжній SENS має виконати обидві форми");
         assert_eq!(result.value.as_predicate_bit(), Some(true));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_source_depth_must_not_exceed_physical_reader() {
+        // Загальний текстовий SENS-reader допускає AST до 768, але
+        // фізичний D2 reader нині обмежений 128 вкладеннями.
+        // Джерело не можна mint-ити успішно, якщо SENS відхилить байти.
+        let deep_source = format!("{}(як-є ()){}", "(як-є ".repeat(129), ")".repeat(129));
+        let error = mint_t5m_source_pair(&deep_source)
+            .expect_err("source >128 must fail before physical mint");
+        assert!(
+            error.contains("T5M_SOURCE_DEPTH_NOT_ADMITTED"),
+            "test_id=T5M-D2-DEPTH layer=SENS-source expected=pre-mint-fail-closed actual={error}"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
