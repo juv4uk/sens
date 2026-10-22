@@ -417,8 +417,8 @@ fn assert_lisp_owned_verdict_passes(session: &mut Session, row: &WitnessRow, act
     assert_eq!(
         result.value.to_string(),
         "1",
-        "Lisp-owned witness verdict rejected actual outcome for {}",
-        row.expr
+        "test_id=witness-actual-red layer=actual-SENS expr={} expected={:?} error={:?} actual={} verdict={}",
+        row.expr, row.expected, row.error, actual, result.value
     );
 }
 
