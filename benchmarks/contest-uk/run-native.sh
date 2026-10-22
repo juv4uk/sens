@@ -33,7 +33,11 @@ for physical_peer in "$here"/*.sens; do
   fi
 done
 for source in "$here"/*.lisp; do
-  [[ -f "$source" && ! -L "$source" ]] || continue
+  if [[ ! -f "$source" || -L "$source" ]]; then
+    echo "CONTEST_INVALID_SOURCE path=$source" >&2
+    fail=1
+    continue
+  fi
   name="$(basename -- "$source" .lisp)"
   case "$name" in
     акерман|акерман-*) expected=61 ;;
@@ -86,6 +90,16 @@ for source in "$here"/*.lisp; do
   if [[ ! -f "$committed" || -L "$committed" ||
         ! -f "$committed_view" || -L "$committed_view" ]]; then
     printf '%s\t-\t-\t0\tНЕПОВНА_ФІЗИЧНА_ПАРА\n' "$name"
+    fail=1
+    continue
+  fi
+  # Справжній нативний суд перевіряє змінні входи, негативного мутанта,
+  # точний T5M roundtrip і paired/standalone SENS. Фіксований результат
+  # сам по собі не доводить алгоритму і не може отримати «ПІДТВЕРДЖЕНО».
+  if ! SENS_BIN="$sens" SENS_TRIT_BIN="$trit" bash "$here/judge.sh" \
+      "benchmarks/contest-uk/$name.sens" >"$scratch/native-proof.out" 2>"$scratch/native-proof.err"; then
+    printf '%s\t-\t-\t0\tНЕ_ДОВЕДЕНО_АЛГОРИТМ\n' "$name"
+    sed 's/^/SENS/Zig суд: /' "$scratch/native-proof.err" >&2
     fail=1
     continue
   fi
