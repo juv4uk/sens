@@ -300,30 +300,24 @@ class ThreePassMigrationTests(unittest.TestCase):
             mod.encode_lambda_params(binder("()"), self.text7),
             [mod.D3_EMPTY],
         )
-        # Справжні головні Lisp-джерела використовують саме variadic.
-        # Їх не можна переписувати на (функція (аргументи) ...).
-        # lib/core4.lisp більше не перевизначає канонічний Д4:1110 список
-        # (коміт 921a6c20 «прибрати застаріле перевизначення»), тож лишається
-        # справжнє variadic-джерело lib/core.lisp.
-        for source_name, parameter in (
-            ("lib/core.lisp", "аргументи"),
-        ):
-            with self.subTest(source=source_name):
-                source = (ROOT / source_name).read_text(encoding="utf-8")
-                program = f"(визначити список (функція {parameter} {parameter}))"
-                self.assertIn(program, source)
-                projection, _ = self.migrate(program)
-                words = projection.split()
-                binder_words = mod.encode_text7_identifier(
-                    parameter, self.text7, mod.Tok("ATOM", parameter, 0),
-                )
-                # Точна D4 форма бере Text7-атом параметра як є,
-                # а не створює нову D2-обгортку одноаргументної функції.
-                self.assertIn(
-                    ["0010", mod.D2_SEP, *binder_words, mod.D2_SEP],
-                    [words[i:i + len(binder_words) + 3]
-                     for i in range(len(words) - len(binder_words) - 2)],
-                )
+        # Д4:1110 список є ратифікованим і не перевизначається у core/core4.
+        # Синтаксис variadic binder все одно тестуємо на автономній
+        # пробній формі: не прив'язуємо граматику до старого DEFINE.
+        for source_name in ("lib/core.lisp", "lib/core4.lisp"):
+            source = (ROOT / source_name).read_text(encoding="utf-8")
+            self.assertNotIn("(визначити список (функція", source)
+        program = "(визначити проба (функція аргументи аргументи))"
+        projection, _ = self.migrate(program)
+        words = projection.split()
+        binder_words = mod.encode_text7_identifier(
+            "аргументи", self.text7, mod.Tok("ATOM", "аргументи", 0),
+        )
+        # Точна D4 форма бере D7-атом параметра без D2-обгортки.
+        self.assertIn(
+            ["0010", mod.D2_SEP, *binder_words, mod.D2_SEP],
+            [words[i:i + len(binder_words) + 3]
+             for i in range(len(words) - len(binder_words) - 2)],
+        )
 
 
         # Один машинний Lisp-атом із апострофом не має перетворитися
