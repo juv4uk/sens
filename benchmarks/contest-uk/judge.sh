@@ -57,6 +57,49 @@ for path in "${inputs[@]}"; do
   # і могло зарахувати зайві порожні рядки як коректний результат.
   printf '%s\n' "$expected" > "$tmp/expected"
   cmp -s "$tmp/standalone" "$tmp/expected" || error "хибний вивід $path: очікувано=$expected (зайві/відсутні байти)"
+  # Справжні змінні входи: константа замість алгоритму не виграє.
+  # Додаємо виклик до тієї самої програми у scratch (оригінал не чіпаємо).
+  # Всі свідки проходять реальний SENS -> Zig/T5M -> SENS, без Python/JSON.
+  final_call="$(grep -vE '^[[:space:]]*(;|$)' "$source" | tail -n 1)"
+  if [[ "$final_call" =~ ^\(([^[:space:]()]+)[[:space:]] ]]; then
+    function_name="${BASH_REMATCH[1]}"
+  else
+    error "не можна прочитати фінальний виклик конкурсанта $source"
+  fi
+  case "$task" in
+    факторіал) witnesses=("0 1|1" "5 1|120" "7 1|5040");;
+    сума-до-n) witnesses=("0 0|0" "10 0|55" "20 0|210");;
+    довжина-списку)
+      witnesses=("(як-є ()) 0|0" "(список 1) 0|1" "(список 1 2 3) 0|3");;
+  esac
+  witness_index=0
+  for witness in "${witnesses[@]}"; do
+    witness_index=$((witness_index + 1))
+    witness_args="${witness%%|*}"
+    witness_expected="${witness#*|}"
+    witness_source="$tmp/вхід-$witness_index.lisp"
+    witness_binary="$tmp/вхід-$witness_index.sens"
+    {
+      cat "$source"
+      printf '\n(%s %s)\n' "$function_name" "$witness_args"
+    } > "$witness_source"
+    "$sens" --t5m-mint "$witness_source" "$witness_binary" >/dev/null ||
+      error "SENS не закодував змінний вхід $path №$witness_index"
+    "$trit" open "$witness_binary" > "$tmp/вхід-$witness_index" ||
+      error "Zig не відкрив змінний вхід $path №$witness_index"
+    "$trit" verify-view "$witness_binary" >/dev/null ||
+      error "необоротний змінний вхід $path №$witness_index"
+    "$sens" --t5m-pair "$witness_source" "$witness_binary" > "$tmp/вхід-$witness_index.paired" ||
+      error "не виконано парний змінний вхід $path №$witness_index"
+    "$sens" "$witness_binary" > "$tmp/вхід-$witness_index.actual" ||
+      error "не виконано автономний змінний вхід $path №$witness_index"
+    printf '%s\n' "$witness_expected" > "$tmp/вхід-$witness_index.expected"
+    cmp -s "$tmp/вхід-$witness_index.actual" "$tmp/вхід-$witness_index.expected" ||
+      error "помилковий алгоритм $path на змінному вході №$witness_index: очікувано $witness_expected"
+    cmp -s "$tmp/вхід-$witness_index.paired" "$tmp/вхід-$witness_index.actual" ||
+      error "розходження SENS paired/standalone $path на змінному вході №$witness_index"
+  done
+  printf 'CONTEST_INPUT_WITNESSES_PASS path=%s cases=%s native=SENS_ZIG_T5M\n' "$path" "$witness_index"
   bytes="$(wc -c < "$path")"
   rows+="$task"$'\t'"$bytes"$'\t'"$nodes"$'\t'"$visits"$'\t'"$path"$'\n'
   printf "CONTEST_EXECUTED_PASS path=%s T5M=%s AST=%s visits=%s result=%s\n" "$path" "$bytes" "$nodes" "$visits" "$result"
