@@ -346,6 +346,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-interpose-general",
         "list-last-occurrence-suffix",
         "list-split-first-occurrence-general",
+        "list-all-suffixes-general",
+        "list-all-prefixes-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
