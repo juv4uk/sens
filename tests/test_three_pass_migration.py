@@ -1325,5 +1325,18 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertGreaterEqual(projection.count(" ".join(first_frame)),2)
 
 
+class ActiveContestSourceInventoryTests(unittest.TestCase):
+    def test_migrator_never_reimports_superseded_lisp_as_executable(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            winner = root / "benchmarks/contest-uk/winner.lisp"
+            old = root / "benchmarks/contest-uk/superseded/older.lisp"
+            winner.parent.mkdir(parents=True)
+            old.parent.mkdir(parents=True)
+            winner.write_text("(перше ())\n", encoding="utf-8")
+            old.write_text("(перше ())\n", encoding="utf-8")
+            self.assertEqual(list(mod.source_files(root)), [winner])
+
+
 if __name__=="__main__":
     unittest.main()
