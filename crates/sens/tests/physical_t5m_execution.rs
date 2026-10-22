@@ -31,6 +31,36 @@ fn physical_multi_form_program_executes_as_a_single_exact_domain_stream() {
     ));
 }
 
+/// Кілька верхніх D2-форм: живе українське джерело й фізичний Zig/T5M
+/// виконуються тим самим SENS, а не інтерпретатором зовнішньої мови.
+/// Негатив змінює останню форму і мусить змінити фактичне SENS-значення.
+#[test]
+fn multiform_ukr_and_physical_t5m_execute_to_the_same_sens_value() {
+    const SOURCE: &str =
+        include_str!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.lisp");
+    let source_value = sens::eval_program(SOURCE, &mut Session::default())
+        .expect("test_id=D2-MULTIFORM-UKR layer=SENS native source execution")
+        .value;
+    let physical_value = eval_reference_t5m(MULTIFORM_T5M, &mut Session::default())
+        .expect("test_id=D2-MULTIFORM-T5M layer=SENS physical execution")
+        .value;
+    assert_eq!(
+        source_value, physical_value,
+        "test_id=D2-MULTIFORM-PARITY layer=SENS expected=identical-value for укр/T5M"
+    );
+
+    let genuine_last_form = "(сполучити (як-є ()) (як-є ()))";
+    assert_eq!(SOURCE.matches(genuine_last_form).count(), 1);
+    let mutant = SOURCE.replacen(genuine_last_form, "(як-є ())", 1);
+    let wrong_value = sens::eval_program(&mutant, &mut Session::default())
+        .expect("test_id=D2-MULTIFORM-MUTANT layer=SENS real negative execution")
+        .value;
+    assert_ne!(
+        wrong_value, physical_value,
+        "test_id=D2-MULTIFORM-MUTANT layer=SENS expected=changed-result actual=same"
+    );
+}
+
 #[test]
 fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
     let words = decode_ternary_program(MULTIFORM_T5M).expect("canonical physical T5M");
