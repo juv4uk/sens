@@ -227,6 +227,18 @@ jobs:
               list="$(git log --diff-filter=A --name-only -n 600 -- '*.sens' | grep '\.sens$' | sed 's/\.sens$/.lisp/' | sort -u)"
             fi
           fi
+          # Початковий native mint також має бути коротким: сотні повних
+          # SENS/Zig перевірок раніше не встигали опублікуватись до нового push.
+          # Першими лишаються джерела, змінені у push, а тоді непарні.
+          # Незавершений хвіст — PENDING, не виданий за PASS чи реліз.
+          list="$(printf '%s\n' "$list" | sed '/^$/d')"
+          initial_total="$(printf '%s\n' "$list" | sed '/^$/d' | wc -l)"
+          if (( initial_total > 24 )); then
+            list="$(printf '%s\n' "$list" | sed -n '1,24p')"
+            echo "REMINT_INITIAL_BATCH selected=24 pending=$((initial_total - 24)) native=SENS_ZIG"
+          else
+            echo "REMINT_INITIAL_BATCH selected=$initial_total pending=0 native=SENS_ZIG"
+          fi
           # Джерела для відтворення на новому exact main, якщо інші агенти
           # посунули HEAD до публікації. Не зберігати готові старі байти.
           printf '%s\n' "$list" > "$RUNNER_TEMP/sens-remint-candidates.list"
