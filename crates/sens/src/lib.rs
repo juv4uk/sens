@@ -72,6 +72,10 @@ mod gpu_execution_packet;
 mod language_items;
 mod binary_bootstrap;
 mod mixed_source;
+// Legacy Rust bit-packer retained only as a unit-test reference. Production
+// SENS exposes no Rust OuterEnvelope carrier; physical packing belongs to the
+// sterile Zig corridor.
+#[cfg(test)]
 mod outer_envelope;
 mod packed_bits;
 mod parser;
@@ -248,7 +252,6 @@ pub use mixed_source::{
     parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_reasoning_source,
     parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_utf8_source,
 };
-pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
 pub use packed_bits::{BitPacker, PackedBitstream};
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, pack_binary_source_words,
