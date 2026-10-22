@@ -1083,17 +1083,22 @@ tcp listen address/port ranges
 
 `None` means the trusted unrestricted profile. Do not call this a complete sandbox; see `docs/host-capability-scoping-adr-2026-08-27.md` for the tested boundary and remaining CLI/operational decisions.
 
-## Environment: WSL2 + Guix
+## Середовище збірки SENS: pinned Guix
 
-Work in this repo from inside WSL2, under the Linux user named after this repo (`my-lisp`), not directly from Windows. Enter the declared environment before running anything:
+Для SENS репозиторій уже містить відтворюване Guix-середовище: `channels.scm`
+закріплює ревізію Guix, кореневий `manifest.scm` — базовий dev-набір, а
+`./guix/run` запускає їх разом через `time-machine` і чистий shell. Перед збіркою,
+тестом або перевіркою Zig запускай команду через цей runner, наприклад:
 
 ```sh
-wsl -u my-lisp
-cd /mnt/c/GitHub/my-lisp
-guix shell -m manifest.scm
+./guix/run dev -- zig version
+./guix/run dev -- cargo test -p sens --lib
 ```
 
-`manifest.scm` pins the toolchain versions this repo expects; don't rely on whatever happens to be on `$PATH` outside the shell.
+Версії звіряй із repo pins, зокрема `.zig-version`; системний `PATH` чи спільний
+профіль не є заміною manifest для відтворюваної перевірки. Якщо `guix` не
+знаходиться, перевір наявний executable `/home/agents/.config/guix/current/bin/guix`
+і передай його runner через `GUIX`, не перевстановлюй інструменти.
 
 ### Журнал відкриттів (2026-09-28)
 

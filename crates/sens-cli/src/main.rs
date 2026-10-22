@@ -355,7 +355,7 @@ fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::ExactDomainWord>, 
 /// не отримує неявних host-можливостей або Core4.
 fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
     let words = decode_physical_t5_words(bytes)?;
-    let program = sens::PhysicalT5Program::from_exact_domain_words(&words)
+    let program = sens::PhysicalT5Program::from_exact_domain_words_owned(words)
         .map_err(|err| format!("exact SENS domain reader rejected: {err}"))?;
 
     // Фізично типізований шлях D1–D10/D24+ не має неявного Lisp macro
@@ -391,7 +391,7 @@ fn eval_physical_t5_with_benchmark_metrics(
     bytes: &[u8],
 ) -> Result<(sens::EvalResult, usize, u64), String> {
     let words = decode_physical_t5_words(bytes)?;
-    let program = sens::PhysicalT5Program::from_exact_domain_words(&words)
+    let program = sens::PhysicalT5Program::from_exact_domain_words_owned(words)
         .map_err(|err| format!("exact SENS domain reader rejected: {err}"))?;
     let ast_nodes = program.forms().iter().map(count_physical_ast_nodes).sum();
     let mut pure = Session::bare();

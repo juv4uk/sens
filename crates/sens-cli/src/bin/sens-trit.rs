@@ -378,7 +378,7 @@ fn eval_t5_bytes_core4(bytes: &[u8], bootstrap_core: bool) -> Result<sens::EvalR
             .into_iter()
             .map(|word| sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits))
             .collect::<Result<Vec<_>, _>>()?;
-        let program = sens::PhysicalT5Program::from_exact_domain_words(&words)
+        let program = sens::PhysicalT5Program::from_exact_domain_words_owned(words)
             .map_err(|e| format!("exact SENS domain admission rejected: {e}"))?;
         let mut session = sens::Session::default();
         if bootstrap_core {

@@ -8,8 +8,9 @@ use crate::{
     decode_ternary_words,
     eval::{lower::lower_exact_domain_program, validate_exact_executable_heads},
     eval_lowered_expressions, BinaryNumber, BinarySourceWord, DomainIdentity, EvalResult, Expr,
-    LanguageError, Session, TernaryTransportError,
+    LanguageError, Session, TernaryTransportError, Value,
 };
+use std::sync::OnceLock;
 
 /// Transport and language failures have distinct, fail-closed provenance.
 #[derive(Debug)]
@@ -66,14 +67,14 @@ impl ExactDomainWord {
     }
 }
 
-/// Canonically validated physical T5 program, stored as the current lowered AST.
-///
-/// Decode+parse+the exact-domain interpreter lowering happens once. Repeated
-/// evaluation reuses those exact immutable lowered forms,
-/// but every evaluation still consults the current interpreter/Session.
-/// This is NOT compiled machine code and grants no additional capabilities.
+/// Канонічна програма зберігає точні доменні слова, відновлені з фізичного
+/// носія. AST будується по одній верхній формі під час виконання; повний AST
+/// матеріалізується лише для сумісного діагностичного доступу через `forms()`.
+/// Це не машинний код і не надає додаткових можливостей.
 pub struct PhysicalT5Program {
-    forms: Vec<Expr>,
+    words: Vec<ExactDomainWord>,
+    form_count: usize,
+    forms: OnceLock<Vec<Expr>>,
 }
 
 impl PhysicalT5Program {
@@ -97,29 +98,53 @@ impl PhysicalT5Program {
             .copied()
             .map(|word| ExactDomainWord::Identity(DomainIdentity::from_source_word(word)))
             .collect::<Vec<_>>();
-        Self::from_exact_domain_words(&exact)
+        Self::from_exact_domain_words_owned(exact)
     }
 
     /// Build an executable SENS program from words already restored by a
     /// physical carrier such as Zig T5M. This reader accepts only explicit
     /// domain identities plus explicitly qualified D24+ numbers.
     pub fn from_exact_domain_words(words: &[ExactDomainWord]) -> Result<Self, LanguageError> {
-        let parsed = parse_exact_domain_words(words)?;
-        let forms = lower_exact_domain_program(&parsed);
-        validate_exact_executable_heads(&forms)?;
-        Ok(Self { forms })
+        Self::from_exact_domain_words_owned(words.to_vec())
+    }
+
+    /// Move the exact domain-word stream into the runtime without retaining a
+    /// second copy of the decoded physical input.
+    pub fn from_exact_domain_words_owned(
+        words: Vec<ExactDomainWord>,
+    ) -> Result<Self, LanguageError> {
+        let mut cursor = 0;
+        let mut form_count = 0;
+        while next_lowered_exact_form(&words, &mut cursor)?.is_some() {
+            form_count += 1;
+        }
+        if form_count == 0 {
+            return Err(empty_program_error());
+        }
+        Ok(Self {
+            words,
+            form_count,
+            forms: OnceLock::new(),
+        })
     }
 
     /// Number of top-level D2 forms; no assumption of a single expression.
     pub fn form_count(&self) -> usize {
-        self.forms.len()
+        self.form_count
     }
 
     /// Exact SENS AST reconstructed from the supplied domain-qualified words.
     /// This is a read-only witness for hosts that need SENS-owned meta-eval;
     /// callers still use `execute` or their explicitly selected evaluator.
     pub fn forms(&self) -> &[Expr] {
-        &self.forms
+        self.forms.get_or_init(|| {
+            let parsed = parse_exact_domain_words(&self.words)
+                .expect("validated exact binary words remain parseable");
+            let forms = lower_exact_domain_program(&parsed);
+            validate_exact_executable_heads(&forms)
+                .expect("validated exact binary forms remain admitted");
+            forms
+        })
     }
 
     /// Execute decoded forms in an explicitly supplied interpreter session.
@@ -127,7 +152,15 @@ impl PhysicalT5Program {
     /// The program does not retain a mutable runtime between calls. Bootstrap,
     /// host capabilities, and session reuse remain the caller's decision.
     pub fn execute(&self, session: &mut Session) -> Result<EvalResult, LanguageError> {
-        eval_lowered_expressions(&self.forms, session)
+        let mut cursor = 0;
+        let mut value = Value::Nil;
+        while let Some(form) = next_lowered_exact_form(&self.words, &mut cursor)? {
+            value = eval_lowered_expressions(std::slice::from_ref(&form), session)?.value;
+        }
+        Ok(EvalResult {
+            value,
+            output: session.environment.output_snapshot(),
+        })
     }
 
     /// Execute this physical binary AST and report actual evaluator dispatches.
@@ -137,8 +170,83 @@ impl PhysicalT5Program {
         &self,
         session: &mut Session,
     ) -> Result<(EvalResult, u64), LanguageError> {
-        crate::eval::eval_expressions_with_visit_count(&self.forms, session)
+        let mut cursor = 0;
+        let mut value = Value::Nil;
+        let mut visits = 0u64;
+        while let Some(form) = next_lowered_exact_form(&self.words, &mut cursor)? {
+            let (result, form_visits) = crate::eval::eval_expressions_with_visit_count(
+                std::slice::from_ref(&form),
+                session,
+            )?;
+            value = result.value;
+            visits = visits.saturating_add(form_visits);
+        }
+        Ok((
+            EvalResult {
+                value,
+                output: session.environment.output_snapshot(),
+            },
+            visits,
+        ))
     }
+}
+
+fn empty_program_error() -> LanguageError {
+    LanguageError::new(
+        crate::ErrorKind::Parse,
+        "T5M SENS program has no exact words",
+        crate::Span { start: 0, end: 1 },
+    )
+}
+
+fn next_lowered_exact_form(
+    words: &[ExactDomainWord],
+    cursor: &mut usize,
+) -> Result<Option<Expr>, LanguageError> {
+    use crate::DomainIdentity::D2;
+    const OPEN: u8 = 0b10;
+    const CLOSE: u8 = 0b01;
+    const SEPARATOR: u8 = 0b00;
+
+    let is_d2 = |word: &ExactDomainWord, bits| matches!(word, ExactDomainWord::Identity(D2(value)) if value.word().packed_bits() == bits);
+    while words
+        .get(*cursor)
+        .is_some_and(|word| is_d2(word, SEPARATOR))
+    {
+        *cursor += 1;
+    }
+    let Some(first) = words.get(*cursor) else {
+        return Ok(None);
+    };
+    let start = *cursor;
+    let end = if is_d2(first, OPEN) {
+        let mut depth = 0usize;
+        let mut end = words.len();
+        for (index, word) in words.iter().enumerate().skip(start) {
+            if is_d2(word, OPEN) {
+                depth += 1;
+            } else if is_d2(word, CLOSE) {
+                depth = depth.saturating_sub(1);
+                if depth == 0 {
+                    end = index + 1;
+                    break;
+                }
+            }
+        }
+        end
+    } else {
+        start + 1
+    };
+    *cursor = end;
+
+    let parsed = parse_exact_domain_words(&words[start..end])?;
+    if parsed.len() != 1 {
+        return Err(empty_program_error());
+    }
+    let mut lowered = lower_exact_domain_program(&parsed);
+    let form = lowered.pop().expect("one parsed form lowers to one form");
+    validate_exact_executable_heads(std::slice::from_ref(&form))?;
+    Ok(Some(form))
 }
 
 fn parse_exact_domain_words(words: &[ExactDomainWord]) -> Result<Vec<Expr>, LanguageError> {
@@ -429,6 +537,56 @@ mod exact_t5_cutover_tests {
         assert_eq!(number.bits(), "11");
     }
 
+    #[test]
+    fn binary_runtime_executes_exact_domain_words_without_caching_a_full_ast() {
+        let identity = |width, bits| {
+            ExactDomainWord::identity(DomainIdentity::from_coordinate(
+                crate::domain_ladder::DomainCoordinate::new(width, bits).unwrap(),
+            ))
+        };
+        let number = |width: usize, value: u8| {
+            let mut bits = vec![0; width];
+            for offset in 0..u8::BITS as usize {
+                let bit = (value >> offset) & 1;
+                if bit != 0 {
+                    bits[width - 1 - offset] = bit;
+                }
+            }
+            ExactDomainWord::number(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
+                .unwrap()
+        };
+        let words = vec![
+            identity(2, 0b10),
+            identity(5, 0b01010),
+            number(24, 1),
+            number(24, 2),
+            identity(2, 0b01),
+            identity(2, 0b00),
+            identity(2, 0b10),
+            identity(5, 0b01010),
+            number(48, 1),
+            number(48, 2),
+            identity(2, 0b01),
+        ];
+        let program = PhysicalT5Program::from_exact_domain_words_owned(words)
+            .expect("exact binary D2/D5/D24+ program is admitted");
+
+        assert!(
+            program.forms.get().is_none(),
+            "reader must retain words, not a whole AST"
+        );
+        assert_eq!(program.form_count(), 2);
+        let result = program
+            .execute(&mut Session::default())
+            .expect("SENS executes the exact domain words");
+
+        assert_eq!(result.value.to_string(), "3");
+        assert!(
+            program.forms.get().is_none(),
+            "execution must not retain the materialized whole-program AST"
+        );
+    }
+
     #[cfg(feature = "benchmark-ast-visits")]
     #[test]
     fn binary_program_reports_actual_evaluator_dispatches() {
@@ -481,7 +639,7 @@ mod exact_t5_cutover_tests {
         let program = PhysicalT5Program::decode(&bytes).expect("admitted D3 quote");
         assert_eq!(program.form_count(), 1);
         assert!(matches!(
-            program.forms[0].kind,
+            program.forms()[0].kind,
             ExprKind::DomainCall(crate::CoreDomainIdentity::D3(word), _)
                 if word.word().packed_bits() == 0b001
         ));
@@ -512,7 +670,10 @@ mod exact_t5_cutover_tests {
             widths.push(decoded[0].width());
             let program = PhysicalT5Program::decode(&physical).unwrap();
             assert_eq!(program.form_count(), 1);
-            assert!(matches!(program.forms[0].kind, ExprKind::DomainIdentity(_)));
+            assert!(matches!(
+                program.forms()[0].kind,
+                ExprKind::DomainIdentity(_)
+            ));
         }
         assert_eq!(widths, [1, 3, 9, 9]);
     }

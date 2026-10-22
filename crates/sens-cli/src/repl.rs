@@ -781,7 +781,7 @@ fn prepare_t5m_repl_program(
 ) -> Result<PhysicalT5Program, String> {
     let words = prepare_t5m_repl_words(line, surface, session)?;
     let restored = t5m_roundtrip_words(&words)?;
-    PhysicalT5Program::from_exact_domain_words(&restored)
+    PhysicalT5Program::from_exact_domain_words_owned(restored)
         .map_err(|error| format!("SENS binary reader: {error:?}"))
 }
 
@@ -874,7 +874,7 @@ pub(crate) fn eval_t5m_paired_file_with_bindings(
     if encoded != physical {
         return Err("T5M_PHYSICAL_PAIR_MISMATCH: noncanonical T5M bytes".into());
     }
-    let program = PhysicalT5Program::from_exact_domain_words(&restored)
+    let program = PhysicalT5Program::from_exact_domain_words_owned(restored)
         .map_err(|error| format!("SENS paired binary reader: {error:?}"))?;
     // Фізичні вхідні слова вже пройшли точну перевірку Zig/SENS.
     // Не відхиляємо справжні результати SENS (списки, пари) лише
