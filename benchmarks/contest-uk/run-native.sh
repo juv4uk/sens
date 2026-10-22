@@ -99,7 +99,7 @@ for source in "$here"/*.lisp; do
   if ! SENS_BIN="$sens" SENS_TRIT_BIN="$trit" bash "$here/judge.sh" \
       "benchmarks/contest-uk/$name.sens" >"$scratch/native-proof.out" 2>"$scratch/native-proof.err"; then
     printf '%s\t-\t-\t0\tНЕ_ДОВЕДЕНО_АЛГОРИТМ\n' "$name"
-    sed 's/^/SENS/Zig суд: /' "$scratch/native-proof.err" >&2
+    sed 's|^|SENS/Zig суд: |' "$scratch/native-proof.err" >&2
     fail=1
     continue
   fi
