@@ -265,6 +265,10 @@ jobs:
             git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main"
           }
           regenerate_on_current_main() {
+            # Стан відмови — тільки поточної перевірки exact main.
+            # Якщо наступний rebase уже містить виправлення, старий RED
+            # не переживає новий успішний SENS/Zig remint.
+            regenerated_failed=0
             # RED належить саме цьому актуальному SHA. Стара помилка у
             # попередній спробі не переживає нативного ремонту нової версії.
             regenerated_failed=0
