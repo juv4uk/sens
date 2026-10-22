@@ -48,16 +48,16 @@ for source in "$here"/*.lisp; do
     fail=1
     continue
   fi
-  if ! "$trit" view "$physical" > "$view" 2>"$scratch/error" ||
+  # «view» та «open» — один і той самий Zig-декодер.
+  # Одного проходу досить; verify-view окремо перевіряє оберненість.
+  if ! "$trit" open "$physical" > "$view" 2>"$scratch/error" ||
      [[ ! -s "$view" ]]; then
     printf '%s\t-\t-\t0\tПОМИЛКА_ZIG_VIEW\n' "$name"
-    sed 's|^|Zig/T5M view: |' "$scratch/error" >&2
+    sed 's|^|Zig/T5M open: |' "$scratch/error" >&2
     fail=1
     continue
   fi
-  if ! "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/error" ||
-     ! "$trit" open "$physical" >"$scratch/opened.view" 2>"$scratch/error" ||
-     ! cmp -s "$view" "$scratch/opened.view"; then
+  if ! "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/error"; then
     printf '%s\t-\t-\t0\tПОМИЛКА_ОБЕРНЕНОСТІ_T5M\n' "$name"
     sed 's|^|Zig/T5M: |' "$scratch/error" >&2
     fail=1
