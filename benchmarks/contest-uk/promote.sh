@@ -28,6 +28,25 @@ task_of() {
   printf '%s' "$task"
 }
 
+# Після rebase паралельний remint іноді повертає фізичну пару вже
+# архівованого конкурсанта до активної теки БЕЗ .lisp. Це не програма.
+# Лише за наявності повної однойменної трійки в superseded/ прибрати
+# саме осиротілий фізичний слід; усі інші порушення залишаються RED.
+for stale in "$dir"/*.sens; do
+  [[ -f "$stale" && ! -L "$stale" ]] || continue
+  stem="${stale%.sens}"
+  [[ ! -e "$stem.lisp" && ! -L "$stem.lisp" ]] || continue
+  name="${stem##*/}"
+  archive="$sup/$name"
+  if [[ -f "$archive.lisp" && ! -L "$archive.lisp" &&
+        -f "$archive.sens" && ! -L "$archive.sens" &&
+        -f "$archive" && ! -L "$archive" &&
+        -f "$stem" && ! -L "$stem" ]]; then
+    rm -- "$stale" "$stem"
+    echo "CONTEST_PRUNED_SUPERSEDED_ORPHAN stem=$name"
+  fi
+done
+
 # 1) Справжній SENS/Zig-суд — не хостова оцінка семантики.
 judge_output="$(bash "$dir/judge.sh")"
 
