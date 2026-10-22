@@ -341,10 +341,17 @@ fn bija3_1968_atom_null_partial_law_executes_and_rejects_false_generator() {
 
 #[test]
 fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
-    // Не порівнюємо лише таблиці: запускаємо сам SENS із визначеннями Д5–Д6.
+    // Виконуємо чинним читачем точних D3–D6 голів, а не історичним
+    // eval_program/parse() з W8 compatibility: D6:100111 «четверте»
+    // належить ратифікованій таблиці, її не можна залишати символом.
+    // Вироки та мутації обчислює сам SENS через eval_parsed_expressions.
+    let execute_exact = |text: &str, session: &mut Session| {
+        let program = sens::parse_mixed_exact_domain(text)?;
+        sens::eval_parsed_expressions(&program, session)
+    };
     let source = include_str!("../../../research/d5-d6-selector-definitions-batch-2026-10-17.lisp");
     let mut session = Session::default();
-    let observed = eval_program(source, &mut session).unwrap_or_else(|error| {
+    let observed = execute_exact(source, &mut session).unwrap_or_else(|error| {
         panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS expected=22-D1:так actual_error={error}")
     });
     let expected = eval_program("(атом? (як-є ()))", &mut Session::default())
@@ -372,7 +379,7 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     let fake_definition = "(визначити дослід-решта-двох-перших\n  (функція (значення)\n    (перше (перше (перше значення)))))";
     assert_eq!(source.matches(definition).count(), 1, "test_id=D5-D6-D3-DERIVATION expected=one-definition");
     let mutant_definition = source.replacen(definition, fake_definition, 1);
-    let mutated = eval_program(&mutant_definition, &mut Session::default()).unwrap_or_else(|error| {
+    let mutated = execute_exact(&mutant_definition, &mut Session::default()).unwrap_or_else(|error| {
         panic!("test_id=D5-D6-D3-DERIVATION layer=SENS expected=predicate-list actual_error={error}")
     });
     let mut cursor = &mutated.value;
@@ -399,7 +406,7 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     let wrong_call = "(тотожне? (перше-двох-перших дерево-селекторів) (як-є б))";
     assert_eq!(source.matches(call).count(), 1, "test_id=D5-D6-SELECTOR-MUTANT expected=one-call");
     let mutant = source.replacen(call, wrong_call, 1);
-    let changed = eval_program(&mutant, &mut Session::default()).unwrap_or_else(|error| {
+    let changed = execute_exact(&mutant, &mut Session::default()).unwrap_or_else(|error| {
         panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual_error={error}")
     });
     let sens::Value::Pair(node) = &changed.value else {
