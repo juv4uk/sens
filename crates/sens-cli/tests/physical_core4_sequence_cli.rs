@@ -789,6 +789,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-collapse-adjacent",
         "lib/list-collapse-adjacent-atoms",
         "lib/list-adjacent-runs-general",
+        "lib/list-collapse-adjacent-runs-general",
         "lib/list-neighbor-windows-general",
         "lib/list-common-prefix-general",
         "lib/list-common-suffix-general",
