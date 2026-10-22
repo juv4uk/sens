@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 305,
+    "total": 314,
     "historical": 17,
-    "library": 288,
-    "distinct_families": 99
+    "library": 297,
+    "distinct_families": 108
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -7569,6 +7569,204 @@
       "signature": "list(atom) → list(atom)",
       "law": "Залишити лише праве останнє входження кожного атома, зберігаючи відносний порядок збережених значень; ідемпотентність.",
       "native_law_test": "crates/sens/tests/d11_existing_patterns_and_suffixes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "взяти-поки-атом",
+      "source_family": "take-while-equal-atom",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-take-while-atom-general.lisp",
+        "blob_sha": "a337409e72843fb657d38b8f72b095ab66f5fa2f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × atom → list(atom)",
+      "law": "Максимальний початковий фрагмент шуканого атома; внутрішні повтори після першої відмінності не включаються.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "пропустити-поки-атом",
+      "source_family": "drop-while-equal-atom",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-drop-while-atom-general.lisp",
+        "blob_sha": "649dc30404331edf75ff551f33df07999fd657e4",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × atom → list(atom)",
+      "law": "Прибрати тільки початкову серію шуканого атома і повернути не змінений решта-суфікс.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "об'єднати-атоми-стало",
+      "source_family": "stable-set-union",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-stable-union-general.lisp",
+        "blob_sha": "5a453f536133b6aede6008e29b97f442659e60de",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × list(atom) → list(atom)",
+      "law": "Зберегти перше входження кожного атома: спершу лівий список, потім ще не бачені праві атоми.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "різниця-мультимножин",
+      "source_family": "stable-multiset-difference",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-multiset-difference-general.lisp",
+        "blob_sha": "dd2f414addc95055a668f2ea8ba6fc42f1c0acab",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × list(atom) → list(atom)",
+      "law": "Зберігати лівий порядок, віднімаючи по одному входженню для кожного правого атома, не згортаючи кратності.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "очистити-обидва-краї",
+      "source_family": "trim-equal-atom-ends",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-trim-edges-atom-general.lisp",
+        "blob_sha": "9b1d31b0c2bbaed732e709adcb668eb269e50ae7",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × atom → list(atom)",
+      "law": "Прибрати початкові й кінцеві серії заданого атома, не чіпаючи середні входження.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "розподілити-атоми-та-списки",
+      "source_family": "stable-partition-atomic-compound",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-partition-atomic-compound-general.lisp",
+        "blob_sha": "bb14dcb9b29e0737498fdd8e6411d8a9e4166cbb",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(value) → pair(list(atom),list(pair))",
+      "law": "Розкласти атомні та складені елементи у дві частини зі збереженням порядку й повторів.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "знайти-першу-позицію-унарно",
+      "source_family": "first-atom-position-unary-status",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-first-position-unary-general.lisp",
+        "blob_sha": "18e3951b8649efa2d22a1630d6b8146a0ac0f04a",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × atom → pair(D1,unary-index)",
+      "law": "Для першого входження повернути ТАК та унарну позицію; без збігу — НІ та унарну довжину входу.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "розділити-перед-кожним",
+      "source_family": "split-before-each-occurrence",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-split-before-every-atom-general.lisp",
+        "blob_sha": "8e050cdcb5714ad4146ac1c9523c228ef148a170",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) × atom → list(list(atom))",
+      "law": "Розділити перед кожним входженням роздільника, залишивши його першим у новій частині; порожній початковий фрагмент допустимий.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "зібрати-всі-частини",
+      "source_family": "join-list-of-parts-losslessly",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-split-before-every-atom-general.lisp",
+        "blob_sha": "8e050cdcb5714ad4146ac1c9523c228ef148a170",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(list(atom)) → list(atom)",
+      "law": "Конкатенувати частини, зберегти порядок і кратності; обернути розділити-перед-кожним на канонічних результатах.",
+      "native_law_test": "crates/sens/tests/d11_existing_sequence_laws.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true
     }
