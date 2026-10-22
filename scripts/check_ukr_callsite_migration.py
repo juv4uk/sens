@@ -235,7 +235,7 @@ def candidate_heads(forms: tuple):
                 for child in node.values[2:]:
                     yield from walk(child)
                 return
-            if head in {'let', 'let*', 'звʼязати'} and len(node.values) > 1:
+            if head in {'let', 'let*', 'звʼязати', "зв'язати", 'нехай', 'нехай-послідовно', '001000', '001001'} and len(node.values) > 1:
                 bindings = node.values[1]
                 if isinstance(bindings, Form):
                     for binding in bindings.values:
