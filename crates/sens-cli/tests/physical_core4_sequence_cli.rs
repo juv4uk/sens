@@ -479,6 +479,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-remove-first-compound-general",
         "list-suffix-after-first-atomic-triple-zero-copy-general",
         "list-suffix-after-last-atomic-triple-zero-copy-general",
+        "list-suffix-after-last-atomic-pair-zero-copy-general",
         "list-tail-after-second-atom-zero-copy-general",
         "list-suffix-after-last-compound-zero-copy-general",
         "pair-associativity-law",
