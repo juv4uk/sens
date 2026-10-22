@@ -6,6 +6,9 @@ sens="${SENS_BIN:-$PWD/target/debug/sens}"
 trit="${SENS_TRIT_BIN:-$PWD/target/debug/sens-trit}"
 [[ -x "$sens" && -x "$trit" ]] || { echo "Зберіть sens + sens-trit з --features benchmark-ast-visits" >&2; exit 2; }
 error() { printf "КОНКУРС: ПОМИЛКА %s\n" "$*" >&2; exit 2; }
+# При RED прибрати тільки поточні тимчасові файли, не змінюючи Lisp/T5M.
+tmp=""
+trap 'if [[ -n "$tmp" ]]; then rm -rf -- "$tmp"; fi' EXIT
 # Непарні кандидати ще не є програмами конкурсу: повідомляємо їх
 # окремо, але не зупиняємо нативний суд уже наявних фізичних трійок.
 # Це не зарахування source-only Lisp: без Zig/T5M і реального SENS
@@ -211,8 +214,8 @@ for path in "${inputs[@]}"; do
   bytes="$(wc -c < "$path")"
   rows+="$task"$'\t'"$bytes"$'\t'"$nodes"$'\t'"$visits"$'\t'"$path"$'\n'
   printf "CONTEST_EXECUTED_PASS path=%s T5M=%s AST=%s visits=%s result=%s\n" "$path" "$bytes" "$nodes" "$visits" "$result"
-  rm -- "$tmp/"*
-  rmdir -- "$tmp"
+  rm -rf -- "$tmp"
+  tmp=""
 done
 printf "\nЗадача | T5M байти | AST | visits | Файл\n"
 printf "%s" "$rows" | sort -t $'\t' -k1,1 -k2,2n -k3,3n -k4,4n
