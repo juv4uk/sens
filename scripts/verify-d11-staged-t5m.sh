@@ -19,7 +19,8 @@ for source in \
   lib/d11-clojure-frequencies-unary.lisp \
   lib/d11-srfi1-find-tail.lisp \
   lib/d11-srfi1-list-equality.lisp \
-  lib/d11-srfi1-unary-count.lisp; do
+  lib/d11-srfi1-unary-count.lisp \
+  lib/d11-srfi1-set-relations.lisp; do
   stem="${source##*/}"
   physical="$scratch/${stem%.lisp}.sens"
   bitview="${physical%.sens}"
