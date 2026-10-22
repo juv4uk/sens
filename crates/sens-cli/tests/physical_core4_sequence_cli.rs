@@ -477,6 +477,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-tail-after-second-compound-zero-copy-general",
         "list-remove-first-compound-general",
         "list-suffix-after-first-atomic-triple-zero-copy-general",
+        "list-suffix-after-last-atomic-triple-zero-copy-general",
         "list-tail-after-second-atom-zero-copy-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
