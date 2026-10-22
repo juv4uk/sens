@@ -707,6 +707,23 @@ jobs:
                   esac
                   echo "REMINT_UNRELATED_LISP source=$changed verified_candidates=UNCHANGED"
                   ;;
+                lib/*.lisp)
+                  # Лише цілком НОВИЙ незалежний Lisp без носія:
+                  # попередній перевірений фізичний код не містить його.
+                  # Заміни, rename, залежності поточного пакета й готові
+                  # трійки — тільки через повне SENS/Zig повторне виконання.
+                  # Після fast-rebase джерело ОБОВ'ЯЗКОВО майниться,
+                  # перевіряється Zig inverse та SENS paired/standalone.
+                  if grep -Fxq -- "$changed" "$RUNNER_TEMP/sens-remint-candidates.list" ||
+                     ! git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" "origin/$target_branch" -- "$changed" | grep -Fxq -- "$changed" ||
+                     git cat-file -e "origin/$target_branch:${changed%.lisp}.sens" 2>/dev/null ||
+                     git cat-file -e "origin/$target_branch:${changed%.lisp}" 2>/dev/null; then
+                    safe_rebase=0
+                    break
+                  fi
+                  fast_mint_sources+=("$changed")
+                  echo "REMINT_FAST_NATIVE_NEW_ROOT_LIB source=$changed status=PENDING_REAL_SENS_ZIG"
+                  ;;
                 *) safe_rebase=0; break ;;
               esac
             done < <(git -c core.quotePath=false diff --name-only "$verified_parent" origin/$target_branch)
