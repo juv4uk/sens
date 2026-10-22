@@ -1021,38 +1021,54 @@ fn ukr_cond_skips_unsafe_branch_and_preserves_exact_t5m_triplet() {
 
 
 #[test]
-fn contest_uk_five_real_program_categories_have_current_physical_peers() {
-    // Справжній виконавець SENS, Zig/T5M inverse та однакові результати
-    // з комітованих пар; Python/JSON не виконують законів конкурсу.
+fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
+    // Лічимо тільки фізичні .sens, які справді виконав SENS через Zig/T5M.
+    // Жодних ручних списків категорій або Python/JSON-оракулів.
+    use std::collections::BTreeSet;
+
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let script = root.join("benchmarks/contest-uk/run-native.sh");
+    let dir = root.join("benchmarks/contest-uk");
     let output = Command::new("bash")
-        .arg(script)
+        .arg(dir.join("run-native.sh"))
         .env("SENS_BINARY", env!("CARGO_BIN_EXE_sens"))
         .env("SENS_TRIT_BINARY", env!("CARGO_BIN_EXE_sens-trit"))
         .env("SENS_CONTEST_REPEATS", "1")
         .output()
-        .expect("виконати наявний нативний конкурс");
+        .expect("виконати нативний конкурс");
     assert!(
         output.status.success(),
         "SENS contest failed: stdout={} stderr={}",
         observed(&output),
         error(&output)
     );
-    let report = observed(&output);
-    // Після нативного конкурсу переможець може замінити стару програму
-    // (факторіал-компакт замість факторіал): перевіряємо саме категорію.
-    // Не повертати старе ім'я чи симулювати зелений результат.
-    for stem in ["довжина-списку", "сума-до-n", "факторіал", "фібоначчі", "степінь-двійки"] {
-        assert!(
-            report.lines().any(|line| {
-                let Some((name, _)) = line.split_once('\t') else {
-                    return false;
-                };
-                (name == stem || name.starts_with(&format!("{stem}-")))
-                    && line.ends_with("ПІДТВЕРДЖЕНО")
-            }),
-            "конкурс не довів нативне виконання категорії {stem}: {report}"
-        );
+
+    let mut tracked: BTreeSet<String> = BTreeSet::new();
+    for entry in fs::read_dir(&dir).expect("прочитати конкурсні програми") {
+        let path = entry.expect("прочитати файл").path();
+        if path.extension().is_none_or(|ext| ext != "sens") {
+            continue;
+        }
+        assert!(path.is_file() && !path.is_symlink(), "неправильний фізичний носій: {path:?}");
+        let name = path.file_stem()
+            .and_then(|stem| stem.to_str())
+            .expect("українська назва фізичного файла")
+            .to_owned();
+        assert!(tracked.insert(name), "дубль фізичної конкурсної програми");
     }
+    assert!(!tracked.is_empty(), "немає жодної фізичної конкурсної програми");
+
+    let report = observed(&output);
+    let executed: BTreeSet<String> = report.lines().filter_map(|line| {
+        let columns: Vec<&str> = line.split('\t').collect();
+        if columns.len() == 5 && columns[4] == "ПІДТВЕРДЖЕНО" {
+            Some(columns[0].to_owned())
+        } else {
+            None
+        }
+    }).collect();
+    assert_eq!(
+        executed, tracked,
+        "Кожна чинна .sens мусить бути обернена й справді виконана SENS: {report}"
+    );
+    println!("SENS_UKR_EXECUTABLE_PASS count={} corpus=contest-uk native=SENS_ZIG_T5M", tracked.len());
 }
