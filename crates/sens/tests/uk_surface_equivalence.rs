@@ -179,35 +179,38 @@ fn ukrainian_surface_status_counts_are_internally_consistent() {
 // TEST-ARCHITECTURE-1 step 4 -- see crates/xtask/src/checks.rs.
 
 #[test]
-fn admitted_invoke_surfaces_lower_to_one_exact_sens_without_bare_value_fallback() {
-    let invoke_sens = sens::semantic_registry_export::semantic_id_for_admitted_surface("invoke")
-        .expect("invoke must be admitted by the single registry");
-    let ukrainian_sens =
-        sens::semantic_registry_export::semantic_id_for_admitted_surface("викликати")
-            .expect("викликати must be admitted by the single registry");
-    assert_eq!(invoke_sens, ukrainian_sens);
-    assert_eq!(
-        sens::semantic_registry_export::semantic_id_bits(invoke_sens),
-        "10101000"
-    );
+fn чинний_d8_round_не_є_історичним_sid8_invoke() {
+    // У ратифікованому D8:10101000 мешкає ROUND, а не історичний
+    // Function8:10101000 INVOKE. Однакові 8 біт не означають один закон.
+    let table = include_str!("../../../lib/domains/d8.lisp");
+    let actual = table.lines()
+        .find(|line| line.starts_with("  (10101000 "))
+        .expect("збережено ратифікований D8:10101000");
+    assert!(actual.contains("(укр округлити-до-найближчого)"));
+    assert!(actual.contains("(en round)"));
+    assert!(!actual.contains("invoke"), "D8 не може успадкувати SID8");
 
-    for surface in ["invoke", "викликати"] {
-        let parsed = parse(&format!("({surface})")).expect("invoke surface call must parse");
-        let lowered = lower_program(&parsed);
-        assert_eq!(lowered.len(), 1);
-        assert!(matches!(
-            &lowered[0].kind,
-            ExprKind::Call(sens, _) if *sens == invoke_sens
-        ));
-    }
+    let decoded = sens::parse_exact_domain_source("10101000")
+        .expect("точний D8 reader");
+    assert!(matches!(
+        &decoded[0].kind,
+        ExprKind::DomainIdentity(sens::DomainIdentity::D8(word))
+            if word.word().packed_bits() == 0b10101000
+    ));
 
-    // #1946 / M8 precedent: an admitted function spelling is an input
-    // projection in executable head position, not a lexical runtime value.
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core bootstrap");
+    // Історична поверхня не отримує чинної DomainCall лише тому,
+    // що її колишній байт збігається з новою D8 координатою.
     for surface in ["invoke", "викликати"] {
-        let error = eval_program(surface, &mut session)
-            .expect_err("bare admitted invoke spelling must not regain name fallback");
-        assert_eq!(error.kind, ErrorKind::UnknownSymbol);
+        let lowered = lower_program(
+            &parse(&format!("({surface})")).expect("історичне ім'я читається як текст")
+        );
+        assert!(
+            !matches!(
+                &lowered[0].kind,
+                ExprKind::DomainCall(identity, _) if
+                    (identity.width(), identity.packed_bits()) == (8, 0b10101000)
+            ),
+            "історичне INVOKE не може підмінити сучасний D8 ROUND"
+        );
     }
 }
