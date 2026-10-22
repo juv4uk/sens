@@ -1532,6 +1532,14 @@ jobs:
           # Дві вже наявні українські Lisp-композиції: реальне SENS-виконання
           # та негативні мутації в тій самій чинній CI, без Python-oracle.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test ukr_four_list_native_runtime -- --nocapture
+          # Доменний код як першокласна функція: Д3 і селектори Д8–Д10.
+          # Викликаємо реальний SENS, зберігаємо відмову для D10 без механізму.
+          # Тільки за зміни evaluator / свідків, у тому самому CI.
+          if [[ -f "$RUNNER_TEMP/changed-core-dependencies.txt" ]] &&
+             grep -Eq '^(crates/sens/src/eval/(mod|closures)[.]rs|crates/sens/tests/first_class_domain_code_d7[.]rs|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib eval::exact_domain_surface_value_position_tests:: -- --nocapture
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test first_class_domain_code_d7 -- --nocapture
+          fi
           # #1968: фізичний SENS/Zig/T5M свідок і негатив Type, не
           # текстова симуляція. Працює в чинному workflow, тільки за зміни джерела.
           if [[ -f "$RUNNER_TEMP/changed-core-dependencies.txt" ]] &&
