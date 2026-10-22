@@ -53,6 +53,18 @@ def fixtures() -> tuple[dict, dict, set[str]]:
 
 
 class T5ProgressLedgerTests(unittest.TestCase):
+    def test_tracked_census_does_not_reactivate_superseded_contest(self):
+        import subprocess
+        from unittest.mock import patch
+        git_paths = (b"benchmarks/contest-uk/winner.lisp\0"
+                     b"benchmarks/contest-uk/superseded/older.lisp\0"
+                     b"lib/normal.lisp\0")
+        response = subprocess.CompletedProcess([], 0, stdout=git_paths, stderr=b"")
+        with patch.object(mod.subprocess, "run", return_value=response):
+            active = mod.tracked_lisp_paths(Path("."))
+        self.assertEqual(active, {"benchmarks/contest-uk/winner.lisp",
+                                  "lib/normal.lisp"})
+
     def test_audits_combine_only_as_mechanical_progress(self):
         pairs, ready, sources = fixtures()
         report = mod.combine(pairs, ready, sources)
