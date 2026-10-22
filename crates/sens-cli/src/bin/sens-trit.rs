@@ -146,16 +146,50 @@ fn verify_exact_t5m_view(physical: &[u8], view: &[u8]) -> Result<(), String> {
 #[cfg(all(test, feature = "zig-transport"))]
 #[test]
 fn t5m_view_inverse_preserves_d24_and_rejects_noncanonical_view() {
-    let words = vec![
-        zig_transport::ExactT5MWord::new(3, vec![1, 0, 0]).unwrap(),
-        zig_transport::ExactT5MWord::new(24, vec![1; 24]).unwrap(),
-    ];
+    // Один фізичний потік перевіряє всі ширини D1–D10 і числові D24+:
+    // неоднакова довжина слів не повинна стирати доменні межі.
+    // Це виключно Zig/T5M транспорт, не host-реалізація законів SENS.
+    let words = (1usize..=10)
+        .chain([24, 48, 96])
+        .map(|width| {
+            let bits = (0..width)
+                .map(|index| ((index + width) % 2) as u8)
+                .collect();
+            zig_transport::ExactT5MWord::new(width, bits).unwrap()
+        })
+        .collect::<Vec<_>>();
     let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
-    let canonical_view = format!("100 {}\n", "1".repeat(24));
-    assert!(verify_exact_t5m_view(&physical, canonical_view.as_bytes()).is_ok());
+    let restored = zig_transport::decode_t5m_exact_words(&physical).unwrap();
+    assert_eq!(restored, words, "Zig T5M змінив точні біти або ширини D1–D10/D24+");
+
+    let canonical_view = format!(
+        "{}\n",
+        words
+            .iter()
+            .map(|word| {
+                word.bits()
+                    .iter()
+                    .map(|&bit| if bit == 0 { '0' } else { '1' })
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
+    verify_exact_t5m_view(&physical, canonical_view.as_bytes())
+        .expect("Zig відновлює рівно ті самі слова й канонічний перегляд");
+
+    // Негативи не змінюють фізичний носій: жодного мовчазного
+    // прийняття обрізаного слова, підміненого біта чи зайвого пробілу.
+    let mut changed_bit = canonical_view.as_bytes().to_vec();
+    changed_bit[0] = if changed_bit[0] == b'0' { b'1' } else { b'0' };
+    assert!(verify_exact_t5m_view(&physical, &changed_bit).is_err());
+
+    let mut shortened = canonical_view.as_bytes().to_vec();
+    shortened.remove(shortened.len() - 2); // біт перед кінцевим LF
+    assert!(verify_exact_t5m_view(&physical, &shortened).is_err());
     assert!(verify_exact_t5m_view(&physical, canonical_view.trim_end().as_bytes()).is_err());
     assert!(
-        verify_exact_t5m_view(&physical, format!("100  {}\n", "1".repeat(24)).as_bytes()).is_err()
+        verify_exact_t5m_view(&physical, canonical_view.replace(' ', "  ").as_bytes()).is_err()
     );
 }
 
