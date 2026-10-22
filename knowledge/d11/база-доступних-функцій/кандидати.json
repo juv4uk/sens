@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 224,
+    "total": 232,
     "historical": 17,
-    "library": 207,
-    "distinct_families": 37
+    "library": 215,
+    "distinct_families": 38
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5644,6 +5644,190 @@
       "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39775673970",
       "native_ci_job": 119813862008,
       "native_ci_scope": "У журналi цього запуску 3 з 3 нативних cargo-тести (28 позитивних/негативних випадків) пройшли; workflow RED через інший d11_legacy43_lower_laws (unknown symbol якщо). Не ратифікація D11 і не доказ T5M оберненості."
+    },
+    {
+      "surface_name": "містить-форму-визначити?",
+      "source_family": "sens-d11-legacy-has-forms-ast",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-form-presence.lisp",
+        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "legacy_fixture_name": "HAS-DEFINE",
+        "legacy_fixture_only": true,
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «визначити». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
+      "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
+      "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
+      "native_positive_negative_cases_shared": 26,
+      "native_ci_status": "PENDING"
+    },
+    {
+      "surface_name": "містить-форму-функція?",
+      "source_family": "sens-d11-legacy-has-forms-ast",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-form-presence.lisp",
+        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "legacy_fixture_name": "HAS-LAMBDA",
+        "legacy_fixture_only": true,
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «функція». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
+      "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
+      "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
+      "native_positive_negative_cases_shared": 26,
+      "native_ci_status": "PENDING"
+    },
+    {
+      "surface_name": "містить-форму-цитування?",
+      "source_family": "sens-d11-legacy-has-forms-ast",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-form-presence.lisp",
+        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "legacy_fixture_name": "HAS-QUOTE",
+        "legacy_fixture_only": true,
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «як-є». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
+      "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
+      "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
+      "native_positive_negative_cases_shared": 26,
+      "native_ci_status": "PENDING"
+    },
+    {
+      "surface_name": "містить-форму-сполучити?",
+      "source_family": "sens-d11-legacy-has-forms-ast",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-form-presence.lisp",
+        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "legacy_fixture_name": "HAS-CONS",
+        "legacy_fixture_only": true,
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «сполучити». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
+      "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
+      "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
+      "native_positive_negative_cases_shared": 26,
+      "native_ci_status": "PENDING"
+    },
+    {
+      "surface_name": "містить-форму-перше?",
+      "source_family": "sens-d11-legacy-has-forms-ast",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-form-presence.lisp",
+        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "legacy_fixture_name": "HAS-CAR",
+        "legacy_fixture_only": true,
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «перше». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
+      "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
+      "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
+      "native_positive_negative_cases_shared": 26,
+      "native_ci_status": "PENDING"
+    },
+    {
+      "surface_name": "містить-форму-атом?",
+      "source_family": "sens-d11-legacy-has-forms-ast",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-form-presence.lisp",
+        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "legacy_fixture_name": "HAS-ATOM",
+        "legacy_fixture_only": true,
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «атом?». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
+      "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
+      "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
+      "native_positive_negative_cases_shared": 26,
+      "native_ci_status": "PENDING"
+    },
+    {
+      "surface_name": "містить-форму-тотожне?",
+      "source_family": "sens-d11-legacy-has-forms-ast",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-form-presence.lisp",
+        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "legacy_fixture_name": "HAS-EQ",
+        "legacy_fixture_only": true,
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «тотожне?». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
+      "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
+      "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
+      "native_positive_negative_cases_shared": 26,
+      "native_ci_status": "PENDING"
+    },
+    {
+      "surface_name": "містить-форму-умов?",
+      "source_family": "sens-d11-legacy-has-forms-ast",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-form-presence.lisp",
+        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "legacy_fixture_name": "HAS-COND",
+        "legacy_fixture_only": true,
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для вже розібраного дерева SENS-форм повернути точний D1 так тоді й лише тоді, коли у виконуваній частині дерева є форма з канонічною викличною головою «за-умовою». Вкладені форми враховувати рекурсивно, атоми та порожній список відхиляти, в дані цитати (як-є ...) не заглядати. Використовується одна спільна SENS-композиція для восьми історичних HAS-форм.",
+      "behavioral_dedup": "Єдиний параметризований закон виявлення голів; вісім бібліотечних поверхонь НЕ є вісьмома новими незалежними примітивами та НЕ ратифікація D11.",
+      "native_law_test": "crates/sens/tests/d11_legacy_form_presence.rs::d11_legacy_has_forms_are_real_sens_predicates",
+      "native_positive_negative_cases_shared": 26,
+      "native_ci_status": "PENDING"
     }
   ],
   "winners_20261022": {
