@@ -373,8 +373,8 @@ jobs:
             # забрати й нові бібліотечні Lisp. Інакше незмінений старий
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
             # Тільки непарні або новіші за носій: без масового перемайну.
-            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp
-              [[ "$target_branch" == main ]] || break lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+              [[ "$target_branch" == main ]] || break
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
