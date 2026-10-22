@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import re
 from pathlib import Path
 
 # Під -O Python усуває assert: жодної удаваної атестації D8.
@@ -59,7 +60,10 @@ assert "D8  full compact — exact 8-bit keys (256/256)" in current
 
 # Residency and callability remain separate. Ratification must not silently
 # turn every D8 resident into a generic callable mechanism.
-assert "Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D10(_) => None" in domain_identity
+# rustfmt може перенести арму `=> { None }` на кілька рядків — звіряємо
+# саму множину доменів у no-callability-армі, без залежності від формату.
+_norm_ident = re.sub(r"\s+", " ", domain_identity)
+assert "Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D10(_) =>" in _norm_ident
 assert "D8 так само OWNER-RATIFIED #3960" in domain_identity
 
 print("D8-CURRENT-AUTHORITY: PASS")
