@@ -420,6 +420,9 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-first-globally-unique-atom-general",
         "list-prefix-before-repeat-general",
         "list-split-before-every-atom-general",
+        "list-remove-last-matching-atom-general",
+        "list-run-length-unary-general",
+        "tree-contains-atom-general",
         "tree-replace-atom-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
