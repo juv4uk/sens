@@ -10,8 +10,13 @@ use sens::{
 };
 use std::path::Path;
 
-const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
-const CORPUS: &str = include_str!("../../../contracts/compiler-nucleus-identity-corpus-v1.tsv");
+fn compiler_sources() -> Result<(String, String), String> {
+    let nucleus = String::from_utf8(sens_cli::zig_transport::compiler_nucleus_source_bytes()?)
+        .map_err(|error| format!("compiler nucleus source is not UTF-8: {error}"))?;
+    let corpus = String::from_utf8(sens_cli::zig_transport::compiler_identity_corpus_bytes()?)
+        .map_err(|error| format!("compiler identity corpus is not UTF-8: {error}"))?;
+    Ok((nucleus, corpus))
+}
 
 #[derive(Debug, Clone)]
 pub struct ExportOptions {
@@ -103,9 +108,12 @@ fn parse_identity(domain: &str, bits: &str) -> Result<CoreDomainIdentity, String
     }
 }
 
-fn parse_fixture_rows(fixture: Option<&str>) -> Result<Vec<(String, CoreDomainIdentity)>, String> {
+fn parse_fixture_rows(
+    fixture: Option<&str>,
+    corpus: &str,
+) -> Result<Vec<(String, CoreDomainIdentity)>, String> {
     let mut rows = Vec::new();
-    for line in CORPUS.lines() {
+    for line in corpus.lines() {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
@@ -144,7 +152,12 @@ fn identity_transport(identity: CoreDomainIdentity) -> (&'static str, String) {
     }
 }
 
-fn render_request(fixture_id: &str, input: &CompilerSemanticInput, source_commit: &str) -> String {
+fn render_request(
+    fixture_id: &str,
+    input: &CompilerSemanticInput,
+    source_commit: &str,
+    nucleus: &str,
+) -> String {
     let (domain, bits) = identity_transport(input.identity);
     format!(
         "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (ідентичність . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{}\") (proof-ref . \"{}\") (semantic-status . {})))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (походження . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"{}\") (authority-sha256 . \"{}\") (compiler-nucleus-sha256 . \"{}\") (contract . {}))))",
@@ -154,7 +167,7 @@ fn render_request(fixture_id: &str, input: &CompilerSemanticInput, source_commit
         role_name(input.lowering_role),
         input.authority_path,
         input.authority_sha256,
-        sha256_hex(NUCLEUS.as_bytes()),
+        sha256_hex(nucleus.as_bytes()),
         input.language_contract_version,
     )
 }
@@ -169,15 +182,16 @@ fn render_artifact(fixture_id: &str, semantic_request: &str) -> String {
 pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
     let root = Path::new(repo_root);
     let source_commit = current_commit(root)?;
+    let (nucleus, corpus) = compiler_sources()?;
 
-    let rows = parse_fixture_rows(options.fixture.as_deref())?;
+    let rows = parse_fixture_rows(options.fixture.as_deref(), &corpus)?;
     let mut rendered = Vec::with_capacity(rows.len());
     for (name, identity) in rows {
         let input = compiler_semantic_input_from_sens(identity)
             .map_err(|error| format!("SENS semantic input production failed for {name}: {error}"))?
             .ok_or_else(|| format!("SENS compiler law returned no role for {name}"))?;
 
-        let request = render_request(&name, &input, &source_commit);
+        let request = render_request(&name, &input, &source_commit, &nucleus);
         rendered.push(if options.artifact {
             render_artifact(&name, &request)
         } else {
@@ -208,7 +222,10 @@ mod tests {
 
     #[test]
     fn corpus_is_identity_only_and_covers_nine_current_roles() {
-        let rows = parse_fixture_rows(None).unwrap();
+        let (nucleus, corpus) = compiler_sources().expect("Zig-carried compiler assets");
+        assert!(!nucleus.is_empty());
+        assert!(!corpus.is_empty());
+        let rows = parse_fixture_rows(None, &corpus).unwrap();
         assert_eq!(rows.len(), 9);
         let roles = rows
             .into_iter()
@@ -227,7 +244,13 @@ mod tests {
         let input = compiler_semantic_input_from_sens(parse_identity("D3", "010").unwrap())
             .unwrap()
             .expect("ATOM compiler input");
-        let request = render_request("atom", &input, "0123456789abcdef0123456789abcdef01234567");
+        let (nucleus, _) = compiler_sources().unwrap();
+        let request = render_request(
+            "atom",
+            &input,
+            "0123456789abcdef0123456789abcdef01234567",
+            &nucleus,
+        );
         let artifact = render_artifact("atom", &request);
         let request_digest = sha256_hex(request.as_bytes());
 
@@ -256,6 +279,7 @@ mod tests {
             "d4-0010",
             &input,
             "0123456789abcdef0123456789abcdef01234567",
+            &compiler_sources().unwrap().0,
         );
         let artifact = render_artifact("d4-0010", &request).to_ascii_lowercase();
 

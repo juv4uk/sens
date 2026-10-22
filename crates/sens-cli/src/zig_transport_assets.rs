@@ -25,4 +25,9 @@ unsafe extern "C" {
         output: *mut u8,
         capacity: usize,
     ) -> isize;
+    pub(super) fn sens_zig_compiler_nucleus_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_compiler_identity_corpus_bytes_copy(
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
 }

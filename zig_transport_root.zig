@@ -490,6 +490,51 @@ test "domain projection tables cross Zig byte-exact and refuse short writes" {
     );
 }
 
+const compiler_nucleus_asset = @embedFile("lib/compiler-nucleus.lisp");
+const compiler_identity_corpus_asset =
+    @embedFile("contracts/compiler-nucleus-identity-corpus-v1.tsv");
+
+fn copy_compiler_asset(asset: []const u8, dst: [*]u8, capacity: usize) isize {
+    if (asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(asset.len);
+    if (capacity < asset.len) return -2;
+    @memcpy(dst[0..asset.len], asset);
+    return @intCast(asset.len);
+}
+
+pub export fn sens_zig_compiler_nucleus_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_compiler_asset(compiler_nucleus_asset, dst, capacity);
+}
+
+pub export fn sens_zig_compiler_identity_corpus_bytes_copy(
+    dst: [*]u8,
+    capacity: usize,
+) isize {
+    return copy_compiler_asset(compiler_identity_corpus_asset, dst, capacity);
+}
+
+test "compiler export assets cross Zig byte-exact without partial writes" {
+    const assets = [_][]const u8{
+        compiler_nucleus_asset,
+        compiler_identity_corpus_asset,
+    };
+    for (assets, 0..) |asset, index| {
+        const copy = if (index == 0)
+            sens_zig_compiler_nucleus_bytes_copy
+        else
+            sens_zig_compiler_identity_corpus_bytes_copy;
+        const required = copy(undefined, 0);
+        try std.testing.expectEqual(@as(isize, @intCast(asset.len)), required);
+        var short: [1]u8 = .{0xA5};
+        try std.testing.expectEqual(@as(isize, -2), copy(&short, short.len));
+        try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+        const output = try std.testing.allocator.alloc(u8, @intCast(required));
+        defer std.testing.allocator.free(output);
+        try std.testing.expectEqual(required, copy(output.ptr, output.len));
+        try std.testing.expectEqualSlices(u8, asset, output);
+    }
+}
+
 // This live host-data file intentionally remains reloadable without rebuilding
 // the CLI. Rust receives bytes only through this Zig-owned, fixed-path adapter.
 const CFile = opaque {};

@@ -1355,3 +1355,19 @@ pub fn domain_table_source_bytes(domain: u8) -> Result<Vec<u8>, String> {
     }
     Ok(bytes)
 }
+
+/// Opaque SENS compiler nucleus bytes carried through the Zig root ABI.
+pub fn compiler_nucleus_source_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_nucleus_bytes_copy,
+        "ZIG_COMPILER_NUCLEUS_CARRIER",
+    )
+}
+
+/// Opaque compiler identity corpus bytes carried through the Zig root ABI.
+pub fn compiler_identity_corpus_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_compiler_identity_corpus_bytes_copy,
+        "ZIG_COMPILER_IDENTITY_CORPUS_CARRIER",
+    )
+}
