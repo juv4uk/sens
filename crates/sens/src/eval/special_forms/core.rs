@@ -276,9 +276,11 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
 // Same compute as the expr-handlers above; arguments arrive
 // pre-evaluated. The expr-handlers delegate here after evaluating.
 
-pub(crate) fn car_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
+// Один механізм вибірки для D3 і складених селекторів: семантична
+// помилка на непридатному вході визначається тут, без дублювання в D10.
+pub(crate) fn car_ref(value: &Value, span: Span) -> Result<&Value, LanguageError> {
     match value {
-        Value::Pair(ref head, _) => Ok((**head).clone()),
+        Value::Pair(head, _) => Ok(head.as_ref()),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
             "car expects a non-empty list · car ochikuie neporozhnii spysok · car erwartet eine nicht leere Liste",
@@ -287,15 +289,23 @@ pub(crate) fn car_value(value: &Value, span: Span) -> Result<Value, LanguageErro
     }
 }
 
-pub(crate) fn cdr_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
+pub(crate) fn cdr_ref(value: &Value, span: Span) -> Result<&Value, LanguageError> {
     match value {
-        Value::Pair(_, ref tail) => Ok((**tail).clone()),
+        Value::Pair(_, tail) => Ok(tail.as_ref()),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
             "cdr expects a non-empty list · cdr ochikuie neporozhnii spysok · cdr erwartet eine nicht leere Liste",
             span,
         )),
     }
+}
+
+pub(crate) fn car_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
+    Ok((*car_ref(value, span)?).clone())
+}
+
+pub(crate) fn cdr_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
+    Ok((*cdr_ref(value, span)?).clone())
 }
 
 pub(crate) fn cons_values(
