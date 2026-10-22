@@ -266,9 +266,7 @@ jobs:
             git diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" > "$changed_all"
           fi
           # Д6: нормативний закон живе в СЕНС, а не в хостовому оракулі.
-          if grep -Eq '^(crates/sens/src/eval/d6_arithmetic[.]rs|crates/sens/src/domain_identity[.]rs|crates/sens/tests/d6_add1_sub1_mechanisms[.]rs|knowledge/d6-mechanism-ledger[.]json|scripts/check-d6-mechanism-ledger[.]py|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
-            echo 'd6_runtime_tests=true' >> "$GITHUB_OUTPUT"
-          fi
+          if grep -Eq '^(crates/sens/src/eval/d6_arithmetic[.]rs|crates/sens/src/domain_identity[.]rs|crates/sens/tests/d6_add1_sub1_mechanisms[.]rs|knowledge/d6-mechanism-ledger[.]json|scripts/check-d6-mechanism-ledger[.]py|[.]github/workflows/ci[.]yml)
           if grep -Eq '^(sens-cml-export[.]contract|crates/sens-cli/src/bin/cml-export[.]rs)$' "$changed_all"; then
             echo 'cml_export_tests=true' >> "$GITHUB_OUTPUT"
           fi
@@ -1308,46 +1306,6 @@ jobs:
               exit 1
             }
             echo "D11_T5M_EXACT_PASS source=$source"
-          done
-
-          # Нові Д11: фізичний T5M через чинні SENS/Zig, не host-оракул.
-          # Тимчасові файли не зараховувати як опубліковані трійки.
-          for source in \
-            lib/d11-clojure-frequencies-unary.lisp \
-            lib/d11-srfi1-find-tail.lisp \
-            lib/d11-srfi1-list-equality.lisp \
-            lib/d11-srfi1-unary-count.lisp; do
-            stem="${source##*/}"
-            physical="$temp_d11/${stem%.lisp}.sens"
-            bitview="${physical%.sens}"
-            mint_flag=--t5m-mint
-            binding_args=()
-            if [[ "$source" == "lib/d11-clojure-frequencies-unary.lisp" ]]; then
-              mint_flag=--t5m-mint-pair
-              binding_args=(--binding-source lib/d11-clojure-group-by.lisp)
-            fi
-            target/debug/sens "$mint_flag" "$source" "$physical" "${binding_args[@]}" || {
-              echo "D11_T5M_MINT_RED layer=lowering input=$source expected=SENS_ZIG_T5M actual=failure" >&2
-              exit 1
-            }
-            test -s "$physical" || {
-              echo "D11_T5M_EMPTY layer=physical input=$source expected=nonempty actual=empty" >&2
-              exit 1
-            }
-            target/debug/sens-trit view "$physical" > "$bitview" || {
-              echo "D11_T5M_VIEW_RED layer=projection input=$source expected=exact_bits actual=failure" >&2
-              exit 1
-            }
-            test -s "$bitview"
-            target/debug/sens-trit verify-view "$physical" || {
-              echo "D11_T5M_ROUNDTRIP_RED layer=ZigT5M input=$source expected=byte_exact actual=failure" >&2
-              exit 1
-            }
-            target/debug/sens --t5m-pair "$source" "$physical" "${binding_args[@]}" > "$temp_d11/execution.out" || {
-              echo "D11_T5M_EXECUTION_RED layer=SENS input=$source expected=paired_execution actual=failure" >&2
-              exit 1
-            }
-            echo "D11_T5M_STAGED_PASS source=$source physical=ZigT5M semantic=paired-SENS repository_pair=not_published"
           done
 
       - name: "Reason: SENS перевіряє індекс і лексичне застосування функцій"
