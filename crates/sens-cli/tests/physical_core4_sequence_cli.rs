@@ -1221,3 +1221,41 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
         tracked.len(), pending.len()
     );
 }
+
+#[test]
+fn d9_native_witness_reuses_exact_core4_lisp_laws() {
+    // Не повторювати семантику чотирьох функцій у мові хоста.
+    // Через непредставний у D7 legacy в решті Core4 witness переносить
+    // лише точні чинні SENS-форми; перевірка суто байтова.
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let core = fs::read_to_string(root.join("lib/core4.lisp")).expect("чинне Core4");
+    let witness = fs::read_to_string(
+        root.join("tests/semantic/d9-four-uk-projections-laws.lisp"),
+    ).expect("живий D9 witness");
+    for name in ["список", "двійковий", "символ?", "частка-остача"] {
+        let prefix = format!("(визначити {name} ");
+        let alt_prefix = format!("(визначити {name}\n");
+        let start = core.find(&prefix).or_else(|| core.find(&alt_prefix))
+            .unwrap_or_else(|| panic!("немає визначення Core4: {name}"));
+        let mut depth = 0_usize;
+        let mut end = None;
+        for (offset, byte) in core.as_bytes()[start..].iter().enumerate() {
+            match byte {
+                b'(' => depth += 1,
+                b')' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        end = Some(start + offset + 1);
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let form = &core[start..end.expect("закрита SENS форма Core4")];
+        assert!(
+            witness.contains(form),
+            "D9 нативне визначення {name} відійшло від Core4; оновіть точну форму",
+        );
+    }
+}
