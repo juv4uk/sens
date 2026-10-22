@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Д11: нативний SENS/Zig свідок оберненості чотирьох бібліотечних законів.
+# Д11: нативний SENS/Zig свідок оберненості бібліотечних законів.
 # Тимчасові байти НЕ є опублікованою фізичною парою в репозиторії.
 set -euo pipefail
 
@@ -21,7 +21,8 @@ for source in \
   lib/d11-srfi1-list-equality.lisp \
   lib/d11-srfi1-unary-count.lisp \
   lib/d11-srfi1-set-relations.lisp \
-  lib/list-foundation-compositions.lisp; do
+  lib/list-foundation-compositions.lisp \
+  lib/d11-srfi1-alist-protocol.lisp; do
   stem="${source##*/}"
   physical="$scratch/${stem%.lisp}.sens"
   bitview="${physical%.sens}"
