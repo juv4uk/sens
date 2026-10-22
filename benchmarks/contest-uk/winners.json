@@ -1,0 +1,8 @@
+{
+  "schema": "sens-contest-winners/v1",
+  "active": {
+    "довжина-списку": {"path": "benchmarks/contest-uk/довжина-списку.sens", "t5m_bytes": 132},
+    "сума-до-n": {"path": "benchmarks/contest-uk/сума-до-n.sens", "t5m_bytes": 119},
+    "факторіал": {"path": "benchmarks/contest-uk/факторіал-компакт.sens", "t5m_bytes": 80}
+  }
+}
