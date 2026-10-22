@@ -1,0 +1,373 @@
+#!/usr/bin/env python3
+"""Порівняти вчителя, учня за gold і учня з м'якими цілями на тих самих holdout.
+
+Вхідні teacher JSONL треба підготувати окремим локальним запуском збирача
+оцінок. До навчання надходить ТІЛЬКИ teacher-train; validation застосовується
+для калібрування/вибору порога, test — лише для фінального вимірювання.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import math
+import sys
+from pathlib import Path
+from typing import Any
+
+HERE = Path(__file__).resolve().parent
+
+
+def load_module(filename: str, module_name: str):
+    path = HERE / filename
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"не вдалося завантажити дослідницький модуль {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+student = load_module(
+    "system-one-compact-student-20261022.py",
+    "system_one_compact_student_for_comparison",
+)
+calibrator = load_module(
+    "system-one-calibrate-20261022.py",
+    "system_one_calibrate_for_comparison",
+)
+evaluator = load_module(
+    "system-one-evaluate-20261022.py",
+    "system_one_evaluate_for_comparison",
+)
+
+LABELS = tuple(student.LABELS)
+
+
+class ComparisonError(ValueError):
+    """Названа помилка порівняльного експерименту."""
+
+
+def sha256(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
+
+
+def read_rows(path: Path) -> tuple[list[dict[str, Any]], bytes]:
+    try:
+        return student.read_jsonl(path)
+    except (OSError, UnicodeDecodeError, student.StudentError) as exc:
+        raise ComparisonError(str(exc)) from exc
+
+
+def validate_teacher_file(
+    path: Path,
+    expected_rows: list[dict[str, Any]],
+    expected_split: str,
+    dataset_sha: str,
+) -> tuple[list[dict[str, Any]], str, str]:
+    rows, _raw = read_rows(path)
+    if len(rows) != len(expected_rows):
+        raise ComparisonError(
+            f"{path}: {len(rows)} записів, очікувалося {len(expected_rows)} для {expected_split}"
+        )
+    expected = {str(row["id"]): row for row in expected_rows}
+    observed: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        row_id = str(row.get("id", ""))
+        if not row_id or row_id in observed:
+            raise ComparisonError(f"{path}: відсутній/повторений id {row_id!r}")
+        observed[row_id] = row
+        if row.get("split") != expected_split:
+            raise ComparisonError(f"{row_id}: очікувався split={expected_split!r}")
+        if row.get("dataset_sha256") != dataset_sha:
+            raise ComparisonError(f"{row_id}: SHA корпусу не збігається")
+        if row_id not in expected:
+            raise ComparisonError(f"{row_id}: id відсутній у seed-корпусі")
+        original = expected[row_id]
+        if row.get("gold") != original.get("gold") or row.get("text") != original.get("text"):
+            raise ComparisonError(f"{row_id}: teacher-запис змінює еталонну мітку або текст")
+        evaluator.extract_distribution(row)
+
+    if set(observed) != set(expected):
+        raise ComparisonError(
+            f"{path}: не збігається склад {expected_split}: "
+            f"відсутні={sorted(set(expected)-set(observed))}"
+        )
+    teacher_names = {str(row.get("teacher", "")) for row in rows}
+    prompt_versions = {str(row.get("prompt_version", "")) for row in rows}
+    if len(teacher_names) != 1 or not next(iter(teacher_names)).strip():
+        raise ComparisonError(f"{path}: очікується одна вказана модель-вчитель")
+    if len(prompt_versions) != 1 or not next(iter(prompt_versions)).strip():
+        raise ComparisonError(f"{path}: очікується одна версія prompt")
+    return rows, next(iter(teacher_names)), next(iter(prompt_versions))
+
+
+def write_model(path: Path, model: dict[str, Any], overwrite: bool) -> str:
+    rendered = json.dumps(model, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
+    student.atomic_write(path, rendered, overwrite=overwrite)
+    return sha256(rendered.encode("utf-8"))
+
+
+def train_model(
+    input_path: Path,
+    teacher_path: Path | None,
+    output_path: Path,
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    result = student.train(
+        argparse.Namespace(
+            input=input_path,
+            teacher=teacher_path,
+            output=output_path,
+            smoothing=args.smoothing,
+            min_count=args.min_count,
+            gold_weight=args.gold_weight if teacher_path is not None else None,
+            overwrite=args.overwrite,
+        )
+    )
+    if result != 0:
+        raise ComparisonError(f"навчання не вдалося: {output_path}")
+    try:
+        model = json.loads(output_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ComparisonError(f"немає коректної моделі {output_path}: {exc}") from exc
+    return model
+
+
+def predict_split(
+    model_path: Path,
+    seed_path: Path,
+    split: str,
+    output_path: Path,
+    overwrite: bool,
+) -> list[dict[str, Any]]:
+    result = student.predict(
+        argparse.Namespace(
+            model=model_path,
+            input=seed_path,
+            split=split,
+            output=output_path,
+            overwrite=overwrite,
+        )
+    )
+    if result != 0:
+        raise ComparisonError(f"прогнозування не вдалося: {model_path} / {split}")
+    rows, _ = read_rows(output_path)
+    return rows
+
+
+def evaluate_rows(
+    rows: list[dict[str, Any]],
+    split: str,
+    threshold: float,
+    bins: int,
+) -> dict[str, Any]:
+    return evaluator.score(rows, threshold=threshold, bins=bins, expected_split=split)
+
+
+def run(args: argparse.Namespace) -> dict[str, Any]:
+    seed_path = args.input.resolve()
+    teacher_paths = {
+        "train": args.teacher_train.resolve(),
+        "validation": args.teacher_validation.resolve(),
+        "test": args.teacher_test.resolve(),
+    }
+    output_dir = args.output_dir.resolve()
+    input_paths = [seed_path, *teacher_paths.values()]
+    if len(set(input_paths)) != len(input_paths):
+        raise ComparisonError("seed і три teacher-файли мають бути різними файлами")
+    if any(path == output_dir or output_dir in path.parents for path in input_paths):
+        raise ComparisonError("вихідний каталог не може містити seed або вхідні teacher-файли")
+    if output_dir.exists() and not output_dir.is_dir():
+        raise ComparisonError("output-dir уже існує як файл")
+    if output_dir.exists() and any(output_dir.iterdir()) and not args.overwrite:
+        raise ComparisonError(f"output-dir не порожній: {output_dir}; додайте --overwrite свідомо")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    seed_rows, seed_raw = read_rows(seed_path)
+    dataset_sha = sha256(seed_raw)
+    unique_ids: set[str] = set()
+    for row in seed_rows:
+        row_id = str(row.get("id", ""))
+        if not row_id or row_id in unique_ids:
+            raise ComparisonError(f"seed має відсутній або повторений id: {row_id!r}")
+        unique_ids.add(row_id)
+        if row.get("gold") not in LABELS or not isinstance(row.get("text"), str):
+            raise ComparisonError(f"{row_id}: некоректний seed-запис")
+        if row.get("split") not in {"train", "validation", "test"}:
+            raise ComparisonError(f"{row_id}: невідомий split")
+
+    split_rows = {
+        split: [row for row in seed_rows if row["split"] == split]
+        for split in ("train", "validation", "test")
+    }
+    if any(not split_rows[split] for split in split_rows):
+        raise ComparisonError("seed має містити непорожні train, validation і test")
+
+    teacher_records: dict[str, list[dict[str, Any]]] = {}
+    teachers: set[str] = set()
+    prompt_versions: set[str] = set()
+    teacher_file_hashes: dict[str, str] = {}
+    for split in ("train", "validation", "test"):
+        records, teacher_name, prompt_version = validate_teacher_file(
+            teacher_paths[split], split_rows[split], split, dataset_sha
+        )
+        teacher_records[split] = records
+        teachers.add(teacher_name)
+        prompt_versions.add(prompt_version)
+        teacher_file_hashes[split] = sha256(teacher_paths[split].read_bytes())
+    if len(teachers) != 1 or len(prompt_versions) != 1:
+        raise ComparisonError("teacher-файли мають походити від однієї моделі та версії prompt")
+    teacher_name = next(iter(teachers))
+    prompt_version = next(iter(prompt_versions))
+
+    # Model training can see only seed train and teacher train. Holdout observations
+    # are used only for measuring the teacher and are never supplied to the trainer.
+    gold_model_path = output_dir / "student-gold-uncalibrated.json"
+    soft_model_path = output_dir / "student-soft-uncalibrated.json"
+    gold_model = train_model(seed_path, None, gold_model_path, args)
+    soft_model = train_model(seed_path, teacher_paths["train"], soft_model_path, args)
+
+    model_paths: dict[str, Path] = {}
+    calibration_reports: dict[str, Any] = {}
+    for kind, raw_model in (("gold", gold_model), ("soft", soft_model)):
+        calibrated, calibration_report = calibrator.fit_temperature(
+            raw_model,
+            seed_rows,
+            dataset_sha,
+            min_temperature=args.min_temperature,
+            max_temperature=args.max_temperature,
+            grid_points=args.grid_points,
+        )
+        calibrated_path = output_dir / f"student-{kind}-calibrated.json"
+        write_model(calibrated_path, calibrated, overwrite=args.overwrite)
+        model_paths[kind] = calibrated_path
+        calibration_reports[kind] = calibration_report
+
+    evaluations: dict[str, dict[str, Any]] = {
+        "teacher": {},
+        "student_gold": {},
+        "student_soft": {},
+    }
+    for split in ("validation", "test"):
+        evaluations["teacher"][split] = evaluate_rows(
+            teacher_records[split], split, args.threshold, args.bins
+        )
+        for kind, model_path in model_paths.items():
+            predictions = predict_split(
+                model_path,
+                seed_path,
+                split,
+                output_dir / f"student-{kind}-{split}.jsonl",
+                overwrite=args.overwrite,
+            )
+            target = "student_gold" if kind == "gold" else "student_soft"
+            evaluations[target][split] = evaluate_rows(
+                predictions, split, args.threshold, args.bins
+            )
+
+    comparisons: dict[str, Any] = {}
+    metric_keys = (
+        "accuracy",
+        "macro_f1",
+        "multiclass_brier_sum_over_examples",
+        "top_class_ece",
+        "coverage_at_threshold",
+        "selective_risk_at_threshold",
+    )
+    for split in ("validation", "test"):
+        comparisons[split] = {
+            model_name: {
+                key: result[split]["metrics"][key]
+                for key in metric_keys
+            }
+            for model_name, result in evaluations.items()
+        }
+
+    report = {
+        "schema": "sens.system-one.teacher-student-comparison/1",
+        "result": "measured",
+        "dataset_sha256": dataset_sha,
+        "dataset_count_by_split": {split: len(values) for split, values in split_rows.items()},
+        "teacher": teacher_name,
+        "prompt_version": prompt_version,
+        "teacher_observation_sha256": teacher_file_hashes,
+        "teacher_observations_used_for_training": ["train"],
+        "validation_used_for_calibration": True,
+        "test_used_for_training_or_calibration": False,
+        "threshold": args.threshold,
+        "calibration": calibration_reports,
+        "evaluations": evaluations,
+        "comparison": comparisons,
+        "models": {
+            "student_gold_sha256": sha256(gold_model_path.read_bytes()),
+            "student_soft_sha256": sha256(soft_model_path.read_bytes()),
+            "student_gold_calibrated_sha256": sha256(model_paths["gold"].read_bytes()),
+            "student_soft_calibrated_sha256": sha256(model_paths["soft"].read_bytes()),
+        },
+        "limitations": [
+            "Початковий seed є синтетичним і малим.",
+            "CPU-наївний баєсів учень не є трансформером.",
+            "Teacher scores are observations, not gold truth.",
+            "Узагальнення на реальні звернення цим seed не доведене.",
+        ],
+    }
+    rendered = json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+    student.atomic_write(output_dir / "comparison.json", rendered, overwrite=args.overwrite)
+    return report
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, default=Path("research/system-one-support-seed-20261022.jsonl"))
+    parser.add_argument("--teacher-train", type=Path, required=True)
+    parser.add_argument("--teacher-validation", type=Path, required=True)
+    parser.add_argument("--teacher-test", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--threshold", type=float, default=0.80)
+    parser.add_argument("--bins", type=int, default=10)
+    parser.add_argument("--smoothing", type=float, default=1.0)
+    parser.add_argument("--min-count", type=int, default=1)
+    parser.add_argument("--gold-weight", type=float, default=0.25)
+    parser.add_argument("--min-temperature", type=float, default=0.05)
+    parser.add_argument("--max-temperature", type=float, default=20.0)
+    parser.add_argument("--grid-points", type=int, default=501)
+    parser.add_argument("--overwrite", action="store_true")
+    args = parser.parse_args()
+    try:
+        if not math.isfinite(args.threshold) or not 0 <= args.threshold <= 1:
+            raise ComparisonError("threshold має бути скінченним числом у [0,1]")
+        if not isinstance(args.bins, int) or not 1 <= args.bins <= 100:
+            raise ComparisonError("bins має бути в межах 1..100")
+        report = run(args)
+        print(
+            json.dumps(
+                {
+                    "result": report["result"],
+                    "dataset_sha256": report["dataset_sha256"],
+                    "dataset_count_by_split": report["dataset_count_by_split"],
+                    "comparison": report["comparison"],
+                    "output": str(args.output_dir.resolve() / "comparison.json"),
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+        )
+        return 0
+    except (
+        OSError,
+        UnicodeDecodeError,
+        ComparisonError,
+        student.StudentError,
+        calibrator.CalibrationError,
+        KeyError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        print(f"помилка порівняння System One: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
