@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 211,
+    "total": 214,
     "historical": 17,
-    "library": 194,
-    "distinct_families": 30
+    "library": 197,
+    "distinct_families": 32
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5327,6 +5327,66 @@
       "native_ci_job": 119735357430,
       "native_ci_exact_test": "d11_srfi1_unfold_and_unfold_right_native_laws",
       "native_ci_step": "Д11 / Scheme + Clojure — нативні закони списків і стану"
+    },
+    {
+      "surface_name": "накопичити-проміжні-стани",
+      "source_family": "clojure-reductions-seeded",
+      "proposed_law_uk": "Clojure reductions(f,init,coll) — для скінченного правильного списку повернути init та кожен послідовний стан після застосування кроку f(acc,item). Порожній список повертає (init), кожен елемент породжує рівно одну нову позицію, порядок зліва направо; eager SENS, не lazy seq чи transducer.",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-historical-scan-fold.lisp",
+        "blob_sha": "a55530fa31f3d0fd45e6d80309d2a587047b72b2",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
+      },
+      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_reductions_and_pair_fold_native_sens_laws",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "згорнути-по-хвостах-зліва",
+      "source_family": "scheme-srfi1-pair-fold",
+      "proposed_law_uk": "Scheme SRFI-1 pair-fold: крок k отримує поточний повний суфікс-список і накопичувач, від першої пари до останньої; базис повертає seed. Крок отримує пару, а НЕ її CAR; чиста SENS реалізація без мутації.",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-historical-scan-fold.lisp",
+        "blob_sha": "a55530fa31f3d0fd45e6d80309d2a587047b72b2",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
+      },
+      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_reductions_and_pair_fold_native_sens_laws",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "згорнути-по-хвостах-справа",
+      "source_family": "scheme-srfi1-pair-fold",
+      "proposed_law_uk": "Scheme SRFI-1 pair-fold-right: k застосовується до повного суфікса після згортання його правого хвоста, праворуч→ліворуч, незмінний вихідний список. Це інший закон порядку, ніж pair-fold; без destructive set-cdr.",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-historical-scan-fold.lisp",
+        "blob_sha": "a55530fa31f3d0fd45e6d80309d2a587047b72b2",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
+      },
+      "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_reductions_and_pair_fold_native_sens_laws",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
     }
   ],
   "winners_20261022": {
