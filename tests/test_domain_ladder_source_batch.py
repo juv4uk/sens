@@ -184,7 +184,9 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(report["summary"]["scanned"], 1)
         self.assertEqual(report["summary"]["admitted_files"], 0)
         self.assertEqual(report["summary"]["blocked_files"], 0)
-        self.assertEqual(report["files"][0]["status"], "source-era-unproved")
+        self.assertEqual(report["files"][0]["status"], "unchanged",
+                         "Already-Ukrainian DEFINE is current source, not legacy W8")
+        self.assertEqual(report["files"][0]["reasons"], [])
         self.assertNotIn("source_git_blob_sha", report["files"][0])
 
     def test_template_strings_are_not_old_executable_define_heads(self):
