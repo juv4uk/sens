@@ -41,7 +41,7 @@ for source in "$here"/*.lisp; do
   source_sha="$(sha256sum "$source" | cut -d' ' -f1)"
   if ! "$sens" --t5m-mint "$source" "$physical" >"$scratch/mint.out" 2>"$scratch/error" ||
      [[ ! -s "$physical" ]]; then
-    printf '%s\\t-\\t-\\t0\\tПОМИЛКА_НАТИВНОГО_MINT\\n' "$name"
+    printf '%s\t-\t-\t0\tПОМИЛКА_НАТИВНОГО_MINT\n' "$name"
     sed 's/^/SENS mint: /' "$scratch/error" >&2
     fail=1
     continue
@@ -49,25 +49,25 @@ for source in "$here"/*.lisp; do
   if ! "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/error" ||
      ! "$trit" open "$physical" >"$view" 2>"$scratch/error" ||
      [[ ! -s "$view" ]]; then
-    printf '%s\\t-\\t-\\t0\\tПОМИЛКА_ОБЕРНЕНОСТІ_T5M\\n' "$name"
+    printf '%s\t-\t-\t0\tПОМИЛКА_ОБЕРНЕНОСТІ_T5M\n' "$name"
     sed 's/^/Zig/T5M: /' "$scratch/error" >&2
     fail=1
     continue
   fi
   if ! cmp -s "$physical" "$committed" || ! cmp -s "$view" "$committed_view"; then
-    printf '%s\\t-\\t-\\t0\\tЗАСТАРІЛА_ФІЗИЧНА_ПАРА\\n' "$name"
+    printf '%s\t-\t-\t0\tЗАСТАРІЛА_ФІЗИЧНА_ПАРА\n' "$name"
     echo "CONTEST_PAIR_DRIFT source=$source action=refresh-executed-t5m-pair" >&2
     fail=1
     continue
   fi
   if [[ "$source_sha" != "$(sha256sum "$source" | cut -d' ' -f1)" ]]; then
-    printf '%s\\t-\\t-\\t0\\tДЖЕРЕЛО_ЗМІНЕНО\\n' "$name"
+    printf '%s\t-\t-\t0\tДЖЕРЕЛО_ЗМІНЕНО\n' "$name"
     fail=1
     continue
   fi
   if ! "$sens" --t5m-pair "$source" "$physical" >"$scratch/paired.out" 2>"$scratch/error" ||
      ! "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/error"; then
-    printf '%s\\t-\\t-\\t0\\tПОМИЛКА_ВИКОНАННЯ_SENS\\n' "$name"
+    printf '%s\t-\t-\t0\tПОМИЛКА_ВИКОНАННЯ_SENS\n' "$name"
     sed 's/^/SENS eval: /' "$scratch/error" >&2
     fail=1
     continue
