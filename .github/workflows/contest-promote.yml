@@ -2,14 +2,10 @@ name: contest-promote
 
 # Просування переможців конкурсу в рантайм: активним стає найменший T5M на
 # задачу, старші варіанти переїжджають у superseded/ (поза glob рантайму).
+# Просування змінює main і не має самовільно запускати другого
+# автоматичного writer: лише центральний ci.yml має push-тригер.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      # .lisp спершу майнить чинний SENS/Zig; судити до появи .sens не можна.
-      - "benchmarks/contest-uk/*.sens"
-      - "benchmarks/contest-uk/judge.sh"
-      - "benchmarks/contest-uk/promote.sh"
 
 permissions:
   contents: write
