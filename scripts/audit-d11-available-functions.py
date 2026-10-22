@@ -191,6 +191,7 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
                         "crates/sens/tests/d11_unify_once.rs::d11_розвязати_один_раз_не_підмінює_рекурсивне_проходження",
                         "crates/sens/tests/reason_index.rs::reason_index_d1_verdicts_from_real_predicates",
                         "crates/sens/tests/core_postcore_ukr.rs::meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens",
+                        "crates/sens/tests/core_postcore_ukr.rs::meta_eval_predicates_are_actual_d1_bits",
                         "crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs::d11_jtms_знайти_запис_за_фактом_зберігає_докази_й_перший_збіг",
                         "crates/sens/tests/d11_unify_once.rs::d11_застосувати_підстановку_обійдений_працює_рекурсивно",
                         "crates/sens/tests/d11_unify_once.rs::d11_спостерігати_уніфікацію_розрізняє_порожній_успіх_і_невдачу",
