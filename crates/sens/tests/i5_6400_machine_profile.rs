@@ -14,9 +14,13 @@ fn legacy_i5_6400_profile_is_provenance_not_current_authority() {
 
     sens::parse(&profile).expect("legacy i5-6400 profile must remain valid sens data");
 
-    assert!(profile.contains("Legacy Intel Core i5-6400 / Skylake SID8 compatibility projection."));
-    assert!(profile.contains("NOT current semantic authority"));
+    // Машинна сумісність лишається даними походження, не кодом функції.
+    // Нинішнє джерело й документація вже українські: старі англійські
+    // підрядки в попередньому тесті давали гарантований хибний RED.
+    assert!(profile.contains("Історична сумісна проєкція сід8"));
+    assert!(profile.contains("НЕ є чинним джерелом семантичних повноважень"));
     assert!(profile.contains("lib/machine/profile/current-domain-x86-64.lisp"));
+    assert!(profile.contains("(machine-profile-1"));
 }
 
 #[test]
@@ -26,6 +30,11 @@ fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() 
     assert!(current.contains("(machine-domain-profile-2"));
     assert!(current.contains("(cpu intel-core-i5-6400)"));
     assert!(current.contains("(key-shape width+packed-bits)"));
+
+    // Рівні байти в різних епохах НЕ означають рівні операції.
+    // D8:00001100 чинної таблиці — зменшити-на-1, а додати — D5:01010.
+    let d8 = include_str!("../../../lib/domains/d8.lisp");
+    assert!(d8.contains("(00001100 (ук зменшити-на-1) (укр зменшити-на-1)"));
 
     for (width, packed_bits, expected_machine_path) in [
         (5, 8, "CMP+SETE+MOVZX"), // D5 ZEROP

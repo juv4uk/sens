@@ -379,6 +379,14 @@ jobs:
           if grep -Eq '^(lib/machine/admission/x86-64\.lisp|crates/sens/tests/machine_admission_false_width\.rs|crates/sens/tests/machine_admission_adversarial\.rs)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
+          # Д5: адресні живі SENS-тести для зміненого машинного профілю.
+          if grep -Eq '^(crates/sens/tests/(machine_lowering_boundary|i5_6400_machine_profile)\.rs|lib/machine/lowering/semantic-x86-64\.lisp)$' "$changed_all"; then
+            echo 'd5_exact_native_tests=true' >> "$GITHUB_OUTPUT"
+          fi
+          # D8: поточний DOSEQ не можна сховати як історичний SID8 QUOTE.
+          if grep -Eq '^tests/test_core4_internal_sid8_migration\.py$' "$changed_all"; then
+            echo 'd8_sid8_firewall_tests=true' >> "$GITHUB_OUTPUT"
+          fi
           # Чинна українська UTF-8 програма запускає справжній SENS D1, не Python/JSON oracle.
           if grep -Eq '^(lib/utf8\.lisp|crates/sens/tests/utf8\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'utf8_runtime_tests=true' >> "$GITHUB_OUTPUT"
@@ -407,6 +415,22 @@ jobs:
 
       - uses: ./.github/actions/install-zig
         if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.reason_tests == 'true' || steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:')) || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
+
+      - name: "Д5: виконувані SENS-свідки замість SID8 і старих ignored"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.d5_exact_native_tests == 'true' }}
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test machine_lowering_boundary --test i5_6400_machine_profile -- --nocapture
+
+      - name: "Д8: цитування Д3 не може приховати сучасний DOSEQ"
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.d8_sid8_firewall_tests == 'true' }}
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.test_core4_internal_sid8_migration.Core4WidthFirewall.test_current_d8_doseq_must_never_be_hidden_as_old_sid8_quote -v
 
       - name: "System One research — один адресний тест учителя, учня та метрик"
         shell: bash
