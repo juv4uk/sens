@@ -345,15 +345,15 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     let source = include_str!("../../../research/d5-d6-selector-definitions-batch-2026-10-17.lisp");
     let mut session = Session::default();
     let observed = eval_program(source, &mut session).unwrap_or_else(|error| {
-        panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS expected=13-D1:так actual_error={error}")
+        panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS expected=22-D1:так actual_error={error}")
     });
     let expected = eval_program("(атом? (як-є ()))", &mut Session::default())
         .expect("D1:так у SENS")
         .value;
 
-    // Дев'ять адресних позитивів і чотири негативи — усі живі D1-відповіді.
+    // Дев'ять канонічних, дев'ять D3-композицій та чотири негативи — усі живі D1-відповіді.
     let mut cursor = &observed.value;
-    for index in 0..13 {
+    for index in 0..22 {
         let sens::Value::Pair(node) = cursor else {
             panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=pair(D1:так, tail) actual={cursor}");
         };
@@ -364,24 +364,33 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
         );
         cursor = &node.tail;
     }
-    assert!(matches!(cursor, sens::Value::Nil), "test_id=D5-D6-SELECTOR-NATIVE expected=exactly-13-predicates");
+    assert!(matches!(cursor, sens::Value::Nil), "test_id=D5-D6-SELECTOR-NATIVE expected=exactly-22-predicates");
 
-    // Канонічний селектор D5 має пріоритет над однойменним DEFINE.
-    // Негативна спроба затінення НЕ змінює його точну семантику.
-    let definition = "(визначити решта-двох-перших\n  (функція (значення)\n    (решта (перше (перше значення)))))";
-    let fake_definition = "(визначити решта-двох-перших\n  (функція (значення)\n    (перше (перше (перше значення)))))";
-    assert_eq!(source.matches(definition).count(), 1, "test_id=D5-D6-SELECTOR-SHADOW expected=one-definition");
-    let shadowed = source.replacen(definition, fake_definition, 1);
-    let preserved = eval_program(&shadowed, &mut Session::default()).unwrap_or_else(|error| {
-        panic!("test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=canonical-D5-law actual_error={error}")
+    // Локальна D3-композиція є незалежною мовною реалізацією закону.
+    // Її мутація повинна псувати саме 10-й результат, не канонічний D5.
+    let definition = "(визначити дослід-решта-двох-перших\n  (функція (значення)\n    (решта (перше (перше значення)))))";
+    let fake_definition = "(визначити дослід-решта-двох-перших\n  (функція (значення)\n    (перше (перше (перше значення)))))";
+    assert_eq!(source.matches(definition).count(), 1, "test_id=D5-D6-D3-DERIVATION expected=one-definition");
+    let mutant_definition = source.replacen(definition, fake_definition, 1);
+    let mutated = eval_program(&mutant_definition, &mut Session::default()).unwrap_or_else(|error| {
+        panic!("test_id=D5-D6-D3-DERIVATION layer=SENS expected=predicate-list actual_error={error}")
     });
-    let sens::Value::Pair(node) = &preserved.value else {
-        panic!("test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=predicate-list actual={}", preserved.value);
+    let mut cursor = &mutated.value;
+    for index in 0..9 {
+        let sens::Value::Pair(node) = cursor else {
+            panic!("test_id=D5-D6-D3-DERIVATION index={index} expected=canonical-D1:так actual={cursor}");
+        };
+        assert_eq!(node.head.as_predicate_bit(), Some(true),
+            "test_id=D5-D6-D3-DERIVATION index={index} expected=canonical-D1:так");
+        cursor = &node.tail;
+    }
+    let sens::Value::Pair(node) = cursor else {
+        panic!("test_id=D5-D6-D3-DERIVATION expected=derived-predicate-at-index-9 actual={cursor}");
     };
     assert_eq!(
         node.head.as_predicate_bit(),
-        Some(true),
-        "test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=unchanged-D1:так actual={}", node.head
+        Some(false),
+        "test_id=D5-D6-D3-DERIVATION layer=SENS expected=mutated-D1:ні actual={}", node.head
     );
 
     // А справжня зміна викликаного шляху CDAAR -> CAAAR має дати D1:ні.
