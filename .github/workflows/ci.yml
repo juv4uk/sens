@@ -1429,11 +1429,9 @@ jobs:
           if [[ -f "$RUNNER_TEMP/changed-core-dependencies.txt" ]]; then
             changed_source="$(cat "$RUNNER_TEMP/changed-core-dependencies.txt")"
           fi
-          # Справжній SENS/Zig/T5M, лише D9/REPL: вісім незалежних законів.
-          # Немає нового workflow, фальшивого Python-оракула чи надлишкового CI.
-          if [[ "$changed_source" == *"tests/semantic/d9-four-uk-projections-laws.lisp"* ||
-                "$changed_source" == *"crates/sens-cli/src/repl.rs"* ||
-                "$changed_source" == *".github/workflows/ci.yml"* ]]; then
+          # Вісім справжніх D9 законів: SENS сам виконує кожен через Zig/T5M,
+          # тест повідомляє точний номер RED; не вводимо Python-семантику.
+          if grep -Eq '^(tests/semantic/d9-four-uk-projections-laws[.]lisp|crates/sens-cli/src/repl[.]rs|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --bin sens d9_four_ukr_witnesses_execute_individually_in_native_sens -- --nocapture
           fi
           for law_source in selector_law.rs semantic_registry.rs domain_family_composition_current.rs ci.yml; do
