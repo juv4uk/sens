@@ -93,7 +93,7 @@ pub(super) fn invoke(
         } else {
             Step::Cdr
         };
-        value = match select(step, &value, span) {
+        value = match select(step, value, span) {
             Ok(value) => value,
             Err(error) => return Some(Err(error)),
         };
