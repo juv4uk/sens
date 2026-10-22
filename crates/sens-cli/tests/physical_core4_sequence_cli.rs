@@ -1024,11 +1024,19 @@ fn contest_uk_three_real_programs_have_current_physical_peers() {
         error(&output)
     );
     let report = observed(&output);
+    // Після нативного конкурсу переможець може замінити стару програму
+    // (факторіал-компакт замість факторіал): перевіряємо саме категорію.
+    // Не повертати старе ім'я чи симулювати зелений результат.
     for stem in ["довжина-списку", "сума-до-n", "факторіал"] {
         assert!(
-            report.lines().any(|line|
-                line.starts_with(&format!("{stem}\t")) && line.ends_with("ПІДТВЕРДЖЕНО")),
-            "конкурс не довів нативне виконання {stem}: {report}"
+            report.lines().any(|line| {
+                let Some((name, _)) = line.split_once('\t') else {
+                    return false;
+                };
+                (name == stem || name.starts_with(&format!("{stem}-")))
+                    && line.ends_with("ПІДТВЕРДЖЕНО")
+            }),
+            "конкурс не довів нативне виконання категорії {stem}: {report}"
         );
     }
 }
