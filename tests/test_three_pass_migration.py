@@ -1148,8 +1148,10 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertFalse(output.exists())
 
 
-    def test_export_trigger_installs_pinned_zig_in_existing_ci(self):
-        # Explicit one-shot T5M must never reach the publisher without Zig.
+    def test_export_trigger_uses_pinned_zig_and_native_sens_writer(self):
+        # CI packaging may use Python tests, but executable .sens MUST be
+        # produced by native SENS -> Zig/T5M and executed by SENS itself.
+        # A renamed historical Python/JSON exporter is no longer authority.
         workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         guards = workflow.split("  lisp-guards:", 1)[1]
         installer = guards.split("      - uses: ./.github/actions/install-zig", 1)[1]
@@ -1158,7 +1160,17 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertIn("BENCH-T5M:", condition)
         self.assertIn("github.event_name == 'push'", condition)
         self.assertIn("steps.changed-t5m-lisp.outputs.needs_zig == 'true'", condition)
-        self.assertIn("ONE-SHOT — фізичні T5M-пари", guards)
+        section = guards.split(
+            '      - name: "ONE-SHOT — нативні SENS/Zig T5M-пари', 1
+        )[1].split('      - name: "ONE-SHOT — artifact', 1)[0]
+        self.assertIn("MIGRATE-LIB-TRIPLETS:", section)
+        self.assertIn("cargo build --locked -p sens-cli --bin sens --bin sens-trit", section)
+        self.assertIn("scripts/refresh-verified-t5m-pair.sh", section)
+        self.assertIn('target/debug/sens-trit "${bindings[@]}"', section)
+        self.assertIn("NATIVE-RESULTS.tsv", section)
+        self.assertIn("NATIVE_REJECTED", section)
+        self.assertNotIn("python3 ", section)
+        self.assertNotIn("migrate-three-pass.py", section)
 
 
     def test_current_nonprogram_sha_pins_are_real_and_d10_d11_are_data(self):
