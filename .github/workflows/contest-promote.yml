@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "benchmarks/contest-uk/*.lisp"
+      # .lisp спершу майнить чинний SENS/Zig; судити до появи .sens не можна.
       - "benchmarks/contest-uk/*.sens"
       - "benchmarks/contest-uk/judge.sh"
       - "benchmarks/contest-uk/promote.sh"
