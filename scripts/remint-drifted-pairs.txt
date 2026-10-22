@@ -108,3 +108,7 @@ benchmarks/contest-uk/сума-четвертих-степенів-без-лям
 benchmarks/contest-uk/факторіал-д6-стислий.lisp
 lib/list-last-atom-to-compound-boundary-zero-copy-general.lisp
 lib/list-tail-after-fourth-atom-zero-copy-general.lisp
+lib/list-penultimate-atomic-suffix-zero-copy-general.lisp
+lib/list-tail-after-fifth-atom-zero-copy-general.lisp
+lib/list-tail-after-nth-compound-zero-copy-general.lisp
+benchmarks/contest-uk/сума-четвертих-степенів-горнер.lisp
