@@ -45,7 +45,7 @@ def active_heads(source: str) -> Counter:
         head = node.children[0].atom
         if head is not None:
             counts[head] += 1
-        if head in {"001", "00000001", "quote"}:
+        if head in {"001", "як-є", "quote"}:
             continue
         stack.extend(node.children)
     return counts
@@ -64,7 +64,7 @@ def active_atoms(source: str) -> list[str]:
         if not node.children:
             continue
         head = node.children[0].atom
-        if head in {"001", "00000001", "quote"}:
+        if head in {"001", "як-є", "quote"}:
             if head is not None:
                 atoms.append(head)
             continue
@@ -129,6 +129,17 @@ class Core4WidthFirewall(unittest.TestCase):
 
     def test_core4_obeys_domain_width_firewall(self):
         verify(self.source)
+
+    def test_current_d8_doseq_must_never_be_hidden_as_old_sid8_quote(self):
+        # D3:001 цитує; чинний D8:00000001 є DOSEQ, не цитатою SID8.
+        actual = active_heads("(00000001 (додати 2 3))")
+        self.assertEqual(actual["00000001"], 1)
+        self.assertEqual(actual["додати"], 1)
+        self.assertIn("t", active_atoms("(00000001 t)"))
+        self.assertNotIn("t", active_atoms("(001 t)"))
+        self.assertNotIn("t", active_atoms("(як-є t)"))
+        with self.assertRaisesRegex(ValueError, "host truth"):
+            verify(self.source + "\n(00000001 t)\n")
 
     def test_seven_macros_are_language_owned_not_w8_defmacro(self):
         heads = active_heads(self.source)
