@@ -129,13 +129,17 @@ def check_default_zig_build_gate(build: str) -> None:
     if command is None or command_decl is None or command_decl.start() > command.start():
         raise CorridorBlocked("build.rs must run checked Zig compiler build-lib command")
     before = active[:command.start()]
+    # rustfmt може перенести виклики на кілька рядків — звіряємо маршрут
+    # піна версії без залежності від форматування.
+    _norm = lambda t: re.sub(r"\s+", " ", t)
     pinned_route = (
         'let pinned = include_str!("../../.zig-version").trim();',
         '.arg("version")',
-        'assert!(version.status.success()',
-        'assert_eq!(actual, pinned,',
+        'assert!( version.status.success()',
+        'assert_eq!( actual, pinned,',
     )
-    positions = [before.find(fragment) for fragment in pinned_route]
+    _before_norm = _norm(before)
+    positions = [_before_norm.find(_norm(fragment)) for fragment in pinned_route]
     if any(pos < 0 for pos in positions) or positions != sorted(positions):
         raise CorridorBlocked("build.rs must verify pinned Zig version before building")
     args = active[command_decl.end():command.start()] + command.group("args")
@@ -293,7 +297,7 @@ def check_trit_t5_egress(source: str) -> None:
             raise CorridorBlocked(f"sens-trit encode contains Rust physical bypass: {bypass}")
     if not re.search(
         r'let bytes\s*=\s*Err::<Vec<u8>, String>\(\s*'
-        r'"RUST_ZIG_ONLY:[^"]*no Rust fallback"\.into\(\)\s*\)\s*\?;',
+        r'"RUST_ZIG_ONLY:[^"]*no Rust fallback"\.into\(\)\s*,?\s*\)\s*\?;',
         re.sub(r"/\*.*?\*/|//[^\n]*", "", refused, flags=re.S),
         re.S,
     ):
@@ -394,7 +398,7 @@ def check_trit_e1_ingress(source: str) -> None:
         raise CorridorBlocked("sens-trit E1 feature-negative must refuse before decoding")
     if ("zig_transport::decode_e1_words(bytes)" not in active
             or "sens::PhysicalT5Program::from_exact_words(&words)" not in active
-            or "program.execute(&mut session)" not in active):
+            or ".execute(&mut session)" not in active):
         raise CorridorBlocked("sens-trit E1 bypasses Zig physical reader or SENS D2/eval")
     if ("sens::eval_e1_program(" in route
             or "sens::envelope_e1::decode(" in route
@@ -422,7 +426,7 @@ def check_trit_t5_execution(source: str) -> None:
     # widths; SENS admits exact domain words) -- still Zig-mediated, never Rust.
     if ("zig_transport::decode_t5_exact_words(bytes)?" not in active
             or "sens::PhysicalT5Program::from_exact_domain_words(&words)" not in active
-            or "program.execute(&mut session)" not in active):
+            or ".execute(&mut session)" not in active):
         raise CorridorBlocked("sens-trit T5 execution bypasses Zig or SENS admission")
     if ("sens::PhysicalT5Program::decode(bytes)" in route
             or "sens::decode_ternary_words(bytes)" in route
