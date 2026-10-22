@@ -4,8 +4,9 @@
 //! semantic identity remain owned by sens.
 //!
 //! The first bounded mechanism set is deliberately small.
-//! Semantic operation identity is always the exact 8-bit SID carried by the
-//! shared ABI; payload text contains arguments only and can never select an operation.
+//! The historical 8-bit C ABI slot is a *transport compatibility selector*,
+//! NOT an SENS domain identity. Modern calls use exact ratified D5/D6 words.
+//! D7 and operator text never select execution; unproven laws fail closed.
 
 use std::collections::HashMap;
 use std::fmt;
@@ -35,6 +36,35 @@ pub fn is_legacy_math_id(sid: u8) -> bool {
             | SID_MOD
             | SID_QUOTIENT
     )
+}
+
+/// A Datalog arithmetic mechanism, never a domain identity by itself.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ArithmeticMechanism {
+    Add, Sub, Mul, Div, Abs, Min, Max, Mod, Quotient,
+}
+
+/// Only mechanisms with a verified matching domain law enter this path.
+/// Both exact width and bits are required: an historical SID8 byte cannot
+/// make an operation callable in present-day D8.
+pub fn parse_exact_domain_request(
+    width: u8, bits: &str, payload: &str
+) -> Result<NumericExpr, DatalogMathError> {
+    use ArithmeticMechanism as Op;
+    let operation = match (width, bits) {
+        (5, "01010") => Op::Add,  // додати
+        (5, "01011") => Op::Sub,  // відняти
+        (5, "10110") => Op::Mul,  // помножити
+        (6, "010011") => Op::Abs, // модуль
+        (6, "110101") => Op::Min, // найменше
+        (6, "110111") => Op::Max, // найбільше
+        // Quotient, division and remainder wait for exact signed/rational
+        // SENS parity; an i64 adapter must not invent their laws.
+        _ => return Err(DatalogMathError::UnsupportedDomainOperation {
+            width, bits: bits.to_owned(),
+        }),
+    };
+    parse_math_operation(operation, payload)
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -118,6 +148,7 @@ pub enum DatalogMathError {
     NonIntegerValue(Value),
     InvalidArgument(String),
     UnsupportedLegacyAbiId(u8),
+    UnsupportedDomainOperation { width: u8, bits: String },
     DivisionByZero,
     Overflow,
 }
@@ -133,7 +164,10 @@ impl fmt::Display for DatalogMathError {
                 write!(formatter, "datalog-math-invalid-argument:{value}")
             }
             Self::UnsupportedLegacyAbiId(sid) => {
-                write!(formatter, "datalog-math-unsupported-semantic-id:{sid:08b}")
+                write!(formatter, "datalog-math-unsupported-legacy-abi-slot:{sid:08b}")
+            }
+            Self::UnsupportedDomainOperation { width, bits } => {
+                write!(formatter, "datalog-math-unsupported-domain:D{width}:{bits}")
             }
             Self::DivisionByZero => write!(formatter, "datalog-math-division-by-zero"),
             Self::Overflow => write!(formatter, "datalog-math-overflow"),
@@ -143,9 +177,29 @@ impl fmt::Display for DatalogMathError {
 
 impl std::error::Error for DatalogMathError {}
 
+/// Explicit historical one-byte WSM C ABI bridge, not current SENS.
 pub fn parse_legacy_abi_request(
     semantic_id: u8,
     payload: &str,
+) -> Result<NumericExpr, DatalogMathError> {
+    use ArithmeticMechanism as Op;
+    let operation = match semantic_id {
+        SID_ADD => Op::Add,
+        SID_SUB => Op::Sub,
+        SID_MUL => Op::Mul,
+        SID_DIV => Op::Div,
+        SID_ABS => Op::Abs,
+        SID_MIN => Op::Min,
+        SID_MAX => Op::Max,
+        SID_MOD => Op::Mod,
+        SID_QUOTIENT => Op::Quotient,
+        other => return Err(DatalogMathError::UnsupportedLegacyAbiId(other)),
+    };
+    parse_math_operation(operation, payload)
+}
+
+fn parse_math_operation(
+    operation: ArithmeticMechanism, payload: &str,
 ) -> Result<NumericExpr, DatalogMathError> {
     let args: Result<Vec<i64>, DatalogMathError> = payload
         .split_whitespace()
@@ -177,41 +231,40 @@ pub fn parse_legacy_abi_request(
     }
 
     use NumericExpr::*;
-    let expr = match semantic_id {
-        SID_ADD => {
+    let expr = match operation {
+        ArithmeticMechanism::Add => {
             let (left, right) = need_two(&args)?;
             Add(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        SID_SUB => {
+        ArithmeticMechanism::Sub => {
             let (left, right) = need_two(&args)?;
             Sub(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        SID_MUL => {
+        ArithmeticMechanism::Mul => {
             let (left, right) = need_two(&args)?;
             Mul(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        SID_DIV => {
+        ArithmeticMechanism::Div => {
             let (left, right) = need_two(&args)?;
             Div(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        SID_ABS => Abs(Box::new(Literal(need_one(&args)?))),
-        SID_MIN => {
+        ArithmeticMechanism::Abs => Abs(Box::new(Literal(need_one(&args)?))),
+        ArithmeticMechanism::Min => {
             let (left, right) = need_two(&args)?;
             Min(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        SID_MAX => {
+        ArithmeticMechanism::Max => {
             let (left, right) = need_two(&args)?;
             Max(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        SID_MOD => {
+        ArithmeticMechanism::Mod => {
             let (left, right) = need_two(&args)?;
             Mod(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        SID_QUOTIENT => {
+        ArithmeticMechanism::Quotient => {
             let (left, right) = need_two(&args)?;
             Quotient(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        other => return Err(DatalogMathError::UnsupportedLegacyAbiId(other)),
     };
 
     Ok(expr)
@@ -220,6 +273,37 @@ pub fn parse_legacy_abi_request(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ratified_domain_math_is_not_legacy_sid8() {
+        let cases = [
+            (5, "01010", "2 3", 5),    // укр додати
+            (5, "01011", "7 3", 4),    // укр відняти
+            (5, "10110", "6 7", 42),   // укр помножити
+            (6, "010011", "-5", 5),    // укр модуль
+            (6, "110101", "4 9", 4),   // укр найменше
+            (6, "110111", "4 9", 9),   // укр найбільше
+        ];
+        for (width, bits, input, expected) in cases {
+            let expr = parse_exact_domain_request(width, bits, input)
+                .expect("ratified exact-domain mechanism");
+            assert_eq!(expr.evaluate(&HashMap::new()), Ok(Value::Int(expected)));
+        }
+        // Historic W8 ADD is not D8 ADD, nor is a width silently padded.
+        assert!(matches!(
+            parse_exact_domain_request(8, "00001100", "2 3"),
+            Err(DatalogMathError::UnsupportedDomainOperation { width: 8, .. })
+        ));
+        assert!(parse_exact_domain_request(6, "01010", "2 3").is_err());
+        assert!(parse_exact_domain_request(5, "00001100", "2 3").is_err());
+        // Exact SENS quotient cannot be assumed to be truncated i64 division.
+        assert!(parse_exact_domain_request(5, "10111", "7 3").is_err());
+        assert!(parse_exact_domain_request(5, "01010", "+ 2 3").is_err());
+        let expr = parse_exact_domain_request(
+            5, "01010", "9223372036854775807 1",
+        ).expect("exact addition mechanism");
+        assert_eq!(expr.evaluate(&HashMap::new()), Err(DatalogMathError::Overflow));
+    }
 
     #[test]
     fn basic_integer_operations() {
