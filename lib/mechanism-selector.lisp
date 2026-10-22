@@ -27,6 +27,7 @@
        (додати clips bounded-exact-add)
        (додати datalog bounded-exact-add))
      (profile-routes))))
+
 (визначити метадані-вибору-механізму
   реєстр-вибору-механізму)
 
