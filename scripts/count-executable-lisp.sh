@@ -258,3 +258,11 @@ if (( bad != 0 )); then
   echo "NATIVE_LISP_EXECUTION_RED failed=$bad: справжню помилку не приховує статус обліку" >&2
   exit 1
 fi
+# PARTIAL/EMPTY — не успіх. Лічильники друкуємо вище навіть для
+# неповного корпусу, але оболонка не має права трактувати пропущені
+# фізичні трійки або paired-only як повне нативне виконання.
+if [[ "$status" != COMPLETE ]]; then
+  printf 'NATIVE_LISP_NOT_COMPLETE status=%s missing=%s paired_only=%s sources=%s\n' \
+    "$status" "$missing" "$paired_only" "$sources" >&2
+  exit 1
+fi
