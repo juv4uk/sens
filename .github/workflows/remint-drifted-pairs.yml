@@ -65,13 +65,66 @@ jobs:
           echo "remint done ok=$ok skip=$skip"
 
       - name: Commit refreshed pairs (only real byte changes)
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "sens-remint-bot"
           git config user.email "sens-remint-bot@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "no drift -- nothing to commit"
-          else
-            git commit -m "ремонт пар: перемайнено дрейфуючі .lisp<->.sens канонічним Zig T5M (refresh-verified-t5m-pair)"
-            git push
+            exit 0
           fi
+
+          # Комітити лише обидва похідні носії перевіреної Lisp-трійки.
+          # Читач SENS і Zig відпрацювали у попередньому кроці; тут немає
+          # власного Python/JSON-оракула або перекодування.
+          mapfile -d '' paths < <(git diff --cached --name-only -z)
+          sources=()
+          for changed in "${paths[@]}"; do
+            if [[ "$changed" == *.sens ]]; then
+              source="${changed%.sens}.lisp"
+            elif [[ -f "$changed.lisp" && -f "$changed.sens" ]]; then
+              source="$changed.lisp"
+            else
+              echo "::error::REMINT_UNEXPECTED_CHANGE path=$changed" >&2
+              exit 1
+            fi
+            if [[ ! -f "$source" || ! -f "${source%.lisp}.sens" || ! -f "${source%.lisp}" ]]; then
+              echo "::error::REMINT_INCOMPLETE_TRIPLET source=$source" >&2
+              exit 1
+            fi
+            sources+=("$source")
+          done
+
+          base="$(git rev-parse HEAD)"
+          git commit -m "ремонт пар: перемайнено дрейфуючі .lisp<->.sens канонічним Zig T5M (refresh-verified-t5m-pair)"
+
+          # На активному main простий git push часто відхиляється через
+          # незалежні коміти інших агентів. Перебазувати можна лише коли
+          # ті самі джерела/пари й сам SENS/Zig-маршрут не змінилися.
+          # У разі drift потрібен новий нативний mint, а не force-push.
+          for attempt in {1..12}; do
+            git fetch --quiet origin main
+            if ! git merge-base --is-ancestor "$base" origin/main; then
+              echo "::error::REMINT_MAIN_DIVERGED old_base=$base" >&2
+              exit 1
+            fi
+            for source in "${sources[@]}"; do
+              if ! git diff --quiet "$base" origin/main --                   "$source" "${source%.lisp}.sens" "${source%.lisp}"; then
+                echo "::error::REMINT_SOURCE_CHANGED source=$source; нативне карбування слід повторити на новому main" >&2
+                exit 1
+              fi
+            done
+            if ! git diff --quiet "$base" origin/main --                 crates/sens/src crates/sens-cli/src research/zig-codecs                 lib/domains scripts/refresh-verified-t5m-pair.sh                 .github/actions/install-zig; then
+              echo "::error::REMINT_RUNTIME_CHANGED; нативне карбування слід повторити" >&2
+              exit 1
+            fi
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "REMINT_PUBLISHED native_pairs=${#sources[@]} attempts=$attempt"
+              exit 0
+            fi
+          done
+          echo "::error::REMINT_PUSH_RACE attempts=12; жодного force-push, виправлені пари не опубліковано" >&2
+          exit 1
