@@ -420,6 +420,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-first-globally-unique-atom-general",
         "list-prefix-before-repeat-general",
         "list-split-before-every-atom-general",
+        "tree-replace-atom-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
