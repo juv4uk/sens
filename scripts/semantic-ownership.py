@@ -173,12 +173,19 @@ def require_cross_evidence_gates(ownership: list[Ownership]) -> None:
 
 def load() -> tuple[list[Ownership], list[Migration]]:
     require_bare_semantic_identity_syntax()
+    entries = forms(MAP_PATH)
+    # Без мовчазного прийняття історичного schema/1 з восьмибітними
+    # SID8 semantic IDs. Семантичне джерело — поточні Dn таблиці.
+    if [row for row in entries if row[0] == "schema"] != [
+        ["schema", "semantic-ownership/2"]
+    ]:
+        raise ValueError("ownership: потрібна чинна схема точних Dn v2")
     ownership: list[Ownership] = []
     migrations: list[Migration] = []
     seen_keys: set[str] = set()
     seen_semantic: dict[str, str] = {}
 
-    for tokens in forms(MAP_PATH):
+    for tokens in entries:
         tag = tokens[0]
         if tag in {"schema", "as-of", "scope"}:
             continue

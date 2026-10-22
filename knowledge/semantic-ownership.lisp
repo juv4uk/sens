@@ -4,8 +4,8 @@
 ; у споживачів діє її укр-проєкція, а не старий восьмибітний slot.
 ; Складений макрос = визначити(D4:0011) + макрос(D5:00011), не окремий SID8.
 ; Один рядок = одна поведінка/відповідальність. Без LOC-claim і без "self-hosting %".
-(schema semantic-ownership/1)
-(as-of "2026-09-17")
+(schema semantic-ownership/2)
+(as-of "2026-10-22")
 (scope audited-primary-behaviors)
 
 ; ownership KEY EXACT_DOMAIN_WORD_OR_DERIVED CLASS LAYER STATUS POLICY_CANDIDATE
