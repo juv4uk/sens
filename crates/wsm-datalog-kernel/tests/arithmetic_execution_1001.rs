@@ -1,11 +1,12 @@
-//! #1001 native Datalog arithmetic witnesses.
+//! #1001 Datalog: old C-ABI byte witness, not SENS domain-law proof.
+//! Current D5/D6 laws are admitted only through the distinct exact-domain path.
 
 use wsm_datalog_kernel::{
     Atom, Database, DatalogAbiAdapter, Evaluator, Program, Rule, Term, Value,
     arithmetic::{
         DatalogMathError, NumericExpr, parse_exact_domain_request,
-        SID_ABS, SID_ADD, SID_DIV, SID_MAX, SID_MIN, SID_MOD,
-        SID_MUL, SID_QUOTIENT, SID_SUB,
+        LEGACY_ABI_ABS, LEGACY_ABI_ADD, LEGACY_ABI_DIV, LEGACY_ABI_MAX, LEGACY_ABI_MIN, LEGACY_ABI_MOD,
+        LEGACY_ABI_MUL, LEGACY_ABI_QUOTIENT, LEGACY_ABI_SUB,
     },
 };
 use wsm_kernel_c_abi::{WsmByteSpan, WsmKernelRequest, WsmMutableByteSpan, WsmStatus};
@@ -133,22 +134,22 @@ fn c_abi_executes_the_admitted_integer_math_surface() {
     );
 
     for (semantic_id, arguments, expected) in [
-        (SID_ADD, b"2 3".as_slice(), b"5".as_slice()),
-        (SID_SUB, b"7 3".as_slice(), b"4".as_slice()),
-        (SID_MUL, b"6 7".as_slice(), b"42".as_slice()),
-        (SID_DIV, b"8 2".as_slice(), b"4".as_slice()),
-        (SID_MOD, b"7 3".as_slice(), b"1".as_slice()),
-        (SID_QUOTIENT, b"7 3".as_slice(), b"2".as_slice()),
-        (SID_ABS, b"-5".as_slice(), b"5".as_slice()),
-        (SID_MIN, b"4 9".as_slice(), b"4".as_slice()),
-        (SID_MAX, b"4 9".as_slice(), b"9".as_slice()),
+        (LEGACY_ABI_ADD, b"2 3".as_slice(), b"5".as_slice()),
+        (LEGACY_ABI_SUB, b"7 3".as_slice(), b"4".as_slice()),
+        (LEGACY_ABI_MUL, b"6 7".as_slice(), b"42".as_slice()),
+        (LEGACY_ABI_DIV, b"8 2".as_slice(), b"4".as_slice()),
+        (LEGACY_ABI_MOD, b"7 3".as_slice(), b"1".as_slice()),
+        (LEGACY_ABI_QUOTIENT, b"7 3".as_slice(), b"2".as_slice()),
+        (LEGACY_ABI_ABS, b"-5".as_slice(), b"5".as_slice()),
+        (LEGACY_ABI_MIN, b"4 9".as_slice(), b"4".as_slice()),
+        (LEGACY_ABI_MAX, b"4 9".as_slice(), b"9".as_slice()),
     ] {
         let (status, output) = exchange_math(&adapter, semantic_id, arguments);
-        assert_eq!(status, WsmStatus::Ok, "SID {semantic_id:08b}");
-        assert_eq!(output, expected, "SID {semantic_id:08b}");
+        assert_eq!(status, WsmStatus::Ok, "legacy-ABI byte {semantic_id:08b}");
+        assert_eq!(output, expected, "legacy-ABI byte {semantic_id:08b}");
     }
 
-    let (text_status, text_output) = exchange_math(&adapter, SID_ADD, b"+ 2 3");
+    let (text_status, text_output) = exchange_math(&adapter, LEGACY_ABI_ADD, b"+ 2 3");
     assert_eq!(
         text_status,
         WsmStatus::KernelFailure,
@@ -156,7 +157,7 @@ fn c_abi_executes_the_admitted_integer_math_surface() {
     );
     assert!(text_output.is_empty());
 
-    let (sub_status, sub_output) = exchange_math(&adapter, SID_SUB, b"7 3");
+    let (sub_status, sub_output) = exchange_math(&adapter, LEGACY_ABI_SUB, b"7 3");
     assert_eq!(sub_status, WsmStatus::Ok);
     assert_eq!(sub_output, b"4");
 
