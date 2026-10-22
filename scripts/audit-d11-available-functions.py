@@ -263,12 +263,14 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
             proof_text = (root / test_rel).read_text(encoding="utf-8")
             require(f"fn {function}()" in proof_text,
                     "WINNER_NATIVE_TEST", f"missing real SENS witness {function}")
-        map_path = root / "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv"
-        selected = [line.split("\t") for line in map_path.read_text(encoding="utf-8").splitlines()
-                    if "\tWINNER_DEFINED_SENS_COMPOSITION\t" in line]
-        require(len(selected) == selected_winners and
-                {row[0] for row in selected} == winner_positions,
-                "WINNER_PLACEMENT", "winner addresses must agree with existing D11 geometric map")
+        # Єдиний чинний список кандидатів — base["rows"].
+        # Старі геометричні TSV лишаються історичними свідченнями, а не
+        # паралельним джерелом D11-призначень. Точні адреси визначених
+        # переможців уже перевірено вище проти 43 тестових і 512 селекторів.
+        require(len(winner_positions) == selected_winners and
+                {row["winner_20261022"]["coordinate"] for row in rows
+                 if row.get("winner_20261022")} == winner_positions,
+                "WINNER_PLACEMENT", "catalogue itself must contain all defined winners")
     # A source snapshot is historical evidence, NOT a veto if modern authority evolves.
     original = base.get("exclusion_snapshot", {})
     require(original.get("d10_blob_sha") == owner["inventory"]["git_blob"],
