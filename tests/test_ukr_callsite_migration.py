@@ -191,7 +191,7 @@ class CallsiteAuditTests(unittest.TestCase):
                  '(machine-authority-boundary-1 (reverse-authority forbidden))\n')
         self.put('lib/active.lisp', '(foreign-live-call x)\n')
         report = mod.measure(self.root)
-        self.assertEqual(report['metadata_files_excluded'], 2)
+        self.assertEqual(report['metadata_files_excluded'], 3)
         self.assertEqual(report['active_latin_heads'], 1)
         self.assertEqual(
             [(site['file'], site['head']) for site in report['latin_sites']],
