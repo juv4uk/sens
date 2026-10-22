@@ -237,7 +237,10 @@ class SourceResolver:
         if token not in self.hist_by_upper:
             rows = self.hist_by_my.get(token, [])
             candidates = set(self.current_surface.get(token, set()))
-            if rows or token in self.registry_surface_sids or candidates:
+            # Сам по собі історичний восьмибітний реєстр не робить
+            # символ ні відомою функцією, ні міграційним блокером.
+            # Лише чинна проєкція або окремий датований рядок походження.
+            if rows or candidates:
                 evidence = ["my-lisp/admitted surface spelling"]
                 evidence += [f"legacy-sid:{sid}" for sid in sorted(self.registry_surface_sids.get(token, ()))]
                 return self._choose(
