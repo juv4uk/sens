@@ -1788,7 +1788,7 @@ mod tests {
         let mut session = crate::Session::default();
         let result = crate::eval::eval_parsed_expressions(&[expression], &mut session)
             .expect("SENS applies first-class D5 domain value");
-        let crate::Value::BinaryNumber(ref number) = result.value else {
+        let crate::Value::BinaryNumber(number) = &result.value else {
             panic!("D5 result must be exact D24+");
         };
         assert_eq!(number.to_decimal_string(), "42");
@@ -1804,7 +1804,7 @@ mod tests {
         ));
         let result = crate::eval::eval_parsed_expressions(&[d6], &mut session)
             .expect("SENS applies first-class D6 domain value");
-        let crate::Value::BinaryNumber(ref number) = result.value else {
+        let crate::Value::BinaryNumber(number) = &result.value else {
             panic!("D6 result must be exact D24+");
         };
         assert_eq!(number.to_decimal_string(), "41");
