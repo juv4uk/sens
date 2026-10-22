@@ -246,3 +246,73 @@ fn quote_depth_is_structural_data_not_an_invented_generator_opcode() {
         "test_id=1968-QUOTE-DATA layer=SENS case=unquoted-mutant expected=unbound-head-error actual={unquoted:?}"
     );
 }
+
+
+/// #1968/#2013: D3 EQ is a typed atomic relation. Comparing freshly built
+/// pairs is not rescued by pointer identity or by a pretend local EQ child;
+/// a composed CAR+EQ law explicitly imports the selector root.
+#[test]
+fn eq_atomic_law_does_not_silently_gain_structural_pair_equality() {
+    let mut session = Session::default();
+    for (source, expected) in [
+        ("(тотожне? (як-є знак) (як-є знак))", true),
+        ("(тотожне? (як-є знак) (як-є інший))", false),
+        ("(тотожне? (як-є ()) (як-є ()))", true),
+        (
+            "(тотожне? (перше (сполучити (як-є знак) (як-є ()))) (як-є знак))",
+            true,
+        ),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=1968-EQ-ATOMS layer=SENS input={source} actual_error={error}"
+            ))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(), Some(expected),
+            "test_id=1968-EQ-ATOMS layer=SENS input={source} expected=D1:{expected} actual={value}"
+        );
+    }
+    let invalid = "(тотожне? (сполучити (як-є знак) (як-є ())) (сполучити (як-є знак) (як-є ())))";
+    let result = eval_program(invalid, &mut session);
+    assert!(
+        result.is_err(),
+        "test_id=1968-EQ-PAIR layer=SENS expected=atomic-domain-error actual={result:?}"
+    );
+}
+
+/// #1968/#2015: COND is control with an exact D1 selection rule.
+/// Exhaustion produces structural NIL, which is not predicate NO. An empty
+/// witness in a condition must continue, not become a made-up YES/NO bit.
+#[test]
+fn cond_exhaustion_and_false_answer_are_distinct_live_sens_values() {
+    let mut session = Session::default();
+    let no = eval_program("ні", &mut session).expect("D1 ні").value;
+    let selected_no = eval_program("(за-умовою (так ні))", &mut session)
+        .expect("вибрана D1-відповідь ні")
+        .value;
+    let exhausted = eval_program("(за-умовою (ні (як-є неможливе)))", &mut session)
+        .expect("вичерпання COND без вибраної гілки")
+        .value;
+    assert_eq!(no.as_predicate_bit(), Some(false));
+    assert_eq!(selected_no.as_predicate_bit(), Some(false));
+    assert!(
+        matches!(exhausted, sens::Value::Nil),
+        "test_id=1968-COND-EXHAUST layer=SENS expected=structural-NIL actual={exhausted}"
+    );
+    assert_ne!(
+        exhausted, selected_no,
+        "test_id=1968-COND-EXHAUST layer=SENS expected=structural-NIL-not-D1-NO"
+    );
+
+    let no_witness = "(тотожне? (за-умовою ((як-є ()) (як-є не-має-виконатися)) (так (як-є правильно))) (як-є правильно))";
+    let value = eval_program(no_witness, &mut session)
+        .unwrap_or_else(|error| panic!(
+            "test_id=1968-COND-EMPTY-WITNESS layer=SENS input={no_witness} actual_error={error}"
+        ))
+        .value;
+    assert_eq!(
+        value.as_predicate_bit(), Some(true),
+        "test_id=1968-COND-EMPTY-WITNESS layer=SENS expected=D1:true actual={value}"
+    );
+}
