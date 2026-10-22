@@ -31,7 +31,7 @@ LABELS = ("оплата", "доставка", "технічне", "обліко�
 LETTERS = "ABCDE"
 DENOMINATOR = 1_000_000_000
 MODEL_SCHEMA = "sens.system-one.transformer-student/1"
-DEFAULT_MODEL = "jhu-clsp/mmbert-small"
+DEFAULT_MODEL = "jhu-clsp/mmBERT-small"
 MAX_REQUEST_BYTES = 1 * 1024 * 1024
 
 
