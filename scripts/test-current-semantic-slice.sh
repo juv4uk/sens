@@ -425,11 +425,18 @@ if [[ "$mechanism_selector_status" != "(mechanism-selector-1047 (status pass))" 
   exit 1
 fi
 
-# #1048/#1169: lowering consumes only Lisp-selected mechanisms. All admitted
-# bounded-add transports carry arguments only; operation identity remains SID8.
-island_lowering_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/island-lowering-1048-witness.lisp)"
-if [[ "$island_lowering_status" != "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))" ]]; then
-  printf 'island lowering Lisp witness failed: %s\n' "$island_lowering_status" >&2
+# #1048/#1169: the current SENS selector chooses admitted mechanisms.
+# Four exact D24+ operand pairs cross Zig/T5M; no old flat SID8, no host LOAD,
+# no unsupported string literal and no Python/JSON execution oracle.
+island_lowering_status="$(
+  set -euo pipefail
+  native_scratch="$(mktemp -d)"
+  trap 'rm -rf -- "$native_scratch"' EXIT
+  cargo run --quiet -p sens-cli --bin sens --     --t5m-mint-pair tests/fixtures/island-lowering-1048-witness.lisp     "$native_scratch/island.sens"     --binding-source lib/mechanism-selector.lisp     --binding-source lib/island-lowering.lisp >/dev/null
+  cargo run --quiet -p sens-cli --bin sens --     --t5m-pair tests/fixtures/island-lowering-1048-witness.lisp     "$native_scratch/island.sens"     --binding-source lib/mechanism-selector.lisp     --binding-source lib/island-lowering.lisp
+)"
+if [[ "$island_lowering_status" != "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct))" ]]; then
+  printf 'island lowering native SENS witness failed: %s\n' "$island_lowering_status" >&2
   exit 1
 fi
 
