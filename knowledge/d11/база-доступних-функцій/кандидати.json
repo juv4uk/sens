@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 182,
-    "historical": 15,
+    "total": 184,
+    "historical": 17,
     "library": 167,
-    "distinct_families": 26
+    "distinct_families": 27
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -4344,6 +4344,90 @@
         "not_a_research_placeholder": true,
         "selection_basis": "Живе SENS-визначення, позитивні й негативні семантичні випадки, підтверджено адресним Reason step, без створення D11 opcode",
         "historical_research_alias": "reason-rule-predicate"
+      }
+    },
+    {
+      "surface_name": "ACTIVE-VALUE-GET",
+      "source_family": "historical-loops-active-values",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+        "blob_sha": "f88711aa939c84f55e61038cf4d362731d8f4597",
+        "original_file": "The LOOPS Manual (Bobrow & Stefik, 1983)",
+        "primary_url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+        "primary_section": "5.1, 5.2, 5.5",
+        "archival_research_only": true,
+        "original_source_row": 0
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "HISTORICAL_BEHAVIORAL_LAW_RESEARCH_NATIVE_SENS_UNVERIFIED",
+      "ratified": false,
+      "callable": false,
+      "historical_law_20261022": {
+        "ukr": "читати-активне-значення",
+        "law_hypothesis": "Nested getter evaluation first resolves deeper localState (inner→outer) and returns the outermost getFn result; a missing getFn yields the resolved localState.",
+        "positive_claims": [
+          "Nested stored 10; inner get adds 2, outer get multiplies by 3 -> 36, trace inner:get,outer:get.",
+          "A plain value is read unchanged, and getFn absent returns child-localState result."
+        ],
+        "negative_falsifiers": [
+          "Executing outer get before inner get returns a different result/trace.",
+          "GetLocalStateOnly must not invoke any nested getFn, and must expose immediate nested value."
+        ],
+        "lower_domain_neighbors": [
+          "D10:0100000000 DEREF",
+          "D10:0100000111 REF-CELL",
+          "D10:0000001111 SLOT-VALUE"
+        ],
+        "live_sens_source": null,
+        "native_law_test": null,
+        "required_decision": "Довести структурний закон реальним SENS; порівняти з D10 композиціями та віддати окрему семантичну ратифікацію власникові",
+        "count_as_defined_function": false,
+        "history_status": "pending-owner-review"
+      }
+    },
+    {
+      "surface_name": "ACTIVE-VALUE-PUT",
+      "source_family": "historical-loops-active-values",
+      "source_kind": "HISTORICAL_LISP",
+      "provenance": {
+        "repo_file": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+        "blob_sha": "f88711aa939c84f55e61038cf4d362731d8f4597",
+        "original_file": "The LOOPS Manual (Bobrow & Stefik, 1983)",
+        "primary_url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+        "primary_section": "5.1, 5.2, 5.5",
+        "archival_research_only": true,
+        "original_source_row": 1
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "HISTORICAL_BEHAVIORAL_LAW_RESEARCH_NATIVE_SENS_UNVERIFIED",
+      "ratified": false,
+      "callable": false,
+      "historical_law_20261022": {
+        "ukr": "записати-активне-значення!",
+        "law_hypothesis": "An outer putFn is invoked first and may call PutLocalState, triggering inner putFns outer→inner; if putFn absent, store new value as this node's localState, without mandatory propagation; raw only bypass skips inner effects.",
+        "positive_claims": [
+          "Nested state 10; put 19 with outer and inner delegating writes -> trace outer:put,inner:put and terminal state 19.",
+          "An outer handler that does not delegate leaves inner state unchanged; absent putFn replaces its own localState."
+        ],
+        "negative_falsifiers": [
+          "Invoking inner put before outer violates nested ordering.",
+          "A putFn that deliberately does not delegate must not trigger inner put; PutLocalStateOnly must suppress nested handlers."
+        ],
+        "lower_domain_neighbors": [
+          "D10:0100001011 RESET-REF!",
+          "D10:0011111001 SWAP-REF!",
+          "D10:0100000111 REF-CELL"
+        ],
+        "live_sens_source": null,
+        "native_law_test": null,
+        "required_decision": "Довести структурний закон реальним SENS; порівняти з D10 композиціями та віддати окрему семантичну ратифікацію власникові",
+        "count_as_defined_function": false,
+        "history_status": "pending-owner-review"
       }
     }
   ],
