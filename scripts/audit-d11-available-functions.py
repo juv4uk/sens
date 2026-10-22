@@ -185,11 +185,12 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
                     winner.get("semantic_defined") is True and
                     winner.get("new_primitive") is False and
                     winner.get("direct_d11_opcode_verified") is False and
-                    winner.get("source_file") in {"lib/persistent-vector.lisp", "lib/unify.lisp", "lib/codec-d2.lisp", "lib/world.lisp", "lib/si.lisp", "lib/repl-core.lisp" , "lib/epistemic.lisp"} and
+                    winner.get("source_file") in {"lib/persistent-vector.lisp", "lib/unify.lisp", "lib/unify-observe.lisp", "lib/codec-d2.lisp", "lib/world.lisp", "lib/si.lisp", "lib/repl-core.lisp" , "lib/epistemic.lisp"} and
                     winner.get("native_law_test") in {
                         "crates/sens/tests/persistent_vector.rs::d11_пятнадцять_визначених_переможців_виконує_sens",
                         "crates/sens/tests/d11_unify_once.rs::d11_розвязати_один_раз_не_підмінює_рекурсивне_проходження",
                         "crates/sens/tests/d11_unify_once.rs::d11_застосувати_підстановку_обійдений_працює_рекурсивно",
+                        "crates/sens/tests/d11_unify_once.rs::d11_спостерігати_уніфікацію_розрізняє_порожній_успіх_і_невдачу",
                         "crates/sens/tests/d11_unify_once.rs::d11_розширити_підстановку_зберігає_пари_та_пріоритет",
                         "crates/sens/tests/codec_in_sens.rs::codec_emits_exact_t5_d2_order",
                         "crates/sens/tests/codec_in_sens.rs::codec_round_trips_every_shape",

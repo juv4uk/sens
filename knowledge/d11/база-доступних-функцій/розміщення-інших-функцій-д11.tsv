@@ -242,7 +242,7 @@
 00111110011	RESEARCH_ONLY_NOT_RATIFIED	0011	prove-goal-scan		логіка-правила-докази	2	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00111110111	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-rule-predicate		логіка-правила-докази	2	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00111111010	RESEARCH_ONLY_NOT_RATIFIED	0011	reason-term-predicate		логіка-правила-докази	2	lib/reason.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
-00111111110	RESEARCH_ONLY_NOT_RATIFIED	0011	unify-observe		логіка-правила-докази	2	lib/unify-observe.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00111111110	WINNER_DEFINED_SENS_COMPOSITION	0011	unify-observe	спостерігати-уніфікацію	логіка-правила-докази	2	lib/unify-observe.lisp	Успішна уніфікація, включно з порожньою підстановкою, утворює (unified результат), невдача fail — (unification-failure ліве праве підстановка); аргументи не переставляються.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 01000000010	RESEARCH_ONLY_NOT_RATIFIED	0100	TCP-READ-FRAME		знання-світ-епістеміка	1	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 01000001000	RESEARCH_ONLY_NOT_RATIFIED	0100	TCP-READ-TO-EOF		знання-світ-епістеміка	1	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 01000001101	RESEARCH_ONLY_NOT_RATIFIED	0100	ACCEPT-KNOWLEDGE-EXCHANGE		знання-світ-епістеміка	2	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні

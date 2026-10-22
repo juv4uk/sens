@@ -22,9 +22,9 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 179,
+    "total": 180,
     "historical": 15,
-    "library": 164,
+    "library": 165,
     "distinct_families": 26
   },
   "excluded": {
@@ -4214,13 +4214,50 @@
       "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false
+    },
+    {
+      "surface_name": "спостерігати-уніфікацію",
+      "source_family": "logic",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/unify-observe.lisp",
+        "blob_sha": "421d3bbb1a8753d96838fb1a100e1ab9b66958fb",
+        "original_file": "lib/unify-observe.lisp",
+        "snapshot_not_live_proof": false,
+        "historical_research_alias": "unify-observe"
+      },
+      "domain_candidate": "D11_DEFINED_COMPOSITE_WINNER",
+      "coordinate": "00111111110",
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "LAW_DEFINED_EXECUTABLE_LIBRARY_WINNER",
+      "ratified": false,
+      "callable": false,
+      "winner_20261022": {
+        "status": "ПЕРЕМОЖЕЦЬ_ВИЗНАЧЕНОЇ_КОМПОЗИЦІЇ",
+        "coordinate": "00111111110",
+        "ukr": "спостерігати-уніфікацію",
+        "source_file": "lib/unify-observe.lisp",
+        "source_blob": "421d3bbb1a8753d96838fb1a100e1ab9b66958fb",
+        "law": "Успішна уніфікація, включно з порожньою підстановкою, утворює (unified результат), невдача fail — (unification-failure ліве праве підстановка); аргументи не переставляються.",
+        "native_law_test": "crates/sens/tests/d11_unify_once.rs::d11_спостерігати_уніфікацію_розрізняє_порожній_успіх_і_невдачу",
+        "native_test_blob": "21f234a2da5f2e38a6c8a111f1f030871d4a9b9f",
+        "native_test_result": "NATIVE_SENS_PASS_8_DISTINCT_CASES",
+        "native_workflow": "https://github.com/juv4uk/sens/actions/runs/39701467544",
+        "native_step_result": "D11_TARGET_STEP_SUCCESS",
+        "semantic_defined": true,
+        "direct_d11_opcode_verified": false,
+        "new_primitive": false,
+        "not_a_research_placeholder": true,
+        "selection_basis": "Живе визначення SENS, відмінні успіх і fail та 8 негативних/позитивних свідків",
+        "historical_research_alias": "unify-observe"
+      }
     }
   ],
   "winners_20261022": {
     "definition": "CURRENT_LIBRARY_WINNERS_PLUS_DETERMINISTIC_SELECTOR_LAW",
     "mathematically_derived_selectors": 512,
-    "native_sens_composition_winners": 39,
-    "semantic_winners_total": 551,
+    "native_sens_composition_winners": 40,
+    "semantic_winners_total": 552,
     "selector_source": "knowledge/d11-selector-seed.json",
     "other_winner_table": "knowledge/d11/база-доступних-функцій/розміщення-інших-функцій-д11.tsv",
     "new_primitive_laws_for_selectors": 0,
