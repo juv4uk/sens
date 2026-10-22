@@ -101,41 +101,36 @@ assert "CADDDDR" not in lower_names
 assert by_name["fifth"]["decision"]=="SELECT-D9-CANDIDATE"
 assert "fifth" in selector_research and "CADDDDR" in selector_research
 
-# Every selected source binding must exist in the claimed language-owned file.
+# Чинні binding-поверхні мають бути визначені безпосередньо через
+# ратифікований D4 DEFINE: повне українське «визначити». Старі голови
+# 00001001 / 00001010 / 0011 більше не доводять живе визначення.
 selected=[row for row in rows if row["selected_d9_candidate"]]
 assert len(selected)==20
-# Визначення живих бібліотек вже використовують D4:0011 DEFINE.
-# Історичні макроси -> / ->> у lib/core.lisp залишаються тільки
-# джерельними прив'язками, не семантичними D8/Function8 викликами.
 SOURCE_DEFINE = re.compile(
-    r'^[ \t]*\((?:0011|00001001|визначити)\s+([^\s()]+)\s+', re.MULTILINE
+    r'^[ \t]*\\(визначити\\s+([^\\s()]+)\\s+', re.MULTILINE
 )
-SOURCE_MACRO = re.compile(
-    r'^[ \t]*\(00001010\s+([^\s()]+)\s+', re.MULTILINE
-)
-PINNED_OLD_CORE_MACROS = frozenset(("->", "->>"))
 
 
 def top_level_source_bindings(path: str, source: str) -> set[str]:
-    names = {match.group(1) for match in SOURCE_DEFINE.finditer(source)}
-    if path == "lib/core.lisp":
-        names.update(
-            match.group(1) for match in SOURCE_MACRO.finditer(source)
-            if match.group(1) in PINNED_OLD_CORE_MACROS
-        )
-    return names
+    # path збережено для діагностики відповідності реєстрового запису.
+    # Історичні D8-подібні W8 не мають дозволеного механізму прив'язки.
+    return {match.group(1) for match in SOURCE_DEFINE.finditer(source)}
 
 
-# Позитивні / негативні свідки відділяють історичний binder
-# від довільного W8 або сучасного D8 оператора.
-assert top_level_source_bindings("lib/core.lisp", "(0011 isqrt\n (0010 (x) x))\n") == {"isqrt"}
-assert top_level_source_bindings("lib/core.lisp", "(00001001 legacy (00001000 (x) x))\n") == {"legacy"}
-assert top_level_source_bindings("lib/core.lisp", "(00001010 -> forms\n (001 forms))\n") == {"->"}
-assert top_level_source_bindings("lib/core.lisp", "(00001010 ->> forms\n (001 forms))\n") == {"->>"}
-assert top_level_source_bindings("lib/other.lisp", "(00001010 -> forms ())\n") == set()
-assert top_level_source_bindings("lib/core.lisp", "(00001010 other forms ())\n") == set()
-assert top_level_source_bindings("lib/core.lisp", "(00000001 quoted ())\n") == set()
-assert top_level_source_bindings("lib/core.lisp", "(110011100 not-define ())\n") == set()
+# Поточний позитивний випадок та негативні історичні слова.
+assert top_level_source_bindings("lib/core.lisp", "(визначити п'ятий (функція (х) х))\\n") == {"п'ятий"}
+assert top_level_source_bindings("lib/core.lisp", "(визначити якщо (макрос (функція х х)))\\n") == {"якщо"}
+for historic in (
+    "(0011 historic (0010 (х) х))\\n",
+    "(00001001 historic (00001000 (х) х))\\n",
+    "(00001010 -> форми (001 форми))\\n",
+    "(00001010 ->> форми (001 форми))\\n",
+    "(00000001 цитата ())\\n",
+    "(110011100 вигадане ())\\n",
+):
+    assert top_level_source_bindings("lib/core.lisp", historic) == set(), historic
+assert top_level_source_bindings("lib/core.lisp", "; (визначити не-код 0)\\n") == set()
+assert top_level_source_bindings("lib/other.lisp", "(визначити поточний 0)\\n") == {"поточний"}
 
 source_cache={}
 for row in selected:
