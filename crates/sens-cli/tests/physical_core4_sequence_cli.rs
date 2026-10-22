@@ -442,6 +442,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-all-matching-positions-unary-general",
         "list-partition-atomic-compound-general",
         "list-count-consecutive-atomic-runs-unary-general",
+        "list-leading-atom-run-length-unary-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
