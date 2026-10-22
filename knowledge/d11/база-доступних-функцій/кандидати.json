@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 216,
+    "total": 218,
     "historical": 17,
-    "library": 199,
-    "distinct_families": 34
+    "library": 201,
+    "distinct_families": 35
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5403,7 +5403,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-clojure-group-by.lisp",
-        "blob_sha": "4fe6fa164dfe978dd851915939bddb1f109febbe",
+        "blob_sha": "2167f1ed0f96d6c2b7781866d9df1b35ffc65bf9",
         "snapshot_not_live_proof": false,
         "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
       },
@@ -5413,18 +5413,19 @@
         "вилучити-елементи-з-ключем"
       ],
       "native_law_test": "crates/sens/tests/d11_clojure_group_by.rs::d11_clojure_group_by_non_adjacent_keys_native_sens",
-      "native_ci_status": "NATIVE_SENS_PASS_47_CASES_TARGETED_STEP_RELEASE_NOT_CERTIFIED",
+      "native_ci_status": "NATIVE_SENS_PASS_47_OLD_BLOB_NEW_AGENT_5938_SOURCE_PENDING_CI",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
+      "review_status": "SENS_COMPOSITION_MODIFIED_NEW_NATIVE_CI_PENDING_NOT_ADMITTED",
       "ratified": false,
       "callable": false,
       "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39756401834",
       "native_ci_job": 119749378458,
       "native_ci_step": "Д11 / Scheme + Clojure — нативні закони списків і стану",
       "physical_t5m_status": "COMMITTED_PAIR_FOUND_EXACT_SHA_CI_PENDING",
-      "physical_t5m_source": "lib/d11-clojure-group-by.sens"
+      "physical_t5m_source": "lib/d11-clojure-group-by.sens",
+      "agent_proposal": "https://github.com/juv4uk/sens/pull/5938"
     },
     {
       "surface_name": "відобразити-та-зберегти-нехибні",
@@ -5438,6 +5439,47 @@
       },
       "proposed_law_uk": "Скінченний unary Scheme SRFI-1 FILTER-MAP мовою SENS: для кожного елемента один раз обчислити перетворене значення; відкинути лише якщо воно структурно дорівнює канонічному точному D1 «ні». Зберігати всі інші значення у вихідному порядку, зокрема структурне (), D1 «так», вкладені списки та повтори; жодного NIL/truthiness host.",
       "native_law_test": "crates/sens/tests/d11_srfi1_filter_map.rs::d11_srfi1_filter_map_preserves_empty_structures_and_drops_only_d1_no",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "розділити-елементи-за-ключем",
+      "source_family": "clojure-group-by-global",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-clojure-group-by.lisp",
+        "blob_sha": "2167f1ed0f96d6c2b7781866d9df1b35ffc65bf9",
+        "agent_proposal": "https://github.com/juv4uk/sens/pull/5938",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
+      },
+      "proposed_law_uk": "Чистий SENS-поділ за структурним ключем за один рекурсивний прохід повертає dotted pair (відібрані . решта). Порядок у кожній підпослідовності зберігається, невідомі ключі не губляться; початковий елемент GROUP-BY не перевіряється повторно. Не новий машинний примітив.",
+      "native_law_test": "crates/sens/tests/d11_clojure_group_by.rs::d11_agent_5938_split_once_preserves_both_subsequences_in_sens",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "розділити-перший-сусідній-ряд",
+      "source_family": "sens-adjacent-runs-single-pass",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/list-adjacent-runs-general.lisp",
+        "blob_sha": "7b01235af59ede044cb5f8464ef67def0a666159",
+        "agent_proposal": "https://github.com/juv4uk/sens/pull/5939",
+        "snapshot_not_live_proof": false
+      },
+      "proposed_law_uk": "SENS-композиція над скінченним правильним списком атомів: за один рекурсивний прохід повертає пару (перший максимальний суміжний ряд рівних атомів . невикористаний хвіст); гарантовано зберігає порядок, не об'єднує несуміжні повтори й не створює opcode. Використовується у групувати-сусідні, пара підлягає D1 та T5M доказу.",
+      "native_law_test": "crates/sens/tests/d11_agent_adjacent_runs.rs::d11_agent_5939_adjacent_split_grouping_and_roundtrip_are_native",
       "native_ci_status": "NOT_YET_CONFIRMED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
