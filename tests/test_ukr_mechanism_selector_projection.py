@@ -18,8 +18,8 @@ REPLACEMENTS = (
     # У цитованому паспорті є по одному ключу маршруту DEFINE/LAMBDA:
     # це ДАНІ, але лексичний лічильник бачить їх як форми.
     # Прямі виклики не змінені; нічого не виконується Python-ом.
-    ("0011", "визначити", "define", "DEFINE", 11),
-    ("0010", "функція", "lambda", "LAMBDA", 7),
+    ("0011", "визначити", "define", "DEFINE", 12),
+    ("0010", "функція", "lambda", "LAMBDA", 8),
 )
 LOCAL_RENAMES = (
     ("mechanism-selector-find-section", "механізм-знайти-секцію"),
@@ -198,7 +198,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         false_d1 = "(атом? (як-є (())))"
         self.assertIn("((атом? рядки) " + false_d1 + ")", code)
         self.assertIn(
-            "((тотожне? ідентичність (перше (перше рядки))) "
+            "((механізм-однакові? ідентичність (перше (перше рядки))) "
             + true_d1 + ")", code,
         )
         self.assertNotRegex(code, r"(?<![\w-])(?:так|ні)(?![\w-])")
