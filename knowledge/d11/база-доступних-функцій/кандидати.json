@@ -6722,11 +6722,11 @@
       "signature": "symbol → (primitive symbol)",
       "law": "Створити точну бібліотечну двоелементну SENS-структуру примітива із збереженим ім'ям; примітив є значенням, а не новим машинним opcode.",
       "native_law_test": "crates/sens/tests/meta_fc_predicate_witness.rs",
-      "native_test_result": "NATIVE_SENS_PASS_META_FC_FIVE_TESTS_26_NEW_CASES",
+      "native_test_result": "NATIVE_SENS_PASS_META_FC_5_TESTS",
       "no_new_primitive": true,
-      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39836199951",
-      "native_ci_job": 120025085901,
-      "native_ci_scope": "META_EVAL_TARGETED_STEP_PASS_PHYSICAL_T5M_STEPS_RED"
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39837315734",
+      "native_ci_job": 120028904421,
+      "native_ci_scope": "META_FC_5_TESTS_PASS_INDEPENDENT_D11_FIRST_CLASS_EVAL_FAILED_SINGLE_TEST_AT_THIS_SHA"
     },
     {
       "surface_name": "першокласний-примітив?",
@@ -6747,11 +6747,11 @@
       "signature": "value → D1",
       "law": "D1-розрізнення структур із тегом примітив від атомів, порожнього списку й замикань без host-орієнтованої підміни.",
       "native_law_test": "crates/sens/tests/meta_fc_predicate_witness.rs",
-      "native_test_result": "NATIVE_SENS_PASS_META_FC_FIVE_TESTS_26_NEW_CASES",
+      "native_test_result": "NATIVE_SENS_PASS_META_FC_5_TESTS",
       "no_new_primitive": true,
-      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39836199951",
-      "native_ci_job": 120025085901,
-      "native_ci_scope": "META_EVAL_TARGETED_STEP_PASS_PHYSICAL_T5M_STEPS_RED"
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39837315734",
+      "native_ci_job": 120028904421,
+      "native_ci_scope": "META_FC_5_TESTS_PASS_INDEPENDENT_D11_FIRST_CLASS_EVAL_FAILED_SINGLE_TEST_AT_THIS_SHA"
     },
     {
       "surface_name": "першокласне-замикання?",
@@ -6772,11 +6772,11 @@
       "signature": "value → D1",
       "law": "D1-розрізнення замикання й примітива за семантичною головою; порожнє значення та одиночний атом не є замиканнями.",
       "native_law_test": "crates/sens/tests/meta_fc_predicate_witness.rs",
-      "native_test_result": "NATIVE_SENS_PASS_META_FC_FIVE_TESTS_26_NEW_CASES",
+      "native_test_result": "NATIVE_SENS_PASS_META_FC_5_TESTS",
       "no_new_primitive": true,
-      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39836199951",
-      "native_ci_job": 120025085901,
-      "native_ci_scope": "META_EVAL_TARGETED_STEP_PASS_PHYSICAL_T5M_STEPS_RED"
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39837315734",
+      "native_ci_job": 120028904421,
+      "native_ci_scope": "META_FC_5_TESTS_PASS_INDEPENDENT_D11_FIRST_CLASS_EVAL_FAILED_SINGLE_TEST_AT_THIS_SHA"
     },
     {
       "surface_name": "першокласне-знайти-в-середовищі",
@@ -6797,11 +6797,11 @@
       "signature": "symbol × lexical-environment → value",
       "law": "У впорядкованому середовищі перше відповідне зв'язування перемагає; відсутнє ім'я не створює прихованих host-значень.",
       "native_law_test": "crates/sens/tests/meta_fc_predicate_witness.rs",
-      "native_test_result": "NATIVE_SENS_PASS_META_FC_FIVE_TESTS_26_NEW_CASES",
+      "native_test_result": "NATIVE_SENS_PASS_META_FC_5_TESTS",
       "no_new_primitive": true,
-      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39836199951",
-      "native_ci_job": 120025085901,
-      "native_ci_scope": "META_EVAL_TARGETED_STEP_PASS_PHYSICAL_T5M_STEPS_RED"
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39837315734",
+      "native_ci_job": 120028904421,
+      "native_ci_scope": "META_FC_5_TESTS_PASS_INDEPENDENT_D11_FIRST_CLASS_EVAL_FAILED_SINGLE_TEST_AT_THIS_SHA"
     },
     {
       "surface_name": "першокласне-звязати-параметри",
@@ -6822,11 +6822,11 @@
       "signature": "parameter-list × argument-list × environment → environment",
       "law": "Порядок лексичних параметрів та аргументів збережено; нові зв'язування передують захопленим і затінюють однойменні попередні.",
       "native_law_test": "crates/sens/tests/meta_fc_predicate_witness.rs",
-      "native_test_result": "NATIVE_SENS_PASS_META_FC_FIVE_TESTS_26_NEW_CASES",
+      "native_test_result": "NATIVE_SENS_PASS_META_FC_5_TESTS",
       "no_new_primitive": true,
-      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39836199951",
-      "native_ci_job": 120025085901,
-      "native_ci_scope": "META_EVAL_TARGETED_STEP_PASS_PHYSICAL_T5M_STEPS_RED"
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39837315734",
+      "native_ci_job": 120028904421,
+      "native_ci_scope": "META_FC_5_TESTS_PASS_INDEPENDENT_D11_FIRST_CLASS_EVAL_FAILED_SINGLE_TEST_AT_THIS_SHA"
     },
     {
       "surface_name": "першокласне-обчислити",
