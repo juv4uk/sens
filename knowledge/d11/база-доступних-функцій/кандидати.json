@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 361,
+    "total": 364,
     "historical": 28,
-    "library": 333,
-    "distinct_families": 139
+    "library": 336,
+    "distinct_families": 140
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -9024,6 +9024,81 @@
       "signature": "(D1 binary element-equality closure, original proper-list, candidates proper-list) -> proper-list",
       "law": "Чиста SENS-адаптація SRFI-1 lset-adjoin: переглядати кандидатів зліва направо, додавати тільки відсутніх спереду; вихідний список завжди лишається суфіксом без усунення його повторів. Аргументи компаратора (вже наявний, кандидат).",
       "negative_falsifier": "до (а а б) додати (в а г в) → (г в а а б), а не дедупліковане (г в а б) чи (в г а а б)."
+    },
+    {
+      "source_family": "srfi1-alist-presence-and-update",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-alist-protocol.lisp",
+        "blob_sha": "a17f05503ede81dc3d1b798cc7e68de31578513b",
+        "original_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html",
+        "snapshot_not_live_proof": false,
+        "physical_lisp_sens_pair_exists": false,
+        "roundtrip_verification": "NOT_VERIFIED_NO_PHYSICAL_PAIR"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "SOURCE_DEFINED_NATIVE_TEST_AWAITING_CI",
+      "ratified": false,
+      "callable": false,
+      "native_law_test": "crates/sens/tests/d11_srfi1_alist_protocol.rs::d11_alist_protocol_is_native_sens",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "surface_name": "знайти-запис-із-наявністю",
+      "signature": "(pure D1 key-comparator, any key, proper-list-of-pairs) -> (D1 yes matching-entry) OR (D1 no ())",
+      "law": "Перший відповідний запис alist повертається разом із окремим бітом D1 наявності. Саме D1 ні як дані НЕ означає відсутність; ключ завжди перший аргумент чистого компаратора. Обхід до першого збігу.",
+      "negative_falsifier": "Список ((а . D1ні)) за ключем а повертає (D1так (а . D1ні)), не (D1ні ()); при двох записах а різних значень повертається ПЕРШИЙ."
+    },
+    {
+      "source_family": "srfi1-alist-presence-and-update",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-alist-protocol.lisp",
+        "blob_sha": "a17f05503ede81dc3d1b798cc7e68de31578513b",
+        "original_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html",
+        "snapshot_not_live_proof": false,
+        "physical_lisp_sens_pair_exists": false,
+        "roundtrip_verification": "NOT_VERIFIED_NO_PHYSICAL_PAIR"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "SOURCE_DEFINED_NATIVE_TEST_AWAITING_CI",
+      "ratified": false,
+      "callable": false,
+      "native_law_test": "crates/sens/tests/d11_srfi1_alist_protocol.rs::d11_alist_protocol_is_native_sens",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "surface_name": "оновити-перший-запис",
+      "signature": "(pure D1 key-comparator, any key, any datum, proper-list-of-pairs) -> proper-list-of-pairs",
+      "law": "Перший запис із заданим ключем отримує нову CONS-пару (ключ . дані); всі пізніші дублікати не змінюються, порядок решти сталий. Коли збігу немає, новий запис додається до КІНЦЯ.",
+      "negative_falsifier": "Оновити а в ((а . х) (б . у) (а . з)) → ((а . нове) (б . у) (а . з)); не замінити обидва а; при невідомому ключі дописати його в кінець, не наперед."
+    },
+    {
+      "source_family": "srfi1-alist-presence-and-update",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-alist-protocol.lisp",
+        "blob_sha": "a17f05503ede81dc3d1b798cc7e68de31578513b",
+        "original_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html",
+        "snapshot_not_live_proof": false,
+        "physical_lisp_sens_pair_exists": false,
+        "roundtrip_verification": "NOT_VERIFIED_NO_PHYSICAL_PAIR"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "SOURCE_DEFINED_NATIVE_TEST_AWAITING_CI",
+      "ratified": false,
+      "callable": false,
+      "native_law_test": "crates/sens/tests/d11_srfi1_alist_protocol.rs::d11_alist_protocol_is_native_sens",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true,
+      "surface_name": "зібрати-значення-ключа",
+      "signature": "(pure D1 key-comparator, any key, proper-list-of-pairs) -> proper-list-of-values",
+      "law": "Усі значення за заданим ключем збираються в тому самому порядку, включно з канонічним D1 ні та структурним (); функція шукає за ключем, повертає CDR запису.",
+      "negative_falsifier": "((а . D1ні) (б . D1так) (а . ())) за ключем а → (D1ні ()), а не () і не (D1ні)."
     }
   ],
   "winners_20261022": {
