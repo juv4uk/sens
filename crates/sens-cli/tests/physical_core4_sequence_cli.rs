@@ -1058,11 +1058,50 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
         .env("SENS_CONTEST_REPEATS", "1")
         .output()
         .expect("виконати нативний конкурс");
+    // У черзі нативного remint можуть перебувати нові українські .lisp,
+    // для яких фізичні .sens/view ще НЕ опубліковані. Вони не є
+    // виконуваними конкурсантами й не повинні робити чужу SENS CI-дію RED.
+    // Але неповна фізична пара або будь-яка невдала вже фізична програма
+    // лишається справжньою помилкою, а не "пропуском".
+    let report = observed(&output);
+    let mut pending: BTreeSet<String> = BTreeSet::new();
+    let mut executed: BTreeSet<String> = BTreeSet::new();
+    let mut unexpected: Vec<String> = Vec::new();
+    for line in report.lines().skip(1) {
+        let columns: Vec<&str> = line.split('\t').collect();
+        if columns.len() != 5 {
+            unexpected.push(line.to_owned());
+            continue;
+        }
+        let name = columns[0];
+        match columns[4] {
+            "ПІДТВЕРДЖЕНО" => {
+                assert!(executed.insert(name.to_owned()), "дубль результату: {name}");
+            }
+            "НЕМАЄ_ОБЕРНЕНОЇ_ПАРИ" => {
+                let source = dir.join(format!("{name}.lisp"));
+                let physical = dir.join(format!("{name}.sens"));
+                let view = dir.join(name);
+                assert!(
+                    source.is_file() && !source.is_symlink()
+                        && !physical.exists() && !physical.is_symlink()
+                        && !view.exists() && !view.is_symlink(),
+                    "не завершений remint або зламана напівпара: {name}"
+                );
+                assert!(pending.insert(name.to_owned()), "дубль очікування: {name}");
+            }
+            _ => unexpected.push(line.to_owned()),
+        }
+    }
     assert!(
-        output.status.success(),
-        "SENS contest failed: stdout={} stderr={}",
-        observed(&output),
+        unexpected.is_empty(),
+        "SENS конкурс має справжню помилку: {unexpected:?}; stdout={report} stderr={}",
         error(&output)
+    );
+    assert_eq!(
+        output.status.success(),
+        pending.is_empty(),
+        "скрипт конкурсу приховав невиконуване джерело чи помилку: {report}"
     );
 
     let mut tracked: BTreeSet<String> = BTreeSet::new();
@@ -1080,18 +1119,12 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
     }
     assert!(!tracked.is_empty(), "немає жодної фізичної конкурсної програми");
 
-    let report = observed(&output);
-    let executed: BTreeSet<String> = report.lines().filter_map(|line| {
-        let columns: Vec<&str> = line.split('\t').collect();
-        if columns.len() == 5 && columns[4] == "ПІДТВЕРДЖЕНО" {
-            Some(columns[0].to_owned())
-        } else {
-            None
-        }
-    }).collect();
     assert_eq!(
         executed, tracked,
         "Кожна чинна .sens мусить бути обернена й справді виконана SENS: {report}"
     );
-    println!("SENS_UKR_EXECUTABLE_PASS count={} corpus=contest-uk native=SENS_ZIG_T5M", tracked.len());
+    println!(
+        "SENS_UKR_EXECUTABLE_PASS count={} pending_unpaired={} corpus=contest-uk native=SENS_ZIG_T5M release=NOT_CERTIFIED",
+        tracked.len(), pending.len()
+    );
 }
