@@ -139,6 +139,7 @@ jobs:
             # при кожному незалежному push: це відтягує обернення нових Lisp.
             # Джерело без .sens або view залишається в черзі; нативний
             # суддя як і раніше відхиляє drift та хибне виконання.
+            if [[ "$GITHUB_REF" == refs/heads/main ]]; then
             for source in benchmarks/contest-uk/*.lisp lib/*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               # Після скасованого remint відновлювати всі непарні кореневі
@@ -155,11 +156,12 @@ jobs:
                 list="$(printf '%s\n%s' "$list" "$source")"
               fi
             done
+            fi
             # Git визначає лише джерела для повторного рідного mint.
             # Не плутати цей список із доказом оборотності чи виконання.
             # Повертаємо не лише конкурс, а й D11/list/tree, коли
             # проміжний queued push було замінено найновішим.
-            if [[ "$EVENT_NAME" == push ]]; then
+            if [[ "$EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main ]]; then
               for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/*-д1.lisp lib/викликати-доменний-код.lisp lib/narrate.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
                 [[ -f "$source" && ! -L "$source" ]] || continue
                 pair="${source%.lisp}.sens"
@@ -181,7 +183,7 @@ jobs:
           # тільки чинний SENS mint та Zig view. Перевірити кожну
           # активну конкурсну трійку (в т. ч. незмінений НСД), щоб
           # пропущений дрейф негайно став кандидатом на справжній remint.
-          if [[ "$EVENT_NAME" == push ]]; then
+          if [[ "$EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main ]]; then
             for source in benchmarks/contest-uk/*.lisp tests/semantic/meta-fc-predicates-d1-law.lisp lib/axioms-d1-principle-five.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               if printf '%s\n' "$list" | grep -Fxq -- "$source"; then
@@ -336,7 +338,7 @@ jobs:
       # Наприкінці workflow справжня відмова mint лишається червоною.
       - name: Нативне суддівство і просування справжніх переможців
         id: contest_judge
-        if: github.event_name == 'push' && steps.remint.outputs.contest == 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.remint.outputs.contest == 'true'
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
@@ -378,8 +380,24 @@ jobs:
             done
           }
           commit_verified_changes() {
-            prune_archived_duplicates
-            git add -A || return 2
+            if [[ "$target_branch" == main ]]; then
+              prune_archived_duplicates
+              git add -A || return 2
+            else
+              # Короткоживучий PR не публікує чужі незавершені пари.
+              # Єдиний допуск — список успішно виконаних SENS+Zig native mint.
+              local confirmed physical view
+              while IFS= read -r confirmed; do
+                [[ -n "$confirmed" ]] || continue
+                physical="${confirmed%.lisp}.sens"
+                view="${confirmed%.lisp}"
+                if [[ ! -f "$physical" || ! -f "$view" || -L "$physical" || -L "$view" ]]; then
+                  echo "::error::REMINT_VERIFIED_OUTPUT_MISSING source=$confirmed" >&2
+                  return 2
+                fi
+                git add -- "$physical" "$view" || return 2
+              done < "$RUNNER_TEMP/sens-remint-success.txt"
+            fi
             local diff_status=0
             git diff --cached --quiet || diff_status=$?
             case "$diff_status" in
