@@ -107,7 +107,7 @@ assert "fifth" in selector_research and "CADDDDR" in selector_research
 selected=[row for row in rows if row["selected_d9_candidate"]]
 assert len(selected)==20
 SOURCE_DEFINE = re.compile(
-    r'^[ \t]*\\(визначити\\s+([^\\s()]+)\\s+', re.MULTILINE
+    r'^[ \t]*\(визначити\s+([^\s()]+)\s+', re.MULTILINE
 )
 
 
@@ -118,19 +118,19 @@ def top_level_source_bindings(path: str, source: str) -> set[str]:
 
 
 # Поточний позитивний випадок та негативні історичні слова.
-assert top_level_source_bindings("lib/core.lisp", "(визначити п'ятий (функція (х) х))\\n") == {"п'ятий"}
-assert top_level_source_bindings("lib/core.lisp", "(визначити якщо (макрос (функція х х)))\\n") == {"якщо"}
+assert top_level_source_bindings("lib/core.lisp", "(визначити п'ятий (функція (х) х))\n") == {"п'ятий"}
+assert top_level_source_bindings("lib/core.lisp", "(визначити якщо (макрос (функція х х)))\n") == {"якщо"}
 for historic in (
-    "(0011 historic (0010 (х) х))\\n",
-    "(00001001 historic (00001000 (х) х))\\n",
-    "(00001010 -> форми (001 форми))\\n",
-    "(00001010 ->> форми (001 форми))\\n",
-    "(00000001 цитата ())\\n",
-    "(110011100 вигадане ())\\n",
+    "(0011 historic (0010 (х) х))\n",
+    "(00001001 historic (00001000 (х) х))\n",
+    "(00001010 -> форми (001 форми))\n",
+    "(00001010 ->> форми (001 форми))\n",
+    "(00000001 цитата ())\n",
+    "(110011100 вигадане ())\n",
 ):
     assert top_level_source_bindings("lib/core.lisp", historic) == set(), historic
-assert top_level_source_bindings("lib/core.lisp", "; (визначити не-код 0)\\n") == set()
-assert top_level_source_bindings("lib/other.lisp", "(визначити поточний 0)\\n") == {"поточний"}
+assert top_level_source_bindings("lib/core.lisp", "; (визначити не-код 0)\n") == set()
+assert top_level_source_bindings("lib/other.lisp", "(визначити поточний 0)\n") == {"поточний"}
 
 source_cache={}
 for row in selected:
