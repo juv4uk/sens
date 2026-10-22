@@ -13,25 +13,25 @@ assert harvest["schema"]=="d9-library-harvest-v1/v1"
 assert harvest["status"]=="RESEARCH-UNRATIFIED"
 assert harvest["authority"]=="#3983"
 assert harvest["accounting"]=={
-    "selected_d9_candidates":58,
+    "selected_d9_candidates":51,
     "persistent_map":5,
     "persistent_vector":6,
     "reasoning":7,
     "unification":6,
-    "epistemic":11,
-    "knowledge":9,
+    "epistemic":7,
+    "knowledge":6,
     "time":14,
     "d9_selected_before_harvest":168,
-    "d9_selected_after_harvest":226,
-    "d9_remaining_after_harvest":286,
+    "d9_selected_after_harvest":219,
+    "d9_remaining_after_harvest":293,
     "ratified_d9_residents":0,
 }
 
 rows=harvest["rows"]
-assert len(rows)==58
-assert len({row["stable_id"] for row in rows})==58
-assert len({row["semantic_name"] for row in rows})==58
-assert len({(row["source_file"],row["source_name"]) for row in rows})==58
+assert len(rows)==51
+assert len({row["stable_id"] for row in rows})==51
+assert len({row["semantic_name"] for row in rows})==51
+assert len({(row["source_file"],row["source_name"]) for row in rows})==51
 assert all(row["decision"]=="SELECT-D9-CANDIDATE" for row in rows)
 assert all(row["selected_d9_candidate"] is True for row in rows)
 assert all(row["coordinate"] is None for row in rows)
@@ -44,8 +44,8 @@ expected_sources={
     "lib/persistent-vector.lisp":6,
     "lib/reason.lisp":7,
     "lib/unify.lisp":6,
-    "lib/epistemic.lisp":11,
-    "lib/knowledge.lisp":9,
+    "lib/epistemic.lisp":7,
+    "lib/knowledge.lisp":6,
     "lib/time.lisp":14,
 }
 actual_sources={}
@@ -58,7 +58,7 @@ assert actual_sources==expected_sources
 # Довжина 8 сама по собі НЕ дозволяє вважати будь-який старий виклик
 # визначенням, і не прирівнює D8 до історичного Function8.
 TOP_LEVEL_DEFINE = re.compile(
-    r'^[ \t]*\((?:0011|00001001)\s+([^\s()]+)\s+', re.MULTILINE
+    r'^[ \t]*\((?:визначити|0011|00001001)\s+([^\s()]+)\s+', re.MULTILINE
 )
 
 

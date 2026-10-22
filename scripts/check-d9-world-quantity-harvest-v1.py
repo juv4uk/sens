@@ -13,20 +13,20 @@ assert harvest["schema"]=="d9-world-quantity-harvest-v1/v1"
 assert harvest["status"]=="RESEARCH-UNRATIFIED"
 assert harvest["authority"]=="#3992"
 assert harvest["accounting"]=={
-    "selected_d9_candidates":62,
+    "selected_d9_candidates":58,
     "world":32,
-    "quantity":30,
+    "quantity":26,
     "d9_selected_before_harvest":313,
-    "d9_selected_after_harvest":375,
-    "d9_remaining_after_harvest":137,
+    "d9_selected_after_harvest":371,
+    "d9_remaining_after_harvest":141,
     "ratified_d9_residents":0,
 }
 
 rows=harvest["rows"]
-assert len(rows)==62
-assert len({row["stable_id"] for row in rows})==62
-assert len({row["semantic_name"] for row in rows})==62
-assert len({(row["source_file"],row["source_name"]) for row in rows})==62
+assert len(rows)==58
+assert len({row["stable_id"] for row in rows})==58
+assert len({row["semantic_name"] for row in rows})==58
+assert len({(row["source_file"],row["source_name"]) for row in rows})==58
 assert all(row["decision"]=="SELECT-D9-CANDIDATE" for row in rows)
 assert all(row["selected_d9_candidate"] is True for row in rows)
 assert all(row["coordinate"] is None for row in rows)
@@ -35,7 +35,7 @@ assert all(row["ratified_resident"] is False for row in rows)
 
 expected_sources={
     "lib/world.lisp":32,
-    "lib/quantity.lisp":30,
+    "lib/quantity.lisp":26,
 }
 actual_sources={}
 for row in rows:
@@ -44,7 +44,7 @@ assert actual_sources==expected_sources
 
 for source_file,count in expected_sources.items():
     text=(root/source_file).read_text(encoding="utf-8")
-    defs={m.group(1) for m in re.finditer(r'^\([01]{8}\s+([^\s()]+)\s+', text, re.MULTILINE)}
+    defs={m.group(1) for m in re.finditer(r'^\((?:визначити|[01]{8})\s+([^\s()]+)\s+', text, re.MULTILINE)}
     claimed={row["source_name"] for row in rows if row["source_file"]==source_file}
     assert len(claimed)==count
     assert claimed <= defs
