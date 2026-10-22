@@ -266,3 +266,30 @@ fn sixth_atomic_tail_skips_compounds_and_preserves_original_suffix() {
         "((атом? (перше елементи)) (хвіст-після-чотирьох-для-шостого (решта елементи)))",
     );
 }
+
+#[test]
+fn bija3_1968_atom_null_partial_law_executes_and_rejects_false_generator() {
+    // Українська проєкція виконується реальною SENS-сесією.
+    // Мутант прибирає уточнення EQ(x, NIL): непорожній атом починає
+    // помилково проходити як порожній, і СЕНС виконує CAR NIL.
+    execute_with_negative(
+        "tests/semantic/біджа3-уточнення-атома-1968.lisp",
+        include_str!("../../../tests/semantic/біджа3-уточнення-атома-1968.lisp"),
+        "(тотожне? значення (як-є ()))",
+        "(атом? значення)",
+    );
+
+    // Безумовне прирівнювання структурного NIL і математичного нуля
+    // до Д1:ні відхиляє СЕНС, а не тестовий виконавець чи Python.
+    for (case, source) in [
+        ("структурне-порожнє", "(за-умовою ((як-є ()) (як-є неправильно)))"),
+        ("математичний-нуль", "(за-умовою (0 (як-є неправильно)))"),
+    ] {
+        let mut session = Session::default();
+        let outcome = eval_program(source, &mut session);
+        assert!(
+            outcome.is_err(),
+            "test_id=1968-D1-COND-{case} layer=SENS input={source} expected=reject_non_D1 actual={outcome:?}"
+        );
+    }
+}
