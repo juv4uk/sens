@@ -10,38 +10,48 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
-const SURFACE_PREREQUISITES: &[(&str, Option<&str>)] = &[
-    ("unify.lisp", Some(include_str!("../../../lib/unify.lisp"))),
-    (
-        "reason.lisp",
-        Some(include_str!("../../../lib/reason.lisp")),
-    ),
-    (
-        "forward.lisp",
-        Some(include_str!("../../../lib/forward.lisp")),
-    ),
-    (
-        "knowledge.lisp",
-        Some(include_str!("../../../lib/knowledge.lisp")),
-    ),
-    (
-        "persistent-map.lisp",
-        Some(include_str!("../../../lib/persistent-map.lisp")),
-    ),
-    (
-        "persistent-vector.lisp",
-        Some(include_str!("../../../lib/persistent-vector.lisp")),
-    ),
+const SURFACE_PREREQUISITES: &[(&str, Option<u32>)] = &[
+    ("unify.lisp", Some(0)),
+    ("reason.lisp", Some(1)),
+    ("forward.lisp", Some(2)),
+    ("knowledge.lisp", Some(3)),
+    ("persistent-map.lisp", Some(4)),
+    ("persistent-vector.lisp", Some(5)),
     // Єдиний штатний loader: WASM не вбудовує окрему копію time.lisp.
     ("time.lisp", None),
-    (
-        "epistemic.lisp",
-        Some(include_str!("../../../lib/epistemic.lisp")),
-    ),
+    ("epistemic.lisp", Some(6)),
 ];
-const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
-const UKR_SURFACE: &str = include_str!("../../../lib/surface/ukr.lisp");
-const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
+
+const UK_SURFACE_ASSET: u32 = 7;
+const UKR_SURFACE_ASSET: u32 = 8;
+const SA_SURFACE_ASSET: u32 = 9;
+
+unsafe extern "C" {
+    fn sens_wasm_source_asset_len(asset: u32) -> usize;
+    fn sens_wasm_source_asset_copy(asset: u32, destination: *mut u8, capacity: usize) -> isize;
+}
+
+fn source_asset(asset: u32) -> Result<String, String> {
+    const MAX_SOURCE_BYTES: usize = 16 * 1024 * 1024;
+
+    // Zig transports opaque bytes only. SENS remains responsible for UTF-8
+    // validation, parsing, and every interpretation of the source.
+    let length = unsafe { sens_wasm_source_asset_len(asset) };
+    if length == 0 || length > MAX_SOURCE_BYTES {
+        return Err(format!(
+            "Неприпустимий розмір джерела Zig asset {asset}: {length}"
+        ));
+    }
+
+    let mut bytes = vec![0; length];
+    let copied = unsafe { sens_wasm_source_asset_copy(asset, bytes.as_mut_ptr(), bytes.len()) };
+    if copied < 0 || copied as usize != length {
+        return Err(format!(
+            "Zig asset {asset} скопійовано не повністю: очікувалося {length}, отримано {copied}"
+        ));
+    }
+    String::from_utf8(bytes).map_err(|error| format!("Zig asset {asset} не є UTF-8: {error}"))
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum WebSurface {
@@ -123,17 +133,19 @@ fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Enviro
         let mut session = Session {
             environment: layer.clone(),
         };
-        for (name, source) in SURFACE_PREREQUISITES {
-            load_surface_prerequisite(name, *source, &mut session)?;
+        for (name, asset) in SURFACE_PREREQUISITES {
+            let source = asset.map(|asset| source_asset(asset)).transpose()?;
+            load_surface_prerequisite(name, source.as_deref(), &mut session)?;
         }
-        let (name, source) = match surface {
-            WebSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
-            WebSurface::UkrainianFull => ("ukr.lisp", UKR_SURFACE),
-            WebSurface::Sanskrit => ("sa.lisp", SA_SURFACE),
+        let (name, asset) = match surface {
+            WebSurface::Ukrainian => ("uk.lisp", UK_SURFACE_ASSET),
+            WebSurface::UkrainianFull => ("ukr.lisp", UKR_SURFACE_ASSET),
+            WebSurface::Sanskrit => ("sa.lisp", SA_SURFACE_ASSET),
             WebSurface::Core | WebSurface::English => unreachable!(),
         };
-        eval_program(source, &mut session)
-            .map_err(|error| format!("failed to load {name}: {}", error.render(source)))?;
+        let source = source_asset(asset)?;
+        eval_program(&source, &mut session)
+            .map_err(|error| format!("failed to load {name}: {}", error.render(&source)))?;
     }
     Ok(layer)
 }
@@ -533,6 +545,47 @@ mod tests {
             .unwrap()
             .value;
         assert_eq!(value.to_string(), "42");
+    }
+
+    #[test]
+    fn zig_surface_asset_transport_copies_exact_bytes_and_rejects_invalid_requests() {
+        for asset in 0..10 {
+            let length = unsafe { sens_wasm_source_asset_len(asset) };
+            assert!(length > 0, "asset {asset} must have non-empty source bytes");
+
+            let mut destination = vec![0; length];
+            assert_eq!(
+                unsafe {
+                    sens_wasm_source_asset_copy(asset, destination.as_mut_ptr(), destination.len())
+                },
+                length as isize,
+                "asset {asset} must be copied in full"
+            );
+            assert!(
+                std::str::from_utf8(&destination).is_ok(),
+                "asset {asset} must preserve UTF-8 bytes"
+            );
+        }
+
+        let length = unsafe { sens_wasm_source_asset_len(0) };
+        let mut short_destination = vec![0; length - 1];
+        assert_eq!(
+            unsafe {
+                sens_wasm_source_asset_copy(
+                    0,
+                    short_destination.as_mut_ptr(),
+                    short_destination.len(),
+                )
+            },
+            -2,
+            "undersized destination must fail without a partial-copy success"
+        );
+        assert_eq!(unsafe { sens_wasm_source_asset_len(u32::MAX) }, 0);
+        assert_eq!(
+            unsafe { sens_wasm_source_asset_copy(u32::MAX, short_destination.as_mut_ptr(), 0) },
+            -1,
+            "unknown asset selector must fail closed"
+        );
     }
 
     #[test]
