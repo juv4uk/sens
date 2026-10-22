@@ -9,6 +9,38 @@ use sens::{eval_program, load_core_library, Session};
 
 const SELECTORS: &str =
     include_str!("../../../knowledge/d11/база-доступних-функцій/селектори-512-д11.tsv");
+const RATIFIED_D10: &str = include_str!("../../../lib/domains/d10.lisp");
+
+// Ратифікований D10 — незалежна від похідної TSV точка істини.
+// Це перевірка тотожності назв/координат, а не host-виконання CAR/CDR.
+fn ratified_d10_surfaces() -> std::collections::HashMap<&'static str, (&'static str, &'static str)> {
+    let mut surfaces = std::collections::HashMap::new();
+    for line in RATIFIED_D10.lines().filter(|line| line.starts_with("  (")) {
+        let (bits, _) = line[3..]
+            .split_once(' ')
+            .expect("test_id=D10-RATIFIED-ROW expected=coordinate");
+        assert!(
+            bits.len() == 10 && bits.bytes().all(|bit| bit == b'0' || bit == b'1'),
+            "test_id=D10-RATIFIED-WIDTH input={bits}"
+        );
+        let ukr = line
+            .split_once("(укр ")
+            .and_then(|(_, right)| right.split_once(')'))
+            .map(|(name, _)| name)
+            .expect("test_id=D10-RATIFIED-UKR");
+        let lisp = line
+            .split_once("(LISP ")
+            .and_then(|(_, right)| right.split_once(')'))
+            .map(|(name, _)| name)
+            .expect("test_id=D10-RATIFIED-LISP");
+        assert!(
+            surfaces.insert(bits, (ukr, lisp)).is_none(),
+            "test_id=D10-RATIFIED-DUPLICATE input={bits}"
+        );
+    }
+    assert_eq!(surfaces.len(), 1024, "test_id=D10-RATIFIED-COUNT");
+    surfaces
+}
 
 // Семантичний вирок робить сама програма SENS: для правильного результату
 // COND коротко замикається на безпечному значенні, для мутанта доходить до
@@ -58,6 +90,7 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("завантажити чинне ядро SENS");
 
+    let ratified_d10 = ratified_d10_surfaces();
     let mut count = 0;
     let mut partial_failures = 0usize;
     let mut parent_bits = std::collections::HashSet::new();
@@ -129,6 +162,18 @@ fn d11_all_512_named_derived_selectors_execute_through_d10_in_sens() {
         let parent_name = child_name
             .strip_suffix(name_end)
             .unwrap_or_else(|| panic!("test_id=D11-UKR-PARENT input={child_name}"));
+        let (ratified_ukr, ratified_lisp) = ratified_d10
+            .get(parent)
+            .copied()
+            .unwrap_or_else(|| panic!("test_id=D11-D10-MISSING-PARENT input={parent}"));
+        assert_eq!(
+            parent_lisp, ratified_lisp,
+            "test_id=D11-D10-LISP-AUTHORITY coordinate={parent} expected={ratified_lisp} actual={parent_lisp}"
+        );
+        assert_eq!(
+            parent_name, ratified_ukr,
+            "test_id=D11-D10-UKR-AUTHORITY coordinate={parent} expected={ratified_ukr} actual={parent_name}"
+        );
 
         // D11 child is library-defined in SENS by the already existing D10
         // selector and the D3 CAR/CDR. This does NOT admit a direct D11 opcode.
