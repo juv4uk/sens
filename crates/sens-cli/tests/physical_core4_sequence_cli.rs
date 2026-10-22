@@ -1160,9 +1160,18 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
                 .strip_suffix(" status=NOT_EXECUTED")
                 .expect("точний стан непарного джерела");
             let source = PathBuf::from(source_path);
+            // Bash pwd та Rust canonicalize можуть розходитись лексично
+            // через шлях checkout. Звіряти фізичну теку, не текст префікса:
+            // усі вимоги до справжнього файла та відсутності пари збережено.
             assert!(
-                source.starts_with(&dir) && source.is_file() && !source.is_symlink(),
+                source.is_file() && !source.is_symlink(),
                 "неправильне джерело у stderr: {source_path}"
+            );
+            let resolved = source.canonicalize()
+                .expect("чинне джерело кандидата SENS");
+            assert_eq!(
+                resolved.parent(), Some(dir.as_path()),
+                "джерело поза реальною текою конкурсу: {source_path}"
             );
             let name = source.file_stem()
                 .and_then(|stem| stem.to_str())
