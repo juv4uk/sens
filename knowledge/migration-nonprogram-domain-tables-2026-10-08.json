@@ -72,13 +72,15 @@
     },
     {
       "path": "lib/domains/d8.lisp",
-      "git_blob_sha1": "1f12843275e1f13d3fbc69e101cecd07ae061118",
+      "git_blob_sha1": "71da43f6d21fe583c52398921e077fecda78ea41",
       "domain": "D8",
       "bit_width": 8,
       "expected_rows": 256,
       "previous_pinned_git_blob_sha1": "97cdd8e8509214468f340492aff71f19da8720b7",
       "previous_schema_1_git_blob_sha1": "1f12843275e1f13d3fbc69e101cecd07ae061118",
-      "canonical_header": "domain-table-1"
+      "canonical_header": "domain-table-1",
+      "previous_comment_only_git_blob_sha1": "1f12843275e1f13d3fbc69e101cecd07ae061118",
+      "comment_only_update_commit": "64865dbf6874d49bf0e25848f67d009bda419e9a"
     },
     {
       "path": "lib/domains/d9.lisp",
@@ -87,7 +89,7 @@
       "domain": "D9",
       "bit_width": 9,
       "expected_rows": 512,
-       "historical_pinned_git_blob_sha1": "b013ad78384ebb0174e0c73205e4b6c85dc344db"
+      "historical_pinned_git_blob_sha1": "b013ad78384ebb0174e0c73205e4b6c85dc344db"
     },
     {
       "path": "lib/domains/d10.lisp",
