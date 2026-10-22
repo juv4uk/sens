@@ -77,3 +77,4 @@ benchmarks/contest-uk/довжина-списку-стисло.lisp
 benchmarks/contest-uk/сума-до-n-формула.lisp
 lib/list-drop-leading-compounds-zero-copy-general.lisp
 lib/list-first-adjacent-equal-atom-suffix-general.lisp
+lib/list-every-third-linear-general.lisp
