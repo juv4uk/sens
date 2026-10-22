@@ -13,7 +13,7 @@ use std::rc::Rc;
 fn contains_predicate_bit(value: &Value) -> bool {
     match value {
         Value::DomainIdentity(crate::DomainIdentity::D1(_)) => true,
-        Value::Pair(head, tail) => contains_predicate_bit(head) || contains_predicate_bit(tail),
+        Value::Pair(node) => contains_predicate_bit(&node.head) || contains_predicate_bit(&node.tail),
         Value::Vector(values) => values.borrow().iter().any(contains_predicate_bit),
         _ => false,
     }

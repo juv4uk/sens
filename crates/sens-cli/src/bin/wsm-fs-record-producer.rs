@@ -124,13 +124,13 @@ fn main() {
     let mut value = result.value;
     loop {
         match &value {
-            Value::Pair(head, tail) => {
-                let Value::String(record) = &**head else {
+            Value::Pair(node) => {
+                let Value::String(record) = &node.head else {
                     eprintln!("wsm-fs-record-producer: record is not a string");
                     std::process::exit(1);
                 };
                 records.push(record.to_string());
-                value = (**tail).clone();
+                value = node.tail.clone();
             }
             Value::Nil => break,
             _ => {

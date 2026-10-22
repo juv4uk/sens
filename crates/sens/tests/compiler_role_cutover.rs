@@ -194,9 +194,9 @@ fn list_values(value: &Value) -> Option<Vec<&Value>> {
     loop {
         match cursor {
             Value::Nil => return Some(out),
-            Value::Pair(head, tail) => {
-                out.push(head.as_ref());
-                cursor = tail.as_ref();
+            Value::Pair(node) => {
+                out.push(&node.head);
+                cursor = &node.tail;
             }
             _ => return None,
         }

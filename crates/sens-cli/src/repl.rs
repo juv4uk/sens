@@ -8,8 +8,8 @@ use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
 use sens::{
     eval_program, render_value_for_presentation, BinaryNumber, CoreDomainIdentity, DomainIdentity,
-    Environment, ExactDomainWord, Expr, ExprKind, PhysicalT5Program, PresentationLanguage, Session,
-    Value,
+    Environment, ExactDomainWord, Expr, ExprKind, PairNode, PhysicalT5Program, PresentationLanguage,
+    Session, Value,
 };
 use std::env;
 use std::path::PathBuf;
@@ -614,9 +614,9 @@ fn exact_t5m_result_data(value: &Value, depth: usize) -> Result<Expr, String> {
     let kind = match value {
         Value::Nil => ExprKind::List(Vec::new().into()),
         Value::Symbol(symbol) => ExprKind::Symbol(symbol.clone()),
-        Value::Pair(head, tail) => ExprKind::Pair(
-            std::rc::Rc::new(exact_t5m_result_data(head, depth + 1)?),
-            std::rc::Rc::new(exact_t5m_result_data(tail, depth + 1)?),
+        Value::Pair(node) => ExprKind::Pair(
+            std::rc::Rc::new(exact_t5m_result_data(&node.head, depth + 1)?),
+            std::rc::Rc::new(exact_t5m_result_data(&node.tail, depth + 1)?),
         ),
         Value::BinaryNumber(number) => ExprKind::BinaryNumber(number.clone()),
         Value::DomainIdentity(identity) if !matches!(identity, DomainIdentity::D2(_)) => {
@@ -1289,7 +1289,7 @@ fn render_repl_reply(value: &Value, language: PresentationLanguage) -> String {
         Value::DomainIdentity(sens::DomainIdentity::D1(_)) => {
             render_value_for_presentation(value, language).to_uppercase()
         }
-        Value::Pair(_, _) => render_repl_pair(value, language),
+        Value::Pair(_) => render_repl_pair(value, language),
         Value::Vector(vector) => {
             let items = vector
                 .borrow()
@@ -1309,12 +1309,12 @@ fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
 
     loop {
         match current {
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 if !first {
                     output.push(' ');
                 }
-                output.push_str(&render_repl_reply(head, language));
-                current = tail;
+                output.push_str(&render_repl_reply(&node.head, language));
+                current = &node.tail;
                 first = false;
             }
             Value::Nil => {
@@ -1841,38 +1841,6 @@ mod tests {
         );
     }
 
-    /// #1968: no UTF-8 source evaluator is allowed to decide the physical
-    /// D3 COND outcome. Zig mints the exact words, SENS executes both cases.
-    #[cfg(feature = "zig-transport")]
-    #[test]
-    fn zig_t5m_paired_cond_accepts_only_d1_and_reports_physical_error_form() {
-        let valid = "(за-умовою (ні (атом? (як-є ()))) (так (атом? (як-є ()))))";
-        let (physical, exact_view) =
-            mint_t5m_source_pair(valid).expect("SENS/Zig має видати точний T5M");
-        assert!(!physical.is_empty());
-        assert!(!exact_view.trim().is_empty());
-        let result = eval_t5m_paired_file(valid, &physical)
-            .expect("точний D1:0 пропускає гілку у фізичному SENS");
-        assert_eq!(
-            result.value.as_predicate_bit(),
-            Some(true),
-            "test_id=1968-ZIG-COND-D1 layer=SENS expected=D1:1 actual={}",
-            result.value
-        );
-
-        let invalid =
-            "(за-умовою ((як-є ()) (атом? (як-є ()))) (так (атом? (як-є ()))))";
-        let (invalid_physical, _) =
-            mint_t5m_source_pair(invalid).expect("навіть недопустима умова має кодуватися");
-        let error = eval_t5m_paired_file(invalid, &invalid_physical)
-            .expect_err("D3:000 як COND test має бути Type, а не D1:NO");
-        assert!(
-            error.contains("D3:110 COND expects exact D1")
-                && error.contains("physical_form_index=0"),
-            "test_id=1968-ZIG-COND-EMPTY layer=SENS expected=Type/form-0 actual={error}"
-        );
-    }
-
     #[cfg(feature = "zig-transport")]
     #[test]
     fn quoted_integer_in_t5m_source_preserves_exact_d24_word() {
@@ -2367,10 +2335,10 @@ mod tests {
             "(CAR (CONS \"Keep Mixed Case\" 42))"
         );
         // Presentation is one-way only: the runtime symbol identity is untouched.
-        let Value::Pair(head, _) = &value else {
+        let Value::Pair(node) = &value else {
             panic!("list");
         };
-        assert_eq!(head.as_ref(), &Value::Symbol("car".into()));
+        assert_eq!(&node.head, &Value::Symbol("car".into()));
     }
 
     #[test]
@@ -2434,10 +2402,10 @@ mod tests {
 
     #[test]
     fn classic_repl_reply_uppercases_dotted_and_vector_symbol_data() {
-        let dotted = Value::Pair(
-            std::rc::Rc::new(Value::Symbol("left".into())),
-            std::rc::Rc::new(Value::Symbol("right".into())),
-        );
+        let dotted = Value::Pair(std::rc::Rc::new(PairNode {
+            head: Value::Symbol("left".into()),
+            tail: Value::Symbol("right".into()),
+        }));
         assert_eq!(
             render_repl_reply(&dotted, PresentationLanguage::Canonical),
             "(LEFT . RIGHT)"

@@ -297,12 +297,12 @@ fn expect_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageError>
     loop {
         match current {
             Value::Nil => return Ok(bytes),
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 // SENS arithmetic now returns exactly qualified D24+ numbers.
                 // The FS host transports raw bytes only: decode 0..255 at
                 // this I/O boundary, never turn decimal host values into the
                 // normative numeric identity and never accept negative bits.
-                let byte = match &**head {
+                let byte = match &node.head {
                     Value::Number(number, _)
                         if number.is_finite()
                             && number.fract() == 0.0
@@ -337,7 +337,7 @@ fn expect_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageError>
                     }
                 };
                 bytes.push(byte);
-                current = tail;
+                current = &node.tail;
             }
             _ => {
                 return Err(LanguageError::new(
@@ -356,10 +356,10 @@ fn expect_tcp_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageEr
     loop {
         match current {
             Value::Nil => return Ok(bytes),
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 // Language-owned UTF-8 encoding produces exact D24+ values;
                 // retain legacy host numbers only as a compatibility input.
-                let byte = match &**head {
+                let byte = match &node.head {
                     Value::Number(number, _)
                         if number.fract() == 0.0 && (0.0..=255.0).contains(number) =>
                     {
@@ -388,7 +388,7 @@ fn expect_tcp_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageEr
                     ));
                 };
                 bytes.push(byte);
-                current = tail;
+                current = &node.tail;
             }
             _ => {
                 return Err(LanguageError::new(

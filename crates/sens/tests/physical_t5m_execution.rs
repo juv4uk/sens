@@ -26,8 +26,8 @@ fn physical_multi_form_program_executes_as_a_single_exact_domain_stream() {
         .expect("physical T5M must execute both D2-framed forms");
     assert!(matches!(
         &result.value,
-        Value::Pair(head, tail)
-            if matches!(head.as_ref(), Value::Nil) && matches!(tail.as_ref(), Value::Nil)
+        Value::Pair(node)
+            if matches!(node.head, Value::Nil) && matches!(node.tail, Value::Nil)
     ));
 }
 

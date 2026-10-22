@@ -93,13 +93,13 @@ pub(super) fn invoke(
         } else {
             Step::Cdr
         };
-        value = match select(step, value, span) {
+        value = match select(step, &value, span) {
             Ok(value) => value,
             Err(error) => return Some(Err(error)),
         };
     }
     if suffix_len != 0 {
-        value = match select(root, value, span) {
+        value = match select(root, &value, span) {
             Ok(value) => value,
             Err(error) => return Some(Err(error)),
         };
@@ -134,10 +134,10 @@ mod tests {
             *first += 1;
             return Value::Symbol(format!("листок-{leaf}").into());
         }
-        Value::Pair(
-            std::rc::Rc::new(full_pair_tree(depth - 1, first)),
-            std::rc::Rc::new(full_pair_tree(depth - 1, first)),
-        )
+        Value::Pair(std::rc::Rc::new(crate::PairNode {
+            head: full_pair_tree(depth - 1, first),
+            tail: full_pair_tree(depth - 1, first),
+        }))
     }
 
     #[test]

@@ -141,7 +141,7 @@ fn render_uk(value: &Value) -> String {
         }
         Value::Symbol(symbol) if symbol.as_ref() == "t" => "істина".to_string(),
         Value::Symbol(symbol) => symbol.to_string(),
-        Value::Pair(_, _) => render_pair_uk(value),
+        Value::Pair(_) => render_pair_uk(value),
         Value::Closure(_) => "<функція>".to_string(),
         Value::Macro(_) => "<макрос>".to_string(),
         Value::Text7(text) => format!("#<текст7 {} комірок>", text.len()),
@@ -154,12 +154,12 @@ fn render_pair_uk(value: &Value) -> String {
     let mut first = true;
     loop {
         match current {
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 if !first {
                     output.push(' ');
                 }
-                output.push_str(&render_uk(head));
-                current = tail;
+                output.push_str(&render_uk(&node.head));
+                current = &node.tail;
                 first = false;
             }
             Value::Nil => {
@@ -187,18 +187,18 @@ fn render_sa(value: &Value) -> String {
                 .map(str::to_string)
                 .unwrap_or_else(|| value.to_string())
         }
-        Value::Pair(_, _) => {
+        Value::Pair(_) => {
             let mut output = String::from("(");
             let mut current = value;
             let mut first = true;
             loop {
                 match current {
-                    Value::Pair(head, tail) => {
+                    Value::Pair(node) => {
                         if !first {
                             output.push(' ');
                         }
-                        output.push_str(&render_sa(head));
-                        current = tail;
+                        output.push_str(&render_sa(&node.head));
+                        current = &node.tail;
                         first = false;
                     }
                     Value::Nil => {

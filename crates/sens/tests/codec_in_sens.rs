@@ -106,13 +106,13 @@ fn exact_d2_quote_of_dotted_pair_executes_without_text7_marker_proxies() {
     let result = program
         .execute(&mut Session::default())
         .expect("real SENS QUOTE executes dotted D2 pair");
-    let Value::Pair(head, tail) = &result.value else {
+    let Value::Pair(node) = &result.value else {
         panic!("D2:11 must produce a dotted SENS pair, not a proxy list");
     };
-    let Value::DomainIdentity(head) = head.as_ref() else {
+    let Value::DomainIdentity(head) = &node.head else {
         panic!("D3:100 must preserve exact identity");
     };
-    let Value::DomainIdentity(tail) = tail.as_ref() else {
+    let Value::DomainIdentity(tail) = &node.tail else {
         panic!("D3:111 must preserve exact identity");
     };
     assert_eq!((head.width(), head.packed_bits()), (3, 0b100));

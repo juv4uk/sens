@@ -315,7 +315,7 @@ pub(crate) fn invoke_value(
                     Value::Number(_, _) | Value::Rational(_) => "число",
                     Value::BinaryNumber(_) => "двійкове число",
                     Value::Symbol(_) => "символ",
-                    Value::Pair(_, _) => "пара",
+                    Value::Pair(_) => "пара",
                     Value::Macro(_) => "макрос",
                     Value::String(_) | Value::Text7(_) => "текст",
                     _ => "інший невикликний носій",
@@ -963,7 +963,7 @@ mod exact_domain_program_tests {
         let mut session = Session::bare();
         let result = eval_exact_domain_program("(001 (def x 11110111))", &mut session)
             .expect("D3 quoted syntax must not be mistaken for a call");
-        assert!(matches!(result.value, Value::Pair(_, _)));
+        assert!(matches!(result.value, Value::Pair(_)));
     }
 
     #[test]

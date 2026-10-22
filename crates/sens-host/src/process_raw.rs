@@ -17,8 +17,8 @@ fn expect_string_list(value: &Value, span: Span) -> Result<Vec<String>, Language
     loop {
         match current {
             Value::Nil => return Ok(items),
-            Value::Pair(head, tail) => {
-                let Value::String(ref text) = **head else {
+            Value::Pair(node) => {
+                let Value::String(ref text) = node.head else {
                     return Err(LanguageError::new(
                         ErrorKind::Type,
                         "process-run-raw expects a list of strings for its second argument · process-run-raw ochikuie spysok riadkiv druhym arhumentom · process-run-raw erwartet eine Liste von Zeichenketten als zweites Argument",
@@ -26,7 +26,7 @@ fn expect_string_list(value: &Value, span: Span) -> Result<Vec<String>, Language
                     ));
                 };
                 items.push(text.to_string());
-                current = tail;
+                current = &node.tail;
             }
             _ => {
                 return Err(LanguageError::new(

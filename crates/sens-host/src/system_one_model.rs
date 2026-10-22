@@ -50,9 +50,9 @@ fn proper_list(value: &Value, what: &str, span: Span) -> Result<Vec<Value>, Lang
     loop {
         match cursor {
             Value::Nil => return Ok(result),
-            Value::Pair(head, tail) => {
-                result.push((**head).clone());
-                cursor = tail;
+            Value::Pair(node) => {
+                result.push(node.head.clone());
+                cursor = &node.tail;
             }
             _ => {
                 return Err(fail(

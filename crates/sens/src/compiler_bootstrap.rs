@@ -6,7 +6,7 @@
 //! it to SENS code explicitly while #3808/#3809 move compiler-law execution
 //! into the language itself.
 
-use crate::{sha256_source, ErrorKind, Exactness, LanguageError, Value};
+use crate::{sha256_source, ErrorKind, Exactness, LanguageError, PairNode, Value};
 use std::rc::Rc;
 
 /// Build an opt-in mechanism value that decomposes one exact DomainIdentity.
@@ -121,10 +121,10 @@ fn encode_canonical_compiler_value(value: &Value, out: &mut Vec<u8>) -> Result<(
             put_canonical_compiler_len(out, text.len());
             out.extend_from_slice(text.as_bytes());
         }
-        Value::Pair(head, tail) => {
+        Value::Pair(node) => {
             out.push(0x04);
-            encode_canonical_compiler_value(head, out)?;
-            encode_canonical_compiler_value(tail, out)?;
+            encode_canonical_compiler_value(&node.head, out)?;
+            encode_canonical_compiler_value(&node.tail, out)?;
         }
         other => {
             return Err(format!(
@@ -252,7 +252,7 @@ impl<'a> CanonicalCompilerDecoder<'a> {
             0x04 => {
                 let head = self.decode_value(depth + 1)?;
                 let tail = self.decode_value(depth + 1)?;
-                Ok(Value::Pair(Rc::new(head), Rc::new(tail)))
+                Ok(Value::Pair(Rc::new(PairNode { head, tail })))
             }
             tag => Err(format!(
                 "unknown canonical compiler evidence tag 0x{tag:02x}"
@@ -339,15 +339,15 @@ mod tests {
 
         let mut cursor = decoded;
         for expected_width in 1..=9 {
-            let Value::Pair(head, tail) = &cursor else {
+            let Value::Pair(node) = &cursor else {
                 panic!("round-trip list must retain all exact-width identities");
             };
-            let Value::DomainIdentity(identity) = head.as_ref() else {
+            let Value::DomainIdentity(identity) = &node.head else {
                 panic!("round-trip item must remain an exact DomainIdentity");
             };
             assert_eq!(identity.width(), expected_width);
             assert_eq!(identity.packed_bits(), 1);
-            cursor = tail.as_ref().clone();
+            cursor = node.tail.clone();
         }
     }
 

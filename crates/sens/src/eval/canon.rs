@@ -493,9 +493,9 @@ fn invoke_compact_derived_d4(
                 loop {
                     match cursor {
                         Value::Nil => break,
-                        Value::Pair(head, tail) => {
-                            items.push(head.as_ref().clone());
-                            cursor = tail.as_ref();
+                        Value::Pair(node) => {
+                            items.push(node.head.clone());
+                            cursor = &node.tail;
                         }
                         _ => {
                             return Some(Err(LanguageError::new(

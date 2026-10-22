@@ -20,9 +20,9 @@ use std::thread;
 /// that was never `def`d into a running `Session`.
 fn list_items(mut value: &Value) -> Vec<Value> {
     let mut items = Vec::new();
-    while let Value::Pair(head, tail) = value {
-        items.push((**head).clone());
-        value = tail;
+    while let Value::Pair(node) = value {
+        items.push(node.head.clone());
+        value = &node.tail;
     }
     items
 }
@@ -80,8 +80,8 @@ fn read_request_frame(reader: &mut BufReader<TcpStream>, limit: usize) -> io::Re
 /// nested one-element list.
 pub(crate) fn dotted_alist_lookup(alist: &Value, key: &str) -> Option<Value> {
     list_items(alist).into_iter().find_map(|item| match &item {
-        Value::Pair(k, v) => match &**k {
-            Value::Symbol(name) if &**name == key => Some((**v).clone()),
+        Value::Pair(node) => match &node.head {
+            Value::Symbol(name) if &**name == key => Some(node.tail.clone()),
             _ => None,
         },
         _ => None,
@@ -967,7 +967,7 @@ mod oracle_result_tests {
         let value = oracle_help(&mut session, None)
             .expect("Zig-carried Guard reference must load and answer the default query");
         assert!(
-            matches!(value, Value::Pair(_, _) | Value::Nil),
+            matches!(value, Value::Pair(_) | Value::Nil),
             "Guard default query returned an unexpected value: {value}"
         );
     }

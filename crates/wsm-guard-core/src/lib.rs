@@ -107,9 +107,9 @@ fn proper_list(value: &Value) -> Option<Vec<&Value>> {
     loop {
         match cursor {
             Value::Nil => return Some(items),
-            Value::Pair(head, tail) => {
-                items.push(head.as_ref());
-                cursor = tail.as_ref();
+            Value::Pair(node) => {
+                items.push(&node.head);
+                cursor = &node.tail;
             }
             _ => return None,
         }

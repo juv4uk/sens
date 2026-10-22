@@ -6,7 +6,7 @@
 use sens::{
     eval_parsed_expressions, eval_program, parse_mixed_exact_domain, BinaryNumber,
     BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, DomainIdentity,
-    ErrorKind, Exactness, Rational, Session, Value,
+    ErrorKind, Exactness, PairNode, Rational, Session, Value,
 };
 
 fn numeric(width: usize, magnitude: u32) -> Value {
@@ -243,10 +243,10 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
     for count in 0u32..=9 {
         let mut list = Value::Nil;
         for _ in 0..count {
-            list = Value::Pair(
-                std::rc::Rc::new(Value::Symbol(std::rc::Rc::from("елемент"))),
-                std::rc::Rc::new(list),
-            );
+            list = Value::Pair(std::rc::Rc::new(PairNode {
+                head: Value::Symbol(std::rc::Rc::from("елемент")),
+                tail: list,
+            }));
         }
         session.environment.define("items", list);
         session.environment.define("seed", numeric(24, 0));
@@ -263,13 +263,13 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
     let unit = Value::Symbol(std::rc::Rc::from("елемент"));
     session.environment.define(
         "items",
-        Value::Pair(
-            std::rc::Rc::new(unit.clone()),
-            std::rc::Rc::new(Value::Pair(
-                std::rc::Rc::new(unit),
-                std::rc::Rc::new(Value::Nil),
-            )),
-        ),
+        Value::Pair(std::rc::Rc::new(PairNode {
+            head: unit.clone(),
+            tail: Value::Pair(std::rc::Rc::new(PairNode {
+                head: unit,
+                tail: Value::Nil,
+            })),
+        })),
     );
     session.environment.define(
         "seed",
@@ -290,10 +290,10 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
     // An unqualified seed never becomes D24 just because it is called 0.
     session.environment.define(
         "items",
-        Value::Pair(
-            std::rc::Rc::new(Value::Symbol(std::rc::Rc::from("елемент"))),
-            std::rc::Rc::new(Value::Nil),
-        ),
+        Value::Pair(std::rc::Rc::new(PairNode {
+            head: Value::Symbol(std::rc::Rc::from("елемент")),
+            tail: Value::Nil,
+        })),
     );
     session
         .environment
@@ -327,10 +327,10 @@ fn lisp_owned_d24_nth_uses_d3_identity_and_d6_sub1_without_number_literals() {
 
     let mut list = Value::Nil;
     for symbol in ["третій", "другий", "перший"] {
-        list = Value::Pair(
-            std::rc::Rc::new(Value::Symbol(std::rc::Rc::from(symbol))),
-            std::rc::Rc::new(list),
-        );
+        list = Value::Pair(std::rc::Rc::new(PairNode {
+            head: Value::Symbol(std::rc::Rc::from(symbol)),
+            tail: list,
+        }));
     }
     session.environment.define("xs", list);
     session.environment.define("zero", numeric(24, 0));

@@ -497,6 +497,16 @@ impl std::fmt::Debug for Builtin {
     }
 }
 
+/// One cons cell: the head and tail live in a single heap block, so a
+/// `Value::Pair` costs one allocation rather than two.
+/// Odna kons-komirka: holova i khvist lezhat v odnomu heap-blotsi, tozh
+/// `Value::Pair` koshtuie odnu alokatsiiu, a ne dvi.
+#[derive(Clone, Debug)]
+pub struct PairNode {
+    pub head: Value,
+    pub tail: Value,
+}
+
 /// Runtime data is independent of the parser and any host representation.
 /// Dani vykonannia ne zalezhat vid parsera ta predstavlennia u khost-systemi.
 /// Laufzeitdaten sind unabhängig vom Parser und von jeder Host-Darstellung.
@@ -525,7 +535,7 @@ pub enum Value {
     /// projection lives at the reader/boundary layer.
     Text7(Text7),
     Symbol(Rc<str>),
-    Pair(Rc<Value>, Rc<Value>),
+    Pair(Rc<PairNode>),
     Closure(Rc<Closure>),
     Macro(Rc<Closure>),
     /// Legacy host implementation closure as a first-class value. This is an
@@ -569,8 +579,8 @@ impl PartialEq for Value {
             (Value::DomainIdentity(left), Value::DomainIdentity(right)) => left == right,
             (Value::String(left), Value::String(right)) => left == right,
             (Value::Symbol(left), Value::Symbol(right)) => left == right,
-            (Value::Pair(left_head, left_tail), Value::Pair(right_head, right_tail)) => {
-                left_head == right_head && left_tail == right_tail
+            (Value::Pair(left), Value::Pair(right)) => {
+                left.head == right.head && left.tail == right.tail
             }
             // Vectors compare structurally, element by element — same rule
             // as Pair chains. Identity would make `(eq (vector 1) (vector 1))`
@@ -716,12 +726,12 @@ impl Value {
             .into_iter()
             .rev()
             .fold(Value::Nil, |tail, head| {
-                Value::Pair(Rc::new(head), Rc::new(tail))
+                Value::Pair(Rc::new(PairNode { head, tail }))
             })
     }
 
     pub fn is_atom(&self) -> bool {
-        !matches!(self, Value::Pair(_, _))
+        !matches!(self, Value::Pair(_))
     }
 }
 
@@ -864,7 +874,7 @@ fn render(value: &Value, quote_strings: bool) -> String {
         // exact cells rather than inventing a Unicode spelling.
         Value::Text7(text) => text.to_canonical_wire_token(),
         Value::Symbol(symbol) => symbol.to_string(),
-        Value::Pair(_, _) => render_pair(value, quote_strings),
+        Value::Pair(_) => render_pair(value, quote_strings),
         Value::Closure(_) => "<lambda>".to_string(),
         Value::Macro(_) => "<macro>".to_string(),
     }
@@ -887,7 +897,7 @@ fn render_canonical_wire(value: &Value) -> String {
             Some(width) => format!("#<D{width}-NUMERIC-WIRE-UNSUPPORTED>"),
             None => format!("#b{}", number.bits()),
         },
-        Value::Pair(_, _) => render_pair_canonical_wire(value),
+        Value::Pair(_) => render_pair_canonical_wire(value),
         Value::Vector(values) => {
             let items = values
                 .borrow()
@@ -909,12 +919,12 @@ fn render_pair_canonical_wire(value: &Value) -> String {
     let mut first = true;
     loop {
         match current {
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 if !first {
                     out.push(' ');
                 }
-                out.push_str(&render_canonical_wire(head));
-                current = tail;
+                out.push_str(&render_canonical_wire(&node.head));
+                current = &node.tail;
                 first = false;
             }
             Value::Nil => {
@@ -937,12 +947,12 @@ fn render_pair(value: &Value, quote_strings: bool) -> String {
     let mut first = true;
     loop {
         match current {
-            Value::Pair(head, tail) => {
+            Value::Pair(node) => {
                 if !first {
                     out.push(' ');
                 }
-                out.push_str(&render(head, quote_strings));
-                current = tail;
+                out.push_str(&render(&node.head, quote_strings));
+                current = &node.tail;
                 first = false;
             }
             Value::Nil => {
@@ -961,7 +971,7 @@ fn render_pair(value: &Value, quote_strings: bool) -> String {
 
 impl Drop for Value {
     fn drop(&mut self) {
-        if !matches!(self, Value::Pair(_, _)) {
+        if !matches!(self, Value::Pair(_)) {
             return;
         }
 
@@ -971,17 +981,16 @@ impl Drop for Value {
         while let Some(value) = worklist.pop() {
             let mut value = std::mem::ManuallyDrop::new(value);
             match &mut *value {
-                Value::Pair(head, tail) => {
-                    let head = unsafe { std::ptr::read(head) };
-                    let tail = unsafe { std::ptr::read(tail) };
-                    if let Ok(inner) = Rc::try_unwrap(head) {
-                        if matches!(inner, Value::Pair(_, _)) {
-                            worklist.push(inner);
+                Value::Pair(node) => {
+                    let node = unsafe { std::ptr::read(node) };
+                    if let Ok(mut inner) = Rc::try_unwrap(node) {
+                        let head = std::mem::replace(&mut inner.head, Value::Nil);
+                        let tail = std::mem::replace(&mut inner.tail, Value::Nil);
+                        if matches!(head, Value::Pair(_)) {
+                            worklist.push(head);
                         }
-                    }
-                    if let Ok(inner) = Rc::try_unwrap(tail) {
-                        if matches!(inner, Value::Pair(_, _)) {
-                            worklist.push(inner);
+                        if matches!(tail, Value::Pair(_)) {
+                            worklist.push(tail);
                         }
                     }
                 }

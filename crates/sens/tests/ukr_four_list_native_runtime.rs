@@ -354,15 +354,15 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     // Дев'ять адресних позитивів і чотири негативи — усі живі D1-відповіді.
     let mut cursor = &observed.value;
     for index in 0..13 {
-        let sens::Value::Pair(head, tail) = cursor else {
+        let sens::Value::Pair(node) = cursor else {
             panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=pair(D1:так, tail) actual={cursor}");
         };
         assert_eq!(
-            head.as_ref(),
+            &node.head,
             &expected,
             "test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=D1:так actual={head}"
         );
-        cursor = tail.as_ref();
+        cursor = &node.tail;
     }
     assert!(matches!(cursor, sens::Value::Nil), "test_id=D5-D6-SELECTOR-NATIVE expected=exactly-13-predicates");
 
@@ -375,11 +375,11 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     let preserved = eval_program(&shadowed, &mut Session::default()).unwrap_or_else(|error| {
         panic!("test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=canonical-D5-law actual_error={error}")
     });
-    let sens::Value::Pair(first, _) = &preserved.value else {
+    let sens::Value::Pair(node) = &preserved.value else {
         panic!("test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=predicate-list actual={}", preserved.value);
     };
     assert_eq!(
-        first.as_predicate_bit(),
+        node.node.head.as_predicate_bit(),
         Some(true),
         "test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=unchanged-D1:так actual={first}"
     );
@@ -393,11 +393,11 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     let changed = eval_program(&mutant, &mut Session::default()).unwrap_or_else(|error| {
         panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual_error={error}")
     });
-    let sens::Value::Pair(head, _) = &changed.value else {
+    let sens::Value::Pair(node) = &changed.value else {
         panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=predicate-list actual={}", changed.value);
     };
     assert_eq!(
-        head.as_predicate_bit(),
+        node.head.as_predicate_bit(),
         Some(false),
         "test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual={head}"
     );

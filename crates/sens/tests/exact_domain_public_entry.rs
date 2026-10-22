@@ -46,7 +46,7 @@ fn d10_core4_defined_listp_executes_by_its_exact_word_identity() {
     // must produce a list, proving this is closure invocation, not a D10 opcode.
     let made_list = eval_exact_domain_program("(0011010111 (001 x))", &mut session)
         .expect("the concrete Core4 MKLIST closure is bound to its exact D10 word");
-    assert!(matches!(made_list.value, Value::Pair(_, _)));
+    assert!(matches!(made_list.value, Value::Pair(_)));
 
     // A D10 coordinate without a loaded definition remains non-callable.
     let error = eval_exact_domain_program("(0000000000 (001 ()))", &mut session)

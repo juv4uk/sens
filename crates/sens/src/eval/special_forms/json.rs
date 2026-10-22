@@ -13,7 +13,7 @@
 //! Hand-rolled, no external dependency — this crate's zero-dependency policy
 //! (see Cargo.toml) predates and outlives this mechanism.
 
-use crate::Value;
+use crate::{PairNode, Value};
 use std::rc::Rc;
 
 /// Plain-function form of the canonical JSON decoder, for host adapters
@@ -142,10 +142,10 @@ impl<'a> JsonParser<'a> {
         }
         let mut alist = Value::Nil;
         for (key, value) in pairs.into_iter().rev() {
-            alist = Value::Pair(
-                Rc::new(Value::Pair(Rc::new(key), Rc::new(value))),
-                Rc::new(alist),
-            );
+            alist = Value::Pair(Rc::new(PairNode {
+                head: Value::Pair(Rc::new(PairNode { head: key, tail: value })),
+                tail: alist,
+            }));
         }
         Ok(alist)
     }

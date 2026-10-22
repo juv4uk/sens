@@ -214,9 +214,9 @@ fn compiler_artifact_list<'a>(
     loop {
         match cursor {
             Value::Nil => return Ok(items),
-            Value::Pair(head, tail) => {
-                items.push(head.as_ref());
-                cursor = tail.as_ref();
+            Value::Pair(node) => {
+                items.push(&node.head);
+                cursor = &node.tail;
             }
             other => {
                 return Err(invalid_projection(format!(
@@ -1172,9 +1172,9 @@ mod tests {
         loop {
             match cursor {
                 Value::Nil => return out,
-                Value::Pair(head, tail) => {
-                    out.push(head.as_ref());
-                    cursor = tail.as_ref();
+                Value::Pair(node) => {
+                    out.push(&node.head);
+                    cursor = &node.tail;
                 }
                 other => panic!("expected proper list, got {other}"),
             }

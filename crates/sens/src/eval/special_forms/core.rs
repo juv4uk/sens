@@ -5,8 +5,8 @@
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
 use crate::{
-    Bit4, CoreD4, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span,
-    Value,
+    Bit4, CoreD4, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError,
+    PairNode, Span, Value,
 };
 
 use std::rc::Rc;
@@ -15,7 +15,7 @@ use std::rc::Rc;
 /// Core profile, or historical T/NIL carrier.
 /// The domain-word contracts own the meaning of the returned bit.
 pub(crate) fn atom_value(value: &Value, _environment: &Environment) -> Value {
-    Value::predicate_bit(!matches!(value, Value::Pair(_, _)))
+    Value::predicate_bit(!matches!(value, Value::Pair(_)))
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -247,9 +247,10 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
                 }
                 Value::list(out)
             }
-            ExprKind::Pair(head, tail) => {
-                Value::Pair(Rc::new(go(head, depth + 1)?), Rc::new(go(tail, depth + 1)?))
-            }
+            ExprKind::Pair(head, tail) => Value::Pair(Rc::new(PairNode {
+                head: go(head, depth + 1)?,
+                tail: go(tail, depth + 1)?,
+            })),
             // Зведений виклик як дані — список із функцією СЕНС у голові.
             ExprKind::Call(sid, arguments) => {
                 let mut out = Vec::with_capacity(arguments.len() + 1);
@@ -280,7 +281,7 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
 // помилка на непридатному вході визначається тут, без дублювання в D10.
 pub(crate) fn car_ref(value: &Value, span: Span) -> Result<&Value, LanguageError> {
     match value {
-        Value::Pair(head, _) => Ok(head.as_ref()),
+        Value::Pair(node) => Ok(&node.head),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
             "car expects a non-empty list · car ochikuie neporozhnii spysok · car erwartet eine nicht leere Liste",
@@ -291,13 +292,21 @@ pub(crate) fn car_ref(value: &Value, span: Span) -> Result<&Value, LanguageError
 
 pub(crate) fn cdr_ref(value: &Value, span: Span) -> Result<&Value, LanguageError> {
     match value {
-        Value::Pair(_, tail) => Ok(tail.as_ref()),
+        Value::Pair(node) => Ok(&node.tail),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
             "cdr expects a non-empty list · cdr ochikuie neporozhnii spysok · cdr erwartet eine nicht leere Liste",
             span,
         )),
     }
+}
+
+pub(crate) fn car_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
+    Ok((*car_ref(value, span)?).clone())
+}
+
+pub(crate) fn cdr_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
+    Ok((*cdr_ref(value, span)?).clone())
 }
 
 pub(crate) fn cons_values(
@@ -313,7 +322,7 @@ pub(crate) fn cons_values(
             span,
         ));
     }
-    Ok(Value::Pair(std::rc::Rc::new(head), std::rc::Rc::new(tail)))
+    Ok(Value::Pair(std::rc::Rc::new(PairNode { head, tail })))
 }
 
 /// Контракт 11.8: EQ — атомна операція; пара або значення поза

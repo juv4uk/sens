@@ -14,15 +14,15 @@ pub fn get<'a>(value: &'a Value, key: &str) -> Option<&'a Value> {
     loop {
         match current {
             Value::Nil => return None,
-            Value::Pair(entry, rest) => {
-                if let Value::Pair(k, v) = &**entry {
-                    if let Value::String(name) = &**k {
+            Value::Pair(node) => {
+                if let Value::Pair(entry) = &node.head {
+                    if let Value::String(name) = &entry.head {
                         if name.as_ref() == key {
-                            return Some(v);
+                            return Some(&entry.tail);
                         }
                     }
                 }
-                current = rest;
+                current = &node.tail;
             }
             _ => return None,
         }
@@ -56,9 +56,9 @@ pub fn as_array(value: Option<&Value>) -> Vec<&Value> {
     loop {
         match current {
             Value::Nil => return items,
-            Value::Pair(head, tail) => {
-                items.push(&**head);
-                current = tail;
+            Value::Pair(node) => {
+                items.push(&node.head);
+                current = &node.tail;
             }
             _ => return items,
         }
