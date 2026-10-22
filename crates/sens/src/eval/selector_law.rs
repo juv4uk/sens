@@ -99,7 +99,7 @@ pub(super) fn invoke(
         };
     }
     if suffix_len != 0 {
-        value = match select(root, &value, span) {
+        value = match select(root, value, span) {
             Ok(value) => value,
             Err(error) => return Some(Err(error)),
         };
