@@ -398,6 +398,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "tree-leaf-tally-unary",
         "list-keep-all-matching-atoms-general",
         "list-overlapping-triplets-general",
+        "list-overlapping-quadruples-general",
         "list-replace-first-atom-general",
         "list-remove-interior-matching-atoms-general",
         "list-multiset-intersection-general",
@@ -532,6 +533,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-all-distinct-atoms-general"
                 | "list-keep-all-matching-atoms-general"
                 | "list-overlapping-triplets-general"
+                | "list-overlapping-quadruples-general"
                 | "list-replace-first-atom-general"
                 | "list-remove-interior-matching-atoms-general"
                 | "list-multiset-intersection-general"
