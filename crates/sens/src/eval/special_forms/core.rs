@@ -22,22 +22,26 @@ pub(crate) fn atom_value(value: &Value, _environment: &Environment) -> Value {
 enum ExactD3CondControl {
     Select,
     SkipNo,
+    SkipNoWitness,
 }
 
 /// Canonical D3:110 control projection.
 ///
-/// Contract 11.8: only exact D1 PredicateBit answers may control COND.
-/// D1:1 selects and D1:0 skips. Structural (), Number 0/1, T/NIL and
-/// every other non-D1 value are wrong-domain control inputs and fail closed.
+/// Чинний #3161 answer-contract: D1:1 вибирає; D1:0 і D3:000
+/// продовжують, зберігаючи *різні* причини невибору.
+/// Інші значення (число, символ, пара, host Bool) не є D1/D3 керуванням.
 fn exact_d3_cond_control(value: &Value, span: Span) -> Result<ExactD3CondControl, LanguageError> {
-    match value.as_predicate_bit() {
-        Some(true) => Ok(ExactD3CondControl::Select),
-        Some(false) => Ok(ExactD3CondControl::SkipNo),
-        None => Err(LanguageError::new(
-            ErrorKind::Type,
-            format!("D3:110 COND expects exact D1:1 / D1:0; got {value}"),
-            span,
-        )),
+    match value {
+        Value::Nil => Ok(ExactD3CondControl::SkipNoWitness),
+        _ => match value.as_predicate_bit() {
+            Some(true) => Ok(ExactD3CondControl::Select),
+            Some(false) => Ok(ExactD3CondControl::SkipNo),
+            None => Err(LanguageError::new(
+                ErrorKind::Type,
+                format!("D3:110 COND expects exact D1:1 / D1:0 / D3:000; got {value}"),
+                span,
+            )),
+        },
     }
 }
 
@@ -71,7 +75,7 @@ pub(crate) fn evaluate_domain_cond(
         let value = evaluate(&parts[0], environment)?;
         match exact_d3_cond_control(&value, parts[0].span)? {
             ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
-            ExactD3CondControl::SkipNo => {}
+            ExactD3CondControl::SkipNo | ExactD3CondControl::SkipNoWitness => {}
         }
     }
 
@@ -313,13 +317,11 @@ pub(crate) fn cons_values(
     Ok(Value::Pair(std::rc::Rc::new(head), std::rc::Rc::new(tail)))
 }
 
-pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, LanguageError> {
+/// #3161: EQ є частковим атомним предикатом. Поза його областю
+/// результат D3:000 (відсутній свідок), а не D1:0 чи host exception.
+pub(crate) fn eq_values(left: Value, right: Value, _span: Span) -> Result<Value, LanguageError> {
     if !left.is_atom() || !right.is_atom() {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "eq expects two atoms · eq ochikuie dva atomy · eq erwartet zwei Atome",
-            span,
-        ));
+        return Ok(Value::Nil);
     }
     Ok(Value::predicate_bit(left == right))
 }
