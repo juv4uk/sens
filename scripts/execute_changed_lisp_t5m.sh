@@ -293,6 +293,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Без цього SENS правильно відхиляє невідомий D7 Text7-символ «світ?».
     # Не підміняємо виконання хостовим оракулом і не тягнемо весь Reason.
     binding_sources=(--binding-source lib/world.lisp)
+  elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ]]; then
+    binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
   fi
   run_native_t5m_program
 done < "$manifest"
