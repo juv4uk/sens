@@ -308,14 +308,6 @@ fn assert_same_bytes(
             .zip(&expected)
             .position(|(a, b)| a != b)
             .unwrap_or(actual.len().min(expected.len()));
-        // Точний фізичний кандидат тільки для відомої дрейфуючої пари.
-        // Перевірка лишається RED, доки Zig/T5M пара не перемайнена.
-        if stem == "list-last-repeated-atom-by-final-occurrence-general" {
-            let minted_hex: String = actual.iter()
-                .map(|byte| format!("{byte:02x}"))
-                .collect();
-            eprintln!("SENS_T5M_REPAIR_CANDIDATE source={stem} bytes={} hex={minted_hex}", actual.len());
-        }
         panic!(
             "test_id={test_id} source={stem} first_diff_byte={offset} minted={:?} committed={:?} minted_len={} committed_len={}",
             actual.get(offset), expected.get(offset), actual.len(), expected.len()
