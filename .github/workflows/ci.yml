@@ -1561,3 +1561,38 @@ jobs:
           else
             echo "SENS CHECKS PASS: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT; release requires corpus admission"
           fi
+
+  interpreter-memory-smoke:
+    name: Пікова RSS інтерпретаторів — smoke
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@1.99.0
+
+      - uses: ./.github/actions/install-zig
+
+      - name: Встановити інтерпретатори порівняння
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends guile-3.0 lua5.4
+
+      - name: Побудувати SENS/T5M виконавець
+        env:
+          CARGO_BUILD_JOBS: 2
+          CARGO_INCREMENTAL: 0
+        run: cargo build --locked -p sens-cli --bin sens-trit
+
+      - name: Перевірити звіт і виміряти однаковий сценарій у свіжих процесах
+        env:
+          PYTHONDONTWRITEBYTECODE: 1
+        run: |
+          set -euo pipefail
+          python3 -m unittest benchmarks/interpreter-memory/test_run.py -v
+          timeout 90s python3 benchmarks/interpreter-memory/run.py \
+            --sens-trit "$PWD/target/debug/sens-trit" \
+            --repetitions 3
