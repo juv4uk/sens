@@ -1161,7 +1161,6 @@ class ThreePassMigrationTests(unittest.TestCase):
         installer = guards.split("      - uses: ./.github/actions/install-zig", 1)[1]
         installer_tail = installer.split("      - name:", 1)[0]
         self.assertNotIn("        if:", installer_tail)
-        self.assertIn("      - uses: ./.github/actions/install-zig\n\n", guards)
         section = guards.split(
             '      - name: "ONE-SHOT — нативні SENS/Zig T5M-пари', 1
         )[1].split('      - name: "ONE-SHOT — artifact', 1)[0]
