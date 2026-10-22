@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CHECKER = ROOT / "scripts" / "check_principle_force.py"
 REGISTRY = "research/principle-evidence.json"
 DOC = "docs/language-core-axioms.md"
-CONST = "scripts/build-constitution.lisp"
+CONST = "my-lisp-constitution.lisp"
 CONF = "tests/fixtures/conformance.lisp"
 ARTIFACTS = (
     "lib/core.lisp", "lib/unify.lisp", "lib/reason.lisp",

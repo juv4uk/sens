@@ -1,7 +1,7 @@
 {
   "schema": "sens-principle-evidence/v1",
   "principles_doc": "docs/language-core-axioms.md",
-  "constitution_script": "scripts/build-constitution.lisp",
+  "constitution_script": "my-lisp-constitution.lisp",
   "conformance": "tests/fixtures/conformance.lisp",
   "note": "The axioms rest on the project principles (P1-P5). This registry gives every principle MACHINE-CHECKABLE evidence, so no principle is merely declared. Restores the force of principle 5, whose old-technology half (lib/clips-import.lisp) had no evidence at all.",
   "bindings": [
