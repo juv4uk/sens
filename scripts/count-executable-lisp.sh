@@ -81,7 +81,7 @@ while IFS= read -r -d '' source; do
     one_byte_diff="$(cmp -l tests/semantic/meta-fc-predicates-d1-law.lisp "$source" 2>/dev/null || :)"
     if [[ "$one_byte_diff" =~ ^[[:space:]]*[0-9]+[[:space:]]+60[[:space:]]+61[[:space:]]*$ ]]; then
       (( expected_negative += 1 ))
-      printf 'NATIVE_EXPECTED_NEGATIVE\\t%s\\ttest=meta_fc_predicate_witness\\n' "$source" >&2
+      printf 'NATIVE_EXPECTED_NEGATIVE\t%s\ttest=meta_fc_predicate_witness\n' "$source" >&2
       continue
     fi
   fi
