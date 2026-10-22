@@ -8,9 +8,17 @@ description = "Independent sens core · Незалежне ядро sens · Unab
 [lib]
 path = "src/lib.rs"
 
+# This is a manually invoked comparison against the isolated Rust reference
+# codec, not a production example or default Cargo test target.
+[[example]]
+name = "zig_f3c_matched_bench"
+test = false
+required-features = ["rust-f3-reference"]
+
 [features]
 default = []
 benchmark-ast-visits = []
+rust-f3-reference = []
 
 [dev-dependencies]
 # Tests may opt into the explicit host capability crate, while the shipped
