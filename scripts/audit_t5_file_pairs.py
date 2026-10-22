@@ -29,7 +29,13 @@ def candidates(root: Path, include_untracked: bool = False) -> list[Path]:
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False,
         )
         if proc.returncode == 0:
-            paths = [root / os.fsdecode(rel) for rel in proc.stdout.split(b"\0") if rel]
+            # superseded/ — виключений набір (його не бачать рантайм, суддя,
+            # glob-и), тож і аудит не має його рахувати як пару.
+            paths = [
+                root / os.fsdecode(rel)
+                for rel in proc.stdout.split(b"\0")
+                if rel and b"/superseded/" not in rel
+            ]
             return sorted(paths)
     result: list[Path] = []
     for directory, names, files in os.walk(root, followlinks=False):
@@ -49,7 +55,8 @@ def source_candidates(root: Path, include_untracked: bool = False) -> list[Path]
         )
         if proc.returncode == 0:
             return sorted(root / os.fsdecode(rel)
-                          for rel in proc.stdout.split(b"\0") if rel)
+                          for rel in proc.stdout.split(b"\0")
+                          if rel and b"/superseded/" not in rel)
     result: list[Path] = []
     for directory, names, files in os.walk(root, followlinks=False):
         names[:] = sorted(name for name in names if name not in SKIP_DIRS)
