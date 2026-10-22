@@ -1254,6 +1254,58 @@ mod tests {
     }
 
     #[test]
+    fn ordinary_ukrainian_source_lifts_only_admitted_d8_io_heads() {
+        for (surface, bits) in [
+            ("код-символу", 0b11100000),
+            ("текст-у-символ", 0b11101101),
+            ("символ-у-текст", 0b11101110),
+            ("значення-у-текст", 0b11110100),
+        ] {
+            let input = format!("({surface} (як-є а))");
+            let expression = only(
+                parse_mixed_exact_domain(&input)
+                    .expect("ратифікований D8 I/O має мати єдину exact адресу"),
+            );
+            let ExprKind::List(parts) = expression.kind else {
+                panic!("виклична форма");
+            };
+            assert!(
+                matches!(
+                    &parts[0].kind,
+                    ExprKind::DomainIdentity(identity)
+                        if identity.width() == 8 && identity.packed_bits() == bits
+                ),
+                "{surface}: людська назва не стає D7-зв'язуванням"
+            );
+        }
+
+        // Quote payload is data; user DEFINE shadows even an admitted surface.
+        let quoted = only(
+            parse_mixed_exact_domain("(як-є (текст-у-символ а))")
+                .expect("цитування не проектує викличні голови"),
+        );
+        let ExprKind::List(outer) = quoted.kind else { panic!("quote"); };
+        let ExprKind::List(inner) = &outer[1].kind else { panic!("quoted list"); };
+        assert!(matches!(&inner[0].kind, ExprKind::Symbol(name)
+            if name.as_ref() == "текст-у-символ"));
+
+        let input = "(визначити текст-у-символ (функція (а) а)) (текст-у-символ (як-є а))";
+        let expressions = parse_mixed_exact_domain(input)
+            .expect("власна функція перекриває зовнішній виклик");
+        let ExprKind::List(call) = &expressions[1].kind else { panic!("call"); };
+        assert!(matches!(&call[0].kind, ExprKind::Symbol(name)
+            if name.as_ref() == "текст-у-символ"));
+
+        let unadmitted = only(
+            parse_mixed_exact_domain("(символ-за-кодом 65)")
+                .expect("нератифікований D8 не змінюється від читання"),
+        );
+        let ExprKind::List(parts) = unadmitted.kind else { panic!("call"); };
+        assert!(matches!(&parts[0].kind, ExprKind::Symbol(name)
+            if name.as_ref() == "символ-за-кодом"));
+    }
+
+    #[test]
     fn d1_values_are_not_shadowed_by_source_binding_inventory() {
         let source = "(визначити тестове-імя (функція (так) так)) так";
         let expressions = parse_mixed_exact_domain(source)
