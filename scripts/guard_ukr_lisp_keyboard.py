@@ -160,14 +160,34 @@ EXCLUDED_PREFIXES = (
     "lib/machine/",
     "lib/generated/",
     "lib/surface/",
+    "docs/",
+    "evidence/",
+    "contracts/",
+    "experiments/",
+    "knowledge/",
+    "research/",
 )
+# Не програми укр-проєкції: статус, контракти, згенеровані зведення.
+EXCLUDED_FILES = frozenset((
+    "my-lisp-constitution.lisp",
+    "ecosystem-status.lisp",
+    "memory-layout-contract.lisp",
+    "machine-lowering-boundary.lisp",
+    "repo.lisp",
+    "tasks.lisp",
+    "language-contract.lisp",
+    "typed-buffer-proposal.lisp",
+    "contract-consumers.lisp",
+))
 
 
 def validate(paths: set[str], revision: str) -> int:
     failures = 0
     paths = {
         p for p in paths
-        if p.endswith(".lisp") and not p.startswith(EXCLUDED_PREFIXES)
+        if p.endswith(".lisp")
+        and not p.startswith(EXCLUDED_PREFIXES)
+        and p not in EXCLUDED_FILES
     }
     for path in sorted(paths):
         try:
