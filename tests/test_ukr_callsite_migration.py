@@ -1766,6 +1766,24 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
             self.assertIn('(читати-файл "tests/fixtures/conformance.lisp")', source)
             self.assertIn("(надрукувати-приклади фікстури)", source)
             return
+        if path == "scripts/generate-rust-function-signatures.lisp":
+            # Працює повний новий генератор: історичний blob короткого
+            # макета не можна вважати каноном виконуваного SENS.
+            assert_live_ukrainian_script(self, self.ROOT, path, source)
+            self.assertIn("(визначити подати-рядок-сигнатури", source)
+            self.assertIn("(визначити згенерований-вміст", source)
+            self.assertIn("(читати-файл шлях-джерела)", source)
+            self.assertIn("(записати-файл шлях-результату згенерований-вміст)", source)
+            self.assertIn(
+                "(однакові? (читати-файл шлях-результату) згенерований-вміст)",
+                source,
+            )
+            # Зворотний код кожної відомої голови відповідає ратифікації.
+            edits = self._head_edits(source)
+            self.assertTrue(edits)
+            for edit in edits:
+                self.assertEqual(edit["head"], self.PROJECTIONS[edit["bits"]])
+            return
         edits = self._head_edits(source)
         actual = Counter(edit["bits"] for edit in edits)
         self.assertEqual(dict(actual), spec["counts"], f"{path}: відмінний точний перелік голів")
