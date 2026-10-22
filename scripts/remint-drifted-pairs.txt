@@ -86,3 +86,4 @@ lib/list-reverse-tail-general.lisp
 benchmarks/contest-uk/факторіал-компакт.lisp
 lib/list-drop-every-third-general.lisp
 lib/list-drop-every-third-compact-general.lisp
+lib/залишити-точні-числа.lisp
