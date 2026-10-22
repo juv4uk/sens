@@ -25,7 +25,6 @@ esac
 scratch="$(mktemp -d)"
 trap 'rm -rf -- "$scratch"' EXIT
 sources=0
-reviewed_nonprogram=0
 complete=0
 inverse=0
 executable=0
@@ -50,15 +49,6 @@ while IFS= read -r -d '' source; do
     lib/domains/d[1-9].lisp|lib/domains/d10.lisp|lib/domains/d11.lisp)
       (( nonprogram_data += 1 ))
       printf 'NATIVE_DATA_ONLY\t%s\tclassification=DOMAIN_TABLE\n' "$source" >&2
-      continue ;;
-  esac
-  # Ратифіковані D1–D11 — визначення доменних таблиць, НЕ програми.
-  # Вони за законом не мають пари .sens; не записувати ці DATA у
-  # "відсутні виконувані" й не створювати фальшивий релізний блокер.
-  # Факт виконання для решти підтверджує ТІЛЬКИ нативний SENS/Zig нижче.
-  case "$source" in
-    lib/domains/d[1-9].lisp|lib/domains/d10.lisp|lib/domains/d11.lisp)
-      (( reviewed_nonprogram += 1 ))
       continue ;;
   esac
   # Історичні бенчмарки входять до діагностики, не у підтверджені PASS.
@@ -182,4 +172,4 @@ while IFS= read -r -d '' source; do
 done < <(git ls-files -z -- '*.lisp')
 
 printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s\n' \
-  "${scope:-all}" "$sources" "$complete" "$inverse" "$executable" "$paired_only" "$bad" "$missing" "$reviewed_nonprogram" "$nonprogram_data"
+  "${scope:-all}" "$sources" "$complete" "$inverse" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data"
