@@ -569,6 +569,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-move-first-match-to-front-general"
                 | "list-all-unordered-position-pairs-general"
                 | "list-all-subsets-by-position-general"
+                | "tree-pair-tally-unary-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
