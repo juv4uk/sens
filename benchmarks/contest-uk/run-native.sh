@@ -36,6 +36,7 @@ for source in "$here"/*.lisp; do
   [[ -f "$source" && ! -L "$source" ]] || continue
   name="$(basename -- "$source" .lisp)"
   case "$name" in
+    акерман|акерман-*) expected=61 ;;
     довжина-списку|довжина-списку-*) expected=8 ;;
     сума-до-n|сума-до-n-*) expected=5050 ;;
     факторіал|факторіал-*) expected=3628800 ;;

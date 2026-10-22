@@ -31,22 +31,21 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertNotIn("(status pass)", script)
         self.assertEqual(script.count("(визначити готовність-породження-метасемантичного-реєстру"), 1)
 
-    def test_generated_function_table_headers_match_ukrainian_generator(self):
-        # Синхронізація похідних даних, не семантичний тест SENS.
+    def test_retired_function_table_generator_cannot_pretend_to_execute(self):
+        # Історична восьмибітна таблиця — дані, а не чинний код чи генератор.
         generator = source("scripts/generate-function-table.lisp")
         machine = source("lib/generated/function-table.lisp")
         document = source("docs/generated/function-table.md")
-        for row in machine.splitlines()[:8]:
-            with self.subTest(machine=row):
-                self.assertIn('"' + row + '"', generator)
-        for row in document.splitlines()[:12]:
-            if row and not row.startswith("|----"):
-                with self.subTest(document=row[:48]):
-                    self.assertIn('"' + row + '"', generator)
-        current = "cargo run -p sens-cli --bin sens -- scripts/generate-function-table.lisp"
-        self.assertIn(current, document)
-        self.assertIn(current, generator)
-        self.assertNotIn("my-lisp-cli --bin my-lisp", document)
+        lines = [line.strip() for line in generator.splitlines() if line.strip()]
+        self.assertTrue(lines)
+        self.assertTrue(all(line.startswith(";") for line in lines))
+        self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", generator)
+        self.assertIn("Не свідок. Не якір.", generator)
+        self.assertNotIn("(status pass)", generator)
+        self.assertIn("ІСТОРИЧНА МІГРАЦІЙНА ПРОЄКЦІЯ — НЕ СЕМАНТИЧНА ВЛАДА", machine)
+        self.assertIn("історична міграційна проєкція", document)
+        self.assertNotIn("Відтворити:", document)
+        self.assertNotIn("cargo run -p sens-cli --bin sens -- scripts/generate-function-table.lisp", document)
 
     def test_constitution_example_is_current_sens_not_host_racket(self):
         # Перевірка вихідних форм і незмінності цитованих даних.
@@ -156,7 +155,6 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         live_callers = (
             "lib/yantra.lisp",
             "lib/translation.lisp",
-            "scripts/generate-function-table.lisp",
         )
         for filename in live_callers:
             code = source(filename)
@@ -169,8 +167,10 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         registry_anchor = source("scripts/generate-rust-semantic-registry.lisp")
         with self.subTest(file="scripts/generate-rust-semantic-registry.lisp",
                           migration="retired generator stays unverified"):
-            self.assertIn("(визначити якір", registry_anchor)
-            self.assertIn("(status not-verified)", registry_anchor)
+            # Вилучений генератор не є ні програмою, ні доказовим якорем.
+            self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", registry_anchor)
+            self.assertIn("Не свідок. Не якір.", registry_anchor)
+            self.assertNotRegex(registry_anchor, r"(?m)^\s*\(")
             self.assertNotIn("(status pass)", registry_anchor)
             self.assertNotIn("класифікувати-рядкове-значення", registry_anchor)
         inventory = source("lib/surface/uk-inventory.lisp")

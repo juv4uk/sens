@@ -98,3 +98,5 @@ benchmarks/contest-uk/сума-квадратів-додавання.lisp
 benchmarks/contest-uk/сума-кубів-два-квадрати.lisp
 benchmarks/contest-uk/сума-четвертих-степенів-рекурсія.lisp
 benchmarks/contest-uk/сума-четвертих-степенів-формула.lisp
+benchmarks/contest-uk/нсд.lisp
+benchmarks/contest-uk/сума-парних.lisp

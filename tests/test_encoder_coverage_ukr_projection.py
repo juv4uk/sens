@@ -1,46 +1,17 @@
-"""Перевірки українських викличних голів encoder coverage.
+"""Перевірка актуальних даних покриття та виведеного з ужитку генератора.
 
-Порівнюємо структуру чинної програми та її викличні голови, а не Git blob:
-коментарі й форматування не є семантикою. Це статичний тест джерела,
-а не доказ виконання SENS чи фізичного T5M-переходу.
+Це лише структурний свідок джерел, а не Python-виконання Lisp і не
+доказ нативного SENS/Zig. Старі викличні голови з уже вилученої програми
+не відновлюються фіктивним AST-тестом.
 """
-from collections import Counter
 from pathlib import Path
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-PATH = ROOT / "lib/machine/encoding/coverage-generator.lisp"
-EXPECTED = {
-    "100": ("перше", 36), "101": ("тотожне?", 3),
-    "110": ("за-умовою", 28), "111": ("сполучити", 4),
-    "1001": ("друге", 26), "1110": ("список", 18),
-    "0011": ("визначити", 40), "0010": ("функція", 25),
-    "001": ("як-є", 49), "010": ("атом?", 3), "011": ("решта", 40),
-}
-# Додаткові перевірені домени D5/D6/D8/D9 (крім reader-unsafe FIFTH).
-HIGH = {
-    "10011": ("третє", 11),
-    "10100": ("зворот", 3),
-    "10101": ("зворот-до", 1),
-    "100111": ("четверте", 3),
-    "101000": ("відобразити", 1),
-    "101110": ("згорнути", 1),
-    "11101110": ("символ-у-текст", 2),
-    "11110100": ("значення-у-текст", 4),
-    "110011110": ("рядок-додати", 2),
-    "110101001": ("читати-всі", 4),
-    "110110111": ("читати-файл", 3),
-    "01010": ("додати", 2),
-    "11010": ("менше?", 2),
-    "001001": ("нехай-послідовно", 3),
-    "001000": ("нехай", 3),
-}
-# D9:110110101 FIFTH: ратифікований рядок має апостроф у друкованій
-# поверхні, яку поточний reader читає як quote; використовуємо точно
-# ту саму композицію D3 CAR(CDR(CDR(CDR(CDR(list))))).
-FIFTH_WITNESS = "(перше (решта (решта (решта (решта coverage-row)))))"
-FIFTH_BINARY = "(110110101 coverage-row)"
+RETIRED = ROOT / "lib/machine/encoding/coverage-generator.lisp"
+LEDGER = ROOT / "lib/machine/encoding/coverage.lisp"
+
 TOKEN = re.compile(r""";[^\n]*|"(?:\\.|[^"\\])*"|[()]|['\x60,]|[^\s()'";\x60,]+""")
 
 
@@ -82,193 +53,109 @@ def parse(text):
     return forms
 
 
-def call_heads(source):
-    def walk(node):
-        if node[0] == "quoted" or node[0] != "list":
-            return
-        kids = node[1]
-        head = kids[0] if kids else None
-        name = head[1] if head and head[0] == "atom" else ""
-        if name:
-            yield (name, head[2], head[3])
-        if name in ("001", "як-є", "quote"):
-            return
-        for kid in kids:
-            yield from walk(kid)
-    for form in parse(source):
-        yield from walk(form)
+
+def _tag(node):
+    if node[0] != "list" or not node[1] or node[1][0][0] != "atom":
+        raise AssertionError("некоректна форма покриття")
+    return node[1][0][1]
 
 
-def ratified():
-    result = {}
-    for width in (3, 4, 5, 6, 8, 9):
-        src = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
-        for line in src.splitlines():
-            row = re.match(
-                r"^\s*\(([01]+)\s+\(ук [^\s()]+\)\s+\(укр ([^()\s]+)\)",
-                line,
-            )
-            if row and len(row.group(1)) == width:
-                result[row.group(1)] = row.group(2)
-    return result
+def _field(node, label, kind="atom"):
+    if _tag(node) != label or len(node[1]) != 2 or node[1][1][0] != kind:
+        raise AssertionError("некоректне поле покриття: " + label)
+    return node[1][1][1]
 
 
-def verify(text):
-    """Точні чинні українські викличні голови й протокол без відтворення Git blob.
+def verify_ledger(source):
+    """Перевірити структуру збережених ДАНИХ, без оцінювання Lisp через Python.
 
-    Структурна охорона джерела, не обчислювач SENS і не доказ релізу.
+    Числа та рядки взяті з самого файлу; не видавати це за native PASS.
     """
-    authority = ratified()
-    for bits, (name, _historical_count) in {**EXPECTED, **HIGH}.items():
-        if authority.get(bits) != name:
-            raise AssertionError("зміна ратифікованої проєкції: " + bits)
-    # Зміст QUOTE — дані, не виконавчі атоми. Лексичний пошук
-    # хибно забороняв (як-є так) і рядки з D1-мітками.
-    # Ця перевірка лише структурна: семантику виконує SENS.
-    def unbound_d1(node):
-        if node[0] == "atom":
-            return node[1] in ("так", "ні")
-        if node[0] == "quoted" or node[0] != "list":
-            return False
-        items = node[1]
-        if items and items[0][0] == "atom" and items[0][1] == "як-є":
-            return False
-        return any(unbound_d1(item) for item in items)
-
-    if any(unbound_d1(form) for form in parse(text)):
-        raise AssertionError("незв'язане D1 так/ні в генераторі")
-    heads = list(call_heads(text))
-    if not heads:
-        raise AssertionError("втрачено викличні голови SENS")
-    binary = [name for name, _start, _end in heads if re.fullmatch(r"[01]+", name)]
-    if binary:
-        raise AssertionError("залишилися сирі числові викличні голови: " + str(binary))
-    # Пряме атомне порівняння D3, а не заміна його на конструктор CONS.
-    witnesses = (
-        "(визначити покриття-кодувальника-числа-рівні?",
-        "((менше? ліве праве) (атом? (як-є (стан))))",
-        "((менше? праве ліве) (атом? (як-є (стан))))",
-        "(визначити покриття-кодувальника-тотожні-атоми?",
-        "(тотожне? ліве-значення праве-значення)",
-        "(покриття-кодувальника-тотожні-структури? (перше ліве-значення) (перше праве-значення))",
-        "(покриття-кодувальника-тотожні-структури? (решта ліве-значення) (решта праве-значення))",
-        "(визначити покриття-кодувальника-збігається-збережений-рядок?",
-        "(визначити покриття-кодувальника-сформувати-звіт",
-        "(як-є x86-encoder-coverage-1)",
-        "(як-є coverage)",
-        "(як-є status)",
-    )
-    for witness in witnesses:
-        if text.count(witness) < 1:
-            raise AssertionError("зміна чинного Lisp-закону або цитованих даних: " + witness)
-    return Counter(name for name, _start, _end in heads)
+    forms = parse(source)
+    if len(forms) != 1 or _tag(forms[0]) != "x86-encoder-coverage-1":
+        raise AssertionError("повинен бути один кореневий запис покриття")
+    header, partial_header, *records = forms[0][1][1:]
+    count = _field(header, "form-count")
+    partial_count = _field(partial_header, "partial-count")
+    if not count.isdecimal() or not partial_count.isdecimal():
+        raise AssertionError("пошкоджений лічильник покриття")
+    if len(records) != int(count):
+        raise AssertionError("кількість записів покриття не відповідає даним")
+    known_statuses = {"partial", "not-yet-implemented"}
+    addresses = set()
+    partial = 0
+    for rec in records:
+        if _tag(rec) != "coverage" or len(rec[1]) != 5:
+            raise AssertionError("пошкоджений запис покриття")
+        iclass = _field(rec[1][1], "iclass", "string")
+        extension = _field(rec[1][2], "extension")
+        status = _field(rec[1][3], "status")
+        reason = _field(rec[1][4], "reason", "string")
+        if not iclass or not extension or not reason:
+            raise AssertionError("порожній опис покриття")
+        if status not in known_statuses:
+            raise AssertionError("невідомий статус: " + status)
+        identity = (extension, iclass)
+        if identity in addresses:
+            raise AssertionError("повтор ICLASS+extension")
+        addresses.add(identity)
+        partial += status == "partial"
+    if partial != int(partial_count):
+        raise AssertionError("partial-count не відповідає даним")
+    if not 0 < partial < len(records):
+        raise AssertionError("неправдиве твердження про повний допуск")
+    return len(records), partial
 
 
-class EncoderCoverageProjectionTests(unittest.TestCase):
+class EncoderCoverageCurrentDataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.text = PATH.read_text(encoding="utf-8")
+        cls.retired = RETIRED.read_text(encoding="utf-8")
+        cls.ledger = LEDGER.read_text(encoding="utf-8")
 
-    def test_d1_outcomes_execute_as_predicate_expressions_not_unbound_names(self):
-        self.assertGreater(self.text.count("(атом? (як-є ()))"), 20)
-        self.assertGreater(self.text.count("(хибне? (атом? (як-є ())))"), 10)
-        verify(self.text)
-        mutant = self.text.replace("(атом? (як-є ()))", "так", 1)
-        self.assertNotEqual(mutant, self.text)
-        with self.assertRaisesRegex(AssertionError, "D1"):
-            verify(mutant)
+    def test_old_generator_is_only_comments_not_executable_sens(self):
+        # Відсутній код не може бути доказовим якорем чи runtime PASS.
+        self.assertEqual(parse(self.retired), [])
+        self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", self.retired)
+        self.assertIn("Не свідок. Не якір.", self.retired)
+        self.assertNotIn("(status pass)", self.retired)
+        self.assertNotIn("(визначити ", self.retired)
 
-    def test_current_ukrainian_call_heads_and_exact_d3_law(self):
-        # Перевіряємо актуальний AST, а не давній SHA/snapshot.
-        self.assertGreater(sum(verify(self.text).values()), 100)
+    def test_executable_reintroduction_is_not_invisible(self):
+        mutant = self.retired + "\n(визначити бутафорія (функція () так))\n"
+        self.assertNotEqual(parse(mutant), [])
+        # Немає автоматичного ратифікування з нової текстової форми.
+        self.assertIn("(визначити бутафорія", mutant)
 
-    def test_other_domain_heads_and_quoted_data_untouched(self):
-        self.assertIn("(рядок-додати накопичене фрагмент)", self.text)
-        self.assertIn("(нехай ", self.text)
-        self.assertIn("(як-є x86-encoder-coverage-1)", self.text)
-        verify(self.text)
+    def test_real_ledger_has_self_consistent_qualified_rows(self):
+        n, partial = verify_ledger(self.ledger)
+        self.assertGreater(n, 1000)
+        self.assertGreater(partial, 0)
 
-    def test_wrong_ukrainian_operator_fails(self):
-        broken = self.text.replace(
-            "(тотожне? ліве-значення праве-значення)",
-            "(сполучити ліве-значення праве-значення)", 1,
-        )
-        self.assertNotEqual(broken, self.text)
-        with self.assertRaisesRegex(AssertionError, "зміна"):
-            verify(broken)
+    def test_ledger_rejects_fake_all_pass_and_wrong_count(self):
+        changed = self.ledger.replace("(status partial)", "(status pass)", 1)
+        self.assertNotEqual(changed, self.ledger)
+        with self.assertRaisesRegex(AssertionError, "невідомий статус"):
+            verify_ledger(changed)
+        changed = self.ledger.replace("(form-count 1176)", "(form-count 1175)", 1)
+        self.assertNotEqual(changed, self.ledger)
+        with self.assertRaisesRegex(AssertionError, "кількість"):
+            verify_ledger(changed)
 
-    def test_d24_counts_use_strict_d5_order_not_d3_identity(self):
-        # Статична перевірка канонічних викличних голів, не Python-eval.
-        self.assertIn(
-            "(покриття-кодувальника-числа-рівні? покриття-кодувальника-кількість-сиріт 0)",
-            self.text,
-        )
-        self.assertNotIn("(тотожне? двійкова-кількість", self.text)
-        self.assertNotIn("(тотожне? покриття-кодувальника-кількість-сиріт 0)", self.text)
-        for old, new in (
-            ("(менше? ліве праве)", "(тотожне? ліве праве)"),
-            ("(менше? праве ліве)", "(тотожне? праве ліве)"),
-        ):
-            broken = self.text.replace(old, new, 1)
-            self.assertNotEqual(broken, self.text)
-            with self.assertRaisesRegex(AssertionError, "Lisp-закону"):
-                verify(broken)
-
-    def test_wrong_quoted_data_fails(self):
-        broken = self.text.replace(
-            "(як-є x86-encoder-coverage-1)",
-            "(як-є пошкоджена-проєкція/1)", 1,
-        )
-        self.assertNotEqual(broken, self.text)
-        with self.assertRaisesRegex(AssertionError, "зміна"):
-            verify(broken)
-
-    def test_wrong_structural_cdr_recursion_is_detected(self):
-        witness = (
-            "(покриття-кодувальника-тотожні-структури? "
-            "(решта ліве-значення) (решта праве-значення))"
-        )
-        broken = self.text.replace(
-            witness,
-            "(покриття-кодувальника-тотожні-структури? "
-            "(перше ліве-значення) (решта праве-значення))", 1,
-        )
-        self.assertNotEqual(broken, self.text)
-        with self.assertRaisesRegex(AssertionError, "зміна"):
-            verify(broken)
-
-    def test_comments_and_whitespace_do_not_change_program_tree(self):
-        # Статичний AST без позицій токенів; це НЕ SENS-виконання.
-        def tree(node):
-            if node[0] == "list":
-                return ("list", tuple(tree(child) for child in node[1]))
-            if node[0] == "quoted":
-                return ("quoted", tree(node[1]))
-            return (node[0], node[1])
-
-        original = tuple(tree(form) for form in parse(self.text))
-        decorated = (
-            "; Коментар перед джерелом не є частиною програми\n"
-            + self.text.replace("(визначити ", "(визначити   ", 1)
-            + "\n; Коментар після джерела також не змінює програму\n"
-        )
-        self.assertEqual(original, tuple(tree(form) for form in parse(decorated)))
-        changed = self.text.replace(
-            "(тотожне? ліве-значення праве-значення)",
-            "(сполучити ліве-значення праве-значення)", 1,
-        )
-        self.assertNotEqual(original, tuple(tree(form) for form in parse(changed)))
-
-    def test_quoted_d1_tags_are_data_not_unbound_expressions(self):
-        # Позитивне й негативне свідчення AST, не Python-eval Lisp.
-        verify(self.text + "\n(як-є (так ні))\n")
-        broken = self.text + "\n(визначити проба так)\n"
-        with self.assertRaisesRegex(AssertionError, "D1"):
-            verify(broken)
-
-    def test_unbalanced_source_is_rejected(self):
-        with self.assertRaisesRegex(AssertionError, "незакр"):
-            parse("(визначити f (функція (x) x)")
+    def test_ledger_rejects_duplicate_identity_and_partial_drift(self):
+        original = self.ledger
+        # Кожен фізичний рядок починається з (coverage; повтор
+        # першого рядка невидимий лише для помилкового поверхового grep.
+        start = original.index("  (coverage\n")
+        stop = original.index("  (coverage\n", start + 1)
+        duplicate = original[start:stop]
+        broken = original[:stop] + duplicate + original[stop:]
+        with self.assertRaisesRegex(AssertionError, "кількість"):
+            verify_ledger(broken)
+        broken = original.replace("(partial-count 122)", "(partial-count 121)", 1)
+        self.assertNotEqual(broken, original)
+        with self.assertRaisesRegex(AssertionError, "partial-count"):
+            verify_ledger(broken)
 
 
 class EncoderCoverageLispDiagnosticsTests(unittest.TestCase):

@@ -7,10 +7,16 @@
   "domain_capacity": 2048,
   "scope": "Дослідницька база назв із історичних Lisp та всіх переглянутих доменів/бібліотек SENS, відсутніх за точною назвою в D1–D10 та чинній тестовій лексиці D11. Назва не є семантичним доказом.",
   "current_d11": {
-    "ratified_testing_vocabulary": "knowledge/d11-testing-vocabulary-ratified.json",
     "blob_sha": "9b4428effaca82629f030c4d168ed585b048aa5f",
     "occupied": 43,
-    "preserved": true
+    "preserved": true,
+    "unratified": true,
+    "ratified": false,
+    "admitted_resident_occupancy": 0,
+    "legacy_fixture_count": 43,
+    "owner_correction_20261022": "Ці 43 записи власник не ратифіковував; старий filename містить історично неправильне слово ratified",
+    "review": "knowledge/d11/база-доступних-функцій/звірка-43-без-ратифікації-20261022.json",
+    "legacy_testing_vocabulary": "knowledge/d11-testing-vocabulary-ratified.json"
   },
   "exclusion_snapshot": {
     "d10_path": "knowledge/d10-v18-semantic-inventory.json",
@@ -22,10 +28,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 220,
+    "total": 224,
     "historical": 17,
-    "library": 203,
-    "distinct_families": 36
+    "library": 207,
+    "distinct_families": 37
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5530,6 +5536,86 @@
       "callable": false,
       "proposed_law_uk": "Повертає лексичне SENS-замикання, що зберігає список одномісних функцій; за майбутнього виклику з одним значенням застосовує кожну до цього значення і зберігає порядок їх результатів. Відрізняється від попередньо обчисленого списку результатів.",
       "native_law_test": "crates/sens/tests/d11_clojure_juxt.rs::d11_clojure_juxt_unary_closures_and_negative_laws_native",
+      "native_ci_status": "NOT_YET_CONFIRMED"
+    },
+    {
+      "surface_name": "усі-префікси",
+      "source_family": "sens-list-prefix-suffix-cuts",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/list-all-prefixes-general.lisp",
+        "blob_sha": "4de7ee10a9bf214ccfd5818d8b39ce38e267e8b8",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для скінченного правильного списку атомів довжини n повертає n+1 початкових частин: перша (), кожна наступна додає рівно наступний вхідний атом, остання — вхід; повторені атоми не зникають. На порожньому вході результат (()).",
+      "behavioral_dedup": "Статичне зіставлення з D1–D10 не доводить незалежності; структурна рекурсія D3/D4. Не виділяти opcode за новою назвою.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_prefix_suffix_cuts.rs",
+      "native_ci_status": "NOT_YET_CONFIRMED"
+    },
+    {
+      "surface_name": "усі-суфікси",
+      "source_family": "sens-list-prefix-suffix-cuts",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/list-all-suffixes-general.lisp",
+        "blob_sha": "cdeb6575893872ac1212ac5395bb460a48cf6680",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для скінченного правильного списку атомів довжини n повертає n+1 хвостів: перший увесь вхід, кожний наступний його решта, останній (). Жодне входження чи порядок атомів не змінюється.",
+      "behavioral_dedup": "Статичне зіставлення з D1–D10 не доводить незалежності; структурна рекурсія D3/D4. Не виділяти opcode за новою назвою.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_prefix_suffix_cuts.rs",
+      "native_ci_status": "NOT_YET_CONFIRMED"
+    },
+    {
+      "surface_name": "всі-розрізи",
+      "source_family": "sens-list-prefix-suffix-cuts",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/list-all-cuts-general.lisp",
+        "blob_sha": "08d41e70bcc50979ed9250668dc7f4262c18710f",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для скінченного правильного списку атомів x довжини n повертає n+1 впорядкованих пар (префікс суфікс), які відповідають кожній можливій границі розрізу, включно з краями. Для кожної пари приєднання частин відновлює x.",
+      "behavioral_dedup": "Статичне зіставлення з D1–D10 не доводить незалежності; структурна рекурсія D3/D4. Не виділяти opcode за новою назвою.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_prefix_suffix_cuts.rs",
+      "native_ci_status": "NOT_YET_CONFIRMED"
+    },
+    {
+      "surface_name": "усі-розрізи-відновлюють?",
+      "source_family": "sens-list-prefix-suffix-cuts",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/list-all-cuts-general.lisp",
+        "blob_sha": "08d41e70bcc50979ed9250668dc7f4262c18710f",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для скінченного правильного списку розрізів і початкового списку x повертає D1 так тоді й лише тоді, коли приєднання префікса та суфікса кожного розрізу дорівнює x; хибна хоча б одна пара повертає D1 ні. Цей закон не доводить, що список розрізів повний: повноту перевіряє окреме n+1 правило.",
+      "behavioral_dedup": "Статичне зіставлення з D1–D10 не доводить незалежності; структурна рекурсія D3/D4. Не виділяти opcode за новою назвою.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_prefix_suffix_cuts.rs",
       "native_ci_status": "NOT_YET_CONFIRMED"
     }
   ],

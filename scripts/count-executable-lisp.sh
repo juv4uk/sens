@@ -27,6 +27,7 @@ trap 'rm -rf -- "$scratch"' EXIT
 sources=0
 complete=0
 inverse=0
+paired_executable=0
 executable=0
 paired_only=0
 bad=0
@@ -162,6 +163,9 @@ while IFS= read -r -d '' source; do
     sed 's/^/SENS paired: /' "$scratch/paired.err" >&2
     continue
   fi
+  # Цей фізичний файл вже успішно виконав SENS-парний шлях.
+  # Не плутати парне виконання з незалежним standalone admission.
+  (( paired_executable += 1 ))
   if timeout "${mint_seconds}s" "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/standalone.err"; then
     :
   else
@@ -197,11 +201,14 @@ done < <(git ls-files -z -- '*.lisp')
 # Підсумковий printf раніше завжди повертав 0 навіть за реального RED.
 # Відсутня трійка/paired-only — неповне покриття, не доведений реліз.
 status=COMPLETE
-if (( bad != 0 || missing != 0 || paired_only != 0 )); then
+if (( sources == 0 )); then
+  # Порожня вибірка НЕ може засвідчувати виконання SENS.
+  status=EMPTY
+elif (( bad != 0 || missing != 0 || paired_only != 0 )); then
   status=PARTIAL
 fi
-printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s status=%s\n' \
-  "${scope:-all}" "$sources" "$complete" "$inverse" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data" "$status"
+printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_executed=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s status=%s\n' \
+  "${scope:-all}" "$sources" "$complete" "$inverse" "$paired_executable" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data" "$status"
 if (( bad != 0 )); then
   echo "NATIVE_LISP_EXECUTION_RED failed=$bad: справжню помилку не приховує статус обліку" >&2
   exit 1

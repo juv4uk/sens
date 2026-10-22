@@ -442,7 +442,7 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         self.assertNotIn("#d1:0", life_source)
         self.assertIn("(нехай-послідовно ", life_source)
         # Чинний LIFE-1 виводить D1 без голих host-істин.
-        # Позитивний та негативний біти будуються живими D3 ATOM.
+        # Керування перевіряє D3 ATOM, негативні гілки повертають D1 «ні».
         # Коментарі можуть містити історичний приклад (так ні);
         # перевіряємо лише виконуваний Lisp, зберігаючи рядки без змін.
         source_without_comments = []
@@ -473,7 +473,10 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
                     in_string = True
         self.assertNotIn("(так ні)", "".join(source_without_comments))
         self.assertIn("(атом? (як-є ()))", life_source)
-        self.assertIn("(атом? (як-є (()))", life_source)
+        # Чинні негативні гілки повертають точний D1 «ні» без
+        # обхідного D3 ATOM від цитованої пари.
+        self.assertIn("((атом? (як-є ())) ні)", life_source)
+        self.assertNotIn("(атом? (як-є (()))", life_source)
         self.assertIn("(хибне? (атом? проєкції))", life_source)
         sample = "(як-є (100 цитоване)) (сполучити (як-є ліве) (як-є ()))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
@@ -1801,7 +1804,9 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                 source = (self.ROOT / path).read_text(encoding="utf-8")
                 self._assert_source_is_exact_ukr_projection(path, source)
 
-    def test_retired_rust_generators_are_explicit_unverified_anchors(self):
+    def test_retired_rust_generators_are_not_executable_or_fake_witnesses(self):
+        # Виведений з ужитку генератор не повинен містити бутафорний
+        # «якір» або вигадану готовність. Це не новий SENS-свідок.
         for path in (
             "scripts/build-constitution.lisp",
             "scripts/generate-rust-evaluator-dispatch.lisp",
@@ -1809,8 +1814,13 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         ):
             with self.subTest(path=path):
                 source = (self.ROOT / path).read_text(encoding="utf-8")
-                self.assertIn("(визначити якір", source)
-                self.assertIn("(status not-verified)", source)
+                lines = [line.strip() for line in source.splitlines() if line.strip()]
+                self.assertTrue(lines, f"{path}: відсутня позначка виведення")
+                self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", source)
+                self.assertIn("Не виконуваний SENS-програма", source)
+                self.assertTrue(all(line.startswith(";") for line in lines),
+                                f"{path}: архівний файл знову має живий Lisp-код")
+                self.assertNotIn("(визначити якір", source)
                 self.assertNotIn("(status pass)", source)
                 self.assertNotIn("(визначити надрукувати-приклад", source)
                 self.assertNotIn("(класифікувати-рядкове-значення", source)
