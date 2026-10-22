@@ -98,6 +98,18 @@ jobs:
               list="$(printf '%s\n%s' "$list" 'tests/semantic/meta-fc-predicates-d1-law.lisp')"
               echo "REMINT_D11_BINDING_CHANGED source=lib/meta-eval-first-class.lisp test=tests/semantic/meta-fc-predicates-d1-law.lisp"
             fi
+            # Core1 — справжній власник обходу графа; GC-свідок залежить
+            # від його DEFINE, хоч фізичний .sens-супутник ще існує.
+            if [[ "$BEFORE" =~ ^0+$ ]]; then
+              core1_change="$(git -c core.quotePath=false diff-tree --no-commit-id --name-only -r HEAD -- lib/core1.lisp)"
+            else
+              core1_change="$(git -c core.quotePath=false diff --name-only "$BEFORE" "$AFTER" -- lib/core1.lisp)"
+            fi
+            if [[ -n "$core1_change" ]] &&
+               ! printf '%s\n' "$list" | grep -Fxq 'tests/semantic/core1-gc-reachability-laws.lisp'; then
+              list="$(printf '%s\n%s' "$list" 'tests/semantic/core1-gc-reachability-laws.lisp')"
+              echo "REMINT_CORE1_BINDING_CHANGED source=lib/core1.lisp test=tests/semantic/core1-gc-reachability-laws.lisp"
+            fi
             # Не передавати нативному mint незмінні описи принципів:
             # core2 і core-math складаються тільки з коментарів, не є програмами.
             # Git pathspec виключає їх з push-дифа, а реальні core1/core3/core4
