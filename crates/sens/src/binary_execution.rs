@@ -626,6 +626,26 @@ mod exact_t5m_cutover_tests {
         physical
     }
 
+    /// The physical SENS engine, not a host-side semantic oracle, must report
+    /// which D2 form actually failed. The first form executes; the second
+    /// rejects D3:000 in COND test position under current Contract 11.8.
+    #[test]
+    fn physical_runtime_type_error_identifies_the_failing_second_form() {
+        let bytes = physical("10 001 00 000 01 00 10 110 00 10 000 00 1 01 01");
+        let program = reference_t5_program(&bytes).expect("two admitted D2 forms");
+        assert_eq!(program.form_count(), 2);
+        let error = program
+            .execute(&mut Session::default())
+            .expect_err("second form must reject a non-D1 COND condition");
+        assert_eq!(error.kind, crate::ErrorKind::Type);
+        assert!(
+            error.message.contains("physical_form_index=1")
+                && error.message.contains("physical_word_start=5")
+                && error.message.contains("physical_word_end=15"),
+            "test_id=1968-PHYSICAL-FORM layer=SENS expected=form-1-words-5..15 actual={error}"
+        );
+    }
+
     #[test]
     fn physical_d3_quote_is_exact_domain_call_not_historical_w8_dispatch() {
         let bytes = physical("10 001 00 000 01");
