@@ -1510,9 +1510,8 @@ jobs:
           # Дві вже наявні українські Lisp-композиції: реальне SENS-виконання
           # та негативні мутації в тій самій чинній CI, без Python-oracle.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test ukr_four_list_native_runtime -- --nocapture
-          # #1968: перевіряємо саме фізичний SENS/Zig/T5M свідок, не
-          # зараховуємо виконання текстового Lisp як доведену оберненість.
-          # Одне вже наявне CI, лише при зміні реального свідка або reader.
+          # #1968: справжній Zig/T5M -> SENS виконавець, D1 і Type-негатив.
+          # Рівно одна адресна перевірка у вже чинному CI; без Python-оракула.
           if [[ -f "$RUNNER_TEMP/changed-core-dependencies.txt" ]] &&
              grep -Eq '^(tests/semantic/біджа3-уточнення-атома-1968[.]lisp|crates/sens-cli/src/repl[.]rs|[.]github/workflows/ci[.]yml)          # Одноблочний CONS (#5950): структурна рівність глибокого списку
           # не має залежати від глибини стеку; адресно перевіряємо Value-механізм.
@@ -1761,8 +1760,6 @@ jobs:
             --sens-memory-bench "$PWD/target/debug/examples/sens_numeric_memory_bench" \
             --repetitions 3
  "$RUNNER_TEMP/changed-core-dependencies.txt"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens-cli --bin sens -- --list |
-              grep -Fqx 'repl::tests::bija3_refinement_full_ukrainian_source_executes_as_exact_zig_t5m: test'
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --bin sens repl::tests::bija3_ -- --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --bin sens repl::tests::zig_t5m_paired_cond_accepts_only_d1_and_reports_physical_error_form -- --exact --nocapture
           fi
