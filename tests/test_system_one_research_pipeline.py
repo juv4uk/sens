@@ -238,6 +238,67 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertIn("top_class_ece", report["metrics"])
             self.assertIn("selective_risk_at_threshold", report["metrics"])
 
+    def test_committed_seed_trains_and_predicts_only_selected_splits(self):
+        seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
+        rows, raw = student.read_jsonl(seed_path)
+        self.assertEqual(len(rows), 60)
+        self.assertEqual(
+            {split: sum(row["split"] == split for row in rows) for split in ("train", "validation", "test")},
+            {"train": 40, "validation": 10, "test": 10},
+        )
+        self.assertEqual(
+            {label: sum(row["gold"] == label for row in rows) for label in student.LABELS},
+            {label: 12 for label in student.LABELS},
+        )
+        self.assertEqual(len({row["text"] for row in rows}), 60)
+        self.assertTrue(all(row["source"] == "synthetic-curated-seed" for row in rows))
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            model_path = root / "seed-student.json"
+            self.assertEqual(
+                student.train(
+                    Namespace(
+                        input=seed_path,
+                        teacher=None,
+                        output=model_path,
+                        smoothing=1.0,
+                        min_count=1,
+                        gold_weight=None,
+                        overwrite=False,
+                    )
+                ),
+                0,
+            )
+            model = json.loads(model_path.read_text(encoding="utf-8"))
+            self.assertEqual(model["training_count"], 40)
+            self.assertEqual(model["training_dataset_sha256"], hashlib.sha256(raw).hexdigest())
+
+            prediction_path = root / "seed-test-predictions.jsonl"
+            self.assertEqual(
+                student.predict(
+                    Namespace(
+                        model=model_path,
+                        input=seed_path,
+                        split="test",
+                        output=prediction_path,
+                        overwrite=False,
+                    )
+                ),
+                0,
+            )
+            predictions = [
+                json.loads(line)
+                for line in prediction_path.read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(len(predictions), 10)
+            self.assertTrue(all(row["split"] == "test" for row in predictions))
+            report = evaluator.score(
+                predictions, threshold=0.8, bins=10, expected_split="test"
+            )
+            self.assertEqual(report["count"], 10)
+            self.assertEqual(report["split"], "test")
+
     def test_evaluator_refuses_wrong_split_and_incomplete_distribution(self):
         row = {
             "id": "test-1",
