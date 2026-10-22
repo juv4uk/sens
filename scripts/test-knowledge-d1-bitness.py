@@ -6,7 +6,7 @@ Checks:
   1. lib/knowledge.lisp size >= 1000 and no PLACEHOLDER
   2. No host COND else (1110 (001 t)
   3. Exact D1:1 form present
-  4. Key surface: tell-knowledge, module-clauses-now, reason-in
+  4. Первинна українська проєкція: повідомити-знання, модуль-клаузи-зараз, міркувати-у
   5. D1–D10 exact-width tables
 
 Run:
@@ -25,11 +25,11 @@ ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST_T = "(1110 (001 t)"
 D1_TRUE = "(010 (001 ()))"
 REQUIRED = (
-    "tell-knowledge",
-    "module-clauses-now",
-    "reason-in",
+    "повідомити-знання",
+    "модуль-клаузи-зараз",
+    "міркувати-у",
     "журнал-знань",
-    "check-conflict",
+    "перевірити-конфлікт?",
 )
 
 
