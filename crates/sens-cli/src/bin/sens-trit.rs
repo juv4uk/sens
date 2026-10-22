@@ -191,6 +191,29 @@ fn t5m_view_inverse_preserves_d24_and_rejects_noncanonical_view() {
     assert!(
         verify_exact_t5m_view(&physical, canonical_view.replace(' ', "  ").as_bytes()).is_err()
     );
+
+    // Контроль зі схожими бітами, але РІЗНИМИ ідентичностями:
+    // D1:0 («ні») не є структурним D3:000 («()»).
+    // Zig лише відновлює фізичні межі; тлумачення належить SENS.
+    let distinct_domains = vec![
+        zig_transport::ExactT5MWord::new(1, vec![0]).unwrap(),
+        zig_transport::ExactT5MWord::new(3, vec![0, 0, 0]).unwrap(),
+    ];
+    let exact_carrier = zig_transport::encode_t5m_exact_words(&distinct_domains).unwrap();
+    assert_eq!(
+        zig_transport::decode_t5m_exact_words(&exact_carrier).unwrap(),
+        distinct_domains,
+        "D1:0 та D3:000 мусять зберігати окремі точні ширини"
+    );
+    verify_exact_t5m_view(&exact_carrier, b"0 000\n").unwrap();
+    assert!(
+        verify_exact_t5m_view(&exact_carrier, b"000 0\n").is_err(),
+        "перестановка доменних слів не є оборотним переглядом"
+    );
+    assert!(
+        verify_exact_t5m_view(&exact_carrier, b"0000\n").is_err(),
+        "злиття різних доменних слів заборонено"
+    );
 }
 
 /// SENS owns exact source words and D2 admission. The host does not create
