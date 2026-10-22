@@ -1219,7 +1219,8 @@ jobs:
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test native_first_d1_cutover -- --nocapture
           fi
       - name: Реальний SENS — точна двопольова форма правил виведення
-        if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+        # Самостійний нативний доказ не губиться після окремого T5M RED.
+        if: ${{ always() && (github.event_name == 'push' || github.event_name == 'pull_request') }}
         timeout-minutes: 4
         shell: bash
         env:
