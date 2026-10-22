@@ -404,6 +404,10 @@ jobs:
       - uses: ./.github/actions/install-zig
         if: ${{ steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.translation_tests == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true' || steps.changed-t5m-lisp.outputs.needs_zig == 'true' || steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' || steps.changed-t5m-lisp.outputs.core1_tests == 'true' || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true' || steps.changed-t5m-lisp.outputs.reason_tests == 'true' || steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' || steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:')) || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'BENCH-T5M:') || startsWith(github.event.head_commit.message, 'Знання:') || startsWith(github.event.head_commit.message, 'SI:') || startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') || startsWith(github.event.head_commit.message, 'LISP-TIER:'))) }}
 
+      - name: System One research: один адресний тест учителя, учня та метрик
+        shell: bash
+        run: python3 -m unittest tests/test_system_one_research_pipeline.py -v
+
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
         shell: bash
@@ -1477,8 +1481,6 @@ jobs:
           python3 -m unittest tests/test_yantra_ukr_projection.py -v
           python3 -m unittest tests/test_world_ukr_primary_projection.py -v
           python3 scripts/test-content-store-d1-bitness.py
-          # Один адресний тест локального вчителя, компактного учня та метрик; мережі/ваг моделі не потребує.
-          python3 -m unittest tests/test_system_one_research_pipeline.py -v
           # Борг active Latin call heads лишається видимим у звіті й JSON.
           # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
 
