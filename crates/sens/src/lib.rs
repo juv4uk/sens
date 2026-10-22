@@ -157,17 +157,13 @@ pub mod semantic_registry_export {
         super::semantic_registry::domain_identity_for_surface(name)
     }
 
-    /// Legacy packed-byte export for external projection consumers.
+    /// Чинні допущені тотожності зберігають точну ширину домену.
     ///
-    /// Runtime/source semantics use opaque `CoreDomainIdentity`; this function deliberately
-    /// preserves the pre-#1098 projection ABI so untouched observers do not
-    /// become semantic participants merely because the runtime identity type
-    /// changed.
-    pub fn admitted_semantic_ids() -> Vec<u8> {
+    /// Не стискати різні D3/D4/D5/D6/D8 до одного u8: бітовий payload
+    /// без домену не є семантичною тотожністю. Історичний байтовий CML ABI
+    /// лишається окремою явно кваліфікованою межею експорту.
+    pub fn admitted_semantic_ids() -> Vec<super::CoreDomainIdentity> {
         super::semantic_registry::admitted_semantic_ids()
-            .into_iter()
-            .filter_map(|identity| u8::try_from(identity.packed_bits()).ok())
-            .collect()
     }
 
     /// Роль функції таблиці за кодом — з таблиці функцій, не з рукописного
