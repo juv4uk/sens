@@ -816,6 +816,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
             independently_executed.insert(stem);
             println!("SENS_UKR_EXECUTABLE_PASS file=lib/{stem}.lisp exact=Zig/T5M d1=1");
         } else if has_pair {
+            // Будь-який фізичний дрейф є справжній RED, навіть якщо цей
+            // Lisp ще не ввійшов до вузького переліку старих трійок вище.
+            // Не втрачати точний шлях проблемного файлу в підсумковому тесті.
+            physical_drifted.insert(stem);
             println!("SENS_UKR_EXECUTABLE_DRIFT file=lib/{stem}.lisp reason=MINT_OR_VIEW_MISMATCH native=SENS/Zig/T5M");
         } else {
             println!("SENS_UKR_EXECUTABLE_PENDING file=lib/{stem}.lisp reason=NO_COMMITTED_T5M_TRIPLE");
