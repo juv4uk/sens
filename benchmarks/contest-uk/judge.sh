@@ -74,7 +74,7 @@ for path in "${inputs[@]}"; do
   # Додаємо виклик до тієї самої програми у scratch (оригінал не чіпаємо).
   # Всі свідки проходять реальний SENS -> Zig/T5M -> SENS, без Python/JSON.
   final_call="$(grep -vE '^[[:space:]]*(;|$)' "$source" | tail -n 1)"
-      if [[ "$final_call" =~ ^[(][^[:space:]()]+[[:space:]][^[:space:]()]+[)]$ ]]; then
+  if [[ "$final_call" =~ ^\(([^[:space:]()]+)[[:space:]] ]]; then
     function_name="${BASH_REMATCH[1]}"
   else
     error "не можна прочитати фінальний виклик конкурсанта $source"
@@ -84,7 +84,7 @@ for path in "${inputs[@]}"; do
       # Порівнюємо однаковий факторіал для двох допустимих SENS API:
       # хвостовий (н а) та звичайний рекурсивний (н).
       # Рішення про істину приймає тільки нативне виконання SENS.
-      if [[ "$final_call" =~ ^\\([^[:space:]()]+[[:space:]][^[:space:]()]+\\)$ ]]; then
+      if [[ "$final_call" =~ ^[(][^[:space:]()]+[[:space:]][^[:space:]()]+[)]$ ]]; then
         witnesses=("0|1" "5|120" "7|5040")
       else
         witnesses=("0 1|1" "5 1|120" "7 1|5040")
