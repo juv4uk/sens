@@ -22,9 +22,12 @@ on:
 permissions:
   contents: write
 
+# GitHub за замовчуванням викидає попередній pending того самого group,
+# навіть якщо cancel-in-progress: false. Черга max зберігає всі native remint.
 concurrency:
   group: remint-native-${{ github.ref }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   remint:
