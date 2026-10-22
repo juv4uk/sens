@@ -301,14 +301,6 @@ pub(crate) fn cdr_ref(value: &Value, span: Span) -> Result<&Value, LanguageError
     }
 }
 
-pub(crate) fn car_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
-    Ok((*car_ref(value, span)?).clone())
-}
-
-pub(crate) fn cdr_value(value: &Value, span: Span) -> Result<Value, LanguageError> {
-    Ok((*cdr_ref(value, span)?).clone())
-}
-
 pub(crate) fn cons_values(
     head: Value,
     tail: Value,
