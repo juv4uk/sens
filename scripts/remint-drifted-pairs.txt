@@ -114,3 +114,5 @@ lib/list-drop-three-zero-copy-general.lisp
 lib/list-every-second-general.lisp
 benchmarks/contest-uk/кількість-атомів-компакт.lisp
 benchmarks/contest-uk/лише-атоми-один-guard.lisp
+lib/list-every-fifth-linear-general.lisp
+benchmarks/contest-uk/збільшити-всі.lisp
