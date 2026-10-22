@@ -26,7 +26,7 @@
  (owner . "217/220/231"))
 
 ((supersedes-expr . "(= 3 3.0)")
- (expr . "(= 3 3.0)")
+ (expr . "(менше? 3 3.0)")
  (error . "Type")
  (compiler-corpus . t)
  (reason . unqualified-decimal-fraction-is-not-an-admitted-same-dn-operand)
