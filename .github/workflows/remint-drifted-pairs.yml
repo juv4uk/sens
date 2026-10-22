@@ -23,12 +23,12 @@ on:
 permissions:
   contents: write
 
-# GitHub за замовчуванням викидає попередній pending того самого group,
-# навіть якщо cancel-in-progress: false. Черга max зберігає всі native remint.
+# Останній push охоплює всі ще не обернуті та відсталі .lisp нижче.
+# Не тримати десятки застарілих build: один native remint на чинному main.
 concurrency:
   group: remint-queued-v2-${{ github.ref }}
   cancel-in-progress: false
-  queue: max
+  queue: single
 
 jobs:
   remint:
@@ -79,8 +79,10 @@ jobs:
             done
             # Git визначає лише джерела для повторного рідного mint.
             # Не плутати цей список із доказом оборотності чи виконання.
-            if printf '%s\n' "$list" | grep -Eq '^benchmarks/contest-uk/[^[:space:]]+\.lisp$'; then
-              for source in benchmarks/contest-uk/*.lisp; do
+            # Повертаємо не лише конкурс, а й D11/list/tree, коли
+            # проміжний queued push було замінено найновішим.
+            if [[ "$EVENT_NAME" == push ]]; then
+              for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp lib/tree-*.lisp lib/d11-*.lisp; do
                 [[ -f "$source" && ! -L "$source" ]] || continue
                 pair="${source%.lisp}.sens"
                 view="${source%.lisp}"
