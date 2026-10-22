@@ -54,11 +54,11 @@
     },
     {
       "path": "lib/domains/d6.lisp",
-      "git_blob_sha1": "fb2e26322adb6dfe90bbd99a90819afd4c5445ba",
+      "git_blob_sha1": "01218302ee4917d4dcb018ad4a60f7ab5b2c7394",
       "domain": "D6",
       "bit_width": 6,
       "expected_rows": 64,
-      "previous_pinned_git_blob_sha1": "b7882a5c06625d1818d69a21d507e41f801332eb"
+      "previous_pinned_git_blob_sha1": "fb2e26322adb6dfe90bbd99a90819afd4c5445ba"
     },
     {
       "path": "lib/domains/d7.lisp",
