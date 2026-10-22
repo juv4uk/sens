@@ -3,8 +3,9 @@
 //! The ordinary Lisp parser remains unchanged. This bridge is intentionally
 //! bounded to executable list heads:
 //! - exact 3/4/5/6-bit heads become DomainIdentity;
-//! - exact 7-bit heads fail closed because current D7 is Sound/Text/local-ordinal, not callable;
-//! - exact 8-bit heads remain the compatibility path except in readers pinned to admitted D8 mechanisms;
+//! - exact 7-bit heads fail closed: D7 v2 is keyboard text/data, not a callable function;
+//! - historical bare 8-bit heads remain opaque W8; only explicitly admitted
+//!   Ukrainian D8 I/O names are exact-lifted, with other D8 mechanisms path-pinned;
 //! - approved path-pinned readers lift exact D9 words; Ukrainian D9 string heads
 //!   additionally require both an explicit projection allowlist and a concrete mechanism;
 //! - non-head and quoted data keep the ordinary parser's interpretation.
@@ -68,13 +69,9 @@ pub fn parse_mixed_exact_domain_machine_source(
     }
 }
 
-/// Approved current D8 mechanism heads at this migration boundary are lifted
-/// only for path-pinned trusted Lisp sources. This includes CHAR-CODE plus the
-/// admitted reader/serializer identities; identical eight-bit payloads never
-/// become current D8 merely because of their width. Historical W8 QUOTE
-/// remains opaque, and binder names remain source data.
-/// The *existing admitted* D8 I/O resident names from the owner ladder.
-/// No historical SID8 code can enter here; one helper serves both readers.
+/// Already-admitted D8 I/O names and exact words from the owner domain ladder.
+/// Shared by ordinary Ukrainian source and path-pinned readers. Neither bare
+/// historical W8 bytes nor quoted/bound words obtain callable authority.
 fn admitted_d8_io_uk_bits(spelling: &str) -> Option<&'static str> {
     match spelling {
         "код-символу" => Some("11100000"),
