@@ -51,6 +51,9 @@ for source in "$here"/*.lisp; do
     різниця-квадратів|різниця-квадратів-*) expected=91 ;;
     модуль|модуль-*) expected=17 ;;
     різниця-кубів|різниця-кубів-*) expected=279 ;;
+    різниця-квадратів|різниця-квадратів-*) expected=91 ;;
+    модуль|модуль-*) expected=17 ;;
+    різниця-кубів|різниця-кубів-*) expected=279 ;;
     *) echo "CONTEST_SKIP: немає перевіреного очікуваного результату: $source" >&2; continue ;;
   esac
   physical="$scratch/$name.sens"
