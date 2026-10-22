@@ -424,23 +424,16 @@ fn mechanism_selector_named_d4_helpers_execute_real_sens_positive_and_negative()
     // Зовнішній читач каталогу D9 перевіряється окремо: тут D4 ядро
     // мусить виконати обидва нові іменовані замикання.
     let source = include_str!("../../../lib/mechanism-selector.lisp");
-    // Порівняння складених D7-паспортів тепер реалізоване двома
-    // власними SENS-функціями перед маршрутними helper-ами.
-    // Не завантажувати вирвані з контексту DEFINE: такий тест
-    // штучно створює unknown symbol замість перевірки актуального Lisp.
-    let start = source
-        .find("(визначити механізм-атомна-рівність?")
-        .expect("чинний атомний D3 helper перед структурним D7");
-    let end = source
-        .find("\n(визначити вибрати-механізм")
-        .expect("межа helper-ів у чинному Lisp");
-    let helpers = &source[start..end];
+    // Завантажуємо повний чинний SENS-модуль, а не вирізаний
+    // підрядок helper-ів: точне резидентне оточення та взаємні
+    // DEFINE-зв'язування має визначати сама мова, не тестовий зріз.
+    // Той самий паспорт та ті самі D3/D7 закони використовує runtime.
     let mut session = Session::default();
     sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
         .expect("SENS D3–D5 core для виконуваних українських імен");
-    let definitions = parse_mixed_exact_domain(helpers).expect("парсер SENS: чинні D4 DEFINE");
+    let definitions = parse_mixed_exact_domain(source).expect("парсер SENS: повний чинний модуль D3–D5");
     sens::eval_parsed_expressions(&definitions, &mut session)
-        .expect("два D4 helper-и реально завантажуються SENS");
+        .expect("усі чинні DEFINE-маршрути реально завантажуються в SENS");
 
     for (input, expected) in [
         ("(механізм-знайти-маршрут (як-є target) (як-є runner) (як-є ((other runner x) (target runner chosen))))",
