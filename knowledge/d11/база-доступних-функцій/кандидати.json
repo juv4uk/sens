@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 340,
+    "total": 349,
     "historical": 28,
-    "library": 312,
-    "distinct_families": 128
+    "library": 321,
+    "distinct_families": 134
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -8484,6 +8484,204 @@
       "signature": "proper-list → existing-suffix",
       "law": "Повернути наявний хвіст після найправішого складеного елемента; без складених елементів повернути увесь вхід.",
       "native_law_test": "crates/sens/tests/d11_existing_inverse_splits_and_suffixes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "суфікс-складених-елементів",
+      "source_family": "trailing-compound-run",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-trailing-compound-run-zero-copy-general.lisp",
+        "blob_sha": "b7e093accab9d316540fc9a5cade7c3bcba53827",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → existing-suffix",
+      "law": "Найдовший кінцевий суфікс із послідовних складених елементів; після останнього атомного елемента, навіть коли він порожній.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "кінцева-серія-однакових-атомів",
+      "source_family": "trailing-equal-atom-run",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-trailing-equal-atomic-run-general.lisp",
+        "blob_sha": "078e10904670e82965a01d5acc9b2c5e093a71d8",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) → existing-suffix",
+      "law": "Максимальний кінцевий суфікс однакових атомів; не сплутати з першою серією або останнім одиничним атомом.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "префікс-до-останньої-пари",
+      "source_family": "prefix-through-last-compound",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-prefix-through-last-compound-general.lisp",
+        "blob_sha": "f44634b60221ebbb33f9ba64c46d0a7104f12398",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → prefix",
+      "law": "Повернути найдовший префікс до останнього складеного елемента включно; без складених елементів порожній.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "хвіст-після-сусідніх-складених",
+      "source_family": "suffix-after-first-adjacent-compounds",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-suffix-after-first-adjacent-compounds-zero-copy-general.lisp",
+        "blob_sha": "311aeefa0b88ce8f762ec06322a4ff33e8468cfe",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-list → existing-suffix",
+      "law": "Хвіст після найпершої пари сусідніх складених елементів; порожній елемент — атом, не складена пара.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "хвіст-після-останньої-трійки",
+      "source_family": "suffix-after-last-equal-atom-triple",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-suffix-after-last-atomic-triple-zero-copy-general.lisp",
+        "blob_sha": "6db2d346eba04f482fa4f222d90e1d45528006da",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(atom) → existing-suffix",
+      "law": "Хвіст після останньої трійки рівних сусідніх атомів, у тому числі перекривних трійок.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "вибрати-перші-з-трійок",
+      "source_family": "three-lane-reversible-decomposition",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-three-lanes-general.lisp",
+        "blob_sha": "28339920d93036fb5ba96899814738c70077de5c",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(length=3k) → list(length=k)",
+      "law": "Кожний перший елемент із послідовних трійок; рівно один вихідний елемент на трійку.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "вибрати-другі-з-трійок",
+      "source_family": "three-lane-reversible-decomposition",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-three-lanes-general.lisp",
+        "blob_sha": "28339920d93036fb5ba96899814738c70077de5c",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(length=3k) → list(length=k)",
+      "law": "Кожний другий елемент із послідовних трійок, без зміни порядку.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "вибрати-треті-з-трійок",
+      "source_family": "three-lane-reversible-decomposition",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-three-lanes-general.lisp",
+        "blob_sha": "28339920d93036fb5ba96899814738c70077de5c",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list(length=3k) → list(length=k)",
+      "law": "Кожний третій елемент із послідовних трійок, без втрати повторів.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "сплести-три-потоки",
+      "source_family": "three-lane-reversible-decomposition",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-three-lanes-general.lisp",
+        "blob_sha": "28339920d93036fb5ba96899814738c70077de5c",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": null,
+      "review_status": "EXISTING_SENS_BODY_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "three proper-lists(equal-length) → proper-list",
+      "law": "Чергувати по одному елементу трьох потоків; на образі трійкового розкладу точно відновити джерело.",
+      "native_law_test": "crates/sens/tests/d11_existing_trailing_and_three_lanes.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true
     }
