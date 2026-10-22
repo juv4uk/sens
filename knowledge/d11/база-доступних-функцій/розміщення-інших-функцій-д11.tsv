@@ -52,6 +52,7 @@
 00001011111	RESEARCH_ONLY_NOT_RATIFIED	0000	типове-зв'язування-імені	типове-зв'язування-імені	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001100000	RESEARCH_ONLY_NOT_RATIFIED	0000	тотожність-відповідає-поверхні?	тотожність-відповідає-поверхні?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001100001	RESEARCH_ONLY_NOT_RATIFIED	0000	це-примітив?	це-примітив?	обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001100010	WINNER_DEFINED_SENS_COMPOSITION	0000	репл-форма-функція	репл-форма-функція	обчислення-рефлексія	0	lib/repl-core.lisp	Створити список форми D4 ФУНКЦІЯ з рівно переданими параметрами й тілом; створення не виконує тіло.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00001100011	RESEARCH_ONLY_NOT_RATIFIED	0000	my-def-compat-name?		обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001100100	RESEARCH_ONLY_NOT_RATIFIED	0000	my-definition-name?		обчислення-рефлексія	2	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001100101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-drop-lambda-def-group		обчислення-рефлексія	2	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
@@ -59,6 +60,7 @@
 00001100111	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-compare-chain		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001101000	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-env-lookup		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001101001	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-primitive		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001101010	WINNER_DEFINED_SENS_COMPOSITION	0000	репл-крок	репл-крок	обчислення-рефлексія	4	lib/repl-core.lisp	Застосувати чинне SENS обчислити-форму-та-оновити-оточення до форми та першого поля стану REPL; не підмінювати метаобчислювач.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00001101011	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-primitive?		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001101100	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-root-env		обчислення-рефлексія	2	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001101101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-sixth		обчислення-рефлексія	2	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
@@ -67,6 +69,7 @@
 00001110000	RESEARCH_ONLY_NOT_RATIFIED	0000	обчислити-компоненти-лямбди	обчислити-компоненти-лямбди	обчислення-рефлексія	4	lib/meta-eval.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001110001	RESEARCH_ONLY_NOT_RATIFIED	0000	my-apply-group-closure		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001110010	RESEARCH_ONLY_NOT_RATIFIED	0000	my-eval-program-with-groups		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001110011	WINNER_DEFINED_SENS_COMPOSITION	0000	репл-визначити	репл-визначити	обчислення-рефлексія	3	lib/repl-core.lisp	Утворити визначення з точної назви та виразу й передати на чинний REPL-крок зі збереженням стану.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00001110100	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-apply		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001110101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-apply-primitive		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001110110	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-eval		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
@@ -74,6 +77,7 @@
 00001111000	RESEARCH_ONLY_NOT_RATIFIED	0000	my-fc-eval-cond		обчислення-рефлексія	4	lib/meta-eval-first-class.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001111001	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-apply		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001111010	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-apply-owned		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
+00001111011	WINNER_DEFINED_SENS_COMPOSITION	0000	репл-визначити-функцію	репл-визначити-функцію	обчислення-рефлексія	3	lib/repl-core.lisp	Визначити функцію через репл-форма-функція та репл-визначити, без другого обчислювача й незалежної семантики.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 00001111100	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-eval		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001111101	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-eval-body		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 00001111110	RESEARCH_ONLY_NOT_RATIFIED	0000	my-group-eval-cond		обчислення-рефлексія	4	lib/meta-eval-mutual.lisp:function	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
@@ -255,7 +259,9 @@
 01001001011	RESEARCH_ONLY_NOT_RATIFIED	0100	SEND-KNOWLEDGE-PACKAGE		знання-світ-епістеміка	4	lib/knowledge.lisp	Серіалізувати версійний пакет і передати його через зовнішній transport.				ні	ні
 01001010000	RESEARCH_ONLY_NOT_RATIFIED	0100	WRITE-KNOWLEDGE-PACKAGE		знання-світ-епістеміка	4	lib/knowledge.lisp	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 01001010110	RESEARCH_ONLY_NOT_RATIFIED	0100	EPISTEMIC--ALL-REQUIRED-PRESENT?		знання-світ-епістеміка	2	lib/epistemic.lisp	Кожний необхідний доказ має підтверджене джерело у фактичному списку.				ні	ні
-01001011011	RESEARCH_ONLY_NOT_RATIFIED	0100	EPISTEMIC--CLAIM-REF?		знання-світ-епістеміка	2	lib/epistemic.lisp	Посилання на claim має визначений структурний tag і обов'язкові поля.				ні	ні
+01001010111	WINNER_DEFINED_SENS_COMPOSITION	0100	епістеміка--усі-вимоги-наявні?	епістеміка--усі-вимоги-наявні?	знання-світ-епістеміка	2	lib/epistemic.lisp	Порожній список вимог означає істину; кожна інша вимога повинна міститись серед можливостей і решта задовольняє той самий закон; атомний пошкоджений хвіст та відсутній елемент повертають D1:0.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
+01001011010	WINNER_DEFINED_SENS_COMPOSITION	0100	це-належне-посилання-на-джерело?	це-належне-посилання-на-джерело?	знання-світ-епістеміка	2	lib/epistemic.lisp	Рівно двопольове посилання з типом digest/proof/test/observation приймається; зайві поля, сторонній тип, вкладений тег, атомний або крапковий хвіст відхиляються.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
+01001011011	WINNER_DEFINED_SENS_COMPOSITION	0100	епістеміка--посилання-на-твердження?	епістеміка--посилання-на-твердження?	знання-світ-епістеміка	2	lib/epistemic.lisp	Правильний двопольовий запис (claim-ref значення) повертає D1:1; неправильний тег, короткий, довгий або крапковий запис — D1:0.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 01001100000	WINNER_DEFINED_SENS_COMPOSITION	0100	внутрішній-зворот-подій	внутрішній-зворот-подій	знання-світ-епістеміка	3	lib/world.lisp	Точне обернення списку подій лівим згортанням у накопичувач, без зміни порядку початкового накопичувача; порожній вхід повертає накопичувач.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 01001100001	WINNER_DEFINED_SENS_COMPOSITION	0100	внутрішній-світ-прибрати-перше	внутрішній-світ-прибрати-перше	знання-світ-епістеміка	1	lib/world.lisp	Вилучає рівно перший структурно тотожний елемент; хвіст, включно з пізнішими збігами, зберігає порядок.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
 01001100100	WINNER_DEFINED_SENS_COMPOSITION	0100	внутрішня-рівність-версій	внутрішня-рівність-версій	знання-світ-епістеміка	2	lib/world.lisp	Рекурсивна структурна рівність: для атомів — тотожність, для непорожніх пар — кон'юнкція рівностей CAR і CDR; неідентичність повертає точне D1:0.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
@@ -580,7 +586,3 @@
 11001111100	RESEARCH_ONLY_NOT_RATIFIED	1100	FORMS		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:28	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 11001111101	RESEARCH_ONLY_NOT_RATIFIED	1100	MODULE-JOURNAL-EVENTS-ONTO		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:92	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
 11001111111	RESEARCH_ONLY_NOT_RATIFIED	1100	JOURNAL		історичні-черги-д10	2	knowledge/d10-proposal-ledger-symbolic-v3.tsv:93	ЗАКОН_НЕ_ДОВЕДЕНО				ні	ні
-00001100010	WINNER_DEFINED_SENS_COMPOSITION	0000	репл-форма-функція	репл-форма-функція	обчислення-рефлексія	0	lib/repl-core.lisp	Створити список форми D4 ФУНКЦІЯ з рівно переданими параметрами й тілом; створення не виконує тіло.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
-00001101010	WINNER_DEFINED_SENS_COMPOSITION	0000	репл-крок	репл-крок	обчислення-рефлексія	4	lib/repl-core.lisp	Застосувати чинне SENS обчислити-форму-та-оновити-оточення до форми та першого поля стану REPL; не підмінювати метаобчислювач.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
-00001110011	WINNER_DEFINED_SENS_COMPOSITION	0000	репл-визначити	репл-визначити	обчислення-рефлексія	3	lib/repl-core.lisp	Утворити визначення з точної назви та виразу й передати на чинний REPL-крок зі збереженням стану.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
-00001111011	WINNER_DEFINED_SENS_COMPOSITION	0000	репл-визначити-функцію	репл-визначити-функцію	обчислення-рефлексія	3	lib/repl-core.lisp	Визначити функцію через репл-форма-функція та репл-визначити, без другого обчислювача й незалежної семантики.				бібліотечна-композиція-виконувана; прямий-D11-opcode-не-підтверджено	новий-примітив-не-потрібен
