@@ -340,6 +340,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-swap-ends-five",
         "поміняти-другий-і-третій",
         "list-swap-inner-five",
+        "reverse-three",
         "list-reverse-four",
         "list-halfturn-four",
         "list-halfturn-six",
@@ -349,6 +350,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-last-adjacent-equal-atom-suffix-general",
         "list-first-adjacent-equal-atom-suffix-general",
         "list-every-third-linear-general",
+        "list-drop-two-zero-copy-general",
         "list-drop-last-general",
         "list-append-general",
         "list-collapse-adjacent",
@@ -463,6 +465,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-drop-through-last-atom-zero-copy-general",
         "list-select-longer-zero-copy-general",
         "list-split-atomic-prefix-general",
+        "list-first-compound-zero-copy-general",
         "list-first-compound-general",
         "list-last-compound-suffix-general",
         "list-last-atom-suffix-general",
@@ -534,10 +537,12 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "rotate-four-right"
                 | "list-delete-second"
                 | "list-insert-second"
+                | "reverse-three"
                 | "list-reverse-four"
                 | "list-halfturn-four"
                 | "list-halfturn-six"
                 | "list-zip-general"
+                | "list-drop-two-zero-copy-general"
                 | "list-drop-last-general"
                 | "list-append-general"
                 | "list-collapse-adjacent"
@@ -609,6 +614,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "вилучити-всі-входження"
                 | "замінити-всі-входження"
                 | "list-deduplicate-neighbors"
+                | "list-first-compound-zero-copy-general"
                 | "list-first-adjacent-repeat-atom-general"
                 | "tree-leaf-tally-unary"
                 | "list-alternating-split-four"
