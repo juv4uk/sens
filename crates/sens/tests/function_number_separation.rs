@@ -1,41 +1,62 @@
-use sens::{eval_program, parse, ErrorKind, Exactness, ExprKind, Session, Value};
+//! Чинний SENS: точна D5 identity не є числом D24+ і навпаки.
+//! Жодна історична 8-бітна Function8/SID8 коробка не потрібна.
+use sens::{
+    eval_program, lower_program, parse, parse_exact_domain_source, Bit5, CoreD5,
+    DomainIdentity, ErrorKind, ExprKind, Session, Value,
+};
 
-#[test]
-fn sens_function_value_is_not_a_number_in_arithmetic() {
-    let error = eval_program("(00001100 00000010 1)", &mut Session::default())
-        .expect_err("a SENS function value must not participate in arithmetic");
-
-    assert_eq!(error.kind, ErrorKind::Type);
+fn додавання_d5() -> DomainIdentity {
+    DomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01010).expect("точна п'ятибітність")))
 }
 
 #[test]
-fn computed_number_with_matching_bits_does_not_become_callable() {
-    // 1 + 1 = numeric value 2. Function 00000010 has the same packed
-    // magnitude, but the domains are orthogonal: the computed number must
-    // remain a number and therefore cannot become callable.
-    let error = eval_program("((00001100 1 1) 1)", &mut Session::default())
-        .expect_err("numeric value 2 must not become function 00000010");
-
-    assert_eq!(error.kind, ErrorKind::Type);
-}
-
-#[test]
-fn number_and_sens_function_are_distinct_even_when_magnitudes_match() {
-    let parsed = parse("00001100").expect("exact SENS source must parse");
-    let [expr] = parsed.as_slice() else {
-        panic!("expected one parsed expression");
+fn українське_додавання_виконується_як_d5_над_d24_а_не_як_sid8() {
+    let source = "(додати #d24:000000000000000000000100 #d24:000000000000000000000110)";
+    let lowered = lower_program(&parse(source).expect("читач українського Lisp"));
+    let [expr] = lowered.as_slice() else {
+        panic!("потрібен один виклик");
     };
-    assert!(
-        matches!(expr.kind, ExprKind::Sid(_)),
-        "bare exact 8-bit source must remain a SENS function value"
-    );
+    assert!(matches!(
+        &expr.kind,
+        ExprKind::DomainCall(identity, _)
+            if (identity.width(), identity.packed_bits()) == (5, 0b01010)
+    ), "голова «додати» мусить мати D5:01010");
 
-    let number = Value::Number(12.0, Exactness::Exact);
-    let function = eval_program("00001100", &mut Session::default())
-        .expect("bare SENS function evaluates as a first-class function value")
-        .value;
+    let result = eval_program(source, &mut Session::default())
+        .expect("живе додавання D24+ у SENS").value;
+    let Value::BinaryNumber(number) = &result else {
+        panic!("арифметика мусить повертати D24+, а не функцію: {result:?}");
+    };
+    assert_eq!(number.numeric_domain_width(), Some(24));
+    assert_eq!(number.to_decimal_string(), "10");
+    assert_ne!(result, Value::DomainIdentity(додавання_d5()));
+}
+
+#[test]
+fn голе_d5_слово_є_доменом_а_не_десятковим_числом() {
+    let parsed = parse_exact_domain_source("01010").expect("точний доменний читач");
+    let [expr] = parsed.as_slice() else {
+        panic!("потрібна одна D5 identity");
+    };
+    assert_eq!(expr.kind, ExprKind::DomainIdentity(додавання_d5()));
     assert_ne!(
-        number, function,
-        "numeric 12 and function 00001100 must never share identity"
+        Value::DomainIdentity(додавання_d5()),
+        Value::Number(10.0, sens::Exactness::Exact),
     );
+}
+
+#[test]
+fn голі_числа_не_стають_операндами_d24_за_збігом_бітів() {
+    let error = eval_program("(додати 1 2)", &mut Session::default())
+        .expect_err("без явного D24 арифметика має відмовити");
+    assert_eq!(error.kind, ErrorKind::Type);
+}
+
+#[test]
+fn точні_d5_і_d8_з_однаковим_payload_не_тотожні() {
+    let d5 = parse_exact_domain_source("01010").expect("D5");
+    let d8 = parse_exact_domain_source("00001010").expect("D8");
+    assert!(matches!(&d5[0].kind, ExprKind::DomainIdentity(DomainIdentity::D5(_))));
+    assert!(matches!(&d8[0].kind, ExprKind::DomainIdentity(DomainIdentity::D8(_))));
+    assert_ne!(d5[0].kind, d8[0].kind, "ширина є частиною тотожності");
 }
