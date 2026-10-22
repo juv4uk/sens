@@ -11,16 +11,16 @@ fn core4_point_witness_crosses_predicates_strings_macros_and_fresh_symbols() {
     let mut session = migrated_core();
 
     for (source, expected) in [
-        ("(equal? (quote (a b)) (quote (a b)))", true),
-        ("(equal? (quote (a b)) (quote (a c)))", false),
-        ("(member? (quote b) (quote (a b c)))", true),
-        ("(member? (quote z) (quote (a b c)))", false),
-        ("(null? (quote ()))", true),
-        ("(null? (quote (a)))", false),
-        ("(string<? \"a\" \"b\")", true),
+        ("(однакові? (як-є (а б)) (як-є (а б)))", true),
+        ("(однакові? (як-є (а б)) (як-є (а в)))", false),
+        ("(значення-у-списку? (як-є б) (як-є (а б в)))", true),
+        ("(значення-у-списку? (як-є з) (як-є (а б в)))", false),
+        ("(порожній? (як-є ()))", true),
+        ("(порожній? (як-є (а)))", false),
+        ("(текст-передує? \"a\" \"b\")", true),
     ] {
         let value = eval_program(source, &mut session)
-            .unwrap_or_else(|e| panic!("{source} failed: {e:?}"))
+            .unwrap_or_else(|error| panic!("source={source} error={error}"))
             .value;
         assert_eq!(
             value.as_predicate_bit(),
@@ -30,29 +30,32 @@ fn core4_point_witness_crosses_predicates_strings_macros_and_fresh_symbols() {
     }
 
     for (source, expected) in [
-        ("(assoc (quote b) (quote ((a . 1) (b . 2))))", "(b . 2)"),
-        ("(assoc (quote z) (quote ((a . 1) (b . 2))))", "()"),
+        (
+            "(знайти-за-ключем (як-є б) (як-є ((а . 1) (б . 2))))",
+            "(б . 2)",
+        ),
+        ("(знайти-за-ключем (як-є з) (як-є ((а . 1) (б . 2))))", "()"),
     ] {
         let value = eval_program(source, &mut session)
-            .unwrap_or_else(|e| panic!("{source} failed: {e:?}"))
+            .unwrap_or_else(|error| panic!("source={source} error={error}"))
             .value;
         assert_eq!(value.to_string(), expected, "{source}");
     }
 
     for (source, expected) in [
-        ("(let ((x 7)) x)", "7"),
-        ("(let* ((x 7) (y x)) y)", "7"),
-        ("(-> 3 (list 4))", "(3 4)"),
-        ("(->> 3 (list 4))", "(4 3)"),
+        ("(нехай ((значення 7)) значення)", "7"),
+        ("(нехай-послідовно ((перше-значення 7) (друге-значення перше-значення)) друге-значення)", "7"),
+        ("(-> 3 (список 4))", "(3 4)"),
+        ("(->> 3 (список 4))", "(4 3)"),
     ] {
         let value = eval_program(source, &mut session)
-            .unwrap_or_else(|e| panic!("{source} failed: {e:?}"))
+            .unwrap_or_else(|error| panic!("source={source} error={error}"))
             .value;
         assert_eq!(value.to_string(), expected, "{source}");
     }
 
-    let fresh = eval_program("(gensym \"core4-point-\")", &mut session)
-        .expect("GENSYM mechanism boundary")
+    let fresh = eval_program("(створити-символ \"core4-point-\")", &mut session)
+        .expect("створення символу через чинну українську поверхню")
         .value;
     assert!(matches!(fresh, Value::Symbol(_)));
 }
@@ -61,6 +64,8 @@ fn core4_point_witness_crosses_predicates_strings_macros_and_fresh_symbols() {
 fn core4_d6_filter_and_reduce_execute_ukrainian_sources() {
     let mut session = migrated_core();
     // Справжній SENS evaluator, а не пошук лексичних шаблонів у файлі.
+    // Десяткові аргументи СПИСКУ проходять проєкцію D24+;
+    // вміст ЯК-Є зберігається як сирий синтаксис.
     for (source, expected) in [
         (
             "(відсіяти (функція (елемент) (тотожне? елемент (як-є б))) (як-є (а б в б)))",
@@ -75,7 +80,7 @@ fn core4_d6_filter_and_reduce_execute_ukrainian_sources() {
             "()",
         ),
         (
-            "(згорнути (функція (сума число) (додати сума число)) 0 (як-є (1 2 3 4)))",
+            "(згорнути (функція (сума число) (додати сума число)) 0 (список 1 2 3 4))",
             "10",
         ),
         (
@@ -84,7 +89,7 @@ fn core4_d6_filter_and_reduce_execute_ukrainian_sources() {
         ),
     ] {
         let value = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("SENS Core4 failed for {source}: {error:?}"))
+            .unwrap_or_else(|error| panic!("source={source} error={error}"))
             .value;
         assert_eq!(value.to_string(), expected, "{source}");
     }
