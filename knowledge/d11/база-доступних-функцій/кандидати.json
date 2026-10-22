@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 253,
+    "total": 260,
     "historical": 17,
-    "library": 236,
-    "distinct_families": 52
+    "library": 243,
+    "distinct_families": 59
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -6363,6 +6363,160 @@
       "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39823699405",
       "native_ci_job": 119981278781,
       "native_ci_scope": "D11_TARGETED_STEP_SUCCESS_WORKFLOW_OTHER_RED"
+    },
+    {
+      "surface_name": "дерево-містить-атом?",
+      "source_family": "tree-atom-membership",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/tree-contains-atom-general.lisp",
+        "blob_sha": "7ecfb85768c14244287a71a15eae0a7ba5bbfe3a",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "tree × atom → D1",
+      "law": "Рекурсивний пошук точного атома в усіх гілках скінченного дерева: порожні вузли не дають хибних збігів, атоми порівнюються тільки через D3 EQ.",
+      "native_law_test": "crates/sens/tests/d11_existing_tree_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "порахувати-листки-унарно",
+      "source_family": "tree-unary-leaf-tally",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/tree-leaf-tally-unary.lisp",
+        "blob_sha": "bb65555f675ac48c4555018ccd267f3c178137da",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "tree → unary-list",
+      "law": "Порахувати всі непорожні атомні листки правильного скінченного дерева унарним списком без машинної арифметики; порожні вузли не є листками.",
+      "native_law_test": "crates/sens/tests/d11_existing_tree_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "порахувати-пари-дерева-унарно",
+      "source_family": "tree-unary-cons-tally",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/tree-pair-tally-unary-general.lisp",
+        "blob_sha": "221532de28555fdc3163f1038a414c6fad7049bc",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "tree → unary-list",
+      "law": "Порахувати всі реальні CONS-пари дерева, включно зі списковим хребтом та вкладеними парами; атоми й порожні структури мають нуль.",
+      "native_law_test": "crates/sens/tests/d11_existing_tree_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "прибрати-збіги-у-дереві",
+      "source_family": "tree-leaf-pruning",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/tree-prune-matching-leaves-general.lisp",
+        "blob_sha": "4a63ad139f726e408ee447c83b8e5ad12d157ed0",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "proper-tree × atom → proper-tree",
+      "law": "Вилучити всі листки, тотожні шуканому атому, із правильного скінченного дерева, зберігаючи порядок і кожну вкладену порожню структуру.",
+      "native_law_test": "crates/sens/tests/d11_existing_tree_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "замінити-атом-у-дереві",
+      "source_family": "tree-exact-substitution",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/tree-replace-atom-general.lisp",
+        "blob_sha": "355b44cf8cfcc3c1d933b06cea61eca149372019",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "tree × atom × atom → tree",
+      "law": "Замінити всі точні атомні листки рекурсивно, не змінюючи структуру пар; зворотна заміна відновлює дерево, лише коли новий атом був відсутній раніше.",
+      "native_law_test": "crates/sens/tests/d11_existing_tree_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "дерева-рівні-точно?",
+      "source_family": "tree-structural-equivalence",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/tree-replace-atom-general.lisp",
+        "blob_sha": "355b44cf8cfcc3c1d933b06cea61eca149372019",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "tree × tree → D1",
+      "law": "Рекурсивна структурна тотожність двох скінченних дерев пар: однакові атоми, порожні вузли, хребти й вкладеність; не лише тотожність адрес або коренів.",
+      "native_law_test": "crates/sens/tests/d11_existing_tree_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "підпослідовність-атомів?",
+      "source_family": "list-ordered-subsequence",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-subsequence-atoms-general.lisp",
+        "blob_sha": "73f081e217ab4719f0960a12de4e8bd564f670e2",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list × list → D1",
+      "law": "Перевірити збереження порядку атомів першого списку всередині другого; збіги не обов'язково суміжні, а кратності мають окремі позиції.",
+      "native_law_test": "crates/sens/tests/d11_existing_tree_laws.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
     }
   ],
   "winners_20261022": {
