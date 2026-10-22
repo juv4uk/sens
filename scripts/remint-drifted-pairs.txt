@@ -100,3 +100,6 @@ knowledge/silent-fallback-inventory.lisp
 benchmarks/contest-uk/перевернути-компакт.lisp
 benchmarks/contest-uk/перевернути-короткий.lisp
 benchmarks/contest-uk/факторіал-хвостовий.lisp
+lib/core-math.lisp
+lib/core2.lisp
+lib/list-suffix-from-last-compound-zero-copy-general.lisp
