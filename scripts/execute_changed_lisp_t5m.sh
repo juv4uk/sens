@@ -159,7 +159,10 @@ run_native_t5m_program() {
           mark_file_failed
           return
         fi
+        # Mint створює фізичний носій. Canonical bit-view генерує Zig open,
+        # тому verify-view не має права перевіряти ще не створений перегляд.
         if ! timeout "$native_timeout" "$binary" --t5m-mint "$negative_source" "$negative_physical" >"$dir/axioms-negative-mint.out" 2>"$dir/axioms-negative-mint.err" ||
+           ! timeout "$native_timeout" "$native_open" open "$negative_physical" >"${negative_physical%.sens}" 2>"$dir/axioms-negative-open.err" ||
            ! timeout "$native_timeout" "$native_open" verify-view "$negative_physical" >"$dir/axioms-negative-view.out" 2>"$dir/axioms-negative-view.err" ||
            ! timeout "$native_timeout" "$binary" --t5m-pair "$negative_source" "$negative_physical" >"$dir/axioms-negative-paired.out" 2>"$dir/axioms-negative-paired.err" ||
            ! timeout "$native_timeout" "$binary" "$negative_physical" >"$dir/axioms-negative-standalone.out" 2>"$dir/axioms-negative-standalone.err"; then
