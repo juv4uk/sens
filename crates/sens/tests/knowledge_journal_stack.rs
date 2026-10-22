@@ -26,23 +26,23 @@ fn large_module_projection_and_existence_scan_are_stack_safe_on_default_thread()
     const N: usize = 2_000;
     let mut session = loaded_session();
 
-    let mut source = String::from("(defmodule bench (quote (");
+    let mut source = String::from("(визначити-модуль bench (як-є (");
     for i in 0..N {
         source.push_str(&format!("((item f{i}))"));
     }
     source.push_str(")))");
     eval(&mut session, &source);
 
-    assert_eq!(eval(&mut session, "(module-known? (quote bench))"), "t");
+    assert_eq!(eval(&mut session, "(модуль-відомий? (як-є bench))"), "t");
     assert_eq!(
         eval(
             &mut session,
-            "(length (module-journal-events (quote bench) журнал-знань))",
+            "(length (отримати-події-журналу-окремого-модуля (як-є bench) журнал-знань))",
         ),
         N.to_string()
     );
     assert_eq!(
-        eval(&mut session, "(length (module-clauses-now (quote bench)))"),
+        eval(&mut session, "(length (модуль-клаузи-зараз (як-є bench)))"),
         N.to_string()
     );
 
@@ -50,7 +50,7 @@ fn large_module_projection_and_existence_scan_are_stack_safe_on_default_thread()
     assert_eq!(
         eval(
             &mut session,
-            "(second (car (car (module-clauses-now (quote bench)))))",
+            "(second (car (car (модуль-клаузи-зараз (як-є bench)))))",
         ),
         "f0"
     );
@@ -58,7 +58,7 @@ fn large_module_projection_and_existence_scan_are_stack_safe_on_default_thread()
         eval(
             &mut session,
             &format!(
-                "(second (car (nth {} (module-clauses-now (quote bench)))))",
+                "(second (car (nth {} (модуль-клаузи-зараз (як-є bench)))))",
                 N - 1
             ),
         ),
