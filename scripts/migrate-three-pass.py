@@ -1462,7 +1462,7 @@ NONPROGRAM_MANIFESTS = (
 # Старі SHA до українізації не мають блокувати кожну виконувану програму.
 # Вміст, схема, кількість і кожен власний source-blob усе ще перевіряються.
 NONPROGRAM_MANIFEST_BLOB_SHA = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "332e111387c4caabde7854f1931d57b359949dd3",
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "71c48840cbb5b7ebd7e651d26f2ef6c858c971a5",
     "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "e258a854fb4abab0070c3f7585b96b6acdfcbfb7",
     "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "d66fa8f636e47cd00744dc0ed5fa5f2f2c16ccd8",
     "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "ea5d3cdfeaf90490c6dee1d00866e56feeb44f6c",
