@@ -5651,7 +5651,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "blob_sha": "0bf4d1a8094022bd9f1a90f7a969af97326abc3e",
         "legacy_fixture_name": "HAS-DEFINE",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5674,7 +5674,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "blob_sha": "0bf4d1a8094022bd9f1a90f7a969af97326abc3e",
         "legacy_fixture_name": "HAS-LAMBDA",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5697,7 +5697,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "blob_sha": "0bf4d1a8094022bd9f1a90f7a969af97326abc3e",
         "legacy_fixture_name": "HAS-QUOTE",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5720,7 +5720,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "blob_sha": "0bf4d1a8094022bd9f1a90f7a969af97326abc3e",
         "legacy_fixture_name": "HAS-CONS",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5743,7 +5743,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "blob_sha": "0bf4d1a8094022bd9f1a90f7a969af97326abc3e",
         "legacy_fixture_name": "HAS-CAR",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5766,7 +5766,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "blob_sha": "0bf4d1a8094022bd9f1a90f7a969af97326abc3e",
         "legacy_fixture_name": "HAS-ATOM",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5789,7 +5789,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "blob_sha": "0bf4d1a8094022bd9f1a90f7a969af97326abc3e",
         "legacy_fixture_name": "HAS-EQ",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
@@ -5812,7 +5812,7 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-form-presence.lisp",
-        "blob_sha": "205f847c470841c9792510d6cfc7342e9e5fef7f",
+        "blob_sha": "0bf4d1a8094022bd9f1a90f7a969af97326abc3e",
         "legacy_fixture_name": "HAS-COND",
         "legacy_fixture_only": true,
         "snapshot_not_live_proof": false
