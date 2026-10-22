@@ -391,17 +391,19 @@ class ReportCliTests(FileTree):
 
 
 class CurrentRepositoryTests(unittest.TestCase):
-    def test_reason_turnstile_is_text_not_an_unreadable_atom(self):
-        # This proves only that the source lexer sees text, not native SENS
-        # printer/evaluator equivalence, which needs independent execution.
+    def test_reason_proof_marker_is_ukrainian_d7_atom_not_unsupported_string(self):
+        # Перевіряємо тільки проєкцію source: сам SENS/Zig доводить
+        # фізичну оборотність і виконання, не лексичний тест Python.
         source = (ROOT / "lib/reason.lisp").read_text(encoding="utf-8")
-        self.assertIn('(друкувати "|-")', source)
+        self.assertIn("(друкувати (як-є висновок))", source)
+        self.assertNotIn('(друкувати "|-")', source)
         self.assertNotIn("(як-є |-)", source)
         tokens = report.tokenize_lisp(source)
-        self.assertIn(("STRING", '"|-"'),
+        self.assertIn(("ATOM", "висновок"),
                       [(t.kind, t.value) for t in tokens])
         self.assertFalse(any(
-            t.kind == "ATOM" and "|" in t.value for t in tokens
+            "|" in t.value for t in tokens
+            if t.kind in ("ATOM", "STRING")
         ))
 
     def test_real_repository_is_scanned_without_archive_exclusions(self):
