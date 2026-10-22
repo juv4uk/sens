@@ -5340,13 +5340,16 @@
         "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
       },
       "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_clojure_reductions_seeds_every_prefix_native",
-      "native_ci_status": "NOT_YET_CONFIRMED",
+      "native_ci_status": "NATIVE_SENS_PASS_52_CASES_THREE_TARGETED_TESTS_RELEASE_NOT_CERTIFIED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39755195620",
+      "native_ci_job": 119745317595,
+      "native_ci_step": "Д11 / Scheme + Clojure — нативні закони списків і стану"
     },
     {
       "surface_name": "згорнути-по-хвостах-зліва",
@@ -5360,13 +5363,16 @@
         "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
       },
       "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_scheme_pair_fold_receives_each_suffix_native",
-      "native_ci_status": "NOT_YET_CONFIRMED",
+      "native_ci_status": "NATIVE_SENS_PASS_52_CASES_THREE_TARGETED_TESTS_RELEASE_NOT_CERTIFIED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39755195620",
+      "native_ci_job": 119745317595,
+      "native_ci_step": "Д11 / Scheme + Clojure — нативні закони списків і стану"
     },
     {
       "surface_name": "згорнути-по-хвостах-справа",
@@ -5380,13 +5386,16 @@
         "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
       },
       "native_law_test": "crates/sens/tests/d11_historical_scan_fold.rs::d11_scheme_pair_fold_right_receives_each_suffix_native",
-      "native_ci_status": "NOT_YET_CONFIRMED",
+      "native_ci_status": "NATIVE_SENS_PASS_52_CASES_THREE_TARGETED_TESTS_RELEASE_NOT_CERTIFIED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39755195620",
+      "native_ci_job": 119745317595,
+      "native_ci_step": "Д11 / Scheme + Clojure — нативні закони списків і стану"
     }
   ],
   "winners_20261022": {
