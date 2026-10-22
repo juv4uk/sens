@@ -1266,39 +1266,57 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
 }
 
 #[test]
-fn d9_native_witness_reuses_exact_core4_lisp_laws() {
-    // Не повторювати семантику чотирьох функцій у мові хоста.
-    // Через непредставний у D7 legacy в решті Core4 witness переносить
-    // лише точні чинні SENS-форми; перевірка суто байтова.
+fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
+    // SENS вирішує семантику, Zig — фізичну оберненість.
+    // Не підтверджувати старий SYMBOL? статичним порівнянням із Core4:
+    // Text7 не є Value::Symbol і не допускає SYMBOL->STRING.
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let core = fs::read_to_string(root.join("lib/core4.lisp")).expect("чинне Core4");
-    let witness = fs::read_to_string(
-        root.join("tests/semantic/d9-four-uk-projections-laws.lisp"),
-    ).expect("живий D9 witness");
-    for name in ["список", "двійковий", "символ?", "частка-остача"] {
-        let prefix = format!("(визначити {name} ");
-        let alt_prefix = format!("(визначити {name}\n");
-        let start = core.find(&prefix).or_else(|| core.find(&alt_prefix))
-            .unwrap_or_else(|| panic!("немає визначення Core4: {name}"));
-        let mut depth = 0_usize;
-        let mut end = None;
-        for (offset, byte) in core.as_bytes()[start..].iter().enumerate() {
-            match byte {
-                b'(' => depth += 1,
-                b')' => {
-                    depth -= 1;
-                    if depth == 0 {
-                        end = Some(start + offset + 1);
-                        break;
-                    }
-                }
-                _ => {}
-            }
-        }
-        let form = &core[start..end.expect("закрита SENS форма Core4")];
-        assert!(
-            witness.contains(form),
-            "D9 нативне визначення {name} відійшло від Core4; оновіть точну форму",
-        );
-    }
+    let source = root.join("tests/semantic/d9-four-uk-projections-laws.lisp");
+    let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
+    let stem = format!("sens-d9-{}-{id}", std::process::id());
+    let physical = std::env::temp_dir().join(format!("{stem}.sens"));
+    let altered = std::env::temp_dir().join(format!("{stem}.lisp"));
+    assert!(!physical.exists() && !altered.exists(), "конфлікт тимчасового SENS-носія");
+
+    let mint = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg("--t5m-mint").arg(&source).arg(&physical)
+        .output().expect("нативний SENS mint Д9");
+    assert!(mint.status.success(), "SENS mint: {}", error(&mint));
+    assert!(physical.is_file(), "SENS mint не створив T5M");
+
+    let opened = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("open").arg(&physical).output()
+        .expect("Zig T5M open");
+    assert!(opened.status.success(), "Zig open: {}", error(&opened));
+    assert!(!opened.stdout.is_empty(), "Zig повернув порожню фізичну проєкцію");
+    let verified = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("verify-view").arg(&physical).output()
+        .expect("Zig verify-view");
+    assert!(verified.status.success(), "Zig verify-view: {}", error(&verified));
+
+    let paired = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg("--t5m-pair").arg(&source).arg(&physical).output()
+        .expect("виконання живого Д9 Lisp із парою");
+    assert!(paired.status.success(), "SENS paired: {}", error(&paired));
+    let standalone = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg(&physical).output()
+        .expect("незалежне фізичне виконання Д9");
+    assert!(standalone.status.success(), "SENS standalone: {}", error(&standalone));
+    assert_eq!(paired.stdout, standalone.stdout, "виконання джерела та T5M не збігається");
+
+    // Змінене джерело мусить отримати справжнє T5M_PHYSICAL_PAIR_MISMATCH.
+    let original = fs::read_to_string(&source).expect("український свідок Д9");
+    fs::write(&altered, format!("{original}\n(як-є ())\n"))
+        .expect("підмінене джерело для негативного свідка");
+    let mismatch = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg("--t5m-pair").arg(&altered).arg(&physical).output()
+        .expect("негативний T5M виклик");
+    assert!(!mismatch.status.success(), "змінений Lisp помилково прийнято як T5M");
+    assert!(
+        error(&mismatch).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "неправильна причина відхилення: {}", error(&mismatch)
+    );
+
+    fs::remove_file(&altered).expect("прибрати негативний Lisp");
+    fs::remove_file(&physical).expect("прибрати тимчасовий T5M");
 }
