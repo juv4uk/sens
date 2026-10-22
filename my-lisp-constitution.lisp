@@ -1,10 +1,10 @@
 ; my-lisp-constitution — проєкція над tests/fixtures/conformance.lisp
-; Українська колонка. SID8 call-heads retired.
+; Чинні виклики — УКР-проєкція ратифікованих доменів, не восьмибітний регістр.
 ; Повний корпус: tests/fixtures/conformance.lisp (expr на як-є/атом?/тотожне?/…)
 
 (about . "executable proof; uk projection")
 (status . "uk-projection")
-(sid8-call-heads . retired)
+(виклики-укр . чинні)
 (source . "tests/fixtures/conformance.lisp")
 (principles-document . "docs/language-core-axioms.md")
 
