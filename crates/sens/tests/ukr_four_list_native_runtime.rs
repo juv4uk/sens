@@ -219,3 +219,37 @@ fn rotate_three_right_executes_exact_d3_without_append_dependency() {
         "(перше елементи)",
     );
 }
+
+
+// Історичні спискові закони: тільки власні SENS-композиції з lib/list-*.
+// Це не доказ руйнівних MACLISP NCONC/NREVERSE і не нові D11 opcodes.
+// Негативи змінюють сам алгоритм, а не текст очікуваної відповіді.
+#[test]
+fn historical_subset_by_position_preserves_order_and_duplicate_choices() {
+    execute_with_negative(
+        "lib/list-all-subsets-by-position-general.lisp",
+        include_str!("../../../lib/list-all-subsets-by-position-general.lisp"),
+        "(зєднати-списки-підмножин\n      підмножини-хвоста\n      (додати-голову-до-всіх-підмножин голова підмножини-хвоста))",
+        "(зєднати-списки-підмножин\n      (додати-голову-до-всіх-підмножин голова підмножини-хвоста)\n      підмножини-хвоста)",
+    );
+}
+
+#[test]
+fn historical_stable_union_preserves_first_occurrences_not_destructive_nconc() {
+    execute_with_negative(
+        "lib/list-stable-union-general.lisp",
+        include_str!("../../../lib/list-stable-union-general.lisp"),
+        "(зберегти-унікальні-атоми праві\n      (зберегти-унікальні-атоми ліві (як-є ())))",
+        "(зберегти-унікальні-атоми ліві\n      (зберегти-унікальні-атоми праві (як-є ())))",
+    );
+}
+
+#[test]
+fn historical_stable_symmetric_difference_keeps_multiplicity_and_order() {
+    execute_with_negative(
+        "lib/list-stable-symmetric-difference-general.lisp",
+        include_str!("../../../lib/list-stable-symmetric-difference-general.lisp"),
+        "(лише-один-бік ліві праві)\n      (лише-один-бік праві ліві)",
+        "(лише-один-бік праві ліві)\n      (лише-один-бік ліві праві)",
+    );
+}
