@@ -23,6 +23,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from domain_tables import read_domain_table
+from report_ukr_projection_progress import UKRAINIAN_KEYBOARD_OUTPUTS
 
 # Тільки ІСТОРИЧНЕ свідчення: цей Git commit передує фізичному вилученню
 # сід8-реєстру з main. Данні використовує ВИКЛЮЧНО одноразовий мігратор.
@@ -83,7 +84,7 @@ def mapping():
         if len(bits) != int(dom[1:]) or row is None or owner_label is None:
             raise ValueError(f"bridge {old} -> {dom}:{bits} не збігається з ратифікацією")
         ukr = row.ukr
-        if not ukr or ukr == "()" or any(c.isspace() for c in ukr) or re.search("[A-Za-z]", ukr):
+        if not ukr or ukr == "()" or any(c not in UKRAINIAN_KEYBOARD_OUTPUTS for c in ukr):
             withheld[old] = f"{dom}:{bits} — немає придатної повної колонки укр"
             continue
         admitted = (dom in {"D3", "D4", "D5", "D6"}
