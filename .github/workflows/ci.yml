@@ -266,7 +266,7 @@ jobs:
             git diff-tree --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" > "$changed_all"
           fi
           # Д6: нормативний закон живе в СЕНС, а не в хостовому оракулі.
-          if grep -Eq '^(crates/sens/src/eval/d6_arithmetic[.]rs|crates/sens/src/domain_identity[.]rs|crates/sens/tests/d6_add1_sub1_mechanisms[.]rs|knowledge/d6-mechanism-ledger[.]json|scripts/check-d6-mechanism-ledger[.]py|[.]github/workflows/ci[.]yml)[.]contract|crates/sens-cli/src/bin/cml-export[.]rs)$' "$changed_all"; then "$changed_all"; then
+          if grep -Eq '^(crates/sens/src/eval/d6_arithmetic[.]rs|crates/sens/src/domain_identity[.]rs|crates/sens/tests/d6_add1_sub1_mechanisms[.]rs|knowledge/d6-mechanism-ledger[.]json|scripts/check-d6-mechanism-ledger[.]py|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'd6_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(sens-cml-export[.]contract|crates/sens-cli/src/bin/cml-export[.]rs)$' "$changed_all"; then
