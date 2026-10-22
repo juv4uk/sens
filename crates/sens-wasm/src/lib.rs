@@ -10,28 +10,33 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
-const CORE_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
-
-const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
-    ("unify.lisp", include_str!("../../../lib/unify.lisp")),
-    ("reason.lisp", include_str!("../../../lib/reason.lisp")),
-    ("forward.lisp", include_str!("../../../lib/forward.lisp")),
+const SURFACE_PREREQUISITES: &[(&str, Option<&str>)] = &[
+    ("unify.lisp", Some(include_str!("../../../lib/unify.lisp"))),
+    (
+        "reason.lisp",
+        Some(include_str!("../../../lib/reason.lisp")),
+    ),
+    (
+        "forward.lisp",
+        Some(include_str!("../../../lib/forward.lisp")),
+    ),
     (
         "knowledge.lisp",
-        include_str!("../../../lib/knowledge.lisp"),
+        Some(include_str!("../../../lib/knowledge.lisp")),
     ),
     (
         "persistent-map.lisp",
-        include_str!("../../../lib/persistent-map.lisp"),
+        Some(include_str!("../../../lib/persistent-map.lisp")),
     ),
     (
         "persistent-vector.lisp",
-        include_str!("../../../lib/persistent-vector.lisp"),
+        Some(include_str!("../../../lib/persistent-vector.lisp")),
     ),
-    ("time.lisp", include_str!("../../../lib/time.lisp")),
+    // Єдиний штатний loader: WASM не вбудовує окрему копію time.lisp.
+    ("time.lisp", None),
     (
         "epistemic.lisp",
-        include_str!("../../../lib/epistemic.lisp"),
+        Some(include_str!("../../../lib/epistemic.lisp")),
     ),
 ];
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
@@ -79,6 +84,36 @@ impl WebSurface {
     }
 }
 
+fn load_surface_prerequisite(
+    name: &str,
+    source: Option<&str>,
+    session: &mut Session,
+) -> Result<(), String> {
+    let result = match (name, source) {
+        ("time.lisp", None) => sens::load_time_library(session),
+        (_, Some(source))
+            if matches!(
+                name,
+                "unify.lisp"
+                    | "reason.lisp"
+                    | "forward.lisp"
+                    | "knowledge.lisp"
+                    | "persistent-map.lisp"
+            ) =>
+        {
+            sens::eval_pinned_reasoning_source(&format!("lib/{name}"), source, session)
+        }
+        (_, Some(source)) => eval_program(source, session),
+        (_, None) => return Err(format!("Бібліотека {name} не має штатного завантажувача")),
+    };
+    result.map(|_| ()).map_err(|error| {
+        let diagnostic = source
+            .map(|source| error.render(source))
+            .unwrap_or_else(|| error.to_string());
+        format!("Помилка завантаження {name}: {diagnostic}")
+    })
+}
+
 fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Environment, String> {
     let layer = base.child();
     if matches!(
@@ -89,21 +124,7 @@ fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Enviro
             environment: layer.clone(),
         };
         for (name, source) in SURFACE_PREREQUISITES {
-            (if *name == "time.lisp" {
-                sens::load_time_library(&mut session)
-            } else if matches!(
-                *name,
-                "unify.lisp"
-                    | "reason.lisp"
-                    | "forward.lisp"
-                    | "knowledge.lisp"
-                    | "persistent-map.lisp"
-            ) {
-                sens::eval_pinned_reasoning_source(&format!("lib/{name}"), source, &mut session)
-            } else {
-                eval_program(source, &mut session)
-            })
-            .map_err(|error| format!("failed to load {name}: {}", error.render(source)))?;
+            load_surface_prerequisite(name, *source, &mut session)?;
         }
         let (name, source) = match surface {
             WebSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
@@ -189,18 +210,18 @@ fn init_if_needed() -> Result<(), String> {
     SESSION.with(|slot| {
         let mut guard = slot.borrow_mut();
         if guard.is_none() {
-            *guard = Some(WebSession::new(session_with_core_fasl(CORE_FASL)?)?);
+            *guard = Some(WebSession::new(session_with_core()?)?);
         }
         Ok(())
     })
 }
 
-fn session_with_core_fasl(fasl_bytes: &[u8]) -> Result<Session, String> {
+fn session_with_core() -> Result<Session, String> {
     let mut session = Session::default();
-    let (expressions, _) = sens::fasl_decode_program(fasl_bytes)
-        .ok_or_else(|| "failed to decode core4.lisp.fasl (format or hash mismatch)".to_string())?;
-    sens::eval_parsed_expressions(&expressions, &mut session)
-        .map_err(|error| format!("failed to preload core.lisp: {error}"))?;
+    // Той самий bootstrap, що й у native: макроси, перевірка чинності
+    // кешу та вибір профілю належать одному loader, а не окремому WASM шляху.
+    sens::load_core_library(&mut session)
+        .map_err(|error| format!("Помилка штатного завантаження Core4: {error}"))?;
     Ok(session)
 }
 
@@ -427,8 +448,8 @@ mod tests {
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
-            let (result, _) = sens_literate::eval_literate(
-                "(length (quote (a b c)))",
+            let (result, _) = sens_literate::eval_literate_ukr(
+                "(довжина (як-є (а б в)))",
                 SourceMode::PureLisp,
                 session,
             )
@@ -445,18 +466,21 @@ mod tests {
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
-            eval_program("(define крок 1)", session).expect("user def");
-            eval_program("(define додай-крок (lambda (x) (+ x крок)))", session)
-                .expect("closure def");
+            eval_program("(визначити крок 1)", session).expect("user def");
+            eval_program(
+                "(визначити додай-крок (функція (число) (додати число крок)))",
+                session,
+            )
+            .expect("closure def");
         });
 
         assert_eq!(set_surface_impl("ук").expect("ук"), "ук");
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
-            let uk = eval_program("(атом? 'мама)", session).expect("uk alias");
-            assert_eq!(uk.value.to_string(), "(1)");
-            eval_program("(define крок 2)", session).expect("redefine user value");
+            let uk = eval_program("(атом? (як-є мама))", session).expect("uk alias");
+            assert_eq!(uk.value.as_predicate_bit(), Some(true));
+            eval_program("(визначити крок 2)", session).expect("redefine user value");
             let closure = eval_program("(додай-крок 5)", session).expect("closure");
             assert_eq!(closure.value.to_string(), "7");
         });
@@ -478,9 +502,9 @@ mod tests {
             let mut guard = slot.borrow_mut();
             let state = guard.as_mut().expect("initialized web session");
             assert_eq!(state.surface, WebSurface::UkrainianFull);
-            let full = eval_program("(порожній-текст? \"\")", &mut state.session)
+            let full = eval_program("(рядок-порожній? \"\")", &mut state.session)
                 .expect("full Ukrainian call head works by default");
-            assert_eq!(full.value.to_string(), "(1)");
+            assert_eq!(full.value.as_predicate_bit(), Some(true));
         });
 
         assert_eq!(set_surface_impl("core").expect("core"), "core");
@@ -488,46 +512,83 @@ mod tests {
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
-            let full = eval_program("(порожній-текст? \"\")", session)
+            let full = eval_program("(рядок-порожній? \"\")", session)
                 .expect("full Ukrainian spelling after explicit switch");
-            assert_eq!(full.value.to_string(), "(1)");
+            assert_eq!(full.value.as_predicate_bit(), Some(true));
         });
     }
 
     #[test]
-    fn broken_core_preload_is_reported_instead_of_installing_partial_session() {
-        let error = session_with_core_fasl(b"broken fasl")
-            .expect_err("if FASL loading fails, it must propagate rather than swallow the error");
-        assert!(
-            error.contains("failed to decode") || error.contains("failed to preload"),
-            "{error}"
+    fn web_bootstrap_selects_current_core4_and_installs_language_macros() {
+        let mut session = session_with_core().expect("ядро браузерної сесії");
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(sens::CoreProfile::Core4)
         );
+        let value = eval_program("(друге (як-є (а б)))", &mut session)
+            .unwrap()
+            .value;
+        assert_eq!(value.to_string(), "б");
+        let value = eval_program("(нехай ((значення 42)) значення)", &mut session)
+            .unwrap()
+            .value;
+        assert_eq!(value.to_string(), "42");
     }
 
     #[test]
-    fn wasm_session_exposes_unicode_string_slice_with_clamped_bounds() {
+    fn web_time_uses_shared_loader_without_a_second_source_copy() {
+        let mut session = session_with_core().expect("Core4");
+        load_surface_prerequisite("time.lisp", None, &mut session).expect("спільний loader часу");
+        for (source, expected) in [
+            ("(інтернет-час-режим-припустимий? 4)", true),
+            ("(інтернет-час-режим-припустимий? 3)", false),
+            ("(інтернет-час-рівень-припустимий? 15)", true),
+            ("(інтернет-час-рівень-припустимий? 16)", false),
+        ] {
+            let value = eval_program(source, &mut session).unwrap().value;
+            assert_eq!(value.as_predicate_bit(), Some(expected), "{source}");
+        }
+        assert!(load_surface_prerequisite("невідомий.lisp", None, &mut session).is_err());
+        assert!(load_surface_prerequisite("некоректний.lisp", Some("("), &mut session).is_err());
+    }
+
+    #[test]
+    fn wasm_session_slices_exact_d7_text_sequences_with_clamped_bounds() {
         reset_session();
         init_if_needed().expect("core.lisp preload must succeed");
 
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
+            // Чинний D9 РЯДОК-ЗРІЗ працює над послідовністю. Українська
+            // поверхня тут лише frontend; backend отримує точні D7 клітини,
+            // не старий host String і не вилучений string-slice primitive.
+            let text = |source: &str| {
+                let text = sens::encode_text7(source, sens::Text7Layout::Uk).unwrap();
+                sens::Value::list(text.cells().iter().map(|&cell| {
+                    let coordinate =
+                        sens::domain_ladder::DomainCoordinate::new(7, u16::from(cell)).unwrap();
+                    sens::Value::DomainIdentity(sens::DomainIdentity::from_coordinate(coordinate))
+                }))
+            };
+            session.environment.define("текст", text("привіт"));
 
-            let (unicode, _) = sens_literate::eval_literate(
-                r#"(string-slice "привіт" 1 3)"#,
+            let (unicode, _) = sens_literate::eval_literate_ukr(
+                "(рядок-зріз текст 1 3)",
                 SourceMode::PureLisp,
                 session,
             )
-            .expect("the WASM session must expose the canonical string-slice primitive");
-            assert_eq!(unicode.value.to_string(), r#""ри""#);
+            .expect("чинний D9 зріз точних D7 клітин має виконуватися");
+            assert_eq!(unicode.value, text("ри"));
 
-            let (clamped, _) = sens_literate::eval_literate(
-                r#"(string-slice "abc" 2 99)"#,
+            session.environment.define("текст", text("абв"));
+            let (clamped, _) = sens_literate::eval_literate_ukr(
+                "(рядок-зріз текст 2 99)",
                 SourceMode::PureLisp,
                 session,
             )
-            .expect("string-slice must preserve its canonical clamping semantics in WASM");
-            assert_eq!(clamped.value.to_string(), r#""c""#);
+            .expect("кінець поза послідовністю має обмежуватися її довжиною");
+            assert_eq!(clamped.value, text("в"));
         });
     }
 
@@ -540,8 +601,8 @@ mod tests {
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
-            let _ = sens_literate::eval_literate(
-                "(def foo (lambda (x) (+ x 1)))",
+            let _ = sens_literate::eval_literate_ukr(
+                "(визначити наступне (функція (число) (додати число 1)))",
                 SourceMode::PureLisp,
                 session,
             )
@@ -553,7 +614,7 @@ mod tests {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
             let (result, _) =
-                sens_literate::eval_literate("(foo 5)", SourceMode::PureLisp, session)
+                sens_literate::eval_literate_ukr("(наступне 5)", SourceMode::PureLisp, session)
                     .expect("foo should be visible from previous eval");
             assert_eq!(result.value.to_string(), "6");
         });
@@ -572,9 +633,13 @@ mod tests {
         init_if_needed().expect("core.lisp preload must succeed");
 
         let mode = JsValue::from_str("sens");
-        evaluate("(def foo (lambda (x) (+ x 1)))", mode.clone()).expect("def should succeed");
+        evaluate(
+            "(визначити наступне (функція (число) (додати число 1)))",
+            mode.clone(),
+        )
+        .expect("визначення має виконуватися");
         let second: Evaluation = serde_wasm_bindgen::from_value(
-            evaluate("(foo 5)", mode).expect("second call should see foo from the first"),
+            evaluate("(наступне 5)", mode).expect("другий виклик бачить попереднє визначення"),
         )
         .expect("decode second evaluation");
         assert_eq!(second.value, "6");
