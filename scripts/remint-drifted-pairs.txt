@@ -77,3 +77,6 @@ lib/list-first-compound-general.lisp
 benchmarks/sens-program-size/fixtures/konkurs-minimal-polynomial.lisp
 lib/list-leading-atom-run-length-unary-general.lisp
 lib/list-interleave-three-general.lisp
+benchmarks/contest-uk/факторіал.lisp
+benchmarks/contest-uk/сума-до-n.lisp
+benchmarks/contest-uk/довжина-списку.lisp
