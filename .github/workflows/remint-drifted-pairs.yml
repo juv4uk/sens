@@ -99,6 +99,38 @@ jobs:
               done
             fi
           fi
+          # Істину оборотності дає SENS/Zig, а не git-історія комітів:
+          # source/pair можуть мати однаковий останній коміт, але різні байти.
+          # Перед суддівством перевіряємо КОЖНУ активну фізичну трійку,
+          # а не лише змінені в push джерела. Саме це усуває пропущений
+          # "необоротний T5M" для нсд-евклід після успішного mint інших.
+          if [[ "$EVENT_NAME" == push ]]; then
+            for source in benchmarks/contest-uk/*.lisp; do
+              [[ -f "$source" && ! -L "$source" ]] || continue
+              if printf '%s\n' "$list" | grep -Fxq -- "$source"; then
+                continue
+              fi
+              pair="${source%.lisp}.sens"
+              view="${source%.lisp}"
+              [[ -s "$pair" && -f "$view" && ! -L "$pair" && ! -L "$view" ]] || continue
+              probe="$(mktemp "$RUNNER_TEMP/sens-remint-probe.XXXXXX")"
+              drift=0
+              if ! target/debug/sens --t5m-mint "$source" "$probe" >/dev/null; then
+                drift=1
+                echo "REMINT_NATIVE_PROBE_FAILED source=$source"
+              elif ! cmp -s "$probe" "$pair"; then
+                drift=1
+                echo "REMINT_PHYSICAL_DRIFT source=$source"
+              elif ! target/debug/sens-trit view "$pair" | cmp -s - "$view"; then
+                drift=1
+                echo "REMINT_VIEW_DRIFT source=$source"
+              fi
+              rm -f -- "$probe"
+              if (( drift )); then
+                list="$(printf '%s\n%s' "$list" "$source")"
+              fi
+            done
+          fi
           if [ -z "$list" ] && [[ "$EVENT_NAME" != push ]]; then
             if [ -f scripts/remint-drifted-pairs.txt ]; then
               list="$(grep -vE '^[[:space:]]*(#|$)' scripts/remint-drifted-pairs.txt)"
