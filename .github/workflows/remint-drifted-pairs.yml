@@ -319,14 +319,33 @@ jobs:
             # маршрут mint → Zig inverse → paired/standalone SENS.
             # Після паралельного оновлення перевірити й дрейфуючі трійки,
             # а не лишати їх новим непоясненим RED під час judge.
-            if [[ "$REMINT_CONTEST" == true ]]; then
-              for source in benchmarks/contest-uk/*.lisp; do
-                [[ -f "$source" && ! -L "$source" ]] || continue
+            # Новий незалежний конкурсант міг з'явитися, коли workflow
+            # уже майнив старий HEAD. Push від GITHUB_TOKEN не запускає
+            # наступний push-workflow: забираємо його в поточний native mint.
+            for source in benchmarks/contest-uk/*.lisp; do
+              [[ -f "$source" && ! -L "$source" ]] || continue
+              pair="${source%.lisp}.sens"
+              view="${source%.lisp}"
+              needs_pair=0
+              if [[ ! -s "$pair" || ! -f "$view" ||
+                    -L "$pair" || -L "$view" ]]; then
+                needs_pair=1
+              else
+                source_commit="$(git log -1 --format=%H -- "$source")"
+                pair_commit="$(git log -1 --format=%H -- "$pair")"
+                if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
+                   ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
+                  needs_pair=1
+                fi
+              fi
+              if (( needs_pair )); then
+                REMINT_CONTEST=true
                 if ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
                   printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
+                  echo "REMINT_RECOVER_CONTEST_SOURCE source=$source"
                 fi
-              done
-            fi
+              fi
+            done
             # Якщо попередні queued push скасовано, після rebase потрібно
             # забрати й нові бібліотечні Lisp. Інакше незмінений старий
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
@@ -457,7 +476,13 @@ jobs:
                   # доведених SENS/Zig пар не потрібен повторний native judge.
                   # Rust src, Zig, Lisp та фізичні .sens і далі вимагають remint.
                   ;;
-                benchmarks/contest-uk/*.lisp|lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp|tests/fixtures/*.lisp)
+                benchmarks/contest-uk/*.lisp)
+                  # Без фізичної пари новий Lisp НЕ стає виконуваним від
+                  # одного git rebase. Перейти до SENS/Zig на чинному SHA.
+                  echo "REMINT_NEW_CONTESTANT source=$changed mint=REVERIFY_CURRENT_MAIN"
+                  safe_rebase=0
+                  break ;;
+                lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp|tests/fixtures/*.lisp)
                   # Лише A незалежного джерела без фізичної пари:
                   # нова D11/list/tree форма чи незалежний Lisp-свідок не змінює
                   # вже перевірений фізичний вхід; candidate і M/D/R — remint.
