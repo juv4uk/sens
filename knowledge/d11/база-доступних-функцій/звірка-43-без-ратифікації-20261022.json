@@ -963,6 +963,29 @@
     },
     "name_only_missing_semantic_neighborhood": 6,
     "clarification": "Попередня категорія unproven_law означає брак точного буквального збігу, а не доказ відсутності семантичного резидента у D1–D10.",
-    "semantic_scope": "Збережено правило попередніх доменів: exact address, independent law, current native mechanism, owner decision. Neighbor ≠ same law; runtime D3 COND ≠ admitted D10 IF."
+    "semantic_scope": "Збережено правило попередніх доменів: exact address, independent law, current native mechanism, owner decision. Neighbor ≠ same law; runtime D3 COND ≠ admitted D10 IF.",
+    "filtered_placement_20261022": {
+      "file": "knowledge/d11/база-доступних-функцій/розміщення-43-фільтр-20261022.tsv",
+      "examined": 43,
+      "status": "ROUTED_NO_MACHINE_ADMISSION",
+      "source": "lib/d11-form-presence.lisp",
+      "native_test": "crates/sens/tests/d11_legacy_form_presence.rs",
+      "native_cases": 26,
+      "native_status": "CI_PENDING",
+      "introspection_projections": [
+        "містить-форму-визначити?",
+        "містить-форму-функція?",
+        "містить-форму-цитування?",
+        "містить-форму-сполучити?",
+        "містить-форму-перше?",
+        "містить-форму-атом?",
+        "містить-форму-тотожне?",
+        "містить-форму-умов?"
+      ],
+      "historic_d11_fixture_bits_only": true,
+      "owner_ratified_from_43": 0,
+      "newly_admitted_d11_opcodes": 0,
+      "decision": "Корисні HAS-* — одна SENS-бібліотечна композиція та 8 укр-викликів. Тотожне нижчим доменам не дублювати, дані й транспорт не видавати за opcode."
+    }
   }
 }
