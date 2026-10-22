@@ -107,10 +107,8 @@ while IFS= read -r -d '' source; do
     tests/fixtures/mechanism-selector-1047-witness.lisp)
       binding_sources=(--binding-source lib/mechanism-selector.lisp) ;;
     tests/fixtures/island-lowering-1048-witness.lisp)
-      # SENS loads exact-domain definitions in dependency order.
-      # No host LOAD, and no Python/JSON semantics.
-      binding_sources=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp) ;;
-    tests/fixtures/island-lowering-1048-witness.lisp)
+      # СЕНС завантажує чинні визначення в порядку залежностей;
+      # жодного стороннього LOAD або Python/JSON-семантики.
       binding_sources=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp) ;;
     tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp)
       binding_sources=(--binding-source lib/world.lisp) ;;
