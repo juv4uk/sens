@@ -142,6 +142,43 @@ run_native_t5m_program() {
         mark_file_failed
         return
       fi
+      # Виконувані аксіоми: тільки D1:1, не структурне D3 () чи host truthiness.
+      # Негативний змінений текст повинен дати саме D1:0 через SENS/Zig.
+      if [[ "$file" == "lib/axioms-d1-principle-five.lisp" ]]; then
+        printf '1\n' > "$dir/d1-true.expected"
+        if ! cmp -s "$dir/native-standalone.stdout" "$dir/d1-true.expected"; then
+          echo "::error::SENS_D1_AXIOMS_P5_WRONG_POSITIVE source=$file expected=D1:1 actual=$(cat "$dir/native-standalone.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+        negative_source="$dir/axioms-mutant.lisp"
+        negative_physical="$dir/axioms-mutant.sens"
+        sed 's/(earth is a planet))))/(earth was a planet))))/' "$file" > "$negative_source"
+        if cmp -s "$file" "$negative_source"; then
+          echo "::error::SENS_D1_AXIOMS_P5_MUTANT_NOT_CREATED source=$file" >&2
+          mark_file_failed
+          return
+        fi
+        if ! timeout "$native_timeout" "$binary" --t5m-mint "$negative_source" "$negative_physical" >"$dir/axioms-negative-mint.out" 2>"$dir/axioms-negative-mint.err" ||
+           ! timeout "$native_timeout" "$native_open" verify-view "$negative_physical" >"$dir/axioms-negative-view.out" 2>"$dir/axioms-negative-view.err" ||
+           ! timeout "$native_timeout" "$binary" --t5m-pair "$negative_source" "$negative_physical" >"$dir/axioms-negative-paired.out" 2>"$dir/axioms-negative-paired.err" ||
+           ! timeout "$native_timeout" "$binary" "$negative_physical" >"$dir/axioms-negative-standalone.out" 2>"$dir/axioms-negative-standalone.err"; then
+          echo "::error::SENS_D1_AXIOMS_P5_NEGATIVE_EXECUTION_FAILED source=$file" >&2
+          for diagnostic in "$dir"/axioms-negative-*.err; do
+            [[ -f "$diagnostic" ]] && sed 's/^/SENS negative: /' "$diagnostic" >&2
+          done
+          mark_file_failed
+          return
+        fi
+        printf '0\n' > "$dir/d1-false.expected"
+        if ! cmp -s "$dir/axioms-negative-paired.out" "$dir/d1-false.expected" ||
+           ! cmp -s "$dir/axioms-negative-standalone.out" "$dir/d1-false.expected"; then
+          echo "::error::SENS_D1_AXIOMS_P5_WRONG_NEGATIVE source=$file expected=D1:0 actual=$(cat "$dir/axioms-negative-standalone.out")" >&2
+          mark_file_failed
+          return
+        fi
+        echo "SENS_D1_AXIOMS_P5_EXECUTED_PASS source=$file positive=D1:1 mutant=D1:0 physical=ZIG_T5M native=SENS"
+      fi
       native_standalone_parity_paths["$file"]=1
       if [[ -f "$committed" && ! -L "$committed" ]] && cmp -s "$physical" "$committed"; then
         printf '%s\n' "$committed" >> "$benchmark_manifest"
