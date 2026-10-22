@@ -298,12 +298,15 @@ jobs:
           }
           commit_verified_changes() {
             prune_archived_duplicates
-            git add -A
-            if git diff --cached --quiet; then
-              echo "REMINT_ALREADY_CURRENT no-byte-changes"
-              return 1
-            fi
-            git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main"
+            git add -A || return 2
+            local diff_status=0
+            git diff --cached --quiet || diff_status=$?
+            case "$diff_status" in
+              0) echo "REMINT_ALREADY_CURRENT no-byte-changes"; return 1 ;;
+              1) ;;
+              *) echo "::error::REMINT_GIT_DIFF_FAILED status=$diff_status" >&2; return 2 ;;
+            esac
+            git commit -m "ремонт пар: канонічні SENS/Zig T5M на актуальному main" || return 2
           }
           regenerate_on_current_main() {
             # Стан відмови — тільки поточної перевірки exact main.
@@ -439,9 +442,13 @@ jobs:
           }
           regenerated_failed=0
           recovered_on_current_main=0
-          if ! commit_verified_changes; then
-            exit 0
-          fi
+          commit_result=0
+          commit_verified_changes || commit_result=$?
+          case "$commit_result" in
+            0) ;;
+            1) exit 0 ;;
+            *) echo "::error::REMINT_NATIVE_COMMIT_FAILED status=$commit_result" >&2; exit "$commit_result" ;;
+          esac
           published=0
           # При частих незалежних push перевірені фізичні T5M можуть
           # годинами програвати гонку refs: повний суд триває десятки секунд.
@@ -590,11 +597,13 @@ jobs:
             # нативного remint і суду на новому main. Старий RED не є
             # чинним, якщо цей самий source уже виправлено та перевірено.
             recovered_on_current_main=1
-            if ! commit_verified_changes; then
-              echo "REMINT_ALREADY_PUBLISHED_EXACT on-current-main"
-              published=1
-              break
-            fi
+            commit_result=0
+            commit_verified_changes || commit_result=$?
+            case "$commit_result" in
+              0) ;;
+              1) echo "REMINT_ALREADY_PUBLISHED_EXACT on-current-main"; published=1; break ;;
+              *) echo "::error::REMINT_NATIVE_COMMIT_FAILED status=$commit_result" >&2; exit "$commit_result" ;;
+            esac
           done
           if (( ! published )); then
             echo "::error::REMINT_PUBLISH_RACE after 6 verified attempts; newer main must retry natively; no force push" >&2
