@@ -92,6 +92,9 @@ jobs:
             echo "contest=false" >> "$GITHUB_OUTPUT"
           fi
           echo "candidates:"; printf '%s\n' "$list" | sed '/^$/d' | wc -l
+          # Журнал тільки справді виконаних нативних джерел переживе
+          # перемикання ephemeral checkout на свіжий main у кроці публікації.
+          : > "$RUNNER_TEMP/sens-remint-success.txt"
           ok=0; skip=0
           while IFS= read -r f; do
             [ -z "$f" ] && continue
@@ -120,6 +123,7 @@ jobs:
             esac
             if bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}"; then
               ok=$((ok+1))
+              printf '%s\n' "$f" >> "$RUNNER_TEMP/sens-remint-success.txt"
             else
               echo "SKIP_FAIL $f"; skip=$((skip+1))
               if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
@@ -138,20 +142,21 @@ jobs:
       # RED одного кандидата не затримує конкурс уже доведених трійок.
       # Наприкінці workflow справжня відмова mint лишається червоною.
       - name: Нативне суддівство і просування справжніх переможців
+        id: contest_judge
         if: github.event_name == 'push' && steps.remint.outputs.contest == 'true'
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
-        # Навіть якщо нативне суддівство виявило чужий червоний внесок,
-        # зберегти незалежні пари, вже доведені Zig/SENS на кроці remint.
-        # Червоний judge лишається червоним; жодної підміни результату.
+        # Застарілий queued job не має права накочувати старий коміт через
+        # git pull --rebase: при конкурентних авторах конфлікт втрачає
+        # справді виконані Zig/SENS пари. Переобчислюємо їх на новому HEAD.
         if: ${{ !cancelled() && steps.remint.outcome == 'success' }}
+        env:
+          CONTEST_JUDGE_OUTCOME: ${{ steps.contest_judge.outcome }}
         run: |
+          set -euo pipefail
           git config user.name "sens-remint-bot"
           git config user.email "sens-remint-bot@users.noreply.github.com"
-          # Старий queued remint може повернути у main сироту після promotion.
-          # Прибираємо ТІЛЬКИ точний фізичний дубль уже архівованої трійки;
-          # жодної нової .lisp чи фальшивої оберненості не синтезуємо.
           prune_archived_duplicates() {
             local physical stem archive
             for physical in benchmarks/contest-uk/*.sens; do
@@ -170,43 +175,76 @@ jobs:
               fi
             done
           }
+          # На першому checkout уже перевірено конкретний набір; порожнє
+          # оновлення не потребує ані перепакування, ані нового коміту.
           prune_archived_duplicates
           git add -A
           if git diff --cached --quiet; then
-            echo "no drift -- nothing to commit"
-          else
-            git commit -m "ремонт пар: перемайнено дрейфуючі .lisp<->.sens канонічним Zig T5M (refresh-verified-t5m-pair)"
-            # У main пишуть незалежні агенти: перший push може програти
-            # перегони refs/heads/main. Переузгодити лише наш реальний commit,
-            # не маскувати конфлікт rebase та не використовувати force-push.
-            published=0
-            for attempt in 1 2 3 4 5 6; do
-              git pull --rebase origin main
-              # Переузгодження зі свіжим main ОБОВ'ЯЗКОВЕ: інакше
-              # старий queued bot повертає вже архівовані .sens без .lisp.
-              prune_archived_duplicates
-              git add -A -- benchmarks/contest-uk
-              if ! git diff --cached --quiet; then
-                # Не переписувати чужий HEAD, якщо наш commit став порожнім
-                # після rebase; тільки наша локальна версія до push.
-                if [[ "$(git rev-list --count origin/main..HEAD)" != 0 ]]; then
-                  git commit --amend --no-edit
-                else
-                  git commit -m "конкурс: прибрати фізичний дубль уже архівованої програми"
-                fi
+            echo "REMINT_NO_BYTE_CHANGE"
+            exit 0
+          fi
+
+          published=0
+          for attempt in 1 2 3 4 5 6; do
+            # Працюємо ТІЛЬКИ в одноразовому Actions checkout. Нічого
+            # не переписуємо в remote й не використовуємо force-push.
+            # Старі локальні згенеровані байти навмисне викидаються:
+            # їх НЕ можна безпечно rebase-ити на нове джерело.
+            git fetch origin main
+            git reset --hard origin/main
+            cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+            count=0
+            while IFS= read -r f; do
+              [[ -n "$f" ]] || continue
+              if [[ ! -f "$f" || -L "$f" ]]; then
+                case "$f" in
+                  benchmarks/contest-uk/*.lisp)
+                    old="benchmarks/contest-uk/superseded/${f##*/}"
+                    if [[ -f "$old" && ! -L "$old" ]]; then
+                      echo "REMINT_ALREADY_SUPERSEDED source=$f"
+                      continue
+                    fi;;
+                esac
+                echo "REMINT_SOURCE_NO_LONGER_ACTIVE source=$f"
+                continue
               fi
-              if git push origin HEAD:main; then
-                echo "REMINT_PUBLISHED attempt=$attempt"
-                published=1
-                break
-              fi
-              echo "REMINT_MAIN_ADVANCED attempt=$attempt: retry without force" >&2
-              sleep 1
-            done
-            if (( published == 0 )); then
-              echo "::error::Не вдалося опублікувати перевірену T5M-пару після шести спроб" >&2
-              exit 1
+              # Рівно ті самі правила імпортованих українських DEFINE,
+              # що й у першому проході, але на актуальному вмісті main.
+              bs=()
+              case "$f" in
+                lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
+                lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
+                lib/result-status.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
+                lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
+                tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/surface/semantic-registry-api.lisp --binding-source lib/mechanism-selector.lisp);;
+                tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
+              esac
+              bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}"
+              count=$((count+1))
+            done < "$RUNNER_TEMP/sens-remint-success.txt"
+            # Переможців після зміни HEAD визначає лише нове нативне
+            # виконання. Якщо перший суд уже впав, не ховаємо цей RED.
+            if [[ "$CONTEST_JUDGE_OUTCOME" == success ]]; then
+              bash benchmarks/contest-uk/promote.sh
             fi
+            prune_archived_duplicates
+            git add -A
+            if git diff --cached --quiet; then
+              echo "REMINT_ALREADY_PRESENT_ON_MAIN native_rechecked=$count"
+              published=1
+              break
+            fi
+            git commit -m "ремонт пар: SENS/Zig T5M на актуальному main, без конфліктного rebase"
+            if git push origin HEAD:main; then
+              echo "REMINT_PUBLISHED attempt=$attempt native_rechecked=$count"
+              published=1
+              break
+            fi
+            echo "REMINT_MAIN_ADVANCED attempt=$attempt: повторити нативний доказ на новому HEAD" >&2
+          done
+          if (( published == 0 )); then
+            echo "::error::Точний main рухається; нативний результат не опубліковано, без force-push" >&2
+            exit 1
           fi
 
       # Не оголошувати GREEN, коли SENS відхилив джерело; але не губити
