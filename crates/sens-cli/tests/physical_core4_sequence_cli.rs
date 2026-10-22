@@ -493,6 +493,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-suffix-from-last-compound-zero-copy-general",
         "list-tail-after-second-atom-zero-copy-general",
         "list-suffix-after-last-compound-zero-copy-general",
+        "interleave-pairs",
         "pair-associativity-law",
         "pair-swap",
         "rotate-left",
@@ -687,6 +688,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-suffix-after-first-atomic-triple-zero-copy-general"
                 | "list-suffix-from-last-compound-zero-copy-general"
                 | "list-tail-after-second-atom-zero-copy-general"
+                | "interleave-pairs"
                 | "pair-associativity-law"
                 | "pair-swap"
                 | "rotate-left"
