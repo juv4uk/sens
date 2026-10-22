@@ -31,6 +31,7 @@ executable=0
 paired_only=0
 bad=0
 missing=0
+nonprogram_data=0
 
 while IFS= read -r -d '' source; do
   if [[ -n "$scope" && "$source" != "$scope"* ]]; then
@@ -41,6 +42,15 @@ while IFS= read -r -d '' source; do
   if [[ "$source" == */superseded/* ]]; then
     continue
   fi
+  # Канонічні таблиці D1..D11 - дані, не програми. Їх спеціально
+  # НЕ можна mint у .sens: це був би вигаданий executable та хибний
+  # NATIVE_MISSING_TRIPLE. Читаємо назви напряму, без Python/JSON.
+  case "$source" in
+    lib/domains/d[1-9].lisp|lib/domains/d10.lisp|lib/domains/d11.lisp)
+      (( nonprogram_data += 1 ))
+      printf 'NATIVE_DATA_ONLY\t%s\tclassification=DOMAIN_TABLE\n' "$source" >&2
+      continue ;;
+  esac
   # Історичні бенчмарки теж враховуються у знаменнику, але ніколи
   # не підмінюють підтверджене нативне виконання.
   (( sources += 1 ))
@@ -162,5 +172,5 @@ while IFS= read -r -d '' source; do
   printf 'NATIVE_EXECUTED\t%s\n' "$source"
 done < <(git ls-files -z -- '*.lisp')
 
-printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s\n' \
-  "${scope:-all}" "$sources" "$complete" "$inverse" "$executable" "$paired_only" "$bad" "$missing"
+printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s\n' \
+  "${scope:-all}" "$sources" "$complete" "$inverse" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data"
