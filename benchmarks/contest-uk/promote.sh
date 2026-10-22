@@ -84,6 +84,14 @@ done
 
 # 1) Справжній SENS/Zig-суд — не хостова оцінка семантики.
 judge_output="$(bash "$dir/judge.sh")"
+# Лічильник тільки з реально виконаних і доведених SENS/Zig програм,
+# не з кількості фізичних файлів або JSON.
+if [[ "$judge_output" =~ CONTEST_NATIVE_PASS[[:space:]]count=([0-9]+) ]]; then
+  judge_executed="${BASH_REMATCH[1]}"
+else
+  echo "PROMOTE_NO_NATIVE_EXECUTION_COUNT" >&2
+  exit 2
+fi
 
 # 2) Ранжування за нативними (T5M, AST, visits), без Python/JSON.
 declare -A best bestbytes bestnodes bestvisits seen
@@ -163,3 +171,9 @@ for task in довжина-списку сума-до-n факторіал по�
   echo "PROMOTED $task ${best[$task]} T5M=${bestbytes[$task]} AST=${bestnodes[$task]} visits=${bestvisits[$task]}"
 done
 echo "CONTEST_PROMOTED excluded=$excluded active=$winner_count"
+# Архівні учасники виконані до promotion, але не належать до активної runtime.
+if (( judge_executed != winner_count + excluded )); then
+  echo "PROMOTE_ACCOUNTING_MISMATCH executed=$judge_executed active=$winner_count superseded=$excluded" >&2
+  exit 2
+fi
+echo "CONTEST_NATIVE_VERIFIED_EXECUTABLES executed_before_promotion=$judge_executed active_winners=$winner_count superseded=$excluded native=SENS_ZIG_T5M"
