@@ -38,7 +38,8 @@ fn verify_one(code: u8) -> Result<(usize, String, Frame3MicroExpr), String> {
 
     let expected = eval_parsed_expressions(&parsed, &mut Session::default())
         .map_err(|error| format!("evaluator: {error:?}"))?;
-    let t5_program = reference_t5m::program(&t5)?;
+    let t5_program =
+        reference_t5m::program(&t5).map_err(|error| format!("T5M reference program: {error}"))?;
     if t5_program.form_count() != 1 {
         return Err(format!("not one physical T5 form: {source}"));
     }

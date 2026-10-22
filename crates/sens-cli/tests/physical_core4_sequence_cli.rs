@@ -658,7 +658,6 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "pair-swap"
                 | "rotate-left"
                 | "rotate-three-right"
-                | "замінити-третій-в-четвірці"
                 | "list-last-three-zero-copy-general"
                 | "list-tail-after-third-compound-zero-copy-general"
                 | "list-unique-stable-fast-general"

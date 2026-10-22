@@ -34,9 +34,9 @@ fn українська_й_англійська_проєкції_зберіга�
     assert!(matches!(тотожність, sens::DomainIdentity::D5(_)));
     assert_eq!(тотожність.width(), 5);
 
-    let трити = sens_cli::zig_transport::encode_t5_direct(&[слово.word])
+    let трити = sens_cli::zig_transport::encode_t5m_direct(&[слово.word])
         .expect("Zig має запакувати точне слово D5 кодеком T5M");
-    let відновлені = sens_cli::zig_transport::decode_t5_words(&трити)
+    let відновлені = sens_cli::zig_transport::decode_t5m_words(&трити)
         .expect("Zig має відновити точні слова з T5M");
     assert_eq!(відновлені, [слово.word]);
 
