@@ -417,11 +417,24 @@ if [[ "$science_projection_status" != "(scientific-constant-knowledge-projection
   exit 1
 fi
 
-# #1047: mechanism selection occurs only after surface->SID resolution and may
-# choose only executor routes already admitted by Canon/function-table metadata.
-mechanism_selector_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/mechanism-selector-1047-witness.lisp)"
+# #1047: тільки точна ратифікована драбина, без колишнього плоского SID.
+# Вибір механізму перевіряє SENS із нинішніми українськими DEFINE.
+# Фізичний T5M переносить Zig; paired є реальним SENS-виконанням.
+mechanism_selector_status="$(
+  set -euo pipefail
+  native_scratch="$(mktemp -d)"
+  trap 'rm -rf -- "$native_scratch"' EXIT
+  cargo run --quiet -p sens-cli --bin sens -- \
+    --t5m-mint-pair tests/fixtures/mechanism-selector-1047-witness.lisp \
+    "$native_scratch/mechanism.sens" \
+    --binding-source lib/mechanism-selector.lisp >/dev/null
+  cargo run --quiet -p sens-cli --bin sens -- \
+    --t5m-pair tests/fixtures/mechanism-selector-1047-witness.lisp \
+    "$native_scratch/mechanism.sens" \
+    --binding-source lib/mechanism-selector.lisp
+)"
 if [[ "$mechanism_selector_status" != "(mechanism-selector-1047 (status pass))" ]]; then
-  printf 'mechanism selector Lisp witness failed: %s\n' "$mechanism_selector_status" >&2
+  printf 'mechanism selector native SENS witness failed: %s\n' "$mechanism_selector_status" >&2
   exit 1
 fi
 
