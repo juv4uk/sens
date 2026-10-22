@@ -162,6 +162,13 @@ jobs:
               fi
             done
           fi
+          # У PR тільки справжні власні зміни від спільного предка main.
+          if [[ "$EVENT_NAME" == push && "$GITHUB_REF" != refs/heads/main ]]; then
+            git rev-parse --verify refs/remotes/origin/main >/dev/null
+            pr_base="$(git merge-base origin/main HEAD)"
+            list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$pr_base" HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
+            echo "REMINT_PR_SOURCE_SCOPE branch=$GITHUB_REF base=$pr_base"
+          fi
           if [ -z "$list" ] && [[ "$EVENT_NAME" != push ]]; then
             if [ -f scripts/remint-drifted-pairs.txt ]; then
               list="$(grep -vE '^[[:space:]]*(#|$)' scripts/remint-drifted-pairs.txt)"
@@ -255,7 +262,7 @@ jobs:
       # Наприкінці workflow справжня відмова mint лишається червоною.
       - name: Нативне суддівство і просування справжніх переможців
         id: contest_judge
-        if: github.event_name == 'push' && steps.remint.outputs.contest == 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.remint.outputs.contest == 'true'
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
@@ -297,8 +304,23 @@ jobs:
             done
           }
           commit_verified_changes() {
-            prune_archived_duplicates
-            git add -A
+            if [[ "$target_branch" == main ]]; then
+              prune_archived_duplicates
+              git add -A
+            else
+              # Не підтягувати в PR сторонні Lisp, contest чи архівні файли.
+              local verified pair view
+              while IFS= read -r verified; do
+                [[ "$verified" == *.lisp ]] || continue
+                pair="${verified%.lisp}.sens"
+                view="${verified%.lisp}"
+                if [[ ! -f "$pair" || ! -f "$view" || -L "$pair" || -L "$view" ]]; then
+                  echo "::error::REMINT_VERIFIED_PAIR_MISSING source=$verified" >&2
+                  return 2
+                fi
+                git add -- "$pair" "$view"
+              done < "$RUNNER_TEMP/sens-remint-success.txt"
+            fi
             if git diff --cached --quiet; then
               echo "REMINT_ALREADY_CURRENT no-byte-changes"
               return 1
@@ -323,6 +345,7 @@ jobs:
             # уже майнив старий HEAD. Push від GITHUB_TOKEN не запускає
             # наступний push-workflow: забираємо його в поточний native mint.
             for source in benchmarks/contest-uk/*.lisp; do
+              [[ "$target_branch" == main ]] || break
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -351,6 +374,7 @@ jobs:
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
             # Тільки непарні або новіші за носій: без масового перемайну.
             for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+              [[ "$target_branch" == main ]] || break
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
