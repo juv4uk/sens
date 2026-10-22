@@ -145,10 +145,13 @@ pub(crate) fn evaluate_definition(
             }
 
             let value = evaluate(&arguments[1], environment)?;
-            if !matches!(value, Value::Closure(_) | Value::Builtin(_)) {
+            // Ратифікована точна голова може мати Lisp-визначений макрос:
+            // це виконуваний мовний механізм, не довільне значення даних.
+            // Той самий перелік допускає canon::bind_language_definition.
+            if !matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
-                    "exact DEFINE target requires a callable closure or builtin mechanism",
+                    "exact DEFINE target requires a callable closure, macro or builtin mechanism",
                     arguments[1].span,
                 ));
             }
