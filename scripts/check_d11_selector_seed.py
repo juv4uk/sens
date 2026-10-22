@@ -170,7 +170,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
 
     vocab_rows = vocabulary.get("table")
     require(isinstance(vocab_rows, list) and len(vocab_rows) == 43,
-            "TEST_VOCAB_COUNT", "expected exactly 43 ratified D11 testing entries")
+            "TEST_VOCAB_COUNT", "expected exactly 43 unratified historical D11 test fixtures")
     test_map: dict[str, str] = {}
     test_names: set[str] = set()
     for index, row in enumerate(vocab_rows):
@@ -225,9 +225,9 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
     coord_collisions = derived_coordinates & test_coordinates
     name_collisions = derived_names & d11_names
     require(not coord_collisions, "D11_TEST_COORD_COLLISION",
-            f"derived coordinates overlap ratified testing rows: {sorted(coord_collisions)[:5]}")
+            f"derived coordinates overlap legacy testing fixture addresses: {sorted(coord_collisions)[:5]}")
     require(not name_collisions, "D11_TEST_NAME_COLLISION",
-            f"derived names overlap ratified testing rows: {sorted(name_collisions)[:5]}")
+            f"derived names overlap legacy testing fixture addresses: {sorted(name_collisions)[:5]}")
 
     expected_coordinates: set[str] = set()
     parent_extensions: dict[str, set[str]] = {bits: set() for bits in parents}

@@ -50,14 +50,25 @@ run_native_t5m_program() {
   local source_bytes native_timeout
   source_bytes=$(wc -c < "$file")
   native_timeout=45s
-  # Реальне core4.lisp має ~0,5 MiB: 45s перериває SENS mint
-  # раніше від результату (CI status=124), не доводячи помилки джерела.
-  # Ліміт лишається кінцевим; лише велике джерело дістає час на
-  # справжній SENS reader → Zig/T5M → обернення → виконання.
-  if (( source_bytes >= 262144 )); then
+  # Мінімальний свідок може підвантажувати 300+ KiB визначень.
+  # Дати бюджет СУМІ реальних Lisp-входів, інакше CI хибно
+  # вважає живий SENS-закон непрацездатним через timeout=124.
+  # Ні Python, ні JSON не беруть участі у reader чи семантиці.
+  local total_input_bytes="$source_bytes"
+  local dependency
+  for ((i=1; i<${#binding_sources[@]}; i+=2)); do
+    dependency="${binding_sources[i]}"
+    if [[ ! -f "$dependency" || -L "$dependency" ]]; then
+      echo "::error::T5M_NATIVE_BINDING_SOURCE_MISSING source=$file binding=$dependency" >&2
+      mark_file_failed
+      return
+    fi
+    (( total_input_bytes += $(wc -c < "$dependency") ))
+  done
+  if (( total_input_bytes >= 262144 )); then
     native_timeout=180s
   fi
-  echo "T5M_NATIVE_BUDGET source=$file bytes=$source_bytes timeout=$native_timeout"
+  echo "T5M_NATIVE_BUDGET source=$file input_bytes=$total_input_bytes timeout=$native_timeout"
   # Для модулів з DEFINE-залежностями використовуємо новий SENS CLI.
   # Mint і парна перевірка відбуваються з однаковими binding-source.
   local mint_flag=--t5m-mint
