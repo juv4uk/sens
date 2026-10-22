@@ -264,7 +264,7 @@
     {
       "stable_id": "d9.lib.a854ae1ec64d11e1",
       "semantic_name": "SOURCE-OF",
-      "source_name": "джерело-від",
+      "source_name": "джерело-вузла-доказу",
       "source_file": "lib/reason.lisp",
       "relation_class": "REASONING-ALGEBRA",
       "behavior": "retrieve the source identity attached to a proof/evidence object",
@@ -278,7 +278,7 @@
     {
       "stable_id": "d9.lib.a6a115490cdb571b",
       "semantic_name": "PROVENANCE",
-      "source_name": "походження",
+      "source_name": "побудувати-походження-вузла",
       "source_file": "lib/reason.lisp",
       "relation_class": "REASONING-ALGEBRA",
       "behavior": "derive provenance information from proof structure",
