@@ -11,7 +11,12 @@ D9 = ROOT / "lib/domains/d9.lisp"
 D10 = ROOT / "lib/domains/d10.lisp"
 RESULT_STATUS = ROOT / "lib/result-status.lisp"
 # Справжній нативний свідок, не нове D4-визначення.
-NARRATE_WITNESS = ["список-із-рівно-двох-елементів?", ["як-є", ["а", "б"]]]
+NARRATE_WITNESS = [
+    "за-умовою",
+    [["список-із-рівно-двох-елементів?", ["як-є", ["а", "б"]]],
+     ["хибне?", ["список-із-рівно-двох-елементів?", ["як-є", ["а", "б", "в"]]]]],
+    ["так", ["перше", ["як-є", []]]],
+]
 
 TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
 
@@ -82,11 +87,10 @@ def definitions(source: str, *, final_witness=None):
     for form in forms:
         if not isinstance(form, list) or not form:
             raise AssertionError("верхня форма має бути справжнім списком SENS")
-        # СЕНС виконує верхні виклики після DEFINE: не відкидати
-        # справжній кінцевий свідок через застарілу вимогу лише DEFINE.
-        # Тут лише структурний аудит; семантику виконує рідний SENS/Zig.
+        # Нативний виклик-свідок вже відокремлено й перевірено вище.
+        # Жодну довільну верхню форму не пропускаємо як DEFINE.
         if form[0] not in ("0011", "визначити"):
-            continue
+            raise AssertionError("кожне верхнє визначення — D4:0011")
         if len(form) != 3:
             raise AssertionError("визначення D4:0011 має ім'я й тіло")
         name = form[1]
@@ -213,9 +217,10 @@ class NarrateUkrPeerTests(unittest.TestCase):
     def test_negative_return_of_removed_alias_is_caught(self):
         for legacy in ("narrate-fact", "narrate-proved-outcome"):
             with self.subTest(legacy=legacy):
-                prefix, separator, witness = self.src.rpartition("\n(список-із-рівно-двох-елементів? (як-є (а б)))")
+                prefix, separator, witness = self.src.rpartition("\n; Два живих закони D1:")
                 self.assertTrue(separator)
-                broken = prefix + f"\n(визначити {legacy} пояснити-факт)\n" + separator + witness
+                broken = (prefix + f"\n(визначити {legacy} пояснити-факт)\n"
+                          + separator + witness)
                 broken_defs = definitions(broken, final_witness=NARRATE_WITNESS)
                 with self.assertRaisesRegex(AssertionError, "застарілий англійський псевдонім"):
                     if legacy in broken_defs:
@@ -224,12 +229,15 @@ class NarrateUkrPeerTests(unittest.TestCase):
     def test_final_native_witness_and_negative_mutations(self):
         self.assertEqual(read_forms(self.src)[-1], NARRATE_WITNESS)
         for changed in (
-            self.src.replace("(список-із-рівно-двох-елементів? (як-є (а б)))", "(решта (як-є (а б)))"),
+            self.src.replace(
+                "(список-із-рівно-двох-елементів? (як-є (а б в)))",
+                "(список-із-рівно-двох-елементів? (як-є (а б)))",
+            ),
             self.src + "\n(решта (як-є (а б)))\n",
         ):
             with self.assertRaisesRegex(AssertionError, "кінцевий SENS-виклик"):
                 definitions(changed, final_witness=NARRATE_WITNESS)
-        with self.assertRaisesRegex(AssertionError, "кожне верхнє визначення"):
+        with self.assertRaisesRegex(AssertionError, "кінцевий SENS-виклик"):
             definitions(self.src + "\n(список-із-рівно-двох-елементів? (як-є (а б)))\n",
                         final_witness=NARRATE_WITNESS)
 
