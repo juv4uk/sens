@@ -76,3 +76,4 @@ lib/list-partition-atomic-compound-general.lisp
 lib/list-first-compound-general.lisp
 benchmarks/sens-program-size/fixtures/konkurs-minimal-polynomial.lisp
 lib/list-leading-atom-run-length-unary-general.lisp
+lib/list-interleave-three-general.lisp
