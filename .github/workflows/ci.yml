@@ -7,11 +7,8 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Для push/PR перевіряємо найновіший код, не накопичуємо старі SHA в черзі.
-# Ручний повний прогін не конкурує з автоматичними push-перевірками.
-concurrency:
-  group: ${{ github.event_name == 'workflow_dispatch' && 'sens-manual' || 'sens-central-ci' }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+# Жодної примусової черги чи автоматичного скасування SHA.
+# Вимірювання відбуваються в тому самому CI, що й нативні SENS/Zig тести.
 
 permissions:
   contents: read
@@ -804,9 +801,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
-      # Одноразове вимірювання T5M (5 тритів/байт); не історичний T5.
+      # Бенчмарк T5M на кожному push та ручному CI; транспорт, не семантичний oracle.
       - name: "BENCH-T5M — Zig, x86-64 ASM, Rust"
-        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
         timeout-minutes: 10
         shell: bash
         run: |
@@ -835,7 +832,7 @@ jobs:
             echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: "BENCH-T5M — зберегти звіт"
-        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
+        if: ${{ always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
         with:
           name: t5m-zig-asm-rust-${{ github.sha }}
