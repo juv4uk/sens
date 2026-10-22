@@ -9,6 +9,7 @@ on:
   push:
     paths:
       - "benchmarks/contest-uk/*.lisp"
+      - "lib/list-*.lisp"
       - ".github/workflows/remint-drifted-pairs.yml"
   workflow_dispatch:
     inputs:
@@ -39,6 +40,7 @@ jobs:
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
 
       - name: Remint pairs via canonical Zig T5M
+        id: remint
         env:
           FILES: ${{ inputs.files }}
           EVENT_NAME: ${{ github.event_name }}
@@ -51,14 +53,14 @@ jobs:
             # Лише реально додані/змінені .lisp у цьому push, не весь
             # історичний список. Видалені під час promotion не перемайнювати.
             if [[ "$BEFORE" =~ ^0+$ ]]; then
-              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp')"
+              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp')"
             else
-              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp')"
+              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp')"
             fi
             # Навіть якщо push містить одну змінену програму, інші
             # непарні Lisp з попереднього RED не повинні губитися.
             # Це той самий нативний SENS/Zig mint, без повторів і Python.
-            for source in benchmarks/contest-uk/*.lisp; do
+            for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -79,7 +81,19 @@ jobs:
           ok=0; skip=0
           while IFS= read -r f; do
             [ -z "$f" ] && continue
-            if [ ! -f "$f" ]; then echo "MISSING $f"; skip=$((skip+1)); continue; fi
+            if [ ! -f "$f" ]; then
+              # Переможець вже фізично перенесений до історії конкурсу.
+              # Це не зламана SENS-програма й не причина губити успішні mint.
+              case "$f" in
+                benchmarks/contest-uk/*.lisp)
+                  old="benchmarks/contest-uk/superseded/${f##*/}"
+                  if [[ -f "$old" && ! -L "$old" ]]; then
+                    echo "MOVED_TO_SUPERSEDED $f -> $old"
+                    continue
+                  fi;;
+              esac
+              echo "MISSING $f"; skip=$((skip+1)); continue
+            fi
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
             case "$f" in
@@ -101,12 +115,14 @@ jobs:
           done <<< "$list"
           echo "remint done ok=$ok skip=$skip"
           if (( skip != 0 )); then
-            echo "::error::Нативний SENS/Zig відхилив $skip конкретних джерел; не маскувати RED як PASS" >&2
-            exit 1
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            echo "::error::Нативний SENS/Zig відхилив $skip конкретних джерел; успішні фізичні пари все одно буде опубліковано" >&2
+          else
+            echo "failed=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Нативне суддівство і просування справжніх переможців
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && steps.remint.outputs.failed == 'false'
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
@@ -137,3 +153,11 @@ jobs:
               exit 1
             fi
           fi
+
+      # Не оголошувати GREEN, коли SENS відхилив джерело; але не губити
+      # незалежні вже доведені Zig/T5M пари через одного конкурсанта.
+      - name: Зафіксувати адресні відмови після публікації справних пар
+        if: steps.remint.outputs.failed == 'true'
+        run: |
+          echo "::error::SENS native mint має адресні RED; справні трійки збережено" >&2
+          exit 1
