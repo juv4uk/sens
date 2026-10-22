@@ -1,0 +1,48 @@
+name: contest-promote
+
+# Просування переможців конкурсу в рантайм: активним стає найменший T5M на
+# задачу, старші варіанти переїжджають у superseded/ (поза glob рантайму).
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "benchmarks/contest-uk/*.lisp"
+      - "benchmarks/contest-uk/*.sens"
+      - "benchmarks/contest-uk/judge.sh"
+      - "benchmarks/contest-uk/promote.sh"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: contest-promote-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@1.99.0
+
+      - name: Build SENS binaries with benchmark metrics
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+
+      - name: Promote winners and exclude superseded
+        run: bash benchmarks/contest-uk/promote.sh
+
+      - name: Commit promoted runtime set
+        run: |
+          set -euo pipefail
+          git config user.name "sens-contest-bot"
+          git config user.email "sens-contest-bot@users.noreply.github.com"
+          git add -A benchmarks/contest-uk
+          if git diff --cached --quiet; then
+            echo "CONTEST_PROMOTE_NOCHANGE"
+            exit 0
+          fi
+          git commit -m "конкурс: просунути переможців у рантайм, виключити старі варіанти (superseded/)"
+          git pull --rebase origin main
+          git push origin HEAD:main
