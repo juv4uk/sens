@@ -145,6 +145,11 @@ run_native_t5m_program() {
   # Критичний доказ — реальне парне виконання фізичних Zig-байтів.
   if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
       >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
+    if [[ "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
+      echo "::error::T5M_META_FC_MUTANT_ACCEPTED source=$file" >&2
+      mark_file_failed
+      return
+    fi
     native_paired_executed_paths["$file"]=1
     if timeout "$native_timeout" "$binary" "$physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
