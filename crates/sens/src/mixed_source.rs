@@ -8,7 +8,7 @@
 //!   Ukrainian D8 I/O names are exact-lifted, with other D8 mechanisms path-pinned;
 //! - approved path-pinned readers lift exact D9 words; Ukrainian D9 string heads
 //!   additionally require both an explicit projection allowlist and a concrete mechanism;
-//! - non-head and quoted data keep the ordinary parser's interpretation.
+//! - admitted unquoted callable values keep their exact first-class domain identity;\n//! - quoted data and lexical bindings are never inferred from name similarity.
 //!
 //! This gives active Core migration a mixed symbol + exact-domain path without
 //! teaching the compatibility parser to infer domains from historical bytes.
@@ -1056,16 +1056,38 @@ fn lift_expression(
         }
         ExprKind::Symbol(name) => {
             if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(&name) {
-                Ok(Expr {
+                return Ok(Expr {
                     kind: ExprKind::DomainIdentity(identity),
                     span,
-                })
-            } else {
-                Ok(Expr {
-                    kind: ExprKind::Symbol(name),
-                    span,
-                })
+                });
             }
+            // A callable's exact domain code is a first-class *value* even
+            // outside the head of a list: (дія додати) passes D5, not Text7.
+            // Only ratified callable mechanisms are eligible. QUOTE/COND and
+            // LAMBDA/DEFINE are syntax, never ordinary function values.
+            // The original lexical binding wins, including later DEFINEs.
+            if !bound_names.contains(name.as_ref()) {
+                if let Some(identity) =
+                    crate::semantic_registry::exact_uk_callable_for_source_head(&name)
+                {
+                    let syntax_only = matches!(
+                        (identity.width(), identity.packed_bits()),
+                        (3, 0b001 | 0b110) | (4, 0b0010 | 0b0011)
+                    );
+                    if !syntax_only {
+                        if let Some(callable) = identity.core_operation() {
+                            return Ok(Expr {
+                                kind: ExprKind::DomainIdentity(DomainIdentity::from(callable)),
+                                span,
+                            });
+                        }
+                    }
+                }
+            }
+            Ok(Expr {
+                kind: ExprKind::Symbol(name),
+                span,
+            })
         }
         other => Ok(Expr { kind: other, span }),
     }
@@ -1716,6 +1738,62 @@ mod tests {
             panic!("exact body");
         };
         assert_eq!(body[0].kind, encoded_body[0].kind);
+    }
+
+    #[test]
+    fn ukr_domain_codes_are_first_class_values_without_python_or_text7_fallback() {
+        // The same admitted D5 code must work as an operator *and* as a value
+        // passed through a lexical parameter in a physical SENS expression.
+        let source = "((функція (дія) (дія 20 22)) додати)";
+        let expression = only(parse_mixed_exact_domain(source).expect("D5 as value"));
+        let ExprKind::List(items) = &expression.kind else { panic!("application") };
+        assert!(matches!(
+            &items[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 5 && identity.packed_bits() == 0b01010
+        ));
+        let mut session = crate::Session::default();
+        let result = crate::eval::eval_parsed_expressions(&[expression], &mut session)
+            .expect("SENS applies first-class D5 domain value");
+        let crate::Value::BinaryNumber(number) = result.value else {
+            panic!("D5 result must be exact D24+");
+        };
+        assert_eq!(number.to_decimal_string(), "42");
+
+        let d6 = only(parse_mixed_exact_domain(
+            "((функція (дія) (дія 42)) відняти-1)"
+        ).expect("D6 as value"));
+        let ExprKind::List(items) = &d6.kind else { panic!("D6 application") };
+        assert!(matches!(
+            &items[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 6 && identity.packed_bits() == 0b001111
+        ));
+        let result = crate::eval::eval_parsed_expressions(&[d6], &mut session)
+            .expect("SENS applies first-class D6 domain value");
+        let crate::Value::BinaryNumber(number) = result.value else {
+            panic!("D6 result must be exact D24+");
+        };
+        assert_eq!(number.to_decimal_string(), "41");
+
+        // No promotion of syntax, quoted data or a locally bound spelling.
+        let quote = only(parse_mixed_exact_domain("(як-є додати)").unwrap());
+        let ExprKind::List(quoted) = &quote.kind else { panic!("quoted data") };
+        assert!(matches!(&quoted[1].kind, ExprKind::Symbol(_)));
+        let shadow = only(parse_mixed_exact_domain(
+            "(функція (додати) додати)"
+        ).unwrap());
+        let ExprKind::List(lambda) = &shadow.kind else { panic!("lambda") };
+        assert!(matches!(&lambda[2].kind, ExprKind::Symbol(_)));
+        let syntax = only(parse_mixed_exact_domain("за-умовою").unwrap());
+        assert!(matches!(syntax.kind, ExprKind::Symbol(_)));
+        let invalid = parse_mixed_exact_domain(
+            "((функція (дія) (дія (як-є ()))) відняти-1)"
+        ).expect("D6 negative source is parseable");
+        assert!(
+            crate::eval::eval_parsed_expressions(&invalid, &mut session).is_err(),
+            "first-class D6 must reject nonnumeric input"
+        );
     }
 
     #[test]
