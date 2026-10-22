@@ -39,16 +39,16 @@ for source in "$here"/*.lisp; do
     continue
   fi
   source_sha="$(sha256sum "$source" | cut -d' ' -f1)"
-  if ! "$sens" --t5m-mint "$source" "$physical" >"$scratch/mint.out" 2>"$scratch/error" ||
-     [[ ! -s "$physical" ]]; then
+  if ! "$sens" --t5m-mint-pair "$source" "$physical" >"$scratch/mint.out" 2>"$scratch/error" ||
+     [[ ! -s "$physical" || ! -s "$view" ]]; then
     printf '%s\t-\t-\t0\tПОМИЛКА_НАТИВНОГО_MINT\n' "$name"
     sed 's/^/SENS mint: /' "$scratch/error" >&2
     fail=1
     continue
   fi
   if ! "$trit" verify-view "$physical" >"$scratch/verify.out" 2>"$scratch/error" ||
-     ! "$trit" open "$physical" >"$view" 2>"$scratch/error" ||
-     [[ ! -s "$view" ]]; then
+     ! "$trit" open "$physical" >"$scratch/opened.view" 2>"$scratch/error" ||
+     ! cmp -s "$view" "$scratch/opened.view"; then
     printf '%s\t-\t-\t0\tПОМИЛКА_ОБЕРНЕНОСТІ_T5M\n' "$name"
     sed 's/^/Zig/T5M: /' "$scratch/error" >&2
     fail=1
