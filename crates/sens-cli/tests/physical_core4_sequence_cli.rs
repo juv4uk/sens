@@ -513,6 +513,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-every-sixth-linear-general",
         "list-maximum-fold-general",
         "list-tail-after-third-atom-zero-copy-general",
+        "залишити-точні-числа",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -713,6 +714,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-every-sixth-linear-general"
                 | "list-maximum-fold-general"
                 | "list-tail-after-third-atom-zero-copy-general"
+                | "залишити-точні-числа"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
