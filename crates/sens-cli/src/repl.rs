@@ -1841,6 +1841,58 @@ mod tests {
         );
     }
 
+    /// #1968: той самий цілий український Lisp-свідок має реально
+    /// виконуватися з байтів Zig/T5M. D7-гліфи не підмінюють атоми D3;
+    /// помилки EQ залишаються помилками SENS, а не вдаваним D1:NO.
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn bija3_refinement_full_ukrainian_source_executes_as_exact_zig_t5m() {
+        let source = include_str!("../../../tests/semantic/біджа3-уточнення-атома-1968.lisp");
+        let (physical, exact_view) = mint_t5m_source_pair(source)
+            .expect("test_id=1968-T5M-MINT source=SENS/Zig");
+        assert!(!physical.is_empty());
+        assert!(!exact_view.trim().is_empty());
+        let result = eval_t5m_paired_file(source, &physical)
+            .unwrap_or_else(|error| panic!(
+                "test_id=1968-T5M-EVAL layer=SENS expected=D1:1 actual_error={error}"
+            ));
+        assert_eq!(
+            result.value.as_predicate_bit(), Some(true),
+            "test_id=1968-T5M-EVAL layer=SENS expected=D1:1 actual={}",
+            result.value
+        );
+
+        // Мутант джерела за незмінених байтів — не та сама програма.
+        let before = "(тотожне? (перше біджа-пара) (як-є атом?))";
+        let after = "(тотожне? (перше біджа-пара) (як-є решта))";
+        assert_eq!(source.matches(before).count(), 1);
+        let mutant = source.replacen(before, after, 1);
+        let error = eval_t5m_paired_file(&mutant, &physical)
+            .expect_err("test_id=1968-T5M-MUTANT expected=physical-source-mismatch");
+        assert!(
+            error.contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+            "test_id=1968-T5M-MUTANT expected=T5M_PHYSICAL_PAIR_MISMATCH actual={error}"
+        );
+    }
+
+    /// D7 quote payload is a sequence of glyphs, not a secretly
+    /// interned atom; EQ must not accept the derived pair as an atom.
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn bija3_eq_d7_text_does_not_gain_atomic_identity_on_physical_route() {
+        let source =
+            "(тотожне? (перше (сполучити (як-є ліве) (як-є праве))) (як-є ліве))";
+        let (physical, _) = mint_t5m_source_pair(source)
+            .expect("test_id=1968-T5M-D7-MINT");
+        let error = eval_t5m_paired_file(source, &physical)
+            .expect_err("test_id=1968-T5M-D7-EQ expected=Type");
+        assert!(
+            error.contains("eq expects two atoms")
+                && error.contains("physical_form_index=0"),
+            "test_id=1968-T5M-D7-EQ expected=Type/form-0 actual={error}"
+        );
+    }
+
     #[cfg(feature = "zig-transport")]
     #[test]
     fn quoted_integer_in_t5m_source_preserves_exact_d24_word() {
