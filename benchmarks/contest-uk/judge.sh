@@ -53,7 +53,10 @@ for path in "${inputs[@]}"; do
   # Перевірені задачі мають незалежний числовий еталон. Перший
   # конкурсант НЕ може визначати правильність усіх наступних.
   [[ "$result" == "$expected" ]] || error "хибне значення $path: отримано=$result очікувано=$expected"
-  [[ "$(cat "$tmp/standalone")" == "$expected" ]] || error "хибний вивід $path: очікувано=$expected"
+  # Повне байтове порівняння: command substitution відкидає кінцеві LF
+  # і могло зарахувати зайві порожні рядки як коректний результат.
+  printf '%s\n' "$expected" > "$tmp/expected"
+  cmp -s "$tmp/standalone" "$tmp/expected" || error "хибний вивід $path: очікувано=$expected (зайві/відсутні байти)"
   bytes="$(wc -c < "$path")"
   rows+="$task"$'\t'"$bytes"$'\t'"$nodes"$'\t'"$visits"$'\t'"$path"$'\n'
   printf "CONTEST_EXECUTED_PASS path=%s T5M=%s AST=%s visits=%s result=%s\n" "$path" "$bytes" "$nodes" "$visits" "$result"
