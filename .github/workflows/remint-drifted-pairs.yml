@@ -94,6 +94,9 @@ jobs:
               ok=$((ok+1))
             else
               echo "SKIP_FAIL $f"; skip=$((skip+1))
+              if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+                printf -- '- SKIP_FAIL `%s`\n' "$f" >> "$GITHUB_STEP_SUMMARY"
+              fi
             fi
           done <<< "$list"
           echo "remint done ok=$ok skip=$skip"
