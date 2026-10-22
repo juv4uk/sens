@@ -19,6 +19,7 @@ CONF = "tests/fixtures/conformance.lisp"
 ARTIFACTS = (
     "lib/core.lisp", "lib/unify.lisp", "lib/reason.lisp",
     "lib/clips-import.lisp", "lib/understand.lisp", "lib/narrate.lisp",
+    "lib/axioms-d1-principle-five.lisp",
 )
 
 
@@ -61,6 +62,15 @@ class PrincipleForceTests(unittest.TestCase):
     def test_p5_missing_artifact_is_blocked(self) -> None:
         (self.root / "lib/clips-import.lisp").unlink()
         self.assertTrue(self.module.check(self.root))
+
+    def test_p5_missing_reversible_is_blocked(self) -> None:
+        def drop_reversible(d):
+            for b in d["bindings"]:
+                if b.get("principle") == 5:
+                    b["evidence"] = [e for e in b["evidence"] if e.get("kind") != "reversible"]
+        edit_registry(self.root, drop_reversible)
+        problems = self.module.check(self.root)
+        self.assertTrue(any("reversible" in p for p in problems), problems)
 
     def test_unbound_principle_is_blocked(self) -> None:
         edit_registry(self.root, lambda d: d["bindings"].pop())

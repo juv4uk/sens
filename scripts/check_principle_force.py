@@ -52,6 +52,15 @@ def check(root: Path) -> list[str]:
         if n not in bound:
             problems.append(f"principle {n} has no evidence binding (force not restored)")
 
+    # Принцип 5 мусить мати не лише декларацію, а й ВИКОНУВАНИЙ доказ та
+    # ОБОРОТНУ пару — інакше він лишається гаслом без сили.
+    p5 = next((b for b in bindings if b.get("principle") == 5), {})
+    kinds5 = {item.get("kind") for item in p5.get("evidence", [])}
+    if "executable" not in kinds5:
+        problems.append("principle 5 lacks executable evidence (force not restored)")
+    if "reversible" not in kinds5:
+        problems.append("principle 5 lacks a reversible evidence pair (force not restored)")
+
     for b in bindings:
         n = b.get("principle")
         evidence = b.get("evidence", [])
@@ -66,6 +75,27 @@ def check(root: Path) -> list[str]:
             elif kind == "fixture":
                 if item["expr"] not in conf:
                     problems.append(f"principle {n} evidence fixture not in conformance.lisp: {item['expr']}")
+            elif kind == "executable":
+                # Доказ мусить бути виконуваною програмою, не лише наявним файлом.
+                artifact = root / item["path"]
+                if not artifact.exists():
+                    problems.append(f"principle {n} executable artifact missing: {item['path']}")
+                elif "(визначити " not in artifact.read_text(encoding="utf-8"):
+                    problems.append(
+                        f"principle {n} executable artifact defines nothing: {item['path']}"
+                    )
+            elif kind == "reversible":
+                # Оборотна пара: обидві половини мусять бути визначені.
+                artifact = root / item["path"]
+                if not artifact.exists():
+                    problems.append(f"principle {n} reversible artifact missing: {item['path']}")
+                else:
+                    body = artifact.read_text(encoding="utf-8")
+                    for half in (item["forward"], item["inverse"]):
+                        if f"(визначити {half}" not in body:
+                            problems.append(
+                                f"principle {n} reversible half missing: {half} in {item['path']}"
+                            )
             elif kind == "doc-reference":
                 if item["text"] not in doc:
                     problems.append(f"principle {n} evidence doc-reference missing: {item['text']}")

@@ -91,6 +91,18 @@
         {
           "kind": "fixture",
           "expr": "(пояснити-факт (перше (розібрати (як-є (earth is a planet)))))"
+        },
+        {
+          "kind": "executable",
+          "path": "lib/axioms-d1-principle-five.lisp",
+          "role": "виконувані аксіоми Д1 + принцип 5, не декларація"
+        },
+        {
+          "kind": "reversible",
+          "path": "lib/axioms-d1-principle-five.lisp",
+          "forward": "принцип-п'ять-факт",
+          "inverse": "принцип-п'ять-слова",
+          "role": "текст -> структурований факт -> текст, оборотно"
         }
       ]
     }
