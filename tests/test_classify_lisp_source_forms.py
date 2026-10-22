@@ -169,6 +169,14 @@ class ThreePassClassifierTests(unittest.TestCase):
             mod.scan_heads("unknown.lisp", src, source_era="auto")
 
 
+    def test_legacy_lambda_sid8_cannot_hide_modern_d8_arguments(self):
+        # D8:00001000 = ТОТОЖНЕ-ЗНАЧЕННЯ?, не історична LAMBDA.
+        src = "(00001000 (додати 2 3))\\n"
+        modern = mod.scan_heads("modern.lisp", src)
+        self.assertEqual([h.token for h in modern], ["00001000", "додати"])
+        historic = mod.scan_heads("historic.lisp", src, source_era="legacy")
+        self.assertEqual([h.token for h in historic], ["00001000"])
+
     def test_nested_executable_operator_does_not_create_second_head(self):
         source = """((car f) car)
 ((0010 (x) (car x)) value)
