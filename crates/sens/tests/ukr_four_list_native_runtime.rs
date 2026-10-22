@@ -254,3 +254,15 @@ fn historical_stable_symmetric_difference_keeps_multiplicity_and_order() {
         "(лише-один-бік праві ліві)",
     );
 }
+
+#[test]
+fn sixth_atomic_tail_skips_compounds_and_preserves_original_suffix() {
+    // D3/D5 algorithm and all positive laws execute in a real SENS session.
+    // The mutant skips one atomic position; it cannot satisfy the same laws.
+    execute_with_negative(
+        "lib/list-tail-after-sixth-atom-zero-copy-general.lisp",
+        include_str!("../../../lib/list-tail-after-sixth-atom-zero-copy-general.lisp"),
+        "((атом? (перше елементи)) (хвіст-після-пяти-для-шостого (решта елементи)))",
+        "((атом? (перше елементи)) (хвіст-після-чотирьох-для-шостого (решта елементи)))",
+    );
+}
