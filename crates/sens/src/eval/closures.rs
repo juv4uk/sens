@@ -583,19 +583,7 @@ pub(super) fn apply(
 ) -> Result<EvalStep, LanguageError> {
     match function {
         Value::DomainIdentity(identity) => {
-            // Справжнє першокласне значення коду: Д3–Д10 проходять
-            // єдиний exact-domain механізм без синтезу текстової голови.
-            let mut values = Vec::with_capacity(arguments.len());
-            for argument in arguments {
-                values.push(evaluate(argument, calling_environment)?);
-            }
-            super::invoke_value(
-                &Value::DomainIdentity(identity),
-                &values,
-                calling_environment,
-                span,
-            )
-            .map(EvalStep::Value)
+            super::apply_exact_domain_value(&identity, arguments, calling_environment, span)
         }
         Value::Sid(sid) => {
             let mut values = Vec::with_capacity(arguments.len());
