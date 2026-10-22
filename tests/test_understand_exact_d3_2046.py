@@ -137,13 +137,19 @@ SOURCE_ALIASES = {
     "розібрати-запит": "розібрати-контрольований-запит",
 }
 
+# Справжній доданий кореневий SENS-виклик — не дев'ятий DEFINE і не D9 alias.
+# Вимагати точний позитивний вхід; довільне дописування форм не приймаємо.
+SOURCE_WITNESS = ["прибрати-артикль", ["як-є", ["кіт", "собака"]]]
+
 
 def normalize_current_source_forms(source_forms):
     """Strict inverse ONLY for canonical operator positions; QUOTE data is opaque."""
-    if len(source_forms) != len(FROZEN) + len(SOURCE_ALIASES):
-        raise AssertionError("8 чинних законів + 7 українських D9-аліасів очікуються")
+    if len(source_forms) != len(FROZEN) + len(SOURCE_ALIASES) + 1:
+        raise AssertionError("очікуються 8 законів, 7 D9-аліасів і один SENS-виклик")
     definitions = source_forms[:len(FROZEN)]
-    aliases = source_forms[len(FROZEN):]
+    aliases = source_forms[len(FROZEN):len(FROZEN) + len(SOURCE_ALIASES)]
+    if source_forms[-1] != SOURCE_WITNESS:
+        raise AssertionError("кінцевий SENS-виклик змінено або замінено даними")
     if {row[1] for row in definitions} != set(LOCAL_HELPERS):
         raise AssertionError("втрачене, дубльоване або неукраїнське локальне визначення")
     if any(not isinstance(row, list) or len(row) != 3
@@ -389,9 +395,24 @@ class UnderstandExactD3Witness(unittest.TestCase):
         self.assertEqual({form[1] for form in definitions}, set(LOCAL_HELPERS))
         self.assertTrue(all(form[2][1] == ["слова"] for form in definitions))
         self.assertEqual(
-            {tuple(form[1:]) for form in self.source_forms[len(FROZEN):]},
+            {tuple(form[1:]) for form in self.source_forms[
+                len(FROZEN):len(FROZEN) + len(SOURCE_ALIASES)]},
             set(SOURCE_ALIASES.items()),
         )
+        self.assertEqual(self.source_forms[-1], SOURCE_WITNESS)
+
+    def test_negative_changed_or_duplicate_executable_witness(self):
+        for mutation in ("замінений", "продубльований"):
+            with self.subTest(mutation=mutation):
+                bad = deepcopy(self.source_forms)
+                if mutation == "замінений":
+                    bad[-1][0] = "решта"
+                    message = "кінцевий SENS-виклик"
+                else:
+                    bad.append(deepcopy(SOURCE_WITNESS))
+                    message = "очікуються 8 законів"
+                with self.assertRaisesRegex(AssertionError, message):
+                    normalize_current_source_forms(bad)
 
     def test_all_eight_functions_preserve_original_laws(self):
         verify_unchanged_laws(self.forms)
