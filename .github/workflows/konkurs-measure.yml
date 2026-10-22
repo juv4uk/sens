@@ -34,7 +34,7 @@ jobs:
             python3 benchmarks/sens-program-size/run.py --binary "$BINARY"
           else
             any=0
-            for f in benchmarks/sens-program-size/fixtures/konkurs-*.sens; do
+            for f in benchmarks/sens-program-size/fixtures/konkurs-*.sens benchmarks/contest-uk/*.sens; do
               [ -f "$f" ] || continue
               any=1
               echo "=== $f"
