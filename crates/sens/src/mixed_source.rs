@@ -2848,8 +2848,9 @@ mod tests {
             );
         }
 
-        assert!(!crate::MACRO_LIBRARY_SOURCE.contains("(як-є 0010)"));
-        assert!(!crate::MACRO_LIBRARY_SOURCE.contains("(як-є 0011)"));
+        let macro_source = include_str!("../../../lib/macro.lisp");
+        assert!(!macro_source.contains("(як-є 0010)"));
+        assert!(!macro_source.contains("(як-є 0011)"));
     }
 
     #[test]

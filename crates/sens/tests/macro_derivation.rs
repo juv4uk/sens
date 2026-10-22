@@ -1,8 +1,11 @@
 use sens::{
     eval_program, load_macro_library, parse_mixed_exact_domain, Environment, Expr, ExprKind,
-    Session, Value, MACRO_LIBRARY_SOURCE,
+    Session, Value,
 };
 use std::rc::Rc;
+
+// Текстове джерело є лише тестовим еталоном, не входом продукційного бекенду.
+const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
 
 fn eval_with_derived_macros(source: &str) -> String {
     let mut session = Session::default();

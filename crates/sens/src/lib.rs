@@ -70,6 +70,7 @@ mod error;
 pub(crate) mod eval;
 mod gpu_execution_packet;
 mod language_items;
+mod macro_bootstrap;
 mod mixed_source;
 mod outer_envelope;
 mod packed_bits;
@@ -298,13 +299,6 @@ pub use syntax::wire::{
     decode_program as wire_decode_program, encode_program as wire_encode_program,
 };
 
-/// Language-owned macro constructor. Its only host-side bootstrap dependency
-/// is the exact D5 `макрос` mechanism that materializes
-/// Closure -> Macro. The source returns one Macro value and deliberately binds
-/// no human surface name; `load_macro_library` installs peer spellings onto
-/// that same value after evaluation.
-pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
-
 /// Frozen Contract-6 compatibility profile.
 pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
 
@@ -369,10 +363,11 @@ pub fn install_ratified_d5_macro_mechanism(session: &Session) {
     eval::install_macro_substrate(&session.environment);
 }
 
+/// Виконує точні слова макробібліотеки, відновлені Zig із Т5М під час збірки.
+/// D5 створює Macro; людські назви прив'язуються до того самого значення нижче.
 pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval::install_macro_substrate(&session.environment);
-    let expressions = parse_mixed_exact_domain(MACRO_LIBRARY_SOURCE)?;
-    let result = eval_parsed_expressions(&expressions, session)?;
+    let result = macro_bootstrap::program()?.execute(session)?;
 
     if !matches!(&result.value, Value::Macro(_)) {
         return Err(LanguageError::new(

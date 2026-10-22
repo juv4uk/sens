@@ -2,6 +2,7 @@ use std::{
     collections::HashSet,
     env, fs,
     path::{Path, PathBuf},
+    process::Command,
 };
 
 #[derive(Debug, Clone)]
@@ -214,13 +215,79 @@ fn domain_tables(root: &Path, out: &mut String) {
     }
 }
 
+fn macro_bootstrap_words(root: &Path, output: &Path) {
+    for path in [
+        ".zig-version",
+        "macro_t5m_bootstrap.zig",
+        "lib/macro.sens",
+        "research/zig-codecs/t5m.zig",
+        "research/zig-codecs/domain_ladder.zig",
+        "research/zig-codecs/numeric_domains.zig",
+        "research/zig-codecs/t5/t5.zig",
+        "research/zig-codecs/transport/fields.zig",
+    ] {
+        println!("cargo:rerun-if-changed={}", root.join(path).display());
+    }
+    println!("cargo:rerun-if-env-changed=ZIG");
+    println!("cargo:rerun-if-env-changed=PATH");
+    println!("cargo:rerun-if-env-changed=LOCALAPPDATA");
+    let pinned = include_str!("../../.zig-version").trim();
+    let compiler = env::var_os("ZIG").unwrap_or_else(|| {
+        #[cfg(windows)]
+        if let Some(local_app_data) = env::var_os("LOCALAPPDATA") {
+            let cached = PathBuf::from(local_app_data)
+                .join("SENS/zig")
+                .join(format!("zig-x86_64-windows-{pinned}"))
+                .join("zig.exe");
+            if cached.is_file() {
+                return cached.into_os_string();
+            }
+        }
+        "zig".into()
+    });
+    let version = Command::new(&compiler)
+        .arg("version")
+        .output()
+        .expect("macro bootstrap requires pinned Zig; use ./guix/run dev or set ZIG");
+    assert!(
+        version.status.success(),
+        "macro bootstrap: Zig version probe failed"
+    );
+    assert_eq!(
+        std::str::from_utf8(&version.stdout)
+            .expect("Zig version UTF-8")
+            .trim(),
+        pinned,
+        "macro bootstrap requires the repository Zig pin"
+    );
+    // Генератор Zig отримує фізичний носій, а Rust — лише точні слова.
+    // Жодного читання macro.lisp або запасного Rust-декодера.
+    let restored = Command::new(&compiler)
+        .current_dir(root)
+        .args(["run", "macro_t5m_bootstrap.zig", "-O", "ReleaseSafe"])
+        .output()
+        .expect("run pinned Zig T5M bootstrap decoder");
+    assert!(
+        restored.status.success(),
+        "Zig T5M macro bootstrap rejected: {}",
+        String::from_utf8_lossy(&restored.stderr)
+    );
+    assert!(
+        !restored.stdout.is_empty(),
+        "Zig returned no macro bootstrap words"
+    );
+    fs::write(output.join("macro_bootstrap_words.rs"), restored.stdout)
+        .expect("write Zig-restored exact macro bootstrap words");
+}
+
 fn main() {
     let root =
         PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("manifest dir")).join("../..");
+    let output = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
+    macro_bootstrap_words(&root, &output);
     let mut generated = String::from("pub(super) static ENTRIES: &[Entry] = &[\n");
     domain_tables(&root, &mut generated);
     generated.push_str("];\n");
-    let destination = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"))
-        .join("domain_projection_catalog.rs");
+    let destination = output.join("domain_projection_catalog.rs");
     fs::write(destination, generated).expect("write generated projection catalog");
 }
