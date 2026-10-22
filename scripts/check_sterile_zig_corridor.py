@@ -723,11 +723,13 @@ def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str,
     contract_host = active(_route_between(
         rust_corridor, "pub fn contract_source_bytes(", "\n/// Opaque Sanskrit REPL source from the root Zig module"
     ))
+    # rustfmt може перенести `let copied = unsafe { ... }` — звіряємо без формату.
+    _contract_norm = re.sub(r"\s+", " ", contract_host)
     if (host.count(f"asset_ffi::{ffi}(") != 2
             or '#[path = "zig_transport_assets.rs"]' not in host
-            or "let copied = unsafe" not in contract_host
-            or "if copied != required" not in contract_host
-            or f"asset_ffi::{ffi}(bytes.as_mut_ptr(), bytes.len())" not in contract_host):
+            or "let copied = unsafe" not in _contract_norm
+            or "if copied != required" not in _contract_norm
+            or f"asset_ffi::{ffi}(bytes.as_mut_ptr(), bytes.len())" not in _contract_norm):
         raise CorridorBlocked("CONTRACT_ZIG_ONLY missing checked Rust FFI egress")
     if (root.count('const contract_asset = @embedFile("language-contract.lisp");') != 1
             or f"pub export fn {ffi}(" not in root
