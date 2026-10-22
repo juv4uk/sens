@@ -39,10 +39,19 @@ for source in "$here"/*.lisp; do
     continue
   fi
   source_sha="$(sha256sum "$source" | cut -d' ' -f1)"
+  # SENS створює фізичний T5M; його бітовий вигляд відновлює Zig.
+  # Раніше тут перевіряли "$view" ДО створення: кожен внесок помилково FAIL.
   if ! "$sens" --t5m-mint-pair "$source" "$physical" >"$scratch/mint.out" 2>"$scratch/error" ||
-     [[ ! -s "$physical" || ! -s "$view" ]]; then
+     [[ ! -s "$physical" ]]; then
     printf '%s\t-\t-\t0\tПОМИЛКА_НАТИВНОГО_MINT\n' "$name"
     sed 's/^/SENS mint: /' "$scratch/error" >&2
+    fail=1
+    continue
+  fi
+  if ! "$trit" view "$physical" > "$view" 2>"$scratch/error" ||
+     [[ ! -s "$view" ]]; then
+    printf '%s\t-\t-\t0\tПОМИЛКА_ZIG_VIEW\n' "$name"
+    sed 's/^/Zig/T5M view: /' "$scratch/error" >&2
     fail=1
     continue
   fi
