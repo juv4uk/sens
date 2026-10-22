@@ -8,9 +8,14 @@ trit="${SENS_TRIT_BIN:-$PWD/target/debug/sens-trit}"
 error() { printf "КОНКУРС: ПОМИЛКА %s\n" "$*" >&2; exit 2; }
 # Автоматично включати нові реальні трійки до конкурсу:
 # оптимізована програма не має залежати від ручної реєстрації.
-inputs=(benchmarks/contest-uk/*.sens)
-[[ -f "${inputs[0]}" ]] || error "немає жодного чинного фізичного T5M учасника"
-inputs+=("$@")
+if (( $# )); then
+  # Явний одиничний виклик вимірює саме названого учасника.
+  inputs=("$@")
+else
+  # Без аргументів усі нові трійки вступають автоматично.
+  inputs=(benchmarks/contest-uk/*.sens)
+  [[ -f "${inputs[0]}" ]] || error "немає жодного чинного фізичного T5M учасника"
+fi
 declare -A seen
 rows=""
 for path in "${inputs[@]}"; do
