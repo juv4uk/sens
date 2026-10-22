@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 232,
+    "total": 240,
     "historical": 17,
-    "library": 215,
-    "distinct_families": 38
+    "library": 223,
+    "distinct_families": 42
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5852,6 +5852,174 @@
       "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39783658270",
       "native_ci_job": 119841052389,
       "native_ci_scope": "Нативний SENS тест із поточними SHA бібліотеки й драйвера: 28 позитивних/негативних випадків PASS; інший крок у цьому workflow RED; жодного допуску прямого D11 opcode"
+    },
+    {
+      "surface_name": "спарити-зі-збереженням-хвостів",
+      "source_family": "list-reversible-zip",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-zip-with-tails-general.lisp",
+        "blob_sha": "31ac863281cddb1e59d1e24bf61f78da4433c29f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Два правильні списки → (спарені-позиції, залишок-лівого, залишок-правого); обидва неспарені хвости зберігаються, порядок і кратність не змінюються.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "відновити-два-списки-зі-хвостів",
+      "source_family": "list-reversible-zip",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-zip-with-tails-general.lisp",
+        "blob_sha": "31ac863281cddb1e59d1e24bf61f78da4433c29f",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Запис, створений оборотним спаруванням, відновлює обидва початкові списки без втрати хвостів.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "вставити-роздільник-між",
+      "source_family": "list-interpose",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-interpose-general.lisp",
+        "blob_sha": "32da6be1fa1fc1d7de3863df50353dc3fc4b7044",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Вставити роздільник тільки між сусідніми позиціями скінченного правильного списку, без кінцевого роздільника.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "вилучити-роздільники-між",
+      "source_family": "list-interpose",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-interpose-general.lisp",
+        "blob_sha": "32da6be1fa1fc1d7de3863df50353dc3fc4b7044",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "На образі вставлення-роздільника відновити вихідні елементи у початковому порядку; не універсальне видалення всіх рівних значень.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "розплести-перші-пари",
+      "source_family": "list-unzip",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-unzip-pairs-general.lisp",
+        "blob_sha": "f722664f9be73ffdf50e9e817cf00620243615a5",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Для правильного списку двоатомних пар зберегти всі перші компоненти, включно з повторами.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "розплести-другі-пари",
+      "source_family": "list-unzip",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-unzip-pairs-general.lisp",
+        "blob_sha": "f722664f9be73ffdf50e9e817cf00620243615a5",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Для правильного списку двоатомних пар зберегти всі другі компоненти, включно з повторами.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "зшити-дві-послідовності",
+      "source_family": "list-unzip",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-unzip-pairs-general.lisp",
+        "blob_sha": "f722664f9be73ffdf50e9e817cf00620243615a5",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Скласти покомпонентні пари з двох правильних списків у вихідному порядку; при різній довжині припинити на коротшому.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "спільний-префікс-атомів",
+      "source_family": "list-common-prefix",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-common-prefix-general.lisp",
+        "blob_sha": "eaff214a61ad2aa2c0f49f9275b54020e3770589",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "law": "Найдовший початковий сегмент, де атоми двох правильних списків тотожні; зупинка при першій відмінності.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
     }
   ],
   "winners_20261022": {
