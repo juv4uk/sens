@@ -37,7 +37,7 @@ pub enum DomainIdentity {
 impl DomainIdentity {
     pub const fn width(self) -> usize {
         match self {
-            Self::D10(_) => 10,
+            Self::D10(value) => value.coordinate().width() as usize,
             _ => self.source_word().width(),
         }
     }
@@ -501,6 +501,22 @@ mod tests {
             DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(0x101).unwrap()));
         assert_eq!(high.packed_bits(), 0x101);
         assert_ne!(high, d9);
+    }
+
+
+    #[test]
+    fn d10_width_comes_from_exact_coordinate_without_d9_narrowing() {
+        for raw in [0u16, 1, 0x1ff, 0x200, 0x3ff] {
+            let word = crate::DomainD10::new(raw).unwrap();
+            let identity = DomainIdentity::D10(word);
+            assert_eq!(identity.width(), word.coordinate().width() as usize);
+            assert_eq!(identity.coordinate().width(), word.coordinate().width());
+            assert_eq!(identity.coordinate().bits(), raw);
+            let d9_neighbor = DomainIdentity::from_source_word(BinarySourceWord::W9(
+                Bit9::new(raw & 0x1ff).unwrap(),
+            ));
+            assert_ne!(identity, d9_neighbor);
+        }
     }
 
     #[test]
