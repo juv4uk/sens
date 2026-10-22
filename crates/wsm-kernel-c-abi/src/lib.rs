@@ -63,7 +63,8 @@ pub type WsmStopFn = unsafe extern "C" fn(context: *mut c_void) -> WsmStatus;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct WsmKernelRequest {
-    /// Opaque 8-bit semantic primitive identity owned by sens.
+    /// Historical C ABI byte selector, never a current SENS semantic identity.
+    /// Current identity requires a domain + exact bits via the Zig/SENS corridor.
     pub semantic_id: u8,
     pub payload: WsmByteSpan,
 }
@@ -198,7 +199,7 @@ mod tests {
     }
 
     #[test]
-    fn exchange_carries_semantic_id_as_opaque_u8() {
+    fn exchange_carries_only_legacy_abi_byte_not_domain_identity() {
         let request = WsmKernelRequest {
             semantic_id: 0b0000_0101,
             payload: WsmByteSpan::empty(),
