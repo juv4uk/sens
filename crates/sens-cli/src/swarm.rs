@@ -425,10 +425,24 @@ pub(crate) fn oracle_check(source: &str, contract_version: &Value) -> (Value, bo
 /// generic unknown-routed `not-found` — a cold agent asks one thing and
 /// never needs to know which of the two directories actually held the
 /// answer.
+fn guard_reference_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = sens_cli::zig_transport::guard_reference_source_bytes()?;
+        String::from_utf8(bytes)
+            .map_err(|error| format!("ZIG_GUARD_REFERENCE is not UTF-8: {error}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err(
+            "RUST_ZIG_ONLY: Guard reference requires the Zig corridor; no Rust file fallback"
+                .into(),
+        )
+    }
+}
+
 pub(crate) fn oracle_help(session: &mut Session, topic: Option<&str>) -> Result<Value, String> {
-    let reference = std::fs::read_to_string("knowledge/guard-reference.lisp").map_err(|error| {
-        format!("cannot read knowledge/guard-reference.lisp (run from the sens repo root): {error}")
-    })?;
+    let reference = guard_reference_source()?;
     // The static Guard source crosses the Zig byte corridor, not Rust include.
     // The mutable reference directory stays dynamically reloaded as before.
     let guard = wsm_guard_core::guard_source()?;
@@ -937,6 +951,18 @@ mod oracle_result_tests {
             Value::Number(4.0, Exactness::Exact),
             Value::Number(0.0, Exactness::Exact),
         ])
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn oracle_help_loads_the_live_guard_reference_via_zig() {
+        let mut session = Session::default();
+        let value = oracle_help(&mut session, None)
+            .expect("Zig-carried Guard reference must load and answer the default query");
+        assert!(
+            matches!(value, Value::Pair(_, _) | Value::Nil),
+            "Guard default query returned an unexpected value: {value}"
+        );
     }
 
     #[test]

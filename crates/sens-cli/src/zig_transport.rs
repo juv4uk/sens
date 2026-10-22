@@ -257,6 +257,15 @@ pub fn repl_core_source_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(asset_ffi::sens_zig_repl_core_bytes_copy, "ZIG_SENS_REPL")
 }
 
+/// Перечитує актуальний Guard-довідник через Zig; шлях зафіксований у Zig,
+/// Rust не відкриває файл сам і не кешує його між викликами.
+pub fn guard_reference_source_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_guard_reference_bytes_copy,
+        "ZIG_GUARD_REFERENCE",
+    )
+}
+
 /// Механічний інваріант SENS ↔ Zig: кількість, ширина, біти.
 /// Не визначає значення функцій і не замінює SENS-семантичний оракул.
 /// Retrieves opaque source bytes through the sterile Zig C ABI.
@@ -989,6 +998,21 @@ mod zig_exact_egress_tests {
         encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words, validate_t5,
         validate_t5_coordinates,
     };
+
+    #[test]
+    fn live_guard_reference_bytes_cross_only_the_zig_adapter() {
+        let bytes = super::guard_reference_source_bytes()
+            .expect("Zig reads the current Guard reference source");
+        let text = std::str::from_utf8(&bytes).expect("Guard reference is UTF-8");
+        assert!(
+            text.starts_with("; Guard reference bureau"),
+            "unexpected Guard source identity"
+        );
+        assert!(
+            bytes.len() > 1024,
+            "reference source unexpectedly truncated"
+        );
+    }
 
     fn words(source: &str) -> Vec<sens::BinarySourceWord> {
         sens::parse_binary_source_words(source)

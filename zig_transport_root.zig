@@ -159,15 +159,12 @@ test "opaque linter bytes cross Zig without partial writes or semantic registry"
     const required = sens_zig_linter_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(linter_asset.len)), required);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2),
-        sens_zig_linter_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_linter_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
     var output: [linter_asset.len]u8 = undefined;
-    try std.testing.expectEqual(required,
-        sens_zig_linter_bytes_copy(&output, output.len));
+    try std.testing.expectEqual(required, sens_zig_linter_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, linter_asset[0..linter_asset.len], &output);
 }
-
 
 // Ukrainian API documentation is a SENS-owned source. Zig only copies bytes.
 const uk_docs_asset = @embedFile("lib/surface/uk-docs.lisp");
@@ -225,12 +222,10 @@ test "reason SENS source via Zig exact byte ABI; short buffer untouched" {
     const length = sens_zig_reason_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(reason_asset.len)), length);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2),
-        sens_zig_reason_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_reason_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
     var result: [reason_asset.len]u8 = undefined;
-    try std.testing.expectEqual(length,
-        sens_zig_reason_bytes_copy(&result, result.len));
+    try std.testing.expectEqual(length, sens_zig_reason_bytes_copy(&result, result.len));
     try std.testing.expectEqualSlices(u8, reason_asset[0..reason_asset.len], &result);
 }
 
@@ -248,8 +243,7 @@ test "forward REPL source exact Zig C bytes; short buffer stays unchanged" {
     const required = sens_zig_forward_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(forward_asset.len)), required);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2),
-        sens_zig_forward_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_forward_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
     var output: [forward_asset.len]u8 = undefined;
     try std.testing.expectEqual(required, sens_zig_forward_bytes_copy(&output, output.len));
@@ -270,12 +264,10 @@ test "knowledge SENS source exact Zig C ABI bytes; no-clobber on short buffer" {
     const length = sens_zig_knowledge_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(knowledge_asset.len)), length);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2),
-        sens_zig_knowledge_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_knowledge_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
     var output: [knowledge_asset.len]u8 = undefined;
-    try std.testing.expectEqual(length,
-        sens_zig_knowledge_bytes_copy(&output, output.len));
+    try std.testing.expectEqual(length, sens_zig_knowledge_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, knowledge_asset[0..knowledge_asset.len], &output);
 }
 
@@ -294,16 +286,13 @@ test "islands release manifest exact bytes via Zig; short buffer not modified" {
     const required = sens_zig_islands_manifest_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(islands_manifest_asset.len)), required);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2),
-        sens_zig_islands_manifest_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_islands_manifest_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
     var output: [islands_manifest_asset.len]u8 = undefined;
-    try std.testing.expectEqual(required,
-        sens_zig_islands_manifest_bytes_copy(&output, output.len));
+    try std.testing.expectEqual(required, sens_zig_islands_manifest_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, islands_manifest_asset[0..islands_manifest_asset.len], &output);
 }
 
- 
 // External source-asset adapter: Zig copies opaque bytes; only SENS assigns meaning.
 // Path/provenance policy belongs to the build and harness, never the physical codec.
 const persistent_map_asset = @embedFile("lib/persistent-map.lisp");
@@ -319,15 +308,12 @@ test "F6 persistent-map carrier: exact Zig bytes and unchanged short buffer" {
     const required = sens_zig_persistent_map_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(persistent_map_asset.len)), required);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2),
-        sens_zig_persistent_map_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_persistent_map_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
     var output: [persistent_map_asset.len]u8 = undefined;
-    try std.testing.expectEqual(required,
-        sens_zig_persistent_map_bytes_copy(&output, output.len));
+    try std.testing.expectEqual(required, sens_zig_persistent_map_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, persistent_map_asset[0..persistent_map_asset.len], &output);
 }
-
 
 // Root-only F6 World source carrier: opaque bytes, never semantic admission.
 const world_asset = @embedFile("lib/world.lisp");
@@ -343,12 +329,10 @@ test "F6 World carrier: exact Zig bytes and unchanged short buffer" {
     const required = sens_zig_world_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(world_asset.len)), required);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2),
-        sens_zig_world_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_world_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
     var output: [world_asset.len]u8 = undefined;
-    try std.testing.expectEqual(required,
-        sens_zig_world_bytes_copy(&output, output.len));
+    try std.testing.expectEqual(required, sens_zig_world_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, world_asset[0..world_asset.len], &output);
 }
 
@@ -365,12 +349,10 @@ test "F6 Content Store exact Zig source and unchanged short buffer" {
     const required = sens_zig_content_store_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(content_store_asset.len)), required);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2),
-        sens_zig_content_store_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_content_store_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
     var output: [content_store_asset.len]u8 = undefined;
-    try std.testing.expectEqual(required,
-        sens_zig_content_store_bytes_copy(&output, output.len));
+    try std.testing.expectEqual(required, sens_zig_content_store_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, content_store_asset[0..content_store_asset.len], &output);
 }
 
@@ -395,7 +377,6 @@ test "REPL persistent_vector exact bytes and untouched short buffer" {
     try std.testing.expectEqualSlices(u8, repl_persistent_vector_asset[0..repl_persistent_vector_asset.len], &full);
 }
 
-
 const repl_time_asset = @embedFile("lib/time.lisp");
 pub export fn sens_zig_repl_time_bytes_copy(dst: [*]u8, capacity: usize) isize {
     if (repl_time_asset.len == 0) return -1;
@@ -414,7 +395,6 @@ test "REPL time exact bytes and untouched short buffer" {
     try std.testing.expectEqual(length, sens_zig_repl_time_bytes_copy(&full, full.len));
     try std.testing.expectEqualSlices(u8, repl_time_asset[0..repl_time_asset.len], &full);
 }
-
 
 const repl_epistemic_asset = @embedFile("lib/epistemic.lisp");
 pub export fn sens_zig_repl_epistemic_bytes_copy(dst: [*]u8, capacity: usize) isize {
@@ -435,7 +415,6 @@ test "REPL epistemic exact bytes and untouched short buffer" {
     try std.testing.expectEqualSlices(u8, repl_epistemic_asset[0..repl_epistemic_asset.len], &full);
 }
 
-
 const lisp_fs_asset = @embedFile("lib/lisp-fs.lisp");
 pub export fn sens_zig_lisp_fs_bytes_copy(dst: [*]u8, capacity: usize) isize {
     if (lisp_fs_asset.len == 0) return -1;
@@ -453,4 +432,51 @@ test "F6 lisp_fs exact bytes and unchanged short buffer" {
     var full: [lisp_fs_asset.len]u8 = undefined;
     try std.testing.expectEqual(required, sens_zig_lisp_fs_bytes_copy(&full, full.len));
     try std.testing.expectEqualSlices(u8, lisp_fs_asset[0..lisp_fs_asset.len], &full);
+}
+
+// This live host-data file intentionally remains reloadable without rebuilding
+// the CLI. Rust receives bytes only through this Zig-owned, fixed-path adapter.
+const CFile = opaque {};
+extern "c" fn fopen([*:0]const u8, [*:0]const u8) ?*CFile;
+extern "c" fn fclose(*CFile) c_int;
+extern "c" fn fseek(*CFile, c_long, c_int) c_int;
+extern "c" fn ftell(*CFile) c_long;
+extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
+
+const guard_reference_path: [*:0]const u8 = "knowledge/guard-reference.lisp";
+const guard_reference_crate_relative_path: [*:0]const u8 = "../../knowledge/guard-reference.lisp";
+const guard_reference_read_limit: usize = 8 * 1024 * 1024;
+
+pub export fn sens_zig_guard_reference_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    const file = fopen(guard_reference_path, "rb") orelse
+        fopen(guard_reference_crate_relative_path, "rb") orelse return -1;
+    defer _ = fclose(file);
+    if (fseek(file, 0, 2) != 0) return -1;
+    const end = ftell(file);
+    if (end <= 0) return -1;
+    const len: usize = @intCast(end);
+    if (len > guard_reference_read_limit) return -3;
+    if (capacity == 0) return @intCast(len);
+    if (capacity < len) return -2;
+    if (fseek(file, 0, 0) != 0) return -1;
+
+    const temporary = std.heap.page_allocator.alloc(u8, len) catch return -4;
+    defer std.heap.page_allocator.free(temporary);
+    if (fread(temporary.ptr, 1, len, file) != len) return -1;
+    @memcpy(dst[0..len], temporary);
+    return @intCast(len);
+}
+
+test "Guard reference source is read through Zig and a short buffer is untouched" {
+    const required = sens_zig_guard_reference_bytes_copy(undefined, 0);
+    try std.testing.expect(required > 0);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_guard_reference_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    const allocator = std.testing.allocator;
+    const actual = try allocator.alloc(u8, @intCast(required));
+    defer allocator.free(actual);
+    try std.testing.expectEqual(required, sens_zig_guard_reference_bytes_copy(actual.ptr, actual.len));
+    try std.testing.expect(std.mem.startsWith(u8, actual, "; Guard reference bureau"));
+    try std.testing.expect(std.mem.indexOf(u8, actual, "*guard-reference-directory*") != null);
 }

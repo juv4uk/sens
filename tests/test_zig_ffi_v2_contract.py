@@ -168,6 +168,7 @@ def declarations(source: str, language: str) -> dict:
 # expand the physical nine-function v2 contract.
 ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy", "sens_zig_forward_bytes_copy", "sens_zig_knowledge_bytes_copy", "sens_zig_persistent_map_bytes_copy", "sens_zig_world_bytes_copy", "sens_zig_content_store_bytes_copy", "sens_zig_lisp_fs_bytes_copy")
 REPL_LOCAL_NAMES = ("sens_zig_repl_persistent_vector_bytes_copy", "sens_zig_repl_time_bytes_copy", "sens_zig_repl_epistemic_bytes_copy")
+LIVE_FILE_NAMES = ("sens_zig_guard_reference_bytes_copy",)
 ASSET_ZIG_EXPORT = re.compile(
     r"(?m)^[ \t]*pub[ \t]+export[ \t]+fn[ \t]+"
     r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*isize\s*\{"
@@ -271,9 +272,9 @@ def check_root_asset_corridor(
                  "repro='python3 -m unittest discover -s tests -p test_zig_ffi_v2_contract.py'")
 
 
-    # Exact-width domain table source and two active SENS-owned source files are
-    # separately reviewed byte carriers, not new codec ABI-v2 functions.
-    # In particular, domain_table has an extra physical width parameter.
+    # REPL source files are separate byte carriers, not new codec ABI-v2
+    # functions. The guard-reference file is a dynamic runtime read and has a
+    # separately reviewed contract below; it is not an embedded asset.
     reviewed_sources = (
         ("sens_zig_repl_core_bytes_copy", "lib/repl-core.lisp", "repl_core_asset"),
         ("sens_zig_meta_eval_bytes_copy", "lib/meta-eval.lisp", "meta_eval_asset"),
@@ -299,40 +300,6 @@ def check_root_asset_corridor(
         if " ".join(match.group("body").split()) != expected:
             fail("asset-zig", f"wrong_copy_body={name}")
 
-    domain_name = "sens_zig_domain_table_bytes_copy"
-    domain_source = re.search(
-        r"(?ms)^fn ratifiedDomainSource\(width: u8\) \?\[\]const u8 \{(?P<body>.*?)^\}",
-        zig_root,
-    )
-    if domain_source is None:
-        fail("asset-zig", "missing_exact_domain_source_selector")
-    expected_switch = " ".join((
-        "return switch (width) {",
-        *(f'{width} => @embedFile("lib/domains/d{width}.lisp"),' for width in range(1, 11)),
-        "else => null,",
-        "};",
-    ))
-    if " ".join(domain_source.group("body").split()) != expected_switch:
-        fail("asset-zig", "wrong_domain_source_map")
-    domain_export = re.search(
-        r"(?ms)^[ \t]*pub export fn sens_zig_domain_table_bytes_copy"
-        r"\([ \t\n]*domain_width: u8,[ \t\n]*dst: \[\*\]u8,"
-        r"[ \t\n]*capacity: usize,[ \t\n]*\) isize \{(?P<body>.*?)^[ \t]*\}",
-        zig_root,
-    )
-    if domain_export is None:
-        fail("asset-zig", "missing_exact_domain_copy_body")
-    expected_domain_body = " ".join((
-        "const source_bytes = ratifiedDomainSource(domain_width) orelse return -1;",
-        "if (source_bytes.len == 0) return -1;",
-        "if (capacity == 0) return @intCast(source_bytes.len);",
-        "if (capacity < source_bytes.len) return -2;",
-        "@memcpy(dst[0..source_bytes.len], source_bytes);",
-        "return @intCast(source_bytes.len);",
-    ))
-    if " ".join(domain_export.group("body").split()) != expected_domain_body:
-        fail("asset-zig", "wrong_exact_domain_copy_body")
-
     # The Rust host can request unmodified bytes. It must not synthesize a
     # registry, reinterpret a width, or bypass length checking on the copy.
     if not re.search(
@@ -349,14 +316,35 @@ def check_root_asset_corridor(
         "copy(bytes.as_mut_ptr(), len)", "if copied != required", "Ok(bytes)",
     )):
         fail("asset-rust", "missing_shared_opaque_byte_guard")
-    domain_start = rust_transport.find("pub fn domain_table_source_bytes(width: u8)")
-    domain_end = rust_transport.find("\npub fn linter_source_bytes()", domain_start)
-    domain_rust = rust_transport[domain_start:domain_end] if domain_start >= 0 and domain_end > domain_start else ""
-    if not all(token in domain_rust for token in (
-        "version()?;", "asset_ffi::sens_zig_domain_table_bytes_copy(",
-        "width,", "if required <= 0", "if copied != required", "Ok(bytes)",
-    )) or domain_rust.count("asset_ffi::sens_zig_domain_table_bytes_copy(") != 2:
-        fail("asset-rust", "missing_exact_domain_carrier")
+    guard_source = re.search(
+        r"(?s)pub fn guard_reference_source_bytes\(\) -> Result<Vec<u8>, String> \{"
+        r"(?P<body>.*?)\n\}",
+        rust_transport,
+    )
+    if guard_source is None or not all(token in guard_source.group("body") for token in (
+        "opaque_zig_asset(", "asset_ffi::sens_zig_guard_reference_bytes_copy",
+        '"ZIG_GUARD_REFERENCE"',
+    )):
+        fail("asset-rust", "missing_guard_reference_carrier")
+    guard_export = re.search(
+        r"(?ms)^[ \t]*pub export fn sens_zig_guard_reference_bytes_copy"
+        r"\(dst: \[\*\]u8, capacity: usize\) isize \{(?P<body>.*?)^[ \t]*\}",
+        zig_root,
+    )
+    if guard_export is None:
+        fail("asset-zig", "missing_guard_reference_dynamic_export")
+    guard_body = " ".join(guard_export.group("body").split())
+    if not all(token in zig_root for token in (
+        '"knowledge/guard-reference.lisp"', '"../../knowledge/guard-reference.lisp"',
+    )) or not all(token in guard_body for token in (
+        "fopen(", "fseek(", "ftell(", "guard_reference_read_limit",
+        "fread(", "fclose(", "@memcpy(dst[0..len], temporary)",
+    )):
+        fail("asset-zig", "incomplete_guard_reference_bounded_reader")
+    if "const guard_reference_read_limit: usize = 8 * 1024 * 1024;" not in zig_root:
+        fail("asset-zig", "wrong_guard_reference_read_limit")
+    if '@embedFile("knowledge/guard-reference.lisp")' in zig_root:
+        fail("asset-zig", "guard_reference_must_remain_dynamic")
 
     repl_source = strip_c_comments(
         (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
@@ -379,11 +367,9 @@ def check_root_asset_corridor(
             entries.setdefault(match.group(1), []).append(
                 " ".join(match.group(2).split())
             )
-        reviewed_extra = (
-            {name for name, _, _ in reviewed_sources} | {domain_name}
-            if layer == "asset-zig" else
-            {"sens_zig_repl_core_bytes_copy", domain_name}
-        )
+        reviewed_extra = ({name for name, _, _ in reviewed_sources} | set(LIVE_FILE_NAMES)
+                          if layer == "asset-zig" else
+                          {"sens_zig_repl_core_bytes_copy"} | set(LIVE_FILE_NAMES))
         extra = sorted(set(entries) - set(ASSET_NAMES) - reviewed_extra
                        - (set(REPL_LOCAL_NAMES) if layer == "asset-zig" else set()))
         if extra:
@@ -397,12 +383,14 @@ def check_root_asset_corridor(
             {
                 "sens_zig_repl_core_bytes_copy": expected_zig,
                 "sens_zig_meta_eval_bytes_copy": expected_zig,
-                domain_name: "domain_width: u8, dst: [*]u8, capacity: usize,",
             } if layer == "asset-zig" else {
                 "sens_zig_repl_core_bytes_copy": expected_rust,
-                domain_name: "domain_width: u8, output: *mut u8, capacity: usize",
             }
         )
+        if layer == "asset-zig":
+            reviewed_signatures[LIVE_FILE_NAMES[0]] = expected_zig
+        else:
+            reviewed_signatures[LIVE_FILE_NAMES[0]] = expected_rust
         for name, signature in reviewed_signatures.items():
             actual = entries.get(name, [])
             if actual != [signature]:
@@ -761,19 +749,14 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "wrong_copy_body=sens_zig_meta_eval_bytes_copy"):
             check_root_asset_corridor(mutant, self.asset_rust, self.rust)
 
-    def test_sens_domain_wrong_rung_is_rejected(self):
-        needle = '7 => @embedFile("lib/domains/d7.lisp"),'
-        mutant = self.asset_zig.replace(needle, '7 => @embedFile("lib/domains/d8.lisp"),', 1)
+    def test_guard_reference_dynamic_reader_is_reviewed_and_bounded(self):
+        check_root_asset_corridor(self.asset_zig, self.asset_rust, self.rust)
+        self.assertIn("LIVE_FILE_NAMES = (\"sens_zig_guard_reference_bytes_copy\",)",
+                      Path(__file__).read_text(encoding="utf-8"))
+        mutant = self.asset_zig.replace("8 * 1024 * 1024", "64 * 1024 * 1024", 1)
         self.assertNotEqual(mutant, self.asset_zig)
-        with self.assertRaisesRegex(ValueError, "wrong_domain_source_map"):
+        with self.assertRaisesRegex(ValueError, "wrong_guard_reference_read_limit"):
             check_root_asset_corridor(mutant, self.asset_rust, self.rust)
-
-    def test_sens_domain_wrong_rust_width_signature_is_rejected(self):
-        needle = "domain_width: u8, output: *mut u8, capacity: usize"
-        mutant = self.asset_rust.replace(needle, "domain_width: u16, output: *mut u8, capacity: usize", 1)
-        self.assertNotEqual(mutant, self.asset_rust)
-        with self.assertRaisesRegex(ValueError, "asset_signature=sens_zig_domain_table_bytes_copy"):
-            check_root_asset_corridor(self.asset_zig, mutant, self.rust)
 
     def test_root_asset_copy_missing_zig_export_is_rejected(self):
         mutated = self.asset_zig.replace(
