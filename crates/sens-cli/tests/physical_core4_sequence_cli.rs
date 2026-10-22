@@ -389,6 +389,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-multiset-intersection-general",
         "list-zip-with-tails-general",
         "list-three-lanes-general",
+        "list-alternating-split-general",
+        "list-chunk-pairs-general",
+        "list-remove-last-atom",
+        "list-stable-symmetric-difference-general",
+        "list-suffix-atoms-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -475,6 +480,11 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-multiset-intersection-general"
                 | "list-zip-with-tails-general"
                 | "list-three-lanes-general"
+                | "list-alternating-split-general"
+                | "list-chunk-pairs-general"
+                | "list-remove-last-atom"
+                | "list-stable-symmetric-difference-general"
+                | "list-suffix-atoms-general"
                 | "list-deduplicate-neighbors"
                 | "list-alternating-split-four"
                 | "list-remove-first-atom"
