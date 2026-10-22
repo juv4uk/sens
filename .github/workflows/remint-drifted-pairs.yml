@@ -200,13 +200,11 @@ jobs:
             echo "failed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Вимір без паперової статистики: mint/inverse/paired/standalone
-      # на тому самому SHA і саме тому SENS/Zig, що обробив учасників.
-      # Структурна трійка без реального виконання в лічильник не потрапляє.
-      - name: Порахувати реально виконувані українські Lisp конкурсу
-        if: steps.remint.outputs.contest == 'true'
-        run: bash scripts/count-executable-lisp.sh benchmarks/contest-uk/
-
+      # Один нативний суд одночасно перевіряє всі фізичні програми
+      # й друкує CONTEST_NATIVE_VERIFIED_EXECUTABLES. Другий повний
+      # count-executable-lisp до push дублював SENS/Zig виконання,
+      # витрачав час та програвав гонку main без нового доказу.
+      # Адресний повний облік залишається у scripts/count-executable-lisp.sh.
       # RED одного кандидата не затримує конкурс уже доведених трійок.
       # Наприкінці workflow справжня відмова mint лишається червоною.
       - name: Нативне суддівство і просування справжніх переможців
