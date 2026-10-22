@@ -54,6 +54,9 @@ jobs:
             # Парне та автономне SENS виконання, негативний мутант,
             # відомий результат, Zig inverse, точні байти й AST/visits.
             bash benchmarks/contest-uk/judge.sh
+            # Реальні медіани часу автономного SENS для тих самих трійок.
+            # Не вносить ні Python/JSON, ні нового workflow чи release-гейту.
+            bash benchmarks/contest-uk/run-native.sh
             # Дослідні поліноми вимірюємо окремо: не приписуємо їм
             # релізного чи семантичного свідка без незалежного оракула.
             for file in benchmarks/sens-program-size/fixtures/konkurs-*.sens; do
