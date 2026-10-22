@@ -1,60 +1,60 @@
-{"id":"sys1-оплата-01","split":"train","text":"Банк списав з картки оплату двічі за одне замовлення.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-02","split":"train","text":"Після скасування замовлення гроші не повернулися.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-03","split":"train","text":"Не можу знайти рахунок за минулий місяць.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-04","split":"train","text":"Підписка продовжилася, хоча я її вимкнув.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-05","split":"train","text":"Платіж відхилено, але баланс зменшився.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-06","split":"train","text":"Де завантажити квитанцію за покупку?","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-07","split":"train","text":"З мене стягнули неправильну суму.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-08","split":"train","text":"Хочу уточнити статус повернення коштів.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-09","split":"validation","text":"Маю дві однакові транзакції за сьогодні.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-10","split":"validation","text":"Оплата є в банку, але замовлення позначене неоплаченим.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-11","split":"test","text":"Зникли кошти після повторного натискання кнопки «Оплатити».","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-оплата-12","split":"test","text":"Потрібен документ, що підтверджує оплату рахунку.","gold":"оплата","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-01","split":"train","text":"Посилка не приїхала в обіцяний день.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-02","split":"train","text":"Як перевірити номер відстеження відправлення?","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-03","split":"train","text":"Кур'єр привіз не на ту адресу.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-04","split":"train","text":"Хочу змінити адресу доставки до відправлення.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-05","split":"train","text":"У повідомленні написано «доставлено», але пакунка немає.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-06","split":"train","text":"Чи можна перенести час приїзду кур'єра?","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-07","split":"train","text":"Замовлення вже тиждень лежить на сортуванні.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-08","split":"train","text":"Частина товарів не потрапила до посилки.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-09","split":"validation","text":"Відправлення довго не змінює статус у відстеженні.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-10","split":"validation","text":"Мені потрібна доставка на інше відділення.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-11","split":"test","text":"Кур'єр не зателефонував і позначив невдалу спробу.","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-доставка-12","split":"test","text":"Де зараз перебуває моя посилка?","gold":"доставка","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-01","split":"train","text":"Після оновлення застосунок одразу закривається.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-02","split":"train","text":"Під час збереження бачу повідомлення про помилку сервера.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-03","split":"train","text":"Сторінка зависає після натискання кнопки «Продовжити».","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-04","split":"train","text":"Файл не завантажується, хоча з'єднання стабільне.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-05","split":"train","text":"Пошук повертає порожній екран для будь-якого запиту.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-06","split":"train","text":"На екрані з'являється код помилки 503.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-07","split":"train","text":"Застосунок не відкривається на моєму пристрої.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-08","split":"train","text":"Після натискання «Експорт» нічого не відбувається.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-09","split":"validation","text":"Не працює фільтр у списку замовлень.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-10","split":"validation","text":"Сторінка постійно перезавантажується після входу.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-11","split":"test","text":"Не вдається прикріпити файл до форми звернення.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-технічне-12","split":"test","text":"Панель керування показує помилку замість графіка.","gold":"технічне","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-01","split":"train","text":"Забув пароль і не отримую лист для його відновлення.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-02","split":"train","text":"Як змінити номер телефону в профілі?","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-03","split":"train","text":"Мій обліковий запис заблоковано після входу.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-04","split":"train","text":"Хочу оновити адресу електронної пошти в профілі.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-05","split":"train","text":"Не можу підтвердити нову адресу електронної пошти.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-06","split":"train","text":"Як увімкнути двофакторний захист для облікового запису?","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-07","split":"train","text":"Мене постійно повертає на форму входу, навіть із правильним паролем.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-08","split":"train","text":"Потрібно видалити старий профіль.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-09","split":"validation","text":"Відновлення пароля повідомляє, що користувача не знайдено.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-10","split":"validation","text":"Хочу переглянути активні сеанси мого облікового запису.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-11","split":"test","text":"У профілі відображається неправильне ім'я.","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-обліковий-запис-12","split":"test","text":"Як від'єднати старий пристрій від облікового запису?","gold":"обліковий-запис","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-01","split":"train","text":"Привіт! Гарного вам дня.","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-02","split":"train","text":"Підкажіть, будь ласка, як тут усе влаштовано?","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-03","split":"train","text":"Мені потрібна допомога, але я ще не знаю з чого почати.","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-04","split":"train","text":"Хочу поговорити з людиною з вашої команди.","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-05","split":"train","text":"Чи працюєте ви у вихідні?","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-06","split":"train","text":"Платіж не пройшов, а ще сайт відкривається з помилкою.","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-07","split":"train","text":"Моє замовлення зникло, і я не впевнений, чи списалися гроші.","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-08","split":"train","text":"Допоможіть розібратися з моєю ситуацією.","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-09","split":"validation","text":"Чи можете ви порадити, з чого почати?","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-10","split":"validation","text":"У мене є питання про послугу, але тема не зрозуміла з повідомлення.","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-11","split":"test","text":"Все не так, як очікував; подробиць поки не маю.","gold":"невизначено","source":"synthetic-human-authored","version":1}
-{"id":"sys1-невизначено-12","split":"test","text":"Хочу уточнити кілька різних питань в одному зверненні.","gold":"невизначено","source":"synthetic-human-authored","version":1}
+{"id":"sys1-оплата-01","split":"train","text":"Банк списав з картки оплату двічі за одне замовлення.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-02","split":"train","text":"Після скасування замовлення гроші не повернулися.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-03","split":"train","text":"Не можу знайти рахунок за минулий місяць.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-04","split":"train","text":"Підписка продовжилася, хоча я її вимкнув.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-05","split":"train","text":"Платіж відхилено, але баланс зменшився.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-06","split":"train","text":"Де завантажити квитанцію за покупку?","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-07","split":"train","text":"З мене стягнули неправильну суму.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-08","split":"train","text":"Хочу уточнити статус повернення коштів.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-09","split":"validation","text":"Маю дві однакові транзакції за сьогодні.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-10","split":"validation","text":"Оплата є в банку, але замовлення позначене неоплаченим.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-11","split":"test","text":"Зникли кошти після повторного натискання кнопки «Оплатити».","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-оплата-12","split":"test","text":"Потрібен документ, що підтверджує оплату рахунку.","gold":"оплата","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-01","split":"train","text":"Посилка не приїхала в обіцяний день.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-02","split":"train","text":"Як перевірити номер відстеження відправлення?","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-03","split":"train","text":"Кур'єр привіз не на ту адресу.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-04","split":"train","text":"Хочу змінити адресу доставки до відправлення.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-05","split":"train","text":"У повідомленні написано «доставлено», але пакунка немає.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-06","split":"train","text":"Чи можна перенести час приїзду кур'єра?","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-07","split":"train","text":"Замовлення вже тиждень лежить на сортуванні.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-08","split":"train","text":"Частина товарів не потрапила до посилки.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-09","split":"validation","text":"Відправлення довго не змінює статус у відстеженні.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-10","split":"validation","text":"Мені потрібна доставка на інше відділення.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-11","split":"test","text":"Кур'єр не зателефонував і позначив невдалу спробу.","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-доставка-12","split":"test","text":"Де зараз перебуває моя посилка?","gold":"доставка","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-01","split":"train","text":"Після оновлення застосунок одразу закривається.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-02","split":"train","text":"Під час збереження бачу повідомлення про помилку сервера.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-03","split":"train","text":"Сторінка зависає після натискання кнопки «Продовжити».","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-04","split":"train","text":"Файл не завантажується, хоча з'єднання стабільне.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-05","split":"train","text":"Пошук повертає порожній екран для будь-якого запиту.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-06","split":"train","text":"На екрані з'являється код помилки 503.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-07","split":"train","text":"Застосунок не відкривається на моєму пристрої.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-08","split":"train","text":"Після натискання «Експорт» нічого не відбувається.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-09","split":"validation","text":"Не працює фільтр у списку замовлень.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-10","split":"validation","text":"Сторінка постійно перезавантажується після входу.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-11","split":"test","text":"Не вдається прикріпити файл до форми звернення.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-технічне-12","split":"test","text":"Панель керування показує помилку замість графіка.","gold":"технічне","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-01","split":"train","text":"Забув пароль і не отримую лист для його відновлення.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-02","split":"train","text":"Як змінити номер телефону в профілі?","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-03","split":"train","text":"Мій обліковий запис заблоковано після входу.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-04","split":"train","text":"Хочу оновити адресу електронної пошти в профілі.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-05","split":"train","text":"Не можу підтвердити нову адресу електронної пошти.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-06","split":"train","text":"Як увімкнути двофакторний захист для облікового запису?","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-07","split":"train","text":"Мене постійно повертає на форму входу, навіть із правильним паролем.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-08","split":"train","text":"Потрібно видалити старий профіль.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-09","split":"validation","text":"Відновлення пароля повідомляє, що користувача не знайдено.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-10","split":"validation","text":"Хочу переглянути активні сеанси мого облікового запису.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-11","split":"test","text":"У профілі відображається неправильне ім'я.","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-обліковий-запис-12","split":"test","text":"Як від'єднати старий пристрій від облікового запису?","gold":"обліковий-запис","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-01","split":"train","text":"Привіт! Гарного вам дня.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-02","split":"train","text":"Підкажіть, будь ласка, як тут усе влаштовано?","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-03","split":"train","text":"Мені потрібна допомога, але я ще не знаю з чого почати.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-04","split":"train","text":"Хочу поговорити з людиною з вашої команди.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-05","split":"train","text":"Чи працюєте ви у вихідні?","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-06","split":"train","text":"Платіж не пройшов, а ще сайт відкривається з помилкою.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-07","split":"train","text":"Моє замовлення зникло, і я не впевнений, чи списалися гроші.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-08","split":"train","text":"Допоможіть розібратися з моєю ситуацією.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-09","split":"validation","text":"Чи можете ви порадити, з чого почати?","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-10","split":"validation","text":"У мене є питання про послугу, але тема не зрозуміла з повідомлення.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-11","split":"test","text":"Все не так, як очікував; подробиць поки не маю.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
+{"id":"sys1-невизначено-12","split":"test","text":"Хочу уточнити кілька різних питань в одному зверненні.","gold":"невизначено","source":"synthetic-curated-seed","version":1}
