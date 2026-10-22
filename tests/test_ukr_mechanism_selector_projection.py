@@ -190,8 +190,12 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         code = uncommented(metadata)
         self.assertIn("(визначити зібрати-механізми-функції", code)
         self.assertIn("(визначити механізми-функції", code)
-        self.assertNotRegex(code, r"\(\s*так(?=\s|\))")
-        self.assertNotRegex(code, r"\(\s*ні(?=\s|\))")
+        # «(так <вираз>)» — законна гілка D3 COND, а не голий D1.
+        # Старий regex забороняв кожну гілку «так» і давав хибний RED.
+        # Відхиляємо лише голі псевдовиклики та буквальне повернення
+        # «так/ні» замість обчисленого D1-предиката.
+        self.assertNotRegex(code, r"\(\s*(?:так|ні)\s*\)")
+        self.assertNotRegex(code, r"\(\s*так\s+(?:так|ні)\s*\)")
         # Чинні дві D1-гілки fallback та єдиний SENS fail-fast helper.
         self.assertGreaterEqual(code.count("((атом? (як-є ()))"), 2)
         self.assertIn("(визначити довести-механізм", code)
