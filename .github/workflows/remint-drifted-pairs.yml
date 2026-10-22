@@ -444,6 +444,27 @@ jobs:
                 echo "REMINT_RECOVER_LIBRARY_SOURCE source=$source"
               fi
             done
+            # При конкурентних push повторний native recovery не повинен
+            # перетворювати пакет на сотні незалежних програм. Решта —
+            # явно PENDING, ніколи не зараховується як обернена/виконана.
+            # Той самий нативний SENS/Zig маршрут лишається обов'язковим.
+            recovery_limit=24
+            recovery_selected=0
+            recovery_pending=0
+            recovery_list="$RUNNER_TEMP/sens-remint-current-main-batch.list"
+            : > "$recovery_list"
+            while IFS= read -r pending_source; do
+              [[ -n "$pending_source" ]] || continue
+              if (( recovery_selected < recovery_limit )); then
+                printf '%s\n' "$pending_source" >> "$recovery_list"
+                recovery_selected=$((recovery_selected + 1))
+              else
+                echo "REMINT_CURRENT_MAIN_PENDING source=$pending_source status=NOT_EXECUTED"
+                recovery_pending=$((recovery_pending + 1))
+              fi
+            done < "$RUNNER_TEMP/sens-remint-candidates.list"
+            mv -- "$recovery_list" "$RUNNER_TEMP/sens-remint-candidates.list"
+            echo "REMINT_CURRENT_MAIN_BATCH selected=$recovery_selected pending=$recovery_pending"
             while IFS= read -r f; do
               [[ -n "$f" ]] || continue
               if [[ ! -f "$f" ]]; then
