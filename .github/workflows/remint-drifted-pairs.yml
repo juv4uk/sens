@@ -162,8 +162,7 @@ jobs:
               fi
             done
           fi
-          # Короткоживучий PR не успадковує жодного чужого боргу main:
-          # тільки зміни власного PR від спільного предка.
+          # У PR тільки справжні власні зміни від спільного предка main.
           if [[ "$EVENT_NAME" == push && "$GITHUB_REF" != refs/heads/main ]]; then
             git rev-parse --verify refs/remotes/origin/main >/dev/null
             pr_base="$(git merge-base origin/main HEAD)"
@@ -309,7 +308,7 @@ jobs:
               prune_archived_duplicates
               git add -A
             else
-              # PR змінює тільки машинні виходи справді виконаних програм.
+              # Не підтягувати в PR сторонні Lisp, contest чи архівні файли.
               local verified pair view
               while IFS= read -r verified; do
                 [[ "$verified" == *.lisp ]] || continue
@@ -374,8 +373,8 @@ jobs:
             # забрати й нові бібліотечні Lisp. Інакше незмінений старий
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
             # Тільки непарні або новіші за носій: без масового перемайну.
-            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp lib/tree-*.lisp
-              [[ "$target_branch" == main ]] || break lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/interleave-pairs.lisp
+              [[ "$target_branch" == main ]] || break lib/tree-*.lisp lib/d11-*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -484,6 +483,10 @@ jobs:
             git fetch origin "$target_branch"
             verified_parent="$(git rev-parse HEAD^)"
             safe_rebase=1
+            # Новий незалежний lib/list Lisp не змінює байтів раніше
+            # нативно перевіреного корпусу. Перевіримо ЙОГО SENS/Zig
+            # після fast-rebase замість 80-секундного повного пересуду.
+            fast_mint_sources=()
             # Не перезапускати повний SENS суд за НОВОГО незалежного
             # конкурсанта без фізичної пари: він потрапить у наступний mint.
             # Але M/D/R Lisp, SENS/Zig/Rust, реєстри й фізичні байти
@@ -541,6 +544,17 @@ jobs:
                       candidate_view="${changed%.lisp}"
                       if ! git cat-file -e "origin/$target_branch:$candidate_pair" 2>/dev/null ||
                          ! git cat-file -e "origin/$target_branch:$candidate_view" 2>/dev/null; then
+                        # Тільки незалежний НОВИЙ бібліотечний файл,
+                        # без фізичних супутників та зміни інших runtime inputs.
+                        # Всі M/D/R, D11 та tests/semantic лишаються fail-closed.
+                        if [[ "$changed" == lib/list-*.lisp ]] &&
+                           git -c core.quotePath=false diff --diff-filter=A --name-only "$verified_parent" "origin/$target_branch" -- "$changed" | grep -Fxq -- "$changed" &&
+                           ! git cat-file -e "origin/$target_branch:$candidate_pair" 2>/dev/null &&
+                           ! git cat-file -e "origin/$target_branch:$candidate_view" 2>/dev/null; then
+                          fast_mint_sources+=("$changed")
+                          echo "REMINT_FAST_NATIVE_NEW_LIB source=$changed status=PENDING_REAL_SENS_ZIG"
+                          continue
+                        fi
                         echo "REMINT_NEW_UNPAIRED_LISP source=$changed mint=REVERIFY_CURRENT_MAIN"
                         safe_rebase=0
                         break
@@ -563,8 +577,27 @@ jobs:
             if (( safe_rebase )) &&
                git merge-base --is-ancestor "$verified_parent" origin/$target_branch; then
               if git rebase origin/$target_branch; then
-                echo "REMINT_SAFE_FAST_REBASE attempt=$attempt verified_inputs=UNCHANGED"
-                continue
+                # Ніяких вгаданих T5M: кожен новий lib/list отримує
+                # справжній mint + exact Zig inverse + SENS paired/standalone.
+                fast_mint_failed=0
+                for independent in "${fast_mint_sources[@]}"; do
+                  if ! bash scripts/refresh-verified-t5m-pair.sh "$independent" target/debug/sens target/debug/sens-trit; then
+                    echo "::error::REMINT_FAST_NATIVE_RED source=$independent" >&2
+                    fast_mint_failed=1
+                  fi
+                done
+                if (( ! fast_mint_failed )); then
+                  if (( ${#fast_mint_sources[@]} )); then
+                    for independent in "${fast_mint_sources[@]}"; do
+                      git add -- "$independent" "${independent%.lisp}.sens" "${independent%.lisp}"
+                    done
+                    git commit --amend --no-edit
+                  fi
+                  echo "REMINT_SAFE_FAST_REBASE attempt=$attempt verified_inputs=UNCHANGED new_native=${#fast_mint_sources[@]}"
+                  continue
+                fi
+                # Після адресного RED не переносимо жодних неперевірених
+                # байтів: нижче існуючий повний native remint на exact main.
               fi
               # Конфлікт не вирішувати силоміць: перейти на native remint.
               git rebase --abort || true
