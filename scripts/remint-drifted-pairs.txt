@@ -74,7 +74,4 @@ lib/list-all-matching-positions-unary-general.lisp
 lib/list-last-repeated-atom-by-final-occurrence-general.lisp
 lib/list-partition-atomic-compound-general.lisp
 lib/list-first-compound-general.lisp
-contracts/compiler-bootstrap-boundary-v1.lisp
-mylisp-cml-export.lisp
 benchmarks/sens-program-size/fixtures/konkurs-minimal-polynomial.lisp
-lib/list-count-consecutive-atomic-runs-unary-general.lisp
