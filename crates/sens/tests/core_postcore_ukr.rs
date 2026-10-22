@@ -225,8 +225,7 @@ fn meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens() {
     // залежності-графа та досяжність-залежностей-графа?.
     // Rust лише порівнює дві відповіді справжнього SENS і читає D1.
     let mut session = core_session();
-    sens::load_meta_evaluator_library(&mut session)
-        .expect("дійсний метаобчислювач SENS");
+    sens::load_meta_evaluator_library(&mut session).expect("дійсний метаобчислювач SENS");
     for (case, actual_source, expected_source) in [
         (
             "перший-запис",

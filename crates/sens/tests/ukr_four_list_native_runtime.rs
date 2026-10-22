@@ -220,7 +220,6 @@ fn rotate_three_right_executes_exact_d3_without_append_dependency() {
     );
 }
 
-
 // Історичні спискові закони: тільки власні SENS-композиції з lib/list-*.
 // Це не доказ руйнівних MACLISP NCONC/NREVERSE і не нові D11 opcodes.
 // Негативи змінюють сам алгоритм, а не текст очікуваної відповіді.
