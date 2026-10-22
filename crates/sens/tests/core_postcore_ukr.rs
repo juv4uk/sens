@@ -344,6 +344,85 @@ fn meta_eval_predicates_are_actual_d1_bits() {
             "test_id=d11-primitive-constructor-{case} layer=SENS input={source} expected_source={expected_source} expected_equal={same} actual={actual}"
         );
     }
+
+    // Д11: збереження виду, причини та payload структурованої помилки
+    // в живому метаобчислювачі. Обидва значення порівнює host лише
+    // після обчислення кожного через SENS (жодної host-семантики).
+    for (case, source, reference_source, equal) in [
+        (
+            "незмінний-канонічний-лямбда",
+            "(помилка-незмінності-канонічного-імені (як-є функція))",
+            "(як-є (error invalid-form (canonical-name-immutable функція)))",
+            true,
+        ),
+        (
+            "незмінний-канонічний-define",
+            "(помилка-незмінності-канонічного-імені (як-є визначити))",
+            "(як-є (error invalid-form (canonical-name-immutable визначити)))",
+            true,
+        ),
+        (
+            "незмінний-канонічний-довільний-символ",
+            "(помилка-незмінності-канонічного-імені (як-є невідоме))",
+            "(як-є (error invalid-form (canonical-name-immutable невідоме)))",
+            true,
+        ),
+        (
+            "незмінний-канонічний-не-змінювати-ім'я",
+            "(помилка-незмінності-канонічного-імені (як-є функція))",
+            "(як-є (error invalid-form (canonical-name-immutable визначити)))",
+            false,
+        ),
+        (
+            "незмінний-канонічний-не-змінювати-вид",
+            "(помилка-незмінності-канонічного-імені (як-є функція))",
+            "(як-є (error arity (canonical-name-immutable функція)))",
+            false,
+        ),
+        (
+            "лямбда-неприпустимий-параметр",
+            "(помилка-форми-лямбди (як-є (поганий)))",
+            "(як-є (error invalid-form (lambda-parameters поганий)))",
+            true,
+        ),
+        (
+            "лямбда-кілька-параметрів",
+            "(помилка-форми-лямбди (як-є (поганий другий)))",
+            "(як-є (error invalid-form (lambda-parameters поганий другий)))",
+            true,
+        ),
+        (
+            "лямбда-порожній-payload",
+            "(помилка-форми-лямбди (як-є ()))",
+            "(як-є (error invalid-form (lambda-parameters)))",
+            true,
+        ),
+        (
+            "лямбда-не-губити-причину",
+            "(помилка-форми-лямбди (як-є (поганий)))",
+            "(як-є (error invalid-form (lambda-parameters інший)))",
+            false,
+        ),
+        (
+            "лямбда-не-підміняти-причину",
+            "(помилка-форми-лямбди (як-є (поганий)))",
+            "(як-є (error invalid-form (canonical-name-immutable поганий)))",
+            false,
+        ),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=d11-meta-structured-error-{case} layer=SENS input={source} actual=error:{error}"
+            )).value;
+        let expected = eval_program(reference_source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=d11-meta-structured-error-{case} layer=SENS expected_source={reference_source} actual=error:{error}"
+            )).value;
+        assert_eq!(
+            actual == expected, equal,
+            "test_id=d11-meta-structured-error-{case} layer=SENS input={source} reference={reference_source} expected_equal={equal} actual={actual}"
+        );
+    }
 }
 
 // Виконуємо оригінальні українські Lisp-свідки графа, не Python таблицю
