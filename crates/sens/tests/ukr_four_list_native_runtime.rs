@@ -337,3 +337,50 @@ fn bija3_1968_atom_null_partial_law_executes_and_rejects_false_generator() {
         );
     }
 }
+
+
+#[test]
+fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
+    // Не порівнюємо лише таблиці: запускаємо сам SENS із визначеннями Д5–Д6.
+    let source = include_str!("../../../research/d5-d6-selector-definitions-batch-2026-10-17.lisp");
+    let mut session = Session::default();
+    let observed = eval_program(source, &mut session).unwrap_or_else(|error| {
+        panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS expected=13-D1:так actual_error={error}")
+    });
+    let expected = eval_program("(атом? (як-є ()))", &mut Session::default())
+        .expect("D1:так у SENS")
+        .value;
+
+    // Дев'ять адресних позитивів і чотири негативи — усі живі D1-відповіді.
+    let mut cursor = &observed.value;
+    for index in 0..13 {
+        let sens::Value::Pair(head, tail) = cursor else {
+            panic!("test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=pair(D1:так, tail) actual={cursor}");
+        };
+        assert_eq!(
+            head.as_ref(),
+            &expected,
+            "test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=D1:так actual={head}"
+        );
+        cursor = tail.as_ref();
+    }
+    assert!(matches!(cursor, sens::Value::Nil), "test_id=D5-D6-SELECTOR-NATIVE expected=exactly-13-predicates");
+
+    // Псування одного селекторного закону змінює справжній результат SENS,
+    // не лише людинозрозуміле ім'я чи запис у каталозі.
+    let original = "(визначити решта-двох-перших\n  (функція (значення)\n    (решта (перше (перше значення)))))";
+    let corrupted = "(визначити решта-двох-перших\n  (функція (значення)\n    (перше (перше (перше значення)))))";
+    assert_eq!(source.matches(original).count(), 1, "test_id=D5-D6-SELECTOR-NATIVE expected=one-mutation-site");
+    let mutant = source.replacen(original, corrupted, 1);
+    let changed = eval_program(&mutant, &mut Session::default()).unwrap_or_else(|error| {
+        panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні-in-first-observation actual_error={error}")
+    });
+    let sens::Value::Pair(head, _) = &changed.value else {
+        panic!("test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=predicate-list actual={}", changed.value);
+    };
+    assert_eq!(
+        head.as_predicate_bit(),
+        Some(false),
+        "test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual={head}"
+    );
+}
