@@ -145,7 +145,7 @@ class ThreePassClassifierTests(unittest.TestCase):
 (00000001 (00110111 f xs))
 (car x)
 """
-        heads = mod.scan_heads("sample.lisp", source)
+        heads = mod.scan_heads("sample.lisp", source, source_era="legacy")
         self.assertEqual(
             [head.token for head in heads if not head.empty_list],
             ["quote", "001", "QUOTE", "00000001", "car"],
@@ -156,6 +156,18 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual([hit.token for hit in current], ["001"])
         self.assertFalse(dynamic)
         self.assertFalse(empty)
+
+    def test_modern_d8_doseq_is_not_confused_with_legacy_sid8_quote(self):
+        # D8:00000001 у чинній драбині = для-кожного-елемента (DOSEQ),
+        # а НЕ старе SID8:00000001 QUOTE. Вкладені голови слід бачити.
+        src = "(00000001 (додати 2 3))\n"
+        current = mod.scan_heads("current.lisp", src)
+        self.assertEqual([x.token for x in current], ["00000001", "додати"])
+        legacy = mod.scan_heads("legacy.lisp", src, source_era="legacy")
+        self.assertEqual([x.token for x in legacy], ["00000001"])
+        with self.assertRaises(ValueError):
+            mod.scan_heads("unknown.lisp", src, source_era="auto")
+
 
     def test_nested_executable_operator_does_not_create_second_head(self):
         source = """((car f) car)
