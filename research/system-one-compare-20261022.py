@@ -103,6 +103,67 @@ def validate_teacher_file(
     return rows, next(iter(teacher_names)), next(iter(prompt_versions))
 
 
+def validate_transformer_predictions(
+    path: Path,
+    expected_rows: list[dict[str, Any]],
+    expected_split: str,
+    dataset_sha: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    rows, raw = read_rows(path)
+    if len(rows) != len(expected_rows):
+        raise ComparisonError(
+            f"{path}: {len(rows)} трансформерних прогнозів, очікувалося {len(expected_rows)} для {expected_split}"
+        )
+    expected = {str(row["id"]): row for row in expected_rows}
+    observed: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        row_id = str(row.get("id", ""))
+        if not row_id or row_id in observed:
+            raise ComparisonError(f"{path}: відсутній або повторений id {row_id!r}")
+        observed[row_id] = row
+        if row.get("split") != expected_split:
+            raise ComparisonError(f"{row_id}: очікувався transformer split={expected_split!r}")
+        if row.get("model_schema") != "sens.system-one.transformer-student/1":
+            raise ComparisonError(f"{row_id}: невідома схема трансформерного учня")
+        if row.get("training_dataset_sha256") != dataset_sha:
+            raise ComparisonError(f"{row_id}: transformer train SHA не збігається з seed")
+        if row_id not in expected:
+            raise ComparisonError(f"{row_id}: transformer ID відсутній у seed")
+        source = expected[row_id]
+        if row.get("gold") != source.get("gold") or row.get("text") != source.get("text"):
+            raise ComparisonError(f"{row_id}: transformer змінив еталонний текст або мітку")
+        try:
+            evaluator.extract_distribution(row)
+        except evaluator.EvaluationError as exc:
+            raise ComparisonError(f"{row_id}: недопустимий transformer distribution: {exc}") from exc
+        temperature = row.get("calibration_temperature")
+        if (
+            isinstance(temperature, bool)
+            or not isinstance(temperature, (int, float))
+            or not math.isfinite(float(temperature))
+            or float(temperature) <= 0
+        ):
+            raise ComparisonError(f"{row_id}: некоректна температура трансформера")
+
+    if set(observed) != set(expected):
+        raise ComparisonError(
+            f"{path}: не збігається склад transformer {expected_split}: "
+            f"відсутні={sorted(set(expected)-set(observed))}"
+        )
+    model_names = {str(row.get("base_model", "")) for row in rows}
+    temperatures = {float(row["calibration_temperature"]) for row in rows}
+    if len(model_names) != 1 or not next(iter(model_names)).strip():
+        raise ComparisonError(f"{path}: очікується одна модель трансформера")
+    if len(temperatures) != 1:
+        raise ComparisonError(f"{path}: температура змінюється між прогнозами одного набору")
+    return rows, {
+        "base_model": next(iter(model_names)),
+        "temperature": next(iter(temperatures)),
+        "predictions_sha256": sha256(raw),
+        "count": len(rows),
+    }
+
+
 def write_model(path: Path, model: dict[str, Any], overwrite: bool) -> str:
     rendered = json.dumps(model, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
     student.atomic_write(path, rendered, overwrite=overwrite)
@@ -174,9 +235,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "test": args.teacher_test.resolve(),
     }
     output_dir = args.output_dir.resolve()
-    input_paths = [seed_path, *teacher_paths.values()]
+    transformer_validation_path = getattr(args, "transformer_validation_predictions", None)
+    transformer_test_path = getattr(args, "transformer_test_predictions", None)
+    if (transformer_validation_path is None) != (transformer_test_path is None):
+        raise ComparisonError("для трансформера потрібно передати обидва файли: validation і test")
+    transformer_paths = (
+        [transformer_validation_path.resolve(), transformer_test_path.resolve()]
+        if transformer_validation_path is not None and transformer_test_path is not None
+        else []
+    )
+    input_paths = [seed_path, *teacher_paths.values(), *transformer_paths]
     if len(set(input_paths)) != len(input_paths):
-        raise ComparisonError("seed і три teacher-файли мають бути різними файлами")
+        raise ComparisonError("seed, teacher і transformer-файли мають бути різними файлами")
     if any(path == output_dir or output_dir in path.parents for path in input_paths):
         raise ComparisonError("вихідний каталог не може містити seed або вхідні teacher-файли")
     if output_dir.exists() and not output_dir.is_dir():
@@ -267,6 +337,28 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 predictions, split, args.threshold, args.bins
             )
 
+    transformer_report: dict[str, Any] | None = None
+    if transformer_paths:
+        transformer_records: dict[str, list[dict[str, Any]]] = {}
+        transformer_report = {}
+        for split, prediction_path in (
+            ("validation", transformer_paths[0]),
+            ("test", transformer_paths[1]),
+        ):
+            records, details = validate_transformer_predictions(
+                prediction_path, split_rows[split], split, dataset_sha
+            )
+            transformer_records[split] = records
+            transformer_report[split] = details
+        if transformer_report["validation"]["base_model"] != transformer_report["test"]["base_model"]:
+            raise ComparisonError("validation/test трансформера походять від різних базових моделей")
+        if transformer_report["validation"]["temperature"] != transformer_report["test"]["temperature"]:
+            raise ComparisonError("validation/test трансформера мають різну температуру")
+        evaluations["student_transformer"] = {
+            split: evaluate_rows(records, split, args.threshold, args.bins)
+            for split, records in transformer_records.items()
+        }
+
     comparisons: dict[str, Any] = {}
     metric_keys = (
         "accuracy",
@@ -298,6 +390,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "test_used_for_training_or_calibration": False,
         "threshold": args.threshold,
         "calibration": calibration_reports,
+        "transformer_student": transformer_report,
         "evaluations": evaluations,
         "comparison": comparisons,
         "models": {
@@ -324,6 +417,8 @@ def main() -> int:
     parser.add_argument("--teacher-train", type=Path, required=True)
     parser.add_argument("--teacher-validation", type=Path, required=True)
     parser.add_argument("--teacher-test", type=Path, required=True)
+    parser.add_argument("--transformer-validation-predictions", type=Path)
+    parser.add_argument("--transformer-test-predictions", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--threshold", type=float, default=0.80)
     parser.add_argument("--bins", type=int, default=10)
