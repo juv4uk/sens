@@ -166,8 +166,11 @@ jobs:
           # Власний diff до main — єдині джерела, які PR може публікувати.
           if [[ "$EVENT_NAME" == push && "$GITHUB_REF" != refs/heads/main ]]; then
             git rev-parse --verify refs/remotes/origin/main >/dev/null
-            list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only origin/main HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
-            echo "REMINT_PR_SOURCE_SCOPE branch=$GITHUB_REF base=origin/main"
+            # Прямий origin/main..HEAD від чужих свіжих main-комітів
+            # вигадує PR-кандидатів. Тільки зміни від спільного предка.
+            pr_base="$(git merge-base origin/main HEAD)"
+            list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$pr_base" HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp')"
+            echo "REMINT_PR_SOURCE_SCOPE branch=$GITHUB_REF base=$pr_base"
           fi
           if [ -z "$list" ] && [[ "$EVENT_NAME" != push ]]; then
             if [ -f scripts/remint-drifted-pairs.txt ]; then
