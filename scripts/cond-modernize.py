@@ -165,7 +165,9 @@ def parse(source: str) -> tuple[Form, ...]:
     return tuple(result)
 
 
-QUOTE_HEADS = frozenset(("001", "00000001", "quote", "QUOTE"))
+# D3:001 is QUOTE. D8:00000001 is current DOSEQ, NOT a quote;
+# never hide executable descendants behind an unqualified legacy SID8.
+QUOTE_HEADS = frozenset(("001", "як-є", "quote", "QUOTE"))
 CURRENT_COND = "110"      # exact D3 bīja3 identity, not 8-bit сід8
 LEGACY_COND = frozenset(("00000111", "cond", "COND"))
 EXACT_D1_PRODUCERS = frozenset(("010", "101"))  # D3 ATOM and EQ
