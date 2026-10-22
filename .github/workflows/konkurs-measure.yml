@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/install-zig
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.99.0
 
       - name: Build SENS binaries with benchmark metrics
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
