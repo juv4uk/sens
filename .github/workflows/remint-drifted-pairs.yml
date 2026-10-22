@@ -62,18 +62,16 @@ jobs:
               list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp')"
             fi
             # Не втрачати непарні програми після скасованого queued run.
-            # У конкурсі також перестворюємо НАЯВНІ трійки: раніше стара
-            # .sens лишалася після правки .lisp і валилося суддівство.
-            # Невеликий active contest перевіряє нативний SENS/Zig T5M.
-            # Великі lib/list-*/tree-* — лише змінені або без фізичної пари.
+            # Змінений конкурсний .lisp уже є у git diff вище, навіть якщо
+            # стара .sens ще існує. Не перемайнювати незмінені повні трійки
+            # при кожному незалежному push: це відтягує обернення нових Lisp.
+            # Джерело без .sens або view залишається в черзі; нативний
+            # суддя як і раніше відхиляє drift та хибне виконання.
             for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp lib/tree-*.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
-              case "$source" in
-                benchmarks/contest-uk/*.lisp) ;;
-                *) [[ ! -f "$pair" || -L "$pair" || ! -f "$view" || -L "$view" ]] || continue ;;
-              esac
+              [[ ! -f "$pair" || -L "$pair" || ! -f "$view" || -L "$view" ]] || continue
               if ! printf '%s\n' "$list" | grep -Fxq -- "$source"; then
                 list="$(printf '%s\n%s' "$list" "$source")"
               fi
