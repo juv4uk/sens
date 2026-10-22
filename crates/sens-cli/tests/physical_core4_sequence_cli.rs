@@ -441,6 +441,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-distinct-unordered-atom-pairs-general",
         "list-split-atomic-prefix-general",
         "list-first-compound-general",
+        "list-last-compound-suffix-general",
         "tree-pair-tally-unary-general",
         "list-all-subsets-by-position-general",
         "list-all-matching-positions-unary-general",
@@ -583,6 +584,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-move-first-match-to-front-general"
                 | "list-all-unordered-position-pairs-general"
                 | "list-distinct-unordered-atom-pairs-general"
+                | "list-last-compound-suffix-general"
                 | "list-all-subsets-by-position-general"
                 | "tree-pair-tally-unary-general"
         ) {
