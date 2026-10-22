@@ -29,10 +29,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 246,
+    "total": 253,
     "historical": 17,
-    "library": 229,
-    "distinct_families": 46
+    "library": 236,
+    "distinct_families": 52
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -6168,6 +6168,160 @@
       "callable": false,
       "law": "Пропускає максимальний спільний атомний префікс двох правильних списків і повертає обидва вихідні хвости без копіювання їхніх елементів.",
       "native_law_test": "crates/sens/tests/d11_existing_list_structural.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "симетрична-різниця-атомів",
+      "source_family": "list-stable-symmetric-difference",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-stable-symmetric-difference-general.lisp",
+        "blob_sha": "13069b5d2bcff0440787242f588a60679712d7ca",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list × list → list",
+      "law": "Для двох скінченних списків атомів відкинути ВСІ входження тих і тільки тих атомів, які присутні в обох списках; зберегти всі повтори та порядок решти зліва, потім справа.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "сталий-перетин-атомів",
+      "source_family": "list-stable-membership-intersection",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-stable-intersection-general.lisp",
+        "blob_sha": "e463a8f5b336e56e4bd04d24ed81102450579178",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list × list → list",
+      "law": "Кожне входження атома зліва зберігається, якщо цей атом хоч один раз є справа; порядок і кратність визначає тільки лівий список.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "перетнути-мультимножини",
+      "source_family": "list-multiset-intersection",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-multiset-intersection-general.lisp",
+        "blob_sha": "70bb1546ccbbba3be26469aa43d84079a0b07b09",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list × list → list",
+      "law": "Зберегти зліва рівно мінімальну кратність кожного атома між двома списками; збережені входження стоять у вихідному порядку.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "поділити-стійко-за-набором",
+      "source_family": "list-stable-bipartition",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-stable-bipartition-general.lisp",
+        "blob_sha": "50e04b279e284730468bff7abd287b93d3b749c0",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list × list → pair(list,list)",
+      "law": "Поділити скінченний список атомів на дві послідовності за належністю заданому набору, не втрачаючи повторів та внутрішнього порядку.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "обернути-ліворуч-на-один",
+      "source_family": "list-cyclic-rotation",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-rotation-inverse-general.lisp",
+        "blob_sha": "13031f7bce8567b58185a334c40052e1b8891740",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list → list",
+      "law": "Перенести перший елемент правильного скінченного списку в кінець, зберігши порядок решти; для порожнього списку повернути порожній.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "обернути-праворуч-на-один",
+      "source_family": "list-cyclic-rotation",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-rotation-inverse-general.lisp",
+        "blob_sha": "13031f7bce8567b58185a334c40052e1b8891740",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list → list",
+      "law": "Перенести останній елемент правильного скінченного списку в початок; для будь-якого скінченного власного списку є оберненням лівої ротації.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
+      "native_test_result": "CI_NOT_VERIFIED",
+      "no_new_primitive": true
+    },
+    {
+      "surface_name": "паліндром-лінійний?",
+      "source_family": "list-linear-palindrome",
+      "source_kind": "EXISTING_EXECUTABLE_SENS_LIBRARY",
+      "provenance": {
+        "repo_file": "lib/list-palindrome-linear-atoms-general.lisp",
+        "blob_sha": "f132481caaae7ccd27a70b50d06c0b40e6c22df6",
+        "physical_lisp_sens_pair_exists": true,
+        "roundtrip_verification": "UNVERIFIED_IN_THIS_PASS"
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "EXISTING_SENS_BODY_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "ratified": false,
+      "callable": false,
+      "signature": "list → D1 predicate",
+      "law": "Для скінченного правильного списку точних атомів обчислити D1 істинність дзеркальної тотожності за O(n) часу з двома покажчиками.",
+      "native_law_test": "crates/sens/tests/d11_existing_list_algebra.rs",
       "native_test_result": "CI_NOT_VERIFIED",
       "no_new_primitive": true
     }
