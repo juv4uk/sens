@@ -81,3 +81,4 @@ benchmarks/contest-uk/факторіал.lisp
 benchmarks/contest-uk/сума-до-n.lisp
 benchmarks/contest-uk/довжина-списку.lisp
 benchmarks/sens-program-size/fixtures/konkurs-polynomial-compact.lisp
+lib/list-interleave-three-rotation-general.lisp
