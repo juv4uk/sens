@@ -519,6 +519,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-all-suffixes-general"
                 | "list-all-prefixes-general"
                 | "замінити-третій-в-четвірці"
+                | "list-split-before-every-atom-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
