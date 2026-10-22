@@ -7,12 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Один реальний CI на ref; кожен commit має власний результат, а не скасовані докази.
-# Черга до 100 очікуваних запусків зберігає адресні перевірки проміжних SHA.
+# Для push/PR перевіряємо найновіший код, не накопичуємо старі SHA в черзі.
+# Ручний повний прогін не конкурує з автоматичними push-перевірками.
 concurrency:
-  group: sens-central-ci-${{ github.ref }}
-  cancel-in-progress: false
-  queue: max
+  group: sens-central-ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
