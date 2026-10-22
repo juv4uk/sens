@@ -5246,13 +5246,16 @@
       },
       "proposed_law_uk": "Скінченний SENS-аналог Clojure partition-by: розбиття на максимальні суміжні серії однакових структурних ключів; A→B→A утворює три серії. Ключі обчислює замикання SENS, послідовність і повтори зберігаються. Ця eager-бібліотека не вдає Clojure lazy seq чи transducer.",
       "native_law_test": "crates/sens/tests/d11_clojure_partition_by.rs::d11_clojure_consecutive_partition_by_has_real_sens_witnesses",
-      "native_ci_status": "NOT_YET_CONFIRMED",
+      "native_ci_status": "NATIVE_SENS_PASS_39_CASES_TARGETED_STEP_WORKFLOW_NOT_CERTIFIED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39719039706",
+      "native_ci_job": 119627977252,
+      "native_ci_step": "Д11 / Scheme + Clojure — живі SENS закони списків"
     },
     {
       "surface_name": "прибрати-суміжні-повтори",
@@ -5266,13 +5269,16 @@
       },
       "proposed_law_uk": "Скінченний чистий SENS-аналог Clojure dedupe: для кожної максимальної серії структурно рівних елементів залишити перше входження; не збирати несуміжні повтори разом, A→B→A лишається A→B→A. Жодних обіцянок lazy seq або transducer.",
       "native_law_test": "crates/sens/tests/d11_clojure_partition_by.rs::d11_clojure_dedupe_preserves_nonconsecutive_reappearances",
-      "native_ci_status": "NOT_YET_CONFIRMED",
+      "native_ci_status": "NATIVE_SENS_PASS_39_CASES_TARGETED_STEP_WORKFLOW_NOT_CERTIFIED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39719039706",
+      "native_ci_job": 119627977252,
+      "native_ci_step": "Д11 / Scheme + Clojure — живі SENS закони списків"
     }
   ],
   "winners_20261022": {
