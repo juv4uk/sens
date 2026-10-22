@@ -51,6 +51,24 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     load_lisp_file("lib/machine/capability-axis.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
+    // Результат машинних предикатів — саме D1 так/ні, не старе D3 ().
+    // W8:00001100 ніколи не стає D5:01010 за збігом payload.
+    for (program, expected) in [
+        ("(машинний-ключ-поточного-домену? 5 10 5 10)", "1"),
+        ("(машинний-ключ-поточного-домену? 8 10 5 10)", "0"),
+        ("(машинний-ключ-поточного-домену? 8 12 5 10)", "0"),
+        ("(машина-поточний-д5-допустимі-входи-32? 2 3)", "1"),
+        ("(машина-поточний-д5-допустимі-входи-32? -1 3)", "0"),
+        ("(машина-поточний-д6-безпечний-наступник-64? 0)", "1"),
+        ("(машина-поточний-д6-безпечний-наступник-64? -1)", "0"),
+    ] {
+        let actual = eval_program(program, &mut session)
+            .unwrap_or_else(|error| panic!("D1 machine predicate {program}: {error}"))
+            .value
+            .to_string();
+        assert_eq!(actual, expected, "D1 machine predicate: {program}");
+    }
+
     let width = identity.width();
     let packed_bits = identity.packed_bits();
     assert_eq!((width, packed_bits), (5, 10));
