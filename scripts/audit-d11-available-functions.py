@@ -185,11 +185,12 @@ def validate(s: dict, hashes: dict, root: Path, *, source_files: bool = True) ->
                     winner.get("semantic_defined") is True and
                     winner.get("new_primitive") is False and
                     winner.get("direct_d11_opcode_verified") is False and
-                    winner.get("source_file") in {"lib/persistent-vector.lisp", "lib/unify.lisp", "lib/reason.lisp", "lib/forward.lisp", "lib/unify-observe.lisp", "lib/codec-d2.lisp", "lib/world.lisp", "lib/si.lisp", "lib/repl-core.lisp" , "lib/epistemic.lisp"} and
+                    winner.get("source_file") in {"lib/persistent-vector.lisp", "lib/unify.lisp", "lib/reason.lisp", "lib/forward.lisp", "lib/unify-observe.lisp", "lib/codec-d2.lisp", "lib/world.lisp", "lib/si.lisp", "lib/repl-core.lisp" , "lib/epistemic.lisp", "lib/meta-eval.lisp"} and
                     winner.get("native_law_test") in {
                         "crates/sens/tests/persistent_vector.rs::d11_пятнадцять_визначених_переможців_виконує_sens",
                         "crates/sens/tests/d11_unify_once.rs::d11_розвязати_один_раз_не_підмінює_рекурсивне_проходження",
                         "crates/sens/tests/reason_index.rs::reason_index_d1_verdicts_from_real_predicates",
+                        "crates/sens/tests/core_postcore_ukr.rs::meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens",
                         "crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs::d11_jtms_знайти_запис_за_фактом_зберігає_докази_й_перший_збіг",
                         "crates/sens/tests/d11_unify_once.rs::d11_застосувати_підстановку_обійдений_працює_рекурсивно",
                         "crates/sens/tests/d11_unify_once.rs::d11_спостерігати_уніфікацію_розрізняє_порожній_успіх_і_невдачу",
