@@ -51,7 +51,7 @@ for source in "$here"/*.lisp; do
   if ! "$trit" view "$physical" > "$view" 2>"$scratch/error" ||
      [[ ! -s "$view" ]]; then
     printf '%s\t-\t-\t0\tПОМИЛКА_ZIG_VIEW\n' "$name"
-    sed 's/^/Zig/T5M view: /' "$scratch/error" >&2
+    sed 's|^|Zig/T5M view: |' "$scratch/error" >&2
     fail=1
     continue
   fi
@@ -59,7 +59,7 @@ for source in "$here"/*.lisp; do
      ! "$trit" open "$physical" >"$scratch/opened.view" 2>"$scratch/error" ||
      ! cmp -s "$view" "$scratch/opened.view"; then
     printf '%s\t-\t-\t0\tПОМИЛКА_ОБЕРНЕНОСТІ_T5M\n' "$name"
-    sed 's/^/Zig/T5M: /' "$scratch/error" >&2
+    sed 's|^|Zig/T5M: |' "$scratch/error" >&2
     fail=1
     continue
   fi
