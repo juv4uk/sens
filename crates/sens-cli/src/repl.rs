@@ -1928,14 +1928,34 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
+    fn d9_witness_source_is_carried_by_zig_and_readable_by_sens() {
+        let bytes =
+            crate::zig_transport::d9_witness_source_bytes().expect("Zig carries D9 witness bytes");
+        let source = String::from_utf8(bytes).expect("D9 witness source is UTF-8");
+        let forms =
+            sens::parse_mixed_exact_domain(&source).expect("SENS reads the D9 witness source");
+        let call = forms.last().expect("D9 witness entry");
+        let ExprKind::List(items) = &call.kind else {
+            panic!("D9 witness entry must be a source call");
+        };
+        let ExprKind::List(witnesses) = &items[1].kind else {
+            panic!("D9 witness must supply one SENS list of assertions");
+        };
+        assert_eq!(witnesses.len() - 1, 8, "eight native SENS witness laws");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
     fn d9_four_ukr_witnesses_execute_individually_in_native_sens() {
         // One false witness used to collapse to a generic CAR-of-NIL error.
         // Diagnose the actual Lisp source one law at a time using precisely
         // the same SENS -> Zig T5M -> SENS path as --t5m-pair.
         // This code extracts AST spans only; Rust never calculates law truth.
-        let source =
-            include_str!("../../../tests/semantic/d9-four-uk-projections-laws.lisp");
-        let forms = sens::parse_mixed_exact_domain(source)
+        let source = String::from_utf8(
+            crate::zig_transport::d9_witness_source_bytes().expect("Zig carries D9 witness bytes"),
+        )
+        .expect("D9 witness source is UTF-8");
+        let forms = sens::parse_mixed_exact_domain(&source)
             .expect("D9 native Lisp source must be readable");
         let call = forms.last().expect("eight native witness assertions");
         let ExprKind::List(call_items) = &call.kind else {

@@ -45,6 +45,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/lisp-fs.lisp");
     println!("cargo:rerun-if-changed=../../lib/persistent-vector.lisp");
     println!("cargo:rerun-if-changed=../../lib/time.lisp");
+    println!("cargo:rerun-if-changed=../../tests/semantic/d9-four-uk-projections-laws.lisp");
     println!("cargo:rerun-if-changed=../../lib/epistemic.lisp");
     println!("cargo:rerun-if-changed=../../lib/meta-eval.lisp");
     println!("cargo:rerun-if-changed=../../lib/repl-core.lisp");

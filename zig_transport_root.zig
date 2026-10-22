@@ -396,6 +396,26 @@ test "REPL time exact bytes and untouched short buffer" {
     try std.testing.expectEqualSlices(u8, repl_time_asset[0..repl_time_asset.len], &full);
 }
 
+const d9_witness_asset = @embedFile("tests/semantic/d9-four-uk-projections-laws.lisp");
+pub export fn sens_zig_d9_witness_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (d9_witness_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(d9_witness_asset.len);
+    if (capacity < d9_witness_asset.len) return -2;
+    @memcpy(dst[0..d9_witness_asset.len], d9_witness_asset[0..d9_witness_asset.len]);
+    return @intCast(d9_witness_asset.len);
+}
+
+test "D9 witness source crosses Zig byte-exact, short buffer is untouched" {
+    const length = sens_zig_d9_witness_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(d9_witness_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_d9_witness_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var full: [d9_witness_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_d9_witness_bytes_copy(&full, full.len));
+    try std.testing.expectEqualSlices(u8, d9_witness_asset[0..d9_witness_asset.len], &full);
+}
+
 const repl_epistemic_asset = @embedFile("lib/epistemic.lisp");
 pub export fn sens_zig_repl_epistemic_bytes_copy(dst: [*]u8, capacity: usize) isize {
     if (repl_epistemic_asset.len == 0) return -1;
