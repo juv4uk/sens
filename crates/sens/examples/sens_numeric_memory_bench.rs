@@ -120,6 +120,17 @@ fn run() -> Result<(), String> {
             "usage: sens_numeric_memory_bench <shared|deep-copy> WIDTH_BITS RETAINED_VALUES".into(),
         );
     }
+    // Diagnostic only: actual host layout is not a SENS domain law.
+    // Keep stdout's benchmark record stable; RSS and allocator costs
+    // still require whole-process measurements on the same runner.
+    eprintln!(
+        "SENS_HOST_LAYOUT value_bytes={} rational_bytes={} binary_number_bytes={} environment_bytes={} pair_rc_fields_bytes={}",
+        std::mem::size_of::<Value>(),
+        std::mem::size_of::<sens::Rational>(),
+        std::mem::size_of::<BinaryNumber>(),
+        std::mem::size_of::<sens::Environment>(),
+        std::mem::size_of::<(std::rc::Rc<Value>, std::rc::Rc<Value>)>(),
+    );
     let strategy = Strategy::from_arg(&args[1])?;
     let width_bits = args[2]
         .parse::<usize>()
