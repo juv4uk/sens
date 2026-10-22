@@ -1514,10 +1514,10 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
         except (OSError, UnicodeError) as exc:
             raise SensT5Error(f"NONPROGRAM_D11_TABLE_UNREADABLE layer=encode {exc}") from exc
         row_pattern = re.compile(
-            r"\\(([01]{11})\\s+\\(ук\\s+[^()\\s]+\\)\\s+"
-            r"\\(укр\\s+[^()\\s]+\\)\\s+\\(san\\s+[^()\\s]+\\)\\s+"
-            r"\\(en\\s+[^()\\s]+\\)\\s+\\(LISP\\s+[^()\\s]+\\)\\s+"
-            r"\\(sym\\s+\\(\\)\\)\\)"
+            r"\(([01]{11})\s+\(ук\s+[^()\s]+\)\s+"
+            r"\(укр\s+[^()\s]+\)\s+\(san\s+[^()\s]+\)\s+"
+            r"\(en\s+[^()\s]+\)\s+\(LISP\s+[^()\s]+\)\s+"
+            r"\(sym\s+\(\)\)\)"
         )
         matches = [row_pattern.fullmatch(row) for row in rows[1:-1]]
         if (len(rows) < 3 or rows[0] != "(domain-table-1" or rows[-1] != ")"
