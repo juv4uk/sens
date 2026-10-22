@@ -360,7 +360,7 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
         assert_eq!(
             &node.head,
             &expected,
-            "test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=D1:так actual={head}"
+            "test_id=D5-D6-SELECTOR-NATIVE layer=SENS index={index} expected=D1:так actual={}", node.head
         );
         cursor = &node.tail;
     }
@@ -379,9 +379,9 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
         panic!("test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=predicate-list actual={}", preserved.value);
     };
     assert_eq!(
-        node.node.head.as_predicate_bit(),
+        node.head.as_predicate_bit(),
         Some(true),
-        "test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=unchanged-D1:так actual={first}"
+        "test_id=D5-D6-SELECTOR-SHADOW layer=SENS expected=unchanged-D1:так actual={}", node.head
     );
 
     // А справжня зміна викликаного шляху CDAAR -> CAAAR має дати D1:ні.
@@ -399,6 +399,6 @@ fn d5_d6_selector_compositions_execute_in_sens_and_reject_mutated_path() {
     assert_eq!(
         node.head.as_predicate_bit(),
         Some(false),
-        "test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual={head}"
+        "test_id=D5-D6-SELECTOR-MUTANT layer=SENS expected=D1:ні actual={}", node.head
     );
 }
