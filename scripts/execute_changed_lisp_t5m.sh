@@ -489,8 +489,10 @@ PY
     standalone_status=$status
     cp "$stderr" "$dir/standalone.stderr"
     if timeout 45s "$binary" --t5m-pair "$file" "$pair" >"$stdout" 2>"$stderr"; then
-      result_sha="$(sha256sum "$stdout" | cut -d ' ' -f 1)"
-      echo "T5M_PHYSICAL_PAIRED_GENERIC_PASS source=$file pair=$pair physical=ZIG_VERIFIED result_sha256=$result_sha semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+      # Valid paired execution does not excuse an unclassified standalone RED.
+      sed 's/^/T5M standalone unclassified stderr: /' "$dir/standalone.stderr" >&2
+      echo "::error::T5M_STANDALONE_UNCLASSIFIED_FAILURE source=$file pair=$pair standalone_status=$standalone_status paired_status=0 physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED" >&2
+      mark_file_failed
       continue
     else
       status=$?
