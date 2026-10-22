@@ -39,6 +39,27 @@ for source in "$here"/*.lisp; do
     continue
   fi
   name="$(basename -- "$source" .lisp)"
+
+  physical="$scratch/$name.sens"
+  view="$scratch/$name"
+  committed="$here/$name.sens"
+  committed_view="$here/$name"
+  # Джерело без ОБОХ фізичних супутників — кандидат у черзі Zig/SENS
+  # remint, а не зламана активна програма. Воно не входить до метрик.
+  # Неповна або підмінена трійка (symlink/тільки один супутник) — RED.
+  if [[ ! -e "$committed" && ! -L "$committed" &&
+        ! -e "$committed_view" && ! -L "$committed_view" ]]; then
+    echo "CONTEST_PENDING_NATIVE_PAIR source=$source status=NOT_EXECUTED" >&2
+    continue
+  fi
+  if [[ ! -f "$committed" || -L "$committed" ||
+        ! -f "$committed_view" || -L "$committed_view" ]]; then
+    printf '%s\t-\t-\t0\tНЕПОВНА_ФІЗИЧНА_ПАРА\n' "$name"
+    fail=1
+    continue
+  fi
+  # Для source-only кандидата немає нативного результату: не вимагати
+  # реєстрації задачі до появи повної фізичної трійки SENS/Zig.
   case "$name" in
     акерман|акерман-*) expected=61 ;;
     довжина-списку|довжина-списку-*) expected=8 ;;
@@ -73,26 +94,10 @@ for source in "$here"/*.lisp; do
     шестикутне|шестикутне-*) expected=190 ;;
     добуток-сусідів|добуток-сусідів-*) expected=156 ;;
     перевернути|перевернути-*) expected="(5 4 3 2 1)" ;;
+    лише-атоми|лише-атоми-*) expected="(1 3)" ;;
+    розгорнути-один|розгорнути-один-*) expected="(4 3 2 1)" ;;
     *) echo "CONTEST_UNKNOWN_TASK: немає перевіреного очікуваного результату: $source" >&2; fail=1; continue ;;
   esac
-  physical="$scratch/$name.sens"
-  view="$scratch/$name"
-  committed="$here/$name.sens"
-  committed_view="$here/$name"
-  # Джерело без ОБОХ фізичних супутників — кандидат у черзі Zig/SENS
-  # remint, а не зламана активна програма. Воно не входить до метрик.
-  # Неповна або підмінена трійка (symlink/тільки один супутник) — RED.
-  if [[ ! -e "$committed" && ! -L "$committed" &&
-        ! -e "$committed_view" && ! -L "$committed_view" ]]; then
-    echo "CONTEST_PENDING_NATIVE_PAIR source=$source status=NOT_EXECUTED" >&2
-    continue
-  fi
-  if [[ ! -f "$committed" || -L "$committed" ||
-        ! -f "$committed_view" || -L "$committed_view" ]]; then
-    printf '%s\t-\t-\t0\tНЕПОВНА_ФІЗИЧНА_ПАРА\n' "$name"
-    fail=1
-    continue
-  fi
   # Справжній нативний суд перевіряє змінні входи, негативного мутанта,
   # точний T5M roundtrip і paired/standalone SENS. Фіксований результат
   # сам по собі не доводить алгоритму і не може отримати «ПІДТВЕРДЖЕНО».
