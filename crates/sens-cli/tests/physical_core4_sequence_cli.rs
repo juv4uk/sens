@@ -1004,7 +1004,7 @@ fn contest_uk_three_real_programs_have_current_physical_peers() {
     for stem in ["довжина-списку", "сума-до-n", "факторіал"] {
         assert!(
             report.lines().any(|line|
-                line.starts_with(&format!("{stem}\\t")) && line.ends_with("ПІДТВЕРДЖЕНО")),
+                line.starts_with(&format!("{stem}\t")) && line.ends_with("ПІДТВЕРДЖЕНО")),
             "конкурс не довів нативне виконання {stem}: {report}"
         );
     }
