@@ -718,7 +718,7 @@ fn zig_test_fixture(name: &'static str) -> &'static [u8] {
         // exact words to the current T5M wire in memory; never rewrite them.
         #[cfg(feature = "zig-transport")]
         {
-            let legacy_words = sens::decode_ternary_words(&bytes)
+            let legacy_words = zig_transport::decode_legacy_t5_words(&bytes)
                 .unwrap_or_else(|e| panic!("legacy T5 fixture decode {name}: {e:?}"));
             let t5m = zig_transport::encode_t5m_direct(&legacy_words)
                 .unwrap_or_else(|e| panic!("T5M fixture carry {name}: {e}"));
@@ -764,6 +764,19 @@ mod rust_zig_only_cutover_tests {
         assert!(runtime.contains("eval_t5m_bytes(&bytes)"));
         assert!(runtime
             .contains("zig_transport::encode_t5m_direct(&admitted_source_words(&projection)?)"));
+
+        let fixture_start = source
+            .find("fn zig_test_fixture(")
+            .expect("fixture adapter");
+        let fixture_adapter = source[fixture_start..]
+            .split("#[cfg(test)]\nmod rust_zig_only_cutover_tests")
+            .next()
+            .expect("fixture adapter section");
+        assert!(
+            !fixture_adapter.contains("sens::decode_ternary_words(&bytes)"),
+            "historical fixture transport must not use the Rust T5 codec"
+        );
+        assert!(fixture_adapter.contains("zig_transport::decode_legacy_t5_words(&bytes)"));
     }
 
     #[cfg(not(feature = "zig-transport"))]

@@ -816,7 +816,7 @@ pub fn decode_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Str
     Ok(words)
 }
 
-fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+pub fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     validate_legacy_t5(bytes)?;
     let capacity = bytes
         .len()

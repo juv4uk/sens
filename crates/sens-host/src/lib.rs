@@ -20,7 +20,7 @@ static NEXT_TCP_HANDLE_TOKEN: AtomicU64 = AtomicU64::new(1);
 
 fn next_tcp_handle_token(span: Span) -> Result<u64, LanguageError> {
     NEXT_TCP_HANDLE_TOKEN
-        .try_update(Ordering::Relaxed, Ordering::Relaxed, |token| {
+        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |token| {
             token.checked_add(1)
         })
         .map_err(|_| {
