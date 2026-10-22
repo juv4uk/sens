@@ -57,7 +57,8 @@ if [[ "$positive" == *'#d1:'* || "$positive" == *'(ні)'* || "$positive" == *'(
   echo "META_GRAPH_FIXTURE_RED: historical D1 text cannot run in SENS" >&2
   exit 1
 fi
-echo "META_GRAPH_MUTATION_CHECK input=one-exact-quoted-symbol positive=D1:1 mutant=D1:0"tmp="$(mktemp -d)"
+echo "META_GRAPH_MUTATION_CHECK input=one-exact-quoted-symbol positive=D1:1 mutant=D1:0"
+tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 cat "$lib" "$law" > "$tmp/positive.lisp"
 cat "$lib" "$mutant" > "$tmp/mutant.lisp"

@@ -19,28 +19,39 @@ if [[ ! -x "$cli" ]]; then
 fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-python3 - "$positive" "$mutant" <<'PY'
-from pathlib import Path
-import sys
+# Тільки структурна перевірка: SENS сам обчислює всі чотири D1 закони.
+# Жоден Python / JSON / хостовий Lisp тут не підміняє позитив чи мутант.
+positive_code="$(sed '/^[[:space:]]*;/d' "$positive")"
+mutant_code="$(sed '/^[[:space:]]*;/d' "$mutant")"
+old="(це-макрос? (як-є приклад))"
+new="(це-макрос? (як-є (macro приклад)))"
 
-positive = Path(sys.argv[1]).read_text(encoding="utf-8")
-mutant = Path(sys.argv[2]).read_text(encoding="utf-8")
-def program(text):
-    # Порівнюємо лише Lisp-код; зміни у коментарях не підробляють мутант.
-    return "\n".join(line for line in text.splitlines()
-                     if not line.lstrip().startswith(";")).strip()
-p = program(positive)
-m = program(mutant)
-old = "(це-макрос? (як-є приклад))"
-new = "(це-макрос? (як-є (macro приклад)))"
-if p.count(old) != 1 or m != p.replace(old, new):
-    raise SystemExit("META_D1_FIXTURE_RED: mutant must change one executable SENS call")
-for name in ("це-макрос?", "це-замикання?",
-             "це-рекурсивне-замикання?", "лямбда-має-параметр-залишку?"):
-    if p.count("(" + name + " ") != 1:
-        raise SystemExit("META_D1_FIXTURE_RED: missing or duplicated callable " + name)
-print("META_D1_MUTATION_CHECK changed=quoted-macro-input expected=positive-1-mutant-0")
-PY
+count_fixed() {
+  local remaining="$1" needle="$2" occurrences=0
+  while [[ "$remaining" == *"$needle"* ]]; do
+    remaining="${remaining#*"$needle"}"
+    (( occurrences += 1 ))
+  done
+  printf '%s' "$occurrences"
+}
+
+if [[ "$(count_fixed "$positive_code" "$old")" != 1 ||
+      "$mutant_code" != "${positive_code/"$old"/"$new"}" ]]; then
+  echo "META_D1_FIXTURE_RED: mutant must change one executable SENS call" >&2
+  exit 1
+fi
+for name in \
+  'це-макрос?' \
+  'це-замикання?' \
+  'це-рекурсивне-замикання?' \
+  'лямбда-має-параметр-залишку?'; do
+  actual="$(count_fixed "$positive_code" "($name ")"
+  if [[ "$actual" != 1 ]]; then
+    printf 'META_D1_FIXTURE_RED: missing or duplicated callable %s count=%s\n' "$name" "$actual" >&2
+    exit 1
+  fi
+done
+echo "META_D1_MUTATION_CHECK changed=quoted-macro-input expected=positive-1-mutant-0"
 cat "$lib" "$positive" > "$tmp/positive.lisp"
 cat "$lib" "$mutant" > "$tmp/mutant.lisp"
 printf 'NATIVE_SENS_EXECUTOR id=%s path=%s version=%s reproduce=%q\n' "$id" "$cli" "$("$cli" --version)" "$reproduce"
