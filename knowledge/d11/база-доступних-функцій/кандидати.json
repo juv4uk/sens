@@ -5866,13 +5866,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Два правильні списки → (спарені-позиції, залишок-лівого, залишок-правого); обидва неспарені хвости зберігаються, порядок і кратність не змінюються.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_35_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39793558347",
+      "native_ci_job": 119875249672,
+      "native_ci_scope": "ADDRESS_D11_4_TESTS_PASS_WORKFLOW_FAILED_OTHER_STEPS"
     },
     {
       "surface_name": "відновити-два-списки-зі-хвостів",
@@ -5887,13 +5890,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Запис, створений оборотним спаруванням, відновлює обидва початкові списки без втрати хвостів.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_35_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39793558347",
+      "native_ci_job": 119875249672,
+      "native_ci_scope": "ADDRESS_D11_4_TESTS_PASS_WORKFLOW_FAILED_OTHER_STEPS"
     },
     {
       "surface_name": "вставити-роздільник-між",
@@ -5908,13 +5914,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Вставити роздільник тільки між сусідніми позиціями скінченного правильного списку, без кінцевого роздільника.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_35_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39793558347",
+      "native_ci_job": 119875249672,
+      "native_ci_scope": "ADDRESS_D11_4_TESTS_PASS_WORKFLOW_FAILED_OTHER_STEPS"
     },
     {
       "surface_name": "вилучити-роздільники-між",
@@ -5929,13 +5938,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "На образі вставлення-роздільника відновити вихідні елементи у початковому порядку; не універсальне видалення всіх рівних значень.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_35_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39793558347",
+      "native_ci_job": 119875249672,
+      "native_ci_scope": "ADDRESS_D11_4_TESTS_PASS_WORKFLOW_FAILED_OTHER_STEPS"
     },
     {
       "surface_name": "розплести-перші-пари",
@@ -5950,13 +5962,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Для правильного списку двоатомних пар зберегти всі перші компоненти, включно з повторами.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_35_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39793558347",
+      "native_ci_job": 119875249672,
+      "native_ci_scope": "ADDRESS_D11_4_TESTS_PASS_WORKFLOW_FAILED_OTHER_STEPS"
     },
     {
       "surface_name": "розплести-другі-пари",
@@ -5971,13 +5986,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Для правильного списку двоатомних пар зберегти всі другі компоненти, включно з повторами.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_35_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39793558347",
+      "native_ci_job": 119875249672,
+      "native_ci_scope": "ADDRESS_D11_4_TESTS_PASS_WORKFLOW_FAILED_OTHER_STEPS"
     },
     {
       "surface_name": "зшити-дві-послідовності",
@@ -5992,13 +6010,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Скласти покомпонентні пари з двох правильних списків у вихідному порядку; при різній довжині припинити на коротшому.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_35_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39793558347",
+      "native_ci_job": 119875249672,
+      "native_ci_scope": "ADDRESS_D11_4_TESTS_PASS_WORKFLOW_FAILED_OTHER_STEPS"
     },
     {
       "surface_name": "спільний-префікс-атомів",
@@ -6013,13 +6034,16 @@
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "EXISTING_SENS_BODY_WITH_NEW_NATIVE_WITNESSES_PENDING_CI_AND_BEHAVIORAL_DEDUP",
+      "review_status": "EXISTING_SENS_COMPOSITION_NATIVE_CI_PASS_BEHAVIORAL_DEDUP_REQUIRED",
       "ratified": false,
       "callable": false,
       "law": "Найдовший початковий сегмент, де атоми двох правильних списків тотожні; зупинка при першій відмінності.",
       "native_law_test": "crates/sens/tests/d11_existing_list_reversible.rs",
-      "native_test_result": "CI_NOT_VERIFIED",
-      "no_new_primitive": true
+      "native_test_result": "NATIVE_SENS_PASS_35_CASES_SHARED_4_TESTS",
+      "no_new_primitive": true,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39793558347",
+      "native_ci_job": 119875249672,
+      "native_ci_scope": "ADDRESS_D11_4_TESTS_PASS_WORKFLOW_FAILED_OTHER_STEPS"
     },
     {
       "surface_name": "дзеркалити-дерево",
