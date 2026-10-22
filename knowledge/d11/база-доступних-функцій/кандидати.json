@@ -22,9 +22,9 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 208,
+    "total": 209,
     "historical": 17,
-    "library": 191,
+    "library": 192,
     "distinct_families": 29
   },
   "excluded": {
@@ -5240,12 +5240,32 @@
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
         "repo_file": "lib/d11-clojure-partition-by.lisp",
-        "blob_sha": "833c217777ffefe3b439f33b7b93871cb3c2e68e",
+        "blob_sha": "fce5ad9e4e2851d5a3f0a354fe1d372daf2940c3",
         "snapshot_not_live_proof": false,
         "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
       },
       "proposed_law_uk": "Скінченний SENS-аналог Clojure partition-by: розбиття на максимальні суміжні серії однакових структурних ключів; A→B→A утворює три серії. Ключі обчислює замикання SENS, послідовність і повтори зберігаються. Ця eager-бібліотека не вдає Clojure lazy seq чи transducer.",
       "native_law_test": "crates/sens/tests/d11_clojure_partition_by.rs::d11_clojure_consecutive_partition_by_has_real_sens_witnesses",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "прибрати-суміжні-повтори",
+      "source_family": "clojure-consecutive-partition",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-clojure-partition-by.lisp",
+        "blob_sha": "fce5ad9e4e2851d5a3f0a354fe1d372daf2940c3",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html"
+      },
+      "proposed_law_uk": "Скінченний чистий SENS-аналог Clojure dedupe: для кожної максимальної серії структурно рівних елементів залишити перше входження; не збирати несуміжні повтори разом, A→B→A лишається A→B→A. Жодних обіцянок lazy seq або transducer.",
+      "native_law_test": "crates/sens/tests/d11_clojure_partition_by.rs::d11_clojure_dedupe_preserves_nonconsecutive_reappearances",
       "native_ci_status": "NOT_YET_CONFIRMED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
