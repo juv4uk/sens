@@ -1510,6 +1510,262 @@ jobs:
           # Дві вже наявні українські Lisp-композиції: реальне SENS-виконання
           # та негативні мутації в тій самій чинній CI, без Python-oracle.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test ukr_four_list_native_runtime -- --nocapture
+          # #1968: перевіряємо саме фізичний SENS/Zig/T5M свідок, не
+          # зараховуємо виконання текстового Lisp як доведену оберненість.
+          # Одне вже наявне CI, лише при зміні реального свідка або reader.
+          if [[ -f "$RUNNER_TEMP/changed-core-dependencies.txt" ]] &&
+             grep -Eq '^(tests/semantic/біджа3-уточнення-атома-1968[.]lisp|crates/sens-cli/src/repl[.]rs|[.]github/workflows/ci[.]yml)          # Одноблочний CONS (#5950): структурна рівність глибокого списку
+          # не має залежати від глибини стеку; адресно перевіряємо Value-механізм.
+          if grep -Eq '^(crates/sens/src/value[.]rs|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib value::exact_domain_value_tests::deep_cons_spines_compare_iteratively_and_preserve_structural_difference -- --exact --nocapture
+          fi
+          # Нативний доказ лише при зміні селекторів/доменної геометрії.
+          # Використовуємо вже обчислений exact-SHA список змінених файлів.
+          # Checkout depth=1 не містить HEAD^; повторний git diff помилково давав RED.
+          changed_source=""
+          if [[ -f "$RUNNER_TEMP/changed-core-dependencies.txt" ]]; then
+            changed_source="$(cat "$RUNNER_TEMP/changed-core-dependencies.txt")"
+          fi
+          # Вісім справжніх D9 законів: SENS сам виконує кожен через Zig/T5M,
+          # тест повідомляє точний номер RED; не вводимо Python-семантику.
+          if grep -Eq '^(tests/semantic/d9-four-uk-projections-laws[.]lisp|crates/sens-cli/src/repl[.]rs|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --bin sens d9_four_ukr_witnesses_execute_individually_in_native_sens -- --nocapture
+          fi
+          for law_source in selector_law.rs semantic_registry.rs domain_family_composition_current.rs ci.yml; do
+            if [[ "$changed_source" == *"$law_source"* ]]; then
+              CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --lib eval::selector_law::tests:: -- --nocapture
+              CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test domain_family_composition_current -- --nocapture
+              break
+            fi
+          done
+          # Старий Python/T5-запис повністю заблоковано: він не є Zig/T5M.
+          python3 -m unittest tests/test_retired_t5_publisher.py -v
+          python3 -m unittest tests/test_ukr_default_t5m_contract.py -v
+          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_lambda_parameter_shape_is_real_program_identity tests.test_three_pass_migration.ThreePassMigrationTests.test_full_d4_lambda_keeps_variadic_and_dotted_semantics -v
+          python3 -m unittest tests.test_admit_t5_migration.T5ProofPublisherTests.test_current_zig_t5m_is_independent_of_historical_t5_manifests tests.test_admit_t5_migration.T5ProofPublisherTests.test_valid_historical_t5_can_only_be_inspected_not_published -v
+          python3 -m unittest tests/test_retired_python_sens_emission.py -v
+          python3 -m unittest tests.test_migrate_one_to_sens.CanonicalOneFileMigration.test_zastarilyi_t5_ne_publikuie_sens -v
+          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_unpaired_only_already_paired_is_noop_without_zig tests.test_three_pass_migration.ThreePassMigrationTests.test_export_trigger_installs_pinned_zig_in_existing_ci tests.test_three_pass_migration.ThreePassMigrationTests.test_current_nonprogram_sha_pins_are_real_and_d10_d11_are_data tests.test_three_pass_migration.ThreePassMigrationTests.test_reviewed_data_and_comment_only_are_not_failed_programs tests.test_three_pass_migration.ThreePassMigrationTests.test_malformed_comment_is_a_real_error_not_nonprogram tests.test_check_migration_zig_only_path.StandaloneThreePassZigMintWitness.test_reviewed_nonprogram_never_mints_and_source_drift_is_not_ignored tests.test_check_migration_zig_only_path.StandaloneThreePassZigMintWitness.test_unrelated_review_manifest_drift_does_not_block_executable_lisp -v
+          # Часткова міграція повинна чесно повідомляти RED, зберігши здобуті результати.
+          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_partial_t5m_preview_reports_blocked_without_hiding_valid_program -v
+          # Легка перевірка транзакційного T5M без важкого Zig/Rust складання.
+          python3 -m unittest tests/test_guarded_sens_mirror.py -v
+          # Перевірити відмову в Python-виданні .sens без Zig і відхилення
+          # підміни T5M-байтів без компіляції Zig у кожному push.
+          python3 -m unittest tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_zig_unavailable_never_mints_python_reference_as_sens tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_zig_reference_divergence_cannot_publish tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_preview_is_reference_only_without_zig_mint -v
+          # Це тести канонічної фізичної тотожності, НЕ незалежний SENS-eval.
+          # Нові помилки у міграторі, інвентарі або свідках мають робити CI червоним.
+          python3 -m unittest tests/test_verify_uk_t5_triplet.py -v
+          python3 -m unittest tests/test_migrated_two_projections.py -v
+          # Охорона українських QUOTE/DEFINE/LAMBDA/LET від хибних замін.
+          python3 -m unittest tests/test_audit_lisp_migration_edits.py -v
+          # Перевірки актуальних D1-гілок перевіряча й генератора кодерного покриття.
+          python3 -m unittest tests/test_encoder_coverage_ukr_projection.py -v
+          # Справжній SENS-виконавець перевіряє D24+ довжину та D1.
+          if grep -Eq '^(lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+            python3 -m unittest tests/test_ukr_quantity_projection.py -v
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_length_d24_current -- --nocapture
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_d1_direct_cutover -- --nocapture
+          fi
+          # Чинний D24+ закон з самого Lisp перевіряє реальний виконавець SENS.
+          # Одна адресна перевірка лише після зміни джерела/свідка або цього CI.
+          if grep -Eq '^(lib/machine/encoding/coverage-generator\.lisp|crates/sens/tests/machine_exact_d5_order\.rs|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test machine_exact_d5_order coverage_d24_count_equality_runs_current_lisp_in_sens -- --exact --nocapture
+          fi
+          python3 -m unittest tests/test_build_inventory_ukr_projection.py -v
+          python3 -m unittest tests/test_stage_two_projections.py -v
+          # Текстовий .bits — не фізичний T5M .sens; D10/D11 мають власні ширини.
+          python3 -m unittest tests/test_sens_domain_spaces.py -v
+          python3 -m unittest tests/test_binary_examples_source_boundary.py -v
+          python3 -m unittest tests/test_audit_t5_file_pairs.py -v
+          python3 -m unittest tests/test_check_release_triple_corpus.py -v
+          # Тільки незмінні Lisp-токени дозволяють переприв'язувати SHA після українізації коментарів.
+          python3 -m unittest tests/test_refresh_nonprogram_comment_pins.py -v
+          python3 -m unittest tests/test_report_t5_triplet_inventory.py -v
+          # Інвентаризаційний борг — warning, а внутрішня помилка аудиту —
+          # справжній RED. Не приховувати винятки за універсальним if !.
+          # Навіть успішний інформативний звіт не є релізним допуском.
+          python3 scripts/report_t5_triplet_inventory.py . --informational
+
+      - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          # Актуальна Lisp AST-поверхня; старі fingerprint/SID8 не є еталоном.
+          python3 -m unittest tests/test_ukr_tcp_island_projection.py -v
+          python3 -m unittest tests/test_ukr_projection_progress_report.py -v
+          python3 -m unittest tests/test_guard_ukr_lisp_keyboard.py -v
+          # Після правки lib/linter.lisp: перевірити повну українську проєкцію й досяжність лексичних гілок.
+          python3 -m unittest tests/test_linter_domain_head_cutover.py -v
+          python3 -m unittest tests/test_migrate_english_predicates_question_mark.py -v
+          python3 -m unittest tests/test_migrate_active_lib_exact_driver.py -v
+          # Живий імпорт DEFINE не наділяє координату D9 машинною викличністю.
+          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_preloaded_lisp_d9_resident_keeps_d7_identifier_without_callability -v
+          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_reason_keeps_unification_as_lexical_d7_not_unadmitted_d9_call -v
+          python3 -m unittest tests/test_ukr_result_status_projection.py -v
+          python3 -m unittest tests/test_result_status_d1_bitness_current.py -v
+          # Повні D9/D10 українські джерела без англомовних DEFINE-дублів.
+          python3 -m unittest tests/test_translation_ukr_primary_projection.py -v
+          python3 -m unittest tests/test_ukr_translation_result_prolog.py -v
+          python3 -m unittest tests/test_translation_d1_bitness_current.py -v
+          # Звіт включає .lisp без .sens і не є релізним допуском.
+          python3 scripts/audit_t5_file_pairs.py --inventory-only --output "$RUNNER_TEMP/t5-source-census.json"
+          # Прогрес поступової міграції — інформативна метрика, не глобальний стоп.
+          # Компактне ук та повне укр — різні peer spellings; їхня рівність
+          # не є вимогою semantic identity чи міграційним критерієм.
+          python3 scripts/report_ukr_projection_progress.py
+          # Рахуємо справжні українські викличні голови до незалежних тестів.
+          python3 scripts/check_ukr_callsite_migration.py --json "$RUNNER_TEMP/ukr-callsite-migration.json" --limit 25
+          # Аудит повністю виводить live та archive знахідки, але історична
+          # міграційна заборгованість не є глобальним стопом для незалежних змін.
+          # Локальний --require-full залишається доступним і має fail-closed тести.
+          # Лексичний звіт не замінює фізичний SENS-eval та не стверджує callability.
+          python3 -m unittest tests/test_ukr_callsite_migration.py -v
+          # Читаємо Lisp-контракти як дані; не удаємо виконання SENS.
+          python3 -m unittest tests/test_contract_lisp_data_structure.py -v
+          # Точні D6/D8 виклики: цитовані біти й коментарі — дані, не псевдовиклики.
+          python3 -m unittest tests/test_sid8_broad_source_cutover.py -v
+          # Структурний доказ збереження українських D3/D4 законів, у т.ч.
+          # негативний мутант прямого D9 селектора четвертого слова.
+          # Це не заміняє фактичний SENS-eval у LISP-TIER.
+          python3 -m unittest tests/test_understand_exact_d3_2046.py -v
+          python3 -m unittest tests/test_ukr_narrate_peers.py -v
+          python3 -m unittest tests/test_ukr_lib_peers.py -v
+          python3 -m unittest tests/test_ukr_verify_repo_domain_calls.py -v
+          python3 -m unittest tests.test_d3_legacy_logic_guard.LegacyD3GuardTests.test_dependency_classifier_exact_d1_cond_and_negative_guards -v
+          python3 -m unittest tests/test_clips_exact_d3_slot_2046.py -v
+          python3 -m unittest tests/test_persistent_map_ukr_primary_projection.py -v
+          python3 -m unittest tests/test_content_store_ukr_primary_projection.py -v
+          python3 -m unittest tests/test_persistent_vector_ukr_primary_projection.py -v
+          python3 -m unittest tests/test_machine_encoding_ukr_aliases.py -v
+          python3 -m unittest tests/test_changed_lisp_t5m_route.py -v
+          python3 -m unittest tests/test_yantra_ukr_projection.py -v
+          python3 -m unittest tests/test_world_ukr_primary_projection.py -v
+          python3 scripts/test-content-store-d1-bitness.py
+          # Борг active Latin call heads лишається видимим у звіті й JSON.
+          # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
+
+
+
+      - name: "ONE-SHOT — фізичні T5M-пари поточних lib-програм для прямої інтеграції"
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$RUNNER_TEMP/sens-lib-triplets"
+          report="$RUNNER_TEMP/sens-lib-triplets.report.json"
+          mkdir -p "$output"
+          set +e
+          python3 scripts/migrate-three-pass.py lib --out "$output" --report "$report" --codec t5m --source-surface укр
+          migrate_rc=$?
+          set -e
+          if [[ ! -s "$report" ]]; then
+            echo "::error::SENS_LIB_TRIPLET_EXPORT_NO_REPORT rc=$migrate_rc" >&2
+            exit 1
+          fi
+          cp "$report" "$output/MIGRATION-REPORT.json"
+          printf '%s\n' "$GITHUB_SHA" > "$output/EXPORT-HEAD"
+          python3 - "$report" <<'PY'
+          import json, sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          summary = report.get("summary", {})
+          print(
+              "SENS_LIB_TRIPLET_EXPORT "
+              f"sha={__import__('os').environ.get('GITHUB_SHA')} "
+              f"seen={summary.get('files_seen')} "
+              f"written={summary.get('files_written')} "
+              f"blocked={summary.get('files_blocked')} "
+              f"semantic_admitted={report.get('semantic_admitted')}"
+          )
+          PY
+          if [[ "$migrate_rc" -gt 2 ]]; then
+            echo "::error::SENS_LIB_TRIPLET_EXPORT rc=$migrate_rc" >&2
+            exit "$migrate_rc"
+          fi
+
+      - name: "ONE-SHOT — artifact фізичних пар для точкового перенесення в main"
+        if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
+        with:
+          name: sens-lib-triplets-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-lib-triplets/
+          if-no-files-found: error
+          retention-days: 1
+
+  lisp-surface:
+    name: Підсумковий гейт перевірок SENS
+    if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
+    needs: [lisp-guards, runtime-shards]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Підсумувати всі перевірки
+        env:
+          GUARDS_RESULT: ${{ needs.lisp-guards.result }}
+          SHARDS_RESULT: ${{ needs.runtime-shards.result }}
+        run: |
+          if [[ "$GUARDS_RESULT" != "success" ]]; then
+            echo "::error::SENS CI failed: guards=$GUARDS_RESULT"
+            exit 1
+          fi
+          if [[ "$SHARDS_RESULT" != "success" && "$SHARDS_RESULT" != "skipped" ]]; then
+            echo "::error::SENS CI failed: runtime_shards=$SHARDS_RESULT"
+            exit 1
+          fi
+          if [[ "$SHARDS_RESULT" == "skipped" && "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "::error::Manual full runtime check was skipped"
+            exit 1
+          fi
+          # Поверхневі Lisp-тести не доводять виконання SENS runtime.
+          if [[ "$SHARDS_RESULT" == "skipped" ]]; then
+            echo "SENS SURFACE PASS: guards=$GUARDS_RESULT; runtime=NOT_TESTED; release=NOT_CERTIFIED"
+            echo "::notice::SENS surface only: runtime shards were skipped; no release proof"
+          else
+            echo "SENS CHECKS PASS: guards=$GUARDS_RESULT runtime_shards=$SHARDS_RESULT; release requires corpus admission"
+          fi
+
+  interpreter-memory-smoke:
+    name: Пікова RSS інтерпретаторів — smoke
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@1.99.0
+
+      - uses: ./.github/actions/install-zig
+
+      - name: Встановити інтерпретатори порівняння
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends guile-3.0 lua5.4
+
+      - name: Побудувати SENS/T5M виконавець
+        env:
+          CARGO_BUILD_JOBS: 2
+          CARGO_INCREMENTAL: 0
+        run: |
+          cargo build --locked -p sens-cli --bin sens-trit
+          cargo build --locked -p sens --example sens_numeric_memory_bench
+
+      - name: Перевірити міжмовний smoke та D24+ RSS у свіжих процесах
+        env:
+          PYTHONDONTWRITEBYTECODE: 1
+        run: |
+          set -euo pipefail
+          python3 -m unittest benchmarks/interpreter-memory/test_run.py -v
+          timeout 90s python3 benchmarks/interpreter-memory/run.py \
+            --sens-trit "$PWD/target/debug/sens-trit" \
+            --sens-memory-bench "$PWD/target/debug/examples/sens_numeric_memory_bench" \
+            --repetitions 3
+ "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens-cli --bin sens -- --list |
+              grep -Fqx 'repl::tests::bija3_refinement_full_ukrainian_source_executes_as_exact_zig_t5m: test'
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --bin sens repl::tests::bija3_ -- --nocapture
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --bin sens repl::tests::zig_t5m_paired_cond_accepts_only_d1_and_reports_physical_error_form -- --exact --nocapture
+          fi
           # Одноблочний CONS (#5950): структурна рівність глибокого списку
           # не має залежати від глибини стеку; адресно перевіряємо Value-механізм.
           if grep -Eq '^(crates/sens/src/value[.]rs|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
