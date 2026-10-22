@@ -293,6 +293,21 @@ impl Drop for SourceTriplet {
 
 // Перевіряємо реальне виконання ще не опублікованих фізичних трійок.
 // Український Lisp є джерелом; exact-слова читає SENS, T5M пакує Zig.
+// Адресна діагностика: перший реальний розбіжний байт без дампу всієї програми.
+fn assert_same_bytes(actual_path: &std::path::Path, committed_path: &std::path::Path, stem: &str, test_id: &str) {
+    let actual = fs::read(actual_path).expect("згенеровані Zig/T5M байти");
+    let expected = fs::read(committed_path).expect("закомічена фізична пара");
+    if actual != expected {
+        let offset = actual.iter().zip(&expected)
+            .position(|(a, b)| a != b)
+            .unwrap_or(actual.len().min(expected.len()));
+        panic!(
+            "test_id={test_id} source={stem} first_diff_byte={offset} minted={:?} committed={:?} minted_len={} committed_len={}",
+            actual.get(offset), expected.get(offset), actual.len(), expected.len()
+        );
+    }
+}
+
 fn verify_unpaired_ukrainian_libs_natively() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let mut independently_executed = std::collections::BTreeSet::new();
@@ -459,16 +474,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
-            assert_eq!(
-                fs::read(&physical).expect("згенеровані T5M байти"),
-                fs::read(&committed_physical).expect("збережені T5M байти"),
-                "test_id=ukr-lib-physical-parity source={stem}"
-            );
-            assert_eq!(
-                fs::read(&view).expect("згенеровані точні слова"),
-                fs::read(&committed_view).expect("збережені точні слова"),
-                "test_id=ukr-lib-exact-parity source={stem}"
-            );
+            assert_same_bytes(&physical, &committed_physical, stem, "ukr-lib-physical-parity");
+            assert_same_bytes(&view, &committed_view, stem, "ukr-lib-exact-parity");
         }
         let verify = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
             .arg("verify-view")
