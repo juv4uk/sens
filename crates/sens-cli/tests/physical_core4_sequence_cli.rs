@@ -394,6 +394,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-remove-last-atom",
         "list-stable-symmetric-difference-general",
         "list-suffix-atoms-general",
+        "list-split-at-first-atom-general",
+        "list-stable-bipartition-general",
+        "вилучити-всі-входження",
+        "замінити-всі-входження",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -485,6 +489,10 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-remove-last-atom"
                 | "list-stable-symmetric-difference-general"
                 | "list-suffix-atoms-general"
+                | "list-split-at-first-atom-general"
+                | "list-stable-bipartition-general"
+                | "вилучити-всі-входження"
+                | "замінити-всі-входження"
                 | "list-deduplicate-neighbors"
                 | "list-alternating-split-four"
                 | "list-remove-first-atom"
@@ -747,6 +755,10 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-zip-with-tails-general",
         "lib/list-three-lanes-general",
         "lib/list-suffix-atoms-general",
+        "lib/list-split-at-first-atom-general",
+        "lib/list-stable-bipartition-general",
+        "lib/вилучити-всі-входження",
+        "lib/замінити-всі-входження",
         "lib/list-stable-symmetric-difference-general",
         "lib/list-drop-while-atom-general",
         "lib/list-take-while-atom-general",
